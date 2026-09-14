@@ -36,6 +36,8 @@ import {
 type KomponentenBedarf = { name: string; bedarf: number; verfuegbar: number }
 type ProductionRole = 'produktion' | 'lager' | 'qs' | 'leitung'
 
+const EMPTY_LINKS: FeedInventoryLinkRow[] = []
+
 const productionRoles = [
   { id: 'produktion', label: 'Produktion', description: 'Plant Rezeptur, Menge, Charge und Start des Produktionsauftrags.' },
   { id: 'lager', label: 'Lager', description: 'Prueft Komponentenverfuegbarkeit und Abbuchung.' },
@@ -84,7 +86,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
   const { data: verfuegbarkeit, isLoading: loadingV } = useMischfutterVerfuegbarkeit()
   const { data: rezepte, isLoading: loadingR } = useMischfutterRezepte()
   const { data: auftraege } = useProduktionsauftraege()
-  const { data: inventoryLinks, isLoading: loadingLinks } = useFeedInventoryLinks()
+  const { data: inventoryLinks, isLoading: loadingLinks } = useFeedInventoryLinks({ mapped: false })
   const ensureInventoryLink = useEnsureFeedInventoryLink()
   const createAuftrag = useCreateProduktionsauftrag()
 
@@ -162,10 +164,10 @@ export default function MischfutterProduktionPage(): JSX.Element {
     [ensureInventoryLink, toast, withPending],
   )
 
-  const unmappedLinks = useMemo(
-    () => (inventoryLinks?.items ?? []).filter((r) => !r.inventory_article_id),
-    [inventoryLinks],
-  )
+  // Die Abfrage liefert bereits nur offene Verknüpfungen; ``unmapped_count`` nennt
+  // den Gesamtbestand, ``items`` nur die geladene Seite.
+  const unmappedLinks = inventoryLinks?.items ?? EMPTY_LINKS
+  const unmappedTotal = inventoryLinks?.unmapped_count ?? 0
 
   // Build a map of component name -> available tons from the API
   const verfuegbarkeitMap = useMemo(() => {
@@ -411,7 +413,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
         onCancel={() => navigate('/futter/misch/liste')}
       />
 
-      {(roleFocus === 'lager' || unmappedLinks.length > 0) ? (
+      {(roleFocus === 'lager' || unmappedTotal > 0) ? (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -434,10 +436,15 @@ export default function MischfutterProduktionPage(): JSX.Element {
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Verknüpfungen laden…
               </p>
-            ) : unmappedLinks.length === 0 ? (
+            ) : unmappedTotal === 0 ? (
               <p className="text-status-success">Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft.</p>
             ) : (
               <ul className="space-y-2">
+                {unmappedTotal > unmappedLinks.length ? (
+                  <li className="text-xs text-muted-foreground">
+                    {unmappedLinks.length} von {unmappedTotal} offenen Verknüpfungen angezeigt.
+                  </li>
+                ) : null}
                 {unmappedLinks.map((row) => (
                   <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2">
                     <div>

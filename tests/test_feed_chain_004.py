@@ -295,13 +295,89 @@ class TestFeedChain004:
         finally:
             db.close()
 
+    def _find_link(self, einzelfutter_id: str, *, mapped: str):
+        """Blaettert die gefilterte Mapping-Liste, bis der Datensatz gefunden ist.
+
+        Der Bestand ist groesser als jede Seite; ein einzelner Abruf traegt
+        daher keine Aussage ueber die Anwesenheit eines Datensatzes.
+        """
+        offset, last_body = 0, None
+        while True:
+            r = self.client.get(
+                "/api/v1/produktion/mischfutter/inventory-links",
+                params={"mapped": mapped, "limit": 500, "offset": offset},
+                headers=HEADERS,
+            )
+            assert r.status_code == 200, r.text
+            last_body = r.json()
+            for item in last_body["items"]:
+                if item["id"] == einzelfutter_id:
+                    return item, last_body
+            if last_body["returned"] < last_body["limit"]:
+                return None, last_body
+            offset += last_body["limit"]
+
     def test_list_inventory_links(self, feed004_seed):
-        self.client.post(
+        ensured = self.client.post(
             f"/api/v1/produktion/mischfutter/inventory-links/{feed004_seed['ef1']}/ensure",
             headers=HEADERS,
         )
-        r = self.client.get("/api/v1/produktion/mischfutter/inventory-links", headers=HEADERS)
-        assert r.status_code == 200, r.text
-        body = r.json()
-        assert "items" in body
+        assert ensured.status_code == 200, ensured.text
+
+        own, body = self._find_link(feed004_seed["ef1"], mapped="true")
+        assert own is not None, "eigener Seed-Datensatz fehlt in der verknuepften Liste"
+        assert own["inventory_article_id"] == ensured.json()["article_id"]
+        assert body["filter_mapped"] is True
         assert body["mapped_count"] >= 1
+
+    def test_inventory_link_counts_cover_full_stock_not_page(self, feed004_seed):
+        """Zaehler beschreiben den Bestand, nicht die ausgelieferte Seite."""
+        ensured = self.client.post(
+            f"/api/v1/produktion/mischfutter/inventory-links/{feed004_seed['ef1']}/ensure",
+            headers=HEADERS,
+        )
+        assert ensured.status_code == 200, ensured.text
+
+        page = self.client.get(
+            "/api/v1/produktion/mischfutter/inventory-links",
+            params={"limit": 1},
+            headers=HEADERS,
+        )
+        assert page.status_code == 200, page.text
+        body = page.json()
+        assert body["returned"] == 1
+        assert body["total"] >= 2, "Seed legt zwei Einzelfuttermittel an"
+        assert body["total"] > body["returned"], "Bestand muss groesser als die Seite sein"
+        assert body["mapped_count"] >= 1
+        assert body["mapped_count"] + body["unmapped_count"] == body["total"]
+
+    def test_ensure_moves_entry_from_unmapped_to_mapped(self, feed004_seed):
+        before = self.client.get(
+            "/api/v1/produktion/mischfutter/inventory-links",
+            params={"limit": 1},
+            headers=HEADERS,
+        )
+        assert before.status_code == 200, before.text
+        before_body = before.json()
+
+        still_open, _ = self._find_link(feed004_seed["ef2"], mapped="false")
+        assert still_open is not None, "ef2 muss vor dem Verknuepfen offen sein"
+        assert still_open["inventory_article_id"] is None
+
+        ensured = self.client.post(
+            f"/api/v1/produktion/mischfutter/inventory-links/{feed004_seed['ef2']}/ensure",
+            headers=HEADERS,
+        )
+        assert ensured.status_code == 200, ensured.text
+
+        after = self.client.get(
+            "/api/v1/produktion/mischfutter/inventory-links",
+            params={"limit": 1},
+            headers=HEADERS,
+        )
+        assert after.status_code == 200, after.text
+        after_body = after.json()
+        assert after_body["mapped_count"] == before_body["mapped_count"] + 1
+        assert after_body["unmapped_count"] == before_body["unmapped_count"] - 1
+        assert after_body["total"] == before_body["total"]
+        assert self._find_link(feed004_seed["ef2"], mapped="false")[0] is None

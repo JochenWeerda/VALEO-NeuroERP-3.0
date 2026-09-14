@@ -6,6 +6,7 @@ Advanced finance endpoints: Wechselkurse, Buchungsschemata, Kostenrechnung, Absc
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime, date
+from app.core.business_time import business_today
 from app.core.uuid7 import uuid7
 
 from app.auth.deps import get_current_user, get_tenant_id
@@ -877,7 +878,7 @@ async def create_gegenbuchung(
         gesellschaft_von=original.gesellschaft_nach,
         gesellschaft_nach=original.gesellschaft_von,
         belegnr=f"GB-{original.belegnr}",
-        datum=datetime.utcnow().date(),
+        datum=business_today(),
         betrag=-original.betrag,
         waehrung=original.waehrung,
         wechselkurs=original.wechselkurs,

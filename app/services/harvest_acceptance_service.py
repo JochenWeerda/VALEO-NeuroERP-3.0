@@ -663,8 +663,8 @@ class HarvestAcceptanceService:
                 return
             entry_date = delivery_date
             if entry_date is None:
-                from datetime import datetime as _dt
-                entry_date = _dt.utcnow().date()
+                from app.core.business_time import business_today
+                entry_date = business_today()
             period = str(entry_date)[:7]
             lines = [
                 {"account_id": "3100", "debit_amount": float(gross), "credit_amount": 0,

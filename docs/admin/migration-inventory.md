@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-11
+last_reviewed: 2026-09-12
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -88,8 +88,10 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `agrar_drying_rules_20260217` | add drying rule sets (lookup/factor/normalization) and audit snapshot on agrar_settlements |
 | `agrar_drying_rules_audit_contract_dms_20260217` | add audit fields, contract/customer links, DMS ref to drying rule sets |
 | `agrar_ernte_planung_20260520` | agrar_ernte_planung — domain_agrar.ernte_planung table for harvest overview |
+| `agrar_harvest_acceptances_sammel_20260911` | Add domain_agrar.harvest_acceptances columns used by Sammelabrechnung. |
 | `agrar_maschinen_wetter_20260301` | Agrar Maschinenpark — Tabelle agrar_maschinen in domain_agrar |
 | `agrar_partie_settlement_20260623` | DOM-AGRAR-004: agrar_partien, agrar_partie_links, agrar_trocknung_abrechnungen, agrar_selbstabrechnung_status_log |
+| `agrar_sammelabrechnungen_20260911` | Create domain_agrar.sammelabrechnungen for Rohware-Sammelabrechnung. |
 | `agrar_settlement_campaign_reference_20260327` | AgrarSettlement campaign reference |
 | `agrar_settlement_row_version_20260324` | AgrarSettlement optimistic locking: row_version |
 | `agrar_settlements_initial_20260213` | add agrar settlements and deductions |
@@ -141,8 +143,6 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_ownership_log_20260610` | crm_ownership_log — Übergabe-/Zuordnungs-Audit (DOM-CRM-004.3) |
 | `crm_phase4_opportunity_links_20260305` | CRM Phase 4: Opportunity links to offer/order, loss_reason |
 | `desktop_runtime_repair_20260909` | Repair missing historical tables in a database already stamped at head. |
-| `agrar_sammelabrechnungen_20260911` | Create domain_agrar.sammelabrechnungen for Rohware-Sammelabrechnung. |
-| `agrar_harvest_acceptances_sammel_20260911` | Add domain_agrar.harvest_acceptances columns used by Sammelabrechnung. |
 | `doc_artifact_version_20260611` | DOM-DOC-004.2 — Artefakt-Versionierung + Freigabe-Status. |
 | `doc_followup_20260611` | DOM-DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage am Vorgang. |
 | `doc_nachweisraum_lifecycle_20260623` | DOM-DOC-004 — Nachweisraum Dokument-Lifecycle + GoBD-Export Tabellen |

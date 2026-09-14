@@ -10,6 +10,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import Field
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
@@ -17,6 +18,20 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 router = APIRouter(tags=["logistik", "frachtbriefe"])
+
+RELATION = "domain_logistics.frachtbriefe"
+
+
+def _db_unavailable(exc: SQLAlchemyError, db: Session) -> HTTPException:
+    """503 mit der echten Ursache statt einer durchgereichten Ausnahme."""
+    db.rollback()
+    return HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail={
+            "message": f"{RELATION} nicht verfuegbar",
+            "cause": str(getattr(exc, "orig", None) or exc),
+        },
+    )
 
 
 # ── Schemas ──────────────────────────────────────────────────────────────────
@@ -69,13 +84,16 @@ def list_frachtbriefe(
     if tour_id:
         where += " AND tour_id = :tour_id"
         params["tour_id"] = tour_id
-    rows = db.execute(
-        text(
-            f"SELECT * FROM domain_logistics.frachtbriefe"  # nosec B608  # column names code-controlled, values parameterized
-            f" WHERE {where} ORDER BY datum DESC, created_at DESC LIMIT :limit"
-        ),
-        {**params, "limit": limit},
-    ).mappings().all()
+    try:
+        rows = db.execute(
+            text(
+                f"SELECT * FROM domain_logistics.frachtbriefe"  # nosec B608  # column names code-controlled, values parameterized
+                f" WHERE {where} ORDER BY datum DESC, created_at DESC LIMIT :limit"
+            ),
+            {**params, "limit": limit},
+        ).mappings().all()
+    except SQLAlchemyError as exc:
+        raise _db_unavailable(exc, db) from exc
     return [FrachtbriefOut.model_validate(dict(r)) for r in rows]
 
 
@@ -91,21 +109,36 @@ def create_frachtbrief(
     db: Session = Depends(get_db),
 ) -> FrachtbriefOut:
     fb_id = str(uuid.uuid4())
-    db.execute(
-        text(
-            "INSERT INTO domain_logistics.frachtbriefe"
-            " (id, tenant_id, nummer, kennzeichen, artikel, menge, absender, empfaenger,"
-            "  datum, status, tour_id, lieferschein_ref)"
-            " VALUES (:id, :tenant_id, :nummer, :kennzeichen, :artikel, :menge, :absender,"
-            "         :empfaenger, :datum, 'erstellt', :tour_id, :lieferschein_ref)"
-        ),
-        {
-            "id": fb_id,
-            "tenant_id": tenant_id,
-            **payload.model_dump(),
-        },
-    )
-    db.commit()
+    try:
+        db.execute(
+            text(
+                "INSERT INTO domain_logistics.frachtbriefe"
+                " (id, tenant_id, nummer, kennzeichen, artikel, menge, absender, empfaenger,"
+                "  datum, status, tour_id, lieferschein_ref)"
+                " VALUES (:id, :tenant_id, :nummer, :kennzeichen, :artikel, :menge, :absender,"
+                "         :empfaenger, :datum, 'erstellt', :tour_id, :lieferschein_ref)"
+            ),
+            {
+                "id": fb_id,
+                "tenant_id": tenant_id,
+                **payload.model_dump(),
+            },
+        )
+        db.commit()
+    except IntegrityError as exc:
+        # Belegnummern sind je Mandant eindeutig; ein Zweitanlauf ist ein
+        # Konflikt des Aufrufers, kein Serverfehler.
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "message": f"Frachtbriefnummer '{payload.nummer}' existiert bereits",
+                "nummer": payload.nummer,
+            },
+        ) from exc
+    except SQLAlchemyError as exc:
+        raise _db_unavailable(exc, db) from exc
+
     row = db.execute(
         text("SELECT * FROM domain_logistics.frachtbriefe WHERE id = :id"),
         {"id": fb_id},
@@ -126,13 +159,16 @@ def update_frachtbrief_status(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> FrachtbriefOut:
-    result = db.execute(
-        text(
-            "UPDATE domain_logistics.frachtbriefe SET status = :status,"
-            " updated_at = :now WHERE id = :id AND tenant_id = :tenant_id RETURNING *"
-        ),
-        {"status": new_status, "now": datetime.now(timezone.utc), "id": fb_id, "tenant_id": tenant_id},
-    ).mappings().first()
+    try:
+        result = db.execute(
+            text(
+                "UPDATE domain_logistics.frachtbriefe SET status = :status,"
+                " updated_at = :now WHERE id = :id AND tenant_id = :tenant_id RETURNING *"
+            ),
+            {"status": new_status, "now": datetime.now(timezone.utc), "id": fb_id, "tenant_id": tenant_id},
+        ).mappings().first()
+    except SQLAlchemyError as exc:
+        raise _db_unavailable(exc, db) from exc
     if not result:
         raise HTTPException(status_code=404, detail="Frachtbrief nicht gefunden")
     db.commit()

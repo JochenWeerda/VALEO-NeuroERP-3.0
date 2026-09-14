@@ -2,9 +2,15 @@
 # Microservice for AI/ML functionality
 
 # Core FastAPI and async support
-fastapi==0.121.3
+# fastapi muss mit dem Root-Pin gleichlaufen: starlette==1.3.1 (CVE-Stand) wird erst
+# ab fastapi 0.136.x akzeptiert; 0.121.3 verlangte starlette<0.51.0 -> ResolutionImpossible.
+fastapi==0.136.3
 uvicorn[standard]==0.24.0
 starlette==1.3.1
+# Pflicht, nicht optional: classification.py nimmt einen UploadFile entgegen, ohne
+# python-multipart bricht der Import der App beim Start ab.
+# Wie im Root-Manifest auf/ueber 0.0.31 halten (Dependabot-Hinweis #288).
+python-multipart==0.0.31
 
 # Pydantic for data validation
 pydantic==2.11.7

@@ -10,6 +10,7 @@ from typing import Any, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_now, business_today
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_settlement_datensatz
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.trocknungs_abrechnung import (
@@ -407,7 +408,7 @@ class AgrarSettlementService:
             raise ValidationFailedError(f"Settlement status '{settlement.status}' cannot be posted")
         if approval_status != "FREIGEGEBEN":
             raise ValidationFailedError(f"Settlement approval status '{approval_status}' must be FREIGEGEBEN before posting")
-        effective_date = posting_date or datetime.utcnow()
+        effective_date = posting_date or business_now()
         settlement.status = "posted"
         settlement.posted_journal_ref = journal_ref
         settlement.posted_at = effective_date
@@ -541,7 +542,7 @@ class AgrarSettlementService:
                     " (prevents double fee application)."
                 )
             gross_qty = _round_qty(payload.gross_quantity_kg)
-            calc_date = payload.drying.calc_date or datetime.utcnow().date().isoformat()
+            calc_date = payload.drying.calc_date or business_today().isoformat()
             try:
                 drying_result = _compute_drying_settlement(
                     DbDryingRuleRepo(self.db, tenant_id=self.tenant_id),
@@ -649,8 +650,8 @@ class AgrarSettlementService:
                 f"Settlement cannot be posted: approval_status={approval_status}. Must be FREIGEGEBEN."
             )
 
-        posting_date = payload.posting_date or datetime.utcnow()
-        journal_ref = f"JE-SET-{datetime.utcnow().strftime('%Y%m%d')}-{settlement.id[:8].upper()}"
+        posting_date = payload.posting_date or business_now()
+        journal_ref = f"JE-SET-{business_today().strftime('%Y%m%d')}-{settlement.id[:8].upper()}"
         gross = _round_money(settlement.gross_amount_eur)
         deductions_amt = _round_money(settlement.total_deductions_eur)
         net = _round_money(settlement.net_amount_eur)

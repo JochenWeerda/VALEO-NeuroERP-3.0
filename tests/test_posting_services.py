@@ -16,6 +16,7 @@ from unittest.mock import MagicMock, patch, call
 
 import pytest
 
+from app.core.business_time import business_today
 from app.core.exceptions import ValidationFailedError
 from app.services.sales_posting_service import SalesPostingService, _coerce_date
 from app.services.finance_transaction_service import FinanceTransactionService
@@ -136,12 +137,18 @@ def test_warenabgang_uses_fallback_field_names():
     assert total == pytest.approx(200.0)
 
 
-def test_warenabgang_falls_back_to_today_when_no_date():
+def test_warenabgang_falls_back_to_business_day_when_no_date():
+    """Fallback ist der Geschaeftstag in Betriebszeitzone, nicht das UTC-Datum.
+
+    Mit UTC landete jede Buchung zwischen 00:00 und 02:00 Ortszeit auf dem
+    Vortag — am Monatsersten in der Vorperiode.
+    """
     fin = _make_fin_mock()
     svc = _make_svc(fin)
     svc.book_warenabgang("dn-1", "LS-004", [{"qty": 1, "unit_price": 50}])
     kwargs = fin.create.call_args.kwargs
-    assert kwargs["entry_date"] == date.today()
+    assert kwargs["entry_date"] == business_today()
+    assert kwargs["period"] == business_today().strftime("%Y-%m")
 
 
 # ── book_ausgangsrechnung ─────────────────────────────────────────────────────
@@ -385,13 +392,14 @@ def test_self_billing_two_lines_without_vat():
         assert not any(l["account_id"] == "1576" for l in lines)
 
 
-def test_self_billing_uses_today_when_no_delivery_date():
+def test_self_billing_uses_business_day_when_no_delivery_date():
     svc = _make_harvest_svc()
     inv = _make_invoice(net=100, vat=0, gross=100)
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb4")) as mock_create:
         svc._book_self_billing_credit_note(inv, None)
         kwargs = mock_create.call_args.kwargs
-        assert kwargs["entry_date"] == date.today()
+        assert kwargs["entry_date"] == business_today()
+        assert kwargs["period"] == business_today().strftime("%Y-%m")
 
 
 def test_self_billing_is_nonblocking_on_error():

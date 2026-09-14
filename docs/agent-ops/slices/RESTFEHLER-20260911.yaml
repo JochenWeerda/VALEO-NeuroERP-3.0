@@ -1,0 +1,219 @@
+slice_id: RESTFEHLER-20260911
+id: RESTFEHLER-20260911
+title: Roten Restbestand aus Vollsuite und CI-Gates an der Ursache schliessen
+owner: Cursor Auto
+status: in arbeit
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  Nach SPEC-P0-05 den verbleibenden Rotstand beheben: zwei Fehlschlaege der
+  Vollsuite, zwei rote Doku-Gates und den gemeldeten Build-Blocker in
+  services/ai. Ursachenbehebung, keine Schwellensenkung und keine
+  Testentschaerfung.
+coordination: >-
+  services/ai/requirements.txt liegt im Dateibesitz der Dependency-Welle
+  (SECURITY-REMAINDER-20260910, Cursor). Der Blocker war von Claude Code aus
+  SECURITY-DOCKERFILE-NONROOT-20260911 als Fremdbefund gemeldet. k8s-Manifeste,
+  Dockerfiles und DESIGN-STATUS-COLORS bleiben bei Claude Code und wurden nicht
+  angefasst. Das Workboard wird aus HEAD neu hergestellt, damit fremde
+  Abschnitte nicht verloren gehen.
+file_ownership:
+  - docs/agent-ops/slices/RESTFEHLER-20260911.yaml
+  - "docs/agent-ops/active-workboard.md: nur die eigenen Abschnitte"
+  - services/ai/requirements.txt
+  - app/services/feed_inventory_link_service.py
+  - app/api/v1/endpoints/produktion_mischfutter.py
+  - tests/test_feed_chain_004.py
+  - tests/test_feed_inventory_link_unit.py
+  - tests/test_desktop_runtime_repair_migration.py
+  - packages/frontend-web/src/lib/api/produktion.ts
+  - packages/frontend-web/src/pages/produktion/mischfutter-produktion.tsx
+  - docs/schnittstellen/openapi.json
+  - docs/admin/migration-inventory.md
+  - docs/project-context/open-gaps-and-known-issues.md
+ausgangsbefund:
+  vollsuite: "pytest -q: 13578 passed, 2 failed, 35 skipped, 1 xfailed"
+  gates_rot:
+    - "generate_openapi.py --check: Spec veraltet"
+    - "check_all_doc_generators.sh --check: migration-inventory handgepflegt"
+  gates_gruen: >-
+    Alembic single head, SQL-f-String-Guard, Tenant-Isolation,
+    Response-Models, Pagination, Godfile, OpenAPI-Doc-Coverage, Doc-Drift,
+    Domain-Table-Ownership, Required-Domain-Schemas, Core-Contamination,
+    Toolchain-Pins, CODEOWNERS, kritische Backend-Coverage.
+befunde:
+  - id: migration-head-momentaufnahme
+    datei: tests/test_desktop_runtime_repair_migration.py
+    befund: >-
+      test_repair_is_single_resolvable_head nagelte den Alembic-Head auf
+      desktop_runtime_repair_20260909 fest. Jede neue Migration setzt sich
+      davor und macht den Test rot, ohne dass ein Vertrag verletzt ist.
+    behebung: >-
+      Gepruefter Vertrag: genau ein Head (keine Verzweigung), unveraenderte
+      down_revision der Repair-Revision, Repair-Revision liegt im Strang zum
+      Head. Der Head selbst darf wandern.
+  - id: feed-inventory-seitenzaehler
+    datei: app/services/feed_inventory_link_service.py
+    befund: >-
+      list_links zaehlte total/mapped_count/unmapped_count auf der per LIMIT
+      abgeschnittenen Seite. Gemessen an der Dev-Datenbank: 558 aktive
+      Einzelfuttermittel, 2 davon verknuepft, 0 innerhalb der ersten 100
+      (alle im ACT-Bereich). Die Zahlen behaupteten einen Bestandsstand und
+      waren Seitenwerte.
+    fehldiagnose_korrigiert: >-
+      Bisher als "Test haengt an fehlenden Seed-Daten" dokumentiert
+      (Workboard-Uebergabe und POS-FIBU-CLEANUP-20260910). Der Test war nicht
+      seed-abhaengig, sondern datenmengenabhaengig.
+    behebung: >-
+      Zaehler aus Aggregatabfrage ueber den vollen Mandantenbestand, Seite aus
+      limit/offset mit optionalem Filter mapped. Antwort nennt zusaetzlich
+      limit, offset, returned und filter_mapped, damit Seite und Bestand
+      unterscheidbar bleiben.
+    frontend: >-
+      mischfutter-produktion.tsx filterte offene Verknuepfungen clientseitig
+      aus der ersten Seite und entwarnte mit "Alle aktiven Einzelfuttermittel
+      sind mit Lagerartikeln verknuepft", sobald die Seite zufaellig keine
+      offene enthielt. Jetzt serverseitig mapped=false, Entwarnung an
+      unmapped_count, Hinweis "x von y offenen Verknuepfungen angezeigt" bei
+      abgeschnittener Liste.
+  - id: buchungsdatum-aus-utc
+    dateien:
+      - app/core/business_time.py
+      - app/services/sales_posting_service.py
+      - app/services/harvest_acceptance_service.py
+      - app/services/procurement_service.py
+      - app/services/ap_invoice_kernel_posting.py
+      - app/services/agrar_settlement_service.py
+      - app/services/settlement_drying_service.py
+      - app/finance/router.py
+      - app/domains/inventory/application/services/inventory_service.py
+    befund: >-
+      entry_date fiel auf datetime.utcnow().date() zurueck, und aus entry_date
+      wird period als YYYY-MM gebildet. Zwischen 00:00 und 02:00 Ortszeit
+      (MESZ) buchte das System auf den Vortag, am Monatsersten damit in die
+      Vorperiode. Der Fehler war in CI unsichtbar, weil der Workflow TZ=UTC
+      setzt; lokal fiel er nur auf, weil der zweite Vollauf die Datumsgrenze
+      ueberschritt.
+    behebung: >-
+      Zentraler Helfer app/core/business_time.py mit business_today(),
+      business_now() und der puren Funktion business_date_at(). Zeitzone ueber
+      BUSINESS_TIMEZONE, Standard Europe/Berlin, unbekannte Werte fallen auf
+      den Standard zurueck. Umgestellt wurden ausschliesslich buchungs- und
+      periodenrelevante Stellen.
+    nicht_umgestellt: >-
+      utcnow().date() ohne Buchungs- oder Periodenbezug bleibt vorerst:
+      Zulassungsablauf in PSM/Saatgut/Duenger, HR-Retention, Tagesstatistik im
+      Portal-Shop, Demo-/Platzhalterdaten in ocr_invoice,
+      atlas_customs_service und compliance_monitor. Als offener Punkt benannt,
+      nicht stillschweigend mitgeaendert.
+  - id: frachtbrief-duplikat-serverfehler
+    datei: app/api/v1/endpoints/logistik_frachtbriefe.py
+    befund: >-
+      Eine doppelte Frachtbriefnummer lief in eine unbehandelte
+      UniqueViolation gegen uq_frachtbriefe_tenant_nummer; die Session blieb
+      im abgebrochenen Zustand. Der Test legte FB-2026-001 mit fester Nummer
+      und ohne Aufraeumen an und war deshalb nur beim ersten Lauf gruen. Seine
+      Statuscode-Listen (in (200, 503, 422) und in (201, 503, 500)) haetten
+      den Serverfehler ohnehin nicht sichtbar gemacht.
+    behebung: >-
+      Belegnummernkonflikt ist ein Aufruferfehler: 409 mit betroffener Nummer
+      und rollback(); sonstige DB-Fehler 503 mit echter cause. Test auf sechs
+      harte Vertraege gegen require_db umgestellt, Belegnummer je Lauf
+      eindeutig und in der Fixture wieder entfernt.
+  - id: services-ai-nicht-baubar
+    datei: services/ai/requirements.txt
+    befund: >-
+      starlette==1.3.1 zusammen mit fastapi==0.121.3, das
+      starlette<0.51.0,>=0.40.0 verlangt - pip endet in ResolutionImpossible,
+      das Image entsteht nicht. Zusaetzlich fehlte python-multipart, obwohl
+      app/api/v1/endpoints/classification.py einen UploadFile entgegennimmt.
+    behebung: >-
+      fastapi auf den Root-Pin 0.136.3 gehoben (verlangt starlette>=0.46.0),
+      CVE-Pin auf starlette unveraendert, python-multipart==0.0.31 ergaenzt.
+      Ein Rueckbau auf starlette 0.50.0 haette den CVE-Stand aufgegeben.
+tests:
+  entfallen:
+    - >-
+      tests/test_feed_inventory_link_unit.py::test_list_links_counts_mapped -
+      Mock-DB-Test, der die Seite selbst stellte und den Fehler daher
+      grundsaetzlich nicht sehen konnte.
+  neu:
+    - "test_inventory_link_counts_cover_full_stock_not_page: Zaehler ueber Seitengrenze"
+    - "test_ensure_moves_entry_from_unmapped_to_mapped: Zaehler-Delta offen -> verknuepft"
+    - "test_list_inventory_links: blaettert die gefilterte Liste und prueft den ensure-Status"
+    - "test_repair_stays_in_the_single_linear_head_strand: Strangvertrag statt Head-Momentaufnahme"
+    - >-
+      tests/test_business_time.py: neun zeitzonenfeste Vertraege gegen
+      Zeitpunkte, darunter Monatswechsel (31.08. 22:30 UTC ist lokal der
+      01.09., Periode 2026-09 statt 2026-08) und Winterzeit.
+    - >-
+      tests/test_log_frachtbrief.py: Liste 200, Anlage 201 mit Rueckleseprobe,
+      Duplikat 409, Statuswechsel mit gepruefter Wirkung, ungueltiges Enum 422,
+      unbekannte ID 404.
+  gehaertet:
+    - >-
+      test_posting_services.py: die beiden Datums-Fallback-Tests pruefen jetzt
+      business_today() und die daraus gebildete Periode statt date.today().
+nachweis:
+  backend:
+    - "test_desktop_runtime_repair_migration.py + test_feed_inventory_link_unit.py: 14 passed"
+    - "test_feed_chain_004.py: 6 passed"
+    - "check_critical_backend_coverage.py: Exit 0"
+  frontend:
+    - "tsc --noEmit: ohne Befund"
+    - "eslint fuer die zwei geaenderten Dateien: ohne Befund"
+  services_ai:
+    - "alter Stand: pip reproduziert ResolutionImpossible"
+    - "neuer Stand: 143 Pakete vollstaendig aufgeloest (fastapi 0.136.3, starlette 1.3.1)"
+    - "docker build -f services/ai/Dockerfile: Image gebaut"
+    - "docker run: uid=1000(appuser), import main erfolgreich, 29 Routen"
+  buchungspfade:
+    - "test_business_time.py + test_posting_services.py: 42 passed"
+    - "test_log_frachtbrief.py: 6 passed"
+    - >-
+      Auswahl settlement|drying|obligo|procurement|ap_invoice|inventory_service|
+      stock_movement: 435 passed
+  gates:
+    - "pnpm run docs:lint, pnpm arch:validate, check_all_doc_generators.sh --check: Exit 0"
+    - "guard-forbidden-paths.cjs, check_no_pii_data.py: Exit 0"
+    - "npm run build (frontend): erfolgreich"
+acceptance:
+  - Vollsuite ohne die beiden Fehlschlaege, ohne neue Rote.
+  - Keine Coverage-Schwelle gesenkt, keine Assertion aufgeweicht.
+  - services/ai baut und die App importiert im Container.
+  - Fremder Dateibesitz und fremde Workboard-Abschnitte unveraendert.
+risks:
+  - >-
+    Die Semantik von total wechselt von Seitengroesse auf Bestandsgroesse. Der
+    einzige Konsument ist die Anzeige "mapped/total verknuepft" in
+    mischfutter-produktion.tsx, die damit erst richtig wird. Typ und Hook sind
+    mitgezogen.
+  - >-
+    fastapi 0.121.3 -> 0.136.3 in services/ai ist ein Versionssprung. Geprueft:
+    keine direkten Starlette-Importe, kein on_event, keine eigene
+    Middleware-Signatur. Nachgewiesen durch Import der App im Container.
+ai_harness:
+  fachlicher_vertrag: >-
+    Eine Zahl in der Oberfleche beschreibt den Bestand, nicht die zufaellig
+    geladene Seite. Eine Entwarnung ("alles verknuepft") darf nur fallen, wenn
+    sie fuer den Bestand gilt.
+  architektur_vertrag: >-
+    Listenendpunkte trennen Seite (limit/offset/returned) von Aggregat
+    (total/mapped_count/unmapped_count) und benennen den aktiven Filter.
+  daten_vertrag: "Keine Migration, keine Datenmutation."
+  test_vertrag: >-
+    Bestandsaussagen werden gegen echte Postgres geprueft, nicht gegen eine
+    Mock-Session, die das Ergebnis selbst liefert.
+  security_vertrag: >-
+    Der starlette-CVE-Pin bleibt; die Aufloesung erfolgt ueber fastapi, nicht
+    durch Rueckbau auf eine aeltere starlette-Version.
+  betriebs_vertrag: >-
+    services/ai muss neu gebaut werden, damit die Aenderung wirkt.
+  dokumentations_vertrag: >-
+    Die frueher falsch dokumentierte Ursache des Feed-Chain-Rotstands ist
+    ausdruecklich als Fehldiagnose benannt, nicht stillschweigend ersetzt.
+verification:
+  - "pytest -q"
+  - "python scripts/check_critical_backend_coverage.py"
+  - "python scripts/generate_openapi.py --check"
+  - "docker build -f services/ai/Dockerfile -t valeo-ai-service:verify services/ai"

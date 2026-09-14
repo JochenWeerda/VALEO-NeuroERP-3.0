@@ -95,11 +95,19 @@ export type FeedInventoryLinkRow = {
   inv_article_number?: string | null
 }
 
+/**
+ * ``total``/``mapped_count``/``unmapped_count`` zählen den gesamten aktiven Bestand,
+ * ``items`` trägt nur die abgerufene Seite (``returned`` Zeilen ab ``offset``).
+ */
 export type FeedInventoryLinksResponse = {
   items: FeedInventoryLinkRow[]
   total: number
   mapped_count: number
   unmapped_count: number
+  limit: number
+  offset: number
+  returned: number
+  filter_mapped: boolean | null
 }
 
 // ── Hooks ──────────────────────────────────────────────────────────────────
@@ -181,11 +189,22 @@ export async function fetchProduktionsTrace(ref: string): Promise<FeedChainTrace
   return res.data
 }
 
-export function useFeedInventoryLinks() {
+/**
+ * Lädt nur die offenen Verknüpfungen. Serverseitig gefiltert, weil der Bestand
+ * größer als eine Seite ist — ein Clientfilter über die erste Seite würde offene
+ * Einzelfuttermittel verschweigen.
+ */
+export function useFeedInventoryLinks(options?: { mapped?: boolean; limit?: number }) {
+  const mapped = options?.mapped
+  const limit = options?.limit ?? 100
   return useQuery({
-    queryKey: ['produktion', 'mischfutter', 'inventory-links'],
+    queryKey: ['produktion', 'mischfutter', 'inventory-links', { mapped: mapped ?? null, limit }],
     queryFn: async () =>
-      (await apiClient.get<FeedInventoryLinksResponse>('/api/v1/produktion/mischfutter/inventory-links')).data,
+      (
+        await apiClient.get<FeedInventoryLinksResponse>('/api/v1/produktion/mischfutter/inventory-links', {
+          params: { limit, ...(mapped === undefined ? {} : { mapped }) },
+        })
+      ).data,
     staleTime: 30 * 1000,
   })
 }

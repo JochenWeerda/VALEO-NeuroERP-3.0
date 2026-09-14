@@ -212066,6 +212066,7 @@
     },
     "/api/v1/agrar/sammelabrechnung/{sammelabrechnung_id}/buchen": {
       "post": {
+        "description": "Bucht atomar: Status GEBUCHT und Kreditoren-OP in einer Transaktion.\n\nBei Betrag > 0 ohne erfolgreiche OP-Anlage kein ``gebucht: true`` (Belegbruch).",
         "operationId": "buchen_api_v1_agrar_sammelabrechnung__sammelabrechnung_id__buchen_post",
         "parameters": [
           {
@@ -376977,6 +376978,35 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "true = nur verknuepfte, false = nur offene",
+            "in": "query",
+            "name": "mapped",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "true = nur verknuepfte, false = nur offene",
+              "title": "Mapped"
             }
           },
           {

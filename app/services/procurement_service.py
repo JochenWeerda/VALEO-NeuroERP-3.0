@@ -8,6 +8,7 @@ from sqlalchemy import func as sqlfunc
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.einkauf_models import (
@@ -460,7 +461,7 @@ class ProcurementService:
         netto = Decimal(str(b.netto_summe or 0))
         if netto == 0:
             return
-        entry_date = b.bestelldatum or datetime.utcnow().date()
+        entry_date = b.bestelldatum or business_today()
         fin = FinanceTransactionService(self.db, self.tenant_id)
         fin.create(
             entry_number=f"OBLIGO-{b.bestellnummer}",

@@ -445,10 +445,14 @@ async def trace_auftrag(
 @router.get("/inventory-links", response_model=TypedObjectOut, summary="Einzelfutter ↔ Lagerartikel-Mapping (FEED-CHAIN-004)")
 async def list_inventory_links(
     limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    mapped: bool | None = Query(None, description="true = nur verknuepfte, false = nur offene"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    return FeedInventoryLinkService(db, tenant_id).list_links(limit=limit)
+    return FeedInventoryLinkService(db, tenant_id).list_links(
+        limit=limit, offset=offset, mapped=mapped
+    )
 
 
 @router.post(

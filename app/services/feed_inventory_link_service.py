@@ -143,7 +143,34 @@ class FeedInventoryLinkService:
         self.db.flush()
         return {"ok": True, "created": True, "article_id": article_id}
 
-    def list_links(self, *, limit: int = 100) -> dict[str, Any]:
+    def list_links(
+        self,
+        *,
+        limit: int = 100,
+        offset: int = 0,
+        mapped: bool | None = None,
+    ) -> dict[str, Any]:
+        """Mapping-Liste als Seite plus Zaehler ueber den gesamten Bestand.
+
+        ``total``/``mapped_count``/``unmapped_count`` zaehlen alle aktiven
+        Einzelfuttermittel des Mandanten, nicht nur die ausgelieferte Seite.
+        Sonst meldet die Oberflaeche bei mehr Datensaetzen als ``limit``
+        einen Verknuepfungsstand, der nichts mit dem Bestand zu tun hat.
+        """
+        counts = self.db.execute(
+            text("""
+                SELECT count(*) AS total,
+                       count(inventory_article_id) AS mapped
+                FROM domain_shared.futtermittel_einzelfutter
+                WHERE tenant_id = :tid AND aktiv = true
+            """),
+            {"tid": self.tenant_id},
+        ).mappings().first()
+        total = int(counts["total"] or 0) if counts else 0
+        mapped_count = int(counts["mapped"] or 0) if counts else 0
+
+        page_limit = max(1, min(limit, 500))
+        page_offset = max(0, offset)
         rows = self.db.execute(
             text("""
                 SELECT ef.id, ef.artikel_nummer, ef.name, ef.inventory_article_id,
@@ -152,17 +179,28 @@ class FeedInventoryLinkService:
                 LEFT JOIN domain_inventory.articles a
                   ON a.id = ef.inventory_article_id AND a.tenant_id = ef.tenant_id
                 WHERE ef.tenant_id = :tid AND ef.aktiv = true
+                  AND (:mapped IS NULL
+                       OR (:mapped = true AND ef.inventory_article_id IS NOT NULL)
+                       OR (:mapped = false AND ef.inventory_article_id IS NULL))
                 ORDER BY ef.artikel_nummer
-                LIMIT :lim
+                LIMIT :lim OFFSET :off
             """),
-            {"tid": self.tenant_id, "lim": max(1, min(limit, 500))},
+            {
+                "tid": self.tenant_id,
+                "mapped": mapped,
+                "lim": page_limit,
+                "off": page_offset,
+            },
         ).mappings().all()
-        mapped = sum(1 for r in rows if r.get("inventory_article_id"))
         return {
             "items": [dict(r) for r in rows],
-            "total": len(rows),
-            "mapped_count": mapped,
-            "unmapped_count": len(rows) - mapped,
+            "total": total,
+            "mapped_count": mapped_count,
+            "unmapped_count": total - mapped_count,
+            "limit": page_limit,
+            "offset": page_offset,
+            "returned": len(rows),
+            "filter_mapped": mapped,
         }
 
     def book_snapshot_movements(

@@ -9,6 +9,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.exceptions import ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.services.finance_transaction_service import FinanceTransactionService
@@ -103,7 +104,7 @@ class SalesPostingService:
         if total_cost == Decimal("0.00"):
             return
 
-        entry_date = _coerce_date(delivery_date) or datetime.utcnow().date()
+        entry_date = _coerce_date(delivery_date) or business_today()
         period = str(entry_date)[:7]
 
         self._fin.create(
@@ -153,7 +154,7 @@ class SalesPostingService:
         if gross == Decimal("0.00"):
             return
 
-        entry_date = _coerce_date(invoice_date) or datetime.utcnow().date()
+        entry_date = _coerce_date(invoice_date) or business_today()
         period = str(entry_date)[:7]
 
         lines = [
@@ -210,7 +211,7 @@ class SalesPostingService:
         if gross <= Decimal("0.00"):
             raise ValidationFailedError("Sales invoice gross amount must be positive")
 
-        entry_date = _coerce_date(invoice_date) or datetime.utcnow().date()
+        entry_date = _coerce_date(invoice_date) or business_today()
         effective_due_date = _coerce_date(due_date) or entry_date + timedelta(days=30)
         period = str(entry_date)[:7]
         existing = self.db.execute(

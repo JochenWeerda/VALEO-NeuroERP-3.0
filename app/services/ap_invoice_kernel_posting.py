@@ -16,6 +16,7 @@ from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.fibu_audit import log_fibu_audit
 from app.core.uuid7 import uuid7
 from app.documents.router_helpers import get_from_store, get_repository
@@ -61,7 +62,7 @@ def post_ap_invoice_kernel_sync(
         )
         return
 
-    invoice_date = str(invoice.get("date") or datetime.utcnow().date().isoformat())[:10]
+    invoice_date = str(invoice.get("date") or business_today().isoformat())[:10]
     period = invoice_date[:7]
     period_status = db.execute(
         text(

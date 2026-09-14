@@ -62,12 +62,24 @@ def test_existing_report_permissions_and_indexes_are_untouched(monkeypatch):
     repair.op.execute.assert_not_called()
 
 
-def test_repair_is_single_resolvable_head():
+def test_repair_stays_in_the_single_linear_head_strand():
+    """Ein Head, und die Repair-Revision haengt unveraendert im Strang.
+
+    Der Head selbst darf weiterwandern — jede neue Migration setzt sich davor.
+    Verletzt waere der Vertrag erst durch eine Verzweigung oder dadurch, dass
+    die Repair-Revision aus dem Strang zum Head herausfaellt.
+    """
     config = Config()
     config.set_main_option("script_location", str(ROOT / "alembic"))
     script = ScriptDirectory.from_config(config)
-    assert script.get_heads() == ["desktop_runtime_repair_20260909"]
-    assert script.get_revision("desktop_runtime_repair_20260909").down_revision == "inv_movement_type_register_20260825"
+
+    assert len(script.get_heads()) == 1, f"Alembic verzweigt: {script.get_heads()}"
+    assert (
+        script.get_revision("desktop_runtime_repair_20260909").down_revision
+        == "inv_movement_type_register_20260825"
+    )
+    strand = {rev.revision for rev in script.iterate_revisions("heads", "base")}
+    assert "desktop_runtime_repair_20260909" in strand
 
 
 def test_downgrade_refuses_to_delete_existing_business_tables():

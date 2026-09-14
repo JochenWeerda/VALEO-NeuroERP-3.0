@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.exceptions import EntityNotFoundError, ValidationFailedError
 from app.core.trocknungs_abrechnung import (
     TrocknungsInput,
@@ -97,7 +97,7 @@ class SettlementDryingService:
         settlement = repo.get_by_id(settlement_id)
 
         gross_qty = _round_qty(float(settlement.gross_quantity_kg))
-        calc_date = datetime.utcnow().date().isoformat()
+        calc_date = business_today().isoformat()
 
         try:
             result = _compute_drying_settlement(
@@ -202,7 +202,7 @@ class SettlementDryingService:
         Raises:
             ValidationFailedError: when the rule engine raises ValueError.
         """
-        effective_date = calc_date or datetime.utcnow().date().isoformat()
+        effective_date = calc_date or business_today().isoformat()
         try:
             result = _compute_drying_settlement(
                 self._drying_repo,
