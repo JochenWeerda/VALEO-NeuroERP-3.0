@@ -417,6 +417,69 @@ die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
 `test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
 --threshold 230` gruen (230/81 Dateien).
 
+## SQL-BIND-CAST-20260914 - abgeschlossen
+
+**Von:** User-Auftrag „GitHub macht Fehlermeldungen, schliesse diese".
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-14.
+**Dateibesitz:** Slice-YAML `SQL-BIND-CAST-20260914`, dieser Abschnitt,
+`scripts/check_sql_bind_casts.py`, `tests/test_sql_bind_casts.py`, die drei
+Workflows `doc-drift-report`/`quality-gate`/`release-gates`, 30 Backend-Dateien
+unter `app/` mit `:name::typ`.
+
+**Drei rote Checks, drei verschiedene Ursachen:**
+
+**1. Docs Governance** war auf *jedem* meiner Pushes rot: den Design-Slices
+018/019/020 fehlten die Pflichtfelder `tests`, `ai_harness` (sieben
+Vertragsebenen) und `external_gates`. Nachgetragen und inhaltlich ausgefuellt
+(`699dd9d6f`).
+
+**2. Doc Drift Report** committet das Dashboard und pusht **direkt auf `main`**.
+`main` ist geschuetzt, der Push wird mit `GH006` abgelehnt — der Lauf konnte nie
+gruen werden. Umgestellt auf Zweig plus Pull Request.
+
+**3. Pytest (PostgreSQL)** war kein Testproblem, sondern ein Produktfehler mit
+grosser Reichweite.
+
+**Die Schreibweise `:name::typ` bindet den Parameter nicht.** SQLAlchemy
+verschluckt das letzte Zeichen des Namens — nachgemessen statt vermutet:
+
+```
+text("SELECT :data::jsonb")._bindparams      -> ['dat']
+text("SELECT :date_from::DATE")._bindparams  -> ['date_fro']
+text("SELECT to_jsonb(:cnt::int)")._bindparams -> ['cn']
+```
+
+**Von 55 Fundstellen im Backend war keine einzige unauffaellig.** Die
+Fehlerklasse war vollstaendig, nicht vereinzelt.
+
+**Warum es lange unbemerkt blieb:** In `app/documents/repository.py` schlug der
+INSERT fehl, `save_to_store` fing die Ausnahme, loggte eine Warnung und meldete
+ueber den **In-Memory-Fallback Erfolg**. Sichtbar wurde der Fehler erst beim
+spaeteren Lesezugriff als 404 — und dort als Testproblem gelesen. Betroffen
+waren ausserdem die **Einkaufs-KPIs** (Zeitraumfilter, 12 Stellen),
+ATLAS-Zollausfuhr, Sammelbelege, Debitoren-/Kreditorenadressen,
+Waage-Metadaten, das DSGVO-Loeschprotokoll und mehrere Konnektoren.
+
+**Behebung:** 66 Stellen in 30 Dateien auf `CAST(:name AS typ)`. Rein
+syntaktisch — Abfrage, Werte und Ergebnis bleiben gleich, der Parameter wird nur
+tatsaechlich gebunden. Spaltencasts (`data::jsonb->>'status'`) tragen keinen
+Parameternamen und sind nicht betroffen.
+
+**Gegen den Rueckfall:** `scripts/check_sql_bind_casts.py` nach dem Muster des
+f-String-Gates, verdrahtet in `quality-gate` und `release-gates`, dazu 16
+Vertraege in `tests/test_sql_bind_casts.py`. Einer davon haelt ausdruecklich
+fest, dass die alte Schreibweise falsch bindet — bindet eine spaetere
+SQLAlchemy-Version sie korrekt, schlaegt er an und das Gate darf weg.
+
+**Nachweis:** `test_sales_invoice_einvoice_endpoints.py` **7 passed** gegen echte
+Postgres (vorher 3 failed in CI) · `test_sql_bind_casts.py` 16 passed · Gate
+Exit 0.
+
+**Offen, bewusst nicht hier entschieden:** Der In-Memory-Fallback in
+`app/documents/router_helpers.py` meldet einen fehlgeschlagenen Schreibvorgang
+weiterhin als Erfolg. Er hat diesen Fehler verdeckt. Ob er abgeschafft wird oder
+sein Ergebnis ehrlich meldet, ist eine eigene Entscheidung.
+
 ## DESIGN-STATUS-COLORS-020 - zurueckgestellt
 
 **Von:** Welle 6 aus DESIGN-STATUS-COLORS-019, User-Auftrag „Rest nach Best

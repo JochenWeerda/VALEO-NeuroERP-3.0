@@ -1,0 +1,123 @@
+slice_id: SQL-BIND-CAST-20260914
+id: SQL-BIND-CAST-20260914
+title: Cast auf Bind-Parameter bindet den Parameter nicht - Ursache und Gate
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-14"
+started_at: "2026-09-14"
+completed_at: "2026-09-14"
+goal: >-
+  Die drei roten Faelle der Pytest-Strecke an der Ursache schliessen und die
+  dahinterliegende Fehlerklasse im ganzen Backend beseitigen: die Schreibweise
+  ':name::typ' in SQLAlchemy-text()-Anweisungen bindet den Parameter nicht.
+befund:
+  symptom: >-
+    tests/test_sales_invoice_einvoice_endpoints.py meldete dreimal 404 auf
+    frisch angelegte Rechnungen. Die Logzeile davor zeigte die kompilierte
+    Anweisung mit einem nicht ersetzten ':data::jsonb' neben regulaeren
+    %(name)s-Platzhaltern.
+  ursache: >-
+    SQLAlchemy erkennt ':name::typ' nicht als Bind-Parameter, sondern
+    verschluckt das letzte Zeichen des Namens.
+  nachgemessen:
+    - "text(\"SELECT :data::jsonb\")._bindparams      -> ['dat']"
+    - "text(\"SELECT :ids::jsonb\")._bindparams       -> ['id']"
+    - "text(\"SELECT :date_from::DATE\")._bindparams  -> ['date_fro']"
+    - "text(\"SELECT to_jsonb(:cnt::int)\")._bindparams -> ['cn']"
+  verbreitung: >-
+    55 Fundstellen im Backend wurden einzeln gegen SQLAlchemy geprueft. Keine
+    einzige war unauffaellig - die Fehlerklasse war vollstaendig, nicht
+    vereinzelt.
+  warum_es_lange_unbemerkt_blieb: >-
+    In app/documents/repository.py schlug der INSERT fehl, save_to_store fing
+    die Ausnahme, loggte eine Warnung und meldete ueber den In-Memory-Fallback
+    Erfolg. Der Fehler wurde erst beim spaeteren Lesezugriff als 404 sichtbar
+    und dort als Testproblem gelesen.
+  weitere_betroffene_pfade: >-
+    Einkaufs-KPIs (Zeitraumfilter ueber :date_from::DATE, 12 Stellen),
+    ATLAS-Zollausfuhr, Sammelbelege, Debitoren- und Kreditorenadressen,
+    Waage-Metadaten, DSGVO-Loeschprotokoll, mehrere Konnektoren.
+behebung: >-
+  66 Stellen in 30 Dateien auf die ANSI-Schreibweise CAST(:name AS typ)
+  umgestellt. Rein syntaktisch: Abfrage, Parameterwerte und Ergebnis bleiben
+  gleich, der Parameter wird nur tatsaechlich gebunden. Spaltencasts wie
+  data::jsonb->>'status' tragen keinen Parameternamen und sind nicht betroffen.
+nebenbefund_doc_drift: >-
+  Der Workflow Doc Drift Report committet das Drift-Dashboard und pusht direkt
+  auf main. main ist geschuetzt, der Push wird mit GH006 abgelehnt, der Lauf
+  konnte also nie gruen werden. Umgestellt auf einen Zweig plus Pull Request,
+  der bei jedem Lauf fortgeschrieben wird.
+file_ownership:
+  - docs/agent-ops/slices/SQL-BIND-CAST-20260914.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - scripts/check_sql_bind_casts.py
+  - tests/test_sql_bind_casts.py
+  - .github/workflows/doc-drift-report.yml
+  - .github/workflows/quality-gate.yml
+  - .github/workflows/release-gates.yml
+  - "30 Backend-Dateien unter app/ mit ':name::typ'"
+acceptance:
+  - Keine Fundstelle ':name::typ' mehr unter app, modules, services, tools, scripts.
+  - Die drei zuvor roten Pytest-Faelle laufen gegen echte Postgres gruen.
+  - Ein Gate verhindert den Rueckfall und ist in CI verdrahtet.
+  - Doc Drift Report scheitert nicht mehr am Branch-Schutz.
+tests:
+  - >-
+    tests/test_sql_bind_casts.py - 16 Vertraege: der Namensverlust je
+    Parametername, die korrekte Bindung der CAST-Form, der unberuehrte
+    Spaltencast, die reparierte INSERT-Anweisung aus dem Dokumenten-Repository
+    und der Waechter selbst.
+  - >-
+    tests/test_sales_invoice_einvoice_endpoints.py gegen echte Postgres:
+    7 passed (zuvor 3 failed in CI).
+  - "scripts/check_sql_bind_casts.py: Exit 0 ueber das ganze Backend."
+  - >-
+    Selbsttest des Reparatur-Skripts ueber fuenf Musterfaelle plus
+    Bindungsvertrag fuer vier Parameternamen.
+external_gates:
+  - >-
+    Keine. Alle Nachweise laufen lokal gegen Postgres und in CI.
+risks:
+  - >-
+    Der Umbau beruehrt 30 Backend-Dateien. Er ist rein syntaktisch, aber breit;
+    abgesichert ist er ueber das Gate, die Vertragstests und die Pytest-Strecke.
+  - >-
+    Ein Vertragstest haelt ausdruecklich fest, dass die alte Schreibweise
+    falsch bindet. Bindet eine spaetere SQLAlchemy-Version sie korrekt, schlaegt
+    genau dieser Test an und das Gate darf gelockert werden - der Test ist
+    damit auch die Ablaufkontrolle fuer das Gate.
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein gespeicherter Beleg ist danach lesbar. Ein Schreibvorgang, der in der
+    Datenbank scheitert, darf dem Aufrufer nicht als Erfolg gemeldet werden.
+  architektur_vertrag: >-
+    Parameter werden gebunden, nicht in die Anweisung geschrieben. Casts auf
+    Parametern verwenden die ANSI-Form CAST(:name AS typ); die
+    Doppelpunktform bleibt Spaltencasts vorbehalten.
+  daten_vertrag: >-
+    Keine Migration und keine Datenmutation. Zuvor fehlgeschlagene Schreibungen
+    wurden nicht nachtraeglich erzeugt - fehlende Altdaten bleiben fehlend.
+  test_vertrag: >-
+    Die Fehlerklasse wird nicht durch Abwesenheit geprueft, sondern durch
+    Bindungsvertraege gegen SQLAlchemy; zusaetzlich laeuft die Endpunktstrecke
+    gegen echte Postgres statt gegen eine Attrappe.
+  security_vertrag: >-
+    Die Umstellung bindet Werte weiterhin als Parameter und bringt keine
+    Zeichenkettenverkettung ins SQL. Das bestehende f-String-Gate bleibt
+    unveraendert daneben bestehen.
+  betriebs_vertrag: >-
+    Backend-Neustart noetig, damit die reparierten Anweisungen greifen. Keine
+    Migration, kein Datenabgleich.
+  dokumentations_vertrag: >-
+    Der stille In-Memory-Fallback ist als Verdeckungsursache benannt statt
+    stillschweigend belassen; das Gate traegt die Erklaerung im Docstring.
+offen:
+  - >-
+    Der In-Memory-Fallback in app/documents/router_helpers.py meldet einen
+    fehlgeschlagenen Schreibvorgang weiterhin als Erfolg. Er hat diesen Fehler
+    verdeckt. Das ist eine eigene Entscheidung (Fallback abschaffen oder
+    Ergebnis ehrlich melden) und nicht Teil dieses Slices.
+verification:
+  - "python scripts/check_sql_bind_casts.py"
+  - "python -m pytest tests/test_sql_bind_casts.py"
+  - "python -m pytest tests/test_sales_invoice_einvoice_endpoints.py"
