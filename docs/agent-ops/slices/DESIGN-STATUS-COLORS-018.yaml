@@ -3,6 +3,7 @@ id: DESIGN-STATUS-COLORS-018
 title: Getoente Flaechen und Resttabellen auf Designsystem-Komponenten (Welle 4)
 owner: Claude Code
 status: in arbeit
+teilschritte_abgeschlossen: 2
 created_at: "2026-09-13"
 started_at: "2026-09-13"
 vorgaenger: DESIGN-STATUS-COLORS-017
@@ -66,3 +67,58 @@ verification:
   - "npx tsc --noEmit"
   - "npm run test"
   - "Gegenprobe mit dem Messskript: 0 verbleibende Treffer je Block"
+
+zwischenstand_2026_09_14:
+  schritt_1:
+    commit: cfd67c2a3
+    umfang: "76 Umstellungen in 54 Dateien"
+    funde:
+      - >-
+        alertVariants fehlte error - dieselbe Luecke wie bei Badge in Welle 2.
+        Ergaenzt auf denselben Tokens; destructive bleibt unveraendert.
+      - >-
+        Rund 20 Faelle waren bereits Alert, nur mit roher Palette im className
+        uebersteuert. Die richtige Komponente war da und wurde am
+        Designsystem vorbei eingefaerbt.
+    selbsttest_hat_gegriffen: >-
+      Zwei echte Fehler der ersten Codemod-Fassung: falsche Slicing-Arithmetik
+      (verschluckte den Kasteninhalt) und ein verschachteltes </div> als
+      Kastenende.
+  schritt_2:
+    commit: c2c923ed9
+    umfang: "10 Status-Tabellen auf Badge-/Callout-Varianten"
+    geloescht:
+      datei: packages/frontend-web/src/lib/design-tokens.ts
+      grund: >-
+        Zweite, konkurrierende Farbquelle mit 22 Palette-Eintraegen ohne einen
+        einzigen Importeur. Belegt per git grep und dadurch, dass tsc nach dem
+        Loeschen unveraendert durchlaeuft. CLAUDE.md nennt palette.css als
+        einzige Quelle; Mitmigrieren haette toten Code gepflegt.
+    kriterium_geschaerft: >-
+      Welle 3 erkannte kategoriale Tabellen an purple/violet. Das reicht nicht:
+      TYP_COLORS in rations-zugang faerbt Zugangsrollen mit rot/blau/gruen/gelb
+      und waere rein chromatisch als Status durchgegangen. Massgeblich ist die
+      Bedeutung des Schluessels, nicht die Farbfamilie des Werts.
+  messung:
+    hinweisbox: "69 -> 13 (Rest haengt an Bedingungen, kein Codemod moeglich)"
+    tabelleneintraege: "172 in 29 Dateien -> 109 in 21"
+    sonstige_flaeche: "98 -> 96 (an den Commits gemessen)"
+    ikonflaeche_overlay: "6 unveraendert"
+    messfehler_eingeraeumt: >-
+      Die Claim-Zahl 82 fuer sonstige Flaechen war mit einer anderen
+      Pill-Abgrenzung gezaehlt als die 96 hier. Der Block ist nicht gewachsen;
+      die Claim-Zahl war die unsauberere.
+  befund_restbloecke: >-
+    Die verbliebenen Flaechen, Ikonflaechen und das Overlay tragen keinen
+    farbigen Text und sind damit kein Kontrastfall nach der CLAUDE.md-Regel,
+    sondern dekorative Flaechen. Sie gehoeren auf semantische Tokens - so in
+    Schritt 2 fuer Ampel-Schaltflaeche, ungelesene Zeile und Touch-Flaeche
+    gemacht - und nicht in Badge oder Callout gezwungen.
+  nachweis:
+    - "tsc --noEmit exit 0 nach jedem Schritt"
+    - "eslint der geaenderten Dateien ohne Befund (4 vorbestehende Warnungen)"
+    - "vitest 126 Dateien, 495 passed, 1 skipped - identisch zur Baseline"
+    - >-
+      Vitest-Gotcha: der Vollauf mit Standardeinstellungen meldete 16
+      Fehlschlaege, alle 5-Sekunden-Timeouts unter Worker-Last (environment
+      1395 s). Mit --testTimeout=30000 --maxWorkers=2 reproduzierbar gruen.

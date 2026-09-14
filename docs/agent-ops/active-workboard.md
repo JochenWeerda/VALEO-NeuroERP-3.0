@@ -457,6 +457,56 @@ Bloecke**, nicht nur die Hinweisboxen.
 die roten Boxen haetten also kein Ziel. Variante `error` wird ergaenzt, exakt
 nach dem Muster der drei vorhandenen und auf denselben Tokens.
 
+**Schritt 1 (`cfd67c2a3`): 76 Umstellungen in 54 Dateien.** Codemod mit
+Selbsttest ueber zehn Musterfaelle. Zwei Funde, die erst die Arbeit zeigte:
+
+- **`alertVariants` fehlte `error`** — dieselbe Luecke wie bei `Badge` in Welle 2.
+  `destructive` ist deckend und meint zerstoerende Aktionen, nicht einen Zustand;
+  die roten Kaesten haetten kein Ziel gehabt. Ergaenzt auf denselben Tokens.
+- **Rund 20 Faelle waren bereits `<Alert>`** — mit roher Palette im `className`
+  uebersteuert. Die richtige Komponente war da und wurde am Designsystem vorbei
+  eingefaerbt; sie brauchten nur `variant=`.
+
+Der Selbsttest fing zwei echte Fehler meiner ersten Codemod-Fassung ab: falsche
+Slicing-Arithmetik, die den Kasteninhalt verschluckte, und ein verschachteltes
+`</div>` als Kastenende.
+
+**Schritt 2 (`c2c923ed9`): zehn Status-Tabellen auf Varianten.** Die getragenen
+Elemente sind jetzt `Badge` bzw. `Callout` statt handgebauter `span`/`div`.
+
+- **`lib/design-tokens.ts` entfernt** — eine zweite, konkurrierende Farbquelle
+  mit 22 Palette-Eintraegen, die **niemand importiert**. Belegt per `git grep`
+  und dadurch, dass `tsc` nach dem Loeschen unveraendert durchlaeuft. CLAUDE.md
+  nennt `palette.css` als einzige Quelle; die Datei mitzumigrieren haette toten
+  Code gepflegt und die Falle fuer den naechsten Leser stehen gelassen.
+- **Ungenutztes Feld `typeStyles.bg`** in `AlertWidget` entfernt (nie gelesen).
+- **Kriterium fuer die Ausnahme geschaerft:** Welle 3 hatte kategoriale Tabellen
+  an `purple`/`violet` erkannt. Das reicht nicht — `TYP_COLORS` in
+  `rations-zugang` faerbt **Zugangsrollen** mit rot/blau/gruen/gelb und waere
+  rein chromatisch als Status durchgegangen. Massgeblich ist die Bedeutung des
+  Schluessels, nicht die Farbfamilie des Werts.
+
+**Stand nach beiden Schritten** (eine Messregel, `<div>` mit `bg-<familie>-50|100`):
+
+| Block | Claim | jetzt |
+|---|---|---|
+| Hinweisbox | 69 | **13** (Rest haengt an Bedingungen) |
+| Tabelleneintraege | 172 in 29 Dateien | **109 in 21** |
+| sonstige Flaeche | 82 | 96 |
+| Ikonflaeche / Overlay | 6 | 6 |
+
+Zur Zeile „sonstige Flaeche": die 82 im Claim und die 96 hier sind **mit leicht
+verschiedenen Regeln gezaehlt** (Pill-Abgrenzung), nicht gewachsen. Gegen die
+Commits gemessen sind es 98 vor und 96 nach der Arbeit. Meine Claim-Zahl war die
+unsauberere — gesagt, statt die bequemere Lesart stehen zu lassen.
+
+**Befund zu den Restbloecken, der die Aufgabenstellung praezisiert:** die
+verbliebenen Flaechen, Ikonflaechen und das Overlay **tragen keinen farbigen
+Text**. Sie sind damit kein Kontrastfall nach der CLAUDE.md-Regel, sondern
+dekorative Flaechen. Sie gehoeren auf semantische Tokens (so in diesem Schritt
+fuer Ampel-Schaltflaeche, ungelesene Zeile und Touch-Flaeche gemacht), nicht in
+`Badge` oder `Callout` gezwungen. Das ist ein eigener, kleinerer Slice.
+
 ## DESIGN-STATUS-COLORS-017 - abgeschlossen
 
 **Von:** Welle 3 aus DESIGN-STATUS-COLORS-016. **Owner:** Claude Code.
