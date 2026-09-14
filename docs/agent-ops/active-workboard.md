@@ -417,10 +417,10 @@ die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
 `test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
 --threshold 230` gruen (230/81 Dateien).
 
-## DESIGN-STATUS-COLORS-019 - in arbeit
+## DESIGN-STATUS-COLORS-019 - abgeschlossen
 
 **Von:** Welle 5 aus DESIGN-STATUS-COLORS-018. **Owner:** Claude Code.
-**Stand:** in arbeit 2026-09-14, geclaimt durch Claude Code.
+**Stand:** abgeschlossen 2026-09-14.
 **Ziel:** Den Restbestand roher Palette-Statusfarben schliessen.
 **Dateibesitz:** `docs/agent-ops/slices/DESIGN-STATUS-COLORS-019.yaml`, dieser
 Abschnitt, Dateien unter `packages/frontend-web/src` mit rohen
@@ -447,6 +447,39 @@ bleibt ausgenommen.
 Die Trennung „mit/ohne farbigen Text" ist neu und folgt dem Befund aus Welle 4:
 nur die erste Gruppe ist ein Kontrastfall nach der CLAUDE.md-Regel. Die zweite
 in `Badge` oder `Callout` zu zwingen waere semantisch falsch.
+
+**Ergebnis: 0 verbleibende `div`-Flaechen mit Palette-Toenung** unter
+`packages/frontend-web/src`. Vier Commits: `71000b6e4` (bedingte Kaesten,
+Warnkarten, Ikonflaechen), `73892e87b` (45 Flaechen mit farbigem Text auf
+Callout), `400e8c302` (41 dekorative Flaechen + 8 Tabellen auf Tokens),
+`e86b029b7` (5 Restfaelle).
+
+**Drei Stellen bewusst nicht auf eine Komponente gedreht** — und das ist der
+inhaltliche Kern dieser Welle:
+
+- `barcode-scanner` traegt `role="alert"` und ist eine **echte, erscheinende**
+  Meldung → `Alert`, nicht `Callout`.
+- Die Absaetze in `fuetterungsdokumentation-mobil` tragen eigene ARIA-Rollen als
+  `<p>`. Ein div-basiertes `Callout` haette die Absatzsemantik ersetzt oder die
+  Rolle verdoppelt — dort wandern nur die Farben auf Tokens.
+- `FlowSpineWorkspace` ist eine **dunkle** Arbeitsflaeche. Toenung und Deckkraft
+  bleiben; eine helle Callout-Variante haette sie zerlegt.
+
+**Zwei eigene Fehler, beide gefangen und behoben:**
+
+- Die Import-Einfuegung des Codemods suchte die letzte Zeile, die mit `import`
+  beginnt, und landete damit **mitten in einem mehrzeiligen Import**. Dreimal
+  aufgetreten, jedes Mal von `tsc` gefangen. Richtig ist das letzte
+  **vollstaendige** import-Statement.
+- Beim Warnkarten-Idiom habe ich zuerst blind `</CardContent></Card>` ersetzt.
+  Das traf in `fuhrpark/fahrzeuge.tsx` eine **fremde** Karte und liess die
+  eigentliche offen. Zurueckgenommen per `git checkout`, neu gemacht mit
+  Tiefenzaehlung ab der Oeffnungsstelle.
+
+**Offen — andere Fehlerklasse, eigene Welle:** 620 Zeilen ausserhalb dieser
+Bloecke, davon **242 Icon- und Textfarben** (`text-<familie>-600` an Symbolen),
+79 bedingte Ausdruecke, 35 Tabellen/Helfer, dazu Button-Uebersteuerungen,
+Zeilen-Hervorhebungen in Auswahldialogen und hover-Zustaende.
 
 ## DESIGN-STATUS-COLORS-018 - in arbeit
 

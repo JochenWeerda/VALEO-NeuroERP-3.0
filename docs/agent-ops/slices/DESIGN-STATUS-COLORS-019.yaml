@@ -2,7 +2,8 @@ slice_id: DESIGN-STATUS-COLORS-019
 id: DESIGN-STATUS-COLORS-019
 title: Restbestand Statusfarben schliessen - bedingte Kaesten, Flaechen, Ikonflaechen (Welle 5)
 owner: Claude Code
-status: in arbeit
+status: abgeschlossen
+completed_at: "2026-09-14"
 created_at: "2026-09-14"
 started_at: "2026-09-14"
 vorgaenger: DESIGN-STATUS-COLORS-018
@@ -69,3 +70,54 @@ verification:
   - "npx tsc --noEmit"
   - "npx vitest run --testTimeout=30000 --maxWorkers=2"
   - "Gegenprobe mit dem Messskript je Block"
+
+abschluss_2026_09_14:
+  ergebnis: >-
+    0 verbleibende div-Flaechen mit Palette-Toenung unter
+    packages/frontend-web/src. Alle im Claim benannten Bloecke geschlossen
+    oder begruendet ausgenommen.
+  commits:
+    - "71000b6e4: 13 bedingte Hinweiskaesten, 6 Warnkarten, Ikonflaechen, Overlay"
+    - "73892e87b: 45 Flaechen mit farbigem Text auf Callout (Codemod)"
+    - "400e8c302: 41 dekorative Flaechen + 8 Tabellen auf semantische Tokens"
+    - "e86b029b7: 5 Restfaelle ohne Regelentsprechung"
+  bewusst_nicht_auf_komponenten_gedreht:
+    - >-
+      barcode-scanner traegt role="alert" und ist eine echte, erscheinende
+      Meldung - dort Alert statt Callout.
+    - >-
+      Die Absaetze in fuetterungsdokumentation-mobil tragen eigene ARIA-Rollen
+      als <p>. Ein div-basiertes Callout haette die Absatzsemantik ersetzt
+      oder die Rolle verdoppelt; dort wandern nur die Farben auf Tokens.
+    - >-
+      FlowSpineWorkspace ist eine dunkle Arbeitsflaeche. Toenung und
+      Deckkraft bleiben erhalten, eine helle Callout-Variante haette sie
+      zerlegt.
+  kategorial_ausgenommen_vollstaendig_benannt: >-
+    Suchergebnistypen, Aktions- und Spartenarten, Belegarten, Zugangsrollen,
+    Kachelfarben im Portal, Zertifikatstypen, Domaenen (zwei Tabellen),
+    Wissensarten. Sie faerben Kategorien, nicht Zustaende.
+  codemod_fehler_behoben: >-
+    Die Import-Einfuegung suchte die letzte Zeile, die mit "import" beginnt,
+    und landete damit mitten in einem mehrzeiligen Import. Dreimal
+    aufgetreten (speditionen-fracht-preise, TourList, lkw-beladung), jedes Mal
+    von tsc gefangen. Richtig ist das letzte vollstaendige import-Statement
+    bis zur schliessenden Quelle.
+  fehlgriff_und_ruecknahme: >-
+    Beim Warnkarten-Idiom wurde zuerst blind </CardContent></Card> ersetzt.
+    Das traf in fuhrpark/fahrzeuge.tsx eine fremde Karte und liess die
+    eigentliche offen. Zurueckgenommen per git checkout und mit einer
+    Tiefenzaehlung ab der Oeffnungsstelle neu gemacht.
+  offen_naechste_welle:
+    umfang: "620 Zeilen ausserhalb der Welle-5-Bloecke"
+    zusammensetzung: >-
+      242 Icon- und Textfarben (text-<familie>-600 an Symbolen), 79 bedingte
+      Ausdruecke, 35 Tabellen/Helfer, Rest verteilt - darunter
+      Button-Uebersteuerungen, Zeilen-Hervorhebungen in Auswahldialogen und
+      hover-Zustaende. Andere Fehlerklasse als die Flaechen dieser Welle und
+      eine eigene Entscheidung wert.
+  nachweis:
+    - "tsc --noEmit exit 0 nach jedem Schritt"
+    - "eslint der geaenderten Dateien ohne Befund"
+    - "vitest 126 Dateien, 495 passed, 1 skipped - identisch zur Baseline (4x)"
+    - "Gegenprobe: 0 verbleibende div-Flaechen mit Palette-Toenung"
