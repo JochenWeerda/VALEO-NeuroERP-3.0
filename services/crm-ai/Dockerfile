@@ -15,7 +15,13 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Download spaCy model
-RUN python -m spacy download en_core_web_sm
+# "spacy download" ist mit dem Pin 3.7.2 nicht mehr benutzbar: die Kompatibilitaets-
+# tabelle von spacy-models kennt nur den Schluessel "3.7", nicht "3.7.2". spacy bildet
+# daraus eine leere Modellversion und laedt ".../download/-en_core_web_sm/-en_core_web_sm.tar.gz"
+# -> HTTP 404, der Image-Build bricht ab. Das Modell wird daher direkt und
+# versionsfest installiert; das ist ohnehin reproduzierbarer als der Download-Befehl.
+RUN pip install --no-cache-dir \
+    https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
 
 # Copy application code
 COPY . .

@@ -5,7 +5,7 @@ Settings for CRM AI Service.
 import os
 from typing import Optional
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -70,9 +70,7 @@ class Settings(BaseSettings):
         "contract_value", "industry", "region", "satisfaction_score"
     ]
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 
 settings = Settings()

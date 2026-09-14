@@ -7,8 +7,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .app.api.v1.api import api_router
-from .app.config.settings import settings
+from app.api.v1.api import api_router
+from app.config.settings import settings
 
 app = FastAPI(
     title="CRM AI Service",
@@ -38,7 +38,10 @@ async def health_check():
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        host="127.0.0.1",
+        # 0.0.0.0, nicht 127.0.0.1: der Entrypoint startet diese Datei im Container,
+        # und an die Loopback-Adresse gebunden ist der Dienst trotz EXPOSE 6200 von
+        # aussen nicht erreichbar.
+        host="0.0.0.0",  # noqa: S104
         port=6200,
         reload=True,
     )
