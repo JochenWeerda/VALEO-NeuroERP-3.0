@@ -1,0 +1,274 @@
+slice_id: SERVICE-FASTAPI-STARLETTE-20260914
+id: SERVICE-FASTAPI-STARLETTE-20260914
+title: Den fastapi- und starlette-Altbestand der Service-Manifeste auf den Stand der Wurzel heben
+owner: Cursor Auto
+status: in arbeit
+created_at: "2026-09-14"
+started_at: "2026-09-14"
+goal: >-
+  Die Service-Manifeste unter services/ standen auf fastapi 0.104.1 und 0.115.4
+  mit starlette 0.27, waehrend die Wurzel bereits fastapi 0.136.3 mit starlette
+  1.3.1 fuehrte. Diese Spreizung war die Ursache dafuer, dass Advisories gegen
+  starlette in den Diensten offen blieben, obwohl die Wurzel sie geschlossen
+  hatte. Ziel ist ein einheitlicher Stand ueber alle 23 Manifeste und der
+  Nachweis, dass der Sprung keinen Dienst bricht.
+coordination: >-
+  Fortsetzung von SERVICE-CVE-PINS-20260914 und damit derselbe Zuschnitt: die
+  Python-Service-Manifeste. Codex hat die Node-Welle am 2026-09-14
+  abgeschlossen und die Python-Service-Pins ausdruecklich als fremden Bereich
+  gekennzeichnet. Frontend-Quellcode bleibt bei Claude Code. Der httpx- und
+  uvicorn-Altbestand ist in diesem Slice ausdruecklich nicht enthalten, siehe
+  bewusst_ausgeklammert - er wuerde den Nachweis dieser Welle nicht mehr
+  zuordenbar machen.
+file_ownership:
+  - docs/agent-ops/slices/SERVICE-FASTAPI-STARLETTE-20260914.yaml
+  - "docs/agent-ops/active-workboard.md: nur die eigenen Abschnitte"
+  - services/compliance/infrastat/requirements.txt
+  - services/compliance/zoll/requirements.txt
+  - services/crm-ai/requirements.txt
+  - services/crm-analytics/requirements.txt
+  - services/crm-communication/requirements.txt
+  - services/crm-consent/requirements.txt
+  - services/crm-core/requirements.txt
+  - services/crm-gdpr/requirements.txt
+  - services/crm-marketing/requirements.txt
+  - services/crm-multichannel/requirements.txt
+  - services/crm-sales/requirements.txt
+  - services/crm-security/requirements.txt
+  - services/crm-service/requirements.txt
+  - services/crm-workflow/requirements.txt
+  - services/dms-adapter/requirements.txt
+  - services/finance/requirements.txt
+  - services/finance/fibu-core/requirements.txt
+  - services/finance/fibu-gateway/requirements.txt
+  - services/inventory/requirements.txt
+  - services/ki-usability/requirements.txt
+  - services/workflow/requirements.txt
+  - services/workflow-mock/requirements.txt
+ausgangslage:
+  befund: >-
+    22 der 23 Service-Manifeste fuehrten fastapi 0.104.1 oder 0.115.4. Nur
+    services/ai stand nach SERVICE-CVE-PINS-20260914 bereits auf 0.136.3. Kein
+    Manifest pinnte starlette explizit, es kam jeweils als transitive
+    Abhaengigkeit von fastapi in der Version 0.27.x herein.
+  warum_das_zaehlt: >-
+    Ein Advisory gegen starlette wird durch einen Fix in der Wurzel nicht
+    geschlossen, wenn 22 Dienstimages ihre eigene alte Version mitbringen. Der
+    Fix in der Wurzel erzeugt in diesem Fall nur den Anschein von Abdeckung.
+aenderung:
+  vorgehen: >-
+    fastapi auf 0.136.3 und starlette explizit auf 1.3.1 gesetzt, damit die
+    Version im Manifest sichtbar und pruefbar ist statt transitiv. pydantic auf
+    2.11.7 gehoben, wo es unter 2.9.0 lag, und pydantic-settings auf 2.10.1.
+    Alle vier Werte entsprechen der Wurzel-requirements.txt; es wurde keine
+    Version frei gewaehlt.
+  ergebnis: >-
+    Alle 23 Manifeste fuehren jetzt fastapi==0.136.3 und starlette==1.3.1.
+    Ueber git ls-files geprueft, kein Manifest faellt durchs Raster.
+bruchrisiko:
+  vorgehen: >-
+    Der Sprung ueberspringt 30 fastapi-Minor-Versionen und eine
+    Starlette-Hauptversion. Statt darauf zu vertrauen, dass nichts bricht, wurden
+    die bekannten Bruchstellen zuerst statisch gesucht und dann gegen die echten
+    Versionen im Container ausgefuehrt.
+  statischer_befund: >-
+    Gesucht wurde nach on_event, BaseSettings-Import aus pydantic, dem in
+    pydantic v2 entfernten regex-Argument, parse_obj und pydantic.v1-Importen.
+    Treffer ausschliesslich bei on_event, und nur in zwei Dateien:
+    services/crm/main.py und services/dms-adapter/app/main.py, jeweils startup
+    und shutdown. Keine pydantic-v1-Reste in den Diensten.
+  ausgefuehrter_befund: >-
+    Sechs Muster wurden mit fastapi 0.136.3, starlette 1.3.1 und pydantic 2.11.7
+    in einem python:3.11-slim-Container ausgefuehrt: on_event fuer startup und
+    shutdown, Lifespan-Kontextmanager, CORS- und TrustedHost-Middleware,
+    BaseHTTPMiddleware mit call_next, pydantic-Modelle in Request und Response
+    sowie die Erzeugung des OpenAPI-Schemas. Alle sechs gruen. on_event traegt
+    also weiterhin, es warnt nur ueber die Abkuendigung. Damit war kein Umbau auf
+    Lifespan-Handler notwendig, um die Pins zu heben.
+bewusst_ausgeklammert:
+  - punkt: httpx-Altbestand
+    befund: >-
+      14 Dienste pinnen httpx==0.25.2, die Wurzel fuehrt 0.28.1, dms-adapter und
+      ki-usability arbeiten mit offenen Untergrenzen. Zusaetzlich meldet
+      starlette 1.3.1 beim TestClient die Abkuendigung von httpx zugunsten von
+      httpx2.
+    warum_nicht_hier: >-
+      httpx ist in diesen Diensten nicht nur Testwerkzeug, sondern
+      Produktionsclient. Eine Hebung gehoert mit eigenem Nachweis der
+      Aufrufstellen abgehandelt, nicht als Beifang einer fastapi-Welle - sonst
+      ist bei einem Fehler nicht mehr zuzuordnen, welche Aenderung ihn erzeugt
+      hat.
+  - punkt: uvicorn streut ueber die Dienste
+    befund: >-
+      Der Resolver liefert je Dienst unterschiedliche uvicorn-Versionen, gesehen
+      wurden 0.23.2, 0.24.0 und 0.27.1 bei einer Wurzel auf 0.24.0. Die Dienste
+      laufen also mit unterschiedlichen ASGI-Servern.
+    warum_nicht_hier: >-
+      Eigene Fragestellung mit eigenem Betriebsrisiko. Hier nur festgehalten,
+      damit sie nicht unbemerkt bleibt.
+  - punkt: Vier Manifeste sind nicht reproduzierbar gepinnt
+    befund: >-
+      Der Resolver hat es sichtbar gemacht, weil dieselben Manifeste je Lauf
+      andere Versionen liefern koennen. dms-adapter und ki-usability fuehren
+      pydantic, pydantic-settings und uvicorn nur mit Untergrenzen; crm-ai und
+      workflow-mock pinnen pydantic gar nicht und ziehen es transitiv ueber
+      fastapi; fibu-core pinnt pydantic-settings nicht. Gemessen aufgeloest:
+      ki-usability landet bei pydantic 2.13.5, pydantic-settings 2.15.0 und
+      uvicorn 0.53.0, workflow-mock bei pydantic 2.13.5, fibu-core bei
+      pydantic-settings 2.15.0 - waehrend die gepinnten Dienste bei 2.11.7 und
+      2.10.1 stehen.
+    warum_nicht_hier: >-
+      Ein Pin auf 2.11.7 waere fuer ki-usability ein Rueckschritt von 2.13.5 und
+      fuer workflow-mock ebenso. Das ist eine Versionsentscheidung mit
+      Verhaltensfolge, die einen eigenen Nachweis braucht, und keine Nebenwirkung
+      einer fastapi-Welle. fastapi und starlette sind auch in diesen vier
+      Manifesten exakt gepinnt, das Ziel dieser Welle ist dort also erreicht.
+  - punkt: on_event-Abkuendigung
+    befund: >-
+      services/crm/main.py und services/dms-adapter/app/main.py nutzen weiter
+      on_event. Das funktioniert unter starlette 1.3.1, warnt aber.
+    warum_nicht_hier: >-
+      Kein Blocker fuer diese Welle, nachgewiesen durch die ausgefuehrte Probe.
+      Der Umbau auf Lifespan-Handler ist Folgearbeit und beruehrt
+      Startreihenfolge und Ressourcenaufbau, also Verhalten - nicht Pins.
+acceptance:
+  - "Alle 23 Service-Manifeste fuehren fastapi==0.136.3 und starlette==1.3.1."
+  - >-
+    Kein Manifest wird durch die neue Kombination unauflösbar - der Fall, an dem
+    services/ai vorher gescheitert ist.
+  - >-
+    Die Apps der geaenderten Dienste sind mit den neuen Versionen importierbar
+    und liefern ihr OpenAPI-Schema.
+  - >-
+    Die bekannten Bruchstellen des Sprungs sind nicht nur statisch gesucht,
+    sondern gegen die echten Versionen ausgefuehrt.
+tests:
+  - >-
+    Bruchmuster-Probe im Container mit fastapi 0.136.3, starlette 1.3.1 und
+    pydantic 2.11.7: sechs von sechs gruen (on_event startup und shutdown,
+    Lifespan, CORS und TrustedHost, BaseHTTPMiddleware mit call_next,
+    pydantic-Modelle in Request und Response, OpenAPI-Erzeugung).
+  - >-
+    Resolver je Manifest im Linux-Container: 22 von 22 geaenderten Manifesten
+    aufloesbar, jeweils mit fastapi 0.136.3 und starlette 1.3.1. Der Fall, an dem
+    services/ai vorher gescheitert ist, tritt in keinem Manifest auf.
+  - >-
+    Die drei finance-Manifeste waren beim ersten Lauf nur scheinbar defekt: sie
+    ziehen packages/finance-shared als editable Paket, und setuptools kann im
+    read-only Mount den Zeitstempel von src/finance_shared.egg-info nicht setzen.
+    Mit beschreibbarer Kopie der beteiligten Pfade loesen alle drei auf. Der
+    Fehler lag in der Pruefung, nicht im Manifest - deshalb hier benannt.
+  - >-
+    Import der App mit den neuen Versionen in 15 Diensten, jeweils mit
+    OpenAPI 3.1.0 und - wo vorhanden - HTTP 200 auf dem Health-Pfad: crm-core
+    (31 Routen), crm-sales (18), crm-service (12), crm-analytics (10),
+    crm-communication (16), crm-multichannel (17), crm-workflow (12),
+    crm-security (16, meldet security_status active), inventory (31),
+    dms-adapter (15), crm-gdpr (19), crm-marketing (37), ki-usability (15),
+    services/ai (29) und crm-ai (15).
+  - >-
+    inventory und services/ai wurden mit bereitgestelltem packages/auth-shared
+    geprueft, also mit aktiver Auth-Middleware, nicht ueber die Ausnahme
+    ALLOW_UNAUTHENTICATED_SERVICE. Beide starten seit d9e0cf7db absichtlich hart
+    ab, wenn auth_shared fehlt.
+  - >-
+    Nicht durch den Sprung verursacht, aber beim Nachweis aufgefallen: die
+    laufenden Compose-Images von ki-usability und crm-marketing hinken ihren
+    Manifesten nach - im Image fehlten httpx bzw. PyJWT, beide stehen im
+    Manifest. Nach dem Nachziehen importieren beide.
+  - >-
+    Statischer Scan der Dienste auf on_event, BaseSettings aus pydantic, regex,
+    parse_obj und pydantic.v1: Treffer nur bei on_event in services/crm/main.py
+    und services/dms-adapter/app/main.py.
+  - >-
+    Einheitlichkeit der Pins ueber git ls-files geprueft: 23 von 23 Manifesten
+    auf fastapi==0.136.3 und starlette==1.3.1.
+  - >-
+    crm-ai im Image mit den neuen Pins: Import ok, 15 Routen, GET /health
+    antwortet HTTP 200 mit {"status":"healthy","service":"crm-ai"}. Damit ist
+    auch die Luecke geschlossen, dass der Startnachweis aus
+    SERVICE-CVE-PINS-20260914 noch mit der alten fastapi-Version lief.
+risks:
+  - risiko: >-
+      Der Import-Nachweis wurde in bereits gebauten Images erbracht, in denen die
+      neuen Pins per pip nachgezogen wurden, nicht in frisch gebauten Images.
+    bewertung: >-
+      Er prueft damit genau das Risiko des Sprungs, naemlich den Dienstcode gegen
+      die neuen Versionen, aber nicht die Reproduzierbarkeit des Builds. Fuer
+      letztere steht der Resolver-Nachweis je Manifest. Ausdruecklich benannt und
+      nicht als frischer Build ausgegeben.
+  - risiko: >-
+      Der Sprung ueberspringt 30 Minor-Versionen; ein Verhaltensunterschied kann
+      sich auch ausserhalb der gepruefteten sechs Muster zeigen.
+    bewertung: >-
+      Die Muster wurden aus den tatsaechlich im Code vorkommenden Konstrukten
+      abgeleitet, nicht geraten. Restrisiko liegt bei Laufzeitverhalten unter
+      Last, das kein Importtest zeigt.
+  - risiko: >-
+      Die Docker-Engine ist waehrend der Nachweise zweimal haengengeblieben, als
+      mehrere Container-Laeufe parallel liefen.
+    bewertung: >-
+      Kein Befund am Code, aber ein Grund, die Nachweise seriell zu fahren. Nach
+      einem Neustart der Engine liefen sie durch.
+ai_harness:
+  fachlicher_vertrag: >-
+    Keine fachliche Aenderung. Die Welle beruehrt ausschliesslich Versionsangaben
+    in Manifesten; kein Endpunkt, kein Feld und keine Regel aendert sich.
+  architektur_vertrag: >-
+    Die Service-Manifeste folgen der Wurzel-requirements.txt als einziger
+    Referenz fuer fastapi, starlette, pydantic und pydantic-settings. starlette
+    wird explizit gepinnt statt transitiv gezogen, damit die Version im Manifest
+    pruefbar ist und ein Advisory nicht an einer unsichtbaren Version vorbeilaeuft.
+  daten_vertrag: >-
+    Keine Datenaenderung, kein Schema, keine Migration. Die Modelle wurden nicht
+    angefasst.
+  test_vertrag: >-
+    Ein Pin gilt als nachgewiesen, wenn das Manifest im Linux-Container
+    aufloesbar ist und die App des Dienstes mit den neuen Versionen importierbar
+    ist. Ein Resolver-Lauf allein genuegt nicht, weil er den Dienstcode nicht
+    beruehrt.
+  security_vertrag: >-
+    Die Welle schliesst die Luecke, dass ein in der Wurzel behobenes
+    starlette-Advisory in 22 Dienstimages offen blieb. Es wurden keine
+    Ausnahmen eingetragen und kein Befund stummgeschaltet.
+  betriebs_vertrag: >-
+    Die Images muessen nach dieser Aenderung neu gebaut werden, damit die Pins
+    wirksam werden. Der Startaufruf und die Ports der Dienste bleiben
+    unveraendert. Die uvicorn-Streuung bleibt als offener Betriebspunkt benannt.
+  dokumentations_vertrag: >-
+    Dieser Slice und der zugehoerige Abschnitt im active-workboard sind die
+    Dokumentation. Die drei ausgeklammerten Punkte sind mit Begruendung
+    festgehalten, damit sie nicht als erledigt gelten.
+external_gates:
+  - >-
+    GitHub-Dependabot ist die Befundquelle fuer die Advisories und aktualisiert
+    sich erst ueber den Dependency Graph, also nach dem Merge.
+  - >-
+    Entscheidung ausstehend: den httpx-Altbestand als eigene Welle aufsetzen (14
+    Dienste auf 0.25.2 gegen 0.28.1 in der Wurzel, dazu die Abkuendigung von
+    httpx im starlette-TestClient zugunsten von httpx2).
+  - >-
+    Entscheidung ausstehend: uvicorn ueber die Dienste vereinheitlichen, aktuell
+    0.23.2 bis 0.27.1 bei einer Wurzel auf 0.24.0.
+  - >-
+    Entscheidung ausstehend: den Umbau von on_event auf Lifespan-Handler in
+    services/crm und services/dms-adapter, bevor die Abkuendigung zur Entfernung
+    wird.
+  - >-
+    Entscheidung ausstehend: pydantic, pydantic-settings und uvicorn in
+    dms-adapter, ki-usability, crm-ai, workflow-mock und fibu-core exakt pinnen.
+    Fuer ki-usability und workflow-mock waere 2.11.7 ein Rueckschritt gegenueber
+    dem heute aufgeloesten 2.13.5, deshalb Entscheidung statt Alleingang.
+  - >-
+    Aus SERVICE-CVE-PINS-20260914 erledigt und hier nur noch als Bezug: der
+    stille Ausfall der Auth-Middleware ist mit d9e0cf7db behoben. Fehlt
+    auth_shared, bricht der Dienst jetzt mit RuntimeError ab; wer ihn ohne
+    Authentifizierung betreiben will, muss ALLOW_UNAUTHENTICATED_SERVICE
+    ausdruecklich setzen und bekommt eine Warnung ins Log. Der Nachweis dieser
+    Welle laeuft fuer inventory und services/ai ueber den Pfad mit aktiver
+    Middleware.
+verification:
+  - "git ls-files 'services/**/requirements.txt' - fastapi- und starlette-Pins vergleichen"
+  - "Bruchmuster-Probe im Container gegen fastapi 0.136.3 und starlette 1.3.1"
+  - "pip install --dry-run je Manifest im Linux-Container"
+  - "Import der App je Dienst im Image mit nachgezogenen Pins"

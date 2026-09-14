@@ -1,4 +1,10 @@
-fastapi>=0.104.0
+# fastapi, starlette und pydantic laufen mit dem Root-Manifest gleich: der alte
+# Stand zog starlette 0.27.x mit 13 offenen Advisories nach, deren Fixversionen bis
+# starlette 1.3.1 reichen - akzeptiert erst ab fastapi 0.136.x, das seinerseits
+# pydantic>=2.9.0 verlangt. starlette ist explizit gepinnt, damit der CVE-Stand
+# nicht still ueber einen transitiven Aufloeser zurueckfaellt.
+fastapi==0.136.3
+starlette==1.3.1
 uvicorn[standard]>=0.24.0
 pydantic>=2.5.0
 pydantic-settings>=2.0.0

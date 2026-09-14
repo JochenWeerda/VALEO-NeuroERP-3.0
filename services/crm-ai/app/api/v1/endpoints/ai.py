@@ -3,7 +3,7 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....db.session import get_db
@@ -22,7 +22,7 @@ router = APIRouter()
 @router.post("/lead-score", response_model=LeadScoringResponse, status_code=status.HTTP_200_OK)
 async def score_lead(
     request: LeadScoringRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Calculate lead scoring using ML models."""
     # Mock lead scoring - in production this would use trained ML models
@@ -70,7 +70,7 @@ async def score_lead(
 @router.post("/predict/churn", response_model=ChurnPredictionResponse, status_code=status.HTTP_200_OK)
 async def predict_churn(
     request: ChurnPredictionRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Predict customer churn probability."""
     # Mock churn prediction
@@ -115,7 +115,7 @@ async def predict_churn(
 @router.post("/predict/clv", response_model=CLVPredictionResponse, status_code=status.HTTP_200_OK)
 async def predict_clv(
     request: CLVPredictionRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Predict customer lifetime value."""
     # Mock CLV prediction
@@ -153,7 +153,7 @@ async def predict_clv(
 @router.post("/recommend/actions", response_model=NextBestActionResponse, status_code=status.HTTP_200_OK)
 async def recommend_next_action(
     request: NextBestActionRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Recommend next best action for customer/lead engagement."""
     # Determine entity info
@@ -194,7 +194,7 @@ async def recommend_next_action(
 @router.post("/analyze/email", response_model=EmailAnalysisResponse, status_code=status.HTTP_200_OK)
 async def analyze_email(
     request: EmailAnalysisRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Analyze email content for sentiment, intent, and routing."""
     # Mock email analysis
@@ -240,7 +240,7 @@ async def analyze_email(
 @router.post("/classify/case", response_model=CaseClassificationResponse, status_code=status.HTTP_200_OK)
 async def classify_case(
     request: CaseClassificationRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Automatically classify support cases for routing."""
     # Mock case classification
@@ -274,7 +274,7 @@ async def list_models(
     status: Optional[str] = Query(None, description="Filter by status"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """List available AI models."""
     # Mock model list
@@ -342,7 +342,7 @@ async def list_models(
 @router.post("/feedback", status_code=status.HTTP_201_CREATED)
 async def submit_feedback(
     feedback: FeedbackSubmission,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Submit feedback on AI predictions for model improvement."""
     # In production, this would store feedback for model retraining
@@ -352,7 +352,7 @@ async def submit_feedback(
 @router.post("/batch/predict", response_model=BatchPredictionResponse, status_code=status.HTTP_200_OK)
 async def batch_predict(
     request: BatchPredictionRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Perform batch predictions for multiple entities."""
     # Mock batch prediction results
@@ -386,7 +386,7 @@ async def batch_predict(
 @router.post("/models/train", response_model=ModelTrainingResponse, status_code=status.HTTP_202_ACCEPTED)
 async def train_model(
     request: ModelTrainingRequest,
-    db: AsyncSession = get_db
+    db: AsyncSession = Depends(get_db)
 ):
     """Initiate model training job."""
     # In production, this would queue a training job
