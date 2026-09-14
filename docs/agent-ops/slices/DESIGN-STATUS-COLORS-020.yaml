@@ -2,7 +2,8 @@ slice_id: DESIGN-STATUS-COLORS-020
 id: DESIGN-STATUS-COLORS-020
 title: Farbe zurueckbauen - Semantik sparsam, Dekoration neutral (Welle 6, Abschluss)
 owner: Claude Code
-status: in arbeit
+status: zurueckgestellt
+zurueckgestellt_am: "2026-09-14"
 created_at: "2026-09-14"
 started_at: "2026-09-14"
 vorgaenger: DESIGN-STATUS-COLORS-019
@@ -72,3 +73,21 @@ verification:
   - "npx tsc --noEmit"
   - "npx vitest run --testTimeout=30000 --maxWorkers=2"
   - "Gegenprobe je Block mit dem Messskript"
+
+zurueckstellung:
+  entscheidung: "User, 2026-09-14: die Farben bleiben vorerst, wie sie sind."
+  stand: >-
+    Nichts umgesetzt. Der Codemod fuer Schritt 1 war angewandt und ist
+    vollstaendig zurueckgenommen (git checkout, 119 Dateien, Arbeitsbaum
+    wieder sauber). Es liegt kein halber Stand im Repository.
+  was_bleibt_nutzbar: >-
+    Die Messung und die Regel. Wer die Welle spaeter aufnimmt, findet den
+    Befund hier: 135 von 176 farbigen Ikonen sind blaue Sachikonen ohne
+    Bedeutung, und der Rueckbau auf text-muted-foreground haette 151 Ikonen
+    in 121 Dateien betroffen - bei ausgenommenen Agent-/KI-Bausteinen, deren
+    Violett ein Merkmalsakzent fuer maschinell erzeugte Inhalte ist.
+  abgeschlossener_vorlauf: >-
+    Die Wellen 4 und 5 (DESIGN-STATUS-COLORS-018/019) sind fertig und
+    gepusht; getoente Flaechen sind vollstaendig auf Komponenten und
+    semantische Tokens umgestellt. Diese Welle betraf nur noch Ikon-, Text-
+    und Akzentfarben.

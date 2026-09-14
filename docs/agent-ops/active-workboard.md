@@ -417,11 +417,14 @@ die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
 `test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
 --threshold 230` gruen (230/81 Dateien).
 
-## DESIGN-STATUS-COLORS-020 - in arbeit
+## DESIGN-STATUS-COLORS-020 - zurueckgestellt
 
 **Von:** Welle 6 aus DESIGN-STATUS-COLORS-019, User-Auftrag „Rest nach Best
 Practice abschliessen, weniger ist mehr". **Owner:** Claude Code.
-**Stand:** in arbeit 2026-09-14, geclaimt durch Claude Code.
+**Stand:** zurueckgestellt 2026-09-14 auf Entscheidung des Users — die Farben
+bleiben vorerst, wie sie sind. **Nichts umgesetzt**, der bereits angewandte
+Codemod ist vollstaendig zurueckgenommen (119 Dateien, Arbeitsbaum sauber).
+Die Messung und die Regel unten bleiben als Vorarbeit stehen.
 **Dateibesitz:** `docs/agent-ops/slices/DESIGN-STATUS-COLORS-020.yaml`, dieser
 Abschnitt, Dateien unter `packages/frontend-web/src` mit rohen Palettenklassen.
 
