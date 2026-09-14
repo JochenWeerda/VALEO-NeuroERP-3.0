@@ -288,8 +288,10 @@ services:
 
   inventory-service:
     build:
-      context: ./services/inventory
-      dockerfile: Dockerfile
+      # Wurzelkontext, damit packages/auth-shared ins Image kommt
+      # (SILENT-FAILURE-20260914).
+      context: .
+      dockerfile: services/inventory/Dockerfile
     container_name: valeo-neuro-erp-inventory
     restart: unless-stopped
     environment:

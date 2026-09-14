@@ -1043,7 +1043,7 @@ erkennt die Dateien nicht mehr, der Inhalt bleibt vollstaendig als historischer
 Nachweis erhalten, und kuenftige Archiv-Meldungen entstehen gar nicht erst.
 Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
-## SERVICE-SECURITY-GATES-20260914 - in arbeit
+## SERVICE-SECURITY-GATES-20260914 - abgeschlossen
 
 **Owner:** Codex. **Auftrag:** Service-Sicherheitspruefungen und crm-ai abschliessen.
 **Ziel:** Alle Service-Manifeste automatisch auditieren, vorhandenen Import-Pin-Check in CI ausfuehren und crm-ai-Start/API-Vertraege durch reproduzierbare Regressionen absichern.
@@ -1051,8 +1051,31 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 **Abgrenzung:** Cursor behaelt SERVICE-CVE-PINS und SERVICE-FASTAPI-STARLETTE samt Service-Manifesten. Bereits vorhandene crm-ai-Schema-/Depends-Fixes werden nachgeprueft, nicht erneut implementiert. Auth-Fail-closed ist bereits geliefert.
 **Abnahme:** Kein Service-Manifest faellt aus dem Audit; Scannerfehler und Befunde schlagen fehl; Import-Pruefung und crm-ai-HTTP-/OpenAPI-Regressionen bestehen.
 **Risiken:** Bestehende Advisories koennen den neuen Gate korrekt rot machen; Mock-Antworten in crm-ai sind keine trainierten Modelle. Kein Deployment.
-**Lieferstand:** CI-Gate fuer alle 23 Manifeste implementiert, neun Audit-Runner-Tests gruen; sieben HTTP-Tests ueber alle zehn crm-ai-Endpunkte gruen (vorher fuenf Teilfehler). Echte frische PostgreSQL-Migration mit fuenf Tabellen, Upgrade-Wiederholung, Nicht-Root-Start und Health 200 im isolierten Vorab-Testimage bestanden; Migrationsfehler verhindert Start. Vollstaendiger Dockerfile-Neubau laeuft noch. Gesamtaudit inklusive korrigierter Finance-Aufloesung: 23 erfasst, 16 ohne Befund, sieben mit echten Befunden; crm-ai ohne Befund. Keine Manifest-Pins fremder aktiver Slices geaendert. Details: [QA-Nachweis](../quality-assurance/service-security-gates-2026-09-14.md).
-**Resume:** Nach Ende des Neubaus Code-Layer mit aktuellen Fixes neu bauen, Container-/HTTP-Pruefer im echten Image wiederholen, 23 Auditberichte zusammenfassen und Abschluss dokumentieren.
+**Lieferstand:** CI-Gate fuer alle 23 Manifeste implementiert, neun Audit-Runner-Tests gruen; sieben HTTP-Tests ueber alle zehn crm-ai-Endpunkte gruen (vorher fuenf Teilfehler). Echte frische PostgreSQL-Migration mit fuenf Tabellen, Upgrade-Wiederholung, Nicht-Root-Start und Health 200 im isolierten Vorab-Testimage bestanden; Migrationsfehler verhindert Start. Vollstaendiger Dockerfile-Build und beide crm-ai-Pruefer auf GitHub gruen (Run 34892743626, Job 104139171772, Commit 9997e1598). Gesamtaudit inklusive korrigierter Finance-Aufloesung: 23 erfasst, 16 ohne Befund, sieben mit echten Befunden; crm-ai ohne Befund. Keine Manifest-Pins fremder aktiver Slices geaendert. Details: [QA-Nachweis](../quality-assurance/service-security-gates-2026-09-14.md).
+**Abschluss:** Service-Gates und technische crm-ai-Abnahme geliefert und gepusht (9997e1598, Finance-Korrektur 5b4736867). Sieben Dienste mit Dependency-Befunden bleiben in den aktiven Manifest-Slices offen; kein gruener Gesamtaudit und keine produktive ML-Freigabe behauptet.
+
+## SERVICE-REMAINDER-GAPS-20260914 - in arbeit
+
+**Owner:** Cursor Auto. Schliesst die sieben vom Gate gemeldeten Befunde und die in SERVICE-FASTAPI-STARLETTE bewusst ausgeklammerten Pin-Luecken.
+
+**python-jose war ungenutzt.** In keinem Dienst gibt es `import jose` oder `from jose`. Das Paket war ausschliesslich der Traeger von pyasn1 0.4.8 und ecdsa 0.19.2. Entfernt in `crm-gdpr`, `crm-marketing`, `crm-security`, `dms-adapter`, `fibu-core`, `fibu-gateway` und `services/ai`. pip-audit danach Exit 0 fuer die sechs CRM-/Finance-/DMS-Dienste (crm-security im Linux-Container, weil `uvloop==0.19.0` unter Windows nicht baut - das ist vorbestehend, nicht durch diese Welle entstanden).
+
+**click** in `services/ai` 8.2.1 -> 8.3.3 (Fixversion). **transformers** bleibt
+explizit auf 4.46.3: chromadb 0.5.23 verlangt `tokenizers<=0.20.3`, und
+transformers ab 4.47 zieht tokenizers>=0.22 - 4.57.6 macht das Manifest
+unaufloesbar. Die Advisories von 4.46.3 bleiben sichtbar. **chromadb 0.5.23
+bleibt** ohne Herstellerfix (GHSA-xph7-9rjv-w5fr, last affected 1.5.9, Patch-PR
+offen). Ein Sprung auf 1.5.9 wuerde denselben Befund behalten und die 0.5-API
+brechen. Der Gate fuer `services/ai` bleibt deshalb sichtbar rot - Absicht, kein
+Ignore.
+
+**httpx** steht in allen Service-Manifesten auf 0.28.1 (vorher 0.25.2 in 14 Diensten, 0.27.2 in Finance, offene Untergrenzen in dms-adapter und ki-usability). Aufrufstellen nutzen `AsyncClient`/`httpx.get` ohne entfernte Parameter.
+
+**Offene Pins geschlossen:** ki-usability und dms-adapter pydantic/pydantic-settings/uvicorn Exact; crm-ai und workflow-mock bekommen pydantic 2.11.7; fibu-core bekommt pydantic-settings 2.10.1; uvicorn 0.23.2 -> 0.24.0 in infrastat, zoll, inventory, workflow-mock. Bereits hoehere uvicorn-Pins (0.27.1, 0.30.1, 0.32.0) nicht gesenkt.
+
+**on_event** in `services/crm/main.py` und `services/dms-adapter/app/main.py` auf Lifespan-Handler umgestellt. In crm bleibt `Base.metadata.create_all` auf dem Startup-Pfad.
+
+**auth-shared im Image:** inventory und workflow bauen aus dem Wurzelkontext und installieren `packages/auth-shared`. docker-compose.yml fuer `inventory-service` entsprechend. Ohne das wuerde der Dienst nach SILENT-FAILURE-20260914 nicht starten.
 
 ## SECURITY-REMAINDER-20260910 - in arbeit
 

@@ -3,6 +3,8 @@ CRM Microservice
 Isolated FastAPI service for Customer Relationship Management
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
@@ -33,6 +35,15 @@ else:
 setup_logging(json_format=True)
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger.info("CRM Service starting...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("CRM Service ready on port 8001")
+    yield
+    logger.info("CRM Service shutting down...")
+
+
 # Create FastAPI app
 app = FastAPI(
     title="VALEO CRM Service",
@@ -40,6 +51,7 @@ app = FastAPI(
     version="3.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # CORS
@@ -94,19 +106,6 @@ async def ready(db: Session = Depends(get_db)):
         return {"service": "crm", "status": "ready", "database": "healthy"}
     except Exception as e:
         return {"service": "crm", "status": "not_ready", "error": str(e)}
-
-# Startup
-@app.on_event("startup")
-async def startup():
-    logger.info("CRM Service starting...")
-    # Create tables if not exist
-    Base.metadata.create_all(bind=engine)
-    logger.info("CRM Service ready on port 8001")
-
-# Shutdown
-@app.on_event("shutdown")
-async def shutdown():
-    logger.info("CRM Service shutting down...")
 
 if __name__ == "__main__":
     import uvicorn

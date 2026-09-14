@@ -7,7 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./requirements.txt
+# Alle Quellpfade sind auf den Wurzelkontext bezogen (docker-compose.yml:
+# context "." mit dockerfile "services/inventory/Dockerfile"), weil
+# packages/auth-shared ausserhalb des Dienstverzeichnisses liegt.
+COPY services/inventory/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # auth_shared ist keine Bequemlichkeit, sondern Voraussetzung: main.py bricht
@@ -16,16 +19,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY packages/auth-shared /opt/auth-shared
 RUN pip install --no-cache-dir /opt/auth-shared
 
-COPY app/ ./app/
-COPY main.py ./main.py
-COPY alembic.ini ./alembic.ini
-COPY alembic/ ./alembic/
+COPY services/inventory/app/ ./app/
+COPY services/inventory/main.py ./main.py
+COPY services/inventory/alembic.ini ./alembic.ini
+COPY services/inventory/alembic/ ./alembic/
 
 # Optional: set PYTHONPATH so Alembic env can import app.*
 ENV PYTHONPATH=/app
 
 # Entrypoint runs migrations before starting API
-COPY --chown=root:root docker-entrypoint.sh /entrypoint.sh
+COPY --chown=root:root services/inventory/docker-entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 5400

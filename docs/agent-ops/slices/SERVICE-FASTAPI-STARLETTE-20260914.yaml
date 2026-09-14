@@ -244,21 +244,8 @@ external_gates:
     GitHub-Dependabot ist die Befundquelle fuer die Advisories und aktualisiert
     sich erst ueber den Dependency Graph, also nach dem Merge.
   - >-
-    Entscheidung ausstehend: den httpx-Altbestand als eigene Welle aufsetzen (14
-    Dienste auf 0.25.2 gegen 0.28.1 in der Wurzel, dazu die Abkuendigung von
-    httpx im starlette-TestClient zugunsten von httpx2).
-  - >-
-    Entscheidung ausstehend: uvicorn ueber die Dienste vereinheitlichen, aktuell
-    0.23.2 bis 0.27.1 bei einer Wurzel auf 0.24.0.
-  - >-
-    Entscheidung ausstehend: den Umbau von on_event auf Lifespan-Handler in
-    services/crm und services/dms-adapter, bevor die Abkuendigung zur Entfernung
-    wird.
-  - >-
-    Entscheidung ausstehend: pydantic, pydantic-settings und uvicorn in
-    dms-adapter, ki-usability, crm-ai, workflow-mock und fibu-core exakt pinnen.
-    Fuer ki-usability und workflow-mock waere 2.11.7 ein Rueckschritt gegenueber
-    dem heute aufgeloesten 2.13.5, deshalb Entscheidung statt Alleingang.
+    Entschieden und umgesetzt in SERVICE-REMAINDER-GAPS-20260914: httpx auf
+    0.28.1, offene pydantic-/uvicorn-Pins geschlossen, on_event auf Lifespan.
   - >-
     Aus SERVICE-CVE-PINS-20260914 erledigt und hier nur noch als Bezug: der
     stille Ausfall der Auth-Middleware ist mit d9e0cf7db behoben. Fehlt

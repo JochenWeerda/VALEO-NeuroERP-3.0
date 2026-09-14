@@ -4,9 +4,11 @@ DMS-Adapter Service
 FastAPI-Anwendung für Dokumentenverwaltung.
 Verbindet NeuroERP mit Paperless-ngx als DMS-Backend.
 """
+from contextlib import asynccontextmanager
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
 
 from app.config import get_settings
 from app.api.routes import router
@@ -19,6 +21,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 settings = get_settings()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger.info("Starting %s...", settings.SERVICE_NAME)
+    logger.info("Paperless URL: %s", settings.PAPERLESS_URL)
+    logger.info("Debug mode: %s", settings.DEBUG)
+    yield
+    logger.info("Shutting down %s...", settings.SERVICE_NAME)
+
 
 # FastAPI App erstellen
 app = FastAPI(
@@ -50,6 +62,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # CORS konfigurieren
@@ -63,20 +76,6 @@ app.add_middleware(
 
 # Router einbinden
 app.include_router(router)
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Startup-Event"""
-    logger.info(f"Starting {settings.SERVICE_NAME}...")
-    logger.info(f"Paperless URL: {settings.PAPERLESS_URL}")
-    logger.info(f"Debug mode: {settings.DEBUG}")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Shutdown-Event"""
-    logger.info(f"Shutting down {settings.SERVICE_NAME}...")
 
 
 @app.get("/")

@@ -1,52 +1,70 @@
-***REMOVED*** Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-.venv
+# Build-Kontext fuer Wurzelkontext-Images (services/ai, services/crm,
+# services/finance, services/inventory, services/workflow). Diese Dienste
+# brauchen den Wurzelkontext, weil sie packages/auth-shared ins Image installieren
+# (SILENT-FAILURE-20260914). Ohne Ausschluesse wuerde jeder dieser Builds das
+# vollstaendige Repository an den Daemon senden.
+#
+# Regel beim Erweitern: nichts ausschliessen, was ein Dockerfile per COPY
+# braucht — also services/*/requirements.txt, services/*/app, services/*/main.py,
+# services/*/alembic, services/*/docker-entrypoint.sh und packages/**.
 
-***REMOVED*** IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-.cursor/
-
-***REMOVED*** Git
-.git/
+.git
+.github
 .gitignore
+.vscode
+.idea
+.cursor
+.claude
 
-***REMOVED*** Tests
-.pytest_cache/
-.coverage
-htmlcov/
+node_modules
+**/node_modules
+.pnpm-store
+.turbo
+**/.next
+**/dist
+**/build
+**/storybook-static
 
-***REMOVED*** Documentation
-docs/
+__pycache__
+**/__pycache__
+*.py[cod]
+.venv
+**/.venv
+venv
+**/*.egg-info
+.pytest_cache
+**/.pytest_cache
+.mypy_cache
+.ruff_cache
+.tox
+
+# Test- und Analyse-Ausgaben: gross, veraenderlich, fuer Images ohne Nutzen
+artifacts
+coverage
+**/coverage
+htmlcov
+**/htmlcov
+.nyc_output
+test-results
+**/test-results
+playwright-report
+**/playwright-report
+blob-report
+evidence
+swarm
+
+*.log
+*.tmp
+*.vhdx
+*.sqlite
+*.sqlite3
+*.db
+
+.env
+.env.*
+!.env.example
+
+# Docs tragen nicht zum Laufzeitverhalten bei
+docs
 *.md
 !README.md
-
-***REMOVED*** Node (if any)
-node_modules/
-packages/*/node_modules/
-domains/*/node_modules/
-domains/*/dist/
-
-***REMOVED*** Data
-data/
-logs/
-*.log
-
-***REMOVED*** OS
-.DS_Store
-Thumbs.db
-
-***REMOVED*** Docker
-Dockerfile
-docker-compose.yml
-.dockerignore
-

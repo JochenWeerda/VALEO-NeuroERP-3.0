@@ -7,11 +7,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+# Alle Quellpfade sind auf den Wurzelkontext bezogen, weil packages/auth-shared
+# ausserhalb des Dienstverzeichnisses liegt. Dieser Dienst steht in keiner
+# Compose-Datei, deshalb hier der Bauaufruf:
+#   docker build -f services/workflow/Dockerfile .
+COPY services/workflow/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./app/
-COPY main.py ./
+# auth_shared ist keine Bequemlichkeit, sondern Voraussetzung: main.py bricht
+# ohne dieses Paket bewusst ab (SILENT-FAILURE-20260914). Ohne die Installation
+# verweigert der Dienst den Start, statt ohne Authentifizierung zu laufen.
+COPY packages/auth-shared /opt/auth-shared
+RUN pip install --no-cache-dir /opt/auth-shared
+
+COPY services/workflow/app/ ./app/
+COPY services/workflow/main.py ./
 
 ENV PYTHONUNBUFFERED=1
 EXPOSE 5100

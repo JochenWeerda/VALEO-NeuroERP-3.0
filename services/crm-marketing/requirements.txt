@@ -13,8 +13,7 @@ pydantic==2.11.7
 pydantic-settings==2.10.1
 asyncpg==0.29.0
 python-multipart==0.0.31
-httpx==0.25.2
-python-jose[cryptography]==3.4.0
+httpx==0.28.1
 # Pflicht, nicht optional: app/api/jwt_oidc.py macht "import jwt" (PyJWT). Ohne diesen
 # Pin bricht der Import der App beim Start ab. Version wie im Root-Manifest.
 PyJWT[crypto]==2.13.0

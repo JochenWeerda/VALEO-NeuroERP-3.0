@@ -1,0 +1,95 @@
+slice_id: SERVICE-REMAINDER-GAPS-20260914
+id: SERVICE-REMAINDER-GAPS-20260914
+title: Restliche Service-Sicherheits- und Pin-Luecken aus der FastAPI-Welle und dem Audit-Gate schliessen
+owner: Cursor Auto
+status: in arbeit
+created_at: "2026-09-14"
+started_at: "2026-09-14"
+goal: >-
+  Die sieben vom Gate SERVICE-SECURITY-GATES-20260914 gemeldeten
+  Dependency-Befunde und die in SERVICE-FASTAPI-STARLETTE-20260914 bewusst
+  ausgeklammerten Pin-Luecken schliessen, soweit ein Herstellerfix oder eine
+  reproduzierbare Pin-Entscheidung existiert. Auth-Images, die nach dem
+  Fail-closed von SILENT-FAILURE-20260914 nicht mehr starten, bekommen
+  packages/auth-shared im Build.
+coordination: >-
+  Fortsetzung von SERVICE-CVE-PINS-20260914 und SERVICE-FASTAPI-STARLETTE-20260914.
+  Codex hat die Gates geliefert und die sieben Befunde ausdruecklich in den
+  aktiven Manifest-Slices belassen. DESIGN-STATUS-COLORS bleibt bei Claude Code.
+  Node-Manifeste bleiben bei Codex.
+file_ownership:
+  - docs/agent-ops/slices/SERVICE-REMAINDER-GAPS-20260914.yaml
+  - "docs/agent-ops/active-workboard.md: nur die eigenen Abschnitte"
+  - services/**/requirements.txt
+  - services/crm/main.py
+  - services/dms-adapter/app/main.py
+  - services/inventory/Dockerfile
+  - services/workflow/Dockerfile
+  - docker-compose.yml
+  - .dockerignore
+acceptance:
+  - python-jose ist aus keinem Service-Manifest mehr als ungenutzter Traeger von pyasn1/ecdsa vorhanden.
+  - click in services/ai steht auf einer Fixversion (8.3.3).
+  - transformers in services/ai ist explizit auf 4.46.3 gepinnt; hoeher geht nicht, weil chromadb 0.5.23 tokenizers<=0.20.3 verlangt.
+  - httpx steht in allen Service-Manifesten auf 0.28.1.
+  - Offene pydantic-/uvicorn-Untergrenzen sind durch Exact-Pins ersetzt.
+  - on_event ist aus den Diensten entfernt.
+  - inventory und workflow bauen mit Wurzelkontext und installieren auth-shared.
+tests:
+  - >-
+    python scripts/audit_service_dependencies.py fuer crm-gdpr, crm-marketing,
+    crm-security, dms-adapter, fibu-core und fibu-gateway.
+  - "Statischer Scan: kein on_event, kein python-jose, kein httpx==0.25.2."
+  - "git ls-files services/**/requirements.txt: httpx entweder 0.28.1 oder nicht vorhanden."
+risks:
+  - risiko: >-
+      chromadb 0.5.23 bleibt ohne Herstellerfix (GHSA-xph7-9rjv-w5fr, last
+      affected 1.5.9, Patch-PR offen). Der AI-Dienst-Audit bleibt deswegen rot.
+    bewertung: >-
+      Bewusst nicht ignoriert. Ein Upgrade auf 1.5.9 wuerde denselben Befund
+      behalten und zusaetzlich die 0.5-API brechen.
+  - risiko: >-
+      transformers bleibt auf 4.46.3. chromadb 0.5.23 verlangt tokenizers<=0.20.3;
+      transformers ab 4.47 zieht tokenizers>=0.22. 4.57.6 macht das Manifest
+      unaufloesbar. Die Advisories von 4.46.3 bleiben sichtbar.
+    bewertung: >-
+      Reproduzierbar gepinnt statt transitiv. Geschlossen wird der Befund erst,
+      wenn chromadb eine Fixversion hat oder der Vector-Store ersetzt wird.
+  - risiko: >-
+      uvicorn bleibt in finance auf 0.32.0, in workflow auf 0.30.1 und in
+      crm-core/dms-adapter auf 0.27.1 statt 0.24.0.
+    bewertung: >-
+      Absicht: bereits hoehere Exact-Pins nicht senken. Geschlossen wurden die
+      offenen Untergrenzen und der 0.23.2-Altbestand.
+ai_harness:
+  fachlicher_vertrag: >-
+    Keine fachliche Aenderung. python-jose wurde nirgends importiert; der
+    Entfernen-Schritt aendert kein Token-Verhalten. Lifespan-Handler loggen
+    dieselben Start-/Stopp-Meldungen wie zuvor on_event; in crm bleibt
+    create_all auf dem Startup-Pfad.
+  architektur_vertrag: >-
+    Service-Manifeste folgen der Wurzel fuer httpx 0.28.1, pydantic 2.11.7 und
+    pydantic-settings 2.10.1. Images, die auth_shared brauchen, bauen aus dem
+    Wurzelkontext.
+  daten_vertrag: Keine Migration, kein Schema.
+  test_vertrag: >-
+    Ein Pin gilt als geschlossen, wenn pip-audit im Dienstverzeichnis ohne
+    Befund zurueckkehrt oder der verbleibende Befund ohne Fixversion dokumentiert
+    ist. on_event gilt als geschlossen, wenn der statische Scan leer ist.
+  security_vertrag: Keine Ignore-Eintraege. chromadb bleibt sichtbar rot.
+  betriebs_vertrag: >-
+    inventory-service in docker-compose.yml baut jetzt aus dem Wurzelkontext.
+    Images muessen neu gebaut werden, damit auth-shared und die neuen Pins greifen.
+  dokumentations_vertrag: Dieser Slice und der Workboard-Abschnitt.
+external_gates:
+  - >-
+    chromadb GHSA-xph7-9rjv-w5fr ohne gepatchte PyPI-Version. Wartet auf
+    Upstream nach 1.5.9.
+  - GitHub-Dependabot aktualisiert sich erst nach dem Merge ueber den Graph.
+  - >-
+    SERVICE-SECURITY-GATES bleibt fuer services/ai rot, solange chromadb ohne
+    Fixversion im Manifest steht. Das ist Absicht, kein Gate-Fehler.
+verification:
+  - python scripts/audit_service_dependencies.py --manifest services/crm-gdpr/requirements.txt
+  - rg "on_event\\(" services
+  - rg "^python-jose" services/**/requirements.txt
