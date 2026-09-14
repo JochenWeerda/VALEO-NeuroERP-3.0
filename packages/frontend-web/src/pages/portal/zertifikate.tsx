@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { usePortalZertifikate } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -37,22 +37,22 @@ interface Zertifikat {
 }
 
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode; bgColor: string }> = {
+const statusConfig: Record<string, { label: string; variant: BadgeVariant; icon: React.ReactNode; bgColor: string }> = {
   'gueltig': { 
     label: 'Gültig', 
-    color: 'bg-emerald-100 text-emerald-800', 
+    variant: 'success',
     icon: <CheckCircle2 className="h-4 w-4" />,
     bgColor: 'border-l-emerald-500',
   },
   'auslaufend': { 
     label: 'Läuft bald aus', 
-    color: 'bg-amber-100 text-amber-800', 
+    variant: 'warning',
     icon: <AlertCircle className="h-4 w-4" />,
     bgColor: 'border-l-amber-500',
   },
   'abgelaufen': { 
     label: 'Abgelaufen', 
-    color: 'bg-red-100 text-red-800', 
+    variant: 'error',
     icon: <Clock className="h-4 w-4" />,
     bgColor: 'border-l-red-500',
   },
@@ -210,7 +210,7 @@ export default function PortalZertifikate() {
                       {zertifikat.gueltigVon} - {zertifikat.gueltigBis}
                     </span>
                   </div>
-                  <Badge className={`${status.color} gap-1`}>
+                  <Badge variant={status.variant} className="gap-1">
                     {status.icon}
                     {status.label}
                   </Badge>

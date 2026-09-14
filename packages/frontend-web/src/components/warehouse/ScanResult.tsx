@@ -5,6 +5,7 @@
  * Große, gut lesbare Darstellung für Warehouse-Terminals
  */
 
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import {
   Package,
@@ -56,10 +57,10 @@ export function ScanResult({
 }: ScanResultProps) {
   void format
   // Status-Farben
-  const statusColors = {
-    verfuegbar: 'bg-emerald-600',
-    gesperrt: 'bg-red-600',
-    reserviert: 'bg-amber-600',
+  const statusVariants: Record<string, BadgeVariant> = {
+    verfuegbar: 'success',
+    gesperrt: 'error',
+    reserviert: 'warning',
   }
 
   const statusLabels = {
@@ -147,14 +148,12 @@ export function ScanResult({
           </div>
         </div>
         {article.status && (
-          <span
-            className={cn(
-              'px-4 py-2 rounded-lg text-white font-bold',
-              statusColors[article.status]
-            )}
+          <Badge
+            variant={statusVariants[article.status] ?? 'secondary'}
+            className="rounded-lg px-4 py-2 font-bold"
           >
             {statusLabels[article.status]}
-          </span>
+          </Badge>
         )}
       </div>
 

@@ -254,10 +254,13 @@ export function TouchSubmitButton({
   className,
   type = 'button',
 }: TouchSubmitButtonProps): JSX.Element {
+  // Grossflaechige Touch-Schaltflaeche: eigene Flaechen auf den semantischen
+  // Tokens, damit sie mit Button-Varianten farbgleich bleibt.
   const colors = {
-    primary: 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white',
-    success: 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white',
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
+    danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80',
+    success:
+      'bg-[hsl(var(--color-semantic-success-500-hsl))] text-white hover:bg-[hsl(var(--color-semantic-success-500-hsl)/0.9)] active:bg-[hsl(var(--color-semantic-success-700-hsl))]',
   }
 
   return (

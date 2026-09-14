@@ -20,7 +20,7 @@ import {
 import { useDebounce } from '@/hooks/useDebounce'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -61,10 +61,10 @@ const TYP_FARBEN: Record<string, string> = {
   PROZESSDEFINITION: 'bg-indigo-100 text-indigo-800',
 }
 
-const STATUS_FARBEN: Record<string, string> = {
-  FREIGEGEBEN: 'bg-green-100 text-green-800',
-  ENTWURF: 'bg-gray-100 text-gray-700',
-  ARCHIVIERT: 'bg-red-100 text-red-700',
+const STATUS_VARIANTEN: Record<string, BadgeVariant> = {
+  FREIGEGEBEN: 'success',
+  ENTWURF: 'secondary',
+  ARCHIVIERT: 'error',
 }
 
 const TYP_FILTER_OPTIONEN: Array<{ value: string; label: string }> = [
@@ -117,11 +117,10 @@ function TypBadge({ typ }: { typ: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const farbe = STATUS_FARBEN[status] ?? 'bg-gray-100 text-gray-700'
   return (
-    <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${farbe}`}>
+    <Badge variant={STATUS_VARIANTEN[status] ?? 'secondary'} className="text-xs">
       {status}
-    </span>
+    </Badge>
   )
 }
 

@@ -11,6 +11,7 @@
 
 import React from 'react'
 import { CheckCircle2, XCircle, AlertTriangle, ArrowUpCircle, HelpCircle } from 'lucide-react'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 export type EntscheidungsErgebnis =
@@ -55,12 +56,12 @@ const _icon: Record<EntscheidungsErgebnis, React.ReactNode> = {
   ESKALATION:  <ArrowUpCircle className="h-3.5 w-3.5" />,
 }
 
-const _badgeClass: Record<EntscheidungsErgebnis, string> = {
-  FREIGEGEBEN: 'bg-green-100 text-green-800 border-green-200',
-  KEINE_REGEL: 'bg-green-100 text-green-800 border-green-200',
-  ABGELEHNT:   'bg-red-100 text-red-800 border-red-200',
-  WARNUNG:     'bg-amber-100 text-amber-800 border-amber-200',
-  ESKALATION:  'bg-orange-100 text-orange-800 border-orange-200',
+const _badgeVariant: Record<EntscheidungsErgebnis, BadgeVariant> = {
+  FREIGEGEBEN: 'success',
+  KEINE_REGEL: 'success',
+  ABGELEHNT:   'error',
+  WARNUNG:     'warning',
+  ESKALATION:  'warning',
 }
 
 const _label: Record<EntscheidungsErgebnis, string> = {
@@ -76,26 +77,24 @@ export function PolicyExplanationBadge({
   showDetails = false,
   className,
 }: PolicyExplanationBadgeProps): JSX.Element {
-  const badgeClass = _badgeClass[explanation.entscheidung] ?? _badgeClass.KEINE_REGEL
+  const badgeVariant = _badgeVariant[explanation.entscheidung] ?? _badgeVariant.KEINE_REGEL
   const icon = _icon[explanation.entscheidung] ?? <HelpCircle className="h-3.5 w-3.5" />
   const label = _label[explanation.entscheidung] ?? 'Unbekannt'
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       {/* Badge */}
-      <span
+      <Badge
+        variant={badgeVariant}
         title={explanation.zusammenfassung}
-        className={cn(
-          'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-          badgeClass,
-        )}
+        className="w-fit gap-1.5 rounded-full px-2.5"
       >
         {icon}
         {label}
         {explanation.tenant_override_aktiv && (
           <span className="ml-1 rounded bg-white/50 px-1 text-[10px]">Override</span>
         )}
-      </span>
+      </Badge>
 
       {/* Zusammenfassung als Tooltip-Text */}
       {showDetails && (

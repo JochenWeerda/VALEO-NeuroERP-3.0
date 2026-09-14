@@ -12,6 +12,7 @@
  */
 
 import { useState } from 'react'
+import { Callout, type CalloutVariant } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,29 +62,29 @@ type PreisspigelResponse = {
 // Produktiv: aus JWT + Schlagkartei-Kulturen ableiten
 const DEMO_ARTIKEL = 'WEI-001,GER-001,RAP-001'
 
-const VARIANTE_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string; beschreibung: string }> = {
+const VARIANTE_CONFIG: Record<string, { label: string; icon: React.ReactNode; variant: CalloutVariant; beschreibung: string }> = {
   altware_ab_hof: {
     label: 'Altware ab Hof',
     icon: <Home className="h-4 w-4" />,
-    color: 'bg-amber-50 border-amber-200',
+    variant: 'warning',
     beschreibung: 'Altjährige Ware, wir holen bei Ihnen ab',
   },
   altware_frei_lager: {
     label: 'Altware frei Lager',
     icon: <Truck className="h-4 w-4" />,
-    color: 'bg-blue-50 border-blue-200',
+    variant: 'info',
     beschreibung: 'Altjährige Ware, Sie liefern zu uns',
   },
   neue_ernte_frei_lager: {
     label: 'Neue Ernte frei Lager',
     icon: <Wheat className="h-4 w-4" />,
-    color: 'bg-green-50 border-green-200',
+    variant: 'success',
     beschreibung: 'Neue Ernte, angeliefert bei uns',
   },
   neue_ernte_ab_hof: {
     label: 'Neue Ernte ab Hof',
     icon: <Calendar className="h-4 w-4" />,
-    color: 'bg-emerald-50 border-emerald-200',
+    variant: 'success',
     beschreibung: 'Neue Ernte, Abholung ab Ihrem Hof',
   },
 }
@@ -92,7 +93,7 @@ function PreisKarte({ variante, preis }: { variante: string; preis: PreisVariant
   const cfg = VARIANTE_CONFIG[variante]
   if (!cfg) return null
   return (
-    <div className={`rounded-lg border p-4 ${cfg.color}`}>
+    <Callout variant={cfg.variant} className="rounded-lg p-4">
       <div className="flex items-center gap-2 mb-2">
         {cfg.icon}
         <span className="text-sm font-medium text-gray-700">{cfg.label}</span>
@@ -111,7 +112,7 @@ function PreisKarte({ variante, preis }: { variante: string; preis: PreisVariant
         </div>
       )}
       <div className="text-xs text-gray-400 mt-2">Stand: {preis.gueltig_ab}</div>
-    </div>
+    </Callout>
   )
 }
 
@@ -224,7 +225,7 @@ export default function PreisspiedelPage() {
             ))
           )}
 
-          <Card className="border-blue-200 bg-blue-50">
+          <Card className="border-[hsl(var(--color-semantic-info-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-info-50-hsl))]">
             <CardContent className="pt-4">
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 text-blue-600 mt-0.5" />

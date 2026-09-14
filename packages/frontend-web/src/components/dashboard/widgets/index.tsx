@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { queryKeys } from '@/lib/query'
 import { apiClient } from '@/lib/api-client'
@@ -299,11 +300,6 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
     items: [],
   }
 
-  const statusColors = {
-    success: 'text-status-success bg-green-100',
-    warning: 'text-status-warning bg-amber-100',
-    error: 'text-status-error bg-red-100',
-  }
 
   return (
     <div className="p-4 h-full flex flex-col">
@@ -318,14 +314,9 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
             className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm"
           >
             <span className="truncate flex-1">{item.label}</span>
-            <span
-              className={clsx(
-                'ml-2 px-2 py-0.5 rounded text-xs font-medium',
-                item.status && statusColors[item.status]
-              )}
-            >
+            <Badge variant={item.status ?? 'secondary'} className="ml-2">
               {item.value}
-            </span>
+            </Badge>
           </div>
         ))}
       </div>

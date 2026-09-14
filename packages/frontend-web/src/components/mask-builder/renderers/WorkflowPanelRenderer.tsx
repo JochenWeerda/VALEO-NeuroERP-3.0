@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AtSign, MessageSquareText, Send } from 'lucide-react'
 import { type FormEvent, useMemo, useState } from 'react'
+import { Callout, type CalloutVariant } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,12 +10,12 @@ import { collabKeys, createEntityNote, useEntityNotes, type CollabMention, type 
 import type { ScreenContextRailSection, ScreenWorkflowDefinition } from '../schema'
 import type { WorkflowState } from '../runtime/WorkflowRuntime'
 
-const TONE_CLASSES: Record<string, string> = {
-  neutral: 'border-border bg-muted/20 text-muted-foreground',
-  success: 'border-green-500/40 bg-green-50 text-green-800',
-  warning: 'border-yellow-500/40 bg-yellow-50 text-yellow-800',
-  danger: 'border-destructive/40 bg-red-50 text-red-800',
-  info: 'border-blue-500/40 bg-blue-50 text-blue-800',
+const TONE_VARIANTS: Record<string, CalloutVariant> = {
+  neutral: 'default',
+  success: 'success',
+  warning: 'warning',
+  danger: 'error',
+  info: 'info',
 }
 
 export function WorkflowPanelRenderer({
@@ -56,10 +57,11 @@ function renderWorkflowPanel(
 ): JSX.Element | null {
   if (workflowState && workflowState.status.currentStatus !== 'unknown') {
     const { status, nextAllowedActions, blockingReasons, policyHints } = workflowState
-    const toneClass = TONE_CLASSES[status.tone] ?? TONE_CLASSES['neutral']
+    const toneVariant = TONE_VARIANTS[status.tone] ?? TONE_VARIANTS['neutral']
     return (
-      <div
-        className={`rounded-md border p-4 ${toneClass}`}
+      <Callout
+        variant={toneVariant}
+        className="rounded-md p-4"
         data-testid="workflow-panel"
         data-status={status.currentStatus}
         data-blocked={workflowState.isBlocked}
@@ -104,7 +106,7 @@ function renderWorkflowPanel(
             ))}
           </ul>
         )}
-      </div>
+      </Callout>
     )
   }
 

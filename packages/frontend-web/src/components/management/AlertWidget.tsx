@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from 'react'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Link } from '@/app/routing/typed-router'
 import { cn } from '@/lib/utils'
 import {
@@ -46,24 +47,20 @@ interface AlertWidgetProps {
 
 const typeStyles = {
   critical: {
-    bg: 'bg-red-50 border-red-200',
     icon: 'text-status-error',
-    badge: 'bg-red-100 text-red-700',
+    badge: 'error' as BadgeVariant,
   },
   warning: {
-    bg: 'bg-amber-50 border-amber-200',
     icon: 'text-status-warning',
-    badge: 'bg-amber-100 text-amber-700',
+    badge: 'warning' as BadgeVariant,
   },
   info: {
-    bg: 'bg-blue-50 border-blue-200',
-    icon: 'text-blue-600',
-    badge: 'bg-blue-100 text-blue-700',
+    icon: 'text-status-info',
+    badge: 'info' as BadgeVariant,
   },
   success: {
-    bg: 'bg-emerald-50 border-emerald-200',
     icon: 'text-status-success',
-    badge: 'bg-emerald-100 text-emerald-700',
+    badge: 'success' as BadgeVariant,
   },
 }
 
@@ -118,14 +115,14 @@ export function AlertWidget({
         <div className="flex items-center gap-3">
           <h3 className="font-semibold">{title}</h3>
           {criticalCount > 0 && (
-            <span className="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">
+            <Badge variant="error" className="rounded-full px-2 py-0.5 font-bold">
               {criticalCount} kritisch
-            </span>
+            </Badge>
           )}
           {warningCount > 0 && (
-            <span className="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">
+            <Badge variant="warning" className="rounded-full px-2 py-0.5 font-bold">
               {warningCount} Warnung
-            </span>
+            </Badge>
           )}
         </div>
         {onViewAll && (
@@ -192,15 +189,10 @@ function AlertItemRow({
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium">{alert.title}</p>
             {showCategory && (
-              <span
-                className={cn(
-                  'inline-flex items-center gap-1 px-1.5 py-0.5 text-xs rounded',
-                  styles.badge
-                )}
-              >
+              <Badge variant={styles.badge} className="gap-1 rounded px-1.5 py-0.5">
                 {categoryIcons[alert.category]}
                 {categoryLabels[alert.category]}
-              </span>
+              </Badge>
             )}
           </div>
 
@@ -276,10 +268,10 @@ export function AlertSummary({
       className={cn(
         'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors',
         critical > 0
-          ? 'bg-red-100 text-red-700 hover:bg-red-200'
+          ? 'bg-[hsl(var(--color-semantic-error-50-hsl))] text-status-error hover:bg-[hsl(var(--color-semantic-error-500-hsl)/0.18)]'
           : warning > 0
-            ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-            : 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+            ? 'bg-[hsl(var(--color-semantic-warning-50-hsl))] text-status-warning hover:bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)]'
+            : 'bg-[hsl(var(--color-semantic-info-50-hsl))] text-status-info hover:bg-[hsl(var(--color-semantic-info-500-hsl)/0.18)]',
         className
       )}
     >

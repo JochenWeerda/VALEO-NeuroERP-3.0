@@ -31,10 +31,10 @@ const typeColors = {
 }
 
 const typeBgColors = {
-  info: 'bg-blue-50 dark:bg-blue-950',
-  success: 'bg-green-50 dark:bg-green-950',
-  warning: 'bg-amber-50 dark:bg-amber-950',
-  error: 'bg-red-50 dark:bg-red-950',
+  info: 'bg-[hsl(var(--color-semantic-info-50-hsl))] dark:bg-[hsl(var(--color-semantic-info-500-hsl)/0.12)]',
+  success: 'bg-[hsl(var(--color-semantic-success-50-hsl))] dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)]',
+  warning: 'bg-[hsl(var(--color-semantic-warning-50-hsl))] dark:bg-[hsl(var(--color-semantic-warning-500-hsl)/0.12)]',
+  error: 'bg-[hsl(var(--color-semantic-error-50-hsl))] dark:bg-[hsl(var(--color-semantic-error-500-hsl)/0.12)]',
 }
 
 interface NotificationItemProps {
@@ -161,7 +161,7 @@ export function NotificationCenter() {
             <div className="flex items-center gap-2">
               <span className="font-medium">Benachrichtigungen</span>
               {!isConnected && (
-                <span className="h-2 w-2 rounded-full bg-amber-500" title="Verbindung getrennt" />
+                <span className="h-2 w-2 rounded-full bg-[hsl(var(--color-semantic-warning-500-hsl))]" title="Verbindung getrennt" />
               )}
             </div>
             {unreadCount > 0 && (
