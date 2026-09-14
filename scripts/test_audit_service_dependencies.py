@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from audit_service_dependencies import audit, discover, matrix
+from audit_service_dependencies import audit, audit_input, discover, matrix
 
 
 class AuditTests(unittest.TestCase):
@@ -27,6 +27,27 @@ class AuditTests(unittest.TestCase):
         added.write_text("example==1.0\n")
         self.assertEqual(len(discover(self.root)), 2)
         self.assertIn({"manifest": "services/finance/core/requirements.txt", "service": "finance--core"}, matrix(self.root)["include"])
+
+    def test_workspace_dependencies_are_retained(self):
+        package = self.root / "packages/local"
+        package.mkdir(parents=True)
+        (package / "pyproject.toml").write_text('[project]\nname="local"\nversion="1"\ndependencies=["transitive>=2"]\n')
+        self.manifest.write_text("direct==1\n-e ../../../packages/local\n")
+        self.out.mkdir()
+        with patch("audit_service_dependencies.ROOT", self.root):
+            result = audit_input(self.manifest, self.out).read_text()
+        self.assertIn("transitive>=2", result)
+        self.assertIn("direct==1", result)
+        self.assertNotIn("-e ", result)
+
+    def test_dynamic_workspace_dependencies_fail_closed(self):
+        package = self.root / "packages/local"
+        package.mkdir(parents=True)
+        (package / "pyproject.toml").write_text('[project]\nname="local"\ndynamic=["dependencies"]\n')
+        self.manifest.write_text("-e ../../../packages/local\n")
+        with patch("audit_service_dependencies.ROOT", self.root):
+            with self.assertRaises(ValueError):
+                audit_input(self.manifest, self.out)
 
     def test_empty_discovery_fails(self):
         with self.assertRaises(ValueError):

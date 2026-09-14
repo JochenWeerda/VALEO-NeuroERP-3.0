@@ -26,9 +26,12 @@ mit transitiven Abhaengigkeiten auf und fuehrt pip-audit 2.10.1 aus. Arbeitsverz
 ist der Dienstordner, damit lokale editable Finance-Pakete korrekt aufgeloest werden.
 
 Die [pip-audit-Dokumentation](https://github.com/pypa/pip-audit) beschreibt den
-verwendeten Requirements-Modus, `--strict` und `--skip-editable`. Lokale editable
-Workspace-Distributionen selbst haben keinen oeffentlichen Advisory-Eintrag;
-ihre aufgeloesten Drittanbieter-Abhaengigkeiten werden mitgeprueft. Keine
+verwendeten Requirements-Modus und `--strict`. Lokale editable Workspace-
+Distributionen selbst haben keinen oeffentlichen Advisory-Eintrag. Da pip-audit
+im Requirements-Modus die Editable-Herkunft verliert, werden deren statische
+PEP-621-Abhaengigkeiten aus pyproject.toml vor der vollstaendigen Aufloesung
+expandiert. Dynamische oder ungueltige Metadaten blockieren; nichts wird still
+ausgelassen. Das expandierte Manifest bleibt im Audit-Artefakt erhalten. Keine
 `--no-deps`-Verkuerzung, keine neuen Ignore-Eintraege. Jeder Befund blockiert,
 auch ohne Fixversion. Timeout, fehlender/leerer Bericht und Sammelfehler
 blockieren ebenfalls. Matrixzellen laufen trotz anderer Fehler weiter;
@@ -55,7 +58,7 @@ konfiguriert werden. Bestehende Root-Gates bleiben bestehen.
 
 ## Nachweise
 
-- Audit-Runner: sieben Tests gruen (Entdeckung verschachtelter/neuer Manifeste,
+- Audit-Runner: neun Tests gruen (Entdeckung verschachtelter/neuer Manifeste,
   Fehler-/Timeout-Verhalten, fehlende/veraltete Berichte und Befunde).
 - Import-Pins: 23 Manifeste, keine fehlenden Pflichtimporte. Hinweise auf
   optionale/lazy Imports und lokale Auth-Pakete bleiben sichtbar.
@@ -64,9 +67,17 @@ konfiguriert werden. Bestehende Root-Gates bleiben bestehen.
 - Vorab-Startnachweis im isolierten Testimage: echte frische PostgreSQL-Datenbank,
   fuenf Tabellen, erwartete Alembic-Revision, wiederholter Upgrade-Lauf,
   Nicht-Root-Ausfuehrung und HTTP 200; falsche Zugangsdaten verhindern Start.
-- Gesamtaudit-Zwischenstand: 14 von 23 Manifesten geprueft, zehn ohne Befund;
-  ai, crm-gdpr, crm-marketing und crm-security mit Befunden. crm-ai ohne Befund.
-- Vollstaendiger Dockerfile-Neubau und restliche Audits laufen noch. Das
+- Gesamtaudit inklusive Finance-Nachlauf: alle 23 Manifeste erfasst; 16 ohne
+  Befund und sieben mit Befunden. Finance-Root ist nach korrekter Expansion
+  sauber; fibu-core und fibu-gateway melden reale pyasn1-/ecdsa-Befunde.
+  crm-ai ist ohne Befund. Keine verbleibenden lokalen Paket-Aufloesefehler.
+- Befundgruppen: services/ai (chromadb 0.5.23, click 8.2.1, pyasn1 0.4.8,
+  transformers 4.46.3, ecdsa 0.19.2); crm-gdpr, crm-marketing, crm-security,
+  fibu-core und fibu-gateway (pyasn1 0.4.8, ecdsa 0.19.2); dms-adapter
+  (ecdsa 0.19.2). Der Scanner nennt Fixversionen fuer click, pyasn1 und
+  mehrere transformers-Befunde, nicht fuer chromadb/ecdsa. Service-Pins
+  bleiben im aktiven Dateibesitz von Cursor.
+- Vollstaendiger Dockerfile-Neubau laeuft noch. Das
   gestartete Build-Snapshot liegt vor den API-/Migrationsfixes; nach Abschluss
   werden die Code-Layer aktualisiert und beide Image-Pruefer erneut ausgefuehrt.
 
