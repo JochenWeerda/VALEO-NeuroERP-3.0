@@ -32,6 +32,7 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { Callout } from '@/components/ui/callout'
 
 type KomponentenBedarf = { name: string; bedarf: number; verfuegbar: number }
 type ProductionRole = 'produktion' | 'lager' | 'qs' | 'leitung'
@@ -352,10 +353,10 @@ export default function MischfutterProduktionPage(): JSX.Element {
                 <dd className="font-mono font-semibold">{chargenId}</dd>
               </div>
             </dl>
-            <div className="mt-6 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+            <Callout variant="info" className="mt-6 rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">Produktionsauftrag wird erstellt</p>
               <p className="mt-1">Komponenten werden automatisch ausgebucht</p>
-            </div>
+            </Callout>
           </CardContent>
         </Card>
       ),

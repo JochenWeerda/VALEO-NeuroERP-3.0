@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, MapPin, Shield, XCircle, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useWasserschutzZonen, usePSM } from '@/lib/api/agrar'
+import { Callout } from '@/components/ui/callout'
 
 type PSMMittel = {
   id: string
@@ -331,9 +332,9 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className={`p-4 rounded-lg ${pruefErgebnis.zulaessig ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}`}>
+            <Callout variant={pruefErgebnis.zulaessig ? 'success' : 'error'} className="rounded-lg p-4">
               <p className="font-medium">{pruefErgebnis.begruendung}</p>
-            </div>
+            </Callout>
 
             {pruefErgebnis.risiken.length > 0 && (
               <div>

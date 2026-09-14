@@ -99,7 +99,7 @@ export function OperationalTaskPlan({ title = 'Arbeitsplan', items }: { title?: 
       <div className="space-y-3">
         {items.map((item, index) => (
           <div key={item.label} className="flex items-start gap-3">
-            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${item.done ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-300 bg-gray-50 text-gray-500'}`}>
+            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${item.done ? 'border-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-50-hsl))] text-status-success' : 'border-border bg-muted text-muted-foreground'}`}>
               {item.done ? <Check className="h-3.5 w-3.5" /> : index + 1}
             </div>
             <div className="min-w-0">

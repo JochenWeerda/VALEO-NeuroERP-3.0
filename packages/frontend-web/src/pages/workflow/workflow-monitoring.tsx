@@ -6,6 +6,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { ErrorState } from '@/components/ErrorState'
+import { Callout } from '@/components/ui/callout'
 
 type WorkflowExecution = ApiWorkflowExecution & { status: 'SUCCESS' | 'FAILED' | 'PENDING' | 'RUNNING'; errorMessage?: string }
 
@@ -74,7 +75,7 @@ export default function WorkflowMonitoringPage(): JSX.Element {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laufende Workflows</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-blue-600">{stats.running}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fehlgeschlagen</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-status-error">{stats.failed}</div></CardContent></Card>
       </div>
-      {stats.failed > 0 && <Card className="border-red-500 bg-red-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-status-error"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{stats.failed} Workflow(s) sind fehlgeschlagen!</span></div></CardContent></Card>}
+      {stats.failed > 0 && <Callout variant="error" className="pt-4"><div className="flex items-center gap-2 text-status-error"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{stats.failed} Workflow(s) sind fehlgeschlagen!</span></div></Callout>}
       <Card><CardHeader><CardTitle>Workflow-Ausfuehrungen</CardTitle></CardHeader><CardContent><DataTable data={executions} columns={columns} /></CardContent></Card>
     </div>
   )
