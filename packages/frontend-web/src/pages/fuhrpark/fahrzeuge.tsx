@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, FileDown, Plus, Search, Truck } from 'lucide-react'
@@ -34,7 +35,7 @@ function LoadingSkeleton(): JSX.Element {
         <div><Skeleton className="h-8 w-32" /><Skeleton className="mt-2 h-4 w-48" /></div>
         <Skeleton className="h-10 w-40" />
       </div>
-      <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><Skeleton className="h-5 w-64" /></CardContent></Card>
+      <Callout variant="warning" className="pt-4"><Skeleton className="h-5 w-64" /></Callout>
       <Card><CardContent className="pt-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
     </div>
   )
@@ -176,7 +177,7 @@ export default function FahrzeugePage(): JSX.Element {
       </div>
 
       {inspektionFaellig > 0 && (
-        <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-orange-900"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{inspektionFaellig} Inspektion(en) in den naechsten 14 Tagen faellig!</span></div></CardContent></Card>
+        <Callout variant="warning" className="pt-4"><div className="flex items-center gap-2 text-status-warning"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{inspektionFaellig} Inspektion(en) in den naechsten 14 Tagen faellig!</span></div></Callout>
       )}
 
       <Card>

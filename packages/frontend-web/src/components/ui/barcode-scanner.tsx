@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Camera, CameraOff, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 
 export interface BarcodeScanResult {
@@ -122,14 +124,14 @@ export function BarcodeScanner({ onScan, onError, continuous = false, className 
 
   if (state === 'unsupported') {
     return (
-      <div className={`flex flex-col items-center gap-3 rounded-lg border border-orange-300 bg-orange-50 p-6 text-center ${className ?? ''}`} role="alert">
+      <Alert variant="warning" className={cn('flex flex-col items-center gap-3 p-6 text-center', className)}>
         <CameraOff className="h-10 w-10 text-status-warning" aria-hidden="true" />
-        <p className="font-medium text-orange-900">Scanner nicht verfügbar</p>
-        <p className="text-sm text-orange-700">
+        <p className="font-medium">Scanner nicht verfügbar</p>
+        <p className="text-sm">
           Dieser Browser unterstützt die BarcodeDetector Web API nicht.
           Bitte Chrome 88+ oder Edge 88+ verwenden.
         </p>
-      </div>
+      </Alert>
     )
   }
 

@@ -574,12 +574,12 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                       { label: 'ASU in Tagen', val: wartungQ.data.asu_faellig_in_tagen },
                       { label: 'Inspektion in Tagen', val: wartungQ.data.inspektion_faellig_in_tagen },
                     ].map(({ label, val }) => (
-                      <div key={label} className={`rounded border p-3 text-center ${val != null && val <= 30 ? 'border-amber-300 bg-amber-50' : ''}`}>
+                      <Callout key={label} variant={val != null && val <= 30 ? 'warning' : 'default'} className="rounded p-3 text-center">
                         <p className="text-xs text-muted-foreground">{label}</p>
                         <p className={`text-lg font-bold tabular-nums ${val != null && val <= 30 ? 'text-status-warning' : ''}`}>
                           {val != null ? val : '—'}
                         </p>
-                      </div>
+                      </Callout>
                     ))}
                   </div>
 

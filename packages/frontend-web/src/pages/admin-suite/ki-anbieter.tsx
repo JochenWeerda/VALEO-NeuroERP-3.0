@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Link } from '@/app/routing/typed-router'
 import { ArrowLeft, BrainCircuit, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -160,9 +161,9 @@ export default function AdminSuiteKiAnbieterPage(): JSX.Element {
           </label>
 
           {testResult && (
-            <div className={`rounded-md border p-3 text-sm ${testResult.ok ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-red-200 bg-red-50 text-red-900'}`}>
+            <Callout variant={testResult.ok ? 'success' : 'error'} className="rounded-md p-3">
               <strong>{testResult.ok ? 'Verbindung OK' : 'Test fehlgeschlagen'}</strong> — {testResult.provider}/{testResult.model}: {testResult.detail}
-            </div>
+            </Callout>
           )}
 
           <div className="flex gap-2">

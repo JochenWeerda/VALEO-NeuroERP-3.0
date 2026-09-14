@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useVersicherungen, type Versicherung } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -57,7 +58,7 @@ export default function VersicherungenListePage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Versicherungen</h1><p className="text-muted-foreground">Versicherungs-Verwaltung</p></div><Button onClick={() => navigate('/crm/aktivitaet/neu')} className="gap-2"><Plus className="h-4 w-4" />Wiedervorlage anlegen</Button></div>
-      {kritischePolicen.length > 0 && <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-orange-900"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{kritischePolicen.length} Versicherung(en) laufen in den naechsten 60 Tagen ab!</span></div></CardContent></Card>}
+      {kritischePolicen.length > 0 && <Callout variant="warning" className="pt-4"><div className="flex items-center gap-2 text-status-warning"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{kritischePolicen.length} Versicherung(en) laufen in den naechsten 60 Tagen ab!</span></div></Callout>}
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Versicherungen Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Shield className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteVersicherungen.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt-Praemie (jaehrl.)</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtPraemie)}</span></CardContent></Card>

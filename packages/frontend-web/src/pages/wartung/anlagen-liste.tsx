@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useWartungAnlagen, type WartungAnlage } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -59,7 +60,7 @@ export default function AnlagenListePage(): JSX.Element {
         <div><h1 className="text-3xl font-bold">Anlagen-Wartung</h1><p className="text-muted-foreground">Wartungsmanagement</p></div>
         <Button onClick={() => navigate('/wartung/anlage/neu')} className="gap-2"><Plus className="h-4 w-4" />Neue Anlage</Button>
       </div>
-      {wartungFaellig > 0 && <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-orange-900"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{wartungFaellig} Wartung(en) in den naechsten 7 Tagen faellig!</span></div></CardContent></Card>}
+      {wartungFaellig > 0 && <Callout variant="warning" className="pt-4"><div className="flex items-center gap-2 text-status-warning"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{wartungFaellig} Wartung(en) in den naechsten 7 Tagen faellig!</span></div></Callout>}
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Anlagen Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Settings className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{anlagen.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{anlagen.filter((a) => a.status === 'aktiv').length}</span></CardContent></Card>

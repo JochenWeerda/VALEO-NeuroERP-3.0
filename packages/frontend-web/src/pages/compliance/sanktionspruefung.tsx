@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -90,12 +91,15 @@ export default function SanktionspruefungPage(): JSX.Element {
               </div>
 
               {result && ResultIcon && (
-                <div className={`mt-4 flex flex-col items-center gap-2 rounded-lg border p-4 ${result.ergebnis === 'TREFFER' ? 'border-red-300 bg-red-50' : result.ergebnis === 'VERDAECHTIG' ? 'border-orange-300 bg-orange-50' : 'border-green-300 bg-green-50'}`}>
+                <Callout
+                  variant={result.ergebnis === 'TREFFER' ? 'error' : result.ergebnis === 'VERDAECHTIG' ? 'warning' : 'success'}
+                  className="mt-4 flex flex-col items-center gap-2 rounded-lg p-4"
+                >
                   <ResultIcon className={`h-10 w-10 ${resultColor}`} />
                   <Badge variant={badgeVariant} className="text-base px-4 py-1">{result.ergebnis.replace('_', ' ')}</Badge>
                   {result.treffer_count > 0 && <p className="text-sm font-semibold">{result.treffer_count} Treffer</p>}
                   {result.details && <p className="text-sm text-muted-foreground">{result.details}</p>}
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>

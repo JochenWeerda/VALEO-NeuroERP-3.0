@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useRahmenvertraege, type Vertrag } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -57,7 +58,7 @@ export default function RahmenvertraegePage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Rahmenvertraege</h1><p className="text-muted-foreground">Liefervertraege</p></div><Button onClick={() => navigate('/vertrag/neu')} className="gap-2"><Plus className="h-4 w-4" />Neuer Vertrag</Button></div>
-      {auslaufendeVertraege.length > 0 && <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-orange-900"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{auslaufendeVertraege.length} Vertrag/Vertraege laufen bald aus!</span></div></CardContent></Card>}
+      {auslaufendeVertraege.length > 0 && <Callout variant="warning" className="pt-4"><div className="flex items-center gap-2 text-status-warning"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{auslaufendeVertraege.length} Vertrag/Vertraege laufen bald aus!</span></div></Callout>}
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Vertraege Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><FileText className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteVertraege.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{gefilterteVertraege.filter((v) => v.status === 'aktiv').length}</span></CardContent></Card>

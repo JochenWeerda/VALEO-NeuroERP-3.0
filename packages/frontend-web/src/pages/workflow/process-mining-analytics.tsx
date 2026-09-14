@@ -4,6 +4,7 @@
  */
 
 import { useState, useRef } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -216,7 +217,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
             </div>
             <div className="space-y-1">
               {drilldown.steps.map((step) => (
-                <div key={step.step_name} className={`flex items-center justify-between rounded p-2 text-sm ${step.is_bottleneck ? 'bg-red-100 border border-red-300' : 'bg-white border'}`}>
+                <Callout key={step.step_name} variant={step.is_bottleneck ? 'error' : 'default'} className="flex items-center justify-between rounded p-2">
                   <div className="flex items-center gap-2">
                     {step.is_bottleneck && <AlertTriangle className="h-4 w-4 text-status-error" />}
                     <span className={step.is_bottleneck ? 'font-semibold text-status-error' : ''}>{step.step_name}</span>
@@ -225,7 +226,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
                     <span>{step.avg_duration_sec.toFixed(1)}s</span>
                     {step.error_count > 0 && <span className="text-status-error">{step.error_count} Fehler</span>}
                   </div>
-                </div>
+                </Callout>
               ))}
             </div>
           </CardContent>

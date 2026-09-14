@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useZulassungenRegister, type Zulassung } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -71,7 +72,7 @@ export default function ZulassungenRegisterPage(): JSX.Element {
     <div className="flex flex-col">
       <div className="space-y-4 p-6">
         <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Zulassungsregister</h1><p className="text-muted-foreground">PSM, Saatgut & Duenger</p></div></div>
-        {auslaufendeZulassungen.length > 0 && <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-orange-900"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{auslaufendeZulassungen.length} Zulassung(en) laufen bald ab!</span></div></CardContent></Card>}
+        {auslaufendeZulassungen.length > 0 && <Callout variant="warning" className="pt-4"><div className="flex items-center gap-2 text-status-warning"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{auslaufendeZulassungen.length} Zulassung(en) laufen bald ab!</span></div></Callout>}
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zulassungen Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteZulassungen.length}</span></div></CardContent></Card>
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{aktiveZulassungen.length}</span></CardContent></Card>

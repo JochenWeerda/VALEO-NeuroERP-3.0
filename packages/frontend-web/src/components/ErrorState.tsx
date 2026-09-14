@@ -37,7 +37,7 @@ export function ErrorState({
       role="alert"
     >
       <div className={`mx-auto flex max-w-2xl ${compact ? 'gap-3' : 'gap-4'} ${compact ? 'items-start' : 'items-center'}`}>
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[hsl(var(--color-semantic-error-50-hsl))]">
           <AlertTriangle className="h-5 w-5 text-status-error" />
         </div>
         <div className="min-w-0 flex-1">

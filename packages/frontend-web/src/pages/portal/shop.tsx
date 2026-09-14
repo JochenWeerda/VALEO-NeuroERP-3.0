@@ -546,7 +546,7 @@ export default function PortalShop() {
 
           {orderSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--color-semantic-success-50-hsl))]">
                 <Check className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">
@@ -857,7 +857,7 @@ export default function PortalShop() {
 
           {anfrageSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--color-semantic-success-50-hsl))]">
                 <Check className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">

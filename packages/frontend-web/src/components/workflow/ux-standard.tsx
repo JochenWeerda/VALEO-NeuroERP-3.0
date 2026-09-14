@@ -265,13 +265,13 @@ export function CrudCapabilityChecklist({ capabilities }: { capabilities: CrudCa
         {capabilities.map((capability) => {
           const Icon = capability.icon
           return (
-            <div key={capability.key} className={`rounded border px-3 py-2 ${capability.available ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+            <Callout key={capability.key} variant={capability.available ? 'success' : 'warning'} className="rounded px-3 py-2">
               <div className="flex items-center gap-2">
                 {Icon ? <Icon className={`h-3.5 w-3.5 ${capability.available ? 'text-status-success' : 'text-status-warning'}`} /> : null}
                 <span className={`text-[12px] font-bold ${capability.available ? 'text-status-success' : 'text-status-warning'}`}>{capability.label}</span>
               </div>
               <p className="mt-1 text-[11px] text-gray-600">{capability.hint}</p>
-            </div>
+            </Callout>
           )
         })}
       </div>

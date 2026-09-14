@@ -267,12 +267,12 @@ export default function BuchungsimportPage(): JSX.Element {
                 <div className="text-3xl font-bold text-status-success">{preview.successful}</div>
                 <div className="text-sm text-muted-foreground">Gültig</div>
               </Callout>
-              <div className={`text-center p-4 border rounded-lg ${preview.failed > 0 ? 'border-red-200 bg-red-50' : ''}`}>
+              <Callout variant={preview.failed > 0 ? 'error' : 'default'} className="rounded-lg p-4 text-center">
                 <div className={`text-3xl font-bold ${preview.failed > 0 ? 'text-status-error' : 'text-muted-foreground'}`}>
                   {preview.failed}
                 </div>
                 <div className="text-sm text-muted-foreground">Fehler</div>
-              </div>
+              </Callout>
             </div>
 
             {preview.errors.length > 0 && (
@@ -340,12 +340,12 @@ export default function BuchungsimportPage(): JSX.Element {
                 <div className="text-3xl font-bold text-status-success">{result.successful}</div>
                 <div className="text-sm text-muted-foreground">Erfolgreich importiert</div>
               </Callout>
-              <div className={`text-center p-4 border rounded-lg ${result.failed > 0 ? 'border-red-200 bg-red-50' : ''}`}>
+              <Callout variant={result.failed > 0 ? 'error' : 'default'} className="rounded-lg p-4 text-center">
                 <div className={`text-3xl font-bold ${result.failed > 0 ? 'text-status-error' : 'text-muted-foreground'}`}>
                   {result.failed}
                 </div>
                 <div className="text-sm text-muted-foreground">Fehler</div>
-              </div>
+              </Callout>
               <div className="text-center p-4 border rounded-lg">
                 <div className="text-lg font-mono font-semibold">{result.import_id.slice(0, 8)}</div>
                 <div className="text-sm text-muted-foreground">Import-ID</div>

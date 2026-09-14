@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { useStockValuation } from '@/lib/api/warehouse-wms'
 import { Input } from '@/components/ui/input'
 
@@ -127,9 +128,9 @@ function SummaryCard({
   highlight?: boolean
 }) {
   return (
-    <div className={`rounded border p-4 ${highlight ? 'bg-blue-50 border-blue-200' : 'bg-white'}`}>
+    <Callout variant={highlight ? 'info' : 'default'} className="rounded p-4">
       <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className={`text-lg font-semibold ${highlight ? 'text-blue-700' : ''}`}>{value}</p>
-    </div>
+      <p className={`text-lg font-semibold ${highlight ? 'text-status-info' : ''}`}>{value}</p>
+    </Callout>
   )
 }

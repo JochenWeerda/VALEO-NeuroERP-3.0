@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 
+import { Callout } from '@/components/ui/callout'
 import { PageToolbar } from '@/components/navigation/PageToolbar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -85,7 +86,7 @@ function AutoLotLinkPanel({ warehouseId }: { warehouseId: string }): JSX.Element
           {busy ? 'Buche...' : 'Automatisch buchen'}
         </Button>
         {result && (
-          <div className={`rounded-md border px-3 py-2 text-sm ${result['ok'] ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20' : 'border-red-300 bg-red-50 dark:bg-red-900/20'}`}>
+          <Callout variant={result['ok'] ? 'success' : 'error'} className="rounded-md px-3 py-2">
             {result['ok'] ? (
               <div className="flex items-center gap-2 text-status-success">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -94,7 +95,7 @@ function AutoLotLinkPanel({ warehouseId }: { warehouseId: string }): JSX.Element
             ) : (
               <span className="text-status-error">{String(result['reason'] ?? 'Kein Ergebnis')}</span>
             )}
-          </div>
+          </Callout>
         )}
       </CardContent>
     </Card>
