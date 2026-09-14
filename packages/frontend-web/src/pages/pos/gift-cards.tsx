@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useGiftCards, type GiftCard as ApiGiftCard } from '@/lib/api/pos'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -144,7 +145,7 @@ export default function GiftCardsPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <Gift className="h-4 w-4" />
           <p className="font-semibold">Gift Cards als Zahlungsmittel</p>
@@ -153,7 +154,7 @@ export default function GiftCardsPage(): JSX.Element {
           Im POS-Terminal scannen → Automatische Einlösung • Restguthaben bleibt auf Karte • Gültigkeit: 3 Jahre ab Ausstellung
         </p>
         <p className="mt-1 text-xs font-medium">Ausweis an der Ladenkasse als B2C-Endpreis inkl. gesetzl. MwSt.</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

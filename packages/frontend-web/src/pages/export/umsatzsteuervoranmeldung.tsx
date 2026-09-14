@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -133,10 +134,10 @@ export default function UmsatzsteuerVoranmeldungPage(): JSX.Element {
                 <FileDown className="h-4 w-4" />
                 ELSTER-XML Export
               </Button>
-              <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+              <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
                 <p className="font-semibold">Übermittlung an Finanzamt</p>
                 <p className="mt-1">Via ELSTER-Schnittstelle</p>
-              </div>
+              </Callout>
             </div>
           </CardContent>
         </Card>

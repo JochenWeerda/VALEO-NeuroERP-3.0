@@ -22,6 +22,7 @@ import {
   TouchCardGroup,
   TouchConfirmCard,
 } from '@/components/touch/TouchFieldLayout'
+import { Callout } from '@/components/ui/callout'
 
 type BeladungData = {
   kennzeichen: string
@@ -214,10 +215,10 @@ export default function LKWBeladungPage(): JSX.Element {
               { label: 'Verladeort', value: verladeortLabel || '—' },
             ]}
           />
-          <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
             <p className="font-semibold">Beladung wird dokumentiert</p>
             <p className="mt-1">Lieferschein wird automatisch erstellt</p>
-          </div>
+          </Callout>
         </div>
       ),
     },

@@ -7,6 +7,7 @@
   */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge, type BadgeVariant } from '@/components/ui/badge'
@@ -724,12 +725,12 @@ export default function PortalShop() {
                               {staffelInfo.zuschlag > 0 && (
                                 <div className="space-y-1.5">
                                   <Label className="text-xs text-muted-foreground">Mengenzuschlag</Label>
-                                  <div className="h-9 flex items-center text-sm text-amber-700 bg-amber-50 rounded-md px-3">
+                                  <Callout variant="warning" className="h-9 flex items-center text-sm rounded-md px-3">
                                     € {formatPrice(staffelInfo.zuschlag)}/{item.einheit}
                                     <span className="ml-1 text-xs text-muted-foreground">
                                       (= € {formatPrice(staffelKosten)})
                                     </span>
-                                  </div>
+                                  </Callout>
                                 </div>
                               )}
 

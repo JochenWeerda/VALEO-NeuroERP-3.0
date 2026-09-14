@@ -29,6 +29,7 @@ import {
 } from '@/lib/api/portal'
 import { toast } from 'sonner'
 import { getAxiosErrorMessage } from '@/lib/api-client'
+import { Callout } from '@/components/ui/callout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -1037,9 +1038,9 @@ export default function PortalFeldbuch() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+              <Callout variant="info" className="rounded-lg p-2">
                 <Leaf className="h-5 w-5" />
-              </div>
+              </Callout>
               <div>
                 <p className="text-2xl font-bold">{gesamtFlaeche.toFixed(1)} ha</p>
                 <p className="text-sm text-muted-foreground">Gesamtfläche</p>

@@ -4,6 +4,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
@@ -270,10 +271,10 @@ export default function ZahlungslaeufeePage(): JSX.Element {
               </dl>
             </CardContent>
           </Card>
-          <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
             <p className="font-semibold">Zahlungslauf wird erstellt und Datei generiert</p>
             <p className="mt-1">Die Datei kann anschliessend im Online-Banking importiert werden</p>
-          </div>
+          </Callout>
         </div>
       ),
     },

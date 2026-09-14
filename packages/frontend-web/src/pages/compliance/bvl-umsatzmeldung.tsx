@@ -3,6 +3,7 @@ import { useNavigate } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -79,10 +80,10 @@ export default function BVLUmsatzmeldungPage(): JSX.Element {
               className="font-mono"
             />
           </div>
-          <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-sm">
             <p className="font-semibold">Meldepflicht nach &sect; 64 PflSchG</p>
             <p className="mt-1">Jaehrliche Meldung der Inlandsabsaetze an das BVL bis 31. Maerz</p>
-          </div>
+          </Callout>
         </div>
       ),
     },
@@ -152,10 +153,10 @@ export default function BVLUmsatzmeldungPage(): JSX.Element {
                 <FileDown className="h-4 w-4" />
                 BVL-XML Export
               </Button>
-              <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+              <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
                 <p className="font-semibold">Elektronische Uebermittlung an BVL</p>
                 <p className="mt-1">Frist: 31. Maerz {meldung.jahr + 1}</p>
-              </div>
+              </Callout>
             </div>
           </CardContent>
         </Card>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -177,16 +178,16 @@ export default function SchadenMeldungPage(): JSX.Element {
               </div>
             </dl>
             {meldungMutation.isError && (
-              <div className="mt-4 rounded-lg bg-red-50 p-4 text-center text-sm text-red-900">
+              <Callout variant="error" className="mt-4 rounded-lg p-4 text-center text-sm">
                 <p className="font-semibold">Fehler beim Erstellen der Meldung</p>
                 <p className="mt-1">{String(meldungMutation.error)}</p>
-              </div>
+              </Callout>
             )}
             {!meldungMutation.isError && (
-              <div className="mt-6 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+              <Callout variant="info" className="mt-6 rounded-lg p-4 text-center text-sm">
                 <p className="font-semibold">Schadenmeldung wird an Versicherung übermittelt</p>
                 <p className="mt-1">Ein Sachverständiger wird Sie kontaktieren</p>
-              </div>
+              </Callout>
             )}
           </CardContent>
         </Card>

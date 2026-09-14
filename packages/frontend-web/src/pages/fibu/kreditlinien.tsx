@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -193,7 +194,7 @@ export default function KreditlinienPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-orange-50 p-4 text-sm text-orange-900">
+      <Callout variant="warning" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4" />
           <p className="font-semibold">Automatische Kreditprüfung</p>
@@ -202,7 +203,7 @@ export default function KreditlinienPage(): JSX.Element {
           Bonität: <strong>A</strong> = sehr gut (Limit bis 500k) • <strong>B</strong> = gut (bis 200k) • <strong>C</strong> = befriedigend (bis 50k) • <strong>D</strong> = mangelhaft (nur Vorkasse)
         </p>
         <p className="mt-1 text-xs">Automatische Sperrung bei Überschreitung oder überfälligen Rechnungen &gt; 30 Tage</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

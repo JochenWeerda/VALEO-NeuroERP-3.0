@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -175,13 +176,13 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
         </div>
       )}
 
-      <div className="rounded-lg bg-orange-50 p-4 text-sm text-orange-900">
+      <Callout variant="warning" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <Award className="h-4 w-4" />
           <p className="font-semibold">Verkaufsvoraussetzung PSM</p>
         </div>
         <p className="mt-1">Sachkundenachweis Pflicht fuer Anwender. Gueltigkeit: 3 Jahre. Vor Vertrieb pruefen.</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-5">
         <Card>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { usePortalDokumente, usePortalLieferscheinCompliance } from '@/lib/api/portal'
 import { buildDocumentRecord, buildDocumentWorkspace } from '@/lib/professional-workspaces'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -179,9 +180,9 @@ export default function PortalDokumente(): JSX.Element {
         <Card className="cursor-pointer transition-all hover:shadow-md" onClick={() => setActiveTab('analyse')}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+              <Callout variant="info" className="rounded-lg p-2">
                 <Beaker className="h-5 w-5" />
-              </div>
+              </Callout>
               <div>
                 <p className="text-2xl font-bold">{workspace.evidenceCount}</p>
                 <p className="text-sm text-muted-foreground">Nachweisrelevant</p>

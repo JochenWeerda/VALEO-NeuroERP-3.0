@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -194,10 +195,10 @@ export default function BwaPage(): JSX.Element {
             </CardContent>
           </Card>
 
-          <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-sm">
             <p className="font-semibold">Hinweis</p>
             <p className="mt-1">BWA nach DATEV-Standard (SKR03) · Monatliche Aktualisierung · DATEV-Export verfügbar</p>
-          </div>
+          </Callout>
         </>
       )}
     </div>

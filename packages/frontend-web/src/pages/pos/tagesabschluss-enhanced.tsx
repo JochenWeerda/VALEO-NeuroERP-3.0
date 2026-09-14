@@ -162,7 +162,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
       title: 'TSE-Daten',
       content: (
         <div className="space-y-4">
-          <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-sm">
             <p className="font-semibold">Daten aus dem signierten Fiskaljournal</p>
             <p className="mt-1">Datum: {new Date(abschluss.datum).toLocaleDateString('de-DE')}</p>
             {fiscalSummaryQuery.data && fiscalSummaryQuery.data.incomplete_count > 0 && (
@@ -170,7 +170,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                 Abschluss blockiert: {fiscalSummaryQuery.data.incomplete_count} unvollständige TSE-Transaktion(en).
               </p>
             )}
-          </div>
+          </Callout>
 
           <Card>
             <CardContent className="pt-4 space-y-3">
@@ -311,16 +311,16 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
               </div>
 
               {Math.abs(abschluss.differenzBar) > 0.01 && (
-                <div className="rounded-lg bg-orange-50 p-4 text-sm text-orange-900">
+                <Callout variant="warning" className="rounded-lg p-4 text-sm">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
                     <p className="font-semibold">Differenz Bar: {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzBar)}</p>
                   </div>
                   <p className="mt-1 text-xs">Wird auf Konto 2150 (Kassenfehlbeträge) gebucht</p>
-                </div>
+                </Callout>
               )}
 
-              <div className="rounded-lg bg-green-50 p-4 text-sm text-green-900">
+              <Callout variant="success" className="rounded-lg p-4 text-sm">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <p className="font-semibold">TSE-Daten → Fibu-Journal</p>
@@ -330,7 +330,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                   Belegnummer: KA-{abschluss.datum} •
                   TSE-Transaktionen: {abschluss.tseTransaktionen}
                 </p>
-              </div>
+              </Callout>
 
               {/* DSFinV-K Export */}
               <Callout variant="info" className="rounded-lg border p-4">

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -464,10 +465,10 @@ export default function WareneingangPage(): JSX.Element {
               </dl>
             </CardContent>
           </Card>
-          <div className="rounded-lg bg-green-50 p-4 text-center text-sm text-green-900">
+          <Callout variant="success" className="rounded-lg p-4 text-center text-sm">
             <p className="font-semibold">Wareneingang wird gebucht und Etiketten gedruckt</p>
             <p className="mt-1">Charge wird automatisch im System angelegt</p>
-          </div>
+          </Callout>
         </div>
       ),
     },

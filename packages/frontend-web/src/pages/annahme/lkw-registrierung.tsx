@@ -8,6 +8,7 @@ import { useDropzone } from 'react-dropzone'
 import { useToast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
 import { api } from '@/lib/axios'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -426,13 +427,13 @@ export default function LKWRegistrierungPage(): JSX.Element {
               ))}
             </div>
           )}
-          <div className="rounded-xl bg-blue-50 px-4 py-3 text-center text-sm text-blue-900">
+          <Callout variant="info" className="rounded-xl px-4 py-3 text-center text-sm">
             <p className="font-semibold">LKW wird in die Warteschlange eingereiht</p>
             <p className="mt-0.5 flex items-center justify-center gap-1 text-blue-700">
               <Clock className="h-3.5 w-3.5" />
               Der Fahrer erhaelt eine Wartenummer
             </p>
-          </div>
+          </Callout>
         </div>
       ),
     },

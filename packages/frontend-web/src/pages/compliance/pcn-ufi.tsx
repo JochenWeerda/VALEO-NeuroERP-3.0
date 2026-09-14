@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -139,13 +140,13 @@ export default function PCNUFIPage(): JSX.Element {
               ))}
             </div>
           </div>
-          <div className="rounded-lg bg-orange-50 p-4 text-sm text-orange-900">
+          <Callout variant="warning" className="rounded-lg p-4 text-sm">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
               <p className="font-semibold">Pflichtangaben nach CLP-Verordnung</p>
             </div>
             <p className="mt-1">Vollständige Rezeptur gemäß Annex VIII der CLP-VO erforderlich</p>
-          </div>
+          </Callout>
         </div>
       ),
     },
@@ -181,10 +182,10 @@ export default function PCNUFIPage(): JSX.Element {
             </dl>
             <div className="mt-6 space-y-2">
               <Button className="w-full">XML für ECHA-Portal generieren</Button>
-              <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+              <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
                 <p className="font-semibold">Poison Centre Notification (ECHA)</p>
                 <p className="mt-1">PCN-Portal: poisoncentres.echa.europa.eu</p>
-              </div>
+              </Callout>
             </div>
           </CardContent>
         </Card>

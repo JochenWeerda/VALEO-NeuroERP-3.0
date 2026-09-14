@@ -11,6 +11,7 @@ import {
   usePortalNaehrstoffbilanzen,
 } from '@/lib/api/portal'
 import { useSustainabilityProviders, useSustainabilityPsm } from '@/lib/api/sustainability'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -267,9 +268,9 @@ export default function PortalNaehrstoffbilanzen() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+                  <Callout variant="info" className="rounded-lg p-2">
                     <Droplets className="h-5 w-5" />
-                  </div>
+                  </Callout>
                   <div>
                     <p className="text-sm text-muted-foreground">N-Saldo {selectedJahr}</p>
                     <p className={`text-2xl font-bold ${getSaldoColor(currentBilanz.stickstoff.saldo, N_GRENZWERT)}`}>

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -116,11 +117,11 @@ export default function ENNIMeldungenPage(): JSX.Element {
         </Card>
       </div>
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <p className="font-semibold">ENNI-Portal Niedersachsen</p>
         <p className="mt-1">Elektronische Erfassung von Naehrstoffstroemen, Meldepflicht fuer Haendler und Betriebe.</p>
         <p className="mt-1">Fristen: DBE (30.04.), DdD (31.05.), 170-N (31.12.)</p>
-      </div>
+      </Callout>
 
       <Card>
         <CardContent className="pt-6">

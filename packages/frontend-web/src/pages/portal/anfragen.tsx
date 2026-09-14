@@ -161,9 +161,9 @@ export default function PortalAnfragen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+              <Callout variant="info" className="rounded-lg p-2">
                 <MessageSquare className="h-5 w-5" />
-              </div>
+              </Callout>
               <div>
                 <p className="text-2xl font-bold">
                   {anfragen.filter(a => a.status === 'beantwortet').length}

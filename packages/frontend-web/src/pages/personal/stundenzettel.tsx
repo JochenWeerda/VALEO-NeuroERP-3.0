@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -189,18 +190,18 @@ export default function StundenzettelPage(): JSX.Element {
             </div>
 
             {zettel.ueberstunden > 0 && (
-              <div className="rounded-lg bg-orange-50 p-3 text-orange-900">
+              <Callout variant="warning" className="rounded-lg p-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-semibold">Überstunden</span>
                   <span className="text-2xl font-bold">{zettel.ueberstunden.toFixed(2)} h</span>
                 </div>
-              </div>
+              </Callout>
             )}
 
-            <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+            <Callout variant="info" className="rounded-lg p-3 text-sm">
               <p className="font-semibold">Arbeitszeitgesetz (ArbZG)</p>
               <p className="mt-1 text-xs">Max. 10h/Tag • 48h/Woche • Mindestpause 30min (bei &gt;6h)</p>
-            </div>
+            </Callout>
           </CardContent>
         </Card>
       </div>

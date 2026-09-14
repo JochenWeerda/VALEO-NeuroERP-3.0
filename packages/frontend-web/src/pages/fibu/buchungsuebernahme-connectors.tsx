@@ -1,4 +1,5 @@
 import { Link } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -42,13 +43,13 @@ export default function BuchungsuebernahmeConnectorsPage(): JSX.Element {
             </div>
           </div>
 
-          <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-sm">
             <p className="font-semibold">Verdrahtung zur FiBu</p>
             <p className="mt-1">
               Connector-Läufe erzeugen Journal-Einträge, erscheinen im Hauptbuch und laufen im selben Revisionspfad wie
               Buchungsübergabe, OP und Abschluss.
             </p>
-          </div>
+          </Callout>
 
           <div className="grid gap-3">
             <Link to="/fibu/lohn-connector">

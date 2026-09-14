@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -120,7 +121,7 @@ export default function SchulungenPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <Award className="h-4 w-4" />
           <p className="font-semibold">Pflicht-Schulungen Landhandel</p>
@@ -129,7 +130,7 @@ export default function SchulungenPage(): JSX.Element {
           <strong>PSM:</strong> § 9 PflSchG (Sachkunde) • <strong>Gabelstapler:</strong> DGUV Vorschrift 68 •
           <strong>Erste Hilfe:</strong> DGUV Vorschrift 1 • <strong>Gefahrstoffe:</strong> GefStoffV § 14
         </p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

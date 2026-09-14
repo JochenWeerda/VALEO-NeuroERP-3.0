@@ -3,6 +3,7 @@ import { useNavigate } from '@/app/routing/typed-router'
 import { useTSEJournal, type TSEEintrag } from '@/lib/api/pos'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -177,14 +178,14 @@ export default function TSEJournalPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <p className="font-semibold">🔐 TSE-Pflicht (KassenSichV)</p>
         <p className="mt-1">
           Alle Kassentransaktionen mit zertifizierter TSE signiert • Unveränderbar • 10 Jahre Aufbewahrungspflicht •
           DSFinV-K Export für DATEV/Finanzamt
         </p>
         <p className="mt-1 text-xs font-medium">POS-Umsätze werden als B2C-Endpreise inkl. gesetzl. MwSt. protokolliert.</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

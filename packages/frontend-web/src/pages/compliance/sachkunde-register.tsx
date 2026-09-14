@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useSachkundeRegister, type Sachkundenachweis } from '@/lib/api/betrieb'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -90,9 +91,9 @@ export default function SachkundeRegisterPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-orange-50 p-4 text-sm text-orange-900">
+      <Callout variant="warning" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2"><Award className="h-4 w-4" /><p className="font-semibold">Verkaufsvoraussetzung PSM</p></div>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Nachweise Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{sachkunde.length}</span></CardContent></Card>
