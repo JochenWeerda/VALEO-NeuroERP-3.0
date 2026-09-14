@@ -847,6 +847,91 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
 ## SECURITY-REMAINDER-20260910 - in arbeit
 
+**Python-Service-Pins 2026-09-14 (Cursor, SERVICE-CVE-PINS-20260914):** Die
+Gegenstueck-Haelfte zum Node-Abschluss ist erledigt: `cryptography` 48.0.1 ->
+50.0.1 in `crm-gdpr`, `crm-marketing`, `crm-security` und `finance/fibu-core`,
+`aiohttp` 3.14.3 und `langgraph-checkpoint-sqlite` 3.1.1 in `services/ai`,
+`transformers` 5.10.0 und `torch` 2.13.0 in `crm-ai`. Grundlage waren die
+Dependabot-Alerts selbst, nicht die Annahme aus einer Datei. Nachgewiesen im
+Linux-Image, nicht nur im Resolver: `crm-security` mit Fernet-Durchlauf,
+`crm-gdpr` mit 19 Routen, `crm-marketing` importierbar, `services/ai` mit
+aiohttp 3.14.3.
+
+Drei Dienste liessen sich dabei nicht nachweisen, weil sie unabhaengig von den
+Pins defekt waren, und sind an der Ursache behoben: `crm-marketing` hatte ein
+Modell-Attribut `metadata`, das SQLAlchemy auf der Declarative-Basisklasse
+reserviert - das Modul war nicht importierbar (Spaltenname unveraendert, keine
+Migration), und `PyJWT` fehlte im Manifest, obwohl `app/api/jwt_oidc.py` es
+importiert. Bei `crm-ai` brach der Image-Build an `spacy download` ab: die
+Kompatibilitaetstabelle von spacy-models kennt nur den Schluessel `3.7`, nicht
+`3.7.2`, woraus spacy eine leere Modellversion und damit eine 404-URL bildet -
+isoliert ohne meine Pins nachgestellt, der Blocker bestand vorher. Das Modell
+wird jetzt versionsfest als Wheel installiert.
+
+**Vier Meldungen, drei davon fremder Besitz:**
+
+1. *Auth faellt still aus (hoch).* `services/ai`, `services/crm`,
+   `services/finance`, `services/finance/fibu-gateway`, `services/inventory` und
+   `services/workflow` importieren `AuthMiddleware` aus `auth_shared` in einem
+   `try/except ImportError`, setzen sie im Fehlerfall auf `None` und haengen sie
+   nur dann ein - protokolliert wird ausschliesslich der Erfolgsfall.
+   `packages/auth-shared` ist in keinem Manifest per `-e` verdrahtet und wird von
+   keinem Dockerfile kopiert. Im gebauten Image belegt: `auth_shared vorhanden:
+   False`, Middleware-Stack `['CORSMiddleware']`. Die sechs Dienste laufen ohne
+   Authentifizierung und schweigen darueber. Nicht selbst behoben, weil das
+   sechs Dockerfiles beruehrt und in laufenden Umgebungen Auth einschaltet.
+2. *`image-size` (Codex).* Erneut gegen die Alert-Daten geprueft: weiterhin keine
+   Fixversion. Damit braucht der Node-Teil einen begruendeten Triage-Eintrag,
+   sonst bleibt ein High-Befund unbegruendet offen. `chromadb` ist mit drei
+   Eintraegen erfasst und stimmt.
+3. *Die Service-Manifeste liegen ausserhalb aller Gates (hoch).* Der
+   Dependency-Gate laeuft als `pip-audit -r requirements.txt`, also nur auf dem
+   Wurzelmanifest, der Docker-Smoke baut nur Backend und Frontend, und kein Test
+   liest ein Manifest unter `services/`. Deshalb blieb ein nicht baubarer, ein
+   nicht importierbarer und ein nie startfaehiger Dienst bei gruener Pipeline
+   unsichtbar. Vorschlag: pip-audit ausweiten und
+   `scripts/check_service_import_pins.py` einhaengen - beides Gate-Entscheidungen.
+4. *Naechste Welle: fastapi/starlette-Altbestand (hoch).* pip-audit auf den
+   Service-Manifesten meldet weit mehr als Dependabot: `fastapi==0.104.1` zieht
+   starlette 0.27.0 mit 13 Befunden (Fixversionen bis 1.3.1), dazu pyasn1 0.4.8
+   ueber python-jose. 21 der 22 Manifeste stehen auf fastapi 0.104.1, 0.110.0,
+   0.115.0 oder 0.115.4 und pinnen starlette nicht; nur `services/ai` ist nach
+   RESTFEHLER-20260911 aktuell. Das ist kein Pin-Wechsel, sondern ein Sprung
+   ueber zwei Jahre und braucht je Dienst einen Startnachweis - als eigene Welle
+   vorgeschlagen, nicht hier angerissen.
+
+**`services/crm-ai` ist unfertig - Entscheidung erbeten.** Hinter dem
+reparierten Build lagen vier weitere Startfehler, die ich behoben habe:
+relative Importe in `main.py`, obwohl der Entrypoint `python main.py` startet;
+`BaseSettings` aus `pydantic` statt aus `pydantic-settings` (Pin fehlte);
+fehlender `asyncpg`, obwohl `session.py` eine Async-Engine baut und
+docker-compose eine `postgresql+asyncpg`-URL uebergibt; Bindung an `127.0.0.1`
+statt `0.0.0.0`. Danach bleibt ein fuenfter: `app/api/v1/endpoints/ai.py`
+importiert `PaginatedResponse` aus `app/schemas/base.py`, und diese Datei
+existiert im Repository nicht. Der Dienst wurde nie gestartet. Ein
+`PaginatedResponse` zu erfinden waere Produktarbeit ohne Vorgabe, deshalb hier
+abgebrochen: entweder fertigstellen oder als toten Code entfernen. Nebenbefund:
+kein Modul in `crm-ai` importiert spacy - Pin und Modell tragen nur Bauzeit und
+Angriffsflaeche.
+
+**Neu abgelegt:** `scripts/check_service_import_pins.py` prueft statisch, ob
+jeder Import eines Dienstes in seiner `requirements.txt` gedeckt ist, und
+unterscheidet Startblocker von still abgesicherten und nur zur Laufzeit
+geladenen Importen. Anlass waren zwei Ausfaelle, die ein gruener Image-Build
+nicht zeigte (`python-multipart`, `PyJWT`). Nicht in einen Gate eingehaengt.
+Grenze offen benannt: den fehlenden Datenbanktreiber findet es nicht, weil
+SQLAlchemy ihn ueber den Dialektnamen in der URL laedt.
+
+> *Nachtrag von Claude Code, 2026-09-14:* Dieser Abschnitt stammt aus deiner
+> Arbeitskopie und war nur noch nicht committet, weshalb der
+> Docs-Governance-Gate `SERVICE-CVE-PINS-20260914` nicht finden konnte. Ich
+> habe ihn unveraendert aus dem Arbeitsbaum uebernommen und im Slice-YAML die
+> zwei fehlenden Pflichtfelder `tests` und `external_gates` nachgetragen -
+> inhaltlich ausschliesslich aus deinen eigenen Angaben (`nachweis` und die
+> von dir vorgelegten Entscheidungen). Owner bleibt bei dir; wenn dir die
+> Formulierung nicht passt, ueberschreib sie.
+
+
 **Docs-Patch 2026-09-14 (Codex):** `requirements-docs.txt` von
 mkdocs-material 9.5.49 auf 9.7.7 wegen GHSA-xvg9-69gf-fjrf; `search.suggest`
 ist in mkdocs.yml aktiv. Abnahme bestanden: komplette Docs-Toolchain
