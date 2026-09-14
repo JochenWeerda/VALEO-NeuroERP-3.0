@@ -1,0 +1,46 @@
+slice_id: SERVICE-SECURITY-GATES-20260914
+title: Service-Audits und crm-ai-Betriebsvertraege absichern
+owner: Codex
+status: in arbeit
+goal: Alle Service-Manifeste automatisch auditieren und crm-ai bis zum echten Start nachweisen.
+file_ownership:
+  - .github/workflows/service-security.yml
+  - scripts/audit_service_dependencies.py
+  - scripts/test_audit_service_dependencies.py
+  - scripts/verify_crm_ai_contracts.py
+  - scripts/verify_crm_ai_container.py
+  - services/crm-ai/app/api/v1/endpoints/ai.py
+  - services/crm-ai/alembic/env.py
+  - services/crm-ai/alembic/versions/001_initial_crm_ai_schema.py
+  - services/crm-ai/docker-entrypoint.sh
+  - services/crm-ai/README.md
+  - docs/agent-ops/slices/SERVICE-SECURITY-GATES-20260914.yaml
+  - docs/quality-assurance/service-security-gates-2026-09-14.md
+acceptance:
+  - Alle verschachtelten Service-Manifeste werden dynamisch entdeckt.
+  - Transitive Abhaengigkeiten werden aufgeloest und auditierte Befunde blockieren.
+  - Leere oder fehlende Berichte, Scannerfehler und Timeout blockieren.
+  - Alle zehn crm-ai-Fachendpunkte erfuellen ihre bestehenden Antwortschemas.
+  - Frische PostgreSQL-Migration, erneuter Upgrade-Lauf und HTTP-Health bestehen.
+  - Fehlerhafte Migration verhindert Serverstart.
+tests:
+  - python scripts/test_audit_service_dependencies.py
+  - python scripts/check_service_import_pins.py
+  - python scripts/audit_service_dependencies.py
+  - python scripts/verify_crm_ai_container.py IMAGE
+  - scripts/verify_crm_ai_contracts.py im gebauten Image ohne Netzwerk
+risks:
+  - Bestehende Advisories mit und ohne Fix machen den neuen Audit-Gate korrekt rot.
+  - crm-ai liefert weiterhin Simulationen; keine trainierten Modelle oder persistierten Trainingsjobs.
+  - Cursor behaelt die Service-Manifest-Pins; keine Uebernahme seiner aktiven Slices.
+ai_harness:
+  fachlicher_vertrag: Bestehende API-Schemas und Simulationslogik erhalten; Startdefekte beheben.
+  architektur_vertrag: Bestehender CRM-AI-Container; keine neue Domain oder API.
+  daten_vertrag: Tests ausschliesslich gegen wegwerfbare Datenbank; keine produktive Migration.
+  test_vertrag: Negativnachweis der API-Defekte und positive HTTP-/Migrationsregression.
+  security_vertrag: Keine Ignore-Erweiterung; fehlgeschlagene Audits und Migrationen blockieren.
+  betriebs_vertrag: Isolierter Neubau, Nicht-Root-Start; kein Deployment.
+  dokumentations_vertrag: Workboard, Slice, QA-Bericht und Service-README nachziehen.
+external_gates:
+  - Neue Workflow-Ausfuehrung nach Push; keine Aenderung der Branch-Protection.
+  - Produktive Modell-, Tenant- und Auth-Freigabe ist keine Aussage dieser Betriebsabnahme.

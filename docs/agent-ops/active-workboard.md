@@ -1034,7 +1034,7 @@ erkennt die Dateien nicht mehr, der Inhalt bleibt vollstaendig als historischer
 Nachweis erhalten, und kuenftige Archiv-Meldungen entstehen gar nicht erst.
 Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
-## SERVICE-SECURITY-GATES-20260914 - reserviert
+## SERVICE-SECURITY-GATES-20260914 - in arbeit
 
 **Owner:** Codex. **Auftrag:** Service-Sicherheitspruefungen und crm-ai abschliessen.
 **Ziel:** Alle Service-Manifeste automatisch auditieren, vorhandenen Import-Pin-Check in CI ausfuehren und crm-ai-Start/API-Vertraege durch reproduzierbare Regressionen absichern.
@@ -1042,10 +1042,12 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 **Abgrenzung:** Cursor behaelt SERVICE-CVE-PINS und SERVICE-FASTAPI-STARLETTE samt Service-Manifesten. Bereits vorhandene crm-ai-Schema-/Depends-Fixes werden nachgeprueft, nicht erneut implementiert. Auth-Fail-closed ist bereits geliefert.
 **Abnahme:** Kein Service-Manifest faellt aus dem Audit; Scannerfehler und Befunde schlagen fehl; Import-Pruefung und crm-ai-HTTP-/OpenAPI-Regressionen bestehen.
 **Risiken:** Bestehende Advisories koennen den neuen Gate korrekt rot machen; Mock-Antworten in crm-ai sind keine trainierten Modelle. Kein Deployment.
+**Lieferstand:** CI-Gate fuer alle 23 Manifeste implementiert, sieben Audit-Runner-Tests gruen; sieben HTTP-Tests ueber alle zehn crm-ai-Endpunkte gruen (vorher fuenf Teilfehler). Echte frische PostgreSQL-Migration mit fuenf Tabellen, Upgrade-Wiederholung, Nicht-Root-Start und Health 200 im isolierten Vorab-Testimage bestanden; Migrationsfehler verhindert Start. Vollstaendiger Dockerfile-Neubau und Gesamtaudit laufen noch. Bisher 14 Audits: zehn ohne Befund, vier mit Befunden (ai, crm-gdpr, crm-marketing, crm-security); crm-ai ohne Befund. Details: [QA-Nachweis](../quality-assurance/service-security-gates-2026-09-14.md).
+**Resume:** Nach Ende des Neubaus Code-Layer mit aktuellen Fixes neu bauen, Container-/HTTP-Pruefer im echten Image wiederholen, 23 Auditberichte zusammenfassen und Abschluss dokumentieren.
 
 ## SECURITY-REMAINDER-20260910 - in arbeit
 
-**Node-Paketwelle 2026-09-14 (Codex):** 19 Manifeste und Lockfile aktualisiert; acht Paketvertraege bestanden, 495 Frontend-Tests gruen plus ein bestehender Skip. stream-json 1.9.1 erhaelt eine lokal angepasste Tiefenbegrenzung; Artillery-Patches erhalten CSV-/YAML-Kompatibilitaet. Audit: 0 Critical, 2 High (bestehende image-size-Ausnahmen ohne Fix), 1 Moderate (versionsbasierter stream-json-Treffer trotz Quellkorrektur). Keine neuen Ausnahmen. Service-Gates, Auth-Fail-open und unvollstaendiges crm-ai bleiben offen. Details im QA-Bericht und Slice.
+**Node-Paketwelle 2026-09-14 (Codex):** 19 Manifeste und Lockfile aktualisiert; acht Paketvertraege bestanden, 495 Frontend-Tests gruen plus ein bestehender Skip. stream-json 1.9.1 erhaelt eine lokal angepasste Tiefenbegrenzung; Artillery-Patches erhalten CSV-/YAML-Kompatibilitaet. Audit: 0 Critical, 2 High (bestehende image-size-Ausnahmen ohne Fix), 1 Moderate (versionsbasierter stream-json-Treffer trotz Quellkorrektur). Keine neuen Ausnahmen. Nachtrag: Auth-Fail-closed wurde bereits geliefert; Service-Gates und crm-ai-Betriebsabnahme werden in SERVICE-SECURITY-GATES-20260914 nachgeprueft. Details im QA-Bericht und Slice.
 
 **Python-Service-Pins 2026-09-14 (Cursor, SERVICE-CVE-PINS-20260914):** Die
 Gegenstueck-Haelfte zum Node-Abschluss ist erledigt: `cryptography` 48.0.1 ->

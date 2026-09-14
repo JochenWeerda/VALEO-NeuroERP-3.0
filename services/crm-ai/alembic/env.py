@@ -10,10 +10,15 @@ from alembic import context
 
 # Import your models here
 from app.db.models import Base
+from app.config.settings import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+if not settings.DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is required for CRM AI migrations")
+# ConfigParser treats percent signs in URL-encoded passwords as interpolation.
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

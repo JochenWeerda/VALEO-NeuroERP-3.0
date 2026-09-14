@@ -1,7 +1,7 @@
 """CRM AI API endpoints."""
 
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -355,6 +355,9 @@ async def batch_predict(
     db: AsyncSession = Depends(get_db)
 ):
     """Perform batch predictions for multiple entities."""
+    if request.prediction_type not in {"lead_scoring", "churn_prediction", "clv"}:
+        raise HTTPException(status_code=400, detail="Unsupported prediction_type")
+
     # Mock batch prediction results
     predictions = []
     for entity_id in request.entity_ids:
@@ -372,13 +375,21 @@ async def batch_predict(
                 "risk_level": "Low"
             })
 
+        elif request.prediction_type == "clv":
+            predictions.append({
+                "entity_id": str(entity_id),
+                "predicted_clv": 125000.0,
+                "confidence_interval_lower": 95000.0,
+                "confidence_interval_upper": 155000.0,
+            })
+
     return BatchPredictionResponse(
         predictions=predictions,
         total_processed=len(request.entity_ids),
-        total_successful=len(request.entity_ids),
+        total_successful=len(predictions),
         total_failed=0,
         model_version="v2.1.0-batch",
-        batch_id="batch-12345",
+        batch_id=uuid4(),
         processed_at="2025-11-15T11:56:00Z"
     )
 
@@ -391,8 +402,8 @@ async def train_model(
     """Initiate model training job."""
     # In production, this would queue a training job
     return ModelTrainingResponse(
-        model_id="model-12345",
-        training_job_id="train-67890",
+        model_id=uuid4(),
+        training_job_id=uuid4(),
         status="queued",
         estimated_completion_time="2025-11-15T13:00:00Z",
         message="Training job queued successfully"
