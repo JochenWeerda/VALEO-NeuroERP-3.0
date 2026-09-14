@@ -122,3 +122,45 @@ zwischenstand_2026_09_14:
       Vitest-Gotcha: der Vollauf mit Standardeinstellungen meldete 16
       Fehlschlaege, alle 5-Sekunden-Timeouts unter Worker-Last (environment
       1395 s). Mit --testTimeout=30000 --maxWorkers=2 reproduzierbar gruen.
+
+tests:
+  - >-
+    Codemod-Selbsttest ueber zehn Musterfaelle vor jedem Lauf: Alert mit
+    Palette-className, bereits gesetzte Variante, cn()-Ausdruck, Flaeche ohne
+    Rahmen, verschachteltes div, erhaltene Attribute, zwei Farbfamilien,
+    selbstschliessendes Element.
+  - "tsc --noEmit als Typpruefung jeder Umstellung (exit 0)."
+  - "eslint der geaenderten Dateien (ohne Befund, 4 vorbestehende Warnungen)."
+  - >-
+    vitest run --testTimeout=30000 --maxWorkers=2: 126 Dateien, 495 passed,
+    1 skipped - identisch zur Baseline.
+  - >-
+    Gegenprobe mit dem Messskript je Block (Hinweisbox 69 -> 13,
+    Tabelleneintraege 172 -> 109).
+external_gates:
+  - >-
+    Keine. Der Slice beruehrt kein Fremdsystem; alle Nachweise sind lokal und
+    in CI reproduzierbar.
+ai_harness:
+  fachlicher_vertrag: >-
+    Eine Farbe in der Oberflaeche benennt einen Zustand. Wo sie das nicht tut,
+    darf sie nicht aus der Statusskala stammen. Kategoriale Faerbung bleibt
+    kategorial und wird nicht zu einem Status umgedeutet.
+  architektur_vertrag: >-
+    Statusdarstellung laeuft ueber die zentralen Komponenten Badge, Callout
+    und Alert; Farbwerte liegen ausschliesslich in palette.css. Callout teilt
+    alertVariants mit Alert, damit es keine zweite Farbdefinition gibt.
+    lib/design-tokens.ts als konkurrierende Quelle ist entfernt.
+  daten_vertrag: "Keine Migration, keine Datenmutation, reine Darstellung."
+  test_vertrag: >-
+    Jede mechanische Umstellung wird von TypeScript geprueft, nicht geglaubt;
+    der Codemod hat einen Selbsttest, der vor dem Lauf gruen sein muss. Der
+    Vitest-Bestand muss der Baseline exakt entsprechen.
+  security_vertrag: >-
+    Keine Berechtigungen, keine Endpunkte, keine Abhaengigkeiten beruehrt.
+  betriebs_vertrag: >-
+    Rein clientseitig, kein Deployment-Schritt, kein Neustart noetig. Die
+    Aenderung wird mit dem naechsten Frontend-Build wirksam.
+  dokumentations_vertrag: >-
+    Ausnahmen werden benannt statt stillschweigend gelassen; der eigene
+    Messfehler in der Claim-Zahl ist ausdruecklich korrigiert.

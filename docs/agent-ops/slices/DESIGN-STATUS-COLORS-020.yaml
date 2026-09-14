@@ -91,3 +91,43 @@ zurueckstellung:
     gepusht; getoente Flaechen sind vollstaendig auf Komponenten und
     semantische Tokens umgestellt. Diese Welle betraf nur noch Ikon-, Text-
     und Akzentfarben.
+
+tests:
+  - >-
+    Codemod-Selbsttest ueber fuenf Musterfaelle (Sachikone in Blau,
+    Statusfamilie bleibt, bereits neutrale Statusutility, Nicht-Ikone,
+    Klassenreihenfolge) - bestanden.
+  - >-
+    Nicht ausgefuehrt, weil zurueckgestellt: tsc, eslint und vitest als
+    Abnahme. Der einmal angewandte Stand wurde vor jeder Pruefung
+    zurueckgenommen.
+  - >-
+    Gegenprobe der Ruecknahme: git status unter packages/frontend-web/src
+    leer, 119 Dateien wiederhergestellt.
+external_gates:
+  - >-
+    Entscheidung des Users ueber den gestalterischen Umfang. Sie ist am
+    2026-09-14 gegen die Umsetzung gefallen; der Slice bleibt bis zu einer
+    neuen Entscheidung zurueckgestellt.
+ai_harness:
+  fachlicher_vertrag: >-
+    Semantische Farbe ist ein knappes Signal fuer Zustand und Kritikalitaet.
+    Wo Farbe nichts bedeutet, ist sie Dekoration und wird neutral - sonst
+    verliert das Signal seinen Wert.
+  architektur_vertrag: >-
+    Ikonen erben die Textfarbe; semantische Farbe kommt ueber Komponenten oder
+    Statusutilities. Auswahl laeuft ueber die neutrale Auswahlfarbe, Verweise
+    ueber die Primaerfarbe bzw. Button-Varianten.
+  daten_vertrag: "Keine Migration, keine Datenmutation, reine Darstellung."
+  test_vertrag: >-
+    Der Selbsttest des Codemods muss vor jedem Lauf gruen sein; die Abnahme
+    haette tsc, eslint und einen Vitest-Lauf gegen die Baseline verlangt.
+    Beides ist wegen der Zurueckstellung nicht zur Anwendung gekommen.
+  security_vertrag: >-
+    Keine Berechtigungen, Endpunkte oder Abhaengigkeiten beruehrt.
+  betriebs_vertrag: >-
+    Rein clientseitig. Da nichts uebernommen wurde, ist kein Betriebsschritt
+    offen.
+  dokumentations_vertrag: >-
+    Die Zurueckstellung, der Stand der Ruecknahme und die verwertbare
+    Vorarbeit sind festgehalten, damit niemand einen halben Stand vermutet.

@@ -121,3 +121,43 @@ abschluss_2026_09_14:
     - "eslint der geaenderten Dateien ohne Befund"
     - "vitest 126 Dateien, 495 passed, 1 skipped - identisch zur Baseline (4x)"
     - "Gegenprobe: 0 verbleibende div-Flaechen mit Palette-Toenung"
+
+tests:
+  - >-
+    Codemod-Selbsttests: acht Musterfaelle fuer Flaechen mit farbigem Text,
+    sechs fuer dekorative Flaechen (darunter die Gegenproben "mit farbigem
+    Text" und "mit farbigem Rahmen", die nicht erfasst werden duerfen).
+  - "tsc --noEmit nach jedem der vier Schritte (exit 0)."
+  - "eslint der geaenderten Dateien (ohne Befund)."
+  - >-
+    vitest run --testTimeout=30000 --maxWorkers=2 nach jedem Schritt:
+    126 Dateien, 495 passed, 1 skipped - identisch zur Baseline.
+  - >-
+    Abschliessende Gegenprobe: 0 verbleibende div-Flaechen mit
+    Palette-Toenung unter packages/frontend-web/src.
+external_gates:
+  - >-
+    Keine. Alle Nachweise sind lokal und in CI reproduzierbar; kein
+    Fremdsystem beteiligt.
+ai_harness:
+  fachlicher_vertrag: >-
+    Getoente Flaechen mit farbigem Text sind Kontrastfaelle und gehoeren auf
+    eine Komponente. Flaechen ohne farbigen Text sind Dekoration und gehoeren
+    auf ein Token. Eine Entwarnung oder Warnung darf nicht allein aus der
+    Flaechenfarbe kommen.
+  architektur_vertrag: >-
+    Callout fuer dauerhafte Hinweiskaesten, Alert nur fuer echte, erscheinende
+    Meldungen. Elemente mit eigener ARIA-Rolle behalten ihr Element und
+    bekommen nur Tokenfarben.
+  daten_vertrag: "Keine Migration, keine Datenmutation, reine Darstellung."
+  test_vertrag: >-
+    Mechanische Umstellungen laufen nur ueber Codemods mit gruenem Selbsttest;
+    Faelle ausserhalb der Regeln werden einzeln angesehen und einzeln
+    geaendert. Der Vitest-Bestand muss der Baseline exakt entsprechen.
+  security_vertrag: >-
+    Keine Berechtigungen, Endpunkte oder Abhaengigkeiten beruehrt.
+  betriebs_vertrag: >-
+    Rein clientseitig, kein Deployment-Schritt, kein Neustart noetig.
+  dokumentations_vertrag: >-
+    Die drei bewussten Ausnahmen und beide eigenen Fehler samt Ruecknahme sind
+    im Slice und im Workboard festgehalten, nicht nur im Commit.
