@@ -677,14 +677,14 @@ laufen laesst und den Fall kuenftig faengt.
 weiterhin als Erfolg. Er hat diesen Fehler verdeckt. Ob er abgeschafft wird oder
 sein Ergebnis ehrlich meldet, ist eine eigene Entscheidung.
 
-## DESIGN-STATUS-COLORS-020 - zurueckgestellt
+## DESIGN-STATUS-COLORS-020 - in Arbeit
 
 **Von:** Welle 6 aus DESIGN-STATUS-COLORS-019, User-Auftrag „Rest nach Best
 Practice abschliessen, weniger ist mehr". **Owner:** Claude Code.
-**Stand:** zurueckgestellt 2026-09-14 auf Entscheidung des Users — die Farben
-bleiben vorerst, wie sie sind. **Nichts umgesetzt**, der bereits angewandte
-Codemod ist vollstaendig zurueckgenommen (119 Dateien, Arbeitsbaum sauber).
-Die Messung und die Regel unten bleiben als Vorarbeit stehen.
+**Stand:** wieder aufgenommen 2026-09-14 — der User hat die Zurueckstellung
+aufgehoben. Regel und Messung unten gelten unveraendert: **Rueckbau statt
+Umfaerben**. Vorgeschichte: am selben Tag zurueckgestellt, der damals bereits
+angewandte Codemod war vollstaendig zurueckgenommen worden (119 Dateien).
 **Dateibesitz:** `docs/agent-ops/slices/DESIGN-STATUS-COLORS-020.yaml`, dieser
 Abschnitt, Dateien unter `packages/frontend-web/src` mit rohen Palettenklassen.
 
@@ -1038,7 +1038,7 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
 **Owner:** Codex. **Auftrag:** Service-Sicherheitspruefungen und crm-ai abschliessen.
 **Ziel:** Alle Service-Manifeste automatisch auditieren, vorhandenen Import-Pin-Check in CI ausfuehren und crm-ai-Start/API-Vertraege durch reproduzierbare Regressionen absichern.
-**Dateibesitz:** neuer Service-Security-Workflow, neuer Audit-Runner und dessen Tests, crm-ai-Regressionspruefer, eigene Slice-/QA-Dokumentation sowie dieser Workboard-Abschnitt.
+**Dateibesitz:** neuer Service-Security-Workflow, neuer Audit-Runner und dessen Tests, crm-ai-Regressionspruefer, services/crm-ai/app/api/v1/endpoints/ai.py, alembic/env.py, initiale Migration, docker-entrypoint.sh und README (Antwortschema-/Start-Bugfixes), eigene Slice-/QA-Dokumentation sowie dieser Workboard-Abschnitt.
 **Abgrenzung:** Cursor behaelt SERVICE-CVE-PINS und SERVICE-FASTAPI-STARLETTE samt Service-Manifesten. Bereits vorhandene crm-ai-Schema-/Depends-Fixes werden nachgeprueft, nicht erneut implementiert. Auth-Fail-closed ist bereits geliefert.
 **Abnahme:** Kein Service-Manifest faellt aus dem Audit; Scannerfehler und Befunde schlagen fehl; Import-Pruefung und crm-ai-HTTP-/OpenAPI-Regressionen bestehen.
 **Risiken:** Bestehende Advisories koennen den neuen Gate korrekt rot machen; Mock-Antworten in crm-ai sind keine trainierten Modelle. Kein Deployment.

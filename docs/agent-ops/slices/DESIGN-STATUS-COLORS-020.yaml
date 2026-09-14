@@ -2,8 +2,9 @@ slice_id: DESIGN-STATUS-COLORS-020
 id: DESIGN-STATUS-COLORS-020
 title: Farbe zurueckbauen - Semantik sparsam, Dekoration neutral (Welle 6, Abschluss)
 owner: Claude Code
-status: zurueckgestellt
+status: in Arbeit
 zurueckgestellt_am: "2026-09-14"
+wiederaufgenommen_am: "2026-09-14"
 created_at: "2026-09-14"
 started_at: "2026-09-14"
 vorgaenger: DESIGN-STATUS-COLORS-019
@@ -74,8 +75,14 @@ verification:
   - "npx vitest run --testTimeout=30000 --maxWorkers=2"
   - "Gegenprobe je Block mit dem Messskript"
 
+wiederaufnahme:
+  entscheidung: >-
+    User, 2026-09-14: die Zurueckstellung ist aufgehoben, Welle 6 wird
+    aufgenommen. Regel und Messung dieses Slices gelten unveraendert -
+    Rueckbau statt Umfaerben.
+
 zurueckstellung:
-  entscheidung: "User, 2026-09-14: die Farben bleiben vorerst, wie sie sind."
+  entscheidung: "User, 2026-09-14: die Farben bleiben vorerst, wie sie sind (aufgehoben, siehe wiederaufnahme)."
   stand: >-
     Nichts umgesetzt. Der Codemod fuer Schritt 1 war angewandt und ist
     vollstaendig zurueckgenommen (git checkout, 119 Dateien, Arbeitsbaum
