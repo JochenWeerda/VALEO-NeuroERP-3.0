@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   drift-report:
@@ -28,16 +29,29 @@ jobs:
       - name: Generate drift dashboard page (DOC-DRIFT-DASHBOARD-002)
         run: python scripts/generate_drift_dashboard_page.py
 
-      - name: Commit updated dashboard (wenn geaendert)
+      # main ist geschuetzt ("Changes must be made through a pull request"), ein
+      # direkter Push scheitert hier zuverlaessig. Die Aktualisierung laeuft
+      # deshalb ueber einen Zweig und einen Pull Request, der bei jedem Lauf
+      # fortgeschrieben wird.
+      - name: Dashboard-Aktualisierung als Pull Request
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/entwickler/drift-dashboard.md
           if git diff --cached --quiet; then
             echo "Kein Dashboard-Update noetig."
+            exit 0
+          fi
+          BRANCH="chore/drift-dashboard"
+          git checkout -B "$BRANCH"
+          git commit -m "chore(docs): Drift-Dashboard aktualisiert [DOC-DRIFT-DASHBOARD-002]"
+          git push --force-with-lease origin "$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base main --head "$BRANCH"               --title "chore(docs): Drift-Dashboard aktualisiert"               --body "Automatischer Snapshot aus dem woechentlichen Drift-Report. Rein informativ, keine Code-Aenderung."
           else
-            git commit -m "chore(docs): Drift-Dashboard aktualisiert [DOC-DRIFT-DASHBOARD-002]"
-            git push
+            echo "Offener Pull Request vorhanden, Zweig wurde fortgeschrieben."
           fi
 
       - name: Upload report artifact

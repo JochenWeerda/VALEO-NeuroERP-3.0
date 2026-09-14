@@ -782,7 +782,7 @@ def save_pod(
         db.execute(
             text("""
                 UPDATE domain_logistics.tour_stops
-                SET pod_data = :pod::jsonb, status = 'ABGELIEFERT'
+                SET pod_data = CAST(:pod AS jsonb), status = 'ABGELIEFERT'
                 WHERE id = :stop_id AND tour_id = :tour_id
             """),
             {"pod": pod_json, "stop_id": stop_id, "tour_id": tour_id},

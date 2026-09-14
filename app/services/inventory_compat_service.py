@@ -463,7 +463,7 @@ class FutterCompatService:
                 self.db.execute(
                     text("""INSERT INTO domain_inventory.articles
                             (id, name, article_number, unit, is_active, custom_properties, created_at)
-                            VALUES (:id, :name, :artnr, 'kg', true, :props::jsonb, NOW())
+                            VALUES (:id, :name, :artnr, 'kg', true, CAST(:props AS jsonb), NOW())
                             ON CONFLICT DO NOTHING"""),
                     {"id": str(_uuid_mod.uuid4()), "name": name,
                      "artnr": norm.get("artikelnummer", ""),

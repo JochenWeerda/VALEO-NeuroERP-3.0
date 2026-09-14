@@ -101,7 +101,7 @@ async def put_quadriga_config(
             updates.append("name = :name")
             params["name"] = payload.name
         if payload.config_json is not None:
-            updates.append("config_json = :config_json::jsonb")
+            updates.append("config_json = CAST(:config_json AS jsonb)")
             import json
             params["config_json"] = json.dumps(payload.config_json)
         if payload.is_active is not None:
@@ -128,7 +128,7 @@ async def put_quadriga_config(
             text("""
                 INSERT INTO domain_erp.connector_configs
                 (id, tenant_id, connector_code, name, config_json, is_active, created_at, updated_at)
-                VALUES (:id, :tenant_id, :code, :name, :config_json::jsonb, :is_active, NOW(), NOW())
+                VALUES (:id, :tenant_id, :code, :name, CAST(:config_json AS jsonb), :is_active, NOW(), NOW())
             """),
             {
                 "id": config_id,

@@ -530,7 +530,7 @@ async def update_kalibrierung(
         import json
         db.execute(
             text(
-                "UPDATE agrar_waagen SET kalibrierung_meta = :meta::jsonb WHERE id = :id"
+                "UPDATE agrar_waagen SET kalibrierung_meta = CAST(:meta AS jsonb) WHERE id = :id"
             ),
             {"meta": json.dumps(current), "id": waage_id},
         )
@@ -626,7 +626,7 @@ async def create_dual_wiegung(
                 ) VALUES (
                     :id, :waage_id, :lieferant_id, :artikel_id, :partie_id,
                     :netto_kg, :gosse, :zielschein_typ, :kfz_kennzeichen,
-                    :extended_data::jsonb, now()
+                    CAST(:extended_data AS jsonb), now()
                 )
                 """
             ),
@@ -654,7 +654,7 @@ async def create_dual_wiegung(
                     text(
                         """
                         INSERT INTO domain_agrar.wiegungen (id, extended_data, created_at)
-                        VALUES (:id, :extended_data::jsonb, now())
+                        VALUES (:id, CAST(:extended_data AS jsonb), now())
                         """
                     ),
                     {"id": new_id, "extended_data": _json.dumps(extended_data)},

@@ -260,7 +260,7 @@ class ATLASCustomsService:
                         "(id, tenant_id, referenz_nr, ausfuhrland_code, bestimmungsland_code, "
                         "anmelder_eori, waren_positionen, befoerderungsart, ausfuehrender_nr, "
                         "ausfuhrdatum, lieferbedingung, status, atlas_mrn, erstellt_am) "
-                        "VALUES (:id, :tid, :ref, :aus, :best, :eori, :waren::jsonb, "
+                        "VALUES (:id, :tid, :ref, :aus, :best, :eori, CAST(:waren AS jsonb), "
                         ":bef, :nr, :datum, :lb, 'ENTWURF', NULL, :now)"
                     ),
                     {

@@ -660,7 +660,7 @@ async def settle_open_item(
             audit_insert = text("""
                 INSERT INTO infrastructure.audit_log
                 (id, user_id, action, entity_type, entity_id, changes, created_at)
-                VALUES (:id, :user_id, :action, :entity_type, :entity_id, :changes::jsonb, NOW())
+                VALUES (:id, :user_id, :action, :entity_type, :entity_id, CAST(:changes AS jsonb), NOW())
                 RETURNING id
             """)
             
@@ -914,7 +914,7 @@ async def reverse_settlement(
             audit_insert = text("""
                 INSERT INTO infrastructure.audit_log
                 (id, user_id, action, entity_type, entity_id, changes, created_at)
-                VALUES (:id, :user_id, :action, :entity_type, :entity_id, :changes::jsonb, NOW())
+                VALUES (:id, :user_id, :action, :entity_type, :entity_id, CAST(:changes AS jsonb), NOW())
             """)
             
             changes = {

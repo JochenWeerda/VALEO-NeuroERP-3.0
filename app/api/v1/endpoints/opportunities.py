@@ -334,7 +334,7 @@ async def patch_opportunity_stage(
                 UPDATE opportunities
                 SET stage = :stage,
                     probability = :prob,
-                    stage_history = :hist::jsonb,
+                    stage_history = CAST(:hist AS jsonb),
                     updated_at = NOW()
                 WHERE id = :oid
                 """

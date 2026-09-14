@@ -184,6 +184,9 @@ jobs:
       - name: SQL injection check (f-string in text())
         run: python scripts/check_sql_fstrings.py
 
+      - name: SQL bind cast check (:name::typ bindet nicht)
+        run: python scripts/check_sql_bind_casts.py
+
       - name: Tenant isolation audit
         run: python scripts/check_tenant_isolation.py
 

@@ -149,7 +149,7 @@ def _create_version(
             INSERT INTO domain_contracts.contract_versions
               (id, contract_id, version_number, changed_at, changed_by, change_summary, content_snapshot, tenant_id)
             VALUES
-              (:id, :cid, :ver, :now, :by, :summary, :snap::jsonb, :tid)
+              (:id, :cid, :ver, :now, :by, :summary, CAST(:snap AS jsonb), :tid)
             """
         ),
         {

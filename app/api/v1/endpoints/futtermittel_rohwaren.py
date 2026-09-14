@@ -368,7 +368,7 @@ async def create_analyse(
             INSERT INTO domain_futtermittel.raw_material_analyses
                 (id, material_id, analyse_datum, labor_ref, analysiert_von, werte, tenant_id)
             VALUES
-                (:id, :material_id, :analyse_datum, :labor_ref, :analysiert_von, :werte::JSONB, :tenant_id)
+                (:id, :material_id, :analyse_datum, :labor_ref, :analysiert_von, CAST(:werte AS JSONB), :tenant_id)
             RETURNING *
         """)
         row = db.execute(sql, {

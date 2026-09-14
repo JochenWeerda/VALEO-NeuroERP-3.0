@@ -141,7 +141,7 @@ def create_vordruck(
             "(id, tenant_id, name, kategorie, beschreibung, papierformat, ausrichtung, "
             " layout, beispieldaten, aktiv) "
             "VALUES (:id, :tid, :name, :kat, :beschr, :format, :ausr, "
-            " :layout::jsonb, :beispiel::jsonb, :aktiv)"
+            " CAST(:layout AS jsonb), CAST(:beispiel AS jsonb), :aktiv)"
         ),
         {
             "id": new_id, "tid": tenant_id, "name": payload.name,
@@ -177,7 +177,7 @@ def update_vordruck(
         text(
             "UPDATE domain_shared.beleg_vordrucke SET name=:name, kategorie=:kat, "
             "beschreibung=:beschr, papierformat=:format, ausrichtung=:ausr, "
-            "layout=:layout::jsonb, beispieldaten=:beispiel::jsonb, aktiv=:aktiv, "
+            "layout=CAST(:layout AS jsonb), beispieldaten=CAST(:beispiel AS jsonb), aktiv=:aktiv, "
             "updated_at=NOW() WHERE id=:id AND tenant_id=:tid"
         ),
         {

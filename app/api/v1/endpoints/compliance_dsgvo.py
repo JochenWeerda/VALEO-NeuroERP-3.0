@@ -192,7 +192,7 @@ async def process_erasure_request(
             text("""
                 UPDATE domain_compliance.data_erasure_requests
                 SET status = 'ABGESCHLOSSEN', completion_date = NOW(),
-                    deletion_log = :deletion_log::jsonb
+                    deletion_log = CAST(:deletion_log AS jsonb)
                 WHERE id = :id AND tenant_id = :tenant_id
             """),
             {"deletion_log": json.dumps(deletion_log), "id": request_id, "tenant_id": tenant_id},

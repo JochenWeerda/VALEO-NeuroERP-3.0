@@ -238,7 +238,7 @@ async def create_template(
                message_body, is_active, meta, created_at, updated_at)
             VALUES
               (:id, :tid, :name, :desc, :ctype, :subject, :body, :active,
-               :meta::jsonb, :now, :now)
+               CAST(:meta AS jsonb), :now, :now)
         """),
         {
             "id": nid, "tid": tenant_id, "name": payload.name,
@@ -327,7 +327,7 @@ async def duplicate_template(
                message_body, is_active, meta, created_at, updated_at)
             VALUES
               (:id, :tid, :name, :desc, :ctype, :subject, :body, :active,
-               :meta::jsonb, :now, :now)
+               CAST(:meta AS jsonb), :now, :now)
         """),
         {
             "id": nid, "tid": tenant_id,
@@ -453,7 +453,7 @@ async def create_campaign(
             VALUES
               (:id, :tid, :name, :desc, 'draft', :ctype, :tmpl, :seg,
                :start, :end, :budget, :owner, :channel, :cust_type, :season,
-               :meta::jsonb, :now, :now)
+               CAST(:meta AS jsonb), :now, :now)
         """),
         {
             "id": nid, "tid": tenant_id, "name": payload.name,
@@ -671,7 +671,7 @@ async def add_recipient(
         text("""
             INSERT INTO domain_crm.crm_campaign_recipients
               (id, tenant_id, campaign_id, recipient_id, recipient_type, status, meta, created_at)
-            VALUES (:id, :tid, :cid, :rid, :rtype, 'queued', :meta::jsonb, NOW())
+            VALUES (:id, :tid, :cid, :rid, :rtype, 'queued', CAST(:meta AS jsonb), NOW())
         """),
         {
             "id": nid, "tid": tenant_id, "cid": campaign_id,

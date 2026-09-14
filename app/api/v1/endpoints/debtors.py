@@ -168,7 +168,7 @@ async def create_debtor(
         insert_query = text("""
             INSERT INTO domain_erp.debitors 
             (tenant_id, debitor_number, name, address, payment_terms, credit_limit, is_active)
-            VALUES (:tenant_id, :debtor_number, :company_name, :address::jsonb, :payment_terms, :credit_limit, :is_active)
+            VALUES (:tenant_id, :debtor_number, :company_name, CAST(:address AS jsonb), :payment_terms, :credit_limit, :is_active)
             RETURNING id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                       is_active, created_at, updated_at
         """)
@@ -376,7 +376,7 @@ async def update_debtor(
             params["is_active"] = debtor_data.is_active
         
         # Always update address JSONB
-        update_fields.append("address = :address::jsonb")
+        update_fields.append("address = CAST(:address AS jsonb)")
         params["address"] = json.dumps(updated_address)
         
         # Update payment_terms if payment_terms_days changed

@@ -116,7 +116,7 @@ class WorkflowCockpitPersistService:
                 INSERT INTO domain_workflow.wf_cockpit_events
                   (id, process_instance_id, tenant_id, kind, message, source, payload, occurred_at)
                 VALUES
-                  (:id, :pid, :tid, :kind, :msg, :src, :payload::jsonb, :now)
+                  (:id, :pid, :tid, :kind, :msg, :src, CAST(:payload AS jsonb), :now)
             """),
             dict(
                 id=event_id, pid=process_instance_id,

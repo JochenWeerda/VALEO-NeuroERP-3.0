@@ -86,7 +86,7 @@ async def create_profile(
         text("""
             INSERT INTO domain_erp.fibu_connector_profiles
             (id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at)
-            VALUES (:id, :tenant_id, :connector_type, :name, :is_default, :settings::jsonb, :mapping::jsonb, 1, NOW(), NOW())
+            VALUES (:id, :tenant_id, :connector_type, :name, :is_default, CAST(:settings AS jsonb), CAST(:mapping AS jsonb), 1, NOW(), NOW())
         """),
         {
             "id": profile_id,
@@ -165,10 +165,10 @@ async def update_profile(
         updates.append("is_default = :is_default")
         params["is_default"] = payload.is_default
     if payload.settings is not None:
-        updates.append("settings = :settings::jsonb")
+        updates.append("settings = CAST(:settings AS jsonb)")
         params["settings"] = json.dumps(payload.settings)
     if payload.mapping is not None:
-        updates.append("mapping = :mapping::jsonb")
+        updates.append("mapping = CAST(:mapping AS jsonb)")
         params["mapping"] = json.dumps(payload.mapping)
     db.execute(text(f"UPDATE domain_erp.fibu_connector_profiles SET {', '.join(updates)} WHERE id = :id AND tenant_id = :tenant_id"), params)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
     if payload.is_default is True:

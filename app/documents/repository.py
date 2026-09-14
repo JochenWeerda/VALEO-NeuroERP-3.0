@@ -43,7 +43,7 @@ class DocumentRepository:
                 self.db.execute(
                     text("""
                         UPDATE documents 
-                        SET data = :data::jsonb, updated_at = :updated_at
+                        SET data = CAST(:data AS jsonb), updated_at = :updated_at
                         WHERE id = :id
                     """),
                     {"id": existing.id, "data": json.dumps(data), "updated_at": now}
@@ -54,7 +54,7 @@ class DocumentRepository:
                 self.db.execute(
                     text("""
                         INSERT INTO documents (id, doc_type, doc_number, data, created_at, updated_at)
-                        VALUES (:id, :doc_type, :doc_number, :data::jsonb, :created_at, :updated_at)
+                        VALUES (:id, :doc_type, :doc_number, CAST(:data AS jsonb), :created_at, :updated_at)
                     """),
                     {
                         "id": doc_id,

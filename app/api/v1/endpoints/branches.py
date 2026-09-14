@@ -91,7 +91,7 @@ async def create_branch(
             INSERT INTO domain_shared.branches (
                 id, tenant_id, branch_number, name, address, is_active, created_at, updated_at
             ) VALUES (
-                :id, :tenant_id, :branch_number, :name, :address::jsonb, :is_active, NOW(), NOW()
+                :id, :tenant_id, :branch_number, :name, CAST(:address AS jsonb), :is_active, NOW(), NOW()
             )
         """),
         {

@@ -142,7 +142,7 @@ def create_anmeldung(
                 "(id, tenant_id, referenz_nr, ausfuhrland_code, bestimmungsland_code, "
                 "anmelder_eori, waren_positionen, befoerderungsart, ausfuehrender_nr, "
                 "ausfuhrdatum, lieferbedingung, status, atlas_mrn, erstellt_am) "
-                "VALUES (:id, :tid, :ref, :aus, :best, :eori, :waren::jsonb, "
+                "VALUES (:id, :tid, :ref, :aus, :best, :eori, CAST(:waren AS jsonb), "
                 ":bef, :nr, :datum, :lb, 'ENTWURF', NULL, :now)"
             ),
             {
@@ -205,7 +205,7 @@ def update_anmeldung(
             text(
                 "UPDATE domain_compliance.zollausfuhr_anmeldungen SET "
                 "referenz_nr=:ref, bestimmungsland_code=:best, anmelder_eori=:eori, "
-                "waren_positionen=:waren::jsonb, befoerderungsart=:bef, "
+                "waren_positionen=CAST(:waren AS jsonb), befoerderungsart=:bef, "
                 "ausfuehrender_nr=:nr, ausfuhrdatum=:datum, lieferbedingung=:lb "
                 "WHERE id=:id AND tenant_id=:tid AND status='ENTWURF'"
             ),

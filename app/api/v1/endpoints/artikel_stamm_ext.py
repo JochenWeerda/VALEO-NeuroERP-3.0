@@ -295,7 +295,7 @@ def create_wiegungsgruppe(
         INSERT INTO domain_shared.waage_wiegungsgruppen
             (id, tenant_id, gruppe_nr, typ, wiegeschein_ids,
              kontrakt_nr, status, bemerkung)
-        VALUES (:id, :tid, :gruppe_nr, :typ, :ids::jsonb,
+        VALUES (:id, :tid, :gruppe_nr, :typ, CAST(:ids AS jsonb),
                 :ktr_nr, 'offen', :bem)
     """), {
         "id": new_id, "tid": tenant_id, "gruppe_nr": gruppe_nr,

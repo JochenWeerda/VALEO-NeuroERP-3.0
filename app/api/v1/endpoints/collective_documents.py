@@ -139,7 +139,7 @@ async def create_collective_invoice(
                    status, source_document_ids, created_at)
                 VALUES
                   (:id, :tid, :cid, :inv_no, :inv_date, :amount,
-                   'OFFEN', :src_ids::jsonb, :now)
+                   'OFFEN', CAST(:src_ids AS jsonb), :now)
                 """
             ),
             {
@@ -270,7 +270,7 @@ async def create_collective_delivery(
                    total_amount, status, source_order_ids, created_at)
                 VALUES
                   (:id, :tid, :cid, :dn_no, :dn_date,
-                   :amount, 'draft', :src_ids::jsonb, :now)
+                   :amount, 'draft', CAST(:src_ids AS jsonb), :now)
                 """
             ),
             {

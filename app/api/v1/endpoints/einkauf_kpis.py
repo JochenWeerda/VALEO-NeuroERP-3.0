@@ -62,7 +62,7 @@ def get_kpis(
                         / NULLIF(COUNT(*), 0)
                 FROM domain_einkauf.bestellungen
                 WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                   AND actual_delivery_date IS NOT NULL
             """),
             date_params,
@@ -81,7 +81,7 @@ def get_kpis(
                 FROM domain_einkauf.bestellung_positionen bp
                 JOIN domain_einkauf.bestellungen b ON b.id = bp.bestellung_id
                 WHERE b.tenant_id = :tid
-                  AND b.bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND b.bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
             """),
             date_params,
         ).scalar()
@@ -97,7 +97,7 @@ def get_kpis(
                 SELECT AVG((invoice_amount - po_amount) / NULLIF(po_amount, 0))
                 FROM domain_einkauf.invoice_verification
                 WHERE tenant_id = :tid
-                  AND created_at BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND created_at BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                   AND po_amount IS NOT NULL AND invoice_amount IS NOT NULL
             """),
             date_params,
@@ -115,7 +115,7 @@ def get_kpis(
                            - bestelldatum::TIMESTAMPTZ)) / 86400)
                 FROM domain_einkauf.bestellungen
                 WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                   AND actual_delivery_date IS NOT NULL
             """),
             date_params,
@@ -132,7 +132,7 @@ def get_kpis(
                 SELECT lieferant_id, SUM(gesamtbetrag) AS total_spend
                 FROM domain_einkauf.bestellungen
                 WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                 GROUP BY lieferant_id
                 ORDER BY total_spend DESC
                 LIMIT 5
@@ -154,7 +154,7 @@ def get_kpis(
                     SELECT lieferant_id, SUM(gesamtbetrag) AS spend
                     FROM domain_einkauf.bestellungen
                     WHERE tenant_id = :tid
-                      AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                      AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                     GROUP BY lieferant_id
                 ),
                 totals AS (SELECT SUM(spend) AS grand_total FROM supplier_spend),

@@ -175,7 +175,7 @@ def parse_run(db: Session, run_id: str, tenant_id: str, file_content: bytes) -> 
             text("""
                 INSERT INTO domain_erp.fibu_connector_run_items
                 (id, run_id, line_no, item_type, payload, validation_errors, status)
-                VALUES (:id, :run_id, :line_no, 'JOURNAL_ENTRY_LINE', :payload::jsonb, :validation_errors::jsonb, :status)
+                VALUES (:id, :run_id, :line_no, 'JOURNAL_ENTRY_LINE', CAST(:payload AS jsonb), CAST(:validation_errors AS jsonb), :status)
             """),
             {
                 "id": item_id,
@@ -193,7 +193,7 @@ def parse_run(db: Session, run_id: str, tenant_id: str, file_content: bytes) -> 
     db.execute(
         text("""
             UPDATE domain_erp.fibu_connector_runs
-            SET status = 'PARSED', counts = :counts::jsonb, totals = :totals::jsonb, finished_at = NOW()
+            SET status = 'PARSED', counts = CAST(:counts AS jsonb), totals = CAST(:totals AS jsonb), finished_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
         """),
         {
@@ -358,7 +358,7 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
     db.execute(
         text("""
             UPDATE domain_erp.fibu_connector_runs
-            SET status = 'POSTED', counts = jsonb_set(COALESCE(counts, '{}'), '{journal_entries_created}', to_jsonb(:cnt::int)), finished_at = NOW()
+            SET status = 'POSTED', counts = jsonb_set(COALESCE(counts, '{}'), '{journal_entries_created}', to_jsonb(CAST(:cnt AS int))), finished_at = NOW()
             WHERE id = :id AND tenant_id = :tid
         """),
         {"id": run_id, "tenant_id": tenant_id, "cnt": len(journal_entry_ids)},

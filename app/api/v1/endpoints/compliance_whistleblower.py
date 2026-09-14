@@ -118,7 +118,7 @@ async def update_report(report_id: str, payload: NoteIn, db: Session = Depends(g
         db.execute(
             text("""
                 UPDATE domain_compliance.whistleblower_reports
-                SET notes = notes || :note::jsonb
+                SET notes = notes || CAST(:note AS jsonb)
                 WHERE id = :id
             """),
             {"note": f'[{{"note": "{payload.note}", "ts": "{datetime.now(timezone.utc).isoformat()}"}}]',

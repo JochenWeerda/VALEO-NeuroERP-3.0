@@ -174,7 +174,7 @@ async def create_creditor(
                 """
                 INSERT INTO domain_erp.creditors
                 (id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active)
-                VALUES (:id, :tenant_id, :creditor_number, :company_name, :address::jsonb, :payment_terms, 0, :is_active)
+                VALUES (:id, :tenant_id, :creditor_number, :company_name, CAST(:address AS jsonb), :payment_terms, 0, :is_active)
                 """
             ),
             {
@@ -345,7 +345,7 @@ async def update_creditor(
         if not dq_result.bestanden:
             raise HTTPException(status_code=422, detail=build_dq_error_detail("Lieferant", dq_result))
         payment_terms_days = address.get("payment_terms_days", 30)
-        set_parts = ["address = :address::jsonb", "payment_terms = :payment_terms", "updated_at = NOW()"]
+        set_parts = ["address = CAST(:address AS jsonb)", "payment_terms = :payment_terms", "updated_at = NOW()"]
         params_update: dict = {
             "id": creditor_id,
             "tenant_id": tenant_id,

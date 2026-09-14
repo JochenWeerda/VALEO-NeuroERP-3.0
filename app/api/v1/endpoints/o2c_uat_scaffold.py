@@ -244,7 +244,7 @@ def create_szenario(
                 "INSERT INTO domain_shared.uat_szenarien "
                 "(id, tenant_id, szenario_name, rohwarengruppe, region, test_menge_t, "
                 "test_preis_eur_t, beschreibung, gesamtstatus, schritte, erstellt_am) "
-                "VALUES (:id, :tid, :name, :rg, :reg, :menge, :preis, :desc, 'OFFEN', :schritte::jsonb, :now)"
+                "VALUES (:id, :tid, :name, :rg, :reg, :menge, :preis, :desc, 'OFFEN', CAST(:schritte AS jsonb), :now)"
             ),
             {
                 "id": new_id, "tid": tenant_id,
@@ -302,7 +302,7 @@ def schritt_ausfuehren(
         db.execute(
             text(
                 "UPDATE domain_shared.uat_szenarien "
-                "SET schritte=:schritte::jsonb, gesamtstatus=:gs, abgeschlossen_am=:ab "
+                "SET schritte=CAST(:schritte AS jsonb), gesamtstatus=:gs, abgeschlossen_am=:ab "
                 "WHERE id=:id AND tenant_id=:tid"
             ),
             {
@@ -382,7 +382,7 @@ def reset_szenario(
         db.execute(
             text(
                 "UPDATE domain_shared.uat_szenarien "
-                "SET schritte=:schritte::jsonb, gesamtstatus='OFFEN', abgeschlossen_am=NULL "
+                "SET schritte=CAST(:schritte AS jsonb), gesamtstatus='OFFEN', abgeschlossen_am=NULL "
                 "WHERE id=:id AND tenant_id=:tid"
             ),
             {"schritte": json.dumps(schritte), "id": id, "tid": tenant_id},
