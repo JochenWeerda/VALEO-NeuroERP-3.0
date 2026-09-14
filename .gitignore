@@ -187,3 +187,5 @@ evidence/screenshots/
 playwright-results.json
 playwright-results.json/
 ostfriesland_*.json
+
+.claude/settings.local.json
