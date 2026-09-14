@@ -10,12 +10,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Python dependencies
-COPY requirements.txt .
+COPY services/ai/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# auth_shared ist keine Bequemlichkeit, sondern Voraussetzung: main.py bricht
+# ohne dieses Paket bewusst ab (SILENT-FAILURE-20260914). Frueher fehlte es im
+# Image, und der Dienst lief stillschweigend ohne Authentifizierung.
+COPY packages/auth-shared /opt/auth-shared
+RUN pip install --no-cache-dir /opt/auth-shared
+
 # Application code
-COPY app/ ./app/
-COPY main.py ./
+COPY services/ai/app/ ./app/
+COPY services/ai/main.py ./
 
 # Create data directory for ChromaDB
 RUN mkdir -p /app/data/chroma

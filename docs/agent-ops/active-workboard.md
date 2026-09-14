@@ -417,6 +417,62 @@ die drei Endpoint-Dateien, `tests/test_welle9_response_models.py`.
 `test_foreign_goods_worklist.py` → 18 passed; `check_weak_response_models.py
 --threshold 230` gruen (230/81 Dateien).
 
+## SILENT-FAILURE-20260914 - abgeschlossen
+
+**Von:** User-Auftrag „alles beides beheben" nach SQL-BIND-CAST-20260914.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-09-14.
+**Dateibesitz:** Slice-YAML, dieser Abschnitt,
+`app/documents/router_helpers.py`, `tests/test_silent_failures.py`, die sechs
+`services/*/main.py` mit Auth-Einbindung, die Dockerfiles von `crm`, `finance`,
+`inventory`, `ai` und der `ai`-Eintrag in `docker-compose.yml`.
+
+**Zwei Ausfaelle, die sich als Erfolg getarnt haben - beide behoben.**
+
+**1. Die Dokumentablage meldete Schreibfehler als Erfolg.** `save_to_store`
+fing jeden Repository-Fehler ab, schrieb in einen Prozessspeicher und gab
+`{"ok": True}` zurueck. Genau das hat den kaputten SQL-Cast monatelang
+verdeckt. `get_from_store` und `list_from_store` hatten dieselbe Form - ein
+Lesefehler wurde zu „nicht vorhanden", eine gestoerte Liste zu einer scheinbar
+vollstaendigen. Jetzt wird der Fehler weitergereicht, sobald ein Repository
+uebergeben ist. Der Prozessspeicher bleibt fuer den Fall **ohne** konfigurierte
+Datenbank und weist sich mit `persisted: False` aus.
+
+**2. Sechs Dienste liessen die Authentifizierung stillschweigend weg.** Der
+Importzweig haelt den Grund jetzt fest; ist die Middleware nicht verfuegbar,
+**startet der Dienst nicht mehr** - es sei denn,
+`ALLOW_UNAUTHENTICATED_SERVICE` ist ausdruecklich gesetzt, dann steht bei jedem
+Start eine `CRITICAL`-Zeile im Protokoll. Damit der Normalfall der abgesicherte
+ist, wird `packages/auth-shared` in `crm`, `finance` und `inventory` installiert;
+`services/ai` wurde dafuer vom lokalen auf den Wurzelkontext umgestellt.
+
+**Nebenbefund, den erst der Nachweis zeigte:** Die Tabelle `documents`
+existierte in der lokalen Entwicklungsdatenbank **gar nicht** (`to_regclass`
+lieferte `None`), obwohl `add_documents_json_table.py` sie anlegt. Auch das hat
+der Fallback verdeckt - saemtliche Dokumentzugriffe liefen still gegen den
+Prozessspeicher. Fuer den Testlauf nach der Vorlage der Migration angelegt; die
+Entwicklungsdatenbank selbst ist damit **nicht** saniert.
+
+**Ein Test stand selbst auf dem verschluckten Fehler:**
+`test_ap_invoice_legacy_approve_facade_delegates_to_workflow` setzte ein nacktes
+`object()` als Repository ein und lief nur durch, weil `save_to_store` den
+`AttributeError` schluckte. Er stellt den Schreibvorgang jetzt selbst.
+
+**Nachweis:** `tests/test_silent_failures.py` 16 passed · Auswahl
+„document or invoice or beleg or sales or store" **602 passed, 2 skipped** ·
+alle acht Dateien, die den Dokumentspeicher beruehren, 18 passed.
+
+**Nicht umgesetzt, ausdruecklich:** `services/workflow` und
+`services/finance/fibu-gateway` bekommen `auth-shared` nicht ins Image - beide
+stehen in keiner Compose-Datei, und der Dockerfile von `fibu-gateway` ist
+**0 Byte** gross. Ebenfalls offen: `crm` und `inventory` kopieren im
+Wurzelkontext das Wurzelmanifest und das Wurzel-`app/`; ob das gewollt ist oder
+Altstand, ist eine eigene Frage.
+
+**Betrieb:** Die vier geaenderten Images muessen neu gebaut werden. Wer die
+Dienste bisher ohne Authentifizierung betrieben hat, braucht entweder das neue
+Image oder `ALLOW_UNAUTHENTICATED_SERVICE` - der Rollout ist damit steuerbar,
+aber nicht mehr unbemerkt.
+
 ## SQL-BIND-CAST-20260914 - abgeschlossen
 
 **Von:** User-Auftrag „GitHub macht Fehlermeldungen, schliesse diese".

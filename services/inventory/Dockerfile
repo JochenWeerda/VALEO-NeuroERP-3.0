@@ -10,6 +10,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# auth_shared ist keine Bequemlichkeit, sondern Voraussetzung: main.py bricht
+# ohne dieses Paket bewusst ab (SILENT-FAILURE-20260914). Frueher fehlte es im
+# Image, und der Dienst lief stillschweigend ohne Authentifizierung.
+COPY packages/auth-shared /opt/auth-shared
+RUN pip install --no-cache-dir /opt/auth-shared
+
 COPY app/ ./app/
 COPY main.py ./main.py
 COPY alembic.ini ./alembic.ini

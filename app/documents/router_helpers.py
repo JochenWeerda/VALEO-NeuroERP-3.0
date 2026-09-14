@@ -27,28 +27,35 @@ def get_repository(db: Session = None) -> Optional[DocumentRepository]:
 
 
 def save_to_store(doc_type: str, doc_number: str, data: dict, repo: Optional[DocumentRepository] = None) -> dict:
-    """Speichert Dokument in DB oder In-Memory Store"""
+    """Speichert Dokument in DB oder In-Memory Store.
+
+    **Kein Fallback bei konfigurierter Datenbank.** Schlaegt der Schreibvorgang
+    dort fehl, wird der Fehler weitergereicht statt in den Prozessspeicher
+    ausgewichen. Die frueher stille Ausweichung hat den kaputten SQL-Cast aus
+    SQL-BIND-CAST-20260914 monatelang verdeckt: der INSERT schlug fehl, die
+    Anlage meldete Erfolg, und erst der spaetere Lesezugriff lief in 404.
+
+    Der In-Memory-Pfad bleibt fuer den Fall **ohne** Repository (keine Datenbank
+    konfiguriert) und meldet das mit ``persisted: False`` ausdruecklich zurueck.
+    """
     if repo:
-        try:
-            return repo.save_document(doc_type, doc_number, data)
-        except Exception as e:
-            logger.warning(f"DB save failed, using in-memory: {e}")
-    
-    # Fallback zu In-Memory
+        return repo.save_document(doc_type, doc_number, data)
+
     _DB[doc_number] = data
-    logger.info(f"Saved {doc_type} (in-memory): {doc_number}")
-    return {"ok": True, "number": doc_number}
+    logger.info(f"Saved {doc_type} (in-memory, nicht persistiert): {doc_number}")
+    return {"ok": True, "number": doc_number, "persisted": False}
 
 
 def get_from_store(doc_type: str, doc_number: str, repo: Optional[DocumentRepository] = None) -> Optional[dict]:
-    """Holt Dokument aus DB oder In-Memory Store"""
+    """Holt Dokument aus DB oder In-Memory Store.
+
+    Wie bei :func:`save_to_store` gibt es bei konfigurierter Datenbank keinen
+    stillen Rueckfall: ein Lesefehler wuerde sonst als "nicht vorhanden"
+    erscheinen und damit eine Stoerung in ein fachliches Ergebnis umdeuten.
+    """
     if repo:
-        try:
-            return repo.get_document(doc_type, doc_number)
-        except Exception as e:
-            logger.warning(f"DB get failed, using in-memory: {e}")
-    
-    # Fallback zu In-Memory
+        return repo.get_document(doc_type, doc_number)
+
     return _DB.get(doc_number)
 
 
@@ -68,18 +75,17 @@ def list_from_store(
     weggelassen werden — der zweite *positions*elle Parameter ist ``skip``, nicht ``repo``.
     """
     if repo:
-        try:
-            docs = repo.list_documents(doc_type, skip, limit, filters)
-            total = repo.count_documents(doc_type, filters)
-            return {
-                "ok": True,
-                "data": docs,
-                "total": total,
-                "skip": skip,
-                "limit": limit
-            }
-        except Exception as e:
-            logger.warning(f"DB list failed, using in-memory: {e}")
+        # Kein stiller Rueckfall: eine halbe Liste aus dem Prozessspeicher sieht
+        # aus wie eine vollstaendige und ist damit schlimmer als ein Fehler.
+        docs = repo.list_documents(doc_type, skip, limit, filters)
+        total = repo.count_documents(doc_type, filters)
+        return {
+            "ok": True,
+            "data": docs,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
     
     # Fallback zu In-Memory - Filtere nach Typ
     filtered_docs = []

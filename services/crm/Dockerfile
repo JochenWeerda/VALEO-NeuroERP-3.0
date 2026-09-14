@@ -6,6 +6,12 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# auth_shared ist keine Bequemlichkeit, sondern Voraussetzung: main.py bricht
+# ohne dieses Paket bewusst ab (SILENT-FAILURE-20260914). Frueher fehlte es im
+# Image, und der Dienst lief stillschweigend ohne Authentifizierung.
+COPY packages/auth-shared /opt/auth-shared
+RUN pip install --no-cache-dir /opt/auth-shared
+
 # Copy application code
 COPY app/ ./app/
 COPY services/crm/main.py ./main.py

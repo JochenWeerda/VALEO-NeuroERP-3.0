@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import logging
 from contextlib import asynccontextmanager
 
@@ -15,8 +16,15 @@ from app.dependencies import get_event_publisher
 
 try:
     from auth_shared import AuthMiddleware
-except ImportError:
+except ImportError as _auth_import_error:  # pragma: no cover - haengt am Image
+    # Frueher wurde hier stillschweigend auf None gesetzt und die Middleware
+    # unten einfach weggelassen - protokolliert wurde nur der Erfolgsfall. Der
+    # Dienst lief dann ohne Authentifizierung und schwieg darueber. Der Grund
+    # wird jetzt festgehalten und unten ausgewertet.
     AuthMiddleware = None  # type: ignore[assignment,misc]
+    AUTH_IMPORT_ERROR: Exception | None = _auth_import_error
+else:
+    AUTH_IMPORT_ERROR = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,6 +62,21 @@ app.add_middleware(
 if AuthMiddleware is not None:
     app.add_middleware(AuthMiddleware)
     logger.info("Auth middleware enabled")
+elif os.getenv("ALLOW_UNAUTHENTICATED_SERVICE", "").strip().lower() in {"1", "true", "yes"}:
+    logger.critical(
+        "Auth-Middleware NICHT aktiv: auth_shared ist nicht importierbar (%s). "
+        "Fortgesetzt, weil ALLOW_UNAUTHENTICATED_SERVICE gesetzt ist - dieser "
+        "Dienst beantwortet Anfragen ohne Authentifizierung.",
+        AUTH_IMPORT_ERROR,
+    )
+else:
+    raise RuntimeError(
+        "auth_shared ist nicht importierbar (%s). Der Dienst wuerde ohne "
+        "Authentifizierung laufen und startet deshalb nicht. Entweder "
+        "packages/auth-shared ins Image aufnehmen oder den Betrieb ohne "
+        "Authentifizierung ausdruecklich mit ALLOW_UNAUTHENTICATED_SERVICE=true "
+        "erlauben." % (AUTH_IMPORT_ERROR,)
+    )
 
 app.middleware("http")(tenant_middleware)
 

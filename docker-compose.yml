@@ -550,8 +550,10 @@ services:
   ai:
     profiles: ["ai"]
     build:
-      context: ./services/ai
-      dockerfile: Dockerfile
+      # Wurzelkontext, damit packages/auth-shared ins Image kommt
+      # (SILENT-FAILURE-20260914).
+      context: .
+      dockerfile: services/ai/Dockerfile
     container_name: valeo-neuro-erp-ai
     restart: unless-stopped
     environment:
