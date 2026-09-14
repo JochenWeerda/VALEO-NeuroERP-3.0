@@ -105,10 +105,43 @@ nichts verloren ausser Bauzeit.
 > Wer das nachmacht: vor dem Optimize-Lauf `wsl -l -v` pruefen und die Sperre mit
 > einem exklusiven Oeffnungsversuch gegenpruefen, nicht nur die Prozessliste.
 >
-> Offen bleibt der dritte Schritt: in den Images stecken weiter rund 35 GB
-> Rueckgewinnbares, darunter die drei KI-Images mit etwa 24 GB, die von meiner
-> Seite frei sind. Dafuer waere derselbe zweite Schritt noetig, damit Windows den
-> Platz auch sieht.
+> **Nachtrag 19:27, damit ist die Bereinigung abgeschlossen.** Auf Freigabe des
+> Nutzers auch der dritte Schritt: `docker image prune -a` hat **36,84 GB**
+> freigegeben - die 46 Images sind auf 22 geschrumpft, die verbleibenden
+> Compose-Images belegen zusammen nur **12,39 GB**. Danach ein zweiter
+> Komprimierungslauf: vhdx **88,29 GB -> 32,69 GB**, C: **34,96 -> 90,56 GB frei**.
+>
+> **Gesamtbilanz des Tages: C: von 2,00 GB auf 90,56 GB frei, also +88,56 GB;**
+> die vhdx von 121,28 GB auf 32,69 GB. Die Schaetzung von rund 62 GB Altlast war
+> richtig und sogar zu niedrig, weil der zuvor geloeschte Build-Cache mit
+> komprimiert wurde: 35,5 GB Images + 6,3 GB Volumes + 23,7 GB Cache.
+>
+> **Drei Dinge, die beim naechsten Mal Zeit und Fehlschluesse sparen:**
+>
+> 1. `fstrim` ist hier *nicht* der Hebel. In der Distribution meldet
+>    `/mnt/docker-desktop-disk` **0 B getrimmt** - Docker Desktop trimmt selbst.
+>    Der Hebel ist allein die Reihenfolge: nach *jedem* Aufraeumen komprimieren,
+>    sonst bleibt der Gewinn in der Datei stecken. Genau deshalb brauchte es hier
+>    zwei Laeufe.
+> 2. Die Sorge, geteilte Layer wuerden die Image-Ersparnis stark druecken, war
+>    unbegruendet - `docker system df` wies 35,52 GB aus, tatsaechlich wurden
+>    36,84 GB frei. Bei diesem Bestand darf man der ausgewiesenen Zahl also
+>    trauen.
+> 3. **`docker volume prune` waere hier ein Datenverlust gewesen.** Unter den 81
+>    verwaisten Volumes lagen rund 15 benannte Datenbanken mit Inhalt, darunter
+>    `valeo-neuroerp-30_postgres_keycloak_data` (Realm mit Nutzern und Rollen),
+>    `valeo-neuro-erp_postgres_staging_data`, `valeo-neuro-erp_pgdata` und
+>    `valeo-neuroerp-30_grafana_data`. Zusammen halten sie nur **1,34 GB** - das
+>    Risiko stand in keinem Verhaeltnis. Geloescht wurden gezielt 46 Volumes: 7
+>    Caches (`trivy-cache` und `valeo-trivy-resume-cache` mit je 1,38 GB, dazu
+>    `valeo-pipcache`, `grype-cache`, die beiden Vite-Caches und
+>    `docker_worker_cache`) sowie 39 anonyme Volumes, die an ihrer einheitlichen
+>    Groesse von etwa 48 MB als weggeworfene Postgres-Testinstanzen zu erkennen
+>    waren. **35 Volumes stehen bewusst weiter**, darunter auch
+>    `l3-migration-screenshots`, das nach Beweismaterial aussieht.
+>
+> Docker ist nach dem Lauf noch unten (beide Distributionen `Stopped`), damit
+> nachgemessen werden kann, bevor der Stack wieder hochfaehrt.
 
 
 ## NACHRICHT AN CURSOR — 2026-09-11 spaet, Claude Code
