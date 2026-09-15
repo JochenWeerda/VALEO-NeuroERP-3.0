@@ -68,11 +68,18 @@ belegzentrierte Weg.
 > Ueberbuchung haelt eine CHECK-Bedingung in der Datenbank, nicht die
 > Anwendung.
 >
-> **K5 ist damit wieder ein Kriterium je Maske — aber noch von keiner Maske
-> erfuellt.** Das Modell ist die Voraussetzung, nicht die Erfuellung: „100 dt
-> geliefert · 60 dt berechnet · 40 dt offen" liefert
-> `DocumentAllocationService.source_state`, gezeigt wird es bisher nirgends.
-> Wer K5 fuer eine Maske abhakt, muss auf deren Anzeige zeigen koennen.
+> **K5 ist damit wieder ein Kriterium je Maske.** Das Modell ist die
+> Voraussetzung, nicht die Erfuellung: Wer K5 fuer eine Maske abhakt, muss auf
+> deren Anzeige zeigen koennen.
+>
+> **Erste erfuellte Maske: `einkauf/bestellung-stamm`.** `PositionAllocationState`
+> zeigt dort je Position „100 dt geliefert · 60 dt berechnet · 40 dt offen" und
+> klappt die Zuordnungen auf — welche Rechnung welche Teilmenge genommen hat.
+> Die Eingabe bleibt neben der umgerechneten Menge stehen („2 big_bag (= 12 dt)"),
+> damit niemand die gerechnete Zahl fuer die eingegebene haelt.
+>
+> **Alle uebrigen Masken erfuellen K5 weiterhin nicht** — der Baustein ist da,
+> verdrahtet ist er einmal.
 >
 > Der urspruengliche Sperrvermerk bleibt stehen, weil er die Begruendung traegt:
 

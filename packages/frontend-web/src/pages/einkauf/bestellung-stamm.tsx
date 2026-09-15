@@ -26,6 +26,7 @@ import { useTenant } from '@/hooks/useTenant'
 import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel'
 import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { DocumentCaseBand } from '@/components/workflow/DocumentCaseBand'
+import { PositionAllocationState } from '@/components/documents/PositionAllocationState'
 import { linkPurchaseOrderToFlowSpine, PURCHASE_ORDER_DOCUMENT_TYPE } from '@/lib/workflow/purchase-order-flow-spine'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -514,6 +515,16 @@ export default function BestellungStammPage(): JSX.Element {
             resumeRoute: window.location.pathname + window.location.search,
           })
         }}
+      />
+
+      {/*
+        FSX-MENGENMODELL / K5: Mengenstand je Position — geliefert, berechnet,
+        offen — mit aufklappbaren Zuordnungen. Zeigt sich nur, wenn es zu diesem
+        Beleg Zuordnungen gibt; sonst rendert der Baustein nichts.
+      */}
+      <PositionAllocationState
+        documentType={PURCHASE_ORDER_DOCUMENT_TYPE}
+        documentId={poCommunicationId}
       />
 
       <OperationalCaseHeader
