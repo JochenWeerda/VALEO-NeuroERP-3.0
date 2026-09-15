@@ -116,10 +116,46 @@ selbst: Zwischen „gelesen" und „uebernommen" gehoert eine Entscheidung.
 
 Ebenfalls offen:
 
-- **Die Bedeutung von „BKH"** — sie gehoert vom Lieferanten geklaert, nicht vom
+- **Die Bedeutung von „BKH“** — sie gehoert vom Lieferanten geklaert, nicht vom
   Import geraten.
-- **Artikelvariante** als eigene Ebene ist im Modell vorgesehen, im Format aber
-  noch nicht ausgepraegt; das Beispiel braucht sie nicht.
-- **Zuordnung der Gebinderegeln zu den Artikeleinheiten** aus
-  `agrar_units.ArtikelEinheiten` — die Bruecke zwischen Importformat und
-  Mengenmodell ist der naechste Schritt.
+- **Die Uebernahme in `domain_inventory.articles`** — die Bruecke erzeugt
+  Varianten im Speicher; geschrieben wird noch kein Stammsatz.
+
+## Die Bruecke ins Mengenmodell
+
+`app/services/article_units_bridge.py` setzt das Importformat in das
+Mengenmodell um — so, wie im Landhandel tatsaechlich gefuehrt wird:
+
+**Je Gebindegroesse ein eigener Artikel.** Aus drei Gebinderegeln werden drei
+Stammsaetze — `WWH Hycard BIG_BAG 1000 kg`, `... 500 kg`, `... BAG 25 kg`. Nicht
+ein Artikel mit drei Gebinden: Lager, Disposition, Inventur und Etikett
+unterscheiden Sack und BigBag, auch wenn dieselbe Sorte darin ist. Damit
+erledigt sich nebenbei die Mehrdeutigkeit zweier BigBag-Groessen von selbst.
+
+**Die Sorteneigenschaften werden vererbt** — Artikelart, Kategorie, Beizung,
+Basiseinheit, Handelsgroesse und Teilbarkeit stehen in jeder Variante unter
+`inherited`, damit im Stammsatz nachlesbar bleibt, woher sie kommen. Innerhalb
+einer Variante laufen dann die **Chargen** mit eigener Gebinde- und
+Einheitenzuordnung (`agrar_units.ChargenEinheiten`); dort gehoert das
+Tausendkorngewicht einer konkreten Partie hin, nicht an den Artikel.
+
+**Die Palette haengt nur an dem Gebinde, das sie stapelt.** Sie wird als
+Vielfaches des Gebindes eingetragen — `49 x sack:25`, nicht `1225 kg` — und
+steht deshalb nur im Sack-Artikel. So bleibt sie richtig, wenn sich das
+Sackgewicht aendert, und taucht nicht dort auf, wo sie nichts stapelt.
+
+**Konditionen bleiben draussen.** Zuschlaege, Ausnahmen (`HYBRID=true`) und
+Palettengebuehren stehen als `conditions` neben den Einheiten — an der Variante,
+zu der sie gehoeren, oder lieferantenweit. Die Verpackungsleiter beantwortet
+„wie viele Kilogramm sind ein BigBag“, nicht „was kostet er“. Wer beides
+vermischt, kann den Preis nicht aendern, ohne die Mengenrechnung anzufassen.
+
+**Geraten wird nichts.** Ein unbekannter Gebindetyp, ein Gebinde in fremder
+Einheit, eine Palette, die zu keinem oder zu mehreren Gebinden passt: Das gibt
+einen **Hinweis**, keine gebogene Zuordnung — und die uebrigen Varianten bleiben
+brauchbar. Die einzige Ableitung, die sich die Bruecke erlaubt, folgt aus dem
+Recht: Pflanzenschutzmittel sind nicht teilbar, weil sie nur in der
+Originalverpackung abgegeben werden duerfen.
+
+Die Vorlage liegt als `tests/data/geno-saaten-angebot.xml` daneben — Import- und
+Brueckentests lesen dieselbe Datei.

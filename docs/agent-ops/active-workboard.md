@@ -11,6 +11,61 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-ARTIKEL-IMPORT - Bruecke ins Mengenmodell 2026-09-15, Claude Code
+
+**Die Praxis hat den Entwurf korrigiert.** Der erste Entwurf machte aus einem
+Angebot **einen** Artikel mit drei Gebinden. Gefuehrt wird aber **je
+Gebindegroesse ein eigener Artikel**: eigene Artikelnummer, eigener Bestand,
+eigener Preis, eigenes Etikett. Ein Sack 25 kg und ein BigBag 500 kg sind fuer
+Lager, Disposition und Inventur zwei Dinge, auch wenn dieselbe Sorte darin ist.
+`build_article_variants` liefert deshalb drei Stammsaetze, nicht einen.
+
+**Damit erledigt sich ein Problem von selbst:** Die zwei BigBag-Groessen des
+Lieferanten waren im einen Artikel mehrdeutig. Als getrennte Stammsaetze stellt
+sich die Frage nicht mehr.
+
+**Vererbt wird die Sorte, nicht die Verpackung.** Artikelart, Kategorie,
+Beizung, Basiseinheit, Handelsgroesse und Teilbarkeit stehen in jeder Variante
+unter `inherited` — nachlesbar, woher sie kommen. Innerhalb einer Variante
+laufen die **Chargen** mit eigener Gebinde- und Einheitenzuordnung
+(`ChargenEinheiten`); dort gehoert das Tausendkorngewicht einer Partie hin.
+
+**Die Palette haengt nur an dem Gebinde, das sie stapelt** — `49 x sack:25`,
+nicht `1225 kg`, und nur im Sack-Artikel. So bleibt sie richtig, wenn sich das
+Sackgewicht aendert.
+
+**Konditionen bleiben draussen.** Zuschlaege, `HYBRID=true` und Palettengebuehren
+stehen als `conditions` neben den Einheiten. Die Verpackungsleiter beantwortet
+„wie viele Kilogramm sind ein BigBag“, nicht „was kostet er“.
+
+**Geraten wird nichts:** unbekannter Gebindetyp, fremde Einheit, nicht
+aufgehende Palette — Hinweis statt gebogener Zuordnung, die uebrigen Varianten
+bleiben brauchbar. Einzige Ableitung: PSM ist nicht teilbar, weil es nur in der
+Originalverpackung abgegeben werden darf.
+
+**Ein Befund nebenbei:** `from tests.test_article_import import ANGEBOT` war
+nicht ausfuehrbar — ein gleichnamiges `tests`-Paket in site-packages verdeckt
+das Repo-Verzeichnis. Der bisherige Brueckentest konnte also nie gelaufen sein.
+Die Vorlage liegt jetzt als `tests/data/geno-saaten-angebot.xml`; beide
+Testdateien lesen dieselbe Datei.
+
+**Abnahme:** 70 Tests gruen (Import, Bruecke, Mengenmodell).
+
+**Offen:** die Uebernahme in `domain_inventory.articles` — zwischen „gelesen“
+und „uebernommen“ gehoert eine Entscheidung.
+
+## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - reserviert 2026-09-15
+
+**Owner:** Codex (pausiert; Claim aus `fsx-source-claim.patch` uebernommen).
+**Ziel:** Automatische positionsbezogene Kontrakt-/Fremdlagervorschlaege im
+zentralen Mask-Builder und Belegeinstieg.
+**Dateibesitz:** neuer docflow_source_proposals-Service und Tests, docflow-API,
+zentraler SourceProposalRenderer/SD-/RenderPlan-Vertrag, Lieferschein-/
+Bestelladapter, FSX-Doku/ADR.
+**Abnahme:** Mandant/Partner/Eigentuemer, Richtung, Mengen/Einheiten/Zeitraum;
+Teilvorschlaege, Begruendung, keine Buchung durch Vorschlaege; Tests und
+Dokumentation.
+
 ## FSX-ARTIKEL-IMPORT - Format und Parser stehen 2026-09-15, Claude Code
 
 **Vorlage:** das Angebot GENO-Saaten / WWH Hycard. Es laeuft vollstaendig durch

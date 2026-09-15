@@ -68,6 +68,22 @@ ALIASE: dict[str, str] = {
     "stück": "st",
     "eh": "einheit",
     "e": "einheit",
+    # Schreibweisen aus Lieferantenangeboten und dem Importformat. Nur belegte
+    # Entsprechungen — was hier nicht steht, gilt als unbekannt und wird
+    # gemeldet, statt auf etwas Aehnliches gebogen zu werden.
+    "bag": "sack",
+    "bigbag": "big_bag",
+    "big_bag": "big_bag",
+    "canister": "kanister",
+    "can": "kanister",
+    "bottle": "flasche",
+    "box": "karton",
+    "carton": "karton",
+    "pallet": "palette",
+    "crate": "kiste",
+    "piece": "st",
+    "pcs": "st",
+    "unit": "einheit",
 }
 
 #: Zaehleinheiten, die im Agrarhandel als Gebinde oder Verkaufseinheit auftreten.
@@ -90,9 +106,36 @@ ZAEHLEINHEITEN: frozenset[str] = frozenset(
 
 
 def normalisiere(einheit: str) -> str:
-    """Schreibweise vereinheitlichen, ohne zu raten."""
-    schluessel = (einheit or "").strip().lower().replace(" ", "_").replace("-", "_")
-    return ALIASE.get(schluessel, schluessel)
+    """Schreibweise vereinheitlichen, ohne zu raten.
+
+    Eine Auspraegung hinter ``:`` bleibt erhalten und wird nur mit normalisiert:
+    ``BigBag:500`` -> ``big_bag:500``.
+    """
+    roh = (einheit or "").strip().lower().replace(" ", "_").replace("-", "_")
+    kopf, trenner, schwanz = roh.partition(":")
+    kopf = ALIASE.get(kopf, kopf)
+    return f"{kopf}:{schwanz}" if trenner else kopf
+
+
+#: Trennt den Gebindetyp von seiner Auspraegung: ``big_bag:500``.
+VARIANTEN_TRENNER = ":"
+
+
+def grundeinheit(einheit: str) -> str:
+    """Auspraegung abtrennen: ``big_bag:500`` -> ``big_bag``.
+
+    Ein Lieferant fuehrt denselben Gebindetyp haeufig in mehreren Groessen — im
+    Angebot GENO-Saaten etwa BigBag zu 500 **und** zu 1000 kg. Beide heissen
+    "BigBag" und sind trotzdem verschiedene Einheiten.
+
+    Der Trenner ist ausdruecklich und nicht geraten. Ein erster Entwurf hat eine
+    angehaengte Ziffernfolge als Groesse gedeutet (``big_bag_500``); das trug
+    Paletten wie ``palette:standard_25kg`` nicht und haette bei jedem
+    Gebindenamen mit Zahl im Wort danebengelegen.
+    """
+    e = normalisiere(einheit)
+    kopf, trenner, _ = e.partition(VARIANTEN_TRENNER)
+    return kopf if trenner else e
 
 
 def art(einheit: str) -> UnitKind | None:
@@ -102,7 +145,7 @@ def art(einheit: str) -> UnitKind | None:
         return UnitKind.MASSE
     if e in VOLUMEN_IN_L:
         return UnitKind.VOLUMEN
-    if e in ZAEHLEINHEITEN:
+    if e in ZAEHLEINHEITEN or grundeinheit(e) in ZAEHLEINHEITEN:
         return UnitKind.ZAEHLEINHEIT
     return None
 
@@ -182,6 +225,25 @@ class ArtikelEinheiten:
     gebinde: tuple[Gebinde, ...] = ()
     teilbar: bool = True
 
+    def __post_init__(self) -> None:
+        """Doppelte Gebindenamen abweisen.
+
+        Ein Lieferant fuehrt denselben Typ oft in mehreren Groessen — BigBag zu
+        500 und zu 1000 kg. Traegt man beide unter ``big_bag`` ein, liefert die
+        Umrechnung stillschweigend **eine** davon, und niemand sieht welche. Das
+        ist die Sorte Fehler, die dieses Modul verhindern soll, also wird sie
+        hier abgewiesen: Die Groessen gehoeren in den Einheitennamen
+        (``big_bag_500``, ``big_bag_1000``).
+        """
+        namen = [normalisiere(g.einheit) for g in self.gebinde]
+        doppelt = {n for n in namen if namen.count(n) > 1}
+        if doppelt:
+            raise ValueError(
+                f"Mehrdeutige Gebinde: {sorted(doppelt)} kommen mehrfach vor. "
+                "Die Umrechnung waere nicht bestimmbar — Groesse in den "
+                "Einheitennamen aufnehmen, z. B. 'big_bag_500'."
+            )
+
     def faktor(self, quelle: str, ziel: str) -> Decimal | None:
         """Umrechnung im Kontext **dieses** Artikels.
 
@@ -225,6 +287,79 @@ class ArtikelEinheiten:
 
         # Masse/Volumen relativ zur Basis, falls beide derselben Art sind.
         return globaler_faktor(einheit, basis)
+
+
+@dataclass(frozen=True)
+class ChargenEinheiten:
+    """Einheitenprofil einer **Charge** — erbt vom Artikel, kann ergaenzen.
+
+    In der Praxis wird je Gebindegroesse ein eigener Artikel gefuehrt; innerhalb
+    eines Artikels laufen dann mehrere Chargen. Die Charge **erbt** die
+    Verpackungsleiter des Artikels.
+
+    Sie darf zusaetzlich etwas, das dem Artikel verwehrt ist: eine Umrechnung
+    **zwischen** Einheitenarten erklaeren. Der Fall dafuer steht im
+    Modelldokument — beim Saatgut haengt das Gewicht einer Einheit an
+    Tausendkorngewicht und Keimfaehigkeit, und beides schwankt je Partie. Ein
+    Artikel kann deshalb gar keinen allgemeingueltigen Faktor Einheit -> kg
+    haben. **Eine Charge kann ihn haben, weil sie eine konkrete Partie ist.**
+
+    Genau hier — und nur hier — ist eine Brücke zwischen Kornzahl und Masse
+    zulaessig. Sie gilt fuer diese Partie und wird nicht auf den Artikel
+    zurueckgeschrieben.
+    """
+
+    charge: str
+    artikel: ArtikelEinheiten
+    #: Partiebezogene Umrechnungen ``(von, nach, faktor)``, z. B.
+    #: ``("einheit", "kg", Decimal(16))`` fuer eine Partie mit bekanntem TKG.
+    umrechnungen: tuple[tuple[str, str, Decimal], ...] = ()
+
+    def __post_init__(self) -> None:
+        for von, nach, faktor in self.umrechnungen:
+            if faktor <= 0:
+                raise ValueError(
+                    f"Chargenumrechnung {von}->{nach} muss positiv sein."
+                )
+            if art(von) is None or art(nach) is None:
+                raise ValueError(
+                    f"Chargenumrechnung nennt eine unbekannte Einheit: {von}->{nach}"
+                )
+        paare = [(normalisiere(v), normalisiere(n)) for v, n, _ in self.umrechnungen]
+        doppelt = {p for p in paare if paare.count(p) > 1}
+        if doppelt:
+            raise ValueError(f"Mehrdeutige Chargenumrechnungen: {sorted(doppelt)}")
+
+    @property
+    def basis_einheit(self) -> str:
+        return self.artikel.basis_einheit
+
+    @property
+    def teilbar(self) -> bool:
+        return self.artikel.teilbar
+
+    def faktor(self, quelle: str, ziel: str) -> Decimal | None:
+        """Umrechnung im Kontext dieser Partie.
+
+        Zuerst das, was der Artikel ohnehin kann — dort aendert die Charge
+        nichts. Erst wenn der Artikel passen muss, kommen die partiebezogenen
+        Brücken zum Zug, in beide Richtungen und auch ueber eine Zwischenstufe
+        des Artikels hinweg (``sack -> einheit`` beim Artikel, ``einheit -> kg``
+        bei der Charge).
+        """
+        q, z = normalisiere(quelle), normalisiere(ziel)
+        vom_artikel = self.artikel.faktor(q, z)
+        if vom_artikel is not None:
+            return vom_artikel
+
+        for von, nach, faktor in self.umrechnungen:
+            v, n = normalisiere(von), normalisiere(nach)
+            for start, ende, richtung in ((v, n, faktor), (n, v, Decimal(1) / faktor)):
+                bis_start = self.artikel.faktor(q, start) if q != start else Decimal(1)
+                ab_ende = self.artikel.faktor(ende, z) if ende != z else Decimal(1)
+                if bis_start is not None and ab_ende is not None:
+                    return bis_start * richtung * ab_ende
+        return None
 
 
 class PackAufloesung(str, Enum):
