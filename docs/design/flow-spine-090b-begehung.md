@@ -92,7 +92,48 @@ Ohne Phasen rendert das Band nichts. Das war eine bewusste Entscheidung gegen
 einen Platzhalter — aber der Nutzer kann nicht unterscheiden, ob dieser Beleg zu
 keinem Prozess gehoert oder ob die Anzeige ausgefallen ist.
 
+## Nachtrag 2026-09-15 spaeter — F1 bis F3 geschlossen
+
+**Reihenfolge hat sich bewaehrt.** Cursor hat FSX-001 umgesetzt (`56ffd0c2f`),
+und damit sind zwei der drei Brueche ohne eigenen Slice verschwunden:
+
+- **F1 erledigt durch FSX-001.** `reason_category`, `reason_code` und
+  `reason_note` des juengsten Knotenereignisses landen jetzt in `detail_rows`.
+  Die Statuskarte in der Mitte rendert `detail_rows` — der Grund steht damit im
+  Arbeitsbereich und nicht mehr nur im Timeline-Register der eingeklappten
+  Spalte. Die Regression aus FSX-023 ist damit aufgehoben, ohne die Spalte
+  wieder aufzuklappen.
+- **F2 war bereits behoben** (`on_hold`-Zweig in `lifecycleSummary`). Der
+  Verweistext zeigt jetzt auf die Knotendetails statt auf die Timeline.
+- **F3 erledigt.** Das Prozessband zeigt einen Blocker, sobald der Vorgang
+  `on_hold` oder `failed` ist. Der Text kommt aus den `detail_rows` des Knotens,
+  also aus der Quelle, die FSX-001 erschlossen hat.
+
+**Zwei Regeln, die dabei eingehalten wurden:**
+
+1. **Ein kritischer Knotenstatus allein erzeugt keinen Blocker.** „critical" ist
+   ein Knotenzustand, keine Sperre des Vorgangs. Die Sperre ist eine Aussage des
+   Lebenszyklus.
+2. **Ein fehlender Grund wird als fehlend benannt** („Pausiert — Grund nicht
+   hinterlegt"), nicht erfunden. Dass der Vorgang steht, ist ein Fakt; warum, ist
+   dann schlicht nicht hinterlegt.
+
+Zusaetzlich faengt das Band jetzt den Fall ab, dass ein pausierter Vorgang
+**keinen** `active`-Knoten mehr hat — ohne diesen Rueckfall waere die Sperre
+ausgerechnet im wichtigsten Fall unsichtbar geblieben.
+
+**K3 des Kriterienkatalogs ist damit in der Belegmaske erfuellt.**
+
+**Offen bleibt F4** (Fokus nimmt den Vorgangswechsel mit). Das ist keine
+Fehlfunktion, sondern eine Zuschnittsfrage, und sie gehoert an den Rollout in
+Waage-Masken — nicht hierher.
+
 ## Folgerung fuer den Rollout
+
+> **Ueberholt durch den Nachtrag oben:** F1 bis F3 sind geschlossen. Die
+> Sperre gegen den Rollout ist damit **aufgehoben**; es bleibt die Bedingung,
+> dass FSX-090b mit echten Nutzern stattfindet. Der urspruengliche Absatz bleibt
+> stehen, weil er die Begruendung traegt.
 
 **Der FSX-013-Rollout auf die restlichen 17 Masken sollte nicht stattfinden,
 solange F1 bis F3 offen sind.** Begruendung: Das Prozessband wird dann in 17

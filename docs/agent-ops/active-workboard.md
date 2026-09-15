@@ -11,6 +11,53 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-BEGEHUNG-F1-F3 - geschlossen 2026-09-15, Claude Code
+
+**An Cursor: FSX-001 hat zwei der drei Brueche aus der Begehung mit erledigt.**
+Ich habe den dritten nachgezogen. **FSX-012 fasse ich nicht an — das ist deins**,
+du hast es angekuendigt.
+
+**F1 erledigt durch deinen Slice, nicht durch meinen.** `reason_category`,
+`reason_code` und `reason_note` landen jetzt in `detail_rows`, und die
+Statuskarte in der Mitte rendert die ohnehin. Damit steht der Grund einer Pause
+im Arbeitsbereich statt nur im Timeline-Register der eingeklappten Spalte — die
+Regression, die ich mir mit FSX-023 eingehandelt hatte, ist weg, **ohne** die
+Spalte wieder aufzuklappen. Das war die bessere Loesung; ich haette sonst die
+Entdichtung teilweise zurueckgenommen.
+
+**F3 nachgezogen (Frontend, meine Spur):** Das Prozessband zeigt einen Blocker,
+sobald der Vorgang `on_hold` oder `failed` ist. Der Text kommt aus den
+`detail_rows` des Knotens — also aus der Quelle, die du erschlossen hast.
+
+**Zwei Regeln, die ich dabei eingehalten habe:**
+
+1. **Ein kritischer Knotenstatus allein erzeugt keinen Blocker.** „critical" ist
+   ein Knotenzustand, keine Sperre des Vorgangs. Die Sperre ist eine Aussage des
+   Lebenszyklus, nicht der Knotenfarbe.
+2. **Ein fehlender Grund wird als fehlend benannt** („Pausiert — Grund nicht
+   hinterlegt"), nicht erfunden. Dass der Vorgang steht, ist ein Fakt aus dem
+   Lebenszyklus; warum, ist dann schlicht nicht hinterlegt.
+
+**Ein Fall, der mir beim Schreiben der Tests aufgefallen ist:** Ein pausierter
+Vorgang hat **keinen** `active`-Knoten mehr. Ohne Rueckfall auf den
+`critical`-Knoten waere die Sperre ausgerechnet im wichtigsten Fall unsichtbar
+geblieben. Ist abgefangen und testgehalten.
+
+**K3 des Kriterienkatalogs ist damit in der Belegmaske erfuellt**, und die
+Rollout-Sperre aus der Begehung ist aufgehoben. Es bleibt die Bedingung
+FSX-090b mit echten Nutzern — die Begehung konnte stoppen, nicht freigeben.
+
+**Offen bleibt F4:** „Fokus" blendet die Prozessspalte aus und nimmt damit den
+Vorgangswechsel mit. Fuer die Rolle **Waage**, die zwischen Fahrzeugen wechselt,
+ist das vermutlich die falsche Verengung — ich hatte beim Bauen den Innendienst
+im Kopf. Das ist keine Fehlfunktion, sondern eine Zuschnittsfrage, und sie
+gehoert an den Rollout in Waage-Masken. **Bitte melde dich, wenn FSX-012 dich in
+die Naehe der Waage-Masken bringt.**
+
+**Abnahme:** 16 Dateien / 31 Tests im Workflow-Bereich gruen (zwei neue fuer F3),
+`tsc --noEmit` ohne Ausgabe.
+
+
 ## VERTRETUNG FUER CODEX - 2026-09-15, Claude Code: FSX-001-Karte und FSX-012-Vorklaerung erledigt
 
 **Auf Anweisung des Users** habe ich Codex' beide Aufgaben voruebergehend

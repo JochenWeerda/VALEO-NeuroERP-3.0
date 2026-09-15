@@ -532,8 +532,9 @@ function lifecycleSummary(workspace: {
     // ein Grund IST gesetzt — er steht nur im Ereignis, nicht auf der Instanz
     // (hold_instance schreibt reason_* ausschliesslich in die Timeline).
     // "Kein Abschlussgrund gesetzt" liess den Nutzer schliessen, es gebe keinen
-    // Grund. Bis FSX-001 den Grund an den Knoten holt, sagen wir, wo er steht.
-    return workspace.reason_note || 'Pausiert — Grund in der Timeline'
+    // Grund. Seit FSX-001 steht er in den Knotendetails der Mitte — nicht mehr
+    // nur in der eingeklappten Timeline; der Verweis zeigt jetzt dorthin.
+    return workspace.reason_note || 'Pausiert — Grund in den Knotendetails'
   }
   return workspace.reason_note || 'Kein Abschlussgrund gesetzt'
 }

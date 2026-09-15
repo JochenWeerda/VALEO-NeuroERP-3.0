@@ -70,10 +70,41 @@ export function WorkflowProcessBand({
     // keine aktive Phase, statt auf die erste zu raten.
     const activeNode = context.instanceId
       ? (nodes.find((node) => node.status === 'active') ??
-         nodes.find((node) => node.id === data?.focus_node_id))
+         nodes.find((node) => node.id === data?.focus_node_id) ??
+         // Ein pausierter Vorgang hat keinen "active"-Knoten mehr. Ohne diesen
+         // Rueckfall bliebe die Sperre unsichtbar — also genau im wichtigsten
+         // Fall.
+         nodes.find((node) => node.status === 'critical'))
       : undefined
 
     const primaryAction = activeNode?.actions?.find((action) => action.variant === 'primary')
+
+    // F3 aus der Begehung, moeglich geworden durch FSX-001: Der Grund einer
+    // Pause steht jetzt in den detail_rows des Knotens (aus dem juengsten
+    // Ereignis). Vorher gab es keine Quelle und damit keinen Blocker.
+    //
+    // Gezeigt wird er nur, wenn der Vorgang tatsaechlich steht — die Sperre ist
+    // eine Aussage des Lebenszyklus, nicht des Textes. Fehlt der Grund, wird er
+    // als fehlend benannt statt erfunden: dass der Vorgang pausiert, ist ein
+    // Fakt; warum, ist dann schlicht nicht hinterlegt.
+    const lifecycle = data?.lifecycle_status
+    const stehtStill = lifecycle === 'on_hold' || lifecycle === 'failed'
+    const grundZeile = activeNode?.detail_rows?.find((row) =>
+      ['Hinweis', 'Grund', 'Grundkategorie'].includes(row.label),
+    )
+    const blockingReasons = stehtStill
+      ? [
+          {
+            code: lifecycle === 'failed' ? 'gescheitert' : 'pausiert',
+            message:
+              grundZeile?.value ||
+              (lifecycle === 'failed'
+                ? 'Gescheitert — Grund nicht hinterlegt'
+                : 'Pausiert — Grund nicht hinterlegt'),
+            blocking: true,
+          },
+        ]
+      : []
 
     return {
       workflow: { processKey: context.process, phases },
@@ -85,6 +116,7 @@ export function WorkflowProcessBand({
                 statusLabel: activeNode.label,
                 tone: activeNode.status === 'critical' ? 'danger' : 'neutral',
               },
+              blockingReasons,
               nextAllowedActions: primaryAction
                 ? [
                     {

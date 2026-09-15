@@ -39,6 +39,12 @@ nicht in das Prozessband.
 
 ### K3 — Blocker sind benannt, nicht nur angezeigt
 
+> **Stand 2026-09-15: erfuellt.** Quelle ist `detail_rows` des Knotens
+> (`reason_category`/`reason_code`/`reason_note` des juengsten Ereignisses,
+> erschlossen durch FSX-001). Ein kritischer Knotenstatus allein erzeugt keinen
+> Blocker; ein fehlender Grund wird als fehlend benannt.
+
+
 Ein blockierter Vorgang sagt **warum**. „Gesperrt" ohne Grund erfuellt K3 nicht.
 Mehrere Blocker werden nacheinander abgearbeitet; das Band nennt den ersten.
 

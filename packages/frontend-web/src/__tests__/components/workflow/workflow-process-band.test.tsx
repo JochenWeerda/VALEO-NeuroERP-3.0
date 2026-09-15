@@ -87,7 +87,7 @@ describe('WorkflowProcessBand', () => {
     expect(action).toHaveAttribute('data-next-action', '/einkauf/bestellungen/neu')
   })
 
-  it('erfindet keinen Blocker aus einem kritischen Knotenstatus', async () => {
+  it('erfindet keinen Blocker aus einem kritischen Knotenstatus allein', async () => {
     fetchMock.mockResolvedValue({
       nodes: [{ id: 'purchase-order', label: 'Bestellung', status: 'critical', actions: [] }],
       focus_node_id: 'purchase-order',
@@ -95,9 +95,47 @@ describe('WorkflowProcessBand', () => {
     renderBand(context())
 
     await screen.findByTestId('process-band')
-    // Die Knoten tragen einen Zustand, aber keinen Sperrgrund. Aus "kritisch"
-    // einen Text zu formulieren waere eine Behauptung ohne Quelle.
+    // "critical" ist ein Knotenzustand, keine Sperre des Vorgangs. Ohne
+    // lifecycle_status bleibt das Band still.
     expect(screen.queryByTestId('process-band-blocker')).not.toBeInTheDocument()
+  })
+
+  it('zeigt bei pausiertem Vorgang den Grund aus den Knotendetails (F3)', async () => {
+    fetchMock.mockResolvedValue({
+      lifecycle_status: 'on_hold',
+      nodes: [
+        {
+          id: 'purchase-order',
+          label: 'Bestellung',
+          status: 'critical',
+          actions: [],
+          // Seit FSX-001 aus dem juengsten Knotenereignis
+          detail_rows: [
+            { label: 'Aktion', value: 'hold' },
+            { label: 'Grund', value: 'Kreditlimit ueberschritten' },
+          ],
+        },
+      ],
+      focus_node_id: 'purchase-order',
+    })
+    renderBand(context())
+
+    const blocker = await screen.findByTestId('process-band-blocker')
+    expect(blocker).toHaveTextContent('Kreditlimit ueberschritten')
+  })
+
+  it('benennt einen fehlenden Grund als fehlend, statt ihn zu erfinden (F3)', async () => {
+    fetchMock.mockResolvedValue({
+      lifecycle_status: 'on_hold',
+      nodes: [{ id: 'purchase-order', label: 'Bestellung', status: 'critical', actions: [], detail_rows: [] }],
+      focus_node_id: 'purchase-order',
+    })
+    renderBand(context())
+
+    // Dass der Vorgang steht, ist ein Fakt aus dem Lebenszyklus. Warum, ist
+    // dann schlicht nicht hinterlegt — und genau das wird gesagt.
+    const blocker = await screen.findByTestId('process-band-blocker')
+    expect(blocker).toHaveTextContent('Pausiert — Grund nicht hinterlegt')
   })
 
   it('arbeitet ohne Band weiter, wenn der Abruf scheitert', async () => {
