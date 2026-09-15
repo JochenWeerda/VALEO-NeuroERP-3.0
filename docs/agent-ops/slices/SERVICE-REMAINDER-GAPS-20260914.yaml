@@ -2,9 +2,10 @@ slice_id: SERVICE-REMAINDER-GAPS-20260914
 id: SERVICE-REMAINDER-GAPS-20260914
 title: Restliche Service-Sicherheits- und Pin-Luecken aus der FastAPI-Welle und dem Audit-Gate schliessen
 owner: Cursor Auto
-status: in arbeit
+status: abgeschlossen
 created_at: "2026-09-14"
 started_at: "2026-09-14"
+completed_at: "2026-09-15"
 goal: >-
   Die sieben vom Gate SERVICE-SECURITY-GATES-20260914 gemeldeten
   Dependency-Befunde und die in SERVICE-FASTAPI-STARLETTE-20260914 bewusst
@@ -25,12 +26,13 @@ file_ownership:
   - services/dms-adapter/app/main.py
   - services/inventory/Dockerfile
   - services/workflow/Dockerfile
+  - tests/test_ai_service_no_huggingface_contract.py
   - docker-compose.yml
   - .dockerignore
 acceptance:
   - python-jose ist aus keinem Service-Manifest mehr als ungenutzter Traeger von pyasn1/ecdsa vorhanden.
   - click in services/ai steht auf einer Fixversion (8.3.3).
-  - transformers in services/ai ist explizit auf 4.46.3 gepinnt; hoeher geht nicht, weil chromadb 0.5.23 tokenizers<=0.20.3 verlangt.
+  - transformers und sentence-transformers sind aus services/ai entfernt; der Dienstcode importiert sie nicht.
   - httpx steht in allen Service-Manifesten auf 0.28.1.
   - Offene pydantic-/uvicorn-Untergrenzen sind durch Exact-Pins ersetzt.
   - on_event ist aus den Diensten entfernt.
@@ -41,6 +43,8 @@ tests:
     crm-security, dms-adapter, fibu-core und fibu-gateway.
   - "Statischer Scan: kein on_event, kein python-jose, kein httpx==0.25.2."
   - "git ls-files services/**/requirements.txt: httpx entweder 0.28.1 oder nicht vorhanden."
+  - python -m pytest tests/test_ai_service_no_huggingface_contract.py --no-cov
+  - python scripts/audit_service_dependencies.py --manifest services/ai/requirements.txt
 risks:
   - risiko: >-
       chromadb 0.5.23 bleibt ohne Herstellerfix (GHSA-xph7-9rjv-w5fr, last
@@ -50,13 +54,11 @@ risks:
       Alt-Pins sind zulaessig. Codex bewertet die drei Server-CVEs bis
       2026-10-15 als not_affected/unreachable (eingebetteter Client).
   - risiko: >-
-      transformers bleibt auf 4.46.3. chromadb 0.5.23 verlangt tokenizers<=0.20.3;
-      transformers ab 4.47 zieht tokenizers>=0.22. 4.57.6 macht das Manifest
-      unaufloesbar. 26 Advisories von 4.46.3 bleiben sichtbar und blockieren
-      das Release-Gate.
+      Ein spaeterer Hugging-Face-Import in services/ai wuerde die Entfernung
+      ungueltig machen.
     bewertung: >-
-      Reproduzierbar gepinnt statt transitiv. Kein Major-Bump. Naechster Schritt
-      ist Pfadanalyse, nicht 4.57.6.
+      Vertragstest tests/test_ai_service_no_huggingface_contract.py. Kein
+      Major-Bump auf 4.57.6.
   - risiko: >-
       uvicorn bleibt in finance auf 0.32.0, in workflow auf 0.30.1 und in
       crm-core/dms-adapter auf 0.27.1 statt 0.24.0.
@@ -87,15 +89,18 @@ ai_harness:
   dokumentations_vertrag: >-
     Dieser Slice, Workboard-Abschnitt, ADR-071 und
     docs/quality-assurance/security-dependency-status-2026-09-15.md.
+    Fingerprint von services/ai/requirements.txt in
+    config/security/dependency-decisions.json nach Pin-Entfernung mechanisch
+    erneuert; Chroma-Entscheidung unveraendert.
 external_gates:
   - >-
     chromadb GHSA-xph7-9rjv-w5fr ohne gepatchte PyPI-Version. Wartet auf
     Upstream nach 1.5.9.
   - GitHub-Dependabot aktualisiert sich erst nach dem Merge ueber den Graph.
   - >-
-    SERVICE-SECURITY-GATES bleibt fuer services/ai scanner-rot, solange
-    chromadb/transformers Advisories im Rohbericht stehen. Release bleibt
-    wegen der 26 unbewerteten Transformers-Befunde false. Das ist Absicht.
+    SERVICE-SECURITY-GATES Scanner bleibt fuer services/ai bei Exit 1 wegen
+    chromadb. Der Policy-Gate ist lokal Exit 0 (release_allowed true). GitHub-CI
+    nach Push ist der Gesamtnachweis.
 verification:
   - python scripts/audit_service_dependencies.py --manifest services/crm-gdpr/requirements.txt
   - rg "on_event\\(" services

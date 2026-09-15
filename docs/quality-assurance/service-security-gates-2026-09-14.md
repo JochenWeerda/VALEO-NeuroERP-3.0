@@ -111,6 +111,11 @@ Der Gate darf bei echten verbliebenen Advisories rot sein. Die technische
 Fertigstellung der Pruefung ist keine Behauptung, alle Dependencies seien frei
 von Schwachstellen.
 
+Nachtrag 2026-09-15: ungenutzte Hugging-Face-Pins in `services/ai` entfernt.
+Lokaler Linux-Audit Gate-Exit 0 bei Scanner-Exit 1 (nur dokumentiertes chromadb).
+GitHub-CI nach dem Folge-Push ist der Gesamtnachweis, nicht der historische
+Lauf 34898484483.
+
 Release-Policy ab 2026-09-15: Scanner-Rot ist nicht gleich Release-Stopp und
 nicht gleich stille Freigabe. Verbindlich sind
 [ADR-071](../adr/adr-071-security-dependency-gate.md) und der

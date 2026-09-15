@@ -35,13 +35,10 @@ openai==1.91.0
 # Vector Store & Embeddings
 # chromadb 0.5.23 hat GHSA-xph7-9rjv-w5fr; Fixversion existiert nicht (last
 # affected 1.5.9, Patch-PR noch offen). Pin bleibt, Befund bleibt sichtbar.
+# Default-Embeddings sind ONNX (chromadb) bzw. OpenAI; Hugging Face
+# transformers/sentence-transformers werden im Dienstcode nicht importiert
+# und gehoeren deshalb nicht ins Image (ADR-071, Pfadanalyse 2026-09-15).
 chromadb==0.5.23
-sentence-transformers==3.3.1
-# Explizit 4.46.3: chromadb 0.5.23 verlangt tokenizers<=0.20.3, transformers
-# ab 4.47 zieht tokenizers>=0.22. Hoeher pinnen wuerde das Manifest unaufloesbar
-# machen. Die Advisories von 4.46.3 bleiben sichtbar, solange chromadb 0.5.x
-# gehalten wird.
-transformers==4.46.3
 tiktoken==0.8.0
 
 # Logging and monitoring

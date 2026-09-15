@@ -75,19 +75,22 @@ vor Auslieferung eine neue Bewertung.
 
 ## Transformers 4.46.3
 
-Der aktuelle CI-Audit auf a9b720a75 enthaelt 26 unterschiedliche
-Transformers-Befunde: unter anderem Modell-/Checkpoint-Deserialisierung,
-Konfigurations-Codeausfuehrung, Tokenizer-/Regex-Pfade und Datei-/URL-Verarbeitung.
-Der Resolver-Konflikt mit ChromaDB ist ein Kompatibilitaetsbefund, keine
-Sicherheitskontrolle. Kein direkter Import im Anwendungscode ist ein Hinweis,
-aber noch kein belastbarer Nachweis aller transitiven Modellladepfade.
+Stand vor der Pfadanalyse: der CI-Audit auf a9b720a75 enthielt 26
+Transformers-Befunde. Der Resolver-Konflikt mit ChromaDB war ein
+Kompatibilitaetsbefund, keine Sicherheitskontrolle.
 
-Deshalb keine pauschale Freigabe fuer Transformers. Die 26 Befunde bleiben
-im Gate blockierend, bis genaue Aufruf-/Datenpfade und wirksame Kontrollen je
-Befund belegt sind. Der Agent erzwingt keinen Major-Sprung als Ersatz fuer diese
-Analyse. Eine unbenutzte Abhaengigkeit entfernen, einen engen Backport anwenden,
-einen Ladepfad begrenzen oder kompatibel aktualisieren sind moegliche,
-separat zu pruefende Massnahmen.
+Pfadanalyse 2026-09-15 (Cursor, SERVICE-REMAINDER-GAPS): unter `services/ai`
+gibt es keinen Import von `transformers` oder `sentence_transformers`.
+Embeddings laufen ueber OpenAI bzw. Chromas Default-ONNX. Die ungenutzten Pins
+`transformers==4.46.3` und `sentence-transformers==3.3.1` wurden entfernt,
+nicht auf 4.57.6 gehoben. Vertragstest:
+`tests/test_ai_service_no_huggingface_contract.py`.
+
+Linux-Audit danach: Scanner-Exit 1 (drei sichtbare Chroma-Befunde), Gate-Exit 0,
+`release_allowed: true`, 0 blocked. `transformers`/`torch` sind nicht mehr im
+Aufloesungsgraph (122 Pakete). Der Fingerprint von
+`services/ai/requirements.txt` in `dependency-decisions.json` wurde mechanisch
+erneuert; die Chroma-Bewertung selbst ist unveraendert.
 
 ## Einbindung und Nachweise
 
@@ -100,7 +103,9 @@ Kein Deployment wurde ausgefuehrt, bestehende Branch-Protection unveraendert.
 
 - Neun Policy-Regressionen und neun Audit-Runner-Regressionen bestanden.
 - Realer CI-Bericht aus Run 34898484483: drei Chroma-Befunde als `not_affected`,
-  26 Transformers-Befunde blockierend; Release-Entscheidung bleibt false.
+  damals 26 Transformers-Befunde blockierend. Nach Entfernen der ungenutzten
+  Hugging-Face-Pins (2026-09-15) ist der lokale Linux-Audit von `services/ai`
+  Gate-Exit 0; Scanner bleibt wegen Chroma bei Exit 1.
 - Integrationstest: Scanner-Exit 1 bleibt dokumentiert, waehrend ausschliesslich
   bestaetigte unerreichbare Befunde Gate-Exit 0 ergeben koennen.
 - Ablauf, erreichbarer Angriffspfad, neue/geaenderte Quellen, falsche Version,

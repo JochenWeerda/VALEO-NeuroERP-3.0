@@ -113,7 +113,7 @@
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "bd6b19b0c8a9269166d281228def900cfc110a0d422ce01b1bb07b741721f8e5"
+        "services/ai/requirements.txt": "5ea11335cffd99831bcdcccc8ad0fa1c34432628c37dc2a2b6ab1f54eaa9112a"
       }
     },
     {
@@ -228,7 +228,7 @@
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "bd6b19b0c8a9269166d281228def900cfc110a0d422ce01b1bb07b741721f8e5"
+        "services/ai/requirements.txt": "5ea11335cffd99831bcdcccc8ad0fa1c34432628c37dc2a2b6ab1f54eaa9112a"
       }
     },
     {
@@ -343,7 +343,7 @@
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "bd6b19b0c8a9269166d281228def900cfc110a0d422ce01b1bb07b741721f8e5"
+        "services/ai/requirements.txt": "5ea11335cffd99831bcdcccc8ad0fa1c34432628c37dc2a2b6ab1f54eaa9112a"
       }
     }
   ]

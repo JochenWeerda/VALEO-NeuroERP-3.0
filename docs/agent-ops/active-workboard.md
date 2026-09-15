@@ -1064,27 +1064,21 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 **Lieferstand:** CI-Gate fuer alle 23 Manifeste implementiert, neun Audit-Runner-Tests gruen; sieben HTTP-Tests ueber alle zehn crm-ai-Endpunkte gruen (vorher fuenf Teilfehler). Echte frische PostgreSQL-Migration mit fuenf Tabellen, Upgrade-Wiederholung, Nicht-Root-Start und Health 200 im isolierten Vorab-Testimage bestanden; Migrationsfehler verhindert Start. Vollstaendiger Dockerfile-Build und beide crm-ai-Pruefer auf GitHub gruen (Run 34892743626, Job 104139171772, Commit 9997e1598). Gesamtaudit inklusive korrigierter Finance-Aufloesung: 23 erfasst, 16 ohne Befund, sieben mit echten Befunden; crm-ai ohne Befund. Keine Manifest-Pins fremder aktiver Slices geaendert. Details: [QA-Nachweis](../quality-assurance/service-security-gates-2026-09-14.md).
 **Abschluss:** Service-Gates und technische crm-ai-Abnahme geliefert und gepusht (9997e1598, Finance-Korrektur 5b4736867). Sieben Dienste mit Dependency-Befunden bleiben in den aktiven Manifest-Slices offen; kein gruener Gesamtaudit und keine produktive ML-Freigabe behauptet.
 
-## SERVICE-REMAINDER-GAPS-20260914 - in arbeit
+## SERVICE-REMAINDER-GAPS-20260914 - abgeschlossen
 
 **Owner:** Cursor Auto. Schliesst die sieben vom Gate gemeldeten Befunde und die in SERVICE-FASTAPI-STARLETTE bewusst ausgeklammerten Pin-Luecken.
 
 **python-jose war ungenutzt.** In keinem Dienst gibt es `import jose` oder `from jose`. Das Paket war ausschliesslich der Traeger von pyasn1 0.4.8 und ecdsa 0.19.2. Entfernt in `crm-gdpr`, `crm-marketing`, `crm-security`, `dms-adapter`, `fibu-core`, `fibu-gateway` und `services/ai`. pip-audit danach Exit 0 fuer die sechs CRM-/Finance-/DMS-Dienste (crm-security im Linux-Container, weil `uvloop==0.19.0` unter Windows nicht baut - das ist vorbestehend, nicht durch diese Welle entstanden).
 
-**click** in `services/ai` 8.2.1 -> 8.3.3 (Fixversion). **transformers** bleibt
-explizit auf 4.46.3: chromadb 0.5.23 verlangt `tokenizers<=0.20.3`, und
-transformers ab 4.47 zieht tokenizers>=0.22 - 4.57.6 macht das Manifest
-unaufloesbar. Die 26 Advisories von 4.46.3 bleiben sichtbar und **blockieren**
-das Release-Gate (Codex: keine pauschale Freigabe, Pfadanalyse fehlt).
-Kein Major-Bump. **chromadb 0.5.23 bleibt** ohne Herstellerfix
-(GHSA-xph7-9rjv-w5fr / CVE-2026-45833/45830/45831, last affected 1.5.9).
-Ein Sprung auf 1.5.9 wuerde denselben Befund behalten und die 0.5-API
-brechen. Der **Scanner** fuer `services/ai` bleibt sichtbar rot - Absicht,
-kein Ignore. Die drei Advisories betreffen den Chroma-Server; VALEO nutzt nur
-den eingebetteten Client. Codex bewertet sie bis 2026-10-15 als
-`not_affected`/`unreachable` (eingebetteter PersistentClient, Fingerprints).
-Release bleibt wegen Transformers `false`. Policy: [ADR-071](../adr/adr-071-security-dependency-gate.md),
-[Ist-Stand](../quality-assurance/security-dependency-status-2026-09-15.md),
-[Gate-QA](../quality-assurance/security-dependency-policy-2026-09-15.md).
+**click** in `services/ai` 8.2.1 -> 8.3.3 (Fixversion).
+
+**transformers-Pfadanalyse 2026-09-15:** Unter `services/ai` kein Hugging-Face-Import.
+Embeddings laufen ueber OpenAI oder Chromas ONNX-Default. `transformers==4.46.3`
+und `sentence-transformers==3.3.1` entfernt, nicht auf 4.57.6 gehoben.
+Vertragstest `tests/test_ai_service_no_huggingface_contract.py`. Linux-Audit:
+Scanner-Exit 1 (drei Chroma-Befunde `not_affected`), Gate-Exit 0,
+`release_allowed: true`. Fingerprint von `services/ai/requirements.txt` in der
+Codex-Decisionsliste mechanisch erneuert; Chroma-Bewertung unveraendert.
 
 **httpx** steht in allen Service-Manifesten auf 0.28.1 (vorher 0.25.2 in 14 Diensten, 0.27.2 in Finance, offene Untergrenzen in dms-adapter und ki-usability). Aufrufstellen nutzen `AsyncClient`/`httpx.get` ohne entfernte Parameter.
 

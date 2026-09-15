@@ -104,14 +104,23 @@ Eine Bewertung ist kein Exploit-Nachweis. Ändert sich der Aufruf auf
 `HttpClient` / `AsyncHttpClient` / `chroma_server_*` oder die Fingerprints,
 fällt die Bewertung und das Release bleibt zu Recht rot.
 
-### transformers 4.46.3 in `services/ai`
+### transformers in `services/ai` — entfernt, nicht hochgezogen
 
-Explizit gepinnt. chromadb 0.5.23 verlangt `tokenizers<=0.20.3`;
-transformers ab 4.47 zieht `tokenizers>=0.22`. 4.57.6 macht das Manifest
-unauflösbar. Die Advisories von 4.46.3 bleiben sichtbar. Der CI-Audit auf `a9b720a75` enthält **26 unterschiedliche Transformers-Befunde**.
-Codex hat sie bewusst **nicht** freigegeben: fehlender Import im Anwendungscode
-ist kein Nachweis aller transitiven Modellladepfade. Sie bleiben blockierend.
-Kein Major-Bump „weil Dependabot es so will“.
+Pfadanalyse 2026-09-15: unter `services/ai` kein Import von `transformers`
+oder `sentence_transformers`. RAG-HTTP ist Mock. Embeddings laufen über
+OpenAI (`openai_service.generate_embeddings`) oder Chromas Default-ONNX,
+nicht über Hugging Face. `app/infrastructure/rag/vector_store.py` nutzt
+`SentenceTransformer` — das ist der Monolith, nicht dieser Microservice.
+
+Deshalb wurden `transformers==4.46.3` und `sentence-transformers==3.3.1`
+aus dem Dienst-Manifest entfernt. 4.57.6 wäre am Resolver an chromadb
+gescheitert und hätte 26 Advisories nicht geheilt, sondern das ERP
+gebrochen. Vertragstest: `tests/test_ai_service_no_huggingface_contract.py`.
+
+Lokaler Linux-Audit `artifacts/service-security-huggingface-20260915/ai/`:
+Scanner-Exit 1 (nur chromadb), Gate-Exit 0, `release_allowed: true`,
+`blocked: 0`. Weder transformers noch torch noch sentence-transformers
+stehen in den 122 aufgelösten Paketen.
 
 ### image-size (Node)
 
@@ -127,16 +136,16 @@ brechen.
 ## CI-Stand Service-Security
 
 [Run 34898484483](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483)
-auf Commit `a9b720a75` (Nachweis später mit Finance-/crm-ai-Folgeläufen
-bestätigt):
+auf Commit `a9b720a75` (historisch, vor der Hugging-Face-Entfernung):
 
 - **22 / 23** Service-Audits grün
-- nur `services/ai` rot (chromadb, transformers; click/jose geschlossen)
+- nur `services/ai` rot (damals chromadb + transformers)
 - crm-ai Image-/HTTP-Job [104158391173](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483/job/104158391173) grün
 
-Der zusammenfassende Scanner-Workflow ist deshalb rot. Das ist der
-Rohbefund-Stand, nicht die Behauptung „das ERP ist unsicher zum Release“,
-und auch nicht die Behauptung „alle Advisories sind beherrscht“.
+Nach Entfernen der ungenutzten Hugging-Face-Pins (2026-09-15, lokal Linux):
+`services/ai` Gate-Exit 0. Der Scanner bleibt wegen der drei dokumentierten
+Chroma-Befunde bei Exit 1. GitHub-CI nach Push ist der verbindliche
+Gesamtnachweis für alle 23 Zellen.
 
 ## Gate-Agent geliefert (Codex)
 
@@ -148,13 +157,16 @@ Slice `SECURITY-DEPENDENCY-POLICY-20260915` ist **abgeschlossen**. Nachweis:
 - Policy-Prüfer: nur `not_affected` + `unreachable` mit Owner, Quellen,
   Fingerprints, max. 90 Tage Wiedervorlage. Erreichbare Befunde und
   `accepted_risk` werden nicht akzeptiert.
-- Reale CI-Evidence Run 34898484483: **3 Chroma-Befunde** `not_affected`,
-  **26 Transformers-Befunde** blockierend; Release-Entscheidung **false**.
+- Reale CI-Evidence Run 34898484483: **3 Chroma-Befunde** `not_affected`;
+  26 Transformers-Befunde waren damals blockierend.
+- Nach Hugging-Face-Entfernung (2026-09-15): lokaler Linux-Audit Gate-Exit 0,
+  Scanner-Exit 1 nur noch chromadb. Fingerprint von `requirements.txt`
+  mechanisch erneuert.
 - `release-gates.yml` verlangt denselben Gate für die Release-SHA.
 - 18 Regressionen grün (9 Policy + 9 Audit-Runner).
 
-Cursor fasst diesen Dateibesitz nicht an. Nächster fachlicher Schritt für
-`services/ai` ist die **Transformers-Pfadanalyse**, kein Versionsbump.
+Nächster fachlicher Schritt ist nicht 4.57.6. Optional: gleicher Unused-Check
+für `services/crm-ai` (`transformers==5.10.0`, kein Import im Dienstcode).
 
 ## Technische Restpunkte außerhalb der Policy
 
