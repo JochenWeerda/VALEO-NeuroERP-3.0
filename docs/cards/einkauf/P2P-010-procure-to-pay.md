@@ -36,6 +36,7 @@ Vorbelegung → Bestellung → Wareneingang → Match → Zahlung. Diese Card is
 ## 3. Betroffene Dateien (Kernpfad)
 
 - `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx` — Standardmaske
+- `packages/frontend-web/src/lib/workflow/purchase-order-flow-spine.ts` — FSX-012 Verknuepfung nach Speichern
 - `packages/frontend-web/src/pages/workflow/flow-spine-procure-to-pay.tsx` — Flow-Spine
 - `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md` — Workflow-Analyse
 

@@ -169,7 +169,9 @@ Kalenderstopp vor der Belegbindung.
     ausgenommen.
   Migration: Vorabprüfung auf vorhandene Dubletten, Bereinigung vor dem Index. Schließt V9.
 - **FSX-012 Fall beim Speichern, nicht davor — mit Absicherung gegen Teilfehler.**
-  P2P-001 umkehren: die Bestellung startet in `einkauf/bestellung-anlegen`, der Prozessfall wird
+  **Stand 2026-09-15: umgesetzt** (`outgoing-purchase-order`, Bestell-Wizard nach
+  Speichern, PATCH-409, Slice FSX-012). P2P-001 umkehren: die Bestellung startet in
+  `einkauf/bestellung-anlegen`, der Prozessfall wird
   beim fachlichen Speichern angelegt oder verknüpft. Zwei Schreibvorgänge gegen zwei Aggregate
   können einzeln scheitern; das ist auszuformulieren, nicht zu hoffen.
   **Kein zweiter Pfad:** `capture-then-resolve` in
@@ -253,8 +255,9 @@ kein Nachweis.
   still umgebogen oder der Aufrufer erhält den falschen Fall.
 - **404 für denselben Mandanten** bei bereits gebundenem Fall — Maske kann Konflikt und
   Nicht-Existenz nicht unterscheiden; deshalb 409 nur für die falsche Belegbindung.
-- **Teilerfolg beim Speichern** (Beleg geschrieben, Fall nicht) — führt ohne FSX-012 entweder zu
-  verwaisten Belegen ohne Vorgang oder zu einer zweiten Bestellung beim Wiederholen.
+- **Teilerfolg beim Speichern** (Beleg geschrieben, Fall nicht) — ohne Retry entweder verwaiste
+  Belege oder eine zweite Bestellung. **Mit FSX-012:** sichtbarer Teilfehler, Wiederholung nur
+  der Verknüpfung; der Beleg bleibt. Nachlauf in der Bestell-Detailmaske ist noch offen.
 - **Zweiter Anlegepfad** neben `capture-then-resolve` (V15) — FSX-012 muss das bestehende
   Muster erweitern, sonst divergieren Lieferschein und Bestellung.
 - **Vertragstest ohne Herkunftskarte** — vergleicht wieder Vorgang gegen Vorgang und würde

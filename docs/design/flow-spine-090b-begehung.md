@@ -43,8 +43,11 @@ Rolle: Innendienst. Pfad: Belegmaske → Fallsuche (FSX-010).
 am `lifecycle_status` erkennbar, und FSX-011 laesst einen neuen Fall zum selben
 Beleg zu. Fachlich ist der Weg offen.
 
-**Aber:** Die Maske, die das anbietet, existiert noch nicht — FSX-012 ist nicht
-umgesetzt. Die Begehung kann hier nur sagen, dass der Unterbau traegt.
+**Aber:** Die Maske, die das anbietet, existierte zum Zeitpunkt der Begehung
+noch nicht — FSX-012 war nicht umgesetzt. **Nachtrag 2026-09-15:** FSX-012 gilt
+fuer die Bestellmaske (Beleg zuerst, Fall danach). Eine eigene Reklamationsmaske
+auf einem abgeschlossenen Vorgang ist das nicht; der Unterbau (FSX-010/011)
+traegt weiter.
 
 ## Aufgabe 3 — Einen blockierten Vorgang erklaeren: *warum* geht es nicht weiter?
 

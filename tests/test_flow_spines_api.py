@@ -865,6 +865,83 @@ def test_flow_spine_completed_case_does_not_block_new_open_case(monkeypatch, db)
     db.commit()
 
 
+def test_flow_spine_get_instance_wrong_process_is_404_not_403(monkeypatch, db):
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-FSX012-404"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    created = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={"subject": "404-Check"},
+        headers=AUTH_HEADERS,
+    )
+    assert created.status_code == 201
+    instance_id = created.json()["instance_id"]
+
+    wrong_process = client.get(
+        f"/api/v1/process/flow-spines/procure-to-pay/instances/{instance_id}",
+        headers=AUTH_HEADERS,
+    )
+    assert wrong_process.status_code == 404
+
+    inst = db.get(FlowSpineInstance, instance_id)
+    if inst:
+        db.delete(inst)
+        db.commit()
+
+
+def test_flow_spine_patch_rejects_rebind_to_other_document(monkeypatch, db):
+    """FSX-012: unverknuepft darf binden, anderer Beleg am selben Fall ist 409."""
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-FSX012-409"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    created = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json={"subject": "Handover"},
+        headers=AUTH_HEADERS,
+    )
+    assert created.status_code == 201
+    instance_id = created.json()["instance_id"]
+    path = f"/api/v1/process/flow-spines/procure-to-pay/instances/{instance_id}"
+
+    first = client.patch(
+        path,
+        json={"linked_document_id": "PO-A", "linked_document_type": "purchase_order"},
+        headers=AUTH_HEADERS,
+    )
+    assert first.status_code == 200
+    assert first.json()["linked_document_id"] == "PO-A"
+
+    same = client.patch(
+        path,
+        json={"linked_document_id": "PO-A", "linked_document_type": "purchase_order"},
+        headers=AUTH_HEADERS,
+    )
+    assert same.status_code == 200
+
+    rebound = client.patch(
+        path,
+        json={"linked_document_id": "PO-B", "linked_document_type": "purchase_order"},
+        headers=AUTH_HEADERS,
+    )
+    assert rebound.status_code == 409
+    stored = db.get(FlowSpineInstance, instance_id)
+    assert stored is not None
+    assert stored.linked_document_id == "PO-A"
+
+    db.delete(stored)
+    db.commit()
+
+
 # ── PCN-Meldungen (Gap 104-C/D — DB-backed) ──────────────────────────────────
 
 def test_pcn_meldung_create_valid(db):

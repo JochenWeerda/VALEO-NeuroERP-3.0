@@ -66,6 +66,39 @@ def _normalize_document_ref(value: str | None) -> str | None:
     return stripped or None
 
 
+def _reject_rebind_to_other_document(
+    inst: FlowSpineInstance,
+    *,
+    new_document_id: str | None,
+    new_document_type: str | None,
+    id_provided: bool,
+    type_provided: bool,
+) -> None:
+    """FSX-012: Eine URL-Fall-ID darf eine gesetzte Belegzuordnung nicht umbiegen.
+
+    Unverknuepfte Faelle (NULL) duerfen sich an den aktuellen Beleg haengen.
+    Dieselbe Zuordnung erneut zu schreiben ist idempotent. 404 fuer fremden
+    Mandanten/Prozess bleibt bei ``_get_instance_or_404`` — hier nur 409.
+    """
+    if not id_provided and not type_provided:
+        return
+    current_id = _normalize_document_ref(inst.linked_document_id)
+    current_type = _normalize_document_ref(inst.linked_document_type)
+    if current_id is None:
+        return
+    target_id = _normalize_document_ref(new_document_id) if id_provided else current_id
+    target_type = _normalize_document_ref(new_document_type) if type_provided else current_type
+    if target_id == current_id and target_type == current_type:
+        return
+    raise HTTPException(
+        status_code=409,
+        detail=(
+            "Dieser Vorgang ist bereits an einen anderen Beleg gebunden. "
+            "Die Zuordnung wird nicht umgebogen."
+        ),
+    )
+
+
 def _require_complete_document_ref(doc_id: str | None, doc_type: str | None) -> None:
     if bool(doc_id) != bool(doc_type):
         raise HTTPException(
@@ -680,6 +713,13 @@ def update_instance(
         inst.subject = body.subject
     if body.entry_mode is not None:
         inst.entry_mode = body.entry_mode
+    _reject_rebind_to_other_document(
+        inst,
+        new_document_id=body.linked_document_id,
+        new_document_type=body.linked_document_type,
+        id_provided=body.linked_document_id is not None,
+        type_provided=body.linked_document_type is not None,
+    )
     if body.linked_document_id is not None:
         inst.linked_document_id = _normalize_document_ref(body.linked_document_id)
     if body.linked_document_type is not None:

@@ -51,15 +51,15 @@ workflow_doc: docs/workflows/p2p-001-procure-to-pay-direktbestellung.md
 - Seite / Maske: `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`
 - Dialog / Untermaske: Wizard mit Schritten Lieferant, Positionen, Lieferung, Zusammenfassung.
 - Button / Aktion: `Abschliessen` im Wizard.
-- Status vor Ausfuehrung: Flow-Spine-Vorgang vorhanden, Bestellung noch nicht gespeichert.
-- Status nach Ausfuehrung: Bestellung als `ENTWURF` angelegt, Rueckkehr zur Bestellliste.
+- Status vor Ausfuehrung: Bestellung noch nicht gespeichert. Ein Flow-Spine-Vorgang darf in der URL stehen, muss aber nicht — ohne Handover entsteht der Fall beim Speichern (FSX-012).
+- Status nach Ausfuehrung: Bestellung als `ENTWURF` angelegt; Prozessfall angelegt oder an den Handover gehaengt. Bei Teilfehler bleibt der Beleg und die Maske bietet „Vorgang erneut verknuepfen“.
 - Sichtbare Felder: Lieferant, Liefertermin, Zahlungsbedingung, Incoterms, Lieferadresse, Positionen, Notizen.
 - Fehlende Felder / Aktionen: Inline-Fehlhinweise pro Schritt fehlen weiterhin; Toast-Validierung ist vorhanden.
 
 ## 7. Aktion
 - Benutzeraktion: Bestellkopf und Positionen pflegen, dann Wizard abschliessen.
-- Systemaktion: Frontend validiert Mindestdaten und sendet `POST /api/v1/purchase-orders`.
-- Automatische Folgeaktion: Navigation zur Bestellliste.
+- Systemaktion: Frontend validiert Mindestdaten und sendet `POST /api/v1/purchase-orders`. Danach `capture-then-resolve` (FSX-010-Kandidaten, bei Bedarf POST/PATCH Fall).
+- Automatische Folgeaktion: Navigation zur Bestelldetailmaske; bei Teilfehler bleibt die Wizard-Seite mit Retry.
 - Synchron / asynchron: synchron mit API-Call.
 - Notwendige Bestaetigung: keine separate Bestaetigung.
 

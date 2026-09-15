@@ -4,6 +4,13 @@ Stand: 2026-09-15 · **Erarbeitet von Claude Code in Vertretung fuer Codex**
 (Auftrag des Users). Gehoert zu `docs/design/flow-spine-entlastung-masterplan.md`,
 Befund V15.
 
+**Umgesetzt 2026-09-15 (Cursor Auto):** Policy `outgoing-purchase-order`,
+Verknuepfung in `bestellung-anlegen.tsx` nach dem Speichern, PATCH-409 gegen
+Umbiegen, Slice `docs/agent-ops/slices/FSX-012.yaml`. Die Vorklaerung bleibt
+die Begruendung; der Code folgt dem Zuschnitt unten. Offener Nachlauf: die
+Detailmaske einer bestehenden Bestellung bietet die Verknuepfung noch nicht
+erneut an — nur der Wizard nach dem Speichern und der Retry auf derselben Seite.
+
 Geprueft: `packages/frontend-web/src/lib/workflow/document-entry-policy.ts`.
 
 ## Die Antwort auf die gestellte Frage
@@ -20,23 +27,22 @@ Beleg, und liefert `attach`, `start`, `manual-review` oder `standalone`.
 | Belegart | Policy | Flow Spine |
 |----------|--------|------------|
 | `delivery_note` (Sofort-Lieferschein) | **`capture-then-resolve`** | order-to-cash, Knoten `delivery` |
+| `purchase_order` (Bestellung) | **`capture-then-resolve`** | procure-to-pay, Knoten `purchase-order` |
 | `sales_offer`, `sales_order`, `sales_invoice`, `credit_note` | `attach-or-start` | order-to-cash |
 | `delivery_advice`, `goods_receipt`, `supplier_delivery_note`, `supplier_invoice` | `attach-or-start` | procure-to-pay |
 
-**Genau eine** Belegart nutzt `capture-then-resolve` heute. Der Rest laeuft ueber
+**Genau zwei** Belegarten nutzen `capture-then-resolve` (Lieferschein und,
+seit FSX-012, Bestellung). Der Rest laeuft ueber
 `resolveDocumentWorkflowIntent` — das ist die Entscheidung **vor** der Erfassung,
-also der alte Weg, den FSX-012 umkehren will.
+also der alte Weg, den FSX-012 fuer P2P-001 umgekehrt hat.
 
 ## Drei Befunde, die die Umsetzung praegen
 
 ### 1. Die Bestellung fehlt in der Policy-Liste
 
-`purchase_order` kommt in `DOCUMENT_ENTRY_POLICIES` **nicht vor**. Die Liste
-deckt Angebot, Auftrag, Lieferschein, Rechnung, Gutschrift und die
-Eingangsbelege ab — aber nicht die Bestellung selbst, obwohl sie der Beleg ist,
-an dem P2P-001 haengt.
-
-FSX-012 braucht also **einen neuen Eintrag**, keinen neuen Mechanismus:
+`purchase_order` **steht** seit FSX-012 in `DOCUMENT_ENTRY_POLICIES` als
+`outgoing-purchase-order` mit `capture-then-resolve`. Der Eintrag unten war der
+Zuschnitt und ist der Ist-Stand.
 
 ```ts
 {

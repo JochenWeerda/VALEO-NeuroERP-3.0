@@ -10,7 +10,7 @@ import {
 describe('document entry policy', () => {
   it('models incoming and outgoing entry routes with party role and match keys', () => {
     expect(getDocumentEntryPolicies('incoming')).toHaveLength(4)
-    expect(getDocumentEntryPolicies('outgoing')).toHaveLength(5)
+    expect(getDocumentEntryPolicies('outgoing')).toHaveLength(6)
 
     for (const policy of DOCUMENT_ENTRY_POLICIES) {
       expect(policy.targetRoute).toMatch(/^\//)
@@ -149,5 +149,42 @@ describe('document entry policy', () => {
     expect(resolution.mode).toBe('manual-review')
     expect(resolution.flowSpine?.processKey).toBe('procure-to-pay')
     expect(resolution.createPayload).toBeUndefined()
+  })
+
+  it('uses capture-then-resolve for purchase orders after save, not before', () => {
+    const policy = getDocumentEntryPolicy('outgoing-purchase-order')
+    const intent = resolveDocumentWorkflowIntent(policy, {
+      supplierId: 'S-1000',
+      requisitionId: 'BANF-1',
+    })
+    const resolution = resolveCapturedDocumentWorkflow(policy, {
+      documentId: 'PO-UUID-1',
+      documentNumber: 'PO-2026-188',
+      partnerName: 'TechLogistics',
+      matchValues: {
+        supplierId: 'S-1000',
+        requisitionId: 'BANF-1',
+      },
+      candidates: [],
+    })
+
+    expect(policy.workflowPolicy).toBe('capture-then-resolve')
+    expect(policy.flowSpine).toMatchObject({
+      processKey: 'procure-to-pay',
+      resumeNodeId: 'purchase-order',
+      resumeRoute: '/einkauf/bestellungen/neu',
+    })
+    expect(intent.mode).toBe('attach')
+    expect(resolution.mode).toBe('start')
+    expect(resolution.createPayload).toMatchObject({
+      partner_name: 'TechLogistics',
+      linked_document_id: 'PO-UUID-1',
+      linked_document_type: 'purchase_order',
+      entry_mode: 'quick-document-capture',
+    })
+    expect(resolution.savePayload).toMatchObject({
+      resume_node_id: 'purchase-order',
+      resume_route: '/einkauf/bestellungen/neu',
+    })
   })
 })

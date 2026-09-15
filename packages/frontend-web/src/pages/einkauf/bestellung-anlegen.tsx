@@ -12,10 +12,14 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Trash2 } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
-import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { isRecord, nullableStringValue, numberValue, stringValue } from '@/lib/record-utils'
+import {
+  linkPurchaseOrderToFlowSpine,
+  purchaseOrderWorkflowLinkErrorMessage,
+} from '@/lib/workflow/purchase-order-flow-spine'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 type BestellungData = {
   lieferant: string
@@ -115,6 +119,8 @@ export default function BestellungAnlegenPage(): JSX.Element {
   const contractId = searchParams.get('contractId')
   const rfqId = searchParams.get('rfqId')
   const workflowContext = useMemo(() => readWorkflowEntryContext(searchParams), [searchParams])
+  const [saving, setSaving] = useState(false)
+  const [pendingLink, setPendingLink] = useState<{ purchaseOrderId: string; message: string } | null>(null)
 
   const buildWorkflowResumeQuery = (purchaseOrderId?: string): string => {
     const params = new URLSearchParams(searchParams)
@@ -122,22 +128,59 @@ export default function BestellungAnlegenPage(): JSX.Element {
     return params.toString()
   }
 
-  const persistWorkflowResume = async (purchaseOrderId?: string): Promise<void> => {
-    if (!workflowContext?.process || !workflowContext.instanceId) return
+  const persistPurchaseOrder = async (): Promise<{ id: string }> => {
+    const purchaseOrder = {
+      orderDate: new Date().toISOString().slice(0, 10),
+      supplierId: bestellung.lieferant,
+      subject: workflowContext?.subject || 'Bestellung',
+      description: bestellung.notizen || '',
+      status: 'ENTWURF',
+      deliveryDate: bestellung.liefertermin,
+      deliveryAddress: bestellung.lieferadresse,
+      shippingAddress: bestellung.lieferadresse,
+      paymentTerms: bestellung.zahlungsbedingung,
+      incoterms: bestellung.incoterms,
+      requisitionId: bestellung.requisitionId,
+      contractId: bestellung.contractId,
+      rfqId: bestellung.rfqId,
+      notes: bestellung.notizen || undefined,
+      taxRate: 19,
+      items: bestellung.positionen.map((pos) => ({
+        itemType: 'PRODUCT',
+        description: pos.artikel,
+        quantity: pos.menge,
+        unitPrice: pos.preis,
+        discountPercent: 0,
+      })),
+    }
+
+    const created = await apiClient.post<{ id?: string; purchaseOrderNumber?: string }>(
+      '/api/v1/purchase-orders',
+      purchaseOrder,
+    )
+    const purchaseOrderId = created.id || created.purchaseOrderNumber
+    if (!purchaseOrderId) {
+      throw new Error('Bestellung gespeichert, aber ohne Belegnummer zurueckgekommen.')
+    }
+    return { id: purchaseOrderId }
+  }
+
+  const persistWorkflowLink = async (purchaseOrderId: string): Promise<void> => {
     const query = buildWorkflowResumeQuery(purchaseOrderId)
-    const basePath = purchaseOrderId
-      ? `/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}`
-      : '/einkauf/bestellungen/neu'
-    await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
-      resume_node_id: 'purchase-order',
-      resume_route: `${basePath}${query ? `?${query}` : ''}`,
-      resume_payload: {
-        screen: purchaseOrderId ? 'purchase-order-detail' : 'purchase-order-create',
-        purchaseOrderId: purchaseOrderId || undefined,
-        workflowCase: workflowContext.caseNumber || undefined,
-      },
-      business_status: purchaseOrderId ? 'bestellung_erfasst' : 'bestellung_in_bearbeitung',
-      action_label: purchaseOrderId ? 'Bestellung gespeichert' : 'Bestellentwurf gesichert',
+    const resumeRoute = `/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}${query ? `?${query}` : ''}`
+    await linkPurchaseOrderToFlowSpine({
+      documentId: purchaseOrderId,
+      documentNumber: purchaseOrderId,
+      supplierId: bestellung.lieferant,
+      supplierName: bestellung.lieferant,
+      subject: workflowContext?.subject,
+      requisitionId: bestellung.requisitionId,
+      contractId: bestellung.contractId,
+      rfqId: bestellung.rfqId,
+      handover: workflowContext?.instanceId
+        ? { process: workflowContext.process, instanceId: workflowContext.instanceId }
+        : null,
+      resumeRoute,
     })
   }
   
@@ -336,6 +379,32 @@ export default function BestellungAnlegenPage(): JSX.Element {
     return null
   }
 
+  async function handleRetryWorkflowLink(): Promise<void> {
+    if (!pendingLink || saving) return
+    setSaving(true)
+    try {
+      await persistWorkflowLink(pendingLink.purchaseOrderId)
+      setPendingLink(null)
+      toast({
+        title: 'Vorgang verknuepft',
+        description: `Bestellung ${pendingLink.purchaseOrderId} ist dem Prozessfall zugeordnet.`,
+      })
+      navigate(
+        `/einkauf/bestellungen/${encodeURIComponent(pendingLink.purchaseOrderId)}?${buildWorkflowResumeQuery(pendingLink.purchaseOrderId)}`,
+      )
+    } catch (error) {
+      const message = purchaseOrderWorkflowLinkErrorMessage(error)
+      setPendingLink({ purchaseOrderId: pendingLink.purchaseOrderId, message })
+      toast({
+        title: 'Bestellung gespeichert, Vorgang noch nicht verknuepft',
+        description: message,
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function handleSubmit(): Promise<void> {
     const validationError = validateBestellung()
     if (validationError) {
@@ -347,45 +416,43 @@ export default function BestellungAnlegenPage(): JSX.Element {
       return
     }
 
+    if (saving) return
+    setSaving(true)
+    let purchaseOrderId: string | null = null
     try {
-      const purchaseOrder = {
-        orderDate: new Date().toISOString().slice(0, 10),
-        supplierId: bestellung.lieferant,
-        subject: workflowContext?.subject || 'Bestellung',
-        description: bestellung.notizen || '',
-        status: 'ENTWURF',
-        deliveryDate: bestellung.liefertermin,
-        deliveryAddress: bestellung.lieferadresse,
-        shippingAddress: bestellung.lieferadresse,
-        paymentTerms: bestellung.zahlungsbedingung,
-        incoterms: bestellung.incoterms,
-        requisitionId: bestellung.requisitionId,
-        contractId: bestellung.contractId,
-        rfqId: bestellung.rfqId,
-        notes: bestellung.notizen || undefined,
-        taxRate: 19,
-        items: bestellung.positionen.map((pos) => ({
-          itemType: 'PRODUCT',
-          description: pos.artikel,
-          quantity: pos.menge,
-          unitPrice: pos.preis,
-          discountPercent: 0,
-        })),
-      }
+      const created = await persistPurchaseOrder()
+      purchaseOrderId = created.id
+    } catch {
+      toast({
+        title: t('common.error', { defaultValue: 'Fehler' }),
+        description: t('crud.messages.createError', {
+          entityType: entityTypeLabel,
+          defaultValue: 'Erstellen fehlgeschlagen.',
+        }),
+        variant: 'destructive',
+      })
+      setSaving(false)
+      return
+    }
 
-      const created = await apiClient.post<{ id?: string; purchaseOrderNumber?: string }>(
-        '/api/v1/purchase-orders',
-        purchaseOrder,
-      )
-      const purchaseOrderId = created.id || created.purchaseOrderNumber
-      await persistWorkflowResume(purchaseOrderId)
-      if (purchaseOrderId) {
-        navigate(`/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}?${buildWorkflowResumeQuery(purchaseOrderId)}`)
-      } else {
-        navigate('/einkauf/bestellungen')
-      }
+    try {
+      await persistWorkflowLink(purchaseOrderId)
+      setPendingLink(null)
+      toast({
+        title: 'Bestellung angelegt',
+        description: `Beleg ${purchaseOrderId} gespeichert.`,
+      })
+      navigate(`/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}?${buildWorkflowResumeQuery(purchaseOrderId)}`)
     } catch (error) {
-      toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.createError', { entityType: entityTypeLabel, defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' })
+      const message = purchaseOrderWorkflowLinkErrorMessage(error)
+      setPendingLink({ purchaseOrderId, message })
+      toast({
+        title: 'Bestellung gespeichert, Vorgang noch nicht verknuepft',
+        description: message,
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -659,6 +726,17 @@ export default function BestellungAnlegenPage(): JSX.Element {
         der Prozessfall bleibt referenziert" — muss die Maske zeigen, nicht sagen.
       */}
       {workflowContext ? <WorkflowProcessBand context={workflowContext} /> : null}
+      {pendingLink ? (
+        <Alert>
+          <AlertTitle>Bestellung gespeichert, Vorgang noch nicht verknuepft</AlertTitle>
+          <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>{pendingLink.message}</span>
+            <Button type="button" onClick={() => void handleRetryWorkflowLink()} disabled={saving}>
+              Vorgang erneut verknuepfen
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <Card className="border-dashed border-slate-300/60 bg-slate-50/40 dark:bg-slate-900/20">
         <CardContent className="py-3 text-sm text-muted-foreground">
           <div className="font-medium text-foreground">Bestellnummer</div>
@@ -677,6 +755,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
           })
         }
         onFinish={handleSubmit}
+        loading={saving}
         onCancel={() => navigate('/einkauf/bestellungen')}
       />
     </div>

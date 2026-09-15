@@ -1,0 +1,52 @@
+slice_id: FSX-012
+id: FSX-012
+title: Fall beim Speichern der Bestellung, nicht davor
+owner: Cursor Auto
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-010-011
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+vorklaerung: docs/design/flow-spine-fsx012-vorklaerung.md
+coordination: >-
+  Erweitert capture-then-resolve, erfindet keinen zweiten Pfad. Bestellmaske
+  und document-entry-policy liegen in dieser Spur. FlowSpineWorkspace und
+  Waage-Masken bleiben unberuehrt (F4 Fokus/Vorgangswechsel ist Leitstand,
+  nicht dieser Slice).
+goal: >-
+  Die Bestellung ist die fuehrende Groesse. Der Prozessfall wird nach dem
+  fachlichen Speichern angelegt oder verknuepft. Schlaegt nur die Fallanlage
+  fehl, bleibt der Beleg stehen und die Maske bietet eine Wiederholung nur
+  fuer die Verknuepfung.
+file_ownership:
+  - docs/agent-ops/slices/FSX-012.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - packages/frontend-web/src/lib/workflow/document-entry-policy.ts
+  - packages/frontend-web/src/lib/workflow/purchase-order-flow-spine.ts
+  - packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+  - app/api/v1/endpoints/flow_spines.py
+  - tests/test_flow_spines_api.py
+  - docs/workflows/p2p-001-procure-to-pay-direktbestellung.md
+acceptance:
+  - Policy outgoing-purchase-order mit capture-then-resolve, Ziel /einkauf/bestellungen/neu.
+  - Speichern legt zuerst den Beleg an, danach den Fall (FSX-010 Kandidaten, FSX-011 Idempotenz).
+  - URL-Handover: GET 404 bei Mandant/Prozess-Mismatch, PATCH 409 wenn der Fall schon einen anderen Beleg hat.
+  - Teilfehler zeigt sichtbare Wiederholung; Retry ruft nicht erneut POST /purchase-orders.
+  - Keine Waage-Maske, kein Fokusmodus, kein zweiter Entscheidungspfad.
+tests:
+  - pytest tests/test_flow_spines_api.py -k "rebind or wrong_process" --no-cov -q
+  - pnpm --filter frontend-web exec vitest run src/__tests__/document-entry-policy.test.ts src/__tests__/purchase-order-flow-spine.test.ts src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx
+risks:
+  - risiko: F4 Fokus blendet den Vorgangswechsel im Leitstand aus.
+    bewertung: FSX-012 kommt nicht in die Naehe der Waage. F4 bleibt Zuschnitt am Leitstand.
+  - risiko: Nachlauf beim erneuten Oeffnen der Detailmaske.
+    bewertung: Dieser Slice haertet den Wizard. Die Detailmaske fragt spaeter ueber FSX-010 nach.
+ai_harness:
+  fachlicher_vertrag: Beleg zuerst, Fall danach. Wiederholung nur der Verknuepfung.
+  architektur_vertrag: capture-then-resolve erweitern, nicht danebenbauen.
+  daten_vertrag: linked_document_type=purchase_order; bestehende Zuordnung wird nicht umgebogen.
+  test_vertrag: Reihenfolge Beleg vor Fall; Retry ohne zweiten POST auf den Beleg; 404/409 am Server.
+  security_vertrag: 404 statt 403 bei fremdem Mandanten oder process_key.
+  betriebs_vertrag: Keine Migration.
+  dokumentations_vertrag: Slice, Workboard, P2P-001, F4-Hinweis.

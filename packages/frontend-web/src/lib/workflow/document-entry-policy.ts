@@ -119,6 +119,17 @@ export const DOCUMENT_ENTRY_POLICIES = [
     flowSpine: { ...ORDER_TO_CASH_FLOW, resumeNodeId: 'order', resumeRoute: '/sales/order' },
   },
   {
+    id: 'outgoing-purchase-order',
+    label: 'Bestellung erfassen',
+    direction: 'outgoing',
+    documentType: 'purchase_order',
+    partyRole: 'supplier',
+    targetRoute: '/einkauf/bestellungen/neu',
+    workflowPolicy: 'capture-then-resolve',
+    matchKeys: ['supplierId', 'supplierNumber', 'requisitionId', 'contractId', 'rfqId'],
+    flowSpine: { ...PROCURE_TO_PAY_FLOW, resumeNodeId: 'purchase-order', resumeRoute: '/einkauf/bestellungen/neu' },
+  },
+  {
     id: 'outgoing-delivery-note',
     label: 'Sofort-Lieferschein erfassen',
     direction: 'outgoing',

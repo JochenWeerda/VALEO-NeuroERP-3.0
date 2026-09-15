@@ -47,11 +47,17 @@ flowchart TD
     G -->|Ja| I[Bestellung speichern]
 
     I --> J[Backend vergibt Bestellnummer]
-    J --> K[Rueckkehr in Bestellliste]
+    J --> J2{Prozessfall verknuepfen}
+    J2 -->|Treffer oder Handover| K[Fall anhaengen]
+    J2 -->|kein Treffer| K2[Fall anlegen (FSX-011 idempotent)]
+    J2 -->|Teilfehler| T[Bestellung bleibt, erneut verknuepfen]
+    T --> J2
+    K --> N[Detailmaske]
+    K2 --> N
 
-    D --> L[Abbrechen oder spaeter fortsetzen]
-    L --> M([Ende ohne Beleg])
-    K --> N([Ende mit Bestellung])
+    D --> X[Abbrechen oder spaeter fortsetzen]
+    X --> M([Ende ohne Beleg])
+    N --> E2([Ende mit Bestellung])
 ```
 
 ## D. Soll-Ist-Abweichungen
@@ -61,7 +67,7 @@ flowchart TD
 | `P2P-020` | Flow-Spine-Handover darf die Standardmaske stabil vorbefuellen. | Die Bestellmaske erzeugte vor diesem Slice bei vorhandenem Workflow-Kontext eine Render-Schleife, weil der Handover-Kontext pro Render neu aufgebaut wurde. | Workflow-Einstieg aus `Procure-to-Pay` war technisch instabil. | hoch | Workflow-Kontext memoizen und Handover-Pfad per Seitentest absichern. |
 | `P2P-020` | Leere oder fachlich unbrauchbare Bestellungen duerfen nicht gespeichert werden. | Die Bestellmaske konnte vor diesem Slice ohne Lieferant oder valide Positionen abschliessen. | Fehlende Mindestvalidierung vor `POST /api/v1/purchase-orders`. | hoch | Frontend-Validierung beim Abschluss nachziehen und per Test absichern. |
 | `P2P-020` | Lieferadresse aus der Standardmaske muss im Backend-Contract ankommen. | Frontend sendete `deliveryAddress`, Backend persistiert aber `shippingAddress`. | Lieferadresse ging im Belegfluss verloren. | hoch | Payload auf `shippingAddress` ausrichten; optional `deliveryAddress` als Compat-Feld weiterreichen. |
-| `P2P-040` | Bedarfsmeldung, RFQ und Vertrag sollen Vorbelegung unterstuetzen. | Ladepfade sind vorhanden, aber nicht explizit workflow-dokumentiert und nicht testlich abgesichert. | Dokumentations- und QA-Luecke. | mittel | In Folge-Slice eigene Cards und Tests fuer Vorbelegungsvarianten nachziehen. |
+| `P2P-030` | Prozessfall entsteht beim Speichern der Bestellung, nicht davor. Teilfehler bleibt sichtbar. | Vor FSX-012 hing der Fall am URL-Handover (`persistWorkflowResume`); ohne `workflowInstanceId` blieb der Beleg ohne Fall, und ein Fehler nach dem POST wirkte wie ein fehlgeschlagenes Speichern. | Beleg und Fall waren nicht getrennt. | hoch | `capture-then-resolve` nach dem Speichern; Retry nur fuer die Verknuepfung; 404/409 am Server. |
 
 ## E. UI-/CRUD-Befunde
 
