@@ -20,6 +20,7 @@ from app.core.flow_spine_registry import (
     merge_instance_statuses,
 )
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 from app.domains.operations.models import FlowSpineInstance, FlowSpineInstanceEvent
 from app.infrastructure.models import BusinessPartner, Customer
 from app.domains.shared.events import get_event_publisher
@@ -43,6 +44,17 @@ class FlowSpineOut(BaseSchema):
 
 
 router = APIRouter(prefix="/process/flow-spines", tags=["process", "flow-spines"])
+
+
+# FSX-011: Lebenszyklus-Zustaende, die einen Vorgang als abgeschlossen gelten
+# lassen. Ein solcher Fall blockiert keinen neuen Vorgang zum selben Beleg —
+# eine Reklamation nach abgeschlossenem Erstfall muss moeglich bleiben.
+#
+# Muss mit dem partiellen Unique-Index aus
+# alembic/versions/flow_spine_document_link_unique_20260915.py uebereinstimmen.
+# Weicht eines ab, greift der Index an anderer Stelle als diese Logik; ein Test
+# haelt beide Listen zusammen.
+CLOSED_LIFECYCLE_STATUSES: tuple[str, ...] = ("completed", "cancelled", "failed")
 LIFECYCLE_STATUSES = {"draft", "in_progress", "on_hold", "completed", "cancelled", "failed"}
 REASON_CATEGORIES = {
     "customer",
@@ -368,17 +380,66 @@ def get_workspace(
 
 # ── Instance CRUD ─────────────────────────────────────────────────────────────
 
-@router.post("/{process_key}/instances", status_code=201, response_model=FlowSpineOut, summary="Instance anlegen")
+def _find_open_instance_for_document(
+    db: Session,
+    tenant_id: str,
+    process_key: str,
+    linked_document_type: str,
+    linked_document_id: str,
+) -> Optional[FlowSpineInstance]:
+    """FSX-011: offenen Vorgang zu genau diesem Beleg finden (oder None)."""
+    return (
+        db.query(FlowSpineInstance)
+        .filter(
+            FlowSpineInstance.tenant_id == tenant_id,
+            FlowSpineInstance.process_key == process_key,
+            FlowSpineInstance.linked_document_type == linked_document_type,
+            FlowSpineInstance.linked_document_id == linked_document_id,
+            FlowSpineInstance.lifecycle_status.notin_(CLOSED_LIFECYCLE_STATUSES),
+        )
+        .order_by(FlowSpineInstance.created_at.asc())
+        .first()
+    )
+
+
+@router.post("/{process_key}/instances", response_model=FlowSpineOut, summary="Instance anlegen")
 async def create_instance(
     process_key: str,
     body: InstanceCreateRequest,
+    response: Response,
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """Create a new flow spine instance for tracking a specific document/case through a process."""
+    """Create a new flow spine instance for tracking a specific document/case through a process.
+
+    FSX-011: Traegt der Aufruf eine Belegreferenz und existiert dazu bereits ein
+    **offener** Vorgang, wird dieser zurueckgegeben (200) statt ein zweiter
+    angelegt (201). Der Aufrufer erhaelt in beiden Faellen dieselbe Fall-ID und
+    darf den Aufruf deshalb beliebig oft wiederholen — genau das braucht
+    FSX-012, wenn die Bestellung gespeichert ist und nur die Verknuepfung
+    fehlgeschlagen war.
+
+    Das Nachschlagen allein genuegt nicht: zwei gleichzeitige Aufrufe sehen
+    beide "kein Fall vorhanden". Die Eindeutigkeit erzwingt der partielle
+    Unique-Index; die Kollision wird hier aufgefangen und aufgeloest.
+    """
     try:
         get_flow_spine_workspace(process_key)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Unknown flow spine process '{process_key}'") from exc
+
+    tenant_id_early = get_current_tenant_id()
+    has_document_ref = bool(body.linked_document_id and body.linked_document_type)
+    if has_document_ref:
+        existing = _find_open_instance_for_document(
+            db,
+            tenant_id_early,
+            process_key,
+            str(body.linked_document_type),
+            str(body.linked_document_id),
+        )
+        if existing is not None:
+            response.status_code = 200
+            return _instance_to_dict(existing)
 
     instance_id = str(uuid.uuid4())
     case_number = get_numbering().next_number("workflow_case")
@@ -435,8 +496,37 @@ async def create_instance(
     except Exception:
         logger.warning("Outbox unavailable — FlowSpineInstanceCreated not stored", exc_info=True)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # FSX-011: Ein paralleler Aufruf war schneller. Der partielle
+        # Unique-Index hat die zweite Anlage verhindert — genau dafuer ist er da.
+        # Aufloesung: zuruecksetzen, den bestehenden offenen Fall lesen und ihn
+        # zurueckgeben. Der Aufrufer merkt vom Wettlauf nichts ausser dem 200.
+        db.rollback()
+        if not has_document_ref:
+            raise
+        existing = _find_open_instance_for_document(
+            db,
+            tenant_id_early,
+            process_key,
+            str(body.linked_document_type),
+            str(body.linked_document_id),
+        )
+        if existing is None:
+            # Der Index hat ausgeloest, aber es findet sich kein offener Fall.
+            # Das ist kein Wettlauf, sondern eine andere Verletzung — sie darf
+            # nicht als Erfolg durchgehen.
+            raise
+        logger.info(
+            "FSX-011: parallele Anlage abgefangen, bestehender Vorgang %s zurueckgegeben",
+            existing.id,
+        )
+        response.status_code = 200
+        return _instance_to_dict(existing)
+
     db.refresh(inst)
+    response.status_code = 201
     return _instance_to_dict(inst)
 
 
@@ -446,10 +536,35 @@ def list_instances(
     skip: int = Query(default=0, ge=0, description="Anzahl übersprungener Einträge"),
     limit: int = Query(default=50, ge=1, le=200, description="Maximale Anzahl Einträge"),
     search: Optional[str] = Query(None, description="Suche in Vorgangsnummer, Kundenname, Bezeichnung"),
+    linked_document_id: Optional[str] = Query(
+        None, description="FSX-010: nur Vorgaenge zu diesem Beleg"
+    ),
+    linked_document_type: Optional[str] = Query(
+        None, description="FSX-010: Belegart, zusammen mit linked_document_id anzugeben"
+    ),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """List instances for a given process_key, tenant-isolated, with pagination and search."""
+    """List instances for a given process_key, tenant-isolated, with pagination and search.
+
+    FSX-010: Mit ``linked_document_id`` und ``linked_document_type`` fragt eine
+    Belegmaske, ob zu *diesem* Beleg bereits ein Vorgang existiert. Abgeschlossene
+    Vorgaenge kommen dabei mit und sind ueber ``lifecycle_status`` erkennbar — die
+    Maske verknuepft nur mit offenen und bietet fuer abgeschlossene ausdruecklich
+    die Neuanlage an, statt einen alten Fall stillschweigend wiederzubeleben.
+    """
     tenant_id = get_current_tenant_id()
+
+    # Halbe Belegangaben wuerden lautlos die ganze Liste zurueckgeben — und die
+    # Maske haette "kein Fall vorhanden" gelesen, wo sie gar nicht gesucht hat.
+    if bool(linked_document_id) != bool(linked_document_type):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "linked_document_id und linked_document_type sind nur gemeinsam "
+                "gueltig — eine Belegreferenz besteht aus Art und Nummer."
+            ),
+        )
+
     base_q = (
         db.query(FlowSpineInstance)
         .filter(
@@ -458,6 +573,11 @@ def list_instances(
         )
         .order_by(FlowSpineInstance.created_at.desc())
     )
+    if linked_document_id and linked_document_type:
+        base_q = base_q.filter(
+            FlowSpineInstance.linked_document_id == linked_document_id,
+            FlowSpineInstance.linked_document_type == linked_document_type,
+        )
     if search:
         s = f"%{search}%"
         base_q = base_q.filter(
@@ -544,7 +664,24 @@ def update_instance(
         },
     )
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        # FSX-011 / V14: Beim Aktualisieren ist eine Kollision **kein**
+        # Idempotenzfall. Wer einen Beleg an einen Vorgang haengt, zu dem schon
+        # ein anderer offener Vorgang gehoert, meint etwas anderes als der
+        # Anleger — stillschweigend den fremden Fall zurueckzugeben waere hier
+        # falsch. Also Konflikt melden und den Aufrufer entscheiden lassen.
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Zu diesem Beleg existiert in diesem Prozess bereits ein offener "
+                "Vorgang. Verknuepfe mit dem bestehenden Vorgang oder schliesse "
+                "ihn ab, bevor der Beleg einem anderen Vorgang zugeordnet wird."
+            ),
+        ) from exc
+
     db.refresh(inst)
     return _instance_to_dict(inst)
 
