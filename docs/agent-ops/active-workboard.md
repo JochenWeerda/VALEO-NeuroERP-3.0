@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FSX-CONTRACT-STOCK-PROPOSALS - reserviert 2026-09-15
+## FSX-CONTRACT-STOCK-PROPOSALS - Planung abgeschlossen 2026-09-15
 
 **Owner:** Codex. **Ziel:** Nutzeranforderung fuer automatische Kontrakt-/Fremdlagervorschlaege in den Split-/Merge-Plan aufnehmen.
 **Dateibesitz:** docs/design/flow-spine-entlastung-masterplan.md und dieser Abschnitt.

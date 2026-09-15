@@ -307,3 +307,81 @@ Bereits durch eine aeltere Migration entfernte Zuordnungen lassen sich nur anhan
 bestehender Sicherungen beziehungsweise Auditdaten rekonstruieren. Dieser Slice
 fuehrt keine Migration auf Produktivdaten aus. Der Nachlauf beim Wiedereroeffnen
 der Bestelldetailmaske bleibt offen; FSX-012 ist insoweit kein Gesamtabschluss.
+
+
+## Verbindliche Erweiterung: Split/Merge, Kontrakt und Fremdlager
+
+Nutzeranforderung 2026-09-15: Automatische Vorschlaege zur Entnahme aus Kontrakten
+oder aus kundeneigenem, beim Haendler eingelagertem Bestand. Umsetzung offen.
+
+### Gemeinsamer Positionsbezug
+
+Ausgangs- und Eingangsbelege brauchen n:m-Zuordnungen auf Positionsebene: ein
+Lieferschein zu mehreren Rechnungen, mehrere Lieferscheine zu einer Rechnung,
+auch kombinierte Teilmengen. Kontraktabruf und physische Bestandsentnahme sind
+zwei getrennte Beziehungen derselben Position. Ein Kontrakt bezeichnet die
+kaufmaennische Verpflichtung, ein Lagerbestand die physische Herkunft und den
+Eigentuemer. Eine Rechnung darf durch ihre Verknuepfung keine zweite Entnahme
+oder einen zweiten Kontraktabruf ausloesen. linked_document_id am Flow Spine
+bleibt Einstiegsbeleg, nicht das vollstaendige Beziehungsmodell.
+
+### Automatische Vorschlaege
+
+- Nach Auswahl/Aenderung von Partner, Artikel, Menge, Belegdatum und Richtung
+  werden passende Quellen automatisch lesend ermittelt, positionsbezogen.
+- Kontrakte: Mandant, Kunden-/Lieferantenrolle, Kontraktseite, Artikel und
+  vereinbarte Qualitaet, Lieferzeitraum, Status, Einheit, offene und bereits
+  reservierte Abrufmenge pruefen. Explizite Belegreferenzen priorisieren;
+  weitere Sortierung nachvollziehbar nach vereinbarter Abrufregel/Faelligkeit.
+- Fremdlager bedeutet hier Kundeneigentum beim Haendler: Mandant UND Eigentuemer,
+  Artikel, Qualitaet/Charge, Lagerort, Sperren, Menge und Reservierungen pruefen.
+  Der Empfaenger muss nicht der Eigentuemer sein; Abholung fuer einen Dritten
+  benoetigt den passenden Auftrag beziehungsweise eine Freigabe des Eigentuemers.
+- Vorschlag zeigt Quellart, Referenz, Eigentuemer, verfuegbare Menge, Einheit,
+  vorgeschlagene Teilmenge und Begruendung. Unvereinbare Quellen bleiben gesperrt;
+  fehlende Eigentums-/Mengeninformationen erzeugen keinen geratenen Treffer.
+- Mehrere Quellen sind zulaessig: etwa 12 t aus Kontrakt A und 8 t aus Kontrakt B.
+  Kundeneigentum und verkaufte Haendlerware werden in getrennten Teilpositionen
+  gefuehrt. Ungedeckte Restmenge wird sichtbar ausgewiesen.
+- Ein Vorschlag reserviert oder bucht nichts. Auswahl bestaetigen; beim fachlichen
+  Ausfuehren Verfuegbarkeit, Berechtigung und Version erneut serverseitig pruefen.
+  Reservierung/Verbrauch nebenlaeufigkeitssicher und idempotent; Ruecknahme und
+  Korrektur mit Audit. Teilrechnungen veraendern nur die Abrechnungszuordnung.
+
+### Eigentum und Abrechnung
+
+Auslagerung kundeneigener Ware ist kein erneuter Verkauf dieser Ware. Lagergeld,
+Verladung, Fracht und andere vereinbarte Leistungen werden separat behandelt.
+Ein Eigentumswechsel bedarf eines eigenen fachlichen Vorgangs; er darf nicht
+als Nebeneffekt eines Matching-Vorschlags entstehen. Auf der Eingangsseite
+entsprechend Einkauf aus Lieferantenkontrakt und reine Fremdwareneinlagerung
+trennen. Kein automatischer Vorrang Fremdlager vor Kontrakt ohne Geschaeftsregel.
+
+### Vorhandene Bausteine zuerst verwenden
+
+- `app/services/agrar_contract_service.py`: Kontrakte und vorhandene Allocations.
+- `app/services/foreign_goods_worklist_service.py` und
+  `app/services/procurement_service.py`: Fremdware mit Eigentuemer, Charge,
+  Lagerort und aktueller Menge; Reservierungs-/Verbrauchsvertrag vor Ausbau pruefen.
+- `app/services/docflow_service.py`: source_line_id und Belegbeziehungen;
+  wiederholte Teilumwandlung aktuell durch existing_link begrenzt.
+- `app/api/v1/endpoints/collective_documents.py`: Sammelrechnung ganzer
+  Lieferscheine; noch kein vollstaendiges Restmengenmodell.
+
+Keinen zweiten Zuordnungsdienst neben bestehenden Mechanismen einfuehren.
+Vorschlagsbereich zentral ueber ScreenDefinition/RenderPlan/Meridian anbinden.
+
+### Abnahme fuer die spaetere Umsetzung
+
+1. Split 100 t auf 60/40 t und Merge aus mehreren Lieferungen auf beiden Seiten;
+   verbleibende Menge korrekt, keine Doppelabrechnung bei parallelen Aktionen.
+2. Kontraktvorschlag nur fuer passenden Partner/Artikel/Zeitraum; Teilabruf ueber
+   zwei Kontrakte moeglich, ausgeschoepfte und gesperrte Quellen ausgeschlossen.
+3. Zwei Eigentuemer mit gleichem Artikel im selben Lager: nur berechtigte
+   Eigentumsmenge vorschlagen, entnehmen und fortschreiben.
+4. Mischung aus Kundeneigentum und Haendlerverkauf: getrennte Teilpositionen,
+   keine Warenrechnung fuer die Rueckgabe des Kundeneigentums.
+5. Zwischen Vorschlag und Ausfuehrung verbrauchte Menge: Konflikt anzeigen,
+   keine Ueberentnahme; Retry ohne doppelte Buchung.
+6. Storno/Retoure/Gutschrift unterscheiden: nur die fachlich passende Operation
+   gibt Kontrakt-, Lager- oder Abrechnungsmenge frei.
