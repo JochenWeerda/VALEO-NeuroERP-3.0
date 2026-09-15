@@ -192,6 +192,81 @@ def document_allocations(
     }
 
 
+@router.get(
+    "/documents/{document_type}/{document_id}/allocation-origins",
+    response_model=AllocationOut,
+    summary="Herkunft der Mengen eines Belegs",
+)
+def document_allocation_origins(
+    document_type: str,
+    document_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Die Gegenrichtung: Woher kommen die Mengen **dieses** Belegs?
+
+    Der Mengenstand oben blickt vom Lieferschein nach vorn — "60 dt berechnet".
+    Eine Rechnung braucht den Blick zurueck: "Position 1: 60 dt aus
+    Lieferschein LS-A/1". Beides ist dieselbe Zuordnung, von zwei Seiten
+    gelesen, und beide Seiten werden gebraucht: Ohne die Herkunft steht in der
+    Rechnung eine Menge ohne Nachweis.
+
+    Auch hier **eine** Abfrage je Beleg statt einer je Position.
+    """
+    tenant_id = get_current_tenant_id()
+    zuordnungen = (
+        db.query(DocumentAllocation, DocumentAllocationSource)
+        .join(
+            DocumentAllocationSource,
+            DocumentAllocation.source_id == DocumentAllocationSource.id,
+        )
+        .filter(
+            DocumentAllocation.tenant_id == tenant_id,
+            DocumentAllocation.target_document_type == document_type,
+            DocumentAllocation.target_document_id == document_id,
+        )
+        .order_by(DocumentAllocation.target_line_id.asc(), DocumentAllocation.created_at.asc())
+        .all()
+    )
+
+    je_zeile: dict[str, list[dict[str, Any]]] = {}
+    for zuordnung, quelle in zuordnungen:
+        je_zeile.setdefault(zuordnung.target_line_id, []).append(
+            {
+                "id": zuordnung.id,
+                "source_document_type": quelle.document_type,
+                "source_document_id": quelle.document_id,
+                "source_line_id": quelle.line_id,
+                "article_id": quelle.article_id,
+                "quantity": _zahl(zuordnung.quantity),
+                "unit": zuordnung.unit,
+                "entered_quantity": (
+                    _zahl(zuordnung.entered_quantity)
+                    if zuordnung.entered_quantity is not None
+                    else None
+                ),
+                "entered_unit": zuordnung.entered_unit,
+                "reason": zuordnung.reason,
+            }
+        )
+
+    zeilen = [
+        {
+            "line_id": line_id,
+            "quantity": _zahl(sum(Decimal(h["quantity"]) for h in herkuenfte)),
+            "unit": herkuenfte[0]["unit"],
+            "origins": herkuenfte,
+        }
+        for line_id, herkuenfte in je_zeile.items()
+    ]
+
+    return {
+        "document_type": document_type,
+        "document_id": document_id,
+        "lines": zeilen,
+        "total": len(zeilen),
+    }
+
+
 @router.post(
     "/allocations",
     response_model=AllocationOut,

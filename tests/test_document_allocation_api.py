@@ -234,3 +234,53 @@ def test_beleg_ohne_zuordnungen_meldet_leer_statt_fehler(client, kopf) -> None:
     )
     assert antwort.status_code == 200
     assert antwort.json()["lines"] == []
+
+
+# -- Die Gegenrichtung: Herkunft der Mengen ------------------------------------
+
+
+def test_herkunft_zeigt_woher_die_rechnungsmenge_kommt(client, kopf, quelle) -> None:
+    """Dieselbe Zuordnung, von der anderen Seite gelesen.
+
+    Der Mengenstand blickt vom Lieferschein nach vorn — "60 dt berechnet". Die
+    Rechnung braucht den Blick zurueck: Ohne die Herkunft steht in ihr eine
+    Menge ohne Nachweis.
+    """
+    for menge, zeile in (("60", "1"), ("40", "2")):
+        angelegt = client.post(
+            f"{BASIS}/allocations",
+            headers=kopf,
+            json={
+                "source_document_type": quelle.document_type,
+                "source_document_id": quelle.document_id,
+                "source_line_id": quelle.line_id,
+                "target_document_type": "sales_invoice",
+                "target_document_id": "RE-H",
+                "target_line_id": zeile,
+                "quantity": menge,
+                "unit": "dt",
+            },
+        )
+        assert angelegt.status_code == 201, angelegt.text
+
+    antwort = client.get(
+        f"{BASIS}/documents/sales_invoice/RE-H/allocation-origins", headers=kopf
+    )
+    assert antwort.status_code == 200
+    zeilen = {z["line_id"]: z for z in antwort.json()["lines"]}
+    assert zeilen["1"]["quantity"] == "60"
+    assert zeilen["2"]["quantity"] == "40"
+
+    herkunft = zeilen["1"]["origins"][0]
+    assert herkunft["source_document_type"] == "delivery_note"
+    assert herkunft["source_document_id"] == quelle.document_id
+    assert herkunft["source_line_id"] == quelle.line_id
+    assert herkunft["article_id"] == "ART-WEIZEN"
+
+
+def test_beleg_ohne_herkunft_meldet_leer_statt_fehler(client, kopf) -> None:
+    antwort = client.get(
+        f"{BASIS}/documents/sales_invoice/GIBTESNICHT/allocation-origins", headers=kopf
+    )
+    assert antwort.status_code == 200
+    assert antwort.json()["lines"] == []

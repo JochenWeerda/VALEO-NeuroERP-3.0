@@ -11,6 +11,56 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-MENGENMODELL - der Kreis ist geschlossen 2026-09-15, Claude Code
+
+**Das Modell stand, aber die Tabelle blieb leer.** `register_source` wurde von
+keiner einzigen Stelle im Produktivcode aufgerufen — nur aus Tests. Der
+Mengenstand an der Position konnte deshalb gar nichts zeigen, und `allocate`
+fand nichts, worauf es sich beziehen konnte. Drei Schritte schliessen das:
+
+**1. Belegzeilen werden beim Speichern zu Quellen.**
+`register_document_lines` nimmt die Positionen eines Belegs auf einmal auf,
+idempotent. Beim Lieferschein haengt der Aufruf im Anlegen und im Aendern.
+Schluessel ist die **Positionsnummer**, nicht die Datensatz-ID: Beim Speichern
+werden Positionen geloescht und neu eingefuegt, die ID wechselt dabei.
+
+Positionen ohne Menge oder Einheit werden **uebersprungen**. Eine Quellposition
+mit geratener Menge waere schlimmer als eine fehlende — sie liesse sich
+zuordnen. Und die Registrierung ist **bewusst nicht best-effort**: Faellt eine
+Menge unter das bereits Berechnete, schlaegt das Speichern mit 409 fehl, statt
+stillschweigend mehr berechnet als geliefert stehenzulassen. Der
+Kontrakt-Movement-Sync daneben darf scheitern, dieser Schritt nicht.
+
+Entfernte Positionen werden aufgeraeumt — aber nur die **unbelegten**. Eine
+Zeile mit Zuordnungen bleibt stehen und faellt im Mengenstand auf; sie zu
+loeschen hiesse, eine Rechnung ihrer Grundlage zu berauben.
+
+**2. Die Umwandlung LS → RE ordnet zu.** `create-invoice` fakturiert den ganzen
+Lieferschein, also geht jede Position mit ihrer **offenen Restmenge** in die
+Rechnung — nicht mit der Liefermenge, sonst waere Teilberechnetes doppelt
+drin. Damit steht am Lieferschein die Zeile, um die es die ganze Zeit ging:
+"100 dt geliefert · 100 dt berechnet · 0 dt offen".
+
+**3. Die Maske zeigt es.** `PositionAllocationState` haengt in
+`lieferschein-erfassung.tsx` unter dem Positionsraster — nicht darin: Das
+Gitter hat dreiundzwanzig Spalten, eine vierundzwanzigste waere unlesbar. Erst
+nach dem Speichern, weil es vorher keine Belegnummer gibt, auf die sich eine
+Zuordnung beziehen koennte.
+
+**Neu dazu:** `GET /documents/{typ}/{id}/allocation-origins` — dieselbe
+Zuordnung von der anderen Seite gelesen. Der Mengenstand blickt vom
+Lieferschein nach vorn; eine Rechnung braucht den Blick zurueck, sonst steht in
+ihr eine Menge ohne Nachweis.
+
+**Abnahme:** 23 Dienst-Tests und 9 Endpunkt-Tests gegen die echte Datenbank,
+tsc und ESLint ohne Ausgabe.
+
+**Offen und benannt:** Die Herkunftsanzeige hat **noch keine Maske**. Die
+vorhandenen Rechnungsmasken fuehren keine Positionen mit eigener Identitaet —
+`create-invoice` schreibt einen Journalsatz ueber den ganzen Beleg. Den
+Endpunkt an eine Maske zu haengen, die nie etwas anzeigen kann, waere
+Dekoration; die Rechnungsposition als eigenes Objekt ist der naechste Schritt.
+
 ## MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915 - reserviert
 
 **Owner:** Codex. **Auftrag:** Framework-Prinzip systemweit umsetzen, wo sinnvoll.

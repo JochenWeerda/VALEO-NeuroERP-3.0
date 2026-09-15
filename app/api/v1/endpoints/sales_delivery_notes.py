@@ -15,6 +15,13 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.services.document_allocation_service import (
+    AllocationError,
+    DocumentAllocationService,
+    LineToRegister,
+    OverAllocationError,
+    PositionRef,
+)
 from app.core.config import settings
 from app.core.tenant import get_tenant_id
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_delivery
@@ -213,6 +220,42 @@ def _list_positions(db: Session, delivery_note_id: str) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def _register_allocation_sources(
+    db: Session, tenant_id: str, ls_id: str, positionen: list
+) -> None:
+    """Die Positionen als Quellen des Mengenmodells bekanntmachen.
+
+    Ohne diesen Schritt bleibt ``doc_allocation_sources`` leer: Der Mengenstand
+    an der Position — "100 dt geliefert, 60 dt berechnet, 40 dt offen" — haette
+    keine Grundlage, und eine Rechnung koennte sich auf nichts beziehen.
+
+    **Bewusst nicht best-effort.** Der Kontrakt-Movement-Sync daneben darf
+    scheitern, ohne das Speichern zu verhindern; dies hier nicht. Der einzige
+    Grund, aus dem die Registrierung fehlschlaegt, ist eine Position, deren
+    Menge unter die bereits berechnete gesenkt wurde — dann waere nach dem
+    Speichern mehr berechnet als geliefert, und genau dann soll das Speichern
+    scheitern statt stillschweigend eine Luecke zu hinterlassen.
+    """
+    service = DocumentAllocationService(db, tenant_id)
+    try:
+        service.register_document_lines(
+            "delivery_note",
+            ls_id,
+            [
+                LineToRegister.from_mapping(
+                    pos if isinstance(pos, dict) else pos.model_dump()
+                )
+                for pos in positionen
+            ],
+        )
+    except OverAllocationError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(fehler)) from fehler
+    except AllocationError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+
+
 @router.post("", response_model=DeliveryNote, status_code=status.HTTP_201_CREATED, summary="Delivery note anlegen")
 async def create_delivery_note(
     payload: DeliveryNoteCreate,
@@ -315,6 +358,8 @@ async def create_delivery_note(
             }
         )
     
+    _register_allocation_sources(db, tenant_id, ls_id, list(payload.positionen))
+
     try:
         sync_movements_for_delivery_note(
             db=db,
@@ -441,6 +486,8 @@ async def update_delivery_note(
             """),
             {"id": ls_id, "tenant_id": tenant_id, "totals": json.dumps(totals)},
         )
+
+        _register_allocation_sources(db, tenant_id, ls_id, list(payload.positionen))
 
     # Build header update (exclude positionen)
     updates = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if k != "positionen" and v is not None}
@@ -727,6 +774,45 @@ async def get_last_delivery_note(
     )
 
 
+def _allocate_delivery_to_invoice(
+    db: Session, tenant_id: str, ls_id: str, invoice_id: str, positions: list
+) -> None:
+    """Die Rechnung nimmt die offenen Mengen des Lieferscheins auf.
+
+    Diese Umwandlung fakturiert den **ganzen** Lieferschein; jede Position geht
+    also mit ihrer offenen Restmenge in die Rechnung. Genau das wird auch
+    zugeordnet — nicht die Liefermenge: Ist auf eine Position bereits
+    teilberechnet worden, waere das eine Doppelberechnung.
+
+    Damit steht am Lieferschein hinterher die Zeile, um die es geht:
+    "100 dt geliefert · 100 dt berechnet · 0 dt offen".
+
+    Positionen ohne offene Menge werden uebersprungen. Ist eine Position
+    ueberhaupt nicht als Quelle bekannt — etwa weil sie ohne Menge gespeichert
+    wurde — entsteht keine Zuordnung; die Menge bleibt im Mengenstand sichtbar
+    unbelegt, statt eine erfundene Zuordnung zu bekommen.
+    """
+    service = DocumentAllocationService(db, tenant_id)
+    for pos in positions:
+        zeile = LineToRegister.from_mapping(dict(pos))
+        if not zeile.line_id:
+            continue
+        quelle = PositionRef("delivery_note", ls_id, zeile.line_id)
+        stand = service.source_state(quelle)
+        if stand is None:
+            continue
+        offen = Decimal(str(stand["open_quantity"]))
+        if offen <= 0:
+            continue
+        service.allocate(
+            quelle,
+            PositionRef("sales_invoice", invoice_id, zeile.line_id),
+            offen,
+            str(stand["unit"]),
+            reason="rechnung_aus_lieferschein",
+        )
+
+
 @router.post("/{ls_id}/create-invoice", response_model=SalesDeliveryNotesOut, status_code=201, summary="Invoice from delivery anlegen")
 async def create_invoice_from_delivery(
     ls_id: str,
@@ -772,6 +858,9 @@ async def create_invoice_from_delivery(
         """),
         {"id": ls_id, "tenant_id": tenant_id},
     )
+
+    _allocate_delivery_to_invoice(db, tenant_id, ls_id, inv_id, positions)
+
     db.commit()
 
     # SALES-DN-INV-OP-001: Debitoren-OP + Document-Store Eintrag (Belegbruch schliessen)

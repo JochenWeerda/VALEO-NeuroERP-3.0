@@ -21,9 +21,10 @@ sie das tut, entscheidet der Fall — Warenrueckgabe ja, Preisnachlass nein.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 
 from sqlalchemy.orm import Session
 
@@ -55,6 +56,31 @@ class PositionRef:
     document_type: str
     document_id: str
     line_id: str
+
+
+@dataclass(frozen=True)
+class LineToRegister:
+    """Eine Belegposition, so weit sie fuer den Mengenstand zaehlt."""
+
+    line_id: str
+    quantity: Decimal | None
+    unit: str | None
+    article_id: str | None = None
+
+    @classmethod
+    def from_mapping(cls, zeile: "dict[str, Any]") -> "LineToRegister":
+        """Aus einer Positionszeile, wie die Belegendpunkte sie fuehren.
+
+        Die Positionsnummer ist der Schluessel, nicht die Datensatz-ID: Beim
+        Speichern werden Positionen geloescht und neu eingefuegt, die ID
+        wechselt dabei. Die Nummer bleibt — und mit ihr die Zuordnung.
+        """
+        return cls(
+            line_id=str(zeile.get("pos_nr") or zeile.get("line_id") or zeile.get("id") or ""),
+            quantity=zeile.get("menge") if zeile.get("menge") is not None else zeile.get("quantity"),
+            unit=zeile.get("einheit") or zeile.get("unit"),
+            article_id=zeile.get("artikel_id") or zeile.get("article_id"),
+        )
 
 
 @dataclass(frozen=True)
@@ -131,6 +157,74 @@ class DocumentAllocationService:
             vorhanden.article_id = article_id
         self.db.flush()
         return vorhanden
+
+    def register_document_lines(
+        self,
+        document_type: str,
+        document_id: str,
+        lines: "Iterable[LineToRegister]",
+    ) -> list[DocumentAllocationSource]:
+        """Alle Positionen eines Belegs auf einmal bekanntmachen.
+
+        Das ist der Aufruf, der beim **Speichern** eines Belegs gehoert. Ohne
+        ihn bleibt die Quelltabelle leer, und das Mengenmodell ist zwar da, aber
+        an keiner Position sichtbar: ``allocate`` findet dann nichts, worauf es
+        sich beziehen koennte.
+
+        Positionen ohne Menge oder ohne Einheit werden **uebersprungen**, nicht
+        mit einem Ersatzwert angelegt. Eine Quellposition mit geratener Menge
+        waere schlimmer als eine fehlende: Sie liesse sich zuordnen.
+
+        Der Aufruf ist idempotent — beim erneuten Speichern werden die Mengen
+        fortgeschrieben. Faellt eine Menge dabei unter das bereits Zugeordnete,
+        schlaegt er fehl; genau dann soll das Speichern scheitern, weil sonst
+        mehr berechnet waere als geliefert.
+        """
+        registriert: list[DocumentAllocationSource] = []
+        for zeile in lines:
+            if zeile.quantity is None or not zeile.unit:
+                continue
+            menge = Decimal(str(zeile.quantity))
+            if menge <= 0:
+                continue
+            registriert.append(
+                self.register_source(
+                    PositionRef(document_type, document_id, str(zeile.line_id)),
+                    menge,
+                    zeile.unit,
+                    article_id=zeile.article_id,
+                )
+            )
+
+        self._prune_removed_lines(document_type, document_id, {q.line_id for q in registriert})
+        return registriert
+
+    def _prune_removed_lines(
+        self, document_type: str, document_id: str, behalten: set[str]
+    ) -> None:
+        """Geloeschte Positionen aufraeumen — aber nur die unbelegten.
+
+        Wird eine Position aus einem Beleg entfernt, soll ihre Quellzeile nicht
+        als Karteileiche zurueckbleiben. Hat sie aber bereits Zuordnungen, wird
+        sie **nicht** geloescht: Dann ist auf sie berechnet worden, und das
+        stillschweigend zu entfernen hiesse, eine Rechnung ihrer Grundlage zu
+        berauben. Sie bleibt stehen und faellt im Mengenstand auf — das ist der
+        Zweck.
+        """
+        verwaist = (
+            self.db.query(DocumentAllocationSource)
+            .filter(
+                DocumentAllocationSource.tenant_id == self.tenant_id,
+                DocumentAllocationSource.document_type == document_type,
+                DocumentAllocationSource.document_id == document_id,
+                DocumentAllocationSource.allocated_quantity <= 0,
+            )
+            .all()
+        )
+        for quelle in verwaist:
+            if quelle.line_id not in behalten:
+                self.db.delete(quelle)
+        self.db.flush()
 
     def _find_source(self, ref: PositionRef, for_update: bool = False):
         query = self.db.query(DocumentAllocationSource).filter(

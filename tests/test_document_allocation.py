@@ -26,6 +26,7 @@ import pytest
 from app.core.agrar_units import ArtikelEinheiten, Gebinde
 from app.services.document_allocation_service import (
     DocumentAllocationService,
+    LineToRegister,
     NotDivisibleError,
     OverAllocationError,
     PositionRef,
@@ -313,3 +314,112 @@ def test_dieselbe_quelle_nicht_zweimal_auf_dieselbe_zielposition(service, sessio
     with pytest.raises(IntegrityError):
         service.allocate(ls(), re("RE-X"), Decimal(20), "dt")
     session.rollback()
+
+
+# -- Registrierung beim Speichern ----------------------------------------------
+
+
+def position(nr: str, menge: str, einheit: str = "dt", artikel: str = "ART-WEIZEN") -> dict:
+    """Eine Positionszeile, wie die Belegendpunkte sie fuehren."""
+    return {"pos_nr": nr, "menge": Decimal(menge), "einheit": einheit, "artikel_id": artikel}
+
+
+def zeilen(*positionen: dict) -> list[LineToRegister]:
+    return [LineToRegister.from_mapping(p) for p in positionen]
+
+
+def test_belegpositionen_werden_beim_speichern_zu_quellen(service) -> None:
+    """Der Schritt, der bisher fehlte.
+
+    Ohne ihn blieb die Quelltabelle leer: Das Mengenmodell war vorhanden, aber
+    an keiner Position sichtbar, und ``allocate`` fand nichts, worauf es sich
+    beziehen konnte.
+    """
+    service.register_document_lines(
+        "delivery_note", "LS-A", zeilen(position("1", "100"), position("2", "40"))
+    )
+
+    assert service.source_state(ls("LS-A", "1"))["quantity"] == Decimal(100)
+    assert service.source_state(ls("LS-A", "2"))["quantity"] == Decimal(40)
+
+
+def test_erneutes_speichern_schreibt_die_menge_fort(service) -> None:
+    """Ein Entwurf darf sich aendern — die Zuordnung darf nicht verloren gehen."""
+    service.register_document_lines("delivery_note", "LS-A", zeilen(position("1", "100")))
+    service.allocate(ls("LS-A", "1"), re("RE-X"), Decimal(60), "dt")
+
+    service.register_document_lines("delivery_note", "LS-A", zeilen(position("1", "120")))
+
+    stand = service.source_state(ls("LS-A", "1"))
+    assert stand["quantity"] == Decimal(120)
+    assert stand["allocated_quantity"] == Decimal(60)
+    assert stand["open_quantity"] == Decimal(60)
+
+
+def test_menge_unter_das_bereits_berechnete_zu_senken_schlaegt_fehl(service) -> None:
+    """Sonst waere nach dem Speichern mehr berechnet als geliefert."""
+    service.register_document_lines("delivery_note", "LS-A", zeilen(position("1", "100")))
+    service.allocate(ls("LS-A", "1"), re("RE-X"), Decimal(60), "dt")
+
+    with pytest.raises(OverAllocationError):
+        service.register_document_lines("delivery_note", "LS-A", zeilen(position("1", "50")))
+
+
+def test_position_ohne_menge_oder_einheit_wird_uebersprungen(service) -> None:
+    """Eine Quellposition mit geratener Menge waere schlimmer als eine fehlende.
+
+    Sie liesse sich zuordnen — und zwar auf eine Zahl, die niemand angegeben hat.
+    """
+    service.register_document_lines(
+        "delivery_note",
+        "LS-A",
+        zeilen(
+            {"pos_nr": "1", "menge": None, "einheit": "dt"},
+            {"pos_nr": "2", "menge": Decimal(10), "einheit": None},
+            {"pos_nr": "3", "menge": Decimal(0), "einheit": "dt"},
+            position("4", "25"),
+        ),
+    )
+
+    assert service.source_state(ls("LS-A", "1")) is None
+    assert service.source_state(ls("LS-A", "2")) is None
+    assert service.source_state(ls("LS-A", "3")) is None
+    assert service.source_state(ls("LS-A", "4"))["quantity"] == Decimal(25)
+
+
+def test_geloeschte_position_ohne_zuordnung_wird_aufgeraeumt(service) -> None:
+    service.register_document_lines(
+        "delivery_note", "LS-A", zeilen(position("1", "100"), position("2", "40"))
+    )
+    service.register_document_lines("delivery_note", "LS-A", zeilen(position("1", "100")))
+
+    assert service.source_state(ls("LS-A", "2")) is None
+
+
+def test_geloeschte_position_mit_zuordnung_bleibt_stehen(service) -> None:
+    """Sie stillschweigend zu entfernen hiesse, eine Rechnung ihrer Grundlage zu berauben.
+
+    Sie bleibt stehen und faellt im Mengenstand auf — das ist der Zweck.
+    """
+    service.register_document_lines(
+        "delivery_note", "LS-A", zeilen(position("1", "100"), position("2", "40"))
+    )
+    service.allocate(ls("LS-A", "2"), re("RE-X"), Decimal(40), "dt")
+
+    service.register_document_lines("delivery_note", "LS-A", zeilen(position("1", "100")))
+
+    stand = service.source_state(ls("LS-A", "2"))
+    assert stand is not None
+    assert stand["allocated_quantity"] == Decimal(40)
+
+
+def test_die_positionsnummer_ist_der_schluessel_nicht_die_datensatz_id() -> None:
+    """Beim Speichern werden Positionen geloescht und neu eingefuegt.
+
+    Die Datensatz-ID wechselt dabei, die Positionsnummer bleibt — und mit ihr
+    die Zuordnung.
+    """
+    zeile = LineToRegister.from_mapping(
+        {"id": "neue-uuid", "pos_nr": "1", "menge": Decimal(5), "einheit": "dt"}
+    )
+    assert zeile.line_id == "1"

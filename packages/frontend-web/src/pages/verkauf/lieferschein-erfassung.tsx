@@ -20,6 +20,7 @@ import type { Customer } from '@/components/sales/CustomerSelectionDialog'
 import type { PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
+import { PositionAllocationState } from '@/components/documents/PositionAllocationState'
 import { linkDocumentToFlowSpine } from '@/lib/workflow/document-flow-spine'
 import { useAuth } from '@/hooks/useAuth'
 import { useSchlaege } from '@/lib/api/agrar'
@@ -2452,6 +2453,28 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               </TableBody>
             </Table>
           </div>
+
+          {/*
+            FSX-MENGENMODELL / K5: Mengenstand je Position — geliefert,
+            berechnet, offen — mit aufklappbaren Zuordnungen.
+
+            Steht unter dem Raster, nicht darin: Das Positionsgitter hat
+            dreiundzwanzig Spalten; eine vierundzwanzigste waere unlesbar. Und
+            die Auskunft gilt der Position ueber den Beleg hinaus — sie
+            beantwortet, welche Rechnung welche Teilmenge genommen hat.
+
+            Erst nach dem Speichern: Vor der ersten Speicherung gibt es keine
+            Belegnummer, auf die sich eine Zuordnung beziehen koennte. Der
+            Baustein rendert ausserdem von sich aus nichts, solange es zu diesem
+            Beleg keine Zuordnungen gibt.
+          */}
+          {state.id ? (
+            <PositionAllocationState
+              documentType="delivery_note"
+              documentId={state.id}
+              className="mt-3"
+            />
+          ) : null}
         </Card>
 
         {/* Positions-Details */}
