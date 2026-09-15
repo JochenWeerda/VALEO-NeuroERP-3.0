@@ -40,6 +40,18 @@ export type LinkDocumentWorkflowInput = {
   matchValues?: DocumentMatchValues
   handover?: DocumentWorkflowHandover | null
   resumeRoute: string
+  /** Fachliche Rolle, falls der Beleg als beteiligter angehaengt wird. */
+  relation?: string
+  /**
+   * Eigene Kandidaten statt der Standardsuche ueber die Belegreferenz.
+   *
+   * Notwendig, weil manche Belege ihren Vorgang **nicht** ueber die eigene
+   * Referenz finden: Ein Lieferschein haengt typischerweise an dem Vorgang, den
+   * der Auftrag eroeffnet hat — dort steht der Lieferschein noch nirgends. Die
+   * Belegsuche aus FSX-010 faende nichts und legte jedes Mal einen neuen Fall an.
+   * Die Maske kennt ihre Vorgaengerbelege und sucht besser.
+   */
+  candidates?: readonly DocumentWorkflowCandidate[]
   /** Fachlicher Status nach der Verknuepfung; sonst der neutrale Vorgabewert. */
   businessStatus?: string
   actionLabel?: string
@@ -118,10 +130,51 @@ async function persistResume(
   })
 }
 
-async function bindDocument(processKey: string, instanceId: string, documentType: string, documentId: string): Promise<void> {
-  await apiClient.patch(`/api/v1/process/flow-spines/${processKey}/instances/${instanceId}`, {
-    linked_document_id: documentId,
-    linked_document_type: documentType,
+/**
+ * Beleg an den Vorgang haengen — in der **richtigen Rolle**.
+ *
+ * Das ist die Stelle, an der sich der n:m-Widerspruch aufloest (siehe
+ * `docs/design/flow-spine-nm-bindungskonflikt.md`):
+ *
+ * - Hat der Vorgang **noch keinen** fuehrenden Beleg, wird dieser es. Das ist
+ *   der Einstiegsfall, und der Unique-Index aus FSX-011 traegt ihn.
+ * - Ist **dieser** Beleg schon der fuehrende, passiert nichts. Idempotent.
+ * - Gehoert der Vorgang bereits einem **anderen** Beleg, haengt sich dieser als
+ *   **beteiligter** Beleg an (FSX-DOC-LINKS). Das ist der Normalfall der
+ *   Belegkette: die Rechnung zum Lieferschein, der Lieferschein zum Auftrag.
+ *
+ * Ein PATCH waere in diesem dritten Fall ein Umbiegen und wuerde zu Recht mit
+ * 409 abgewiesen. Vor FSX-DOC-LINKS gab es dafuer keinen Ausweg — Masken haben
+ * die Bindung deshalb ganz weggelassen und den Beleg unverknuepft gelassen.
+ */
+async function bindOrAttachDocument(
+  processKey: string,
+  instanceId: string,
+  documentType: string,
+  documentId: string,
+  relation?: string,
+): Promise<void> {
+  const instance = await apiClient.get<FlowSpineInstance>(
+    `/api/v1/process/flow-spines/${processKey}/instances/${instanceId}`,
+  )
+  const vorhanden = String(instance.linked_document_id ?? '').trim()
+
+  if (!vorhanden) {
+    await apiClient.patch(`/api/v1/process/flow-spines/${processKey}/instances/${instanceId}`, {
+      linked_document_id: documentId,
+      linked_document_type: documentType,
+    })
+    return
+  }
+
+  if (vorhanden === documentId && String(instance.linked_document_type ?? '') === documentType) {
+    return
+  }
+
+  await apiClient.post(`/api/v1/process/flow-spines/${processKey}/instances/${instanceId}/documents`, {
+    document_type: documentType,
+    document_id: documentId,
+    relation,
   })
 }
 
@@ -145,17 +198,18 @@ export async function linkDocumentToFlowSpine(
     // Die Policy legt den Prozess fest; eine URL kann kein anderes Aggregat
     // waehlen. Ein fremder Prozess laeuft an diesem festen Pfad in den 404.
     const instanceId = input.handover.instanceId
-    await apiClient.get(`/api/v1/process/flow-spines/${flowSpine.processKey}/instances/${instanceId}`)
-    await bindDocument(flowSpine.processKey, instanceId, policy.documentType, input.documentId)
+    // Der GET in bindOrAttachDocument ist zugleich die Pruefung: ein fremder
+    // Mandant oder Prozess laeuft an diesem festen Pfad in den 404.
+    await bindOrAttachDocument(
+      flowSpine.processKey, instanceId, policy.documentType, input.documentId, input.relation,
+    )
     await persistResume(policyId, flowSpine.processKey, instanceId, input)
     return
   }
 
-  const candidates = await fetchDocumentCandidates(
-    flowSpine.processKey,
-    policy.documentType,
-    input.documentId,
-  )
+  const candidates =
+    input.candidates ??
+    (await fetchDocumentCandidates(flowSpine.processKey, policy.documentType, input.documentId))
   const resolution = resolveCapturedDocumentWorkflow(policy, {
     documentId: input.documentId,
     documentNumber: input.documentNumber,
@@ -173,7 +227,9 @@ export async function linkDocumentToFlowSpine(
   if (resolution.mode === 'standalone' || !resolution.flowSpine) return
 
   if (resolution.mode === 'attach' && resolution.instanceId && resolution.savePayload) {
-    await bindDocument(flowSpine.processKey, resolution.instanceId, policy.documentType, input.documentId)
+    await bindOrAttachDocument(
+      flowSpine.processKey, resolution.instanceId, policy.documentType, input.documentId, input.relation,
+    )
     await apiClient.post(
       `/api/v1/process/flow-spines/${flowSpine.processKey}/instances/${resolution.instanceId}/save`,
       resolution.savePayload,

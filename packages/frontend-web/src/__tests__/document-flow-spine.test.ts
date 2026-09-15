@@ -75,18 +75,21 @@ describe('document-flow-spine (FSX-013-LINKER)', () => {
   })
 
   it('haengt an einen gefundenen offenen Fall an, statt einen zweiten anzulegen', async () => {
-    getMock.mockResolvedValue({
-      data: {
-        instances: [
-          {
-            instance_id: 'wf-vorhanden',
-            process_key: 'order-to-cash',
-            lifecycle_status: 'in_progress',
-            linked_document_id: 'LS-1',
-          },
-        ],
-      },
-    })
+    getMock
+      .mockResolvedValueOnce({
+        data: {
+          instances: [
+            {
+              instance_id: 'wf-vorhanden',
+              process_key: 'order-to-cash',
+              lifecycle_status: 'in_progress',
+              linked_document_id: 'LS-1',
+            },
+          ],
+        },
+      })
+      // Der Vorgang hat noch keinen fuehrenden Beleg -> dieser wird es.
+      .mockResolvedValueOnce({ instance_id: 'wf-vorhanden', linked_document_id: null })
 
     await linkDocumentToFlowSpine('outgoing-delivery-note', {
       documentId: 'LS-1',
@@ -99,6 +102,74 @@ describe('document-flow-spine (FSX-013-LINKER)', () => {
     )
     expect(postMock).not.toHaveBeenCalledWith(
       '/api/v1/process/flow-spines/order-to-cash/instances',
+      expect.anything(),
+    )
+  })
+
+  it('haengt sich als beteiligter Beleg an, wenn der Vorgang schon einem anderen gehoert', async () => {
+    // Der Normalfall der Belegkette: Der Vorgang wurde vom Auftrag eroeffnet,
+    // der Lieferschein gehoert dazu — ist aber nicht der Einstiegsbeleg.
+    getMock
+      .mockResolvedValueOnce({
+        data: {
+          instances: [
+            {
+              instance_id: 'wf-auftrag',
+              process_key: 'order-to-cash',
+              lifecycle_status: 'in_progress',
+              linked_document_id: 'SO-7',
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        instance_id: 'wf-auftrag',
+        linked_document_id: 'SO-7',
+        linked_document_type: 'sales_order',
+      })
+
+    await linkDocumentToFlowSpine('outgoing-delivery-note', {
+      documentId: 'LS-1',
+      relation: 'lieferschein',
+      resumeRoute: '/verkauf/lieferschein-erfassung',
+    })
+
+    // Kein PATCH — das waere ein Umbiegen und wuerde zu Recht 409 liefern.
+    expect(patchMock).not.toHaveBeenCalled()
+    expect(postMock).toHaveBeenCalledWith(
+      '/api/v1/process/flow-spines/order-to-cash/instances/wf-auftrag/documents',
+      { document_type: 'delivery_note', document_id: 'LS-1', relation: 'lieferschein' },
+    )
+  })
+
+  it('tut nichts, wenn der Beleg bereits der fuehrende des Vorgangs ist', async () => {
+    getMock
+      .mockResolvedValueOnce({
+        data: {
+          instances: [
+            {
+              instance_id: 'wf-1',
+              process_key: 'order-to-cash',
+              lifecycle_status: 'in_progress',
+              linked_document_id: 'LS-1',
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        instance_id: 'wf-1',
+        linked_document_id: 'LS-1',
+        linked_document_type: 'delivery_note',
+      })
+
+    await linkDocumentToFlowSpine('outgoing-delivery-note', {
+      documentId: 'LS-1',
+      resumeRoute: '/verkauf/lieferschein-erfassung',
+    })
+
+    expect(patchMock).not.toHaveBeenCalled()
+    expect(postMock).not.toHaveBeenCalledWith(
+      expect.stringContaining('/documents'),
       expect.anything(),
     )
   })
@@ -126,6 +197,7 @@ describe('document-flow-spine (FSX-013-LINKER)', () => {
 
   it('prueft eine URL-Fall-ID am Prozess der Policy, nicht am behaupteten', async () => {
     getMock.mockRejectedValue({ response: { status: 404 } })
+    // Der GET ist zugleich die Pruefung; er laeuft gegen den Policy-Prozess.
 
     await expect(
       linkDocumentToFlowSpine('outgoing-delivery-note', {

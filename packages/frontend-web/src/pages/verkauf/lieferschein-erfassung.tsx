@@ -20,6 +20,7 @@ import type { Customer } from '@/components/sales/CustomerSelectionDialog'
 import type { PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
+import { linkDocumentToFlowSpine } from '@/lib/workflow/document-flow-spine'
 import { useAuth } from '@/hooks/useAuth'
 import { useSchlaege } from '@/lib/api/agrar'
 import { useKontraktLookup } from '@/hooks/useKontraktLookup'
@@ -33,7 +34,6 @@ import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility
 import { buildSalesHandoverPath, parseSalesHandover } from '@/lib/workflow/sales-handover'
 import {
   getDocumentEntryPolicy,
-  resolveCapturedDocumentWorkflow,
   type DocumentWorkflowCandidate,
 } from '@/lib/workflow/document-entry-policy'
 import { NativeSelect } from '@/components/ui/native-select'
@@ -774,58 +774,44 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }
 
   const resolveSavedDeliveryNoteWorkflow = async (saved: DeliveryNoteResponse): Promise<void> => {
-    const flowSpine = deliveryNoteWorkflowPolicy.flowSpine
-    if (!flowSpine) return
+    if (!deliveryNoteWorkflowPolicy.flowSpine) return
 
+    // Die Kandidatensuche bleibt hier: Ein Lieferschein haengt typischerweise an
+    // dem Vorgang, den der Auftrag eroeffnet hat — unter seiner eigenen
+    // Belegreferenz steht er dort noch nirgends. Die Standardsuche aus FSX-010
+    // faende nichts und legte jedes Mal einen neuen Fall an.
     const candidates = await fetchDeliveryNoteWorkflowCandidates(saved)
     if (candidates === null) {
       push('Lieferschein gespeichert, Workflow-Zuordnung offen: Flow-Spine-Suche nicht erreichbar.')
       return
     }
-    const resolution = resolveCapturedDocumentWorkflow(deliveryNoteWorkflowPolicy, {
-      documentId: saved.id,
-      documentNumber: saved.delivery_note_number,
-      partnerName: state.customer?.name,
-      matchValues: {
-        customerId: state.customer?.id ?? saved.customer_id,
-        customerNumber: state.customer?.customerNumber ?? state.customer?.debitorAccount,
-        orderId: sourceOrderId ?? saved.sales_order_id,
-        deliveryNoteId: saved.id,
-      },
-      candidates,
-    })
 
-    if (resolution.mode === 'manual-review') {
-      push('Workflow-Zuordnung unklar: Bitte vorhandenen Flow-Spline manuell auswaehlen.')
-      return
-    }
-
+    // Die Ausfuehrung liegt seit FSX-LS-KONSOLIDIERUNG im gemeinsamen Linker.
+    // Vorher stand hier eine dritte Umsetzung desselben Ablaufs — und sie band
+    // den Lieferschein bewusst **nicht** an den Vorgang, weil ein PATCH den
+    // fuehrenden Beleg des Auftrags umgebogen haette. Der Linker entscheidet die
+    // Rolle jetzt selbst: fuehrend, wenn der Vorgang noch keinen Beleg hat,
+    // sonst beteiligt (FSX-DOC-LINKS).
     try {
-      if (resolution.mode === 'attach' && resolution.instanceId && resolution.savePayload) {
-        await apiClient.post(
-          `/api/v1/process/flow-spines/${flowSpine.processKey}/instances/${resolution.instanceId}/save`,
-          resolution.savePayload,
-        )
-        push('Lieferschein dem vorhandenen Workflow-Spline zugeordnet')
-        return
-      }
-
-      if (resolution.mode === 'start' && resolution.createPayload) {
-        const created = await apiClient.post<FlowSpineInstanceSummary>(
-          `/api/v1/process/flow-spines/${flowSpine.processKey}/instances`,
-          resolution.createPayload,
-        )
-        const createdId = apiString(created.instance_id ?? created.id)
-        if (createdId && resolution.savePayload) {
-          await apiClient.post(
-            `/api/v1/process/flow-spines/${flowSpine.processKey}/instances/${createdId}/save`,
-            resolution.savePayload,
-          )
-        }
-        push('Neuer Workflow-Spline fuer den Lieferschein gestartet')
-      }
-    } catch (_rawErr: unknown) {
-      push(`Lieferschein gespeichert, Workflow-Zuordnung offen: ${getAxiosErrorMessage(_rawErr)}`)
+      await linkDocumentToFlowSpine('outgoing-delivery-note', {
+        documentId: saved.id,
+        documentNumber: saved.delivery_note_number,
+        partnerName: state.customer?.name,
+        matchValues: {
+          customerId: state.customer?.id ?? saved.customer_id,
+          customerNumber: state.customer?.customerNumber ?? state.customer?.debitorAccount,
+          orderId: sourceOrderId ?? saved.sales_order_id,
+          deliveryNoteId: saved.id,
+        },
+        candidates,
+        relation: 'lieferschein',
+        resumeRoute: '/verkauf/lieferschein-erfassung',
+        businessStatus: 'lieferschein_erfasst',
+        actionLabel: 'Lieferschein gespeichert',
+      })
+      push('Lieferschein dem Workflow-Vorgang zugeordnet')
+    } catch (workflowError: unknown) {
+      push(`Lieferschein gespeichert, Workflow-Zuordnung offen: ${getAxiosErrorMessage(workflowError)}`)
     }
   }
 

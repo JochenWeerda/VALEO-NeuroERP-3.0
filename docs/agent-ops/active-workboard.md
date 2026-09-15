@@ -11,6 +11,52 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-LS-KONSOLIDIERUNG - abgeschlossen 2026-09-15, Claude Code
+
+**Die dritte Umsetzung ist weg. Aber nicht so, wie ich es geplant hatte** — und
+der Grund ist der interessante Teil.
+
+**Beim Lesen kam ein Befund, der einen naiven Umbau verboten haette:** Die
+Lieferscheinmaske band den Beleg **bewusst nicht** an den Vorgang. Sie rief nur
+`/save` auf, nie `PATCH linked_document_id`. Mein generischer Linker patchte
+dagegen immer. Ein Eins-zu-eins-Austausch haette **genau die 409 ausgeloest**,
+vor der ich heute Vormittag im Konfliktdokument gewarnt habe — der Lieferschein
+haengt typischerweise an dem Vorgang, den der **Auftrag** eroeffnet hat, und
+dessen fuehrender Beleg ist der Auftrag.
+
+**Damit war die Lieferscheinmaske die ganze Zeit der lebende Beleg fuer den
+Widerspruch.** Sie hat ihn geloest, indem sie die Bindung wegliess — der Beleg
+blieb unverknuepft.
+
+**Der Linker entscheidet die Rolle jetzt selbst** (`bindOrAttachDocument`):
+
+- Vorgang **ohne** fuehrenden Beleg → dieser wird es (PATCH, wie bisher).
+- **Dieser** Beleg ist schon der fuehrende → nichts zu tun, idempotent.
+- Vorgang gehoert **einem anderen** Beleg → Anhaengen als **beteiligter** Beleg
+  ueber FSX-DOC-LINKS. Kein PATCH, also kein Umbiegen, also kein 409.
+
+**Damit ist der n:m-Widerspruch nicht mehr nur dokumentiert, sondern im Code
+aufgeloest** — und die Verknuepfungstabelle von heute Mittag hat ihren ersten
+echten Nutzen.
+
+**Zweiter Befund: Die Kandidatensuche der Maske ist keine Belegabfrage,** sondern
+eine Freitextsuche ueber bis zu drei Begriffe (Belegnummer, Auftrags-ID,
+Kundenname). Sie **bleibt in der Maske**. Die Standardsuche aus FSX-010 findet
+den Lieferschein unter seiner eigenen Referenz naemlich gar nicht — er steht dort
+noch nirgends —, und der Linker legte jedes Mal einen neuen Fall an. Der Linker
+nimmt deshalb jetzt optional Kandidaten vom Aufrufer entgegen.
+
+**Die Trennung, die daraus folgt:** *Wie finde ich den Vorgang* ist fachlich und
+gehoert in die Maske. *Was tue ich damit* ist es nicht und gehoert in den Linker.
+Vorher lag beides dreimal im Repo.
+
+**Abnahme:** 134 Dateien / 554 Tests gruen, `tsc --noEmit` ohne Ausgabe. Cursors
+Bestelltests laufen unveraendert — die Rollenlogik aendert ihren Pfad nicht, weil
+dort `linked_document_id` leer ist.
+
+**Nicht angefasst:** die Belegerfassung selbst (Positionen, Mengen, Speichern),
+wie im Claim abgegrenzt.
+
 ## UIX-091-GATE - abgeschlossen 2026-09-15
 
 **Owner:** Cursor. **Stand:** abgeschlossen — `missing_process_chain` ist
