@@ -1,0 +1,127 @@
+slice_id: FSX-SOURCE-PROPOSALS-IMPLEMENTATION
+id: FSX-SOURCE-PROPOSALS-IMPLEMENTATION
+title: Automatische Kontrakt- und Fremdlagervorschlaege je Belegposition
+owner: Codex (Umsetzung) / Claude Code (Uebernahme, Tests und Abschluss)
+status: abgeschlossen
+created_at: "2026-09-15"
+completed_at: "2026-09-15"
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+coordination: >-
+  Codex hat den Slice geclaimt und implementiert, dann pausiert. Der User hat die
+  Uebernahme freigegeben. Uebernommen wurde der Abschluss: Tests und
+  Dokumentation, die Codex' eigene Abnahme verlangt. Die Umsetzung selbst ist
+  unveraendert von Codex — es gab nichts zu reparieren.
+
+befund_bei_uebernahme: >-
+  Der Stand war vollstaendig und lauffaehig: Dienst importiert, Endpunkt
+  registriert, tsc ohne Ausgabe. Fehlend waren ausschliesslich Tests und Slice.
+  Kein Fehler gefunden, der eine Korrektur noetig gemacht haette.
+
+umsetzung_codex:
+  - >-
+    app/services/docflow_source_proposals.py — Pydantic-Vertrag plus die reine
+    Projektionsfunktion build_proposals; SQL gegen kon_contract/kon_contract_line
+    (Restmenge = qty_contract minus gebuchte Bewegungen) und
+    fremdwaren_einlagerung.
+  - "POST /api/v1/docflow/source-proposals, Mandant aus dem Anfragekontext."
+  - >-
+    SourceProposalRenderer plus DocumentSourceProposalRegion; Verdrahtung ueber
+    ScreenDefinition, RenderPlan und UniversalMaskRenderer.
+
+ergaenzt_bei_uebernahme:
+  - >-
+    tests/test_docflow_source_proposals.py — 18 Tests auf build_proposals, der
+    datenbankfreien Mitte.
+  - >-
+    packages/frontend-web/src/__tests__/components/mask-builder/source-proposal-renderer.test.tsx
+    — 9 Tests auf die Anzeige.
+  - "Dieser Slice."
+
+fachliche_zusicherungen:
+  geteiltes_budget: >-
+    Zwei Positionen duerfen dieselbe Kontraktrestmenge nicht doppelt abrufen. Der
+    Test rechnet die Summe nach: 60 + 40 aus einem 100-t-Kontrakt, Rest 20
+    ungedeckt. Ohne geteiltes Budget bekaeme jede Position die volle Restmenge
+    angeboten.
+  einheiten: >-
+    t/kg werden umgerechnet, Stueck auf Masse nicht — das waere eine Annahme
+    ueber das Gewicht. Eine unbekannte Einheit fuehrt zum Ueberspringen, nicht zu
+    einer geratenen Zahl.
+  kontraktseite: >-
+    Ausgehende Belege ziehen Verkaufskontrakte, eingehende Einkaufs- und
+    Zukaufkontrakte. Beide Richtungen sind gegeneinander getestet.
+  eigentum: >-
+    Fremdlager nur bei Auslagerung (eine Einlagerung ist Verwahrung, keine
+    Entnahme) und nur bei storage_type 'fremdware'. Kommissions- und Poolware
+    begruendet kein Kundeneigentum — waere dieser Filter offen, wuerde Ware zur
+    Auslagerung vorgeschlagen, die dem Haendler gehoert.
+  abrechnung: >-
+    Kontraktabruf ist 'goods', Fremdlagerentnahme 'services_only'. Kundeneigene
+    Ware wird bei der Auslagerung nicht nochmals verkauft; Lager-, Verlade- und
+    Frachtleistungen bleiben separat abrechenbar. Die Anzeige sagt das
+    ausdruecklich ("Keine Warenrechnung; Leistungen separat").
+  getrennte_gruppen: >-
+    Kontrakt und physischer Bestand bleiben getrennte Gruppen, damit niemand die
+    Mengen addiert — dieselbe Tonne kann in beiden auftauchen.
+  kein_zugriff: >-
+    Der Vorschlag reserviert und bucht nichts und sagt das auch. read_only,
+    reservation_checked=false und ein Hinweis, vor der Ausfuehrung erneut zu
+    pruefen.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-SOURCE-PROPOSALS-IMPLEMENTATION.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - app/services/docflow_source_proposals.py
+  - "app/api/v1/endpoints/docflow.py: nur der neue Endpunkt"
+  - packages/frontend-web/src/components/mask-builder/renderers/SourceProposalRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/DocumentSourceProposalRegion.tsx
+  - tests/test_docflow_source_proposals.py
+  - packages/frontend-web/src/__tests__/components/mask-builder/source-proposal-renderer.test.tsx
+
+acceptance:
+  - Partner, Artikel, Richtung, Zeitraum, Mengen und Einheiten werden beruecksichtigt.
+  - Teilvorschlaege aus mehreren Quellen, ungedeckte Restmenge wird benannt.
+  - Jeder Vorschlag nennt Quelle, Menge und Begruendung.
+  - Vorschlaege reservieren und buchen nichts.
+  - Tests und Dokumentation liegen vor.
+
+tests:
+  - "pytest tests/test_docflow_source_proposals.py — 18 gruen."
+  - "vitest source-proposal-renderer — 9 gruen."
+  - "tsc --noEmit exit 0 ohne Ausgabe; Dienst importiert, Endpunkt registriert."
+
+risks:
+  - >-
+    Die SQL-Pfade sind gegen eine laufende Datenbank nicht ausgefuehrt. Getestet
+    ist die Projektion, nicht die Abfrage — die Spaltennamen von kon_contract und
+    fremdwaren_einlagerung sind statisch uebernommen.
+  - >-
+    Die Restmenge ist eine Momentaufnahme gebuchter Bewegungen, keine Zusage
+    gegen gleichzeitige Reservierungen. Genau das steht im Hinweistext; wer
+    daraus eine Zusicherung macht, ueberdehnt den Vorschlag.
+
+external_gates:
+  - >-
+    Ausfuehrung gegen echte Kontrakt- und Fremdlagerdaten. Bis dahin ist die
+    Projektion belegt, die Datenbeschaffung nicht.
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Vorschlag ist eine Auskunft, keine Zusage. Er nennt Quelle, Menge und
+    Grund; erst die bestaetigte Ausfuehrung reserviert oder bucht.
+  architektur_vertrag: >-
+    Die Entscheidungslogik ist eine reine Funktion ohne Datenbank; die
+    Datenbeschaffung liegt im Dienst, die Anzeige im zentralen Mask-Builder. Kein
+    Vorschlagspfad an der Maske vorbei.
+  daten_vertrag: >-
+    Rein lesend. Keine Migration, keine Reservierung, keine Buchung.
+  test_vertrag: >-
+    Geprueft wird die Projektion, nicht die Abfrage. Jede neue Quellart braucht
+    Zusicherungen zu Budget, Einheit, Richtung und Abrechnungsart.
+  security_vertrag: >-
+    Mandant kommt ausschliesslich aus dem Anfragekontext, nie aus dem Rumpf;
+    Partner wird ueber Stammdaten aufgeloest, nie ueber Namensaehnlichkeit.
+  betriebs_vertrag: "Kein Rollout-Schritt; rein lesender Endpunkt."
+  dokumentations_vertrag: >-
+    Dieser Slice haelt Befund bei Uebernahme, fachliche Zusicherungen und die
+    beiden nicht ausgefuehrten Gates fest.

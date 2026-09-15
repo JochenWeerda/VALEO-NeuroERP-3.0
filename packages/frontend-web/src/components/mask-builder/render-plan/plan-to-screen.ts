@@ -78,6 +78,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
       keyboardShortcut: action.keyboardShortcut,
     })),
     workflow: plan.workflow,
+    sourceProposals: plan.sourceProposals,
     layout: {
       preferredMode: plan.shell.layoutMode,
       mobileMode: plan.shell.mobileMode,

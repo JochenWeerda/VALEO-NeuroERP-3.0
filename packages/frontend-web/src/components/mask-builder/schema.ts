@@ -320,6 +320,11 @@ export function resolveContextRailSections(
   return ['workflow', 'audit', 'copilot']
 }
 
+export interface ScreenSourceProposals {
+  /** Key in the current form payload containing the typed draft context. */
+  contextKey: string
+}
+
 export interface ScreenDefinition {
   schemaVersion: 1
   id: string
@@ -342,6 +347,7 @@ export interface ScreenDefinition {
   tables?: ScreenTableDefinition[]
   tiles?: ScreenTileDefinition[]
   calendar?: ScreenCalendarDefinition
+  sourceProposals?: ScreenSourceProposals
   twin?: ScreenTwinDefinition
   voice?: {
     enabled?: boolean

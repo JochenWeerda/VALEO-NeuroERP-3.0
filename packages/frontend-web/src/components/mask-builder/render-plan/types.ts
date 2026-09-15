@@ -238,6 +238,7 @@ export interface RenderPlan {
   summaryItems: ScreenSummaryItem[]
   tiles: RenderTilePlan[]
   calendar?: RenderCalendarPlan
+  sourceProposals?: { contextKey: string }
   twin?: RenderTwinPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>

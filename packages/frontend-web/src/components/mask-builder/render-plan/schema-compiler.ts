@@ -289,6 +289,7 @@ export function compileRenderPlan(
     tiles: compileTiles(schema),
     calendar: compileCalendar(schema),
     twin: compileTwin(schema),
+    sourceProposals: schema.sourceProposals ? { ...schema.sourceProposals } : undefined,
     visibleTabs,
     tabContent,
     rootFieldKeys: rootFields.map((field) => field.key),

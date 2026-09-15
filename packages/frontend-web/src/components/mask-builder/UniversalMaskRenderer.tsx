@@ -1,3 +1,4 @@
+import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
 import { type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { LazyTabs } from '@/components/ui/LazyTabs'
 import { cn } from '@/lib/utils'
@@ -26,6 +27,7 @@ import {
 
 interface UniversalMaskRendererProps {
   /** Preferred: pre-compiled render plan */
+  region?: 'sourceProposals'
   plan?: RenderPlan
   /** Legacy: raw screen definition (compiled internally once per reference) */
   screen?: ScreenDefinition
@@ -206,6 +208,7 @@ function RenderFromPlan({
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
+      {plan.sourceProposals ? <SourceProposalRenderer context={effectivePayload[plan.sourceProposals.contextKey]} /> : null}
 
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}
@@ -440,8 +443,14 @@ export function UniversalMaskRenderer({
   formState,
   workflowState,
   entityId,
+  region,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
+
+  if (region === 'sourceProposals') {
+    const definition = plan?.sourceProposals ?? screen?.sourceProposals
+    return <SourceProposalRenderer context={definition ? payload[definition.contextKey] : undefined} />
+  }
 
   if (plan) {
     return (

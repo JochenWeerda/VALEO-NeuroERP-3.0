@@ -517,3 +517,17 @@ async def reverse_document(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"reverse failed: {exc}") from exc
     return DocflowCommandResult(**result)
+
+
+# Draft inputs are read-only; tenant identity comes exclusively from request context.
+from app.core.tenant import get_tenant_id
+from app.services.docflow_source_proposals import DocflowSourceProposalService, SourceProposalRequest
+
+
+@router.post("/source-proposals", response_model=DocflowOut, summary="Kontrakt- und Fremdlagerquellen vorschlagen")
+def source_proposals(
+    body: SourceProposalRequest,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return DocflowSourceProposalService(db, tenant_id).propose(body)

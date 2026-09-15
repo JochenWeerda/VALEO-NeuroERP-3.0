@@ -11,6 +11,53 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - uebernommen und abgeschlossen 2026-09-15
+
+**Codex pausiert, der User hat die Uebernahme freigegeben.** Uebernommen wurde
+der **Abschluss**, nicht die Umsetzung: Codex' Stand war vollstaendig und
+lauffaehig — Dienst importiert, Endpunkt registriert, `tsc` ohne Ausgabe.
+**Ich habe nichts repariert, weil nichts kaputt war.** Gefehlt haben
+ausschliesslich Tests und Slice, also genau das, was Codex' eigene Abnahme
+verlangt.
+
+**Ergaenzt: 27 Tests.** 18 auf `build_proposals` — die datenbankfreie Mitte, wo
+die Fachlichkeit sitzt — und 9 auf die Anzeige.
+
+**Vier Zusicherungen, die mir beim Lesen wichtig genug fuer einen eigenen Test
+waren:**
+
+1. **Geteiltes Budget.** Zwei Positionen duerfen dieselbe Kontraktrestmenge
+   nicht doppelt abrufen. Der Test rechnet die Summe nach: 60 + 40 aus einem
+   100-t-Kontrakt, Rest 20 ungedeckt. Ohne geteiltes Budget bekaeme jede Position
+   die volle Restmenge angeboten — und zwei Positionen zusammen mehr, als der
+   Kontrakt hergibt. Codex hatte das richtig geloest; jetzt ist es festgehalten.
+2. **Kommissions- und Poolware ist kein Kundeneigentum.** Der Filter auf
+   `storage_type = 'fremdware'` ist der wichtigste in der ganzen Datei: waere er
+   offen, wuerde Ware zur Auslagerung vorgeschlagen, die dem Haendler gehoert —
+   und die Abrechnungsart „nur Leistungen" waere schlicht falsch.
+3. **Kundeneigene Ware wird nicht nochmals verkauft.** `billing` trennt `goods`
+   von `services_only`, und die Anzeige sagt es im Klartext („Keine
+   Warenrechnung; Leistungen separat"). Das ist die Stelle, an der ein Fehler
+   dem Kunden seine eigene Ware in Rechnung stellen wuerde.
+4. **Stueck wird nicht in Masse umgerechnet.** `unit_factor` gibt dafuer `None`
+   zurueck, und die Quelle wird uebersprungen statt mit einer geratenen Zahl
+   angeboten. Eine unbekannte Einheit fuehrt zu „nicht gedeckt", nicht zu einer
+   erfundenen Menge.
+
+**Zwei Dinge, die ausdruecklich nicht belegt sind** und die ich im Slice
+festgehalten habe: Die **SQL-Pfade** sind gegen keine Datenbank gelaufen —
+getestet ist die Projektion, nicht die Abfrage; die Spaltennamen von
+`kon_contract` und `fremdwaren_einlagerung` sind statisch uebernommen. Und die
+**Restmenge ist eine Momentaufnahme** gebuchter Bewegungen, keine Zusage gegen
+gleichzeitige Reservierungen. Genau das steht im Hinweistext des Dienstes; wer
+daraus eine Zusicherung macht, ueberdehnt den Vorschlag.
+
+**An Codex, wenn du zurueck bist:** Die Umsetzung ist unveraendert deine — ich
+habe nur Tests darum gelegt und den Slice geschrieben. Widersprich, wo ich eine
+Zusicherung festgeschrieben habe, die du anders gemeint hast; die Tests sind
+Beschreibung deines Verhaltens, nicht meine Vorgabe daran.
+
+
 ## FSX-DOC-LINKS - reserviert 2026-09-15
 
 **Owner:** Claude Code. **Ziel:** Verknuepfungstabelle fuer beteiligte Belege je
