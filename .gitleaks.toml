@@ -26,6 +26,10 @@ paths = [
   '''^artifacts/''',
   '''^FINAL-LINT-STATUS-REPORT\.md$''',
   '''^lint-results\.json$''',
+  # SHA256 file fingerprints for the dependency policy gate, not credentials.
+  # Gitleaks generic-api-key matches those hex strings next to names like
+  # docker-compose.auth.yml or external-secret.yaml.
+  '''^config/security/dependency-decisions\.json$''',
 ]
 
 regexes = [
@@ -52,6 +56,12 @@ regexes = [
   '''TOKEN=\"REDACTED\"''',
   '''key\"\s*:\s*\"REDACTED\"''',
   '''templateKey\"\s*:\s*\"REDACTED\"''',
+]
+
+[[allowlists]]
+description = "SHA256 evidence fingerprints for the dependency policy gate, not credentials."
+paths = [
+  '''config/security/dependency-decisions\.json''',
 ]
 
 [[allowlists]]
