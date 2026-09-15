@@ -290,6 +290,20 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     a("cockpit_content", not is_cockpit or has_cockpit_content,
       "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles or tables"))
 
+    # 16. missing_process_chain (UIX-091) — Belegmasken ohne Kette bleiben
+    # sichtbar unvollstaendig; nach Voll-Rollout wird die Warnung auf Error gehoben.
+    from app.core.process_chains import needs_process_chain
+
+    needs_pc = needs_process_chain(definition)
+    has_pc = bool((definition.get("processChain") or {}).get("chainId"))
+    a(
+        "missing_process_chain",
+        not needs_pc or has_pc,
+        "OK" if has_pc else (
+            "gate skipped" if not needs_pc else "detail/transaction document screen missing processChain"
+        ),
+    )
+
     # ── Summary ───────────────────────────────────────────────────────────────
     all_gates = mandatory + advisory
     failed_m = [g for g in mandatory if not g["passed"]]
@@ -319,7 +333,8 @@ async def get_mask_readiness(
 
     Advisory gates (nur Warnungen, kein Block):
     sort_whitelist, filter_columns, agent_contract, workflow_declared,
-    stable_test_selectors, table_query_contract.
+    stable_test_selectors, table_query_contract, cockpit_content,
+    missing_process_chain.
     """
     _ = tenant_id
     normalized = _normalize_mask_id(mask_id)

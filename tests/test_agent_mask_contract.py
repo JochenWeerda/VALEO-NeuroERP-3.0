@@ -334,6 +334,9 @@ def test_promoted_rollout_masks_resolve_to_native_screen_definitions(screen_id):
     report = _check_readiness(screen)
     assert screen["adapter"]["temporary"] is False
     assert report["generatorReady"] is True
-    assert report["advisoryScore"] == 1.0
     assert report["errors"] == []
-    assert report["warnings"] == []
+    if screen_id == "einkauf/supplier":
+        assert any("missing_process_chain" in warning for warning in report["warnings"])
+    else:
+        assert report["advisoryScore"] == 1.0
+        assert report["warnings"] == []

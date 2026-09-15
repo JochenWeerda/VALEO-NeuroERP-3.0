@@ -34,9 +34,11 @@ progress: >-
   ProcessRibbonRenderer (nav mit Chips, current gold, Klick-Navigation,
   deaktiviert ohne Route). 5 pytest (check-script) + 7 Vitest (Compiler+Renderer).
   tsc 0, ESLint sauber. PIPELINE-Tail 2026-09-15 (Cursor): processChain-SD-Feld
-  + Compiler-Einbindung in RenderShellPlan + zentraler Renderer. OFFEN im Kern:
-  Registry-Katalog-Feld processChains aus dem Backend, Readiness-Advisory
-  missing_process_chain, check-script in quality-gate-CI, Playwright, SD-Massenpflege.
+  + Compiler-Einbindung in RenderShellPlan + zentraler Renderer.
+  CONTRACT-Tail 2026-09-15 (Cursor): Katalog+Mitgliedschaft in get_screen_definition,
+  Readiness-Advisory missing_process_chain, Quality-Gate-Step, Playwright zwei Ketten.
+  OFFEN im Kern: SD-Massenpflege ueber die YAML-Mitglieder hinaus, Warnung auf Error
+  nach Voll-Rollout.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

@@ -236,6 +236,9 @@ jobs:
       - name: Godfile regression check (>1000 LOC)
         run: python scripts/check_file_size.py --threshold 12
 
+      - name: Process chains registry (UIX-091)
+        run: python scripts/check_process_chains.py
+
       - name: Mask performance contract (UIX-PERF-GATE-006)
         # Gepinnte Toolchain + --transpile-only: Backend-Job hat kein pnpm install;
         # neuere npx-TypeScript-Versionen lehnen die Repo-tsconfig ab (TS5011/5101/5109).

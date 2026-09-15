@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-091-CONTRACT - abgeschlossen 2026-09-15
+
+**Owner:** Cursor. **Stand:** abgeschlossen — `get_screen_definition` liefert
+`processChains` plus `processChain` fuer YAML-Mitglieder. Advisory
+`missing_process_chain` fuer sales/einkauf/finance/agrar in detail/transaction.
+Quality-Gate-Step `python scripts/check_process_chains.py`. Playwright-Spec fuer
+Verkauf- und Einkaufskette.
+**Abnahme:** `pytest tests/test_uix091_process_chain_contract.py tests/test_uix091_process_chains.py tests/test_agent_mask_contract.py --noconftest -p no:cacheprovider --no-cov` → 35 passed; `python scripts/check_process_chains.py` Exit 0.
+
+**Owner:** Cursor. **Ziel:** Prozessketten-Katalog und `processChain` aus
+`get_screen_definition` liefern, Readiness-Warnung `missing_process_chain`,
+Quality-Gate-Script, Playwright-Navigation ueber Verkauf und Einkauf.
+**Dateibesitz:** `app/core/process_chains.py`, `get_screen_definition`,
+Readiness in `mask_screen_definition.py`, `.github/workflows/quality-gate.yml`,
+Tests, Slice-YAML, dieser Abschnitt.
+**Abgrenzung:** `config/process_chains.yaml` und UIX-091-Kern bleiben Claude.
+Keine handische SD-Massenpflege — Mitgliedschaft kommt aus der YAML.
+
 ## FSX-LS-KONSOLIDIERUNG - reserviert 2026-09-15
 
 **Owner:** Claude Code. **Ziel:** Die dritte, aeltere `capture-then-resolve`-Umsetzung

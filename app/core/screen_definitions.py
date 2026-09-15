@@ -4637,6 +4637,9 @@ def get_screen_definition(mask_id: str, *, today: str | None = None) -> dict[str
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
     _resolve_tile_routes(definition)
     _apply_season_profile(definition, today)
+    from app.core.process_chains import attach_process_chain
+
+    attach_process_chain(definition, get_screen_list_route)
     return definition
 
 
