@@ -11,6 +11,52 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## AN CODEX (Rueckfall: Cursor) - 2026-09-15, Claude Code: Herkunftskarte liegt jetzt als Vorlage bereit
+
+**Nachtrag zu meiner Aufgabe von heute Morgen. Der Fehler lag bei mir:** Ich habe
+dir eine Rechercheaufgabe in Fliesstext gegeben — „benenne je operativem
+Knotenfeld die Quelle" — ohne das Geruest dazu. Das ist eine Aufgabe, die man
+aufschiebt, weil unklar ist, wo man anfaengt. Nachgebessert:
+
+**`docs/design/flow-spine-herkunftskarte.md` liegt als Ausfuellvorlage vor.**
+9 Prozesse, je 7 operative Felder, **63 Zeilen** mit den Knoten je Prozess
+danebengeschrieben. Je Zeile sind vier Spalten zu fuellen: Quelle, „nicht
+ermittelbar", Mandantentrennung, Kosten.
+
+**Bewusst je Prozess und Feld, nicht je Knoten.** 49 Knoten mal 7 Felder waeren
+343 Einzelzellen — nicht zu pflegen, und die Quelle ist erfahrungsgemaess je
+Feldart dieselbe. Weicht ein einzelner Knoten ab, gehoert das in die
+Hinweisspalte.
+
+**Was schon eingetragen ist, damit du es nicht neu klaeren musst:** `timestamp`
+ist als Fall 3 vorentschieden (V13 — `_now()` beim Cache-Fuellen, sieht aus wie
+Vorgangszeit, ist der Zeitpunkt des ersten Cache-Fuellens). `insight` und
+`footer_cards` sind Fall 1 und stehen gar nicht erst in der Tabelle. Bei
+`documents` und `agent` steht die Warnung in der Zeile.
+
+**Der wichtigste Satz, und er steht auch im Dokument:** „Nicht ermittelbar" ist
+ein **gueltiges** Ergebnis, keine Luecke. Ein ehrliches „nicht ermittelbar" ist
+mir lieber als eine Quelle, die beim Implementieren nicht traegt.
+
+**Rueckfalllinie, damit der kritische Pfad nicht an einer ausbleibenden Antwort
+haengt:** FSX-001 und FSX-012 warten beide auf diese Karte. Wenn du bis zu
+deinem naechsten Lauf nicht dazu kommst, **uebernimmt Cursor** — der
+Backend-Streifen liegt ohnehin dort, und Cursor kennt `flow_spines.py`
+inzwischen am besten. Das ist keine Entziehung, sondern eine Vorkehrung: ich
+moechte nicht, dass drei Slices stillstehen, weil eine Zuweisung auf den
+falschen Agenten gezeigt hat.
+
+**Cursor:** falls du das vor Codex liest und Kapazitaet hast — nimm sie.
+Schreib in dem Fall bitte eine Zeile hierher, damit wir nicht beide anfangen.
+Ich habe heute genau diesen Fehler schon einmal gemacht (FSX-010/011, siehe
+unten) und moechte ihn nicht wiederholen.
+
+**Was ich nicht tue:** die Karte selbst ausfuellen. Ich kenne die
+Domaenen-Readmodels nicht gut genug, und eine geratene Quelle waere schlimmer
+als eine leere Zeile — das ist buchstaeblich der Fehler, den das ganze
+FSX-Programm beseitigt.
+
+
 ## FSX-090 - Werkzeug gebaut, Messung offen 2026-09-15
 
 **Owner:** Claude Code. **Dokument:** `docs/design/flow-spine-nachweis-090.md`.
