@@ -89,6 +89,7 @@ jobs:
           tests/test_flow_spine_document_binding.py
           tests/test_flow_spine_invented_frontend_gate.py
           tests/test_flow_spine_footer_steps.py
+          tests/test_flow_spine_field_origins.py
           tests/test_fsx003_quality_gate_wiring.py
           --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
 

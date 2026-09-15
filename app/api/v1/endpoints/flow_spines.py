@@ -179,6 +179,28 @@ def _get_instance_or_404(db: Session, process_key: str, instance_id: str) -> Flo
     return inst
 
 
+def _latest_events_by_node(
+    db: Session, instance_id: str, tenant_id: str
+) -> dict[str, dict[str, Any]]:
+    """Eine Abfrage je Instanz: juengstes Ereignis je node_id (Herkunftskarte FSX-001)."""
+    rows = (
+        db.query(FlowSpineInstanceEvent)
+        .filter(
+            FlowSpineInstanceEvent.instance_id == instance_id,
+            FlowSpineInstanceEvent.tenant_id == tenant_id,
+            FlowSpineInstanceEvent.node_id.isnot(None),
+            FlowSpineInstanceEvent.node_id != "",
+        )
+        .order_by(FlowSpineInstanceEvent.created_at.desc())
+        .all()
+    )
+    latest: dict[str, dict[str, Any]] = {}
+    for event in rows:
+        if event.node_id not in latest:
+            latest[event.node_id] = _event_to_dict(event)
+    return latest
+
+
 def _parse_datetime(value: str | None, field_name: str) -> datetime | None:
     if not value:
         return None
@@ -381,12 +403,20 @@ def get_workspace(
 
     if instance_id:
         inst = db.get(FlowSpineInstance, instance_id)
-        if inst and inst.process_key == process_key and inst.tenant_id == tenant_id:
-            workspace = merge_instance_statuses(workspace, _instance_to_dict(inst))
-            if inst.customer_id:
-                customer_data = _resolve_customer_data(db, inst.tenant_id, inst.customer_id)
-                if customer_data:
-                    workspace["customer_data"] = customer_data
+        if not inst or inst.process_key != process_key or inst.tenant_id != tenant_id:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Instance '{instance_id}' not found for process '{process_key}'",
+            )
+        workspace = merge_instance_statuses(
+            workspace,
+            _instance_to_dict(inst),
+            node_events=_latest_events_by_node(db, inst.id, tenant_id),
+        )
+        if inst.customer_id:
+            customer_data = _resolve_customer_data(db, inst.tenant_id, inst.customer_id)
+            if customer_data:
+                workspace["customer_data"] = customer_data
         return JSONResponse(content=workspace)
 
     etag = _flow_spine_etag(workspace)

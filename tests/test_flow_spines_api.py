@@ -370,6 +370,87 @@ def test_flow_spine_instance_transition(monkeypatch, db):
         db.commit()
 
 
+def test_workspace_unknown_instance_is_404_not_catalog(db):
+    _require_flow_spine_table(db)
+    response = client.get(
+        "/api/v1/process/flow-spines/order-to-cash?instance_id=00000000-0000-0000-0000-000000000000",
+        headers=AUTH_HEADERS,
+    )
+    assert response.status_code == 404
+
+
+def test_workspace_instance_fields_match_declared_event_source(monkeypatch, db):
+    """FSX-001: timestamp/detail_rows gegen das Knotenereignis, undeclared Felder leer."""
+    _require_flow_spine_table(db)
+    _require_flow_spine_event_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-FSX001-001"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    create_resp = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={"subject": "Herkunftskarte"},
+        headers=AUTH_HEADERS,
+    )
+    assert create_resp.status_code == 201
+    instance_id = create_resp.json()["instance_id"]
+
+    trans_resp = client.post(
+        f"/api/v1/process/flow-spines/order-to-cash/instances/{instance_id}/transitions",
+        json={
+            "node_id": "order",
+            "new_status": "ok",
+            "action_label": "Auftrag bestaetigt",
+            "user_id": "user-origin",
+        },
+        headers=AUTH_HEADERS,
+    )
+    assert trans_resp.status_code == 200
+
+    timeline_resp = client.get(
+        f"/api/v1/process/flow-spines/order-to-cash/instances/{instance_id}/timeline",
+        headers=AUTH_HEADERS,
+    )
+    assert timeline_resp.status_code == 200
+    order_events = [
+        event for event in timeline_resp.json()["events"] if event.get("node_id") == "order"
+    ]
+    assert order_events, "Transition muss ein Knotenereignis schreiben"
+    source = order_events[-1]
+
+    workspace_resp = client.get(
+        f"/api/v1/process/flow-spines/order-to-cash?instance_id={instance_id}",
+        headers=AUTH_HEADERS,
+    )
+    assert workspace_resp.status_code == 200
+    body = workspace_resp.json()
+    order = next(node for node in body["nodes"] if node["id"] == "order")
+    delivery = next(node for node in body["nodes"] if node["id"] == "delivery")
+
+    assert order["timestamp"] == source["created_at"]
+    rows = {row["label"]: row["value"] for row in order["detail_rows"]}
+    assert rows["Aktion"] == source["event_type"]
+    assert rows["Akteur"] == source["actor_id"]
+    assert rows["Vorgang"] == "WF-FSX001-001"
+    assert order["metric"] is None
+    assert order["kpis"] == []
+    assert order["documents"] == []
+    assert order["agent"] is None
+    assert order["data_state"] == "instance"
+
+    assert delivery["timestamp"] is None
+    assert delivery["metric"] is None
+    assert delivery["agent"] is None
+
+    inst = db.get(FlowSpineInstance, instance_id)
+    if inst:
+        db.delete(inst)
+        db.commit()
+
+
 def test_flow_spine_instance_delete(monkeypatch, db):
     _require_flow_spine_table(db)
 

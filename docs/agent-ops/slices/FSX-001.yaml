@@ -1,0 +1,55 @@
+slice_id: FSX-001
+id: FSX-001
+title: Instanzbezug der Knotendaten gegen deklarierte Herkunft
+owner: Cursor Auto
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-001-QUELLENKARTE
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+coordination: >-
+  Inhalt der Herkunftskarte kommt aus docs/design/flow-spine-herkunftskarte.md
+  (Claude in Vertretung fuer Codex, Arbeitsbaum). Dieser Slice nimmt sie als
+  Orakel, ersetzt die Datei nicht und committet sie nicht. Maschinenlesbare
+  Kopie: app/core/flow_spine_field_origins.yaml.
+goal: >-
+  Im Instanzpfad stammen timestamp und detail_rows aus dem juengsten
+  Knotenereignis. Felder ohne Quelle bleiben leer. Der Vertragstest prueft gegen
+  diese Quelle, nicht gegen einen zweiten Vorgang.
+file_ownership:
+  - docs/agent-ops/slices/FSX-001.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - app/core/flow_spine_registry.py
+  - app/core/flow_spine_field_origins.yaml
+  - app/api/v1/endpoints/flow_spines.py
+  - tests/test_flow_spine_field_origins.py
+  - tests/test_flow_spine_data_provenance.py
+  - tests/test_flow_spines_api.py
+acceptance:
+  - YAML deckt jedes operative Knotenfeld plus insight/footer_cards ab.
+  - Merge fuellt timestamp/detail_rows nur aus node_events plus Instanzfeldern.
+  - metric, submetric, kpis, documents, agent bleiben im Instanzpfad leer.
+  - GET ?instance_id= unbekannte ID liefert 404, nie den Katalog.
+  - HTTP-Test vergleicht Workspace-timestamp mit dem Timeline-Ereignis derselben Instanz.
+tests:
+  - >-
+    pytest tests/test_flow_spine_field_origins.py
+    tests/test_flow_spine_data_provenance.py
+    --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
+  - pytest tests/test_flow_spines_api.py -k "workspace_instance or unknown_instance" --no-cov -q
+risks:
+  - risiko: Hold-Ereignisse ohne node_id landen an keinem Knoten.
+    bewertung: Die Karte verlangt node_id; die Pause-Zeile in der Timeline bleibt die Quelle, bis der Aufrufer node_id setzt.
+  - risiko: Herkunftskarte.md ist uncommitted fremder Dateibesitz.
+    bewertung: YAML ist das Orakel dieses Slices; Markdown bleibt bei Codex/Claude.
+ai_harness:
+  fachlicher_vertrag: >-
+    Zwei Instanzen mit verschiedenen Werten belegen keine Quelle. Der Wert muss
+    dem juengsten Knotenereignis derselben Instanz gleichen.
+  architektur_vertrag: Eine Abfrage je Instanz, tenant_id Pflicht, Katalogpfad ungecacht unberuehrt.
+  daten_vertrag: Undeclared Felder bleiben leer, auch wenn das Registry Beispiele hat.
+  test_vertrag: Source-Vertrag ohne DB plus HTTP gegen Timeline.
+  security_vertrag: tenant_id in der Ereignisabfrage; 404 statt Katalog bei fremder Instanz.
+  betriebs_vertrag: Keine Migration.
+  dokumentations_vertrag: YAML, Slice, Workboard, Masterplan-V13-Zuordnung.

@@ -43,6 +43,7 @@ def test_fsx_gates_fuehrt_provenance_bindung_und_frontend_aus() -> None:
     assert "tests/test_flow_spine_data_provenance.py" in block
     assert "tests/test_flow_spine_document_binding.py" in block
     assert "tests/test_flow_spine_footer_steps.py" in block
+    assert "tests/test_flow_spine_field_origins.py" in block
     assert "scripts/check_flow_spine_invented_frontend_values.py" in block
     assert "--noconftest" in block
     assert "requirements.txt" in block

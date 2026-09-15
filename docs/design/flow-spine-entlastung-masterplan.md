@@ -96,17 +96,12 @@ Daten —, danach die Datenbindung (FSX-001) und der zentrale UI-Vertrag (FSX-03
   Wert **gegen diese Quelle**, nicht gegen einen anderen Vorgang. Felder ohne deklarierte Quelle
   fallen nach FSX-003 Fall 3.
   Registry-Werte bleiben ausschließlich Vorgaben für den Katalogfall ohne Instanz.
-  **Herkunftskarte (verbindlich, maschinenlesbar):** Liefergegenstand von FSX-001 ist eine
-  explizite Karte Feld → Quelle, neben dem Merge-Code, nicht implizit in ihm versteckt. Ohne
-  diese Karte hat der Vertragstest kein Orakel und prüft wieder nur „irgendein Wert“.
-  - Format: YAML oder JSON, versioniert im Repo (Vorschlag:
-    `app/core/flow_spine_field_origins.yaml`), je `process_key` und Knotenfeld.
-  - Jeder Eintrag benennt genau eine Quelle: Instanzattribut
-    (`instance.node_statuses`, `instance.linked_document_id`, …) **oder** ein benanntes
-    Domänen-Readmodel (Modul + Query/Service, nicht „wird irgendwo geladen“).
-  - Felder ohne Eintrag gelten als undeclared → FSX-003 Fall 3 im Instanzpfad.
-  - `insight` und `footer_cards` stehen in der Karte ausdrücklich als `static` (Fall 1)
-    oder als operative Quelle; Offenlassen ist kein zulässiger Zustand.
+  **Herkunftskarte (verbindlich, maschinenlesbar):** `app/core/flow_spine_field_origins.yaml`.
+  Inhaltlich entspricht sie `docs/design/flow-spine-herkunftskarte.md`: `timestamp` und
+  `detail_rows` kommen aus dem jüngsten Knotenereignis (eine Abfrage je Instanz, mit
+  `tenant_id`); `metric`, `submetric`, `kpis`, `documents` und `agent` sind undeclared und
+  bleiben leer. V13 bleibt als Befund richtig (Registry-`_now()` ist keine Vorgangszeit) und
+  ist als Zuordnung überholt — die Vorgangszeit steht in `ops_flow_spine_instance_events`.
   - Der Vertragstest lädt die Karte und vergleicht den gerenderten Wert mit der
     deklarierten Quelle derselben Instanz. Ein zweiter Vorgang ist kein Vergleichsmaßstab.
 

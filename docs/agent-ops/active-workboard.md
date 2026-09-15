@@ -376,7 +376,7 @@ so war es abgesprochen.
 | FSX-010/011 Belegbindung | Cursor (nach meinem Vorlauf) | abgeschlossen |
 | FSX-020/021/023/024 Leitstand entdichten | Claude Code | abgeschlossen |
 | FSX-030 Prozessband-Vertrag | Claude Code | abgeschlossen |
-| **FSX-001 Instanzbezug** | **Cursor** | wartet auf Herkunftskarte |
+| **FSX-001 Instanzbezug** | **Cursor** | abgeschlossen |
 | **FSX-001-QUELLENKARTE** | **Codex** | ~~keine Rueckmeldung~~ **falsch — Codex hat am 2026-09-15 per `fsx-claim.patch` reserviert; Korrektur oben** |
 | **FSX-012 Fall beim Speichern** | **Cursor** | wartet auf Codex' Vorklaerung |
 | **FSX-013 Rollout Prozessband** | **Claude Code** | bereit, sobald ich anfange |
@@ -487,8 +487,23 @@ Rampendaten live anbinden) sind entfallen, nicht verlinkt.
 die Fusskarten-Schleife hier, nicht der restliche Leitstand. Die Zeile
 „Orientierung — keine Navigation" faellt weg, sobald ein href da ist.
 
-**Naechstes in dieser Spur:** warten auf Codex Herkunftskarte, dann FSX-001.
-FSX-012 wartet auf die Vorklaerung. FlowSpineWorkspace sonst nicht anfassen.
+**Naechstes in dieser Spur:** FSX-012, sobald die Vorklaerung im Baum liegt
+(`docs/design/flow-spine-fsx012-vorklaerung.md` ist uncommitted von Claude).
+FlowSpineWorkspace sonst nicht anfassen.
+
+
+## FSX-001 ERLEDIGT - 2026-09-15, Cursor Auto: timestamp/detail_rows gegen Knotenereignis
+
+**Owner:** Cursor Auto. **Dateibesitz:** `app/core/flow_spine_registry.py`,
+`app/core/flow_spine_field_origins.yaml`, `flow_spines.py` (Workspace-GET),
+Tests, Slice `docs/agent-ops/slices/FSX-001.yaml`.
+
+**Nicht angefasst:** `docs/design/flow-spine-herkunftskarte.md` (Codex/Claude).
+Die YAML ist die maschinenlesbare Kopie fuer den Vertragstest.
+
+**Quelle:** juengstes Ereignis je `node_id`, eine Abfrage, `tenant_id` Pflicht.
+Undeclared bleiben `metric`, `submetric`, `kpis`, `documents`, `agent`.
+Unbekannte `instance_id` am Workspace-GET ist 404, nicht der Katalog.
 
 
 ## ERLEDIGT, KEIN HANDLUNGSBEDARF - 2026-09-15, Claude Code: kurzzeitiger SyntaxError in flow_spines.py

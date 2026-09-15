@@ -628,32 +628,69 @@ def invalidate_flow_spine_cache(process_key: str | None = None) -> None:
         _catalog_json_cache.clear()
 
 
-def merge_instance_statuses(workspace: dict, instance: dict) -> dict:
-    """
-    Overlay node statuses from an instance onto a workspace dict.
+def _detail_rows_from_pairs(pairs: list[tuple[str, object | None]]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for label, value in pairs:
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            rows.append({"label": label, "value": text})
+    return rows
 
-    Iterates workspace["nodes"] and, for each node whose id appears in
-    instance["node_statuses"], sets node["status"] to the stored value.
-    Also stamps instance_label and instance_id at the workspace root.
 
-    Returns the modified workspace (already a deep copy from get_flow_spine_workspace).
+def merge_instance_statuses(
+    workspace: dict,
+    instance: dict,
+    node_events: dict[str, dict] | None = None,
+) -> dict:
+    """Overlay instance status and declared operational fields onto a workspace.
+
+    Registry-Vorgaben werden zuerst geleert (FSX-003). Anschliessend fuellt
+    FSX-001 nur Felder mit deklarierter Quelle in flow_spine_field_origins.yaml:
+    timestamp und detail_rows aus dem juengsten Knotenereignis, plus instanzweite
+    Vorgangsfelder. metric/submetric/kpis/documents/agent bleiben leer.
+
+    node_events maps node_id → event dict (created_at, event_type, actor_id,
+    reason_*). Die Abfrage selbst liegt beim Aufrufer, eine je Instanz.
     """
     node_statuses: dict[str, str] = instance.get("node_statuses") or {}
+    events = node_events or {}
+    instance_rows = _detail_rows_from_pairs(
+        [
+            ("Vorgang", instance.get("case_number")),
+            ("Einstieg", instance.get("entry_mode")),
+            ("Bearbeiter", instance.get("assigned_owner")),
+            ("Vorgangsstatus", instance.get("business_status")),
+        ]
+    )
     workspace["content_mode"] = CONTENT_MODE_INSTANCE
     for node in workspace.get("nodes", []):
         node_id = node.get("id")
         if node_id and node_id in node_statuses:
             node["status"] = node_statuses[node_id]
 
-        # FSX-003 Fall 3: Im Instanzpfad gibt es fuer die operativen Felder noch
-        # keine Quelle (FSX-001 liefert sie nach). Bis dahin werden die
-        # Registry-Vorgaben geleert statt als Werte dieses Vorgangs ausgegeben.
-        # Die Definitionsfelder (Label, Icon, Reihenfolge, Beschreibung,
-        # Zielrouten) bleiben unangetastet.
         for field in OPERATIONAL_NODE_FIELDS:
             if field in node:
                 node[field] = copy.deepcopy(_OPERATIONAL_EMPTY[field])
-        node["data_state"] = "not_determined"
+
+        event = events.get(node_id) if node_id else None
+        event_rows: list[dict[str, str]] = []
+        if event:
+            node["timestamp"] = event.get("created_at")
+            event_rows = _detail_rows_from_pairs(
+                [
+                    ("Aktion", event.get("event_type")),
+                    ("Akteur", event.get("actor_id")),
+                    ("Grundkategorie", event.get("reason_category")),
+                    ("Grund", event.get("reason_code")),
+                    ("Hinweis", event.get("reason_note")),
+                ]
+            )
+        node["detail_rows"] = event_rows + instance_rows
+        node["data_state"] = (
+            "instance" if node.get("timestamp") or node.get("detail_rows") else "not_determined"
+        )
 
     if instance.get("label"):
         workspace["instance_label"] = instance["label"]

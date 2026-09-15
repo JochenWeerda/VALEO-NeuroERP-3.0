@@ -1,0 +1,41 @@
+# FSX-001 — Herkunft operativer Flow-Spine-Knotenfelder.
+# Quellen haengen am Vorgang, nicht am Prozess; deshalb eine Default-Karte
+# fuer alle process_key. Knotenabweichungen kaemen unter `overrides`.
+#
+# undeclared: true  → Instanzpfad bleibt leer (FSX-003 Fall 3).
+# source: benannte Spalte / Abfrage. Der Vertragstest prueft gegen diese Quelle.
+
+schema_version: 1
+static_fields:
+  insight: process_definition
+  footer_cards: process_definition
+
+defaults:
+  timestamp:
+    undeclared: false
+    source: FlowSpineInstanceEvent.created_at
+    query: latest_event_per_node
+    tenant_filter: ops_flow_spine_instance_events.tenant_id
+  detail_rows:
+    undeclared: false
+    source: FlowSpineInstanceEvent.event_type,actor_id,reason_category,reason_code,reason_note
+    instance_fields:
+      - case_number
+      - entry_mode
+      - assigned_owner
+      - business_status
+    query: latest_event_per_node
+    tenant_filter: ops_flow_spine_instance_events.tenant_id
+  metric:
+    undeclared: true
+  submetric:
+    undeclared: true
+  kpis:
+    undeclared: true
+  documents:
+    undeclared: true
+    note: Instanzbeleg existiert, Knotenzuordnung fehlt — gehoert in den Vorgangskopf.
+  agent:
+    undeclared: true
+
+overrides: {}

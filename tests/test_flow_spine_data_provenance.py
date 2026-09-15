@@ -124,7 +124,16 @@ def test_inhaltsmodus_wird_ausgewiesen(process_key: str) -> None:
         get_flow_spine_workspace(process_key), _instance(process_key)
     )
     assert merged["content_mode"] == CONTENT_MODE_INSTANCE
-    assert all(node.get("data_state") == "not_determined" for node in merged["nodes"])
+    for node in merged["nodes"]:
+        assert node.get("metric") is None
+        assert node.get("submetric") is None
+        assert node.get("kpis") == []
+        assert node.get("documents") == []
+        assert node.get("agent") is None
+        if node.get("timestamp") or node.get("detail_rows"):
+            assert node.get("data_state") == "instance"
+        else:
+            assert node.get("data_state") == "not_determined"
 
 
 def test_feldlisten_sind_ueberschneidungsfrei_und_vollstaendig() -> None:
