@@ -1,0 +1,135 @@
+slice_id: FSX-DOC-LINKS
+id: FSX-DOC-LINKS
+title: Verknuepfungstabelle fuer beteiligte Belege je Flow-Spine-Vorgang
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-012
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+befund: docs/design/flow-spine-nm-bindungskonflikt.md
+coordination: >-
+  Backend Flow Spine lag bei Cursor, das Belegmodell bei Codex. Dieser Slice
+  wurde auf Anweisung des Users vorgezogen und vor Beginn im Workboard
+  geclaimt. Kein Eingriff in Codex' laufende Arbeit an docflow und den
+  Quellvorschlaegen.
+goal: >-
+  Den latenten Widerspruch aufloesen, bevor er ausloest: Das n:m-Belegmodell
+  verlangt, dass sich eine Rechnung an denselben Vorgang haengt wie der
+  Lieferschein — waehrend FSX-012 das Umbiegen des fuehrenden Belegs zu Recht
+  mit 409 abweist. Beides geht nur, wenn fuehrender und beteiligte Belege
+  getrennte Dinge sind.
+
+warum_jetzt: >-
+  Heute nutzen nur zwei Belegarten capture-then-resolve (purchase_order,
+  delivery_note), also gibt es je Prozess genau einen bindenden Beleg und der
+  Guard kann nicht ausloesen. Sobald die zweite Belegart eines Prozesses
+  umgestellt wird, sieht ein Nutzer "bereits an einen anderen Beleg gebunden"
+  fuer eine gewoehnliche Belegkette — und die naheliegende Schnellkorrektur
+  waere das Aufweichen des Guards. Deshalb die Tabelle vorher.
+
+entscheidungen:
+  fuehrender_beleg_bleibt_wo_er_ist: >-
+    linked_document_id/-type auf der Instanz bleiben unveraendert. Dort haengt
+    der partielle Unique-Index aus FSX-011, und dort greift der Schutz aus
+    FSX-012. Beide wurden nicht angefasst; ein Test haelt fest, dass sie noch da
+    sind.
+  keine_globale_eindeutigkeit: >-
+    Auf (tenant_id, document_type, document_id) gibt es bewusst KEINE
+    Eindeutigkeit. Eine Sammelrechnung ueber drei Lieferscheine gehoert zu drei
+    Vorgaengen — eine globale Eindeutigkeit wuerde genau das verbieten. Ein Test
+    verbietet jede Eindeutigkeit ohne instance_id.
+  eindeutig_je_vorgang: >-
+    (tenant_id, instance_id, document_type, document_id) ist eindeutig. Das
+    macht das Anhaengen idempotent, und aus demselben Grund wie bei FSX-011:
+    ein Wiederholungsversuch nach einem Teilfehler darf nichts verdoppeln.
+  keine_mengen: >-
+    Die Tabelle traegt keine Menge und keine Einheit. Welche Teilmenge einer
+    Lieferposition auf welche Rechnungsposition laeuft, ist das
+    positionsbezogene n:m-Modell und gehoert in den Belegfluss. Eine
+    Mengenspalte hier waere der Anfang eines zweiten, schwaecheren Belegflusses
+    neben dem eigentlichen — ein Test verbietet sie.
+  rueckwaertssuche_ohne_prozess: >-
+    GET /documents/{document_type}/{document_id}/instances liegt bewusst nicht
+    unter /{process_key}/. Eine Sammelrechnung muss auffindbar sein, ohne dass
+    der Aufrufer den Prozess vorher kennt. Die Antwort unterscheidet role
+    "leading" von "participant" — "hiermit eroeffnet" und "gehoert auch dazu"
+    sind verschiedene Aussagen.
+
+umsetzung:
+  - >-
+    Modell FlowSpineInstanceDocument in app/domains/operations/models.py
+    (Tabelle domain_ops.ops_flow_spine_instance_documents).
+  - >-
+    Migration flow_spine_instance_documents_20260915, angehaengt an
+    flow_spine_document_link_unique_20260915; Single Head bestaetigt.
+  - >-
+    Drei Endpunkte am Vorgang: Liste (fuehrend und beteiligt getrennt
+    ausgewiesen), Anhaengen (idempotent, IntegrityError wird aufgeloest),
+    Loesen. Dazu die prozessuebergreifende Rueckwaertssuche.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-DOC-LINKS.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - "app/domains/operations/models.py: nur die neue Tabelle"
+  - alembic/versions/flow_spine_instance_documents_20260915.py
+  - "app/api/v1/endpoints/flow_spines.py: nur die neuen Document-Endpunkte"
+  - tests/test_flow_spine_instance_documents.py
+
+acceptance:
+  - Ein Beleg kann in mehreren Vorgaengen beteiligt sein.
+  - Derselbe Beleg nicht zweimal im selben Vorgang; Anhaengen ist idempotent.
+  - Der fuehrende Beleg bleibt unveraendert und weiterhin geschuetzt.
+  - Rueckwaertssuche findet Vorgaenge prozessuebergreifend und trennt die Rollen.
+  - Keine Mengen in der Tabelle.
+
+tests:
+  - >-
+    tests/test_flow_spine_instance_documents.py — 10 Tests gruen. Sie pruefen
+    nicht die Existenz der Tabelle, sondern die beiden Kardinalitaeten und die
+    Abwesenheit dessen, was nicht hierher gehoert (globale Eindeutigkeit,
+    Mengen, Aufweichung des Guards).
+  - >-
+    Zusammen mit test_flow_spine_document_binding und
+    test_flow_spine_data_provenance: 72 Tests gruen.
+  - "scripts/check_alembic_single_head.py: OK."
+
+risks:
+  - >-
+    Die Tabelle ist angelegt, aber noch von niemandem benutzt. Der Nutzen
+    entsteht erst, wenn die zweite capture-then-resolve-Policy kommt — das war
+    der Zweck der Reihenfolge.
+  - >-
+    Die Endpunkte sind gegen eine laufende PostgreSQL-Instanz nicht ausgefuehrt.
+    Modell, Migrationstext und Endpunktvertrag sind statisch geprueft, der
+    Router laedt.
+
+external_gates:
+  - "alembic upgrade head, bevor die Endpunkte benutzt werden."
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Vorgang hat genau einen fuehrenden Einstiegsbeleg und beliebig viele
+    weitere beteiligte Belege. Ein Beleg kann zu mehreren Vorgaengen gehoeren.
+  architektur_vertrag: >-
+    Eindeutigkeit des Vorgangs haengt am fuehrenden Beleg (FSX-011), Beteiligung
+    haengt an der Verknuepfungstabelle, Mengen haengen am Belegfluss. Drei
+    Dinge, drei Orte — vorher war es ein Feld.
+  daten_vertrag: >-
+    Neue Tabelle mit FK auf die Instanz (ON DELETE CASCADE), ein UNIQUE je
+    Vorgang und ein nicht-eindeutiger Rueckwaerts-Index. Keine Datenmutation an
+    bestehenden Tabellen.
+  test_vertrag: >-
+    Die Tests halten die beiden Kardinalitaeten gegeneinander: keine
+    Eindeutigkeit ohne instance_id (sonst faellt die Sammelrechnung), und die
+    Eindeutigkeit je Vorgang muss da sein (sonst ist Anhaengen nicht idempotent).
+  security_vertrag: >-
+    tenant_id ist Teil des Schluessels und jeder Abfrage; die Endpunkte
+    validieren den Vorgang ueber _get_instance_or_404, also mit Mandant und
+    Prozess.
+  betriebs_vertrag: "Eine Migration anzuwenden; die Tabelle startet leer."
+  dokumentations_vertrag: >-
+    Der aufgeloeste Widerspruch steht in
+    docs/design/flow-spine-nm-bindungskonflikt.md; dieser Slice haelt die
+    Umsetzung und die bewussten Auslassungen fest.

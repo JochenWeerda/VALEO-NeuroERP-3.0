@@ -76,6 +76,27 @@ Dann gilt beides ohne Widerspruch:
   auftauchen — was Codex ausdruecklich verlangt und mit einem einzelnen Feld
   nicht geht.
 
+## Aufgeloest 2026-09-15 — FSX-DOC-LINKS
+
+Die Verknuepfungstabelle steht: `domain_ops.ops_flow_spine_instance_documents`
+(Modell, Migration, drei Endpunkte am Vorgang plus prozessuebergreifende
+Rueckwaertssuche). **Der Widerspruch kann damit nicht mehr ausloesen**, wenn die
+zweite `capture-then-resolve`-Policy kommt — genau das war der Zweck der
+Reihenfolge.
+
+Nicht angefasst wurde, was oben als „nicht die Loesung" steht: der Guard ist
+unveraendert scharf, der partielle Unique-Index liegt weiter auf dem fuehrenden
+Beleg, und `linked_document_id` ist kein Listenfeld geworden. Ein Test haelt
+fest, dass `_reject_rebind_to_other_document` noch existiert — die Tabelle soll
+ihn **ueberfluessig machen, nicht ersetzen**.
+
+Ebenfalls bewusst nicht enthalten: **Mengen**. Die Tabelle sagt, *dass* ein
+Beleg zum Vorgang gehoert, nicht *wieviel davon*. Das positionsbezogene
+n:m-Modell bleibt Codex' Belegfluss; eine Mengenspalte hier waere der Anfang
+eines zweiten, schwaecheren Belegflusses daneben. Ein Test verbietet sie.
+
+Slice: `docs/agent-ops/slices/FSX-DOC-LINKS.yaml`.
+
 ## Empfehlung zur Reihenfolge
 
 Die Verknuepfungstabelle sollte **vor** der zweiten `capture-then-resolve`-Policy

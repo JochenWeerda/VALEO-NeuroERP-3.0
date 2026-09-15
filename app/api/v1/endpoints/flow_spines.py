@@ -21,7 +21,11 @@ from app.core.flow_spine_registry import (
 )
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
-from app.domains.operations.models import FlowSpineInstance, FlowSpineInstanceEvent
+from app.domains.operations.models import (
+    FlowSpineInstance,
+    FlowSpineInstanceDocument,
+    FlowSpineInstanceEvent,
+)
 from app.infrastructure.models import BusinessPartner, Customer
 from app.domains.shared.events import get_event_publisher
 from app.domains.shared.process_events import (
@@ -1218,3 +1222,278 @@ async def execute_agent_action(
         len(rag_hits),
     )
     return response
+
+
+# -- FSX-DOC-LINKS: beteiligte Belege je Vorgang --------------------------------
+#
+# Der fuehrende Einstiegsbeleg bleibt, wo er ist: auf der Instanz. An ihm haengt
+# der partielle Unique-Index (FSX-011), und er wird weiterhin nicht umgebogen
+# (FSX-012). Diese Endpunkte betreffen ausschliesslich die *weiteren* Belege.
+
+
+class InstanceDocumentRequest(BaseModel):
+    document_type: str = Field(min_length=1, max_length=80)
+    document_id: str = Field(min_length=1, max_length=120)
+    #: Fachliche Rolle im Vorgang ("rechnung", "wareneingang"), kein Status.
+    relation: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+def _document_link_to_dict(link: FlowSpineInstanceDocument) -> dict[str, Any]:
+    return {
+        "id": link.id,
+        "instance_id": link.instance_id,
+        "process_key": link.process_key,
+        "document_type": link.document_type,
+        "document_id": link.document_id,
+        "relation": link.relation,
+        "linked_by": link.linked_by,
+        "created_at": link.created_at.isoformat() if link.created_at else None,
+    }
+
+
+@router.get(
+    "/{process_key}/instances/{instance_id}/documents",
+    response_model=FlowSpineOut,
+    summary="Beteiligte Belege eines Vorgangs auflisten",
+)
+def list_instance_documents(
+    process_key: str,
+    instance_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Fuehrenden Einstiegsbeleg und beteiligte Belege getrennt ausweisen.
+
+    Die Trennung ist keine Formsache: der fuehrende Beleg ist unveraenderlich und
+    traegt die Eindeutigkeit des Vorgangs, die beteiligten sind beliebig viele.
+    Wer beides in eine Liste wirft, verliert genau die Unterscheidung, an der
+    FSX-011 und FSX-012 haengen.
+    """
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    links = (
+        db.query(FlowSpineInstanceDocument)
+        .filter(
+            FlowSpineInstanceDocument.instance_id == instance_id,
+            FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+        )
+        .order_by(FlowSpineInstanceDocument.created_at.asc())
+        .all()
+    )
+    leading = None
+    if inst.linked_document_id and inst.linked_document_type:
+        leading = {
+            "document_type": inst.linked_document_type,
+            "document_id": inst.linked_document_id,
+        }
+    return {
+        "instance_id": instance_id,
+        "process_key": process_key,
+        "leading_document": leading,
+        "documents": [_document_link_to_dict(link) for link in links],
+        "total": len(links),
+    }
+
+
+@router.post(
+    "/{process_key}/instances/{instance_id}/documents",
+    response_model=FlowSpineOut,
+    summary="Beleg an einen Vorgang anhaengen",
+)
+def attach_instance_document(
+    process_key: str,
+    instance_id: str,
+    body: InstanceDocumentRequest,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Einen weiteren Beleg an den Vorgang haengen — ohne den fuehrenden anzufassen.
+
+    Das ist der Fall, den FSX-012 bisher als Umbiegen abgewiesen hat: die
+    Rechnung zum Lieferschein gehoert in denselben Vorgang, ist aber nicht der
+    Einstiegsbeleg. Ohne diesen Endpunkt muesste sie den fuehrenden verdraengen.
+
+    **Idempotent**: haengt der Beleg bereits, kommt derselbe Eintrag mit 200
+    zurueck statt eines zweiten mit 201. Damit ist der Aufruf beliebig oft
+    wiederholbar — dieselbe Eigenschaft, die FSX-011 fuer die Fallanlage
+    hergestellt hat, und aus demselben Grund: ein Wiederholungsversuch nach einem
+    Teilfehler darf nichts verdoppeln.
+    """
+    inst = _get_instance_or_404(db, process_key, instance_id)
+
+    document_type = _normalize_document_ref(body.document_type)
+    document_id = _normalize_document_ref(body.document_id)
+    if not document_type or not document_id:
+        raise HTTPException(
+            status_code=422,
+            detail="document_type und document_id duerfen nicht leer sein.",
+        )
+
+    existing = (
+        db.query(FlowSpineInstanceDocument)
+        .filter(
+            FlowSpineInstanceDocument.instance_id == instance_id,
+            FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+            FlowSpineInstanceDocument.document_type == document_type,
+            FlowSpineInstanceDocument.document_id == document_id,
+        )
+        .first()
+    )
+    if existing is not None:
+        response.status_code = 200
+        return _document_link_to_dict(existing)
+
+    link = FlowSpineInstanceDocument(
+        instance_id=instance_id,
+        tenant_id=inst.tenant_id,
+        process_key=process_key,
+        document_type=document_type,
+        document_id=document_id,
+        relation=body.relation,
+        linked_by=body.user_id,
+    )
+    db.add(link)
+    try:
+        db.commit()
+    except IntegrityError:
+        # Ein paralleler Aufruf war schneller. Der Unique-Index hat die zweite
+        # Zeile verhindert; aufgeloest wird sie wie bei FSX-011 — bestehenden
+        # Eintrag lesen und zurueckgeben.
+        db.rollback()
+        existing = (
+            db.query(FlowSpineInstanceDocument)
+            .filter(
+                FlowSpineInstanceDocument.instance_id == instance_id,
+                FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+                FlowSpineInstanceDocument.document_type == document_type,
+                FlowSpineInstanceDocument.document_id == document_id,
+            )
+            .first()
+        )
+        if existing is None:
+            raise
+        response.status_code = 200
+        return _document_link_to_dict(existing)
+
+    db.refresh(link)
+    response.status_code = 201
+    return _document_link_to_dict(link)
+
+
+@router.delete(
+    "/{process_key}/instances/{instance_id}/documents/{link_id}",
+    status_code=204,
+    response_class=Response,
+    response_model=None,
+    summary="Beleg vom Vorgang loesen",
+)
+def detach_instance_document(
+    process_key: str,
+    instance_id: str,
+    link_id: str,
+    db: Session = Depends(get_db),
+) -> Response:
+    """Eine Beteiligung loesen. Der fuehrende Beleg ist davon nicht betroffen."""
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    link = (
+        db.query(FlowSpineInstanceDocument)
+        .filter(
+            FlowSpineInstanceDocument.id == link_id,
+            FlowSpineInstanceDocument.instance_id == instance_id,
+            FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+        )
+        .first()
+    )
+    if link is None:
+        raise HTTPException(status_code=404, detail="Belegverknuepfung nicht gefunden")
+    db.delete(link)
+    db.commit()
+    return Response(status_code=204)
+
+
+@router.get(
+    "/documents/{document_type}/{document_id}/instances",
+    response_model=FlowSpineOut,
+    summary="Vorgaenge zu einem Beleg finden",
+)
+def find_instances_for_document(
+    document_type: str,
+    document_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Rueckwaertssuche ueber **alle** Prozesse: wo kommt dieser Beleg vor?
+
+    Der Endpunkt liegt bewusst nicht unter ``/{process_key}/``: eine
+    Sammelrechnung ueber drei Lieferscheine gehoert zu drei Vorgaengen, und die
+    muessen auffindbar sein, ohne dass der Aufrufer den Prozess vorher kennt.
+
+    Gefunden wird in beiden Rollen — als fuehrender Einstiegsbeleg und als
+    beteiligter Beleg. ``role`` sagt, welche von beiden es war; das ist der
+    Unterschied zwischen "dieser Vorgang wurde hiermit eroeffnet" und "dieser
+    Beleg gehoert auch dazu".
+    """
+    tenant_id = get_current_tenant_id()
+    doc_type = _normalize_document_ref(document_type)
+    doc_id = _normalize_document_ref(document_id)
+    if not doc_type or not doc_id:
+        raise HTTPException(
+            status_code=422,
+            detail="document_type und document_id duerfen nicht leer sein.",
+        )
+
+    hits: list[dict[str, Any]] = []
+
+    leading_instances = (
+        db.query(FlowSpineInstance)
+        .filter(
+            FlowSpineInstance.tenant_id == tenant_id,
+            FlowSpineInstance.linked_document_type == doc_type,
+            FlowSpineInstance.linked_document_id == doc_id,
+        )
+        .all()
+    )
+    for inst in leading_instances:
+        hits.append(
+            {
+                "instance_id": inst.id,
+                "process_key": inst.process_key,
+                "case_number": inst.case_number,
+                "label": inst.label,
+                "lifecycle_status": inst.lifecycle_status,
+                "role": "leading",
+                "relation": None,
+            }
+        )
+
+    seen = {(hit["instance_id"]) for hit in hits}
+    links = (
+        db.query(FlowSpineInstanceDocument, FlowSpineInstance)
+        .join(FlowSpineInstance, FlowSpineInstance.id == FlowSpineInstanceDocument.instance_id)
+        .filter(
+            FlowSpineInstanceDocument.tenant_id == tenant_id,
+            FlowSpineInstanceDocument.document_type == doc_type,
+            FlowSpineInstanceDocument.document_id == doc_id,
+        )
+        .all()
+    )
+    for link, inst in links:
+        if inst.id in seen:
+            continue
+        hits.append(
+            {
+                "instance_id": inst.id,
+                "process_key": inst.process_key,
+                "case_number": inst.case_number,
+                "label": inst.label,
+                "lifecycle_status": inst.lifecycle_status,
+                "role": "participant",
+                "relation": link.relation,
+            }
+        )
+
+    return {
+        "document_type": doc_type,
+        "document_id": doc_id,
+        "tenant_id": tenant_id,
+        "instances": hits,
+        "total": len(hits),
+    }

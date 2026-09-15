@@ -23,6 +23,10 @@ def _new_flow_spine_event_id() -> str:
     return str(uuid4())
 
 
+def _new_flow_spine_document_link_id() -> str:
+    return str(uuid4())
+
+
 class WaageStatus(str, enum.Enum):
     """Waage Status Enum"""
     AKTIV = "aktiv"
@@ -1062,6 +1066,63 @@ class FlowSpineInstanceEvent(Base):
     reason_note = Column(Text, nullable=True)
     payload = Column(JSONB, nullable=False, default=dict)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+class FlowSpineInstanceDocument(Base):
+    """FSX-DOC-LINKS: beteiligte Belege eines Flow-Spine-Vorgangs.
+
+    Der **fuehrende Einstiegsbeleg** bleibt unveraendert auf der Instanz
+    (``linked_document_id``/``linked_document_type``). Er ist es, an dem der
+    partielle Unique-Index aus FSX-011 haengt, und er wird weiterhin nicht
+    umgebogen (``_reject_rebind_to_other_document``).
+
+    Diese Tabelle traegt die **weiteren** Belege, die zum selben Vorgang
+    gehoeren — die Rechnung zum Lieferschein, der Wareneingang zur Bestellung.
+    Ohne sie muesste ein zweiter Beleg den fuehrenden verdraengen, und genau das
+    ist verboten; der Widerspruch ist in
+    ``docs/design/flow-spine-nm-bindungskonflikt.md`` beschrieben.
+
+    Zwei Kardinalitaeten, die bewusst so gewaehlt sind:
+
+    * **Ein Beleg darf in mehreren Vorgaengen beteiligt sein.** Eine
+      Sammelrechnung ueber drei Lieferscheine gehoert zu drei Vorgaengen. Es gibt
+      deshalb *keine* globale Eindeutigkeit auf (Mandant, Belegart, Beleg-ID).
+    * **Derselbe Beleg nicht zweimal im selben Vorgang.** Dafuer die
+      Eindeutigkeit auf (Mandant, Instanz, Belegart, Beleg-ID) — sie macht das
+      Anhaengen idempotent.
+
+    Ausdruecklich **nicht** hier: Mengen. Welche Teilmenge einer Lieferposition
+    auf welche Rechnungsposition laeuft, ist das positionsbezogene n:m-Modell und
+    gehoert in den Belegfluss, nicht an den Vorgang.
+    """
+
+    __tablename__ = "ops_flow_spine_instance_documents"
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id",
+            "instance_id",
+            "document_type",
+            "document_id",
+            name="uq_flow_spine_instance_document",
+        ),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
+
+    id = Column(String, primary_key=True, default=_new_flow_spine_document_link_id)
+    instance_id = Column(
+        String(36),
+        ForeignKey("domain_ops.ops_flow_spine_instances.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    process_key = Column(String(120), nullable=False, index=True)
+    document_type = Column(String(80), nullable=False)
+    document_id = Column(String(120), nullable=False)
+    #: Wofuer der Beleg in diesem Vorgang steht — fachliche Rolle, kein Status.
+    relation = Column(String(60), nullable=True)
+    linked_by = Column(String(120), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 
 
 # ── VERSICHERUNGEN ────────────────────────────────────────────────────────────
