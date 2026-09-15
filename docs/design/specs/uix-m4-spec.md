@@ -67,17 +67,18 @@ Schritt gold, Klick navigiert (mit Objektkontext, sofern die Ziel-Maske über
 `entity_id`-Route erreichbar und eine Verknüpfung ableitbar ist — sonst
 Liste). Tastatur: Band ist eine `nav` mit Links.
 
-### Gate (advisory v1, mandatory ab M4-Abschluss)
-Readiness-Warnung: SD mit `domain ∈ {sales, einkauf, finance, agrar}` und
-`mode ∈ {detail, transaction}` ohne `processChain` → Warning
-`missing_process_chain`. Nach Rollout auf alle Beleg-SDs wird die Warnung
-für diese Domänen auf Error angehoben (separater Commit, im Slice dokumentiert).
+### Gate (mandatory seit UIX-091-GATE, 2026-09-15)
+SD mit `domain ∈ {sales, einkauf, finance, agrar}` und
+`mode ∈ {detail, transaction}` ohne `processChain` und ohne
+`noProcessChainReason` → Error `missing_process_chain` (blockiert
+`generatorReady`). Stammdaten und Fuetterung tragen eine begruendete
+Ausnahme statt einer erfundenen Kette.
 
 ### Tests
 Vitest: Compiler (chainId/stepKey → Ribbon, unbekannte chainId → kein Ribbon +
 Warnung), Renderer (current-Markierung, Navigation). pytest: YAML-Schema-
 Validierung (`scripts/check_process_chains.py` in quality-gate: jede
-screenId existiert in der Registry), Readiness-Warnfall.
+screenId existiert in der Registry), Readiness-Errorfall.
 
 ---
 

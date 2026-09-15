@@ -290,15 +290,15 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     a("cockpit_content", not is_cockpit or has_cockpit_content,
       "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles or tables"))
 
-    # 16. missing_process_chain (UIX-091) — Belegmasken ohne Kette bleiben
-    # sichtbar unvollstaendig. Warnung bleibt advisory, bis UIX-091-GATE die
-    # Anhebung auf Error in einem eigenen Commit macht (Spec: nach Voll-Rollout).
+    # 16. missing_process_chain (UIX-091-GATE) — Belegmasken ohne Kette oder
+    # noProcessChainReason blockieren generatorReady. Stammdaten und Fuetterung
+    # bleiben mit begruendeter Ausnahme generatorReady.
     from app.core.process_chains import needs_process_chain
 
     needs_pc = needs_process_chain(definition)
     has_pc = bool((definition.get("processChain") or {}).get("chainId"))
     has_reason = bool(str(definition.get("noProcessChainReason") or "").strip())
-    a(
+    m(
         "missing_process_chain",
         not needs_pc or has_pc or has_reason,
         "OK" if has_pc or has_reason else (
@@ -331,12 +331,11 @@ async def get_mask_readiness(
 
     Mandatory gates (blockieren generatorReady):
     schema_valid, non_temporary, data_sources, table_data_source_bound,
-    table_columns_complete, actions_classified.
+    table_columns_complete, actions_classified, missing_process_chain.
 
     Advisory gates (nur Warnungen, kein Block):
     sort_whitelist, filter_columns, agent_contract, workflow_declared,
-    stable_test_selectors, table_query_contract, cockpit_content,
-    missing_process_chain.
+    stable_test_selectors, table_query_contract, cockpit_content.
     """
     _ = tenant_id
     normalized = _normalize_mask_id(mask_id)

@@ -16,13 +16,13 @@ file_ownership:
   - "packages/frontend-web/src/components/mask-builder/renderers/ProcessRibbonRenderer.tsx"
   - "scripts/check_process_chains.py"
 acceptance:
-  - "Beleg-SDs (sales/einkauf/finance/agrar detail+transaction) tragen processChain; Readiness-Warnung sonst."
+  - "Beleg-SDs (sales/einkauf/finance/agrar detail+transaction) tragen processChain oder noProcessChainReason; sonst Readiness-Error."
   - "Jede screenId in Ketten existiert in der Registry (CI-Check)."
   - "Aktueller Schritt markiert; Klick navigiert; nav-Semantik mit Tastatur."
-  - "Anhebung Warnung->Error nach Voll-Rollout dokumentiert."
+  - "Anhebung Warnung->Error nach Voll-Rollout erfolgt (UIX-091-GATE)."
 tests:
   - "Vitest Compiler+Renderer"
-  - "pytest YAML-Validierung + Readiness-Warnfall"
+  - "pytest YAML-Validierung + Readiness-Errorfall"
   - "Playwright Band-Navigation ueber 2 Ketten"
 progress: >-
   2026-07-07 Compiler-Kern + Config + Gate-Script geliefert (isoliert): config/
@@ -38,8 +38,9 @@ progress: >-
   CONTRACT-Tail 2026-09-15 (Cursor): Katalog+Mitgliedschaft in get_screen_definition,
   Readiness-Advisory missing_process_chain, Quality-Gate-Step, Playwright zwei Ketten.
   ROLLOUT-Tail 2026-09-15 (Cursor): 22/22 Domain-SDs klassifiziert (Kette oder
-  noProcessChainReason); Auftragsbestaetigung in k3. OFFEN: UIX-091-GATE —
-  Anhebung der Warnung auf Error in einem eigenen Commit.
+  noProcessChainReason); Auftragsbestaetigung in k3. GATE-Tail 2026-09-15
+  (Cursor): missing_process_chain ist mandatory; Roh-SD ohne Kette/Reason
+  blockiert generatorReady. Registry bleibt gruen.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

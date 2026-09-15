@@ -1,4 +1,4 @@
-"""UIX-091: Prozessketten-Katalog und Readiness-Warnung.
+"""UIX-091: Prozessketten-Katalog und Readiness-Gate.
 
 Reine Unit-Tests: pytest tests/test_uix091_process_chain_contract.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
 """
@@ -42,7 +42,7 @@ def test_membership_unknown_screen_is_none():
     assert membership_for("workspace/einkauf") is None
 
 
-def test_readiness_warns_when_beleg_mask_has_no_chain():
+def test_readiness_blocks_when_beleg_mask_has_no_chain():
     screen = {
         "schemaVersion": 1,
         "id": "einkauf/supplier",
@@ -65,8 +65,11 @@ def test_readiness_warns_when_beleg_mask_has_no_chain():
     }
     assert needs_process_chain(screen) is True
     report = _check_readiness(screen)
-    assert report["generatorReady"] is True
-    assert any("missing_process_chain" in warning for warning in report["warnings"])
+    assert report["generatorReady"] is False
+    assert any("missing_process_chain" in error for error in report["errors"])
+    gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
+    assert gate["severity"] == "mandatory"
+    assert gate["passed"] is False
 
 
 def test_order_confirmation_joins_einkauf_chain():
@@ -125,9 +128,25 @@ def test_readiness_accepts_no_process_chain_reason():
     report = _check_readiness(screen)
     assert report["generatorReady"] is True
     gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
+    assert gate["severity"] == "mandatory"
     assert gate["passed"] is True
     sd = get_screen_definition("sales/delivery-note")
     assert sd is not None
     report = _check_readiness(sd)
     gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
     assert gate["passed"] is True
+
+
+def test_all_document_domain_screens_pass_mandatory_process_chain_gate():
+    from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
+
+    blocked: list[str] = []
+    for screen_id in SCREEN_DEFINITION_BUILDERS:
+        sd = get_screen_definition(screen_id)
+        if sd is None or not needs_process_chain(sd):
+            continue
+        report = _check_readiness(sd)
+        gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
+        if not gate["passed"]:
+            blocked.append(screen_id)
+    assert blocked == []

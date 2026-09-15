@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-091-GATE - abgeschlossen 2026-09-15
+
+**Owner:** Cursor. **Stand:** abgeschlossen — `missing_process_chain` ist
+mandatory. Belegmasken ohne `processChain` und ohne `noProcessChainReason`
+sind nicht `generatorReady`. Registry-SDs bleiben gruen, weil ROLLOUT sie
+klassifiziert hat.
+**Abnahme:** Roh-SD ohne Klassifikation → Error; Inventur-Gate 0 blockiert.
+
 ## UIX-091-ROLLOUT - abgeschlossen 2026-09-15
 
 **Owner:** Cursor. **Stand:** abgeschlossen — alle 22 sales/einkauf/finance/agrar
