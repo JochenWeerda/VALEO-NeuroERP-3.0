@@ -83,11 +83,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Flow Spine contracts (FSX-003 + FSX-010/011)
+      - name: Flow Spine contracts (FSX-003 + FSX-010/011 + FSX-022)
         run: >
           pytest tests/test_flow_spine_data_provenance.py
           tests/test_flow_spine_document_binding.py
           tests/test_flow_spine_invented_frontend_gate.py
+          tests/test_flow_spine_footer_steps.py
           tests/test_fsx003_quality_gate_wiring.py
           --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
 

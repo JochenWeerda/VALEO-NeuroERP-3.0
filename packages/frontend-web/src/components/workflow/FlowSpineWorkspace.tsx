@@ -67,6 +67,8 @@ import {
   useResumeFlowSpineInstance,
   useSaveFlowSpineInstance,
   useFlowSpineCatalogHook,
+  flowSpineFooterItemHref,
+  flowSpineFooterItemLabel,
   type FlowSpineAction,
   type FlowSpineLifecycleActionPayload,
   type FlowSpineLifecycleStatus,
@@ -1421,11 +1423,14 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               {workspace.footer_cards.map((card) => {
                 const isNextSteps =
                   /schritt/i.test(card.title) || /naechste/i.test(card.title)
+                const hasNavigableItems = card.items.some(
+                  (item) => flowSpineFooterItemHref(item) !== undefined,
+                )
                 return (
                 <Card key={card.title} className="border-white/10 bg-slate-950/45 text-slate-100">
                   <CardHeader>
                     <CardTitle className="text-base">{card.title}</CardTitle>
-                    {isNextSteps ? (
+                    {isNextSteps && !hasNavigableItems ? (
                       <CardDescription className="text-slate-400">
                         Orientierung — keine Navigation; die Punkte sind als Checkliste gemeint.
                       </CardDescription>
@@ -1434,19 +1439,41 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                   <CardContent className="text-sm text-slate-300">
                     <ul
                       className={
-                        isNextSteps
+                        isNextSteps && !hasNavigableItems
                           ? 'list-disc space-y-1.5 pl-5 marker:text-slate-500'
                           : 'space-y-2'
                       }
                     >
-                      {card.items.map((item) => (
-                        <li
-                          key={item}
-                          className={isNextSteps ? 'leading-snug' : 'rounded-2xl border border-white/10 px-4 py-3'}
-                        >
-                          {item}
-                        </li>
-                      ))}
+                      {card.items.map((item) => {
+                        const label = flowSpineFooterItemLabel(item)
+                        const href = flowSpineFooterItemHref(item)
+                        if (href) {
+                          return (
+                            <li key={`${label}:${href}`}>
+                              <button
+                                type="button"
+                                onClick={() => go(href)}
+                                className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                              >
+                                <span>{label}</span>
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              </button>
+                            </li>
+                          )
+                        }
+                        return (
+                          <li
+                            key={label}
+                            className={
+                              isNextSteps
+                                ? 'leading-snug'
+                                : 'rounded-2xl border border-white/10 px-4 py-3'
+                            }
+                          >
+                            {label}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </CardContent>
                 </Card>

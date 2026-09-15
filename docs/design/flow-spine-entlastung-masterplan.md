@@ -217,6 +217,11 @@ Kalenderstopp vor der Belegbindung.
 - **FSX-021 Technik aus dem Arbeitsbereich.** `resume_node_id` und `resume_route` (V3) in eine
   Diagnoseansicht verschieben.
 - **FSX-022 „Nächste Schritte“ navigierbar machen** (V4): jeder Punkt wird zur Aktion oder entfällt.
+  Vertrag: `items` ist `str | {label, href}`. Beobachtungskarten (Heatmap, Agent Events) bleiben
+  Strings. Die Karte „Nächste Schritte“ enthält nur Objekte; `href` muss bereits im selben
+  Workspace als Aktion, Dokument, Ressource oder verknüpftes Modul stehen. Zeilen ohne Ziel
+  entfallen — sie werden nicht als tote Checkliste stehen gelassen. Die Zeilen sind
+  Prozessdefinition (FSX-003 Fall 1), keine Vorgangswerte.
 - **FSX-023 Redundanz auflösen.** Aktionen und Agenteninhalte stehen doppelt (Mitte und
   Copilot-Spalte). Eine Quelle; die Spalte wird einklappbar, Grundzustand eingeklappt.
 - **FSX-024 Linke Spalte reduzieren.** Favoriten und Rollenwechsel sind Aufgaben der AppShell,

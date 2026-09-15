@@ -62,6 +62,17 @@ export interface CustomerData {
   creditor_account?: string
 }
 
+/** FSX-022 — Textzeile oder Verweis. Reine Strings sind Feststellungen, kein Ziel. */
+export type FlowSpineFooterItem = string | { label: string; href: string }
+
+export function flowSpineFooterItemLabel(item: FlowSpineFooterItem): string {
+  return typeof item === 'string' ? item : item.label
+}
+
+export function flowSpineFooterItemHref(item: FlowSpineFooterItem): string | undefined {
+  return typeof item === 'string' ? undefined : item.href
+}
+
 export interface FlowSpineWorkspace {
   schema_version: number
   manifest_kind: string
@@ -90,7 +101,11 @@ export interface FlowSpineWorkspace {
     linked_modules: Array<{ label: string; href: string; api_path: string }>
     domain: string
   }
-  footer_cards: Array<{ title: string; items: string[] }>
+  /**
+   * FSX-022: Beobachtung bleibt String; navigierbarer Schritt ist {label, href}.
+   * Zielrouten sind Prozessdefinition (FSX-003 Fall 1), keine Vorgangswerte.
+   */
+  footer_cards: Array<{ title: string; items: FlowSpineFooterItem[] }>
   instance_id?: string
   case_number?: string
   customer_id?: string

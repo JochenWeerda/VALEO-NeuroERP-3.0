@@ -1,0 +1,66 @@
+slice_id: FSX-022
+id: FSX-022
+title: Naechste Schritte navigierbar oder sie entfallen
+owner: Cursor Auto
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-020-024
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+coordination: >-
+  Claude Code hat den Slice nach der Spurtrennung an Cursor uebergeben, weil
+  der Vertrag im Prozessregister liegt. Die Fusskarten-Darstellung in
+  FlowSpineWorkspace.tsx gehoert fachlich zum Leitstand; ohne sie waeren
+  {label, href}-Objekte [object Object]. Deshalb ein gezielter Render-Diff
+  dort, kein Eingriff in Modi, Copilot oder Prozessband.
+goal: >-
+  Die Karte „Naechste Schritte" ist eine Checkliste ohne Ziel oder sie oeffnet
+  eine Maske, die der Prozess bereits kennt. Kein Raten aus Textzeilen.
+vertrag: >-
+  items: list[str | {label: str, href: str}]. Strings bleiben Feststellungen
+  (Heatmap, Agent Events). Naechste Schritte enthalten nur Objekte. href ist
+  ein In-App-Pfad, der in demselben Workspace als Aktion, Dokument, Ressource
+  oder linked_module vorkommt. Zeilen ohne Ziel entfallen (V4). Die Zeilen sind
+  Prozessdefinition (FSX-003 Fall 1), keine Vorgangswerte.
+entscheidungen:
+  keine_neuen_pfade: >-
+    Engineering-Saetze wie „ETA-Dispatch live schalten" und „Blockchain-Anchor
+    setzen" wurden nicht verlinkt, sondern gestrichen. Ersetzt durch die
+    bestehenden Prozessschritte (Wareneingang, Abrechnung, Freigabe).
+  frontend_minimal: >-
+    Claude zieht den Leitstand. Dieser Slice aendert an FlowSpineWorkspace
+    nur die Fusskarten-Schleife, weil der Vertrag sonst die UI bricht.
+file_ownership:
+  - docs/agent-ops/slices/FSX-022.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - app/core/flow_spine_registry.py
+  - tests/test_flow_spine_footer_steps.py
+  - packages/frontend-web/src/lib/api/flow-spines.ts
+  - packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx
+  - packages/frontend-web/src/__tests__/components/workflow/flow-spine-footer-steps.test.tsx
+acceptance:
+  - Jeder Prozess hat eine Karte Naechste Schritte mit mindestens einem {label, href}.
+  - Jedes href steht bereits in Aktionen oder Modulen desselben Workspace.
+  - Beobachtungskarten bleiben reine Strings.
+  - Instanz-Merge laesst die hrefs stehen (Fall 1).
+  - Klick auf einen Schritt navigiert; Feststellungen sind keine Schaltflaechen.
+tests:
+  - >-
+    pytest tests/test_flow_spine_footer_steps.py
+    tests/test_fsx003_quality_gate_wiring.py
+    --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
+  - pnpm --filter frontend-web test -- src/__tests__/components/workflow/flow-spine-footer-steps.test.tsx
+risks:
+  - risiko: Claude arbeitet parallel an FlowSpineWorkspace.
+    bewertung: Diff beschraenkt auf die Fusskarten-Schleife; bei Konflikt deren Stand übernehmen und nur die href-Schleife nachziehen.
+  - risiko: hrefs werden zu Vorgangswerten.
+    bewertung: Gate verbietet EUR/%/Belegnummern in den Schrittlabein; Herkunftskarte nimmt footer_cards nicht als operative Felder.
+ai_harness:
+  fachlicher_vertrag: Naechster Schritt oeffnet eine vorhandene Maske oder existiert nicht.
+  architektur_vertrag: Ziele kommen aus dem Register, nicht aus Frontend-Textmustern.
+  daten_vertrag: Keine neuen Routen, keine Vorgangswerte in den Schritten.
+  test_vertrag: Source-Vertrag ohne DB; UI-Test prueft Navigation, nicht nur Text.
+  security_vertrag: Nur In-App-Pfade, die mit / beginnen.
+  betriebs_vertrag: Keine Migration.
+  dokumentations_vertrag: Slice, Workboard, Masterplan-Vertrag.
