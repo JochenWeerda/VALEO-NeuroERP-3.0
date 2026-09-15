@@ -222,11 +222,16 @@ grün; nur services/ai bleibt blockierend. Details:
 Fruehere Aussagen zum fehlenden CRM-AI-Schema/Start sind damit ueberholt;
 der Dienst liefert weiterhin simulierte Ergebnisse, keine trainierten Modelle.
 
-## Nachtrag 2026-09-15: Release-Policy
+## Nachtrag 2026-09-15: Release-Policy und Unused-Pins
 
 Scanner-Rohbefunde bleiben. Releases folgen
 [ADR-071](../adr/adr-071-security-dependency-gate.md): kein unbehandeltes
 praktisch ausnutzbares Critical; beherrschte Alt-Pins sind zulässig;
 Dependabot ist Sensor, kein Auto-Merge. Inventar und Rollen:
 [Ist-Stand](security-dependency-status-2026-09-15.md). Die Gate-Implementierung
-bleibt Slice SECURITY-DEPENDENCY-POLICY-20260915 (Codex).
+ist Slice SECURITY-DEPENDENCY-POLICY-20260915 (Codex, abgeschlossen).
+
+Ungenutzte Hugging-Face-Pins sind entfernt: `services/ai` und `services/crm-ai`.
+Der historische CI-Stand 22/23 (Lauf 34898484483) gilt nur bis `a9b720a75`.
+Aktuelle lokale Audits: ai Gate-Exit 0 bei Scanner-Exit 1 (chromadb);
+crm-ai Scanner- und Gate-Exit 0.

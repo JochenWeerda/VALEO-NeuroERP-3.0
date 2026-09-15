@@ -51,4 +51,4 @@ completion:
   audit: "Aktueller CI-Lauf 34898484483 auf a9b720a75: 22 von 23 Audits gruen; services/ai bleibt rot."
   ci_crm_ai: "Run 34898484483, Job 104158391173: echter Build, PostgreSQL-Start und HTTP-Tests gruen."
   tests: "Neun Audit-Runner-Tests; 23 Import-Pin-Pruefungen; Doku-Gates und Agent-Handbuch aktuell."
-  remaining: "chromadb-/transformers-Befunde in services/ai bleiben im Folge-Slice offen; CRM-AI bleibt Simulation; kein Deployment."
+  remaining: "chromadb-Rohbefunde in services/ai bleiben scanner-sichtbar und als not_affected bewertet; Transformers-Pins sind in Folge-Slices entfernt; CRM-AI bleibt Simulation; kein Deployment."

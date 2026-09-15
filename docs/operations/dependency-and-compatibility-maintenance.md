@@ -4,14 +4,14 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-27
+last_reviewed: 2026-09-15
 version: 3.0.0
 description: Release-Kompatibilitätsmatrix, Toolchain-Pins, Dependency-Update-Prozess für VALEO NeuroERP.
 ---
 
 # Dependency and Compatibility Maintenance
 
-Stand: 2026-06-11
+Stand: 2026-09-15
 
 ## Release-Kompatibilitaetsmatrix
 
@@ -92,18 +92,35 @@ VALEO-Betriebsbedingungen.
 
 ## Sicherheitsupdates
 
-Bewertet werden CVSS, bekannte Ausnutzung, Produktions-Erreichbarkeit,
-Datenklasse und vorhandene Kompensationsmassnahmen. Der hoechste relevante
-Wert bestimmt die Prioritaet.
+Verbindlich ist [ADR-071](../adr/adr-071-security-dependency-gate.md): keine
+bekannte, praktisch ausnutzbare kritische Schwachstelle unbehandelt ins
+Release. Eine ältere Library ist zulässig, wenn das Risiko analysiert und
+beherrscht ist. Ungenutzte Pins werden entfernt, nicht auf eine
+Advisory-Major gehoben.
+
+Bewertet werden Ausnutzbarkeit, Erreichbarkeit im konkreten Dienst,
+Datenklasse und vorhandene Kompensationsmassnahmen. Scanner-Severity allein
+erzwingt keinen Versionsprung.
+
+Fuer **erreichbare** Befunde gelten die Zeitziele:
 
 - `Critical` oder aktiv ausgenutzt: Release-Stop, Triage sofort, Ziel 24 Stunden.
 - `High`: Release-Stop, Ziel 72 Stunden.
 - `Moderate`: naechster geplanter Wartungsrelease, spaetestens 30 Tage.
 - `Low`: gebuendelt, sofern keine fachliche Exposition die Einstufung erhoeht.
 
-Eine Ausnahme ist nur zeitlich befristet zulaessig und dokumentiert CVE,
-Owner, Erreichbarkeitsanalyse, Kompensationsmassnahme, Ablaufdatum und
-Freigabe. Eine verwundbare Version wird nicht dauerhaft festgeschrieben.
+`not_affected` / `unreachable` braucht Owner, Quellen, Fingerprints und
+Wiedervorlage (höchstens 90 Tage) in `config/security/dependency-decisions.json`.
+Unbekannte Befunde blockieren. Eine pauschale Severity-Ausnahme ist verboten.
+
+Dependabot ist Sensor und PR-Erzeuger, kein Merge-Bot. Es gibt keinen
+Auto-Merge fuer Dependabot-PRs
+([GitHub-Doku](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions)).
+Routine-Version-PRs fuer pip/npm sind in `.github/dependabot.yml` auf null
+begrenzt; Security-Alerts bleiben sichtbar. Vor dem Release sitzt
+`scripts/security_dependency_gate.py`.
+
+Operativer Stand: [Ist-Stand 2026-09-15](../quality-assurance/security-dependency-status-2026-09-15.md).
 
 ## Vorgehen bei gefordertem Major-Update
 
@@ -125,10 +142,10 @@ Freigabe. Eine verwundbare Version wird nicht dauerhaft festgeschrieben.
 9. Nach Stabilisierung Adapter und alte Vertragspfade entfernen und die
    Kompatibilitaetsmatrix aktualisieren.
 
-Automatisierte Security-PRs sollen Patch/Minor regelmaessig gruppieren und
-Security-Updates sofort oeffnen. Major-Upgrades werden mindestens monatlich in
-einem Testzweig geprobt, damit der erste Kontakt nicht erst bei einer
-kritischen Sicherheitsluecke erfolgt.
+Dependabot oeffnet Security-PRs als Sensor. Patch/Minor werden nicht
+automatisch gemergt. Major-Upgrades brauchen Kompatibilitaetsnachweis und
+Review (ADR-071). Ein monatlicher Testzweig fuer Major-Proben bleibt sinnvoll,
+damit der erste Kontakt nicht erst bei einer erreichbaren Luecke erfolgt.
 
 ## AI-gestuetzte Major-Update-Arbeit
 
@@ -139,7 +156,8 @@ Pflicht fuer jeden AI-gestuetzten Security- oder Major-Update-Slice:
 
 - Slice-YAML mit AI-Harness und `external_gates`.
 - Advisory-Klassifikation: `fixable_minor`, `forced_major`,
-  `accepted_temporary_risk`.
+  `not_affected_unreachable`, `remove_unused`. `accepted_risk` ist im
+  Service-Dependency-Gate nicht zulaessig (ADR-071).
 - Betroffene direkte und transitive Module.
 - Liste der Contract-, Integration-, Migration-, Browser- und Negativtests.
 - Canary-/Feature-Flag- oder Rollback-/Forward-Fix-Plan.

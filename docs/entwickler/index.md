@@ -4,7 +4,7 @@ type: explanation
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-09-15
 version: 3.3.0
 ---
 
@@ -20,6 +20,7 @@ Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
 | Multi-Tenancy & Schemas | [Datenmodell & Tenancy](datenmodell-tenancy.md) |
 | Error-Handling & Mutation-Invarianten | [Konventionen](konventionen.md) |
 | pytest, Vitest, Playwright | [Test-Strategie](test-strategie.md) |
+| Dependency-Security (ADR-071) | [Ist-Stand](../quality-assurance/security-dependency-status-2026-09-15.md) · [Gate](../quality-assurance/security-dependency-policy-2026-09-15.md) |
 | Mask Runtime API (ScreenDefinition, Readiness, ActionRuntime) | [Mask Runtime API](mask-runtime-api.md) |
 | Agent-Handbuch (Prozessketten, Masken-API, Automatisierung) | [Agent-Handbuch](../agent-handbuch/index.md) |
 | Backend-Service-Module (Inventar) | [Service-Inventar](service-inventory.md) |
@@ -48,5 +49,6 @@ Einstieg für Entwickler:innen in Architektur, Setup und Konventionen.
 
 - `CLAUDE.md` / `AGENTS.md` (Repo-Root) — Konventionen, Invarianten, Agent-Operating-Guide.
 - [Schnittstellen](../schnittstellen/index.md) — REST, MCP, Events.
+- [ADR-071 Security-Dependency-Gate](../adr/adr-071-security-dependency-gate.md) — kein Auto-Merge, beherrschte Alt-Pins zulässig.
 - `docs/workflows/` — Prozessketten (intern, Ergebnisse in Open-Gaps).
 - `docs/project-context/open-gaps-and-known-issues.md` — bekannter Lieferstand (repo-only).

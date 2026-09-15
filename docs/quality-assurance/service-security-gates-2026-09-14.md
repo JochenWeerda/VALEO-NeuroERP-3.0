@@ -111,10 +111,15 @@ Der Gate darf bei echten verbliebenen Advisories rot sein. Die technische
 Fertigstellung der Pruefung ist keine Behauptung, alle Dependencies seien frei
 von Schwachstellen.
 
-Nachtrag 2026-09-15: ungenutzte Hugging-Face-Pins in `services/ai` entfernt.
-Lokaler Linux-Audit Gate-Exit 0 bei Scanner-Exit 1 (nur dokumentiertes chromadb).
-GitHub-CI nach dem Folge-Push ist der Gesamtnachweis, nicht der historische
-Lauf 34898484483.
+Nachtrag 2026-09-15: ungenutzte Hugging-Face-Pins entfernt, nicht hochgezogen.
+
+- `services/ai` (`e0ee50b4d`): `transformers` und `sentence-transformers` weg.
+  Lokaler Linux-Audit Gate-Exit 0, Scanner-Exit 1 nur chromadb.
+- `services/crm-ai` (`7dc3812b0`): `transformers` und `torch` weg.
+  Lokaler Linux-Audit Scanner-Exit 0 und Gate-Exit 0.
+
+GitHub-CI nach `7dc3812b0` (Run 34929639169) war zum Nachzug noch in der Queue.
+Der historische Lauf 34898484483 (22/23) ist nicht mehr der aktuelle Ist-Stand.
 
 Release-Policy ab 2026-09-15: Scanner-Rot ist nicht gleich Release-Stopp und
 nicht gleich stille Freigabe. Verbindlich sind

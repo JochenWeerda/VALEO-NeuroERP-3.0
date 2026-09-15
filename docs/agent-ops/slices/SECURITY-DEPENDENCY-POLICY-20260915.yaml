@@ -24,11 +24,11 @@ acceptance:
 tests:
   - python scripts/test_security_dependency_gate.py (9 bestanden)
   - python scripts/test_audit_service_dependencies.py (9 bestanden)
-  - Reale CI-Evidence a9b720a75 (3 not_affected, 26 blocked)
+  - Reale CI-Evidence a9b720a75 (3 not_affected, damals 26 transformers blocked)
 risks:
-  - Transformers-Einzelpfade sind noch nicht freigegeben; Release fuer services/ai bleibt blockiert.
   - Fingerprints erfordern bewusste Neubeurteilung bei Aenderungen.
   - Externe nicht versionierte Deployments sind nicht durch Quelltests bewiesen.
+  - Hinweis 2026-09-15: ungenutzte transformers/torch-Pins in services/ai und services/crm-ai sind entfernt; der Gate bewertet sie nicht mehr.
 ai_harness:
   fachlicher_vertrag: Keine fachliche oder ML-Aenderung.
   architektur_vertrag: Bestehende CI-Gates ergaenzen; keine Service- oder Domain-Aenderung.
@@ -38,5 +38,5 @@ ai_harness:
   betriebs_vertrag: Staging/Produktion verlangen wiederholten Gate fuer Release-SHA.
   dokumentations_vertrag: Policy-Nachweis, Slice und Workboard aktualisiert.
 external_gates:
-  - Transformers-Angriffspfade separat bewerten oder gezielt beheben.
+  - Ungenutzte Hugging-Face-Pins sind entfernt (SERVICE-REMAINDER-GAPS, SERVICE-CRM-AI-HF-UNUSED).
   - CI-Ausfuehrung nach Push; kein Deployment.

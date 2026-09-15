@@ -18,7 +18,8 @@ Security-Dependency-Gate-Agent.
 Dieser Text ist der **Ist-Stand der Wellen und des Inventars**. Die
 Gate-Spezifikation und der CI-Nachweis stehen in
 [Codex Policy-QA](security-dependency-policy-2026-09-15.md). Cursor ändert
-keine Gate-Dateien, keine `dependabot.yml` und keine Entscheidungsliste.
+keine Gate-Logik und keine `dependabot.yml`. Fingerprints in
+`dependency-decisions.json` nur, wenn ein eigenes Manifest die Evidenz ändert.
 
 ## Betriebsmodell
 
@@ -48,10 +49,11 @@ VALEO aktiviert dieses Muster nicht.
 
 | Slice | Inhalt | Nachweis |
 |---|---|---|
-| SERVICE-CVE-PINS-20260914 | cryptography 50.0.1, aiohttp 3.14.3, langgraph-checkpoint-sqlite 3.1.1; crm-ai transformers/torch | Linux-Image, nicht nur Resolver |
+| SERVICE-CVE-PINS-20260914 | cryptography 50.0.1, aiohttp 3.14.3, langgraph-checkpoint-sqlite 3.1.1; crm-ai damals transformers/torch | Linux-Image, nicht nur Resolver |
 | SERVICE-FASTAPI-STARLETTE-20260914 | FastAPI 0.136.3, Starlette 1.3.1 in 23 Service-Manifesten | Import-Pin-Check |
-| SERVICE-REMAINDER-GAPS-20260914 | python-jose entfernt, httpx 0.28.1, Pins, Lifespan, auth-shared Images | siehe unten |
-| SERVICE-SECURITY-GATES-20260914 | Audit aller 23 Manifeste, crm-ai Image/HTTP | CI-Lauf [34898484483](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483) |
+| SERVICE-REMAINDER-GAPS-20260914 | python-jose entfernt, httpx 0.28.1, Pins, Lifespan, auth-shared; HF aus services/ai | Linux-Audit Gate-Exit 0 |
+| SERVICE-CRM-AI-HF-UNUSED-20260915 | transformers/torch aus crm-ai entfernt | Scanner-Exit 0, 91 Pakete |
+| SERVICE-SECURITY-GATES-20260914 | Audit aller 23 Manifeste, crm-ai Image/HTTP | historisch [34898484483](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483) |
 | SECURITY-DEPENDENCY-POLICY-20260915 | Gate-Agent, Dependabot als Sensor, Chroma-Bewertung | [Policy-QA](security-dependency-policy-2026-09-15.md) |
 | SECURITY-REMAINDER Node | 19 Manifeste; 0 Critical im npm-Audit | 2 High image-size ohne Fix, 1 Moderate stream-json versionsbasiert |
 | Auth fail-closed | SILENT-FAILURE-20260914 | bereits vorher geliefert |
@@ -136,16 +138,20 @@ brechen.
 ## CI-Stand Service-Security
 
 [Run 34898484483](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483)
-auf Commit `a9b720a75` (historisch, vor der Hugging-Face-Entfernung):
+auf Commit `a9b720a75` (historisch, vor Hugging-Face-Entfernung):
 
 - **22 / 23** Service-Audits grün
 - nur `services/ai` rot (damals chromadb + transformers)
 - crm-ai Image-/HTTP-Job [104158391173](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483/job/104158391173) grün
 
-Nach Entfernen der ungenutzten Hugging-Face-Pins (2026-09-15, lokal Linux):
-`services/ai` Gate-Exit 0. Der Scanner bleibt wegen der drei dokumentierten
-Chroma-Befunde bei Exit 1. GitHub-CI nach Push ist der verbindliche
-Gesamtnachweis für alle 23 Zellen.
+Lokale Linux-Audits nach den Unused-Checks (2026-09-15):
+
+- `services/ai` (`e0ee50b4d`): Scanner-Exit 1 (drei Chroma-Befunde `not_affected`), Gate-Exit 0
+- `services/crm-ai` (`7dc3812b0`): Scanner-Exit 0, Gate-Exit 0
+
+GitHub-CI auf `7dc3812b0` (Run 34929639169) war zum Dokumentationsstand noch
+in der Queue. Der Scanner bleibt für `services/ai` wegen chromadb bei Exit 1;
+das ist Absicht. Das Release-Gate darf trotzdem grün sein.
 
 ## Gate-Agent geliefert (Codex)
 
@@ -164,8 +170,6 @@ Slice `SECURITY-DEPENDENCY-POLICY-20260915` ist **abgeschlossen**. Nachweis:
   mechanisch erneuert.
 - `release-gates.yml` verlangt denselben Gate für die Release-SHA.
 - 18 Regressionen grün (9 Policy + 9 Audit-Runner).
-
-Nächster fachlicher Schritt ist nicht 4.57.6.
 
 ### crm-ai transformers 5.10.0 / torch 2.13.0 — entfernt
 

@@ -135,6 +135,10 @@ exclude_docs: |
   !/quality-assurance/soll-ist-checks.md
   !/quality-assurance/external-auditor-simulation-template.md
   !/quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
+  !/quality-assurance/security-dependency-status-2026-09-15.md
+  !/quality-assurance/security-dependency-policy-2026-09-15.md
+  !/quality-assurance/service-security-gates-2026-09-14.md
+  !/quality-assurance/security-remainder-2026-09-10.md
   /roadmap/
   /runbooks/
   !/runbooks/ALERTS.md
@@ -288,6 +292,9 @@ nav:
       - Soll-Ist Checks: quality-assurance/soll-ist-checks.md
       - Auditor Simulation Template: quality-assurance/external-auditor-simulation-template.md
       - E2E CRUD Acceptance Matrix: quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md
+      - Security-Dependency-Status: quality-assurance/security-dependency-status-2026-09-15.md
+      - Security-Dependency-Gate: quality-assurance/security-dependency-policy-2026-09-15.md
+      - Service-Security-Gates: quality-assurance/service-security-gates-2026-09-14.md
       - Workflow-Ketten (intern): _internal/workflow-chains.md
       - Prozess-Cards:
           - Cards — Konzept: cards/README.md

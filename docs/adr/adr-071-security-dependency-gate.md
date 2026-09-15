@@ -77,13 +77,16 @@ Negativ:
 - Scanner-Jobs dürfen rot bleiben, während das Release-Gate nach
   dokumentierter Bewertung grün wird. Beide Signale müssen getrennt lesbar
   sein.
-- Unbewertete Befunde (zum Beispiel transformers auf 4.46.3) bleiben
-  blockierend, bis eine Entscheidung vorliegt.
+- Unbewertete Befunde bleiben blockierend, bis eine Entscheidung vorliegt.
+  Ungenutzte Pins werden entfernt statt hochgezogen: `services/ai` und
+  `services/crm-ai` haben transformers/torch 2026-09-15 nach Pfadanalyse
+  verloren, nicht per Advisory-Major.
 
 ## Referenzen
 
 - [Ist-Stand 2026-09-15](../quality-assurance/security-dependency-status-2026-09-15.md)
 - [Service-Security-Gates](../quality-assurance/service-security-gates-2026-09-14.md)
+- [Dependency- und Kompatibilitätspflege](../operations/dependency-and-compatibility-maintenance.md)
 - [ADR-019 Sicherheitsmodell für externe Agenten](adr-019-sicherheitsmodell-externe-agenten-delegierte-aktionen.md)
 - [GitHub: Dependabot mit Actions automatisieren](https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions)
 - Workboard: `SECURITY-DEPENDENCY-POLICY-20260915`
