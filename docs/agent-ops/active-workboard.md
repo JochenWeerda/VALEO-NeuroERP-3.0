@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-LS-KONSOLIDIERUNG - reserviert 2026-09-15
+
+**Owner:** Claude Code. **Ziel:** Die dritte, aeltere `capture-then-resolve`-Umsetzung
+in `pages/verkauf/lieferschein-erfassung.tsx` auf `document-flow-spine.ts`
+zurueckfuehren — eigener Slice, weil sie den Speicherpfad einer produktiven
+Maske beruehrt.
+**Dateibesitz:** `pages/verkauf/lieferschein-erfassung.tsx` (nur der
+Workflow-Abschnitt), zugehoerige Tests, `docs/agent-ops/slices/FSX-LS-KONSOLIDIERUNG.yaml`,
+dieser Abschnitt.
+**Abgrenzung:** kein Eingriff in die Belegerfassung selbst (Positionen, Mengen,
+Speichern). Nur die Verknuepfung danach.
+**Abnahme:** bestehende Lieferschein-Tests unveraendert gruen; Verhalten der
+Verknuepfung identisch; keine dritte Entscheidungslogik mehr im Repo.
+
+
 ## FSX-013 - Rollout abgeschlossen 2026-09-15, Claude Code
 
 **Alle 15 verbliebenen Masken sind umgestellt.** Der `WorkflowEntryBanner` wird
