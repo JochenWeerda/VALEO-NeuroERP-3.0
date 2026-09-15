@@ -1043,6 +1043,13 @@ erkennt die Dateien nicht mehr, der Inhalt bleibt vollstaendig als historischer
 Nachweis erhalten, und kuenftige Archiv-Meldungen entstehen gar nicht erst.
 Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
+## SECURITY-DEPENDENCY-POLICY-20260915 - reserviert
+
+**Owner:** Codex. **Auftrag:** Risikobasierter Security-Dependency-Gate vor Releases; kein unbehandeltes praktisch ausnutzbares Critical, keine automatischen Major-Upgrades.
+**Dateibesitz:** neuer Dependency-Policy-Pruefer mit Tests und Policy unter config/security, Einbindung in scripts/audit_service_dependencies.py und service-security.yml, neue Dependabot-Konfiguration, eigene Slice-/QA-Doku. Bestehende Cursor-Service-Pins bleiben unangetastet.
+**Abnahme:** Rohbefunde sichtbar; unbekannte/abgelaufene/unbelegte Bewertungen blockieren; genaue Paket-/Versions-/Manifestbindung; bestehende Chroma-Evidenz nachpruefen; kein Auto-Merge.
+**Risiken:** Eine Bewertung ersetzt keinen Exploit-Nachweis; unbelegte Transformers-Befunde bleiben blockierend. Keine pauschale Severity-Ausnahme.
+
 ## SERVICE-SECURITY-GATES-20260914 - abgeschlossen
 
 **CI-Abgleich 2026-09-15 (Codex):** Nach a9b720a75 bestaetigt Run 34898484483 insgesamt 22/23 Service-Audits gruen; ausschliesslich services/ai bleibt wegen der dokumentierten Dependency-Befunde rot. Inventar und vollstaendiger crm-ai-Build-/Start-/HTTP-Job 104158391173 sind gruen. Die unten genannten sieben betroffenen Dienste beschreiben den historischen Erstlauf. Abschlussdokumentation und Slice entsprechend nachgezogen.
