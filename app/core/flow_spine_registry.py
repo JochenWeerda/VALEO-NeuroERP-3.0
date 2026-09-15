@@ -31,15 +31,15 @@ OPERATIONAL_NODE_FIELDS: tuple[str, ...] = (
     "kpis",
     "documents",
     "agent",
+    "status",
+    "insight",
 )
 
 #: Felder eines Knotens, die zur Prozessdefinition gehoeren und statisch bleiben.
 DEFINITION_NODE_FIELDS: tuple[str, ...] = (
     "id",
     "label",
-    "status",
     "icon",
-    "insight",
     "actions",
 )
 
@@ -52,6 +52,8 @@ _OPERATIONAL_EMPTY: dict[str, Any] = {
     "kpis": [],
     "documents": [],
     "agent": None,
+    "status": "unknown",
+    "insight": "",
 }
 
 #: Inhaltsmodus des Workspace.
@@ -667,12 +669,11 @@ def merge_instance_statuses(
     workspace["content_mode"] = CONTENT_MODE_INSTANCE
     for node in workspace.get("nodes", []):
         node_id = node.get("id")
-        if node_id and node_id in node_statuses:
-            node["status"] = node_statuses[node_id]
-
         for field in OPERATIONAL_NODE_FIELDS:
             if field in node:
                 node[field] = copy.deepcopy(_OPERATIONAL_EMPTY[field])
+
+        node["status"] = node_statuses.get(node_id) or "unknown"
 
         event = events.get(node_id) if node_id else None
         event_rows: list[dict[str, str]] = []

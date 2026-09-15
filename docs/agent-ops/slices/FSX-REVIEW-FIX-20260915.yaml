@@ -1,0 +1,16 @@
+id: FSX-REVIEW-FIX-20260915
+owner: Codex
+status: abgeschlossen
+date: 2026-09-15
+goal: Vier Review-Befunde nach FSX-012 schliessen.
+changes:
+  - Abschluss nach Teilfehler ruft nur die Verknuepfung erneut auf.
+  - Handover wird immer am Procure-to-Pay-Endpunkt geprueft.
+  - Dubletten stoppen die Migration statt Belegbindungen zu entfernen.
+  - Fehlender Instanzstatus ist unknown; ungepruefte insights bleiben leer.
+validation:
+  - 69 Backend-Tests bestanden (Provenienz, Herkunftskarte, Belegbindung).
+  - 31 Frontend-Tests bestanden (Bestellmaske, Prozessverknuepfung, Leitstand, Prozessband).
+limits:
+  - Kein produktiver Migrationslauf; bereits frueher entfernte Bindungen sind nicht automatisch rekonstruierbar.
+  - Nachlauf beim Wiedereroeffnen der Bestelldetailmaske bleibt separater offener FSX-012-Umfang.

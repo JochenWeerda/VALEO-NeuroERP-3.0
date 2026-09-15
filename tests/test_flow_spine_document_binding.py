@@ -154,3 +154,16 @@ def test_halbe_belegangabe_wird_abgewiesen() -> None:
 )
 def test_leerstring_wird_zu_null(raw: str | None, expected: str | None) -> None:
     assert _normalize_document_ref(raw) == expected
+
+
+def test_duplicate_preflight_stops_without_detaching_documents() -> None:
+    text = MIGRATION.read_text(encoding="utf-8")
+    assert "HAVING COUNT(*) > 1" in text
+    assert "RAISE EXCEPTION 'Duplicate open flow-spine document bindings" in text
+    assert text.index("RAISE EXCEPTION") < text.index("CREATE UNIQUE INDEX")
+    assert "ROW_NUMBER()" not in text
+    assert "r.rn > 1" not in text
+    # Only empty references may be normalized, never an actual duplicate binding.
+    updates = re.findall(r"UPDATE domain_ops\.ops_flow_spine_instances(.*?);", text, re.S)
+    assert len(updates) == 2
+    assert all("btrim(" in update and "= ''" in update for update in updates)

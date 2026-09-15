@@ -406,6 +406,10 @@ export default function BestellungAnlegenPage(): JSX.Element {
   }
 
   async function handleSubmit(): Promise<void> {
+    if (pendingLink) {
+      await handleRetryWorkflowLink()
+      return
+    }
     const validationError = validateBestellung()
     if (validationError) {
       toast({

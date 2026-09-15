@@ -7,10 +7,17 @@
 
 schema_version: 1
 static_fields:
-  insight: process_definition
   footer_cards: process_definition
 
 defaults:
+  status:
+    undeclared: false
+    source: FlowSpineInstance.node_statuses[node_id]
+    missing: unknown
+    tenant_filter: ops_flow_spine_instances.tenant_id
+  insight:
+    undeclared: true
+    note: Registry mixes instructions and operative assertions; do not project into instances.
   timestamp:
     undeclared: false
     source: FlowSpineInstanceEvent.created_at

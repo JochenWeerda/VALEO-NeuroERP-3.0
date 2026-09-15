@@ -277,3 +277,33 @@ kein Nachweis.
   großen ERP-Systeme“ ist nicht belegt; belegt sind Business Process Flows in modellgesteuerten
   Dynamics-Anwendungen und der SAP-Belegfluss — und SAP rät bei vertrauten Tagesaufgaben
   ausdrücklich von Wizards ab.
+
+
+## Review-Korrekturen 2026-09-15 — FSX-REVIEW-FIX-20260915
+
+Die vier Code-Review-Befunde sind korrigiert: Auch der normale Wizard-Abschluss
+wiederholt nach einem Teilfehler ausschliesslich die Verknuepfung. Die Bestellpolicy
+fixiert den Prozesspfad auf procure-to-pay; eine URL kann ihn nicht wechseln.
+Fehlende Knotenstatuswerte werden als unknown / Status nicht ermittelt angezeigt.
+Das gemischte insight-Feld ist operativ klassifiziert und bleibt ohne Quelle leer;
+Labels, Icons, Reihenfolge und Aktionen bleiben Prozessdefinition.
+
+Die Migration stoppt bei mehrfachen offenen Belegbindungen. Sie entfernt keine
+realen Belegreferenzen. Vor einem erneuten Lauf sind die betroffenen Faelle durch
+eine dokumentierte fachliche Entscheidung zu klaeren. Ermittlungsabfrage:
+
+```sql
+SELECT tenant_id, process_key, linked_document_type, linked_document_id,
+       array_agg(id ORDER BY created_at, id) AS instance_ids
+FROM domain_ops.ops_flow_spine_instances
+WHERE linked_document_id IS NOT NULL AND btrim(linked_document_id) <> ''
+  AND linked_document_type IS NOT NULL AND btrim(linked_document_type) <> ''
+  AND lifecycle_status NOT IN ('completed', 'cancelled', 'failed')
+GROUP BY tenant_id, process_key, linked_document_type, linked_document_id
+HAVING count(*) > 1;
+```
+
+Bereits durch eine aeltere Migration entfernte Zuordnungen lassen sich nur anhand
+bestehender Sicherungen beziehungsweise Auditdaten rekonstruieren. Dieser Slice
+fuehrt keine Migration auf Produktivdaten aus. Der Nachlauf beim Wiedereroeffnen
+der Bestelldetailmaske bleibt offen; FSX-012 ist insoweit kein Gesamtabschluss.

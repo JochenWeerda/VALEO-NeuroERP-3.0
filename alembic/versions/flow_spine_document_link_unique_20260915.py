@@ -61,25 +61,19 @@ def upgrade() -> None:
                  WHERE linked_document_type IS NOT NULL
                    AND btrim(linked_document_type) = '';
 
-                WITH ranked AS (
-                  SELECT id,
-                         ROW_NUMBER() OVER (
-                           PARTITION BY tenant_id, process_key,
-                                        linked_document_type, linked_document_id
-                           ORDER BY created_at ASC, id ASC
-                         ) AS rn
-                  FROM domain_ops.ops_flow_spine_instances
+                IF EXISTS (
+                  SELECT 1 FROM domain_ops.ops_flow_spine_instances
                   WHERE linked_document_id IS NOT NULL
                     AND btrim(linked_document_id) <> ''
                     AND linked_document_type IS NOT NULL
                     AND btrim(linked_document_type) <> ''
                     AND lifecycle_status NOT IN ({_CLOSED})
-                )
-                UPDATE domain_ops.ops_flow_spine_instances t
-                   SET linked_document_id = NULL,
-                       linked_document_type = NULL
-                  FROM ranked r
-                 WHERE t.id = r.id AND r.rn > 1;
+                  GROUP BY tenant_id, process_key, linked_document_type, linked_document_id
+                  HAVING COUNT(*) > 1
+                ) THEN
+                  RAISE EXCEPTION 'Duplicate open flow-spine document bindings; no bindings changed'
+                    USING HINT = 'Group ops_flow_spine_instances by tenant_id, process_key, linked_document_type, linked_document_id; resolve duplicates with an audited business decision before retrying.';
+                END IF;
 
                 CREATE UNIQUE INDEX IF NOT EXISTS {INDEX_NAME}
                   ON domain_ops.ops_flow_spine_instances

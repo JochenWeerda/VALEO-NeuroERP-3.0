@@ -50,7 +50,8 @@ def test_origin_map_covers_every_operational_field() -> None:
     defaults = origins["defaults"]
     missing = [field for field in OPERATIONAL_NODE_FIELDS if field not in defaults]
     assert not missing, f"Herkunftskarte ohne Eintrag: {missing}"
-    assert origins["static_fields"]["insight"] == "process_definition"
+    assert defaults["insight"]["undeclared"] is True
+    assert defaults["status"]["source"] == "FlowSpineInstance.node_statuses[node_id]"
     assert origins["static_fields"]["footer_cards"] == "process_definition"
 
 

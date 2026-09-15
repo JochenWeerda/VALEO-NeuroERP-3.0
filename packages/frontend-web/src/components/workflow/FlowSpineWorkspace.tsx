@@ -1288,6 +1288,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                           <Icon className="h-6 w-6" />
                         </div>
                         <div className="mt-3 text-sm font-semibold text-slate-100">{node.label}</div>
+                        {node.status === 'unknown' ? <div className="text-xs text-slate-500">Status nicht ermittelt</div> : null}
                         {/* FSX-003: metric/submetric sind operativ. Fehlen sie, bleibt die
                             Zeile leer statt einen Registry-Vorgabewert zu zeigen. */}
                         {node.metric ? <div className="text-xs text-slate-500">{node.metric}</div> : null}

@@ -99,3 +99,18 @@ describe('purchase-order flow spine (FSX-012)', () => {
     expect(createCalls).toHaveLength(0)
   })
 })
+
+
+it('checks a foreign-process URL instance only against the purchase-order policy', async () => {
+  getMock.mockReset().mockRejectedValue({ response: { status: 404 } })
+  patchMock.mockReset()
+  postMock.mockReset()
+  await expect(linkPurchaseOrderToFlowSpine({
+    documentId: 'PO-1',
+    handover: { process: 'order-to-cash', instanceId: 'sales-case' },
+    resumeRoute: '/einkauf/bestellungen/PO-1',
+  })).rejects.toEqual({ response: { status: 404 } })
+  expect(getMock).toHaveBeenCalledWith('/api/v1/process/flow-spines/procure-to-pay/instances/sales-case')
+  expect(patchMock).not.toHaveBeenCalled()
+  expect(postMock).not.toHaveBeenCalled()
+})

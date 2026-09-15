@@ -445,7 +445,7 @@ describe('BestellungAnlegenPage', () => {
     expect(caseCreateCallIndex).toBeGreaterThan(purchaseOrderCallIndex)
   })
 
-  it('wiederholt bei Teilfehler nur die Fallanlage, nicht die Bestellung', async () => {
+  it.each(['Vorgang erneut verknuepfen', 'Abschliessen'])('wiederholt bei Teilfehler ueber %s nur die Fallanlage', async (buttonName) => {
     postMock.mockImplementation((url: unknown) => {
       const path = String(url)
       if (path.includes('/purchase-orders')) {
@@ -480,7 +480,7 @@ describe('BestellungAnlegenPage', () => {
       }
       return Promise.resolve({})
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Vorgang erneut verknuepfen' }))
+    fireEvent.click(screen.getByRole('button', { name: buttonName }))
 
     await waitFor(() => {
       expect(postMock.mock.calls.filter((call) => String(call[0]).endsWith('/instances')).length).toBeGreaterThan(1)

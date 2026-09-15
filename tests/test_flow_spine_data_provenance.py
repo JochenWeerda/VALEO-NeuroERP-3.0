@@ -148,3 +148,17 @@ def test_feldlisten_sind_ueberschneidungsfrei_und_vollstaendig() -> None:
         f"Nicht eingeordnete Knotenfelder: {sorted(unclassified)}. "
         "Jedes neue Feld muss als Definition oder als operativ deklariert werden."
     )
+
+
+@pytest.mark.parametrize("process_key", ALL_PROCESS_KEYS)
+def test_missing_status_and_unverified_insight_never_inherit_examples(process_key: str) -> None:
+    catalog = get_flow_spine_workspace(process_key)
+    first_id = catalog["nodes"][0]["id"]
+    merged = merge_instance_statuses(
+        catalog, _instance(process_key, node_statuses={first_id: "ok"})
+    )
+    for node in merged["nodes"]:
+        assert node["status"] == ("ok" if node["id"] == first_id else "unknown")
+        assert node["insight"] == ""
+    # Mutating one projection must not erase the example catalog in the shared cache.
+    assert get_flow_spine_workspace(process_key)["nodes"][0]["insight"]

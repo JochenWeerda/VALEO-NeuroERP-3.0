@@ -26,7 +26,7 @@ export interface FlowSpineNode {
   // Prozessdefinition — statisch, zulaessig aus dem Register (FSX-003 Fall 1)
   id: string
   label: string
-  status: FlowSpineTone
+  status: FlowSpineTone | 'unknown'
   icon: string
   insight: string
   actions: FlowSpineAction[]

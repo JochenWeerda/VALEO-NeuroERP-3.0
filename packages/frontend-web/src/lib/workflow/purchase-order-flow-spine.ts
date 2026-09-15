@@ -122,8 +122,9 @@ export async function linkPurchaseOrderToFlowSpine(input: LinkPurchaseOrderWorkf
   if (!flowSpine) return
 
   if (input.handover?.instanceId) {
-    const claimedProcess = input.handover.process?.trim() || flowSpine.processKey
-    await attachHandover(claimedProcess, input)
+    // The policy fixes the process; URL data cannot select another aggregate.
+    // A foreign-process instance is rejected by the server at this fixed path.
+    await attachHandover(flowSpine.processKey, input)
     return
   }
 
