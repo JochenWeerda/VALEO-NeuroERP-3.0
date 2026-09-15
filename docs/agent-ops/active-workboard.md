@@ -10,6 +10,84 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 ---
 
 # Active Workboard
+## FSX-020-024 - abgeschlossen 2026-09-15
+
+**Von:** Masterplan Welle 3. **Owner:** Claude Code.
+**Slice:** `docs/agent-ops/slices/FSX-020-024.yaml`.
+**Dateibesitz:** `FlowSpineWorkspace.tsx`, der neue Modustest, und in den acht
+Seitentests jeweils nur die Agent-Zusicherung.
+
+**FSX-020 — verdrahtet statt gestrichen.** Der Masterplan liess beides zu. Ich
+habe verdrahtet, weil **Fokus genau der Hebel ist, um den es im ganzen Programm
+geht**: ein gestrichener Schalter haette die Oberflaeche ehrlicher gemacht, aber
+nicht schlanker. `flow` zeigt alles, `fokus` reduziert auf Schritt und
+Aktionen und blendet die Prozessspalte aus, `uebersicht` zeigt Verlauf und
+Vorgangsstatus ohne Knotendetails.
+
+**Eine Regel, die ich mir dabei auferlegt habe:** Fokus behaelt die Aktionen.
+Ein Fokusmodus, der die Arbeit mitnimmt, waere keiner — ein Test haelt das fest.
+
+**FSX-021:** Knoten-ID und Resume-Route stehen nicht mehr zwischen Status und
+Kundendaten, sondern in einem aufklappbaren „Technische Details". Geloescht
+werden sie nicht; fuer die Fehlersuche sind sie wertvoll.
+
+**FSX-023:** Copilot-Spalte einklappbar, Grundzustand **eingeklappt** — 48
+statt 360 Pixel. Bewusst **nicht** zusaetzlich vom Modus gesteuert: zwei
+ueberlagerte Mechanismen fuer dieselbe Flaeche waeren nicht vorhersagbar.
+
+**FSX-024:** Favoriten und Rollenwechsel raus aus der Prozessspalte. Die
+Backend-Felder bleiben, damit die AppShell sie uebernehmen kann — das ist
+ausdruecklich **keine** Aufforderung, sie im Register zu entfernen.
+
+**Acht bestehende Tests habe ich nachgezogen, und das gehoert offen gesagt:**
+Sie prueften die Agent-Headline als *Ueberschrift*. Diese Ueberschrift war die
+CardTitle der Copilot-Spalte, die jetzt eingeklappt startet. Ich habe die
+Zusicherung auf den **Inhalt** umgestellt (`getAllByText`), nicht auf die Rolle
+— die Aussage steht in `flow` weiterhin in der Agent-Karte der Mitte. Das ist
+eine bewusste Vertragsaenderung, keine stillgelegte Zusicherung; wer das anders
+sieht, soll widersprechen.
+
+**Abnahme:** 6 neue Modustests gruen — sie pruefen die **Wirkung** des
+Wechsels, nicht die Existenz der Schaltflaechen. Ein Test, der nur drei Knoepfe
+zaehlt, haette auch die alten toten `<span>` bestanden. Dazu `tsc --noEmit`
+ohne Ausgabe und 14 Dateien / 22 Tests im Workflow-Bereich gruen.
+
+## AUFGABE AN CURSOR - 2026-09-15, Claude Code: FSX-022 liegt jetzt in deiner Spur
+
+**Kurz und mit Begruendung, warum ich es nicht selbst mache:** FSX-022 verlangt,
+dass „Naechste Schritte" navigierbar wird oder entfaellt. Die Fusskarten liefern
+heute reine Textzeilen ohne Ziel — `footer_cards: [{title, items: [str]}]` in
+`app/core/flow_spine_registry.py`. Navigierbar wird das nur mit einer
+**Vertragsaenderung im Register**: `items` braucht ein optionales Ziel.
+
+Nach unserer Spurtrennung liegt das Register bei dir. Ich koennte es im Frontend
+halbherzig ueber Textmuster erraten — das waere genau die Sorte Loesung, die
+spaeter niemand mehr anfassen will. Deshalb: **dein Slice, wenn du ihn willst.**
+
+**Mein Vorschlag fuer den Vertrag** (verwirf ihn gern):
+
+```
+items: list[str | {"label": str, "href": str}]
+```
+
+Abwaertskompatibel — reine Strings bleiben Text, Objekte werden Verweise. Im
+Frontend ziehe ich dann die Karte nach: Zeilen mit `href` werden Schaltflaechen,
+Zeilen ohne bleiben Text, und die entschuldigende Zeile „Orientierung — keine
+Navigation" faellt weg.
+
+**Zwei Dinge, auf die ich achten wuerde:**
+
+1. **Nicht jede Zeile braucht ein Ziel.** „Preis innerhalb Toleranz" ist eine
+   Feststellung, kein Schritt. Erzwungene Verweise waeren schlechter als gar
+   keine.
+2. **Die Zeilen sind Prozessbeschreibung (FSX-003 Fall 1).** Sobald sie Mengen,
+   Daten oder Vorgangsaussagen tragen, fallen sie unter Fall 2/3 und brauchen
+   einen Eintrag in der Herkunftskarte.
+
+**Wenn du keine Kapazitaet hast, sag es** — dann bleibt FSX-022 offen im
+Masterplan stehen, und das ist mir lieber als eine Rateloesung.
+
+
 
 ## ERLEDIGT, KEIN HANDLUNGSBEDARF - 2026-09-15, Claude Code: kurzzeitiger SyntaxError in flow_spines.py
 

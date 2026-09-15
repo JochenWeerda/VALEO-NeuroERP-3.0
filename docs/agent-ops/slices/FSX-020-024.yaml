@@ -1,0 +1,149 @@
+slice_id: FSX-020-024
+id: FSX-020-024
+title: Flow-Spine-Leitstand entdichten — Modi verdrahten, Technik und Nebenflaechen raeumen
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-002-003
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+coordination: >-
+  Spurtrennung mit Cursor (Workboard 2026-09-15): Backend Flow Spine bei Cursor,
+  Frontend Leitstand und UI-Vertrag bei Claude Code. Dieser Slice fasst
+  ausschliesslich Frontend-Dateien an; app/api/v1/endpoints/flow_spines.py und
+  app/core/flow_spine_registry.py bleiben unberuehrt.
+goal: >-
+  Die Oberflaeche beansprucht Aufmerksamkeit fuer Prozessuebersicht und
+  Hilfsinformationen, bevor die eigentliche Arbeit beginnt. Dieser Slice raeumt
+  auf, ohne den Leitstand abzuschaffen: wer alles sehen will, sieht weiter
+  alles — aber es ist nicht mehr der einzige Zustand.
+
+befund:
+  V1: "Raster fest auf 220px + 360px = 580px vor der Arbeitsflaeche."
+  V2: "Flow/Fokus/Uebersicht waren <span> ohne Handler und ohne State."
+  V3: "resume_node_id und resume_route standen zwischen Status und Kundendaten."
+  redundanz: >-
+    Aktionen, Agentenhinweis und Dokumente standen doppelt — in der Mitte und in
+    der Copilot-Spalte.
+
+entscheidungen:
+  fsx_020_verdrahten_statt_streichen: >-
+    Der Masterplan liess beides zu: echte Umschalter oder streichen. Entschieden
+    wurde fuer Verdrahten, weil 'Fokus' genau der Dichte-Hebel ist, um den es im
+    ganzen Programm geht. Ein gestrichener Schalter haette die Oberflaeche
+    ehrlicher gemacht, aber nicht schlanker.
+  fokus_behaelt_die_aktionen: >-
+    Fokus blendet Kennzahlen, Belege, Agentenhinweis, Fusskarten und die
+    Prozessspalte aus — aber nicht den Schritt und seine Aktionen. Ein
+    Fokusmodus, der die Arbeit mitnimmt, waere keiner. Ein Test haelt das fest.
+  ein_mechanismus_statt_zwei: >-
+    Die Copilot-Spalte wird nicht zusaetzlich vom Modus gesteuert, sondern
+    ausschliesslich vom eigenen Aufklapp-Zustand. Zwei ueberlagerte Mechanismen
+    fuer dieselbe Flaeche waeren fuer Nutzer nicht vorhersagbar.
+  technik_bleibt_erreichbar: >-
+    Knoten-ID und Resume-Route werden nicht geloescht, sondern in ein
+    aufklappbares "Technische Details" verschoben. Fuer die Fehlersuche sind sie
+    wertvoll; im Arbeitsbereich sind sie Ballast.
+
+umsetzung:
+  FSX-020: >-
+    FlowSpineViewMode mit echtem State und aria-pressed. 'flow' zeigt alles,
+    'fokus' reduziert auf Schritt und Aktionen und blendet die Prozessspalte
+    aus, 'uebersicht' zeigt Verlauf und Vorgangsstatus ohne Knotendetails.
+  FSX-021: >-
+    resume_node_id/active_node_id und resume_route in ein <details>
+    "Technische Details" verschoben; die Kennzahlenreihe des Lebenszyklus geht
+    von vier auf drei Spalten.
+  FSX-023: >-
+    Copilot-Spalte einklappbar, Grundzustand eingeklappt. Eingeklappt belegt sie
+    48 statt 360 Pixel; die Registerkarten werden dann nicht gerendert.
+  FSX-024: >-
+    Favoriten und Rollenwechsel aus der Prozessspalte entfernt — das sind
+    Aufgaben der AppShell. Die Backend-Felder bleiben bestehen, damit die Shell
+    sie uebernehmen kann.
+
+nicht_umgesetzt:
+  FSX-022: >-
+    "Naechste Schritte" navigierbar machen. Die Fusskarten liefern heute reine
+    Textzeilen ohne Ziel; sie navigierbar zu machen verlangt eine
+    Vertragsaenderung im Prozessregister — und das liegt nach der Spurtrennung
+    bei Cursor. Der Punkt bleibt offen und ist dort anzumelden, nicht hier
+    halbherzig zu loesen.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-020-024.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx
+  - packages/frontend-web/src/__tests__/components/workflow/flow-spine-view-modes.test.tsx
+  - "packages/frontend-web/src/__tests__/pages/workflow/*.test.tsx: nur die Agent-Zusicherung"
+
+acceptance:
+  - Die drei Modi sind Schaltflaechen mit aria-pressed und veraendern die Anzeige.
+  - Fokus blendet Nebenflaechen aus und behaelt Schritt und Aktionen.
+  - Uebersicht zeigt den Verlauf ohne Knotendetails.
+  - Die Copilot-Spalte ist eingeklappt erreichbar und belegt 48 statt 360 Pixel.
+  - Favoriten und Rollenwechsel stehen nicht mehr im Prozessraum.
+  - Knoten-ID und Resume-Route nur noch in den technischen Details.
+
+tests:
+  - >-
+    packages/frontend-web/src/__tests__/components/workflow/flow-spine-view-modes.test.tsx
+    — 6 Tests, gruen. Geprueft wird die Wirkung des Moduswechsels, nicht die
+    Existenz der Schaltflaechen: ein Test, der nur drei Knoepfe zaehlt, haette
+    auch das alte Verhalten aus toten <span> bestanden.
+  - "tsc --noEmit exit 0 ohne Ausgabe."
+  - >-
+    vitest src/__tests__/pages/workflow + src/__tests__/components/workflow —
+    14 Dateien, 22 Tests, gruen.
+
+nachgezogene_tests:
+  grund: >-
+    Acht bestehende Seitentests pruefen die Agent-Headline als Ueberschrift.
+    Diese Ueberschrift war die CardTitle der Copilot-Spalte — mit FSX-023 ist
+    sie im Grundzustand nicht mehr gerendert.
+  entscheidung: >-
+    Die Zusicherung wurde auf den Inhalt umgestellt (getAllByText), nicht auf
+    die Rolle. Die Agentenaussage steht in 'flow' weiterhin in der Agent-Karte
+    der Mitte; geprueft wird jetzt, dass sie sichtbar ist, nicht in welcher
+    Rolle. Das ist eine bewusste Vertragsaenderung, keine stillgelegte
+    Zusicherung.
+
+risks:
+  - >-
+    Der Grundzustand zeigt weniger als vorher. Wer die Copilot-Spalte gewohnt
+    ist, muss sie einmal aufklappen. Das ist beabsichtigt und sollte den
+    Nutzern angesagt werden.
+  - >-
+    'fokus' blendet die Prozessspalte aus. Der Wechsel zwischen Vorgaengen
+    laeuft dort dann ueber 'flow' oder 'uebersicht' — bewusst, weil Fokus genau
+    keine Navigation sein soll.
+
+external_gates:
+  - >-
+    FSX-090b (Nutzerbeobachtung) muss bestaetigen, dass 'fokus' tatsaechlich
+    schneller zum Ziel fuehrt. Bis dahin ist die Entdichtung plausibel, aber
+    nicht belegt.
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Der Leitstand bleibt vollstaendig, aber er ist nicht mehr der einzige
+    Zustand. Wer eine Aufgabe erledigt, soll den Schritt und seine Aktionen
+    sehen — nicht zuerst Kennzahlen, Agentenhinweise und Prozessbeschreibung.
+  architektur_vertrag: >-
+    Eine Flaeche wird von genau einem Mechanismus gesteuert. Der Modus steuert
+    die Mitte und die Prozessspalte, der Aufklapp-Zustand die Copilot-Spalte.
+    Keine Ueberlagerung.
+  daten_vertrag: >-
+    Keine Datenaenderung, keine Migration. left_navigation.favorites und
+    role_switches bleiben im Vertrag bestehen, werden hier aber nicht mehr
+    gerendert.
+  test_vertrag: >-
+    Modustests pruefen die Wirkung, nicht die Existenz von Schaltflaechen.
+    Jeder neue Modus braucht eine Zusicherung darueber, was er ausblendet und
+    was er behaelt.
+  security_vertrag: "Keine Endpunkte, Berechtigungen oder Abhaengigkeiten beruehrt."
+  betriebs_vertrag: "Rein clientseitig, kein Rollout-Schritt."
+  dokumentations_vertrag: >-
+    Masterplan Welle 3, Workboard-Abschnitt FSX-020-024 und dieser Slice.
+    FSX-022 ist ausdruecklich als offen vermerkt und an Cursor uebergeben.

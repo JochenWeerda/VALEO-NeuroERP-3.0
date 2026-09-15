@@ -49,6 +49,9 @@ describe('FlowSpineContractToSettlementPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Contract-to-Settlement', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('ANH-551')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Annahme sauber verknuepft' })).toBeInTheDocument()
+        // FSX-023: Die Agentenaussage steht weiterhin auf dem Schirm (Agent-Karte in
+    // der Mitte), aber nicht mehr als Ueberschrift der Copilot-Spalte — die ist
+    // jetzt eingeklappt. Geprueft wird deshalb die Aussage, nicht ihre Rolle.
+    expect(screen.getAllByText('Annahme sauber verknuepft').length).toBeGreaterThan(0)
   })
 })

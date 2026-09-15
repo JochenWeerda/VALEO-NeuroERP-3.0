@@ -49,6 +49,9 @@ describe('FlowSpineComplianceToReportPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Compliance-to-Report', level: 1 })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /aggregation/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Aggregation laeuft' })).toBeInTheDocument()
+        // FSX-023: Die Agentenaussage steht weiterhin auf dem Schirm (Agent-Karte in
+    // der Mitte), aber nicht mehr als Ueberschrift der Copilot-Spalte — die ist
+    // jetzt eingeklappt. Geprueft wird deshalb die Aussage, nicht ihre Rolle.
+    expect(screen.getAllByText('Aggregation laeuft').length).toBeGreaterThan(0)
   })
 })

@@ -488,6 +488,15 @@ function CatalogContentNotice(): JSX.Element {
   )
 }
 
+/** FSX-020: die drei Arbeitsmodi des Leitstands. */
+type FlowSpineViewMode = 'flow' | 'fokus' | 'uebersicht'
+
+const VIEW_MODES: Array<{ id: FlowSpineViewMode; label: string; hint: string }> = [
+  { id: 'flow', label: 'Flow', hint: 'Vollbild: Prozess, Details, Kennzahlen und Agent.' },
+  { id: 'fokus', label: 'Fokus', hint: 'Nur der aktuelle Schritt und seine Aktionen.' },
+  { id: 'uebersicht', label: 'Uebersicht', hint: 'Nur Prozessverlauf und Vorgangsstatus.' },
+]
+
 function formatDateTime(value?: string | null): string {
   if (!value) return '—'
   try {
@@ -650,8 +659,20 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
     return []
   }, [workspace?.left_navigation?.processes, catalogQuery.data?.processes, processKey])
 
-  const navFavorites = workspace?.left_navigation?.favorites ?? []
-  const navRoleSwitches = workspace?.left_navigation?.role_switches ?? []
+  // FSX-024: Favoriten und Rollenwechsel sind Aufgaben der AppShell, nicht des
+  // Prozessraums. Sie werden hier nicht mehr gerendert; die Backend-Felder
+  // bleiben vorerst bestehen, damit die Shell sie uebernehmen kann.
+
+  // FSX-020: Die drei Modi waren beschriftete <span> ohne Wirkung. Jetzt tragen
+  // sie echten Zustand — 'fokus' ist dabei der eigentliche Dichte-Hebel: eine
+  // Aufgabe, ein Knoten, keine Nebenflaechen.
+  const [viewMode, setViewMode] = useState<FlowSpineViewMode>('flow')
+  const showNodeDetails = viewMode !== 'uebersicht'
+  const showSideFlaechen = viewMode === 'flow'
+
+  // FSX-023: Die Copilot-Spalte stand doppelt zur Mitte und beanspruchte 360 px
+  // dauerhaft. Sie bleibt erreichbar, aber eingeklappt, bis jemand sie braucht.
+  const [copilotOpen, setCopilotOpen] = useState(false)
 
   const completedCount = useMemo(() => nodes.filter((node) => node.status === 'ok').length, [nodes])
   const progressWidth = nodes.length
@@ -958,11 +979,23 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               {startConfig.buttonLabel}
             </Button>
-            <div className="flex rounded-xl bg-white/5 p-1 text-xs">
-              {['Flow', 'Fokus', 'Uebersicht'].map((mode) => (
-                <span key={mode} className={cn('rounded-lg px-3 py-1.5 text-slate-400', workspace.mode === mode && 'bg-indigo-500/30 text-indigo-100')}>
-                  {mode}
-                </span>
+            <div className="flex rounded-xl bg-white/5 p-1 text-xs" role="group" aria-label="Ansicht">
+              {VIEW_MODES.map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  title={mode.hint}
+                  aria-pressed={viewMode === mode.id}
+                  onClick={() => setViewMode(mode.id)}
+                  className={cn(
+                    'rounded-lg px-3 py-1.5 transition',
+                    viewMode === mode.id
+                      ? 'bg-indigo-500/30 text-indigo-100'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-200',
+                  )}
+                >
+                  {mode.label}
+                </button>
               ))}
             </div>
             <Bell className="h-4 w-4 text-muted-foreground" />
@@ -974,7 +1007,25 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
           </div>
         </header>
 
-        <div className="grid min-h-[720px] grid-cols-[220px_minmax(0,1fr)_360px]">
+        {/*
+          FSX-020/023/024: Das Raster stand fest auf 220 px + 360 px = 580 px, bevor
+          die eigentliche Arbeitsflaeche begann. Die Prozessspalte entfaellt in
+          'fokus' ganz, die Copilot-Spalte schrumpft auf 48 px, solange sie
+          eingeklappt ist.
+        */}
+        <div
+          className={cn(
+            'grid min-h-[720px]',
+            viewMode === 'fokus'
+              ? copilotOpen
+                ? 'grid-cols-[minmax(0,1fr)_360px]'
+                : 'grid-cols-[minmax(0,1fr)_48px]'
+              : copilotOpen
+                ? 'grid-cols-[220px_minmax(0,1fr)_360px]'
+                : 'grid-cols-[220px_minmax(0,1fr)_48px]',
+          )}
+        >
+          {viewMode !== 'fokus' ? (
           <aside className="border-r border-white/5 bg-slate-950/45 p-4">
             <div className="mb-6">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
@@ -996,14 +1047,6 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     <span>{process.label}</span>
                     <ChevronRight className="h-4 w-4" />
                   </button>
-                ))}
-              </div>
-            </div>
-            <div className="mb-6">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Favoriten</p>
-              <div className="space-y-2 text-sm text-slate-300">
-                {navFavorites.map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/5 bg-white/3 px-3 py-3">{item}</div>
                 ))}
               </div>
             </div>
@@ -1052,17 +1095,8 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 )}
               </div>
             </div>
-            <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Rollenwechsel</p>
-              <div className="space-y-2">
-                {navRoleSwitches.map((role) => (
-                  <Button key={role} variant="outline" className="w-full justify-start border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
-                    {role}
-                  </Button>
-                ))}
-              </div>
-            </div>
           </aside>
+          ) : null}
 
           <main className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6">
             <div className="mb-6 flex items-start justify-between gap-4">
@@ -1122,11 +1156,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         </Badge>
                       ) : null}
                     </div>
-                    <div className="grid gap-2 text-xs text-slate-400 md:grid-cols-4">
-                      <div>
-                        <div className="uppercase tracking-[0.18em] text-slate-500">Resume</div>
-                        <div className="mt-1 text-slate-200">{workspace.resume_node_id || workspace.active_node_id || '—'}</div>
-                      </div>
+                    <div className="grid gap-2 text-xs text-slate-400 md:grid-cols-3">
                       <div>
                         <div className="uppercase tracking-[0.18em] text-slate-500">Owner</div>
                         <div className="mt-1 text-slate-200">{workspace.assigned_owner || 'Nicht gesetzt'}</div>
@@ -1140,10 +1170,27 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         <div className="mt-1 text-slate-200">{lifecycleSummary(workspace)}</div>
                       </div>
                     </div>
-                    {workspace.resume_route ? (
-                      <div className="rounded-xl border border-white/10 bg-white/3 px-3 py-2 text-xs text-slate-400">
-                        Letztes Resume-Ziel: <span className="text-slate-200">{workspace.resume_route}</span>
-                      </div>
+                    {/*
+                      FSX-021: Knoten-ID und Resume-Route sind Technik, keine Fachinformation.
+                      Sie bleiben erreichbar — fuer die Fehlersuche sind sie wertvoll —, stehen
+                      aber nicht mehr zwischen Status und Kundendaten.
+                    */}
+                    {workspace.resume_node_id || workspace.active_node_id || workspace.resume_route ? (
+                      <details className="rounded-xl border border-white/10 bg-white/3 px-3 py-2">
+                        <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300">
+                          Technische Details
+                        </summary>
+                        <div className="mt-2 space-y-1 text-xs text-slate-400">
+                          <div>
+                            Knoten: <span className="text-slate-200">{workspace.resume_node_id || workspace.active_node_id || '—'}</span>
+                          </div>
+                          {workspace.resume_route ? (
+                            <div>
+                              Letztes Resume-Ziel: <span className="text-slate-200">{workspace.resume_route}</span>
+                            </div>
+                          ) : null}
+                        </div>
+                      </details>
                     ) : null}
                   </div>
 
@@ -1236,7 +1283,13 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 </div>
               </div>
 
-              <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
+              {/*
+                FSX-020: In 'uebersicht' zaehlt der Prozessverlauf, nicht der einzelne
+                Knoten. Die Detailflaeche entfaellt dort ganz — das ist der Unterschied
+                zwischen einem Modus und einer Beschriftung.
+              */}
+              {showNodeDetails ? (
+              <div className={cn('grid gap-5', showSideFlaechen && 'xl:grid-cols-[1fr_300px]')}>
                 <div className="grid gap-5">
                   {/*
                     FSX-002: Der "KPI Health Score" ist ersatzlos entfallen. Er zeigte einen
@@ -1267,7 +1320,14 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     </CardContent>
                   </Card>
 
-                  <div className="grid gap-4 lg:grid-cols-4">
+                  {/*
+                    FSX-020: In 'fokus' bleibt nur, was zum Weiterarbeiten noetig ist —
+                    der Schritt und seine Aktionen. Kennzahlen, Belege und Agentenhinweis
+                    sind dort Nebenflaeche.
+                  */}
+                  <div className={cn('grid gap-4', showSideFlaechen ? 'lg:grid-cols-4' : 'lg:grid-cols-1')}>
+                    {showSideFlaechen ? (
+                    <>
                     <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">KPIs</CardTitle></CardHeader>
                       <CardContent className="space-y-2 text-sm">
@@ -1288,6 +1348,8 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         )}
                       </CardContent>
                     </Card>
+                    </>
+                    ) : null}
                     <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
                       <CardContent className="space-y-3">
@@ -1305,6 +1367,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         ))}
                       </CardContent>
                     </Card>
+                    {showSideFlaechen ? (
                     <Card className="border-indigo-400/20 bg-indigo-500/10 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Agent</CardTitle></CardHeader>
                       <CardContent className="space-y-3 text-sm">
@@ -1319,9 +1382,11 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         )}
                       </CardContent>
                     </Card>
+                    ) : null}
                   </div>
                 </div>
 
+                {showSideFlaechen ? (
                 <div className="space-y-4">
                   <Suspense fallback={null}><AgentProcessPanel domain={workspace.right_panel.domain} className="max-w-none border-white/10 bg-slate-950/50" /></Suspense>
                   <Card className="border-white/10 bg-slate-950/50 text-slate-100">
@@ -1345,9 +1410,13 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     </CardContent>
                   </Card>
                 </div>
+                ) : null}
               </div>
+              ) : null}
             </div>
 
+            {/* FSX-020: Die Fusskarten sind Prozessbeschreibung — in 'fokus' stehen sie im Weg. */}
+            {viewMode !== 'fokus' ? (
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
               {workspace.footer_cards.map((card) => {
                 const isNextSteps =
@@ -1383,10 +1452,47 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 </Card>
               )})}
             </div>
+            ) : null}
           </main>
 
-          <aside className="border-l border-white/5 bg-slate-950/45 p-5">
-            <div className="mb-4 text-sm font-semibold text-slate-100">AI Copilot</div>
+          {/*
+            FSX-023: Die Copilot-Spalte hat 360 px dauerhaft belegt und ihre Inhalte
+            (Aktionen, Agent, Dokumente) standen bereits in der Mitte. Sie bleibt
+            vollstaendig erreichbar, beansprucht aber keinen Platz mehr, solange
+            niemand sie aufklappt.
+          */}
+          <aside
+            className={cn(
+              'border-l border-white/5 bg-slate-950/45',
+              copilotOpen ? 'p-5' : 'flex w-12 flex-col items-center gap-3 py-4',
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => setCopilotOpen((open) => !open)}
+              aria-expanded={copilotOpen}
+              aria-label={copilotOpen ? 'Copilot einklappen' : 'Copilot aufklappen'}
+              className={cn(
+                'rounded-lg text-slate-400 transition hover:bg-white/5 hover:text-slate-100',
+                copilotOpen ? 'mb-3 flex w-full items-center justify-between px-2 py-1.5' : 'p-2',
+              )}
+            >
+              {copilotOpen ? (
+                <>
+                  <span className="text-sm font-semibold text-slate-100">AI Copilot</span>
+                  <ArrowLeftRight className="h-4 w-4" />
+                </>
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+            </button>
+            {!copilotOpen ? (
+              <span className="text-2xs uppercase tracking-wide text-slate-500 [writing-mode:vertical-rl]">
+                Copilot
+              </span>
+            ) : null}
+            {copilotOpen ? (
+            <>
             <Tabs defaultValue="agent" className="flex h-full flex-col">
               <TabsList className="grid w-full grid-cols-5 bg-white/5">
                 <TabsTrigger value="agent">Agent</TabsTrigger>
@@ -1497,6 +1603,8 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 ))}
               </TabsContent>
             </Tabs>
+            </>
+            ) : null}
           </aside>
         </div>
       </PageSection>
