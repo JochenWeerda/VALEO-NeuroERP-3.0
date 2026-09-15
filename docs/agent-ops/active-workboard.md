@@ -105,15 +105,19 @@ vorhandenen Rechnungsmasken fuehren keine Positionen mit eigener Identitaet —
 Endpunkt an eine Maske zu haengen, die nie etwas anzeigen kann, waere
 Dekoration; die Rechnungsposition als eigenes Objekt ist der naechste Schritt.
 
-## MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915 - reserviert
+## MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915 - in arbeit 2026-09-15
 
-**Owner:** Codex. **Auftrag:** Framework-Prinzip systemweit umsetzen, wo sinnvoll.
-**Ziel:** Bestehenden Single Mask Builder als verbindlichen Bedienvertrag ausbauen: gemeinsame Meldungen/Validierung, sichere Datenzustaende, nachvollziehbare Flaechenabdeckung und schrittweiser Rollout ohne Fachverlust.
-**Dateibesitz:** zentrale Mask-Builder-Renderer und Runtime, gemeinsame native Page-Wrapper, Framework-Inventur/Gate samt Tests, zugehoerige CI-Anbindung, docs/design/valeo-meridian-experience.md, eigene Slice-/QA-Dokumentation und dieser Abschnitt.
-**Abgrenzung:** Keine neue UI-Architektur; SAP-Pixel sind kein Ziel. FSX-Dateien (insbesondere lieferschein-erfassung.tsx, Dokumentzuordnungen und Artikelimporte) bleiben bei ihren laufenden Owners. Spezialoberflaechen werden begruendet klassifiziert statt blind ersetzt.
-**Abnahme:** Gemeinsame Verbesserungen erreichen alle angeschlossenen Masken; keine stillen Datenfehler; Meldungen sind dauerhaft und bedienbar; maschinenpruefbare Abdeckung verhindert neue unklassifizierte Seiten. Runtime-, Komponenten- und Doku-Pruefungen gruen.
-**Risiken:** Generator-Readiness ist keine visuelle oder fachliche Abnahme; gespeicherte Entwuerfe duerfen nie implizit buchen/freigeben. Kein Deployment.
-
+**Owner:** Cursor (von Codex übernommen nach Nutzungslimit). **Stand:** in Arbeit —
+Floorplans und adaptive Spaltennavigation sind im Builder verdrahtet.
+`analyticalList` ergänzt die fünf bestehenden Seitentypen. Transaction,
+Cockpit und Wizard bleiben einspaltig. Erste reale Maske ist die lesende
+Kunden-Schnellauswahl. Tabellen-Ladefehler sind von leeren Trefferlisten
+getrennt. Feldnavigation aus der Meldungsleiste öffnet das Register.
+**Abgrenzung:** keine FSX-Dateien, kein Lieferschein, keine SAP-Pixel.
+**Nächster Schritt:** weitere List-Detail-Masken bewusst anschließen, nicht
+blind ersetzen.
+**Dateibesitz:** Mask-Builder-Renderer/Runtime, `kunden-schnellauswahl.tsx`,
+Meridian-Experience, Slice-YAML, dieser Abschnitt.
 
 ## FSX-ARTIKEL-IMPORT - Bruecke ins Mengenmodell 2026-09-15, Claude Code
 

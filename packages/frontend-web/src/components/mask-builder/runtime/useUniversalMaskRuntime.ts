@@ -1,3 +1,4 @@
+import type { ScreenMessage } from '../renderers/MessagePanelRenderer'
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueries, useQueryClient } from '@tanstack/react-query'
 import type { ScreenDefinition, ScreenSummaryItem } from '../schema'
@@ -26,6 +27,7 @@ export interface UseUniversalMaskRuntimeOptions {
 }
 
 export interface UseUniversalMaskRuntimeResult {
+  messages: ScreenMessage[]
   plan: RenderPlan | undefined
   binding: DataBindingPlan | undefined
   entityData: Record<string, unknown>
@@ -230,7 +232,20 @@ export function useUniversalMaskRuntime({
     return result
   }, [tableEntries, tableResults])
 
+  const messages: ScreenMessage[] = [
+    ...(entityQuery.error ? [{
+      key: 'entity',
+      severity: 'error' as const,
+      message: 'Vorgang konnte nicht geladen werden.',
+    }] : []),
+    ...tableEntries.flatMap(([key], index) => tableResults[index]?.error ? [{
+      key: `table-${key}`, severity: 'error' as const,
+      message: `Tabelle „${plan?.tablesByKey[key]?.label ?? key}“ konnte nicht geladen werden.${tableResults[index]?.data ? ' Angezeigte Daten sind möglicherweise veraltet.' : ''}`,
+    }] : []),
+  ]
+
   return {
+    messages,
     plan,
     binding,
     entityData: (entityQuery.data as Record<string, unknown>) ?? {},

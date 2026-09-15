@@ -309,30 +309,17 @@ export function UniversalNativeDetailPage({
             Aktion wird ausgefuehrt...
           </div>
         )}
-        {actionError && (
-          <div className="flex items-start gap-2 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{actionError}</span>
-          </div>
-        )}
-        {validationErrors.length > 0 && (
-          <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
-            <div className="flex items-center gap-2 font-medium">
-              <AlertCircle className="h-4 w-4" />
-              Validierungsfehler:
-            </div>
-            <ul className="mt-1 list-inside list-disc space-y-0.5">
-              {validationErrors.map((e, i) => (
-                <li key={i}>{e.field ? <strong>{e.field}:</strong> : null} {e.message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
         <UniversalMaskRenderer
           plan={runtime.plan}
           data={runtime.entityData}
           entityId={entityId}
           tables={runtime.tableRows}
+          messages={[
+            ...(runtime.messages ?? []),
+            ...validationErrors.map((error, index) => ({ key: `action-field-${index}`, severity: 'error' as const, message: error.message, fieldKey: error.field })),
+            ...(actionError ? [{ key: 'action-error', severity: 'error' as const, message: actionError }] : []),
+          ]}
+          onRetry={() => { void runtime.refetch() }}
           tableQueryStates={runtime.tableQueryStates}
           tableTotals={runtime.tableTotals}
           lookupBindings={runtime.lookupBindings}

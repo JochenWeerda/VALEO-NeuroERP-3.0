@@ -160,6 +160,8 @@ function UniversalCustomerMaskPilotPage(): JSX.Element {
           plan={nativeRuntime.plan}
           data={nativeRuntime.entityData}
           tables={nativeRuntime.tableRows}
+          messages={nativeRuntime.messages}
+          onRetry={() => { void nativeRuntime.refetch() }}
           tableQueryStates={nativeRuntime.tableQueryStates}
           tableTotals={nativeRuntime.tableTotals}
           lookupBindings={nativeRuntime.lookupBindings}

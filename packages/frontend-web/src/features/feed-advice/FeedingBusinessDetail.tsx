@@ -84,7 +84,9 @@ export function FeedingBusinessDetail({ businessId }: { businessId: string }): J
       {feedback ? <p className="mb-3 rounded-md border bg-muted px-3 py-2 text-sm" role="status">{feedback}</p> : null}
       <UniversalMaskRenderer
         plan={runtime.plan} data={runtime.entityData} entityId={businessId}
-        tables={runtime.tableRows} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals}
+        tables={runtime.tableRows}
+          messages={runtime.messages}
+          onRetry={() => { void runtime.refetch() }} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals}
         lookupBindings={runtime.lookupBindings} onTableQueryChange={runtime.setTableQuery}
         overlay={runtime.userOverlay} onOverlayChange={runtime.updateUserOverlay} onOverlayReset={runtime.resetUserOverlay}
         onAction={(key) => handleAction(key)}

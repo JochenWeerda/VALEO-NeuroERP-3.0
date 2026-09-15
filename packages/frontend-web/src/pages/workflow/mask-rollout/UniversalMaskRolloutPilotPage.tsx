@@ -38,6 +38,8 @@ export default function UniversalMaskRolloutPilotPage({ screenId, entityId }: Pr
     plan,
     entityData,
     tableRows,
+    messages,
+    refetch,
     tableTotals,
     tableQueryStates,
     setTableQuery,
@@ -91,6 +93,8 @@ export default function UniversalMaskRolloutPilotPage({ screenId, entityId }: Pr
           plan={plan}
           data={mergedData}
           tables={tableRows}
+          messages={messages}
+          onRetry={() => { void refetch() }}
           tableTotals={tableTotals}
           tableQueryStates={tableQueryStates}
           onTableQueryChange={setTableQuery}

@@ -38,6 +38,8 @@ export function FeedingAnalysisDetail({ analysisId }: { analysisId?: string }): 
   return <div data-testid="feeding-analysis-detail">
     {feedback ? <p className="mb-3 rounded-md border bg-muted px-3 py-2 text-sm" role="status">{feedback}</p> : null}
     <UniversalMaskRenderer plan={runtime.plan} data={runtime.entityData} tables={runtime.tableRows}
+          messages={runtime.messages}
+          onRetry={() => { void runtime.refetch() }}
       tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals}
       onTableQueryChange={runtime.setTableQuery} onOverlayChange={runtime.updateUserOverlay}
       onOverlayReset={runtime.resetUserOverlay} lookupBindings={runtime.lookupBindings} entityId={analysisId}

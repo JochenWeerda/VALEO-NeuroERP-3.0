@@ -33,7 +33,9 @@ export function FeedingPlanDetail({ versionId }: { versionId: string }): JSX.Ele
       {plan?.plan_status === 'scheduled' ? <div className="flex items-center gap-2 border-b bg-muted px-4 py-2 text-sm" role="status"><CalendarClock className="h-4 w-4" />Dieser Plan ist geplant und gilt ab {new Date(plan.valid_from).toLocaleDateString('de-DE')}.</div> : null}
       <UniversalMaskRenderer
         plan={runtime.plan} data={runtime.entityData} entityId={versionId}
-        tables={runtime.tableRows} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals}
+        tables={runtime.tableRows}
+          messages={runtime.messages}
+          onRetry={() => { void runtime.refetch() }} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals}
         lookupBindings={runtime.lookupBindings} onTableQueryChange={runtime.setTableQuery}
         overlay={runtime.userOverlay} onOverlayChange={runtime.updateUserOverlay} onOverlayReset={runtime.resetUserOverlay}
         onAction={(key) => handleAction(key)}

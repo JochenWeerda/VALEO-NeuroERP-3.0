@@ -11,7 +11,7 @@ type SmokeCase = {
   testId: string
   title: string
   entityId: string
-  floorplan: 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard'
+  floorplan: 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard' | 'analyticalList'
   density: 'comfortable' | 'compact' | 'expertDense'
   contextRail: 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
   tableProfile: 'standard' | 'financial' | 'inventory' | 'audit'

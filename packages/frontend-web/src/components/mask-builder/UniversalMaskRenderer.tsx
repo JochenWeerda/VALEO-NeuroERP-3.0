@@ -1,5 +1,7 @@
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
-import { type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
+import { MessagePanelRenderer, type ScreenMessage } from './renderers/MessagePanelRenderer'
 import { LazyTabs } from '@/components/ui/LazyTabs'
 import { cn } from '@/lib/utils'
 import { resolveContextRailSections, type ScreenDefinition, type ScreenFieldDefinition } from './schema'
@@ -27,6 +29,9 @@ import {
 } from './renderers'
 
 interface UniversalMaskRendererProps {
+  columns?: NavigationColumn[]
+  messages?: ScreenMessage[]
+  onRetry?: () => void
   /** Preferred: pre-compiled render plan */
   region?: 'sourceProposals'
   plan?: RenderPlan
@@ -133,6 +138,9 @@ function renderLegacyFields(
 }
 
 function RenderFromPlan({
+  columns,
+  messages = [],
+  onRetry,
   plan,
   payload,
   tables,
@@ -147,6 +155,9 @@ function RenderFromPlan({
   workflowState,
   entityId,
 }: {
+  columns?: NavigationColumn[]
+  messages?: ScreenMessage[]
+  onRetry?: () => void
   plan: RenderPlan
   payload: Record<string, unknown>
   entityId?: string
@@ -161,6 +172,54 @@ function RenderFromPlan({
   formState?: UniversalFormState
   workflowState?: WorkflowState
 }): JSX.Element {
+  const container = useRef<HTMLDivElement>(null)
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
+  const [locateField, setLocateField] = useState<string | undefined>(undefined)
+  useEffect(() => { setActiveTab(undefined); setLocateField(undefined) }, [plan.screenId])
+  useEffect(() => {
+    if (!locateField) return
+    let cancelled = false
+    const focusField = (): boolean => {
+      if (cancelled || !container.current) return false
+      const field = Array.from(container.current.querySelectorAll<HTMLElement>('[data-meridian-field]'))
+        .find((element) => (
+          element.dataset.meridianField === locateField
+          && !element.closest('[hidden], [data-state="inactive"]')
+        ))
+      if (!field) return false
+      const control = field.querySelector<HTMLElement>('input, select, textarea, button, [tabindex]:not([tabindex="-1"])') ?? field
+      if (control === field) field.tabIndex = -1
+      control.focus()
+      control.scrollIntoView?.({ block: 'nearest' })
+      return document.activeElement === control
+    }
+    const outer = window.requestAnimationFrame(() => {
+      if (focusField()) {
+        setLocateField(undefined)
+        return
+      }
+      window.requestAnimationFrame(() => {
+        if (focusField()) setLocateField(undefined)
+      })
+    })
+    const timer = window.setTimeout(() => {
+      if (focusField()) setLocateField(undefined)
+    }, 0)
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(outer)
+      window.clearTimeout(timer)
+    }
+  }, [locateField, activeTab])
+  const formMessages: ScreenMessage[] = Object.values(formState?.fieldErrors ?? {}).flat().map((error, index) => ({
+    key: `field-${error.fieldKey}-${index}`, fieldKey: error.fieldKey, message: error.message,
+    severity: error.severity === 'blocking' ? 'error' : error.severity,
+  }))
+  if (formState?.submitError) formMessages.push({ key: 'submit-error', severity: 'error', message: formState.submitError })
+  const visibleMessages = [...messages, ...formMessages]
+  function tableLoadError(tableKey: string): string | undefined {
+    return visibleMessages.find((message) => message.key === `table-${tableKey}`)?.message
+  }
   const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
   const effectivePayload = formState ? formState.values : payload
   const effectiveEntityId = entityId ?? String(effectivePayload.id ?? effectivePayload.entity_id ?? '')
@@ -170,6 +229,7 @@ function RenderFromPlan({
   return (
     <FormStateContext.Provider value={formState}>
     <div
+      ref={container}
       className={classes.root}
       onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, onAction)}
       data-screen-definition={plan.screenId}
@@ -197,6 +257,13 @@ function RenderFromPlan({
         onAction={onAction}
         payload={effectivePayload}
       />
+      <MessagePanelRenderer messages={visibleMessages} onRetry={onRetry}
+        onLocateField={(key) => {
+          const field = plan.fieldsByKey[key]
+          if (field?.tabKey) setActiveTab(field.tabKey)
+          setLocateField(key)
+        }} />
+      {columns && <ColumnLayoutRenderer pattern={plan.shell.columnNavigation ?? 'single'} columns={columns} />}
       {plan.shell.processRibbon ? <ProcessRibbonRenderer ribbon={plan.shell.processRibbon} /> : null}
 
       <WorkflowPanelRenderer
@@ -239,14 +306,17 @@ function RenderFromPlan({
             onVisibleColumnsChange={onOverlayChange ? (visibleColumns) => onOverlayChange({ tables: { [tableKey]: { visibleColumns } } }) : undefined}
             onResetOverlay={onOverlayReset}
             onRowAction={onAction}
+            errorMessage={tableLoadError(tableKey)}
+            onRetry={onRetry}
           />
         )
       })}
 
       {plan.visibleTabs.length > 0 && (
         <LazyTabs
+          value={activeTab}
           variant="register"
-          onValueChange={onTabChange}
+          onValueChange={(key) => { setActiveTab(key); onTabChange?.(key) }}
           tabs={plan.visibleTabs.map((tab) => ({
             key: tab.key,
             label: tab.label,
@@ -263,6 +333,8 @@ function RenderFromPlan({
                 onQueryChange={onTableQueryChange}
                 onVisibleColumnsChange={onOverlayChange}
                 onResetOverlay={onOverlayReset}
+                tableLoadError={tableLoadError}
+                onRetry={onRetry}
               />
             ),
           }))}
@@ -429,6 +501,9 @@ function RenderFromScreen({
 }
 
 export function UniversalMaskRenderer({
+  columns,
+  messages,
+  onRetry,
   plan,
   screen,
   data = {},
@@ -458,6 +533,9 @@ export function UniversalMaskRenderer({
     return (
       <LookupBindingContext.Provider value={lookupBindings ?? {}}>
         <RenderFromPlan
+          columns={columns}
+          messages={messages}
+          onRetry={onRetry}
           plan={plan}
           payload={payload}
           tables={tables}

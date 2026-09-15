@@ -75,6 +75,8 @@ export function FeedingAnalysisWorklist(): JSX.Element {
   return <div data-testid="feeding-analysis-worklist">
     {feedback ? <p role="alert" className="mb-3 rounded-md border border-destructive/30 px-3 py-2 text-sm text-destructive">{feedback}</p> : null}
     <UniversalMaskRenderer plan={runtime.plan} data={runtime.entityData} tables={runtime.tableRows}
+          messages={runtime.messages}
+          onRetry={() => { void runtime.refetch() }}
       tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals}
       onTableQueryChange={runtime.setTableQuery} onOverlayChange={runtime.updateUserOverlay}
       onOverlayReset={runtime.resetUserOverlay} lookupBindings={runtime.lookupBindings}

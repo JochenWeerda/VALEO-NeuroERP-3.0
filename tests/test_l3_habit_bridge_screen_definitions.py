@@ -71,7 +71,7 @@ def test_readiness_rejects_duplicate_shortcuts_and_unknown_zones() -> None:
 
 
 def test_all_native_screens_use_renderer_supported_layout_vocabulary() -> None:
-    allowed_floorplans = {"worklist", "objectPage", "transaction", "cockpit", "wizard"}
+    allowed_floorplans = {"worklist", "objectPage", "transaction", "cockpit", "wizard", "analyticalList"}
     allowed_profiles = {"standard", "financial", "inventory", "audit"}
     allowed_rails = {"none", "audit", "copilot", "workflow", "combined"}
     allowed_danger_levels = {"safe", "moderate", "high", "critical"}

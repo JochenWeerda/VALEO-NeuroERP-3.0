@@ -1,0 +1,46 @@
+slice_id: MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915
+title: Verbindliche Floorplans und adaptive Spaltennavigation
+owner: Cursor
+status: in_arbeit
+created_at: 2026-09-15
+spec: docs/design/valeo-meridian-experience.md
+coordination: >-
+  Uebernommen von Codex nach Nutzungslimit. Claude bleibt Owner von
+  FSX-Dateien, insbesondere lieferschein-erfassung.tsx.
+  SAP-Pixel sind kein Ziel.
+goal: >-
+  Floorplans als verbindliche Seitentypen plus zentral gesteuerte
+  Ein-/Zwei-/Drei-Spalten-Navigation im bestehenden Builder. Dichte
+  Buchungsmasken behalten volle Breite. Tabellenfehler sind von leeren
+  Listen unterscheidbar.
+file_ownership:
+  - packages/frontend-web/src/components/mask-builder/floorplans.ts
+  - packages/frontend-web/src/components/mask-builder/schema.ts
+  - packages/frontend-web/src/components/mask-builder/renderers/ColumnLayoutRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/MessagePanelRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/FastTableRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx
+  - packages/frontend-web/src/pages/crm/kunden-schnellauswahl.tsx
+  - docs/design/valeo-meridian-experience.md
+  - docs/agent-ops/slices/MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915.yaml
+acceptance:
+  - Sechs Floorplans im Vertrag; transaction/cockpit/wizard ohne Spalten.
+  - Spaltennavigation haelt Suche und Eingaben beim Zurueckwechseln.
+  - Feldnavigation aus Meldungen oeffnet das Register und fokussiert das Feld.
+  - Tabellen-Ladefehler zeigen eine Fehlermeldung, nicht „Keine Eintraege“.
+  - Erste reale Maske: Kunden-Schnellauswahl, lesend.
+tests:
+  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/mask-builder/framework-navigation.test.tsx
+risks:
+  - Generator-Ready ist keine visuelle Abnahme.
+  - Weitere Masken brauchen bewussten Anschluss, kein Blindersatz.
+ai_harness:
+  fachlicher_vertrag: Seitentyp und Navigation sind getrennt von Audit/Copilot.
+  architektur_vertrag: Nur ScreenDefinition -> RenderPlan -> UniversalMaskRenderer.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Spaltenzustand, Feldfokus, Tabellenfehler vs. Leer.
+  security_vertrag: Keine neuen Secrets.
+  betriebs_vertrag: Kein Deployment in diesem Slice.
+  dokumentations_vertrag: Meridian-Experience, Workboard, Slice.
+external_gates:
+  - not_applicable

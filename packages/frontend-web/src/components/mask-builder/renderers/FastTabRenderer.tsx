@@ -16,6 +16,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   onQueryChange,
   onVisibleColumnsChange,
   onResetOverlay,
+  tableLoadError,
+  onRetry,
 }: {
   plan: RenderPlan
   tabKey: string
@@ -26,6 +28,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   onQueryChange?: (tableKey: string, patch: Partial<TableQueryState>) => void
   onVisibleColumnsChange?: (patch: ScreenOverlay) => void | Promise<void>
   onResetOverlay?: () => void | Promise<void>
+  tableLoadError?: (tableKey: string) => string | undefined
+  onRetry?: () => void
 }): JSX.Element {
   const content = plan.tabContent[tabKey]
   const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
@@ -57,6 +61,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
             onQueryChange={onQueryChange ? (patch) => onQueryChange(tableKey, patch) : undefined}
             onVisibleColumnsChange={onVisibleColumnsChange ? (visibleColumns) => onVisibleColumnsChange({ tables: { [tableKey]: { visibleColumns } } }) : undefined}
             onResetOverlay={onResetOverlay}
+            errorMessage={tableLoadError?.(tableKey)}
+            onRetry={onRetry}
           />
         )
       })}

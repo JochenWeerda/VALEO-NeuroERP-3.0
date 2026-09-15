@@ -64,7 +64,9 @@ export function FeedingFeedDetail({ feedId }: { feedId?: string }): JSX.Element 
 
   return <div data-testid="feeding-feed-detail">
     {feedback ? <p className="mb-3 rounded-md border bg-muted px-3 py-2 text-sm" role="status">{feedback}</p> : null}
-    <UniversalMaskRenderer plan={runtime.plan} data={runtime.entityData} tables={runtime.tableRows} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals} onTableQueryChange={runtime.setTableQuery} onOverlayChange={runtime.updateUserOverlay} onOverlayReset={runtime.resetUserOverlay} lookupBindings={runtime.lookupBindings} entityId={feedId} onAction={(key) => { if (key === 'edit') beginEdit() }} />
+    <UniversalMaskRenderer plan={runtime.plan} data={runtime.entityData} tables={runtime.tableRows}
+          messages={runtime.messages}
+          onRetry={() => { void runtime.refetch() }} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals} onTableQueryChange={runtime.setTableQuery} onOverlayChange={runtime.updateUserOverlay} onOverlayReset={runtime.resetUserOverlay} lookupBindings={runtime.lookupBindings} entityId={feedId} onAction={(key) => { if (key === 'edit') beginEdit() }} />
     <Dialog open={open} onOpenChange={setOpen}><DialogContent><DialogHeader><DialogTitle>Futtermittel bearbeiten</DialogTitle><DialogDescription>Die Aenderung bleibt als neue Stammrevision nachvollziehbar.</DialogDescription></DialogHeader>
       <div className="grid gap-3 py-2 sm:grid-cols-2">
         <div className="grid gap-1"><Label htmlFor="feed-name">Bezeichnung</Label><Input id="feed-name" value={name} onChange={(event) => setName(event.target.value)} /></div>

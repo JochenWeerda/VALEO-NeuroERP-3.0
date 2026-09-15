@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
 import { Search, Loader2, MapPin, CreditCard, Hash } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,6 +17,14 @@ import { useKundenLookup, useKundenDetail } from '@/lib/api/kunden-lookup'
  * den kunden_*-Satelliten (GET /customers/lookup/{kunden_nr}/detail). Reine
  * Lese-/Auswahlmaske — keine Mutationen.
  */
+
+const screenDefinition: ScreenDefinition = {
+  id: 'crm/customer-quick-selection', schemaVersion: 1, domain: 'crm', mode: 'list',
+  title: 'Kunden-Schnellauswahl',
+  subtitle: 'Kunden suchen und Stammdaten prüfen.',
+  layout: { floorplan: 'worklist', density: 'compact', contextRail: 'none', tableProfile: 'standard', columnNavigation: 'listDetail' },
+}
+const plan = compileRenderPlanFromScreenDefinition(screenDefinition)
 
 function useDebounced<T>(value: T, delay = 250): T {
   const [debounced, setDebounced] = useState(value)
@@ -93,17 +104,9 @@ export default function KundenSchnellauswahlPage(): JSX.Element {
   const items = lookup.data ?? []
 
   return (
-    <div className="p-6">
-      <div className="mb-4">
-        <h1 className="text-2xl font-semibold">Kunden-Schnellauswahl</h1>
-        <p className="text-sm text-muted-foreground">
-          Schnelle Auswahl aus dem Kundenstamm; Detaildaten werden beim Öffnen aus den Domänentabellen geladen.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        {/* Suche + Trefferliste */}
-        <Card>
+    <UniversalMaskRenderer plan={plan} columns={[
+      { key: 'customers', title: 'Kunden', content: (
+<Card>
           <CardHeader>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -124,6 +127,8 @@ export default function KundenSchnellauswahlPage(): JSX.Element {
                   <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
+            ) : lookup.isError ? (
+              <p role="alert" className="text-sm text-destructive">Kunden konnten nicht geladen werden.</p>
             ) : items.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 {debounced.trim() ? 'Keine Treffer.' : 'Tippen, um zu suchen …'}
@@ -160,9 +165,9 @@ export default function KundenSchnellauswahlPage(): JSX.Element {
             )}
           </CardContent>
         </Card>
-
-        {/* Detail aus Satelliten */}
-        <Card>
+      ) },
+      ...(selected ? [{ key: `customer-${selected}`, title: `Kunde ${selected}`, content: (
+<Card>
           <CardHeader>
             <CardTitle className="text-base">
               {selected ? `Detail · ${selected}` : 'Kunde wählen'}
@@ -205,7 +210,7 @@ export default function KundenSchnellauswahlPage(): JSX.Element {
             ) : null}
           </CardContent>
         </Card>
-      </div>
-    </div>
+      ) }] : []),
+    ]} />
   )
 }

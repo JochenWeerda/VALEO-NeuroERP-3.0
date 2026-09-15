@@ -96,6 +96,8 @@ export function RationLifecycleDetail({ rationId }: { rationId: string }): JSX.E
         plan={plan}
         data={runtime.entityData}
         tables={runtime.tableRows}
+          messages={runtime.messages}
+          onRetry={() => { void runtime.refetch() }}
         tableQueryStates={runtime.tableQueryStates}
         tableTotals={runtime.tableTotals}
         onTableQueryChange={runtime.setTableQuery}

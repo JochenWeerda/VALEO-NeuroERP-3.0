@@ -54,7 +54,8 @@ Actions und Tabellenprofilen ausgedrueckt. Es entsteht keine separate Referenz-U
 
 ```ts
 layout: {
-  floorplan: 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard'
+  floorplan: 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard' | 'analyticalList'
+  columnNavigation?: 'single' | 'listDetail' | 'listDetailDetail'
   density: 'comfortable' | 'compact' | 'expertDense'
   contextRail: 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
   tableProfile?: 'standard' | 'financial' | 'inventory' | 'audit'
@@ -63,6 +64,31 @@ layout: {
   stickyFooter?: boolean
 }
 ```
+
+Floorplans beschreiben den Zweck der Seite. Spaltennavigation ist eine
+eigene Achse und nicht die Kontextleiste:
+
+| Floorplan | Einsatz | Spalten |
+|---|---|---|
+| `worklist` | Belege suchen, filtern und bearbeiten | erlaubt |
+| `objectPage` | Kunde, Artikel oder Vertrag mit Details | erlaubt |
+| `transaction` | Wiegen, Wareneingang, Buchen | gesperrt, volle Breite |
+| `cockpit` | Ausnahmen erkennen und Maßnahmen starten | gesperrt |
+| `wizard` | Mehrstufige Vorgänge mit Abschlussprüfung | gesperrt |
+| `analyticalList` | Kennzahlen und Datensätze gemeinsam | erlaubt |
+
+`single` ist eine konzentrierte Erfassung oder eine breite Tabelle.
+`listDetail` hält die Arbeitsliste neben dem Objekt. `listDetailDetail`
+öffnet bei Bedarf die dritte Spalte (Liste → Objekt → Unterobjekt).
+Auswahl, Filter und Eingaben bleiben beim Zurückwechseln erhalten, weil
+die Spalten im DOM bleiben. Unter 900 px und in der Vollansicht ist nur
+eine Spalte sichtbar; dazwischen zwei, ab 1440 px drei. Audit, Hinweise
+und Copilot bleiben `contextRail`.
+
+Erste angeschlossene Maske: lesende Kunden-Schnellauswahl
+(`/crm/kunden-schnellauswahl`, `listDetail`). Tabellen-Ladefehler laufen
+über `MessagePanelRenderer` und den Fast-Table-Renderer; sie dürfen nicht
+wie eine leere Trefferliste aussehen.
 
 Der `RenderPlan.shell` uebernimmt diese Felder zentral. Renderer lesen den Plan
 und erzeugen daraus Header, Aktionshierarchie, Summary, Tabs, Tabellenprofil,

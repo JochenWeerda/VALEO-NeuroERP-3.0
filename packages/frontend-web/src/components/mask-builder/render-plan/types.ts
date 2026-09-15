@@ -1,5 +1,6 @@
 import type {
   ScreenDomain,
+  ScreenColumnNavigation,
   ScreenCalendarView,
   ScreenContextRail,
   ScreenContextRailSection,
@@ -39,6 +40,7 @@ export interface RenderShellPlan {
   mobileMode: ScreenLayoutMode
   touchTargetPx: number
   floorplan: ScreenFloorplan
+  columnNavigation?: ScreenColumnNavigation
   density: ScreenDensity
   contextRail: ScreenContextRail
   contextRailSections: ScreenContextRailSection[]

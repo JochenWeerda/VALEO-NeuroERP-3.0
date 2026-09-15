@@ -72,7 +72,9 @@ export function FeedingGroupDetail({ groupId }: { groupId: string }): JSX.Elemen
   return <div data-testid="feeding-group-detail">
     <a href="/portal/rationsoptimierung?view=rations" className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Zur Rationsliste</a>
     {feedback ? <p className="mb-3 rounded-md border bg-muted px-3 py-2 text-sm" role="status">{feedback}</p> : null}
-    <UniversalMaskRenderer plan={runtime.plan} data={runtime.entityData} tables={runtime.tableRows} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals} onTableQueryChange={runtime.setTableQuery} onOverlayChange={runtime.updateUserOverlay} onOverlayReset={runtime.resetUserOverlay} lookupBindings={runtime.lookupBindings} entityId={groupId} onAction={(key) => { if (key === 'edit_group') beginEdit() }} />
+    <UniversalMaskRenderer plan={runtime.plan} data={runtime.entityData} tables={runtime.tableRows}
+          messages={runtime.messages}
+          onRetry={() => { void runtime.refetch() }} tableQueryStates={runtime.tableQueryStates} tableTotals={runtime.tableTotals} onTableQueryChange={runtime.setTableQuery} onOverlayChange={runtime.updateUserOverlay} onOverlayReset={runtime.resetUserOverlay} lookupBindings={runtime.lookupBindings} entityId={groupId} onAction={(key) => { if (key === 'edit_group') beginEdit() }} />
     <Dialog open={open} onOpenChange={setOpen}><DialogContent><DialogHeader><DialogTitle>Tiergruppe bearbeiten</DialogTitle><DialogDescription>Die Aenderung erzeugt eine neue, auditierbare Parameterrevision.</DialogDescription></DialogHeader>
       <div className="grid gap-3 py-2 sm:grid-cols-2">
         <div className="grid gap-1"><Label htmlFor="group-name">Name</Label><Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} /></div>

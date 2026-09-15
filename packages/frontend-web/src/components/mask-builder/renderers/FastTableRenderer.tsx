@@ -19,6 +19,8 @@ interface FastTableRendererProps {
   onVisibleColumnsChange?: (visibleColumns: string[]) => void | Promise<void>
   onResetOverlay?: () => void | Promise<void>
   onRowAction?: (_actionKey: string, _row: Record<string, unknown>) => void | Promise<void>
+  errorMessage?: string
+  onRetry?: () => void
 }
 
 function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
@@ -117,6 +119,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   onVisibleColumnsChange,
   onResetOverlay,
   onRowAction,
+  errorMessage,
+  onRetry,
 }: FastTableRendererProps): JSX.Element {
   const isServerPaged = table.serverPagination && Boolean(onQueryChange)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
@@ -403,29 +407,39 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             onRemove={handleRemoveFilter}
           />
         )}
-        <VirtualDataTable
-          data={visibleRows}
-          rowHeight={table.rowHeight}
-          sortColumn={sort}
-          sortDir={sortDir}
-          onSortChange={
-            onQueryChange
-              ? (colKey, dir) => onQueryChange({ sort: colKey, sortDir: dir })
-              : undefined
-          }
-          onRowClick={table.rowRouteTemplate
-            ? (row) => {
-                const target = table.rowRouteTemplate?.replace(/\{([^}]+)\}/g, (_match, key: string) =>
-                  encodeURIComponent(String(row[key] ?? '')),
-                )
-                if (target) {
-                  window.history.pushState(null, '', target)
-                  window.dispatchEvent(new PopStateEvent('popstate'))
+        {errorMessage ? (
+          <div role="alert" className="space-y-2 pb-4 text-sm" data-testid={`table-load-error-${table.key}`}>
+            <p className="text-destructive">{errorMessage}</p>
+            {onRetry ? (
+              <Button type="button" variant="outline" size="sm" onClick={onRetry}>Erneut laden</Button>
+            ) : null}
+          </div>
+        ) : null}
+        {errorMessage && visibleRows.length === 0 ? null : (
+          <VirtualDataTable
+            data={visibleRows}
+            rowHeight={table.rowHeight}
+            sortColumn={sort}
+            sortDir={sortDir}
+            onSortChange={
+              onQueryChange
+                ? (colKey, dir) => onQueryChange({ sort: colKey, sortDir: dir })
+                : undefined
+            }
+            onRowClick={table.rowRouteTemplate
+              ? (row) => {
+                  const target = table.rowRouteTemplate?.replace(/\{([^}]+)\}/g, (_match, key: string) =>
+                    encodeURIComponent(String(row[key] ?? '')),
+                  )
+                  if (target) {
+                    window.history.pushState(null, '', target)
+                    window.dispatchEvent(new PopStateEvent('popstate'))
+                  }
                 }
-              }
-            : undefined}
-          columns={renderedColumns}
-        />
+              : undefined}
+            columns={renderedColumns}
+          />
+        )}
         {isServerPaged && totalPages !== undefined && totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button

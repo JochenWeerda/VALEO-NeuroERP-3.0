@@ -9,6 +9,7 @@ import {
   type ScreenTableProfile,
   type ScreenTileDefinition,
 } from '../schema'
+import { FLOORPLAN_RULES } from '../floorplans'
 import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
@@ -213,7 +214,12 @@ export function compileRenderPlan(
     'objectPage'
   )
   const density = schema.layout?.density ?? 'compact'
-  const contextRail = schema.layout?.contextRail ?? (floorplan === 'worklist' ? 'none' : 'combined')
+  if (schema.layout?.columnNavigation && schema.layout.columnNavigation !== 'single' && !FLOORPLAN_RULES[floorplan].allowsColumns) {
+    throw new Error('Column navigation is not supported for this floorplan')
+  }
+  const contextRail = schema.layout?.contextRail ?? (
+    floorplan === 'worklist' || floorplan === 'analyticalList' ? 'none' : 'combined'
+  )
   const contextRailSections = resolveContextRailSections(contextRail, schema.layout?.contextRailSections)
   const tableProfile = schema.layout?.tableProfile ?? 'standard'
   const performance = {
@@ -290,6 +296,7 @@ export function compileRenderPlan(
       mobileMode: schema.layout?.mobileMode ?? 'mobileStack',
       touchTargetPx: schema.layout?.touchTargetPx ?? 44,
       floorplan,
+      columnNavigation: schema.layout?.columnNavigation ?? 'single',
       density,
       contextRail,
       contextRailSections,

@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react'
+import { FLOORPLAN_RULES } from './floorplans'
+
+export { FLOORPLAN_IDS, FLOORPLAN_RULES } from './floorplans'
 
 export type ScreenDomain =
   | 'crm'
@@ -17,7 +20,8 @@ export type ScreenDomain =
 
 export type ScreenMode = 'list' | 'detail' | 'cockpit' | 'workflow' | 'wizard'
 export type ScreenLayoutMode = 'desktopDense' | 'tabletTouch' | 'mobileStack'
-export type ScreenFloorplan = 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard'
+export type ScreenFloorplan = 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard' | 'analyticalList'
+export type ScreenColumnNavigation = 'single' | 'listDetail' | 'listDetailDetail'
 export type ScreenDensity = 'comfortable' | 'compact' | 'expertDense'
 export type ScreenContextRail = 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
 export type ScreenContextRailSection = 'audit' | 'workflow' | 'copilot' | 'collab'
@@ -385,6 +389,7 @@ export interface ScreenDefinition {
     mobileMode?: ScreenLayoutMode
     touchTargetPx?: number
     floorplan?: ScreenFloorplan
+    columnNavigation?: ScreenColumnNavigation
     density?: ScreenDensity
     contextRail?: ScreenContextRail
     contextRailSections?: ScreenContextRailSection[]
@@ -412,7 +417,14 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (!screen.mode) errors.push('mode is required')
   if (!screen.title) errors.push('title is required')
 
-  if (screen.layout?.floorplan && !['worklist', 'objectPage', 'transaction', 'cockpit', 'wizard'].includes(screen.layout.floorplan)) {
+  if (screen.layout?.columnNavigation && screen.layout.columnNavigation !== 'single'
+      && screen.layout.floorplan && FLOORPLAN_RULES[screen.layout.floorplan]?.allowsColumns === false) {
+    errors.push('layout.columnNavigation is not supported for this floorplan')
+  }
+  if (screen.layout?.columnNavigation && !['single', 'listDetail', 'listDetailDetail'].includes(screen.layout.columnNavigation)) {
+    errors.push('layout.columnNavigation is invalid')
+  }
+  if (screen.layout?.floorplan && !(screen.layout.floorplan in FLOORPLAN_RULES)) {
     errors.push(`layout.floorplan is invalid: ${screen.layout.floorplan}`)
   }
   if (screen.layout?.density && !['comfortable', 'compact', 'expertDense'].includes(screen.layout.density)) {

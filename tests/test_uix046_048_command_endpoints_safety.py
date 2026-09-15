@@ -162,7 +162,7 @@ class TestUIX048AgentSafety:
     def test_meridian_layout_metadata_declared(self, screen_id: str):
         sd = get_screen_definition(screen_id)
         layout = sd.get("layout", {})
-        assert layout.get("floorplan") in {"worklist", "objectPage", "transaction", "cockpit", "wizard"}, (
+        assert layout.get("floorplan") in {"worklist", "objectPage", "transaction", "cockpit", "wizard", "analyticalList"}, (
             f"{screen_id}: layout.floorplan fehlt oder ist ungueltig"
         )
         assert layout.get("density") in {"comfortable", "compact", "expertDense"}, (
