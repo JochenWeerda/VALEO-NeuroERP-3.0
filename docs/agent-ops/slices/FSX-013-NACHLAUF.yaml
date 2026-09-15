@@ -1,0 +1,111 @@
+slice_id: FSX-013-NACHLAUF
+id: FSX-013-NACHLAUF
+title: Prozessband und Verknuepfungs-Nachlauf fuer bestehende Belege
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger:
+  - FSX-012 (Cursor, offener Nachlauf)
+  - FSX-DOC-LINKS (Rueckwaertssuche)
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+goal: >-
+  Die letzte offene Kante des Teilfehler-Pfades schliessen: Wer beim Speichern
+  den Wiederholungsversuch abbricht, kommt spaeter zurueck — und die Maske soll
+  ihn daran erinnern, statt zu schweigen. Dazu das Prozessband auf die erste
+  Detailmaske ausrollen.
+
+befund: >-
+  Cursor hat FSX-012 mit einem ausdruecklich offenen Punkt abgeschlossen: "die
+  Detailmaske einer bestehenden Bestellung bietet die Verknuepfung noch nicht
+  erneut an — nur der Wizard nach dem Speichern und der Retry auf derselben
+  Seite." Damit blieb ein Beleg ohne Vorgang dauerhaft ohne Vorgang, sobald
+  jemand den Retry einmal wegklickt.
+
+entscheidungen:
+  ein_baustein_statt_maskenflicken: >-
+    Der Nachlauf wird in jeder Belegmaske gebraucht, nicht nur in der Bestellung.
+    Deshalb DocumentCaseBand als wiederverwendbarer Baustein: gehoert der Beleg
+    zu einem Vorgang, zeigt er das Prozessband; gehoert er zu keinem, bietet er
+    die Verknuepfung an.
+  rueckwaertssuche_statt_prozessfilter: >-
+    Gefragt wird ueber GET /documents/{type}/{id}/instances aus FSX-DOC-LINKS,
+    nicht ueber den Prozessfilter aus FSX-010. Ein Beleg kann fuehrend in einem
+    Vorgang stehen und beteiligt in einem anderen — eine Sammelrechnung tut
+    genau das, und der Prozessfilter wuerde den zweiten Fall uebersehen.
+  fuehrend_vor_beteiligt: >-
+    Gibt es einen fuehrenden Vorgang, wird der gezeigt. Er beschreibt *diesen*
+    Beleg; eine Beteiligung beschreibt einen anderen Vorgang, in dem der Beleg
+    nur mitspielt.
+  abwesenheit_ist_eine_behauptung: >-
+    "Kein Vorgang zu diesem Beleg" faellt erst, wenn wirklich gesucht **und**
+    nichts gefunden wurde. Waehrend der Suche und nach einem Abrufsfehler wird
+    nichts gesagt — weder ein Vorgang noch dessen Abwesenheit. Ein Angebot, das
+    waehrend des Ladens erscheint, behauptet etwas, das niemand geprueft hat.
+  kein_angebot_ohne_wirkung: >-
+    Ohne onLink-Rueckruf wird nichts angeboten. Eine Schaltflaeche ohne Wirkung
+    waere schlimmer als keine.
+  kein_react_query: >-
+    Wie beim Prozessband: useQuery wuerde jeder einbindenden Maske einen
+    QueryClientProvider aufzwingen. Einfacher Abruf im useEffect.
+
+umsetzung:
+  - packages/frontend-web/src/components/workflow/DocumentCaseBand.tsx
+  - >-
+    pages/einkauf/bestellung-stamm.tsx — WorkflowEntryBanner ersetzt; der
+    Nachlauf ruft Cursors linkPurchaseOrderToFlowSpine auf, also denselben Pfad
+    wie der Wizard. Kein zweiter Verknuepfungsweg.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-013-NACHLAUF.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - packages/frontend-web/src/components/workflow/DocumentCaseBand.tsx
+  - "packages/frontend-web/src/pages/einkauf/bestellung-stamm.tsx: nur Band und Nachlauf"
+  - packages/frontend-web/src/__tests__/components/workflow/document-case-band.test.tsx
+
+acceptance:
+  - Beleg mit Vorgang zeigt das Prozessband.
+  - Beleg ohne Vorgang bietet die Verknuepfung an.
+  - Waehrend der Suche und nach einem Abrufsfehler wird nichts behauptet.
+  - Nach erfolgreicher Verknuepfung erscheint das Band ohne Neuladen.
+  - Ein Fehlschlag der Verknuepfung wird angezeigt, nicht verschluckt.
+
+tests:
+  - >-
+    document-case-band.test.tsx — 9 Tests gruen. Der wichtigste prueft, dass nach
+    einem Abrufsfehler weder Band noch Angebot erscheint: die Abwesenheit eines
+    Vorgangs ist eine Aussage und darf nicht aus einem Netzwerkfehler folgen.
+  - "tsc --noEmit exit 0; 50 Dateien / 217 Tests in den beruehrten Bereichen gruen."
+
+risks:
+  - >-
+    Ein zusaetzlicher Abruf beim Oeffnen jeder Belegmaske, die den Baustein
+    einbindet. Vertretbar, aber beim Rollout ueber viele Masken im Blick zu
+    behalten.
+  - >-
+    Der Nachlauf ist bisher nur in der Bestell-Detailmaske verdrahtet. Die
+    uebrigen Belegarten brauchen je einen eigenen Linker, weil
+    linkPurchaseOrderToFlowSpine bestellungsspezifisch ist.
+
+external_gates:
+  - >-
+    FSX-090b (Nutzerbeobachtung) vor dem breiten Rollout. Ob das Angebot am
+    richtigen Ort steht, entscheidet nicht meine Einschaetzung.
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein gespeicherter Beleg ohne Prozessvorgang ist ein sichtbarer Zustand, kein
+    stiller. Die Maske bietet die Verknuepfung an, solange sie fehlt.
+  architektur_vertrag: >-
+    Ein Baustein fuer beide Faelle; die Suche laeuft ueber die
+    prozessuebergreifende Rueckwaertssuche, die Verknuepfung ueber den
+    bestehenden Pfad der jeweiligen Belegart. Kein zweiter Verknuepfungsweg.
+  daten_vertrag: "Rein lesend plus der bestehende Verknuepfungsaufruf."
+  test_vertrag: >-
+    Jede Aussage ueber Abwesenheit braucht eine Zusicherung, dass sie nicht aus
+    einem Fehler oder aus einem Ladezustand folgt.
+  security_vertrag: "Keine neuen Endpunkte; Mandant kommt aus dem Anfragekontext."
+  betriebs_vertrag: "Rein clientseitig."
+  dokumentations_vertrag: >-
+    Dieser Slice haelt fest, dass Cursors offener Punkt aus FSX-012 geschlossen
+    ist und welche Belegarten noch keinen Linker haben.

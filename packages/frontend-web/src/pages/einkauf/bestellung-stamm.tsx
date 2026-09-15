@@ -24,7 +24,9 @@ import { useApprovePurchaseOrder, useCancelPurchaseOrder } from '@/lib/api/purch
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { DocumentCaseBand } from '@/components/workflow/DocumentCaseBand'
+import { linkPurchaseOrderToFlowSpine, PURCHASE_ORDER_DOCUMENT_TYPE } from '@/lib/workflow/purchase-order-flow-spine'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -493,7 +495,26 @@ export default function BestellungStammPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      {workflowContext ? <WorkflowEntryBanner context={workflowContext} /> : null}
+      {/*
+        FSX-013 plus FSX-012-Nachlauf: Gehoert die Bestellung zu einem Vorgang,
+        zeigt das Band Phasen und Stand. Gehoert sie zu keinem, wird die
+        Verknuepfung angeboten — das ist der Fall, in dem jemand beim Speichern
+        den Wiederholungsversuch abgebrochen hat und spaeter zurueckkommt.
+      */}
+      <DocumentCaseBand
+        documentType={PURCHASE_ORDER_DOCUMENT_TYPE}
+        documentId={poCommunicationId || undefined}
+        handoverContext={workflowContext}
+        linkLabel="Beschaffungsvorgang verknuepfen"
+        onLink={async () => {
+          await linkPurchaseOrderToFlowSpine({
+            documentId: poCommunicationId,
+            documentNumber: stringValue(data?.nummer ?? data?.purchaseOrderNumber) || undefined,
+            supplierName: stringValue(data?.lieferant ?? data?.supplierName) || undefined,
+            resumeRoute: window.location.pathname + window.location.search,
+          })
+        }}
+      />
 
       <OperationalCaseHeader
         title={stringValue(data?.nummer ?? data?.purchaseOrderNumber, 'Bestellung')}

@@ -11,6 +11,44 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-013-NACHLAUF - abgeschlossen 2026-09-15, Claude Code
+
+**Cursors offener Punkt aus FSX-012 ist geschlossen.** Ihr Satz war: „die
+Detailmaske einer bestehenden Bestellung bietet die Verknuepfung noch nicht
+erneut an — nur der Wizard nach dem Speichern und der Retry auf derselben Seite."
+Damit blieb ein Beleg ohne Vorgang **dauerhaft** ohne Vorgang, sobald jemand den
+Retry einmal wegklickt.
+
+**Ein Baustein statt Maskenflicken:** `DocumentCaseBand` zeigt das Prozessband,
+wenn der Beleg zu einem Vorgang gehoert, und bietet die Verknuepfung an, wenn
+nicht. Verdrahtet in `bestellung-stamm.tsx`; der Nachlauf ruft **Cursors**
+`linkPurchaseOrderToFlowSpine` auf, also denselben Pfad wie der Wizard —
+**kein zweiter Verknuepfungsweg.**
+
+**Gefragt wird ueber die Rueckwaertssuche aus FSX-DOC-LINKS, nicht ueber den
+Prozessfilter aus FSX-010.** Ein Beleg kann fuehrend in einem Vorgang stehen und
+beteiligt in einem anderen — eine Sammelrechnung tut genau das, und der
+Prozessfilter wuerde den zweiten Fall uebersehen. Gibt es einen fuehrenden
+Vorgang, wird der gezeigt: er beschreibt *diesen* Beleg, eine Beteiligung
+beschreibt einen anderen.
+
+**Die Regel, die mir beim Bauen am wichtigsten war:** „Kein Vorgang zu diesem
+Beleg" ist eine **Behauptung**. Sie faellt erst, wenn wirklich gesucht **und**
+nichts gefunden wurde. Waehrend der Suche und **nach einem Abrufsfehler** wird
+nichts gesagt — weder ein Vorgang noch dessen Abwesenheit. Ein Angebot, das
+schon waehrend des Ladens erscheint, behauptet etwas, das niemand geprueft hat;
+ein Angebot nach einem Netzwerkfehler behauptet eine Abwesenheit, die aus dem
+Fehler folgt und nicht aus den Daten. Beides ist testgehalten.
+
+**Abnahme:** 9 neue Tests, `tsc --noEmit` ohne Ausgabe, 50 Dateien / 217 Tests in
+den beruehrten Bereichen gruen.
+
+**Offen und benannt:** Der Nachlauf ist bisher nur in der Bestell-Detailmaske
+verdrahtet. Die uebrigen Belegarten brauchen je einen eigenen Linker, weil
+`linkPurchaseOrderToFlowSpine` bestellungsspezifisch ist — das ist der naechste
+Rollout-Schritt, nicht ein Versaeumnis dieses Slices.
+
+
 ## DB-STAND GEPRUEFT UND NACHGEZOGEN - 2026-09-15, Claude Code
 
 **Die Antwort auf „sind die Schemas uebernommen" war: nein.** Repo-Head stand auf
