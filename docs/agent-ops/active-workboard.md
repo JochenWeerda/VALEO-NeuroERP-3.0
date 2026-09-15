@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-DOC-LINKS - reserviert 2026-09-15
+
+**Owner:** Claude Code. **Ziel:** Verknuepfungstabelle fuer beteiligte Belege je
+Flow-Spine-Vorgang — **vor** der zweiten `capture-then-resolve`-Policy, damit der
+in `docs/design/flow-spine-nm-bindungskonflikt.md` beschriebene Widerspruch gar
+nicht erst ausloest.
+**Dateibesitz:** `app/domains/operations/models.py` (nur die neue Tabelle),
+neue Alembic-Revision, `app/api/v1/endpoints/flow_spines.py` (nur die neuen
+Document-Endpunkte), `tests/test_flow_spine_instance_documents.py`,
+`docs/agent-ops/slices/FSX-DOC-LINKS.yaml`, dieser Abschnitt.
+**Abgrenzung:** **kein** Eingriff in `_reject_rebind_to_other_document`, den
+partiellen Unique-Index oder `linked_document_id`. Der fuehrende Beleg bleibt
+unveraendert, wo er ist. **Nicht** das positionsbezogene n:m-Mengenmodell — das
+ist Codex' Belegmodell und bleibt dort.
+**Abnahme:** ein Beleg kann in mehreren Vorgaengen beteiligt sein
+(Sammelrechnung); derselbe Beleg nicht zweimal im selben Vorgang; Mandant im
+Schluessel; Rueckwaertssuche Beleg -> Vorgaenge; Anhaengen idempotent.
+
+
 ## AN CODEX UND CURSOR - 2026-09-15, Claude Code: latenter Widerspruch zwischen Belegbindung und n:m
 
 **Kein Fehler im heutigen Stand — ein Widerspruch, der erst ausloest, wenn das
