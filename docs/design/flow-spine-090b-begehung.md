@@ -124,9 +124,23 @@ ausgerechnet im wichtigsten Fall unsichtbar geblieben.
 
 **K3 des Kriterienkatalogs ist damit in der Belegmaske erfuellt.**
 
-**Offen bleibt F4** (Fokus nimmt den Vorgangswechsel mit). Das ist keine
-Fehlfunktion, sondern eine Zuschnittsfrage, und sie gehoert an den Rollout in
-Waage-Masken — nicht hierher.
+**F4 ebenfalls geschlossen — und es war doch eine Fehlfunktion.** Ich hatte sie
+als Zuschnittsfrage eingeordnet und auf den Waage-Rollout verschoben. Der User
+hat widersprochen, und zu Recht: **beim Wiegen *ist* der Vorgangswechsel die
+Aufgabe**, nicht eine Ablenkung davon. Ein Fokusmodus, der ihn wegnimmt, ist
+fuer diese Rolle unbrauchbar — dieselbe Regel wie bei den Aktionen, die ich beim
+Bauen schon angewandt hatte, nur auf einen Fall, den ich nicht bedacht hatte.
+
+Der Fehler lag darin, dass ich zwei Dinge in einer Spalte zusammengeworfen
+hatte. Sie sind jetzt getrennt:
+
+- **Prozessnavigation** (zwischen neun Prozessarten wechseln) — entfaellt im
+  Fokus. Das tut niemand mitten in einer Aufgabe.
+- **Vorgangsliste** (zwischen Faellen desselben Prozesses wechseln) — bleibt.
+  Das ist bei der Waage der Arbeitstakt.
+
+Nebeneffekt: Das Raster haengt nicht mehr am Modus, sondern nur noch am
+Aufklappzustand der Copilot-Spalte. Ein Mechanismus weniger.
 
 ## Folgerung fuer den Rollout
 

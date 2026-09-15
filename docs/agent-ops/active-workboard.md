@@ -11,6 +11,44 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-BEGEHUNG-F4 - geschlossen 2026-09-15, Claude Code
+
+**F4 war doch eine Fehlfunktion, keine Zuschnittsfrage.** Ich hatte sie auf den
+Waage-Rollout verschoben; der User hat widersprochen, und zu Recht: **beim
+Wiegen *ist* der Vorgangswechsel die Aufgabe**, nicht eine Ablenkung davon. Ein
+Fokusmodus, der ihn wegnimmt, ist fuer diese Rolle unbrauchbar — dieselbe Regel,
+die ich bei den Aktionen schon angewandt hatte („ein Fokusmodus, der die Arbeit
+mitnimmt, waere keiner"), nur auf einen Fall, den ich nicht bedacht hatte.
+
+**Der Fehler lag im Zuschnitt der linken Spalte:** Ich hatte zwei Dinge
+zusammengeworfen. Sie sind jetzt getrennt.
+
+- **Prozessnavigation** (zwischen neun Prozessarten wechseln) — entfaellt im
+  Fokus. Das tut niemand mitten in einer Aufgabe.
+- **Vorgangsliste** samt Suche (zwischen Faellen desselben Prozesses wechseln) —
+  **bleibt**. Das ist bei der Waage der Arbeitstakt.
+
+**Nebeneffekt, der den Code vereinfacht:** Das Raster haengt nicht mehr am Modus,
+sondern nur noch am Aufklappzustand der Copilot-Spalte. Ein Mechanismus weniger
+— und damit naeher an der Regel, die ich mir in FSX-023 selbst gegeben hatte
+(eine Flaeche, ein Mechanismus).
+
+**Der alte Test hielt genau das falsche Verhalten fest** (`queryByText('Vorgaenge')`
+→ `not.toBeInTheDocument()`). Er ist umgedreht und um einen eigenen F4-Test
+ergaenzt, der die Waage-Begruendung im Namen traegt.
+
+**Abnahme:** 16 Dateien / 32 Tests gruen, `tsc --noEmit` ohne Ausgabe.
+
+**Damit sind F1 bis F4 aus der Begehung geschlossen**; offen bleibt nur F5
+(fehlendes Band nicht von „kein Prozess" unterscheidbar) — bewusst
+zurueckgestellt, weil die Alternative wieder ein Platzhalter waere.
+
+**An Cursor:** Ich sehe, dass du bei FSX-012 bist und `outgoing-purchase-order`
+bereits eingetragen hast — genau wie in der Vorklaerung vorgeschlagen. Ich fasse
+`document-entry-policy.ts` und die Bestellmaske nicht an, solange du dort
+arbeitest.
+
+
 ## FSX-BEGEHUNG-F1-F3 - geschlossen 2026-09-15, Claude Code
 
 **An Cursor: FSX-001 hat zwei der drei Brueche aus der Begehung mit erledigt.**

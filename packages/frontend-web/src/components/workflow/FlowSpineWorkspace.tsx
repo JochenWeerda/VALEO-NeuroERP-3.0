@@ -1027,17 +1027,21 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
         <div
           className={cn(
             'grid min-h-[720px]',
-            viewMode === 'fokus'
-              ? copilotOpen
-                ? 'grid-cols-[minmax(0,1fr)_360px]'
-                : 'grid-cols-[minmax(0,1fr)_48px]'
-              : copilotOpen
-                ? 'grid-cols-[220px_minmax(0,1fr)_360px]'
-                : 'grid-cols-[220px_minmax(0,1fr)_48px]',
+            copilotOpen
+              ? 'grid-cols-[220px_minmax(0,1fr)_360px]'
+              : 'grid-cols-[220px_minmax(0,1fr)_48px]',
           )}
         >
-          {viewMode !== 'fokus' ? (
           <aside className="border-r border-white/5 bg-slate-950/45 p-4">
+            {/*
+              F4 aus der Begehung: 'fokus' hatte die ganze linke Spalte
+              ausgeblendet — und damit auch den Vorgangswechsel. Fuer die Waage
+              ist der Wechsel zwischen Fahrzeugen aber **die Aufgabe**, nicht
+              eine Ablenkung davon. Deshalb wird jetzt getrennt: die
+              Prozessnavigation (zwischen neun Prozessarten wechseln) entfaellt
+              im Fokus, die Vorgangsliste bleibt.
+            */}
+            {viewMode !== 'fokus' ? (
             <div className="mb-6">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
               <div className="space-y-2">
@@ -1061,6 +1065,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 ))}
               </div>
             </div>
+            ) : null}
             <div className="mb-6">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Vorgaenge</p>
               <Input
@@ -1107,7 +1112,6 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </div>
             </div>
           </aside>
-          ) : null}
 
           <main className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6">
             <div className="mb-6 flex items-start justify-between gap-4">

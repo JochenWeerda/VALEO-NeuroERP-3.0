@@ -133,15 +133,31 @@ describe('FlowSpineWorkspace — Welle 3', () => {
 
     await user.click(screen.getByRole('button', { name: 'Fokus' }))
 
-    // Was gehen muss: Kennzahlen, Belege, Agentenhinweis, Fusskarten, Prozessspalte.
+    // Was gehen muss: Kennzahlen, Belege, Agentenhinweis, Fusskarten und die
+    // Prozessnavigation.
     expect(screen.queryByText('SLA-Quote')).not.toBeInTheDocument()
     expect(screen.queryByText('Tourenstatus')).not.toBeInTheDocument()
-    expect(screen.queryByText('Vorgaenge')).not.toBeInTheDocument()
+    expect(screen.queryByText('Prozesse')).not.toBeInTheDocument()
 
     // Was bleiben muss: der Schritt und seine Aktion. Ein Fokusmodus, der die
     // Arbeit mitnimmt, waere keiner.
     expect(screen.getByText('Aktionen')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Field Task/i })).toBeInTheDocument()
+  })
+
+  it('FSX-020/F4: Fokus behaelt den Vorgangswechsel — fuer die Waage ist er die Aufgabe', async () => {
+    const user = userEvent.setup()
+    renderWorkspace()
+    await screen.findByRole('heading', { name: 'Service-to-Customer', level: 1 })
+
+    await user.click(screen.getByRole('button', { name: 'Fokus' }))
+
+    // Zwischen Fahrzeugen zu wechseln ist beim Wiegen keine Ablenkung von der
+    // Aufgabe, sondern die Aufgabe. Die Vorgangsliste bleibt deshalb stehen,
+    // waehrend die Navigation zwischen Prozessarten entfaellt.
+    expect(screen.getByText('Vorgaenge')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Suchen...')).toBeInTheDocument()
+    expect(screen.queryByText('Prozesse')).not.toBeInTheDocument()
   })
 
   it('FSX-020: Uebersicht zeigt den Verlauf ohne die Knotendetails', async () => {
