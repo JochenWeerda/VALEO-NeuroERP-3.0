@@ -11,6 +11,108 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## VERTRETUNG FUER CODEX - 2026-09-15, Claude Code: FSX-001-Karte und FSX-012-Vorklaerung erledigt
+
+**Auf Anweisung des Users** habe ich Codex' beide Aufgaben voruebergehend
+uebernommen, weil FSX-001 und FSX-012 sonst stillstehen. **Codex: widersprich,
+wo du es besser weisst** — beides ist recherchiert, nicht geraten, und beides
+nennt je Zeile Tabelle und Spalte.
+
+### Herkunftskarte (`docs/design/flow-spine-herkunftskarte.md`)
+
+**Zwei der sieben operativen Felder haben eine Quelle, fuenf nicht** — und die
+Quellen sind in allen neun Prozessen dieselben, weil sie am **Vorgang** haengen
+und nicht am Prozess.
+
+| Feld | Ergebnis |
+|------|----------|
+| `timestamp` | Quelle vorhanden — juengstes Knotenereignis |
+| `detail_rows` | teilweise — Bearbeiter, Aktion, Grund aus demselben Ereignis |
+| `metric`, `submetric`, `kpis`, `documents`, `agent` | nicht ermittelbar |
+
+**Wichtigster Einzelbefund — V13 ist als Zuordnung ueberholt:** `timestamp` ist
+**doch** ermittelbar. Die Begruendung von V13 stimmt (`_now()` beim Cache-Fuellen
+ist wertlos), die Folgerung nicht: `ops_flow_spine_instance_events` fuehrt
+`node_id`, `actor_id` und `created_at`. Das juengste Ereignis eines Knotens ist
+genau die Zeit, die der Leitstand meint. **Eine** zusaetzliche Abfrage je
+Instanz (`DISTINCT ON (node_id)`), nicht eine je Knoten; der Katalogpfad bleibt
+gecacht.
+
+Bei `agent` ist die ehrliche Antwort „nicht ermittelbar": `agent_proposals`
+traegt `rationale` und `risk_level`, aber **keine Verknuepfung** zu
+`instance_id`/`node_id`, und `execute_agent_action` persistiert nichts.
+
+### FSX-012-Vorklaerung (`docs/design/flow-spine-fsx012-vorklaerung.md`)
+
+**Antwort: erweitern, nicht danebenbauen.** Drei Befunde:
+
+1. **`purchase_order` fehlt in `DOCUMENT_ENTRY_POLICIES` komplett.** Die Liste
+   deckt Angebot, Auftrag, Lieferschein, Rechnung, Gutschrift und die
+   Eingangsbelege ab — aber nicht die Bestellung, an der P2P-001 haengt. FSX-012
+   braucht einen **Eintrag**, keinen Mechanismus. Vorschlag steht im Dokument.
+2. **Die `candidates` hatten bis heute keine Quelle — jetzt haben sie eine.**
+   `resolveCapturedDocumentWorkflow` erwartet sie vom Aufrufer; FSX-010 ist
+   genau diese Quelle. Die Slices passen ohne Anpassung zusammen.
+3. **Die Ambiguitaet ist schon strenger geloest als mein Auftrag verlangte:**
+   mehrere oder unsichere Treffer ergeben `manual-review`, nichts wird
+   automatisch angehaengt. Das soll so bleiben.
+
+**Der Teilfehler gehoert nicht in die Policy.** Sie ist eine reine Funktion und
+soll es bleiben; der Wiederholungsmechanismus gehoert in die Maske. Dank FSX-011
+ist er billig: der Anlageaufruf ist auf der Belegreferenz idempotent, die
+Wiederholung muss nichts entdoppeln.
+
+## FSX-090b - Expertenbegehung durchgefuehrt 2026-09-15, drei Brueche gefunden
+
+**Der User hat mich gebeten, die Nutzer zu simulieren. Das kann ich nicht** — ich
+kenne jede dieser Masken und habe die Haelfte heute gebaut; ich kann von nichts
+ueberrascht werden, und genau die Ueberraschung ist das Messinstrument. Was ich
+durchgefuehrt habe, ist ein **Cognitive Walkthrough**, also eine
+Expertenbegehung. Sie findet offensichtliche Brueche zuverlaessig und misst
+weder Zeit noch Verstaendlichkeit. **Sie kann den Rollout stoppen, nicht
+freigeben.**
+
+Dokument: `docs/design/flow-spine-090b-begehung.md`.
+
+**Aufgabe 1 (Direktbestellung): kein Bruch.** Das Prozessband ersetzt den
+Hinweiskasten ohne erkennbaren Verlust.
+
+**Aufgabe 3 (blockierten Vorgang erklaeren): bricht dreifach.**
+
+- **F1 (schwer):** `hold_instance` schreibt den Grund (`reason_category`,
+  `reason_code`, `reason_note`) **nur ins Ereignis**, nicht auf die Instanz.
+  Sichtbar ist er damit ausschliesslich im Timeline-Register der Copilot-Spalte
+  — **und die habe ich in FSX-023 eingeklappt.** Der Grund ist von „ein Blick
+  nach rechts" auf „aufklappen, Register wechseln, Ereignis suchen" gewandert.
+  **Das ist eine Regression durch meinen eigenen Slice.**
+- **F2 (schwer, bereits behoben):** `lifecycleSummary()` hatte keinen
+  `on_hold`-Zweig und meldete bei einem **pausierten** Vorgang woertlich „Kein
+  Abschlussgrund gesetzt". Doppelt falsch: es ist kein Abschluss, und ein Grund
+  *ist* gesetzt — nur woanders. **Sofort korrigiert**, weil eine falsche Aussage
+  schlimmer ist als eine fehlende.
+- **F3 (mittel):** Das Band zeigt keinen Blocker, weil es je Knoten keinen
+  Sperrgrund gibt (bestaetigt durch die Herkunftskarte). Damit ist **K3 des
+  Kriterienkatalogs in der Belegmaske nicht erfuellt** und die Ebene-1-Regel
+  verletzt: der Nutzer muss fuer eine Auskunft ueber *diesen* Beleg in den
+  Leitstand.
+- **F4 (mittel):** „Fokus" blendet die Prozessspalte aus, also auch den
+  Vorgangswechsel. Fuer die Rolle **Waage**, die zwischen Fahrzeugen wechselt,
+  vermutlich die falsche Verengung. Ich habe beim Bauen an den Innendienst
+  gedacht.
+
+### Folgerung, und sie geht gegen meinen eigenen Plan
+
+**Der FSX-013-Rollout auf die restlichen 17 Masken sollte nicht stattfinden,
+solange F1 bis F3 offen sind.** Sonst behauptet das Band in 17 weiteren Masken,
+den Prozessstand zu zeigen, waehrend die wichtigste Auskunft eines gestoerten
+Vorgangs — warum er steht — nur im Leitstand zu haben ist.
+
+**Die Reihenfolge ergibt sich aus der Herkunftskarte:** F1 loest sich mit
+FSX-001, weil `reason_*` des juengsten Knotenereignisses ohnehin in
+`detail_rows` gehoert. Danach kann das Band den Grund als Blocker zeigen, und
+F3 faellt mit.
+
+
 ## FSX-001-QUELLENKARTE - reserviert 2026-09-15
 
 **Owner:** Codex. **Ziel:** Quellen je operativem Knotenfeld pruefen und dokumentieren.

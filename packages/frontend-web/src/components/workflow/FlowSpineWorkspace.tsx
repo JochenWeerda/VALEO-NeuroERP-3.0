@@ -527,6 +527,14 @@ function lifecycleSummary(workspace: {
   if (workspace.lifecycle_status === 'completed') {
     return workspace.completion_reason_code || workspace.reason_note || 'Fachlich abgeschlossen'
   }
+  if (workspace.lifecycle_status === 'on_hold') {
+    // F2 aus der Begehung: Ein pausierter Vorgang ist nicht abgeschlossen, und
+    // ein Grund IST gesetzt — er steht nur im Ereignis, nicht auf der Instanz
+    // (hold_instance schreibt reason_* ausschliesslich in die Timeline).
+    // "Kein Abschlussgrund gesetzt" liess den Nutzer schliessen, es gebe keinen
+    // Grund. Bis FSX-001 den Grund an den Knoten holt, sagen wir, wo er steht.
+    return workspace.reason_note || 'Pausiert — Grund in der Timeline'
+  }
   return workspace.reason_note || 'Kein Abschlussgrund gesetzt'
 }
 
