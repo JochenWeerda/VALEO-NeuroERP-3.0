@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-MENGENMODELL - reserviert 2026-09-15
+
+**Owner:** Claude Code. **Ziel:** Positionsbezogenes n:m-Mengenmodell (K5) mit
+Einheiten- und Gebindesystem des Agrarhandels — dt als Standardgroesse, PSM-Pack
+mit rollenabhaengiger Aufloesung.
+**Dateibesitz:** neues `docs/design/agrar-mengen-gebinde-modell.md`, Modell und
+Migration fuer die Positionszuordnung, zugehoerige Tests, Slice, dieser Abschnitt.
+**Abgrenzung:** kein Eingriff in bestehende Belegmasken oder in
+`docflow_source_proposals`. Erst Recherche und Modell, dann Code.
+**Abnahme:** Einheiten belegt recherchiert (Quellen genannt); dt als
+Standardgroesse; Pack-Aufloesung und -Sperre modelliert; Split/Merge auf
+Positionsebene mit Restmengenfuehrung.
+
+
 ## AUFFAELLIGKEITEN-DURCHSICHT - 2026-09-15, Claude Code
 
 Frage des Users: *„Sind alle aufgetretenen Auffaelligkeiten dokumentiert und in
