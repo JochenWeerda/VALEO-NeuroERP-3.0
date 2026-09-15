@@ -1,0 +1,116 @@
+slice_id: FSX-013
+id: FSX-013
+title: Prozessband statt Hinweiskasten — Pilot in der Bestellmaske
+owner: Claude Code
+status: in arbeit
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+vorgaenger: FSX-030
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+kriterienkatalog: docs/design/flow-spine-ebene1-kriterienkatalog.md
+goal: >-
+  Den WorkflowEntryBanner durch das Prozessband ersetzen. Aus einem
+  Hinweiskasten mit Erklaertext und vier Merkmalschips wird eine Zeile, die
+  sagt, wo der Vorgang steht und was als naechstes ansteht.
+
+stand:
+  pilot: >-
+    Umgesetzt in packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+    — der Direktbestellungsfall aus P2P-001, also genau der Fall, an dem die
+    Ausgangsdiagnose den zusaetzlichen Einstieg bemaengelt hat.
+  offen: >-
+    17 weitere Masken lesen readWorkflowEntryContext. Der Rollout folgt erst,
+    wenn der Pilot am Nutzer bestanden hat — eine Zeile, die 18-mal falsch ist,
+    ist schlimmer als 18 Hinweiskaesten.
+
+entscheidungen:
+  bruecke_statt_screendefinition: >-
+    Die Handover-Masken haben keine ScreenDefinition mit Phasen. Statt 18
+    Definitionen zu erfinden, zieht WorkflowProcessBand die Phasen aus dem
+    Flow-Spine-Prozess selbst (Knoten-Labels = Prozessbeschreibung, FSX-003
+    Fall 1) und den Stand aus dem Vorgang (node.status wird serverseitig aus
+    der Instanz ueberlagert).
+  kein_react_query: >-
+    Der erste Entwurf nutzte useFlowSpineWorkspace. Das hat die bestehenden
+    Tests der Bestellmaske gebrochen — useQuery erzwingt einen
+    QueryClientProvider in jeder Maske, die das Band einbaut. Fuer einen
+    Baustein, der in 18 Masken soll, ist das die falsche Abhaengigkeit.
+    Ersetzt durch einen einfachen Abruf im useEffect; der Endpunkt ist
+    serverseitig 60 s HTTP-gecacht.
+  kein_erfundener_blocker: >-
+    Die Knoten tragen einen Zustand ("critical"), aber keinen Sperrgrund. Daraus
+    einen Text zu formulieren waere eine Behauptung ohne Quelle — dieselbe
+    Klasse von Fehler, die FSX-002 aus dem Leitstand entfernt hat. Das Band
+    zeigt deshalb keinen Blocker, bis es eine Quelle dafuer gibt.
+  kein_fehlerbanner: >-
+    Scheitert der Abruf, arbeitet die Maske ohne Band weiter. Ein Fehlerbanner
+    ueber einem funktionierenden Formular waere schlimmer als kein Band — das
+    Band ist Orientierung, kein Arbeitsmittel.
+  ohne_vorgang_kein_stand: >-
+    Ohne instanceId ueberlagert das Backend nichts; was es liefert, ist
+    Prozessbeschreibung. Ein "aktiver" Knoten darin waere ein Beispielwert. Das
+    Band zeigt dann keine aktive Phase — ein Test haelt das fest.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-013.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - packages/frontend-web/src/components/workflow/WorkflowProcessBand.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+  - packages/frontend-web/src/__tests__/components/workflow/workflow-process-band.test.tsx
+  - "packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx: nur die Banner-Zusicherung"
+
+acceptance:
+  - Die Bestellmaske zeigt Phasen und Stand statt eines Erklaerkastens.
+  - Ohne Vorgang wird kein Stand geraten.
+  - Kein Blocker ohne Sperrgrund, kein Fehlerbanner bei Abrufproblemen.
+  - Das Band erzwingt keinen QueryClientProvider in der Maske.
+
+tests:
+  - >-
+    packages/frontend-web/src/__tests__/components/workflow/workflow-process-band.test.tsx
+    — 6 Tests gruen, darunter "raet ohne Vorgang keinen Stand" und "erfindet
+    keinen Blocker aus einem kritischen Knotenstatus".
+  - "tsc --noEmit exit 0 ohne Ausgabe."
+  - >-
+    vitest src/__tests__/components + pages/einkauf + pages/workflow —
+    47 Dateien, 192 Tests, gruen.
+
+nachgezogene_tests:
+  bestellung_anlegen: >-
+    Die Zusicherung auf den Bannertitel "Workflow-Handover aus Procure-to-Pay"
+    ist entfallen. Der Handover zeigt sich jetzt an dem, was er bewirkt —
+    vorbefuellter Lieferant und Vorgangsnotizen —, nicht an einem Erklaertext.
+    Beide Wirkungszusicherungen bleiben unveraendert bestehen.
+
+risks:
+  - >-
+    Ein Abruf je Maskenaufruf statt eines geteilten Caches. Vertretbar wegen
+    HTTP-Caching, aber bei 18 Masken im Blick behalten.
+  - >-
+    Das Band nimmt dem Nutzer den Erklaertext weg. Ob die Zeile ohne ihn
+    verstaendlich ist, entscheidet FSX-090b — nicht meine Einschaetzung.
+
+external_gates:
+  - >-
+    FSX-090b (Nutzerbeobachtung) vor dem Rollout auf die restlichen 17 Masken.
+  - >-
+    Cursor erweitert den FSX-003-Frontend-Scanner auf die Fachmasken-Ordner,
+    sobald der Rollout beginnt (im Workboard angekuendigt).
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Die Belegmaske sagt, wo der Vorgang steht und was als naechstes ansteht.
+    Sie erklaert nicht mehr, dass sie Teil eines Prozesses ist — sie zeigt es.
+  architektur_vertrag: >-
+    Phasen sind Prozessbeschreibung und kommen aus dem Register; der Stand
+    kommt aus der Instanz. Der Baustein bringt keine Framework-Abhaengigkeit in
+    die Maske.
+  daten_vertrag: "Keine Migration, keine Datenmutation. Ein lesender Abruf."
+  test_vertrag: >-
+    Jede Ableitung eines Stands braucht eine Zusicherung, dass sie ohne Quelle
+    unterbleibt. Tests, die nur die Existenz des Bands pruefen, genuegen nicht.
+  security_vertrag: "Keine Berechtigungen, keine neuen Endpunkte."
+  betriebs_vertrag: "Rein clientseitig."
+  dokumentations_vertrag: >-
+    Masterplan Welle 2, Kriterienkatalog, Workboard-Abschnitt und dieser Slice.
+    Der Pilotcharakter ist ausdruecklich vermerkt.

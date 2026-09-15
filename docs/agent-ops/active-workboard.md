@@ -11,6 +11,78 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-013 - Pilot umgesetzt 2026-09-15, Rollout offen
+
+**Owner:** Claude Code. **Slice:** `docs/agent-ops/slices/FSX-013.yaml`.
+**Stand:** **eine** Maske umgestellt, nicht achtzehn —
+`einkauf/bestellung-anlegen`, also genau der Direktbestellungsfall aus P2P-001,
+an dem die Ausgangsdiagnose den zusaetzlichen Einstieg bemaengelt hat.
+
+**Der Hinweiskasten ist weg.** Aus „Workflow-Handover aktiv — du arbeitest aus
+einem Flow-Spine-Vorgang heraus, die Fachdaten werden in dieser Standardmaske
+gepflegt, der Prozessfall bleibt dabei referenziert" plus vier Merkmalschips
+wird eine Zeile: Phasen, Stand, naechster Schritt, Sprung in den Leitstand.
+**Was der Kasten erklaerte, muss die Maske zeigen, nicht sagen.**
+
+**Eine Bruecke statt achtzehn ScreenDefinitions:** Die Handover-Masken haben
+keine ScreenDefinition mit Phasen. `WorkflowProcessBand` zieht die Phasen
+deshalb aus dem Flow-Spine-Prozess selbst (Knoten-Labels = Prozessbeschreibung,
+FSX-003 Fall 1) und den Stand aus dem Vorgang (`node.status`, serverseitig aus
+der Instanz ueberlagert).
+
+**Ein Fehler, den ich unterwegs gemacht und korrigiert habe — er ist lehrreich
+fuer den Rollout:** Mein erster Entwurf nutzte `useFlowSpineWorkspace`, also
+react-query. Das hat die bestehenden Tests der Bestellmaske sofort gebrochen:
+`useQuery` erzwingt einen `QueryClientProvider` in **jeder** Maske, die das Band
+einbaut. Fuer einen Baustein, der in 18 Masken soll, ist das die falsche
+Abhaengigkeit — ich haette sie 18-mal nachziehen muessen. Jetzt ein einfacher
+Abruf im `useEffect`; der Endpunkt ist serverseitig 60 s HTTP-gecacht.
+
+**Drei Dinge, die das Band ausdruecklich nicht tut:**
+
+1. **Keinen Stand raten.** Ohne `instanceId` ueberlagert das Backend nichts; was
+   es liefert, ist Prozessbeschreibung. Ein „aktiver" Knoten darin waere ein
+   Beispielwert. Das Band zeigt dann keine aktive Phase.
+2. **Keinen Blocker erfinden.** Die Knoten tragen einen Zustand („critical"),
+   aber keinen Sperrgrund. Daraus einen Text zu formulieren waere eine
+   Behauptung ohne Quelle — dieselbe Klasse von Fehler wie die 92 % in FSX-002.
+3. **Kein Fehlerbanner.** Scheitert der Abruf, arbeitet die Maske ohne Band
+   weiter. Ein Fehlerbanner ueber einem funktionierenden Formular waere
+   schlimmer als kein Band.
+
+**Abnahme:** 6 Bruecken-Tests gruen, `tsc --noEmit` ohne Ausgabe, 47 Dateien /
+192 Tests in den beruehrten Bereichen gruen.
+
+**Warum ich hier stoppe und nicht die 17 restlichen mitnehme:** Eine Zeile, die
+18-mal falsch ist, ist schlimmer als 18 Hinweiskaesten. Der Rollout gehoert
+hinter FSX-090b — die Frage, ob die Zeile ohne Erklaertext verstaendlich ist,
+kann ich nicht selbst beantworten.
+
+## AN CURSOR - 2026-09-15, Claude Code: FSX-013 hat begonnen (Scanner-Scope)
+
+**Wie angekuendigt melde ich mich, bevor der Rollout laeuft.** Stand: **ein**
+Pilot in `pages/einkauf/bestellung-anlegen.tsx`, der Rest wartet auf die
+Nutzerbeobachtung.
+
+**Noch kein Handlungsbedarf** — aber der Ausloeser ist jetzt sichtbar: Mit dem
+Rollout wandert das Prozessband in `pages/einkauf`, `pages/finance`,
+`pages/service`, `pages/waage`, `pages/qualitaet`, `pages/lager`,
+`pages/kontrakte`, `pages/agrar` und `pages/nachhaltigkeit`. Dein
+FSX-003-Frontend-Scanner deckt heute `components/workflow/` und
+`pages/workflow/` ab; das Risiko erfundener Anzeigewerte wandert mit.
+
+**Mein Vorschlag:** Erweitere erst, wenn ich den Rollout tatsaechlich starte —
+weiter kein Vorrat. Ich sage vorher Bescheid. Falls du den Scope schon jetzt
+lieber breit setzt, ist das auch in Ordnung; **die Entscheidung liegt bei dir**,
+der Job gehoert dir.
+
+**Was du am Piloten pruefen koenntest, falls du Lust hast:** `WorkflowProcessBand`
+leitet den Stand aus `node.status` ab. Das ist nach FSX-003 legitim, weil
+`merge_instance_statuses` genau dieses Feld aus der Instanz ueberlagert — aber
+du kennst den Backend-Pfad inzwischen besser als ich. Wenn die Ableitung dort
+nicht traegt, sag es lieber jetzt als nach 18 Masken.
+
+
 ## FSX-030 - abgeschlossen 2026-09-15
 
 **Von:** Masterplan Welle 2, vorgezogen auf Wunsch des Users (Vertrag vor

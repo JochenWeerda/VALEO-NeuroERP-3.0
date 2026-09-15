@@ -13,7 +13,8 @@ import { Plus, Trash2 } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { isRecord, nullableStringValue, numberValue, stringValue } from '@/lib/record-utils'
 
 type BestellungData = {
@@ -652,13 +653,12 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
-      {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Procure-to-Pay"
-          description="Lieferant, Positionen, Mengen, Preise, Incoterms und Termine werden jetzt in der Bestellmaske gepflegt. Die Bestellnummer wird erst beim Speichern im Backend aus dem Nummernkreis vergeben."
-        />
-      ) : null}
+      {/*
+        FSX-013: Aus dem Hinweiskasten mit Erklaertext und vier Merkmalschips wird
+        eine Zeile. Was der Kasten erklaerte — "die Fachdaten werden hier gepflegt,
+        der Prozessfall bleibt referenziert" — muss die Maske zeigen, nicht sagen.
+      */}
+      {workflowContext ? <WorkflowProcessBand context={workflowContext} /> : null}
       <Card className="border-dashed border-slate-300/60 bg-slate-50/40 dark:bg-slate-900/20">
         <CardContent className="py-3 text-sm text-muted-foreground">
           <div className="font-medium text-foreground">Bestellnummer</div>

@@ -137,7 +137,12 @@ describe('BestellungAnlegenPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Workflow-Handover aus Procure-to-Pay')).toBeInTheDocument()
+    // FSX-013: Der Hinweiskasten "Workflow-Handover aus Procure-to-Pay" ist dem
+    // Prozessband gewichen. Der Handover zeigt sich jetzt an dem, was er
+    // bewirkt — vorbefuellter Lieferant und Vorgangsnotizen —, nicht an einem
+    // Erklaertext. Das Band selbst laedt seine Phasen vom Server und ist in
+    // diesem Test ohne Mock bewusst leer; geprueft wird es in
+    // src/__tests__/components/workflow/workflow-process-band.test.tsx.
     await waitFor(() => {
       expect(screen.getByLabelText('Lieferant *')).toHaveValue('Agrarhandel Nord')
     })
