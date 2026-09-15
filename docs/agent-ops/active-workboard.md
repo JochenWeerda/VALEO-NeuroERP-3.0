@@ -54,17 +54,21 @@ Testdateien lesen dieselbe Datei.
 **Offen:** die Uebernahme in `domain_inventory.articles` — zwischen „gelesen“
 und „uebernommen“ gehoert eine Entscheidung.
 
-## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - reserviert 2026-09-15
+## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - Claim war schon eingeloest 2026-09-15
 
-**Owner:** Codex (pausiert; Claim aus `fsx-source-claim.patch` uebernommen).
-**Ziel:** Automatische positionsbezogene Kontrakt-/Fremdlagervorschlaege im
-zentralen Mask-Builder und Belegeinstieg.
-**Dateibesitz:** neuer docflow_source_proposals-Service und Tests, docflow-API,
-zentraler SourceProposalRenderer/SD-/RenderPlan-Vertrag, Lieferschein-/
-Bestelladapter, FSX-Doku/ADR.
-**Abnahme:** Mandant/Partner/Eigentuemer, Richtung, Mengen/Einheiten/Zeitraum;
-Teilvorschlaege, Begruendung, keine Buchung durch Vorschlaege; Tests und
-Dokumentation.
+Der Claim aus `fsx-source-claim.patch` ist **erledigt**, nicht offen: Codex hat
+den Dienst implementiert (`c3b76632d`), der Abschluss samt 27 Tests ist
+uebernommen — siehe den Abschnitt weiter unten. Ich habe ihn hier zuerst als
+reserviert eingetragen und dabei uebersehen, dass die Datei laengst im Repo
+steht. Der Patch ist damit verbraucht.
+
+**Und ein Fehler, den ich lieber benenne:** Ich habe
+`app/services/docflow_source_proposals.py` mit einer zweiten, eigenen Fassung
+ueberschrieben, bevor ich nachgesehen habe, ob die Datei existiert. Aufgefallen
+ist es erst, als `docflow.py` `DocflowSourceProposalService` nicht mehr
+importieren konnte. Codex' Fassung ist unveraendert wiederhergestellt, ihre 18
+Kerntests laufen; mein Entwurf ist verworfen. Die Lehre steht schon im
+Workboard, ich habe sie nur nicht angewandt: **erst nachsehen, dann schreiben.**
 
 ## FSX-ARTIKEL-IMPORT - Format und Parser stehen 2026-09-15, Claude Code
 
