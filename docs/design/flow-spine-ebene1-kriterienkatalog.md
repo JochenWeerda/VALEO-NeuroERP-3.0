@@ -60,6 +60,20 @@ belegzentrierte Weg.
 
 ### K5 — Teilmengen und Zuordnungen sind in der Maske aufloesbar
 
+> **Stand 2026-09-15: heute nicht erfuellbar, und zwar aus einem Modellgrund.**
+> Codex hat belegt, dass die positionsbezogene n:m-Zuordnung zwischen Belegen
+> fehlt: Docflow gibt bei einer zweiten Umwandlung derselben Beziehungsart die
+> vorhandene Rechnung zurueck (wiederholter Split blockiert), die Sammelrechnung
+> uebernimmt ganze Lieferscheinsummen mit **einer** `invoice_id` (Merge ohne
+> Teilmengen), und der Einkaufsabgleich aggregiert auf Kopfebene.
+>
+> **Folge fuer diesen Katalog:** K5 darf bis auf Weiteres fuer **keine** Maske
+> als erfuellt berichtet werden — auch nicht fuer solche, die Teilmengen
+> *anzeigen*. Anzeigen ist nicht aufloesen. Wer K5 abhakt, bevor Quellposition,
+> Zielposition, zugeordnete Menge und Status modelliert sind, berichtet einen
+> Stand, den das Datenmodell nicht traegt.
+
+
 Teillieferungen, Teilrechnungen, Chargenzuordnungen und Belegbeziehungen sind in der
 Maske erreichbar — aufklappbar genuegt, sichtbar muss es nicht dauerhaft sein
 (Ebene 2). Wer dafuer in den Leitstand wechseln muss, erfuellt K5 nicht.
