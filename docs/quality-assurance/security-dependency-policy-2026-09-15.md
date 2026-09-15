@@ -12,7 +12,10 @@ last_reviewed: 2026-09-15
 ## Release-Regel
 
 Keine bekannte, praktisch ausnutzbare kritische Schwachstelle darf unbehandelt
-in ein Release gelangen. Eine alte Versionsnummer allein erzwingt keinen
+in ein Release gelangen. Architekturentscheidung:
+[ADR-071](../adr/adr-071-security-dependency-gate.md). Welleninventar:
+[Ist-Stand 2026-09-15](security-dependency-status-2026-09-15.md).
+Eine alte Versionsnummer allein erzwingt keinen
 Major-Sprung. Fehlende Erkenntnisse sind keine Freigabe: unbekannte oder noch
 nicht belegte Befunde blockieren konservativ ebenfalls, unabhaengig von Severity.
 

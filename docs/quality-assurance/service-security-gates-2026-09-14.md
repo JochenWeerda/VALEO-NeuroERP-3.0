@@ -111,6 +111,13 @@ Der Gate darf bei echten verbliebenen Advisories rot sein. Die technische
 Fertigstellung der Pruefung ist keine Behauptung, alle Dependencies seien frei
 von Schwachstellen.
 
+Release-Policy ab 2026-09-15: Scanner-Rot ist nicht gleich Release-Stopp und
+nicht gleich stille Freigabe. Verbindlich sind
+[ADR-071](../adr/adr-071-security-dependency-gate.md) und der
+[Ist-Stand](security-dependency-status-2026-09-15.md). Dependabot merget
+nicht; der Policy-Gate (Slice SECURITY-DEPENDENCY-POLICY-20260915) sitzt
+davor.
+
 Lokale Nachweise: `artifacts/service-security/`, `crm-ai-contracts-before.log`,
 `crm-ai-contracts-after.log`, `crm-ai-startup-test.log` und
 `crm-ai-security-build.log` unter `artifacts/`.

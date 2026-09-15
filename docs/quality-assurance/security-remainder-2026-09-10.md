@@ -221,3 +221,12 @@ grün; nur services/ai bleibt blockierend. Details:
 [Service-Security-Nachweis](service-security-gates-2026-09-14.md).
 Fruehere Aussagen zum fehlenden CRM-AI-Schema/Start sind damit ueberholt;
 der Dienst liefert weiterhin simulierte Ergebnisse, keine trainierten Modelle.
+
+## Nachtrag 2026-09-15: Release-Policy
+
+Scanner-Rohbefunde bleiben. Releases folgen
+[ADR-071](../adr/adr-071-security-dependency-gate.md): kein unbehandeltes
+praktisch ausnutzbares Critical; beherrschte Alt-Pins sind zulässig;
+Dependabot ist Sensor, kein Auto-Merge. Inventar und Rollen:
+[Ist-Stand](security-dependency-status-2026-09-15.md). Die Gate-Implementierung
+bleibt Slice SECURITY-DEPENDENCY-POLICY-20260915 (Codex).

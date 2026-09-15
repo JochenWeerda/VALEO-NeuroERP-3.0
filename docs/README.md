@@ -23,6 +23,7 @@ Die vollständige Startseite mit Diátaxis-Navigation liegt unter **[index.md](i
 | KI-Agent (API/Prozesse) | [Agent-Handbuch](agent-handbuch/index.md) (generiert aus Code) |
 | Architektur | [Architektur-Index](architecture/index.md) → [arc42](architecture/arc42/01-einfuehrung.md) |
 | Entscheidungen | [ADR-Index](adr/README.md) |
+| Dependency-Security | [ADR-071](adr/adr-071-security-dependency-gate.md) · [Ist-Stand](quality-assurance/security-dependency-status-2026-09-15.md) · [Gate-QA](quality-assurance/security-dependency-policy-2026-09-15.md) |
 | Offene Lücken | [Open Gaps](project-context/open-gaps-and-known-issues.md) |
 | Mask Runtime Status | [Universal Mask Runtime](architecture/uix/universal-mask-runtime-status.md) |
 

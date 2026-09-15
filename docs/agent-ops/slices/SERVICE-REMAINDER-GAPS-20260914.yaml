@@ -44,17 +44,19 @@ tests:
 risks:
   - risiko: >-
       chromadb 0.5.23 bleibt ohne Herstellerfix (GHSA-xph7-9rjv-w5fr, last
-      affected 1.5.9, Patch-PR offen). Der AI-Dienst-Audit bleibt deswegen rot.
+      affected 1.5.9, Patch-PR offen). Der Scanner-Audit bleibt deswegen rot.
     bewertung: >-
-      Bewusst nicht ignoriert. Ein Upgrade auf 1.5.9 wuerde denselben Befund
-      behalten und zusaetzlich die 0.5-API brechen.
+      Bewusst nicht ignoriert und nicht hochgezogen. ADR-071: beherrschte
+      Alt-Pins sind zulaessig. Codex bewertet die drei Server-CVEs bis
+      2026-10-15 als not_affected/unreachable (eingebetteter Client).
   - risiko: >-
       transformers bleibt auf 4.46.3. chromadb 0.5.23 verlangt tokenizers<=0.20.3;
       transformers ab 4.47 zieht tokenizers>=0.22. 4.57.6 macht das Manifest
-      unaufloesbar. Die Advisories von 4.46.3 bleiben sichtbar.
+      unaufloesbar. 26 Advisories von 4.46.3 bleiben sichtbar und blockieren
+      das Release-Gate.
     bewertung: >-
-      Reproduzierbar gepinnt statt transitiv. Geschlossen wird der Befund erst,
-      wenn chromadb eine Fixversion hat oder der Vector-Store ersetzt wird.
+      Reproduzierbar gepinnt statt transitiv. Kein Major-Bump. Naechster Schritt
+      ist Pfadanalyse, nicht 4.57.6.
   - risiko: >-
       uvicorn bleibt in finance auf 0.32.0, in workflow auf 0.30.1 und in
       crm-core/dms-adapter auf 0.27.1 statt 0.24.0.
@@ -76,19 +78,24 @@ ai_harness:
     Ein Pin gilt als geschlossen, wenn pip-audit im Dienstverzeichnis ohne
     Befund zurueckkehrt oder der verbleibende Befund ohne Fixversion dokumentiert
     ist. on_event gilt als geschlossen, wenn der statische Scan leer ist.
-  security_vertrag: Keine Ignore-Eintraege. chromadb bleibt sichtbar rot.
+  security_vertrag: >-
+    Keine Ignore-Eintraege. Scanner-Rohbefunde bleiben sichtbar. Release folgt
+    ADR-071 und dem Codex-Policy-Gate, nicht einem automatischen Major-Bump.
   betriebs_vertrag: >-
     inventory-service in docker-compose.yml baut jetzt aus dem Wurzelkontext.
     Images muessen neu gebaut werden, damit auth-shared und die neuen Pins greifen.
-  dokumentations_vertrag: Dieser Slice und der Workboard-Abschnitt.
+  dokumentations_vertrag: >-
+    Dieser Slice, Workboard-Abschnitt, ADR-071 und
+    docs/quality-assurance/security-dependency-status-2026-09-15.md.
 external_gates:
   - >-
     chromadb GHSA-xph7-9rjv-w5fr ohne gepatchte PyPI-Version. Wartet auf
     Upstream nach 1.5.9.
   - GitHub-Dependabot aktualisiert sich erst nach dem Merge ueber den Graph.
   - >-
-    SERVICE-SECURITY-GATES bleibt fuer services/ai rot, solange chromadb ohne
-    Fixversion im Manifest steht. Das ist Absicht, kein Gate-Fehler.
+    SERVICE-SECURITY-GATES bleibt fuer services/ai scanner-rot, solange
+    chromadb/transformers Advisories im Rohbericht stehen. Release bleibt
+    wegen der 26 unbewerteten Transformers-Befunde false. Das ist Absicht.
 verification:
   - python scripts/audit_service_dependencies.py --manifest services/crm-gdpr/requirements.txt
   - rg "on_event\\(" services
