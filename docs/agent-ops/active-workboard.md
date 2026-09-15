@@ -11,6 +11,71 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## AUFFAELLIGKEITEN-DURCHSICHT - 2026-09-15, Claude Code
+
+Frage des Users: *„Sind alle aufgetretenen Auffaelligkeiten dokumentiert und in
+Bearbeitung?"* Nachgeprueft gegen das Repository, nicht aus dem Gedaechtnis.
+**Antwort: ueberwiegend ja — aber drei Dinge waren es nicht.** Zwei sind hiermit
+erledigt, eines ist benannt.
+
+### Nicht verfolgt gewesen, jetzt geschlossen: kein Gate fuer den Datenbankstand
+
+Die Auffaelligkeit, die uns heute tatsaechlich getroffen hat, war **nirgends als
+Aufgabe erfasst**: Zwei Migrationen standen im Repository und waren auf der
+Datenbank nicht angewandt — darunter der Unique-Index aus FSX-011. Dokumentiert
+habe ich den *Vorfall*; dass die **Luecke bleibt**, nicht.
+
+`check_alembic_single_head.py` faengt das nicht: Es prueft die Revisionskette im
+Repository, nicht die Datenbank. Und die Tests pruefen den **Migrationstext**,
+nicht den Zustand — deshalb waren sie gruen, waehrend die Eindeutigkeit
+zugesichert, aber nicht erzwungen war.
+
+**Neu: `scripts/check_alembic_db_head.py`.** Kein CI-Gate — in der CI gibt es
+keine Produktionsdatenbank, und gegen eine frisch migrierte Wegwerf-Instanz waere
+die Pruefung wertlos. Es gehoert **vor die Abnahme eines Slices mit Migration**
+und in die Betriebscheckliste vor einem Release.
+
+Alle drei Ausgaenge nachgemessen: 0 (im Takt), 1 (Datenbank zurueck, mit beiden
+Revisionen im Klartext), 2 (nicht erreichbar — und das ist ausdruecklich **kein**
+„in Ordnung").
+
+**Zwei eigene Fehler dabei, die ich nenne, weil sie lehrreich sind:** Mein erster
+Head-Parser las die Revisionsdateien mit regulaeren Ausdruecken und kam auf **71
+Heads statt einem** — Merge-Revisionen tragen ein *Tupel* in `down_revision`, und
+der Ausdruck sah nur den ersten Eintrag. Und meine erste Gegenprobe mass
+`exit=$?` nach einer Pipe, also den Exit-Code von `tail` statt des Skripts; sie
+meldete faelschlich 0. Beides korrigiert, das erste mit einem Kommentar im Code.
+
+### Stale: die Statusuebersicht
+
+Der Abschnitt „STAND FSX-PROGRAMM" weiter unten ist vom Vormittag und
+**ueberholt** — er fuehrt FSX-001 und FSX-012 noch als offen und wartend auf
+Codex. Wer ihn heute liest, bekommt ein falsches Bild. Er bleibt als Zeitstempel
+stehen; **massgeblich ist die Liste unten.**
+
+### Offen und bewusst nicht in Bearbeitung
+
+| Punkt | Warum offen |
+|---|---|
+| **FSX-090b** Nutzerbeobachtung | Braucht echte Sachbearbeiter und einen Termin. Protokoll fertig. Meine Expertenbegehung konnte den Rollout stoppen, nicht freigeben. |
+| **FSX-090a** Messlauf | Werkzeug gebaut und typgeprueft, **nicht gelaufen** — braucht eine laufende Oberflaeche. Gebaut ist nicht gemessen. |
+| **F5** fehlendes Band ununterscheidbar von „kein Prozess" | Bewusst zurueckgestellt: die Alternative waere wieder ein Platzhalter. |
+| **401-Artefakt** in `test_flow_spines_api.py` unter `--noconftest` | Vorbestehend, in FSX-002-003 festgehalten. Ein Testumgebungs-Artefakt, kein Produktfehler — aber niemand hat es als Aufgabe. |
+| **`coverage_path_check.xml`** | Seit Sitzungsbeginn geaendert, von niemandem committet, Urheber unbekannt. Ich habe es durchgehend ausgelassen. |
+| **`fsx-source-claim.patch`** | Codex' Claim-Datei; der Claim ist laengst im Workboard. Kann weg — gehoert Codex, deshalb lasse ich sie liegen. |
+
+### Bereits verfolgt, nur zur Bestaetigung
+
+**Dependabot** (1 kritisch, 4 hoch, 1 moderat auf `main`) ist **kein blinder
+Fleck**: `SEC-DEPENDABOT-API-001`, `SEC-CODE-SCANNING-REDUCE-001` und
+`SEC-GITHUB-WARNINGS-CLOSEOUT-001` fuehren das. Ich hatte es heute einmal
+erwaehnt und nicht weiterverfolgt — zu Recht, es liegt woanders.
+
+Der **n:m-Widerspruch** ist seit `bb0cb0658` nicht mehr nur dokumentiert,
+sondern im Code aufgeloest. **K5** bleibt im Kriterienkatalog gesperrt, bis das
+positionsbezogene Mengenmodell steht — das ist Codex' Belegfluss und weiterhin
+offen.
+
 ## FSX-LS-KONSOLIDIERUNG - abgeschlossen 2026-09-15, Claude Code
 
 **Die dritte Umsetzung ist weg. Aber nicht so, wie ich es geplant hatte** — und
