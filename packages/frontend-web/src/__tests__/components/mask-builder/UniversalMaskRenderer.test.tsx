@@ -5,6 +5,7 @@ import { UniversalMaskRenderer, adaptMaskConfigToScreenDefinition, validateScree
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import type { MaskConfig } from '@/components/mask-builder/types'
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import { MemoryRouter } from '@/app/routing/test-router'
 
 const legacyMask: MaskConfig = {
   title: 'Kundenstamm',
@@ -253,5 +254,37 @@ describe('UniversalMaskRenderer', () => {
     first.focus()
     fireEvent.keyDown(first, { key: 'Enter' })
     expect(second).toHaveFocus()
+  })
+
+  it('renders the compiled process ribbon from ScreenDefinition.processChain', () => {
+    const definition: ScreenDefinition = {
+      schemaVersion: 1,
+      id: 'sales/delivery-note-process-ribbon',
+      domain: 'sales',
+      mode: 'detail',
+      title: 'Lieferschein',
+      processChain: { chainId: 'k2_verkauf', stepKey: 'lieferschein' },
+      processChains: {
+        k2_verkauf: {
+          label: 'Verkauf',
+          steps: [
+            { key: 'auftrag', label: 'Auftrag', screenId: 'sales/sales-order', routePath: '/verkauf/auftraege' },
+            { key: 'lieferschein', label: 'Lieferschein', screenId: 'sales/delivery-note', routePath: '/verkauf/lieferschein-erfassung' },
+          ],
+        },
+      },
+    }
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <UniversalMaskRenderer plan={compileRenderPlanFromScreenDefinition(definition)} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getByTestId('process-ribbon')).toHaveAttribute('data-chain', 'k2_verkauf')
+    expect(screen.getByTestId('ribbon-step-lieferschein')).toHaveAttribute('data-state', 'current')
   })
 })

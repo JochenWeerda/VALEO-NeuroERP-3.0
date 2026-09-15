@@ -6,6 +6,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { compileProcessRibbon, type ProcessChain } from '@/components/mask-builder/renderers/process-ribbon'
 import { ProcessRibbonRenderer } from '@/components/mask-builder/renderers/ProcessRibbonRenderer'
+import { compileProcessRibbonPlan } from '@/components/mask-builder/render-plan/schema-compiler'
 
 const mockNavigate = vi.fn()
 vi.mock('@/app/routing/typed-router', async (importOriginal) => {
@@ -91,5 +92,20 @@ describe('ProcessRibbonRenderer', () => {
       </MemoryRouter>,
     )
     expect(container.querySelector('[data-testid="process-ribbon"]')).toBeNull()
+  })
+})
+
+describe('compileProcessRibbonPlan Pipeline', () => {
+  it('unbekannte Kette wird Warnung, kein Renderfehler', () => {
+    const { ribbon, warnings } = compileProcessRibbonPlan({
+      schemaVersion: 1,
+      id: 'sales/delivery-note',
+      domain: 'sales',
+      mode: 'detail',
+      title: 'Lieferschein',
+      processChain: { chainId: 'fehlt', stepKey: 'auftrag' },
+    })
+    expect(ribbon).toBeUndefined()
+    expect(warnings).toContain('unknown_chain:fehlt')
   })
 })

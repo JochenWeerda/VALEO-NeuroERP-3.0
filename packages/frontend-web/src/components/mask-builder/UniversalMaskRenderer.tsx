@@ -21,6 +21,7 @@ import {
   TabContentRenderer,
   TileGridRenderer,
   TwinReadModelRenderer,
+  ProcessRibbonRenderer,
   WorkflowPanelRenderer,
   layoutClasses,
 } from './renderers'
@@ -196,6 +197,7 @@ function RenderFromPlan({
         onAction={onAction}
         payload={effectivePayload}
       />
+      {plan.shell.processRibbon ? <ProcessRibbonRenderer ribbon={plan.shell.processRibbon} /> : null}
 
       <WorkflowPanelRenderer
         workflow={plan.workflow}

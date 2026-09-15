@@ -4,7 +4,7 @@ type: reference
 audience: [agent, entwickler, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-15
 version: 1.0.0
 description: CPython-Backports und weitere Dependency-Befunde mit Abnahmenachweis.
 ---
@@ -235,3 +235,18 @@ Ungenutzte Hugging-Face-Pins sind entfernt: `services/ai` und `services/crm-ai`.
 Der historische CI-Stand 22/23 (Lauf 34898484483) gilt nur bis `a9b720a75`.
 Aktuelle lokale Audits: ai Gate-Exit 0 bei Scanner-Exit 1 (chromadb);
 crm-ai Scanner- und Gate-Exit 0.
+
+## Abschluss 2026-09-15 (Cursor, Uebernahme von Codex)
+
+Der Parent-Slice ist geschlossen. Die CPython-Backports und die
+Dependency-Wellen sind auf `main`. Dependabot zeigt am Abschlussabend
+**6 offene Meldungen** und bleibt Sensor (ADR-071), kein Auto-Merge.
+
+Rohbefunde ohne Herstellerfix bleiben sichtbar und sind keine neuen Ignores:
+
+- `image-size` (Node, 2 High)
+- `stream-json` 1.9.1 versionsbasiert trotz lokalem Tiefen-Backport
+- `chromadb` 0.5.23 embedded, Policy `not_affected` / `unreachable`
+- CVE-2026-89092 libc, Scanner `not-fixed`
+
+Details: [Ist-Stand](security-dependency-status-2026-09-15.md).

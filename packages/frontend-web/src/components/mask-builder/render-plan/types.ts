@@ -51,6 +51,24 @@ export interface RenderShellPlan {
     enabled: boolean
     provider: ScreenVoiceProvider
   }
+  processRibbon?: RenderProcessRibbonPlan
+  processRibbonWarnings?: string[]
+}
+
+export type RenderProcessStepState = 'done' | 'current' | 'upcoming'
+
+export interface RenderProcessRibbonStep {
+  key: string
+  label: string
+  screenId: string
+  routePath: string
+  state: RenderProcessStepState
+}
+
+export interface RenderProcessRibbonPlan {
+  chainId: string
+  label: string
+  steps: RenderProcessRibbonStep[]
 }
 
 export interface RenderSummarySlot {

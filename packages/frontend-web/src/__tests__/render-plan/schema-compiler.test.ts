@@ -262,6 +262,36 @@ describe('schema-compiler', () => {
     expect(plan.twin?.metrics.map((metric) => metric.key)).toEqual(['fill_pct', 'locked'])
   })
 
+  it('compiles processChain into shell.processRibbon and degrades unknown chains to warnings', () => {
+    const schema = {
+      ...crmSchema(),
+      processChain: { chainId: 'k2_verkauf', stepKey: 'lieferschein' },
+      processChains: {
+        k2_verkauf: {
+          label: 'Verkauf',
+          steps: [
+            { key: 'auftrag', label: 'Auftrag', screenId: 'sales/sales-order', routePath: '/verkauf/auftraege' },
+            { key: 'lieferschein', label: 'Lieferschein', screenId: 'sales/delivery-note', routePath: '/verkauf/lieferschein-erfassung' },
+          ],
+        },
+      },
+    }
+
+    const plan = compileRenderPlanFromScreenDefinition(schema)
+    expect(plan.shell.processRibbon?.chainId).toBe('k2_verkauf')
+    expect(plan.shell.processRibbon?.steps.map((step) => step.state)).toEqual(['upcoming', 'current'])
+    expect(plan.shell.processRibbonWarnings).toBeUndefined()
+
+    const unknown = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/customer-360-unknown-chain',
+      processChain: { chainId: 'gibtsnicht', stepKey: 'x' },
+      processChains: schema.processChains,
+    })
+    expect(unknown.shell.processRibbon).toBeUndefined()
+    expect(unknown.shell.processRibbonWarnings).toContain('unknown_chain:gibtsnicht')
+  })
+
   it('preserves explicit context rail sections and enables collab opt-in', () => {
     const schema = {
       ...crmSchema(),

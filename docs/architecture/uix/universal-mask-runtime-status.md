@@ -83,6 +83,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-061 | Rollen-Workspaces + Tiles-Primitive + Rollen-Redirect | ✅ | 27 pytest, 6 Vitest, Workspace Playwright grün |
 | UIX-062 | Collab-Rail v1: `contextRailSections`, datensatzgebundene Notizen, Mentions, Inbox/Outbox | ✅ lokal | 4 pytest, 7 Vitest, TypeScript 0, Playwright 1/1 |
 | UIX-063 | Planungskalender v1: `calendar`-Contract, Projektionsservice, ICS-Feed, CalendarRenderer | ✅ lokal | 33 pytest, 3 Vitest, TypeScript 0, Playwright 1/1 |
+| UIX-091-PIPELINE | `processChain` → `shell.processRibbon` zentral im UniversalMaskRenderer | ✅ | 27 Vitest (schema-compiler, process-ribbon, UniversalMaskRenderer) |
 | L3-HABIT-BRIDGE-001 | Herstellerneutrale Desktop-Gewohnheitsvertraege + 3 Referenzmasken | ✅ technisch abgeschlossen, Human Review vor Rollout | 125 Mask-Builder/RenderPlan-Tests, 4 Backend-Tests, 12 Visual-Audits; ADR-056 + Paritaetsmatrix |
 
 | L3-MDE-INBOX-003 | Native MDE-Worklist + zentrale statusabhaengige Tabellenzeilen-Aktionen | technisch abgeschlossen, Provider-Pilot extern | `schnittstelle/mde-inbox`, Quarantaene/Retry-Audit, ADR-057 |

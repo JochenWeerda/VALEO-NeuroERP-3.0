@@ -325,6 +325,24 @@ export interface ScreenSourceProposals {
   contextKey: string
 }
 
+/** UIX-091: Verweis auf eine deklarative Prozesskette, ohne Instanzfortschritt. */
+export interface ScreenProcessChainRef {
+  chainId: string
+  stepKey: string
+}
+
+export interface ScreenProcessChainStep {
+  key: string
+  label: string
+  screenId: string
+  routePath?: string
+}
+
+export interface ScreenProcessChainCatalogEntry {
+  label: string
+  steps: ScreenProcessChainStep[]
+}
+
 export interface ScreenDefinition {
   schemaVersion: 1
   id: string
@@ -349,6 +367,8 @@ export interface ScreenDefinition {
   calendar?: ScreenCalendarDefinition
   sourceProposals?: ScreenSourceProposals
   twin?: ScreenTwinDefinition
+  processChain?: ScreenProcessChainRef
+  processChains?: Record<string, ScreenProcessChainCatalogEntry>
   voice?: {
     enabled?: boolean
     provider?: ScreenVoiceProvider
@@ -428,6 +448,10 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   }
   if (screen.twin && !screen.twin.endpoint) {
     errors.push('twin.endpoint is required')
+  }
+  if (screen.processChain) {
+    if (!screen.processChain.chainId?.trim()) errors.push('processChain.chainId is required')
+    if (!screen.processChain.stepKey?.trim()) errors.push('processChain.stepKey is required')
   }
   for (const metric of screen.twin?.metrics ?? []) {
     if (!metric.key) errors.push('twin.metrics.key is required')

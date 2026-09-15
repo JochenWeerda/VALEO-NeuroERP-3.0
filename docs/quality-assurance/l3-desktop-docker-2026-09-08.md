@@ -2,11 +2,11 @@
 title: L3 Desktop und Docker Wiederaufnahme
 type: reference
 audience: [agent, entwickler, qa]
-owner: Codex
-status: aktiv
-last_reviewed: 2026-09-10
-version: 1.0.0
-description: Aktuelle Verifikation und offene Abnahme des Desktop-Rebuild-Slices.
+owner: Cursor
+status: abgeschlossen
+last_reviewed: 2026-09-15
+version: 1.1.0
+description: Verifikation und Abschluss des Desktop-Rebuild-Slices.
 ---
 
 # L3 Desktop und Docker
@@ -73,13 +73,13 @@ Der Lauf wurde beendet und wird nach dem Neubau erneut ausgefuehrt.
 
 ## Offene Abnahme
 
-Offen: HTTP 500 bei `/api/crm-sales/opportunities/`,
-`/api/v1/crm/opportunities/`, `/api/mcp/policy/backup`,
-`/api/v1/admin/report-permissions` und `/api/v1/journal-entries/`;
-`/readyz` liefert unerwartet 503. Ursachen noch in Pruefung.
-Die vorbereitete additive Datenbank-Reparaturmigration
-ist durch die oben genannten Tests nicht abgenommen. Fachliche Pilotfreigaben
-bleiben extern. Der Slice bleibt bis zur vollstaendigen Abnahme in Arbeit.
+**Historisch (2026-09-10):** Die fuenf HTTP-500 und das unerwartete `readyz` 503
+sind in Claudes Runtime-Sweep und Codex' CRM-/Migrationswelle geschlossen.
+Die Reparaturmigration ist versioniert und vertraglich getestet.
+
+**Abschluss 2026-09-15 (Cursor):** Technischer Slice geschlossen. E2E Smoke und
+Security Scan bleiben eigene CI-Jobs. Fachliche L3-/FiBu-Pilotfreigabe bleibt
+externes Gate und ist durch diese technischen Tests nicht ersetzt.
 
 ## Zwischenstand in Git
 

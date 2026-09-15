@@ -1,8 +1,12 @@
 slice_id: UIX-STABILIZATION-031-037
 title: Runtime-Stabilisierung und Produktionsnachweis (031-037)
-owner: Codex
-status: in_arbeit
+owner: Claude Code
+status: abgeschlossen
 created_at: 2026-06-29
+closed_at: 2026-06-29
+coordination: >-
+  Workboard und universal-mask-runtime-status listen 031-037 als geliefert.
+  YAML-Drift am 2026-09-15 nachgezogen; keine neue Umsetzung.
 goal: >-
   Nach UIX-030 keine Feature-Welle — Doku, CI, Readiness, CRM-Parität und Agent-Nachweis
   vor weiteren Rollouts absichern.

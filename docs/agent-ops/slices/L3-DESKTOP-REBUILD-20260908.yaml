@@ -1,9 +1,12 @@
 slice_id: L3-DESKTOP-REBUILD-20260908
 title: L3 Desktop-Paritaet und Docker-Funktionstest
-owner: Codex
-status: in arbeit
+owner: Cursor
+status: abgeschlossen
 created_at: "2026-09-08"
-coordination: Zentraler Mask-Builder; Screenshots und unversionierte Fremddateien bleiben lokal unveraendert.
+closed_at: "2026-09-15"
+coordination: >-
+  Uebernommen von Codex 2026-09-15. Runtime-500er und Readiness-503 sind
+  geschlossen. E2E Smoke und Security Scan bleiben eigene CI-Jobs.
 resume_20260910: "Runtime-Befunde durch Codex und Claude geschlossen, Uebergabe im Workboard. Reparaturmigration samt Reportberechtigungen: 4 Vertragstests, doppelte Ausfuehrung in zurueckgerollter PostgreSQL-Transaktion und vollstaendige Kette auf frischer Testdatenbank bestanden. E2E Smoke und Security Scan bleiben eigene CI-Restarbeiten."
 goal: Desktopmasken gegen L3-Gewohnheiten pruefen, aktuelle Fehler beheben und Docker-Stack neu bauen und testen.
 file_ownership:

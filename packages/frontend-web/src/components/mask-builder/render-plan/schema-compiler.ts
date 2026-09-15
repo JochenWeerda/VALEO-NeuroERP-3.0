@@ -9,9 +9,10 @@ import {
   type ScreenTableProfile,
   type ScreenTileDefinition,
 } from '../schema'
+import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
-import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan, type RenderTwinPlan } from './types'
+import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderProcessRibbonPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan, type RenderTwinPlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
 const DEFAULT_LOOKUP_RESULT_LIMIT = 25
@@ -155,6 +156,26 @@ export function compileCalendar(schema: ScreenDefinition): RenderCalendarPlan | 
   }
 }
 
+export function compileProcessRibbonPlan(schema: ScreenDefinition): {
+  ribbon?: RenderProcessRibbonPlan
+  warnings: string[]
+} {
+  const ref = schema.processChain
+  if (!ref?.chainId?.trim()) return { warnings: [] }
+
+  const chains = (schema.processChains ?? {}) as Record<string, ProcessChain>
+  const resolveRoute = (screenId: string): string | undefined => {
+    for (const chain of Object.values(chains)) {
+      const step = chain.steps.find((item) => item.screenId === screenId) as { routePath?: string } | undefined
+      const path = step?.routePath?.trim()
+      if (path) return path
+    }
+    return undefined
+  }
+  const { ribbon, warnings } = compileProcessRibbon(ref.chainId.trim(), ref.stepKey, chains, resolveRoute)
+  return { ribbon: ribbon ?? undefined, warnings }
+}
+
 export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefined {
   const twin = schema.twin
   if (!twin?.endpoint) return undefined
@@ -254,6 +275,8 @@ export function compileRenderPlan(
     }
   }
 
+  const processRibbon = compileProcessRibbonPlan(schema)
+
   const plan: RenderPlan = {
     cacheKey,
     screenId: schema.id,
@@ -279,6 +302,8 @@ export function compileRenderPlan(
         enabled: schema.voice?.enabled ?? true,
         provider: schema.voice?.provider ?? 'webspeech',
       },
+      processRibbon: processRibbon.ribbon,
+      processRibbonWarnings: processRibbon.warnings.length > 0 ? processRibbon.warnings : undefined,
     },
     summarySlots: (context.summary?.summaryItems ?? schema.summary ?? []).map((item) => ({
       key: item.key,

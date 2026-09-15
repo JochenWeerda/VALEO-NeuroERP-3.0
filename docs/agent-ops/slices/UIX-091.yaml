@@ -33,10 +33,10 @@ progress: >-
   v1-state current vs neutral, unbekannte chain/step/route → Warnung nie Fehler);
   ProcessRibbonRenderer (nav mit Chips, current gold, Klick-Navigation,
   deaktiviert ohne Route). 5 pytest (check-script) + 7 Vitest (Compiler+Renderer).
-  tsc 0, ESLint sauber. OFFEN: processChain-SD-Feld + Compiler-Einbindung in
-  RenderShellPlan (render-plan shared) + Registry-Katalog-Feld processChains +
-  Readiness-Advisory missing_process_chain + check-script in quality-gate-CI +
-  Playwright.
+  tsc 0, ESLint sauber. PIPELINE-Tail 2026-09-15 (Cursor): processChain-SD-Feld
+  + Compiler-Einbindung in RenderShellPlan + zentraler Renderer. OFFEN im Kern:
+  Registry-Katalog-Feld processChains aus dem Backend, Readiness-Advisory
+  missing_process_chain, check-script in quality-gate-CI, Playwright, SD-Massenpflege.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
