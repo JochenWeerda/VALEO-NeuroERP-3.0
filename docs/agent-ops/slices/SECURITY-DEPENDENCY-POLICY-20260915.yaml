@@ -1,0 +1,42 @@
+slice_id: SECURITY-DEPENDENCY-POLICY-20260915
+title: Risikobasierte Service-Dependency-Entscheidung vor Releases
+owner: Codex
+status: abgeschlossen
+goal: Belegte unerreichbare Befunde versionsgenau bewerten; unbekannte und ausnutzbare Befunde blockieren ohne automatische Major-Upgrades.
+file_ownership:
+  - scripts/security_dependency_gate.py
+  - scripts/test_security_dependency_gate.py
+  - scripts/audit_service_dependencies.py
+  - scripts/test_audit_service_dependencies.py
+  - config/security/dependency-decisions.json
+  - .github/dependabot.yml
+  - .github/CODEOWNERS
+  - .github/workflows/service-security.yml
+  - .github/workflows/release-gates.yml
+  - docs/quality-assurance/security-dependency-policy-2026-09-15.md
+  - docs/agent-ops/slices/SECURITY-DEPENDENCY-POLICY-20260915.yaml
+acceptance:
+  - Keine Freigabe fuer erreichbare oder unbekannte Befunde.
+  - Exakte Version und Advisory mit Ablauf und Quellnachweis erforderlich.
+  - Rohbefunde unveraendert sichtbar, getrennte Scanner- und Gate-Ergebnisse.
+  - Release-Workflow prueft denselben SHA vor Deployment.
+  - Dependabot erstellt PRs ohne Auto-Merge oder automatische Major-Spruenge.
+tests:
+  - python scripts/test_security_dependency_gate.py (9 bestanden)
+  - python scripts/test_audit_service_dependencies.py (9 bestanden)
+  - Reale CI-Evidence a9b720a75 (3 not_affected, 26 blocked)
+risks:
+  - Transformers-Einzelpfade sind noch nicht freigegeben; Release fuer services/ai bleibt blockiert.
+  - Fingerprints erfordern bewusste Neubeurteilung bei Aenderungen.
+  - Externe nicht versionierte Deployments sind nicht durch Quelltests bewiesen.
+ai_harness:
+  fachlicher_vertrag: Keine fachliche oder ML-Aenderung.
+  architektur_vertrag: Bestehende CI-Gates ergaenzen; keine Service- oder Domain-Aenderung.
+  daten_vertrag: Keine Migration und keine produktive Mutation.
+  test_vertrag: Fail-closed Negativtests, echte Audit-Evidence und Runner-Integration.
+  security_vertrag: Exploitabilitaet statt pauschaler Versionsfreigabe; keine automatische Risikoannahme.
+  betriebs_vertrag: Staging/Produktion verlangen wiederholten Gate fuer Release-SHA.
+  dokumentations_vertrag: Policy-Nachweis, Slice und Workboard aktualisiert.
+external_gates:
+  - Transformers-Angriffspfade separat bewerten oder gezielt beheben.
+  - CI-Ausfuehrung nach Push; kein Deployment.

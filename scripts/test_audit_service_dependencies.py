@@ -62,7 +62,7 @@ class AuditTests(unittest.TestCase):
             if data is not None:
                 Path(command[-1]).write_text(json.dumps(data))
             return subprocess.CompletedProcess(command, code)
-        with patch("audit_service_dependencies.subprocess.run", side_effect=fake):
+        with patch("audit_service_dependencies.subprocess.run", side_effect=fake), patch("audit_service_dependencies.ROOT", self.root), patch("audit_service_dependencies.assess_file", return_value={"findings": [] if code == 0 else [{"decision": "blocked"}], "release_allowed": code == 0}):
             return audit(self.manifest, self.out)
 
     def test_complete_clean_report_passes(self):

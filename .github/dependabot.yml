@@ -1,0 +1,21 @@
+version: 2
+# Sensor and security PR creator. No workflow grants automatic merge rights.
+# Suppress routine version-update PRs, never security advisories or security PRs.
+updates:
+  - package-ecosystem: pip
+    directories:
+      - /
+      - /services/**
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

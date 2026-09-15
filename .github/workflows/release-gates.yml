@@ -11,7 +11,13 @@ permissions:
   contents: read
 
 jobs:
+  service-dependencies:
+    uses: ./.github/workflows/service-security.yml
+    with:
+      release_sha: ${{ inputs.release_sha || github.sha }}
+
   release-gates:
+    needs: service-dependencies
     runs-on: ubuntu-latest
     services:
       postgres:

@@ -51,3 +51,8 @@
 /scripts/check_codeowners_spec_p0_06.py @JochenWeerda
 /scripts/purge_pii_history.sh           @JochenWeerda
 /docs/operations/governance/            @JochenWeerda
+
+# Dependency release decisions require the same review as security controls.
+/config/security/dependency-decisions.json @JochenWeerda
+/scripts/security_dependency_gate.py @JochenWeerda
+/scripts/audit_service_dependencies.py @JochenWeerda

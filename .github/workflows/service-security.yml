@@ -8,12 +8,17 @@ on:
   schedule:
     - cron: '30 2 * * 1'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      release_sha:
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: service-security-${{ github.ref }}
+  group: ${{ github.workflow }}-service-security-${{ inputs.release_sha || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -23,6 +28,8 @@ jobs:
       matrix: ${{ steps.discover.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -32,7 +39,9 @@ jobs:
       - name: Check service imports
         run: python scripts/check_service_import_pins.py
       - name: Verify audit failure handling
-        run: python scripts/test_audit_service_dependencies.py
+        run: |
+          python scripts/test_audit_service_dependencies.py
+          python scripts/test_security_dependency_gate.py
 
   audit:
     needs: inventory
@@ -44,6 +53,8 @@ jobs:
       matrix: ${{ fromJSON(needs.inventory.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -67,15 +78,17 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_sha || github.sha }}
       - name: Build actual CRM AI image
-        run: docker build -t crm-ai-security:${{ github.sha }} services/crm-ai
+        run: docker build -t crm-ai-security:${{ inputs.release_sha || github.sha }} services/crm-ai
       - name: Verify real startup and migration failure against disposable PostgreSQL
-        run: python scripts/verify_crm_ai_container.py crm-ai-security:${{ github.sha }}
+        run: python scripts/verify_crm_ai_container.py crm-ai-security:${{ inputs.release_sha || github.sha }}
       - name: Check health, OpenAPI and all simulated endpoint contracts
         run: >-
           docker run --rm --network none --entrypoint python
           --mount type=bind,src=${{ github.workspace }}/scripts/verify_crm_ai_contracts.py,dst=/verify.py,readonly
-          crm-ai-security:${{ github.sha }} /verify.py
+          crm-ai-security:${{ inputs.release_sha || github.sha }} /verify.py
 
   service-security:
     name: Service Security Gate

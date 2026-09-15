@@ -1043,12 +1043,13 @@ erkennt die Dateien nicht mehr, der Inhalt bleibt vollstaendig als historischer
 Nachweis erhalten, und kuenftige Archiv-Meldungen entstehen gar nicht erst.
 Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
-## SECURITY-DEPENDENCY-POLICY-20260915 - reserviert
+## SECURITY-DEPENDENCY-POLICY-20260915 - abgeschlossen
 
 **Owner:** Codex. **Auftrag:** Risikobasierter Security-Dependency-Gate vor Releases; kein unbehandeltes praktisch ausnutzbares Critical, keine automatischen Major-Upgrades.
-**Dateibesitz:** neuer Dependency-Policy-Pruefer mit Tests und Policy unter config/security, Einbindung in scripts/audit_service_dependencies.py und service-security.yml, neue Dependabot-Konfiguration, eigene Slice-/QA-Doku. Bestehende Cursor-Service-Pins bleiben unangetastet.
+**Dateibesitz:** neuer Dependency-Policy-Pruefer mit Tests und Policy unter config/security, Einbindung in scripts/audit_service_dependencies.py, service-security.yml und release-gates.yml, CODEOWNERS und neue Dependabot-Konfiguration, eigene Slice-/QA-Doku. Bestehende Cursor-Service-Pins bleiben unangetastet.
 **Abnahme:** Rohbefunde sichtbar; unbekannte/abgelaufene/unbelegte Bewertungen blockieren; genaue Paket-/Versions-/Manifestbindung; bestehende Chroma-Evidenz nachpruefen; kein Auto-Merge.
 **Risiken:** Eine Bewertung ersetzt keinen Exploit-Nachweis; unbelegte Transformers-Befunde bleiben blockierend. Keine pauschale Severity-Ausnahme.
+**Ergebnis:** Deterministischer Policy-Gate und Release-Einbindung implementiert; 18 Regressionen gruen. Reale CI-Evidence: drei ChromaDB-Befunde fuer exakte Version und eingebetteten Betrieb bis 2026-10-15 als not_affected belegt; 26 Transformers-Befunde bleiben gesperrt. Kein Pin geaendert, kein Auto-Merge. [Bewertung und Betriebsgrenzen](../quality-assurance/security-dependency-policy-2026-09-15.md).
 
 ## SERVICE-SECURITY-GATES-20260914 - abgeschlossen
 
@@ -1072,11 +1073,19 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 **click** in `services/ai` 8.2.1 -> 8.3.3 (Fixversion). **transformers** bleibt
 explizit auf 4.46.3: chromadb 0.5.23 verlangt `tokenizers<=0.20.3`, und
 transformers ab 4.47 zieht tokenizers>=0.22 - 4.57.6 macht das Manifest
-unaufloesbar. Die Advisories von 4.46.3 bleiben sichtbar. **chromadb 0.5.23
-bleibt** ohne Herstellerfix (GHSA-xph7-9rjv-w5fr, last affected 1.5.9, Patch-PR
-offen). Ein Sprung auf 1.5.9 wuerde denselben Befund behalten und die 0.5-API
-brechen. Der Gate fuer `services/ai` bleibt deshalb sichtbar rot - Absicht, kein
-Ignore.
+unaufloesbar. Die Advisories von 4.46.3 bleiben sichtbar und sind **unbewertet**;
+sie blockieren das Release-Gate, bis Codex sie im Policy-Slice entscheidet.
+Kein Major-Bump. **chromadb 0.5.23 bleibt** ohne Herstellerfix
+(GHSA-xph7-9rjv-w5fr / CVE-2026-45833/45830/45831, last affected 1.5.9).
+Ein Sprung auf 1.5.9 wuerde denselben Befund behalten und die 0.5-API
+brechen. Der **Scanner-Gate** fuer `services/ai` bleibt sichtbar rot - Absicht,
+kein Ignore. Die drei Advisories betreffen den Chroma-Server; VALEO nutzt nur
+den eingebetteten Client (`PersistentClient` / `Client` + persist_directory),
+abgesichert durch `tests/test_chromadb_embedded_only_contract.py` und
+`config/security/triage-exceptions.json`. Ob das Release nach ADR-071 damit
+gruen werden darf, entscheidet der Codex-Gate, nicht ein Versionsbump.
+Policy und Inventar: [ADR-071](../adr/adr-071-security-dependency-gate.md),
+[QA-Status](../quality-assurance/security-dependency-status-2026-09-15.md).
 
 **httpx** steht in allen Service-Manifesten auf 0.28.1 (vorher 0.25.2 in 14 Diensten, 0.27.2 in Finance, offene Untergrenzen in dms-adapter und ki-usability). Aufrufstellen nutzen `AsyncClient`/`httpx.get` ohne entfernte Parameter.
 
