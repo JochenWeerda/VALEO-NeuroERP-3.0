@@ -11,6 +11,76 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-RECHNUNGSPOSITION - die Rechnung wird ein Gegenstand 2026-09-15, Claude Code
+
+**Der Befund zuerst:** Die Ausgangsrechnung war im Belegfluss **kein Objekt**.
+Aus einem Lieferschein wurde ein Journalsatz und ein offener Posten, beide ueber
+den ganzen Beleg. Es gab nichts, worauf eine Positionszuordnung haette zeigen
+koennen — und deshalb keine Stelle, an der nachlesbar waere, woher eine
+berechnete Menge kommt. Die Herkunftsanzeige aus dem vorigen Slice hatte genau
+deshalb keine Maske.
+
+**Zweiter Befund, ungeplant:** `domain_finance.finance_invoices` wird von drei
+Endpunkten benutzt (Sammelrechnung schreibt hinein, Kreditpruefung liest),
+**existiert aber nicht** — keine Migration, kein Modell, in der Entwicklungs-DB
+nicht angelegt. Die Sammelrechnung faengt den Fehler als 503 „Datenbankfehler"
+ab. Und die beiden Aufrufer sind sich uneins: `collective_documents` schreibt
+`total_amount`, `credit_management` summiert `amount`. Ich habe die Tabelle
+**nicht** nachgebaut — eine Tabelle nach zwei widerspruechlichen Vermutungen zu
+formen waere geraten. Der Befund gehoert benannt, nicht stillschweigend geheilt.
+
+**Gebaut wurde stattdessen im Verkauf**, wo die Belegkette liegt und wo
+`delivery_notes`/`delivery_note_positions` und
+`sales_credit_notes`/`sales_credit_note_lines` das Muster schon vorgeben:
+`domain_sales.sales_invoices` + `sales_invoice_lines`
+(`sales_invoice_lines_20260915`, Single-Head geprueft).
+
+**`line_no` ist der Schluessel, auf den `doc_allocations.target_line_id`
+zeigt** — je Rechnung eindeutig per Index und nicht umnummerierbar: Eine
+Umnummerierung liesse bestehende Zuordnungen ins Leere zeigen.
+
+**Keine Herkunftsspalte an der Position.** Ein `source_document_id` waere
+naheliegend und waere wieder die 1:1-Annahme, die das Mengenmodell gerade
+aufloest — eine Rechnungsposition kann aus mehreren Lieferscheinpositionen
+gespeist sein. Die Beziehung lebt in `doc_allocations`, mit Menge, Einheit und
+Restmengenfuehrung. Ein Test haelt die Abwesenheit der Spalte fest.
+
+**Berechnet wird die offene Menge, nicht die gelieferte.** Der
+`SalesInvoiceService` liest je Quellposition den Stand und nimmt den Rest. Eine
+vollstaendig berechnete Position ergibt **keine Nullzeile**, sondern einen
+Eintrag in `skipped` mit Grund — sonst wuerde stillschweigend weniger berechnet
+als erwartet. Gibt es gar nichts Offenes, entsteht **keine** Rechnung: eine
+Rechnung ueber nichts ist kein Beleg, sondern eine Nummer (409).
+
+**Die Sammelrechnung ist hier kein Sonderfall**, sondern eine laengere
+Quellenliste: `POST /sales/invoices/from-delivery-notes`.
+`GET /sales/invoices/{id}` liefert Kopf, Positionen und je Position die
+Herkunft — in einer Abfrage.
+
+**Ein Test musste umgebaut werden.**
+`test_create_invoice_from_delivery_scopes_final_update_by_tenant` prueft die
+Mandantentrennung ueber eine Attrappen-Sitzung, die nur `execute` und `commit`
+kann. Seit die Rechnung mit Positionen entsteht, braucht der Endpunkt eine
+echte Sitzung; die Attrappe haette nur noch nachgezeichnet, was sie selbst
+vorgibt. Jetzt zwei Mandanten, zwei Lieferscheine, eine Umwandlung — der fremde
+Beleg bleibt Entwurf und ist nicht einmal sichtbar. Nebenbei sichtbar geworden:
+`journal_entries.tenant_id` haengt per Fremdschluessel an `tenants`, ein
+erfundener Testmandant ist dort ein 500er.
+
+**Abnahme:** 12 Dienst-Tests, 5 Endpunkt-Tests, 2 Sicherheitstests — alle gegen
+die echte Datenbank. `alembic upgrade head` gelaufen, Single-Head.
+`check_openapi_docs` 100 %.
+
+**Zur mitkommenden `openapi.json`:** Die eingecheckte Fassung war seit
+`eae0ae598` veraltet; die Regenerierung nimmt deshalb auch die Routen dieses
+Programms mit, die vorher schon committet waren (Allocations, Flow-Spine-
+Belegverknuepfung, Source-Proposals). Das ist ein erzeugtes Artefakt, keine
+fremde Handarbeit — aber es sollte niemanden ueberraschen.
+
+**Offen:** Die Rechnungsmaske. Das Objekt steht jetzt und hat einen Endpunkt,
+der Positionen samt Herkunft liefert; eine Maske darauf ist der naechste
+Schritt.
+
 ## FSX-BEGEHUNG-F5 - geschlossen 2026-09-15, Claude Code
 
 **F5 war: Ein fehlendes Band ist nicht von „kein Prozess“ zu unterscheiden.**

@@ -8694,6 +8694,117 @@
         "title": "Alert",
         "type": "object"
       },
+      "AllocateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "source_document_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Source Document Id",
+            "type": "string"
+          },
+          "source_document_type": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Source Document Type",
+            "type": "string"
+          },
+          "source_line_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Source Line Id",
+            "type": "string"
+          },
+          "target_document_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Target Document Id",
+            "type": "string"
+          },
+          "target_document_type": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Target Document Type",
+            "type": "string"
+          },
+          "target_line_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Target Line Id",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "source_document_type",
+          "source_document_id",
+          "source_line_id",
+          "target_document_type",
+          "target_document_id",
+          "target_line_id",
+          "quantity",
+          "unit"
+        ],
+        "title": "AllocateRequest",
+        "type": "object"
+      },
+      "AllocationOut": {
+        "additionalProperties": true,
+        "properties": {},
+        "title": "AllocationOut",
+        "type": "object"
+      },
       "AmendmentStatusUpdate": {
         "properties": {
           "status": {
@@ -36089,6 +36200,83 @@
           "tenant_id"
         ],
         "title": "CreateEdgeRequest",
+        "type": "object"
+      },
+      "CreateFromDeliveryNotes": {
+        "additionalProperties": false,
+        "properties": {
+          "customer_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "delivery_note_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Delivery Note Ids",
+            "type": "array"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "invoice_date": {
+            "format": "date",
+            "title": "Invoice Date",
+            "type": "string"
+          },
+          "invoice_number": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice Number"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "customer_id",
+          "delivery_note_ids",
+          "invoice_date"
+        ],
+        "title": "CreateFromDeliveryNotes",
         "type": "object"
       },
       "CreateFromInboxResponse": {
@@ -73396,6 +73584,50 @@
           }
         },
         "title": "InstanceCreateRequest",
+        "type": "object"
+      },
+      "InstanceDocumentRequest": {
+        "properties": {
+          "document_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Document Id",
+            "type": "string"
+          },
+          "document_type": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Document Type",
+            "type": "string"
+          },
+          "relation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relation"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "document_type",
+          "document_id"
+        ],
+        "title": "InstanceDocumentRequest",
         "type": "object"
       },
       "InstanceSaveRequest": {
@@ -115895,6 +116127,101 @@
         "title": "PromotionRule",
         "type": "object"
       },
+      "ProposalLine": {
+        "additionalProperties": false,
+        "properties": {
+          "article_id": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Id"
+          },
+          "article_number": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Number"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "contract_reference": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Reference"
+          },
+          "line_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Line Id",
+            "type": "string"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "unit": {
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "line_id",
+          "quantity",
+          "unit"
+        ],
+        "title": "ProposalLine",
+        "type": "object"
+      },
       "ProposalOut": {
         "properties": {
           "agent": {
@@ -123120,6 +123447,20 @@
         "title": "ReleaseOut",
         "type": "object"
       },
+      "ReleaseRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "frees_quantity": {
+            "title": "Frees Quantity",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "frees_quantity"
+        ],
+        "title": "ReleaseRequest",
+        "type": "object"
+      },
       "RemainingOut": {
         "properties": {
           "blanket_order_id": {
@@ -128276,6 +128617,12 @@
         "description": "Response schema for sales invoice einvoice endpoints.",
         "properties": {},
         "title": "SalesInvoiceEinvoiceOut",
+        "type": "object"
+      },
+      "SalesInvoiceOut": {
+        "additionalProperties": true,
+        "properties": {},
+        "title": "SalesInvoiceOut",
         "type": "object"
       },
       "SalesOffer-Input": {
@@ -135831,6 +136178,59 @@
           "condensed_at"
         ],
         "title": "SnapshotOut",
+        "type": "object"
+      },
+      "SourceProposalRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "direction": {
+            "enum": [
+              "incoming",
+              "outgoing"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "document_date": {
+            "format": "date",
+            "title": "Document Date",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/ProposalLine"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Lines",
+            "type": "array"
+          },
+          "party_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Party Id",
+            "type": "string"
+          },
+          "warehouse_id": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warehouse Id"
+          }
+        },
+        "required": [
+          "party_id",
+          "direction",
+          "document_date",
+          "lines"
+        ],
+        "title": "SourceProposalRequest",
         "type": "object"
       },
       "SperreIn": {
@@ -260874,6 +261274,228 @@
         ]
       }
     },
+    "/api/v1/docflow/allocations": {
+      "post": {
+        "operationId": "allocate_api_v1_docflow_allocations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Teilmenge einer Position zuordnen",
+        "tags": [
+          "docflow",
+          "allocations"
+        ]
+      }
+    },
+    "/api/v1/docflow/allocations/{allocation_id}/release": {
+      "post": {
+        "description": "Eine Zuordnung loesen; ``frees_quantity`` entscheidet ueber die Menge.\n\nEs gibt bewusst keinen Vorgabewert: Eine Gutschrift kann Warenrueckgabe sein\n— dann wird die Menge wieder berechenbar — oder Preisnachlass, dann nicht.",
+        "operationId": "release_api_v1_docflow_allocations__allocation_id__release_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "allocation_id",
+            "required": true,
+            "schema": {
+              "title": "Allocation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zuordnung loesen",
+        "tags": [
+          "docflow",
+          "allocations"
+        ]
+      }
+    },
+    "/api/v1/docflow/documents/{document_type}/{document_id}/allocation-origins": {
+      "get": {
+        "description": "Die Gegenrichtung: Woher kommen die Mengen **dieses** Belegs?\n\nDer Mengenstand oben blickt vom Lieferschein nach vorn — \"60 dt berechnet\".\nEine Rechnung braucht den Blick zurueck: \"Position 1: 60 dt aus\nLieferschein LS-A/1\". Beides ist dieselbe Zuordnung, von zwei Seiten\ngelesen, und beide Seiten werden gebraucht: Ohne die Herkunft steht in der\nRechnung eine Menge ohne Nachweis.\n\nAuch hier **eine** Abfrage je Beleg statt einer je Position.",
+        "operationId": "document_allocation_origins_api_v1_docflow_documents__document_type___document_id__allocation_origins_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_type",
+            "required": true,
+            "schema": {
+              "title": "Document Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Herkunft der Mengen eines Belegs",
+        "tags": [
+          "docflow",
+          "allocations"
+        ]
+      }
+    },
+    "/api/v1/docflow/documents/{document_type}/{document_id}/allocations": {
+      "get": {
+        "description": "Je Position: geliefert, berechnet, offen — plus die Zuordnungen selbst.\n\nBewusst **eine** Abfrage je Beleg und nicht eine je Position: Eine Maske mit\nzwanzig Positionen soll nicht zwanzig Aufrufe ausloesen.",
+        "operationId": "document_allocations_api_v1_docflow_documents__document_type___document_id__allocations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_type",
+            "required": true,
+            "schema": {
+              "title": "Document Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mengenstand aller Positionen eines Belegs",
+        "tags": [
+          "docflow",
+          "allocations"
+        ]
+      }
+    },
     "/api/v1/docflow/evidence/artifacts": {
       "get": {
         "operationId": "list_artifacts_api_v1_docflow_evidence_artifacts_get",
@@ -262111,6 +262733,70 @@
         "tags": [
           "docflow",
           "dms"
+        ]
+      }
+    },
+    "/api/v1/docflow/source-proposals": {
+      "post": {
+        "operationId": "source_proposals_api_v1_docflow_source_proposals_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourceProposalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocflowOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontrakt- und Fremdlagerquellen vorschlagen",
+        "tags": [
+          "docflow"
         ]
       }
     },
@@ -336581,7 +337267,7 @@
     },
     "/api/v1/masks/{mask_id}/readiness": {
       "get": {
-        "description": "Prueft alle Generator-Readiness-Gates fuer eine Maske.\n\nMandatory gates (blockieren generatorReady):\nschema_valid, non_temporary, data_sources, table_data_source_bound,\ntable_columns_complete, actions_classified.\n\nAdvisory gates (nur Warnungen, kein Block):\nsort_whitelist, filter_columns, agent_contract, workflow_declared,\nstable_test_selectors, table_query_contract.",
+        "description": "Prueft alle Generator-Readiness-Gates fuer eine Maske.\n\nMandatory gates (blockieren generatorReady):\nschema_valid, non_temporary, data_sources, table_data_source_bound,\ntable_columns_complete, actions_classified, missing_process_chain.\n\nAdvisory gates (nur Warnungen, kein Block):\nsort_whitelist, filter_columns, agent_contract, workflow_declared,\nstable_test_selectors, table_query_contract, cockpit_content.",
         "operationId": "get_mask_readiness_api_v1_masks__mask_id__readiness_get",
         "parameters": [
           {
@@ -367152,6 +367838,64 @@
         ]
       }
     },
+    "/api/v1/process/flow-spines/documents/{document_type}/{document_id}/instances": {
+      "get": {
+        "description": "Rueckwaertssuche ueber **alle** Prozesse: wo kommt dieser Beleg vor?\n\nDer Endpunkt liegt bewusst nicht unter ``/{process_key}/``: eine\nSammelrechnung ueber drei Lieferscheine gehoert zu drei Vorgaengen, und die\nmuessen auffindbar sein, ohne dass der Aufrufer den Prozess vorher kennt.\n\nGefunden wird in beiden Rollen — als fuehrender Einstiegsbeleg und als\nbeteiligter Beleg. ``role`` sagt, welche von beiden es war; das ist der\nUnterschied zwischen \"dieser Vorgang wurde hiermit eroeffnet\" und \"dieser\nBeleg gehoert auch dazu\".",
+        "operationId": "find_instances_for_document_api_v1_process_flow_spines_documents__document_type___document_id__instances_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_type",
+            "required": true,
+            "schema": {
+              "title": "Document Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "title": "Document Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowSpineOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vorgaenge zu einem Beleg finden",
+        "tags": [
+          "process",
+          "flow-spines"
+        ]
+      }
+    },
     "/api/v1/process/flow-spines/{process_key}": {
       "get": {
         "operationId": "get_workspace_api_v1_process_flow_spines__process_key__get",
@@ -367293,7 +368037,7 @@
     },
     "/api/v1/process/flow-spines/{process_key}/instances": {
       "get": {
-        "description": "List instances for a given process_key, tenant-isolated, with pagination and search.",
+        "description": "List instances for a given process_key, tenant-isolated, with pagination and search.\n\nFSX-010: Mit ``linked_document_id`` und ``linked_document_type`` fragt eine\nBelegmaske, ob zu *diesem* Beleg bereits ein Vorgang existiert. Abgeschlossene\nVorgaenge kommen dabei mit und sind ueber ``lifecycle_status`` erkennbar — die\nMaske verknuepft nur mit offenen und bietet fuer abgeschlossene ausdruecklich\ndie Neuanlage an, statt einen alten Fall stillschweigend wiederzubeleben.",
         "operationId": "list_instances_api_v1_process_flow_spines__process_key__instances_get",
         "parameters": [
           {
@@ -367349,6 +368093,42 @@
               "description": "Suche in Vorgangsnummer, Kundenname, Bezeichnung",
               "title": "Search"
             }
+          },
+          {
+            "description": "FSX-010: nur Vorgaenge zu diesem Beleg",
+            "in": "query",
+            "name": "linked_document_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "FSX-010: nur Vorgaenge zu diesem Beleg",
+              "title": "Linked Document Id"
+            }
+          },
+          {
+            "description": "FSX-010: Belegart, zusammen mit linked_document_id anzugeben",
+            "in": "query",
+            "name": "linked_document_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "FSX-010: Belegart, zusammen mit linked_document_id anzugeben",
+              "title": "Linked Document Type"
+            }
           }
         ],
         "responses": {
@@ -367385,7 +368165,7 @@
         ]
       },
       "post": {
-        "description": "Create a new flow spine instance for tracking a specific document/case through a process.",
+        "description": "Create a new flow spine instance for tracking a specific document/case through a process.\n\nFSX-011: Traegt der Aufruf eine Belegreferenz und existiert dazu bereits ein\n**offener** Vorgang, wird dieser zurueckgegeben (200) statt ein zweiter\nangelegt (201). Der Aufrufer erhaelt in beiden Faellen dieselbe Fall-ID und\ndarf den Aufruf deshalb beliebig oft wiederholen — genau das braucht\nFSX-012, wenn die Bestellung gespeichert ist und nur die Verknuepfung\nfehlgeschlagen war.\n\nDas Nachschlagen allein genuegt nicht: zwei gleichzeitige Aufrufe sehen\nbeide \"kein Fall vorhanden\". Die Eindeutigkeit erzwingt der partielle\nUnique-Index; die Kollision wird hier aufgefangen und aufgeloest.",
         "operationId": "create_instance_api_v1_process_flow_spines__process_key__instances_post",
         "parameters": [
           {
@@ -367409,7 +368189,7 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
@@ -367742,6 +368522,190 @@
           }
         ],
         "summary": "Instance complete",
+        "tags": [
+          "process",
+          "flow-spines"
+        ]
+      }
+    },
+    "/api/v1/process/flow-spines/{process_key}/instances/{instance_id}/documents": {
+      "get": {
+        "description": "Fuehrenden Einstiegsbeleg und beteiligte Belege getrennt ausweisen.\n\nDie Trennung ist keine Formsache: der fuehrende Beleg ist unveraenderlich und\ntraegt die Eindeutigkeit des Vorgangs, die beteiligten sind beliebig viele.\nWer beides in eine Liste wirft, verliert genau die Unterscheidung, an der\nFSX-011 und FSX-012 haengen.",
+        "operationId": "list_instance_documents_api_v1_process_flow_spines__process_key__instances__instance_id__documents_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "process_key",
+            "required": true,
+            "schema": {
+              "title": "Process Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowSpineOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Beteiligte Belege eines Vorgangs auflisten",
+        "tags": [
+          "process",
+          "flow-spines"
+        ]
+      },
+      "post": {
+        "description": "Einen weiteren Beleg an den Vorgang haengen — ohne den fuehrenden anzufassen.\n\nDas ist der Fall, den FSX-012 bisher als Umbiegen abgewiesen hat: die\nRechnung zum Lieferschein gehoert in denselben Vorgang, ist aber nicht der\nEinstiegsbeleg. Ohne diesen Endpunkt muesste sie den fuehrenden verdraengen.\n\n**Idempotent**: haengt der Beleg bereits, kommt derselbe Eintrag mit 200\nzurueck statt eines zweiten mit 201. Damit ist der Aufruf beliebig oft\nwiederholbar — dieselbe Eigenschaft, die FSX-011 fuer die Fallanlage\nhergestellt hat, und aus demselben Grund: ein Wiederholungsversuch nach einem\nTeilfehler darf nichts verdoppeln.",
+        "operationId": "attach_instance_document_api_v1_process_flow_spines__process_key__instances__instance_id__documents_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "process_key",
+            "required": true,
+            "schema": {
+              "title": "Process Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "title": "Instance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstanceDocumentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowSpineOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Beleg an einen Vorgang anhaengen",
+        "tags": [
+          "process",
+          "flow-spines"
+        ]
+      }
+    },
+    "/api/v1/process/flow-spines/{process_key}/instances/{instance_id}/documents/{link_id}": {
+      "delete": {
+        "description": "Eine Beteiligung loesen. Der fuehrende Beleg ist davon nicht betroffen.",
+        "operationId": "detach_instance_document_api_v1_process_flow_spines__process_key__instances__instance_id__documents__link_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "process_key",
+            "required": true,
+            "schema": {
+              "title": "Process Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "instance_id",
+            "required": true,
+            "schema": {
+              "title": "Instance Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "title": "Link Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Beleg vom Vorgang loesen",
         "tags": [
           "process",
           "flow-spines"
@@ -388266,6 +389230,103 @@
           "delivery-notes",
           "sales",
           "delivery-notes"
+        ]
+      }
+    },
+    "/api/v1/sales/invoices/from-delivery-notes": {
+      "post": {
+        "description": "Eine Rechnung mit eigenen Positionen, Menge fuer Menge zugeordnet.\n\nBerechnet wird die **offene** Menge je Lieferscheinposition. Bereits\nberechnete Positionen kommen nicht noch einmal mit; sie stehen mit Grund in\n``skipped``, damit nicht unbemerkt weniger berechnet wird als erwartet.",
+        "operationId": "create_from_delivery_notes_api_v1_sales_invoices_from_delivery_notes_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFromDeliveryNotes"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesInvoiceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnung aus Lieferscheinen anlegen",
+        "tags": [
+          "sales",
+          "invoices"
+        ]
+      }
+    },
+    "/api/v1/sales/invoices/{invoice_id}": {
+      "get": {
+        "description": "Kopf, Positionen und je Position die Herkunft der Menge.\n\nDie Herkunft kommt in **einer** Abfrage mit, nicht in einer je Position:\nEine Rechnung ueber zwanzig Lieferscheinpositionen soll nicht zwanzig\nAufrufe ausloesen.",
+        "operationId": "get_invoice_api_v1_sales_invoices__invoice_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invoice_id",
+            "required": true,
+            "schema": {
+              "title": "Invoice Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesInvoiceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnung mit Positionen und Herkunft",
+        "tags": [
+          "sales",
+          "invoices"
         ]
       }
     },

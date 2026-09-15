@@ -561,6 +561,15 @@ api_router.include_router(
     tags=["docflow", "allocations"]
 )
 
+# Rechnungsposition als eigenes Objekt: Ziel der Mengenzuordnung.
+from app.api.v1.endpoints import sales_invoices  # noqa: E402
+
+api_router.include_router(
+    sales_invoices.router,
+    prefix="/sales",
+    tags=["sales", "invoices"]
+)
+
 api_router.include_router(
     leads.router,
     prefix="/crm/leads",

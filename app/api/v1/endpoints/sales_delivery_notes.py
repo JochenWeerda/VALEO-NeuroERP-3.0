@@ -20,7 +20,11 @@ from app.services.document_allocation_service import (
     DocumentAllocationService,
     LineToRegister,
     OverAllocationError,
-    PositionRef,
+)
+from app.services.sales_invoice_service import (
+    InvoiceCreationError,
+    SalesInvoiceService,
+    SourceLine,
 )
 from app.core.config import settings
 from app.core.tenant import get_tenant_id
@@ -774,43 +778,39 @@ async def get_last_delivery_note(
     )
 
 
-def _allocate_delivery_to_invoice(
-    db: Session, tenant_id: str, ls_id: str, invoice_id: str, positions: list
-) -> None:
-    """Die Rechnung nimmt die offenen Mengen des Lieferscheins auf.
+def _invoice_sources(ls_id: str, positions: list) -> list[SourceLine]:
+    """Die Lieferscheinpositionen als zu berechnende Quellen.
 
-    Diese Umwandlung fakturiert den **ganzen** Lieferschein; jede Position geht
-    also mit ihrer offenen Restmenge in die Rechnung. Genau das wird auch
-    zugeordnet — nicht die Liefermenge: Ist auf eine Position bereits
-    teilberechnet worden, waere das eine Doppelberechnung.
-
-    Damit steht am Lieferschein hinterher die Zeile, um die es geht:
-    "100 dt geliefert · 100 dt berechnet · 0 dt offen".
-
-    Positionen ohne offene Menge werden uebersprungen. Ist eine Position
-    ueberhaupt nicht als Quelle bekannt — etwa weil sie ohne Menge gespeichert
-    wurde — entsteht keine Zuordnung; die Menge bleibt im Mengenstand sichtbar
-    unbelegt, statt eine erfundene Zuordnung zu bekommen.
+    Preis und Steuersatz kommen mit, damit die Rechnungsposition eine eigene
+    Zeile werden kann statt einer blossen Mengenangabe. Die **Menge** kommt
+    ausdruecklich nicht mit: Berechnet wird die offene, und die kennt nur die
+    Restmengenfuehrung.
     """
-    service = DocumentAllocationService(db, tenant_id)
+    quellen: list[SourceLine] = []
     for pos in positions:
-        zeile = LineToRegister.from_mapping(dict(pos))
-        if not zeile.line_id:
+        eintrag = dict(pos)
+        zeile = LineToRegister.from_mapping(eintrag)
+        if not zeile.line_id or not zeile.unit:
             continue
-        quelle = PositionRef("delivery_note", ls_id, zeile.line_id)
-        stand = service.source_state(quelle)
-        if stand is None:
-            continue
-        offen = Decimal(str(stand["open_quantity"]))
-        if offen <= 0:
-            continue
-        service.allocate(
-            quelle,
-            PositionRef("sales_invoice", invoice_id, zeile.line_id),
-            offen,
-            str(stand["unit"]),
-            reason="rechnung_aus_lieferschein",
+        quellen.append(
+            SourceLine(
+                document_type="delivery_note",
+                document_id=ls_id,
+                line_id=zeile.line_id,
+                article_id=zeile.article_id,
+                article_number=eintrag.get("artikel_nr"),
+                description=eintrag.get("bezeichnung"),
+                quantity=Decimal(str(zeile.quantity or 0)),
+                unit=str(zeile.unit),
+                unit_price=Decimal(str(eintrag.get("netto_preis") or 0)),
+                vat_rate=(
+                    Decimal(str(eintrag["mwst_prozent"]))
+                    if eintrag.get("mwst_prozent") is not None
+                    else None
+                ),
+            )
         )
+    return quellen
 
 
 @router.post("/{ls_id}/create-invoice", response_model=SalesDeliveryNotesOut, status_code=201, summary="Invoice from delivery anlegen")
@@ -830,9 +830,27 @@ async def create_invoice_from_delivery(
         raise HTTPException(status_code=400, detail="Lieferschein muss gebucht/gedruckt sein, bevor eine Rechnung erstellt werden kann")
 
     positions = _list_positions(db, ls_id)
-    total = sum(Decimal(str(p.get("netto_betrag") or 0)) for p in positions)
-    inv_id = uuid7()
     inv_nr = f"RE-{row.get('ls_nummer', ls_id[:8])}"
+
+    # Die Rechnung mit eigenen Positionen — erst damit gibt es ein Ziel, auf das
+    # die Mengenzuordnung zeigen kann. Vorher entstand nur ein Journalsatz ueber
+    # den ganzen Beleg, und die Herkunft einer berechneten Menge war nirgends
+    # nachlesbar.
+    try:
+        rechnung = SalesInvoiceService(db, tenant_id).create_from_sources(
+            invoice_number=inv_nr,
+            customer_id=str(row.get("customer_id") or ""),
+            invoice_date=date.today(),
+            sources=_invoice_sources(ls_id, positions),
+        )
+    except InvoiceCreationError as fehler:
+        db.rollback()
+        # 409, nicht 500: Der haeufigste Grund ist, dass bereits berechnet
+        # wurde. Das ist eine Lage, kein Fehler im Programm.
+        raise HTTPException(status_code=409, detail=str(fehler)) from fehler
+
+    inv_id = rechnung.invoice.id
+    total = rechnung.invoice.net_amount
 
     db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_erp"))
     db.execute(
@@ -858,8 +876,6 @@ async def create_invoice_from_delivery(
         """),
         {"id": ls_id, "tenant_id": tenant_id},
     )
-
-    _allocate_delivery_to_invoice(db, tenant_id, ls_id, inv_id, positions)
 
     db.commit()
 
