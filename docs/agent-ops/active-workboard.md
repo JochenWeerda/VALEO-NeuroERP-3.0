@@ -11,6 +11,52 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DB-STAND GEPRUEFT UND NACHGEZOGEN - 2026-09-15, Claude Code
+
+**Die Antwort auf „sind die Schemas uebernommen" war: nein.** Repo-Head stand auf
+`flow_spine_instance_documents_20260915`, die **Datenbank auf
+`agrar_harvest_acceptances_sammel_20260911`** — also vor FSX-011. **Zwei
+Migrationen waren nicht angewandt.**
+
+Konkret fehlten: die Tabelle `ops_flow_spine_instance_documents` und **alle drei**
+Indizes — auch `uq_flow_spine_open_by_document`. Das heisst: **die Eindeutigkeit
+aus FSX-011 war zugesichert, aber nicht erzwungen.** Die Doppelanlage bei
+parallelem Speichern haette real passieren koennen, obwohl der Code und die Tests
+gruen waren. Genau dafuer gibt es die externen Gates.
+
+**Vor dem Anwenden geprueft, nicht danach:** 6 Vorgaenge, **0 Dublettengruppen**.
+Die Vorabbereinigung aus FSX-011 haette also nichts angefasst — das Anwenden war
+reines DDL, kein Datenumbau. Nachgemessen: weiterhin 6 Vorgaenge, 0 mit
+Belegbezug.
+
+**Jetzt:** `alembic upgrade head` ausgefuehrt, Single Head bestaetigt
+(`flow_spine_instance_documents_20260915`), Tabelle und alle drei Indizes da.
+
+### Und damit war das zweite Gate erreichbar: Endpunkte live
+
+Zehn Pruefungen gegen die laufende Datenbank, alle gruen:
+
+- **FSX-011:** zweite Anlage zum selben Beleg → **200 und dieselbe Fall-ID**.
+- **FSX-DOC-LINKS:** Anhaengen 201, Wiederholung 200 mit demselben Eintrag.
+- Liste trennt **fuehrend** von **beteiligt**; der fuehrende Beleg bleibt
+  unveraendert.
+- **FSX-012-Guard greift weiterhin:** Umbiegen des fuehrenden Belegs → **409**.
+  Die neue Tabelle hat ihn also nicht aufgeweicht, sondern ueberfluessig gemacht
+  — genau die Unterscheidung aus dem Konfliktdokument.
+- **Sammelrechnung:** dieselbe Rechnung in zwei Vorgaengen angehaengt — geht.
+- **Rueckwaertssuche** findet beide, prozessuebergreifend, mit Rolle
+  `participant`; auf den fuehrenden Beleg mit Rolle `leading`.
+
+Testdaten anschliessend geloescht, CASCADE hat die Verknuepfungen mitgenommen:
+6 Vorgaenge wie vorher, 0 Verknuepfungen, keine Reste.
+
+**An Cursor:** In eurem Slice `FSX-010-011.yaml` steht als Gate nur noch „Alembic
+single head in quality-gate". Der wichtigere Punkt fehlt dort: **die Migration
+war bis heute nicht angewandt.** Ich habe euren Slice nicht angefasst — tragt es
+bitte selbst nach, wenn ihr es genauso seht. Der Nachweis steht hier und in
+`FSX-DOC-LINKS.yaml`.
+
+
 ## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - uebernommen und abgeschlossen 2026-09-15
 
 **Codex pausiert, der User hat die Uebernahme freigegeben.** Uebernommen wurde

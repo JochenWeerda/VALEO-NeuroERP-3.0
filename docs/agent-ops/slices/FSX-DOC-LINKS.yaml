@@ -101,12 +101,19 @@ risks:
     entsteht erst, wenn die zweite capture-then-resolve-Policy kommt — das war
     der Zweck der Reihenfolge.
   - >-
-    Die Endpunkte sind gegen eine laufende PostgreSQL-Instanz nicht ausgefuehrt.
-    Modell, Migrationstext und Endpunktvertrag sind statisch geprueft, der
-    Router laedt.
+    ERLEDIGT 2026-09-15: Die Endpunkte sind gegen die laufende Dev-Datenbank
+    ausgefuehrt — Anhaengen (201), Wiederholung (200, derselbe Eintrag),
+    Trennung fuehrend/beteiligt, dieselbe Rechnung in zwei Vorgaengen,
+    Rueckwaertssuche mit beiden Rollen. Der FSX-012-Guard wirft weiterhin 409
+    beim Umbiegen. Testdaten anschliessend geloescht; CASCADE hat die
+    Verknuepfungen mitgenommen.
 
 external_gates:
-  - "alembic upgrade head, bevor die Endpunkte benutzt werden."
+  - >-
+    GESCHLOSSEN 2026-09-15: alembic upgrade head ausgefuehrt. Die Datenbank
+    stand auf agrar_harvest_acceptances_sammel_20260911 — also vor FSX-011 —,
+    beide Migrationen sind jetzt angewandt, Tabelle und beide Indizes
+    existieren, Single Head bestaetigt.
 
 ai_harness:
   fachlicher_vertrag: >-
