@@ -3,6 +3,11 @@
 Stand: 2026-09-15 · Geruest von Claude Code, **Inhalt offen**.
 Gehoert zu `docs/design/flow-spine-entlastung-masterplan.md`, Slice FSX-001.
 
+> **Dateibesitz: Codex** (Claim FSX-001-QUELLENKARTE vom 2026-09-15). Dieses
+> Geruest ist entstanden, bevor ich den Claim gesehen hatte — es ist **kein
+> Gegenentwurf** und **darf vollstaendig ersetzt werden**. Es enthaelt keinen
+> einzigen Inhalt, nur leere Spalten und das, was ohnehin schon entschieden war.
+
 ## Warum es diese Karte gibt
 
 > Unterschiedliche Zahlen in zwei Instanzen allein beweisen keine korrekte
