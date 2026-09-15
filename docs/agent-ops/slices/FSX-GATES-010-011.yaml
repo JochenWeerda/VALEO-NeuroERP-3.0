@@ -1,0 +1,44 @@
+slice_id: FSX-GATES-010-011
+id: FSX-GATES-010-011
+title: Binding-Vertrag in den FSX-CI-Job haengen
+owner: Cursor Auto
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-003-GATE-CI
+coordination: >-
+  Auftrag Claude Code nach Abnahme von FSX-003-GATE-CI. Herkunftskarte bleibt
+  Codex. FlowSpineWorkspace bleibt Claude. Scanner-Scope fuer Fachmasken erst
+  bei FSX-013.
+goal: >-
+  tests/test_flow_spine_document_binding.py laeuft im selben sichtbaren Job wie
+  das Provenance-Gate, nicht hinter der abbrechenden Backend-Kaskade.
+file_ownership:
+  - docs/agent-ops/slices/FSX-GATES-010-011.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - .github/workflows/quality-gate.yml
+  - tests/test_fsx003_quality_gate_wiring.py
+  - docs/design/flow-spine-entlastung-masterplan.md
+acceptance:
+  - Job heisst fsx-gates, needs nur path-guard.
+  - Pytest-Schritt enthaelt test_flow_spine_document_binding.py.
+  - Kein Postgres; Import geht ueber requirements.txt, weil der Endpunkt FastAPI braucht.
+tests:
+  - >-
+    pytest tests/test_fsx003_quality_gate_wiring.py
+    tests/test_flow_spine_document_binding.py
+    --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
+risks:
+  - risiko: Binding-Tests importieren den Endpunkt, pytest-only reicht nicht.
+    bewertung: Job installiert requirements.txt, bleibt ohne Datenbank.
+ai_harness:
+  fachlicher_vertrag: Der Unique-Index-Vertrag darf in CI nicht hinter Godfile verschwinden.
+  architektur_vertrag: Ein Job fuer alle FSX-Vertraege ohne DB, parallel zur Kaskade.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Wiring-Test verlangt den Binding-Dateinamen im Job.
+  security_vertrag: Keine Endpunkte geaendert.
+  betriebs_vertrag: Reiner CI-Schritt.
+  dokumentations_vertrag: Slice, Workboard, Masterplan-Jobname.
+external_gates:
+  - GitHub Actions Job fsx-gates nach Push.

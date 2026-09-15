@@ -69,4 +69,4 @@ ai_harness:
   betriebs_vertrag: Reiner CI-Schritt, kein Rollout.
   dokumentations_vertrag: Slice, Workboard, Masterplan-Hinweis.
 external_gates:
-  - GitHub Actions quality-gate Job fsx-003-gates nach Push.
+  - GitHub Actions quality-gate Job fsx-gates nach Push.

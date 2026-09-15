@@ -1,11 +1,7 @@
-"""FSX-003 — das Provenance-Gate darf nicht hinter der Backend-Kaskade verschwinden.
+"""FSX-Gates — Provenance und Belegbindung duerfen nicht hinter der Backend-Kaskade verschwinden.
 
 Die Backend-Job-Steps in quality-gate.yml sind strikt sequentiell und brechen
-beim ersten Rot ab. Saeße FSX-003 dort hinter Godfile, Drift oder pytest,
-waere ein Rueckfall unsichtbar, sobald ein frueherer Schritt bereits rot ist.
-
-Dieser Test liest die YAML als Text — bewusst ohne PyYAML, damit der Job
-`fsx-003-gates` bei ``pytest==9.0.3`` allein lauffaehig bleibt.
+beim ersten Rot ab. Dieser Test liest die YAML als Text — bewusst ohne PyYAML.
 """
 
 from __future__ import annotations
@@ -28,22 +24,24 @@ def _job_block(name: str) -> str:
     return match.group(1)
 
 
-def test_fsx003_ist_ein_eigener_job() -> None:
-    block = _job_block("fsx-003-gates")
+def test_fsx_gates_ist_ein_eigener_job() -> None:
+    block = _job_block("fsx-gates")
     assert "needs: [path-guard]" in block
     assert "needs: [backend]" not in block
     assert "needs: [secret-scan]" not in block
 
 
-def test_fsx003_job_haengt_nicht_hinter_der_backend_kaskade() -> None:
+def test_fsx_gates_haengt_nicht_hinter_der_backend_kaskade() -> None:
     backend = _job_block("backend")
+    assert "fsx-gates" not in backend
     assert "fsx-003-gates" not in backend
     assert "needs: [secret-scan]" in backend
 
 
-def test_fsx003_job_fuehrt_beide_haelften_aus() -> None:
-    block = _job_block("fsx-003-gates")
+def test_fsx_gates_fuehrt_provenance_bindung_und_frontend_aus() -> None:
+    block = _job_block("fsx-gates")
     assert "tests/test_flow_spine_data_provenance.py" in block
+    assert "tests/test_flow_spine_document_binding.py" in block
     assert "scripts/check_flow_spine_invented_frontend_values.py" in block
     assert "--noconftest" in block
-    assert "pytest==9.0.3" in block
+    assert "requirements.txt" in block

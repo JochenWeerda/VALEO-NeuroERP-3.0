@@ -74,7 +74,7 @@ Daten —, danach die Datenbindung (FSX-001) und der zentrale UI-Vertrag (FSX-03
   Quote, Freigabestand, Dokumentbezug, Agentenaussage) aus dem Registry im Kontext einer echten
   Instanz. Gate: Test, der Registry-Konstanten aus der Menge der operativen Felder im Instanzpfad
   verbietet — die Phasenbezeichner sind ausdrücklich ausgenommen.
-  CI: eigener Job `fsx-003-gates` in `quality-gate.yml`, parallel zur
+  CI: eigener Job `fsx-gates` in `quality-gate.yml`, parallel zur
   Backend-Kaskade (die beim ersten Rot abbricht). Zweite Hälfte: Scanner
   `scripts/check_flow_spine_invented_frontend_values.py` gegen das JSX-Muster
   aus FSX-002 (`?? '92%'` / `width: '92%'`), Scope nur `components/workflow`
