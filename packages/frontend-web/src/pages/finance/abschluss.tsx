@@ -9,7 +9,8 @@ import { apiClient } from '@/lib/api-client'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAccountingPeriods, useFibuCockpit } from '@/lib/api/fibu'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
@@ -813,11 +814,7 @@ export default function AbschlussPage(): JSX.Element {
         </ProcessStatusPanel>
       ) : null}
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Finance-to-Close"
-          description="Periode, Abstimmung, Meldewesen und Freigaben werden jetzt im Abschlussarbeitsplatz gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div className="space-y-4 px-4 pb-4">
         <OperationalCaseHeader

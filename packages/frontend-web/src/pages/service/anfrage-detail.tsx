@@ -16,10 +16,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import {
-  WorkflowEntryBanner,
-  readWorkflowEntryContext,
-} from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -172,11 +170,7 @@ export default function AnfrageDetailPage(): JSX.Element {
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
       {workflowContext && (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Service-to-Customer"
-          description="Die Service-Anfrage wird hier bearbeitet. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       )}
 
       {/* Header */}

@@ -23,7 +23,8 @@ import {
   TouchCardGroup,
   TouchConfirmCard,
 } from '@/components/touch/TouchFieldLayout'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -442,7 +443,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
   return (
     <div className="flex flex-col">
       <div className="p-6">
-        {workflowContext ? <div className="mb-6"><WorkflowEntryBanner context={workflowContext} /></div> : null}
+        {workflowContext ? <div className="mb-6"><WorkflowProcessBand context={workflowContext} /></div> : null}
         <div className="mb-6 space-y-6">
           <OperationalCaseHeader
             title={lkw.kennzeichen || 'LKW-Registrierung'}

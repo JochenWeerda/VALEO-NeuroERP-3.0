@@ -12,7 +12,8 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -166,11 +167,7 @@ export default function ServiceAnfragenPage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Service-to-Customer"
-          description="Ticketdaten, Prioritaet, Einsatzplanung und Rueckmeldung werden jetzt in den Service-Masken gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
 
       <div className="flex items-center justify-between">

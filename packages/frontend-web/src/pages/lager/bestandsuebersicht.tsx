@@ -9,7 +9,8 @@ import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 
 type PsmArtikel = {
   name: string
@@ -94,11 +95,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         </div>
       )}
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Inventory-to-Settlement"
-          description="Bestand, Rampen, Chargen und Versandbewegungen werden jetzt in den Lager- und Verlade-Masken gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">

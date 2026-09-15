@@ -11,7 +11,8 @@ import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertCircle, FileDown, Plus, Search } from 'lucide-react'
 import { useReklamationen, type Reklamation } from '@/lib/api/misc-modules'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 
 export default function ReklamationenPage(): JSX.Element {
@@ -159,11 +160,7 @@ export default function ReklamationenPage(): JSX.Element {
   return (
     <PageSurface data-page-surface="reklamationen" contentClassName="space-y-6">
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Complaint-to-Resolution"
-          description="Hier werden Reklamationsfall, Kundenbezug, Dokumente und Bearbeitungsstatus gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       {/* Operativer Fallkopf */}
       <Card className={`border ${fallkopf.statusColor}`}>

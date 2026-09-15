@@ -16,7 +16,8 @@ import { type WeighingTicket } from '@/lib/api/weighing-tickets'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 import { ArrowRight, CheckCircle, Clock, FileText, Link, Scale, Truck } from 'lucide-react'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -482,7 +483,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
   return (
     <div className="flex flex-col">
     <div className="p-6 space-y-6">
-      {workflowContext ? <WorkflowEntryBanner context={workflowContext} /> : null}
+      {workflowContext ? <WorkflowProcessBand context={workflowContext} /> : null}
       <OperationalCaseHeader
         title={ticket.ticket_number}
         description="Wiegeschein als operativer Brueckenvorgang zwischen Annahme, Qualitaet, Kontrakt und Abrechnung."

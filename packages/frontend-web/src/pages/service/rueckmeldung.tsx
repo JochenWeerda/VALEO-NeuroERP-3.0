@@ -21,10 +21,8 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
-import {
-  WorkflowEntryBanner,
-  readWorkflowEntryContext,
-} from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { ArrowLeft, Loader2, Send } from 'lucide-react'
 
 type RueckmeldungForm = {
@@ -125,11 +123,7 @@ export default function RueckmeldungPage(): JSX.Element {
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
       {workflowContext && (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover: Rueckmeldung"
-          description="Einsatzdaten und Ergebnis der Service-Anfrage werden hier dokumentiert."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       )}
 
       {/* Header */}

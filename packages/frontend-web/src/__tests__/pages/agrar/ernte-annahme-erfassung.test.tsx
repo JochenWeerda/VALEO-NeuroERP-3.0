@@ -86,7 +86,9 @@ describe('ErnteAnnahmeErfassungPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Workflow-Handover aus Harvest-to-Settlement')).toBeInTheDocument()
+    // FSX-013: Der Hinweiskasten ist dem Prozessband gewichen. Der Handover
+    // zeigt sich jetzt an dem, was er bewirkt — vorbefuellte Vorgangsdaten —,
+    // nicht an einem Erklaertext ueber den Prozess.
     await waitFor(() => {
       expect(screen.getByDisplayValue(/Workflow-Vorgang ERN-2026-001/)).toBeInTheDocument()
     })

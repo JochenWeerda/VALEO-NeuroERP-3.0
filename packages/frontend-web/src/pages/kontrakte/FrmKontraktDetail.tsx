@@ -39,7 +39,8 @@ import { errorMessage } from '@/lib/record-utils'
 import { useTenant } from '@/hooks/useTenant'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -501,11 +502,7 @@ export default function FrmKontraktDetail(): JSX.Element {
     <div className="flex flex-col" data-testid="legacy-kontrakt-detail">
     <div className="space-y-4 p-6">
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Contract-to-Settlement"
-          description="Kontraktstammdaten, Mengen, Preise, Staffeln und Bedingungen werden jetzt in der Kontraktmaske gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <OperationalCaseHeader
         title="Kontrakt steuern"

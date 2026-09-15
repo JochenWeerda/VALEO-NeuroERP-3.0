@@ -8,7 +8,8 @@ import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { BarChart3, Leaf, TrendingDown } from 'lucide-react'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 
 type EsgReport = {
   totalCo2eKg: number
@@ -76,11 +77,7 @@ export default function CO2BilanzPage(): JSX.Element {
   return (
     <div className="space-y-6 p-6">
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Compliance-to-Report"
-          description="CO2-, EUDR- und ESG-Daten werden jetzt in den Reporting-Cockpits konsolidiert. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div>
         <h1 className="text-3xl font-bold">CO₂-Bilanz</h1>

@@ -28,7 +28,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
 import {
@@ -1152,11 +1153,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         title="Ernte-Annahme-Erfassung"
       />
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Harvest-to-Settlement"
-          description="Wiegeschein, Qualitaet, Trocknung, Kontraktbezug und Settlement werden jetzt in der Annahme-Maske gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div className="flex items-center justify-between">
         <div>

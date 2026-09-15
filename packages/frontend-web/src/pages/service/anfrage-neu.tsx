@@ -13,10 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import {
-  WorkflowEntryBanner,
-  readWorkflowEntryContext,
-} from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { ArrowLeft, Loader2, Plus } from 'lucide-react'
 
 type AnfrageForm = {
@@ -61,11 +59,7 @@ export default function AnfrageNeuPage(): JSX.Element {
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
       {workflowContext && (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Service-to-Customer"
-          description="Neue Anfrage wird aus dem Flow-Spine-Vorgang heraus erstellt."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       )}
 
       {/* Header */}

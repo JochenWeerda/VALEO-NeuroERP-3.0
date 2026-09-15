@@ -11,6 +11,47 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-013 - Rollout abgeschlossen 2026-09-15, Claude Code
+
+**Alle 15 verbliebenen Masken sind umgestellt.** Der `WorkflowEntryBanner` wird
+nirgends mehr gerendert; er ist **geloescht**. Geblieben sind der Kontexttyp und
+`readWorkflowEntryContext` — sie beschreiben den Einstieg aus dem Leitstand und
+werden weiter von 18 Masken genutzt. Der Dateiname bleibt, damit deren Importe
+nicht ohne Grund wandern.
+
+Betroffen: Ernte-Annahme, LKW-Registrierung, Finanz-Abschluss und
+Buchungserfassung, Kontraktdetail, Bestandsuebersicht, CO2-Bilanz, Reklamationen
+(Liste und Detail), fuenf Service-Masken und das Wiegeschein-Detail.
+
+**Per Codemod mit Selbsttest, nicht von Hand.** Drei Faelle im Selbsttest
+(einzeilig, mehrzeilig mit Erklaertext, und der Fall ohne `context` — dort wird
+**nichts** angefasst). Lieber eine Maske von Hand als eine kaputte: der Codemod
+laesst eine Datei unveraendert, wenn er sein Muster nicht sicher wiedererkennt.
+
+**Was dabei verschwindet, und das ist der Punkt:** Titel und Beschreibung des
+Kastens waren Erklaertext ueber den Prozess — „Ticketdaten, Prioritaet,
+Einsatzplanung und Rueckmeldung werden jetzt in den Service-Masken gepflegt. Der
+Flow-Fall bleibt als Referenz erhalten." Das Band zeigt stattdessen Phasen,
+Stand und naechsten Schritt. **Was die Maske zeigt, muss sie nicht sagen.**
+
+**Ein Test hat den Wechsel korrekt bemerkt:** `ernte-annahme-erfassung.test.tsx`
+prueft den Bannertitel. Umgestellt auf die Wirkung — vorbefuellte Vorgangsdaten
+—, nicht auf den Erklaertext. Das war der einzige Fehlschlag von 553 Tests.
+
+**Abnahme:** Vollstaendiger Frontend-Lauf **134 Dateien / 552 Tests gruen** (1
+Skip, vorbestehend), `tsc --noEmit` ohne Ausgabe.
+
+**Damit ist der FSX-Umbau inhaltlich durch.** Was bleibt, ist kein Code:
+
+- **FSX-090b** — Nutzerbeobachtung mit echten Sachbearbeitern. Protokoll liegt,
+  Termin fehlt. Meine Expertenbegehung konnte den Rollout stoppen, nicht
+  freigeben.
+- **FSX-090a** — der Messlauf braucht eine laufende Oberflaeche.
+- **F5** — ein fehlendes Band ist nicht von „kein Prozess" unterscheidbar.
+  Bewusst offen, weil die Alternative wieder ein Platzhalter waere.
+- **Dritte Umsetzung in `lieferschein-erfassung.tsx`** — eigener Slice, eigene
+  Abnahme; sie beruehrt den Speicherpfad einer produktiven Maske.
+
 ## FSX-013-LINKER - abgeschlossen 2026-09-15, Claude Code
 
 **Die Verknuepfung ist nicht mehr bestellungsspezifisch.** `document-flow-spine.ts`

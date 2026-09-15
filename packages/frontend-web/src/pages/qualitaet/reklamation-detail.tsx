@@ -15,10 +15,8 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import {
-  WorkflowEntryBanner,
-  readWorkflowEntryContext,
-} from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -289,11 +287,7 @@ export default function ReklamationDetailPage(): JSX.Element {
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
       {workflowContext && (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Complaint-to-Resolution"
-          description="Reklamationsfall, Kundenbezug, Dokumente und Bearbeitungsstatus werden hier gepflegt."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       )}
 
       <OperationalCaseHeader

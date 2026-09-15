@@ -1,5 +1,16 @@
-import { Link2, Sparkles, Workflow } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+/**
+ * FSX-013: Die Komponente `WorkflowEntryBanner` ist entfallen.
+ *
+ * Sie war ein Hinweiskasten, der erklaerte, dass hinter der Maske ein
+ * Prozessvorgang steht — mit Titel, Absatz und vier Merkmalschips. Seit dem
+ * Rollout zeigt `WorkflowProcessBand` denselben Sachverhalt in einer Zeile:
+ * Phasen, Stand, naechster Schritt. Was die Maske zeigt, muss sie nicht sagen.
+ *
+ * Geblieben sind der Kontexttyp und der Leser der Handover-Parameter — sie
+ * beschreiben den Einstieg aus dem Leitstand und werden von 18 Masken genutzt.
+ * Der Dateiname bleibt, damit deren Importe nicht ohne Grund wandern.
+ */
+
 
 export type WorkflowEntryContext = {
   process: string
@@ -33,54 +44,4 @@ export function readWorkflowEntryContext(searchParams: URLSearchParams): Workflo
     subject,
     entryMode,
   }
-}
-
-type WorkflowEntryBannerProps = {
-  context: WorkflowEntryContext
-  title?: string
-  description?: string
-}
-
-export function WorkflowEntryBanner({
-  context,
-  title = 'Workflow-Handover aktiv',
-  description = 'Du arbeitest aus einem Flow-Spine-Vorgang heraus. Die Fachdaten werden in dieser Standardmaske gepflegt, der Prozessfall bleibt dabei referenziert.',
-}: WorkflowEntryBannerProps): JSX.Element {
-  const parts = [
-    context.caseNumber ? `Vorgang ${context.caseNumber}` : '',
-    context.entryMode || '',
-    context.partnerName || '',
-    context.subject || '',
-  ].filter(Boolean)
-
-  return (
-    <Alert className="border-indigo-400/30 bg-indigo-500/10 text-slate-100">
-      <Workflow className="h-4 w-4 text-muted-foreground" />
-      <AlertTitle className="flex items-center gap-2 text-indigo-50">
-        {title}
-        <span className="inline-flex items-center gap-1 rounded-full border border-indigo-300/20 bg-indigo-400/10 px-2 py-0.5 text-[11px] font-medium text-indigo-100">
-          <Sparkles className="h-3 w-3" />
-          Flow Spine
-        </span>
-      </AlertTitle>
-      <AlertDescription className="mt-2 space-y-2 text-slate-200">
-        <div>{description}</div>
-        {parts.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-2 text-xs text-indigo-100/90">
-            {parts.map((part) => (
-              <span key={part} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
-                {part}
-              </span>
-            ))}
-          </div>
-        ) : null}
-        {context.label ? (
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
-            Interne Referenz: {context.label}
-          </div>
-        ) : null}
-      </AlertDescription>
-    </Alert>
-  )
 }
