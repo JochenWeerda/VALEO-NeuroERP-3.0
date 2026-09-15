@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - reserviert 2026-09-15
+
+**Owner:** Codex. **Ziel:** Automatische positionsbezogene Kontrakt-/Fremdlagervorschlaege im zentralen Mask-Builder und Belegeinstieg.
+**Dateibesitz:** neuer docflow_source_proposals-Service und Tests, docflow-API, zentraler SourceProposalRenderer/SD-/RenderPlan-Vertrag, Lieferschein-/Bestelladapter, FSX-Doku/ADR.
+**Abnahme:** Mandant/Partner/Eigentuemer, Richtung, Mengen/Einheiten/Zeitraum; Teilvorschlaege, Begruendung, keine Buchung durch Vorschlaege; Tests und Dokumentation.
+
+
 ## FSX-CONTRACT-STOCK-PROPOSALS - Planung abgeschlossen 2026-09-15
 
 **Owner:** Codex. **Ziel:** Nutzeranforderung fuer automatische Kontrakt-/Fremdlagervorschlaege in den Split-/Merge-Plan aufnehmen.
