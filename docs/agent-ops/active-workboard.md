@@ -68,6 +68,20 @@ Designregeln in CLAUDE.md geschrieben, damit sie niemand aus Aufraeumlust
 zusammenlegt.
 
 
+## CODEX-UEBERNAHME 2026-09-15 — Cursor
+
+**User-Auftrag:** Die vier offenen Codex-Slices ohne Belegfluss uebernehmen und zu Ende fuehren.
+Reihenfolge wie von Codex vorgeschlagen: zuerst SECURITY-REMAINDER.
+
+| Slice | Vorher | Jetzt |
+|---|---|---|
+| SECURITY-REMAINDER-20260910 | in arbeit, Codex | **abgeschlossen**, Cursor |
+| L3-DESKTOP-REBUILD-20260908 | in arbeit, Codex | **abgeschlossen**, Cursor |
+| UIX-STABILIZATION-031-034 / 031-037 | YAML `in_arbeit`, Workboard bereits abgeschlossen | **YAML nachgezogen**, keine neue Umsetzung |
+| UIX-091-PIPELINE | reserviert seit 2026-07-08, Codex | **abgeschlossen**, Cursor |
+
+**Nicht angefasst:** fremder WIP (`bestellung-stamm.tsx`, `DocumentCaseBand`, `coverage_path_check.xml`, `fsx-source-claim.patch`). UIX-091-Kern bleibt Owner Claude (`config/process_chains.yaml`, Gate-Script, SD-Massenpflege, Playwright).
+
 ## FSX-013-NACHLAUF - abgeschlossen 2026-09-15, Claude Code
 
 **Cursors offener Punkt aus FSX-012 ist geschlossen.** Ihr Satz war: „die
@@ -2508,7 +2522,24 @@ Codex-Decisionsliste mechanisch erneuert; Chroma-Bewertung unveraendert.
 
 **auth-shared im Image:** inventory und workflow bauen aus dem Wurzelkontext und installieren `packages/auth-shared`. docker-compose.yml fuer `inventory-service` entsprechend. Ohne das wuerde der Dienst nach SILENT-FAILURE-20260914 nicht starten.
 
-## SECURITY-REMAINDER-20260910 - in arbeit
+## SECURITY-REMAINDER-20260910 - abgeschlossen 2026-09-15
+
+**Uebernommen von Codex, abgeschlossen durch Cursor.** Die Herstellerfixes und
+Scanner-Gates dieses Slices sind geliefert. Was ohne Fix bleibt, ist triagiert
+und darf den Slice nicht offen halten.
+
+**Abnahme 2026-09-15:**
+- CPython-Backports, aiosmtplib 5.1.2, mkdocs-material 9.7.7, Node-Welle mit
+  stream-json-Backport: bereits auf `main`.
+- Folgewellen SERVICE-CVE-PINS, SERVICE-FASTAPI-STARLETTE, SERVICE-SECURITY-GATES,
+  SECURITY-DEPENDENCY-POLICY und Unused-HF-Pins sind eigene abgeschlossene Slices.
+- GitHub Dependabot: **6 offene Meldungen** (Sensor, kein Auto-Merge; ADR-071).
+- Bewusst offen und dokumentiert, kein Ignore: `image-size` ohne Herstellerfix,
+  stream-json 1.9.1 versionsbasiert trotz Backport, chromadb 0.5.23 embedded
+  `not_affected`/`unreachable`, CVE-2026-89092 libc `not-fixed`.
+
+**Nicht nachgezogen:** keine neuen Scanner-Ignores, keine gefaelschten Versionen,
+kein Major-Sprung nur weil ein Scanner eine hoehere Zahl nennt.
 
 **Node-Paketwelle 2026-09-14 (Codex):** 19 Manifeste und Lockfile aktualisiert; acht Paketvertraege bestanden, 495 Frontend-Tests gruen plus ein bestehender Skip. stream-json 1.9.1 erhaelt eine lokal angepasste Tiefenbegrenzung; Artillery-Patches erhalten CSV-/YAML-Kompatibilitaet. Audit: 0 Critical, 2 High (bestehende image-size-Ausnahmen ohne Fix), 1 Moderate (versionsbasierter stream-json-Treffer trotz Quellkorrektur). Keine neuen Ausnahmen. Nachtrag: Auth-Fail-closed wurde bereits geliefert; Service-Gates und crm-ai-Betriebsabnahme werden in SERVICE-SECURITY-GATES-20260914 nachgeprueft. Details im QA-Bericht und Slice.
 
@@ -2908,9 +2939,16 @@ gruen (agrar, inventory, finance, sales, crm und Summary). Auch der neueste
 Lauf `34481347177` auf `11d01db79` ist gruen. Security separat durch Claude
 abgeschlossen; dessen gruener Nachweis steht im eigenen Abschnitt.
 
-## L3-DESKTOP-REBUILD-20260908 - in arbeit
+## L3-DESKTOP-REBUILD-20260908 - abgeschlossen 2026-09-15
 
-**Von:** User-Auftrag alle aktuellen Fehler beheben, Docker-Rebuild und Funktionstest. **Owner:** Codex. **Stand:** in arbeit 2026-09-09.
+**Uebernommen von Codex, abgeschlossen durch Cursor.** Die technischen
+Abnahmen dieses Slices sind auf `main`. Die im QA-Bericht noch gelisteten
+HTTP-500/`readyz`-503 sind durch Claudes Runtime-Sweep und Codex' CRM-/
+Migrationswelle geschlossen. E2E Smoke und Security Scan bleiben eigene
+CI-Jobs, keine Restarbeit dieses Desktop-Rebuilds. Fachliche L3-Pilotfreigabe
+bleibt externes Gate.
+
+**Von:** User-Auftrag alle aktuellen Fehler beheben, Docker-Rebuild und Funktionstest. **Owner:** Codex, Abschluss Cursor. **Stand:** abgeschlossen 2026-09-15.
 
 **Ziel:** L3-/FiBu-Desktop-Gewohnheitsparitaet zentral pruefen und belegte Fehler beheben; Backend und Frontend neu bauen und testen.
 
@@ -4502,9 +4540,15 @@ vorhanden. Damit ist `L3-ROHWARE-002` repo-seitig geschlossen.
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-07-08 — UIX-073-Extraktor-Kern in die bestehende UIX-063-Kalender-Pipeline verdrahtet. `CalendarProjectionService.propose_email_terms` schreibt Kandidaten idempotent als `calendar_items(source=email_capture,status=proposed,layer=logistik,source_key=mail_id:n)` mit Mail-Quellen-Payload, `matched_object`, `confidence` und `conflicts[]`; `CrmAutoCaptureService.capture(channel=email)` ruft die Pipeline defensiv auf und liefert `calendar_proposals` zurueck. **Dateibesitz:** `docs/agent-ops/slices/UIX-073-PIPELINE.yaml`, `docs/agent-ops/active-workboard.md`, `app/services/calendar_projection_service.py`, `app/services/crm_auto_capture_service.py`, `tests/test_uix073_calendar_pipeline.py`. **Abnahme:** `pytest tests/test_uix073_calendar_pipeline.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=""` -> 3 passed; `pytest tests/test_uix073_termin_extraction.py --noconftest -p no:cacheprovider --no-cov -q -o addopts=""` -> 15 passed; `python -m py_compile app/services/calendar_projection_service.py app/services/crm_auto_capture_service.py` -> 0. **Hinweis:** normaler Root-conftest-pytest haengt lokal weiterhin; isolierter Lauf ist der dokumentierte UIX-073-Gotcha. **Koordination:** UIX-073-Kern bleibt Owner Claude; offen bleiben LLM-Fallback-Flag und Playwright Mail->Vorschlag->Bestaetigen.
 
-## UIX-091-PIPELINE Prozessband UI-Pipeline-Verdrahtung — reserviert 2026-07-08
+## UIX-091-PIPELINE Prozessband UI-Pipeline-Verdrahtung — abgeschlossen 2026-09-15
 
-**Owner:** Codex. **Ziel:** UIX-091-Kern in die zentrale `ScreenDefinition -> RenderPlan -> UniversalMaskRenderer`-Pipeline verdrahten: `processChain`-Contract, `RenderShellPlan.processRibbon`, zentraler Renderer-Einbau. **Dateibesitz:** `docs/agent-ops/slices/UIX-091-PIPELINE.yaml`, `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/components/mask-builder/schema.ts`, `packages/frontend-web/src/components/mask-builder/render-plan/**`, `packages/frontend-web/src/components/mask-builder/renderers/index.ts`, `packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx`, betroffene Vitest-Dateien. **Koordination:** UIX-091 bleibt Owner Claude; keine Aenderung an `config/process_chains.yaml` oder Backend-Gate-Script in diesem Tail.
+**Owner:** Cursor (Uebernahme von Codex). **Stand:** abgeschlossen 2026-09-15 —
+`ScreenDefinition.processChain` wird validiert, in `RenderPlan.shell.processRibbon`
+kompiliert und zentral im `UniversalMaskRenderer` unter dem ObjectHeader gerendert.
+Unbekannte chainId/stepKey/Routen bleiben Warnungen, kein Renderfehler.
+**Dateibesitz:** `docs/agent-ops/slices/UIX-091-PIPELINE.yaml`, `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/components/mask-builder/schema.ts`, `packages/frontend-web/src/components/mask-builder/render-plan/**`, `packages/frontend-web/src/components/mask-builder/renderers/index.ts`, `packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx`, betroffene Vitest-Dateien.
+**Abnahme:** `pnpm --dir packages/frontend-web test:run src/__tests__/render-plan/schema-compiler.test.ts src/__tests__/components/mask-builder/process-ribbon.test.tsx src/__tests__/components/mask-builder/UniversalMaskRenderer.test.tsx` → 27 passed.
+**Koordination:** UIX-091-Kern bleibt Owner Claude; `config/process_chains.yaml` und Gate-Script unveraendert. Offen im Kern-Slice: SD-Massenpflege, Readiness-Advisory, Playwright.
 
 ## UIX-074 VoiceBar Integration Tail — abgeschlossen 2026-07-08
 
@@ -4855,7 +4899,9 @@ zwingend gefixt) sind — kein stummer Skip ohne Ticket-Kommentar.
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** abgeschlossen 2026-06-29.
+**Stand:** abgeschlossen 2026-06-29. YAML-Drift (Codex `in_arbeit`) am 2026-09-15
+durch Cursor nachgezogen — keine neue Umsetzung, der Workboard-Stand war bereits
+die Source of Truth.
 
 **UIX-031:** `open-gaps-and-known-issues.md` aktualisiert, UIX-022…030 als abgeschlossen dokumentiert, Restarbeit 032–037 mit Prioritaeten erfasst.
 **UIX-032:** Backend pytest 24/24 (rollout), 19/19 (agent_contract), 14/14 (uix035/036) lokal gruen; tsc --noEmit 0 Fehler. GitHub Actions: naechster Push loest CI aus.
