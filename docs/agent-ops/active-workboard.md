@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-ARTIKEL-IMPORT - reserviert 2026-09-15
+
+**Owner:** Claude Code. **Ziel:** Kanonisches XML-Zwischenformat fuer den
+Artikelstamm aus Lieferantenangeboten — fuenf getrennte Ebenen
+(Artikel → Variante → Lieferantenartikel → Gebinde → Kondition), Preisbasis mit
+Menge und Einheit, Gebinde und Logistikeinheit strikt getrennt, unklare
+Quellwerte als `sourceValue` erhalten.
+**Dateibesitz:** `docs/design/artikel-import-format.md`, Schema-Datei,
+`app/services/article_import.py`, Tests, Slice, dieser Abschnitt.
+**Abgrenzung:** **kein** Schreiben in `domain_inventory.articles` in diesem
+Slice. Erst Format, Parser und Pruefung; die Uebernahme in den Stammsatz ist ein
+eigener Schritt mit eigener Abnahme.
+**Abnahme:** Das Beispiel GENO-Saaten/WWH Hycard laeuft durch; „BKH" bekommt
+keine gedeutete Bedeutung; 49 x 25 kg = 1225 kg wird geprueft statt geglaubt;
+Preis ohne Preisbasis wird abgewiesen.
+
+
 ## FSX-MENGENMODELL - n:m-Zuordnung steht 2026-09-15, Claude Code
 
 **Der Leitfall aus dem Belegfluss-Befund ist abbildbar:** Lieferschein A mit
