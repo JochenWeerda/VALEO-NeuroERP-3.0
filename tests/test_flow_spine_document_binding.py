@@ -3,13 +3,12 @@
 Geprueft wird die Logik, nicht die Datenbank: der partielle Unique-Index kann
 ohne PostgreSQL nicht laufen. Was hier gehalten wird, ist deshalb
 (a) die Uebereinstimmung von Index-Bedingung und Anwendungslogik,
-(b) die Aufloesung einer Kollision, und
-(c) die Abgrenzung offen/abgeschlossen.
+(b) die Aufloesung einer Kollision,
+(c) ein Index statt zwei,
+(d) Leerstring-Normalisierung, sonst greift der Index am falschen Ende.
 
 Die Index-Bedingung selbst steht in
-alembic/versions/flow_spine_document_link_unique_20260915.py und wird gegen die
-Konstante im Endpunkt gehalten — weicht eines ab, greift der Index an anderer
-Stelle als der Code.
+alembic/versions/flow_spine_document_link_unique_20260915.py.
 """
 
 from __future__ import annotations
@@ -18,8 +17,13 @@ import re
 from pathlib import Path
 
 import pytest
+from fastapi import HTTPException
 
-from app.api.v1.endpoints.flow_spines import CLOSED_LIFECYCLE_STATUSES
+from app.api.v1.endpoints.flow_spines import (
+    CLOSED_LIFECYCLE_STATUSES,
+    _normalize_document_ref,
+    _require_complete_document_ref,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -35,8 +39,13 @@ def test_migration_existiert() -> None:
     assert MIGRATION.is_file(), "FSX-011-Migration fehlt"
 
 
+def test_migration_haengt_am_aktuellen_head() -> None:
+    """Eine alte down_revision erzeugt einen zweiten Alembic-Head."""
+    text = MIGRATION.read_text(encoding="utf-8")
+    assert 'down_revision = "agrar_harvest_acceptances_sammel_20260911"' in text
+
+
 def test_index_bedingung_deckt_sich_mit_der_anwendungslogik() -> None:
-    """Der Index darf nicht andere Faelle ausnehmen als der Endpunkt."""
     text = MIGRATION.read_text(encoding="utf-8")
     match = re.search(r"_CLOSED\s*=\s*\"([^\"]+)\"", text)
     assert match, "Die Migration deklariert keine _CLOSED-Liste"
@@ -51,14 +60,11 @@ def test_index_bedingung_deckt_sich_mit_der_anwendungslogik() -> None:
     )
 
 
-def test_index_ist_partiell_und_mandantengetrennt() -> None:
+def test_index_ist_partiell_mandantengetrennt_und_ohne_leerstring() -> None:
     text = MIGRATION.read_text(encoding="utf-8")
 
-    assert 'INDEX_NAME = "uq_flow_spine_open_document_link"' in text
+    assert 'INDEX_NAME = "uq_flow_spine_open_by_document"' in text
     assert "CREATE UNIQUE INDEX IF NOT EXISTS {INDEX_NAME}" in text
-    # Mandant und Prozess gehoeren in den Schluessel: sonst blockieren sich
-    # Mandanten gegenseitig, bzw. derselbe Beleg kann in zwei Prozessen keinen
-    # eigenen Vorgang mehr haben.
     key_match = re.search(
         r"CREATE UNIQUE INDEX IF NOT EXISTS \{INDEX_NAME\}[^(]*\(([^)]*)\)", text
     )
@@ -71,14 +77,19 @@ def test_index_ist_partiell_und_mandantengetrennt() -> None:
         "linked_document_id",
     ], f"Unerwarteter Schluessel: {key}"
 
-    # Faelle ohne Belegreferenz bleiben ausgenommen — sie sind manuell
-    # angelegte Vorgaenge und unterliegen der Idempotenz nicht.
-    assert "linked_document_id IS NOT NULL" in text
-    assert "linked_document_type IS NOT NULL" in text
+    assert "btrim(linked_document_id) <> ''" in text
+    assert "btrim(linked_document_type) <> ''" in text
+
+
+def test_kein_zweiter_index_ohne_process_key() -> None:
+    """FSX-010 nutzt denselben Schluessel. Ein schwacherer Lookup-Index entsteht nicht."""
+    text = MIGRATION.read_text(encoding="utf-8")
+    assert "ix_flow_spine_document_lookup" not in text
+    assert text.count("CREATE INDEX") == 0
+    assert text.count("CREATE UNIQUE INDEX") == 1
 
 
 def test_bereinigung_loescht_keine_vorgaenge() -> None:
-    """Dubletten verlieren den Belegbezug, aber kein Vorgang wird geloescht."""
     text = MIGRATION.read_text(encoding="utf-8")
     assert "UPDATE domain_ops.ops_flow_spine_instances" in text
     assert "DELETE FROM domain_ops.ops_flow_spine_instances" not in text, (
@@ -87,14 +98,7 @@ def test_bereinigung_loescht_keine_vorgaenge() -> None:
     )
 
 
-def test_lookup_index_deckt_auch_abgeschlossene_vorgaenge() -> None:
-    """FSX-010 fragt auch ueber abgeschlossene Faelle; der partielle Index reicht nicht."""
-    text = MIGRATION.read_text(encoding="utf-8")
-    assert "ix_flow_spine_document_lookup" in text
-
-
 def test_abgeschlossene_zustaende_sind_vollstaendig() -> None:
-    """completed, cancelled, failed — und 'on_hold' gehoert ausdruecklich nicht dazu."""
     assert set(CLOSED_LIFECYCLE_STATUSES) == {"completed", "cancelled", "failed"}
     assert "on_hold" not in CLOSED_LIFECYCLE_STATUSES, (
         "Ein pausierter Vorgang ist offen. Zaehlte er als abgeschlossen, "
@@ -103,7 +107,6 @@ def test_abgeschlossene_zustaende_sind_vollstaendig() -> None:
 
 
 def test_endpunkt_faengt_integrityerror_und_gibt_bestehenden_fall_zurueck() -> None:
-    """Der Wettlauf wird aufgeloest, nicht durchgereicht."""
     source = (
         Path(__file__).resolve().parents[1]
         / "app"
@@ -115,13 +118,10 @@ def test_endpunkt_faengt_integrityerror_und_gibt_bestehenden_fall_zurueck() -> N
 
     assert "except IntegrityError" in source
     assert "_find_open_instance_for_document" in source
-    # Ohne Belegreferenz gibt es nichts aufzuloesen — dann muss der Fehler
-    # sichtbar bleiben statt als Erfolg durchzugehen.
     assert "if not has_document_ref:" in source
 
 
 def test_patch_meldet_konflikt_statt_stillschweigender_umbindung() -> None:
-    """V14: Beim Aktualisieren ist die Kollision ein Konflikt, kein Idempotenzfall."""
     source = (
         Path(__file__).resolve().parents[1]
         / "app"
@@ -131,23 +131,26 @@ def test_patch_meldet_konflikt_statt_stillschweigender_umbindung() -> None:
         / "flow_spines.py"
     ).read_text(encoding="utf-8")
 
-    assert "status_code=409" in source, (
-        "Ein PATCH, der einen Beleg an einen fremden offenen Vorgang haengt, "
-        "muss einen Konflikt melden — nicht stillschweigend den anderen Fall "
-        "zurueckgeben."
-    )
+    assert "status_code=409" in source
 
 
 def test_halbe_belegangabe_wird_abgewiesen() -> None:
-    """Nur die Art oder nur die Nummer wuerde lautlos die ganze Liste liefern."""
-    source = (
-        Path(__file__).resolve().parents[1]
-        / "app"
-        / "api"
-        / "v1"
-        / "endpoints"
-        / "flow_spines.py"
-    ).read_text(encoding="utf-8")
+    with pytest.raises(HTTPException) as caught:
+        _require_complete_document_ref("PO-1", None)
+    assert caught.value.status_code == 422
+    _require_complete_document_ref(None, None)
+    _require_complete_document_ref("PO-1", "purchase_order")
 
-    assert "bool(linked_document_id) != bool(linked_document_type)" in source
-    assert "status_code=422" in source
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (None, None),
+        ("", None),
+        ("   ", None),
+        ("PO-1", "PO-1"),
+        ("  PO-1  ", "PO-1"),
+    ],
+)
+def test_leerstring_wird_zu_null(raw: str | None, expected: str | None) -> None:
+    assert _normalize_document_ref(raw) == expected

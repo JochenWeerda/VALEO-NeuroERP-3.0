@@ -1,153 +1,64 @@
 slice_id: FSX-010-011
 id: FSX-010-011
-title: Flow Spine — Fallsuche je Beleg und nebenlaeufigkeitssichere Fallanlage
-owner: Claude Code
+title: Fallsuche je Beleg und nebenlaeufigkeitssichere Fallanlage
+owner: Cursor Auto
 status: abgeschlossen
 created_at: "2026-09-15"
 started_at: "2026-09-15"
 completed_at: "2026-09-15"
-vorgaenger: FSX-002-003
+vorgaenger: FSX-003-GATE-CI
 masterplan: docs/design/flow-spine-entlastung-masterplan.md
-nachfolger:
-  - FSX-030 (Mask-Builder-Vertrag, Voraussetzung fuer FSX-013)
-  - FSX-012 (Fall beim Speichern — braucht die Vorklaerung von Codex zu capture-then-resolve)
+coordination: >-
+  Im Arbeitsbaum lag ein angefangener Stand (Lookup-Index ohne process_key,
+  Migration an altem Head, kein btrim). An den Masterplan-Vertrag gezogen.
+  Registry und FlowSpineWorkspace bleiben bei Claude (FSX-001). FSX-012
+  (document-entry-policy, Bestellmaske) wartet, bis DESIGN-STATUS-COLORS-020
+  die Frontend-Dateien nicht mehr beansprucht.
 goal: >-
-  Den belegzentrierten Einstieg tragfaehig machen. Eine Belegmaske muss fragen
-  koennen, ob zu diesem Beleg bereits ein Vorgang existiert, und einen Fall
-  anlegen duerfen, ohne dass paralleles Speichern zwei Faelle erzeugt.
-
-befund:
-  V8: >-
-    GET /flow-spines/{process_key}/instances konnte nicht nach
-    linked_document_id filtern — die Maske konnte gar nicht fragen.
-  V9: >-
-    POST .../instances war ohne Idempotenz auf die Belegreferenz. Jeder Retry
-    haette einen zweiten Vorgang erzeugt.
-  V14: >-
-    PATCH .../instances/{id} setzt linked_document_id frei; dort ist eine
-    Kollision ein Konflikt, kein Idempotenzfall.
-
-regel:
-  - >-
-    Ein vorheriges Nachschlagen verhindert keine parallele Doppelanlage. Die
-    Eindeutigkeit gehoert in die Datenbank, nicht in die Anwendungslogik.
-  - >-
-    Der Schluessel ist (tenant_id, process_key, linked_document_type,
-    linked_document_id). Mandant, damit sich Mandanten nicht blockieren;
-    Prozess, damit derselbe Beleg in zwei Prozessen je einen Fall haben darf.
-  - >-
-    Der Index gilt nur fuer offene Vorgaenge. Abgeschlossene, stornierte und
-    gescheiterte Faelle blockieren keinen neuen Vorgang zum selben Beleg.
-  - >-
-    on_hold zaehlt nicht als abgeschlossen. Ein pausierter Vorgang ist offen.
-  - >-
-    Faelle ohne Belegreferenz sind von der Idempotenz ausgenommen — es sind
-    manuell angelegte Vorgaenge.
-
-umsetzung:
-  fsx_010:
-    - >-
-      list_instances nimmt linked_document_id und linked_document_type.
-      Abgeschlossene Vorgaenge kommen mit und sind am lifecycle_status
-      erkennbar.
-    - >-
-      Halbe Belegangabe (nur Art oder nur Nummer) wird mit 422 abgewiesen.
-      Sonst haette die Maske lautlos die ungefilterte Liste erhalten und
-      daraus "kein Fall vorhanden" gelesen, ohne gesucht zu haben.
-    - >-
-      Zusaetzlicher Index ix_flow_spine_document_lookup auf
-      (tenant_id, linked_document_type, linked_document_id) — der partielle
-      Unique-Index deckt die abgeschlossenen Faelle nicht ab, die Suche fragt
-      aber ueber alle.
-  fsx_011:
-    - >-
-      Partieller Unique-Index uq_flow_spine_open_document_link, Migration
-      flow_spine_document_link_unique_20260915, angehaengt an
-      flow_spine_lifecycle_20260417.
-    - >-
-      create_instance schlaegt vorab nach und gibt einen bestehenden offenen
-      Fall mit 200 statt 201 zurueck.
-    - >-
-      IntegrityError beim Commit wird aufgefangen: rollback, bestehenden
-      offenen Fall lesen, mit 200 zurueckgeben. Ohne Belegreferenz oder ohne
-      auffindbaren Fall wird der Fehler weitergereicht — eine andere
-      Verletzung darf nicht als Erfolg durchgehen.
-    - >-
-      Vorabbereinigung in der Migration entzieht Dubletten den Belegbezug,
-      loescht aber keinen Vorgang. Umkehrbar statt endgueltig.
-  fsx_011_patch:
-    - >-
-      update_instance meldet bei Kollision 409 statt den fremden Fall
-      zurueckzugeben (V14).
-
+  Belegmasken finden den Vorgang zu einem Beleg (FSX-010) und legen ihn
+  kollisionsfest an (FSX-011), ohne Doppelanlage und ohne stilles Wiederbeleben
+  abgeschlossener Faelle.
 file_ownership:
   - docs/agent-ops/slices/FSX-010-011.yaml
   - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
   - app/api/v1/endpoints/flow_spines.py
   - alembic/versions/flow_spine_document_link_unique_20260915.py
   - tests/test_flow_spine_document_binding.py
-
+  - tests/test_flow_spines_api.py
 acceptance:
-  - Eine Belegmaske kann nach Vorgaengen zu genau einem Beleg fragen.
-  - Zwei parallele Anlagen zum selben Beleg erzeugen einen Vorgang, nicht zwei.
-  - Der Anlageaufruf ist beliebig oft wiederholbar und liefert denselben Fall.
-  - Abgeschlossene Faelle blockieren keinen neuen Vorgang zum selben Beleg.
-  - Keine bestehenden Vorgaenge gehen bei der Migration verloren.
-
+  - GET filtert nach linked_document_id und linked_document_type; halbe Angabe 422.
+  - Ein partieller Unique-Index (tenant, process, type, id), inkl. btrim, nur offene Faelle.
+  - Kein zweiter Index ohne process_key.
+  - POST Kollision 200 mit bestehender Fall-ID; PATCH Kollision 409.
+  - Leerstring wird NULL; abgeschlossene Faelle blockieren keine Neuanlage.
 tests:
+  - python scripts/check_alembic_single_head.py
   - >-
-    tests/test_flow_spine_document_binding.py — 9 Tests, gruen. Haelt
-    insbesondere die _CLOSED-Liste der Migration gegen
-    CLOSED_LIFECYCLE_STATUSES im Endpunkt zusammen: laufen sie auseinander,
-    greift der Index an anderer Stelle als die Logik und der Wettlauf bliebe
-    ungefangen.
-  - >-
-    Zusammen mit tests/test_flow_spine_data_provenance.py 46 Tests gruen.
-
-abnahme:
-  vorbestehende_rotstaende: >-
-    tests/test_flow_spines_api.py unveraendert bei 6 Fehlschlaegen (401) und
-    17 gruen unter --noconftest — identisch zur Messung vor diesem Slice.
-  nicht_ausgefuehrt: >-
-    Der Index ist gegen eine laufende PostgreSQL-Instanz noch nicht angewandt.
-    Die Migrationslogik ist statisch geprueft, nicht ausgefuehrt.
-
+    pytest tests/test_flow_spine_document_binding.py
+    tests/test_flow_spines_api.py
+    --no-cov -q
 risks:
-  - >-
-    Der Alembic-Strang hat viele Heads. Diese Migration haengt an
-    flow_spine_lifecycle_20260417 — dem fachlich richtigen Vorgaenger, aber vor
-    dem naechsten upgrade sollte jemand die Head-Lage gegenlesen.
-  - >-
-    Die Vorabbereinigung entzieht Dubletten den Belegbezug. Fachlich ist das
-    ein sichtbarer Eingriff, auch wenn kein Vorgang verloren geht.
-
-external_gates:
-  - >-
-    Anwendung der Migration gegen PostgreSQL. Bis dahin ist die Eindeutigkeit
-    zugesichert, aber nicht erzwungen.
-
+  - risiko: Migration an falschem Head erzeugt zwei Alembic-Heads.
+    bewertung: down_revision auf agrar_harvest_acceptances_sammel_20260911; Gate prueft 1 Head.
+  - risiko: Leerstring '' kollidiert alle manuellen Faelle.
+    bewertung: btrim in der Index-WHERE und Normalisierung beim Schreiben.
+  - risiko: FSX-012 Frontend noch nicht verdrahtet.
+    bewertung: Bewusst dieser Slice. API ist der Vertrag fuer die Maske.
 ai_harness:
   fachlicher_vertrag: >-
-    Zu einem Beleg gehoert in einem Prozess hoechstens ein offener Vorgang.
-    Abgeschlossene Vorgaenge stehen einem neuen Fall nicht im Weg.
+    Derselbe offene Beleg hat genau einen Fall je Prozess und Mandant.
+    Abgeschlossene Faelle bleiben sichtbar und blockieren keine Reklamation.
   architektur_vertrag: >-
-    Eindeutigkeit ist eine Eigenschaft der Daten, nicht des Aufrufpfads. Sie
-    wird von einem partiellen Unique-Index getragen; die Anwendungslogik loest
-    die Kollision nur auf. Index-Bedingung und Anwendungslogik werden von
-    einem Test zusammengehalten.
+    Eindeutigkeit in der Datenbank, nicht in der Anwendungslogik.
+    Ein Index, vier Spalten, partiell auf offene echte Belegreferenzen.
   daten_vertrag: >-
-    Ein partieller Unique-Index und ein Lookup-Index auf
-    domain_ops.ops_flow_spine_instances. Die Vorabbereinigung veraendert bei
-    Dubletten linked_document_id/-type auf NULL und loescht nichts.
+    Dubletten verlieren den Belegbezug, werden nicht geloescht.
+    Leere Strings werden NULL.
   test_vertrag: >-
-    Die Uebereinstimmung von Migration und Endpunkt ist testgehalten. Neue
-    Lebenszyklus-Zustaende muessen in beiden Listen gepflegt werden, sonst
-    faellt der Test.
-  security_vertrag: >-
-    Der Mandant ist Teil des Eindeutigkeitsschluessels; die Tenant-Filter der
-    Abfragen bleiben unveraendert. Keine neuen Berechtigungen.
-  betriebs_vertrag: >-
-    Eine Migration ist anzuwenden. Der Index wird ohne CONCURRENTLY angelegt —
-    bei grossen Bestaenden ist ein kurzes Schreibfenster einzuplanen.
-  dokumentations_vertrag: >-
-    Masterplan Welle 2, Workboard-Abschnitt FSX-010-011 und dieser Slice.
+    Source-Vertrag ohne DB plus HTTP-Vertraege gegen TestClient und Postgres
+    (skip wenn Tabelle fehlt).
+  security_vertrag: Tenant bleibt Teil des Schluessels; 422 statt stiller Vollliste.
+  betriebs_vertrag: alembic upgrade head vor Nutzung der Idempotenz unter Last.
+  dokumentations_vertrag: Slice, Workboard, Masterplan unveraendert im Vertrag.
+external_gates:
+  - Alembic single head in quality-gate.

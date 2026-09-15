@@ -56,6 +56,27 @@ router = APIRouter(prefix="/process/flow-spines", tags=["process", "flow-spines"
 # haelt beide Listen zusammen.
 CLOSED_LIFECYCLE_STATUSES: tuple[str, ...] = ("completed", "cancelled", "failed")
 LIFECYCLE_STATUSES = {"draft", "in_progress", "on_hold", "completed", "cancelled", "failed"}
+
+
+def _normalize_document_ref(value: str | None) -> str | None:
+    """Leerstring und Whitespace sind keine Belegreferenz — sonst greift der Unique-Index am falschen Ende."""
+    if value is None:
+        return None
+    stripped = value.strip()
+    return stripped or None
+
+
+def _require_complete_document_ref(doc_id: str | None, doc_type: str | None) -> None:
+    if bool(doc_id) != bool(doc_type):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "linked_document_id und linked_document_type sind nur gemeinsam "
+                "gueltig — eine Belegreferenz besteht aus Art und Nummer."
+            ),
+        )
+
+
 REASON_CATEGORIES = {
     "customer",
     "supplier",
@@ -428,14 +449,17 @@ async def create_instance(
         raise HTTPException(status_code=404, detail=f"Unknown flow spine process '{process_key}'") from exc
 
     tenant_id_early = get_current_tenant_id()
-    has_document_ref = bool(body.linked_document_id and body.linked_document_type)
+    linked_document_id = _normalize_document_ref(body.linked_document_id)
+    linked_document_type = _normalize_document_ref(body.linked_document_type)
+    _require_complete_document_ref(linked_document_id, linked_document_type)
+    has_document_ref = bool(linked_document_id and linked_document_type)
     if has_document_ref:
         existing = _find_open_instance_for_document(
             db,
             tenant_id_early,
             process_key,
-            str(body.linked_document_type),
-            str(body.linked_document_id),
+            linked_document_type,
+            linked_document_id,
         )
         if existing is not None:
             response.status_code = 200
@@ -460,8 +484,8 @@ async def create_instance(
         customer_name=persisted_partner_name,
         subject=body.subject,
         entry_mode=body.entry_mode,
-        linked_document_id=body.linked_document_id,
-        linked_document_type=body.linked_document_type,
+        linked_document_id=linked_document_id,
+        linked_document_type=linked_document_type,
         lifecycle_status="draft",
         node_statuses={},
         resume_payload={},
@@ -477,7 +501,7 @@ async def create_instance(
         payload={
             "case_number": case_number,
             "entry_mode": body.entry_mode,
-            "linked_document_type": body.linked_document_type,
+            "linked_document_type": linked_document_type,
         },
     )
 
@@ -490,7 +514,7 @@ async def create_instance(
             case_number=case_number,
             label=label,
             entry_mode=body.entry_mode,
-            linked_document_type=body.linked_document_type,
+            linked_document_type=linked_document_type,
         )
         await OutboxPublisher(db, get_event_publisher()).store_event(event, tenant_id)
     except Exception:
@@ -510,8 +534,8 @@ async def create_instance(
             db,
             tenant_id_early,
             process_key,
-            str(body.linked_document_type),
-            str(body.linked_document_id),
+            linked_document_type,
+            linked_document_id,
         )
         if existing is None:
             # Der Index hat ausgeloest, aber es findet sich kein offener Fall.
@@ -554,16 +578,9 @@ def list_instances(
     """
     tenant_id = get_current_tenant_id()
 
-    # Halbe Belegangaben wuerden lautlos die ganze Liste zurueckgeben — und die
-    # Maske haette "kein Fall vorhanden" gelesen, wo sie gar nicht gesucht hat.
-    if bool(linked_document_id) != bool(linked_document_type):
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                "linked_document_id und linked_document_type sind nur gemeinsam "
-                "gueltig — eine Belegreferenz besteht aus Art und Nummer."
-            ),
-        )
+    linked_document_id = _normalize_document_ref(linked_document_id)
+    linked_document_type = _normalize_document_ref(linked_document_type)
+    _require_complete_document_ref(linked_document_id, linked_document_type)
 
     base_q = (
         db.query(FlowSpineInstance)
@@ -634,9 +651,10 @@ def update_instance(
     if body.entry_mode is not None:
         inst.entry_mode = body.entry_mode
     if body.linked_document_id is not None:
-        inst.linked_document_id = body.linked_document_id
+        inst.linked_document_id = _normalize_document_ref(body.linked_document_id)
     if body.linked_document_type is not None:
-        inst.linked_document_type = body.linked_document_type
+        inst.linked_document_type = _normalize_document_ref(body.linked_document_type)
+    _require_complete_document_ref(inst.linked_document_id, inst.linked_document_type)
     if body.business_status is not None:
         inst.business_status = body.business_status
     if body.assigned_owner is not None:
