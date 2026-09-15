@@ -11,6 +11,42 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-090 - Werkzeug gebaut, Messung offen 2026-09-15
+
+**Owner:** Claude Code. **Dokument:** `docs/design/flow-spine-nachweis-090.md`.
+
+**090a technische Interaktionsmessung:** Helfer
+(`tests/e2e/helpers/flow-spine-task-metrics.ts`) und Spec
+(`tests/e2e/fsx-090a-direktbestellung.spec.ts`) sind gebaut und typgeprueft.
+Gemessen werden Maskenwechsel, Klicks, Eingaben und Netzwerkrunden.
+
+**Was der Helfer ausdruecklich nicht erhebt: die Bedienzeit.** Playwright tippt
+ohne Zoegern, sucht nichts und liest nichts. Eine „Dauer" aus diesem Lauf waere
+die Zahl, die am ehesten falsch zitiert wuerde — deshalb gibt es sie gar nicht
+erst. Und es stehen bewusst **keine Schwellwerte** im Spec: eine Zahl, gegen die
+niemand etwas haelt, waere eine erfundene Norm.
+
+**Der Vergleich alt gegen neu ist absichtlich nicht automatisiert.** Der Stand
+vor FSX liegt in der Historie (`cb7a38f99`); der Vergleich laeuft ueber zwei
+Laeufe in zwei Worktrees, per Umgebungsvariable beschriftet. Ein automatisierter
+Zweibaum-Vergleich waere ein Bauwerk, das bei jeder Toolchain-Aenderung bricht —
+fuer eine Messung, die zweimal stattfindet.
+
+**Ehrlich zum Stand: der Spec ist noch nicht gelaufen.** Er braucht einen
+laufenden Stack (Frontend, Backend, Datenbank). **Solange keine Protokollzeile
+vorliegt, gibt es zu 090a nichts zu berichten** — gebaut ist nicht gemessen.
+
+**090b Nutzerbeobachtung:** Protokoll liegt vor — drei Aufgaben, sieben
+Erhebungsfelder je Teilnehmer, mindestens fuenf Personen je Rolle (Innendienst,
+Waage, Buchhaltung). Mit verbindlichem **Abbruchkriterium**: Wird eine Sperre
+oder Teilmenge in der neuen Fassung seltener verstanden als in der alten, wird
+der betroffene Rollout zurueckgestellt — **auch bei besseren 090a-Zahlen**.
+
+**Das ist ein externes Gate.** Es braucht echte Nutzer und einen Termin; von
+hier aus ist es nicht zu schliessen. Damit haengt der FSX-013-Rollout auf die
+restlichen 17 Masken an einer Entscheidung des Users, nicht an Code.
+
+
 ## FSX-013 - Pilot umgesetzt 2026-09-15, Rollout offen
 
 **Owner:** Claude Code. **Slice:** `docs/agent-ops/slices/FSX-013.yaml`.
