@@ -11,6 +11,51 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-ARTIKEL-IMPORT - Format und Parser stehen 2026-09-15, Claude Code
+
+**Vorlage:** das Angebot GENO-Saaten / WWH Hycard. Es laeuft vollstaendig durch
+— zwei Preise, zwei Frachtkonditionen, drei Gebinderegeln, zwei Paletten, zwei
+Palettengebuehren, Zahlungs- und Lieferbedingungen.
+
+**Die fuenf Ebenen sind getrennt, und der Test dazu ist der wichtigste der
+Datei:** Der Artikel traegt **weder Gebinde noch Fracht noch Preis**. „25 kg"
+ist keine Eigenschaft der Sorte — dieselbe Sorte kann morgen als 500-kg-BigBag
+kommen. `franko` ist keine Eigenschaft des Artikels, sondern eine
+Beschaffungskondition. Die **Beizung** dagegen haengt am Artikel: Sie beschreibt
+die Ware, nicht die Bezugsquelle.
+
+**Drei Regeln, dieselbe Haltung wie im Mengenmodell:**
+
+1. **Kein Preis ohne Preisbasis.** 64,00 EUR allein ist keine Angabe, sondern
+   eine Zahl — Saatgut kommt in €/kg, €/dt, €/EH und €/Gebinde. Fehlt Menge oder
+   Einheit, wird **abgewiesen**. Ebenso ein Zu-/Abschlag ohne `perUnit`:
+   −1,00 je dt ist etwas anderes als −1,00 je Gebinde.
+2. **„BKH" bekommt keine erfundene Bedeutung.** Es bleibt `sourceValue` und
+   `nicht_eindeutig_erkannt`. Es als „ab Werk" zu deuten waere eine Behauptung,
+   die danach im Stammsatz staende, ohne dass sie je jemand geprueft haette.
+   Auch **verstandene** Werte behalten ihren Quellwert — wer die Zuordnung
+   anzweifelt, soll nachlesen koennen.
+3. **49 x 25 kg = 1225 kg wird nachgerechnet, nicht geglaubt.** Geht es nicht
+   auf, gibt es einen Hinweis, der die vorhandenen Gebinde nennt — ein
+   Tippfehler soll auffallen, bevor daraus Lagerbestand wird.
+
+**Abbruch und Hinweis sind bewusst verschieden:** Ein fehlender Preisbezug ist
+ein Abbruch, damit kann man nicht rechnen. Eine unverstandene Frachtangabe ist
+keiner — der Rest des Angebots bleibt brauchbar, jemand muss nur hinsehen.
+
+**Abnahme:** 25 Tests gruen, alle gegen die echte Vorlage.
+
+**Ausdruecklich nicht in diesem Slice:** das Schreiben in
+`domain_inventory.articles`. Zwischen „gelesen" und „uebernommen" gehoert eine
+Entscheidung — das ist derselbe Grund, aus dem es das Zwischenformat ueberhaupt
+gibt.
+
+**Offen und benannt:** die Bedeutung von „BKH" (gehoert vom Lieferanten
+geklaert, nicht vom Import geraten); die Artikelvariante als eigene Ebene (im
+Modell vorgesehen, vom Beispiel nicht gebraucht); und die Bruecke von den
+Gebinderegeln zu `agrar_units.ArtikelEinheiten` — dort wuerde aus „Sack 25 kg"
+ein Gebindefaktor, und der Import speiste direkt das Mengenmodell.
+
 ## FSX-ARTIKEL-IMPORT - reserviert 2026-09-15
 
 **Owner:** Claude Code. **Ziel:** Kanonisches XML-Zwischenformat fuer den
