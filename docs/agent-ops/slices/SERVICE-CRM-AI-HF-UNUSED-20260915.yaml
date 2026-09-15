@@ -1,0 +1,51 @@
+slice_id: SERVICE-CRM-AI-HF-UNUSED-20260915
+id: SERVICE-CRM-AI-HF-UNUSED-20260915
+title: Ungenutzte Hugging-Face-Pins in services/crm-ai entfernen
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-15"
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+goal: >-
+  Derselbe Unused-Check wie in services/ai: transformers 5.10.0 wird in
+  crm-ai nicht importiert und gehoert nicht ins Manifest.
+coordination: >-
+  Fortsetzung von SERVICE-REMAINDER-GAPS-20260914 und ADR-071. Codex behaelt
+  den Policy-Gate. spacy bleibt vorerst, weil SERVICE-CVE-PINS das als
+  fachliche Entscheidung markiert hat.
+file_ownership:
+  - docs/agent-ops/slices/SERVICE-CRM-AI-HF-UNUSED-20260915.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - services/crm-ai/requirements.txt
+  - tests/test_ai_service_no_huggingface_contract.py
+acceptance:
+  - services/crm-ai/requirements.txt enthaelt weder transformers noch torch.
+  - Kein Python-Modul unter services/crm-ai importiert transformers oder torch.
+  - Vertragstest und pip-audit fuer das Manifest bestehen bzw. bleiben ohne
+    neue Hugging-Face-Befunde.
+tests:
+  - python -m pytest tests/test_ai_service_no_huggingface_contract.py --no-cov
+  - python scripts/check_service_import_pins.py services/crm-ai
+  - python scripts/audit_service_dependencies.py --manifest services/crm-ai/requirements.txt
+risks:
+  - risiko: >-
+      Settings enthalten HF-Modellnamen (SENTIMENT_MODEL, INTENT_MODEL) ohne
+      Ladepfad. Ein spaeterer Import wuerde die Entfernung ungueltig machen.
+    bewertung: Vertragstest blockt den Import. Dann erst wieder pinnen.
+  - risiko: spacy, sklearn, xgboost, lightgbm bleiben ungenutzt im Image.
+    bewertung: >-
+      Bewusst nicht dieser Slice. SERVICE-CVE-PINS hat spacy als geplante
+      Funktion dokumentiert.
+ai_harness:
+  fachlicher_vertrag: Keine Aenderung der simulierten HTTP-Antworten.
+  architektur_vertrag: Kein neuer ML-Laufzeitpfad.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Statischer Import-/Pin-Vertrag plus Manifest-Audit.
+  security_vertrag: ADR-071, keine Ignore-Eintraege, kein Major-Bump.
+  betriebs_vertrag: Image muss neu gebaut werden, damit torch/transformers fehlen.
+  dokumentations_vertrag: Slice, Workboard, security-dependency-status.
+external_gates:
+  - GitHub-CI nach Push; crm-ai Image-Job prueft Start/HTTP weiter.
+verification:
+  - rg "transformers==|torch==" services/crm-ai/requirements.txt
+  - rg "import torch|import transformers|from transformers|from torch" services/crm-ai

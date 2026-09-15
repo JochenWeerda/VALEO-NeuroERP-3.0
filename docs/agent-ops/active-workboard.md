@@ -1064,6 +1064,10 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 **Lieferstand:** CI-Gate fuer alle 23 Manifeste implementiert, neun Audit-Runner-Tests gruen; sieben HTTP-Tests ueber alle zehn crm-ai-Endpunkte gruen (vorher fuenf Teilfehler). Echte frische PostgreSQL-Migration mit fuenf Tabellen, Upgrade-Wiederholung, Nicht-Root-Start und Health 200 im isolierten Vorab-Testimage bestanden; Migrationsfehler verhindert Start. Vollstaendiger Dockerfile-Build und beide crm-ai-Pruefer auf GitHub gruen (Run 34892743626, Job 104139171772, Commit 9997e1598). Gesamtaudit inklusive korrigierter Finance-Aufloesung: 23 erfasst, 16 ohne Befund, sieben mit echten Befunden; crm-ai ohne Befund. Keine Manifest-Pins fremder aktiver Slices geaendert. Details: [QA-Nachweis](../quality-assurance/service-security-gates-2026-09-14.md).
 **Abschluss:** Service-Gates und technische crm-ai-Abnahme geliefert und gepusht (9997e1598, Finance-Korrektur 5b4736867). Sieben Dienste mit Dependency-Befunden bleiben in den aktiven Manifest-Slices offen; kein gruener Gesamtaudit und keine produktive ML-Freigabe behauptet.
 
+## SERVICE-CRM-AI-HF-UNUSED-20260915 - abgeschlossen
+
+**Owner:** Cursor Auto. `transformers==5.10.0` und `torch==2.13.0` entfernt: kein Import unter `services/crm-ai`, HTTP bleibt Simulation. Settings-Strings `SENTIMENT_MODEL`/`INTENT_MODEL` ohne Ladepfad. Vertragstest parametrisiert fuer ai und crm-ai. Linux-Audit: Scanner-Exit 0, Gate-Exit 0, 91 Pakete, weder transformers noch torch. spacy bleibt (fachliche Entscheidung aus SERVICE-CVE-PINS).
+
 ## SERVICE-REMAINDER-GAPS-20260914 - abgeschlossen
 
 **Owner:** Cursor Auto. Schliesst die sieben vom Gate gemeldeten Befunde und die in SERVICE-FASTAPI-STARLETTE bewusst ausgeklammerten Pin-Luecken.

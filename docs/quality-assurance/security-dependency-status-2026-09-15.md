@@ -165,8 +165,16 @@ Slice `SECURITY-DEPENDENCY-POLICY-20260915` ist **abgeschlossen**. Nachweis:
 - `release-gates.yml` verlangt denselben Gate für die Release-SHA.
 - 18 Regressionen grün (9 Policy + 9 Audit-Runner).
 
-Nächster fachlicher Schritt ist nicht 4.57.6. Optional: gleicher Unused-Check
-für `services/crm-ai` (`transformers==5.10.0`, kein Import im Dienstcode).
+Nächster fachlicher Schritt ist nicht 4.57.6.
+
+### crm-ai transformers 5.10.0 / torch 2.13.0 — entfernt
+
+Pfadanalyse 2026-09-15: kein Import unter `services/crm-ai`. Die zehn HTTP-Endpunkte
+bleiben Simulation. `SENTIMENT_MODEL` und `INTENT_MODEL` sind nur Settings-Strings
+ohne Ladepfad. Beide Pins entfernt. Linux-Audit
+`artifacts/service-security-crm-ai-hf-20260915/crm-ai/`: Scanner-Exit 0,
+Gate-Exit 0, 91 Pakete, keine transformers/torch. spacy bleibt vorerst
+(SERVICE-CVE-PINS: geplante Funktion).
 
 ## Technische Restpunkte außerhalb der Policy
 

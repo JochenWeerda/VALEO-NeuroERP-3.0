@@ -92,6 +92,9 @@ Aufloesungsgraph (122 Pakete). Der Fingerprint von
 `services/ai/requirements.txt` in `dependency-decisions.json` wurde mechanisch
 erneuert; die Chroma-Bewertung selbst ist unveraendert.
 
+`services/crm-ai`: `transformers==5.10.0` und `torch==2.13.0` ebenfalls ohne
+Import entfernt. Linux-Audit Scanner-Exit 0, Gate-Exit 0, 91 Pakete.
+
 ## Einbindung und Nachweise
 
 `service-security.yml` ist auch als Workflow wiederverwendbar und prueft die
