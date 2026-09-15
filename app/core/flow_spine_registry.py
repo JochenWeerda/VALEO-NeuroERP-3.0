@@ -10,6 +10,55 @@ def _now() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
 
 
+# ── FSX-003: Drei Feldzustaende ───────────────────────────────────────────────
+#
+# 1. Statisch und zulaessig  — Prozessdefinition (Phasenbezeichnung, Knotenlabel,
+#    Reihenfolge, Icon, Beschreibung, Zielrouten). Kommt aus dem Registry, bleibt
+#    dort und braucht keine Kennzeichnung.
+# 2. Operativ und vorhanden  — instanzbezogen, mit benannter Quelle (FSX-001).
+# 3. Operativ und nicht ermittelbar — sichtbar als fehlend, niemals durch einen
+#    Registry-Vorgabewert ersetzt.
+#
+# Verboten ist allein Fall 3, der wie Fall 2 aussieht. Deshalb werden die
+# operativen Felder im Instanzpfad geleert, solange keine Quelle sie speist.
+
+#: Felder eines Knotens, die einen operativen Wert des konkreten Vorgangs tragen.
+OPERATIONAL_NODE_FIELDS: tuple[str, ...] = (
+    "metric",
+    "submetric",
+    "timestamp",
+    "detail_rows",
+    "kpis",
+    "documents",
+    "agent",
+)
+
+#: Felder eines Knotens, die zur Prozessdefinition gehoeren und statisch bleiben.
+DEFINITION_NODE_FIELDS: tuple[str, ...] = (
+    "id",
+    "label",
+    "status",
+    "icon",
+    "insight",
+    "actions",
+)
+
+#: Leerwert je operativem Feld — kein Vorgabewert, sondern die Abwesenheit selbst.
+_OPERATIONAL_EMPTY: dict[str, Any] = {
+    "metric": None,
+    "submetric": None,
+    "timestamp": None,
+    "detail_rows": [],
+    "kpis": [],
+    "documents": [],
+    "agent": None,
+}
+
+#: Inhaltsmodus des Workspace.
+CONTENT_MODE_CATALOG = "catalog"  # ohne Instanz: Registry-Beispielinhalt, gekennzeichnet
+CONTENT_MODE_INSTANCE = "instance"  # mit Instanz: nur belegte Werte oder "nicht ermittelt"
+
+
 GERMAN_TRANSLATIONS: dict[str, str] = {
     "Order-to-Cash": "Auftrag bis Zahlung",
     "Procure-to-Pay": "Bedarf bis Zahlung",
@@ -182,6 +231,8 @@ def _node(
         "label": label,
         "status": status,
         "icon": icon,
+        # FSX-003: im Katalogfall sind die operativen Felder Beispielinhalt.
+        "data_state": "example",
         "metric": metric,
         "submetric": submetric,
         "timestamp": _now(),
@@ -225,6 +276,9 @@ def _workspace(
         "schema_version": 1,
         "manifest_kind": "FLOW_SPINE_WORKSPACE",
         "generated_at": _now(),
+        # FSX-003: ohne Instanz zeigt der Workspace Beispielinhalt aus dem
+        # Registry. Das wird ausgewiesen, nicht verschwiegen.
+        "content_mode": CONTENT_MODE_CATALOG,
         "process_key": process_key,
         "title": title,
         "subtitle": subtitle,
@@ -562,10 +616,21 @@ def merge_instance_statuses(workspace: dict, instance: dict) -> dict:
     Returns the modified workspace (already a deep copy from get_flow_spine_workspace).
     """
     node_statuses: dict[str, str] = instance.get("node_statuses") or {}
+    workspace["content_mode"] = CONTENT_MODE_INSTANCE
     for node in workspace.get("nodes", []):
         node_id = node.get("id")
         if node_id and node_id in node_statuses:
             node["status"] = node_statuses[node_id]
+
+        # FSX-003 Fall 3: Im Instanzpfad gibt es fuer die operativen Felder noch
+        # keine Quelle (FSX-001 liefert sie nach). Bis dahin werden die
+        # Registry-Vorgaben geleert statt als Werte dieses Vorgangs ausgegeben.
+        # Die Definitionsfelder (Label, Icon, Reihenfolge, Beschreibung,
+        # Zielrouten) bleiben unangetastet.
+        for field in OPERATIONAL_NODE_FIELDS:
+            if field in node:
+                node[field] = copy.deepcopy(_OPERATIONAL_EMPTY[field])
+        node["data_state"] = "not_determined"
 
     if instance.get("label"):
         workspace["instance_label"] = instance["label"]

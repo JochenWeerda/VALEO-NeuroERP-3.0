@@ -14,25 +14,36 @@ export interface FlowSpineAction {
   api_path: string
 }
 
+/**
+ * FSX-003 — Herkunft der operativen Knotenfelder.
+ * `example`        Beispielinhalt aus dem Prozessregister (nur ohne Instanz).
+ * `instance`       instanzbezogener Wert mit benannter Quelle (FSX-001).
+ * `not_determined` operativ, aber (noch) nicht ermittelbar — bleibt sichtbar leer.
+ */
+export type FlowSpineDataState = 'example' | 'instance' | 'not_determined'
+
 export interface FlowSpineNode {
+  // Prozessdefinition — statisch, zulaessig aus dem Register (FSX-003 Fall 1)
   id: string
   label: string
   status: FlowSpineTone
   icon: string
-  metric: string
-  submetric: string
-  timestamp: string
   insight: string
+  actions: FlowSpineAction[]
+  // Operative Felder — instanzbezogen oder sichtbar leer (FSX-003 Fall 2/3)
+  data_state?: FlowSpineDataState
+  metric: string | null
+  submetric: string | null
+  timestamp: string | null
   detail_rows: Array<{ label: string; value: string }>
   kpis: Array<{ label: string; value: string }>
   documents: Array<{ label: string; href: string }>
-  actions: FlowSpineAction[]
   agent: {
     headline: string
     message: string
     reasons: string[]
     actions: string[]
-  }
+  } | null
 }
 
 export interface CustomerData {
@@ -55,6 +66,8 @@ export interface FlowSpineWorkspace {
   schema_version: number
   manifest_kind: string
   generated_at: string
+  /** FSX-003: `catalog` zeigt Beispielinhalt, `instance` nur belegte Werte. */
+  content_mode?: 'catalog' | 'instance'
   process_key: string
   title: string
   subtitle: string

@@ -12,6 +12,7 @@ import {
   Database,
   FileText,
   History,
+  Info,
   Landmark,
   Package,
   PauseCircle,
@@ -444,6 +445,48 @@ const REASON_CATEGORY_OPTIONS = [
   { value: 'technical', label: 'Technik' },
   { value: 'internal', label: 'Intern' },
 ]
+
+/**
+ * FSX-003 Fall 3 — ein operatives Feld ohne ermittelbaren Wert.
+ *
+ * Bewusst sichtbar und benannt: ein leerer Bereich liest sich wie ein Ladefehler,
+ * ein Vorgabewert aus dem Prozessregister waere eine Falschaussage. „Nicht
+ * ermittelt“ ist die einzige ehrliche dritte Moeglichkeit.
+ */
+function EmptyOperationalField({
+  label,
+  className,
+}: {
+  label: string
+  className?: string
+}): JSX.Element {
+  return (
+    <div className={cn('rounded-xl border border-dashed border-white/12 px-3 py-2.5', className)}>
+      <div className="text-xs text-slate-500">
+        {label}: <span className="text-slate-400">nicht ermittelt</span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * FSX-003 Fall 1/2-Abgrenzung — Hinweis, dass der Workspace ohne konkreten Vorgang
+ * Beispielinhalte aus dem Prozessregister zeigt. Ohne diesen Hinweis liest sich der
+ * Katalogfall wie ein echter Vorgang.
+ */
+function CatalogContentNotice(): JSX.Element {
+  return (
+    <div className="mb-4 flex items-start gap-3 rounded-2xl border border-dashed border-amber-400/25 bg-amber-500/5 px-4 py-3">
+      <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+      <div className="text-sm text-slate-300">
+        <span className="font-medium text-slate-100">Beispielinhalt</span> — es ist kein
+        Vorgang geladen. Kennzahlen, Zeitpunkte, Dokumente und Agentenhinweise stammen aus
+        der Prozessbeschreibung und gehoeren zu keinem konkreten Fall. Waehle links einen
+        Vorgang, um die tatsaechlichen Werte zu sehen.
+      </div>
+    </div>
+  )
+}
 
 function formatDateTime(value?: string | null): string {
   if (!value) return '—'
@@ -1036,6 +1079,8 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </div>
             </div>
 
+            {workspace.content_mode === 'catalog' ? <CatalogContentNotice /> : null}
+
             {workspace.customer_data && (
               <div className="mb-4 flex items-center gap-4 rounded-2xl border border-indigo-400/20 bg-indigo-500/8 px-5 py-3">
                 <Building2 className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -1181,8 +1226,10 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                           <Icon className="h-6 w-6" />
                         </div>
                         <div className="mt-3 text-sm font-semibold text-slate-100">{node.label}</div>
-                        <div className="text-xs text-slate-500">{node.metric}</div>
-                        <div className="text-[11px] text-slate-400">{node.submetric}</div>
+                        {/* FSX-003: metric/submetric sind operativ. Fehlen sie, bleibt die
+                            Zeile leer statt einen Registry-Vorgabewert zu zeigen. */}
+                        {node.metric ? <div className="text-xs text-slate-500">{node.metric}</div> : null}
+                        {node.submetric ? <div className="text-[11px] text-slate-400">{node.submetric}</div> : null}
                       </button>
                     )
                   })}
@@ -1191,47 +1238,55 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
 
               <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
                 <div className="grid gap-5">
-                  <div className="grid gap-5 xl:grid-cols-[1.2fr_280px]">
-                    <Card className="border-white/10 bg-slate-950/50 text-slate-100">
-                      <CardHeader className="flex flex-row items-start justify-between gap-4">
-                        <div>
-                          <CardTitle className="text-xl">Status Details: {selectedNode.label}</CardTitle>
-                          <p className="mt-1 text-sm text-slate-400">{selectedNode.insight}</p>
-                        </div>
-                        <Badge className={cn('border px-2.5 py-1 text-xs', toneClasses(selectedNode.status))}>{selectedNode.status.toUpperCase()}</Badge>
-                      </CardHeader>
-                      <CardContent className="grid gap-4 md:grid-cols-2">
-                        {selectedNode.detail_rows.map((row) => (
+                  {/*
+                    FSX-002: Der "KPI Health Score" ist ersatzlos entfallen. Er zeigte einen
+                    Fallback von 92 % und eine fest verdrahtete Balkenbreite von ebenfalls
+                    92 % — eine Zahl ohne Quelle, die in jedem Vorgang gleich aussah. Eine
+                    Kennzahl kehrt erst zurueck, wenn sie an eine benannte Quelle gebunden
+                    ist (FSX-001). Mit ihr entfaellt auch die zweite Rasterspalte.
+                  */}
+                  <Card className="border-white/10 bg-slate-950/50 text-slate-100">
+                    <CardHeader className="flex flex-row items-start justify-between gap-4">
+                      <div>
+                        <CardTitle className="text-xl">Status Details: {selectedNode.label}</CardTitle>
+                        <p className="mt-1 text-sm text-slate-400">{selectedNode.insight}</p>
+                      </div>
+                      <Badge className={cn('border px-2.5 py-1 text-xs', toneClasses(selectedNode.status))}>{selectedNode.status.toUpperCase()}</Badge>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 md:grid-cols-2">
+                      {selectedNode.detail_rows.length > 0 ? (
+                        selectedNode.detail_rows.map((row) => (
                           <div key={row.label} className="space-y-1">
                             <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{row.label}</div>
                             <div className="text-sm font-medium text-slate-100">{row.value}</div>
                           </div>
-                        ))}
-                      </CardContent>
-                    </Card>
-
-                    <Card className="border-white/10 bg-white/6 text-slate-100">
-                      <CardHeader>
-                        <CardTitle className="text-sm uppercase tracking-[0.2em] text-slate-400">KPI Health Score</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="mb-3 text-5xl font-bold text-white">{selectedNode.kpis[0]?.value ?? '92%'}</div>
-                        <div className="mb-4 h-2 rounded-full bg-white/10">
-                          <div className="h-2 rounded-full bg-indigo-400" style={{ width: '92%' }} />
-                        </div>
-                        <div className="text-sm text-slate-400">Prozesseffizienz liegt sichtbar ueber dem Quartalsdurchschnitt.</div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                        ))
+                      ) : (
+                        <EmptyOperationalField label="Statusdetails" className="md:col-span-2" />
+                      )}
+                    </CardContent>
+                  </Card>
 
                   <div className="grid gap-4 lg:grid-cols-4">
                     <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">KPIs</CardTitle></CardHeader>
-                      <CardContent className="space-y-2 text-sm">{selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-slate-400">{kpi.label}</span><span>{kpi.value}</span></div>)}</CardContent>
+                      <CardContent className="space-y-2 text-sm">
+                        {selectedNode.kpis.length > 0 ? (
+                          selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-slate-400">{kpi.label}</span><span>{kpi.value}</span></div>)
+                        ) : (
+                          <EmptyOperationalField label="Kennzahlen" />
+                        )}
+                      </CardContent>
                     </Card>
                     <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Dokumente</CardTitle></CardHeader>
-                      <CardContent className="space-y-2 text-sm">{selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</button>)}</CardContent>
+                      <CardContent className="space-y-2 text-sm">
+                        {selectedNode.documents.length > 0 ? (
+                          selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</button>)
+                        ) : (
+                          <EmptyOperationalField label="Belege zum Vorgang" />
+                        )}
+                      </CardContent>
                     </Card>
                     <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
@@ -1253,9 +1308,15 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     <Card className="border-indigo-400/20 bg-indigo-500/10 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Agent</CardTitle></CardHeader>
                       <CardContent className="space-y-3 text-sm">
-                        <div className="font-semibold text-white">{selectedNode.agent.headline}</div>
-                        <p className="text-slate-300">{selectedNode.agent.message}</p>
-                        <ul className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <li key={reason}>- {reason}</li>)}</ul>
+                        {selectedNode.agent ? (
+                          <>
+                            <div className="font-semibold text-white">{selectedNode.agent.headline}</div>
+                            <p className="text-slate-300">{selectedNode.agent.message}</p>
+                            <ul className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <li key={reason}>- {reason}</li>)}</ul>
+                          </>
+                        ) : (
+                          <EmptyOperationalField label="Agentenbewertung" />
+                        )}
                       </CardContent>
                     </Card>
                   </div>
@@ -1335,6 +1396,9 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 <TabsTrigger value="kpis">KPIs</TabsTrigger>
               </TabsList>
               <TabsContent value="agent" className="mt-4 space-y-4">
+                {!selectedNode.agent ? (
+                  <EmptyOperationalField label="Agentenbewertung" />
+                ) : (
                 <Card className="border-white/10 bg-white/3 text-slate-100">
                   <CardHeader><CardTitle className="text-base">{selectedNode.agent.headline}</CardTitle></CardHeader>
                   <CardContent className="space-y-3 text-sm">
@@ -1356,6 +1420,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     </div>
                   </CardContent>
                 </Card>
+                )}
               </TabsContent>
               <TabsContent value="actions" className="mt-4 space-y-3">
                 {selectedNode.actions.map((action) => (
@@ -1409,6 +1474,9 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 )}
               </TabsContent>
               <TabsContent value="docs" className="mt-4 space-y-3">
+                {selectedNode.documents.length === 0 && workspace.right_panel.resources.length === 0 ? (
+                  <EmptyOperationalField label="Belege zum Vorgang" />
+                ) : null}
                 {selectedNode.documents.concat(workspace.right_panel.resources).map((doc) => (
                   <button
                     key={`${doc.label}-${doc.href}`}

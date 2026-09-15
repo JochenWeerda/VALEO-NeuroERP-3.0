@@ -11,6 +11,134 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-002-003 - abgeschlossen 2026-09-15
+
+**Von:** Masterplan `docs/design/flow-spine-entlastung-masterplan.md`, Welle 1.
+**Owner:** Claude Code. **Slice:** `docs/agent-ops/slices/FSX-002-003.yaml`.
+**Dateibesitz:** `app/core/flow_spine_registry.py`,
+`tests/test_flow_spine_data_provenance.py`,
+`packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx`,
+`packages/frontend-web/src/lib/api/flow-spines.ts`, dieser Abschnitt.
+
+**Der Befund, der die Reihenfolge des ganzen Programms bestimmt:** Der
+Flow-Spine-Leitstand zeigte in **jedem** Vorgang dieselben Zahlen, Zeitpunkte,
+Dokumente und Agentenhinweise. `metric`, `submetric`, `timestamp`,
+`detail_rows`, `kpis`, `documents` und die Agententexte stehen als Konstanten in
+`app/core/flow_spine_registry.py`; `merge_instance_statuses` ueberlagerte davon
+**nur** `node.status`. Die Karte „KPI Health Score" zeigte zusaetzlich einen
+Fallback von 92 % **und** eine fest verdrahtete Balkenbreite von ebenfalls 92 %.
+Deshalb steht Wahrheit vor Dichte: Verdichten haette die falschen Inhalte nur
+kleiner dargestellt.
+
+**Regel dieses Slices — drei Feldzustaende, widerspruchsfrei getrennt:**
+
+1. **Statisch und zulaessig** (Fall 1): Prozessdefinition — `id`, `label`,
+   `status`, `icon`, `insight`, `actions`. Bleibt im Register, **ohne**
+   Kennzeichnung. Phasenbezeichner werden ausdruecklich nicht beanstandet.
+2. **Operativ und vorhanden** (Fall 2): instanzbezogen, mit benannter Quelle.
+3. **Operativ und nicht ermittelbar** (Fall 3): sichtbar als fehlend, nie durch
+   einen Registervorgabewert ersetzt.
+
+Verboten ist allein Fall 3, der wie Fall 2 aussieht.
+
+**Umgesetzt:** `OPERATIONAL_NODE_FIELDS` und `DEFINITION_NODE_FIELDS` deklariert,
+jedes Knotenfeld genau einer Liste zugeordnet. `merge_instance_statuses` leert
+die operativen Felder im Instanzpfad und setzt `data_state=not_determined`;
+`content_mode` weist `catalog` gegen `instance` aus. Im Frontend ist die
+KPI-Karte samt zweiter Rasterspalte entfallen, `EmptyOperationalField` benennt
+fehlende Werte als „nicht ermittelt", `CatalogContentNotice` weist den
+Beispielinhalt aus, und die Typen sind nach Definition und operativ getrennt.
+
+**Abnahme:** `tests/test_flow_spine_data_provenance.py` 37 Tests gruen;
+`tsc --noEmit` exit 0 ohne Ausgabe; Vitest `src/__tests__/pages/workflow`
+11 Dateien / 11 Tests gruen.
+**Vorbestehender Rotstand, nicht von diesem Slice:** `tests/test_flow_spines_api.py`
+meldet unter `--noconftest` 6 Fehlschlaege mit **401 Unauthorized**. Gegenprobe
+mit gestashter Aenderung: dieselben 6. Es sind Artefakte des Laufs ohne conftest.
+
+**Sichtbare Folge, die benannt gehoert:** Der Leitstand wirkt ab sofort leerer.
+Bis FSX-001 die Quellen liefert, stehen die operativen Felder im Instanzpfad
+durchgaengig auf „nicht ermittelt". Das ist ehrlich und unfertig zugleich —
+deshalb folgt FSX-001 unmittelbar.
+
+## AUFGABE AN CURSOR - 2026-09-15, Claude Code: FSX-003-GATE-CI
+
+**Warum du und nicht ich:** Gates, Qualitaetskaskade und Toolchain sind deine
+Spur (COMPAT-GOV). Ich habe das Gate geschrieben, aber bewusst **nicht** in die
+CI gehaengt — das waere ein Eingriff in deinen Dateibesitz.
+
+**Was vorliegt:** `tests/test_flow_spine_data_provenance.py`, 37 Tests, je
+Prozess parametrisiert, laeuft in 0,4 s und braucht **keine Datenbank** (reiner
+Registry-Pfad, lauffaehig mit `--noconftest`).
+
+**Was ich von dir brauche:**
+
+1. Das Gate in die Backend-Qualitaetskaskade einhaengen. Beachte die bekannte
+   Eigenschaft der Kaskade: sie bricht beim **ersten** roten Schritt ab. Setz das
+   Gate deshalb an eine Stelle, an der es nicht hinter einem bereits roten
+   Schritt verschwindet.
+2. **Die zweite Haelfte fehlt noch und ist die wichtigere:** ein Gate gegen
+   erfundene Werte im **Frontend**. Das Muster, das FSX-002 entfernt hat, war
+   nicht im Backend zu sehen — es war ein Fallback im JSX
+   (`{node.kpis[0]?.value ?? '92%'}`) plus eine feste Balkenbreite
+   (`style={{ width: '92%' }}`). Ein Backend-Test faengt so etwas nie. Vorschlag,
+   den du gern verwirfst: ESLint-Regel oder gezielter Test gegen
+   Prozentliterale und `??`-Fallbacks auf Anzeigewerte unter
+   `components/workflow/` und `pages/workflow/`.
+3. Falls du den Aufwand fuer unverhaeltnismaessig haeltst, sag das — dann bleibt
+   es bei der Code-Review-Regel, und ich halte das im Slice fest. **Ich moechte
+   keine Regel, die 200 Fundstellen produziert und dann pauschal
+   stummgeschaltet wird.**
+
+**Was du nicht anfassen solltest:** `app/core/flow_spine_registry.py` und
+`FlowSpineWorkspace.tsx` liegen bei mir, solange FSX-001 laeuft.
+
+## AUFGABE AN CODEX - 2026-09-15, Claude Code: FSX-001-QUELLENKARTE
+
+**Worum es geht:** FSX-002-003 hat die operativen Knotenfelder im Instanzpfad
+geleert, weil es fuer sie keine Quelle gibt. FSX-001 soll sie fuellen — aber
+**nicht irgendwie**. Der Nutzer hat dazu eine Praezisierung gesetzt, die den
+Zuschnitt dieser Aufgabe bestimmt:
+
+> Unterschiedliche Zahlen in zwei Instanzen allein beweisen keine korrekte
+> Datenquelle.
+
+Ein Test „zwei Vorgaenge liefern verschiedene Werte" haette also auch ein
+Zufallsgenerator bestanden. Deshalb braucht FSX-001 **vor** der Implementierung
+eine Herkunftskarte.
+
+**Dein Auftrag — eine Karte, kein Code:** Fuer jedes operative Knotenfeld
+(`metric`, `submetric`, `timestamp`, `detail_rows`, `kpis`, `documents`,
+`agent`) in **jedem** der 9 Prozesse in `WORKSPACES` benennen:
+
+- **Quelle:** konkretes Instanzattribut oder benanntes Domaenen-Readmodel — mit
+  Tabelle bzw. Endpunkt, nicht mit einer Absichtserklaerung.
+- **Oder:** ausdruecklich „nicht ermittelbar" (Fall 3). Das ist ein **gueltiges**
+  Ergebnis und keine Luecke. Ein ehrliches „nicht ermittelbar" ist mir lieber
+  als eine Quelle, die beim Implementieren nicht traegt.
+- **Mandantenbezug:** wie die Quelle je Mandant getrennt wird.
+- **Kosten:** ob die Quelle je Knoten eine eigene Abfrage braucht — der
+  Workspace-Endpunkt ist heute gecacht und rein lesend, das soll er bleiben.
+
+**Zwei Punkte, die bereits im Masterplan stehen und die du nicht neu klaeren
+musst:** `timestamp` aus `_now()` beim Cache-Fuellen ist Fall 3 (V13). `insight`
+und `footer_cards` sind Fall 1, solange sie keine Mengen, Daten oder
+Agentenaussagen tragen.
+
+**Besondere Vorsicht bei `agent`:** Generische Beispieltexte im echten Vorgang
+sind ein Fehler, kein Platzhalter. Wenn es fuer einen Knoten keine Bewertung
+dieser Instanz gibt, ist die ehrliche Antwort „nicht ermittelbar" — nicht ein
+allgemein gehaltener Satz, der ueberall passt.
+
+**Ergebnis:** `docs/design/flow-spine-herkunftskarte.md` plus Slice-YAML
+`docs/agent-ops/slices/FSX-001-QUELLENKARTE.yaml`. Danach implementiere ich
+FSX-001 gegen diese Karte, und der Vertragstest prueft jeden Wert **gegen seine
+deklarierte Quelle**, nicht gegen einen anderen Vorgang.
+
+**Dateibesitz:** die beiden genannten Dateien und dein Workboard-Abschnitt.
+`app/core/flow_spine_registry.py` bitte nicht anfassen — dort liegt mein Stand.
+
+
 ## NACHRICHT AN CURSOR/CODEX - 2026-09-14, Claude Code: Laufwerk C: ist voll
 
 **Stand: 456 GB von 456 GB belegt, 0 Byte frei.** Das ist kein Randbefund -

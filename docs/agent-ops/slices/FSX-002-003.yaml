@@ -1,0 +1,154 @@
+slice_id: FSX-002-003
+id: FSX-002-003
+title: Flow Spine — erfundene Kennzahlen entfernen, fehlende Daten als fehlend zeigen
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+nachfolger:
+  - FSX-001 (Instanzbezug der Knotendaten — braucht die Herkunftskarte aus FSX-001-QUELLENKARTE)
+  - FSX-003-GATE-CI (Gate in die Qualitaetskaskade haengen — Cursor)
+goal: >-
+  Der Flow-Spine-Leitstand zeigte in jedem Vorgang dieselben Zahlen, Zeitpunkte,
+  Dokumente und Agentenhinweise, weil diese Werte im Prozessregister fest
+  hinterlegt sind und die Instanz nur den Knotenstatus ueberlagert hat. Dieser
+  Slice trennt Prozessdefinition von operativem Wert und macht fehlende Daten
+  als fehlend sichtbar, statt sie durch Registervorgaben zu ersetzen.
+
+befund:
+  gemessen_am: "2026-09-15"
+  V5: >-
+    metric, submetric, timestamp, detail_rows, kpis, documents und die
+    Agententexte stehen als Konstanten in app/core/flow_spine_registry.py.
+  V6: >-
+    merge_instance_statuses ueberlagerte ausschliesslich node.status sowie
+    instance_label, instance_id, case_number und Kundendaten.
+  V7: >-
+    Die Karte "KPI Health Score" zeigte den Fallback 92 % und eine fest
+    verdrahtete Balkenbreite von ebenfalls 92 % — eine Zahl ohne Quelle.
+  V13: >-
+    timestamp entsteht aus _now() beim Fuellen des Caches. Es sieht aus wie eine
+    Vorgangszeit, ist aber der Zeitpunkt des ersten Cache-Fuellens. Zuordnung:
+    Fall 3.
+
+regel:
+  - >-
+    Fall 1 — statisch und zulaessig: Prozessdefinition (id, label, status, icon,
+    insight, actions). Kommt aus dem Register, bleibt dort, braucht keine
+    Kennzeichnung. Phasenbezeichner werden ausdruecklich nicht beanstandet.
+  - >-
+    Fall 2 — operativ und vorhanden: instanzbezogen, mit benannter Quelle.
+    Liefert FSX-001 nach.
+  - >-
+    Fall 3 — operativ und nicht ermittelbar: sichtbar als fehlend ("nicht
+    ermittelt"), niemals durch einen Registervorgabewert ersetzt.
+  - >-
+    Verboten ist allein Fall 3, der wie Fall 2 aussieht.
+
+umsetzung:
+  backend:
+    - >-
+      OPERATIONAL_NODE_FIELDS und DEFINITION_NODE_FIELDS in
+      app/core/flow_spine_registry.py deklariert — jedes Knotenfeld ist genau
+      einer der beiden Listen zugeordnet, ein Test haelt das vollstaendig.
+    - >-
+      merge_instance_statuses leert die operativen Felder im Instanzpfad
+      (None bzw. leere Liste) und setzt node.data_state = "not_determined".
+      Die Statusueberlagerung bleibt unveraendert funktionsfaehig.
+    - >-
+      content_mode am Workspace: "catalog" ohne Instanz, "instance" mit Instanz.
+      Knoten im Katalogfall tragen data_state = "example".
+  frontend:
+    - >-
+      FSX-002: Die Karte "KPI Health Score" ist ersatzlos entfernt, samt
+      Fallback und fest verdrahteter Balkenbreite. Mit ihr entfaellt die zweite
+      Rasterspalte; die Statusdetails nehmen die volle Breite.
+    - >-
+      EmptyOperationalField: benannter Leerzustand ("nicht ermittelt") fuer
+      Statusdetails, Kennzahlen, Belege und Agentenbewertung. Ein leerer Bereich
+      laese sich wie ein Ladefehler lesen, ein Vorgabewert waere eine
+      Falschaussage.
+    - >-
+      CatalogContentNotice: Hinweis, dass ohne geladenen Vorgang Beispielinhalt
+      aus der Prozessbeschreibung gezeigt wird.
+    - >-
+      Typen in lib/api/flow-spines.ts nach Definition und operativ getrennt;
+      operative Felder sind nullable, agent ist nullable.
+    - >-
+      metric und submetric in der Knotenleiste entfallen still, wenn leer.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-002-003.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - app/core/flow_spine_registry.py
+  - tests/test_flow_spine_data_provenance.py
+  - packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx
+  - packages/frontend-web/src/lib/api/flow-spines.ts
+
+acceptance:
+  - Keine Kennzahl ohne Quelle mehr in der Maske; die 92 % sind ersatzlos entfallen.
+  - Im Instanzpfad erscheint kein operativer Registerwert.
+  - Phasenbezeichnungen, Labels, Icons, Beschreibungen und Zielrouten bleiben statisch.
+  - Fehlende operative Werte sind als "nicht ermittelt" erkennbar, nicht als Leerflaeche.
+  - Der Katalogfall ist als Beispielinhalt ausgewiesen.
+
+tests:
+  - >-
+    tests/test_flow_spine_data_provenance.py — 37 Tests, gruen. Prueft je
+    Prozess: kein operativer Registerwert im Instanzpfad, Definitionsfelder
+    unveraendert, Statusueberlagerung intakt, content_mode und data_state
+    korrekt, Feldlisten ueberschneidungsfrei und vollstaendig.
+  - "npx tsc --noEmit — exit 0, keine Ausgabe."
+  - "vitest src/__tests__/pages/workflow — 11 Dateien, 11 Tests, gruen."
+
+abnahme:
+  vorbestehende_rotstaende: >-
+    tests/test_flow_spines_api.py meldet unter --noconftest 6 Fehlschlaege mit
+    401 Unauthorized. Gegenprobe mit gestashter Aenderung: dieselben 6
+    Fehlschlaege. Es sind Artefakte des Laufs ohne conftest (fehlende
+    Auth-Ueberschreibung), nicht Folge dieses Slices.
+
+risks:
+  - >-
+    Der Leitstand wirkt ab sofort leerer, weil die gefaelligen Beispielzahlen
+    im echten Vorgang verschwunden sind. Das ist der Zweck des Slices und keine
+    Regression — aber es ist eine sichtbare Aenderung und gegenueber Nutzern zu
+    benennen.
+  - >-
+    Bis FSX-001 die Quellen liefert, stehen die operativen Felder im
+    Instanzpfad durchgaengig auf "nicht ermittelt". Ehrlich, aber unfertig;
+    deshalb folgt FSX-001 unmittelbar.
+
+external_gates:
+  - >-
+    Keine. Der Slice beruehrt weder Berechtigungen noch Migrationen noch
+    Fremdsysteme.
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Prozessleitstand darf nur behaupten, was er weiss. Eine Kennzahl ohne
+    Quelle ist schaedlicher als eine fehlende Kennzahl, weil sie Entscheidungen
+    traegt, die sie nicht tragen kann. Fehlende Daten bleiben sichtbar fehlend.
+  architektur_vertrag: >-
+    Das Prozessregister beschreibt den Prozess, nicht den Vorgang. Jedes
+    Knotenfeld ist entweder Definition (statisch, aus dem Register) oder
+    operativ (instanzbezogen oder leer). Ein drittes gibt es nicht, und ein
+    Test haelt die Einteilung vollstaendig.
+  daten_vertrag: >-
+    Keine Migration, keine Datenmutation. merge_instance_statuses arbeitet
+    weiterhin auf einer Kopie; der Workspace-Cache bleibt unberuehrt.
+  test_vertrag: >-
+    Das Gate in tests/test_flow_spine_data_provenance.py laeuft je Prozess
+    parametrisiert und muss gruen sein, bevor ein neues Knotenfeld eingefuehrt
+    wird — unklassifizierte Felder lassen den Test fehlschlagen.
+  security_vertrag: >-
+    Keine Endpunkte, Berechtigungen oder Abhaengigkeiten beruehrt. Die
+    Mandantenpruefung im Workspace-Endpunkt bleibt unveraendert.
+  betriebs_vertrag: >-
+    Rein lesender Pfad, kein Betriebsschritt, kein Rollout-Fenster noetig.
+  dokumentations_vertrag: >-
+    Der Masterplan docs/design/flow-spine-entlastung-masterplan.md fuehrt
+    Befund, Regel und Reihenfolge; dieser Slice haelt die Umsetzung und die
+    vorbestehenden Rotstaende fest.
