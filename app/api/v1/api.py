@@ -552,6 +552,15 @@ api_router.include_router(
     tags=["docflow"]
 )
 
+# FSX-MENGENMODELL: positionsbezogene Mengenzuordnung (K5).
+from app.api.v1.endpoints import document_allocations  # noqa: E402
+
+api_router.include_router(
+    document_allocations.router,
+    prefix="/docflow",
+    tags=["docflow", "allocations"]
+)
+
 api_router.include_router(
     leads.router,
     prefix="/crm/leads",
