@@ -69,7 +69,63 @@ def test_readiness_warns_when_beleg_mask_has_no_chain():
     assert any("missing_process_chain" in warning for warning in report["warnings"])
 
 
-def test_readiness_passes_when_process_chain_present():
+def test_order_confirmation_joins_einkauf_chain():
+    sd = get_screen_definition("einkauf/auftragsbestaetigung")
+    assert sd is not None
+    assert sd["processChain"] == {"chainId": "k3_einkauf", "stepKey": "bestaetigung"}
+
+
+def test_supplier_gets_explicit_non_document_reason():
+    sd = get_screen_definition("einkauf/supplier")
+    assert sd is not None
+    assert "processChain" not in sd
+    assert sd["noProcessChainReason"] == "Stammdatenmaske ohne Belegkette"
+    report = _check_readiness(sd)
+    gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
+    assert gate["passed"] is True
+
+
+def test_all_document_domain_screens_have_chain_or_reason():
+    from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
+
+    unclassified: list[str] = []
+    for screen_id in SCREEN_DEFINITION_BUILDERS:
+        sd = get_screen_definition(screen_id)
+        if sd is None or not needs_process_chain(sd):
+            continue
+        has_chain = bool((sd.get("processChain") or {}).get("chainId"))
+        has_reason = bool(str(sd.get("noProcessChainReason") or "").strip())
+        if not has_chain and not has_reason:
+            unclassified.append(screen_id)
+    assert unclassified == []
+
+
+def test_readiness_accepts_no_process_chain_reason():
+    screen = {
+        "schemaVersion": 1,
+        "id": "finance/debitor",
+        "domain": "finance",
+        "mode": "detail",
+        "title": "Debitor",
+        "adapter": {"type": "native", "temporary": False},
+        "noWorkflowReason": "Stammdaten",
+        "noProcessChainReason": "Stammdatenmaske ohne Belegkette",
+        "layout": {
+            "floorplan": "objectPage",
+            "density": "compact",
+            "contextRail": "combined",
+            "tableProfile": "financial",
+        },
+        "dataSources": [{"key": "entity", "endpoint": "/api/v1/finance/debitoren/{entity_id}"}],
+        "agentContract": {
+            "businessPurpose": "Debitorenstamm",
+            "testSelectors": {"screenRoot": '[data-testid="screen-finance/debitor"]'},
+        },
+    }
+    report = _check_readiness(screen)
+    assert report["generatorReady"] is True
+    gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
+    assert gate["passed"] is True
     sd = get_screen_definition("sales/delivery-note")
     assert sd is not None
     report = _check_readiness(sd)

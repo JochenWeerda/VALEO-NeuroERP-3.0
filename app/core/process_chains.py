@@ -17,6 +17,20 @@ _CONFIG = _REPO_ROOT / "config" / "process_chains.yaml"
 PROCESS_CHAIN_DOMAINS = frozenset({"sales", "einkauf", "finance", "agrar"})
 PROCESS_CHAIN_MODES = frozenset({"detail", "transaction"})
 
+# Keine Belegketten: Stammdaten und Fuetterung. Begruendung analog noWorkflowReason.
+NON_DOCUMENT_REASONS: dict[str, str] = {
+    "einkauf/supplier": "Stammdatenmaske ohne Belegkette",
+    "finance/debitor": "Stammdatenmaske ohne Belegkette",
+    "finance/kreditor": "Stammdatenmaske ohne Belegkette",
+    "finance/bankkonto": "Stammdatenmaske ohne Belegkette",
+    "agrar/duenger": "Stammdatenmaske ohne Belegkette",
+    "agrar/saatgut": "Stammdatenmaske ohne Belegkette",
+    "agrar/feeding-business": "Fuetterungsprozess, nicht Ernte-Belegkette",
+    "agrar/feeding-group": "Fuetterungsprozess, nicht Ernte-Belegkette",
+    "agrar/feeding-plan": "Fuetterungsprozess, nicht Ernte-Belegkette",
+    "agrar/ration": "Fuetterungsprozess, nicht Ernte-Belegkette",
+}
+
 RouteResolver = Callable[[str], str | None]
 
 
@@ -69,6 +83,11 @@ def needs_process_chain(definition: dict[str, Any]) -> bool:
 def attach_process_chain(definition: dict[str, Any], resolve_route: RouteResolver) -> None:
     """Additives Anreichern — vorhandene processChain-Felder bleiben stehen."""
     definition["processChains"] = build_catalog(resolve_route)
-    hit = membership_for(str(definition.get("id") or ""))
+    screen_id = str(definition.get("id") or "")
+    hit = membership_for(screen_id)
     if hit:
         definition.setdefault("processChain", hit)
+        return
+    reason = NON_DOCUMENT_REASONS.get(screen_id)
+    if reason:
+        definition.setdefault("noProcessChainReason", reason)

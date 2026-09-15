@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-091-ROLLOUT - abgeschlossen 2026-09-15
+
+**Owner:** Cursor. **Stand:** abgeschlossen — alle 22 sales/einkauf/finance/agrar
+detail/transaction-SDs sind klassifiziert. Auftragsbestaetigung haengt in
+`k3_einkauf`. Stammdaten und Fuetterung tragen `noProcessChainReason`.
+Die Anhebung `missing_process_chain` von Warnung auf Error ist bewusst nicht
+hier: Spec verlangt einen eigenen Commit nach Voll-Rollout (`UIX-091-GATE`).
+**Abnahme:** Inventur-Test 0 unklassifiziert; `check_process_chains.py` Exit 0.
+
 ## UIX-091-CONTRACT - abgeschlossen 2026-09-15
 
 **Owner:** Cursor. **Stand:** abgeschlossen — `get_screen_definition` liefert

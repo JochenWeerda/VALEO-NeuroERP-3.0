@@ -37,8 +37,9 @@ progress: >-
   + Compiler-Einbindung in RenderShellPlan + zentraler Renderer.
   CONTRACT-Tail 2026-09-15 (Cursor): Katalog+Mitgliedschaft in get_screen_definition,
   Readiness-Advisory missing_process_chain, Quality-Gate-Step, Playwright zwei Ketten.
-  OFFEN im Kern: SD-Massenpflege ueber die YAML-Mitglieder hinaus, Warnung auf Error
-  nach Voll-Rollout.
+  ROLLOUT-Tail 2026-09-15 (Cursor): 22/22 Domain-SDs klassifiziert (Kette oder
+  noProcessChainReason); Auftragsbestaetigung in k3. OFFEN: UIX-091-GATE —
+  Anhebung der Warnung auf Error in einem eigenen Commit.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

@@ -291,15 +291,17 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
       "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles or tables"))
 
     # 16. missing_process_chain (UIX-091) — Belegmasken ohne Kette bleiben
-    # sichtbar unvollstaendig; nach Voll-Rollout wird die Warnung auf Error gehoben.
+    # sichtbar unvollstaendig. Warnung bleibt advisory, bis UIX-091-GATE die
+    # Anhebung auf Error in einem eigenen Commit macht (Spec: nach Voll-Rollout).
     from app.core.process_chains import needs_process_chain
 
     needs_pc = needs_process_chain(definition)
     has_pc = bool((definition.get("processChain") or {}).get("chainId"))
+    has_reason = bool(str(definition.get("noProcessChainReason") or "").strip())
     a(
         "missing_process_chain",
-        not needs_pc or has_pc,
-        "OK" if has_pc else (
+        not needs_pc or has_pc or has_reason,
+        "OK" if has_pc or has_reason else (
             "gate skipped" if not needs_pc else "detail/transaction document screen missing processChain"
         ),
     )

@@ -23,6 +23,7 @@ chains:
       - { key: anfrage,     label: "Anfrage",     screenId: "einkauf/anfrage" }
       - { key: angebot,     label: "Angebot",     screenId: "einkauf/angebot" }
       - { key: bestellung,  label: "Bestellung",  screenId: "einkauf/purchase-order" }
+      - { key: bestaetigung, label: "Auftragsbestaetigung", screenId: "einkauf/auftragsbestaetigung" }
       - { key: avis,        label: "Avis",        screenId: "einkauf/anlieferavis" }
       - { key: rechnung,    label: "Rechnung",    screenId: "finance/ap-invoice" }
       - { key: zahlung,     label: "Zahlung",     screenId: "finance/payment-run" }

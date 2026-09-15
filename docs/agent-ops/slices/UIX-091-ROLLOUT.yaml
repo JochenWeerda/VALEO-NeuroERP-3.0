@@ -1,0 +1,44 @@
+slice_id: UIX-091-ROLLOUT
+title: Belegketten-Vollabdeckung der bestehenden ScreenDefinitions
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-09-15
+closed_at: 2026-09-15
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Tail nach UIX-091-CONTRACT. Claude bleibt Owner von UIX-091-Kern.
+  process_chains.yaml wird nur um den fehlenden Belegschritt
+  Auftragsbestaetigung ergaenzt. Stammdaten und Fuetterung bekommen
+  noProcessChainReason statt einer erfundenen Kette.
+goal: >-
+  Jede sales/einkauf/finance/agrar-Maske in detail/transaction hat processChain
+  oder eine explizite noProcessChainReason. Die Anhebung der Warnung auf Error
+  bleibt der separate Slice UIX-091-GATE.
+file_ownership:
+  - docs/agent-ops/slices/UIX-091-ROLLOUT.yaml
+  - docs/agent-ops/active-workboard.md
+  - config/process_chains.yaml
+  - app/core/process_chains.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - tests/test_uix091_process_chain_contract.py
+  - tests/test_uix091_process_chains.py
+acceptance:
+  - Inventur: 0 unklassifizierte Beleg-Domain-SDs.
+  - einkauf/auftragsbestaetigung steht in k3_einkauf.
+  - Stammdaten und Fuetterung tragen noProcessChainReason.
+  - missing_process_chain bleibt advisory; Elevation ist UIX-091-GATE.
+tests:
+  - pytest tests/test_uix091_process_chain_contract.py tests/test_uix091_process_chains.py tests/test_agent_mask_contract.py --noconftest -p no:cacheprovider --no-cov
+  - python scripts/check_process_chains.py
+risks:
+  - Neue agrar/einkauf/finance/sales-Detailmasken ohne Kette oder Reason fallen advisory auf.
+ai_harness:
+  fachlicher_vertrag: Belege zeigen die Kette; Stammdaten begruenden deren Fehlen.
+  architektur_vertrag: Mitgliedschaft bleibt YAML; Reason ist additiv wie noWorkflowReason.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Inventur gegen die echte Registry; YAML-Gate bleibt gruen.
+  security_vertrag: Keine neuen Secrets.
+  betriebs_vertrag: Advisory unveraendert; generatorReady nicht blockiert.
+  dokumentations_vertrag: Workboard, Slice, UIX-091-Fortschritt, Spec-Verweis auf UIX-091-GATE.
+external_gates:
+  - not_applicable

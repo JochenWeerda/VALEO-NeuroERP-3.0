@@ -15,6 +15,7 @@ KNOWN = {
     "lager/article-stock", "agrar/harvest-settlement", "sales/sales-order",
     "sales/delivery-note", "finance/ar-open-item", "finance/payment-run",
     "einkauf/anfrage", "einkauf/angebot", "einkauf/purchase-order",
+    "einkauf/auftragsbestaetigung",
     "finance/ap-invoice", "crm/lead", "crm/opportunity", "crm/customer-360",
 }
 
