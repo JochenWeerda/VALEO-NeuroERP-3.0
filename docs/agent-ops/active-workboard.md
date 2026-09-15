@@ -11,6 +11,63 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-MENGENMODELL - n:m-Zuordnung steht 2026-09-15, Claude Code
+
+**Der Leitfall aus dem Belegfluss-Befund ist abbildbar:** Lieferschein A mit
+100 dt, Rechnung X nimmt 60 dt, Rechnung Y die uebrigen 40 dt **und** 20 dt aus
+Lieferschein B. Split und Merge, beides getestet.
+
+**Zwei Tabellen, und die Aufteilung ist der Kern:**
+
+- `doc_allocation_sources` — **eine** Zeile je Quellposition mit Gesamt- und
+  zugeordneter Menge. Dort lebt die Restmenge, und dort sperrt eine Transaktion,
+  bevor sie rechnet.
+- `doc_allocations` — die n:m-Zeilen: Quelle → Ziel, Menge, Einheit.
+
+**Warum nicht eine Tabelle:** Ueber eine reine Zuordnungstabelle laesst sich
+„parallele Zuordnungen duerfen dieselbe Restmenge nicht doppelt vergeben" nicht
+durchsetzen. Zwei Transaktionen laesen beide die vorhandenen Zeilen, kaemen
+beide auf dieselbe Restmenge und fuegten beide ein — das klassische Phantom.
+Erst eine Summenzeile mit `CHECK (allocated_quantity <= quantity)` macht die
+Grenze erzwingbar. **Dieselbe Lektion wie FSX-011: Nachschlagen genuegt nicht.**
+
+Ein Test umgeht dafuer bewusst die Anwendungslogik und schreibt direkt in die
+Tabelle. Faellt er, ist die Grenze nur noch eine Absprache.
+
+**Die drei Regeln aus dem Modelldokument sind durchgesetzt:**
+
+1. **Keine Umrechnung ohne belegten Faktor.** 2000 kg auf eine dt-Position
+   werden zu 20 dt; 2 Big Bag brauchen das Artikelprofil; „10 l auf eine
+   dt-Position" wird abgewiesen statt geschaetzt. Die **Eingabe bleibt
+   erhalten**, damit die Anzeige „2000 kg (= 20 dt)" sagen kann.
+2. **Teilbarkeit ist Artikeleigenschaft.** Ein halber Kanister PSM wird
+   abgewiesen — Originalverpackung.
+3. **Keine Ueberbuchung**, und die Meldung nennt die offene Menge, statt den
+   Anwender raten zu lassen.
+
+**Die fachlich heikelste Stelle hat keinen Vorgabewert bekommen:**
+`release(..., frees_quantity=...)` ist ein Pflichtargument. Eine Gutschrift kann
+eine **Warenrueckgabe** sein — dann wird die Menge wieder berechenbar — oder ein
+**Preisnachlass**, dann nicht. Wer das raet, erzeugt doppelt berechnete oder nie
+berechnete Mengen. Ein Test haelt fest, dass der Aufruf ohne Angabe gar nicht
+moeglich ist.
+
+**Abnahme:** 16 Tests **gegen die echte Datenbank**, nicht gegen Attrappen — die
+zentrale Zusicherung ist eine Eigenschaft der Datenbank, und ein Mock haette sie
+bestaetigt, ohne sie zu pruefen. Ohne erreichbare Datenbank werden sie
+uebersprungen, nicht als gruen gewertet. Migration angewandt, Single Head,
+Testdaten rueckstandsfrei.
+
+### K5: Sperre aufgehoben, aber noch nicht erfuellt
+
+Der Modellgrund ist weg — K5 ist wieder ein Kriterium **je Maske**. Erfuellt ist
+es damit von **keiner**: `source_state` liefert „100 dt geliefert · 60 dt
+berechnet · 40 dt offen", gezeigt wird es bisher nirgends. **Wer K5 abhakt, muss
+auf eine Anzeige zeigen koennen.**
+
+**Offen und benannt:** die Anzeige an der Position (Ebene 1) und im Leitstand
+(aggregiert); Keimfaehigkeit/TKG je Partie; Pfand und Gebinderuecknahme.
+
 ## FSX-MENGENMODELL - reserviert 2026-09-15
 
 **Owner:** Claude Code. **Ziel:** Positionsbezogenes n:m-Mengenmodell (K5) mit

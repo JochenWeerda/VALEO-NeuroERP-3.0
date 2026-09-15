@@ -60,6 +60,22 @@ belegzentrierte Weg.
 
 ### K5 — Teilmengen und Zuordnungen sind in der Maske aufloesbar
 
+> **Nachtrag 2026-09-15 spaet: die Sperre ist aufgehoben.** Das
+> positionsbezogene Mengenmodell steht (`FSX-MENGENMODELL`):
+> `domain_docs.doc_allocation_sources` fuehrt je Quellposition Gesamt- und
+> zugeordnete Menge, `doc_allocations` die n:m-Zeilen mit Menge und Einheit.
+> Split, Merge, Restmenge und Status sind damit abbildbar; die Grenze gegen
+> Ueberbuchung haelt eine CHECK-Bedingung in der Datenbank, nicht die
+> Anwendung.
+>
+> **K5 ist damit wieder ein Kriterium je Maske — aber noch von keiner Maske
+> erfuellt.** Das Modell ist die Voraussetzung, nicht die Erfuellung: „100 dt
+> geliefert · 60 dt berechnet · 40 dt offen" liefert
+> `DocumentAllocationService.source_state`, gezeigt wird es bisher nirgends.
+> Wer K5 fuer eine Maske abhakt, muss auf deren Anzeige zeigen koennen.
+>
+> Der urspruengliche Sperrvermerk bleibt stehen, weil er die Begruendung traegt:
+
 > **Stand 2026-09-15: heute nicht erfuellbar, und zwar aus einem Modellgrund.**
 > Codex hat belegt, dass die positionsbezogene n:m-Zuordnung zwischen Belegen
 > fehlt: Docflow gibt bei einer zweiten Umwandlung derselben Beziehungsart die
