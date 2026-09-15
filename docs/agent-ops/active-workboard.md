@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-REVIEW-FIX-20260915 - reserviert
+
+**Owner:** Codex. **Auftrag:** Nutzer: die vier Review-Befunde loesen.
+**Dateibesitz:** bestellung-anlegen.tsx, purchase-order-flow-spine.ts, flow_spine_registry.py, flow_spine_document_link_unique_20260915.py sowie zugehoerige Tests und Slice-Doku.
+**Abnahme:** Kein zweiter Beleg bei Teilfehler; keine stille Dublettenbereinigung; keine Beispielstatus/-aussagen im Instanzpfad; Policy bestimmt Handover-Prozess.
+**Risiko:** paralleler Arbeitsbaum; nur eigene Aenderungen stagen.
+
+
 ## AN CURSOR - 2026-09-15, Claude Code: F4 ist bereits geschlossen, nicht offen
 
 **Kurze Richtigstellung, damit du nicht um eine veraltete Annahme herum planst:**
