@@ -11,6 +11,50 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-BEGEHUNG-F5 - geschlossen 2026-09-15, Claude Code
+
+**F5 war: Ein fehlendes Band ist nicht von „kein Prozess“ zu unterscheiden.**
+Zurueckgestellt war es mit der Begruendung, die Alternative waere wieder ein
+Platzhalter. Das stimmte fuer einen erfundenen Prozessstand — aber nicht fuer
+die Aussage, um die es geht. `DocumentCaseBand` liess **drei** verschiedene
+Lagen gleich aussehen, naemlich leer:
+
+1. Der Beleg ist noch nicht gespeichert.
+2. Die Suche laeuft oder ist **fehlgeschlagen**.
+3. Es wurde geprueft, nichts gefunden — und die Maske bietet kein Verknuepfen
+   an.
+
+Aus zwei Wahrheitswerten wird jetzt ein Zustand (`ruht | laeuft | geprueft |
+unerreichbar`):
+
+- **`ruht` und `laeuft` schweigen weiter.** Beides ist ein Augenblick, keine
+  Auskunft; erst der Ausgang der Suche ist eine.
+- **`unerreichbar` bekommt eine eigene Zeile:** „Prozessstand nicht
+  ermittelt — es ist keine Aussage darueber, dass keiner existiert", mit
+  „Erneut abrufen". Damit ist kein Platzhalter entstanden: Behauptet wird
+  nichts ueber den Vorgang, sondern etwas ueber den eigenen Kenntnisstand. Das
+  ist dieselbe Unterscheidung wie „nicht ermittelt“ im Leitstand.
+- **`geprueft` ohne Treffer sagt das auch dann**, wenn die Maske nichts dagegen
+  tun kann — sonst fiele der bekannte Fall wieder mit dem unbekannten
+  zusammen. Die Schaltflaeche bleibt an `onLink` gebunden: eine ohne Wirkung
+  waere weiterhin schlimmer als keine.
+
+**Zwei Tests behaupteten die alte Lage aktiv** (`toBeEmptyDOMElement` nach
+Abrufsfehler und ohne `onLink`) — dasselbe Muster wie bei F4. Sie sind
+umgedreht und tragen die Begruendung im Namen; dazu ein neuer Test, dass
+waehrend der laufenden Suche weiterhin geschwiegen wird.
+
+**Abnahme:** 10 Tests gruen, `tsc --noEmit` und ESLint ohne Ausgabe.
+
+**Damit sind F1 bis F5 aus der Begehung geschlossen.** Offen bleiben nur noch
+die beiden Gates, die kein Code sind: FSX-090a (Messlauf braucht eine laufende
+Oberflaeche) und FSX-090b (Nutzerbeobachtung, Termin fehlt).
+
+**Nachtrag zum Vorbehalt „dritte Umsetzung in `lieferschein-erfassung.tsx`“:**
+Die Maske ist inzwischen angefasst — aber nur lesend. Der Mengenstand haengt
+unter dem Positionsraster; der Speicherpfad ist unberuehrt. Die Verknuepfung
+zum Vorgang in dieser Maske bleibt der eigene Slice, der sie braucht.
+
 ## FSX-MENGENMODELL - der Kreis ist geschlossen 2026-09-15, Claude Code
 
 **Das Modell stand, aber die Tabelle blieb leer.** `register_source` wurde von

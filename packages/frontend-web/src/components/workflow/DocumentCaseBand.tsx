@@ -26,6 +26,15 @@ import type { WorkflowEntryContext } from './WorkflowEntryBanner'
  * und `useQuery` wuerde jeder von ihnen einen QueryClientProvider aufzwingen.
  */
 
+/**
+ * Was ueber den Vorgang dieses Belegs bekannt ist.
+ *
+ * `unerreichbar` ist der Zustand, den F5 gefordert hat: Er ist nicht dasselbe
+ * wie `geprueft` ohne Treffer. „Es gibt keinen Vorgang" und „ich konnte nicht
+ * nachsehen" sahen vorher beide wie eine leere Flaeche aus.
+ */
+type Suchstand = 'ruht' | 'laeuft' | 'geprueft' | 'unerreichbar'
+
 type CaseHit = {
   instance_id: string
   process_key: string
@@ -57,7 +66,7 @@ export function DocumentCaseBand({
   className?: string
 }): JSX.Element | null {
   const [hit, setHit] = useState<CaseHit | null>(null)
-  const [geprueft, setGeprueft] = useState(false)
+  const [stand, setStand] = useState<Suchstand>('ruht')
   const [laeuft, setLaeuft] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
   const [erneut, setErneut] = useState(0)
@@ -67,8 +76,11 @@ export function DocumentCaseBand({
   useEffect(() => {
     let aktuell = true
     setHit(null)
-    setGeprueft(false)
-    if (!suchen) return
+    if (!suchen) {
+      setStand('ruht')
+      return
+    }
+    setStand('laeuft')
     void apiClient
       .get<{ instances?: CaseHit[] }>(
         `/api/v1/process/flow-spines/documents/${encodeURIComponent(documentType)}/${encodeURIComponent(String(documentId))}/instances`,
@@ -79,12 +91,13 @@ export function DocumentCaseBand({
         // Der fuehrende Vorgang beschreibt diesen Beleg am besten; nur wenn es
         // keinen gibt, steht der Beleg als Beteiligter in einem fremden Vorgang.
         setHit(treffer.find((t) => t.role === 'leading') ?? treffer[0] ?? null)
-        setGeprueft(true)
+        setStand('geprueft')
       })
       .catch(() => {
-        // Das Band ist Orientierung, kein Arbeitsmittel. Faellt die Suche aus,
-        // wird nichts behauptet — weder ein Vorgang noch dessen Abwesenheit.
-        if (aktuell) setGeprueft(false)
+        // Faellt die Suche aus, wird ueber den Vorgang nichts behauptet — wohl
+        // aber ueber den eigenen Kenntnisstand. Das ist der Unterschied, den
+        // F5 verlangt.
+        if (aktuell) setStand('unerreichbar')
       })
     return () => {
       aktuell = false
@@ -130,11 +143,36 @@ export function DocumentCaseBand({
     )
   }
 
-  // Erst anbieten, wenn wirklich gesucht **und** nichts gefunden wurde. Ohne
-  // diese Bedingung stuende das Angebot schon waehrend der Suche da und
-  // behauptete eine Abwesenheit, die noch niemand geprueft hat.
-  if (!suchen || !geprueft || !onLink) return null
+  // Solange nicht gesucht wird oder die Suche laeuft, bleibt die Flaeche leer:
+  // Der Beleg hat noch keine Nummer, oder die Antwort steht noch aus. Beides
+  // ist ein Augenblick, keine Auskunft.
+  if (stand === 'ruht' || stand === 'laeuft') return null
 
+  // F5: Der Ausfall der Suche bekommt eine eigene Zeile. Ohne sie waere ein
+  // fehlendes Band nicht von „kein Prozess" zu unterscheiden — der Beleg saehe
+  // in beiden Faellen gleich aus. Behauptet wird dabei nichts ueber den
+  // Vorgang, sondern etwas ueber den eigenen Kenntnisstand: nicht ermittelt.
+  if (stand === 'unerreichbar') {
+    return (
+      <Alert className={className} data-testid="document-case-unknown">
+        <AlertTitle>Prozessstand nicht ermittelt</AlertTitle>
+        <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            Ob dieser Beleg zu einem Vorgang gehoert, konnte nicht abgerufen
+            werden. Es ist keine Aussage darueber, dass keiner existiert.
+          </span>
+          <Button type="button" variant="outline" onClick={() => setErneut((wert) => wert + 1)}>
+            Erneut abrufen
+          </Button>
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
+  // Ab hier ist geprueft und nichts gefunden. Das ist eine Auskunft und wird
+  // auch dann gegeben, wenn die Maske das Verknuepfen nicht anbietet — sonst
+  // fiele der bekannte Fall wieder mit dem unbekannten zusammen. Eine
+  // Schaltflaeche ohne Wirkung gibt es weiterhin nicht.
   return (
     <Alert className={className} data-testid="document-case-link-offer">
       <AlertTitle>Kein Vorgang zu diesem Beleg</AlertTitle>
@@ -142,9 +180,11 @@ export function DocumentCaseBand({
         <span>
           {fehler ?? 'Der Beleg ist gespeichert, gehoert aber zu keinem Prozessvorgang.'}
         </span>
-        <Button type="button" onClick={() => void verknuepfen()} disabled={laeuft}>
-          {laeuft ? 'Wird verknuepft …' : linkLabel}
-        </Button>
+        {onLink ? (
+          <Button type="button" onClick={() => void verknuepfen()} disabled={laeuft}>
+            {laeuft ? 'Wird verknuepft …' : linkLabel}
+          </Button>
+        ) : null}
       </AlertDescription>
     </Alert>
   )

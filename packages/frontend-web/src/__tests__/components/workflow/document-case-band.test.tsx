@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from '@/app/routing/test-router'
@@ -9,8 +9,12 @@ import { DocumentCaseBand } from '@/components/workflow/DocumentCaseBand'
  *
  * Die heikle Aussage dieser Flaeche ist die **Abwesenheit**: „Kein Vorgang zu
  * diesem Beleg" ist eine Behauptung, und sie darf erst fallen, wenn wirklich
- * gesucht wurde. Waehrend der Suche oder nach einem Abrufsfehler ist Schweigen
- * die richtige Antwort.
+ * gesucht wurde. Waehrend der Suche ist Schweigen die richtige Antwort.
+ *
+ * Nach einem **Abrufsfehler** dagegen nicht mehr — das war F5 aus der
+ * Begehung: Ein fehlendes Band war nicht von „kein Prozess" zu unterscheiden.
+ * Der Ausfall bekommt deshalb eine eigene Zeile, die ueber den Vorgang nichts
+ * behauptet, sondern ueber den eigenen Kenntnisstand: nicht ermittelt.
  */
 
 const getMock = vi.hoisted(() => vi.fn())
@@ -80,27 +84,44 @@ describe('DocumentCaseBand', () => {
     expect(screen.getByRole('button', { name: 'Beschaffungsvorgang verknuepfen' })).toBeInTheDocument()
   })
 
-  it('behauptet nach einem Abrufsfehler keine Abwesenheit', async () => {
+  it('meldet nach einem Abrufsfehler den eigenen Kenntnisstand (F5)', async () => {
     getMock.mockRejectedValue(new Error('Netz weg'))
-    const { container } = renderBand({ onLink: vi.fn() })
+    renderBand({ onLink: vi.fn() })
 
-    await waitFor(() => {
-      expect(getMock).toHaveBeenCalled()
-    })
-    // Weder Band noch Angebot: wir wissen schlicht nicht, ob ein Vorgang
-    // existiert, und sagen deshalb nichts.
-    expect(container).toBeEmptyDOMElement()
+    // Frueher blieb die Flaeche hier leer. Genau das war F5: Ein fehlendes Band
+    // war nicht von „kein Prozess" zu unterscheiden — der Beleg sah in beiden
+    // Faellen gleich aus, und das Schweigen wurde als Auskunft gelesen.
+    const hinweis = await screen.findByTestId('document-case-unknown')
+    expect(hinweis).toHaveTextContent('Prozessstand nicht ermittelt')
+    // Ueber den Vorgang selbst wird weiterhin nichts behauptet.
+    expect(hinweis).toHaveTextContent(/keine Aussage darueber, dass keiner existiert/)
+    expect(screen.queryByTestId('document-case-link-offer')).not.toBeInTheDocument()
   })
 
-  it('bietet nichts an, wenn kein Verknuepfen moeglich ist', async () => {
-    getMock.mockResolvedValue({ data: { instances: [] } })
-    const { container } = renderBand({ onLink: undefined })
+  it('schweigt, solange die Suche laeuft', async () => {
+    let aufloesen: (wert: unknown) => void = () => {}
+    getMock.mockReturnValue(new Promise((resolve) => {
+      aufloesen = resolve
+    }))
+    const { container } = renderBand({ onLink: vi.fn() })
 
-    await waitFor(() => {
-      expect(getMock).toHaveBeenCalled()
-    })
-    // Eine Schaltflaeche ohne Wirkung waere schlimmer als keine.
+    // Waehrend der Suche ist Schweigen richtig: Das ist ein Augenblick, keine
+    // Auskunft. Erst ihr Ausgang ist eine.
     expect(container).toBeEmptyDOMElement()
+
+    aufloesen({ data: { instances: [] } })
+    expect(await screen.findByTestId('document-case-link-offer')).toBeInTheDocument()
+  })
+
+  it('nennt die Abwesenheit auch ohne Verknuepfungsangebot', async () => {
+    getMock.mockResolvedValue({ data: { instances: [] } })
+    renderBand({ onLink: undefined })
+
+    // Die Auskunft haengt nicht daran, ob die Maske etwas dagegen tun kann:
+    // Sonst fiele der gepruefte Fall wieder mit dem unbekannten zusammen.
+    expect(await screen.findByTestId('document-case-link-offer')).toBeInTheDocument()
+    // Eine Schaltflaeche ohne Wirkung waere aber weiterhin schlimmer als keine.
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
   it('sucht nach erfolgreicher Verknuepfung erneut', async () => {
