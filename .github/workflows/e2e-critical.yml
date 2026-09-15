@@ -80,7 +80,7 @@ jobs:
 
       - name: Upload results on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-critical-results
           path: playwright-tests/artifacts/

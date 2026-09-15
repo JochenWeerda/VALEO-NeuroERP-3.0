@@ -62,7 +62,7 @@ jobs:
             --report-path gitleaks.json \
             --no-banner
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: gitleaks-report
@@ -94,7 +94,7 @@ jobs:
             --timeout 300 \
             . || true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: semgrep-report
@@ -116,7 +116,7 @@ jobs:
           pip install bandit[toml]
           bandit -r app/ modules/ -f json -o bandit.json --exit-zero || true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: bandit-report
@@ -186,7 +186,7 @@ jobs:
           severity: 'HIGH,CRITICAL'
           scanners: 'vuln,secret'
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trivy-fs-report
@@ -208,7 +208,7 @@ jobs:
           output: 'trivy-config.json'
           severity: 'HIGH,CRITICAL'
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trivy-config-report
@@ -249,7 +249,7 @@ jobs:
         with:
           sarif_file: trivy-image.sarif
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: trivy-image-report
@@ -308,7 +308,7 @@ jobs:
             echo "::error::$CRIT CRITICAL security findings detected!"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: security-agent-unified

@@ -261,7 +261,7 @@ jobs:
         run: python scripts/check_critical_backend_coverage.py
 
       - name: Upload full-suite coverage (release evidence)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-coverage-xml
           path: coverage.xml
@@ -271,7 +271,7 @@ jobs:
         run: python scripts/generate_release_compatibility_matrix.py
 
       - name: Upload release compatibility matrix
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-compatibility-matrix
           path: |
@@ -347,7 +347,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright report on failure
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-accessibility-report
@@ -418,7 +418,7 @@ jobs:
             --output-markdown artifacts/production-readiness-assessment.md
 
       - name: Upload assessor evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: production-readiness-assessment
           path: artifacts/production-readiness-assessment.*
@@ -439,7 +439,7 @@ jobs:
           output-file: valeo-neuroerp-sbom.cdx.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: valeo-neuroerp-sbom
           path: valeo-neuroerp-sbom.cdx.json
