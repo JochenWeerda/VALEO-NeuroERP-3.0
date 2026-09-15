@@ -14,4 +14,7 @@ export { TileGridRenderer } from './TileGridRenderer'
 export { CalendarRenderer } from './CalendarRenderer'
 export { TwinReadModelRenderer } from './TwinReadModelRenderer'
 export { WorkflowPanelRenderer } from './WorkflowPanelRenderer'
+// FSX-030: Prozessband fuer Ebene 1 (Belegmaske), siehe
+// docs/design/flow-spine-ebene1-kriterienkatalog.md
+export { ProcessBand } from './ProcessBand'
 export { getValue, layoutClasses, renderValue } from './render-utils'

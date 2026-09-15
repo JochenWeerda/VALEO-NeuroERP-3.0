@@ -308,6 +308,10 @@ export function compileRenderPlan(
           nextActionKey: schema.workflow.nextActionKey,
           auditRequired: schema.workflow.auditRequired,
           evidenceRequired: schema.workflow.evidenceRequired,
+          // FSX-030: Prozessband und Belegbindung wandern mit in den RenderPlan,
+          // damit die Masken sie ohne eigenes JSX erhalten.
+          phases: schema.workflow.phases,
+          documentType: schema.workflow.documentType,
         }
       : undefined,
     performance,

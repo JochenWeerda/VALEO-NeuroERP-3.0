@@ -10,6 +10,77 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 ---
 
 # Active Workboard
+
+## FSX-030 - abgeschlossen 2026-09-15
+
+**Von:** Masterplan Welle 2, vorgezogen auf Wunsch des Users (Vertrag vor
+Rollout). **Owner:** Claude Code. **Slice:** `docs/agent-ops/slices/FSX-030.yaml`.
+
+**Der Vertrag war halb schon da — das ist die wichtigste Erkenntnis dieses
+Slices.** `ScreenWorkflowDefinition` trug bereits `processKey`, `status`,
+`nextActionKey`; `WorkflowRuntime` liefert bereits `currentStatus`,
+`nextAllowedActions` und `blockingReasons`. Gefehlt haben nur die **geordneten
+Phasen**, die **Belegbindung** und eine kompakte Darstellung. Ich habe deshalb
+den vorhandenen Block erweitert statt einen zweiten Prozessband-Vertrag
+danebenzustellen — zwei Vertraege fuer denselben Sachverhalt waeren in einem
+Jahr auseinandergelaufen.
+
+**Strenge Arbeitsteilung, testgehalten:** `phases` sind Prozessdefinition und
+duerfen statisch sein (FSX-003 Fall 1). Stand, Aktionen und Blocker kommen
+**ausschliesslich** aus dem `WorkflowState`. Ein Band, das seinen Stand aus der
+Definition zoege, zeigte in jedem Beleg dasselbe — genau der Fehler, den
+FSX-002/003 im Leitstand beseitigt haben. Der schaerfste der sechs Tests prueft
+deshalb: **ohne WorkflowState ist keine Phase aktiv**, und das Band faellt auch
+nicht auf die erste zurueck.
+
+**Zwei bewusste Verengungen:** genau **eine** naechste Aktion (eine Liste waere
+wieder ein Entscheidungsproblem) und genau **ein** Blocker (wer drei
+gleichzeitig liest, loest keinen).
+
+**Nebenbefund, mitgenommen:** `WorkflowPanelRenderer` rendert ohne
+WorkflowState einen gestrichelten Kasten mit `Workflow: <processKey>` — ein
+**interner Schluessel in der Fachmaske**, dieselbe Klasse von Fehler wie die
+Resume-Route im Leitstand. Ersatzlos entfallen. Ohne Phasen rendert das Band
+nichts; ein Kasten, der Platz kostet und dem Sachbearbeiter nichts sagt, ist
+schlechter als kein Kasten.
+
+**Kriterienkatalog K1-K6** liegt in
+`docs/design/flow-spine-ebene1-kriterienkatalog.md` — mit einer ausdruecklichen
+Liste dessen, was Ebene 1 **nicht** ist (Vergleiche ueber Vorgaenge,
+Ausnahmebehandlung, Rollenkoordination, prozessweite Kennzahlen). Wer die in
+jede Belegmaske zieht, hat nicht entdichtet, sondern verteilt.
+**Gemessen wird je Maske, nicht als Quote** — „14 von 18 erfuellen K1-K4, K5
+fehlt bei 9", nicht „78 Prozent fertig". Das ist der Grund, warum die
+70-Prozent-Angabe aus dem Masterplan geflogen ist.
+
+**Abnahme:** 6 Prozessband-Tests gruen, `tsc --noEmit` ohne Ausgabe, 34 Dateien
+/ 167 Tests im Komponentenbereich gruen. Designregel in CLAUDE.md ergaenzt.
+
+**Ehrlich gesagt:** Das Band ist gebaut, aber noch in **keiner** Maske
+verdrahtet. Bis FSX-013 ist der Nutzen null. Der Vertrag steht bewusst zuerst —
+so war es abgesprochen.
+
+## STAND FSX-PROGRAMM - 2026-09-15, Claude Code
+
+| Slice | Owner | Stand |
+|-------|-------|-------|
+| FSX-002/003 Wahrheit im Leitstand | Claude Code | abgeschlossen |
+| FSX-003-GATE-CI + FSX-GATES-010-011 | Cursor | abgeschlossen |
+| FSX-010/011 Belegbindung | Cursor (nach meinem Vorlauf) | abgeschlossen |
+| FSX-020/021/023/024 Leitstand entdichten | Claude Code | abgeschlossen |
+| FSX-030 Prozessband-Vertrag | Claude Code | abgeschlossen |
+| **FSX-001 Instanzbezug** | **Cursor** | wartet auf Herkunftskarte |
+| **FSX-001-QUELLENKARTE** | **Codex** | offen, keine Rueckmeldung bisher |
+| **FSX-012 Fall beim Speichern** | **Cursor** | wartet auf Codex' Vorklaerung |
+| **FSX-013 Rollout Prozessband** | **Claude Code** | bereit, sobald ich anfange |
+| **FSX-022 Naechste Schritte** | **Cursor** | uebergeben mit Vertragsvorschlag |
+| FSX-090a/b Nachweis | offen | nach Welle 3 |
+
+**Der kritische Pfad laeuft ueber Codex.** FSX-001 und FSX-012 haengen beide an
+der Herkunftskarte, und dazu gibt es bisher keine Rueckmeldung. Alles andere ist
+entweder fertig oder liegt bei mir.
+
+
 ## FSX-020-024 - abgeschlossen 2026-09-15
 
 **Von:** Masterplan Welle 3. **Owner:** Claude Code.
@@ -86,7 +157,6 @@ Navigation" faellt weg.
 
 **Wenn du keine Kapazitaet hast, sag es** — dann bleibt FSX-022 offen im
 Masterplan stehen, und das ist mir lieber als eine Rateloesung.
-
 
 
 ## ERLEDIGT, KEIN HANDLUNGSBEDARF - 2026-09-15, Claude Code: kurzzeitiger SyntaxError in flow_spines.py

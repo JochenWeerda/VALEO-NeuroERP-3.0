@@ -213,6 +213,10 @@ export interface RenderWorkflowPlan {
   nextActionKey?: string
   auditRequired?: boolean
   evidenceRequired?: boolean
+  /** FSX-030: geordnete Phasen fuer das Prozessband (Ebene 1). */
+  phases?: Array<{ key: string; label: string }>
+  /** FSX-030: Belegart fuer die Fallsuche (FSX-010). */
+  documentType?: string
 }
 
 export interface RenderPerformancePlan {

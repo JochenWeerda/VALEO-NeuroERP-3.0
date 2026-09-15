@@ -110,17 +110,13 @@ function renderWorkflowPanel(
     )
   }
 
-  // Legacy fallback (ScreenWorkflowDefinition)
-  if (!workflow?.processKey) return null
-  return (
-    <div
-      className="rounded-md border border-dashed border-border bg-muted/20 p-4 text-sm text-muted-foreground"
-      data-testid="workflow-panel-placeholder"
-    >
-      Workflow: {workflow.processKey}
-      {workflow.status ? ` — Status: ${workflow.status}` : ''}
-    </div>
-  )
+  // FSX-030/FSX-021: Der fruehere Platzhalter zeigte den internen Prozess-
+  // schluessel ("Workflow: order-to-cash") in der Fachmaske. Das ist Technik im
+  // Arbeitsbereich und sagt dem Sachbearbeiter nichts. Solange kein
+  // WorkflowState vorliegt, gibt es hier nichts Ehrliches zu zeigen — der
+  // Prozessstand gehoert dann ins Prozessband, das seine Phasen aus der
+  // ScreenDefinition und seinen Stand aus dem WorkflowState bezieht.
+  return null
 }
 
 function parseMentions(body: string, mentionDraft: string): CollabMention[] {

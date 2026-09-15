@@ -213,6 +213,31 @@ export interface ScreenWorkflowDefinition {
   nextActionKey?: string
   auditRequired?: boolean
   evidenceRequired?: boolean
+  /**
+   * FSX-030 — Prozessband (Ebene 1).
+   *
+   * Die geordneten Phasen des Prozesses, wie sie in der Belegmaske als
+   * kompakte Leiste erscheinen. Reine Prozessdefinition (FSX-003 Fall 1):
+   * Bezeichner sind statisch, der *aktuelle* Stand kommt aus dem
+   * WorkflowState, nie von hier.
+   *
+   * Fehlt die Angabe, rendert die Maske kein Band — und zwar sichtbar
+   * nichts statt eines Platzhalters mit internem Schluessel.
+   */
+  phases?: Array<{
+    /** Stabiler Schluessel, passend zu WorkflowStatusInfo.currentStatus. */
+    key: string
+    /** Fachliche Bezeichnung. Deutsch, ohne interne Kuerzel. */
+    label: string
+  }>
+  /**
+   * FSX-030/FSX-010 — Belegbindung.
+   *
+   * Belegart, unter der diese Maske ihren Vorgang sucht und anlegt. Erst
+   * damit kann eine Maske fragen "gibt es zu diesem Beleg schon einen Fall?",
+   * ohne dass jede Maske den Prozessschluessel selbst verdrahtet.
+   */
+  documentType?: string
 }
 
 /** Worklist-Kachel eines cockpit-Workspaces (UIX-061). */
