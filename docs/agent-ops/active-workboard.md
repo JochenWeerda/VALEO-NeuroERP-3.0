@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915 - reserviert
+
+**Owner:** Codex. **Auftrag:** Framework-Prinzip systemweit umsetzen, wo sinnvoll.
+**Ziel:** Bestehenden Single Mask Builder als verbindlichen Bedienvertrag ausbauen: gemeinsame Meldungen/Validierung, sichere Datenzustaende, nachvollziehbare Flaechenabdeckung und schrittweiser Rollout ohne Fachverlust.
+**Dateibesitz:** zentrale Mask-Builder-Renderer und Runtime, gemeinsame native Page-Wrapper, Framework-Inventur/Gate samt Tests, zugehoerige CI-Anbindung, docs/design/valeo-meridian-experience.md, eigene Slice-/QA-Dokumentation und dieser Abschnitt.
+**Abgrenzung:** Keine neue UI-Architektur; SAP-Pixel sind kein Ziel. FSX-Dateien (insbesondere lieferschein-erfassung.tsx, Dokumentzuordnungen und Artikelimporte) bleiben bei ihren laufenden Owners. Spezialoberflaechen werden begruendet klassifiziert statt blind ersetzt.
+**Abnahme:** Gemeinsame Verbesserungen erreichen alle angeschlossenen Masken; keine stillen Datenfehler; Meldungen sind dauerhaft und bedienbar; maschinenpruefbare Abdeckung verhindert neue unklassifizierte Seiten. Runtime-, Komponenten- und Doku-Pruefungen gruen.
+**Risiken:** Generator-Readiness ist keine visuelle oder fachliche Abnahme; gespeicherte Entwuerfe duerfen nie implizit buchen/freigeben. Kein Deployment.
+
+
 ## FSX-ARTIKEL-IMPORT - Bruecke ins Mengenmodell 2026-09-15, Claude Code
 
 **Die Praxis hat den Entwurf korrigiert.** Der erste Entwurf machte aus einem
