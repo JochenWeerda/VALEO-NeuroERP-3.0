@@ -1045,6 +1045,8 @@ Kein Dismissal, damit kein Befund auf geliefertem Code stumm geschaltet wird.
 
 ## SERVICE-SECURITY-GATES-20260914 - abgeschlossen
 
+**CI-Abgleich 2026-09-15 (Codex):** Nach a9b720a75 bestaetigt Run 34898484483 insgesamt 22/23 Service-Audits gruen; ausschliesslich services/ai bleibt wegen der dokumentierten Dependency-Befunde rot. Inventar und vollstaendiger crm-ai-Build-/Start-/HTTP-Job 104158391173 sind gruen. Die unten genannten sieben betroffenen Dienste beschreiben den historischen Erstlauf. Abschlussdokumentation und Slice entsprechend nachgezogen.
+
 **Owner:** Codex. **Auftrag:** Service-Sicherheitspruefungen und crm-ai abschliessen.
 **Ziel:** Alle Service-Manifeste automatisch auditieren, vorhandenen Import-Pin-Check in CI ausfuehren und crm-ai-Start/API-Vertraege durch reproduzierbare Regressionen absichern.
 **Dateibesitz:** neuer Service-Security-Workflow, neuer Audit-Runner und dessen Tests, crm-ai-Regressionspruefer, services/crm-ai/app/api/v1/endpoints/ai.py, alembic/env.py, initiale Migration, docker-entrypoint.sh und README (Antwortschema-/Start-Bugfixes), eigene Slice-/QA-Dokumentation sowie dieser Workboard-Abschnitt.

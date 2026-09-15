@@ -1,7 +1,7 @@
 slice_id: SERVICE-SECURITY-GATES-20260914
 title: Service-Audits und crm-ai-Betriebsvertraege absichern
 owner: Codex
-status: in arbeit
+status: abgeschlossen
 goal: Alle Service-Manifeste automatisch auditieren und crm-ai bis zum echten Start nachweisen.
 file_ownership:
   - .github/workflows/service-security.yml
@@ -44,3 +44,11 @@ ai_harness:
 external_gates:
   - Neue Workflow-Ausfuehrung nach Push; keine Aenderung der Branch-Protection.
   - Produktive Modell-, Tenant- und Auth-Freigabe ist keine Aussage dieser Betriebsabnahme.
+
+completion:
+  commit: 9997e1598
+  finance_audit_fix: 5b4736867
+  audit: "Aktueller CI-Lauf 34898484483 auf a9b720a75: 22 von 23 Audits gruen; services/ai bleibt rot."
+  ci_crm_ai: "Run 34898484483, Job 104158391173: echter Build, PostgreSQL-Start und HTTP-Tests gruen."
+  tests: "Neun Audit-Runner-Tests; 23 Import-Pin-Pruefungen; Doku-Gates und Agent-Handbuch aktuell."
+  remaining: "chromadb-/transformers-Befunde in services/ai bleiben im Folge-Slice offen; CRM-AI bleibt Simulation; kein Deployment."

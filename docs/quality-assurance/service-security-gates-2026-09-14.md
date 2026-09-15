@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, agent, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-09-14
+last_reviewed: 2026-09-15
 ---
 
 # Service-Security-Gates und CRM-AI-Betriebsabnahme
@@ -58,6 +58,9 @@ konfiguriert werden. Bestehende Root-Gates bleiben bestehen.
 
 ## Nachweise
 
+Die folgenden Erstlauf-Zahlen beziehen sich auf den Stand vor `a9b720a75`;
+der aktuelle CI-Abschluss steht im Abschnitt darunter.
+
 - Audit-Runner: neun Tests gruen (Entdeckung verschachtelter/neuer Manifeste,
   Fehler-/Timeout-Verhalten, fehlende/veraltete Berichte und Befunde).
 - Import-Pins: 23 Manifeste, keine fehlenden Pflichtimporte. Hinweise auf
@@ -77,9 +80,27 @@ konfiguriert werden. Bestehende Root-Gates bleiben bestehen.
   (ecdsa 0.19.2). Der Scanner nennt Fixversionen fuer click, pyasn1 und
   mehrere transformers-Befunde, nicht fuer chromadb/ecdsa. Service-Pins
   bleiben im aktiven Dateibesitz von Cursor.
-- Vollstaendiger Dockerfile-Neubau laeuft noch. Das
-  gestartete Build-Snapshot liegt vor den API-/Migrationsfixes; nach Abschluss
-  werden die Code-Layer aktualisiert und beide Image-Pruefer erneut ausgefuehrt.
+- Vollstaendige Image-Abnahme auf GitHub bestanden: [Job 104139171772](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34892743626/job/104139171772)
+  auf Commit `9997e1598`: echter Dockerfile-Build, frische Migration,
+  Wiederholungsmigration, Startverweigerung bei falschen Zugangsdaten und alle
+  sieben HTTP-Tests erfolgreich. Der lokale Vorab-Build ist nicht die
+  Abnahmequelle: er brach mit einer Paket-Hashabweichung ab (Exit 1); keine
+  Hashpruefung wurde abgeschwaecht oder umgangen. CI-Nachweis lokal: `artifacts/crm-ai-ci-104139171772.log`.
+- Finance-Prueferkorrektur `5b4736867`: neun Runner-Regressionen und alle drei
+  realen Finance-Nachlaeufe abgeschlossen. Der neue CI-Lauf 34893311746 ist
+  gestartet; kein gruener Gesamtworkflow behauptet.
+
+## Abschluss
+
+Service-Audit-Abdeckung und technische CRM-AI-Betriebsabnahme sind abgeschlossen.
+Nach der Folgekorrektur `a9b720a75` sind im [CI-Lauf 34898484483](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483)
+22 von 23 Service-Audits erfolgreich. Nur `services/ai` bleibt blockierend;
+chromadb-/transformers-Befunde werden nicht unterdrueckt. Inventar und der
+[vollstaendige CRM-AI-Job](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/34898484483/job/104158391173)
+sind ebenfalls erfolgreich. Die sechs weiteren zuvor betroffenen Dienste
+sind durch die Manifest-Korrekturen im Folge-Slice bereinigt. Der gesamte
+Workflow bleibt wegen services/ai rot. Der produktive Funktionsumfang von
+CRM-AI bleibt wie unten abgegrenzt.
 
 ## Grenzen
 

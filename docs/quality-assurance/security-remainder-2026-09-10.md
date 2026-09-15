@@ -209,3 +209,15 @@ Logs: `security-node-frozen-final.log`, `security-node-vitest.log`,
 `security-node-contracts.log`, `security-node-contracts-baseline.log`
 unter artifacts/. Service-Gates, Auth-Fail-open, FastAPI-Altbestand und
 fehlendes crm-ai-Schema bleiben eigenstaendige offene Betriebs-/Produktarbeit.
+
+
+## Nachtrag 2026-09-14: Service-Gates und CRM-AI
+
+Die automatische Abdeckung aller 23 Service-Manifeste sowie die technische
+CRM-AI-Betriebsabnahme sind unter SERVICE-SECURITY-GATES-20260914 geliefert.
+Echter Image-Build, Migration und HTTP-Vertraege sind auf GitHub gruen.
+Aktueller CI-Lauf 34898484483 nach a9b720a75: 22 von 23 Service-Audits
+grün; nur services/ai bleibt blockierend. Details:
+[Service-Security-Nachweis](service-security-gates-2026-09-14.md).
+Fruehere Aussagen zum fehlenden CRM-AI-Schema/Start sind damit ueberholt;
+der Dienst liefert weiterhin simulierte Ergebnisse, keine trainierten Modelle.
