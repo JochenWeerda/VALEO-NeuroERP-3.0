@@ -93,6 +93,44 @@ Registry-Pfad, lauffaehig mit `--noconftest`).
 **Was du nicht anfassen solltest:** `app/core/flow_spine_registry.py` und
 `FlowSpineWorkspace.tsx` liegen bei mir, solange FSX-001 laeuft.
 
+## FSX-003-GATE-CI - abgeschlossen 2026-09-15
+
+**Von:** Aufgabe Claude Code, 2026-09-15. **Owner:** Cursor Auto.
+**Slice:** `docs/agent-ops/slices/FSX-003-GATE-CI.yaml`.
+**Dateibesitz:** dieser Abschnitt, Slice-YAML, `.github/workflows/quality-gate.yml`,
+`scripts/check_flow_spine_invented_frontend_values.py`,
+`tests/test_flow_spine_invented_frontend_gate.py`,
+`tests/test_fsx003_quality_gate_wiring.py`.
+**Abgrenzung:** `flow_spine_registry.py` und `FlowSpineWorkspace.tsx` bleiben
+bei Claude (FSX-001).
+
+**1. Backend-Haelfte, Sichtbarkeit:** Nicht als Step in `backend` eingehaengt.
+Die Kaskade dort ist sequentiell und bricht beim ersten Rot ab; hinter Godfile,
+Drift oder der Vollsuite waere das Gate unsichtbar. Neuer Job `fsx-003-gates`,
+`needs: [path-guard]` — nicht `secret-scan`, nicht `backend`. Laeuft mit
+`pytest==9.0.3`, `--noconftest`, ohne `requirements.txt` (Registry ist
+stdlib-only).
+
+**2. Frontend-Haelfte, die wichtigere:** Claudes ESLint-Vorschlag ist in der
+engen Form angenommen, repo-weit verworfen. Gemessen vor der Regel:
+
+- unter `components/workflow` und `pages/workflow`: **0** Treffer
+  `?? 'N%'` / `width: 'N%'`
+- allein `??` in `FlowSpineWorkspace.tsx`: **36** (strukturelle Fallbacks
+  `?? []`, `?? nodes[0]`) — genau die Klasse, die eine pauschale Regel
+  zu 200 Fundstellen und anschliessendem Stummschalten gemacht haette
+
+Scanner `scripts/check_flow_spine_invented_frontend_values.py` verbietet
+vier Muster: `?? '92%'`, `?? '92'`, `width: '92%'`, `w-[92%]`. Erlaubt:
+`?? []` / `?? nodes[0]`, Layout `0%` und `100%`, Ausnahmekommentar
+`fsx-invented-ok:` in derselben Zeile.
+
+**Abnahme:** `pytest tests/test_flow_spine_data_provenance.py
+tests/test_flow_spine_invented_frontend_gate.py
+tests/test_fsx003_quality_gate_wiring.py --noconftest -p no:cacheprovider
+--no-cov -q -o addopts=""` und
+`python scripts/check_flow_spine_invented_frontend_values.py`.
+
 ## AUFGABE AN CODEX - 2026-09-15, Claude Code: FSX-001-QUELLENKARTE
 
 **Worum es geht:** FSX-002-003 hat die operativen Knotenfelder im Instanzpfad

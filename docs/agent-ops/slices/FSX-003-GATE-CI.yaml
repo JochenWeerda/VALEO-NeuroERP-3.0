@@ -1,0 +1,72 @@
+slice_id: FSX-003-GATE-CI
+id: FSX-003-GATE-CI
+title: FSX-003-Gates in die Qualitaetskaskade haengen — Backend-Provenance plus Frontend-Anzeigewerte
+owner: Cursor Auto
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-002-003
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+coordination: >-
+  Auftrag von Claude Code im Workboard. Registry und FlowSpineWorkspace bleiben
+  bei Claude (FSX-001). Dieser Slice aendert nur CI, den Frontend-Scanner und
+  den eigenen Workboard-Abschnitt.
+goal: >-
+  Das Provenance-Gate aus tests/test_flow_spine_data_provenance.py darf nicht
+  hinter einem bereits roten Schritt der Backend-Kaskade verschwinden. Die
+  wichtigere zweite Haelfte faengt das FSX-002-Muster im JSX, das kein
+  Backend-Test sehen kann.
+entscheidung_frontend_regel: >-
+  Claudes Vorschlag einer ESLint-Regel gegen Prozentliterale und ??-Fallbacks
+  wird in der engen Form angenommen, nicht repo-weit. Gemessen: unter
+  components/workflow und pages/workflow 0 Treffer der Klasse
+  ?? 'N%' / width: 'N%'. Pauschales ?? im selben Ordner waere 36 Fundstellen
+  allein in FlowSpineWorkspace (strukturelle Fallbacks). Repo-weit waere
+  no-magic-numbers / jedes ?? eine Regel mit vielen Dutzend Fundstellen —
+  die Claude ausdruecklich nicht wollte. Deshalb kein ESLint, sondern ein
+  gezielter Scanner mit vier Mustern.
+file_ownership:
+  - docs/agent-ops/slices/FSX-003-GATE-CI.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - .github/workflows/quality-gate.yml
+  - scripts/check_flow_spine_invented_frontend_values.py
+  - tests/test_flow_spine_invented_frontend_gate.py
+  - tests/test_fsx003_quality_gate_wiring.py
+acceptance:
+  - Eigenes quality-gate-Job, needs nur path-guard, nicht backend.
+  - Provenance-Tests laufen mit --noconftest und ohne Vollsuite.
+  - Scanner verbietet ?? '92%' und width: '92%' unter workflow/, erlaubt ?? [] und 0%/100%.
+  - Live-Bestand unter workflow/ ist 0 Treffer.
+tests:
+  - >-
+    pytest tests/test_flow_spine_data_provenance.py
+    tests/test_flow_spine_invented_frontend_gate.py
+    tests/test_fsx003_quality_gate_wiring.py
+    --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
+  - python scripts/check_flow_spine_invented_frontend_values.py
+risks:
+  - risiko: >-
+      Die Backend-Kaskade bricht beim ersten roten Schritt ab. Saeße das Gate
+      hinter Godfile/Drift/pytest, waere ein Rueckfall unsichtbar.
+    bewertung: Eigener Job parallel zur Kaskade, nur von path-guard abhaengig.
+  - risiko: Eine zu breite Regel erzeugt 200 Fundstellen und wird stummgeschaltet.
+    bewertung: Scope auf workflow/; strukturelles ?? und Layout 0%/100% erlaubt.
+  - risiko: Claude aendert FlowSpineWorkspace waehrend FSX-001.
+    bewertung: Dieser Slice editiert die Maske nicht. Der Scanner liest sie nur.
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Anzeigewert ohne Quelle ist schaedlicher als ein fehlender Wert.
+    Das Frontend darf den FSX-002-Fallback nicht still zurueckbringen.
+  architektur_vertrag: >-
+    Backend-Provenance und Frontend-Scanner sind getrennte Vertraege.
+    Ein Job, der hinter pytest haengt, ist keiner.
+  daten_vertrag: Keine Migration, keine Datenmutation.
+  test_vertrag: >-
+    Scanner-Selbsttest an synthetischem FSX-002-Muster; Live-Bestand 0 Treffer;
+    Workflow-YAML muss den Job ohne needs: backend enthalten.
+  security_vertrag: Keine Berechtigungen oder Endpunkte.
+  betriebs_vertrag: Reiner CI-Schritt, kein Rollout.
+  dokumentations_vertrag: Slice, Workboard, Masterplan-Hinweis.
+external_gates:
+  - GitHub Actions quality-gate Job fsx-003-gates nach Push.
