@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MERIDIAN-SCREEN-STUDIO-PERSIST - Drafts in Postgres, published_temp im Katalog 2026-09-16, Cursor
+
+**Stand:** abgeschlossen. Owner Cursor. UIX-090 bleibt bei Claude.
+Kein Lieferschein, keine sales-invoice-Dateien.
+
+**Ziel:** Studio-Entwürfe in `domain_shared.screen_definition_drafts`. Freigegebene
+`tenant/<slug>`-Masken über `get_screen_definition`, Masken-Endpoint, Omnibox
+und `/studio/run/:screenId` erreichbar. Native IDs unbeschattet.
+
+**Dateibesitz:** Alembic `screen_definition_drafts_20260916`, `studio_draft_store`,
+`studio_models`, Mask-Lookup, `pages/admin/studio-run.tsx`.
+
+**Abnahme:** pytest Studio-API + Persistenz (`require_db`); Vitest screen-studio
+inkl. StudioRunPage.
+
+
 ## FSX-LS-RECHNUNG-KNOPF - der Knopf lag am falschen Weg 2026-09-16, Claude Code
 
 **Befund:** „Sofort-Rechnung" in der Lieferscheinmaske rief

@@ -95,7 +95,11 @@ Einzel-JSX je Maske.
 
 Fach-Admins und Agenten erzeugen Entwürfe im Masken-Studio
 (`/admin/screen-studio`). Ausgabe ist eine normale ScreenDefinition unter
-`tenant/<slug>`; Validate und Publish nutzen denselben Gate-Pfad. Zeilenklick
+`tenant/<slug>`; Validate und Publish nutzen denselben Gate-Pfad. Nach
+Vier-Augen-Freigabe hängt `published_temp` in den Laufzeitkatalog
+(`GET /api/v1/masks/{id}/screen-definition`, Omnibox) und öffnet unter
+`/studio/run/{tenant__slug}`. Native Screen-IDs bleiben unbeschattet.
+Entwürfe liegen in `domain_shared.screen_definition_drafts`. Zeilenklick
 wählt; `In Vollansicht öffnen` folgt `rowRouteTemplate`. Explizite `columns`
 (Kunden-Schnellauswahl) bleiben Vorrang.
 

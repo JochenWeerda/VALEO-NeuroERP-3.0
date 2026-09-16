@@ -99,9 +99,8 @@ async def get_mask_screen_definition(
 ):
     """Liefert die native ScreenDefinition fuer Generator-faehige Masken."""
 
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return definition
@@ -117,9 +116,8 @@ async def get_agent_mask_contract(
     Wird deterministisch aus der ScreenDefinition abgeleitet — kein separates Speichern
     noetig. Explizite agentContract-Felder im Screen ueberschreiben die generierten Werte.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return _generate_agent_contract(definition)
@@ -337,9 +335,8 @@ async def get_mask_readiness(
     sort_whitelist, filter_columns, agent_contract, workflow_declared,
     stable_test_selectors, table_query_contract, cockpit_content.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return _check_readiness(definition)
@@ -360,9 +357,8 @@ async def get_mask_entity_stub(
     Liefert Platzhalter-Daten damit das Frontend kein 404 erhaelt.
     Wird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     # Collect all field keys from kopf tab to build a minimal stub payload
@@ -395,9 +391,8 @@ async def get_mask_tab_stub(
     Liefert leere Ergebnisliste damit das Frontend kein 404 erhaelt.
     Wird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return {

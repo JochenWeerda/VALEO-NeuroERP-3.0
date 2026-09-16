@@ -95,31 +95,46 @@ def _collect_command_actions(sd: dict) -> list[dict]:
     return actions
 
 
-def _build_omnibox_catalog() -> list[dict]:
-    from app.core.screen_definitions import (
-        _SCREEN_DEFINITIONS,
-        get_screen_definition,
-        get_screen_list_route,
-    )
+def _omnibox_entry(screen_id: str, sd: dict) -> dict:
+    from app.core.screen_definitions import get_screen_list_route
+
+    contract = sd.get("agentContract") or {}
+    layout = sd.get("layout") or {}
+    synonyms = list(contract.get("synonyms") or [])
+    if not synonyms:
+        title = str(sd.get("title") or screen_id)
+        synonyms = [title.lower()]
+    return {
+        "screen_id": screen_id,
+        "title": sd.get("title", screen_id),
+        "domain": sd.get("domain", ""),
+        "floorplan": layout.get("floorplan", ""),
+        "route": get_screen_list_route(screen_id) or "",
+        "synonyms": synonyms,
+        "example_prompts": list(contract.get("examplePrompts") or []),
+        "filterable_fields": _collect_filterable_fields(sd),
+        "actions": _collect_command_actions(sd),
+    }
+
+
+def _build_omnibox_catalog(tenant_id: str | None = None) -> list[dict]:
+    from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
+    from app.services.studio_draft_store import list_published_definitions
 
     entries: list[dict] = []
-    for screen_id in sorted(_SCREEN_DEFINITIONS.keys()):
+    native_ids = set(_SCREEN_DEFINITIONS.keys())
+    for screen_id in sorted(native_ids):
         sd = get_screen_definition(screen_id)
         if not sd:
             continue
-        contract = sd.get("agentContract") or {}
-        layout = sd.get("layout") or {}
-        entries.append({
-            "screen_id": screen_id,
-            "title": sd.get("title", screen_id),
-            "domain": sd.get("domain", ""),
-            "floorplan": layout.get("floorplan", ""),
-            "route": get_screen_list_route(screen_id) or "",
-            "synonyms": list(contract.get("synonyms") or []),
-            "example_prompts": list(contract.get("examplePrompts") or []),
-            "filterable_fields": _collect_filterable_fields(sd),
-            "actions": _collect_command_actions(sd),
-        })
+        entries.append(_omnibox_entry(screen_id, sd))
+    if tenant_id:
+        for sd in list_published_definitions(tenant_id):
+            screen_id = str(sd.get("id") or "")
+            if not screen_id or screen_id in native_ids:
+                continue
+            hydrated = get_screen_definition(screen_id, tenant_id=tenant_id) or sd
+            entries.append(_omnibox_entry(screen_id, hydrated))
     return entries
 
 
@@ -131,8 +146,7 @@ def _build_omnibox_catalog() -> list[dict]:
 async def get_omnibox_catalog(tenant_id: str = Depends(get_tenant_id)):
     """Kompakter Masken-Katalog fuer den Omnibox-Intent-Compiler (UIX-060):
     Titel, Synonyme, Beispiel-Prompts und filterbare Felder je ScreenDefinition."""
-    _ = tenant_id
-    return _build_omnibox_catalog()
+    return _build_omnibox_catalog(tenant_id)
 
 
 @router.get(

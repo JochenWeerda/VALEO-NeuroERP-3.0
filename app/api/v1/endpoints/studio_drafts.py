@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
 from app.core.tenant import get_tenant_id
-from app.services.studio_draft_store import get_draft, list_drafts, save_draft, set_status
+from app.services.studio_draft_store import get_draft, list_drafts, save_draft, set_status, studio_run_route
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
 
@@ -144,7 +144,17 @@ def studio_publish(
         record = set_status(tenant_id, draft_id, _actor(x_actor_id), "published_temp")
     except PermissionError as error:
         raise HTTPException(status_code=403, detail=str(error)) from error
-    return {**record, **report}
+    screen_id = str(record.get("screen_id") or (record.get("definition") or {}).get("id") or "")
+    return {**record, **report, "route": studio_run_route(screen_id) if screen_id else None}
+
+
+@router.post("/drafts/{draft_id}/retire")
+def studio_retire(
+    draft_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    x_actor_id: str | None = Header(default=None, alias="X-Actor-ID"),
+) -> dict[str, Any]:
+    return _transition(draft_id, tenant_id, _actor(x_actor_id), "retired")
 
 
 def _transition(draft_id: str, tenant_id: str, actor: str, status: str) -> dict[str, Any]:

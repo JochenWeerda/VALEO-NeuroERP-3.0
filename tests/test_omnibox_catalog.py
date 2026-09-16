@@ -23,8 +23,9 @@ def test_catalog_returns_all_registry_screens():
     resp = client.get(BASE, headers=HEADERS)
     assert resp.status_code == 200, resp.text
     body = resp.json()
-    assert len(body) == len(_SCREEN_DEFINITIONS)
-    ids = {e["screen_id"] for e in body}
+    natives = [entry for entry in body if not str(entry["screen_id"]).startswith("tenant/")]
+    assert len(natives) == len(_SCREEN_DEFINITIONS)
+    ids = {e["screen_id"] for e in natives}
     assert "crm/customer-360" in ids
     assert "finance/payment-run" in ids
 
@@ -49,7 +50,11 @@ def test_catalog_entry_shape_and_synonyms():
 def test_catalog_synonyms_curated_for_all_native_screens():
     """Jede Registry-Maske hat kuratierte Synonyme (Wartungsstelle _AGENT_SYNONYMS)."""
     resp = client.get(BASE, headers=HEADERS)
-    missing = [e["screen_id"] for e in resp.json() if not e["synonyms"]]
+    missing = [
+        e["screen_id"]
+        for e in resp.json()
+        if not e["synonyms"] and not str(e["screen_id"]).startswith("tenant/")
+    ]
     assert missing == [], f"Ohne Synonyme: {missing}"
 
 
@@ -61,7 +66,11 @@ def test_catalog_list_route_curated_for_all_native_screens():
     """
     resp = client.get(BASE, headers=HEADERS)
     body = resp.json()
-    missing = [e["screen_id"] for e in body if not e["route"]]
+    missing = [
+        e["screen_id"]
+        for e in body
+        if not e["route"] and not str(e["screen_id"]).startswith("tenant/")
+    ]
     assert missing == [], f"Ohne Listen-Route: {missing}"
     # Routen sind absolute Frontend-Pfade
     assert all(e["route"].startswith("/") for e in body)

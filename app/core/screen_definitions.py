@@ -740,6 +740,75 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
     }
 
 
+def build_sales_invoices_worklist_screen_definition() -> dict[str, Any]:
+    """Native Worklist fuer die Ausgangsrechnungen (FSX-RECHNUNGSMASKE-MERIDIAN).
+
+    Die Faktura-Liste war bis heute eine handgeschriebene Seite, die auf einen
+    Endpunkt zeigte, den es nicht gab. Jetzt gibt es den Endpunkt — und die
+    Liste ist eine `worklist`: Suchen, sortieren, blaettern und auswaehlen
+    laufen serverseitig, die Spaltennavigation kommt aus dem Floorplan.
+
+    Die Spalte **Positionen** steht bewusst in der Liste: Eine Rechnung mit
+    null Positionen ist ein Befund und soll auffallen, ohne den Beleg zu
+    oeffnen.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "sales/invoices",
+        "domain": "sales",
+        "mode": "list",
+        "title": "Ausgangsrechnungen",
+        "subtitle": "Faktura / Forderungen",
+        "adapter": {"type": "native", "sourceId": "sales/invoices", "temporary": False},
+        "dataSources": [
+            {"key": "list", "endpoint": "/api/v1/sales/invoices", "pageSize": 50},
+        ],
+        "tabs": [
+            {
+                "key": "rechnungen", "label": "Rechnungen", "lazy": False, "keepAlive": True,
+                "tables": [{"key": "list", "label": "Ausgangsrechnungen", "dataSourceKey": "list",
+                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
+                            "rowRouteTemplate": "/verkauf/rechnung/{id}",
+                            "columns": [
+                                {"key": "invoice_number", "label": "Rechnungsnr.", "sortable": True, "filterable": True, "width": 150},
+                                {"key": "customer_id", "label": "Kunde", "sortable": True, "filterable": True, "width": 160},
+                                {"key": "invoice_date", "label": "Rechnungsdatum", "renderKind": "date", "sortable": True, "width": 140},
+                                {"key": "due_date", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 120},
+                                {"key": "line_count", "label": "Positionen", "numeric": True, "width": 100},
+                                {"key": "net_amount", "label": "Netto", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "gross_amount", "label": "Brutto", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120},
+                            ]}],
+            },
+        ],
+        "actions": [
+            {
+                "key": "export",
+                "label": "Liste exportieren",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "permission": "sales.rechnung.lesen",
+                "zone": "footer",
+            },
+        ],
+        "noWorkflowReason": "Die Worklist sucht und priorisiert Rechnungen; Status und Zahlungsstand haengen am Beleg und an den offenen Posten.",
+        "agentContract": {
+            "businessPurpose": "Ausgangsrechnungen suchen, nach Faelligkeit und Status priorisieren und den Beleg oeffnen.",
+            "examplePrompts": [
+                "Welche Rechnungen sind noch im Entwurf?",
+                "Zeige die Rechnungen des Kunden K-100 aus diesem Monat.",
+                "Gibt es Rechnungen ohne Positionen?",
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {"screenRoot": "[data-testid='sales-invoices-worklist']", "summaryArea": "[data-testid='mask-summary']"},
+        },
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "none",
+                   "tableProfile": "financial", "preferredMode": "desktopDense",
+                   "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
+    }
+
+
 def build_sales_invoice_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer sales/invoice (FSX-RECHNUNGSMASKE-MERIDIAN).
 
@@ -4007,6 +4076,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "lager/article-stock": build_lager_article_stock_screen_definition,
     "sales/delivery-note": build_sales_delivery_note_screen_definition,
     "sales/invoice": build_sales_invoice_screen_definition,
+    "sales/invoices": build_sales_invoices_worklist_screen_definition,
     "einkauf/purchase-order": build_einkauf_purchase_order_screen_definition,
     "finance/ap-invoice": build_finance_ap_invoice_screen_definition,
     "finance/ar-open-item": build_finance_ar_open_item_screen_definition,
@@ -4583,6 +4653,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
     "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
     "sales/invoice": ["rechnung", "ausgangsrechnung", "faktura", "sammelrechnung", "herkunft der menge"],
+    "sales/invoices": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht"],
     "sales/sales-order": ["verkaufsauftrag", "auftrag", "kundenauftrag"],
     "workspace/einkauf": ["einkauf cockpit", "einkauf startseite", "beschaffung workspace"],
     "workspace/verkauf": ["verkauf cockpit", "vertrieb startseite", "sales workspace"],
@@ -4684,6 +4755,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "qualitaet/reklamation": "/qualitaet/reklamationen",
     "sales/delivery-note": "/verkauf/lieferschein-erfassung",
     "sales/invoice": "/verkauf/rechnungen",
+    "sales/invoices": "/verkauf/rechnungen",
     "sales/sales-order": "/verkauf/auftraege",
     "workspace/einkauf": "/workspace/einkauf",
     "workspace/verkauf": "/workspace/verkauf",
@@ -4702,7 +4774,14 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
 
 def get_screen_list_route(mask_id: str) -> str | None:
     """Kuratierte Listen-Route einer Maske fuer die Omnibox-Navigation (UIX-060)."""
-    return _SCREEN_LIST_ROUTE.get(mask_id)
+    route = _SCREEN_LIST_ROUTE.get(mask_id)
+    if route:
+        return route
+    if mask_id.startswith("tenant/"):
+        from app.services.studio_draft_store import studio_run_route
+
+        return studio_run_route(mask_id)
+    return None
 
 
 def _resolve_tile_routes(definition: dict[str, Any]) -> None:
@@ -4741,11 +4820,8 @@ def _apply_season_profile(definition: dict[str, Any], today: str | None) -> None
     definition["tiles"] = sorted(tiles, key=lambda t: rank.get(t.get("key"), len(order)))
 
 
-def get_screen_definition(mask_id: str, *, today: str | None = None) -> dict[str, Any] | None:
-    builder = _SCREEN_DEFINITIONS.get(mask_id)
-    if builder is None:
-        return None
-    definition = _with_meridian_action_contract(_with_meridian_layout(builder()))
+def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: str | None) -> dict[str, Any]:
+    definition = _with_meridian_action_contract(_with_meridian_layout(definition))
     contract = definition.setdefault("agentContract", {})
     contract.setdefault("sensitiveFields", [])
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
@@ -4755,6 +4831,27 @@ def get_screen_definition(mask_id: str, *, today: str | None = None) -> dict[str
 
     attach_process_chain(definition, get_screen_list_route)
     return definition
+
+
+def get_screen_definition(
+    mask_id: str,
+    *,
+    today: str | None = None,
+    tenant_id: str | None = None,
+) -> dict[str, Any] | None:
+    builder = _SCREEN_DEFINITIONS.get(mask_id)
+    if builder is not None:
+        return _hydrate_screen_definition(builder(), mask_id, today)
+    if not tenant_id:
+        return None
+    from copy import deepcopy
+
+    from app.services.studio_draft_store import get_published_definition
+
+    published = get_published_definition(tenant_id, mask_id)
+    if published is None:
+        return None
+    return _hydrate_screen_definition(deepcopy(published), mask_id, today)
 
 
 # Public alias for inventory / governance scripts (SPEC-P1-04)

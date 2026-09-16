@@ -51,7 +51,11 @@ export async function publishStudioDraft(draftId: string, actor = 'studio-review
   const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/publish`, {}, {
     headers: { 'X-Actor-ID': actor },
   })
-  return response.data as StudioReport & { id: string; status: string }
+  return response.data as StudioReport & { id: string; status: string; route?: string }
+}
+
+export function studioRunPath(screenId: string) {
+  return `/studio/run/${screenId.replace(/\//g, '__')}`
 }
 
 function currentStudioActor(): string {

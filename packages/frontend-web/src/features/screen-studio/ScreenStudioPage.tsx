@@ -24,6 +24,7 @@ export function ScreenStudioPage(): JSX.Element {
   const [definition, dispatch] = useReducer(studioReducer, emptyStudioDraft())
   const [intent, setIntent] = useState('Lieferanten bewerten und auswählen')
   const [draftId, setDraftId] = useState<string>()
+  const [publishedRoute, setPublishedRoute] = useState<string>()
   const [report, setReport] = useState<StudioReport>()
   const [pending, setPending] = useState<string>()
   const [feedback, setFeedback] = useState<string | null>(null)
@@ -111,12 +112,18 @@ export function ScreenStudioPage(): JSX.Element {
           <Button type="button" variant="outline" disabled={!draftId || Boolean(pending)} onClick={() => void run('publish', async () => {
             const published = await publishStudioDraft(draftId ?? '')
             setReport(published)
+            setPublishedRoute(published.route)
             setFeedback(`Veröffentlicht als ${published.status}.`)
           })}>
             Freigeben
           </Button>
         </div>
         {feedback ? <p className="text-sm" role="status">{feedback}</p> : null}
+        {publishedRoute ? (
+          <a className="text-sm underline" href={publishedRoute} data-testid="studio-run-link">
+            Freigegebene Maske öffnen
+          </a>
+        ) : null}
       </section>
 
       <section className="min-w-0 overflow-auto rounded border" data-testid="studio-preview">

@@ -362,6 +362,12 @@ Status: abgeschlossen — zehn Rollout-Kandidaten mit zentralem `/api/v1/mask-ro
 - Grenzen: Adapter-Parität (Felder aus MaskConfig); generische Tab-Spalten; keine Detail-Route-Switches pro Legacy-Seite.
 - ~~**Naechster Architekturschritt:** UniversalMaskRuntime (`UIX-RUNTIME-020`…`024`)~~ → **abgeschlossen in UIX-022…030** (siehe unten).
 
+## MERIDIAN-SCREEN-STUDIO-PERSIST — Drafts in Postgres (2026-09-16)
+
+Status: **geschlossen**. `domain_shared.screen_definition_drafts` persistiert Studio-Entwürfe;
+`published_temp` hängt in `get_screen_definition` / Omnibox / `/studio/run/:screenId`.
+Native Screen-IDs bleiben unbeschattet. JSON-Schema-Drift bleibt bei UIX-090.
+
 ## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
 
 Status: **abgeschlossen** — alle Phasen implementiert, getestet und gepusht (`81d706da8` bis `e6cabb380`).

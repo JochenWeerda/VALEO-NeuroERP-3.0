@@ -201,6 +201,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/screen-studio",
+      "path": "admin/screen-studio",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/setup/index",
       "path": "admin/setup",
       "source": "auto"
@@ -4179,6 +4184,11 @@
       "module": "@/pages/strecke/vorlaeufige-streckengeschaefte",
       "path": "strecke/vorlaeufige-streckengeschaefte",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/admin/studio-run",
+      "path": "studio/run/:screenId",
+      "source": "alias"
     },
     {
       "module": "@/pages/subventionen/dashboard",

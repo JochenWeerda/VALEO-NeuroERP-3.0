@@ -36,7 +36,9 @@ progress: >-
   2026-07-07 Sicherheits-Validierungskern geliefert (isoliert, kollisionsfrei).
   2026-09-16 Cursor setzt den offenen Editor-Rest als MERIDIAN-SCREEN-STUDIO um:
   Katalog/Validate/Propose/Vier-Augen-Drafts + Live-Vorschau unter /admin/screen-studio.
-  OFFEN bleibt die Alembic-Tabelle domain_shared.screen_definition_drafts.
+  2026-09-16 Cursor persistiert Drafts (Alembic domain_shared.screen_definition_drafts)
+  und haengt published_temp in get_screen_definition / Omnibox; Owner von UIX-090 bleibt Claude.
+  OFFEN bleibt das JSON-Schema-Drift-Gate (config/screen_definition.schema.json).
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

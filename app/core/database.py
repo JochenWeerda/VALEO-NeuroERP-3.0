@@ -101,6 +101,12 @@ def create_tables():
         except Exception as e:
             logger.warning(f"L3C models import failed: {e}")
 
+        try:
+            from app.infrastructure.models import studio_models  # noqa: F401
+            logger.info("Studio draft models imported")
+        except Exception as e:
+            logger.warning(f"Studio draft models import failed: {e}")
+
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
     except Exception as e:

@@ -1,0 +1,48 @@
+slice_id: MERIDIAN-SCREEN-STUDIO-PERSIST-20260916
+title: Studio-Drafts persistieren und published_temp in den Laufzeitkatalog
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-09-16
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Folge von MERIDIAN-SCREEN-STUDIO-20260916. Claude bleibt Owner von UIX-090
+  und von FSX-Dateien. Kein Lieferschein, keine sales-invoice-Dateien.
+goal: >-
+  Studio-Entwuerfe liegen in PostgreSQL. Freigegebene tenant/-Masken sind
+  ueber get_screen_definition, den Masken-Endpoint und den Omnibox-Katalog
+  erreichbar, ohne native Screen-IDs zu beschatten.
+file_ownership:
+  - alembic/versions/screen_definition_drafts_20260916.py
+  - app/infrastructure/models/studio_models.py
+  - app/services/studio_draft_store.py
+  - app/api/v1/endpoints/studio_drafts.py
+  - app/core/screen_definitions.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - app/api/v1/endpoints/mask_registry.py
+  - packages/frontend-web/src/pages/admin/studio-run.tsx
+  - tests/test_meridian_screen_studio_api.py
+  - tests/test_meridian_screen_studio_persistence.py
+  - docs/agent-ops/slices/MERIDIAN-SCREEN-STUDIO-PERSIST-20260916.yaml
+acceptance:
+  - Tabelle domain_shared.screen_definition_drafts existiert per Alembic.
+  - Draft-CRUD und Vier-Augen funktionieren gegen Postgres (require_db).
+  - published_temp erscheint in GET /masks/{id}/screen-definition und Omnibox.
+  - Native Screen-IDs bleiben unbeschattet, auch wenn ein Draft dieselbe ID hat.
+  - Tenant-Isolation gilt fuer Persistenz und Katalog-Lookup.
+tests:
+  - pytest tests/test_meridian_screen_studio_api.py tests/test_uix090_studio_validation.py --noconftest --no-cov
+  - pytest tests/test_meridian_screen_studio_persistence.py --no-cov
+  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/features/screen-studio
+risks:
+  - JSON-Schema-Drift-Gate (config/screen_definition.schema.json) bleibt bei UIX-090.
+  - Route-Generator muss studio/run/:screenId in den Tree schreiben.
+ai_harness:
+  fachlicher_vertrag: Freigegebene Studio-Masken sind normale temporaere SDs.
+  architektur_vertrag: Native Builder zuerst, danach published_temp je Tenant.
+  daten_vertrag: UNIQUE (tenant_id, screen_id) in domain_shared.screen_definition_drafts.
+  test_vertrag: Memory-Unit plus require_db Persistenz, kein MagicMock-DB.
+  security_vertrag: Vier-Augen und Tenant-Isolation bleiben serverseitig.
+  betriebs_vertrag: alembic upgrade head.
+  dokumentations_vertrag: Slice, UIX-090-Fortschritt, Meridian-Status.
+external_gates:
+  - not_applicable

@@ -49,6 +49,10 @@
       "path": "admin/screen-studio"
     },
     {
+      "module": "@/pages/admin/studio-run",
+      "path": "studio/run/:screenId"
+    },
+    {
       "module": "@/pages/admin/compliance-dashboard",
       "path": "admin/compliance"
     },

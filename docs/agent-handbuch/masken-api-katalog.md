@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (70 Masken).
+> Generiert aus `app/core/screen_definitions.py` (71 Masken).
 
 ## Übersicht
 
@@ -77,6 +77,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
+| `sales/invoices` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/sales/invoices/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
 | `schnittstelle/legacy-adapter-monitor` | Standard-/Unimet-Adapter | integration | niedrig | — | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
 | `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
@@ -2446,6 +2447,41 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Woher stammt die berechnete Menge von Position 2 der Rechnung {entity_id}?
 - Welche Positionen der Rechnung {entity_id} sind nicht vollstaendig durch Zuordnungen belegt?
 - Aus welchen Lieferscheinen ist Rechnung {entity_id} entstanden?
+
+---
+
+### `sales/invoices` — Ausgangsrechnungen
+
+**Zweck:** Ausgangsrechnungen suchen, nach Faelligkeit und Status priorisieren und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/sales/invoices/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/sales/invoices/agent-contract` |
+| Readiness | `GET /api/v1/masks/sales/invoices/readiness` |
+| Rollout-Route | `/mask-rollout/sales__invoices/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/sales/invoices`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Rechnungen sind noch im Entwurf?
+- Zeige die Rechnungen des Kunden K-100 aus diesem Monat.
+- Gibt es Rechnungen ohne Positionen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | Liste exportieren | safe | nein | `—` |
 
 ---
 

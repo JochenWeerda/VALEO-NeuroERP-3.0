@@ -2970,6 +2970,35 @@
       ]
     },
     {
+      "mask_id": "sales/invoices",
+      "title": "Ausgangsrechnungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/sales__invoices/:entityId",
+      "agent_contract_url": "/api/v1/masks/sales/invoices/agent-contract",
+      "screen_definition_url": "/api/v1/masks/sales/invoices/screen-definition",
+      "readiness_url": "/api/v1/masks/sales/invoices/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "Liste exportieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.rechnung.lesen",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
       "mask_id": "sales/sales-order",
       "title": "Verkaufsauftrag",
       "domain": "sales",

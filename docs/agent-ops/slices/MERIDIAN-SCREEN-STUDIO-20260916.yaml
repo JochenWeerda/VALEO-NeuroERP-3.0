@@ -31,8 +31,8 @@ tests:
   - pytest tests/test_uix090_studio_validation.py tests/test_meridian_screen_studio_api.py --noconftest --no-cov
   - pnpm --dir packages/frontend-web exec vitest run src/__tests__/features/screen-studio/studio-reducer.test.ts src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx
 risks:
-  - Drafts sind prozesslokal, bis die Alembic-Tabelle aus UIX-090 nachzieht.
-  - published_temp haengt die Maske noch nicht in die native Registry.
+  - JSON-Schema der SD aus schema.ts plus CI-Drift bleibt bei UIX-090.
+  - Playwright-Abnahme-Szenario fuer Lieferanten-Bewertung ist Folgearbeit.
 ai_harness:
   fachlicher_vertrag: Studio-SDs sind deklarativ und durchlaufen dieselben Gates.
   architektur_vertrag: ScreenDefinition -> RenderPlan -> UniversalMaskRenderer.
