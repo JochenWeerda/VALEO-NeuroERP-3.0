@@ -1777,7 +1777,7 @@
       "path": "sales/orders-modern"
     },
     {
-      "module": "@/pages/sales/rechnungen-liste",
+      "module": "@/pages/verkauf/rechnungen-worklist",
       "path": "sales/rechnungen"
     },
     {

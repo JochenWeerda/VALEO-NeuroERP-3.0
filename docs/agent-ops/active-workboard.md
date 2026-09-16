@@ -55,6 +55,15 @@ Filterplan ergibt 422 statt stiller Wirkungslosigkeit.
 **Abnahme:** 14 Endpunkt- und 12 Dienst-Tests gruen gegen die echte Datenbank,
 5 Vitest auf die Seite, `tsc` und eslint ohne eigenen Befund.
 
+**Nachtrag, und er hat sich gelohnt:** Die Browser-Abnahme
+(`tests/e2e/fsx-rechnungsmaske.spec.ts`, beide Faelle gruen) hat gezeigt, dass
+mein erster Alias-Wechsel **nicht gewirkt** hat: `/verkauf/rechnungen` zeigte
+weiter die alte Seite. Der Grund ist die zweite Quelle — `route-aliases.json`
+fuehrt `sales/rechnungen` ebenfalls, und sie gewinnt gegen
+`alias-groups/generated/sales.ts`. Beide stehen jetzt auf der Worklist. Ohne
+den Browserlauf waere der Slice als „angeschlossen" durchgegangen, waehrend
+niemand die neue Maske gesehen haette.
+
 **Zwei fremde Gates weiterhin rot, unangetastet:**
 `features/screen-studio/studio-defaults.ts` bricht `tsc` (AgentMaskContract
 unvollstaendig), und `studio_drafts.py` hat inzwischen **9** Routen ohne

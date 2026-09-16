@@ -5516,8 +5516,8 @@ const appRoute0770 = createRoute({
 const appRoute0771 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "sales/rechnungen",
-  component: () => renderPage("@/pages/sales/rechnungen-liste"),
-  staticData: {"breadcrumb":"Rechnungen","module":"@/pages/sales/rechnungen-liste","legacyPath":"/sales/rechnungen"},
+  component: () => renderPage("@/pages/verkauf/rechnungen-worklist"),
+  staticData: {"breadcrumb":"Rechnungen","module":"@/pages/verkauf/rechnungen-worklist","legacyPath":"/sales/rechnungen"},
 })
 
 const appRoute0772 = createRoute({
@@ -11544,7 +11544,7 @@ export const generatedRouteInventory = [
     "source": "alias"
   },
   {
-    "module": "@/pages/sales/rechnungen-liste",
+    "module": "@/pages/verkauf/rechnungen-worklist",
     "path": "sales/rechnungen",
     "source": "alias"
   },
