@@ -9,9 +9,10 @@ export interface NavigationColumn {
 }
 
 /** Business navigation only. Audit/copilot rails are not navigation columns. */
-export function ColumnLayoutRenderer({ pattern, columns }: {
+export function ColumnLayoutRenderer({ pattern, columns, source }: {
   pattern: ScreenColumnNavigation
   columns: NavigationColumn[]
+  source?: 'derived' | 'explicit'
 }): JSX.Element {
   const maximum = pattern === 'listDetailDetail' ? 3 : pattern === 'listDetail' ? 2 : 1
   const lastColumn = columns[columns.length - 1]
@@ -49,7 +50,7 @@ export function ColumnLayoutRenderer({ pattern, columns }: {
   const grid = visible.length === 3 ? 'minmax(260px, 1fr) minmax(360px, 1.4fr) minmax(320px, 1.2fr)'
     : visible.length === 2 ? 'minmax(280px, 1fr) minmax(400px, 1.6fr)' : 'minmax(0, 1fr)'
   return (
-    <div ref={root} data-column-navigation={pattern} data-visible-columns={visible.length}>
+    <div ref={root} data-column-navigation={pattern} data-column-source={source} data-visible-columns={visible.length}>
       <nav aria-label="Ansichten" className="mb-2 flex flex-wrap items-center gap-2">
         {active > 0 && <Button type="button" variant="outline" size="sm" onClick={() => setActiveKey(columns[active - 1].key)}>Zurück zu {columns[active - 1].title}</Button>}
         {columns.map((column, index) => <Button key={column.key} type="button" size="sm"

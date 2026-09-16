@@ -87,7 +87,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-091-CONTRACT | Katalog+Mitgliedschaft in `get_screen_definition`, Readiness-Advisory, Quality-Gate | ✅ | pytest `test_uix091_process_chain_contract.py`; `check_process_chains.py` |
 | UIX-091-ROLLOUT | 22/22 Domain-SDs klassifiziert; `noProcessChainReason`; k3 Auftragsbestaetigung | ✅ | Inventur-Test; `check_process_chains.py` |
 | UIX-091-GATE | `missing_process_chain` mandatory; Roh-SD ohne Kette/Reason blockiert | ✅ | pytest Block-Fall + Registry-Gate |
-| MERIDIAN-FRAMEWORK-SYSTEMWIDE | Floorplans + adaptive 1/2/3-Spalten; Tabellenfehler ≠ leer | in Arbeit | Vitest `framework-navigation.test.tsx` |
+| MERIDIAN-FRAMEWORK-SYSTEMWIDE | Floorplans + adaptive 1/2/3-Spalten; Tabellenfehler ≠ leer | ✅ | Vitest `framework-navigation.test.tsx`; pytest `test_meridian_column_navigation_inventory.py` |
 | L3-HABIT-BRIDGE-001 | Herstellerneutrale Desktop-Gewohnheitsvertraege + 3 Referenzmasken | ✅ technisch abgeschlossen, Human Review vor Rollout | 125 Mask-Builder/RenderPlan-Tests, 4 Backend-Tests, 12 Visual-Audits; ADR-056 + Paritaetsmatrix |
 
 | L3-MDE-INBOX-003 | Native MDE-Worklist + zentrale statusabhaengige Tabellenzeilen-Aktionen | technisch abgeschlossen, Provider-Pilot extern | `schnittstelle/mde-inbox`, Quarantaene/Retry-Audit, ADR-057 |

@@ -18,6 +18,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   onResetOverlay,
   tableLoadError,
   onRetry,
+  hideTableKeys,
+  tableSelection,
 }: {
   plan: RenderPlan
   tabKey: string
@@ -30,6 +32,11 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   onResetOverlay?: () => void | Promise<void>
   tableLoadError?: (tableKey: string) => string | undefined
   onRetry?: () => void
+  hideTableKeys?: Set<string>
+  tableSelection?: Record<string, {
+    selectedRowKey?: string
+    onRowSelect?: (_row: Record<string, unknown>) => void
+  }>
 }): JSX.Element {
   const content = plan.tabContent[tabKey]
   const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
@@ -46,7 +53,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
       />
       {(content?.tableKeys ?? []).map((tableKey) => {
         const tablePlan = plan.tablesByKey[tableKey]
-        if (!tablePlan) return null
+        if (!tablePlan || hideTableKeys?.has(tableKey)) return null
+        const selection = tableSelection?.[tableKey]
         return (
           <FastTableRenderer
             key={tableKey}
@@ -63,6 +71,8 @@ export const FastTabRenderer = memo(function FastTabRenderer({
             onResetOverlay={onResetOverlay}
             errorMessage={tableLoadError?.(tableKey)}
             onRetry={onRetry}
+            selectedRowKey={selection?.selectedRowKey}
+            onRowSelect={selection?.onRowSelect}
           />
         )
       })}

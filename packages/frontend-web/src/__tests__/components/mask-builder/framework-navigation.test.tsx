@@ -15,6 +15,7 @@ beforeEach(() => {
       resize = width => callback([{ contentRect: { width } } as ResizeObserverEntry], {} as ResizeObserver)
     }
     observe() {}
+    unobserve() {}
     disconnect() {}
   })
 })
@@ -113,5 +114,52 @@ describe('Table load errors', () => {
     expect(screen.queryByText('Keine Eintraege vorhanden.')).not.toBeInTheDocument()
     rerender(<FastTableRenderer table={table} rows={[]} />)
     expect(screen.getByText('Keine Eintraege vorhanden.')).toBeInTheDocument()
+  })
+})
+
+describe('Derived worklist columns', () => {
+  const definition: ScreenDefinition = {
+    id: 'test/derived-worklist',
+    schemaVersion: 1,
+    domain: 'crm',
+    mode: 'list',
+    title: 'Analysen',
+    layout: { floorplan: 'worklist', contextRail: 'none' },
+    tables: [{
+      key: 'list',
+      label: 'Analysen',
+      columns: [{ key: 'probe_nr', label: 'Probe' }, { key: 'bezeichnung', label: 'Material' }],
+      rowRouteTemplate: '/analysen/{id}',
+      pageSize: 25,
+      virtualized: true,
+      rowHeight: 44,
+    }],
+  }
+
+  it('selects a row beside the list and opens the full view from the preview', async () => {
+    const pushState = vi.spyOn(window.history, 'pushState')
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <UniversalMaskRenderer
+            plan={compileRenderPlanFromScreenDefinition(definition)}
+            tables={{
+              list: [
+                { id: 'a1', probe_nr: 'P-1', bezeichnung: 'Grassilage' },
+                { id: 'a2', probe_nr: 'P-2', bezeichnung: 'Maissilage' },
+              ],
+            }}
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    expect(screen.getByTestId('screen-test/derived-worklist')).toHaveAttribute('data-column-navigation', 'listDetail')
+    expect(document.querySelector('[data-column-source]')).toHaveAttribute('data-column-source', 'derived')
+    await waitFor(() => expect(screen.getByTestId('selected-record-panel')).toHaveTextContent('Grassilage'))
+    fireEvent.click(screen.getByText('Maissilage'))
+    expect(screen.getByTestId('selected-record-panel')).toHaveTextContent('Maissilage')
+    fireEvent.click(screen.getByRole('button', { name: 'In Vollansicht öffnen' }))
+    expect(pushState).toHaveBeenCalledWith(null, '', '/analysen/a2')
+    pushState.mockRestore()
   })
 })

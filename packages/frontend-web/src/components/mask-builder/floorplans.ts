@@ -1,4 +1,4 @@
-import type { ScreenFloorplan } from './schema'
+import type { ScreenColumnNavigation, ScreenFloorplan } from './schema'
 
 /** One vocabulary for page purpose; navigation columns are an independent axis. */
 export const FLOORPLAN_RULES: Record<ScreenFloorplan, { label: string; purpose: string; allowsColumns: boolean }> = {
@@ -11,3 +11,17 @@ export const FLOORPLAN_RULES: Record<ScreenFloorplan, { label: string; purpose: 
 }
 
 export const FLOORPLAN_IDS = Object.keys(FLOORPLAN_RULES) as ScreenFloorplan[]
+
+const LIST_FLOORPLANS = new Set<ScreenFloorplan>(['worklist', 'analyticalList'])
+
+/** Dense booking screens stay full width. List floors with tables open listDetail unless declared. */
+export function defaultColumnNavigation(
+  floorplan: ScreenFloorplan,
+  hasTables: boolean,
+  declared?: ScreenColumnNavigation,
+): ScreenColumnNavigation {
+  if (!FLOORPLAN_RULES[floorplan].allowsColumns) return 'single'
+  if (declared) return declared
+  if (LIST_FLOORPLANS.has(floorplan) && hasTables) return 'listDetail'
+  return 'single'
+}

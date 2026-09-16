@@ -1,6 +1,7 @@
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
+import { DerivedColumnLayout, shouldDeriveColumns } from './renderers/DerivedColumnLayout'
 import { MessagePanelRenderer, type ScreenMessage } from './renderers/MessagePanelRenderer'
 import { LazyTabs } from '@/components/ui/LazyTabs'
 import { cn } from '@/lib/utils'
@@ -225,6 +226,7 @@ function RenderFromPlan({
   const effectiveEntityId = entityId ?? String(effectivePayload.id ?? effectivePayload.entity_id ?? '')
   const headerActions = plan.actions.filter((action) => action.zone === 'header')
   const footerActions = plan.actions.filter((action) => action.zone !== 'header')
+  const deriveColumns = shouldDeriveColumns(plan, columns)
 
   return (
     <FormStateContext.Provider value={formState}>
@@ -238,6 +240,7 @@ function RenderFromPlan({
       data-mobile-layout={plan.shell.mobileMode}
       data-render-plan-cache-key={plan.cacheKey}
       data-floorplan={plan.shell.floorplan}
+      data-column-navigation={plan.shell.columnNavigation ?? 'single'}
       data-density={plan.shell.density}
       data-context-rail={plan.shell.contextRail}
       data-context-rail-sections={plan.shell.contextRailSections.join(',')}
@@ -263,7 +266,25 @@ function RenderFromPlan({
           if (field?.tabKey) setActiveTab(field.tabKey)
           setLocateField(key)
         }} />
-      {columns && <ColumnLayoutRenderer pattern={plan.shell.columnNavigation ?? 'single'} columns={columns} />}
+      {columns ? <ColumnLayoutRenderer pattern={plan.shell.columnNavigation ?? 'single'} columns={columns} source="explicit" /> : null}
+      {deriveColumns ? (
+        <DerivedColumnLayout
+          plan={plan}
+          payload={effectivePayload}
+          tables={tables}
+          tableQueryStates={tableQueryStates}
+          tableTotals={tableTotals}
+          onTableQueryChange={onTableQueryChange}
+          onOverlayChange={onOverlayChange}
+          onOverlayReset={onOverlayReset}
+          onTabChange={onTabChange}
+          onAction={onAction}
+          activeTab={activeTab}
+          onActiveTabChange={setActiveTab}
+          tableLoadError={tableLoadError}
+          onRetry={onRetry}
+        />
+      ) : null}
       {plan.shell.processRibbon ? <ProcessRibbonRenderer ribbon={plan.shell.processRibbon} /> : null}
 
       <WorkflowPanelRenderer
@@ -279,6 +300,8 @@ function RenderFromPlan({
       <TwinReadModelRenderer twin={plan.twin} />
       {plan.sourceProposals ? <SourceProposalRenderer context={effectivePayload[plan.sourceProposals.contextKey]} /> : null}
 
+      {deriveColumns ? null : (
+        <>
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}
         fieldsByKey={plan.fieldsByKey}
@@ -339,6 +362,8 @@ function RenderFromPlan({
             ),
           }))}
         />
+      )}
+        </>
       )}
 
       {plan.shell.summaryPlacement === 'footer' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}

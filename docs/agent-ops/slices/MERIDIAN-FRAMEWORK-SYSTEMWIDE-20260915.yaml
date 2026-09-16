@@ -1,7 +1,7 @@
 slice_id: MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915
 title: Verbindliche Floorplans und adaptive Spaltennavigation
 owner: Cursor
-status: in_arbeit
+status: abgeschlossen
 created_at: 2026-09-15
 spec: docs/design/valeo-meridian-experience.md
 coordination: >-
@@ -19,6 +19,7 @@ file_ownership:
   - packages/frontend-web/src/components/mask-builder/renderers/ColumnLayoutRenderer.tsx
   - packages/frontend-web/src/components/mask-builder/renderers/MessagePanelRenderer.tsx
   - packages/frontend-web/src/components/mask-builder/renderers/FastTableRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/DerivedColumnLayout.tsx
   - packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx
   - packages/frontend-web/src/pages/crm/kunden-schnellauswahl.tsx
   - docs/design/valeo-meridian-experience.md
@@ -28,9 +29,13 @@ acceptance:
   - Spaltennavigation haelt Suche und Eingaben beim Zurueckwechseln.
   - Feldnavigation aus Meldungen oeffnet das Register und fokussiert das Feld.
   - Tabellen-Ladefehler zeigen eine Fehlermeldung, nicht „Keine Eintraege“.
-  - Erste reale Maske: Kunden-Schnellauswahl, lesend.
+  - Compiler setzt worklist/analyticalList mit Tabellen auf listDetail.
+  - UniversalMaskRenderer leitet Spalten aus dem Plan ab; kein Einzel-JSX je Worklist.
+  - Native Worklists (z. B. futtermittel/analysen) und Kunden-Schnellauswahl angeschlossen.
+  - Inventur: jede native SD hat columnNavigation.
 tests:
-  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/mask-builder/framework-navigation.test.tsx
+  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/mask-builder/framework-navigation.test.tsx src/__tests__/render-plan/schema-compiler.test.ts
+  - pytest tests/test_meridian_column_navigation_inventory.py
 risks:
   - Generator-Ready ist keine visuelle Abnahme.
   - Weitere Masken brauchen bewussten Anschluss, kein Blindersatz.

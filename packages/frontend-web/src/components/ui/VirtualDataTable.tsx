@@ -20,6 +20,8 @@ interface VirtualDataTableProps<T extends Record<string, unknown>> {
   loading?: boolean
   emptyMessage?: string
   onRowClick?: (_row: T) => void
+  selectedRowKey?: string
+  getRowKey?: (_row: T, _index: number) => string
   sortColumn?: string
   sortDir?: 'asc' | 'desc'
   onSortChange?: (_columnKey: string, _dir: 'asc' | 'desc') => void
@@ -33,6 +35,8 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
   loading = false,
   emptyMessage = 'Keine Eintraege vorhanden.',
   onRowClick,
+  selectedRowKey,
+  getRowKey,
   sortColumn,
   sortDir,
   onSortChange,
@@ -129,10 +133,15 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
             <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
               {renderedItems.map((virtualRow) => {
                 const row = data[virtualRow.index]
+                const rowKey = getRowKey?.(row, virtualRow.index) ?? String(row.id ?? virtualRow.index)
+                const selected = Boolean(selectedRowKey) && rowKey === selectedRowKey
                 return (
                   <div
                     key={virtualRow.key}
-                    className="absolute left-0 grid w-full border-b bg-background text-left text-sm hover:bg-primary/5 focus:outline-hidden focus:ring-2 focus:ring-primary/40"
+                    className={cn(
+                      'absolute left-0 grid w-full border-b bg-background text-left text-sm hover:bg-primary/5 focus:outline-hidden focus:ring-2 focus:ring-primary/40',
+                      selected && 'bg-muted',
+                    )}
                     style={{
                       gridTemplateColumns,
                       height: virtualRow.size,
@@ -140,6 +149,8 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
                     }}
                     onClick={() => onRowClick?.(row)}
                     role={onRowClick ? 'button' : 'row'}
+                    aria-selected={selected || undefined}
+                    data-selected={selected || undefined}
                     tabIndex={onRowClick ? 0 : undefined}
                     onKeyDown={onRowClick ? (event) => {
                       if (event.key === 'Enter' || event.key === ' ') {

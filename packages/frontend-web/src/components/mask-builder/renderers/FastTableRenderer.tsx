@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
 import type { RenderColumnKind, RenderTablePlan } from '../render-plan/types'
 import type { FilterPlan, TableQueryState } from '../runtime/types'
+import { navigateRowRoute, rowIdentity } from './row-identity'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -21,6 +22,8 @@ interface FastTableRendererProps {
   onRowAction?: (_actionKey: string, _row: Record<string, unknown>) => void | Promise<void>
   errorMessage?: string
   onRetry?: () => void
+  selectedRowKey?: string
+  onRowSelect?: (_row: Record<string, unknown>) => void
 }
 
 function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
@@ -121,6 +124,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   onRowAction,
   errorMessage,
   onRetry,
+  selectedRowKey,
+  onRowSelect,
 }: FastTableRendererProps): JSX.Element {
   const isServerPaged = table.serverPagination && Boolean(onQueryChange)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
@@ -426,17 +431,13 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 ? (colKey, dir) => onQueryChange({ sort: colKey, sortDir: dir })
                 : undefined
             }
-            onRowClick={table.rowRouteTemplate
-              ? (row) => {
-                  const target = table.rowRouteTemplate?.replace(/\{([^}]+)\}/g, (_match, key: string) =>
-                    encodeURIComponent(String(row[key] ?? '')),
-                  )
-                  if (target) {
-                    window.history.pushState(null, '', target)
-                    window.dispatchEvent(new PopStateEvent('popstate'))
-                  }
-                }
-              : undefined}
+            onRowClick={onRowSelect
+              ? (row) => onRowSelect(row)
+              : table.rowRouteTemplate
+                ? (row) => navigateRowRoute(table.rowRouteTemplate, row)
+                : undefined}
+            selectedRowKey={selectedRowKey}
+            getRowKey={(row, index) => rowIdentity(row, index)}
             columns={renderedColumns}
           />
         )}

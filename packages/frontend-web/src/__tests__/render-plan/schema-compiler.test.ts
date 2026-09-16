@@ -224,6 +224,42 @@ describe('schema-compiler', () => {
     ]))
   })
 
+  it('defaults worklist tables to listDetail and keeps booking and object pages single', () => {
+    const worklist = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/customer-worklist',
+      mode: 'list',
+      layout: { floorplan: 'worklist', contextRail: 'none' },
+      tables: [{ key: 'customers', label: 'Kunden', columns: [{ key: 'nr', label: 'Nr' }] }],
+    })
+    expect(worklist.shell.columnNavigation).toBe('listDetail')
+
+    const analytical = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/customer-analytics',
+      mode: 'list',
+      layout: { floorplan: 'analyticalList', contextRail: 'none' },
+      tables: [{ key: 'kpis', label: 'Kennzahlen', columns: [{ key: 'nr', label: 'Nr' }] }],
+    })
+    expect(analytical.shell.columnNavigation).toBe('listDetail')
+
+    const objectPage = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/customer-object-tables',
+      layout: { floorplan: 'objectPage' },
+      tables: [{ key: 'orders', label: 'Aufträge', columns: [{ key: 'nr', label: 'Nr' }] }],
+    })
+    expect(objectPage.shell.columnNavigation).toBe('single')
+
+    const transaction = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'lager/weighing',
+      layout: { floorplan: 'transaction', contextRail: 'audit' },
+      tables: [{ key: 'lines', label: 'Positionen', columns: [{ key: 'nr', label: 'Nr' }] }],
+    })
+    expect(transaction.shell.columnNavigation).toBe('single')
+  })
+
   it('compiles voice capability into the RenderPlan shell', () => {
     const plan = compileRenderPlanFromScreenDefinition({
       ...crmSchema(),

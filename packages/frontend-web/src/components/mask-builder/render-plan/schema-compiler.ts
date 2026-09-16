@@ -9,7 +9,7 @@ import {
   type ScreenTableProfile,
   type ScreenTileDefinition,
 } from '../schema'
-import { FLOORPLAN_RULES } from '../floorplans'
+import { defaultColumnNavigation, FLOORPLAN_RULES } from '../floorplans'
 import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
@@ -296,7 +296,11 @@ export function compileRenderPlan(
       mobileMode: schema.layout?.mobileMode ?? 'mobileStack',
       touchTargetPx: schema.layout?.touchTargetPx ?? 44,
       floorplan,
-      columnNavigation: schema.layout?.columnNavigation ?? 'single',
+      columnNavigation: defaultColumnNavigation(
+        floorplan,
+        Object.keys(tablesByKey).length > 0,
+        schema.layout?.columnNavigation,
+      ),
       density,
       contextRail,
       contextRailSections,

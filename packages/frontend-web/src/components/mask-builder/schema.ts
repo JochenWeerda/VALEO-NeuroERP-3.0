@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { FLOORPLAN_RULES } from './floorplans'
 
-export { FLOORPLAN_IDS, FLOORPLAN_RULES } from './floorplans'
+export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation } from './floorplans'
 
 export type ScreenDomain =
   | 'crm'

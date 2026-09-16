@@ -85,10 +85,22 @@ die Spalten im DOM bleiben. Unter 900 px und in der Vollansicht ist nur
 eine Spalte sichtbar; dazwischen zwei, ab 1440 px drei. Audit, Hinweise
 und Copilot bleiben `contextRail`.
 
-Erste angeschlossene Maske: lesende Kunden-Schnellauswahl
-(`/crm/kunden-schnellauswahl`, `listDetail`). Tabellen-Ladefehler laufen
-über `MessagePanelRenderer` und den Fast-Table-Renderer; sie dürfen nicht
-wie eine leere Trefferliste aussehen.
+Der Compiler setzt `columnNavigation` zentral: `worklist` und
+`analyticalList` mit Tabellen werden `listDetail`, sofern die
+ScreenDefinition nichts anderes erklärt. `transaction`, `cockpit` und
+`wizard` bleiben immer `single`. `objectPage` bleibt `single`, bis eine
+Maske `listDetail` oder `listDetailDetail` ausdrücklich setzt. Der
+`UniversalMaskRenderer` leitet die Spalten aus dem Plan ab — ohne
+Einzel-JSX je Maske. Zeilenklick wählt; `In Vollansicht öffnen` folgt
+`rowRouteTemplate`. Explizite `columns` (Kunden-Schnellauswahl) bleiben
+Vorrang.
+
+Erste Referenzmasken: lesende Kunden-Schnellauswahl
+(`/crm/kunden-schnellauswahl`, explizites `listDetail`) und die native
+Futteranalyse-Worklist (`futtermittel/analysen`, abgeleitet).
+Tabellen-Ladefehler laufen über `MessagePanelRenderer` und den
+Fast-Table-Renderer; sie dürfen nicht wie eine leere Trefferliste
+aussehen. Coverage: `tests/test_meridian_column_navigation_inventory.py`.
 
 Der `RenderPlan.shell` uebernimmt diese Felder zentral. Renderer lesen den Plan
 und erzeugen daraus Header, Aktionshierarchie, Summary, Tabs, Tabellenprofil,

@@ -4344,6 +4344,18 @@ def _has_tables(definition: dict[str, Any]) -> bool:
     return any(tab.get("tables") for tab in definition.get("tabs") or [])
 
 
+_MERIDIAN_COLUMNS_FORBIDDEN = {"transaction", "cockpit", "wizard"}
+_MERIDIAN_LIST_FLOORPLANS = {"worklist", "analyticalList"}
+
+
+def _default_column_navigation(floorplan: str, has_tables: bool) -> str:
+    if floorplan in _MERIDIAN_COLUMNS_FORBIDDEN:
+        return "single"
+    if floorplan in _MERIDIAN_LIST_FLOORPLANS and has_tables:
+        return "listDetail"
+    return "single"
+
+
 _MERIDIAN_TABLE_PROFILE_ALIASES = {
     "crm": "standard",
     "document": "standard",
@@ -4381,6 +4393,14 @@ def _with_meridian_layout(definition: dict[str, Any]) -> dict[str, Any]:
     if layout.get("tableProfile"):
         layout["tableProfile"] = _MERIDIAN_TABLE_PROFILE_ALIASES.get(
             layout["tableProfile"], layout["tableProfile"]
+        )
+    resolved_floorplan = layout["floorplan"]
+    if resolved_floorplan in _MERIDIAN_COLUMNS_FORBIDDEN:
+        layout["columnNavigation"] = "single"
+    else:
+        layout.setdefault(
+            "columnNavigation",
+            _default_column_navigation(resolved_floorplan, _has_tables(definition)),
         )
     definition["layout"] = layout
     return definition
