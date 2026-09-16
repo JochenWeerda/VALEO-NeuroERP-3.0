@@ -80,8 +80,18 @@ def test_danger_level_erhoehen_erlaubt():
 
 
 def test_forbidden_for_agents_aufheben_verboten():
-    draft = _draft(actions=[{"key": "stornieren", "dangerLevel": "high", "forbiddenForAgents": False}])
+    draft = _draft(actions=[{"key": "stornieren", "dangerLevel": "high", "forbiddenForAgents": False, "requiresConfirmation": True}])
     assert any(x.startswith("action_forbiddenForAgents_aufgehoben") for x in _v(draft))
+
+
+def test_high_ohne_confirmation_verboten():
+    draft = _draft(actions=[{"key": "stornieren", "dangerLevel": "high", "forbiddenForAgents": True}])
+    assert any(x.startswith("action_confirmation_fehlt") for x in _v(draft))
+
+
+def test_high_mit_confirmation_erlaubt():
+    draft = _draft(actions=[{"key": "stornieren", "dangerLevel": "high", "forbiddenForAgents": True, "requiresConfirmation": True}])
+    assert not any(x.startswith("action_confirmation_fehlt") for x in _v(draft))
 
 
 def test_pflichtfeld_fehlt_verboten():

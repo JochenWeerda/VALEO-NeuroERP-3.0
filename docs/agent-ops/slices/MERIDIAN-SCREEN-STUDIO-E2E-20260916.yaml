@@ -1,0 +1,40 @@
+slice_id: MERIDIAN-SCREEN-STUDIO-E2E-20260916
+title: Playwright-Abnahme Masken-Studio Lieferanten-Bewertung
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-09-16
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Folge von MERIDIAN-SCREEN-STUDIO-PERSIST. Claude bleibt Owner von UIX-090
+  (JSON-Schema-Drift) und von FSX-/Rechnungsdateien. Kein Lieferschein.
+goal: >-
+  Das UIX-090-Abnahme-Szenario laeuft im Browser: Lieferanten-Bewertung
+  erzeugen, Gates gruen, Vier-Augen-Freigabe, published_temp oeffnen.
+  High/critical ohne Confirmation wird serverseitig abgelehnt.
+file_ownership:
+  - packages/frontend-web/tests/e2e/meridian-screen-studio.spec.ts
+  - packages/frontend-web/src/features/screen-studio/ScreenStudioPage.tsx
+  - app/services/studio_validation.py
+  - tests/test_uix090_studio_validation.py
+  - docs/agent-ops/slices/MERIDIAN-SCREEN-STUDIO-E2E-20260916.yaml
+acceptance:
+  - Playwright oeffnet /admin/screen-studio, speichert, gibt frei, landet auf /studio/run.
+  - Freigeben bleibt gesperrt, solange Gates rot oder kein Draft existiert.
+  - high/critical ohne requiresConfirmation wird von validate_studio_draft abgelehnt.
+tests:
+  - pytest tests/test_uix090_studio_validation.py tests/test_meridian_screen_studio_api.py --noconftest --no-cov
+  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/features/screen-studio
+  - pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-screen-studio.spec.ts --project=chromium
+risks:
+  - Playwright braucht Vite plus erreichbares /api/v1; sonst skip.
+  - JSON-Schema-Drift bleibt bei UIX-090.
+ai_harness:
+  fachlicher_vertrag: Abnahme-Szenario aus uix-m4-spec.md.
+  architektur_vertrag: ScreenDefinition -> RenderPlan -> UniversalMaskRenderer.
+  daten_vertrag: Nur tenant/<slug>; native IDs unbeschattet.
+  test_vertrag: Playwright plus bestehende Studio-pytest/Vitest.
+  security_vertrag: Confirmation fuer high/critical serverseitig.
+  betriebs_vertrag: Kein Deployment.
+  dokumentations_vertrag: Slice, Workboard, Runtime-Status.
+external_gates:
+  - not_applicable

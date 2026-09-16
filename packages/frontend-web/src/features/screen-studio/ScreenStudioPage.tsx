@@ -87,13 +87,16 @@ export function ScreenStudioPage(): JSX.Element {
             {(catalog.data?.columnNavigation ?? ['single', 'listDetail']).map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
         </div>
-        <Button type="button" variant="outline" disabled={Boolean(pending)} onClick={() => dispatch({
+        <Button type="button" variant="outline" disabled={Boolean(pending)} data-testid="studio-add-column" onClick={() => dispatch({
           type: 'addColumn',
           tableKey: definition.tables?.[0]?.key ?? 'list',
           column: { key: `feld_${(definition.tables?.[0]?.columns.length ?? 0) + 1}`, label: 'Neues Feld', sortable: true, filterable: true },
         })}>
           Spalte hinzufügen
         </Button>
+        <p className="text-sm text-muted-foreground" data-testid="studio-column-count">
+          {definition.tables?.[0]?.columns.length ?? 0} Felder
+        </p>
         <div className="flex flex-wrap gap-2">
           <Button type="button" disabled={Boolean(pending)} onClick={() => void run('save', async () => {
             const saved = await saveStudioDraft(definition, draftId)
@@ -109,7 +112,7 @@ export function ScreenStudioPage(): JSX.Element {
           })}>
             Prüfung
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || Boolean(pending)} onClick={() => void run('publish', async () => {
+          <Button type="button" variant="outline" disabled={!draftId || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
             const published = await publishStudioDraft(draftId ?? '')
             setReport(published)
             setPublishedRoute(published.route)

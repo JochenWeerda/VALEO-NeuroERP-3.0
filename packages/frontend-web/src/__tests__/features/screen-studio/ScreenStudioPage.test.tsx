@@ -79,5 +79,19 @@ describe('ScreenStudioPage', () => {
     await waitFor(() => expect(screen.getByDisplayValue('Kunden-Arbeitsliste')).toBeInTheDocument())
     expect(screen.getByTestId('studio-preview')).toBeInTheDocument()
     expect(screen.getByTestId('studio-gates')).toHaveTextContent('Publish möglich')
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+  })
+
+  it('keeps publish disabled while gates are red', async () => {
+    postMock.mockImplementation(async () => ({
+      data: {
+        violations: ['action_confirmation_fehlt:stornieren'],
+        canPublish: false,
+        readiness: { generatorReady: false, errors: [] },
+      },
+    }))
+    renderStudio()
+    await waitFor(() => expect(screen.getByTestId('studio-gates')).toHaveTextContent('action_confirmation_fehlt'))
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
   })
 })

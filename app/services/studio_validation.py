@@ -113,5 +113,12 @@ def validate_studio_draft(
         # forbiddenForAgents darf nicht aufgehoben werden
         if base.get("forbiddenForAgents") is True and action.get("forbiddenForAgents") is False:
             violations.append(f"action_forbiddenForAgents_aufgehoben:{key}")
+        effective_danger = draft_danger if draft_danger in _DANGER_RANK else base.get("dangerLevel")
+        if (
+            effective_danger in _DANGER_RANK
+            and _DANGER_RANK[effective_danger] >= _DANGER_RANK["high"]
+            and not action.get("requiresConfirmation")
+        ):
+            violations.append(f"action_confirmation_fehlt:{key}")
 
     return violations

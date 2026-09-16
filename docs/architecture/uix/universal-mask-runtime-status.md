@@ -89,7 +89,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-091-GATE | `missing_process_chain` mandatory; Roh-SD ohne Kette/Reason blockiert | ✅ | pytest Block-Fall + Registry-Gate |
 | MERIDIAN-FRAMEWORK-SYSTEMWIDE | Floorplans + adaptive 1/2/3-Spalten; Tabellenfehler ≠ leer | ✅ | Vitest `framework-navigation.test.tsx`; pytest `test_meridian_column_navigation_inventory.py` |
 | MERIDIAN-SCREEN-STUDIO | No-Code/Agent-Editor für ScreenDefinitions + Live-Vorschau | ✅ | `/admin/screen-studio`; pytest `test_meridian_screen_studio_api.py`; Vitest `screen-studio` |
-| MERIDIAN-SCREEN-STUDIO-PERSIST | Drafts in Postgres; `published_temp` im Laufzeitkatalog | ✅ | `domain_shared.screen_definition_drafts`; `/studio/run/:screenId`; Omnibox inkl. tenant/-Masken |
+| MERIDIAN-SCREEN-STUDIO-E2E | Playwright-Abnahme Lieferanten-Bewertung + Confirmation-Gate | ✅ | `tests/e2e/meridian-screen-studio.spec.ts`; pytest Confirmation-Gate |
 | L3-HABIT-BRIDGE-001 | Herstellerneutrale Desktop-Gewohnheitsvertraege + 3 Referenzmasken | ✅ technisch abgeschlossen, Human Review vor Rollout | 125 Mask-Builder/RenderPlan-Tests, 4 Backend-Tests, 12 Visual-Audits; ADR-056 + Paritaetsmatrix |
 
 | L3-MDE-INBOX-003 | Native MDE-Worklist + zentrale statusabhaengige Tabellenzeilen-Aktionen | technisch abgeschlossen, Provider-Pilot extern | `schnittstelle/mde-inbox`, Quarantaene/Retry-Audit, ADR-057 |

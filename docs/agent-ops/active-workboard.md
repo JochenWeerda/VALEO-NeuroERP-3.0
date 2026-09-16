@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MERIDIAN-SCREEN-STUDIO-E2E - Playwright-Abnahme Lieferanten-Bewertung 2026-09-16, Cursor
+
+**Stand:** abgeschlossen. Owner Cursor. UIX-090-JSON-Schema und FSX/Rechnung bleiben bei Claude.
+
+**Ziel:** Browser-Abnahme `/admin/screen-studio` → Speichern → Vier-Augen → `/studio/run`.
+High/critical ohne Confirmation wird serverseitig abgelehnt.
+
+**Dateibesitz:** `meridian-screen-studio.spec.ts`, ScreenStudioPage Publish-Sperre,
+`studio_validation.py` Confirmation-Gate.
+
+
 ## MERIDIAN-SCREEN-STUDIO-PERSIST - Drafts in Postgres, published_temp im Katalog 2026-09-16, Cursor
 
 **Stand:** abgeschlossen. Owner Cursor. UIX-090 bleibt bei Claude.
