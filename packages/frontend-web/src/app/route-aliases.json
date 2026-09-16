@@ -2425,6 +2425,10 @@
       "path": "sales/delivery-note/:id"
     },
     {
+      "module": "@/pages/verkauf/rechnung",
+      "path": "verkauf/rechnung/:id"
+    },
+    {
       "module": "@/pages/einkauf/bestellung-native",
       "path": "einkauf/bestellung/:id"
     },

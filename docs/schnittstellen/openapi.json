@@ -389233,6 +389233,154 @@
         ]
       }
     },
+    "/api/v1/sales/invoices": {
+      "get": {
+        "description": "Die Liste, ueber die eine Rechnung erreichbar wird.\n\nDie Positionen kommen hier **nicht** mit: Eine Trefferliste ueber fuenfzig\nRechnungen wuerde sonst mehrere hundert Zeilen laden, von denen keine\nangezeigt wird. Sichtbar ist die Positionszahl — sie beantwortet die Frage,\nob ein Beleg leer aussieht, ohne ihn zu oeffnen.\n\n``total`` ist die Trefferzahl **ohne** Seitenbegrenzung. Ohne sie waere\n\"50 von 50\" nicht von \"50 von 900\" zu unterscheiden.",
+        "operationId": "list_invoices_api_v1_sales_invoices_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 20,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "invoice_number",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Invoice Number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesInvoiceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnungen suchen",
+        "tags": [
+          "sales",
+          "invoices"
+        ]
+      }
+    },
     "/api/v1/sales/invoices/from-delivery-notes": {
       "post": {
         "description": "Eine Rechnung mit eigenen Positionen, Menge fuer Menge zugeordnet.\n\nBerechnet wird die **offene** Menge je Lieferscheinposition. Bereits\nberechnete Positionen kommen nicht noch einmal mit; sie stehen mit Grund in\n``skipped``, damit nicht unbemerkt weniger berechnet wird als erwartet.",

@@ -135,17 +135,27 @@ export type Lieferung = {
   status: LieferungStatus
 }
 
-export type RechnungStatus = 'offen' | 'teilbezahlt' | 'bezahlt' | 'ueberfaellig' | 'storniert'
+export type RechnungStatus =
+  | 'entwurf'
+  | 'gebucht'
+  | 'offen'
+  | 'teilbezahlt'
+  | 'bezahlt'
+  | 'ueberfaellig'
+  | 'storniert'
 
 export type Rechnung = {
   id: string
   nummer: string
   datum: string
   kunde: string
+  /** Leer, solange die Rechnung ihre Quelle ueber Zuordnungen fuehrt, nicht ueber eine Auftragsnummer. */
   auftragsNr: string
   betrag: number
   faelligAm: string
   status: RechnungStatus
+  /** Positionszahl aus dem Beleg; 0 ist ein Befund, kein Formfehler. */
+  positionen?: number
 }
 
 export type Auftrag = {
@@ -392,14 +402,79 @@ export function useLieferungen() {
 
 // ── Hooks: Invoices ───────────────────────────────────────────────────────────
 
+/**
+ * Rohform einer Rechnung aus `GET /sales/invoices`.
+ *
+ * Bis zu FSX-RECHNUNGSMASKE gab es diesen Endpunkt nicht: Der Abruf lief in
+ * einen 404, das `catch` machte daraus eine leere Liste, und die Maske sah aus,
+ * als gaebe es keine Rechnungen. Seit es ihn gibt, muss die Antwort auch
+ * **gelesen** werden — die Feldnamen des Belegs sind andere als die der Maske.
+ */
+export type SalesInvoiceListRow = {
+  id?: string
+  invoice_number?: string
+  customer_id?: string
+  invoice_date?: string
+  due_date?: string | null
+  status?: string
+  net_amount?: string
+  gross_amount?: string
+  line_count?: number
+}
+
+/**
+ * Belegstatus auf den Status der Faktura-Liste.
+ *
+ * `gebucht` wird zu `offen`: Eine gebuchte Rechnung ist fachlich eine offene
+ * Forderung. `teilbezahlt` und `ueberfaellig` entstehen hier **nicht** — beide
+ * haengen am Zahlungsstand, den der Beleg nicht fuehrt. Sie aus dem
+ * Faelligkeitsdatum zu erfinden waere eine Aussage ueber Zahlungen, die wir an
+ * dieser Stelle nicht haben.
+ */
+export function rechnungStatus(status?: string): RechnungStatus {
+  switch (status) {
+    case 'entwurf':
+      return 'entwurf'
+    case 'gebucht':
+      return 'offen'
+    case 'bezahlt':
+      return 'bezahlt'
+    case 'storniert':
+      return 'storniert'
+    default:
+      return 'entwurf'
+  }
+}
+
+export function zuRechnung(zeile: SalesInvoiceListRow): Rechnung {
+  const betrag = Number(zeile.gross_amount ?? zeile.net_amount ?? '0')
+  return {
+    id: String(zeile.id ?? ''),
+    nummer: String(zeile.invoice_number ?? ''),
+    datum: String(zeile.invoice_date ?? ''),
+    kunde: String(zeile.customer_id ?? ''),
+    // Die Herkunft der Rechnung steht in den Zuordnungen, nicht in einer
+    // Auftragsnummer am Kopf. Leer ist hier richtig, nicht unvollstaendig.
+    auftragsNr: '',
+    betrag: Number.isFinite(betrag) ? betrag : 0,
+    faelligAm: String(zeile.due_date ?? ''),
+    status: rechnungStatus(zeile.status),
+    positionen: typeof zeile.line_count === 'number' ? zeile.line_count : undefined,
+  }
+}
+
 export function useRechnungen() {
   return useQuery<Rechnung[]>({
     queryKey: [...salesKeys.all, 'invoices'],
     queryFn: async () => {
       try {
-        const resp = await apiClient.get<{ items: Rechnung[] }>('/api/v1/sales/invoices/?limit=100')
-        return resp.data.items ?? []
+        const resp = await apiClient.get<{ items?: SalesInvoiceListRow[] }>(
+          '/api/v1/sales/invoices?limit=100',
+        )
+        return (resp.data?.items ?? []).map(zuRechnung)
       } catch {
+        // Bewusst still: Die Liste ist eine Uebersicht, kein Vorgang. Ein
+        // Fehlerbanner statt der Tabelle waere hier die schlechtere Auskunft.
         return []
       }
     },

@@ -11,6 +11,66 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-RECHNUNGSMASKE - die Rechnung wird lesbar 2026-09-16, Claude Code
+
+**Der Befund, der den Slice umgeleitet hat:** Die Rechnungsliste gab es
+laengst. `/verkauf/rechnungen` ruft seit jeher `GET /sales/invoices/?limit=100`
+auf — **einen Endpunkt, den es nicht gab**. Der 404 lief in ein `catch`, das
+eine leere Liste zurueckgab. Die Maske sah aus, als haette dieses Haus keine
+Rechnungen. Meine zuerst gebaute zweite Listenmaske ist deshalb wieder
+geloescht: Eine zweite Liste neben einer stillen ersten waere
+Maskenvermehrung gewesen, und zwar die peinliche Sorte.
+
+**Und der Endpunkt weckt den schlafenden Aufrufer.** Sobald
+`GET /sales/invoices` antwortete, bekam die bestehende Liste Daten in einer
+anderen Feldform (`invoice_number` statt `nummer`) — ab sofort Zeilen mit
+lauter leeren Feldern, schlimmer als die leere Liste vorher. Die Abbildung
+gehoert deshalb in diesen Slice und nicht in eine Nacharbeit. Nebenbei
+abgesichert: `new Date('').toISOString()` an der Faelligkeitsspalte haette bei
+der ersten Rechnung ohne Faelligkeitsdatum die ganze Liste geworfen.
+
+**Gebaut ist die Belegmaske** `/verkauf/rechnung/:id`: Kopf, Positionen und je
+Position die **Herkunft** — welche Lieferscheinposition mit welcher Teilmenge.
+Dieselbe Zuordnung, die der Lieferschein nach vorn zeigt, von der anderen Seite
+gelesen. Der Quellbeleg ist verlinkt; wer die Menge sieht, erreicht ihren
+Nachweis ohne Maskenwechsel.
+
+**Drei Aussagen, die sich unterscheiden muessen.** `InvoiceLineOrigins` sagt
+nicht nur "Herkunft vorhanden", sondern rechnet die Deckung nach: **belegt**,
+**teilweise belegt** (die Luecke steht als Zahl da) und **ohne Herkunft**. Die
+mittlere ist der Fall, den sonst niemand bemerkt — die Position sieht richtig
+aus, ihr Betrag stimmt fuer sich genommen, und nur die Summe der Zuordnungen
+verraet, dass ein Teil der Menge unbelegt ist. Dieselbe Pruefung steht oben als
+Hinweis, damit man dafuer nicht jede Zeile aufklappen muss.
+
+**Was die Maske bewusst nicht tut:** Sie addiert die Positionen nicht zur
+Summe. Netto, Steuer und Brutto kommen vom Beleg; eine zweite Summe weicht bei
+Rundungen von der ersten ab und niemand wuesste dann, welche gilt. Und sie
+rechnet keine Einheiten um: Quellen in abweichenden Einheiten werden benannt,
+nicht addiert.
+
+**Beim Status wird nichts erfunden.** `gebucht` heisst in der Faktura-Liste
+`offen` — eine gebuchte Rechnung **ist** eine offene Forderung. `teilbezahlt`
+und `ueberfaellig` entstehen nicht mehr: Beide haengen am Zahlungsstand, den
+der Beleg nicht fuehrt. Aus dem Faelligkeitsdatum eine Ueberfaelligkeit
+abzuleiten waere eine Aussage ueber Zahlungen, die wir nicht haben.
+
+**Abnahme:** 8 Endpunkt-Tests gegen die echte Datenbank (3 neu, davon einer auf
+die Mandantentrennung in der Trefferliste), 10 Vitest auf den Herkunfts-
+Baustein, 7 auf die Abbildung. `tsc --noEmit` und eslint ohne Ausgabe, ruff
+ohne Befund, `check_openapi_docs` 100 %; `openapi.json` regeneriert und
+enthaelt nur den neuen Pfad.
+
+**Abgrenzung:** Mask-Builder-Renderer und -Runtime unberuehrt (MERIDIAN).
+`domain_finance.finance_invoices` bleibt der offene Befund aus dem vorigen
+Slice. `pages/sales/invoice-editor.tsx` arbeitet weiter auf dem alten Objekt.
+
+**Offen und benannt:** Der Kunde steht als `customer_id` in Liste und Maske —
+die Aufloesung auf den Namen braucht den Stammdatenzugriff, eine erfundene
+Anzeige waere schlechter als die Kennung. Die Faktura-Liste laedt weiter 100
+Belege ohne Serverfilter, obwohl der Endpunkt filtern kann. Und die Ablösung
+des alten `invoice-editor` ist der naechste Schritt, nicht dieser.
+
 ## FSX-RECHNUNGSPOSITION - die Rechnung wird ein Gegenstand 2026-09-15, Claude Code
 
 **Der Befund zuerst:** Die Ausgangsrechnung war im Belegfluss **kein Objekt**.
@@ -175,9 +235,9 @@ vorhandenen Rechnungsmasken fuehren keine Positionen mit eigener Identitaet —
 Endpunkt an eine Maske zu haengen, die nie etwas anzeigen kann, waere
 Dekoration; die Rechnungsposition als eigenes Objekt ist der naechste Schritt.
 
-## MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915 - in arbeit 2026-09-15
+## MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915 - abgeschlossen 2026-09-16
 
-**Owner:** Cursor (von Codex übernommen nach Nutzungslimit). **Stand:** in Arbeit —
+**Owner:** Cursor (von Codex übernommen nach Nutzungslimit). **Stand:** abgeschlossen.
 Floorplans und adaptive Spaltennavigation sind im Builder verdrahtet.
 `analyticalList` ergänzt die fünf bestehenden Seitentypen. Transaction,
 Cockpit und Wizard bleiben einspaltig. Erste reale Maske ist die lesende

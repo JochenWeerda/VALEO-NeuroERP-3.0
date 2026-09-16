@@ -1,0 +1,152 @@
+slice_id: FSX-RECHNUNGSMASKE
+id: FSX-RECHNUNGSMASKE
+title: Die Rechnung bekommt ihre Maske — Positionen mit Herkunft
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-16"
+completed_at: "2026-09-16"
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+vorgaenger: FSX-RECHNUNGSPOSITION
+
+ausgangslage: >-
+  Der vorige Slice hat die Ausgangsrechnung zu einem Objekt gemacht: Kopf,
+  Positionen und je Position die Zuordnung in doc_allocations. Offen blieb die
+  Maske. Ohne sie ist die Herkunft einer berechneten Menge zwar gespeichert,
+  aber fuer niemanden lesbar.
+
+befund_beim_bauen: >-
+  Die Rechnungsliste gab es laengst — `/verkauf/rechnungen` mit
+  `pages/sales/rechnungen-liste.tsx`. Sie rief `GET /sales/invoices/?limit=100`
+  auf, einen Endpunkt, den es **nicht gab**. Der 404 lief in ein `catch`, das
+  eine leere Liste zurueckgab; die Maske sah aus, als gaebe es keine Rechnungen.
+  Deshalb ist die zunaechst gebaute zweite Listenmaske wieder entfernt worden —
+  eine zweite Liste neben einer stillen ersten waere Maskenvermehrung gewesen.
+  Stattdessen liest die vorhandene Liste jetzt echte Belege und fuehrt in die
+  neue Belegmaske.
+
+folge_des_befunds: >-
+  Sobald der Endpunkt existierte, bekam der bestehende Aufrufer Daten in
+  **anderer** Feldform (`invoice_number` statt `nummer`). Ohne Zuordnung haette
+  die Liste ab sofort Zeilen mit lauter leeren Feldern gezeigt — schlimmer als
+  die leere Liste vorher. Die Abbildung ist deshalb Teil dieses Slices, nicht
+  Nacharbeit.
+
+umsetzung:
+  backend:
+    - >-
+      `GET /api/v1/sales/invoices` — Filter nach Kunde, Status, Nummernteil und
+      Zeitraum, `limit`/`offset`, `total` ohne Seitenbegrenzung. Die Positionen
+      kommen nicht mit; sichtbar ist die Positionszahl, in **einer** Abfrage
+      gruppiert statt einer je Rechnung.
+  frontend:
+    - >-
+      `lib/api/sales-invoices.ts` — Vertrag und Hooks; Zahlen bleiben
+      Zeichenketten, gerundet wird erst in der Anzeige.
+    - >-
+      `components/documents/InvoiceLineOrigins.tsx` — die Herkunft je Position,
+      aufklappbar, mit Link auf den Quellbeleg.
+    - >-
+      `pages/verkauf/rechnung.tsx` — die Belegmaske: Kopf, Positionen, Summen
+      vom Beleg, Hinweis auf Positionen ohne vollstaendige Herkunft.
+    - >-
+      `pages/sales/rechnungen-liste.tsx` — Nummernspalte fuehrt in die neue
+      Maske, Positionsspalte, leere Auftragsnummer ohne toten Link, Datumsfelder
+      gegen fehlende Werte abgesichert.
+
+fachliche_zusicherungen:
+  drei_aussagen: >-
+    Belegt, teilweise belegt und ohne Herkunft muessen sich unterscheiden. Eine
+    Position, deren Menge nur teilweise aus Zuordnungen stammt, nennt die Luecke
+    als Zahl — das ist der Fall, den sonst niemand bemerkt.
+  keine_umrechnung_in_der_anzeige: >-
+    Quellen in abweichenden Einheiten werden nicht addiert, sondern als solche
+    benannt. 100 kg und 1 dt sind dasselbe; das hier zu rechnen hiesse, eine
+    Umrechnung in der Anzeige zu erfinden.
+  keine_zweite_summe: >-
+    Netto, Steuer und Brutto kommen vom Beleg. Die Maske addiert die Positionen
+    nicht nach — eine zweite Summe weicht bei Rundungen von der ersten ab.
+  status_ohne_zahlungsstand: >-
+    `gebucht` wird in der Faktura-Liste zu `offen` (eine gebuchte Rechnung ist
+    eine offene Forderung). `teilbezahlt` und `ueberfaellig` entstehen **nicht**
+    — beide haengen am Zahlungsstand, den der Beleg nicht fuehrt. Sie aus dem
+    Faelligkeitsdatum abzuleiten waere eine Aussage ueber Zahlungen, die wir
+    nicht haben.
+  null_positionen_ist_ein_befund: >-
+    Eine Rechnung ohne Positionen entsteht regulaer nicht. Sie wird deshalb in
+    Liste und Maske hervorgehoben, statt als leere Tabelle durchzugehen.
+  keine_buchung: >-
+    Die Maske ist lesend. Kein Buchen, kein Stornieren, keine Mutation — und
+    damit auch kein Fall fuer das Mutation-Lifecycle-Invariant.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-RECHNUNGSMASKE.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - "app/api/v1/endpoints/sales_invoices.py: nur der neue Listen-Endpunkt"
+  - tests/test_sales_invoices_api.py
+  - packages/frontend-web/src/lib/api/sales-invoices.ts
+  - packages/frontend-web/src/components/documents/InvoiceLineOrigins.tsx
+  - packages/frontend-web/src/pages/verkauf/rechnung.tsx
+  - "packages/frontend-web/src/lib/api/sales.ts: nur useRechnungen und der Rechnung-Typ"
+  - "packages/frontend-web/src/pages/sales/rechnungen-liste.tsx: Spalten, Status, Datumsschutz"
+  - "packages/frontend-web/src/app/route-aliases.json: nur der neue Eintrag"
+  - packages/frontend-web/src/__tests__/components/documents/invoice-line-origins.test.tsx
+  - packages/frontend-web/src/__tests__/lib/api/sales-rechnungen-mapping.test.ts
+
+abgrenzung:
+  - >-
+    Mask-Builder-Renderer und -Runtime bleiben unberuehrt; sie gehoeren
+    MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915.
+  - >-
+    `domain_finance.finance_invoices` bleibt der offene Befund aus
+    FSX-RECHNUNGSPOSITION — hier wird nichts nachgebaut.
+  - >-
+    `pages/sales/invoice-editor.tsx` arbeitet weiter auf dem alten Objekt. Die
+    Ablösung ist ein eigener Schritt, keine Nebenwirkung dieses Slices.
+
+acceptance:
+  - Eine Rechnung ist ueber die Liste erreichbar und zeigt ihre Positionen.
+  - Je Position ist die Herkunft der Menge lesbar, mit Quelle, Position und Teilmenge.
+  - Ungedeckte und fehlende Herkunft sind sichtbar und voneinander unterscheidbar.
+  - Die bestehende Faktura-Liste zeigt echte Belege statt einer stillen Leere.
+
+tests:
+  - "pytest tests/test_sales_invoices_api.py — 8 gruen gegen die echte Datenbank (3 neu)."
+  - "vitest invoice-line-origins — 10 gruen."
+  - "vitest sales-rechnungen-mapping — 7 gruen."
+  - "tsc --noEmit exit 0 ohne Ausgabe; eslint ohne Befund; ruff ohne Befund."
+  - "scripts/check_openapi_docs.py — 100 %; openapi.json regeneriert (nur der neue Pfad)."
+
+risks:
+  - >-
+    Die Faktura-Liste laedt weiterhin bis zu 100 Belege ohne Serverfilter. Der
+    Endpunkt kann filtern; die Maske nutzt es noch nicht.
+  - >-
+    Der Kunde steht in Liste und Maske als `customer_id`. Die Aufloesung auf den
+    Namen braucht den Stammdatenzugriff und ist hier nicht gemacht — eine
+    erfundene Anzeige waere schlechter als die Kennung.
+
+external_gates:
+  - >-
+    Sichtprüfung der Maske im laufenden Portal durch den Nutzer; automatisiert
+    geprueft sind Endpunkt, Abbildung und Bausteinverhalten, nicht das Bild.
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Die Maske zeigt den Beleg und den Nachweis seiner Mengen. Sie bucht nicht
+    und rechnet nichts nach ausser der Deckungspruefung.
+  architektur_vertrag: >-
+    Lesende Hooks in lib/api, ein Anzeigebaustein in components/documents, die
+    Maske in pages/verkauf. Keine Aenderung an Mask-Builder-Runtime.
+  daten_vertrag: >-
+    Rein lesend. Keine Migration, keine Schreiboperation.
+  test_vertrag: >-
+    Geprueft werden die Aussagen (Deckung, Einheiten, Status, fehlende Daten),
+    nicht das Aussehen. Jede neue Quellart braucht eine Zusicherung zur
+    Deckungsrechnung.
+  security_vertrag: >-
+    Mandant ausschliesslich aus dem Anfragekontext; die Liste ist gegen einen
+    zweiten Mandanten getestet, einzeln und in der Trefferliste.
+  betriebs_vertrag: "Kein Rollout-Schritt; neue Route, rein lesender Endpunkt."
+  dokumentations_vertrag: >-
+    Dieser Slice haelt den Befund der stillen Faktura-Liste fest, samt der
+    Folge, dass ein neuer Endpunkt einen schlafenden Aufrufer aufweckt.

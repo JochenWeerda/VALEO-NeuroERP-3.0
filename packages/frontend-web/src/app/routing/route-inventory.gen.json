@@ -4321,6 +4321,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/verkauf/rechnung",
+      "path": "verkauf/rechnung/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/sales/rechnungen-liste",
       "path": "verkauf/rechnungen",
       "source": "alias"

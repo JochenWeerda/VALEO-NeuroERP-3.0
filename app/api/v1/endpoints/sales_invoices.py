@@ -20,9 +20,9 @@ from datetime import date
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
@@ -33,6 +33,7 @@ from app.domains.documents.allocation_models import (
     DocumentAllocation,
     DocumentAllocationSource,
 )
+from app.domains.documents.sales_invoice_models import SalesInvoice, SalesInvoiceLine
 from app.services.document_allocation_service import LineToRegister
 from app.services.sales_invoice_service import (
     InvoiceCreationError,
@@ -184,6 +185,91 @@ def create_from_delivery_notes(
             }
             for eintrag in ergebnis.skipped
         ],
+    }
+
+
+@router.get(
+    "/invoices",
+    response_model=SalesInvoiceOut,
+    summary="Rechnungen suchen",
+)
+def list_invoices(
+    db: Session = Depends(get_db),
+    customer_id: Optional[str] = Query(default=None, max_length=120),
+    status: Optional[str] = Query(default=None, max_length=20),
+    invoice_number: Optional[str] = Query(default=None, max_length=60),
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+) -> dict[str, Any]:
+    """Die Liste, ueber die eine Rechnung erreichbar wird.
+
+    Die Positionen kommen hier **nicht** mit: Eine Trefferliste ueber fuenfzig
+    Rechnungen wuerde sonst mehrere hundert Zeilen laden, von denen keine
+    angezeigt wird. Sichtbar ist die Positionszahl — sie beantwortet die Frage,
+    ob ein Beleg leer aussieht, ohne ihn zu oeffnen.
+
+    ``total`` ist die Trefferzahl **ohne** Seitenbegrenzung. Ohne sie waere
+    "50 von 50" nicht von "50 von 900" zu unterscheiden.
+    """
+    tenant_id = get_current_tenant_id()
+
+    abfrage = db.query(SalesInvoice).filter(SalesInvoice.tenant_id == tenant_id)
+    if customer_id:
+        abfrage = abfrage.filter(SalesInvoice.customer_id == customer_id)
+    if status:
+        abfrage = abfrage.filter(SalesInvoice.status == status)
+    if invoice_number:
+        # Teiltreffer, weil in der Praxis die letzten Stellen gesucht werden.
+        abfrage = abfrage.filter(SalesInvoice.invoice_number.ilike(f"%{invoice_number}%"))
+    if date_from:
+        abfrage = abfrage.filter(SalesInvoice.invoice_date >= date_from)
+    if date_to:
+        abfrage = abfrage.filter(SalesInvoice.invoice_date <= date_to)
+
+    gesamt = abfrage.count()
+    treffer = (
+        abfrage.order_by(SalesInvoice.invoice_date.desc(), SalesInvoice.invoice_number.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    # Eine Abfrage fuer alle Positionszahlen, nicht eine je Rechnung.
+    zahlen: dict[str, int] = {}
+    if treffer:
+        for rechnung_id, anzahl in (
+            db.query(SalesInvoiceLine.invoice_id, func.count(SalesInvoiceLine.id))
+            .filter(
+                SalesInvoiceLine.tenant_id == tenant_id,
+                SalesInvoiceLine.invoice_id.in_([r.id for r in treffer]),
+            )
+            .group_by(SalesInvoiceLine.invoice_id)
+            .all()
+        ):
+            zahlen[rechnung_id] = int(anzahl)
+
+    return {
+        "items": [
+            {
+                "id": rechnung.id,
+                "invoice_number": rechnung.invoice_number,
+                "customer_id": rechnung.customer_id,
+                "invoice_date": rechnung.invoice_date.isoformat(),
+                "due_date": rechnung.due_date.isoformat() if rechnung.due_date else None,
+                "status": rechnung.status,
+                "currency": rechnung.currency,
+                "net_amount": _zahl(rechnung.net_amount),
+                "vat_amount": _zahl(rechnung.vat_amount),
+                "gross_amount": _zahl(rechnung.gross_amount),
+                "line_count": zahlen.get(rechnung.id, 0),
+            }
+            for rechnung in treffer
+        ],
+        "total": gesamt,
+        "limit": limit,
+        "offset": offset,
     }
 
 
