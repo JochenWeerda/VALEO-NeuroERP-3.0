@@ -27,9 +27,9 @@ const definition = {
     key: 'list',
     label: 'Lieferanten',
     columns: [
-      { key: 'lieferanten_nr', label: 'Nr' },
-      { key: 'name', label: 'Name' },
-      { key: 'score', label: 'Bewertung', numeric: true },
+      { key: 'lieferantennummer', label: 'Nr' },
+      { key: 'firmenname', label: 'Name' },
+      { key: 'bewertung', label: 'Bewertung', numeric: true },
     ],
   }],
   actions: [{ key: 'create_activity', dangerLevel: 'safe' }],

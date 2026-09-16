@@ -27,9 +27,10 @@ export function emptyStudioDraft(): ScreenDefinition {
       virtualized: true,
       rowHeight: 44,
       columns: [
-        { key: 'lieferanten_nr', label: 'Nr', sortable: true, filterable: true },
-        { key: 'name', label: 'Name', sortable: true, filterable: true },
-        { key: 'score', label: 'Bewertung', sortable: true, numeric: true },
+        { key: 'lieferantennummer', label: 'Nr', sortable: true, filterable: true },
+        { key: 'firmenname', label: 'Name', sortable: true, filterable: true },
+        { key: 'bewertung', label: 'Bewertung', sortable: true, numeric: true },
+        { key: 'ort', label: 'Ort', sortable: true, filterable: true },
       ],
     }],
     actions: [{

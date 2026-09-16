@@ -19,14 +19,14 @@ Selectors, Prompts und Tasks explizit. Alle neun Studio-Routen haben `summary=`;
 `check_openapi_docs.py --threshold 0` steht bei 3468/3468, `tsc --noEmit` Exit 0.
 `openapi.json` ist nur in den neun Studio-Summaries nachgezogen.
 
-**Abnahme:** pytest Studio 12/12, Vitest screen-studio 5/5. Docker-Rebuild
-Backend + Frontend (Dockerfile kopiert jetzt `config/security/npm-patches`).
-Im laufenden Portal: `/admin/screen-studio` Speichern → Prüfung → Freigabe →
-`/studio/run/tenant__lieferanten-bewertung` (Live-Liste leer, weil
-`/einkauf/lieferanten` keine Zeilen hat; Preview nutzt Mockzeilen). Native
-Artikelmaske und Flow-Spine `Auftrag bis Zahlung` (Vorgang WF-00001) bedient.
-`screen_definitions.py`-Split bleibt auf ruhigem Baum. UIX-090 und
-FSX/Rechnung bleiben bei Claude.
+**Abnahme:** pytest Studio 12/12, Vitest screen-studio 6/6. Docker-Rebuild
+Backend + Frontend. `/admin/screen-studio` Speichern → Prüfung → Freigabe.
+Die erste `/studio/run`-Sicht war leer, weil die Seite die Maskenlaufzeit nicht
+angeschlossen hatte und die Spalten `lieferanten_nr`/`name` nicht zur API
+(`lieferantennummer`/`firmenname`) passten — nicht weil keine Lieferanten
+existieren. Native Artikelmaske und Flow-Spine `Auftrag bis Zahlung`
+(Vorgang WF-00001) bedient. `screen_definitions.py`-Split bleibt auf ruhigem
+Baum (Datei derzeit fremd geändert). UIX-090 und FSX/Rechnung bleiben bei Claude.
 
 ## FSX-RECHNUNGSMASKE-WORKLIST - die Faktura-Liste wird eine Maske 2026-09-16, Claude Code
 

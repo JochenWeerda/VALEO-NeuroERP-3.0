@@ -42,7 +42,7 @@ def propose_studio_draft(intent: str) -> dict[str, Any]:
         source = sources["suppliers"]
         title = "Lieferanten-Bewertung"
         domain = "einkauf"
-        columns = [("lieferanten_nr", "Nr"), ("name", "Name"), ("score", "Bewertung")]
+        columns = [("lieferantennummer", "Nr"), ("firmenname", "Name"), ("bewertung", "Bewertung"), ("ort", "Ort")]
         action_key = "create_activity"
 
     action = catalog["actions"][action_key]
