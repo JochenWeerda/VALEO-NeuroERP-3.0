@@ -15,6 +15,7 @@ chains:
     steps:
       - { key: auftrag,     label: "Auftrag",     screenId: "sales/sales-order" }
       - { key: lieferschein, label: "Lieferschein", screenId: "sales/delivery-note" }
+      - { key: rechnung,    label: "Rechnung",    screenId: "sales/invoice" }
       - { key: offene_posten, label: "Offene Posten", screenId: "finance/ar-open-item" }
       - { key: zahlung,     label: "Zahlung",     screenId: "finance/payment-run" }
   k3_einkauf:

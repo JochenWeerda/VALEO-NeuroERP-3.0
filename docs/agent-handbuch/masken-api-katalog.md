@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (69 Masken).
+> Generiert aus `app/core/screen_definitions.py` (70 Masken).
 
 ## Übersicht
 
@@ -76,6 +76,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
+| `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
 | `schnittstelle/legacy-adapter-monitor` | Standard-/Unimet-Adapter | integration | niedrig | — | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
 | `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
@@ -2412,6 +2413,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `drucken` | Lieferschein drucken | safe | nein | `/api/v1/sales/delivery-notes/{entity_id}/actions/drucken` |
+
+---
+
+### `sales/invoice` — Ausgangsrechnung
+
+**Zweck:** Ausgangsrechnung mit Positionen und dem Nachweis, aus welcher Lieferscheinposition welche berechnete Teilmenge stammt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/sales/invoice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/sales/invoice/agent-contract` |
+| Readiness | `GET /api/v1/masks/sales/invoice/readiness` |
+| Rollout-Route | `/mask-rollout/sales__invoice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Summary:** `/api/v1/sales/invoices/{entity_id}/screen-summary`
+
+**Data Sources:**
+
+- `entity` → `/api/v1/sales/invoices/{entity_id}`
+- `positionen` → `/api/v1/sales/invoices/{entity_id}/tabs/positionen`
+- `herkunft` → `/api/v1/sales/invoices/{entity_id}/tabs/herkunft`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Woher stammt die berechnete Menge von Position 2 der Rechnung {entity_id}?
+- Welche Positionen der Rechnung {entity_id} sind nicht vollstaendig durch Zuordnungen belegt?
+- Aus welchen Lieferscheinen ist Rechnung {entity_id} entstanden?
 
 ---
 

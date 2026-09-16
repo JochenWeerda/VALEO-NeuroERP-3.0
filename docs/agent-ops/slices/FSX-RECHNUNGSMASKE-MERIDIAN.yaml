@@ -1,0 +1,141 @@
+slice_id: FSX-RECHNUNGSMASKE-MERIDIAN
+id: FSX-RECHNUNGSMASKE-MERIDIAN
+title: Die Rechnungsmaske zieht in den Builder — ScreenDefinition statt Einzel-JSX
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-16"
+completed_at: "2026-09-16"
+vorgaenger: FSX-RECHNUNGSMASKE
+spec: docs/design/valeo-meridian-experience.md
+rahmen: MERIDIAN-FRAMEWORK-SYSTEMWIDE-20260915
+
+anlass: >-
+  Die Maskenerzeugung laeuft ab sofort verbindlich ueber
+  ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer.
+  Die im Vorgaengerslice gebaute Rechnungsmaske war handgeschriebenes TSX und
+  damit die letzte ihrer Art. Sie wandert vollstaendig in den Builder — nicht
+  als Nachbau, sondern als Vertrag.
+
+entscheidungen:
+  zwei_register_statt_aufklappzeile: >-
+    Die Herkunft lag bisher als aufklappbare Zeile an der Position. Im Builder
+    ist sie ein eigenes Register: eine Zeile je Zuordnung, sortier- und
+    filterbar. „Welche Positionen kommen aus Lieferschein LS-7" ist damit eine
+    Frage an die Tabelle statt zwanzigmal Aufklappen. Der Deckungsstand bleibt
+    an der Position, als Spalte `herkunft`.
+  bewertung_gehoert_in_die_daten: >-
+    „Diese Position ist nur teilweise belegt" ist eine fachliche Bewertung, kein
+    Anzeigekniff. Sie liegt jetzt in `app/services/sales_invoice_mask.py` und
+    wird dort geprueft — die Maske bekommt sie als Text und Art mitgeliefert.
+  objectpage_und_volle_breite: >-
+    Die Rechnung wird gelesen und geprueft, nicht gebucht: `objectPage`, nicht
+    `transaction`. `columnNavigation: single`, weil die Positionstabelle die
+    Breite braucht.
+  rechnung_fehlte_in_der_belegkette: >-
+    Die Verkaufskette k2 ging Auftrag -> Lieferschein -> Offene Posten ->
+    Zahlung. Der Schritt **Rechnung** fehlte — im Einkauf (k3) gibt es ihn
+    laengst. Jetzt ist er da; das Belegketten-Ribbon navigiert ihn.
+
+umsetzung:
+  backend:
+    - >-
+      `app/services/sales_invoice_mask.py` — Deckungsbewertung (belegt /
+      teilweise / ohne / unvergleichbar), Herkunftsbuendelung in **einer**
+      Abfrage, Positions- und Herkunftszeilen.
+    - >-
+      `GET /sales/invoices/{id}/screen-summary` und
+      `GET /sales/invoices/{id}/tabs/{tab_key}` ueber die zentralen Helfer
+      `build_screen_summary_payload` / `build_tab_page` — kein eigener
+      Payload-Dialekt.
+    - >-
+      ScreenDefinition `sales/invoice` in der Registry, Listen-Route und
+      Omnibox-Synonyme kuratiert, Belegkettenschritt in
+      `config/process_chains.yaml`.
+  frontend:
+    - >-
+      `pages/verkauf/rechnung.tsx` ist nur noch der Einstieg mit der
+      Belegkennung (`UniversalNativeDetailPage`).
+    - >-
+      Geloescht: `components/documents/InvoiceLineOrigins.tsx`,
+      `lib/api/sales-invoices.ts` und der zugehoerige Vitest. Die Aussagen
+      leben weiter, geprueft in `tests/test_sales_invoice_mask.py`.
+
+fachliche_zusicherungen:
+  drei_aussagen: >-
+    Belegt, teilweise belegt und ohne Herkunft bleiben unterscheidbar; die
+    Luecke steht als Zahl in der Spalte.
+  keine_umrechnung: >-
+    Quellen in abweichender Einheit ergeben `unvergleichbar`, keine geratene
+    Umrechnung.
+  unlesbare_menge: >-
+    Eine nicht interpretierbare Menge wird nicht zu null gerechnet, sondern als
+    unvergleichbar ausgewiesen.
+  unbekanntes_register: >-
+    Ein Registerschluessel ohne Entsprechung liefert eine leere Seite, keinen
+    Fehler — ein Tippfehler in der Definition zerlegt die Maske nicht.
+  mandant: >-
+    Beide Maskenendpunkte antworten fuer einen fremden Mandanten mit 404, nicht
+    mit leeren Tabellen.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-RECHNUNGSMASKE-MERIDIAN.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - app/services/sales_invoice_mask.py
+  - "app/api/v1/endpoints/sales_invoices.py: Maskenendpunkte"
+  - "app/core/screen_definitions.py: nur der neue Builder, Registry-, Routen- und Synonymeintrag"
+  - "config/process_chains.yaml: nur der Schritt k2_verkauf.rechnung"
+  - "tests/test_uix091_process_chains.py: nur die bekannte screenId"
+  - tests/test_sales_invoice_mask.py
+  - tests/test_sales_invoices_api.py
+  - packages/frontend-web/src/pages/verkauf/rechnung.tsx
+
+acceptance:
+  - Die Maske entsteht ausschliesslich aus der ScreenDefinition.
+  - generatorReady=true, advisoryScore=1.0 fuer sales/invoice.
+  - Jede native SD behaelt ihre columnNavigation (Inventar gruen).
+  - Die Belegkette Verkauf enthaelt den Schritt Rechnung mit Route.
+  - Der Deckungsstand ist als Spalte sichtbar, die Zuordnungen als Register.
+
+tests:
+  - "pytest tests/test_sales_invoice_mask.py — 12 gruen, datenbankfrei."
+  - "pytest tests/test_sales_invoices_api.py — 11 gruen gegen die echte Datenbank (3 neu)."
+  - "pytest Masken-/Ketten-Sweep — test_meridian_column_navigation_inventory, test_mask_rollout_batch_w42_51, test_mask_registry_uix, test_agent_mask_contract, test_mask_screen_definition, test_uix091_*, test_omnibox_catalog, test_l3_deep_mask_parity, test_generate_agent_handbuch: gruen."
+  - "Agent-Handbuch regeneriert (70 Masken); openapi.json regeneriert."
+
+risks:
+  - >-
+    Die Maske ist inhaltlich geprueft, aber nicht angesehen. Generator-Ready
+    ist keine visuelle Abnahme — das steht schon im Rahmenslice.
+
+befunde_fremder_stand:
+  - >-
+    `packages/frontend-web/src/features/screen-studio/studio-defaults.ts` aus
+    `827b266af` bricht `tsc --noEmit`: Das Objekt erfuellt `AgentMaskContract`
+    nicht (screenId, domain, schemaVersion, contractVersion und 11 weitere
+    fehlen). Fremder Slice, nicht angefasst.
+  - >-
+    `app/api/v1/endpoints/studio_drafts.py` aus demselben Commit hat 8 Routen
+    ohne `summary=`; `scripts/check_openapi_docs.py` faellt deshalb unter die
+    Schwelle 0. Ebenfalls fremder Slice.
+
+external_gates:
+  - Sichtprüfung der erzeugten Maske im laufenden Portal.
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Die Rechnung wird gelesen und geprueft. Die Maske sagt, ob eine berechnete
+    Menge belegt ist, und zeigt woraus.
+  architektur_vertrag: >-
+    Kein Einzel-JSX je Maske. Definition in der Registry, Daten ueber die
+    zentralen Maskenhelfer, Anzeige im UniversalMaskRenderer.
+  daten_vertrag: "Rein lesend. Keine Migration."
+  test_vertrag: >-
+    Die Bewertung ist datenbankfrei geprueft, die Endpunkte gegen die echte
+    Datenbank. Eine neue Quellart braucht eine Zusicherung zur Deckung.
+  security_vertrag: >-
+    Mandant ausschliesslich aus dem Anfragekontext; Maskenendpunkte gegen einen
+    fremden Mandanten getestet.
+  betriebs_vertrag: "Kein Rollout-Schritt; neue Registry-Maske, lesende Endpunkte."
+  dokumentations_vertrag: >-
+    Dieser Slice haelt fest, warum die Herkunft ein eigenes Register wurde und
+    dass der Rechnungsschritt in der Verkaufskette gefehlt hat.

@@ -290,3 +290,60 @@ def test_liste_filtert_nach_nummer_status_und_zeitraum(client, kopf) -> None:
         params={"date_from": "2026-09-15", "date_to": "2026-09-15"},
     ).json()
     assert angelegt["id"] in {z["id"] for z in passend["items"]}
+
+
+def test_maske_bekommt_kopf_positionen_und_herkunft_als_register(client, kopf) -> None:
+    """Die Maske entsteht aus der ScreenDefinition — hier ist ihre Datenseite."""
+    ls_id = lieferschein(client, kopf)
+    angelegt = rechnung(client, kopf, ls_id).json()
+    rid = angelegt["id"]
+
+    summary = client.get(f"/api/v1/sales/invoices/{rid}/screen-summary", headers=kopf)
+    assert summary.status_code == 200, summary.text
+    daten = summary.json()
+    assert daten["screen_id"] == "sales/invoice"
+    assert daten["invoice_id"] == rid
+    assert daten["title"] == angelegt["invoice_number"]
+    assert daten["summary"]["positionen"] == 1
+    # Alles belegt: Die Meldung bleibt leer, und das ist eine Aussage.
+    assert daten["summary"]["ungedeckte_positionen"] == ""
+    assert set(daten["available_tabs"]) == {"kopf", "positionen", "herkunft"}
+
+    positionen = client.get(
+        f"/api/v1/sales/invoices/{rid}/tabs/positionen", headers=kopf
+    ).json()
+    assert positionen["total"] == 1
+    zeile = positionen["items"][0]
+    assert zeile["quantity"] == 100.0
+    assert zeile["herkunft"] == "Belegt"
+    assert zeile["herkunft_art"] == "belegt"
+
+    herkunft = client.get(f"/api/v1/sales/invoices/{rid}/tabs/herkunft", headers=kopf).json()
+    assert herkunft["total"] == 1
+    quelle = herkunft["items"][0]
+    assert quelle["source_type"] == "Lieferschein"
+    assert quelle["source_document_id"] == ls_id
+    assert quelle["source_line_id"] == "1"
+    assert quelle["quantity"] == 100.0
+
+
+def test_unbekanntes_register_bleibt_leer_statt_die_maske_zu_zerlegen(client, kopf) -> None:
+    ls_id = lieferschein(client, kopf)
+    rid = rechnung(client, kopf, ls_id).json()["id"]
+
+    antwort = client.get(f"/api/v1/sales/invoices/{rid}/tabs/gibt-es-nicht", headers=kopf)
+    assert antwort.status_code == 200
+    assert antwort.json()["items"] == []
+
+
+def test_maske_einer_fremden_rechnung_bleibt_verschlossen(client, kopf) -> None:
+    ls_id = lieferschein(client, kopf)
+    rid = rechnung(client, kopf, ls_id).json()["id"]
+
+    fremd = {
+        "Authorization": "Bearer dev-token",
+        "X-Tenant-ID": "test-fremder-mandant",
+        "X-Tenant-Id": "test-fremder-mandant",
+    }
+    assert client.get(f"/api/v1/sales/invoices/{rid}/screen-summary", headers=fremd).status_code == 404
+    assert client.get(f"/api/v1/sales/invoices/{rid}/tabs/positionen", headers=fremd).status_code == 404

@@ -28,6 +28,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.schemas.base import BaseSchema
 from app.core.database import get_db
 from app.core.tenant_context import get_current_tenant_id
+from app.core.mask_screen_summary_common import build_screen_summary_payload, build_tab_page
 from app.core.uuid7 import uuid7
 from app.domains.documents.allocation_models import (
     DocumentAllocation,
@@ -35,6 +36,12 @@ from app.domains.documents.allocation_models import (
 )
 from app.domains.documents.sales_invoice_models import SalesInvoice, SalesInvoiceLine
 from app.services.document_allocation_service import LineToRegister
+from app.services.sales_invoice_mask import (
+    herkunfts_zeilen,
+    lade_herkunft,
+    positions_zeilen,
+    ungedeckte_positionen,
+)
 from app.services.sales_invoice_service import (
     InvoiceCreationError,
     SalesInvoiceService,
@@ -351,3 +358,120 @@ def get_invoice(
         ],
         "total": len(positionen),
     }
+
+
+# ---------------------------------------------------------------------------
+# Die Maske
+#
+# Masken entstehen ueber ScreenDefinition -> RenderPlan -> UniversalMaskRenderer.
+# Diese beiden Endpunkte sind die Datenseite davon: Der Builder fragt Kopf und
+# Tabellen ab, die Maske selbst wird nicht von Hand gebaut.
+# ---------------------------------------------------------------------------
+
+SCREEN_ID = "sales/invoice"
+API_PREFIX = "/api/v1/sales/invoices"
+TABS = ("kopf", "positionen", "herkunft")
+LAZY_TABS = ("positionen", "herkunft")
+
+
+@router.get(
+    "/invoices/{invoice_id}/screen-summary",
+    response_model=SalesInvoiceOut,
+    summary="Rechnungsmaske: Kopf und Kennzahlen",
+)
+def get_invoice_screen_summary(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Kopfdaten der Maske — und der Deckungsstand als Kennzahl.
+
+    ``ungedeckte_positionen`` steht bewusst im Kopf: Wer eine Rechnung oeffnet,
+    soll ohne Klick in die Positionen sehen, ob eine Menge unbelegt ist.
+    """
+    tenant_id = get_current_tenant_id()
+    gefunden = SalesInvoiceService(db, tenant_id).get_with_lines(invoice_id)
+    if gefunden is None:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    rechnung, positionen = gefunden
+
+    herkunft = lade_herkunft(db, tenant_id, invoice_id)
+    zeilen = positions_zeilen(positionen, herkunft)
+    ungedeckt = ungedeckte_positionen(zeilen)
+
+    return build_screen_summary_payload(
+        screen_id=SCREEN_ID,
+        entity_id=invoice_id,
+        tenant_id=tenant_id,
+        title=rechnung.invoice_number,
+        subtitle=rechnung.customer_id,
+        summary={
+            "invoice_number": rechnung.invoice_number,
+            "customer_id": rechnung.customer_id,
+            "invoice_date": rechnung.invoice_date.isoformat(),
+            "due_date": rechnung.due_date.isoformat() if rechnung.due_date else None,
+            "status": rechnung.status,
+            "currency": rechnung.currency,
+            "net_amount": float(rechnung.net_amount or 0),
+            "vat_amount": float(rechnung.vat_amount or 0),
+            "gross_amount": float(rechnung.gross_amount or 0),
+            "positionen": len(positionen),
+            # Leere Liste heisst: alles belegt. Das ist eine Aussage, kein
+            # fehlender Wert.
+            "ungedeckte_positionen": ", ".join(ungedeckt),
+        },
+        available_tabs=list(TABS),
+        api_prefix=API_PREFIX,
+        lazy_tab_keys=list(LAZY_TABS),
+        initial_payload_budget_kb=48,
+        entity_key="invoice_id",
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/{tab_key}",
+    response_model=SalesInvoiceOut,
+    summary="Rechnungsmaske: Tabellendaten eines Registers",
+)
+def get_invoice_tab(
+    invoice_id: str,
+    tab_key: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Positionen und Herkunft als Tabellen des Builders.
+
+    Ein unbekanntes Register ergibt eine **leere** Seite und keinen Fehler: Die
+    Registerliste steht in der ScreenDefinition, und ein Tippfehler dort soll
+    die Maske nicht zerlegen.
+    """
+    tenant_id = get_current_tenant_id()
+    gefunden = SalesInvoiceService(db, tenant_id).get_with_lines(invoice_id)
+    if gefunden is None:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    _, positionen = gefunden
+
+    herkunft = lade_herkunft(db, tenant_id, invoice_id)
+    if tab_key == "positionen":
+        items = positions_zeilen(positionen, herkunft)
+        table_key = "invoice_lines"
+    elif tab_key == "herkunft":
+        items = herkunfts_zeilen(herkunft)
+        table_key = "invoice_origins"
+    else:
+        items, table_key = [], tab_key
+
+    return build_tab_page(
+        tab_key=tab_key,
+        table_key=table_key,
+        items=items,
+        page=page,
+        limit=limit,
+        q=q,
+        sort=sort,
+        sort_dir=sort_dir,
+        screen_id=SCREEN_ID,
+    )

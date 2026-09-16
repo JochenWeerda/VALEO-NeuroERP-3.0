@@ -11,6 +11,54 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-RECHNUNGSMASKE-MERIDIAN - die Maske zieht in den Builder 2026-09-16, Claude Code
+
+**Die Maskenerzeugung ist ab sofort verbindlich der Builder** —
+`ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer`.
+Die Rechnungsmaske von heute frueh war handgeschriebenes TSX und damit die
+letzte ihrer Art. Sie ist **vollstaendig** umgezogen: Die Definition
+`sales/invoice` steht in der Registry, `pages/verkauf/rechnung.tsx` ist nur noch
+der Einstieg mit der Belegkennung. Wer an der Maske etwas aendern will, aendert
+die Definition.
+
+**Aus der Aufklappzeile wird ein Register.** Die Herkunft hing als aufklappbare
+Zeile an jeder Position. Im Builder ist sie eine eigene Tabelle — eine Zeile je
+Zuordnung, sortier- und filterbar. Damit ist „welche Positionen kommen aus
+Lieferschein LS-7" eine Frage an die Tabelle statt zwanzigmal Aufklappen. Der
+**Deckungsstand** bleibt an der Position, als Spalte: „Belegt", „40 dt ohne
+Zuordnung", „Keine Herkunft".
+
+**Die Bewertung ist nach hinten gewandert, nicht verschwunden.** „Diese Menge
+ist nur teilweise belegt" ist eine fachliche Aussage und kein Anzeigekniff; sie
+liegt jetzt in `app/services/sales_invoice_mask.py` und wird dort geprueft —
+datenbankfrei, 12 Tests. Der TSX-Baustein und sein Vitest sind geloescht, die
+Aussagen sind dieselben geblieben, inklusive der Weigerung, kg in dt
+umzurechnen.
+
+**Ein Befund am Rande, und kein kleiner:** In der Belegkette **Verkauf** fehlte
+die Rechnung. Die Kette ging Auftrag -> Lieferschein -> Offene Posten ->
+Zahlung; im Einkauf gibt es den Rechnungsschritt laengst. Jetzt steht er in
+`config/process_chains.yaml` samt Route — das Belegketten-Ribbon navigiert ihn
+ab sofort in jeder Verkaufsmaske.
+
+**Abnahme:** `generatorReady=true`, `advisoryScore=1.0`. 12 + 11 eigene Tests,
+dazu der Masken- und Kettensweep (Spaltennavigations-Inventar, Rollout-Batch,
+Registry, Agent-Contract, UIX-091, Omnibox, L3-Parity, Handbuch) gruen.
+Agent-Handbuch regeneriert (70 Masken), `openapi.json` regeneriert.
+
+**Zwei Befunde aus fremdem Stand, unangetastet:** `827b266af` (Masken-Studio)
+bricht `tsc --noEmit` in
+`features/screen-studio/studio-defaults.ts` — das Objekt erfuellt
+`AgentMaskContract` nicht. Und `app/api/v1/endpoints/studio_drafts.py` hat 8
+Routen ohne `summary=`, womit `check_openapi_docs` unter die Schwelle 0 faellt.
+Beides gehoert zum fremden Slice; ich habe es benannt, nicht repariert.
+
+**Offen:** Die visuelle Abnahme. Generator-Ready ist keine Sichtpruefung — das
+steht schon im Rahmenslice. Und die Faktura-Liste ist weiter eine
+handgeschriebene Seite; sie waere die naechste Kandidatin fuer eine
+`worklist`-Definition mit `listDetail`.
+
+
 ## FSX-RECHNUNGSMASKE - die Rechnung wird lesbar 2026-09-16, Claude Code
 
 **Der Befund, der den Slice umgeleitet hat:** Die Rechnungsliste gab es

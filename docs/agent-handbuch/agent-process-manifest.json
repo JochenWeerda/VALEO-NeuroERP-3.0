@@ -2953,6 +2953,23 @@
       ]
     },
     {
+      "mask_id": "sales/invoice",
+      "title": "Ausgangsrechnung",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/sales__invoice/:entityId",
+      "agent_contract_url": "/api/v1/masks/sales/invoice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/sales/invoice/screen-definition",
+      "readiness_url": "/api/v1/masks/sales/invoice/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
       "mask_id": "sales/sales-order",
       "title": "Verkaufsauftrag",
       "domain": "sales",
