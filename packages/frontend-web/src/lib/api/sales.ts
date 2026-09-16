@@ -384,14 +384,76 @@ export function useDeleteOrder() {
 
 // ── Hooks: Deliveries ─────────────────────────────────────────────────────────
 
+/**
+ * Rohform eines Lieferscheins aus `GET /sales/delivery-notes`.
+ *
+ * Der Abruf ging bis hierher an `/api/v1/sales/deliveries/` — eine Route, die
+ * es nicht gibt. Der 404 lief in ein `catch`, und die Lieferliste war immer
+ * leer. Derselbe Fehler wie bei den Rechnungen, in derselben Datei.
+ */
+export type DeliveryNoteRow = {
+  id?: string
+  delivery_note_number?: string
+  delivery_date?: string
+  customer_id?: string
+  sales_order_id?: string | null
+  status?: string
+  is_delivered?: boolean
+  positionen?: Array<{ menge?: number | string | null }>
+}
+
+/**
+ * Lieferscheinstatus auf den Status der Lieferliste.
+ *
+ * `unterwegs` ist hier die **Annahme**, dass ein gebuchter, noch nicht
+ * zugestellter Lieferschein unterwegs ist — der Beleg fuehrt keinen
+ * Transportstand. Entwurf bleibt `geplant`, `is_delivered` entscheidet ueber
+ * `zugestellt`, damit die Zustellung nicht aus dem Status geraten wird.
+ */
+export function lieferungStatus(row: DeliveryNoteRow): LieferungStatus {
+  const status = String(row.status ?? '').toLowerCase()
+  if (status === 'storniert' || status === 'cancelled') return 'storniert'
+  if (row.is_delivered || status === 'geliefert' || status === 'delivered') return 'zugestellt'
+  if (status === 'draft' || status === 'entwurf' || !status) return 'geplant'
+  return 'unterwegs'
+}
+
+/** Summe der Positionsmengen — der Beleg fuehrt keine Kopfmenge. */
+function lieferMenge(row: DeliveryNoteRow): number {
+  const positionen = row.positionen ?? []
+  let summe = 0
+  for (const position of positionen) {
+    const menge = Number(position?.menge ?? 0)
+    if (Number.isFinite(menge)) summe += menge
+  }
+  return summe
+}
+
+export function zuLieferung(row: DeliveryNoteRow): Lieferung {
+  return {
+    id: String(row.id ?? ''),
+    nummer: String(row.delivery_note_number ?? ''),
+    datum: String(row.delivery_date ?? ''),
+    kunde: String(row.customer_id ?? ''),
+    auftragsNr: String(row.sales_order_id ?? ''),
+    menge: lieferMenge(row),
+    status: lieferungStatus(row),
+  }
+}
+
 export function useLieferungen() {
   return useQuery<Lieferung[]>({
     queryKey: [...salesKeys.all, 'deliveries'],
     queryFn: async () => {
       try {
-        const resp = await apiClient.get<{ items: Lieferung[] }>('/api/v1/sales/deliveries/?limit=100')
-        return resp.data.items ?? []
+        // Der Endpunkt liefert eine Liste, keine Huelle mit `items`.
+        const resp = await apiClient.get<DeliveryNoteRow[]>(
+          '/api/v1/sales/delivery-notes?limit=100',
+        )
+        const zeilen = Array.isArray(resp.data) ? resp.data : []
+        return zeilen.map(zuLieferung)
       } catch {
+        // Bewusst still: Die Liste ist eine Uebersicht, kein Vorgang.
         return []
       }
     },

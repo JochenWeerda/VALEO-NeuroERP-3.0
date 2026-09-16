@@ -59,6 +59,21 @@ Cockpit-Definition **ohne Inhalt** (keine Kacheln, keine Tabellen) und ohne
 Seite. Die gehoert nicht verdrahtet, sondern beantwortet: Was soll ein
 Lagerleitstand zeigen? Eine Seite dafuer zu bauen waere Dekoration.
 
+**Zweiter Befund, derselbe Mechanismus, groesserer Umfang:** Ich habe **jeden**
+`/api/v1`-Aufruf des Frontends gegen die echten Routen gehalten — **110
+verschiedene Pfade zeigen ins Leere**. Zuerst gefunden in derselben Datei wie
+die Rechnungen: `useLieferungen` rief `/api/v1/sales/deliveries/` auf, den
+Beleg gibt es aber unter `/api/v1/sales/delivery-notes`. Der 404 lief in ein
+`catch`, und die Lieferliste war immer leer. Repariert samt Abbildung
+(Kopfmenge gibt es nicht — sie ist die Summe der Positionen; die Zustellung
+entscheidet `is_delivered`, nicht der Status) und drei Tests.
+
+Die uebrigen 109 sind aufgelistet in
+`docs/quality-assurance/frontend-api-calls-ohne-route-2026-09-16.md` und werden
+von `scripts/check_frontend_api_calls.py` gezaehlt — Schwelle 110, die Zahl
+darf sinken, nicht steigen. Je Eintrag gibt es genau zwei Antworten: Pfad
+korrigieren oder Endpunkt bauen. Den Aufruf still zu lassen ist keine.
+
 **Und der eigentliche Rest, gemessen:** 20 Masken nennen eine Listen-Route, an
 der eine **handgeschriebene** Seite rendert (200–700 Zeilen je Seite) —
 `einkauf/bestellungen`, `finance/op-debitoren`, `lager/bestandsuebersicht`,
