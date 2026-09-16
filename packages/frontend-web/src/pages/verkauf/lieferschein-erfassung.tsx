@@ -32,7 +32,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBanner'
 import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
 import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
-import { buildSalesHandoverPath, parseSalesHandover } from '@/lib/workflow/sales-handover'
+import { parseSalesHandover } from '@/lib/workflow/sales-handover'
 import {
   getDocumentEntryPolicy,
   type DocumentWorkflowCandidate,
@@ -1341,7 +1341,22 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     setShowVertreterDialog(false)
   }
 
-  // Sofort-Rechnung: Lieferschein speichern, dann per Docflow in Rechnung umwandeln
+  /**
+   * Sofort-Rechnung: Lieferschein speichern, dann die Rechnung **mit Positionen**
+   * anlegen.
+   *
+   * Vorher lief der Knopf ueber `docflow/{id}/convert` und erzeugte ein
+   * Docflow-Dokument — eine Rechnung ohne eigene Positionen, auf die keine
+   * Mengenzuordnung zeigen konnte. Die Herkunft einer berechneten Menge war
+   * damit nirgends nachlesbar, obwohl es den Weg laengst gibt:
+   * `sales/delivery-notes/{id}/create-invoice` legt die Rechnung ueber den
+   * SalesInvoiceService an, Position fuer Position und Menge fuer Menge
+   * zugeordnet.
+   *
+   * Der Preis dieser Korrektur ist sichtbar: Ein ungebuchter Lieferschein wird
+   * abgewiesen (400). Das ist keine Verschlechterung — eine Rechnung ueber eine
+   * Lieferung, die noch Entwurf ist, gehoert nicht in die Buecher.
+   */
   const handleCreateInvoice = async (): Promise<void> => {
     setIsSaving(true)
     try {
@@ -1352,40 +1367,31 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       }
       if (savedId && !state.id) setState((prev) => ({ ...prev, id: savedId }))
       const lsId = savedId
-      const idempotencyKey = crypto.randomUUID()
       const res = await apiClient.post<{
-        command: string
-        target_doc_id?: string
-        status: string
-        payload?: { target_doc_number?: string; target_doc_type?: string }
-      }>(`/api/v1/docflow/${lsId}/convert`, {
-        target_doc_type: 'sales_invoice',
-        idempotency_key: idempotencyKey,
-      })
-      const docNumber = res.payload?.target_doc_number
-      if (docNumber) {
-        push(`Rechnung ${docNumber} erstellt`)
-        setState((prev) => ({ ...prev, fakturiertRechnNr: docNumber }))
-        const targetId = res.target_doc_id
-        if (targetId && typeof navigate === 'function') {
-          navigate(buildSalesHandoverPath('/sales/invoice-editor', {
-            customerId: state.customer?.id,
-            customerNumber: state.customer?.customerNumber || state.customer?.debitorAccount,
-            customerName: state.customer?.name,
-            entryMode: salesHandover.entryMode ?? 'delivery-conversion',
-            sourceOfferId: salesHandover.sourceOfferId,
-            sourceOrderId,
-            sourceDeliveryId: lsId,
-            invoiceId: targetId,
-            invoiceNumber: docNumber,
-          }), { replace: false })
-        }
+        ok?: boolean
+        invoice_id?: string
+        invoice_number?: string
+        total?: number
+      }>(`/api/v1/sales/delivery-notes/${lsId}/create-invoice`, {})
+      const rechnungsNr = res.data?.invoice_number
+      const rechnungsId = res.data?.invoice_id
+      if (rechnungsNr) {
+        push(`Rechnung ${rechnungsNr} erstellt`)
+        setState((prev) => ({ ...prev, fakturiertRechnNr: rechnungsNr }))
       } else {
         push('Rechnung erstellt')
       }
+      if (rechnungsId && typeof navigate === 'function') {
+        // Ziel ist die Belegmaske: Sie zeigt die Positionen und je Position,
+        // aus welcher Lieferscheinposition die berechnete Menge stammt.
+        navigate(`/verkauf/rechnung/${rechnungsId}`, { replace: false })
+      }
     } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-      push(`Sofort-Rechnung fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
+      const error = _rawErr as { response?: { status?: number; data?: { detail?: string } }; message?: string }
+      const detail = error.response?.data?.detail || error.message
+      // 409 heisst in aller Regel: schon berechnet. Das ist eine Lage, kein
+      // Programmfehler — und der Grund steht im Detail.
+      push(`Sofort-Rechnung fehlgeschlagen: ${detail}`)
     } finally {
       setIsSaving(false)
     }

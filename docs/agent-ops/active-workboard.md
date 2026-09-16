@@ -11,6 +11,41 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-LS-RECHNUNG-KNOPF - der Knopf lag am falschen Weg 2026-09-16, Claude Code
+
+**Befund:** „Sofort-Rechnung" in der Lieferscheinmaske rief
+`POST /docflow/{id}/convert` mit `target_doc_type: sales_invoice` auf. Das legt
+ein **Docflow-Dokument** an — eine Rechnung ohne eigene Positionen, auf die
+keine Mengenzuordnung zeigen kann. Anschliessend landete man im alten
+`/sales/invoice-editor`, der wiederum auf Docflow arbeitet. Der Weg zum echten
+Beleg existierte die ganze Zeit daneben:
+`POST /sales/delivery-notes/{id}/create-invoice` legt die Rechnung ueber den
+`SalesInvoiceService` an, Position fuer Position und Menge fuer Menge
+zugeordnet.
+
+**Damit gab es drei Rechnungswelten nebeneinander** — Docflow-Dokumente,
+`domain_sales.sales_invoices` (neu) und das nicht existierende
+`domain_finance.finance_invoices` aus dem Befund von gestern. Der Knopf hat auf
+die Welt gezeigt, in der am wenigsten steht.
+
+**Geaendert ist der Knopf, nicht die Maske:** Er ruft jetzt den echten Endpunkt
+und navigiert in die Belegmaske `/verkauf/rechnung/{id}`, wo Positionen und
+Herkunft stehen.
+
+**Der Preis ist sichtbar und gewollt:** Ein ungebuchter Lieferschein wird
+abgewiesen (400 „muss gebucht/gedruckt sein"). Das ist keine Verschlechterung —
+eine Rechnung ueber eine Lieferung im Entwurfszustand gehoert nicht in die
+Buecher. Docflow-Convert hat das nicht geprueft.
+
+**Abnahme:** `tsc --noEmit` und eslint ohne Ausgabe (ausser dem fremden
+Studio-Fehler), `tests/test_security_sales_delivery_notes.py` deckt den
+Endpunktweg samt Mandantentrennung ab.
+
+**Offen:** Docflow-Rechnungen und `sales/invoice-editor` bleiben bestehen. Ob
+die Docflow-Rechnung eine eigene Daseinsberechtigung hat oder abgeloest gehoert,
+ist eine Entscheidung ueber das Belegmodell — kein Nebeneffekt eines Knopfes.
+
+
 ## FSX-RECHNUNGSMASKE-MERIDIAN - die Maske zieht in den Builder 2026-09-16, Claude Code
 
 **Die Maskenerzeugung ist ab sofort verbindlich der Builder** —
