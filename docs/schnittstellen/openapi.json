@@ -389352,6 +389352,77 @@
             }
           },
           {
+            "description": "Freitext ueber Nummer und Kunde",
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Freitext ueber Nummer und Kunde",
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON-Spaltenfilter der Maskenlaufzeit",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON-Spaltenfilter der Maskenlaufzeit",
+              "title": "Filter Plan"
+            }
+          },
+          {
             "in": "query",
             "name": "limit",
             "required": false,
@@ -389372,6 +389443,25 @@
               "minimum": 0,
               "title": "Offset",
               "type": "integer"
+            }
+          },
+          {
+            "description": "Seite statt offset — die Maskenlaufzeit zaehlt Seiten",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Seite statt offset — die Maskenlaufzeit zaehlt Seiten",
+              "title": "Page"
             }
           }
         ],
@@ -397637,6 +397727,89 @@
           }
         ],
         "summary": "Studio Publish",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/drafts/{draft_id}/retire": {
+      "post": {
+        "operationId": "studio_retire_api_v1_studio_drafts__draft_id__retire_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Actor-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Actor-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Studio Retire Api V1 Studio Drafts  Draft Id  Retire Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Studio Retire",
         "tags": [
           "ui",
           "studio",

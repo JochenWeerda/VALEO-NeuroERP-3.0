@@ -4336,7 +4336,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/sales/rechnungen-liste",
+      "module": "@/pages/verkauf/rechnungen-worklist",
       "path": "verkauf/rechnungen",
       "source": "alias"
     },

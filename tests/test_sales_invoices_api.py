@@ -347,3 +347,97 @@ def test_maske_einer_fremden_rechnung_bleibt_verschlossen(client, kopf) -> None:
     }
     assert client.get(f"/api/v1/sales/invoices/{rid}/screen-summary", headers=fremd).status_code == 404
     assert client.get(f"/api/v1/sales/invoices/{rid}/tabs/positionen", headers=fremd).status_code == 404
+
+
+def test_liste_bedient_die_maskenlaufzeit_mit_seite_sortierung_und_spaltenfilter(
+    client, kopf
+) -> None:
+    """Die Faktura-Worklist fragt in Seiten, nicht in Zeilenversaetzen."""
+    erster = rechnung(client, kopf, lieferschein(client, kopf, "10")).json()
+    zweiter = rechnung(client, kopf, lieferschein(client, kopf, "20")).json()
+
+    seite = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"page": 1, "limit": 1}
+    ).json()
+    assert len(seite["items"]) == 1
+    assert seite["page"] == 1
+    assert seite["total"] >= 2
+
+    zweite_seite = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"page": 2, "limit": 1}
+    ).json()
+    assert zweite_seite["page"] == 2
+    assert zweite_seite["items"][0]["id"] != seite["items"][0]["id"]
+
+    # Sortierung nach einer benannten Spalte ...
+    aufsteigend = client.get(
+        "/api/v1/sales/invoices",
+        headers=kopf,
+        params={"sort": "net_amount", "sort_dir": "asc", "limit": 200},
+    ).json()
+    betraege = [float(z["net_amount"]) for z in aufsteigend["items"]]
+    assert betraege == sorted(betraege)
+
+    # ... und nach einer erfundenen Spalte: geordnet bleibt es trotzdem.
+    erfunden = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"sort": "drop table", "limit": 5}
+    )
+    assert erfunden.status_code == 200
+
+    # Freitext trifft Nummer oder Kunde.
+    gefunden = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"q": "K-100"}
+    ).json()
+    assert {erster["id"], zweiter["id"]} <= {z["id"] for z in gefunden["items"]}
+
+    # Spaltenfilter der Maske.
+    plan = client.get(
+        "/api/v1/sales/invoices",
+        headers=kopf,
+        params={"filter_plan": '{"status": {"op": "eq", "value": "entwurf"}}', "limit": 200},
+    ).json()
+    assert all(z["status"] == "entwurf" for z in plan["items"])
+
+    # Ein unlesbarer Plan wird abgewiesen, nicht stillschweigend ignoriert.
+    kaputt = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"filter_plan": "{kein json"}
+    )
+    assert kaputt.status_code == 422
+
+
+def test_zwei_rechnungen_kurz_hintereinander_bekommen_zwei_nummern(client, kopf) -> None:
+    """Der Fehler, der den Slice aufgehalten hat.
+
+    Die Ersatznummer war der Kopf einer uuid7 — und der ist der Zeitstempel.
+    Ueber rund eine Minute war er identisch: Die zweite Rechnung lief in die
+    Eindeutigkeitsbedingung und der Aufrufer bekam einen 500er.
+    """
+    erste = rechnung(client, kopf, lieferschein(client, kopf, "10"))
+    zweite = rechnung(client, kopf, lieferschein(client, kopf, "20"))
+
+    assert erste.status_code == 201, erste.text
+    assert zweite.status_code == 201, zweite.text
+    assert erste.json()["invoice_number"] != zweite.json()["invoice_number"]
+
+
+def test_doppelte_rechnungsnummer_ist_eine_lage_kein_serverfehler(client, kopf) -> None:
+    ls_erster = lieferschein(client, kopf, "10")
+    ls_zweiter = lieferschein(client, kopf, "20")
+    nummer = f"RE-TEST-{uuid.uuid4().hex[:6].upper()}"
+
+    def mit_nummer(ls_id: str):
+        return client.post(
+            "/api/v1/sales/invoices/from-delivery-notes",
+            headers=kopf,
+            json={
+                "customer_id": "K-100",
+                "delivery_note_ids": [ls_id],
+                "invoice_date": "2026-09-15",
+                "invoice_number": nummer,
+            },
+        )
+
+    assert mit_nummer(ls_erster).status_code == 201
+    kollision = mit_nummer(ls_zweiter)
+    assert kollision.status_code == 409
+    assert "bereits vergeben" in kollision.json()["detail"]

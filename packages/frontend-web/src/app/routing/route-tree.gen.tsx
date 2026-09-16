@@ -6016,8 +6016,8 @@ const appRoute0842 = createRoute({
   beforeLoad: ({ params }) => {
     throw redirect({ href: buildLegacyRedirect("sales/rechnungen", params) })
   },
-  component: () => renderPage("@/pages/sales/rechnungen-liste"),
-  staticData: {"breadcrumb":"Rechnungen","module":"@/pages/sales/rechnungen-liste","legacyPath":"/verkauf/rechnungen"},
+  component: () => renderPage("@/pages/verkauf/rechnungen-worklist"),
+  staticData: {"breadcrumb":"Rechnungen","module":"@/pages/verkauf/rechnungen-worklist","legacyPath":"/verkauf/rechnungen"},
 })
 
 const appRoute0843 = createRoute({
@@ -11909,7 +11909,7 @@ export const generatedRouteInventory = [
     "source": "alias"
   },
   {
-    "module": "@/pages/sales/rechnungen-liste",
+    "module": "@/pages/verkauf/rechnungen-worklist",
     "path": "verkauf/rechnungen",
     "source": "alias"
   },

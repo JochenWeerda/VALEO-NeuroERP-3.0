@@ -54,7 +54,7 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "orders-modern"
   },
   {
-    "module": "@/pages/sales/rechnungen-liste",
+    "module": "@/pages/verkauf/rechnungen-worklist",
     "path": "rechnungen"
   }
 ]

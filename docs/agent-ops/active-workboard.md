@@ -11,6 +11,58 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FSX-RECHNUNGSMASKE-WORKLIST - die Faktura-Liste wird eine Maske 2026-09-16, Claude Code
+
+**Die Definition lag seit `a4fc65e76` auf main, die Seite fehlte.** Cursors
+Studio-Commit hat `build_sales_invoices_worklist_screen_definition()` samt
+Registry-Eintrag, Listen-Route und Synonymen mitgenommen; Seite und Alias
+gehoerten zu diesem Slice. Jetzt sind sie da.
+
+**Der Redirect war die eigentliche Stelle.** `/verkauf/rechnungen` rendert
+nichts — es leitet ueber `legacy-redirects.json` auf `sales/rechnungen` um. Der
+Alias, den ich zuerst umgestellt hatte, war damit wirkungslos. Umgestellt ist
+jetzt `sales/rechnungen` in `alias-groups/generated/sales.ts`, also das Ziel des
+Redirects.
+
+**Der Export ist mitgezogen, der CSV-Import nicht.** Die Worklist exportiert
+ueber `useListActions` genau die **sichtbaren** Zeilen — was gefiltert wurde,
+landet gefiltert in der Datei. Der CSV-Import der alten Seite ist bewusst nicht
+uebernommen: Er hat Rechnungen mit `lines: []` in den Dokumentenspeicher
+geschrieben, also genau die positionslose Rechnung, die dieses Programm
+aufloest. Die alte Seite bleibt unter `/sales/rechnungen-liste` erreichbar, bis
+entschieden ist, ob es einen Massenimport geben soll — und wenn ja, ueber
+welches Objekt.
+
+**Ein Fehler aus meinem eigenen Slice, beim Anschliessen aufgefallen:** Die
+Ersatz-Rechnungsnummer war `RE-{uuid7()[:8]}` — und die ersten acht Zeichen
+einer uuid7 sind der Zeitstempel. Er bleibt rund eine Minute gleich: **zwei
+Rechnungen kurz hintereinander bekamen dieselbe Nummer**, die zweite lief in die
+Eindeutigkeitsbedingung, und der Endpunkt reichte das als **500** durch. Jetzt
+nimmt `_ersatznummer()` den Zufallsteil am Ende, und eine doppelte Nummer ist
+ein 409 mit Grund. Zwei Regressionstests halten beides fest. Der Nutzer hat den
+Fehler gegen den laufenden Stand nachgestellt und bestaetigt.
+
+**Die Nummer bleibt trotzdem ein Platzhalter.** Eindeutig ist nicht
+fortlaufend; ein Nummernkreis je Mandant und Jahr ist GoBD-relevant und eine
+eigene Aufgabe, keine Zeile in diesem Endpunkt.
+
+**Serverseitig arbeitet die Liste jetzt wirklich.** Die Maskenlaufzeit fragt in
+Seiten (`page`), sortiert ueber benannte Spalten und schickt `filter_plan` —
+alles drei beantwortet der Endpunkt, statt die Parameter stillschweigend zu
+ignorieren und eine Liste zu zeigen, deren Filter nichts tun. Ein unlesbarer
+Filterplan ergibt 422 statt stiller Wirkungslosigkeit.
+
+**Abnahme:** 14 Endpunkt- und 12 Dienst-Tests gruen gegen die echte Datenbank,
+5 Vitest auf die Seite, `tsc` und eslint ohne eigenen Befund.
+
+**Zwei fremde Gates weiterhin rot, unangetastet:**
+`features/screen-studio/studio-defaults.ts` bricht `tsc` (AgentMaskContract
+unvollstaendig), und `studio_drafts.py` hat inzwischen **9** Routen ohne
+`summary=`, womit `check_openapi_docs` unter der Schwelle 0 bleibt. Die
+mitkommende `openapi.json` enthaelt deshalb auch eine fremde Route
+(`/studio/drafts/{draft_id}/retire`) — erzeugtes Artefakt, keine Handarbeit.
+
+
 ## MERIDIAN-SCREEN-STUDIO-E2E - Playwright-Abnahme Lieferanten-Bewertung 2026-09-16, Cursor
 
 **Stand:** abgeschlossen. Owner Cursor. UIX-090-JSON-Schema und FSX/Rechnung bleiben bei Claude.

@@ -16,6 +16,7 @@ Lieferscheine in eine Rechnung sind nur eine laengere Quellenliste.
 
 from __future__ import annotations
 
+import json
 from datetime import date
 from decimal import Decimal
 from typing import Any, Optional
@@ -23,6 +24,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
@@ -65,6 +67,20 @@ class CreateFromDeliveryNotes(BaseModel):
     due_date: Optional[date] = None
     note: Optional[str] = None
     user_id: Optional[str] = None
+
+
+def _ersatznummer() -> str:
+    """Rechnungsnummer, wenn der Aufrufer keine mitgibt.
+
+    **Nicht** der Kopf einer uuid7: Dessen erste acht Zeichen sind der
+    Zeitstempel, und der bleibt ueber rund eine Minute gleich — zwei Rechnungen
+    kurz hintereinander bekamen so dieselbe Nummer und die zweite lief in einen
+    500er. Genommen wird der Zufallsteil am Ende.
+
+    Das bleibt ein **Platzhalter**: Ein fortlaufender Nummernkreis je Mandant
+    und Jahr ist eine eigene Aufgabe (GoBD), keine Zeile in diesem Endpunkt.
+    """
+    return f"RE-{uuid7().replace('-', '')[-10:].upper()}"
 
 
 def _zahl(wert: Any) -> str:
@@ -149,7 +165,7 @@ def create_from_delivery_notes(
     """
     tenant_id = get_current_tenant_id()
     quellen = _delivery_note_sources(db, tenant_id, body.delivery_note_ids)
-    nummer = body.invoice_number or f"RE-{uuid7()[:8].upper()}"
+    nummer = body.invoice_number or _ersatznummer()
 
     try:
         ergebnis = SalesInvoiceService(db, tenant_id).create_from_sources(
@@ -167,6 +183,14 @@ def create_from_delivery_notes(
         # 409: Der haeufigste Grund ist, dass bereits berechnet wurde. Das ist
         # eine Lage, kein Fehler im Programm.
         raise HTTPException(status_code=409, detail=str(fehler)) from fehler
+    except IntegrityError as fehler:
+        db.rollback()
+        # Eine doppelte Rechnungsnummer ist eine Lage, kein Programmfehler —
+        # und sie gehoert benannt, nicht als 500 ausgeliefert.
+        raise HTTPException(
+            status_code=409,
+            detail=f"Rechnungsnummer {nummer} ist fuer diesen Mandanten bereits vergeben.",
+        ) from fehler
 
     db.commit()
     return {
@@ -195,6 +219,14 @@ def create_from_delivery_notes(
     }
 
 
+#: Spalten, nach denen die Maske filtern darf. Ein freier Spaltenname aus dem
+#: Aufruf waere eine Einladung, in die Abfrage zu schreiben.
+FILTERBAR = {
+    "invoice_number": SalesInvoice.invoice_number,
+    "customer_id": SalesInvoice.customer_id,
+    "status": SalesInvoice.status,
+}
+
 @router.get(
     "/invoices",
     response_model=SalesInvoiceOut,
@@ -207,8 +239,13 @@ def list_invoices(
     invoice_number: Optional[str] = Query(default=None, max_length=60),
     date_from: Optional[date] = None,
     date_to: Optional[date] = None,
+    q: Optional[str] = Query(default=None, max_length=120, description="Freitext ueber Nummer und Kunde"),
+    sort: Optional[str] = Query(default=None, max_length=40),
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(default=None, description="JSON-Spaltenfilter der Maskenlaufzeit"),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
+    page: Optional[int] = Query(default=None, ge=1, description="Seite statt offset — die Maskenlaufzeit zaehlt Seiten"),
 ) -> dict[str, Any]:
     """Die Liste, ueber die eine Rechnung erreichbar wird.
 
@@ -221,6 +258,10 @@ def list_invoices(
     "50 von 50" nicht von "50 von 900" zu unterscheiden.
     """
     tenant_id = get_current_tenant_id()
+    # Die Maskenlaufzeit zaehlt Seiten, direkte Aufrufer rechnen in Zeilen.
+    # Beides fuehrt auf denselben Versatz; `page` gewinnt, wenn es gesetzt ist.
+    if page is not None:
+        offset = (page - 1) * limit
 
     abfrage = db.query(SalesInvoice).filter(SalesInvoice.tenant_id == tenant_id)
     if customer_id:
@@ -234,14 +275,60 @@ def list_invoices(
         abfrage = abfrage.filter(SalesInvoice.invoice_date >= date_from)
     if date_to:
         abfrage = abfrage.filter(SalesInvoice.invoice_date <= date_to)
+    if q:
+        # Freitext trifft Nummer **oder** Kunde — mehr Felder waeren geraten.
+        muster = f"%{q}%"
+        abfrage = abfrage.filter(
+            SalesInvoice.invoice_number.ilike(muster) | SalesInvoice.customer_id.ilike(muster)
+        )
+
+    # Spaltenfilter der Maske. Nur benannte Spalten, und ein unlesbarer Plan
+    # wird abgewiesen statt stillschweigend ignoriert: Ein Filter, der nichts
+    # tut und nichts sagt, ist schlimmer als keiner.
+    if filter_plan:
+        try:
+            plan = json.loads(filter_plan)
+        except (ValueError, TypeError) as fehler:
+            raise HTTPException(status_code=422, detail="filter_plan ist kein gueltiges JSON") from fehler
+        if not isinstance(plan, dict):
+            raise HTTPException(status_code=422, detail="filter_plan muss ein Objekt sein")
+        for spalten_name, vorgabe in plan.items():
+            spalte = FILTERBAR.get(spalten_name)
+            if spalte is None or not isinstance(vorgabe, dict):
+                continue
+            wert = vorgabe.get("value")
+            if wert is None:
+                continue
+            operation = vorgabe.get("op", "eq")
+            if operation == "eq":
+                abfrage = abfrage.filter(spalte == wert)
+            elif operation == "neq":
+                abfrage = abfrage.filter(spalte != wert)
+            elif operation == "contains":
+                abfrage = abfrage.filter(spalte.ilike(f"%{wert}%"))
+            elif operation == "in" and isinstance(wert, list):
+                abfrage = abfrage.filter(spalte.in_(wert))
 
     gesamt = abfrage.count()
-    treffer = (
-        abfrage.order_by(SalesInvoice.invoice_date.desc(), SalesInvoice.invoice_number.desc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+
+    # Sortiert wird nur nach benannten Spalten. Ein freier Spaltenname aus dem
+    # Aufruf waere eine Einladung, in die Abfrage zu schreiben.
+    SORTIERBAR = {
+        "invoice_number": SalesInvoice.invoice_number,
+        "customer_id": SalesInvoice.customer_id,
+        "invoice_date": SalesInvoice.invoice_date,
+        "due_date": SalesInvoice.due_date,
+        "status": SalesInvoice.status,
+        "net_amount": SalesInvoice.net_amount,
+        "gross_amount": SalesInvoice.gross_amount,
+    }
+    spalte = SORTIERBAR.get(sort or "")
+    if spalte is not None:
+        ordnung = [spalte.asc() if sort_dir == "asc" else spalte.desc()]
+    else:
+        ordnung = [SalesInvoice.invoice_date.desc(), SalesInvoice.invoice_number.desc()]
+
+    treffer = abfrage.order_by(*ordnung).offset(offset).limit(limit).all()
 
     # Eine Abfrage fuer alle Positionszahlen, nicht eine je Rechnung.
     zahlen: dict[str, int] = {}
@@ -277,6 +364,9 @@ def list_invoices(
         "total": gesamt,
         "limit": limit,
         "offset": offset,
+        # Die Maskenlaufzeit liest die Seite zurueck, nicht den Versatz.
+        "page": (offset // limit) + 1,
+        "table_key": "sales_invoices",
     }
 
 

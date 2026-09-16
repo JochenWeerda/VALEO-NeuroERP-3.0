@@ -56,6 +56,11 @@ umsetzung:
       `pages/verkauf/rechnung.tsx` ist nur noch der Einstieg mit der
       Belegkennung (`UniversalNativeDetailPage`).
     - >-
+      Nachtrag: `pages/verkauf/rechnungen-worklist.tsx` rendert die Worklist
+      `sales/invoices`; die Seite steuert nur den Export der sichtbaren Zeilen
+      bei. `sales/rechnungen` (Ziel des Legacy-Redirects von
+      `/verkauf/rechnungen`) zeigt darauf.
+    - >-
       Geloescht: `components/documents/InvoiceLineOrigins.tsx`,
       `lib/api/sales-invoices.ts` und der zugehoerige Vitest. Die Aussagen
       leben weiter, geprueft in `tests/test_sales_invoice_mask.py`.
@@ -88,6 +93,9 @@ file_ownership:
   - tests/test_sales_invoice_mask.py
   - tests/test_sales_invoices_api.py
   - packages/frontend-web/src/pages/verkauf/rechnung.tsx
+  - packages/frontend-web/src/pages/verkauf/rechnungen-worklist.tsx
+  - packages/frontend-web/src/__tests__/pages/verkauf/rechnungen-worklist.test.tsx
+  - "packages/frontend-web/src/app/route-aliases.json und alias-groups/generated/sales.ts: nur die Rechnungsliste"
 
 acceptance:
   - Die Maske entsteht ausschliesslich aus der ScreenDefinition.
@@ -98,7 +106,8 @@ acceptance:
 
 tests:
   - "pytest tests/test_sales_invoice_mask.py — 12 gruen, datenbankfrei."
-  - "pytest tests/test_sales_invoices_api.py — 11 gruen gegen die echte Datenbank (3 neu)."
+  - "pytest tests/test_sales_invoices_api.py — 14 gruen gegen die echte Datenbank."
+  - "vitest rechnungen-worklist — 5 gruen (Plan, Export der sichtbaren Zeilen, Fehler- und Ladezustand)."
   - "pytest Masken-/Ketten-Sweep — test_meridian_column_navigation_inventory, test_mask_rollout_batch_w42_51, test_mask_registry_uix, test_agent_mask_contract, test_mask_screen_definition, test_uix091_*, test_omnibox_catalog, test_l3_deep_mask_parity, test_generate_agent_handbuch: gruen."
   - "Agent-Handbuch regeneriert (70 Masken); openapi.json regeneriert."
 
@@ -106,6 +115,10 @@ risks:
   - >-
     Die Maske ist inhaltlich geprueft, aber nicht angesehen. Generator-Ready
     ist keine visuelle Abnahme — das steht schon im Rahmenslice.
+  - >-
+    Die Rechnungsnummer ist weiter ein Platzhalter. `_ersatznummer()` ist
+    eindeutig, aber nicht fortlaufend; ein Nummernkreis je Mandant und Jahr ist
+    GoBD-relevant und eine eigene Aufgabe.
 
 befunde_fremder_stand:
   - >-

@@ -2221,7 +2221,7 @@
       "path": "verkauf/auftraege/neu"
     },
     {
-      "module": "@/pages/sales/rechnungen-liste",
+      "module": "@/pages/verkauf/rechnungen-worklist",
       "path": "verkauf/rechnungen"
     },
     {
