@@ -105,8 +105,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/agrar__duenger/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/agrar/duenger/{entity_id}/screen-summary`
-
 **Data Sources:**
 
 - `entity` → `/api/v1/masks/agrar/duenger/entity/{entity_id}`
@@ -469,11 +467,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/agrar__harvest-settlement/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/agrar/settlements/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/agrar/settlements/{entity_id}`
+- `entity` → `/api/v1/agrar/settlements/{entity_id}`
 - `positionen` → `/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/positionen`
 - `abzuege` → `/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/abzuege`
 
@@ -631,8 +629,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/agrar__saatgut/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/agrar/saatgut/{entity_id}/screen-summary`
-
 **Data Sources:**
 
 - `entity` → `/api/v1/masks/agrar/saatgut/entity/{entity_id}`
@@ -671,8 +667,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/feldbuch/duengemittelmengen`
-- `amounts` → `/api/v1/feldbuch/duengemittelmengen`
+- `entity` → `/api/v1/agrar/feldbuch/duengemittelmengen`
+- `amounts` → `/api/v1/agrar/feldbuch/duengemittelmengen`
 
 **MCP-Tools (Domäne):**
 
@@ -914,11 +910,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/crm__lead/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/crm/leads/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/crm/lead/entity/{entity_id}`
+- `entity` → `/api/v1/crm/leads/{entity_id}`
 - `aktivitaeten` → `/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aktivitaeten`
 - `aufgaben` → `/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aufgaben`
 
@@ -995,7 +989,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/crm__opportunity/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/crm/opportunities/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/crm/opportunity/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -1096,8 +1090,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__anfrage/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/anfragen/{entity_id}/screen-summary`
-
 **Data Sources:**
 
 - `entity` → `/api/v1/masks/einkauf/anfrage/entity/{entity_id}`
@@ -1131,8 +1123,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Readiness | `GET /api/v1/masks/einkauf/angebot/readiness` |
 | Rollout-Route | `/mask-rollout/einkauf__angebot/:entityId` |
 | Adapter | `native` (temporary=nein) |
-
-**Summary:** `/api/v1/masks/einkauf/angebote/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -1170,8 +1160,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__anlieferavis/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/anlieferavise/{entity_id}/screen-summary`
-
 **Data Sources:**
 
 - `entity` → `/api/v1/masks/einkauf/anlieferavis/entity/{entity_id}`
@@ -1205,8 +1193,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Readiness | `GET /api/v1/masks/einkauf/auftragsbestaetigung/readiness` |
 | Rollout-Route | `/mask-rollout/einkauf__auftragsbestaetigung/:entityId` |
 | Adapter | `native` (temporary=nein) |
-
-**Summary:** `/api/v1/masks/einkauf/auftragsbestaetigungen/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -1244,11 +1230,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__purchase-order/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/bestellungen/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/bestellungen/{entity_id}`
+- `entity` → `/api/v1/einkauf/bestellungen/{entity_id}`
 - `positionen` → `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/positionen`
 - `kommunikation` → `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/kommunikation`
 
@@ -1283,11 +1269,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__supplier/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/lieferanten/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/lieferanten/{entity_id}`
+- `entity` → `/api/v1/einkauf/lieferanten/{entity_id}`
 - `bestellungen` → `/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/bestellungen`
 - `kontakte` → `/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/kontakte`
 
@@ -1477,11 +1463,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__ap-invoice/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/ap/invoices/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/ap/invoices/{entity_id}`
+- `entity` → `/api/v1/finance/ap/invoices/{entity_id}`
 - `positionen` → `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/positionen`
 - `freigabe` → `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/freigabe`
 
@@ -1517,11 +1503,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__ar-open-item/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/open-items/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/finance/ar-open-item/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/open-items/{entity_id}`
+- `entity` → `/api/v1/finance/open-items/{entity_id}`
 - `ausgleich` → `/api/v1/mask-rollouts/finance/ar-open-item/{entity_id}/tabs/ausgleich`
 
 **MCP-Tools (Domäne):**
@@ -1555,8 +1541,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Readiness | `GET /api/v1/masks/finance/bankkonto/readiness` |
 | Rollout-Route | `/mask-rollout/finance__bankkonto/:entityId` |
 | Adapter | `native` (temporary=nein) |
-
-**Summary:** `/api/v1/masks/finance/bankkonten/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -1594,8 +1578,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Readiness | `GET /api/v1/masks/finance/debitor/readiness` |
 | Rollout-Route | `/mask-rollout/finance__debitor/:entityId` |
 | Adapter | `native` (temporary=nein) |
-
-**Summary:** `/api/v1/masks/finance/debitoren/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -1635,8 +1617,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__kreditor/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/kreditoren/{entity_id}/screen-summary`
-
 **Data Sources:**
 
 - `entity` → `/api/v1/masks/finance/kreditor/entity/{entity_id}`
@@ -1675,11 +1655,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__payment-run/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/payment-runs/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/finance/payment-run/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/payment-runs/{entity_id}`
+- `entity` → `/api/v1/finance/payment-runs/{entity_id}`
 - `zahlungen` → `/api/v1/mask-rollouts/finance/payment-run/{entity_id}/tabs/zahlungen`
 
 **MCP-Tools (Domäne):**
@@ -1692,7 +1672,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Was ist der Status von Zahlungslauf {entity_id} und wie hoch ist der Gesamtbetrag?
 - Zeige alle Einzelzahlungen von Zahlungslauf {entity_id} mit Status 'fehler'.
 
-**Sensible Felder:** `gesamtbetrag, bank`
+**Sensible Felder:** `initiator_iban, gesamtbetrag, bank`
 
 **Actions:**
 
@@ -1871,8 +1851,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/futtermittel__mischfuttermittel/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/futtermittel/mischfuttermittel/{entity_id}/screen-summary`
-
 **Data Sources:**
 
 - `entity` → `/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}`
@@ -2040,7 +2018,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/lager__article-stock/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/articles/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/lager/article-stock/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -2112,7 +2090,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/lager__stock-movement/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/inventory/stock-movements/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/lager/stock-movement/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -2261,11 +2239,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/qualitaet__reklamation/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/qualitaet/reklamationen/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/qualitaet/reklamation/entity/{entity_id}`
+- `entity` → `/api/v1/reklamationen/{entity_id}`
 - `massnahmen` → `/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/massnahmen`
 - `dokumente` → `/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/dokumente`
 
@@ -2390,7 +2366,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/sales__delivery-note/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/sales/delivery-notes/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/screen-summary`
 
 **Data Sources:**
 

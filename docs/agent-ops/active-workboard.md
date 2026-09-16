@@ -11,6 +11,63 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-VERDRAHTUNG-AUDIT - acht Masken zeigten ins Leere 2026-09-16, Claude Code
+
+**Die Frage war: Ist alles verdrahtet, was verdrahtet gehoert?** Die Antwort ist
+gemessen, nicht geschaetzt. Ich habe jede Quelle jeder nativen ScreenDefinition
+gegen die echten Routen der laufenden App gehalten.
+
+**Befund: 30 von 193 Maskenquellen zeigten auf Routen, die es nicht gibt.**
+Davon waren **acht** unmittelbar sichtbar, weil sie die `entity`-Quelle
+betrafen — die Maske holt den Kopf, bekommt einen 404 und schreibt „Vorgang
+konnte nicht geladen werden":
+
+- `einkauf/purchase-order`, `einkauf/supplier`, `finance/ar-open-item`,
+  `finance/payment-run`, `agrar/harvest-settlement`, `finance/ap-invoice`
+  hatten ein `masks/`-Praefix, unter dem keine Route liegt
+  (`/api/v1/masks/einkauf/bestellungen/{id}`), waehrend der echte Endpunkt
+  danebenlag (`/api/v1/einkauf/bestellungen/{id}`).
+- `auswertungen/duengemittelmengen` fehlte schlicht das `/agrar` im Pfad.
+
+**Es reichte nicht, den Endpunkt umzubiegen.** Die Feldschluessel der Masken
+waren deutsche Wunschnamen (`beleg_nr`, `gesamtbetrag`, `lauf_nr`), die
+Endpunkte liefern andere (`rechnungsnr`, `net_amount_eur`, `run_number`). Nur
+den Pfad zu korrigieren haette den Fehler *unsichtbar* gemacht: Statt einer
+Fehlermeldung haette die Maske lauter leere Felder gezeigt — und leer sieht aus
+wie „nichts erfasst". Die Kopffelder sind deshalb auf die echten Schluessel
+umgestellt, mit den Einheiten, die der Beleg wirklich fuehrt (Abrechnungsmenge
+in **kg**, nicht in t; Kampagne statt erfundenem Erntejahr).
+
+**Zwei weitere Masken hingen am Platzhalter-Stub, obwohl es den Fachendpunkt
+gibt:** `crm/lead` und `qualitaet/reklamation` lesen jetzt echte Daten. Der Lead
+fuehrt weder Nummer noch Titel — beide Felder sind raus statt leer.
+
+**17 `summaryEndpoint`-Angaben zeigten ebenfalls ins Leere.** Die
+Maskenlaufzeit ruft sie gar nicht ab, sie sind also nicht sichtbar kaputt —
+aber sie sind eine Behauptung. Fuenf zeigen jetzt auf die vorhandene
+Rollout-Zusammenfassung, zwoelf sind geloescht: Lieber keine Angabe als eine
+falsche.
+
+**Damit das nicht wieder verrottet:** `tests/test_mask_endpoint_inventory.py`
+haelt fest, dass jede Maskenquelle auf eine echte Route zeigt (jetzt 181 von
+181), und fuehrt die Masken, die noch am Entity-Stub haengen, als **Restliste,
+die schrumpfen darf, nicht wachsen**.
+
+**Was den Framework-Aufruf angeht:** 70 der 71 nativen Definitionen werden
+ueber den Builder gerendert. Einzige Ausnahme ist `lager/leitstand` — eine
+Cockpit-Definition **ohne Inhalt** (keine Kacheln, keine Tabellen) und ohne
+Seite. Die gehoert nicht verdrahtet, sondern beantwortet: Was soll ein
+Lagerleitstand zeigen? Eine Seite dafuer zu bauen waere Dekoration.
+
+**Und der eigentliche Rest, gemessen:** 20 Masken nennen eine Listen-Route, an
+der eine **handgeschriebene** Seite rendert (200–700 Zeilen je Seite) —
+`einkauf/bestellungen`, `finance/op-debitoren`, `lager/bestandsuebersicht`,
+`verkauf/auftraege` und weitere. Der Registry enthaelt fast nur Detailmasken;
+die Listen sind noch Handarbeit. Das ist kein Fehler, sondern das naechste
+Programm — je Liste ein bewusster Anschluss wie bei der Faktura-Liste, kein
+Blindersatz.
+
+
 ## MERIDIAN-SCREEN-STUDIO-GATES - tsc und OpenAPI-Summaries 2026-09-16, Cursor
 
 **Die beiden roten Studio-Gates sind geschlossen.** `emptyStudioDraft()` baut
