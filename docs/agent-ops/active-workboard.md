@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MERIDIAN-SCREEN-STUDIO-GATES - tsc und OpenAPI-Summaries 2026-09-16, Cursor
+
+**Die beiden roten Studio-Gates sind geschlossen.** `emptyStudioDraft()` baut
+den Agent-Vertrag jetzt ueber `generateAgentMaskContract` und setzt nur Purpose,
+Selectors, Prompts und Tasks explizit. Alle neun Studio-Routen haben `summary=`;
+`check_openapi_docs.py --threshold 0` steht bei 3468/3468, `tsc --noEmit` Exit 0.
+`openapi.json` ist nur in den neun Studio-Summaries nachgezogen.
+
+**Abnahme:** pytest Studio 12/12, Vitest screen-studio 5/5. Docker-Rebuild
+Backend/Frontend und Browser-Abnahme der beiden Studio-Masken folgen in dieser
+Session. `screen_definitions.py`-Split bleibt auf ruhigem Baum. UIX-090 und
+FSX/Rechnung bleiben bei Claude.
+
 ## FSX-RECHNUNGSMASKE-WORKLIST - die Faktura-Liste wird eine Maske 2026-09-16, Claude Code
 
 **Die Definition lag seit `a4fc65e76` auf main, die Seite fehlte.** Cursors
@@ -64,12 +77,9 @@ fuehrt `sales/rechnungen` ebenfalls, und sie gewinnt gegen
 den Browserlauf waere der Slice als „angeschlossen" durchgegangen, waehrend
 niemand die neue Maske gesehen haette.
 
-**Zwei fremde Gates weiterhin rot, unangetastet:**
-`features/screen-studio/studio-defaults.ts` bricht `tsc` (AgentMaskContract
-unvollstaendig), und `studio_drafts.py` hat inzwischen **9** Routen ohne
-`summary=`, womit `check_openapi_docs` unter der Schwelle 0 bleibt. Die
-mitkommende `openapi.json` enthaelt deshalb auch eine fremde Route
-(`/studio/drafts/{draft_id}/retire`) — erzeugtes Artefakt, keine Handarbeit.
+**Die zwei fremden Studio-Gates sind geschlossen (Cursor, gleicher Tag):**
+vollstaendiges `AgentMaskContract` in `studio-defaults.ts`, neun `summary=`
+an den Studio-Routen, OpenAPI-Artefakt nachgezogen.
 
 
 ## MERIDIAN-SCREEN-STUDIO-E2E - Playwright-Abnahme Lieferanten-Bewertung 2026-09-16, Cursor

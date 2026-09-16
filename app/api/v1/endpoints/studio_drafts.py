@@ -52,7 +52,7 @@ def _report(definition: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/catalog")
+@router.get("/catalog", summary="Studio-Katalog für Floorplans, Datenquellen und Actions")
 def studio_catalog() -> dict[str, Any]:
     catalog = load_studio_catalog()
     return {
@@ -65,23 +65,23 @@ def studio_catalog() -> dict[str, Any]:
     }
 
 
-@router.post("/validate")
+@router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen")
 def studio_validate(body: StudioDefinitionIn) -> dict[str, Any]:
     return _report(body.definition)
 
 
-@router.post("/propose")
+@router.post("/propose", summary="Studio-ScreenDefinition aus einer Absicht vorschlagen")
 def studio_propose(body: StudioProposeIn) -> dict[str, Any]:
     definition = propose_studio_draft(body.intent)
     return _report(definition)
 
 
-@router.get("/drafts")
+@router.get("/drafts", summary="Studio-Entwürfe des Mandanten auflisten")
 def studio_list_drafts(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return {"drafts": list_drafts(tenant_id)}
 
 
-@router.post("/drafts")
+@router.post("/drafts", summary="Studio-Entwurf anlegen")
 def studio_create_draft(
     body: StudioDefinitionIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -94,7 +94,7 @@ def studio_create_draft(
     return {**record, **report}
 
 
-@router.put("/drafts/{draft_id}")
+@router.put("/drafts/{draft_id}", summary="Studio-Entwurf aktualisieren")
 def studio_update_draft(
     draft_id: str,
     body: StudioDefinitionIn,
@@ -119,7 +119,7 @@ def studio_update_draft(
     return {**record, **report}
 
 
-@router.post("/drafts/{draft_id}/submit-review")
+@router.post("/drafts/{draft_id}/submit-review", summary="Studio-Entwurf zur Vier-Augen-Prüfung geben")
 def studio_submit_review(
     draft_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -128,7 +128,7 @@ def studio_submit_review(
     return _transition(draft_id, tenant_id, _actor(x_actor_id), "review")
 
 
-@router.post("/drafts/{draft_id}/publish")
+@router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben")
 def studio_publish(
     draft_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -148,7 +148,7 @@ def studio_publish(
     return {**record, **report, "route": studio_run_route(screen_id) if screen_id else None}
 
 
-@router.post("/drafts/{draft_id}/retire")
+@router.post("/drafts/{draft_id}/retire", summary="Freigegebene Studio-Maske zurückziehen")
 def studio_retire(
     draft_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -1,7 +1,8 @@
+import { generateAgentMaskContract } from '@/components/mask-builder/runtime/generateAgentMaskContract'
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
 
 export function emptyStudioDraft(): ScreenDefinition {
-  return {
+  const draft: ScreenDefinition = {
     schemaVersion: 1,
     id: 'tenant/lieferanten-bewertung',
     domain: 'einkauf',
@@ -38,9 +39,19 @@ export function emptyStudioDraft(): ScreenDefinition {
       permission: 'studio.draft.execute',
     }],
     noWorkflowReason: 'Studio-Worklist priorisiert Auswahl; Statuswechsel bleiben auf der ObjectPage.',
+  }
+  return {
+    ...draft,
     agentContract: {
+      ...generateAgentMaskContract(draft),
       businessPurpose: 'Lieferanten bewerten und auswählen.',
-      testSelectors: { screenRoot: "[data-testid='screen-tenant/lieferanten-bewertung']" },
+      testSelectors: {
+        screenRoot: "[data-testid='screen-tenant/lieferanten-bewertung']",
+        submitButton: '[data-testid="form-submit-btn"]',
+        workflowPanel: '[data-testid="workflow-panel"]',
+      },
+      examplePrompts: ['Welche Lieferanten haben die beste Bewertung?'],
+      recommendedAgentTasks: ['Lieferanten nach Bewertung sortieren'],
     },
   }
 }

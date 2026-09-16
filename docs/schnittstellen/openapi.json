@@ -397410,7 +397410,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Catalog",
+        "summary": "Studio-Katalog für Floorplans, Datenquellen und Actions",
         "tags": [
           "ui",
           "studio",
@@ -397468,7 +397468,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio List Drafts",
+        "summary": "Studio-Entwürfe des Mandanten auflisten",
         "tags": [
           "ui",
           "studio",
@@ -397550,7 +397550,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Create Draft",
+        "summary": "Studio-Entwurf anlegen",
         "tags": [
           "ui",
           "studio",
@@ -397643,7 +397643,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Update Draft",
+        "summary": "Studio-Entwurf aktualisieren",
         "tags": [
           "ui",
           "studio",
@@ -397726,7 +397726,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Publish",
+        "summary": "Studio-Entwurf als published_temp freigeben",
         "tags": [
           "ui",
           "studio",
@@ -397809,7 +397809,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Retire",
+        "summary": "Freigegebene Studio-Maske zurückziehen",
         "tags": [
           "ui",
           "studio",
@@ -397892,7 +397892,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Submit Review",
+        "summary": "Studio-Entwurf zur Vier-Augen-Prüfung geben",
         "tags": [
           "ui",
           "studio",
@@ -397942,7 +397942,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Propose",
+        "summary": "Studio-ScreenDefinition aus einer Absicht vorschlagen",
         "tags": [
           "ui",
           "studio",
@@ -397992,7 +397992,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Studio Validate",
+        "summary": "Studio-ScreenDefinition gegen Katalog und Gates prüfen",
         "tags": [
           "ui",
           "studio",
