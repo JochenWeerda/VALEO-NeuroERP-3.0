@@ -20,8 +20,12 @@ Selectors, Prompts und Tasks explizit. Alle neun Studio-Routen haben `summary=`;
 `openapi.json` ist nur in den neun Studio-Summaries nachgezogen.
 
 **Abnahme:** pytest Studio 12/12, Vitest screen-studio 5/5. Docker-Rebuild
-Backend/Frontend und Browser-Abnahme der beiden Studio-Masken folgen in dieser
-Session. `screen_definitions.py`-Split bleibt auf ruhigem Baum. UIX-090 und
+Backend + Frontend (Dockerfile kopiert jetzt `config/security/npm-patches`).
+Im laufenden Portal: `/admin/screen-studio` Speichern → Prüfung → Freigabe →
+`/studio/run/tenant__lieferanten-bewertung` (Live-Liste leer, weil
+`/einkauf/lieferanten` keine Zeilen hat; Preview nutzt Mockzeilen). Native
+Artikelmaske und Flow-Spine `Auftrag bis Zahlung` (Vorgang WF-00001) bedient.
+`screen_definitions.py`-Split bleibt auf ruhigem Baum. UIX-090 und
 FSX/Rechnung bleiben bei Claude.
 
 ## FSX-RECHNUNGSMASKE-WORKLIST - die Faktura-Liste wird eine Maske 2026-09-16, Claude Code
