@@ -44,7 +44,7 @@ type ApplyResult = {
 function useBookingTemplates() {
   return useQuery({
     queryKey: ['finance', 'booking-templates'],
-    queryFn: async () => (await apiClient.get<BookingTemplate[]>('/api/v1/booking-templates')).data,
+    queryFn: async () => (await apiClient.get<BookingTemplate[]>('/api/v1/finance/booking-templates')).data,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -53,7 +53,7 @@ function useApplyTemplate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async ({ id, amount, entry_date }: { id: string; amount: number; entry_date: string }) =>
-      (await apiClient.post<ApplyResult>(`/api/v1/booking-templates/${id}/apply`, {
+      (await apiClient.post<ApplyResult>(`/api/v1/finance/booking-templates/${id}/apply`, {
         template_id: id,
         amount,
         entry_date,
@@ -68,7 +68,7 @@ function useDeleteTemplate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (id: string) => {
-      await apiClient.delete(`/api/v1/booking-templates/${id}`)
+      await apiClient.delete(`/api/v1/finance/booking-templates/${id}`)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['finance', 'booking-templates'] }),
   })

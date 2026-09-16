@@ -37,7 +37,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 FRONTEND = pathlib.Path("packages/frontend-web/src")
 #: Stand bei Einfuehrung des Gates. Die Zahl darf sinken, nicht steigen.
-BASELINE = 110
+BASELINE = 101
 
 _PFAD = re.compile(r"['\"`](/api/v1/[^'\"`\s]*)['\"`]")
 _AUFRUF = re.compile(r"apiClient\.(get|post|put|patch|delete)|fetch\(")

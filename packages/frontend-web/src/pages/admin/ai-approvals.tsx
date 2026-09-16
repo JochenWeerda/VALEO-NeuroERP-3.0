@@ -115,8 +115,8 @@ export default function AiApprovalsPage(): JSX.Element {
         <CardContent className="space-y-2">
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• AP-Rechnungen: <code>/api/v1/finance/ap/invoices/?status=ZUR_FREIGABE</code></li>
-            <li>• Freigabe-Regeln: <code>/api/v1/ap/approval-workflow/rules</code></li>
-            <li>• Freigabe-Aktion: <code>POST /api/v1/ap/approval-workflow/approve</code></li>
+            <li>• Freigabe-Regeln: <code>/api/v1/finance/ap/approval-workflow/rules</code></li>
+            <li>• Freigabe-Aktion: <code>POST /api/v1/finance/ap/approval-workflow/approve</code></li>
           </ul>
         </CardContent>
       </Card>

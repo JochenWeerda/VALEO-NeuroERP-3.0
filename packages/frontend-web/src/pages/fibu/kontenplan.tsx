@@ -50,7 +50,7 @@ export default function KontenplanPage(): JSX.Element {
     queryKey: ['fibu', 'chart-of-accounts'],
     queryFn: async () => {
       const res = await apiClient.get<{ items: Array<{ id: string; account_number: string; name: string; category?: string }> }>(
-        '/api/v1/chart-of-accounts'
+        '/api/v1/finance/chart-of-accounts/'
       )
       if (!res.data?.items) {
         throw new Error('Ungültige Antwort für Kontenplan')

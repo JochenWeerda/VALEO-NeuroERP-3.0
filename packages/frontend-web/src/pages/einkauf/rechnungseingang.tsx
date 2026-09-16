@@ -144,7 +144,7 @@ const createRechnungseingangConfig = (t: TFunction, entityTypeLabel: string): Ma
           name: 'accountCode',
           label: t('crud.fields.accountCode'),
           type: 'lookup',
-          endpoint: '/api/v1/chart-of-accounts',
+          endpoint: '/api/v1/finance/chart-of-accounts/',
           displayField: 'number',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.accountCode')

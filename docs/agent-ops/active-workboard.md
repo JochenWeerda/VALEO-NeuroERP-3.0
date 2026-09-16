@@ -68,9 +68,16 @@ Beleg gibt es aber unter `/api/v1/sales/delivery-notes`. Der 404 lief in ein
 (Kopfmenge gibt es nicht — sie ist die Summe der Positionen; die Zustellung
 entscheidet `is_delivered`, nicht der Status) und drei Tests.
 
-Die uebrigen 109 sind aufgelistet in
+**Neun davon sind schon weg**, weil sie reine Praefix-Fehler waren und die
+richtige Route daneben lag: `ap/approval-workflow` -> `finance/ap/...`,
+`chart-of-accounts` -> `finance/chart-of-accounts`, `booking-templates` und
+`exchange-rates` je unter `finance/`, und die GS1-Erzeugung unter
+`gs1/barcode/`. Alle vier Zielrouten antworten mit 200 — nachgemessen, nicht
+vermutet. Stand jetzt: **101**.
+
+Die uebrigen sind aufgelistet in
 `docs/quality-assurance/frontend-api-calls-ohne-route-2026-09-16.md` und werden
-von `scripts/check_frontend_api_calls.py` gezaehlt — Schwelle 110, die Zahl
+von `scripts/check_frontend_api_calls.py` gezaehlt — Schwelle 101, die Zahl
 darf sinken, nicht steigen. Je Eintrag gibt es genau zwei Antworten: Pfad
 korrigieren oder Endpunkt bauen. Den Aufruf still zu lassen ist keine.
 

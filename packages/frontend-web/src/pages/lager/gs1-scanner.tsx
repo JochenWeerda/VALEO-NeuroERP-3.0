@@ -1,8 +1,8 @@
 /**
  * GS1 Barcode Scanner & Label Workbench (Lager)
  * Scanner Tab: parse single/batch barcodes via POST /api/v1/gs1/parse
- * SSCC Tab: generate SSCC-18 via POST /api/v1/gs1/sscc/generate
- * Label Tab: generate GS1-128 label data via POST /api/v1/gs1/labels/generate
+ * SSCC Tab: generate SSCC-18 via POST /api/v1/gs1/barcode/sscc/generate
+ * Label Tab: generate GS1-128 label data via POST /api/v1/gs1/barcode/labels/generate
  */
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
@@ -70,7 +70,7 @@ export default function GS1ScannerPage(): JSX.Element {
 
   const ssccMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post<SSCCResult>('/api/v1/gs1/sscc/generate', {
+      const res = await apiClient.post<SSCCResult>('/api/v1/gs1/barcode/sscc/generate', {
         company_prefix: companyPrefix,
         serial_ref: serialRef,
       })
@@ -82,7 +82,7 @@ export default function GS1ScannerPage(): JSX.Element {
 
   const labelMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post<LabelResult>('/api/v1/gs1/labels/generate', {
+      const res = await apiClient.post<LabelResult>('/api/v1/gs1/barcode/labels/generate', {
         gtin,
         charge,
         mhd,

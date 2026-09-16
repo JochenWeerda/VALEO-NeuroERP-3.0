@@ -21,7 +21,7 @@ nur Zeilen, die selbst einen Aufruf absetzen; zusammengesetzte Pfade
 (`${BASE}/feeds`) erkennt das Skript nicht. Die Liste ist damit ein starker
 Hinweis, kein Beweis — und keine Obergrenze.
 
-**110 verschiedene Pfade** in 36 Bereichen.
+**101 verschiedene Pfade** in 33 Bereichen. (Start: 110; neun Praefix-Fehler in Finance und GS1 sind bereits korrigiert.)
 
 Jeder Eintrag hat genau zwei moegliche Antworten: **Pfad korrigieren** (die Route
 heisst anders) oder **Endpunkt bauen** (es gibt ihn wirklich nicht). Ein dritter
@@ -57,23 +57,12 @@ Weg — den Aufruf still zu lassen — ist keiner.
 - `/api/v1/analytics/benchmarkx` — lib\api\controlling.ts:501
 - `/api/v1/analytics/cubes/contract-positions` — features\dashboard\Dashboard.tsx:117
 
-## ap
-
-- `/api/v1/ap/approval-workflow/request` — pages\finance\ap-invoices-list.tsx:163
-
 ## audit
 
 - `/api/v1/audit/change-logs/audit-trail/x/x` — pages\agribusiness\farmers.tsx:102
 
-## booking-templates
-
-- `/api/v1/booking-templates` — pages\finance\buchungsvorlagen.tsx:47
-- `/api/v1/booking-templates/x` — pages\finance\buchungsvorlagen.tsx:71
-- `/api/v1/booking-templates/x/apply` — pages\finance\buchungsvorlagen.tsx:56
-
 ## chart-of-accounts
 
-- `/api/v1/chart-of-accounts` — lib\services\finance-service.ts:236
 - `/api/v1/chart-of-accounts/x` — lib\services\finance-service.ts:231
 
 ## compliance
@@ -111,11 +100,6 @@ Weg — den Aufruf still zu lassen — ist keiner.
 - `/api/v1/einkauf/rechnungen/x` — pages\einkauf\rechnung-eingang-erfassung.tsx:319
 - `/api/v1/einkauf/rechnungseingaenge/x` — pages\einkauf\rechnung-abgleich.tsx:125
 
-## exchange-rates
-
-- `/api/v1/exchange-rates` — pages\finance\wechselkurse.tsx:48
-- `/api/v1/exchange-rates/x` — pages\finance\wechselkurse.tsx:71
-
 ## fibu
 
 - `/api/v1/fibu/periodische-buchungenx` — lib\api\fibu.ts:1155
@@ -150,8 +134,6 @@ Weg — den Aufruf still zu lassen — ist keiner.
 ## gs1
 
 - `/api/v1/gs1/batch-parse` — pages\lager\gs1-scanner.tsx:64
-- `/api/v1/gs1/labels/generate` — pages\lager\gs1-scanner.tsx:85
-- `/api/v1/gs1/sscc/generate` — pages\lager\gs1-scanner.tsx:73
 
 ## inventory
 

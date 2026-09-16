@@ -215,7 +215,7 @@ export const financeService = {
       pages: number
       has_next: boolean
       has_prev: boolean
-    }>('/api/v1/chart-of-accounts/', { params })
+    }>('/api/v1/finance/chart-of-accounts/', { params })
     return response.data
   },
 
@@ -233,7 +233,7 @@ export const financeService = {
   },
 
   async createAccount(data: AccountCreate) {
-    const response = await apiClient.post<{ data: Account }>('/api/v1/chart-of-accounts/', data)
+    const response = await apiClient.post<{ data: Account }>('/api/v1/finance/chart-of-accounts/', data)
     return response.data.data
   },
 

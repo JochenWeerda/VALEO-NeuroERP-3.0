@@ -160,7 +160,7 @@ export default function APInvoicesListPage(): JSX.Element {
               size="sm"
               disabled={pendingActions.has(`approval-${row.original.number}`)}
               onClick={() => void withPending(`approval-${row.original.number}`, async () => {
-                await apiClient.post('/api/v1/ap/approval-workflow/request', {
+                await apiClient.post('/api/v1/finance/ap/approval-workflow/request', {
                   invoice_id: row.original.number,
                   requested_by: 'current_user',
                 })
