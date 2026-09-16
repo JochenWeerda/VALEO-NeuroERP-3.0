@@ -37,8 +37,15 @@ def load_studio_catalog() -> dict[str, Any]:
         raise StudioConfigError(f"Studio-Katalog fehlt: {_CONFIG_PATH}")
     data = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
     actions = {a["key"]: a for a in data.get("command_actions", []) if a.get("key")}
-    endpoints = {ds["endpoint"] for ds in data.get("data_sources", []) if ds.get("endpoint")}
-    return {"actions": actions, "data_source_endpoints": endpoints, "version": data.get("version")}
+    data_sources = list(data.get("data_sources") or [])
+    endpoints = {ds["endpoint"] for ds in data_sources if ds.get("endpoint")}
+    return {
+        "actions": actions,
+        "data_sources": data_sources,
+        "command_actions": list(data.get("command_actions") or []),
+        "data_source_endpoints": endpoints,
+        "version": data.get("version"),
+    }
 
 
 def _iter_actions(definition: dict[str, Any]):
@@ -79,6 +86,12 @@ def validate_studio_draft(
     adapter = definition.get("adapter") or {}
     if adapter.get("temporary") is False:
         violations.append("adapter_temporary_false_verboten")
+
+    allowed_endpoints: set[str] = cat.get("data_source_endpoints") or set()
+    for source in definition.get("dataSources") or []:
+        endpoint = source.get("endpoint")
+        if endpoint and endpoint not in allowed_endpoints:
+            violations.append(f"datenquelle_nicht_im_katalog:{endpoint}")
 
     # ── Actions ──────────────────────────────────────────────────────────────
     for action in _iter_actions(definition):

@@ -361,6 +361,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'screen-studio',
+        label: 'Masken-Studio',
+        icon: LayoutGrid,
+        module: '@/pages/admin/screen-studio',
+        preferredPath: 'admin/screen-studio',
+        keywords: ['studio', 'screen definition', 'maske erzeugen', 'no-code', 'tabellen'],
+        mcp: { businessDomain: 'admin', scope: 'admin:write' },
+      },
+      {
         id: 'superglue-control-center',
         label: 'Superglue Ops',
         icon: Zap,

@@ -384,6 +384,7 @@ export interface ScreenDefinition {
     enterMovesFocus?: boolean
   }
   workflow?: ScreenWorkflowDefinition
+  noWorkflowReason?: string
   layout?: {
     preferredMode?: ScreenLayoutMode
     mobileMode?: ScreenLayoutMode

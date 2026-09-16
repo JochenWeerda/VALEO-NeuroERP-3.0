@@ -1,0 +1,45 @@
+slice_id: MERIDIAN-SCREEN-STUDIO-20260916
+title: ScreenDefinition-Studio für Anwender und Agenten
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-09-16
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Setzt den offenen Rest von UIX-090 um (Editor, Katalog-API, Validate,
+  Propose, Draft-Vier-Augen). Der Validierungskern in
+  app/services/studio_validation.py bleibt bestehen. Claude bleibt Owner von
+  FSX-Dateien. Kein Lieferschein.
+goal: >-
+  Fach-Admins und LLM-Agenten erzeugen und aendern ScreenDefinitions im
+  Browser. Ausgabe ist eine normale SD mit Live-Vorschau im
+  UniversalMaskRenderer. Publish nur durch bestehende Gates.
+file_ownership:
+  - app/services/studio_propose.py
+  - app/services/studio_draft_store.py
+  - app/api/v1/endpoints/studio_drafts.py
+  - packages/frontend-web/src/features/screen-studio/**
+  - packages/frontend-web/src/pages/admin/screen-studio.tsx
+  - packages/frontend-web/src/lib/api/studio.ts
+  - docs/agent-ops/slices/MERIDIAN-SCREEN-STUDIO-20260916.yaml
+acceptance:
+  - Katalog liefert Floorplans, Feldtypen, Datenquellen und Actions.
+  - Validate lehnt Gate-Verletzungen ab, bereinigt sie nicht.
+  - Agent-Propose erzeugt eine tenant/-SD mit listDetail-Worklist.
+  - Editor zeigt Live-Vorschau und Gate-Panel.
+  - Publish scheitert, wenn derselbe Akteur zuletzt gespeichert hat.
+tests:
+  - pytest tests/test_uix090_studio_validation.py tests/test_meridian_screen_studio_api.py --noconftest --no-cov
+  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/features/screen-studio/studio-reducer.test.ts src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx
+risks:
+  - Drafts sind prozesslokal, bis die Alembic-Tabelle aus UIX-090 nachzieht.
+  - published_temp haengt die Maske noch nicht in die native Registry.
+ai_harness:
+  fachlicher_vertrag: Studio-SDs sind deklarativ und durchlaufen dieselben Gates.
+  architektur_vertrag: ScreenDefinition -> RenderPlan -> UniversalMaskRenderer.
+  daten_vertrag: Keine native Screen-IDs, nur tenant/<slug>.
+  test_vertrag: Boese Fixtures plus Editor-Reducer und Vier-Augen.
+  security_vertrag: dangerLevel nur erhoehen; commandEndpoints nur aus Katalog.
+  betriebs_vertrag: Kein Deployment.
+  dokumentations_vertrag: Slice, Workboard, Meridian-Experience.
+external_gates:
+  - not_applicable

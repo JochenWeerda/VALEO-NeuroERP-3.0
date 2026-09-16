@@ -91,9 +91,13 @@ ScreenDefinition nichts anderes erklärt. `transaction`, `cockpit` und
 `wizard` bleiben immer `single`. `objectPage` bleibt `single`, bis eine
 Maske `listDetail` oder `listDetailDetail` ausdrücklich setzt. Der
 `UniversalMaskRenderer` leitet die Spalten aus dem Plan ab — ohne
-Einzel-JSX je Maske. Zeilenklick wählt; `In Vollansicht öffnen` folgt
-`rowRouteTemplate`. Explizite `columns` (Kunden-Schnellauswahl) bleiben
-Vorrang.
+Einzel-JSX je Maske.
+
+Fach-Admins und Agenten erzeugen Entwürfe im Masken-Studio
+(`/admin/screen-studio`). Ausgabe ist eine normale ScreenDefinition unter
+`tenant/<slug>`; Validate und Publish nutzen denselben Gate-Pfad. Zeilenklick
+wählt; `In Vollansicht öffnen` folgt `rowRouteTemplate`. Explizite `columns`
+(Kunden-Schnellauswahl) bleiben Vorrang.
 
 Erste Referenzmasken: lesende Kunden-Schnellauswahl
 (`/crm/kunden-schnellauswahl`, explizites `listDetail`) und die native

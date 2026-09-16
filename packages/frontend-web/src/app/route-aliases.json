@@ -45,6 +45,10 @@
       "path": "admin/control-center/agent-ops"
     },
     {
+      "module": "@/pages/admin/screen-studio",
+      "path": "admin/screen-studio"
+    },
+    {
       "module": "@/pages/admin/compliance-dashboard",
       "path": "admin/compliance"
     },

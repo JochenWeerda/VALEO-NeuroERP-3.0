@@ -33,10 +33,10 @@ progress: >-
   adapter.temporary!=False, Actions nur aus Katalog, kein fremder commandEndpoint,
   dangerLevel darf ERHOEHT nie gesenkt werden, forbiddenForAgents nie aufgehoben;
   Pflichtfeld-/schemaVersion-Check; alle Verletzungen werden gesammelt gemeldet.
-  13 pytest (12 boese Faelle + valider Draft, --noconftest 0.6s). OFFEN: Alembic
-  screen_definition_drafts + studio_drafts.py CRUD/publish (Vier-Augen) +
-  screen_definition.schema.json (CI-Drift) + features/screen-studio/ Editor +
-  Live-Vorschau (UniversalMaskRenderer Mock-Mode) + Playwright.
+  2026-07-07 Sicherheits-Validierungskern geliefert (isoliert, kollisionsfrei).
+  2026-09-16 Cursor setzt den offenen Editor-Rest als MERIDIAN-SCREEN-STUDIO um:
+  Katalog/Validate/Propose/Vier-Augen-Drafts + Live-Vorschau unter /admin/screen-studio.
+  OFFEN bleibt die Alembic-Tabelle domain_shared.screen_definition_drafts.
 risks:
   - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
   - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.

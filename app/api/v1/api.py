@@ -1829,6 +1829,7 @@ from app.api.v1.endpoints import (
     mask_actions,
     mask_rollout_summaries,
     mask_screen_definition,
+    studio_drafts,
     operational_governance,
     planung_kalender,
     pricing_governance,
@@ -1868,6 +1869,7 @@ api_router.include_router(mask_registry.router)
 api_router.include_router(mask_actions.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
+api_router.include_router(studio_drafts.router)
 api_router.include_router(operational_governance.router)
 api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)
