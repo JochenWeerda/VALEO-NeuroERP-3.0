@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-09-09
+# Architecture Index — generiert 2026-09-16
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-09-09T20:22:38Z'
+generated_at: '2026-09-16T20:46:36Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -687,6 +687,7 @@ domains:
     - /verkauf/kunden-stamm/:id
     - /verkauf/lieferschein-erfassung
     - /verkauf/lieferschein-erfassung/:id
+    - /verkauf/rechnung/:id
     - /verkauf/rechnungen
     - /verkauf/rechnungen/:id
     - /verkauf/rechnungen/neu
@@ -820,6 +821,7 @@ domains:
     - docs/adr/adr-066-tank-adapter-intake-outbox.md
     - docs/adr/adr-067-governed-l3-report-catalog.md
     - docs/adr/adr-069-gated-l3-standard-unimet-adapters.md
+    - docs/adr/adr-071-security-dependency-gate.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1623,6 +1625,7 @@ domains:
     - /admin/rolle/:id
     - /admin/rolle/neu
     - /admin/rollen-verwaltung
+    - /admin/screen-studio
     - /admin/setup
     - /admin/setup/dms-integration
     - /admin/terminologie
@@ -1665,6 +1668,7 @@ domains:
     - /schnittstelle/mde-inbox
     - /setup/firma
     - /start-dashboard
+    - /studio/run/:screenId
     - /system/live-monitor
     - /verify/:domain/:number
     - /verify/:domain/:number/:hash
@@ -1981,8 +1985,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 927
-  frontend_routes_mapped: 927
+  frontend_routes_total: 930
+  frontend_routes_mapped: 930
   backend_services_total: 251
   backend_services_mapped: 251
   backend_endpoints_total: 441
