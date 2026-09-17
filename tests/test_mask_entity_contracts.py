@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from app.api.v1.schemas.mask_entity_contracts import ap_invoice_mask_aliases
+from app.api.v1.schemas.mask_entity_contracts import (
+    ap_invoice_freigabe_zeilen,
+    ap_invoice_mask_aliases,
+    ap_invoice_position_aliases,
+    purchase_order_comm_aliases,
+    purchase_order_position_aliases,
+    supplier_contact_aliases,
+    supplier_order_aliases,
+)
 from scripts.check_field_contracts import _operation, _zeilenform
 
 
@@ -24,6 +32,51 @@ def test_ap_invoice_alias_spricht_die_maske() -> None:
     assert aliased["faellig_am"] == "2026-09-30"
     assert aliased["brutto"] == 119.0
     assert aliased["mwst"] == 19.0
+
+
+def test_purchase_order_position_spricht_die_maske() -> None:
+    aliased = purchase_order_position_aliases(
+        {"position_nr": 2, "artikel_nr": "A-1", "bezeichnung": "Weizen", "menge": 10, "einheit": "t", "gesamtpreis": 120.0}
+    )
+    assert aliased["pos_nr"] == 2
+    assert aliased["betrag"] == 120.0
+
+
+def test_purchase_order_comm_spricht_die_maske() -> None:
+    aliased = purchase_order_comm_aliases(
+        {"kanal": "E-Mail", "empfaenger": "einkauf@hof.de", "versendet_am": "2026-09-01", "status": "gesendet"}
+    )
+    assert aliased["typ"] == "E-Mail"
+    assert aliased["datum"] == "2026-09-01"
+
+
+def test_supplier_order_spricht_die_maske() -> None:
+    aliased = supplier_order_aliases(
+        {"bestell_nr": "B-9", "bestelldatum": "2026-08-01", "status": "offen", "gesamtbetrag": 50.0}
+    )
+    assert aliased["datum"] == "2026-08-01"
+    assert aliased["betrag"] == 50.0
+
+
+def test_supplier_contact_spricht_die_maske() -> None:
+    aliased = supplier_contact_aliases({"name": "Mara", "rolle": "Einkauf", "email": "m@x.de", "telefon": "1"})
+    assert aliased["funktion"] == "Einkauf"
+
+
+def test_ap_invoice_position_spricht_die_maske() -> None:
+    aliased = ap_invoice_position_aliases(
+        {"position": 1, "description": "Fracht", "quantity": 2, "total": 40.0}
+    )
+    assert aliased["pos_nr"] == 1
+    assert aliased["bezeichnung"] == "Fracht"
+    assert aliased["menge"] == 2.0
+    assert aliased["betrag"] == 40.0
+
+
+def test_ap_invoice_freigabe_ist_stand_keine_historie() -> None:
+    zeilen = ap_invoice_freigabe_zeilen({"status": "ENTWURF", "semantic_status": "pruefen"})
+    assert zeilen[0] == {"feld": "approval_status", "wert": "ENTWURF"}
+    assert zeilen[1]["feld"] == "semantic_status"
 
 
 def test_operation_ueberspringt_pfad_ohne_get() -> None:

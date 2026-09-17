@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -141,6 +141,146 @@ class QualitaetReklamationOut(_MaskEntityOut):
     sla_status: Optional[str] = None
     zustaendiger: Optional[str] = None
     status: Optional[str] = None
+
+
+class _MaskRowOut(_MaskEntityOut):
+    """Eine Tabellenzeile: zugesagte Spalten, zusaetzliche Schluessel erlaubt."""
+
+
+class MaskTabOut(BaseSchema):
+    """Eine Registerseite des Builders."""
+
+    tab_key: str
+    table_key: str
+    page: int
+    limit: int
+    total: int
+
+
+class PurchaseOrderPositionRowOut(_MaskRowOut):
+    pos_nr: Optional[Any] = None
+    artikel_nr: Optional[str] = None
+    bezeichnung: Optional[str] = None
+    menge: Optional[float] = None
+    einheit: Optional[str] = None
+    betrag: Optional[float] = None
+
+
+class PurchaseOrderCommRowOut(_MaskRowOut):
+    datum: Optional[Any] = None
+    typ: Optional[str] = None
+    empfaenger: Optional[str] = None
+    status: Optional[str] = None
+
+
+class SupplierOrderRowOut(_MaskRowOut):
+    bestell_nr: Optional[str] = None
+    datum: Optional[Any] = None
+    status: Optional[str] = None
+    betrag: Optional[float] = None
+
+
+class SupplierContactRowOut(_MaskRowOut):
+    name: Optional[str] = None
+    funktion: Optional[str] = None
+    telefon: Optional[str] = None
+    email: Optional[str] = None
+
+
+class ApInvoicePositionRowOut(_MaskRowOut):
+    pos_nr: Optional[Any] = None
+    bezeichnung: Optional[str] = None
+    menge: Optional[float] = None
+    betrag: Optional[float] = None
+
+
+class ApInvoiceFreigabeRowOut(BaseSchema):
+    """Zwei Felder, extra verboten — sonst gilt die Zeile als Platzhalter."""
+
+    feld: Optional[str] = None
+    wert: Optional[str] = None
+
+
+class PurchaseOrderPositionTabOut(MaskTabOut):
+    items: list[PurchaseOrderPositionRowOut] = Field(default_factory=list)
+
+
+class PurchaseOrderCommTabOut(MaskTabOut):
+    items: list[PurchaseOrderCommRowOut] = Field(default_factory=list)
+
+
+class SupplierOrderTabOut(MaskTabOut):
+    items: list[SupplierOrderRowOut] = Field(default_factory=list)
+
+
+class SupplierContactTabOut(MaskTabOut):
+    items: list[SupplierContactRowOut] = Field(default_factory=list)
+
+
+class ApInvoicePositionTabOut(MaskTabOut):
+    items: list[ApInvoicePositionRowOut] = Field(default_factory=list)
+
+
+class ApInvoiceFreigabeTabOut(MaskTabOut):
+    items: list[ApInvoiceFreigabeRowOut] = Field(default_factory=list)
+
+
+def purchase_order_position_aliases(row: dict[str, Any]) -> dict[str, Any]:
+    """Spalten der Bestellposition, wie die Maske sie liest."""
+    out = dict(row)
+    out.setdefault("pos_nr", row.get("position_nr"))
+    if out.get("betrag") is None and row.get("gesamtpreis") is not None:
+        out["betrag"] = float(row["gesamtpreis"])
+    return out
+
+
+def purchase_order_comm_aliases(row: dict[str, Any]) -> dict[str, Any]:
+    """Kommunikation: Kanal und Versandzeit, nicht erfundene Betreffzeilen."""
+    out = dict(row)
+    out.setdefault("typ", row.get("kanal"))
+    out.setdefault("datum", row.get("versendet_am"))
+    return out
+
+
+def supplier_order_aliases(row: dict[str, Any]) -> dict[str, Any]:
+    out = dict(row)
+    out.setdefault("datum", row.get("bestelldatum"))
+    if out.get("betrag") is None and row.get("gesamtbetrag") is not None:
+        out["betrag"] = float(row["gesamtbetrag"])
+    return out
+
+
+def supplier_contact_aliases(row: dict[str, Any]) -> dict[str, Any]:
+    out = dict(row)
+    out.setdefault("funktion", row.get("rolle"))
+    return out
+
+
+def ap_invoice_position_aliases(row: dict[str, Any]) -> dict[str, Any]:
+    out = dict(row)
+    out.setdefault("pos_nr", row.get("position"))
+    out.setdefault("bezeichnung", row.get("description") or row.get("itemDescription"))
+    if out.get("menge") is None and row.get("quantity") is not None:
+        out["menge"] = float(row["quantity"])
+    if out.get("betrag") is None:
+        raw = row.get("total") if row.get("total") is not None else row.get("lineTotal")
+        if raw is not None:
+            out["betrag"] = float(raw)
+    return out
+
+
+def ap_invoice_freigabe_zeilen(invoice: dict[str, Any]) -> list[dict[str, Any]]:
+    """Zwei Zeilen Stand, keine erfundene Historie."""
+    return [
+        {
+            "feld": "approval_status",
+            "wert": str(invoice.get("approval_status") or invoice.get("status") or "-"),
+        },
+        {
+            "feld": "semantic_status",
+            "wert": str(invoice.get("semantic_status") or "-"),
+        },
+    ]
 
 
 def ap_invoice_mask_aliases(invoice: dict[str, Any]) -> dict[str, Any]:

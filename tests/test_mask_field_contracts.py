@@ -36,10 +36,9 @@ pytestmark = pytest.mark.unit
 #: typisiert (21642ae85); die zwoelf Bruecken-Koepfe Cursor.
 NICHT_PRUEFBAR_MAX = 0
 
-#: Tabellenquellen ohne deklarierte Zeilenform. Committed mit 8da5d757b:
-#: 49 (Start 52). Die drei Rechnungsregister sind typisiert — keine Luft.
-#: Darf sinken, nicht steigen.
-ZEILEN_NICHT_PRUEFBAR_MAX = 49
+#: 49 (8da5d757b) minus 6 Bruecken-Tabellen: Bestellung, Lieferant, Eingangsrechnung.
+#: Darf sinken, nicht steigen. Auftrag/Rechnung bleiben Claude.
+ZEILEN_NICHT_PRUEFBAR_MAX = 43
 
 
 @pytest.fixture(scope="module")

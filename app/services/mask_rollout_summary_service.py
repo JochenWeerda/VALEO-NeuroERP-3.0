@@ -308,22 +308,25 @@ class MaskRolloutSummaryService:
             raise HTTPException(status_code=404, detail="AP Invoice not found")
         if tab_key == "positionen":
             lines = invoice.get("lines") or []
+            from app.api.v1.schemas.mask_entity_contracts import ap_invoice_position_aliases
+
             items = [
-                {
-                    "position": idx + 1,
-                    "description": line.get("description") or line.get("itemDescription") or "",
-                    "quantity": float(line.get("quantity") or 0),
-                    "unit_price": float(line.get("unitPrice") or 0),
-                    "total": float(line.get("total") or line.get("lineTotal") or 0),
-                }
+                ap_invoice_position_aliases(
+                    {
+                        "position": idx + 1,
+                        "description": line.get("description") or line.get("itemDescription") or "",
+                        "quantity": float(line.get("quantity") or 0),
+                        "unit_price": float(line.get("unitPrice") or 0),
+                        "total": float(line.get("total") or line.get("lineTotal") or 0),
+                    }
+                )
                 for idx, line in enumerate(lines)
             ]
             return build_tab_page(tab_key=tab_key, table_key="invoice_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "freigabe":
-            items = [
-                {"key": "approval_status", "value": invoice.get("approval_status") or invoice.get("status") or "-"},
-                {"key": "semantic_status", "value": invoice.get("semantic_status") or "-"},
-            ]
+            from app.api.v1.schemas.mask_entity_contracts import ap_invoice_freigabe_zeilen
+
+            items = ap_invoice_freigabe_zeilen(invoice)
             return build_tab_page(tab_key=tab_key, table_key="approval", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -470,7 +473,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import purchase_order_position_aliases
+
+            items = [purchase_order_position_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="po_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "kommunikation":
             rows = self.db.execute(
@@ -484,7 +489,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import purchase_order_comm_aliases
+
+            items = [purchase_order_comm_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="po_comms", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -545,7 +552,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "lieferant_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import supplier_order_aliases
+
+            items = [supplier_order_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="supplier_pos", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "kontakte":
             rows = self.db.execute(
@@ -559,7 +568,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "lieferant_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import supplier_contact_aliases
+
+            items = [supplier_contact_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="supplier_contacts", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 

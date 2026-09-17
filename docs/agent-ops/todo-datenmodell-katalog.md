@@ -170,6 +170,19 @@ Versagen: falscher Schluessel, 200, leere Zelle.
 **Abnahme:** 285 Felder, 0 Abweichungen, 49 blinde Tabellenquellen. Die drei
 Rechnungsregister hat Claude typisiert — Cursor fasst `sales_invoices.py` nicht an.
 
+### P8 — Bruecken-Zeilen (echte Rollout-Daten) — erledigt 2026-09-17
+
+Die Generic-Stubs bleiben leer. Drei P4-Bruecken liefern aber schon Zeilen
+und sprechen nicht die Maske.
+
+- [x] `einkauf/purchase-order` Positionen + Kommunikation
+- [x] `einkauf/supplier` Bestellungen + Kontakte
+- [x] `finance/ap-invoice` Positionen + Freigabe-Stand
+- [ ] Leere `/masks/.../tabs/`-Stubs — naechster Claim
+
+**Abnahme:** `ZEILEN_NICHT_PRUEFBAR_MAX = 43`. Abweichungen 0. Keine
+Rechnungs- oder Auftragsdateien.
+
 ### P6 — Optional nach P1–P3 — nicht starten
 
 - tbls auf die JSON aus P1 oder direkt auf Postgres, Artefakt in CI, nicht
@@ -199,6 +212,5 @@ Owner an Tabellen, die der Check nicht sieht.
 ## Einstieg fuer den naechsten Slice
 
 Datei: `docs/agent-ops/slices/MASK-FELDVERTRAG-ZEILE-20260917.yaml`.
-Naechster Claim nach P7: Generic-Tab-Stubs typisieren, **ohne** den
-Rechnungsweg. P6 (tbls / COMMENT ON / OpenMetadata) nicht starten.
-P5 bleibt dauerhaft: UML nur bei neuem ADR-003-Aggregat.
+Naechster Claim nach P8: leere `/masks/.../tabs/`-Stubs, **ohne** Auftrag und
+Rechnung. P6 nicht starten. P5 bleibt dauerhaft.
