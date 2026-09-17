@@ -44,6 +44,45 @@ def _query_one(db: Session, sql: str, params: dict) -> dict | None:
         return None
 
 
+def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict | None:
+    """Den Kunden im Stamm suchen, der ihn wirklich fuehrt.
+
+    Gesucht wurde in ``domain_erp.business_partners`` — die Tabelle ist **leer**
+    und hat die abgefragten Spalten (`name`, `kunden_nr`) gar nicht. Das
+    ``except`` in `_query_one` verschluckte den Spaltenfehler, die Suche lief
+    ins Leere, und **jedes** Register der Kunden-360-Maske antwortete „Kunde
+    nicht gefunden" — auch fuer Kunden, die es gibt.
+
+    Gefuehrt wird der Kunde in ``domain_crm.customers`` (operativer Stamm) und
+    als Partner in ``domain_crm.business_partners``. Beide werden befragt, der
+    operative zuerst: Er traegt die Kundennummer, mit der die Register weiter
+    suchen.
+    """
+    kunde = _query_one(
+        db,
+        """
+        SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr
+        FROM domain_crm.customers
+        WHERE id::text = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
+        LIMIT 1
+        """,
+        {"cid": customer_id, "tid": tenant_id},
+    )
+    if kunde is not None:
+        return kunde
+
+    return _query_one(
+        db,
+        """
+        SELECT partner_id::text AS id, name_1 AS name, partner_number AS kunden_nr
+        FROM domain_crm.business_partners
+        WHERE partner_id::text = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
+        LIMIT 1
+        """,
+        {"cid": customer_id, "tid": tenant_id},
+    )
+
+
 def _safe_query(db: Session, sql: str, params: dict) -> dict | None:
     """Backward-compatible single-row safe query used by older CRM 360 tests."""
     return _query_one(db, sql, params)
@@ -130,16 +169,7 @@ async def get_customer_screen_summary(
     bleiben separate, limitierte Endpunkte.
     """
 
-    customer = _query_one(
-        db,
-        """
-        SELECT id, name, kunden_nr
-        FROM domain_erp.business_partners
-        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
-        LIMIT 1
-        """,
-        {"cid": customer_id, "tid": tenant_id},
-    )
+    customer = _kunde_finden(db, customer_id, tenant_id)
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
 
@@ -345,16 +375,7 @@ async def get_customer_tab_data(
     """Limitierte Tab-Listen fuer den Universal Mask Generator (read-only)."""
     import json
 
-    customer = _query_one(
-        db,
-        """
-        SELECT id, name, kunden_nr
-        FROM domain_erp.business_partners
-        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
-        LIMIT 1
-        """,
-        {"cid": customer_id, "tid": tenant_id},
-    )
+    customer = _kunde_finden(db, customer_id, tenant_id)
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
 
@@ -398,17 +419,9 @@ async def get_customer_360(
     """360°-Kundensicht: aggregiert Aufträge, Rechnungen, OP, Kontrakte,
     Aktivitäten, Wareneingänge und Kreditlimit aus echten ERP-Tabellen."""
 
-    # Kunde muss existieren (domain_erp.business_partners ist kanonisch)
-    customer = _query_one(
-        db,
-        """
-        SELECT id, name, kunden_nr
-        FROM domain_erp.business_partners
-        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
-        LIMIT 1
-        """,
-        {"cid": customer_id, "tid": tenant_id},
-    )
+    # Kunde muss existieren — gefuehrt wird er in domain_crm.customers
+    # bzw. im Partnerstamm; domain_erp.business_partners ist leer.
+    customer = _kunde_finden(db, customer_id, tenant_id)
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
 
