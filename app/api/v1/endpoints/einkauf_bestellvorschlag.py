@@ -58,6 +58,7 @@ from app.services.procurement_service import ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.einkauf_bestellvorschlag_schemas import EinkaufBestellvorschlagOut
+from app.api.v1.schemas.mask_entity_contracts import EinkaufBestellungOut, EinkaufLieferantOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -469,7 +470,7 @@ async def create_lieferant(
 
 
 @router.get("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant abrufen",
-    response_model=BestellvorschlagOut
+    response_model=EinkaufLieferantOut
 )
 async def get_lieferant(
     lieferant_id: str,
@@ -613,7 +614,7 @@ async def create_bestellung(
 
 
 @router.get("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung abrufen",
-    response_model=BestellvorschlagOut
+    response_model=EinkaufBestellungOut
 )
 async def get_bestellung(
     bestellung_id: str,

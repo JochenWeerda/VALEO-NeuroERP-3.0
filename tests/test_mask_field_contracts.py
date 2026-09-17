@@ -32,8 +32,8 @@ from scripts.check_field_contracts import pruefe
 
 pytestmark = pytest.mark.unit
 
-#: Stand nach P4 und FSX-Rechnungsvertrag: **keine** ungetypte Maskenquelle
-#: mehr. Jede neue macht das Gate an ihrer Stelle blind — deshalb 0.
+#: Stand nach P4: keine ungetypte Maskenquelle. sales/invoice hat Claude
+#: typisiert (21642ae85); die zwoelf Bruecken-Koepfe dieser Commit.
 NICHT_PRUEFBAR_MAX = 0
 
 

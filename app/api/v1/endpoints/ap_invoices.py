@@ -30,6 +30,7 @@ from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_ac
 logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema, StatusResponse, TypedObjectOut
 from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
+from app.api.v1.schemas.mask_entity_contracts import FinanceApInvoiceOut, ap_invoice_mask_aliases
 
 
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
@@ -90,7 +91,7 @@ async def _enrich_invoice_with_approval(invoice: dict[str, Any], db: Session) ->
     response = await _load_invoice_approval_status(enriched, db)
     enriched.update(_serialize_approval_snapshot(response))
     enriched["semantic_status"] = _compute_ap_invoice_semantic_status(enriched)
-    return enriched
+    return ap_invoice_mask_aliases(enriched)
 
 
 async def _store_ap_invoice_posted_event_in_outbox(
@@ -156,7 +157,7 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
 
 
 @router.get("/{invoice_id}", summary="Ap invoice abrufen",
-    response_model=ApInvoicesOut
+    response_model=FinanceApInvoiceOut
 )
 async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
     """Ruft eine Eingangsrechnung anhand ihrer ID ab."""

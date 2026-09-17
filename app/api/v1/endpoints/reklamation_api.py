@@ -20,8 +20,18 @@ from pydantic import ConfigDict as _ConfigDict
 
 
 class ReklamationOut(BaseSchema):
-    """Typed response schema for ReklamationOut endpoints (extra fields forwarded)."""
+    """Kopffelder der Maske qualitaet/reklamation; weitere Schluessel bleiben erlaubt."""
+
     model_config = _ConfigDict(extra="allow")
+    reklamation_id: Optional[str] = None
+    typ: Optional[str] = None
+    lieferant_id: Optional[str] = None
+    kontrakt_id: Optional[str] = None
+    erstellt_am: Optional[str] = None
+    frist_datum: Optional[str] = None
+    sla_status: Optional[str] = None
+    zustaendiger: Optional[str] = None
+    status: Optional[str] = None
 
 
 router = APIRouter(prefix="/reklamationen", tags=["reklamationen"])

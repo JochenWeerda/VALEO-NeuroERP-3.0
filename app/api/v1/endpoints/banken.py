@@ -13,6 +13,7 @@ from app.domains.operations.repository import BankKontoRepository
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.api.v1.schemas.mask_entity_contracts import FinanceBankkontoOut
 
 
 class BankenOut(BaseSchema):
@@ -71,7 +72,7 @@ async def list_bankkonten(
     return {"items": [_to_dict(i) for i in items], "total": total, "limit": limit, "offset": offset}
 
 
-@router.get("/konten/{konto_id}", response_model=BankenOut, summary="Bankkonto abrufen")
+@router.get("/konten/{konto_id}", response_model=FinanceBankkontoOut, summary="Bankkonto abrufen")
 async def get_bankkonto(konto_id: str, db: Session = Depends(get_db)) -> dict:
     repo = BankKontoRepository(db)
     konto = repo.get_by_id(konto_id)

@@ -38,14 +38,11 @@ Gate: `tests/test_mask_field_contracts.py`, `tests/test_mask_bridge_field_contra
 
 ## Die blinden Flecken: keine mehr
 
-Von 13 ungetypten Quellen sind alle weg. Die zwoelf Bruecken-Koepfe hat Cursor
-in P4 typisiert, `sales/invoice` der Rechnungsweg selbst: `GET /sales/invoices/{id}`
-sagt jetzt `SalesInvoiceDetailOut` zu — Kopf, Positionen und je Position ihre
-Herkunft, Mengen und Betraege als Zeichenketten, weil die Anzeige rundet und der
-Wert nicht.
+Die zwoelf Bruecken-Koepfe aus Abschnitt B sind typisiert (P4, Cursor).
+`sales/invoice` hat Claude parallel typisiert (`SalesInvoiceDetailOut`).
 
-`NICHT_PRUEFBAR_MAX` steht damit auf **0**. Eine neue ungetypte Maskenquelle
-macht das Gate an ihrer Stelle blind — und faellt ab jetzt sofort auf.
+`NICHT_PRUEFBAR_MAX` steht auf **0**. Eine neue ungetypte Maskenquelle macht
+das Gate an ihrer Stelle blind.
 
 ## Was das Gate nicht kann
 

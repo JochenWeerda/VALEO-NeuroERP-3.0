@@ -47,15 +47,26 @@ def _spec():
 
 
 def _operation(spec: dict, endpunkt: str) -> dict | None:
-    """Die GET-Operation zu einem Endpunkt — Parameter tolerant verglichen."""
+    """Die GET-Operation zu einem Endpunkt — Parameter tolerant verglichen.
+
+    Mehrere OpenAPI-Pfade koennen denselben konkreten Pfad matchen
+    (``{item_id}`` neben ``{misch_id}``). Ohne GET (nur DELETE) wird
+    uebersprungen, sonst waere der Kopf unpruefbar obwohl ein GET existiert.
+    """
     konkret = re.sub(r"\{[^}]+\}", "x", endpunkt.split("?")[0]).rstrip("/")
+    treffer: list[tuple[str, dict]] = []
     for pfad, operationen in spec["paths"].items():
         muster = re.escape(pfad)
         muster = re.sub(r"\\\{[^}]*:path\\\}", ".+", muster)
         muster = re.sub(r"\\\{[^}]*\\\}", "[^/]+", muster)
         if re.match("^" + muster + "/?$", konkret):
-            return operationen.get("get")
-    return None
+            get_op = operationen.get("get")
+            if get_op:
+                treffer.append((pfad, get_op))
+    if not treffer:
+        return None
+    treffer.sort(key=lambda item: len(item[0]), reverse=True)
+    return treffer[0][1]
 
 
 def _eigenschaften(spec: dict, operation: dict | None) -> set[str] | None:

@@ -7,51 +7,46 @@ owner: unassigned
 date: 2026-09-17
 created_at: 2026-09-17
 coordination: >
-  P3 geliefert. Naechster Claim ist P4 (Feldvertrag Maske ↔ JSON), nicht P5/P6
-  gleichzeitig. Keine FSX-/Rechnungsdateien.
+  P4 geliefert. Naechster Claim ist P5 (Canonical UML pflegen, nicht
+  ausweiten). Keine FSX-/Rechnungsdateien, sales/invoice bleibt Claude.
 goal: >
-  Tabelle → Code unter app/ → native ScreenDefinition. crm_consents und
-  crm_contact_consents listen ihre Verbraucher. Native entity.table muss im
-  Katalog stehen.
+  Bruecken-Masken aus Abschnitt B haben deklarierte Kopffelder. Das Gate
+  faellt bei neuen Abweichungen und neuen ungetypten Quellen.
 file_ownership:
+  - app/api/v1/schemas/mask_entity_contracts.py
+  - scripts/check_field_contracts.py
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_entity_contracts.py
+  - docs/quality-assurance/feldvertrag-masken-2026-09-17.md
   - docs/agent-ops/todo-datenmodell-katalog.md
-  - docs/entwickler/datenmodell-tenancy.md
-  - scripts/generate_table_catalog.py
-  - scripts/table_ownership.py
-  - scripts/table_lineage.py
-  - scripts/check_domain_table_ownership.py
-  - tests/test_generate_table_catalog.py
-  - tests/test_table_ownership.py
-  - tests/test_table_lineage.py
-  - docs/admin/table-catalog.md
-  - docs/admin/table-catalog.json
-  - packages/frontend-web/src/components/mask-builder/schema.ts
 acceptance:
-  - crm_consents.written_by enthaelt app/crm/router.py
-  - crm_contact_consents.read_by enthaelt app/api/v1/endpoints/crm_consents.py
-  - Native dataSources.entity.table ohne Katalog-Treffer faellt --check
+  - python scripts/check_field_contracts.py Exit 0, Abweichungen 0
+  - 12 Bruecken-Koepfe nicht in nicht_pruefbar
+  - NICHT_PRUEFBAR_MAX = 0 (sales/invoice von Claude, Bruecken von Cursor)
 tests:
-  - tests/test_table_lineage.py
-  - tests/test_generate_table_catalog.py
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_entity_contracts.py
 risks:
-  - Code nennt Tabellen in falschem Schema (109 Refs); das ist kein Gate
-  - Screen-Bindung nur ueber APIRouter-prefix oder explizites table-Feld
+  - sales/invoice bleibt ungetypt; Cursor typt den Rechnungsweg nicht
+  - OpenAPI-Drift nach neuen response_model
 ai_harness:
   fachlicher_vertrag: >
-    Impact Analysis beginnt im Katalog-Abschnitt Verbraucher, nicht im UML.
-    Zwei Fachmodelle bleiben zwei Tabellen.
+    Maskenfelder folgen den JSON-Schluesseln. 200 mit leerem Kopf ist ein
+    Vertragsbruch, kein leerer Vorgang.
   architektur_vertrag: >
-    Lineage wird geerntet, nicht gezeichnet. Architecture-OS-Muster (--check).
+    Gate liest deklariertes Schema, nicht die Laufzeit-Antwort.
   daten_vertrag: >
-    Kein DROP. Maske loeschen sucht Verbraucher, droppt keine Spalte.
+    Kein DROP. Studio-Katalog bleibt Endpunkt-Allowlist.
   test_vertrag: >
-    Unit gegen Fixtures und echte Consent-Dateien. Harvest mit require_db.
+    Unit gegen Aliase und Pfadwahl. Gate gegen echte OpenAPI der App.
   security_vertrag: >
-    Nur Dateilesen unter app/ plus Metadata-SELECT. Keine Secrets.
+    Keine Secrets. Nur Schema-Vergleich.
   betriebs_vertrag: >
-    Qualitaetsgate nach Alembic. Rollback = Generator-Commit revertieren.
+    pytest haelt das Gate. Rollback = Commit revertieren.
   dokumentations_vertrag: >
-    Workboard, todo-datenmodell-katalog.md P3, table_lineage.py, Katalog Verbraucher.
+    Workboard, todo P4, feldvertrag-masken, tenancy Feldvertrag.
 external_gates:
   - not_applicable
 ---

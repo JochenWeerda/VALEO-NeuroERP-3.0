@@ -43,7 +43,7 @@ version: 3.1.0
 | Skript | Zweck |
 |--------|-------|
 | `pytest` | Backend-Tests |
-| `scripts/check_sql_fstrings.py` | SQL-f-string CI-Gate |
+| `scripts/check_field_contracts.py` | Kopffelder der Maske gegen deklariertes Antwortschema |
 | `scripts/check_critical_backend_coverage.py` | Coverage-Ratchet |
 | `scripts/check_toolchain_pins.py` | Toolchain-Pins |
 | `scripts/valeo_slice.py` | Slice claim/verify/close (Agent-Ops) |

@@ -11,6 +11,7 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
+from app.api.v1.schemas.mask_entity_contracts import FinanceDebitorOut, FinanceKreditorOut
 from app.core.database import get_db
 from app.core.exceptions import EntityNotFoundError
 from app.core.tenant import get_tenant_id
@@ -148,7 +149,7 @@ async def list_debitoren(
     return [_debitor_dict(row, op_map.get(row.company_name or "")) for row in rows]
 
 
-@router.get("/finance/debitoren/{debitor_id}", response_model=TypedObjectOut, summary="Debitor abrufen")
+@router.get("/finance/debitoren/{debitor_id}", response_model=FinanceDebitorOut, summary="Debitor abrufen")
 async def get_debitor(
     debitor_id: str,
     db: Session = Depends(get_db),
@@ -235,8 +236,8 @@ async def create_kreditor(
     )
 
 
-@router.get("/finance/kreditoren/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor abrufen")
-@router.get("/finance/creditors/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor abrufen")
+@router.get("/finance/kreditoren/{kreditor_id}", response_model=FinanceKreditorOut, summary="Kreditor abrufen")
+@router.get("/finance/creditors/{kreditor_id}", response_model=FinanceKreditorOut, summary="Kreditor abrufen")
 async def get_kreditor(
     kreditor_id: str,
     db: Session = Depends(get_db),

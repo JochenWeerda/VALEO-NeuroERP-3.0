@@ -52546,6 +52546,448 @@
         "title": "EinbuchenResult",
         "type": "object"
       },
+      "EinkaufAnfrageOut": {
+        "additionalProperties": true,
+        "properties": {
+          "anforderer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anforderer"
+          },
+          "anfrageNummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anfragenummer"
+          },
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "faelligkeit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faelligkeit"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "EinkaufAnfrageOut",
+        "type": "object"
+      },
+      "EinkaufAngebotOut": {
+        "additionalProperties": true,
+        "properties": {
+          "angebotNummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Angebotnummer"
+          },
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "gueltigBis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltigbis"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "lieferant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant"
+          },
+          "preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "EinkaufAngebotOut",
+        "type": "object"
+      },
+      "EinkaufAnlieferavisOut": {
+        "additionalProperties": true,
+        "properties": {
+          "avisNummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avisnummer"
+          },
+          "bestellung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellung"
+          },
+          "geplantesAnlieferDatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geplantesanlieferdatum"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kennzeichen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kennzeichen"
+          },
+          "lieferant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "EinkaufAnlieferavisOut",
+        "type": "object"
+      },
+      "EinkaufAuftragsbestaetigungOut": {
+        "additionalProperties": true,
+        "properties": {
+          "bestaetigungsNummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestaetigungsnummer"
+          },
+          "bestellung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellung"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "lieferant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "EinkaufAuftragsbestaetigungOut",
+        "type": "object"
+      },
+      "EinkaufBestellungOut": {
+        "additionalProperties": true,
+        "properties": {
+          "bestelldatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestelldatum"
+          },
+          "bestellnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellnummer"
+          },
+          "brutto_summe": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto Summe"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "lieferant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Name"
+          },
+          "lieferdatum_wunsch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum Wunsch"
+          },
+          "lieferdatum_zugesagt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum Zugesagt"
+          },
+          "netto_summe": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto Summe"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "unsere_referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsere Referenz"
+          }
+        },
+        "title": "EinkaufBestellungOut",
+        "type": "object"
+      },
       "EinkaufDocOut": {
         "additionalProperties": true,
         "properties": {
@@ -52563,6 +53005,143 @@
         "description": "Response schema for einkauf kpis endpoints.",
         "properties": {},
         "title": "EinkaufKpisOut",
+        "type": "object"
+      },
+      "EinkaufLieferantOut": {
+        "additionalProperties": true,
+        "properties": {
+          "aktiv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aktiv"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "firmenname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Firmenname"
+          },
+          "id": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "land": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Land"
+          },
+          "lieferantennummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferantennummer"
+          },
+          "lieferzeit_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferzeit Tage"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ort"
+          },
+          "plz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz"
+          },
+          "strasse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strasse"
+          },
+          "telefon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefon"
+          },
+          "zahlungsbedingungen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsbedingungen"
+          }
+        },
+        "title": "EinkaufLieferantOut",
         "type": "object"
       },
       "EinlagerungIn": {
@@ -60570,6 +61149,288 @@
         "title": "Finance",
         "type": "object"
       },
+      "FinanceApInvoiceOut": {
+        "additionalProperties": true,
+        "description": "Englische Belegfelder plus deutsche Masken-Aliase.",
+        "properties": {
+          "beleg_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beleg Nr"
+          },
+          "brutto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto"
+          },
+          "datum": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "faellig_am": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faellig Am"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kreditor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kreditor"
+          },
+          "mwst": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mwst"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "FinanceApInvoiceOut",
+        "type": "object"
+      },
+      "FinanceBankkontoOut": {
+        "additionalProperties": true,
+        "properties": {
+          "bank": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank"
+          },
+          "bic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "saldo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Saldo"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "waehrung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waehrung"
+          }
+        },
+        "title": "FinanceBankkontoOut",
+        "type": "object"
+      },
+      "FinanceDebitorOut": {
+        "additionalProperties": true,
+        "properties": {
+          "debitoren_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debitoren Nr"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kreditlimit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kreditlimit"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "steuernummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuernummer"
+          },
+          "ust_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ust Id"
+          },
+          "zahlungsbedingungen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsbedingungen"
+          }
+        },
+        "title": "FinanceDebitorOut",
+        "type": "object"
+      },
       "FinanceFollowupOut": {
         "additionalProperties": true,
         "properties": {},
@@ -60581,6 +61442,90 @@
         "description": "Response schema for finance invoices endpoints.",
         "properties": {},
         "title": "FinanceInvoicesOut",
+        "type": "object"
+      },
+      "FinanceKreditorOut": {
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kreditoren_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kreditoren Nr"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "steuernummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuernummer"
+          },
+          "ust_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ust Id"
+          },
+          "zahlungsbedingungen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsbedingungen"
+          }
+        },
+        "title": "FinanceKreditorOut",
         "type": "object"
       },
       "FinancePeriodActionOut": {
@@ -76729,6 +77674,51 @@
           "created_at"
         ],
         "title": "InventurgruppeOut",
+        "type": "object"
+      },
+      "InvoiceLineOriginOut": {
+        "description": "Woher eine berechnete Teilmenge stammt.",
+        "properties": {
+          "quantity": {
+            "title": "Quantity",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "source_document_id": {
+            "title": "Source Document Id",
+            "type": "string"
+          },
+          "source_document_type": {
+            "title": "Source Document Type",
+            "type": "string"
+          },
+          "source_line_id": {
+            "title": "Source Line Id",
+            "type": "string"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_document_type",
+          "source_document_id",
+          "source_line_id",
+          "quantity",
+          "unit"
+        ],
+        "title": "InvoiceLineOriginOut",
         "type": "object"
       },
       "InvoiceOut": {
@@ -124310,8 +125300,108 @@
       },
       "ReklamationOut": {
         "additionalProperties": true,
-        "description": "Typed response schema for ReklamationOut endpoints (extra fields forwarded).",
-        "properties": {},
+        "description": "Kopffelder der Maske qualitaet/reklamation; weitere Schluessel bleiben erlaubt.",
+        "properties": {
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "frist_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frist Datum"
+          },
+          "kontrakt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Id"
+          },
+          "lieferant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Id"
+          },
+          "reklamation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reklamation Id"
+          },
+          "sla_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sla Status"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          },
+          "zustaendiger": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zustaendiger"
+          }
+        },
         "title": "ReklamationOut",
         "type": "object"
       },
@@ -129716,6 +130806,83 @@
         "title": "SalesInvoice",
         "type": "object"
       },
+      "SalesInvoiceDetailOut": {
+        "description": "Der Beleg, wie die Maske ihn liest.\n\nDiese Form ist **zugesagt**, nicht geduldet: Solange sie eine offene Huelle\nwar, konnte `scripts/check_field_contracts.py` nicht pruefen, ob die Maske\nnach Feldern fragt, die es gibt. Genau dort entstehen die 200er mit leerem\nKopf.",
+        "properties": {
+          "currency": {
+            "title": "Currency",
+            "type": "string"
+          },
+          "customer_id": {
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "due_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
+          },
+          "gross_amount": {
+            "title": "Gross Amount",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "invoice_date": {
+            "title": "Invoice Date",
+            "type": "string"
+          },
+          "invoice_number": {
+            "title": "Invoice Number",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/SalesInvoiceLineOut"
+            },
+            "title": "Lines",
+            "type": "array"
+          },
+          "net_amount": {
+            "title": "Net Amount",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "vat_amount": {
+            "title": "Vat Amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "invoice_number",
+          "customer_id",
+          "invoice_date",
+          "status",
+          "currency",
+          "net_amount",
+          "vat_amount",
+          "gross_amount",
+          "total"
+        ],
+        "title": "SalesInvoiceDetailOut",
+        "type": "object"
+      },
       "SalesInvoiceEinvoiceOut": {
         "additionalProperties": true,
         "description": "Response schema for sales invoice einvoice endpoints.",
@@ -129723,8 +130890,94 @@
         "title": "SalesInvoiceEinvoiceOut",
         "type": "object"
       },
+      "SalesInvoiceLineOut": {
+        "description": "Eine Rechnungsposition mit ihrer Herkunft.\n\nMengen und Betraege sind **Zeichenketten**: Die Anzeige rundet, der Wert\nnicht. Eine Gleitkommazahl an dieser Stelle waere eine stille Rundung, die\nniemand sucht.",
+        "properties": {
+          "article_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Id"
+          },
+          "article_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Number"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "line_no": {
+            "title": "Line No",
+            "type": "string"
+          },
+          "net_amount": {
+            "title": "Net Amount",
+            "type": "string"
+          },
+          "origins": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceLineOriginOut"
+            },
+            "title": "Origins",
+            "type": "array"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "string"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "unit_price": {
+            "title": "Unit Price",
+            "type": "string"
+          },
+          "vat_rate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Rate"
+          }
+        },
+        "required": [
+          "line_no",
+          "quantity",
+          "unit",
+          "unit_price",
+          "net_amount"
+        ],
+        "title": "SalesInvoiceLineOut",
+        "type": "object"
+      },
       "SalesInvoiceOut": {
         "additionalProperties": true,
+        "description": "Offene Huelle fuer die Antworten, die keine feste Form haben.\n\nAnlegen, Maskenkopf und Registerdaten liefern je nach Lage andere Felder\n(``skipped``, Seitenzahlen, Tabellenzeilen). Fuer den **Beleg** gilt das\nnicht — er hat eine Form, und die steht unten.",
         "properties": {},
         "title": "SalesInvoiceOut",
         "type": "object"
@@ -228603,7 +229856,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BankenOut"
+                  "$ref": "#/components/schemas/FinanceBankkontoOut"
                 }
               }
             },
@@ -269125,7 +270378,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/EinkaufAngebotOut"
                 }
               }
             },
@@ -269498,7 +270751,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/EinkaufAnlieferavisOut"
                 }
               }
             },
@@ -270082,7 +271335,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/EinkaufAuftragsbestaetigungOut"
                 }
               }
             },
@@ -285137,7 +286390,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApInvoicesOut"
+                  "$ref": "#/components/schemas/FinanceApInvoiceOut"
                 }
               }
             },
@@ -292883,7 +294136,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
+                  "$ref": "#/components/schemas/FinanceKreditorOut"
                 }
               }
             },
@@ -293309,7 +294562,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
+                  "$ref": "#/components/schemas/FinanceDebitorOut"
                 }
               }
             },
@@ -299294,7 +300547,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
+                  "$ref": "#/components/schemas/FinanceKreditorOut"
                 }
               }
             },
@@ -395538,7 +396791,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SalesInvoiceOut"
+                  "$ref": "#/components/schemas/SalesInvoiceDetailOut"
                 }
               }
             },

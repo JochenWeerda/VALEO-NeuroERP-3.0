@@ -122,23 +122,18 @@ Tabelle → Code unter `app/` → native ScreenDefinition, nicht Spalte durch db
 listet `app/api/v1/endpoints/crm_consents.py`. Native Entity mit unbekanntem
 `table`-Feld faellt.
 
-### P4 — Feldvertrag Maske ↔ JSON — offen
+### P4 — Feldvertrag Maske ↔ JSON — erledigt 2026-09-17
 
-Der Adresszaehler ist 0. Er prueft keine Spalten. Best Practice fuer UI-Bindung
-(Odoo `fields_get`, SAP CDS Consumption View): der Vertrag der Maske ist
-abgeleitet, nicht parallel erfunden.
+Der Adresszaehler ist 0 und prueft keine Spalten. Claude hat das Gate gebaut
+(`check_field_contracts.py`, 0 Abweichungen). Die 13 blinden Bruecken-Koepfe
+waren `extra="allow"` ohne Felder.
 
-- [ ] Fuer native ScreenDefinitions: Kopffelder gegen tatsaechliche
-      Response-Schluessel (zuerst Bruecken-Endpunkte, die Claude nicht
-      gegen Felder gehalten hat)
-- [ ] Gate darf nur wachsen (neue Ungleichheit fällt), kein Vollscan aller
-      70 Masken in Iteration 1
-- [ ] Studio-Katalog (`config/studio_data_sources.yaml`) bleibt Allowlist
-      von Endpunkten, nicht von Tabellen
+- [x] Native Kopffelder gegen deklarierte Antwortschluessel (Bruecken zuerst)
+- [x] Gate only-up: Abweichungen = 0, ungetypt darf sinken nicht steigen
+- [x] Studio-Katalog bleibt Allowlist von Endpunkten, nicht von Tabellen
 
-**Abnahme:** Mindestens die Bruecken-Masken aus
-`docs/agent-ops/todo-frontend-backend-luecken.md` Abschnitt B haben einen
-Feldvertrag oder sind als bewusstes View-Mapping dokumentiert.
+**Abnahme:** 12 Bruecken-Masken aus Abschnitt B haben ein Antwortmodell mit
+Kopffeldern. `sales/invoice` hat Claude parallel typisiert — ungetypt = 0.
 
 ### P5 — Canonical UML pflegen, nicht ausweiten — offen (dauerhaft)
 
@@ -179,5 +174,5 @@ Owner an Tabellen, die der Check nicht sieht.
 ## Einstieg fuer den naechsten Slice
 
 Datei: `docs/agent-ops/slices/DATA-MODEL-CATALOG-20260917.yaml`.
-Naechster Claim: **P4** (Feldvertrag Maske ↔ JSON), nicht P5/P6 gleichzeitig.
+Naechster Claim: **P5** (Canonical UML pflegen, nicht ausweiten), dauerhaft und klein.
 Alembic-Head zum Zeitpunkt der Liste: `crm_kreditlimite_20260917`.

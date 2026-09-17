@@ -55,6 +55,12 @@ from app.services.portal_compat_service import PortalCompatService
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import CompatBridgeOut
+from app.api.v1.schemas.mask_entity_contracts import (
+    EinkaufAnfrageOut,
+    EinkaufAngebotOut,
+    EinkaufAnlieferavisOut,
+    EinkaufAuftragsbestaetigungOut,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -594,7 +600,7 @@ def _load_einkauf_anfrage(db: Session, anfrage_id: str):
         return None
 
 
-@router.get("/einkauf/anfragen/{anfrage_id}", response_model=EinkaufDocOut, summary="Anfrage get einkauf")
+@router.get("/einkauf/anfragen/{anfrage_id}", response_model=EinkaufAnfrageOut, summary="Anfrage get einkauf")
 async def einkauf_anfrage_get(
     anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -640,7 +646,7 @@ def _load_einkauf_angebot(db: Session, angebot_id: str):
         return None
 
 
-@router.get("/einkauf/angebote/{angebot_id}", response_model=EinkaufDocOut, summary="Angebot get einkauf")
+@router.get("/einkauf/angebote/{angebot_id}", response_model=EinkaufAngebotOut, summary="Angebot get einkauf")
 async def einkauf_angebot_get(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -705,7 +711,7 @@ def _load_einkauf_anlieferavis(db: Session, avis_id: str):
         return None
 
 
-@router.get("/einkauf/anlieferavis/{avis_id}", response_model=EinkaufDocOut, summary="Anlieferavis get einkauf")
+@router.get("/einkauf/anlieferavis/{avis_id}", response_model=EinkaufAnlieferavisOut, summary="Anlieferavis get einkauf")
 async def einkauf_anlieferavis_get(
     avis_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -745,7 +751,7 @@ def _load_einkauf_auftragsbestaetigung(db: Session, bestaetigung_id: str):
 
 @router.get(
     "/einkauf/auftragsbestaetigungen/{bestaetigung_id}",
-    response_model=EinkaufDocOut,
+    response_model=EinkaufAuftragsbestaetigungOut,
     summary="Auftragsbestaetigung get einkauf",
 )
 async def einkauf_auftragsbestaetigung_get(
