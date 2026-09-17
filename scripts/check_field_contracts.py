@@ -13,6 +13,19 @@ antwortete mit 200, die Maske fragte nach `beleg_nr`, geliefert wurde
 Dieses Skript haelt die Feldschluessel jeder ScreenDefinition gegen die
 Antwortschemata der Endpunkte, die sie liest.
 
+Kopf **und** Zeile
+------------------
+
+Geprueft werden die Kopffelder einer Maske gegen die ``entity``-Quelle **und**
+die Tabellenspalten gegen die Zeilenform ihrer Quelle. Die Spalten sind die
+groessere Haelfte (305 gegen 204) und haben dasselbe Versagen: Eine Spalte mit
+falschem Schluessel bleibt leer, und leer sieht aus wie „nichts erfasst".
+
+Eine Zeilenform ist lesbar, wenn die Antwort eine Liste typisierter Zeilen ist
+(``list[ZeileOut]``) oder eine Seiten-Huelle mit typisiertem ``items``. Wo die
+Zeile nicht deklariert ist, zaehlt die Quelle als **nicht pruefbar** — dieselbe
+Ratsche wie beim Kopf.
+
 Was es prueft und was nicht
 ---------------------------
 
@@ -65,8 +78,28 @@ def _operation(spec: dict, endpunkt: str) -> dict | None:
                 treffer.append((pfad, get_op))
     if not treffer:
         return None
-    treffer.sort(key=lambda item: len(item[0]), reverse=True)
+    # Der **woertlichste** Pfad gewinnt, nicht der laengste: Ein Sammelpfad wie
+    # `/sales/{doc_type}` ist als Zeichenkette laenger als `/sales/invoices`,
+    # meint aber etwas anderes. Erst wenige Platzhalter, dann laengerer Pfad.
+    treffer.sort(key=lambda item: (item[0].count("{"), -len(item[0])))
     return treffer[0][1]
+
+
+def _komponente(spec: dict, schema: dict) -> dict:
+    """Folgt einem ``$ref``, sonst bleibt das Schema selbst."""
+    referenz = schema.get("$ref")
+    if not referenz:
+        return schema
+    return (spec.get("components", {}).get("schemas") or {}).get(referenz.split("/")[-1]) or {}
+
+
+def _objektfelder(schema: dict) -> set[str] | None:
+    """Feldnamen eines Objekts — oder None, wenn es nichts zusagt."""
+    eigenschaften = schema.get("properties") or {}
+    # extra="allow" ohne Modell: Platzhalter, kein Vertrag.
+    if schema.get("additionalProperties") is True and len(eigenschaften) <= 2:
+        return None
+    return set(eigenschaften) or None
 
 
 def _eigenschaften(spec: dict, operation: dict | None) -> set[str] | None:
@@ -77,17 +110,9 @@ def _eigenschaften(spec: dict, operation: dict | None) -> set[str] | None:
     schema = (inhalt.get("application/json") or {}).get("schema") or {}
     if schema.get("type") == "array":
         schema = schema.get("items") or {}
-    referenz = schema.get("$ref")
-    if not referenz:
-        return None
-    name = referenz.split("/")[-1]
-    komponente = (spec.get("components", {}).get("schemas") or {}).get(name) or {}
+    komponente = _komponente(spec, schema)
     eigenschaften = komponente.get("properties") or {}
 
-    # Eine Huelle, die zusaetzliche Felder ausdruecklich zulaesst und selbst
-    # kaum welche nennt, ist kein Vertrag, sondern ein Platzhalter
-    # (`extra="allow"` ohne Modell). Daraus laesst sich **nicht** folgern, dass
-    # ein Maskenfeld fehlt — nur, dass niemand es zugesagt hat.
     if komponente.get("additionalProperties") is True and len(eigenschaften) <= 2:
         return None
     # Eine Huelle mit `items` ist eine Seite, keine Zeile: Dann steckt die
@@ -98,12 +123,38 @@ def _eigenschaften(spec: dict, operation: dict | None) -> set[str] | None:
     return set(eigenschaften) or None
 
 
+def _zeilenform(spec: dict, operation: dict | None) -> set[str] | None:
+    """Die Feldnamen **einer Zeile** — oder None, wenn sie nicht deklariert ist.
+
+    Zwei Formen kommen vor: eine Liste typisierter Zeilen und eine Seiten-Huelle
+    mit typisiertem ``items``. Alles andere sagt ueber die Zeile nichts.
+    """
+    if not operation:
+        return None
+    inhalt = ((operation.get("responses") or {}).get("200") or {}).get("content") or {}
+    schema = (inhalt.get("application/json") or {}).get("schema") or {}
+
+    if schema.get("type") == "array":
+        return _objektfelder(_komponente(spec, schema.get("items") or {}))
+
+    if not schema.get("$ref"):
+        return None
+    huelle = _komponente(spec, schema)
+    items = _komponente(spec, (huelle.get("properties") or {}).get("items") or {})
+    if items.get("type") == "array" or "items" in items:
+        return _objektfelder(_komponente(spec, items.get("items") or {}))
+    if items.get("properties"):
+        return _objektfelder(items)
+    return None
+
+
 def pruefe() -> dict:
     from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
 
     spec = _spec()
     abweichungen: list[dict] = []
     nicht_pruefbar: list[str] = []
+    zeilen_nicht_pruefbar: list[str] = []
     geprueft = 0
 
     for screen_id in sorted(SCREEN_DEFINITION_BUILDERS):
@@ -142,10 +193,41 @@ def pruefe() -> dict:
                     }
                 )
 
+        # ── Tabellenspalten gegen die Zeilenform ───────────────────────────
+        for tab in screen.get("tabs") or []:
+            for tabelle in tab.get("tables") or []:
+                spalten = [c.get("key") for c in tabelle.get("columns") or [] if c.get("key")]
+                endpunkt = quellen.get(tabelle.get("dataSourceKey"))
+                if not spalten or not endpunkt or not endpunkt.startswith("/api/"):
+                    continue
+
+                zeile = _zeilenform(spec, _operation(spec, endpunkt))
+                if zeile is None:
+                    zeilen_nicht_pruefbar.append(
+                        f"{screen_id}/{tab.get('key')}/{tabelle.get('key')} -> {endpunkt}"
+                    )
+                    continue
+
+                for spalte in spalten:
+                    geprueft += 1
+                    if spalte in zeile:
+                        continue
+                    vorschlag = difflib.get_close_matches(spalte, sorted(zeile), n=1, cutoff=0.6)
+                    abweichungen.append(
+                        {
+                            "screen": screen_id,
+                            "tab": f"{tab.get('key')}/{tabelle.get('key')}",
+                            "feld": spalte,
+                            "endpunkt": endpunkt,
+                            "vorschlag": vorschlag[0] if vorschlag else None,
+                        }
+                    )
+
     return {
         "geprueft": geprueft,
         "abweichungen": abweichungen,
         "nicht_pruefbar": sorted(set(nicht_pruefbar)),
+        "zeilen_nicht_pruefbar": sorted(set(zeilen_nicht_pruefbar)),
     }
 
 
@@ -159,7 +241,8 @@ def main() -> int:
     print(
         f"Feldvertrag: {ergebnis['geprueft']} Felder gegen deklarierte Antworten geprueft, "
         f"{len(ergebnis['abweichungen'])} Abweichungen (Schwelle: {args.threshold}); "
-        f"{len(ergebnis['nicht_pruefbar'])} Quellen ohne deklarierte Antwort."
+        f"{len(ergebnis['nicht_pruefbar'])} Kopfquellen und "
+        f"{len(ergebnis['zeilen_nicht_pruefbar'])} Tabellenquellen ohne deklarierte Form."
     )
 
     for eintrag in ergebnis["abweichungen"]:
@@ -168,8 +251,11 @@ def main() -> int:
         print(f"      {eintrag['endpunkt']}")
 
     if args.list:
-        print("\nNicht pruefbar (Antwort ist nicht typisiert):")
+        print("\nKopfquellen ohne deklarierte Antwort:")
         for zeile in ergebnis["nicht_pruefbar"]:
+            print(f"  {zeile}")
+        print("\nTabellenquellen ohne deklarierte Zeilenform:")
+        for zeile in ergebnis["zeilen_nicht_pruefbar"]:
             print(f"  {zeile}")
 
     if len(ergebnis["abweichungen"]) > args.threshold:

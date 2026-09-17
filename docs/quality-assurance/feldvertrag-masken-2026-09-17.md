@@ -27,22 +27,48 @@ Zehn Masken hatten den zweiten Fall: `beleg_nr` statt `rechnungsnr`, `ls_nr`
 statt `delivery_note_number`, `wert` statt `amount`, `ist_aktiv` statt
 `is_active`. Alle behoben; das Gate haelt den Stand.
 
-## Stand 2026-09-17
+## Stand 2026-09-17, Abend
 
-    197 Felder gegen deklarierte Antworten geprueft (Start: 110)
+    285 Felder gegen deklarierte Antworten geprueft (Start: 110)
       0 Abweichungen
-      0 Maskenquellen ohne deklarierte Antwort
+      0 Kopfquellen ohne deklarierte Antwort
+     49 Tabellenquellen ohne deklarierte Zeilenform (Start: 52)
 
 Aufruf: `python scripts/check_field_contracts.py [--list]`.
 Gate: `tests/test_mask_field_contracts.py`, `tests/test_mask_bridge_field_contracts.py`.
 
-## Die blinden Flecken: keine mehr
+## Kopf und Zeile
 
-Die zwoelf Bruecken-Koepfe aus Abschnitt B sind typisiert (P4, Cursor).
-`sales/invoice` hat Claude parallel typisiert (`SalesInvoiceDetailOut`).
+Das Gate prueft beide Haelften:
 
-`NICHT_PRUEFBAR_MAX` steht auf **0**. Eine neue ungetypte Maskenquelle macht
-das Gate an ihrer Stelle blind.
+| | Anzahl | Stand |
+|---|---|---|
+| Kopffelder (`tabs[].fields`) | 204 | vollstaendig geprueft |
+| Tabellenspalten (`tables[].columns`) | 305 | geprueft, **wo die Zeile deklariert ist** |
+
+Die Spalten sind die groessere Haelfte und haben dasselbe stille Versagen: Eine
+Spalte mit falschem Schluessel bleibt leer. Lesbar ist eine Zeilenform, wenn die
+Antwort eine Liste typisierter Zeilen ist (`list[ZeileOut]`) oder eine
+Seiten-Huelle mit typisiertem `items`.
+
+## Die blinden Flecken: 49 Tabellenquellen
+
+Kopfquellen sind vollstaendig typisiert — die zwoelf Bruecken-Koepfe hat Cursor
+in P4 erledigt, `sales/invoice` der Rechnungsweg selbst. Bei den Tabellen liegt
+der Rest: 49 von 63 Quellen sagen ihre Zeilenform nicht zu.
+
+Drei davon sind heute geschlossen worden, als Muster fuer die uebrigen:
+
+- `GET /sales/invoices` → `SalesInvoiceListOut` mit `SalesInvoiceListRowOut`
+- `GET /sales/invoices/{id}/tabs/positionen` → `InvoicePositionTabOut`
+- `GET /sales/invoices/{id}/tabs/herkunft` → `InvoiceOriginTabOut`
+
+Die beiden Register hatten vorher **eine** Route mit Pfadparameter. Zwei
+Register mit zwei Zeilenformen brauchen zwei Routen; die Sammelroute bleibt
+dahinter stehen, damit ein unbekanntes Register weiterhin eine leere Seite
+ergibt und keinen Fehler.
+
+`ZEILEN_NICHT_PRUEFBAR_MAX` steht auf **49** und darf nur sinken.
 
 ## Was das Gate nicht kann
 

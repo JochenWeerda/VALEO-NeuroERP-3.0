@@ -96,6 +96,93 @@ class SalesInvoiceLineOut(BaseSchema):
     origins: list[InvoiceLineOriginOut] = Field(default_factory=list)
 
 
+class SalesInvoiceListRowOut(BaseSchema):
+    """Eine Zeile der Faktura-Liste.
+
+    Die Positionszahl steht bewusst in der Zeile: Sie beantwortet „sieht der
+    Beleg leer aus", ohne ihn zu oeffnen.
+    """
+
+    id: str
+    invoice_number: str
+    customer_id: str
+    invoice_date: str
+    due_date: Optional[str] = None
+    status: str
+    currency: str
+    net_amount: str
+    vat_amount: str
+    gross_amount: str
+    line_count: int
+
+
+class SalesInvoiceListOut(BaseSchema):
+    """Die Trefferliste mit ihrer Seitenangabe.
+
+    ``total`` ist die Trefferzahl **ohne** Seitenbegrenzung — ohne sie waere
+    „50 von 50" nicht von „50 von 900" zu unterscheiden.
+    """
+
+    items: list[SalesInvoiceListRowOut] = Field(default_factory=list)
+    total: int
+    limit: int
+    offset: int
+    page: int
+    table_key: str
+
+
+class InvoicePositionRowOut(BaseSchema):
+    """Eine Zeile im Register *Positionen* — mit ihrem Deckungsstand.
+
+    ``herkunft`` ist der Text, ``herkunft_art`` die Lage dahinter
+    (``belegt``/``teilweise``/``ohne``/``unvergleichbar``). Beides gehoert in
+    die Zeile: Wer die Menge sieht, soll sehen, ob sie belegt ist.
+    """
+
+    line_no: str
+    article_number: str
+    description: str
+    quantity: float
+    unit: str
+    unit_price: float
+    net_amount: float
+    vat_rate: Optional[float] = None
+    herkunft: str
+    herkunft_art: str
+    quellen: int
+
+
+class InvoiceOriginRowOut(BaseSchema):
+    """Eine Zeile im Register *Herkunft* — eine Zuordnung, nicht eine Position."""
+
+    line_no: str
+    source_type: str
+    source_document_id: str
+    source_line_id: str
+    quantity: float
+    unit: str
+    reason: str
+
+
+class InvoiceTabOut(BaseSchema):
+    """Eine Registerseite des Builders."""
+
+    tab_key: str
+    table_key: str
+    items: list[dict[str, Any]] = Field(default_factory=list)
+    page: int
+    limit: int
+    total: int
+
+
+class InvoicePositionTabOut(InvoiceTabOut):
+    items: list[InvoicePositionRowOut] = Field(default_factory=list)
+
+
+class InvoiceOriginTabOut(InvoiceTabOut):
+    items: list[InvoiceOriginRowOut] = Field(default_factory=list)
+
+
 class SalesInvoiceDetailOut(BaseSchema):
     """Der Beleg, wie die Maske ihn liest.
 
@@ -292,7 +379,7 @@ FILTERBAR = {
 
 @router.get(
     "/invoices",
-    response_model=SalesInvoiceOut,
+    response_model=SalesInvoiceListOut,
     summary="Rechnungen suchen",
 )
 def list_invoices(
@@ -580,26 +667,22 @@ def get_invoice_screen_summary(
     )
 
 
-@router.get(
-    "/invoices/{invoice_id}/tabs/{tab_key}",
-    response_model=SalesInvoiceOut,
-    summary="Rechnungsmaske: Tabellendaten eines Registers",
-)
-def get_invoice_tab(
+def _register_daten(
+    db: Session,
     invoice_id: str,
     tab_key: str,
-    db: Session = Depends(get_db),
-    page: int = Query(default=1, ge=1),
-    limit: int = Query(default=25, ge=1, le=100),
-    q: Optional[str] = None,
-    sort: Optional[str] = None,
-    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+    *,
+    page: int,
+    limit: int,
+    q: Optional[str],
+    sort: Optional[str],
+    sort_dir: Optional[str],
 ) -> dict[str, Any]:
-    """Positionen und Herkunft als Tabellen des Builders.
+    """Die Zeilen eines Registers — eine Stelle fuer beide Register.
 
-    Ein unbekanntes Register ergibt eine **leere** Seite und keinen Fehler: Die
-    Registerliste steht in der ScreenDefinition, und ein Tippfehler dort soll
-    die Maske nicht zerlegen.
+    Die Register haben je eine eigene Route, weil sie je eine eigene
+    **Zeilenform** haben: Positionen und Zuordnungen sind nicht dasselbe. Die
+    Beschaffung ist trotzdem dieselbe und steht deshalb nur einmal hier.
     """
     tenant_id = get_current_tenant_id()
     gefunden = SalesInvoiceService(db, tenant_id).get_with_lines(invoice_id)
@@ -627,4 +710,74 @@ def get_invoice_tab(
         sort=sort,
         sort_dir=sort_dir,
         screen_id=SCREEN_ID,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/positionen",
+    response_model=InvoicePositionTabOut,
+    summary="Rechnungsmaske: Positionen mit Deckungsstand",
+)
+def get_invoice_positions_tab(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Die Positionen — je Zeile mit dem Stand ihrer Herkunft."""
+    return _register_daten(
+        db, invoice_id, "positionen",
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/herkunft",
+    response_model=InvoiceOriginTabOut,
+    summary="Rechnungsmaske: Zuordnungen je Position",
+)
+def get_invoice_origins_tab(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Eine Zeile je Zuordnung — sortier- und filterbar, statt zwanzigmal aufklappen."""
+    return _register_daten(
+        db, invoice_id, "herkunft",
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/{tab_key}",
+    response_model=SalesInvoiceOut,
+    summary="Rechnungsmaske: Tabellendaten eines Registers",
+)
+def get_invoice_tab(
+    invoice_id: str,
+    tab_key: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Ein Register, das nicht benannt ist.
+
+    **Nach** den beiden benannten Routen deklariert, sonst faengt dieser Pfad
+    sie ab. Ein unbekanntes Register ergibt eine **leere** Seite und keinen
+    Fehler: Die Registerliste steht in der ScreenDefinition, und ein Tippfehler
+    dort soll die Maske nicht zerlegen.
+    """
+    return _register_daten(
+        db, invoice_id, tab_key,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
     )

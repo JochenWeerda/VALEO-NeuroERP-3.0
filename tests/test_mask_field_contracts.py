@@ -32,9 +32,14 @@ from scripts.check_field_contracts import pruefe
 
 pytestmark = pytest.mark.unit
 
-#: Stand nach P4: keine ungetypte Maskenquelle. sales/invoice hat Claude
-#: typisiert (21642ae85); die zwoelf Bruecken-Koepfe dieser Commit.
+#: Stand nach P4: keine ungetypte Kopfquelle. sales/invoice hat Claude
+#: typisiert (21642ae85); die zwoelf Bruecken-Koepfe Cursor.
 NICHT_PRUEFBAR_MAX = 0
+
+#: Tabellenquellen ohne deklarierte Zeilenform (Stand 2026-09-17, committed).
+#: Generic-Stubs (`TypedObjectOut`) und mask-rollouts. Darf sinken, nicht steigen.
+#: Drei der 52 sind sales/invoice-Register — Claude typt den Rechnungsweg getrennt.
+ZEILEN_NICHT_PRUEFBAR_MAX = 52
 
 
 @pytest.fixture(scope="module")
@@ -53,8 +58,25 @@ def test_keine_maske_fragt_nach_feldern_die_es_nicht_gibt(ergebnis: dict) -> Non
 
 
 def test_es_wird_ueberhaupt_etwas_geprueft(ergebnis: dict) -> None:
-    """Ein Gate, das nichts prueft, ist gruen und wertlos."""
-    assert ergebnis["geprueft"] >= 100
+    """Ein Gate, das nichts prueft, ist gruen und wertlos.
+
+    197 Kopffelder plus die bereits typisierten Zeilen. Unter 250 waere der
+    Zeilenteil wieder aus.
+    """
+    assert ergebnis["geprueft"] >= 250
+
+
+def test_tabellenquellen_ohne_zeilenform_nehmen_nicht_zu(ergebnis: dict) -> None:
+    """Die groessere Haelfte: 305 Spalten gegen 204 Kopffelder.
+
+    Eine Spalte mit falschem Schluessel bleibt leer — dasselbe stille Versagen
+    wie im Kopf, nur oefter. Wo die Zeilenform nicht deklariert ist, kann das
+    Gate nichts sagen; diese Zahl haelt den Rest fest und darf nur sinken.
+    """
+    offen = ergebnis["zeilen_nicht_pruefbar"]
+    assert len(offen) <= ZEILEN_NICHT_PRUEFBAR_MAX, (
+        "Neue Tabellenquellen ohne deklarierte Zeilenform: " + ", ".join(offen)
+    )
 
 
 def test_ungetypte_maskenquellen_nehmen_nicht_zu(ergebnis: dict) -> None:
