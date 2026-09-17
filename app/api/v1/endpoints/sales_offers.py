@@ -8,10 +8,11 @@ from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.base import BaseSchema
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
@@ -560,3 +561,129 @@ async def convert_offer_to_order(
         "created_order_id": order_id,
         "created_order_number": order_number,
     }
+
+
+# ---------------------------------------------------------------------------
+# Drucken und Buchen
+#
+# Die Angebotsmaske rief `POST /sales/quotations/{id}/print` und `/post` — ein
+# Pfad, den es nie gab, fuer ein Objekt, das hier `offer` heisst. Beides ist
+# jetzt zusammengefuehrt: Die Maske spricht den Angebotsendpunkt an, und der
+# Beleg haelt Druck und Buchung fest.
+# ---------------------------------------------------------------------------
+
+
+class SalesOfferPrintOut(BaseSchema):
+    """Was der Druck hinterlassen hat — nicht das Angebot selbst."""
+
+    model_config = ConfigDict(extra="allow")
+
+
+@router.post(
+    "/{offer_id}/print",
+    response_model=SalesOfferPrintOut,
+    summary="Sales offer drucken",
+)
+async def print_sales_offer(
+    offer_id: str,
+    template: Optional[str] = Query(default=None, max_length=60, description="Formatvorlage"),
+    copies: int = Query(default=1, ge=1, le=20, description="Anzahl Ausdrucke"),
+    attestation: Optional[str] = Query(
+        default=None, max_length=500, description="Begruendung fuer den Wiederholungsdruck"
+    ),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Haelt fest, dass das Angebot gedruckt wurde.
+
+    Gezaehlt, nicht ueberschrieben: Ein zweites Exemplar ist ein eigener
+    Vorgang. Der Wiederholungsdruck verlangt eine Begruendung — dieselbe Regel
+    wie bei Auftrag und Lieferschein, damit sie nicht je Beleg anders ist.
+    """
+    angebot = _get_sales_offer_row(db, offer_id, tenant_id)
+    bisher = int(angebot.get("print_count") or 0)
+    if bisher > 0 and not attestation:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Angebot wurde bereits {bisher}x gedruckt — fuer den "
+                "Wiederholungsdruck wird eine Begruendung verlangt."
+            ),
+        )
+
+    db.execute(
+        text(
+            """
+            UPDATE domain_crm.sales_offers
+            SET print_count = COALESCE(print_count, 0) + :copies,
+                printed_at = NOW(),
+                updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tid
+            """
+        ),
+        {"id": offer_id, "tid": tenant_id, "copies": copies},
+    )
+    db.commit()
+
+    aktuell = _get_sales_offer_row(db, offer_id, tenant_id)
+    return {
+        "id": offer_id,
+        "offer_number": aktuell.get("offer_number"),
+        "print_count": int(aktuell.get("print_count") or 0),
+        "printed_at": aktuell.get("printed_at").isoformat() if aktuell.get("printed_at") else None,
+        "template": template,
+        "copies": copies,
+        "attestation": attestation,
+    }
+
+
+@router.post(
+    "/{offer_id}/post",
+    response_model=SalesOffer,
+    summary="Sales offer buchen",
+)
+async def post_sales_offer(
+    offer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Bucht das Angebot — aus dem Entwurf wird ein herausgegebener Beleg.
+
+    Zweimal buchen ist kein Fehler: Die Maske druckt und bucht in einem Zug.
+    Ein angenommenes oder abgelehntes Angebot faellt aber nicht auf
+    `versendet` zurueck — der spaetere Stand bleibt stehen.
+    """
+    angebot = _get_sales_offer_row(db, offer_id, tenant_id)
+    status_jetzt = str(angebot.get("status") or "")
+
+    if status_jetzt in ("abgelehnt", "rejected", "storniert", "cancelled"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Angebot hat Status '{status_jetzt}' und kann nicht gebucht werden.",
+        )
+
+    if status_jetzt in ("", "entwurf", "draft", "offen", "open"):
+        db.execute(
+            text(
+                """
+                UPDATE domain_crm.sales_offers
+                SET status = 'versendet', posted_at = NOW(), updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tid
+                """
+            ),
+            {"id": offer_id, "tid": tenant_id},
+        )
+        db.commit()
+    elif angebot.get("posted_at") is None:
+        # Schon weiter im Lebenslauf, aber ohne Buchungszeitpunkt: den Zeitpunkt
+        # nachtragen, ohne den Status zurueckzudrehen.
+        db.execute(
+            text(
+                "UPDATE domain_crm.sales_offers SET posted_at = NOW(), updated_at = NOW() "
+                "WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"id": offer_id, "tid": tenant_id},
+        )
+        db.commit()
+
+    return _row_to_offer(_get_sales_offer_row(db, offer_id, tenant_id))

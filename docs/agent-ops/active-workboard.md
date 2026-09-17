@@ -11,6 +11,77 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SALES-BELEG-DRUCK-BUCHUNG - der Weg, den beide Masken schon gingen 2026-09-17, Claude Code
+
+**Befund:** Auftrag und Angebot haben je einen Knopf „drucken und buchen". Beide
+riefen `POST /{id}/print` und `POST /{id}/post` — **beide Endpunkte gab es
+nicht**. Der 404 landete im `catch` und wurde als „Fehler beim Drucken"
+gemeldet, ohne zu sagen, dass der Weg selbst fehlt. Beim Angebot kam ein
+zweiter Fehler dazu: Der Druckweg legte den Beleg vorher ueber
+`POST /sales/quotations` an — ein Objekt, das im Backend `offer` heisst.
+
+**Gebaut ist der Beleg, nicht nur der Endpunkt.** Die Belege hatten nichts,
+worin sie Druck und Buchung haetten festhalten koennen. Neu an
+`domain_crm.sales_orders` und `sales_offers`: `printed_at`, `print_count`,
+`posted_at` (Migration `sales_beleg_druck_buchung_20260917`).
+
+**`print_count` statt `is_printed`:** Der zweite Druck ist im Landhandel ein
+eigener Vorgang — der Kunde hat das erste Exemplar nicht bekommen, der Fahrer
+braucht eines fuer die Tour. Das gehoert gezaehlt, nicht ueberschrieben. Und
+der Wiederholungsdruck verlangt eine **Begruendung**, wie beim Lieferschein;
+ohne sie 400 und nichts geaendert.
+
+**Zweimal buchen ist kein Fehler.** Die Maske druckt und bucht in einem Zug;
+wer ein zweites Exemplar druckt, bucht dabei erneut. Ein gebuchter Auftrag
+bleibt deshalb unveraendert und antwortet mit 200 — ein Fehler haette hier
+nichts zu bedeuten. Rueckwaerts geht es trotzdem nicht: Ein stornierter Auftrag
+wird nicht gebucht, und ein angenommenes Angebot faellt nicht auf „versendet"
+zurueck.
+
+**Abnahme:** 8 Tests gegen die echte Datenbank (Zaehlung, Begruendungspflicht,
+Idempotenz, Storno, Mandantentrennung, Angebotslauf). `tsc` ohne Ausgabe.
+Zaehler der toten Frontend-Aufrufe: 40 -> 36.
+
+**Zwei Befunde aus fremdem Stand, die ich nicht anfasse:**
+1. `alembic upgrade head` **bricht ab** — die Revision `crm_consents_20260917`
+   legt einen Index auf `contact_id` an, aber `domain_crm.crm_consents`
+   existierte bereits mit `partner_id` und ohne diese Spalte. Meine Migration
+   haengt hinter ihrer und kommt deshalb nicht durch; die Spalten sind lokal
+   von Hand nachgezogen, damit die Tests laufen. **Die Kette bleibt rot, bis
+   die fremde Revision die vorhandene Tabelle beruecksichtigt.**
+2. `docs/schnittstellen/openapi.json` habe ich **nicht** mitgeliefert: Der
+   Stand enthaelt gerade unfertige fremde Routen (Einwilligungen, Duenger,
+   Biostimulanzien). Wer zuletzt committet, erzeugt sie neu.
+
+
+## MASK-GEN-FRONTEND-BRIDGES - 40 tote Frontend-Pfade geschlossen 2026-09-17, Cursor
+
+**Claudes Verdrahtungsbericht liess 40 Aufrufe ohne Route.** Der 404 landete im
+`catch`, die Maske zeigte eine leere Liste. Gemessen mit
+`python scripts/check_frontend_api_calls.py --list`: Stand **0**, Ratsche 0.
+
+**Pfad oder Endpunkt, je Eintrag:** Angebotsmaske spricht `/sales/quotations`
+(Alias auf den Offer-Router). Reklamationsliste unter `/qualitaet/reklamationen`
+(GET-Liste fehlte). Ausnahmen-Maske unter `/operations/exceptions` mit deutschen
+Feldschluesseln. Waagenvorlagen, DATEV, VIES, Konditionen als Adapter, damit
+leer nicht wie „nichts erfasst" aussieht.
+
+**Neue Fachendpunkte:** Biostimulanzien-CRUD, Agrar-Kunden inkl. Schlagzahlen,
+Saatgutbestellungen, Segment-Mitglieder/Performance, Opportunity-Quotes,
+Anfrage senden, Einkauf-Lieferschein-Druck (ohne FSX-Datei), Eingangsrechnungen,
+Lastschrift freigeben/ausfuehren, Anlagen, Fibu-Cockpit/Stats, EPCIS,
+Dienstplan-Zuweisung, POS, Preise, RAG, Ask-Valeo.
+
+**Nicht dekoriert:** `lager/leitstand`. FSX `lieferschein-erfassung.tsx` und
+Rechnungsdateien bleiben bei Claude.
+
+**Dateibesitz:** `app/api/v1/endpoints/mask_frontend_bridges.py`,
+`app/domains/agrar/api/biostimulanzien.py`,
+`alembic/versions/mask_frontend_bridges_20260917.py`,
+`tests/test_mask_frontend_bridges.py`.
+
+**Abnahme:** Scanner 0/0, Bridge-Tests gegen echte App, OpenAPI-`summary=`.
+
 ## MASK-GEN-STUB-BACKENDS - zehn Entity-Stubs auf Fachendpunkte 2026-09-17, Cursor
 
 **Claudes Verdrahtungsbericht hat Restluecken gemessen, keine Schaetzungen.**

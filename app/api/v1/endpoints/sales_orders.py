@@ -9,7 +9,7 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -857,6 +857,130 @@ async def cancel_sales_order(
         {"id": order_id, "tid": tenant_id},
     )
     db.commit()
+    return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
+
+
+# ---------------------------------------------------------------------------
+# Drucken und Buchen
+#
+# Die Auftragsmaske ruft seit jeher `POST /{id}/print` und `POST /{id}/post` —
+# beide Endpunkte gab es nicht. Der 404 landete im `catch` und wurde als
+# "Fehler beim Drucken" gemeldet, ohne zu sagen, dass der Weg selbst fehlt.
+# Der Lieferschein fuehrt denselben Ablauf schon vor; hier ist er fuer den
+# Auftrag nachgezogen.
+# ---------------------------------------------------------------------------
+
+
+class SalesOrderPrintOut(BaseSchema):
+    """Was der Druck hinterlassen hat — nicht der Beleg selbst."""
+
+    model_config = ConfigDict(extra="allow")
+
+
+@router.post(
+    "/{order_id}/print",
+    response_model=SalesOrderPrintOut,
+    summary="Sales order drucken",
+)
+async def print_sales_order(
+    order_id: str,
+    template: Optional[str] = Query(default=None, max_length=60, description="Formatvorlage"),
+    copies: int = Query(default=1, ge=1, le=20, description="Anzahl Ausdrucke"),
+    attestation: Optional[str] = Query(
+        default=None, max_length=500, description="Begruendung fuer den Wiederholungsdruck"
+    ),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Haelt fest, dass der Auftrag gedruckt wurde.
+
+    **Gezaehlt, nicht ueberschrieben:** Der zweite Druck ist ein eigener
+    Vorgang — der Kunde hat den ersten nicht bekommen, der Fahrer braucht ein
+    weiteres Exemplar. Deshalb `print_count` und nicht `is_printed`.
+
+    Ein Wiederholungsdruck verlangt eine **Begruendung**, wie beim
+    Lieferschein: Wer einen bereits gedruckten Beleg erneut ausgibt, soll
+    sagen warum. Ohne sie antwortet der Endpunkt mit 400 und aendert nichts.
+    """
+    order = _get_sales_order_row(db, order_id, tenant_id)
+    bisher = int(order.get("print_count") or 0)
+    if bisher > 0 and not attestation:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Auftrag wurde bereits {bisher}x gedruckt — fuer den "
+                "Wiederholungsdruck wird eine Begruendung verlangt."
+            ),
+        )
+
+    db.execute(
+        text(
+            """
+            UPDATE domain_crm.sales_orders
+            SET print_count = COALESCE(print_count, 0) + :copies,
+                printed_at = NOW(),
+                updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tid
+            """
+        ),
+        {"id": order_id, "tid": tenant_id, "copies": copies},
+    )
+    db.commit()
+
+    aktuell = _get_sales_order_row(db, order_id, tenant_id)
+    return {
+        "id": order_id,
+        "order_number": aktuell.get("order_number"),
+        "print_count": int(aktuell.get("print_count") or 0),
+        "printed_at": aktuell.get("printed_at").isoformat() if aktuell.get("printed_at") else None,
+        "template": template,
+        "copies": copies,
+        "attestation": attestation,
+    }
+
+
+@router.post(
+    "/{order_id}/post",
+    response_model=SalesOrder,
+    summary="Sales order buchen",
+)
+async def post_sales_order(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Bucht den Auftrag — aus dem Entwurf wird ein verbindlicher Beleg.
+
+    **Zweimal buchen ist kein Fehler.** Die Maske druckt und bucht in einem
+    Zug; wer ein zweites Exemplar druckt, bucht dabei erneut. Ein bereits
+    gebuchter Auftrag bleibt deshalb unveraendert und antwortet mit 200 statt
+    mit einem Fehler, der nichts zu bedeuten haette.
+
+    Ein stornierter Auftrag laesst sich nicht buchen — das waere eine
+    Wiederbelebung durch die Hintertuer.
+    """
+    order = _get_sales_order_row(db, order_id, tenant_id)
+    status_jetzt = str(order.get("status") or "")
+
+    if status_jetzt == "cancelled":
+        raise HTTPException(
+            status_code=400,
+            detail="Ein stornierter Auftrag kann nicht gebucht werden.",
+        )
+
+    if status_jetzt == "open":
+        db.execute(
+            text(
+                """
+                UPDATE domain_crm.sales_orders
+                SET status = 'confirmed', posted_at = NOW(), updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tid
+                """
+            ),
+            {"id": order_id, "tid": tenant_id},
+        )
+        db.commit()
+
     return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
 
 

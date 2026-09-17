@@ -583,38 +583,23 @@ export default function AngebotErstellenPage(): JSX.Element {
     try {
       let id = angebotId
       if (!id) {
-        // Angebot speichern, um ID zu erhalten
-        const saved = await apiClient.post<{ id: string }>('/api/v1/sales/quotations', {
-          nummer: angebotNr,
-          datum,
-          gueltig_bis: gueltigBis || null,
-          status,
-          ist_pauschal: isPauschale,
-          customer_id: customer?.id || null,
-          kontakt,
-          positionen: positionen.map((p) => ({
-            pos_nr: p.posNr,
-            artikel_id: p.artikelId,
-            artikel_nr: p.artikelNr,
-            bezeichnung: p.bezeichnung,
-            menge: p.menge,
-            einheit: p.einheit,
-            listenpreis: p.listenpreis,
-            rabatt: p.rabatt,
-            netto_preis: p.nettoPreis,
-            netto_betrag: p.nettoBetrag,
-            mwst_prozent: p.mwstProzent,
-          })),
-        })
-        id = saved.id
+        // Dasselbe Anlegen wie beim Speichern: Der Druckweg hatte bis hierher
+        // einen eigenen Aufruf auf /sales/quotations — ein Objekt, das es im
+        // Backend nicht gibt. Das Angebot heisst dort `offer`.
+        const created = await apiClient.post<{ id: string; offer_number: string }>(
+          '/api/v1/sales/offers/',
+          buildOfferPayload(),
+        )
+        id = created.id
         setAngebotId(id)
+        if (created.offer_number) setAngebotNr(created.offer_number)
       }
 
       const params = new URLSearchParams()
       params.append('template', options.formatvorlage)
       params.append('copies', String(options.anzahlDrucke))
-      await apiClient.post(`/api/v1/sales/quotations/${id}/print?${params.toString()}`)
-      await apiClient.post(`/api/v1/sales/quotations/${id}/post`)
+      await apiClient.post(`/api/v1/sales/offers/${id}/print?${params.toString()}`)
+      await apiClient.post(`/api/v1/sales/offers/${id}/post`)
 
       push('Angebot erfolgreich gedruckt und gebucht')
       setShowPrintDialog(false)
