@@ -62,9 +62,11 @@ def test_markdown_nennt_beide_consent_tabellen() -> None:
     md = render_markdown(_sample_catalog(), today="2026-09-17")
     assert "`crm_consents`" in md
     assert "`crm_contact_consents`" in md
+    assert "Nicht manuell bearbeiten" in md
     assert "partner_id" in md
     assert "contact_id" in md
-    assert "Nicht manuell bearbeiten" in md
+    assert "| Domain |" in md
+    assert "`crm`" in md
 
 
 def test_json_ist_stabil_sortiert() -> None:

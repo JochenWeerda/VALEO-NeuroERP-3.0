@@ -4,7 +4,7 @@ type: explanation
 audience: [entwickler, product, qa, admin]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-08
+last_reviewed: 2026-09-17
 version: 3.2.0
 ---
 
@@ -32,6 +32,7 @@ erfordern Review der jeweils Verantwortlichen.
 | `quality-gate.yml`: `doc_drift_report.py --fail-over 0` | Blockierendes Code-Doku-Drift-Gate; kein Drift-Item erlaubt. |
 | `generate_code_inventories.py --check` | Endpoint-/Service-/Migrations-Inventare synchron zu Code (docs.yml). |
 | `generate_table_catalog.py --check` | Physischer domain_*-Katalog synchron zur migrierten DB (Quality-Gate nach Alembic). |
+| `check_domain_table_ownership.py` | Jede domain_*-Tabelle hat Schema-Custodian; unbekanntes Schema faellt. |
 | `generate_agent_handbuch.py --check` | Agent-Handbuch synchron zu Flow Spine, ScreenDefinitions, MCP, Events. |
 
 ## Doku-Code-Drift

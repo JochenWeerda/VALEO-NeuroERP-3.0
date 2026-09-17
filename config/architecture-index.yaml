@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-09-17
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-09-17T05:12:39Z'
+generated_at: '2026-09-17T07:47:08Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -62,6 +62,8 @@ domains:
     - docs/architecture/views/components/c4-agrar.md
     database_schemas:
     - domain_agrar
+    - domain_futtermittel
+    - domain_kontrakte
     - domain_shared
     frontend_routes:
     - /agrar
@@ -506,6 +508,8 @@ domains:
     - docs/architecture/views/components/c4-crm.md
     database_schemas:
     - domain_crm
+    - domain_sales
+    - domain_portal
     - domain_shared
     frontend_routes:
     - /benachrichtigungen
@@ -848,6 +852,8 @@ domains:
     - docs/architecture/views/components/c4-dms-compliance.md
     database_schemas:
     - domain_compliance
+    - domain_docflow
+    - domain_nachweisraum
     - domain_shared
     frontend_routes:
     - /compliance/bvl-meldungen
@@ -986,6 +992,12 @@ domains:
     - docs/architecture/views/components/c4-finance.md
     database_schemas:
     - domain_finance
+    - domain_erp
+    - domain_controlling
+    - domain_pos
+    - domain_pricing
+    - domain_meldewesen
+    - domain_reporting
     - domain_shared
     frontend_routes:
     - /abrechnung/eb-lieferschein-kontrolle
@@ -1304,6 +1316,8 @@ domains:
     - backend
     architecture_docs: []
     database_schemas:
+    - domain_hr
+    - domain_hrm
     - domain_shared
     frontend_routes:
     - /personal/bewerbungen
@@ -1356,6 +1370,7 @@ domains:
     - docs/architecture/views/components/c4-procurement-inventory.md
     database_schemas:
     - domain_inventory
+    - domain_ops
     - domain_shared
     frontend_routes:
     - /artikel
@@ -1508,6 +1523,7 @@ domains:
     architecture_docs:
     - docs/architecture/views/components/c4-procurement-inventory.md
     database_schemas:
+    - domain_logistics
     - domain_shared
     frontend_routes:
     - /fuhrpark/ausgehende-belege-dokumente
@@ -1593,6 +1609,11 @@ domains:
     architecture_docs: []
     database_schemas:
     - domain_shared
+    - domain_docs
+    - domain_log
+    - domain_workflow
+    - domain_integration
+    - domain_dev_mock
     frontend_routes:
     - /
     - /admin-suite
@@ -1892,6 +1913,7 @@ domains:
     - docs/architecture/views/components/c4-procurement-inventory.md
     database_schemas:
     - domain_procurement
+    - domain_einkauf
     - domain_shared
     frontend_routes:
     - /einkauf

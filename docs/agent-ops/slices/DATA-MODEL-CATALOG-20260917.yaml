@@ -7,28 +7,31 @@ owner: unassigned
 date: 2026-09-17
 created_at: 2026-09-17
 coordination: >
-  P1 geliefert. Naechster Claim ist P2 (Ownership-Check only-up), nicht P3/P4
-  gleichzeitig. Keine FSX-/Rechnungsdateien.
+  P2 geliefert. Naechster Claim ist P3 (Verbraucher-Lineage Tabelle →
+  Endpunkt → ScreenDefinition), nicht P4 gleichzeitig. Keine FSX-/Rechnungsdateien.
 goal: >
-  Nach alembic upgrade head das physische domain_*-Schema ernten und als
-  versionierten Katalog mit --check-Gate halten. crm_consents und
-  crm_contact_consents stehen getrennt.
+  Jede domain_*-Tabelle hat Schema-Custodian und Architecture-Domain.
+  Unbekanntes Schema und Praefix-Konflikt ohne Legacy-Zeile fallen (only-up).
 file_ownership:
   - docs/agent-ops/todo-datenmodell-katalog.md
   - docs/entwickler/datenmodell-tenancy.md
   - scripts/generate_table_catalog.py
+  - scripts/table_ownership.py
+  - scripts/check_domain_table_ownership.py
   - tests/test_generate_table_catalog.py
+  - tests/test_table_ownership.py
   - docs/admin/table-catalog.md
   - docs/admin/table-catalog.json
 acceptance:
-  - python scripts/generate_table_catalog.py --check Exit 0 nach Migration
-  - Katalog listet domain_crm.crm_consents und crm_contact_consents mit Spalten
-  - Qualitaetsgate laeuft nach Alembic, nicht im Doc-Meta-Check ohne DB
+  - python scripts/check_domain_table_ownership.py Exit 0 (635 Tabellen, 13 Legacy)
+  - Katalog-JSON nennt owner_domain und placement je Tabelle
+  - Architecture Index database_schemas listet die physischen Schemas je Domain
 tests:
-  - tests/test_generate_table_catalog.py (Render ohne DB, Harvest mit require_db)
+  - tests/test_table_ownership.py
+  - tests/test_generate_table_catalog.py
 risks:
-  - Katalog-Markdown wird lang; JSON ist die Vergleichsquelle fuer --check
-  - CI muss nach init_db.py laufen, sonst ist der Katalog leer oder veraltet
+  - Praefixe crm_/finance_/hrm_ wurden bewusst nicht erweitert (zu viele Altlagen)
+  - Legacy-Liste darf nur wachsen mit Begruendung, nicht als stilles Schlupfloch
 ai_harness:
   fachlicher_vertrag: >
     Agenten und Entwickler sehen Schema, Tabelle und Spalten aus der laufenden
@@ -48,7 +51,7 @@ ai_harness:
     Qualitaetsgate nach Alembic. Rollback = Generator-Commit revertieren;
     die Datenbank bleibt unangetastet.
   dokumentations_vertrag: >
-    Workboard, todo-datenmodell-katalog.md P1, MkDocs Admin-Nav, Viewpoint-Katalog.
+    Workboard, todo-datenmodell-katalog.md P2, table_ownership.py, Architecture Index database_schemas.
 external_gates:
   - not_applicable
 ---

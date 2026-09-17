@@ -92,21 +92,19 @@ Stand der Ernte: 29 Schemas, 635 Tabellen, 8368 Spalten. `crm_consents`
 
 **Nicht in P1:** Bedeutungen aller Spalten, ERD aller Relationen, OpenMetadata.
 
-### P2 — Besitz vollstaendig — offen
+### P2 — Besitz vollstaendig — erledigt 2026-09-17
 
-Heute prueft `scripts/check_domain_table_ownership.py` Anker und Praefixe,
-nicht den Rest. Best Practice ist eine Owner-Matrix je Asset, nicht nur
-Beispiele.
+Heute wies der Check nur Anker und fuenf Praefixe. Jetzt hat jede
+`domain_*`-Tabelle einen Schema-Custodian und eine Architecture-Domain.
 
-- [ ] Jede `domain_*`-Tabelle hat Schema-Owner oder dokumentierte Legacy-Zeile
-- [ ] Unbekannte Tabellen fallen im Check durch (only-up, wie die Frontend-Ratsche)
-- [ ] Architecture Index `database_schemas` bleibt die Domänen-Klammer;
-      der Katalog nennt den technischen Custodian (Schema) plus fachliche
-      Domain aus `architecture-domain-prefixes.yaml`
+- [x] `scripts/table_ownership.py`: 29 Schemas → Domain (only-up: unbekanntes Schema faellt)
+- [x] Praefix-Konflikt ohne Legacy-Zeile faellt; 13 benannte Legacy-Lagen
+- [x] Katalog nennt `owner_domain` und `placement` (native / prefix / legacy)
+- [x] Architecture Index `database_schemas` listet die physischen Schemas je Domain
 
-**Abnahme:** Ownership-Check ohne neue unbegruendete Ausnahmen. Bekannte
-Legacy-Placements (`sales_orders` in `domain_crm`, Kontrakte in
-`domain_inventory`) bleiben benannt, nicht still.
+**Abnahme:** `check_domain_table_ownership.py` — 635 Tabellen, 29 Schemas, 13
+Legacy. `sales_orders` in `domain_crm` und Kontrakte in `domain_inventory`
+bleiben begruendet.
 
 ### P3 — Verbraucher-Lineage — offen
 
@@ -182,5 +180,5 @@ Owner an Tabellen, die der Check nicht sieht.
 ## Einstieg fuer den naechsten Slice
 
 Datei: `docs/agent-ops/slices/DATA-MODEL-CATALOG-20260917.yaml`.
-Erster Claim: **P0+P1** (Regel + Generator), nicht P2–P4 gleichzeitig.
+Naechster Claim: **P3** (Verbraucher-Lineage), nicht P4 gleichzeitig.
 Alembic-Head zum Zeitpunkt der Liste: `crm_kreditlimite_20260917`.

@@ -26,6 +26,8 @@ from typing import Any
 
 from sqlalchemy import create_engine, text
 
+from scripts.table_ownership import SCHEMA_TO_DOMAIN, classify_table
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MD_OUTPUT = REPO_ROOT / "docs" / "admin" / "table-catalog.md"
 JSON_OUTPUT = REPO_ROOT / "docs" / "admin" / "table-catalog.json"
@@ -115,6 +117,14 @@ def assemble_catalog(
             table,
             {"columns": [], "primary_key": [], "foreign_keys": []},
         )
+
+    for schema, schema_body in schemas.items():
+        for table, bucket in schema_body["tables"].items():
+            verdict = classify_table(schema, table)
+            bucket["owner_domain"] = verdict["owner_domain"]
+            bucket["placement"] = verdict["placement"]
+            if verdict.get("reason"):
+                bucket["ownership_reason"] = verdict["reason"]
 
     for schema, table, name, data_type, nullable, _pos in columns:
         bucket = schemas.get(schema, {}).get("tables", {}).get(table)
@@ -221,13 +231,14 @@ def render_markdown(payload: dict[str, Any], today: str | None = None) -> str:
         "",
         "## Schemas",
         "",
-        "| Schema | Tabellen | Spalten |",
-        "|---|---|---|",
+        "| Schema | Domain | Tabellen | Spalten |",
+        "|---|---|---|---|",
     ]
     for schema in sorted(schemas):
         tables = schemas[schema].get("tables") or {}
         cols = sum(len(t.get("columns") or []) for t in tables.values())
-        lines.append(f"| `{schema}` | {len(tables)} | {cols} |")
+        domain = SCHEMA_TO_DOMAIN.get(schema, "—")
+        lines.append(f"| `{schema}` | `{domain}` | {len(tables)} | {cols} |")
 
     siblings = payload.get("sibling_models") or []
     if siblings:
@@ -243,13 +254,15 @@ def render_markdown(payload: dict[str, Any], today: str | None = None) -> str:
             lines.append(f"- `{item['table']}` in {joined}")
 
     for schema in sorted(schemas):
-        lines.extend(["", f"## `{schema}`", "", "| Tabelle | PK | Spalten |", "|---|---|---|"])
+        lines.extend(["", f"## `{schema}`", "", "| Tabelle | Domain | Lage | PK | Spalten |", "|---|---|---|---|---|"])
         tables = schemas[schema].get("tables") or {}
         for table in sorted(tables):
             body = tables[table]
             pk = ", ".join(f"`{c}`" for c in body.get("primary_key") or []) or "—"
             cols = ", ".join(c["name"] for c in body.get("columns") or [])
-            lines.append(f"| `{table}` | {pk} | {cols} |")
+            domain = body.get("owner_domain") or "—"
+            lage = body.get("placement") or "—"
+            lines.append(f"| `{table}` | `{domain}` | {lage} | {pk} | {cols} |")
     lines.append("")
     return "\n".join(lines)
 

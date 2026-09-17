@@ -13,8 +13,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## DATA-MODEL-CATALOG — Tabellenkatalog statt Gesamt-UML 2026-09-17, Cursor
 
-**Stand:** P1 abgeschlossen (Katalog, 635 Tabellen). Naechster Claim: **P2**
-(Ownership only-up). Liste: `docs/agent-ops/todo-datenmodell-katalog.md`.
+**Stand:** P2 abgeschlossen (Ownership only-up, 635 Tabellen, 29 Schemas,
+13 Legacy). Naechster Claim: **P3** (Verbraucher-Lineage). Liste:
+`docs/agent-ops/todo-datenmodell-katalog.md`.
 
 **Befund:** Maske, Tabelle und schreibender Code hängen nicht in einem Artefakt.
 `crm_consents` hatte zwei Fachmodelle unter einem Namen. Das Canonical-UML

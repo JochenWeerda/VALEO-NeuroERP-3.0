@@ -69,10 +69,14 @@ Maske keine Tabelle; fehlende Persistenz ist eine Migration, kein
 **Neue Spalte nur per Alembic.** Kopffelder der Maske folgen den JSON-Schluesseln
 des Endpunkts (ADR-003 Regel 3: keine parallele fachliche Wahrheit in der UI).
 
-**Besitz** ist das PostgreSQL-Schema (`domain_crm`, `domain_agrar`, …), geprueft
-durch `scripts/check_domain_table_ownership.py`. Der physische Katalog steht in
-[table-catalog.md](../admin/table-catalog.md) (`python scripts/generate_table_catalog.py`).
-Fachliche Domäne steht im Architecture Index. Zwei Modelle duerfen nicht denselben
+**Besitz** ist das PostgreSQL-Schema (`domain_crm`, `domain_agrar`, …).
+`scripts/table_ownership.py` mappt 29 Schemas auf Architecture-Domains;
+`scripts/check_domain_table_ownership.py` bewertet jede `domain_*`-Tabelle
+(only-up: unbekanntes Schema oder Praefix-Konflikt ohne Legacy-Zeile faellt).
+Der physische Katalog nennt `owner_domain` und `placement`
+([table-catalog.md](../admin/table-catalog.md),
+`python scripts/generate_table_catalog.py`). Fachliche Domäne steht im
+Architecture Index (`database_schemas`). Zwei Modelle duerfen nicht denselben
 Tabellennamen in einem Schema teilen.
 
 ## Module & Feature-Flags

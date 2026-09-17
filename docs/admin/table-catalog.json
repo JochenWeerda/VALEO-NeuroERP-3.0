@@ -152,6 +152,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -320,6 +323,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -408,6 +414,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -516,6 +525,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -554,6 +566,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -617,6 +632,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -785,6 +803,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -923,6 +944,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -990,6 +1014,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -1058,6 +1085,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -1106,6 +1136,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -1129,6 +1162,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -1182,6 +1218,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -1244,6 +1283,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1295,6 +1337,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1386,6 +1431,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1467,6 +1515,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1529,6 +1580,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1587,6 +1641,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1645,6 +1702,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1703,6 +1763,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1751,6 +1814,9 @@
               "references": "domain_agrar.evaluation_systems.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1779,6 +1845,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1836,6 +1905,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -1912,6 +1984,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2012,6 +2087,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2112,6 +2190,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2165,6 +2246,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2242,6 +2326,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2335,6 +2422,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2515,6 +2605,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2578,6 +2671,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2641,6 +2737,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2753,6 +2852,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2850,6 +2952,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2907,6 +3012,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -2964,6 +3072,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3135,6 +3246,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3218,6 +3332,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3271,6 +3388,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3329,6 +3449,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3416,6 +3539,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3478,6 +3604,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3545,6 +3674,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3613,6 +3745,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3711,6 +3846,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3807,6 +3945,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3854,6 +3995,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3911,6 +4055,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -3977,6 +4124,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4029,6 +4179,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4092,6 +4245,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4155,6 +4311,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4236,6 +4395,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4269,6 +4431,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "tenant_id"
           ]
@@ -4352,6 +4517,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4605,6 +4773,9 @@
               "references": "domain_agrar.feldbuch_schlaege.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4753,6 +4924,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4806,6 +4980,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4889,6 +5066,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -4981,6 +5161,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5048,6 +5231,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5114,6 +5300,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5177,6 +5366,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5305,6 +5497,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5381,6 +5576,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5457,6 +5655,9 @@
               "references": "domain_agrar.ration_versions.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5537,6 +5738,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5607,6 +5811,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5717,6 +5924,9 @@
               "references": "domain_agrar.ration_versions.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "version_id"
           ]
@@ -5793,6 +6003,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5850,6 +6063,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5908,6 +6124,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -5974,6 +6193,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6062,6 +6284,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6130,6 +6355,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6158,6 +6386,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6211,6 +6442,9 @@
               "references": "domain_agrar.silo_zellen.silo_id"
             }
           ],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6269,6 +6503,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6332,6 +6569,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6415,6 +6655,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6473,6 +6716,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_agrar / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6525,6 +6771,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6583,6 +6832,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6631,6 +6883,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6674,6 +6929,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6717,6 +6975,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6765,6 +7026,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6818,6 +7082,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6866,6 +7133,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6951,6 +7221,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_controlling / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -6994,6 +7267,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_controlling / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7047,6 +7323,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_controlling / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7090,6 +7369,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_controlling / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7138,6 +7420,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_controlling / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7206,6 +7491,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_controlling / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7292,6 +7580,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_controlling / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7370,6 +7661,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Praefix 'kpi_' → domain_controlling.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -7432,6 +7726,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Praefix 'kpi_' → domain_controlling.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -7509,6 +7806,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7667,6 +7967,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7800,6 +8103,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7833,6 +8139,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -7880,6 +8189,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8048,6 +8360,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8126,6 +8441,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8319,6 +8637,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8397,6 +8718,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8465,6 +8789,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8518,6 +8845,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8581,6 +8911,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8654,6 +8987,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8722,6 +9058,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8830,6 +9169,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -8908,6 +9250,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -9006,6 +9351,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -9764,6 +10112,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "partner_id"
           ]
@@ -9837,6 +10188,9 @@
               "references": "domain_crm.customers.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -9885,6 +10239,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -9928,6 +10285,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10044,6 +10404,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10122,6 +10485,9 @@
               "references": "domain_crm.crm_campaigns.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10190,6 +10556,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10343,6 +10712,9 @@
               "references": "domain_crm.crm_campaign_templates.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10411,6 +10783,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10474,6 +10849,9 @@
               "references": "domain_crm.crm_contact_consents.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10577,6 +10955,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10689,6 +11070,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10847,6 +11231,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -10974,6 +11361,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11007,6 +11397,9 @@
               "references": "domain_crm.crm_segments.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11060,6 +11453,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11202,6 +11598,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11334,6 +11733,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11407,6 +11809,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11513,6 +11918,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11586,6 +11994,9 @@
               "references": "domain_crm.mail_workspace_messages.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11634,6 +12045,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11747,6 +12161,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -11830,6 +12247,9 @@
               "references": "domain_crm.sales_offers.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Sales-Angebotspositionen liegen historisch im CRM-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -11943,6 +12363,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Sales-Angebote liegen historisch im CRM-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -12026,6 +12449,9 @@
               "references": "domain_crm.sales_orders.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Sales-Auftragspositionen liegen historisch im CRM-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -12159,6 +12585,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Sales-Auftraege liegen historisch im CRM-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -12236,6 +12665,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -12283,6 +12715,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_dev_mock / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -12330,6 +12765,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -12363,6 +12801,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -12441,6 +12882,9 @@
               "references": "domain_docflow.document_headers.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -12509,6 +12953,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -12556,6 +13003,9 @@
               "references": "domain_docflow.document_headers.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -12694,6 +13144,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -12807,6 +13260,9 @@
               "references": "domain_docflow.document_headers.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -12877,6 +13333,9 @@
               "references": "domain_docflow.document_items.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -12945,6 +13404,9 @@
               "references": "domain_docflow.document_headers.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -13003,6 +13465,9 @@
               "references": "domain_docflow.document_return_cases.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -13105,6 +13570,9 @@
               "references": "domain_docflow.document_headers.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -13178,6 +13646,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13241,6 +13712,9 @@
               "references": "domain_docflow.document_headers.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13289,6 +13763,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13372,6 +13849,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13455,6 +13935,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13508,6 +13991,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "tenant_id"
           ]
@@ -13636,6 +14122,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13743,6 +14232,9 @@
               "references": "domain_docflow.document_headers.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13820,6 +14312,9 @@
               "references": "domain_docflow.pos_tse_devices.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13888,6 +14383,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -13971,6 +14469,9 @@
               "references": "domain_docflow.pos_terminals.id"
             }
           ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14038,6 +14539,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_docs / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14121,6 +14625,9 @@
               "references": "domain_docs.doc_allocation_sources.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_docs / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14238,6 +14745,9 @@
               "references": "domain_einkauf.lieferanten.id"
             }
           ],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14370,6 +14880,9 @@
               "references": "domain_einkauf.kontrakt_positionen.id"
             }
           ],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14546,6 +15059,9 @@
               "references": "domain_einkauf.bestellvorschlaege.id"
             }
           ],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14624,6 +15140,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14745,6 +15264,9 @@
               "references": "domain_einkauf.bestellvorschlaege.id"
             }
           ],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14788,6 +15310,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14821,6 +15346,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -14904,6 +15432,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15047,6 +15578,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15135,6 +15669,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15218,6 +15755,9 @@
               "references": "domain_einkauf.kontrakte.id"
             }
           ],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15326,6 +15866,9 @@
               "references": "domain_einkauf.lieferanten.id"
             }
           ],
+          "owner_domain": "procurement",
+          "ownership_reason": "Kontrakte liegen historisch im Einkaufsschema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -15424,6 +15967,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15582,6 +16128,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15675,6 +16224,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15778,6 +16330,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15841,6 +16396,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15894,6 +16452,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -15952,6 +16513,9 @@
               "references": "domain_einkauf.rfq_requests.id"
             }
           ],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16000,6 +16564,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16062,6 +16629,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16120,6 +16690,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16183,6 +16756,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16226,6 +16802,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16289,6 +16868,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16342,6 +16924,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16440,6 +17025,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16513,6 +17101,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16586,6 +17177,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16634,6 +17228,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16657,6 +17254,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16750,6 +17350,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16803,6 +17406,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16891,6 +17497,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16939,6 +17548,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -16987,6 +17599,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17045,6 +17660,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17113,6 +17731,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17151,6 +17772,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17179,6 +17803,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17277,6 +17904,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17360,6 +17990,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17433,6 +18066,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17501,6 +18137,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17554,6 +18193,9 @@
               "references": "domain_erp.fibu_connector_runs.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17657,6 +18299,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17754,6 +18399,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17855,6 +18503,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17907,6 +18558,9 @@
               "references": "domain_erp.finance_journal_entries.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -17930,6 +18584,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18071,6 +18728,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18173,6 +18833,9 @@
               "references": "domain_erp.journal_entries.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18241,6 +18904,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18304,6 +18970,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18447,6 +19116,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18505,6 +19177,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18553,6 +19228,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18646,6 +19324,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18739,6 +19420,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18767,6 +19451,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18795,6 +19482,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18818,6 +19508,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -18926,6 +19619,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19029,6 +19725,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_erp / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19096,6 +19795,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19164,6 +19866,9 @@
               "references": "domain_finance.bank_statements.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19207,6 +19912,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19270,6 +19978,9 @@
               "references": "domain_finance.billing_batches.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19358,6 +20069,9 @@
               "references": "domain_finance.billing_batches.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19441,6 +20155,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19558,6 +20275,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19636,6 +20356,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19679,6 +20402,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19727,6 +20453,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19775,6 +20504,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19818,6 +20550,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19881,6 +20616,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -19954,6 +20692,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20002,6 +20743,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20070,6 +20814,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20138,6 +20885,9 @@
               "references": "domain_finance.kostenstellen.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20205,6 +20955,9 @@
               "references": "domain_finance.kostenstellen.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20337,6 +21090,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20400,6 +21156,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20452,6 +21211,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20520,6 +21282,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20628,6 +21393,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20691,6 +21459,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20729,6 +21500,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20787,6 +21561,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20835,6 +21612,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20883,6 +21663,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_futtermittel / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -20955,6 +21738,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21063,6 +21849,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21136,6 +21925,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21209,6 +22001,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21272,6 +22067,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21350,6 +22148,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21468,6 +22269,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21546,6 +22350,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21604,6 +22411,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21674,6 +22484,9 @@
               "references": "domain_hr.hrm_operations_gates.tenant_id"
             }
           ],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21744,6 +22557,9 @@
               "references": "domain_hr.hrm_operations_gates.gate_id"
             }
           ],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21817,6 +22633,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "tenant_id",
             "gate_id"
@@ -21876,6 +22695,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -21954,6 +22776,9 @@
               "references": "domain_hr.onboarding_checklists.id"
             }
           ],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22012,6 +22837,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22070,6 +22898,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22168,6 +22999,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22286,6 +23120,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22369,6 +23206,9 @@
               "references": "domain_hr.training_courses.id"
             }
           ],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22447,6 +23287,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22505,6 +23348,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hr / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22582,6 +23428,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hrm / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22615,6 +23464,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hrm / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22693,6 +23545,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "hr",
+          "ownership_reason": "Custodian domain_hrm / Domain hr.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22750,6 +23605,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_integration / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22833,6 +23691,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_integration / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22901,6 +23762,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_integration / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -22959,6 +23823,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_integration / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23011,6 +23878,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Agrar-Kontraktallokationen liegen historisch im Inventory-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -23109,6 +23979,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Agrar-Kontrakte liegen historisch im Inventory-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -23172,6 +24045,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Agrar-Abzuege liegen historisch im Inventory-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -23295,6 +24171,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Agrar-Abrechnungen liegen historisch im Inventory-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -23343,6 +24222,9 @@
               "references": "domain_inventory.articles.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23401,6 +24283,9 @@
               "references": "domain_inventory.articles.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23449,6 +24334,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23532,6 +24420,9 @@
               "references": "domain_inventory.articles.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23604,6 +24495,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23657,6 +24551,9 @@
               "references": "domain_inventory.articles.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23704,6 +24601,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23810,6 +24710,9 @@
               "references": "domain_crm.business_partners.partner_id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -23873,6 +24776,9 @@
               "references": "domain_inventory.articles.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -24570,6 +25476,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -24632,6 +25541,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -24690,6 +25602,9 @@
               "references": "domain_inventory.warehouse_bins.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -24772,6 +25687,9 @@
               "references": "domain_inventory.inventory_stock_movements.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -24850,6 +25768,9 @@
               "references": "domain_inventory.consignment_storage_fee_runs.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -24933,6 +25854,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25035,6 +25959,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25078,6 +26005,9 @@
               "references": "domain_inventory.drying_rule_sets.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25131,6 +26061,9 @@
               "references": "domain_inventory.drying_rule_sets.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25277,6 +26210,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25340,6 +26276,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25398,6 +26337,9 @@
               "references": "domain_inventory.harvest_acceptances.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25520,6 +26462,9 @@
               "references": "domain_inventory.harvest_acceptances.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25823,6 +26768,9 @@
               "references": "domain_inventory.weighing_tickets.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25881,6 +26829,9 @@
               "references": "domain_inventory.inventory_auxiliary_batches.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -25969,6 +26920,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26054,6 +27008,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26139,6 +27096,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26187,6 +27147,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26270,6 +27233,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26303,6 +27269,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "movement_type"
           ]
@@ -26503,6 +27472,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26576,6 +27548,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Annahme-Queue liegt historisch bei Inventory.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -26652,6 +27627,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26740,6 +27718,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26842,6 +27823,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26905,6 +27889,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -26992,6 +27979,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27045,6 +28035,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27118,6 +28111,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27200,6 +28196,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27272,6 +28271,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27364,6 +28366,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27464,6 +28469,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27552,6 +28560,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27613,6 +28624,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27670,6 +28684,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27757,6 +28774,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27884,6 +28904,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -27947,6 +28970,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28081,6 +29107,9 @@
               "references": "domain_inventory.warehouse_zones.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28129,6 +29158,9 @@
               "references": "domain_inventory.silo_lots.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28221,6 +29253,9 @@
               "references": "domain_inventory.weighing_tickets.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28284,6 +29319,9 @@
               "references": "domain_inventory.silos.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28337,6 +29375,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28390,6 +29431,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28456,6 +29500,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28518,6 +29565,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28611,6 +29661,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28673,6 +29726,9 @@
               "references": "domain_inventory.warehouse_zones.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28745,6 +29801,9 @@
               "references": "domain_inventory.warehouse_zones.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28801,6 +29860,9 @@
               "references": "domain_inventory.warehouse_transfers.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28867,6 +29929,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -28925,6 +29990,9 @@
               "references": "domain_inventory.warehouses.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29028,6 +30096,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29081,6 +30152,9 @@
               "references": "domain_inventory.weighing_tickets.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29137,6 +30211,9 @@
               "references": "domain_inventory.weighing_tickets.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29290,6 +30367,9 @@
               "references": "domain_inventory.articles.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29352,6 +30432,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29420,6 +30503,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29493,6 +30579,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29541,6 +30630,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "agrar",
+          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29637,6 +30729,9 @@
               "references": "domain_log.log_touren.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_log / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29690,6 +30785,9 @@
               "references": "domain_log.log_touren.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_log / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29793,6 +30891,9 @@
               "references": "domain_log.log_touren.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_log / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29900,6 +31001,9 @@
               "references": "domain_ops.ops_fahrzeuge.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_log / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -29982,6 +31086,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30030,6 +31137,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30108,6 +31218,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30181,6 +31294,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30234,6 +31350,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30287,6 +31406,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30380,6 +31502,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30428,6 +31553,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "logistics",
+          "ownership_reason": "Custodian domain_logistics / Domain logistics.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30480,6 +31608,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_meldewesen / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30553,6 +31684,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_meldewesen / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30615,6 +31749,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_nachweisraum / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30663,6 +31800,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_nachweisraum / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30736,6 +31876,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_nachweisraum / Domain dms-compliance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30788,6 +31931,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30841,6 +31987,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -30899,6 +32048,9 @@
               "references": "domain_ops.document_control_exceptions.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Audit-Spur der Belegkontroll-Worklist, liegt beim Prozess in domain_ops.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -30982,6 +32134,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Belegkontroll-Worklist ist ein Prozessvorrat in domain_ops, kein Belegartefakt.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -31055,6 +32210,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -31103,6 +32261,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -31161,6 +32322,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "audit_id"
           ]
@@ -31324,6 +32488,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "contract_id"
           ]
@@ -31412,6 +32579,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "fixing_id"
           ]
@@ -31520,6 +32690,9 @@
               "references": "domain_ops.kon_contract.contract_id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "line_id"
           ]
@@ -31627,6 +32800,9 @@
               "references": "domain_ops.kon_contract_line.line_id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "movement_id"
           ]
@@ -31675,6 +32851,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "reminder_id"
           ]
@@ -31723,6 +32902,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -31771,6 +32953,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "quote_id"
           ]
@@ -31839,6 +33024,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -31887,6 +33075,9 @@
               "references": "domain_ops.mobile_event_queue.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -31960,6 +33151,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32148,6 +33342,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32201,6 +33398,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32249,6 +33449,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32307,6 +33510,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32365,6 +33571,9 @@
               "references": "domain_ops.ops_dokumente.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32478,6 +33687,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32541,6 +33753,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32659,6 +33874,9 @@
               "references": "domain_ops.ops_fahrzeuge.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32742,6 +33960,9 @@
               "references": "domain_ops.ops_fahrzeuge.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32830,6 +34051,9 @@
               "references": "domain_ops.ops_fahrzeuge.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32883,6 +34107,9 @@
               "references": "domain_ops.ops_fahrzeuge.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -32970,6 +34197,9 @@
               "references": "domain_ops.ops_fahrzeuge.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33348,6 +34578,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33406,6 +34639,9 @@
               "references": "domain_ops.ops_flow_spine_instances.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33499,6 +34735,9 @@
               "references": "domain_ops.ops_flow_spine_instances.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33697,6 +34936,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33750,6 +34992,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33803,6 +35048,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33871,6 +35119,9 @@
               "references": "domain_ops.ops_fahrzeuge.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33909,6 +35160,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -33957,6 +35211,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34010,6 +35267,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34068,6 +35328,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34126,6 +35389,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34194,6 +35460,9 @@
               "references": "domain_ops.ops_projekte.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34302,6 +35571,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34350,6 +35622,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34438,6 +35713,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34496,6 +35774,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34554,6 +35835,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34602,6 +35886,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34735,6 +36022,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34848,6 +36138,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34901,6 +36194,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -34979,6 +36275,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35077,6 +36376,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35145,6 +36447,9 @@
               "references": "domain_ops.ops_wartung_anlagen.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35228,6 +36533,9 @@
               "references": "domain_ops.ops_waagen.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35316,6 +36624,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35369,6 +36680,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35432,6 +36746,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35485,6 +36802,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -35578,6 +36898,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "override_id"
           ]
@@ -35666,6 +36989,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "rule_id"
           ]
@@ -35739,6 +37065,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "snapshot_id"
           ]
@@ -35827,6 +37156,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -35865,6 +37197,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -35938,6 +37273,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -35996,6 +37334,9 @@
               "references": "domain_ops.production_operations.id"
             }
           ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36099,6 +37440,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36187,6 +37531,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36250,6 +37597,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36328,6 +37678,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36416,6 +37769,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36479,6 +37835,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36527,6 +37886,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36610,6 +37972,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36668,6 +38033,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36721,6 +38089,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_ops / Domain inventory.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36828,6 +38199,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36896,6 +38270,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -36979,6 +38356,9 @@
               "references": "domain_portal.customer_orders.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37067,6 +38447,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37170,6 +38553,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37207,6 +38593,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pos / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37285,6 +38674,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pos / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37328,6 +38720,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pos / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37391,6 +38786,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pos / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37458,6 +38856,9 @@
               "references": "domain_pricing.price_lists.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pricing / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37521,6 +38922,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pricing / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37554,6 +38958,9 @@
               "references": "domain_pricing.staffelrabatte.id"
             }
           ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pricing / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "staffelrabatt_id",
             "artikel_id"
@@ -37628,6 +39035,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_pricing / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37680,6 +39090,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_procurement / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37703,6 +39116,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_procurement / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37771,6 +39187,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_procurement / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37829,6 +39248,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_procurement / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37922,6 +39344,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_procurement / Domain procurement.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -37989,6 +39414,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_reporting / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38067,6 +39495,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_reporting / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38115,6 +39546,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_reporting / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38263,6 +39697,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_reporting / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38311,6 +39748,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_reporting / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38374,6 +39814,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_reporting / Domain finance.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38551,6 +39994,9 @@
               "references": "domain_sales.delivery_notes.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_sales / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38689,6 +40135,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_sales / Domain crm.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -38737,6 +40186,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -38795,6 +40247,9 @@
               "references": "domain_sales.sales_credit_notes.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -38868,6 +40323,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -38896,6 +40354,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -38979,6 +40440,9 @@
               "references": "domain_sales.sales_invoices.id"
             }
           ],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -39062,6 +40526,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -39105,6 +40572,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -39168,6 +40638,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -39241,6 +40714,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "placement": "prefix",
           "primary_key": [
             "id"
           ]
@@ -39338,6 +40814,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39405,6 +40884,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39477,6 +40959,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39550,6 +41035,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39661,6 +41149,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39757,6 +41248,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39819,6 +41313,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39887,6 +41384,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -39955,6 +41455,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40055,6 +41558,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40133,6 +41639,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40204,6 +41713,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40267,6 +41779,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40340,6 +41855,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Agrar-Sorten liegen historisch im Shared-Schema.",
+          "placement": "legacy",
           "primary_key": [
             "id"
           ]
@@ -40388,6 +41906,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40476,6 +41997,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40544,6 +42068,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40582,6 +42109,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40640,6 +42170,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40688,6 +42221,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40741,6 +42277,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40799,6 +42338,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40847,6 +42389,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -40930,6 +42475,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41023,6 +42571,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41110,6 +42661,9 @@
               "references": "domain_shared.users.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41178,6 +42732,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41266,6 +42823,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41349,6 +42909,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "anchor_id"
           ]
@@ -41402,6 +42965,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41450,6 +43016,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41573,6 +43142,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41616,6 +43188,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41729,6 +43304,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "thread_id"
           ]
@@ -41777,6 +43355,9 @@
               "references": "domain_shared.channel_process_threads.thread_id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41830,6 +43411,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41888,6 +43472,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -41966,6 +43553,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42004,6 +43594,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42082,6 +43675,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42130,6 +43726,9 @@
               "references": "domain_shared.dauerauftraege.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42188,6 +43787,9 @@
               "references": "domain_shared.dauerauftraege.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42246,6 +43848,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42304,6 +43909,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42352,6 +43960,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42415,6 +44026,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42453,6 +44067,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42531,6 +44148,9 @@
               "references": "domain_shared.erloeskennziffern.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42604,6 +44224,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42667,6 +44290,9 @@
               "references": "domain_shared.grundfutter_analysen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42720,6 +44346,9 @@
               "references": "domain_shared.grundfutter_analysen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42818,6 +44447,9 @@
               "references": "domain_shared.grundfutter_analysen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42901,6 +44533,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -42959,6 +44594,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43042,6 +44680,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43120,6 +44761,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43173,6 +44817,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43236,6 +44883,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43414,6 +45064,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43482,6 +45135,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43585,6 +45241,9 @@
               "references": "domain_shared.futtermittel_rezepte.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43642,6 +45301,9 @@
               "references": "domain_shared.futtermittel_rezepte.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43730,6 +45392,9 @@
               "references": "domain_shared.futtermittel_mischfutter.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43778,6 +45443,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -43846,6 +45514,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44264,6 +45935,9 @@
               "references": "domain_shared.futtermittel_einzelfutter.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44302,6 +45976,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44390,6 +46067,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44468,6 +46148,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44531,6 +46214,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44592,6 +46278,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44665,6 +46354,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44743,6 +46435,9 @@
               "references": "domain_shared.inventur_piv_abschluesse.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -44890,6 +46585,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "proposal_id"
           ]
@@ -44958,6 +46656,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "knowledge_id"
           ]
@@ -45011,6 +46712,9 @@
               "references": "domain_shared.knowledge_objects.knowledge_id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45084,6 +46788,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45192,6 +46899,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45265,6 +46975,9 @@
               "references": "domain_shared.kontrakt_zuabschlagsgruppen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45308,6 +47021,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45381,6 +47097,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45434,6 +47153,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45512,6 +47234,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45560,6 +47285,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45603,6 +47331,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45661,6 +47392,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45724,6 +47458,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45792,6 +47529,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -45885,6 +47625,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "entry_id"
           ]
@@ -45933,6 +47676,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "edge_id"
           ]
@@ -45996,6 +47742,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "node_id"
           ]
@@ -46064,6 +47813,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "transition_id"
           ]
@@ -46132,6 +47884,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46180,6 +47935,9 @@
               "references": "domain_shared.hauptwarengruppen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46268,6 +48026,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46346,6 +48107,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46384,6 +48148,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46462,6 +48229,9 @@
               "references": "domain_shared.partiegruppen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46545,6 +48315,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46623,6 +48396,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46666,6 +48442,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46709,6 +48488,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46767,6 +48549,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -46830,6 +48615,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "tenant_id",
             "consumer_id",
@@ -46870,6 +48658,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "tenant_id",
             "projection_key"
@@ -46914,6 +48705,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "tenant_id",
             "projection_key"
@@ -47028,6 +48822,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47081,6 +48878,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47134,6 +48934,9 @@
               "references": "domain_shared.rohwarengruppen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47182,6 +48985,9 @@
               "references": "domain_shared.rohware_analysewert_korrekturen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47240,6 +49046,9 @@
               "references": "domain_shared.rohwarengruppen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47318,6 +49127,9 @@
               "references": "domain_shared.rohware_massebilanzen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47416,6 +49228,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47493,6 +49308,9 @@
               "references": "domain_shared.rohware_abrechnungsschemata.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47541,6 +49359,9 @@
               "references": "domain_shared.rohware_za_staffeln.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47613,6 +49434,9 @@
               "references": "domain_shared.rohware_qualitaeten.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47676,6 +49500,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47774,6 +49601,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47847,6 +49677,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47910,6 +49743,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -47968,6 +49804,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48036,6 +49875,9 @@
               "references": "domain_shared.stuecklisten.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48084,6 +49926,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48127,6 +49972,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48170,6 +50018,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "tenant_id",
             "user_id",
@@ -48255,6 +50106,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48343,6 +50197,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48396,6 +50253,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48429,6 +50289,9 @@
               "references": "domain_shared.vertreter_provisionsgruppen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48467,6 +50330,9 @@
               "references": "domain_shared.vertreter_provisionsstaffeln.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48575,6 +50441,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48638,6 +50507,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48686,6 +50558,9 @@
               "references": "domain_shared.oberwarengruppen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48739,6 +50614,9 @@
               "references": "domain_shared.tenants.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48817,6 +50695,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48875,6 +50756,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -48938,6 +50822,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -49005,6 +50892,9 @@
               "references": "domain_shared.zu_abschlagklassen.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -49048,6 +50938,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -49091,6 +50984,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -49158,6 +51054,9 @@
               "references": "domain_workflow.wf_cockpit_instances.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_workflow / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -49211,6 +51110,9 @@
               "references": "domain_workflow.wf_cockpit_instances.id"
             }
           ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_workflow / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]
@@ -49284,6 +51186,9 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_workflow / Domain platform.",
+          "placement": "native",
           "primary_key": [
             "id"
           ]

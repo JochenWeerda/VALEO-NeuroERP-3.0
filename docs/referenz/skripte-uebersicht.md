@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-09-17
 version: 3.1.0
 ---
 
@@ -23,6 +23,8 @@ version: 3.1.0
 | `scripts/generate_adr_nav.py` | MkDocs ADR-Navigation patchen |
 | `scripts/generate_code_inventories.py` | Endpoint-/Service-/Migrations-Inventare |
 | `scripts/generate_table_catalog.py` | Physischer domain_*-Tabellenkatalog (`information_schema`) |
+| `scripts/table_ownership.py` | Schema→Domain, Praefixregeln, benannte Legacy-Lagen |
+| `scripts/check_domain_table_ownership.py` | Only-up-Besitz jeder domain_*-Tabelle (nach Alembic) |
 | `scripts/generate_container_inventory.py` | Docker-Compose-Container-Inventar → C4-Drift-Check |
 | `scripts/doc_drift_report.py` | Code↔Doku-Drift-Report → `artifacts/` |
 | `scripts/docs-legacy-migrate.py` | Alt-Doku inventarisieren/archivieren |
