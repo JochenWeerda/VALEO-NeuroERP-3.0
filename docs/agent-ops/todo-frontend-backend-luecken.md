@@ -27,6 +27,22 @@ Jeder Eintrag hatte genau zwei moegliche Antworten:
 Ein dritter Weg — den Aufruf still zu lassen — ist keiner: Der 404 landet im
 `catch` und die Maske zeigt eine leere Liste statt eines Fehlers.
 
+## Stand 2026-09-17, Abend: Liste abgearbeitet
+
+`python scripts/check_frontend_api_calls.py` meldet **0** — von 101 gemeldeten
+Luecken waren 37 Lesefehler des Scanners (angehaengte Template-Literale und
+`${id}/${aktion}`), die uebrigen sind behoben: teils als Pfadkorrektur, teils
+als gebauter Endpunkt. Zwei Agenten haben parallel daran gearbeitet; die
+Zuordnung steht in den jeweiligen Workboard-Abschnitten.
+
+Und nach `alembic upgrade head` fehlt **keine** der 19 Tabellen mehr, die die
+Bruecken-Endpunkte lesen.
+
+**Was die Zahl nicht sagt:** Sie prueft Adressen, keine Spalten. Ein Endpunkt,
+der antwortet, kann trotzdem andere Feldnamen liefern als die Maske erwartet —
+dafuer gibt es kein Gate, sondern nur den Blick in die Antwort. Bei den acht
+Masken aus MASK-VERDRAHTUNG-AUDIT und bei Saatzucht ist er getan.
+
 ## A. Pfadkorrekturen
 
 | Aufruf | Antwort | Stand |
