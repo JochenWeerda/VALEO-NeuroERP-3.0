@@ -20,6 +20,8 @@ Dieses Dokument definiert die **Pflicht-Funktionalitäten** und **Design-Prinzip
 
 **Ähnliche Belege in einer Belegfolge müssen sich im Design, Layout und in den grundsätzlichen Funktionalitäten möglichst ähneln**, damit sich Benutzer schnell zurechtfinden können.
 
+Die **Objekte** der Belegkette (Auftrag, Lieferung, Rechnung, Kontrakt, Charge) stehen im [Canonical ERD](architecture/views/erd-canonical-domain.md). Dieses Dokument regelt das **Layout**, nicht die Objektmenge.
+
 ### Belegfolgen
 
 #### Verkauf (Sales)

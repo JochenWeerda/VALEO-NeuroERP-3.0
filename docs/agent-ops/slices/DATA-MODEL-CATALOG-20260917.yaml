@@ -2,51 +2,46 @@
 slice_id: DATA-MODEL-CATALOG
 id: DATA-MODEL-CATALOG
 title: Tabellenkatalog, Besitz und Masken-Lebenszyklus
-status: offen
-owner: unassigned
+status: abgeschlossen
+owner: Cursor
 date: 2026-09-17
 created_at: 2026-09-17
 coordination: >
-  P4 geliefert. Naechster Claim ist P5 (Canonical UML pflegen, nicht
-  ausweiten). Keine FSX-/Rechnungsdateien, sales/invoice bleibt Claude.
+  P0–P5 geliefert. P6 nicht starten. UML/ERD nur noch bei neuem
+  ADR-003-Aggregat. Keine FSX-/Rechnungsdateien.
 goal: >
-  Bruecken-Masken aus Abschnitt B haben deklarierte Kopffelder. Das Gate
-  faellt bei neuen Abweichungen und neuen ungetypten Quellen.
+  Canonical UML und ERD bleiben ADR-003. Review-Datum 2026-09-17.
+  Physische Tabellen leben im Katalog, nicht im classDiagram.
 file_ownership:
-  - app/api/v1/schemas/mask_entity_contracts.py
-  - scripts/check_field_contracts.py
-  - tests/test_mask_field_contracts.py
-  - tests/test_mask_bridge_field_contracts.py
-  - tests/test_mask_entity_contracts.py
-  - docs/quality-assurance/feldvertrag-masken-2026-09-17.md
+  - docs/architecture/views/erd-canonical-domain.md
+  - docs/architecture/views/uml-canonical-domain-class.md
+  - docs/MASKEN.md
   - docs/agent-ops/todo-datenmodell-katalog.md
+  - tests/test_canonical_domain_views.py
 acceptance:
-  - python scripts/check_field_contracts.py Exit 0, Abweichungen 0
-  - 12 Bruecken-Koepfe nicht in nicht_pruefbar
-  - NICHT_PRUEFBAR_MAX = 0 (sales/invoice von Claude, Bruecken von Cursor)
+  - last_reviewed auf ERD und UML ist 2026-09-17
+  - kein neues ADR-003-Aggregat im classDiagram
+  - MASKEN.md bleibt Layout, ERD bleibt Objektmenge
+  - tests/test_canonical_domain_views.py Exit 0
 tests:
-  - tests/test_mask_field_contracts.py
-  - tests/test_mask_bridge_field_contracts.py
-  - tests/test_mask_entity_contracts.py
+  - tests/test_canonical_domain_views.py
 risks:
-  - sales/invoice bleibt ungetypt; Cursor typt den Rechnungsweg nicht
-  - OpenAPI-Drift nach neuen response_model
+  - Ein spaeteres Ticket will alle 635 Tabellen ins Mermaid zeichnen
 ai_harness:
   fachlicher_vertrag: >
-    Maskenfelder folgen den JSON-Schluesseln. 200 mit leerem Kopf ist ein
-    Vertragsbruch, kein leerer Vorgang.
+    ADR-003-Aggregate sind die fachliche Wahrheit. Tabellen sind es nicht.
   architektur_vertrag: >
-    Gate liest deklariertes Schema, nicht die Laufzeit-Antwort.
+    classDiagram bleibt klein. Katalog ist das physische Inventar.
   daten_vertrag: >
-    Kein DROP. Studio-Katalog bleibt Endpunkt-Allowlist.
+    Kein DROP. Keine neuen Tabellen aus dem UML-Review.
   test_vertrag: >
-    Unit gegen Aliase und Pfadwahl. Gate gegen echte OpenAPI der App.
+    Klassenzahl begrenzt. Katalogtabellen nicht im Mermaid.
   security_vertrag: >
-    Keine Secrets. Nur Schema-Vergleich.
+    Keine Secrets.
   betriebs_vertrag: >
-    pytest haelt das Gate. Rollback = Commit revertieren.
+    pytest haelt die Grenze. Rollback = Commit revertieren.
   dokumentations_vertrag: >
-    Workboard, todo P4, feldvertrag-masken, tenancy Feldvertrag.
+    Workboard, todo P5, ERD, UML, MASKEN.md.
 external_gates:
   - not_applicable
 ---

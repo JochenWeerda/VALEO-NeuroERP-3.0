@@ -77,8 +77,10 @@ Agent-Handbuch regeneriert, openapi.json driftfrei.
 
 ## DATA-MODEL-CATALOG — Tabellenkatalog statt Gesamt-UML 2026-09-17, Cursor
 
-**Stand:** P4 abgeschlossen (Feldvertrag der Bruecken-Koepfe). Naechster Claim:
-**P5** Canonical UML. Liste: `docs/agent-ops/todo-datenmodell-katalog.md`.
+**Stand:** P5 abgeschlossen 2026-09-17 (Canonical UML/ERD Review). Kein neues
+ADR-003-Aggregat seit 2026-03-11. `last_reviewed` gezogen. Permission im UML
+an das ERD angeglichen. P6 nicht starten. Naechster UML-Claim nur bei neuem
+ADR-003-Aggregat. Liste: `docs/agent-ops/todo-datenmodell-katalog.md`.
 
 **Befund:** Maske, Tabelle und schreibender Code hängen nicht in einem Artefakt.
 `crm_consents` hatte zwei Fachmodelle unter einem Namen. Das Canonical-UML

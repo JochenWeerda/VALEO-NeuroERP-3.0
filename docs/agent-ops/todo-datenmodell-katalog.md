@@ -135,15 +135,25 @@ waren `extra="allow"` ohne Felder.
 **Abnahme:** 12 Bruecken-Masken aus Abschnitt B haben ein Antwortmodell mit
 Kopffeldern. `sales/invoice` hat Claude parallel typisiert — ungetypt = 0.
 
-### P5 — Canonical UML pflegen, nicht ausweiten — offen (dauerhaft)
+### P5 — Canonical UML pflegen, nicht ausweiten — erledigt 2026-09-17 (dauerhaft)
 
-- [ ] `docs/architecture/views/erd-canonical-domain.md` und
+Review gegen ADR-003 (Accepted 2026-03-11): kein neues Kernaggregat. Katalog,
+Consent-Geschwister und Rechnungs-Feldvertrag sind physisch bzw. Vertrag,
+keine neuen Aggregate. `last_reviewed` auf 2026-09-17 gezogen.
+
+- [x] `docs/architecture/views/erd-canonical-domain.md` und
       `uml-canonical-domain-class.md` nur bei neuem ADR-003-Aggregat
       (`last_reviewed` ziehen)
-- [ ] Kein Ticket „alle Tabellen ins classDiagram"
-- [ ] Belegkette bleibt `docs/MASKEN.md` (Layout) plus Canonical-ERD (Objekte)
+- [x] Kein Ticket „alle Tabellen ins classDiagram"
+- [x] Belegkette bleibt `docs/MASKEN.md` (Layout) plus Canonical-ERD (Objekte)
 
-**Abnahme:** Review-Datum nicht aelter als die letzte Aggregat-Entscheidung.
+**Abnahme:** Review-Datum 2026-09-17, juenger als die letzte Aggregat-Entscheidung
+(2026-03-11). Permission stand im ERD, fehlte im classDiagram — nachgezogen,
+kein neues Aggregat. PSM/Duenger/Saatgut-Anwendung bleibt Item auf Field;
+physische Tabellen im Katalog. Gate: `tests/test_canonical_domain_views.py`
+(Klassenzahl begrenzt, Katalog nicht im Mermaid).
+
+Naechster UML-Claim nur, wenn ADR-003 ein Aggregat erhaelt. P6 nicht starten.
 
 ### P6 — Optional nach P1–P3 — nicht starten
 
@@ -173,6 +183,7 @@ Owner an Tabellen, die der Check nicht sieht.
 
 ## Einstieg fuer den naechsten Slice
 
-Datei: `docs/agent-ops/slices/DATA-MODEL-CATALOG-20260917.yaml`.
-Naechster Claim: **P5** (Canonical UML pflegen, nicht ausweiten), dauerhaft und klein.
+Datei: `docs/agent-ops/slices/DATA-MODEL-CATALOG-20260917.yaml` — P0–P5 geliefert.
+Naechster Claim: keiner aus dieser Liste. P5 ist dauerhaft: UML nur bei neuem
+ADR-003-Aggregat anfassen. **P6 nicht starten** (tbls / COMMENT ON / OpenMetadata).
 Alembic-Head zum Zeitpunkt der Liste: `crm_kreditlimite_20260917`.
