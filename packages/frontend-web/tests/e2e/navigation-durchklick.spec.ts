@@ -149,7 +149,14 @@ async function lesen(page: Page): Promise<{ ueberschrift: string; text: string }
       document.querySelector('[role="main"]') ??
       document.body
     const h1 = haupt.querySelector('h1')
-    const text = (haupt.textContent ?? '').replace(/\s+/g, ' ').trim()
+    // Ein offener Dialog gehoert dazu: `/portal/lohndienste/neu` zeigt dieselbe
+    // Liste wie `/portal/lohndienste` und oeffnet darueber die Anfrage. Der
+    // Dialog rendert in einem Portal ausserhalb von `main` — ohne ihn sind die
+    // beiden Wege ununterscheidbar und der Test meldet einen Doppelgaenger,
+    // wo keiner ist.
+    const dialog = document.querySelector('[role="dialog"]')
+    const dialogText = dialog ? ` [Dialog: ${(dialog.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 80)}]` : ''
+    const text = (haupt.textContent ?? '').replace(/\s+/g, ' ').trim() + dialogText
     return { ueberschrift: (h1?.textContent ?? '').trim(), text }
   })
 }

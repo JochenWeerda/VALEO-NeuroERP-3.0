@@ -2,7 +2,6 @@
   { "path": "lager", "module": "@/pages/lager/bestandsuebersicht" },
   { "path": "einstellungen", "module": "@/pages/einstellungen/system" },
   { "path": "portal", "module": "@/pages/portal/index" },
-  { "path": "portal/profil", "module": "@/pages/portal/index" },
   { "path": "agrar", "module": "@/pages/agrar/aussaat/liste" },
   { "path": "agrar/aussaat/neu", "module": "@/pages/agrar/aussaat/liste" },
   { "path": "agrar/biostimulanzien-stamm", "module": "@/pages/agrar/biostimulanzien-liste" },
@@ -119,6 +118,7 @@
   ,{ "path": "auswertungen/sanktionspruefung-kunden", "module": "@/pages/auswertungen/sanktionspruefung-kunden" }
   ,{ "path": "auswertungen/duengemittelmengen", "module": "@/pages/auswertungen/duengemittelmengen" }
   ,{ "path": "auswertungen/auftrags-kontrolle", "module": "@/pages/auswertungen/auftrags-kontrolle" }
+  ,{ "path": "auswertungen/beleg-kontrolle", "module": "@/pages/auswertungen/beleg-kontrolle" }
   ,{ "path": "auswertungen/lieferschein-kontrolle", "module": "@/pages/auswertungen/lieferschein-kontrolle" }
   ,{ "path": "abrechnung/eb-lieferschein-kontrolle", "module": "@/pages/abrechnung/eb-lieferschein-kontrolle" }
   ,{ "path": "produktion/chargen-bearbeiten", "module": "@/pages/produktion/chargen-bearbeiten" }

@@ -811,6 +811,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/auswertungen/beleg-kontrolle",
+      "path": "auswertungen/beleg-kontrolle",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/auswertungen/bonus-berechnung",
       "path": "auswertungen/bonus-berechnung",
       "source": "navigation"
@@ -3511,11 +3516,6 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/portal/index",
-      "path": "portal/profil",
-      "source": "navigation"
-    },
-    {
       "module": "@/pages/portal/rationsoptimierung",
       "path": "portal/rationsoptimierung",
       "source": "alias"
@@ -3689,6 +3689,11 @@
       "module": "@/pages/produktion/produktionsleitstand",
       "path": "produktion/produktionsleitstand",
       "source": "navigation"
+    },
+    {
+      "module": "@/pages/produktion/rezepturgruppen",
+      "path": "produktion/rezepturgruppen",
+      "source": "alias"
     },
     {
       "module": "@/pages/projekte/liste",

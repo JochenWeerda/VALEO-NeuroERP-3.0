@@ -13,7 +13,6 @@ import {
   Leaf,
   Menu,
   LogOut,
-  User,
   Bell,
   ChevronRight,
   Package,
@@ -291,14 +290,21 @@ export default function CustomerPortalLayout() {
                     <div className="font-medium">{mockCustomer.name}</div>
                     <div className="text-xs text-muted-foreground">{mockCustomer.kundennummer}</div>
                   </div>
-                  <Link
-                    to="/portal/profil"
-                    className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <User className="h-4 w-4" />
-                    Mein Profil
-                  </Link>
+                  {/*
+                    „Mein Profil" führte auf `/portal/profil` — und diese Route
+                    zeigte auf `@/pages/portal/index`, also auf die Übersicht.
+                    Der Kunde klickte sein Profil an und bekam die Startseite;
+                    eine `profil.tsx` gibt es nicht.
+
+                    Eine echte Profilseite zu bauen ist keine Verdrahtungsfrage:
+                    Das Portal kennt seinen Kunden bisher nur als Konstante im
+                    Quelltext, und zwar in zwei Fassungen (hier `K-2024-001`,
+                    in der Übersicht `K-10001`). Solange nicht entschieden ist,
+                    woher das Portal seine Kundenidentität nimmt, wäre jede
+                    Profilseite eine erfundene Seite — schlimmer als der Fehler.
+                    Deshalb steht hier kein Link, statt einer, der woanders
+                    hinführt.
+                  */}
                   <button
                     type="button"
                     onClick={handleLogout}

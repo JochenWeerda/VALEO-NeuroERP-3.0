@@ -441,6 +441,10 @@
       "path": "produktion"
     },
     {
+      "module": "@/pages/produktion/rezepturgruppen",
+      "path": "produktion/rezepturgruppen"
+    },
+    {
       "module": "@/pages/produktion/produktions-dokumente-drucken",
       "path": "produktion/dokumente"
     },
