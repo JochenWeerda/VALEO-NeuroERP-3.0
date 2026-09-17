@@ -506,6 +506,7 @@ domains:
       - knowledge_
       - mask_registry
       - mask_actions
+      - mask_frontend_bridges
       - mask_rollout_
       - mask_screen_
       - beleg_vordrucke

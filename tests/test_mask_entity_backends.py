@@ -126,5 +126,35 @@ def test_agrar_und_finance_routen_sind_registriert() -> None:
     assert "/api/v1/finance/kreditoren/{kreditor_id}" in paths
     assert "/api/v1/crm/consents/{consent_id}" in paths
     assert "/api/v1/crm/consents/contact/{contact_id}" in paths
+    from app.infrastructure.models.crm_consent import CrmConsent
+
+    assert CrmConsent.__tablename__ == "crm_contact_consents"
+    assert CrmConsent.__table_args__[-1]["schema"] == "domain_crm"
+    from app.infrastructure.models.crm_consent import CrmConsentHistory
+
+    assert CrmConsentHistory.__tablename__ == "crm_contact_consent_history"
     assert "/api/v1/banken/konten/{konto_id}" in paths
     assert "/api/v1/futter/mischfuttermittel/{misch_id}" in paths
+
+
+def test_crm_contact_consents_migration_laesst_partner_tabelle_in_ruhe() -> None:
+    from pathlib import Path
+
+    source = Path("alembic/versions/crm_consents_20260917.py").read_text(encoding="utf-8")
+    assert "CREATE TABLE IF NOT EXISTS domain_crm.crm_contact_consents" in source
+    assert "CREATE TABLE IF NOT EXISTS domain_crm.crm_consents" not in source
+    assert "ON domain_crm.crm_contact_consents (tenant_id, contact_id)" in source
+    assert "ON domain_crm.crm_consents (tenant_id, contact_id)" not in source
+
+
+def test_mask_bridges_haengen_hinter_sales_beleg() -> None:
+    from pathlib import Path
+
+    consents = Path("alembic/versions/crm_consents_20260917.py").read_text(encoding="utf-8")
+    sales = Path("alembic/versions/sales_beleg_druck_buchung_20260917.py").read_text(encoding="utf-8")
+    bridges = Path("alembic/versions/mask_frontend_bridges_20260917.py").read_text(
+        encoding="utf-8"
+    )
+    assert 'down_revision = "screen_definition_drafts_20260916"' in consents
+    assert 'down_revision = "crm_consents_20260917"' in sales
+    assert 'down_revision = "sales_beleg_druck_buchung_20260917"' in bridges

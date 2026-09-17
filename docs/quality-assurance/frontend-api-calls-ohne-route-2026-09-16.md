@@ -4,7 +4,7 @@ type: reference
 audience: [agent, entwickler, qa]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-17
 version: 1.0.0
 description: Bestandsaufnahme der Frontend-Aufrufe, fuer die es keine Backend-Route gibt — gemessen, nicht geschaetzt.
 ---
@@ -21,10 +21,8 @@ nur Zeilen, die selbst einen Aufruf absetzen; zusammengesetzte Pfade
 (`${BASE}/feeds`) erkennt das Skript nicht. Die Liste ist damit ein starker
 Hinweis, kein Beweis — und keine Obergrenze.
 
-**40 verschiedene Pfade** (Stand 2026-09-17). Start 110; Praefix-Fehler,
-Scanner-Phantome, Duenger/Saatgut-Mount, Einkauf-GET, Debitoren-Adapter und
-CRM-Einwilligungen sind bereits weg. Restliste und Abarbeitung:
-`docs/agent-ops/todo-frontend-backend-luecken.md`.
+**0 verschiedene Pfade** (Stand 2026-09-17, Ratsche 0). Start 110. Restliste
+und Abarbeitung: `docs/agent-ops/todo-frontend-backend-luecken.md`.
 
 Jeder Eintrag hat genau zwei moegliche Antworten: **Pfad korrigieren** (die Route
 heisst anders) oder **Endpunkt bauen** (es gibt ihn wirklich nicht). Ein dritter

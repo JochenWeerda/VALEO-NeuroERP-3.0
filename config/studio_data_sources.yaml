@@ -38,6 +38,18 @@ data_sources:
   - key: consents
     label: Einwilligungen
     endpoint: /api/v1/crm/consents
+  - key: biostimulanzien
+    label: Biostimulanzien
+    endpoint: /api/v1/agrar/biostimulanzien
+  - key: agrar_kunden
+    label: Agrar-Kunden
+    endpoint: /api/v1/agrar/kunden
+  - key: reklamationen
+    label: Reklamationen
+    endpoint: /api/v1/qualitaet/reklamationen
+  - key: fixed_assets
+    label: Anlagen
+    endpoint: /api/v1/finance/fixed-assets
 
 # Zulaessige Command-Actions mit vorgegebenem dangerLevel (Studio darf ERHOEHEN,
 # nie senken) und forbiddenForAgents-Basis (darf nicht aufgehoben werden).

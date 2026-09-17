@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-09-17
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-09-17T04:44:03Z'
+generated_at: '2026-09-17T05:12:39Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1811,6 +1811,7 @@ domains:
     - knowledge_api
     - legacy_interface_adapters
     - mask_actions
+    - mask_frontend_bridges
     - mask_registry
     - mask_rollout_summaries
     - mask_screen_definition
@@ -1997,8 +1998,8 @@ mapping_stats:
   frontend_routes_mapped: 930
   backend_services_total: 259
   backend_services_mapped: 256
-  backend_endpoints_total: 446
-  backend_endpoints_mapped: 444
+  backend_endpoints_total: 447
+  backend_endpoints_mapped: 445
 unmapped:
   frontend_routes: []
   backend_services:

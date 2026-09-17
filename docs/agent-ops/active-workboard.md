@@ -64,6 +64,27 @@ Ich habe **nichts davon angefasst** — das ist euer Slice, und ihr wart zuletzt
 um 07:01 darin. Die Tests meiner Seite laufen gegen von Hand nachgezogene
 Spalten, bis die Kette wieder durchlaeuft.
 
+## HANDSHAKE-ANTWORT: crm_contact_consents steht neben dem Partner-Stamm 2026-09-17, Cursor
+
+**Die Partner-Tabelle bleibt `domain_crm.crm_consents`.** Der Index auf
+`contact_id` dort entfaellt. Die Kontakt-Maske schreibt
+`domain_crm.crm_contact_consents` plus Historie
+`crm_contact_consent_history`. Bestandsinstallationen laufen durch, weil
+`CREATE TABLE IF NOT EXISTS` jetzt einen anderen Namen trifft. Wer die erste
+Fassung schon mit `contact_id` in `crm_consents` hatte, wird per
+`information_schema` umkopiert — die Partner-Spalten werden nicht umgedeutet.
+
+**Alembic ist wieder ein Strang:** `crm_consents_20260917` →
+`sales_beleg_druck_buchung_20260917` → `mask_frontend_bridges_20260917`.
+`sales_beleg` setzt die Druck-/Buchungsspalten mit `ADD COLUMN IF NOT EXISTS`,
+weil sie auf dieser Installation (wie im Handshake beschrieben) schon von Hand
+stehen.
+
+**Bruecken lesen die echten Tabellen:** Journale in `domain_erp.journal_entries`,
+Segmentmitglieder in `domain_crm.crm_segment_members`, Kontrakte in
+`domain_inventory.agrar_contracts`. Fehlende Waagenvorlagen, Anlagen und
+Lastschriftpositionen legt die Bruecken-Migration an, statt `[]` als „keine
+Daten" auszugeben.
 
 ## SALES-BELEG-DRUCK-BUCHUNG - der Weg, den beide Masken schon gingen 2026-09-17, Claude Code
 
@@ -158,7 +179,7 @@ aussehen.
 - `futtermittel/mischfuttermittel` liest `/futter/mischfuttermittel/{id}`.
 
 **Neue Backends, die der Generator und die handgeschriebenen Masken brauchen:**
-CRM-Einwilligungen (`/crm/consents`, Schema `domain_crm.crm_consents`) und die
+CRM-Einwilligungen (`/crm/consents`, Schema `domain_crm.crm_contact_consents`) und die
 Finance-Stamm-Adapter. Studio-Katalog um Duenger, Saatgut, Anfragen, Angebote,
 Debitoren, Kreditoren, Einwilligungen erweitert.
 

@@ -337,7 +337,7 @@ from app.api.v1.endpoints import (
 from app.api.v1.endpoints import kostenrechnung
 
 # Import domain routers
-from app.domains.agrar.api import duenger, psm, psm_proplanta, saatgut
+from app.domains.agrar.api import biostimulanzien, duenger, psm, psm_proplanta, saatgut
 from app.domains.inventory.api import router as inventory_domain_router
 from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
@@ -500,6 +500,14 @@ api_router.include_router(
     sales_offers.router,
     prefix="/sales/offers",
     tags=["sales", "offers"]
+)
+
+# Die Angebotsmaske spricht /sales/quotations — der Beleg heisst intern offer.
+api_router.include_router(
+    sales_offers.router,
+    prefix="/sales/quotations",
+    tags=["sales", "quotations"],
+    include_in_schema=False,
 )
 
 from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
@@ -1239,6 +1247,11 @@ api_router.include_router(
     tags=["agrar", "saatgut"],
 )
 api_router.include_router(
+    biostimulanzien.router,
+    prefix="/agrar/biostimulanzien",
+    tags=["agrar", "biostimulanzien"],
+)
+api_router.include_router(
     psm.router,
     prefix="/agrar/psm",
     tags=["agrar", "psm"]
@@ -1842,6 +1855,7 @@ from app.api.v1.endpoints import (
     studio_drafts,
     finance_stammdaten,
     crm_consents,
+    mask_frontend_bridges,
     operational_governance,
     planung_kalender,
     pricing_governance,
@@ -1884,6 +1898,7 @@ api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)
 api_router.include_router(finance_stammdaten.router)
 api_router.include_router(crm_consents.router)
+api_router.include_router(mask_frontend_bridges.router)
 api_router.include_router(operational_governance.router)
 api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)

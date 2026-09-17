@@ -133,7 +133,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_campaigns_20260524` | CRM: campaign_templates, campaigns, campaign_recipients |
 | `crm_capture_inbox_kim_20260609` | crm_capture_inbox — Klärfall-Inbox für nicht zuordenbare Auto-Captures (KIM) |
 | `crm_consent_segments_20260305` | CRM: consent, segments and segment_members tables |
-| `crm_consents_20260917` | CRM-Einwilligungen (DSGVO) in domain_crm. |
+| `crm_consents_20260917` | Kontakt-Einwilligungen (Double-Opt-in) in domain_crm.crm_contact_consents — Partner-Tabelle crm_consents bleibt unangetastet. |
 | `crm_contacts_ext_kim_s4_20260609` | crm_contacts_ext — Ansprechpartner-Erweiterung (KIM-S4) |
 | `crm_customers_business_partner_id_20260404` | domain_crm.customers.business_partner_id — Verknüpfung CRM-Kunde ↔ Business Partner (Stammdaten) |
 | `crm_customers_search_index_20260414` | domain_crm.customers — pg_trgm GIN-Indizes fuer schnelle Typeahead-Suche |
@@ -293,6 +293,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
 | `mail_workspace_20260821` | Role based ERP mail workspace. |
+| `mask_frontend_bridges_20260917` | Masken-Bruecken-Tabellen (Waagenvorlagen, Anlagen, Lastschrift) plus Nachzug crm_contact_consents; haengt hinter sales_beleg_druck_buchung. |
 | `mde_inbox_hardening_20260821` | Harden the existing mobile sync queue for the MDE operator inbox. |
 | `meldewesen_lifecycle_20260623` | DOM-MEL-004 — Meldewesen Lifecycle Tabellen (Intrastat/ELSTER/ATLAS) |
 | `merge_agent_job_runner_20260626` | Merge Alembic heads: agent_proposals + job_runner_tables_repair. |
@@ -354,6 +355,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |
 | `sales_ab_preisabweichung_20260623` | DOM-SALES-004: sales_ab_status_log, lieferschein_close_log, sales_preisabweichungen |
 | `sales_angebot_auftrag_tables_20260225` | Add sales_offers, sales_offer_items, sales_orders, sales_order_items to domain_crm |
+| `sales_beleg_druck_buchung_20260917` | Druck- und Buchungsstand an Auftrag und Angebot. |
 | `sales_credit_returns_pricing_20260305` | Sales: credit notes, returns, price list items |
 | `sales_delivery_notes_branches_audit_20260216` | Add sales delivery notes, branches, and audit attestations tables. |
 | `sales_delivery_storno_20260611` | DOM-SALES-004.4 — Lieferungs-Storno (Grund am Lieferschein). |

@@ -347,7 +347,7 @@ class BiostimulanzBase(BaseSchema):
 
 class BiostimulanzCreate(BiostimulanzBase):
     """Schema for creating Biostimulanz"""
-    tenant_id: str = Field(..., description="Tenant ID")
+    tenant_id: Optional[str] = Field(None, description="Tenant ID")
 
 
 class BiostimulanzUpdate(BaseSchema):

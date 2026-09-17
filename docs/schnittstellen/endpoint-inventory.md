@@ -121,7 +121,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_call_transcript` | KIM Telefon-Transkript-Connector — Anrufe automatisch als Kontakt erfassen. |
 | `crm_campaigns` | — |
 | `crm_capture_inbox` | KIM Klärfall-Inbox — nicht zuordenbare Auto-Captures sichten und zuordnen. |
-| `crm_consents` | CRM-Einwilligungen (DSGVO) fuer Maskengenerator und Consent-Masken. |
+| `crm_consents` | Kontakt-Einwilligungen (Double-Opt-in) auf domain_crm.crm_contact_consents; Partner-Einwilligungen bleiben unter crm_consents. |
 | `crm_contacts_ext` | KIM-S4 — Ansprechpartner-Erweiterung: Werbe-Präferenzen + Pseudonymisierung. |
 | `crm_duplicates` | Kunden-Dubletten (DOM-CRM-004) — Erkennung wahrscheinlicher Doppelanlagen. |
 | `crm_gifts` | KIM-S3 — Kunden-Präsente-Endpoints (eigener Router, prefix /crm/kim). |
@@ -273,6 +273,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `mail_workspace` | Role-scoped ERP mail workspace API. |
 | `marketing` | Marketing API - DB-backed endpoints. |
 | `mask_actions` | SPEC-P1-04 / UIX-053+: Mask Action CommandEndpoints mit ActionRuntime. |
+| `mask_frontend_bridges` | Frontend-Pfade, die der Maskengenerator und die Fachmasken schon rufen. |
 | `mask_registry` | Mask Registry API — Wave 3 AP1 |
 | `mask_rollout_summaries` | Central screen-summary routes for batch mask rollouts (Waves 42–51). |
 | `mask_screen_definition` | Mask ScreenDefinition API — native generator payloads. |

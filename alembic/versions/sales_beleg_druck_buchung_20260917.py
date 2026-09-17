@@ -16,7 +16,6 @@ Revises: crm_consents_20260917
 
 from __future__ import annotations
 
-import sqlalchemy as sa
 from alembic import op
 
 revision = "sales_beleg_druck_buchung_20260917"
@@ -32,30 +31,20 @@ _TABELLEN = (
 
 def upgrade() -> None:
     for schema, tabelle in _TABELLEN:
-        op.add_column(
-            tabelle,
-            sa.Column("printed_at", sa.DateTime(timezone=True), nullable=True),
-            schema=schema,
+        op.execute(
+            f"ALTER TABLE {schema}.{tabelle} ADD COLUMN IF NOT EXISTS printed_at TIMESTAMPTZ"
         )
-        op.add_column(
-            tabelle,
-            sa.Column(
-                "print_count",
-                sa.Integer(),
-                nullable=False,
-                server_default="0",
-            ),
-            schema=schema,
+        op.execute(
+            f"ALTER TABLE {schema}.{tabelle} "
+            "ADD COLUMN IF NOT EXISTS print_count INTEGER NOT NULL DEFAULT 0"
         )
-        op.add_column(
-            tabelle,
-            sa.Column("posted_at", sa.DateTime(timezone=True), nullable=True),
-            schema=schema,
+        op.execute(
+            f"ALTER TABLE {schema}.{tabelle} ADD COLUMN IF NOT EXISTS posted_at TIMESTAMPTZ"
         )
 
 
 def downgrade() -> None:
     for schema, tabelle in _TABELLEN:
-        op.drop_column(tabelle, "posted_at", schema=schema)
-        op.drop_column(tabelle, "print_count", schema=schema)
-        op.drop_column(tabelle, "printed_at", schema=schema)
+        op.execute(f"ALTER TABLE {schema}.{tabelle} DROP COLUMN IF EXISTS posted_at")
+        op.execute(f"ALTER TABLE {schema}.{tabelle} DROP COLUMN IF EXISTS print_count")
+        op.execute(f"ALTER TABLE {schema}.{tabelle} DROP COLUMN IF EXISTS printed_at")

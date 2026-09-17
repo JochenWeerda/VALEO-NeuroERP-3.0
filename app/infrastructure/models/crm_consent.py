@@ -10,12 +10,12 @@ from app.core.uuid7 import uuid7
 
 
 class CrmConsent(Base):
-    """Einwilligung eines Kontakts fuer einen Kanal."""
+    """Einwilligung eines Kontakts fuer einen Kanal (Double-Opt-in)."""
 
-    __tablename__ = "crm_consents"
+    __tablename__ = "crm_contact_consents"
     __table_args__ = (
-        Index("ix_crm_consents_tenant_contact", "tenant_id", "contact_id"),
-        Index("ix_crm_consents_tenant_status", "tenant_id", "status"),
+        Index("ix_crm_contact_consents_tenant_contact", "tenant_id", "contact_id"),
+        Index("ix_crm_contact_consents_tenant_status", "tenant_id", "status"),
         {"schema": "domain_crm"},
     )
 
@@ -43,16 +43,16 @@ class CrmConsent(Base):
 class CrmConsentHistory(Base):
     """Revisionssichere Historie einer Einwilligung."""
 
-    __tablename__ = "crm_consent_history"
+    __tablename__ = "crm_contact_consent_history"
     __table_args__ = (
-        Index("ix_crm_consent_history_consent", "consent_id"),
+        Index("ix_crm_contact_consent_history_consent", "consent_id"),
         {"schema": "domain_crm"},
     )
 
     id = Column(String, primary_key=True, default=uuid7)
     consent_id = Column(
         String,
-        ForeignKey("domain_crm.crm_consents.id", ondelete="CASCADE"),
+        ForeignKey("domain_crm.crm_contact_consents.id", ondelete="CASCADE"),
         nullable=False,
     )
     action = Column(String(20), nullable=False)

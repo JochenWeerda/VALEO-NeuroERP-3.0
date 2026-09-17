@@ -1,4 +1,8 @@
-"""CRM-Einwilligungen (DSGVO) fuer Maskengenerator und Consent-Masken."""
+"""CRM-Einwilligungen (DSGVO) fuer Maskengenerator und Consent-Masken.
+
+Persistenz: ``domain_crm.crm_contact_consents`` — neben der Partner-Tabelle
+``domain_crm.crm_consents`` (Art. 6/7, partner_id/purpose/granted).
+"""
 
 from __future__ import annotations
 

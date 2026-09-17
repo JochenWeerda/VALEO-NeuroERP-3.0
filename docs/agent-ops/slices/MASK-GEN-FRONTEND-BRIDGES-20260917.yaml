@@ -1,0 +1,26 @@
+---
+id: MASK-GEN-FRONTEND-BRIDGES
+title: 40 tote Frontend-Pfade fuer den Maskengenerator geschlossen
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+---
+
+ziel: >
+  Aus Claudes Masken-Verdrahtungsbericht die gemessenen Restpfade ohne Route
+  schliessen: fehlende Backends und Schemas bauen oder Verweise korrigieren.
+  Feldschluessel an die Masken halten. lager/leitstand nicht dekorativ
+  verdrahten. Keine FSX-/Rechnungsdateien von Claude stehlen.
+
+abnahme:
+  - scripts/check_frontend_api_calls.py Schwelle 0
+  - tests/test_mask_frontend_bridges.py gegen echte App
+  - tests/test_mask_endpoint_inventory.py: 0 Entity-Stubs
+  - check_openapi_docs.py --threshold 0
+
+dateibesitz:
+  - app/api/v1/endpoints/mask_frontend_bridges.py
+  - app/domains/agrar/api/biostimulanzien.py
+  - alembic/versions/mask_frontend_bridges_20260917.py
+  - tests/test_mask_frontend_bridges.py
+  - docs/agent-ops/todo-frontend-backend-luecken.md
