@@ -155,6 +155,21 @@ physische Tabellen im Katalog. Gate: `tests/test_canonical_domain_views.py`
 
 Naechster UML-Claim nur, wenn ADR-003 ein Aggregat erhaelt. P6 nicht starten.
 
+### P7 — Feldvertrag der Zeile — erledigt 2026-09-17
+
+P4 prueft den Kopf. Die Spalten sind die groessere Haelfte und haben dasselbe
+Versagen: falscher Schluessel, 200, leere Zelle.
+
+- [x] `check_field_contracts.py` haelt `tables[].columns` gegen die Zeilenform
+      (`list[ZeileOut]` oder Seiten-Huelle mit typisiertem `items`)
+- [x] Gate only-up: Abweichungen 0; ungetypte Tabellenquellen duerfen sinken,
+      nicht steigen (`ZEILEN_NICHT_PRUEFBAR_MAX = 49`, Handshake `8da5d757b`)
+- [x] Generic-Stubs (`/masks/.../tabs/...`, mask-rollouts) bleiben in dieser
+      Welle ungetypt — ehrliche Restliste, kein zweites Kopf-P4
+
+**Abnahme:** 285 Felder, 0 Abweichungen, 49 blinde Tabellenquellen. Die drei
+Rechnungsregister hat Claude typisiert — Cursor fasst `sales_invoices.py` nicht an.
+
 ### P6 — Optional nach P1–P3 — nicht starten
 
 - tbls auf die JSON aus P1 oder direkt auf Postgres, Artefakt in CI, nicht
@@ -183,7 +198,7 @@ Owner an Tabellen, die der Check nicht sieht.
 
 ## Einstieg fuer den naechsten Slice
 
-Datei: `docs/agent-ops/slices/DATA-MODEL-CATALOG-20260917.yaml` — P0–P5 geliefert.
-Naechster Claim: keiner aus dieser Liste. P5 ist dauerhaft: UML nur bei neuem
-ADR-003-Aggregat anfassen. **P6 nicht starten** (tbls / COMMENT ON / OpenMetadata).
-Alembic-Head zum Zeitpunkt der Liste: `crm_kreditlimite_20260917`.
+Datei: `docs/agent-ops/slices/MASK-FELDVERTRAG-ZEILE-20260917.yaml`.
+Naechster Claim nach P7: Generic-Tab-Stubs typisieren, **ohne** den
+Rechnungsweg. P6 (tbls / COMMENT ON / OpenMetadata) nicht starten.
+P5 bleibt dauerhaft: UML nur bei neuem ADR-003-Aggregat.

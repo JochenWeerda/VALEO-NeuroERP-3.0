@@ -72,10 +72,10 @@ ergibt und keinen Fehler.
 
 ## Was das Gate nicht kann
 
-- Es liest das **deklarierte** Schema, nicht die tatsaechliche Antwort. Ein
-  Endpunkt, der mehr liefert als er zusagt, gilt hier als zusagend.
-- Es prueft **Kopffelder** (`tabs[].fields` gegen die `entity`-Quelle).
-  Tabellenspalten haengen an Seiten-Huellen (`items`), deren Zeilenform in aller
-  Regel nicht deklariert ist; dort ist der Vertrag weiter offen.
-- Es sagt nichts ueber **Inhalt**: Ein Feld kann heissen wie vereinbart und
-  trotzdem etwas anderes bedeuten.
+- Es liest das **deklarierte** Schema, nicht die Laufzeit-Antwort. Mit
+  `response_model` ist deklariert ⊇ tatsächlich. Das verbleibende Risiko ist
+  nicht „Feld fehlt", sondern „Feld ist immer leer".
+- Es sagt nichts ueber **Bedeutung**: `menge` kann gelieferte oder berechnete
+  Menge meinen. Dagegen helfen Fachtests, kein Scanner.
+- Wo die Zeilenform fehlt (`extra="allow"` ohne Felder), zaehlt die Quelle als
+  unpruefbar statt als Abweichung — das sind die 49 Generic-Stubs.

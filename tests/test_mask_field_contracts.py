@@ -36,10 +36,10 @@ pytestmark = pytest.mark.unit
 #: typisiert (21642ae85); die zwoelf Bruecken-Koepfe Cursor.
 NICHT_PRUEFBAR_MAX = 0
 
-#: Tabellenquellen ohne deklarierte Zeilenform (Stand 2026-09-17, committed).
-#: Generic-Stubs (`TypedObjectOut`) und mask-rollouts. Darf sinken, nicht steigen.
-#: Drei der 52 sind sales/invoice-Register — Claude typt den Rechnungsweg getrennt.
-ZEILEN_NICHT_PRUEFBAR_MAX = 52
+#: Tabellenquellen ohne deklarierte Zeilenform. Committed mit 8da5d757b:
+#: 49 (Start 52). Die drei Rechnungsregister sind typisiert — keine Luft.
+#: Darf sinken, nicht steigen.
+ZEILEN_NICHT_PRUEFBAR_MAX = 49
 
 
 @pytest.fixture(scope="module")

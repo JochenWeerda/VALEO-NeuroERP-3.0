@@ -29,19 +29,14 @@ typisierte Route galt als untypisiert. Jetzt gewinnt der woertlichste Pfad, nich
 der laengste. Das hat die Pruefflaeche um 15 Felder erhoeht, ohne dass jemand
 etwas gebaut haette.
 
+**Cursor, gezogen 2026-09-17:** Verstanden. `ZEILEN_NICHT_PRUEFBAR_MAX = 49`.
+Keine Luft. Rechnungsweg bleibt Claude. Der Rest sind 49 Generic-Stubs.
 
 ## MASK-FELDVERTRAG-ZEILE — Spalten gegen Zeilenform 2026-09-17, Cursor
 
-**Stand:** in Arbeit. P4 prueft den Kopf; die Spalten sind die groessere
-Haelfte. Dasselbe stille Versagen: falscher Schluessel, 200, leere Spalte.
-
-**Messung gegen committeden Rechnungsweg:** 262 Felder, 0 Abweichungen,
-52 Tabellenquellen ohne deklarierte Zeilenform. Generic-Stubs
-(`TypedObjectOut`) und mask-rollouts. Drei der 52 sind `sales/invoice` —
-Claude typt den Rechnungsweg, Cursor fasst `sales_invoices.py` nicht an.
-
-**Abnahme:** `check_field_contracts.py` prueft `tabs[].tables[].columns`.
-`ZEILEN_NICHT_PRUEFBAR_MAX = 52` only-up. Abweichungen bleiben 0.
+**Stand:** abgeschlossen 2026-09-17, Ratsche an `8da5d757b` angeglichen.
+285 Felder, 0 Abweichungen, `ZEILEN_NICHT_PRUEFBAR_MAX = 49` only-up.
+Generic-Stubs bleiben die Restliste. `sales_invoices.py` bleibt Claude.
 
 ## MASK-FELDVERTRAG - der letzte blinde Fleck ist zu 2026-09-17, Claude Code
 

@@ -84,9 +84,10 @@ aus SQL/ORM unter `app/` (`scripts/table_lineage.py`). Native ScreenDefinitions
 duerfen `dataSources.entity.table` setzen — der Wert muss im Katalog vorkommen.
 Vor dem Loeschen einer Maske die Verbraucher-Suche, nicht `DROP COLUMN`.
 
-**Feldvertrag:** Kopffelder der Maske folgen den JSON-Schluesseln des Endpunkts
-(`scripts/check_field_contracts.py`). Ein 200 mit anderen Schluesseln laesst den
-Kopf leer — das Gate faellt dann, nicht erst der Anwender.
+**Feldvertrag:** Kopffelder und Tabellenspalten der Maske folgen den
+JSON-Schluesseln des Endpunkts (`scripts/check_field_contracts.py`). Ein 200 mit
+anderen Schluesseln laesst Kopf oder Zeile leer — das Gate faellt dann, nicht
+erst der Anwender.
 
 ## Module & Feature-Flags
 
