@@ -80,6 +80,55 @@ class SalesOrderItemOut(SalesOrderItemInput):
     line_total: float
 
 
+class SalesOrderTabOut(BaseSchema):
+    """Eine Registerseite des Builders."""
+
+    tab_key: str
+    table_key: str
+    page: int
+    limit: int
+    total: int
+    items: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class SalesOrderDeliveryRowOut(BaseSchema):
+    """Ein Lieferschein zum Auftrag.
+
+    **Keine Menge:** Der Lieferschein fuehrt seine Mengen an den Positionen, der
+    Kopf hat keine. Eine Spalte `menge` stand vorher in der Maske und blieb
+    leer — das sah aus wie „nichts geliefert".
+    """
+
+    id: str
+    delivery_note_number: Optional[str] = None
+    status: Optional[str] = None
+    delivery_date: Optional[str] = None
+    invoice_number: Optional[str] = None
+    is_delivered: Optional[bool] = None
+
+
+class SalesOrderDocumentRowOut(BaseSchema):
+    """Ein Beleg zum Auftrag — abgeleitet aus den berechneten Lieferscheinen."""
+
+    id: str
+    beleg_nr: Optional[str] = None
+    beleg_datum: Optional[str] = None
+    status: Optional[str] = None
+    invoice_number: Optional[str] = None
+
+
+class SalesOrderPositionTabOut(SalesOrderTabOut):
+    items: list[SalesOrderItemOut] = Field(default_factory=list)
+
+
+class SalesOrderDeliveryTabOut(SalesOrderTabOut):
+    items: list[SalesOrderDeliveryRowOut] = Field(default_factory=list)
+
+
+class SalesOrderDocumentTabOut(SalesOrderTabOut):
+    items: list[SalesOrderDocumentRowOut] = Field(default_factory=list)
+
+
 class SalesOrder(SalesOrderBase):
     order_number: str
     id: str
@@ -420,6 +469,69 @@ async def get_sales_order_screen_summary(
     )
 
 
+@router.get(
+    "/{order_id}/tabs/positionen",
+    response_model=SalesOrderPositionTabOut,
+    summary="Sales order: Positionen",
+)
+async def get_sales_order_positions_tab(
+    order_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Die Auftragspositionen."""
+    return await get_sales_order_tab_data(
+        order_id=order_id, tab_key="positionen", page=page, limit=limit,
+        q=q, tenant_id=tenant_id, db=db,
+    )
+
+
+@router.get(
+    "/{order_id}/tabs/lieferung",
+    response_model=SalesOrderDeliveryTabOut,
+    summary="Sales order: Lieferscheine",
+)
+async def get_sales_order_delivery_tab(
+    order_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Die Lieferscheine zum Auftrag."""
+    return await get_sales_order_tab_data(
+        order_id=order_id, tab_key="lieferung", page=page, limit=limit,
+        q=q, tenant_id=tenant_id, db=db,
+    )
+
+
+@router.get(
+    "/{order_id}/tabs/dokumente",
+    response_model=SalesOrderDocumentTabOut,
+    summary="Sales order: Belege",
+)
+async def get_sales_order_documents_tab(
+    order_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Die Belege zum Auftrag."""
+    return await get_sales_order_tab_data(
+        order_id=order_id, tab_key="dokumente", page=page, limit=limit,
+        q=q, tenant_id=tenant_id, db=db,
+    )
+
+
+# Die Sammelroute steht **hinter** den benannten: Sonst faengt ihr
+# Pfadparameter sie ab, und jedes Register haette wieder dieselbe, nichts
+# sagende Antwortform.
 @router.get(
     "/{order_id}/tabs/{tab_key}",
     response_model=TypedObjectOut,

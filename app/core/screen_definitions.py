@@ -192,13 +192,13 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
                 "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
                             "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
                             "columns": [
-                                {"key": "pos_nr", "label": "Pos.", "width": 50},
-                                {"key": "artikel_nr", "label": "Artikel-Nr.", "width": 120},
-                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220, "filterable": True},
-                                {"key": "menge", "label": "Menge", "numeric": True},
-                                {"key": "einheit", "label": "Einheit", "width": 70},
-                                {"key": "einzelpreis", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
-                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "line_number", "label": "Pos.", "width": 50},
+                                {"key": "article_number", "label": "Artikel-Nr.", "width": 120},
+                                {"key": "description", "label": "Bezeichnung", "width": 220, "filterable": True},
+                                {"key": "quantity", "label": "Menge", "numeric": True},
+                                {"key": "discount_percent", "label": "Rabatt %", "numeric": True, "width": 90},
+                                {"key": "unit_price", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
+                                {"key": "line_total", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                             ]}],
             },
             {
@@ -206,10 +206,15 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
                 "tables": [{"key": "lieferung", "label": "Lieferscheine", "dataSourceKey": "lieferung",
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
-                                {"key": "ls_nr", "label": "LS-Nr.", "width": 130, "sortable": True},
-                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "delivery_note_number", "label": "LS-Nr.", "width": 130, "sortable": True},
+                                {"key": "delivery_date", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
                                 {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
-                                {"key": "menge", "label": "Menge", "numeric": True},
+                                # Eine Menge fuehrt der Lieferscheinkopf nicht — sie haengt
+                                # an den Positionen. Die Spalte blieb leer und sah aus wie
+                                # "nichts geliefert". Was der Kopf weiss: ob zugestellt ist
+                                # und unter welcher Rechnung er berechnet wurde.
+                                {"key": "is_delivered", "label": "Zugestellt", "renderKind": "boolean", "width": 100},
+                                {"key": "invoice_number", "label": "Rechnungsnr.", "width": 130},
                             ]}],
             },
             {
@@ -217,9 +222,10 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
                 "tables": [{"key": "dokumente", "label": "Dokumente", "dataSourceKey": "dokumente",
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
-                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "typ", "label": "Typ", "width": 120, "filterable": True},
-                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
+                                {"key": "beleg_datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "beleg_nr", "label": "Beleg", "width": 140, "filterable": True},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 110, "filterable": True},
+                                {"key": "invoice_number", "label": "Rechnungsnr.", "width": 140},
                             ]}],
             },
         ],
