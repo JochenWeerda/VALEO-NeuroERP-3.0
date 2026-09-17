@@ -32,8 +32,9 @@ from scripts.check_field_contracts import pruefe
 
 pytestmark = pytest.mark.unit
 
-#: Stand bei Einfuehrung: Maskenquellen ohne deklariertes Antwortschema.
-NICHT_PRUEFBAR_MAX = 13
+#: Stand nach P4 und FSX-Rechnungsvertrag: **keine** ungetypte Maskenquelle
+#: mehr. Jede neue macht das Gate an ihrer Stelle blind — deshalb 0.
+NICHT_PRUEFBAR_MAX = 0
 
 
 @pytest.fixture(scope="module")

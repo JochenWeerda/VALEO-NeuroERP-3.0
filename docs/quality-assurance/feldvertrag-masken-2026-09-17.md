@@ -29,34 +29,23 @@ statt `delivery_note_number`, `wert` statt `amount`, `ist_aktiv` statt
 
 ## Stand 2026-09-17
 
-    110 Felder gegen deklarierte Antworten geprueft
+    197 Felder gegen deklarierte Antworten geprueft (Start: 110)
       0 Abweichungen
-     13 Maskenquellen ohne deklarierte Antwort
+      0 Maskenquellen ohne deklarierte Antwort
 
 Aufruf: `python scripts/check_field_contracts.py [--list]`.
-Gate: `tests/test_mask_field_contracts.py`.
+Gate: `tests/test_mask_field_contracts.py`, `tests/test_mask_bridge_field_contracts.py`.
 
-## Die 13 blinden Flecken
+## Die blinden Flecken: keine mehr
 
-Diese Endpunkte typisieren ihre Antwort nicht (`extra="allow"` ohne Felder oder
-rohe `dict`-Rueckgabe). Das Gate kann dort **nichts** zusagen — weder dass die
-Schluessel stimmen noch dass sie fehlen:
+Von 13 ungetypten Quellen sind alle weg. Die zwoelf Bruecken-Koepfe hat Cursor
+in P4 typisiert, `sales/invoice` der Rechnungsweg selbst: `GET /sales/invoices/{id}`
+sagt jetzt `SalesInvoiceDetailOut` zu — Kopf, Positionen und je Position ihre
+Herkunft, Mengen und Betraege als Zeichenketten, weil die Anzeige rundet und der
+Wert nicht.
 
-- `einkauf/anfrage`, `einkauf/angebot`, `einkauf/anlieferavis`,
-  `einkauf/auftragsbestaetigung`, `einkauf/purchase-order`, `einkauf/supplier`
-- `finance/ap-invoice`, `finance/bankkonto`, `finance/debitor`,
-  `finance/kreditor`
-- `futtermittel/mischfuttermittel`
-- `qualitaet/reklamation`
-- `sales/invoice`
-
-**Der Weg dahin, wenn jemand weitermacht:** Antwortmodelle deklarieren, dann
-faellt die Zahl von selbst. Jede Maske, die aus der Liste verschwindet, ist eine
-Maske, deren Kopf nicht mehr stillschweigend leer bleiben kann.
-
-`NICHT_PRUEFBAR_MAX` im Test steht auf 13 — die Zahl darf **sinken**, nicht
-steigen. Eine neue ungetypte Maskenquelle macht das Gate an dieser Stelle blind,
-und das soll auffallen.
+`NICHT_PRUEFBAR_MAX` steht damit auf **0**. Eine neue ungetypte Maskenquelle
+macht das Gate an ihrer Stelle blind — und faellt ab jetzt sofort auf.
 
 ## Was das Gate nicht kann
 

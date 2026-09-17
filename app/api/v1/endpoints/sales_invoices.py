@@ -54,7 +54,70 @@ router = APIRouter()
 
 
 class SalesInvoiceOut(BaseSchema):
+    """Offene Huelle fuer die Antworten, die keine feste Form haben.
+
+    Anlegen, Maskenkopf und Registerdaten liefern je nach Lage andere Felder
+    (``skipped``, Seitenzahlen, Tabellenzeilen). Fuer den **Beleg** gilt das
+    nicht — er hat eine Form, und die steht unten.
+    """
+
     model_config = ConfigDict(extra="allow")
+
+
+class InvoiceLineOriginOut(BaseSchema):
+    """Woher eine berechnete Teilmenge stammt."""
+
+    source_document_type: str
+    source_document_id: str
+    source_line_id: str
+    quantity: str
+    unit: str
+    reason: Optional[str] = None
+
+
+class SalesInvoiceLineOut(BaseSchema):
+    """Eine Rechnungsposition mit ihrer Herkunft.
+
+    Mengen und Betraege sind **Zeichenketten**: Die Anzeige rundet, der Wert
+    nicht. Eine Gleitkommazahl an dieser Stelle waere eine stille Rundung, die
+    niemand sucht.
+    """
+
+    line_no: str
+    article_id: Optional[str] = None
+    article_number: Optional[str] = None
+    description: Optional[str] = None
+    quantity: str
+    unit: str
+    unit_price: str
+    net_amount: str
+    vat_rate: Optional[str] = None
+    #: Leer heisst: keine Zuordnung vorhanden — eine Auskunft, kein Ladezustand.
+    origins: list[InvoiceLineOriginOut] = Field(default_factory=list)
+
+
+class SalesInvoiceDetailOut(BaseSchema):
+    """Der Beleg, wie die Maske ihn liest.
+
+    Diese Form ist **zugesagt**, nicht geduldet: Solange sie eine offene Huelle
+    war, konnte `scripts/check_field_contracts.py` nicht pruefen, ob die Maske
+    nach Feldern fragt, die es gibt. Genau dort entstehen die 200er mit leerem
+    Kopf.
+    """
+
+    id: str
+    invoice_number: str
+    customer_id: str
+    invoice_date: str
+    due_date: Optional[str] = None
+    status: str
+    currency: str
+    net_amount: str
+    vat_amount: str
+    gross_amount: str
+    lines: list[SalesInvoiceLineOut] = Field(default_factory=list)
+    #: Anzahl der Positionen — die Maske zeigt sie im Kopf.
+    total: int
 
 
 class CreateFromDeliveryNotes(BaseModel):
@@ -372,7 +435,7 @@ def list_invoices(
 
 @router.get(
     "/invoices/{invoice_id}",
-    response_model=SalesInvoiceOut,
+    response_model=SalesInvoiceDetailOut,
     summary="Rechnung mit Positionen und Herkunft",
 )
 def get_invoice(

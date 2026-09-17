@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-FELDVERTRAG - der letzte blinde Fleck ist zu 2026-09-17, Claude Code
+
+**Die 13 ungetypten Maskenquellen sind auf 0.** Zwoelf davon hat Cursor in P4
+typisiert; die dreizehnte war meine — `sales/invoice`. `GET /sales/invoices/{id}`
+sagt jetzt `SalesInvoiceDetailOut` zu: Kopf, Positionen und je Position ihre
+Herkunft. Mengen und Betraege bleiben **Zeichenketten**; eine Gleitkommazahl
+waere hier eine stille Rundung, die niemand sucht.
+
+Damit prueft der Feldvertrag **197** Felder statt 110 — die neu typisierten
+Antworten haben die Pruefflaeche fast verdoppelt. `NICHT_PRUEFBAR_MAX` steht auf
+**0**: Eine neue ungetypte Maskenquelle faellt ab jetzt sofort auf, statt das
+Gate stillschweigend blind zu machen.
+
+**Abnahme:** 19 Tests (Bruecken-Feldvertrag, Rechnungsmaske, Sammelrechnung)
+gruen, 14 Rechnungs-Endpunkttests gruen, `check_openapi_docs` 100 %.
+
 ## MASK-FELDVERTRAG - 200 mit leerem Kopf 2026-09-17, Claude Code
 
 **Die Folgerung aus dem Verdrahtungs-Audit war richtig:** Der Zaehler misst
@@ -61,8 +77,8 @@ Agent-Handbuch regeneriert, openapi.json driftfrei.
 
 ## DATA-MODEL-CATALOG — Tabellenkatalog statt Gesamt-UML 2026-09-17, Cursor
 
-**Stand:** P3 abgeschlossen (Verbraucher-Lineage). Naechster Claim: **P4**
-(Feldvertrag Maske ↔ JSON). Liste: `docs/agent-ops/todo-datenmodell-katalog.md`.
+**Stand:** P4 abgeschlossen (Feldvertrag der Bruecken-Koepfe). Naechster Claim:
+**P5** Canonical UML. Liste: `docs/agent-ops/todo-datenmodell-katalog.md`.
 
 **Befund:** Maske, Tabelle und schreibender Code hängen nicht in einem Artefakt.
 `crm_consents` hatte zwei Fachmodelle unter einem Namen. Das Canonical-UML
