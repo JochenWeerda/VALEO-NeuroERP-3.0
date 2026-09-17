@@ -52,6 +52,8 @@ def _query_open_items_for_week(
     week_end: date,
     item_type: str,  # "debitor" | "kreditor"
 ) -> float:
+    # Der Aufrufer spricht Einzahl, die Tabelle Mehrzahl. Die Uebersetzung
+    # gehoert hierher und nicht in jeden Aufruf.
     """
     Sum open items due within [week_start, week_end].
     Falls back to 0.0 if table not available.
@@ -59,14 +61,27 @@ def _query_open_items_for_week(
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(open_amount), 0)
-                FROM domain_finance.open_items
+                # Die offenen Posten stehen in `domain_erp.offene_posten` —
+                # dort schreibt der Belegfluss hinein. `domain_finance.open_items`
+                # gibt es nicht; das `except` machte daraus stillschweigend 0,00
+                # und die Planung meldete „nichts faellig", egal wie viel offen
+                # war.
+                #
+                # Auch die Werte sind deutsch: konto_typ 'debitoren'/'kreditoren',
+                # op_status 'offen'.
+                """SELECT COALESCE(SUM(offen), 0)
+                FROM domain_erp.offene_posten
                 WHERE tenant_id = :tid
-                AND type = :typ
-                AND due_date BETWEEN :ws AND :we
-                AND status = 'OPEN'"""
+                AND konto_typ = :typ
+                AND COALESCE(faelligkeit, due_date) BETWEEN :ws AND :we
+                AND op_status = 'offen'"""
             ),
-            {"tid": tenant_id, "typ": item_type, "ws": week_start, "we": week_end},
+            {
+                "tid": tenant_id,
+                "typ": {"debitor": "debitoren", "kreditor": "kreditoren"}.get(item_type, item_type),
+                "ws": week_start,
+                "we": week_end,
+            },
         ).scalar()
         return float(row or 0)
     except Exception:
@@ -77,8 +92,9 @@ def _get_cash_at_bank(db: Session, tenant_id: str) -> float:
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(current_balance), 0)
-                FROM domain_finance.bank_accounts
+                # `domain_erp.bank_accounts`, und der Saldo heisst `balance`.
+                """SELECT COALESCE(SUM(balance), 0)
+                FROM domain_erp.bank_accounts
                 WHERE tenant_id = :tid AND is_active = true"""
             ),
             {"tid": tenant_id},
@@ -92,9 +108,9 @@ def _get_open_receivables(db: Session, tenant_id: str) -> float:
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(open_amount), 0)
-                FROM domain_finance.open_items
-                WHERE tenant_id = :tid AND type = 'debitor' AND status = 'OPEN'"""
+                """SELECT COALESCE(SUM(offen), 0)
+                FROM domain_erp.offene_posten
+                WHERE tenant_id = :tid AND konto_typ = 'debitoren' AND op_status = 'offen'"""
             ),
             {"tid": tenant_id},
         ).scalar()
@@ -107,9 +123,9 @@ def _get_open_payables(db: Session, tenant_id: str) -> float:
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(open_amount), 0)
-                FROM domain_finance.open_items
-                WHERE tenant_id = :tid AND type = 'kreditor' AND status = 'OPEN'"""
+                """SELECT COALESCE(SUM(offen), 0)
+                FROM domain_erp.offene_posten
+                WHERE tenant_id = :tid AND konto_typ = 'kreditoren' AND op_status = 'offen'"""
             ),
             {"tid": tenant_id},
         ).scalar()

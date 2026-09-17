@@ -57,17 +57,26 @@ async def get_liquidity_overview(
     today = date.today()
 
     # Sum open receivables (Debitoren-OP)
+# Offene Posten liegen in `domain_erp.offene_posten` — dort schreibt der
+# Belegfluss hinein (Rechnung aus Lieferschein, Sammelrechnung). Gelesen wurde
+# `domain_shared.open_items`: eine Tabelle, die es gibt, die aber **leer** ist.
+# Die Uebersicht meldete deshalb immer 0,00 — und eine Null sieht aus wie „nichts
+# offen", nicht wie „falsche Tabelle".
+#
+# Die Spalten heissen dort deutsch: `offen` ist der offene Betrag (schon
+# abzueglich Zahlungen), `konto_typ` traegt 'debitoren'/'kreditoren', `op_status`
+# 'offen'/'storniert'.
     forderungen = _safe_float(db.execute(text(
-        "SELECT COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) "
-        "FROM domain_shared.open_items "
-        "WHERE tenant_id = :tid AND type = 'debitor' AND status != 'closed'"
+        "SELECT COALESCE(SUM(offen), 0) "
+        "FROM domain_erp.offene_posten "
+        "WHERE tenant_id = :tid AND konto_typ = 'debitoren' AND op_status = 'offen'"
     ), {"tid": tenant_id}).scalar())
 
     # Sum open payables (Kreditoren-OP)
     verbindlichkeiten = _safe_float(db.execute(text(
-        "SELECT COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) "
-        "FROM domain_shared.open_items "
-        "WHERE tenant_id = :tid AND type = 'kreditor' AND status != 'closed'"
+        "SELECT COALESCE(SUM(offen), 0) "
+        "FROM domain_erp.offene_posten "
+        "WHERE tenant_id = :tid AND konto_typ = 'kreditoren' AND op_status = 'offen'"
     ), {"tid": tenant_id}).scalar())
 
     # Bank/cash balance from journal (Kontenklasse 1xxx = liquide Mittel)
@@ -91,17 +100,17 @@ async def get_liquidity_overview(
         bis = today + timedelta(days=min(i + bucket_days, horizon_days))
 
         eingaenge = _safe_float(db.execute(text(
-            "SELECT COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) "
-            "FROM domain_shared.open_items "
-            "WHERE tenant_id = :tid AND type = 'debitor' AND status != 'closed' "
-            "AND due_date BETWEEN :von AND :bis"
+            "SELECT COALESCE(SUM(offen), 0) "
+            "FROM domain_erp.offene_posten "
+            "WHERE tenant_id = :tid AND konto_typ = 'debitoren' AND op_status = 'offen' "
+            "AND COALESCE(faelligkeit, due_date) BETWEEN :von AND :bis"
         ), {"tid": tenant_id, "von": von, "bis": bis}).scalar())
 
         ausgaenge = _safe_float(db.execute(text(
-            "SELECT COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) "
-            "FROM domain_shared.open_items "
-            "WHERE tenant_id = :tid AND type = 'kreditor' AND status != 'closed' "
-            "AND due_date BETWEEN :von AND :bis"
+            "SELECT COALESCE(SUM(offen), 0) "
+            "FROM domain_erp.offene_posten "
+            "WHERE tenant_id = :tid AND konto_typ = 'kreditoren' AND op_status = 'offen' "
+            "AND COALESCE(faelligkeit, due_date) BETWEEN :von AND :bis"
         ), {"tid": tenant_id, "von": von, "bis": bis}).scalar())
 
         prognose.append(LiquidityBucket(
