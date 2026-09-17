@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -206,11 +206,13 @@ async def get_customer_screen_summary(
         """
         SELECT COUNT(*)::int AS recent_activity_count
         FROM domain_crm.activities
-        WHERE customer_id = :cid
+        WHERE customer = :kunde
           AND (:tid IS NULL OR tenant_id::text = :tid)
           AND created_at >= NOW() - INTERVAL '90 days'
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        # Die Aktivitaet kennt ihren Kunden nur beim Namen: `customer` ist ein
+        # String(100), keine Kundenreferenz. Mehr gibt das Modell nicht her.
+        {"kunde": customer.get("name"), "tid": tenant_id},
     ) or {}
 
     return build_customer_screen_summary(
@@ -241,6 +243,7 @@ def _fetch_customer_tab_items(
     tenant_id: str | None,
     tab_key: str,
     kunden_nr: str | None,
+    kunden_name: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     normalized = _normalize_tab_key(tab_key)
 
@@ -292,17 +295,18 @@ def _fetch_customer_tab_items(
             db,
             """
             SELECT id::text AS id,
-                   activity_type,
-                   subject,
+                   type AS activity_type,
+                   title AS subject,
+                   COALESCE(status, '') AS status,
                    COALESCE(assigned_to, '') AS assigned_to,
-                   created_at::text AS created_at
+                   COALESCE(date, created_at)::text AS created_at
             FROM domain_crm.activities
-            WHERE customer_id = :cid
+            WHERE customer = :kunde
               AND (:tid IS NULL OR tenant_id::text = :tid)
-            ORDER BY created_at DESC
+            ORDER BY COALESCE(date, created_at) DESC
             LIMIT 25
             """,
-            {"cid": customer_id, "tid": tenant_id},
+            {"kunde": kunden_name, "tid": tenant_id},
         )
         return "recent_activities", rows
 
@@ -354,6 +358,198 @@ def _paginate_items(
     )
 
 
+class CustomerTabOut(BaseSchema):
+    """Die Huelle jeder Register-Antwort der Kunden-360-Maske."""
+
+    model_config = ConfigDict(extra="allow")
+
+    tab_key: str
+    table_key: str
+    total: int = 0
+    page: int = 1
+    limit: int = 25
+
+
+class CustomerContactRowOut(BaseSchema):
+    """Eine Zeile im Register Ansprechpartner."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    name: str = ""
+    firstName: str = ""
+    position: str = ""
+    email: str = ""
+    phone1: str = ""
+
+
+class CustomerOrderRowOut(BaseSchema):
+    """Eine Zeile im Register Auftraege."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    order_number: Optional[str] = None
+    status: Optional[str] = None
+    total_amount: float = 0.0
+    created_at: Optional[str] = None
+
+
+class CustomerActivityRowOut(BaseSchema):
+    """Eine Zeile im Register Aktivitaeten."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    activity_type: Optional[str] = None
+    subject: Optional[str] = None
+    status: str = ""
+    assigned_to: str = ""
+    created_at: Optional[str] = None
+
+
+class CustomerDocumentRowOut(BaseSchema):
+    """Eine Zeile im Register Dokumente — offene Posten des Kunden."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    rechnungsnr: Optional[str] = None
+    faelligkeit: Optional[str] = None
+    amount: float = 0.0
+    days_overdue: int = 0
+    op_status: Optional[str] = None
+
+
+class CustomerContactsTabOut(CustomerTabOut):
+    items: list[CustomerContactRowOut] = Field(default_factory=list)
+
+
+class CustomerOrdersTabOut(CustomerTabOut):
+    items: list[CustomerOrderRowOut] = Field(default_factory=list)
+
+
+class CustomerActivitiesTabOut(CustomerTabOut):
+    items: list[CustomerActivityRowOut] = Field(default_factory=list)
+
+
+class CustomerDocumentsTabOut(CustomerTabOut):
+    items: list[CustomerDocumentRowOut] = Field(default_factory=list)
+
+
+# Vier benannte Register vor der generischen Route
+# -----------------------------------------------
+#
+# Die generische Route `/{customer_id}/tabs/{tab_key}` antwortet mit
+# ``TypedObjectOut`` — einer Huelle, die jede Form durchlaesst. Damit kann das
+# Feldvertrags-Gate nicht pruefen, ob die Spalten der Maske (ScreenDefinition
+# `crm/customer-360`) den Schluesseln der Antwort entsprechen; eine Spalte, die
+# ins Leere zeigt, bliebe eine leere Zelle und faellt niemandem auf.
+#
+# Deshalb dieselbe Aufteilung wie bei Auftrag und Rechnung: je Register eine
+# eigene Route mit deklarierter Zeilenform. Sie muessen **vor** der generischen
+# Route stehen, sonst verschluckt `{tab_key}` sie.
+
+@router.get(
+    "/{customer_id}/tabs/contacts",
+    response_model=CustomerContactsTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Ansprechpartner",
+)
+async def get_customer_tab_contacts(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Die Ansprechpartner des Kunden."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="contacts", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/auftraege",
+    response_model=CustomerOrdersTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Auftraege",
+)
+async def get_customer_tab_auftraege(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Die letzten Auftraege des Kunden."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="auftraege", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/aktivitaeten",
+    response_model=CustomerActivitiesTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Aktivitaeten",
+)
+async def get_customer_tab_aktivitaeten(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Die letzten CRM-Aktivitaeten zum Kunden."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="aktivitaeten", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/dokumente",
+    response_model=CustomerDocumentsTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Dokumente",
+)
+async def get_customer_tab_dokumente(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Die offenen Posten des Kunden."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="dokumente", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
 @router.get(
     "/{customer_id}/tabs/{tab_key}",
     response_model=TypedObjectOut,
@@ -399,6 +595,7 @@ async def get_customer_tab_data(
         tenant_id=tenant_id,
         tab_key=tab_key,
         kunden_nr=customer.get("kunden_nr"),
+        kunden_name=customer.get("name"),
     )
     paged_items, total = _paginate_items(
         items, page=page, limit=limit, q=q,
@@ -513,15 +710,18 @@ async def get_customer_360(
     recent_activities = _query_many(
         db,
         """
-        SELECT id, activity_type, subject,
-               created_at::text, assigned_to
+        SELECT id::text AS id,
+               type AS activity_type,
+               title AS subject,
+               COALESCE(date, created_at)::text AS created_at,
+               assigned_to
         FROM domain_crm.activities
-        WHERE customer_id = :cid
+        WHERE customer = :kunde
           AND (:tid IS NULL OR tenant_id::text = :tid)
-        ORDER BY created_at DESC
+        ORDER BY COALESCE(date, created_at) DESC
         LIMIT 5
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"kunde": customer.get("name"), "tid": tenant_id},
     )
 
     # 6. Letzter Wareneingang (domain_agrar.harvest_acceptances)
