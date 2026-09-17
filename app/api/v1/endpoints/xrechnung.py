@@ -130,11 +130,18 @@ def _build_xrechnung_xml(inv: dict, lines: list[dict]) -> str:
 def _load_invoice(db: Session, invoice_id: str, tenant_id: str) -> tuple[dict, list[dict]] | None:
     """Lädt Rechnungskopf + Positionen aus der DB. Gibt None zurück wenn nicht gefunden."""
     try:
+        # Der Beleg liegt in `domain_sales`. Gelesen wurde `domain_erp` — ein
+        # Schema, das es nicht gibt: Die E-Rechnung fand **nie** eine Rechnung
+        # und antwortete mit 404 „Rechnung nicht gefunden". Die Spalten heissen
+        # dort ausserdem anders: vat_amount und gross_amount.
         inv_row = db.execute(text("""
             SELECT si.id, si.invoice_number, si.invoice_date, si.due_date,
-                   si.customer_id, si.net_amount, si.tax_amount, si.total_amount,
-                   si.currency, bp.name AS customer_name
-              FROM domain_erp.sales_invoices si
+                   si.customer_id, si.net_amount, si.vat_amount AS tax_amount,
+                   si.gross_amount AS total_amount,
+                   si.currency, bp.partner_name AS customer_name
+              FROM domain_sales.sales_invoices si
+              -- Der Partner heisst dort `partner_name`, nicht `name`. Der
+              -- Verweis ging doppelt daneben: falsches Schema, falsche Spalte.
               LEFT JOIN domain_erp.business_partners bp ON bp.id = si.customer_id
              WHERE si.id = :id AND si.tenant_id = :tid
         """), {"id": invoice_id, "tid": tenant_id}).fetchone()
@@ -159,13 +166,18 @@ def _load_invoice(db: Session, invoice_id: str, tenant_id: str) -> tuple[dict, l
         "payment_terms": "Zahlbar innerhalb 30 Tagen netto",
     }
 
+    # `net_amount` ist der Betrag der Position, wie er im Beleg steht. Ihn aus
+    # Menge mal Preis neu zu rechnen waere eine zweite Wahrheit, die bei
+    # Rundungen von der ersten abweicht — in einer Rechnung, die ans Amt geht.
+    #
+    # Der Mandant gehoert auch in die Positionsabfrage: Er stand vorher nur am
+    # Kopf.
     line_rows = db.execute(text("""
-        SELECT article_id, description, quantity, unit, unit_price,
-               quantity * unit_price AS line_total
-          FROM domain_erp.sales_invoice_lines
-         WHERE invoice_id = :id
-         ORDER BY position
-    """), {"id": invoice_id}).fetchall()
+        SELECT article_id, description, quantity, unit, unit_price, net_amount
+          FROM domain_sales.sales_invoice_lines
+         WHERE invoice_id = :id AND tenant_id = :tid
+         ORDER BY line_no
+    """), {"id": invoice_id, "tid": tenant_id}).fetchall()
 
     lines = [
         {
@@ -250,7 +262,7 @@ def export_xrechnung_batch(
     """Exportiert alle Rechnungen einer Periode als XRechnung-ZIP."""
     try:
         rows = db.execute(text("""
-            SELECT id FROM domain_erp.sales_invoices
+            SELECT id FROM domain_sales.sales_invoices
              WHERE tenant_id = :tid
                AND status = :status
                AND TO_CHAR(invoice_date, 'YYYY-MM') = :periode
