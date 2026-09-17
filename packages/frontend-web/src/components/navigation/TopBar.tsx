@@ -3,7 +3,7 @@ import { clsx } from 'clsx'
 import { Link, useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { BookOpen, Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { BookOpen, ClipboardList, Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
 import { HELP_ROUTE, getEmbeddedHelpHref } from '@/lib/docs-help'
 import { useFeature } from '@/hooks/useFeature'
 import { useTheme } from '@/hooks/useTheme'
@@ -213,6 +213,11 @@ export function TopBar({
           <Home className="h-5 w-5" />
         </Link>
       </Button>
+      <Button variant="ghost" size="icon" className="inline-flex" title="Aufgaben" aria-label="Aufgaben" asChild>
+        <Link to="/crm/aktivitaeten">
+          <ClipboardList className="h-5 w-5" />
+        </Link>
+      </Button>
 
       <div className="flex-1 max-w-md">
         <Button
@@ -322,6 +327,17 @@ export function TopBar({
             <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent">
               <Settings className="h-4 w-4" />
               <span>Einstellungen</span>
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+              onClick={() => {
+                setUserMenuOpen(false)
+                window.dispatchEvent(new Event('valeo:open-app-finder'))
+              }}
+            >
+              <Search className="h-4 w-4" />
+              <span>App-Katalog</span>
             </button>
             <div className="my-1 h-px bg-border" />
             <button

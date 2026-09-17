@@ -83,6 +83,8 @@ describe('CommandPalette', () => {
     )
 
     await screen.findByText('Periodenabschluss-Arbeitsplatz')
+    expect(screen.getByText('abschluss')).toBeInTheDocument()
+    expect(screen.queryByText(/closing_checklist/)).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Periodenabschluss-Arbeitsplatz'))
 

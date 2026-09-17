@@ -11,6 +11,52 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HOME-BELEG-FIRST — Flow Spine von der Startseite 2026-09-17, Cursor
+
+**Stand:** abgeschlossen 2026-09-17. Sechs Arbeitswelten statt Modulraster:
+Handel & CRM, Ernte & Warenannahme, Lager & Logistik, Betriebsmittel &
+Produktion, Finanzen & Controlling, Steuerung & Compliance. Dieselbe
+Entität darf in mehreren Spaces liegen. Kunden stehen in Handel, nicht
+unter Organisation. Keine FSX-Dateien. Startseite anpassen liegt als lokales
+Overlay über Pages (Gruppen): entfernen, verschieben, App-Katalog, eigene
+Gruppen. Erste Seite einer Arbeitswelt ist gesperrt.
+
+**Dateibesitz:** `start-dashboard.tsx`, `launchpad-spaces.ts`,
+`launchpad-personalization.ts`, `LaunchpadBoard.tsx`,
+`dashboard-catalog.ts`, Vitest, `docs/design/launchpad-spaces.md`,
+`docs/design/flow-spine-entlastung-masterplan.md`.
+
+## HOME-LAUNCHPAD-PERSONALIZE — Startseite anpassen 2026-09-17, Cursor
+
+**Stand:** abgeschlossen 2026-09-17. Fiori-Verhalten (Anpassen-Modus, Kachelaktionen,
+Gruppen) als VALEO-Overlay auf Spaces/Pages, ohne SAP-Pixel. Overlay lokal.
+Katalog-Lücken (Kategorie, Finder ohne Anpassen, Suche inkl. Beschreibung)
+sind in `HOME-IA-HIERARCHIE` geschlossen.
+
+**Dateibesitz:** `LaunchpadBoard.tsx`, `launchpad-personalization.ts`,
+`useLaunchpadPersonalization.ts`, `start-dashboard.tsx`, Vitest,
+`docs/design/launchpad-spaces.md`.
+
+## HOME-IA-HIERARCHIE — Weniger Navigation, mehr Arbeit 2026-09-17, Cursor
+
+**Stand:** Sprint 1+2 abgeschlossen 2026-09-17. Startseite als Arbeitsplatz:
+Bereich → Prozessraum → Inhalt. Meine Kunden nur Kunden / KIM / Aufgaben.
+Seiten ≤10 Kacheln. Task-Kacheln visuell stärker. Schnellaktionen
++Kunde/+Angebot/+Auftrag/+Aktivität plus Mehr. App-Finder mit Kategorie und
+Beschreibung, auch ohne Anpassen. KPI mit Drilldown, ohne Fake-97; Kontext
+einmal unter den Karten. Katalog, Reiter und Schnellaktionen **44 px**.
+Prozessraum als Auswahl statt Unterreiter. Sidebar auf `/` ausgeblendet bis
+zur Top-Leiste, Realtime-Leiste nur bei Störung. Sprint 3 (KIM Object Page)
+bleibt Claude. Keine FSX-Dateien. Nicht raten: SEPA/POS/Budget/Personal.
+
+**Ziel:** Startseite als Arbeitsplatz (Wo / Was tun / Was wichtig), nicht als
+Menü aller Funktionen. Operatives „Heute“ nur mit echten Zahlen.
+
+**Dateibesitz:** `start-dashboard.tsx`, `LaunchpadBoard.tsx`,
+`launchpad-spaces.ts`, `AppShell.tsx`, `TopBar.tsx`, `DashboardLayout.tsx`,
+Vitest, `docs/design/launchpad-informationshierarchie.md`,
+`docs/design/launchpad-spaces.md`.
+
 ## MASK-L3-HABIT-DECLARE — Zeilensprung aus L3-Gewohnheit 2026-09-17, Cursor
 
 **Stand:** abgeschlossen 2026-09-17. L3-PNGs bleiben lokal. Registertabellen
@@ -29,6 +75,26 @@ aus der Worklist-Vorschau. Auftrag/Rechnung und FSX bleiben Claude.
 **Stand:** abgeschlossen 2026-09-17. Dreizehn leere `/masks/.../tabs/`-Routen
 mit Zeilenform, `ZEILEN_NICHT_PRUEFBAR_MAX = 27`. Auftrag, Rechnung und
 `screen_definitions.py` unangetastet.
+
+## MASK-FELDVERTRAG-GENERIC-STUBS — letzte 17 Zeilenformen 2026-09-17, Cursor
+
+**Stand:** umgesetzt, nicht committed. Claude hat 17 gemessen, die Schwelle
+stand bei 27 — jetzt 0. Sechs leere `/masks/`-Register und elf
+`/mask-rollouts/`-Catch-alls mit eigener Route und Zeilenform. R5 bleibt
+Produktentscheidung. `crm_360.py` und DSGVO-Loeschweg bleiben Claude.
+Commit `2f044dbb7` (Betreff `@`) wird nicht force-gepusht.
+
+**Dateibesitz:** `mask_entity_contracts.py`, `mask_screen_definition.py`,
+`mask_rollout_summaries.py`, `mask_rollout_summary_service.py`, Gate-Tests.
+
+## HANDSHAKE: Mandantenleck und Art.-17-Zusage 2026-09-17, Claude an Cursor
+
+Kunden-360 las `?tenant_id=`, den niemand setzt — Filter dauerhaft offen.
+Art. 17 setzte ABGESCHLOSSEN, obwohl keine Anweisung traf. Cursor fasst
+diese Dateien nicht an. Die 17 Generic-Stubs sind der erklaerte naechste
+Schritt; R5 (SEPA, POS-Huelle, Budget, Personalstamm) nicht raten.
+
+**Cursor:** Verstanden. Stubs auf 0. R5 nicht gestartet.
 
 ## MASK-FELDVERTRAG-BRUECKEN-ZEILE — Bestellung, Lieferant, ER 2026-09-17, Cursor
 

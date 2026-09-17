@@ -1,5 +1,6 @@
 ﻿import { Suspense, lazy, type ReactNode, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
+import { useLocation } from '@/app/routing/typed-router'
 import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
 import { useFeature } from '@/hooks/useFeature'
 
@@ -39,9 +40,17 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   const commandPaletteFeatureEnabled = useFeature('commandPalette')
   const telephonyEnabled = useFeature('telephony')
   const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
+  const location = useLocation()
+  const isStart = location.pathname === '/' || location.pathname === ''
   const [commandOpen, setCommandOpen] = useState<boolean>(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(isStart)
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (isStart) {
+      setSidebarCollapsed(true)
+    }
+  }, [isStart])
 
   const handleToggleSidebar = useCallback((): void => {
     setSidebarCollapsed((collapsed) => !collapsed)
@@ -165,7 +174,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
       data-mcp-version="1.0.0"
     >
       {/* Desktop Sidebar */}
-      <div className="hidden md:block">
+      <div className={isStart && sidebarCollapsed ? 'hidden' : 'hidden md:block'}>
         <Suspense fallback={<div className="h-screen w-16 border-r bg-background" />}>
           <Sidebar collapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
         </Suspense>

@@ -1,0 +1,49 @@
+---
+slice_id: HOME-LAUNCHPAD-PERSONALIZE
+id: HOME-LAUNCHPAD-PERSONALIZE
+title: Startseite anpassen (Launchpad-Personalisierung)
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  Kein SAP-Lookalike. Keine FSX-Dateien. sales_orders.py, sales_invoices.py
+  und Claude-Hunks in screen_definitions.py unangetastet.
+  coverage_path_check.xml nicht committen.
+goal: >
+  Fiori-Launchpad-Personalisierung als VALEO-Verhalten auf Spaces/Pages:
+  Anpassen-Modus, Kachel entfernen/verschieben/umbenennen, App-Katalog,
+  Gruppen anlegen/umbenennen/löschen/ausblenden/zurücksetzen.
+file_ownership:
+  - packages/frontend-web/src/app/navigation/launchpad-personalization.ts
+  - packages/frontend-web/src/hooks/useLaunchpadPersonalization.ts
+  - packages/frontend-web/src/components/navigation/LaunchpadBoard.tsx
+  - packages/frontend-web/src/pages/start-dashboard.tsx
+  - packages/frontend-web/src/app/navigation/launchpad-spaces.ts
+  - docs/design/launchpad-spaces.md
+acceptance:
+  - Normaler Kachelklick oeffnet die App
+  - Anpassen-Modus per Button oben rechts, Fertig beendet ihn
+  - Im Anpassen-Modus keine Navigation, sondern Aktionen und Entfernen
+  - Katalogseiten resetbar, erste Seite einer Arbeitswelt nicht loeschbar/ausblendbar
+  - Eigene Gruppen loeschbar
+  - Overlay lokal, ScreenDefinition unangetastet
+tests:
+  - packages/frontend-web/src/__tests__/app/navigation/launchpad-personalization.test.ts
+  - packages/frontend-web/src/__tests__/pages/start-dashboard.test.tsx
+risks:
+  - Overlay nur lokal, noch kein UIX-071-Serverstand
+ai_harness:
+  fachlicher_vertrag: >
+    Personalisierung aendert nicht Berechtigungen oder Maskenvertraege.
+  architektur_vertrag: >
+    Overlay ueber den Launchpad-Katalog. Keine parallele Home-Architektur.
+  daten_vertrag: >
+    localStorage valeo.launchpad.overlay, Drift unbekannter IDs wird verworfen.
+  test_vertrag: >
+    Pure Overlay-Funktionen plus Startseiten-Anpassen-Modus.
+  security_vertrag: >
+    Keine Rechteausweitung durch umbenannte Kacheln.
+  betriebs_vertrag: >
+    Rollback = Overlay loeschen oder Commit revertieren.
+---

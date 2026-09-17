@@ -33,6 +33,7 @@ type DashboardText = {
 type SectionPreset = {
   landingItemId?: string
   landingPath?: string
+  landingLabel?: DashboardText
   description: DashboardText
 }
 
@@ -92,15 +93,16 @@ const SECTION_PRESETS: Record<string, SectionPreset> = {
   dashboard: {
     landingPath: '/',
     description: {
-      de: 'Persönliche Startseite mit Kennzahlen, Schnellaktionen und Prozessräumen.',
-      en: 'Personal home with KPIs, shortcuts, and process rooms.',
+      de: 'Persönliche Startseite mit Spaces, Belegen und Schnellaktionen.',
+      en: 'Personal home with spaces, documents, and shortcuts.',
     },
   },
   workflow: {
-    landingItemId: 'workflow-flow-spine',
+    landingPath: '/workflow/leitstand',
+    landingLabel: { de: 'Leitstand', en: 'Control center' },
     description: {
-      de: 'End-to-End-Prozesse, Freigaben und KI-Steuerung in einem Arbeitsraum.',
-      en: 'End-to-end workflows, approvals, and AI control in one workspace.',
+      de: 'Leitstand für Ausnahmen, Freigaben und übergreifende Koordination.',
+      en: 'Control center for exceptions, approvals, and cross-case coordination.',
     },
   },
   admin: {
@@ -289,7 +291,9 @@ export function getSectionPresentation(section: NavItem, lang?: string): Dashboa
         ? translate(preset.description, lang)
         : `${domain.label} ${normalizeLanguage(lang) === 'de' ? 'starten und steuern' : 'workspace and operations'}`,
     landingPath: preset?.landingPath ?? landingItem?.path,
-    landingLabel: landingItem?.label ?? section.label,
+    landingLabel: preset?.landingLabel
+      ? translate(preset.landingLabel, lang)
+      : (landingItem?.label ?? section.label),
     domain,
   }
 }

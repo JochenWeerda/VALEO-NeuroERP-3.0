@@ -26,6 +26,7 @@ Die vollständige Startseite mit Diátaxis-Navigation liegt unter **[index.md](i
 | Dependency-Security | [ADR-071](adr/adr-071-security-dependency-gate.md) · [Ist-Stand](quality-assurance/security-dependency-status-2026-09-15.md) · [Gate-QA](quality-assurance/security-dependency-policy-2026-09-15.md) |
 | Offene Lücken | [Open Gaps](project-context/open-gaps-and-known-issues.md) |
 | Mask Runtime Status | [Universal Mask Runtime](architecture/uix/universal-mask-runtime-status.md) |
+| Startseite / Launchpad | [Spaces/Pages](design/launchpad-spaces.md) · [Informationshierarchie](design/launchpad-informationshierarchie.md) |
 
 ## Architektur-Sichten (neu)
 

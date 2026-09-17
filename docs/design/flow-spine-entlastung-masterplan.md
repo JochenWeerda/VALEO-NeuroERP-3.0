@@ -40,15 +40,18 @@ unbelegt — die beiden messen Verschiedenes und ersetzen einander nicht.
 
 | Ebene | Ort | Inhalt | Stand heute |
 |-------|-----|--------|-------------|
+| Home | Start-Dashboard | Spaces/Pages mit Beleg-Kacheln — **keine** Flow-Spine-Prozesskacheln | 2026-09-17: Hierarchie Sprint 1+2 (Sidebar auf Start eingeklappt, 6–10 Kacheln, drei Kunden-Einstiege, Finder mit Kategorie/Beschreibung). Sprint 3 KIM bleibt Claude. `launchpad-informationshierarchie.md` |
 | 1 Alltag | Belegmaske / Arbeitsliste | kompakte Phasenleiste, aktueller Status, **eine** nächste Aktion, Blocker | Bausteine vorhanden (V10), Bindung fehlt; Reifegrad erst nach Kriterienkatalog aus FSX-030 bezifferbar |
 | 2 Detail bei Bedarf | aufklappbar in der Maske | Belegbeziehungen, Teilmengen, Zuständigkeiten, Historie, Copilot | teilweise; Timeline nur im Cockpit |
-| 3 Leitstand | `workflow/flow-spine-*` | Überwachung, Ausnahmen, übergreifende Koordination | vorhanden, aber demo-lastig |
+| 3 Leitstand | `workflow/leitstand`, `workflow/flow-spine-*` | Überwachung, Ausnahmen, übergreifende Koordination | vorhanden, aber demo-lastig |
 
 Regel (verbindliche Fassung): **Alle für die aktuelle Fachaufgabe notwendigen Informationen sind
 in der Belegmaske erreichbar.** Übergreifende Analysen und Koordination über mehrere Vorgänge
 hinweg dürfen ausschließlich auf Ebene 3 bleiben. Der Prüfsatz lautet also nicht „nichts nur im
 Leitstand“, sondern: kein Feld, das zur Bearbeitung *dieses* Belegs gebraucht wird, zwingt in den
-Leitstand.
+Leitstand. Die Startseite ist Einstieg in Belege, nicht in Prozessräume. Der Vorgangsstand läuft
+am Beleg mit (`ProcessBand`); das System führt den Flow Spine parallel im Hintergrund. Ebene 3
+bleibt Leitstand.
 
 ## C. Slice-Plan
 

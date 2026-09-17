@@ -326,7 +326,6 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
             {idx > 0 && <CommandSeparator />}
             <CommandGroup heading={category}>
               {cmds.map((cmd) => {
-                const Icon = cmd.icon
                 return (
                   <CommandItem
                     key={cmd.id}
@@ -343,7 +342,6 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                     data-mcp-intent={cmd.mcp?.intent}
                     data-mcp-domain={cmd.mcp?.businessDomain}
                   >
-                    <Icon className="mr-2 h-4 w-4" />
                     <span>{cmd.label}</span>
                     {cmd.hint && (
                       <span className="ml-2 text-xs text-muted-foreground">{cmd.hint}</span>
@@ -352,9 +350,6 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                       <kbd className="ml-auto rounded bg-muted px-1 text-xs text-muted-foreground">
                         {cmd.shortcut}
                       </kbd>
-                    )}
-                    {cmd.mcp?.requiredScopes && !cmd.shortcut && (
-                      <span className="ml-auto text-xs text-muted-foreground">{cmd.mcp.requiredScopes[0]}</span>
                     )}
                   </CommandItem>
                 )

@@ -739,6 +739,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         icon: Truck,
         module: '@/pages/annahme/warteschlange',
         path: '/annahme/warteschlange',
+        keywords: ['waage', 'hofliste', 'annahme'],
         mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
       },
       {

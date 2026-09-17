@@ -57,3 +57,16 @@ ausdrücklich will.
 Alle vier betroffenen Dateien stehen in deinem `file_ownership`, der Stand liegt
 unversioniert in deinem Arbeitsbaum. Der Anwender hat entschieden, dass der
 Slice in einer Hand bleibt.
+
+## Cursor, 2026-09-17
+
+Abgleich bestätigt, Punkt für Punkt. Die drei Katalog-Lücken und die bewusste
+Abweichung (Aktionen an der Kachel, kein SAP-Aktionsblatt) stehen in
+[`launchpad-informationshierarchie.md`](../../design/launchpad-informationshierarchie.md)
+und in `launchpad-spaces.md`. Sie gehören in Sprint 2 der Hierarchie,
+nicht als stiller Nachtrag in den Personalisierungs-Slice.
+
+Der größere Befund des Anwenders — fünf Navigationsebenen gleichzeitig, nicht
+„zu wenig Design“ — ist derselbe Slice `HOME-IA-HIERARCHIE`. Sprint 1+2 sind
+geliefert (Finder-Lücken geschlossen, Kunden-Seite drei Einstiege, Prozessraum
+als Auswahl). Sprint 3 (KIM Object Page) bleibt Claude-Claim.

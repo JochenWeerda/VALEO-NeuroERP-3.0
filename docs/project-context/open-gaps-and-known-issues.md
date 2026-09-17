@@ -11,6 +11,26 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## HOME-IA-HIERARCHIE — Startseite zu viele Ebenen gleichzeitig (2026-09-17)
+
+Status: **Sprint 1+2 abgeschlossen.** Sidebar auf `/` eingeklappt,
+Meine Kunden drei Einstiege, Prozessraum als Auswahl statt Unterreiter,
+App-Finder mit Kategorie/Beschreibung ohne Anpassen, Schnellaktionen 4+Mehr,
+KPI mit Drilldown ohne Fake-Lagerzahl, Start-Steuerelemente 44 px. Sprint 3
+(KIM Object Page) und vollständige WCAG/Responsive/Heute der übrigen Masken
+bleiben offen.
+Entscheidung: [`docs/design/launchpad-informationshierarchie.md`](../design/launchpad-informationshierarchie.md).
+
+| Lücke | Prio | Slice |
+|---|---|---|
+| Fünf Navigationsebenen gleichzeitig; „Meine Kunden“ fünf überlappende Kacheln | P1 | Sprint 1 — umgesetzt, verifiziert |
+| Gleiche Kachelgewichtung, KPI ohne Trend, zu viele Schnellaktionen | P2 | Sprint 2 — Code da |
+| App-Finder ohne Kategorie, nur im Anpassen-Modus, Suche nur Label | P4 / Sprint 2 | geschlossen |
+| KIM nicht durchgängiger Object-Page-Workspace | P1/P3 | Sprint 3, Claude-Claim |
+| Realtime-Leiste dauerhaft für alle | P4 | Code: nur bei Störung; rollenbasiert danach |
+
+Nicht in diesem Gap: SAP visuell kopieren; erfundene „Heute“-Kennzahlen.
+
 ## ASK-ACKERSCHLAGKARTEI — Lastenheft LWK 2017+ (2026-07-16)
 
 Status: **repo-Gaps geschlossen** (Slice ACKER-OPEN-GAPS-009). Traceability: [`docs/specs/agrar/ackerschlagkartei-traceability.md`](../specs/agrar/ackerschlagkartei-traceability.md).

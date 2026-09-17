@@ -692,7 +692,7 @@ function buildMaskCommands(maskRegistry: MaskRegistryEntry[] | undefined, agrarE
         maskClass: mask.mask_class,
         processKey: mask.process_key ?? null,
       },
-      hint: `${mask.mask_class} | ${mask.domain}${mask.process_key ? ` | ${mask.process_key}` : ''}`,
+      hint: shortPathAlias(mask.route),
       mcp: {
         intent: 'open-process-mask',
         businessDomain: mask.domain,
@@ -722,6 +722,24 @@ const OMNIBOX_DOMAIN_ICONS: Record<string, ComponentType<{ className?: string }>
 function normalizePath(path: string): string {
   const trimmed = path.split('?')[0].replace(/\/+$/, '')
   return trimmed.toLowerCase()
+}
+
+/** Letztes nicht-parametrisches Pfadsegment — Alias statt technischer Screen-ID. */
+export function shortPathAlias(path: string | undefined): string | undefined {
+  if (!path) return undefined
+  const segments = path.split(/[?#]/, 1)[0].replace(/^\/+|\/+$/g, '').split('/').filter(Boolean)
+  return [...segments].reverse().find((segment) => !segment.startsWith(':') && !segment.startsWith('$'))
+}
+
+function withPathAlias(command: PaletteCommand): PaletteCommand {
+  const path = typeof command.actionParams?.path === 'string' ? command.actionParams.path : undefined
+  const alias = shortPathAlias(path)
+  if (!alias) return command
+  return {
+    ...command,
+    hint: alias,
+    keywords: mergeKeywords(command.keywords, [alias]),
+  }
 }
 
 function mergeKeywords(existing: string[], incoming: string[]): string[] {
@@ -765,10 +783,15 @@ export function enrichCommandsWithOmniboxCatalog(
     const target = enrichedByPath.get(normalizePath(entry.route))
     if (target) {
       target.keywords = mergeKeywords(target.keywords, synonyms)
+      const alias = shortPathAlias(entry.route)
+      if (alias) {
+        target.hint = alias
+        target.keywords = mergeKeywords(target.keywords, [alias])
+      }
       continue
     }
     // Kein passender Command → synthetisieren, damit die Maske findbar wird.
-    synthesized.push({
+    synthesized.push(withPathAlias({
       id: `omnibox:${entry.screen_id}`,
       label: entry.title,
       keywords: mergeKeywords([entry.screen_id, entry.domain], synonyms),
@@ -776,9 +799,9 @@ export function enrichCommandsWithOmniboxCatalog(
       category: 'Masken',
       actionId: `omnibox:${entry.screen_id}`,
       actionParams: { path: entry.route, screenId: entry.screen_id },
-      hint: entry.domain,
+      hint: shortPathAlias(entry.route),
       mcp: { intent: 'navigate', businessDomain: entry.domain || 'core' },
-    })
+    }))
   }
 
   appendUniqueCommands(enriched, synthesized)
@@ -865,5 +888,6 @@ export function buildPaletteCommands({
   appendUniqueCommands(commands, aiCommands)
   appendUniqueCommands(commands, buildMaskCommands(maskRegistry, agrarEnabled))
 
-  return agrarEnabled ? commands : commands.filter(supportsAgrarCommand)
+  const visible = agrarEnabled ? commands : commands.filter(supportsAgrarCommand)
+  return visible.map(withPathAlias)
 }

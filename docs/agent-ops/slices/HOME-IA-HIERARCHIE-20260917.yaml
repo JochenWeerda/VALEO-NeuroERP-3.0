@@ -1,0 +1,49 @@
+---
+slice_id: HOME-IA-HIERARCHIE
+id: HOME-IA-HIERARCHIE
+title: Startseite — weniger Navigation, mehr situative Arbeit
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  Kein SAP-Lookalike. Keine FSX-Dateien. screen_definitions.py, Auftrag,
+  Rechnung, crm_360.py und DSGVO bleiben Claude bis Sprint 3 (KIM) mit
+  eigener Claim-Grenze. coverage_path_check.xml nicht committen.
+  HOME-LAUNCHPAD-PERSONALIZE bleibt; dieser Slice baut die Hierarchie um.
+goal: >
+  Startseite als Arbeitsplatz: Bereich → Prozessraum → Inhalt. Meine Kunden
+  nur Kunden / KIM / Aufgaben. 6–10 Kacheln je Seite. App-Finder mit Kategorie
+  und Beschreibung auch ohne Anpassen. Keine erfundenen Heute-Zahlen.
+  Sprint 3 (KIM Object Page) bleibt Claude-Claim-Grenze.
+file_ownership:
+  - docs/design/launchpad-informationshierarchie.md
+  - docs/design/launchpad-spaces.md
+  - docs/agent-ops/handshakes/claude-cursor-launchpad-katalog-2026-09-17.md
+  - packages/frontend-web/src/app/navigation/launchpad-spaces.ts
+  - packages/frontend-web/src/components/navigation/LaunchpadBoard.tsx
+  - packages/frontend-web/src/pages/start-dashboard.tsx
+  - packages/frontend-web/src/components/navigation/AppShell.tsx
+  - packages/frontend-web/src/components/navigation/TopBar.tsx
+  - packages/frontend-web/src/layouts/DashboardLayout.tsx
+acceptance:
+  - Diagnose IST/SOLL und Prio-Tabelle in launchpad-informationshierarchie.md
+  - Meine Kunden drei Einstiege; Seiten ≤10 Kacheln
+  - App-Finder Kategorie + Beschreibungssuche ohne Anpassen-Modus
+  - Schnellaktionen 4+Mehr; KPI ohne Fake-Zahlen, mit Drilldown
+  - Prozessraum als Auswahl statt Unterreiter; eine Überschrift bei nur einem Raum
+tests:
+  - packages/frontend-web/src/__tests__/app/navigation/launchpad-spaces.test.ts
+  - packages/frontend-web/src/__tests__/pages/start-dashboard.test.tsx
+  - packages/frontend-web/src/__tests__/app/navigation/launchpad-personalization.test.ts
+  - packages/frontend-web/src/__tests__/components/navigation/LaunchpadBoard.test.tsx
+risks:
+  - Sprint 1 ohne Rollenfilter bleibt ein entschlackter Katalog fuer alle
+  - KIM-Sprint darf Claudes Kunden-360-Mandantentrennung nicht ueberschreiben
+ai_harness:
+  fachlicher_vertrag: >
+    Die Startseite beantwortet Wo bin ich, was kann ich tun, was ist wichtig.
+    Ueberlappende Kunden-Einstiege entfallen zugunsten Liste, KIM, Aufgaben.
+  architektur_vertrag: >
+    Spaces/Pages bleiben. Linke Navigation und Schnellaktionen werden
+    nachrangig, nicht durch ein zweites Launchpad ersetzt.

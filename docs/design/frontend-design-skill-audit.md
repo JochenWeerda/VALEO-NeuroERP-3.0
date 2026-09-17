@@ -387,3 +387,9 @@ axe-E2E 8/8 ✅ · tsc ✅ · Vitest 91/91 ✅.
 | 6 | Mask-Builder-`ObjectPage` | Register-Variante als Standard-Tab-Look der ObjectPage → alle nativen SDs erben den Look konfigurationsfrei |
 
 Jede Welle als eigener Slice (Claim → YAML → Code → Abschluss) gemäß AI-Harness-Governance.
+
+Nachzug 2026-09-17: Die Startseite war fachlich reich, visuell unruhig, weil
+fünf Navigationsebenen gleichzeitig da waren. Sprint 1+2 der Hierarchie sind
+geliefert (`launchpad-informationshierarchie.md`): Prozessraum als Auswahl,
+Katalog ohne Anpassen, 44 px auf der Startfläche. Sprint 3 (KIM) bleibt Claude.
+Kein zweites Meridian, kein SAP-Lookalike.

@@ -3,6 +3,7 @@ import { FileText } from 'lucide-react'
 import {
   buildPaletteCommands,
   enrichCommandsWithOmniboxCatalog,
+  shortPathAlias,
   type PaletteCommand,
 } from '@/components/navigation/command-palette-model'
 import type { OmniboxCatalogEntry } from '@/lib/api/mask-registry'
@@ -78,6 +79,8 @@ describe('buildPaletteCommands', () => {
       maskClass: 'A',
       processKey: 'closing_checklist',
     })
+    expect(processCommand?.hint).toBe('abschluss')
+    expect(processCommand?.keywords).toContain('abschluss')
     expect(commands.some((command) => command.id === 'mask:finance/index')).toBe(false)
   })
 
@@ -145,6 +148,7 @@ describe('enrichCommandsWithOmniboxCatalog', () => {
     const synth = result.find((command) => command.id === 'omnibox:qualitaet/reklamation')
     expect(synth).toBeDefined()
     expect(synth?.actionParams).toMatchObject({ path: '/qualitaet/reklamationen', screenId: 'qualitaet/reklamation' })
+    expect(synth?.hint).toBe('reklamationen')
     expect(synth?.keywords).toEqual(expect.arrayContaining(['qualitaet/reklamation', 'beanstandung']))
   })
 
@@ -162,5 +166,14 @@ describe('enrichCommandsWithOmniboxCatalog', () => {
     expect(enrichCommandsWithOmniboxCatalog(base, undefined, true)).toBe(base)
     const result = enrichCommandsWithOmniboxCatalog([], [catalogEntry({ route: '' })], true)
     expect(result).toHaveLength(0)
+  })
+})
+
+describe('shortPathAlias', () => {
+  it('nimmt das letzte nicht-parametrische Segment', () => {
+    expect(shortPathAlias('/lager/bestandsuebersicht')).toBe('bestandsuebersicht')
+    expect(shortPathAlias('/lager/article-stock/:id')).toBe('article-stock')
+    expect(shortPathAlias('/auswertungen/beleg-kontrolle?tab=1')).toBe('beleg-kontrolle')
+    expect(shortPathAlias(undefined)).toBeUndefined()
   })
 })

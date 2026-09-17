@@ -43,6 +43,12 @@ Promotion-Pfad temp→native. **Alles Weitere baut hierauf.**
 Startseiten, Kollaborations-Rail v1, Planungskalender v1. Nutzer navigieren
 per Intent statt Menü; Zeitbezogenes visualisiert sich selbst.
 
+Nachzug 2026-09-17: Die Startseite hat Spaces/Pages. Sprint 1+2 der
+Hierarchie sind geliefert (Prozessraum als Auswahl, Sidebar auf Start
+nachrangig). UIX-060 (Suche) und UIX-061 (Rollen) nähren
+[`launchpad-informationshierarchie.md`](launchpad-informationshierarchie.md),
+ersetzen Sprint 3 (KIM Object Page) nicht.
+
 ### Slices
 
 **UIX-060 Omnibox-Shell + Intent-Vorschau (Read-only)**

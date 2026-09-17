@@ -1,27 +1,37 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from '@/app/routing/typed-router'
+import { Link } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import {
-  ArrowRight,
   DollarSign,
-  Package,
   Pin,
   PinOff,
   Search,
   ShoppingCart,
   Users,
-  Zap,
   type LucideIcon,
 } from 'lucide-react'
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
-import { getDomainPresentation, getSectionPresentation } from '@/app/navigation/dashboard-catalog'
+import { getSectionPresentation } from '@/app/navigation/dashboard-catalog'
+import {
+  canonicalizeLaunchpadSpaceId,
+  flattenLaunchpadTiles,
+  launchpadTileSurface,
+  matchesLaunchpadCatalogQuery,
+  resolveLaunchpadSpaces,
+} from '@/app/navigation/launchpad-spaces'
 import { useNavSections } from '@/app/navigation/nav-runtime'
+import { LaunchpadBoard } from '@/components/navigation/LaunchpadBoard'
 import { useWorkspaceRedirect } from '@/hooks/useWorkspaceRedirect'
 import type { NavItem } from '@/app/navigation/types'
-import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFeature } from '@/hooks/useFeature'
@@ -29,7 +39,6 @@ import { usePinnedTiles } from '@/hooks/usePinnedTiles'
 import { useTranslation } from 'react-i18next'
 import { queryKeys } from '@/lib/query'
 import { apiClient } from '@/lib/api-client'
-import { fetchFlowSpineCatalog, getFlowSpineFetchErrorMessage, type FlowSpineCatalog } from '@/lib/api/flow-spines'
 
 type StarterTile = {
   id: string
@@ -45,8 +54,55 @@ type StarterTile = {
 }
 
 const SEARCH_KEYS = ['label', 'description'] as const
-const MAX_CHILD_LINKS = 7
 const NUM_DE = new Intl.NumberFormat('de-DE')
+const LEITSTAND_PATH = '/workflow/leitstand'
+const LETZTE_DOKUMENTE_PATH = '/workspace/letzte-dokumente'
+const SPACE_STORAGE_KEY = 'valeo-launchpad-space'
+const PAGE_STORAGE_KEY = 'valeo-launchpad-page'
+
+function readStoredSpace(): string | undefined {
+  try {
+    return canonicalizeLaunchpadSpaceId(sessionStorage.getItem(SPACE_STORAGE_KEY) ?? undefined)
+  } catch {
+    return undefined
+  }
+}
+
+function writeStoredSpace(spaceId: string): void {
+  try {
+    sessionStorage.setItem(SPACE_STORAGE_KEY, spaceId)
+  } catch {
+    // Best-effort: private mode may block sessionStorage.
+  }
+}
+
+function readStoredPages(): Record<string, string> {
+  try {
+    const raw = sessionStorage.getItem(PAGE_STORAGE_KEY)
+    if (!raw) {
+      return {}
+    }
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') {
+      return {}
+    }
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>).filter(
+        (entry): entry is [string, string] => typeof entry[1] === 'string',
+      ),
+    )
+  } catch {
+    return {}
+  }
+}
+
+function writeStoredPages(pages: Record<string, string>): void {
+  try {
+    sessionStorage.setItem(PAGE_STORAGE_KEY, JSON.stringify(pages))
+  } catch {
+    // Best-effort: private mode may block sessionStorage.
+  }
+}
 
 interface KpiTile {
   key: string
@@ -56,6 +112,13 @@ interface KpiTile {
   icon: JSX.Element
   accentClass: string
 }
+
+const HOME_PRIMARY_ACTIONS = [
+  { id: 'home-kunde', label: '+ Kunde', path: '/verkauf/kunden-stamm' },
+  { id: 'home-angebot', label: '+ Angebot', path: '/sales/angebote' },
+  { id: 'home-auftrag', label: '+ Auftrag', path: '/sales/order' },
+  { id: 'home-aktivitaet', label: '+ Aktivität', path: '/crm/aktivitaeten' },
+] as const
 
 const EMPTY_START_KPIS: Record<string, number> = {}
 
@@ -84,14 +147,6 @@ const KPI_TILES: KpiTile[] = [
     icon: <Users className="h-4 w-4" />,
     accentClass: 'text-primary',
   },
-  {
-    key: 'inventory',
-    label: 'Lagerauslastung',
-    path: '/lager/bestandsuebersicht',
-    format: (v) => `${v}%`,
-    icon: <Package className="h-4 w-4" />,
-    accentClass: 'text-[hsl(var(--accent))]',
-  },
 ]
 
 function toStarterTile(section: NavItem, lang?: string): StarterTile | null {
@@ -116,21 +171,6 @@ function toStarterTile(section: NavItem, lang?: string): StarterTile | null {
   }
 }
 
-function getSectionShortcuts(section: NavItem): Array<NavItem & { path: string }> {
-  if (!section.children) {
-    return []
-  }
-
-  return section.children
-    .filter((child): child is NavItem & { path: string } => {
-      if (!child.path || child.path.includes(':')) {
-        return false
-      }
-      return true
-    })
-    .slice(0, MAX_CHILD_LINKS)
-}
-
 function flattenStarterTiles(sections: NavItem[], lang?: string): StarterTile[] {
   return sections.reduce<StarterTile[]>((accumulator, section) => {
     const tile = toStarterTile(section, lang)
@@ -141,27 +181,14 @@ function flattenStarterTiles(sections: NavItem[], lang?: string): StarterTile[] 
   }, [])
 }
 
-const DOMAIN_COLOR: Record<string, string> = {
-  'order-to-cash': 'from-indigo-500/20 to-indigo-600/5 border-indigo-500/30',
-  'procure-to-pay': 'from-amber-500/20 to-amber-600/5 border-amber-500/30',
-  'inventory-to-settlement': 'from-sky-500/20 to-sky-600/5 border-sky-500/30',
-  'harvest-to-settlement': 'from-emerald-500/20 to-emerald-600/5 border-emerald-500/30',
-  'contract-to-settlement': 'from-violet-500/20 to-violet-600/5 border-violet-500/30',
-  'complaint-to-resolution': 'from-rose-500/20 to-rose-600/5 border-rose-500/30',
-  'service-to-customer': 'from-cyan-500/20 to-cyan-600/5 border-cyan-500/30',
-  'finance-to-close': 'from-green-500/20 to-green-600/5 border-green-500/30',
-  'compliance-to-report': 'from-teal-500/20 to-teal-600/5 border-teal-500/30',
-}
-
 export default function StartDashboardPage(): JSX.Element {
   const { i18n } = useTranslation()
   // UIX-061: rollenbasierter Redirect auf cockpit-Workspace (flag-geschuetzt).
   useWorkspaceRedirect()
   const agrarEnabled = useFeature('agrar')
   const navSections = useNavSections()
-  const navigate = useNavigate()
   const [query, setQuery] = useState<string>('')
-  const { isPinned, pinnedTileIds, togglePin } = usePinnedTiles()
+  const { pinnedTileIds, togglePin } = usePinnedTiles()
 
   const sections = useMemo(
     () => navSections.filter((section) => (section.featureKey === 'agrar' ? agrarEnabled : true)),
@@ -189,6 +216,25 @@ export default function StartDashboardPage(): JSX.Element {
     [allTiles, pinnedTileIds],
   )
 
+  const launchpadSpaces = useMemo(
+    () => resolveLaunchpadSpaces(sections, activeLang),
+    [activeLang, sections],
+  )
+  const launchpadTiles = useMemo(() => flattenLaunchpadTiles(launchpadSpaces), [launchpadSpaces])
+  const defaultSpaceId = launchpadSpaces[0]?.id ?? 'handel'
+  const [spaceId, setSpaceId] = useState<string>(() => readStoredSpace() ?? defaultSpaceId)
+  const [pageBySpace, setPageBySpace] = useState<Record<string, string>>(() => readStoredPages())
+  const activeSpaceId = launchpadSpaces.some((space) => space.id === spaceId) ? spaceId : defaultSpaceId
+
+  const searchHits = useMemo(() => {
+    if (!normalizedQuery) {
+      return []
+    }
+    return launchpadTiles.filter((tile) => {
+      return matchesLaunchpadCatalogQuery(tile, normalizedQuery) || tile.pageLabel.toLowerCase().includes(normalizedQuery)
+    })
+  }, [launchpadTiles, normalizedQuery])
+
   const { data: kpis, isPending: kpiLoading } = useQuery({
     queryKey: queryKeys.analytics.kpis,
     queryFn: async () => {
@@ -201,163 +247,67 @@ export default function StartDashboardPage(): JSX.Element {
     refetchInterval: 60_000,
   })
 
-  const {
-    data: flowCatalog,
-    isPending: flowCatalogPending,
-    isError: flowCatalogError,
-    error: flowCatalogErr,
-  } = useQuery<FlowSpineCatalog>({
-    queryKey: ['flow-spine', 'catalog', activeLang],
-    queryFn: fetchFlowSpineCatalog,
-    staleTime: 120_000,
-    retry: false,
-  })
-
   return (
-    <div className="min-h-full space-y-8 px-0 py-2">
-      {/* KPI-Streifen */}
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {KPI_TILES.map((tile) => {
-          const value = kpis?.[tile.key]
-          return (
-            <Link
-              key={tile.key}
-              to={tile.path}
-              className="group rounded-(--radius) border border-l-4 border-border border-l-[hsl(var(--accent))] bg-card shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
-            >
-              <div className="p-5">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">{tile.label}</span>
-                  <span className={tile.accentClass}>{tile.icon}</span>
-                </div>
-                <div className="mt-3">
-                  {kpiLoading ? (
-                    <Skeleton className="h-8 w-24" />
-                  ) : (
-                    <div className="text-2xl font-bold tracking-normal tabular-nums text-foreground">
-                      {value !== undefined ? tile.format(value) : '-'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Link>
-          )
-        })}
+    <div className="min-h-full space-y-10 px-0 py-4">
+      <section className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="space-y-1">
+          <p className="text-2xs tracking-wide uppercase text-muted-foreground">Start · Arbeitsplatz</p>
+          <h1 className="text-2xl font-semibold tracking-normal text-foreground">Start</h1>
+          <p className="text-sm text-muted-foreground">
+            Wo bin ich, was kann ich tun, was ist wichtig. Der Prozessstand läuft am Beleg mit.
+          </p>
+        </div>
+        <div className="relative w-full max-w-xl">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            className="pl-9"
+            placeholder="Belege und Apps suchen..."
+            aria-label="Belege und Apps suchen"
+          />
+        </div>
       </section>
 
-      {/* Flow Spine E2E-Prozesse */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary/10">
-            <Zap className="h-4 w-4 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold leading-none text-foreground">Flow Spine Prozesse</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">End-to-End Prozesskontrolle mit KI-Copilot</p>
-          </div>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {flowCatalogPending && !flowCatalog
-            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)
-            : null}
-          {flowCatalogError ? (
-            <Callout variant="error" className="sm:col-span-2 xl:col-span-3 rounded-2xl border px-4 py-3 text-sm">
-              Flow-Spine-Katalog konnte nicht geladen werden: {getFlowSpineFetchErrorMessage(flowCatalogErr)}. Lokal FastAPI starten und Vite{' '}
-              <code className="rounded bg-white/80 px-1 text-xs text-status-error dark:bg-black/20">/api/v1</code> auf Port 8000 proxien.
-            </Callout>
-          ) : null}
-          {!flowCatalogPending &&
-          !flowCatalogError &&
-          flowCatalog &&
-          (!flowCatalog.processes?.length ? (
-            <div className="sm:col-span-2 xl:col-span-3 text-sm text-muted-foreground">
-              Keine Flow-Spine-Prozesse im Katalog-Antwort (leeres <code className="rounded bg-muted px-1 text-xs">processes</code>-Array).
-            </div>
+      {normalizedQuery ? (
+        <section className="space-y-3" aria-label="Suchtreffer">
+          <h2 className="text-lg font-semibold text-foreground">Treffer</h2>
+          {searchHits.length === 0 && filteredTiles.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Keine Belege oder Apps gefunden.</p>
           ) : (
-            flowCatalog.processes.map((proc) => {
-                const gradient = DOMAIN_COLOR[proc.key] ?? 'from-slate-500/20 to-slate-600/5 border-slate-500/30'
-                const domain = getDomainPresentation(proc.domain, activeLang)
-                const DomainIcon = domain.icon
-                return (
-                  <button
-                    key={proc.key}
-                    type="button"
-                    onClick={() => navigate(proc.route_path)}
-                    className={`group flex flex-col items-start gap-1 rounded-2xl border bg-linear-to-br p-4 text-left shadow-sm transition-all hover:shadow-md dark:hover:brightness-110 ${gradient}`}
-                  >
-                    <div className="flex w-full items-center justify-between">
-                      <span className="text-sm font-semibold">{proc.label}</span>
-                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                    </div>
-                    <span className="text-xs text-muted-foreground line-clamp-2">{proc.summary}</span>
-                    <Badge
-                      variant="outline"
-                      className="mt-2 inline-flex items-center gap-1 rounded-full border-white/20 bg-white/10 px-2.5 py-1 text-[10px] font-medium tracking-[0.12em] text-foreground/90"
-                    >
-                      <DomainIcon className="h-3 w-3" />
-                      {domain.label}
-                    </Badge>
-                  </button>
-                )
-              })
-          ))}
-        </div>
-      </section>
+            <div className="flex flex-wrap gap-3">
+              {searchHits.map((tile) => (
+                <LaunchpadTile
+                  key={`${tile.spaceId}-${tile.pageId}-${tile.id}`}
+                  label={tile.label}
+                  path={tile.path}
+                  caption={tile.pageLabel}
+                  colorKey={tile.id}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      ) : (
+        <LaunchpadBoard
+          catalogSpaces={launchpadSpaces}
+          spaceId={activeSpaceId}
+          onSpaceIdChange={(next) => {
+            setSpaceId(next)
+            writeStoredSpace(next)
+          }}
+          pageBySpace={pageBySpace}
+          onPageBySpaceChange={(nextPages) => {
+            setPageBySpace(nextPages)
+            writeStoredPages(nextPages)
+          }}
+        />
+      )}
 
-      {/* Header + Suche */}
-      <section className="rounded-(--radius) border border-border bg-card p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold tracking-normal text-foreground">App Starter</h1>
-            <p className="text-sm text-muted-foreground">
-              Einstieg in alle VALEO ERP Bereiche mit aktueller Modul-Verdrahtung.
-            </p>
-          </div>
-          <div className="relative w-full max-w-xl">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className="pl-9"
-              placeholder="Module durchsuchen..."
-              aria-label="Module durchsuchen"
-            />
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Badge variant="secondary">{allTiles.length} Bereiche</Badge>
-          <Badge variant="outline">{ACTION_SHORTCUTS.length} Schnellaktionen</Badge>
-          <Badge variant="outline">{pinnedTiles.length} Favoriten</Badge>
-        </div>
-      </section>
-
-      {/* Schnellaktionen */}
-      <section className="rounded-(--radius) border border-border bg-card p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground">Schnellaktionen</h2>
-        <p className="mb-3 text-sm text-muted-foreground">
-          Haeufige Startaktionen fuer Tagesgeschaeft und neue Belege.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {ACTION_SHORTCUTS.map((action) => (
-            <Button
-              key={action.id}
-              asChild
-              variant="outline"
-              size="sm"
-              className="dark:border-white/10 dark:bg-slate-900/50 dark:hover:border-indigo-400/40 dark:hover:bg-slate-800/60"
-            >
-              <Link to={action.path}>{action.label}</Link>
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      {/* Favoriten */}
       {pinnedTiles.length > 0 ? (
-        <section className="space-y-3">
+        <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <Pin className="h-4 w-4 text-status-warning" aria-hidden="true" />
+            <Pin className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <h2 className="text-lg font-semibold">Favoriten</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -365,14 +315,11 @@ export default function StartDashboardPage(): JSX.Element {
               const Icon = tile.icon
               const BadgeIcon = tile.badgeIcon
               return (
-                <Card
-                  key={`pinned-${tile.id}`}
-                  className="border-amber-200 bg-amber-50/40 dark:border-amber-500/25 dark:bg-amber-500/5"
-                >
+                <Card key={`pinned-${tile.id}`}>
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="rounded-lg border border-border bg-background p-2 dark:border-white/10 dark:bg-slate-900/60">
+                        <span className="rounded-lg border border-border bg-background p-2">
                           <Icon className="h-4 w-4" />
                         </span>
                         <div>
@@ -394,18 +341,13 @@ export default function StartDashboardPage(): JSX.Element {
                         size="icon"
                         onClick={() => togglePin(tile.id)}
                         aria-label={`${tile.label} entpinnen`}
-                        className="dark:hover:bg-white/5"
                       >
                         <PinOff className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button
-                      asChild
-                      size="sm"
-                      className="dark:bg-indigo-600/80 dark:text-white dark:hover:bg-indigo-600"
-                    >
+                    <Button asChild size="sm">
                       <Link to={tile.path}>Oeffnen</Link>
                     </Button>
                   </CardContent>
@@ -416,80 +358,102 @@ export default function StartDashboardPage(): JSX.Element {
         </section>
       ) : null}
 
-      {/* Alle Module */}
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {filteredTiles.map((tile) => {
-          const section = sections.find((entry) => entry.id === tile.sectionId)
-          const shortcuts = section ? getSectionShortcuts(section) : []
-          const Icon = tile.icon
-          const BadgeIcon = tile.badgeIcon
+      <section className="flex flex-wrap items-center gap-2">
+        <span className="text-2xs tracking-wide uppercase text-muted-foreground">Schnellaktionen</span>
+        {HOME_PRIMARY_ACTIONS.map((action) => (
+          <Button key={action.id} asChild variant="outline">
+            <Link to={action.path}>{action.label}</Link>
+          </Button>
+        ))}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="ghost" aria-label="Weitere Schnellaktionen">
+              Mehr
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="top" className="z-[200] border bg-popover text-popover-foreground shadow-xl">
+            {ACTION_SHORTCUTS.filter((action) => action.id !== 'action-kunden-schnellauswahl').map((action) => (
+              <DropdownMenuItem key={action.id} asChild>
+                <Link to={action.path}>{action.label}</Link>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuItem asChild>
+              <Link to={LETZTE_DOKUMENTE_PATH}>Letzte Dokumente</Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </section>
 
+      <section className="space-y-3" aria-label="Kennzahlen">
+        <div className="grid gap-4 sm:grid-cols-3">
+        {KPI_TILES.map((tile) => {
+          const value = kpis?.[tile.key]
           return (
-            <div
-              key={tile.id}
-              className="flex h-full flex-col rounded-2xl border border-border bg-card shadow-sm dark:border-white/10 dark:bg-slate-950/60"
+            <Link
+              key={tile.key}
+              to={tile.path}
+              aria-label={`${tile.label} zur Auswertung`}
+              className="group min-h-11 rounded-(--radius) border border-l-4 border-border border-l-[hsl(var(--accent))] bg-card px-4 py-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <div className="p-4 pb-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="rounded-lg border border-border bg-muted/40 p-2 dark:border-white/10 dark:bg-slate-800/60">
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <div>
-                      <div className="text-base font-semibold leading-tight">
-                        <Link to={tile.path} className="hover:underline hover:text-indigo-500 dark:hover:text-indigo-400">
-                          {tile.label}
-                        </Link>
-                      </div>
-                      <div className="mt-1 text-xs text-muted-foreground">{tile.description}</div>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                        <Badge variant="outline" className="inline-flex items-center gap-1">
-                          <BadgeIcon className="h-3 w-3" />
-                          {tile.badgeLabel}
-                        </Badge>
-                        <span>Öffnet: {tile.landingLabel}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant={isPinned(tile.id) ? 'secondary' : 'ghost'}
-                    size="icon"
-                    onClick={() => togglePin(tile.id)}
-                    aria-label={isPinned(tile.id) ? `${tile.label} entpinnen` : `${tile.label} pinnen`}
-                    className="shrink-0 dark:hover:bg-white/5"
-                  >
-                    <Pin className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">{tile.label}</span>
+                <span className={tile.accentClass}>{tile.icon}</span>
               </div>
-              <div className="flex flex-1 flex-col gap-3 px-4 pb-4">
-                {shortcuts.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {shortcuts.map((shortcut) => (
-                      <Button
-                        key={shortcut.id}
-                        asChild
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-indigo-400/30 dark:hover:bg-slate-800/50"
-                      >
-                        <Link to={shortcut.path}>{shortcut.label}</Link>
-                      </Button>
-                    ))}
+              <div className="mt-2">
+                {kpiLoading ? (
+                  <Skeleton className="h-7 w-20" />
+                ) : (
+                  <div className="text-xl font-bold tracking-normal tabular-nums text-foreground">
+                    {value !== undefined ? tile.format(value) : '-'}
                   </div>
                 )}
-                <Button
-                  asChild
-                  size="sm"
-                  className="mt-auto self-start dark:bg-indigo-600/70 dark:text-white dark:hover:bg-indigo-600"
-                >
-                  <Link to={tile.path}>Bereich oeffnen</Link>
-                </Button>
               </div>
-            </div>
+              <p className="mt-2 text-xs font-medium text-primary group-hover:underline">Zur Auswertung</p>
+            </Link>
           )
         })}
+        </div>
+        <p className="text-2xs text-muted-foreground">
+          Zeitraum, Trend und Abweichung sind nicht ermittelt. Es werden keine Schätzwerte angezeigt.
+        </p>
       </section>
+
+      <p className="text-xs text-muted-foreground">
+        Ausnahmen und übergreifende Koordination bleiben im{' '}
+        <Link to={LEITSTAND_PATH} className="underline underline-offset-2 hover:text-foreground">
+          Leitstand
+        </Link>
+        . Prozessräume sind kein Einstieg für das Tagesgeschäft.
+      </p>
     </div>
+  )
+}
+
+function LaunchpadTile({
+  label,
+  path,
+  caption,
+  colorKey,
+}: {
+  label: string
+  path: string
+  caption?: string
+  colorKey: string
+}): JSX.Element {
+  const surface = launchpadTileSurface(colorKey)
+  return (
+    <Link
+      to={path}
+      aria-label={label}
+      className="flex min-h-32 w-full max-w-52 shrink-0 flex-col justify-between rounded-(--radius) border border-l-4 p-3 shadow-sm transition-shadow hover:shadow-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+      style={surface}
+    >
+      {caption ? (
+        <span className="text-2xs tracking-wide uppercase text-muted-foreground">{caption}</span>
+      ) : (
+        <span aria-hidden="true" />
+      )}
+      <span className="text-sm font-semibold leading-snug text-foreground">{label}</span>
+    </Link>
   )
 }

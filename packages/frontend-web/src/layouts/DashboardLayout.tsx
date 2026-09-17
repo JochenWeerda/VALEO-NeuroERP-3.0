@@ -78,7 +78,7 @@ export default function AppLayout(): JSX.Element {
         <div className="flex-1 overflow-y-auto bg-background p-4 md:p-8">
           <Outlet />
         </div>
-        {realtimeEnabled ? (
+        {realtimeEnabled && connectionState !== 'open' ? (
           <footer className="border-t border-border bg-muted/40 px-6 py-2 text-xs text-muted-foreground">
             <div className="flex items-center justify-between gap-2">
               <span className={`${connectionMeta.className} font-medium`}>Realtime: {connectionMeta.label}</span>
