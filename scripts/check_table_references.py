@@ -39,9 +39,10 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-#: Stand bei Einfuehrung (2026-09-17). Beide Zahlen duerfen sinken, nicht steigen.
-BASELINE_LEBEND = 29
-BASELINE_RUHEND = 23
+#: Stand 2026-09-17 nach den Verweisfixes (Einfuehrung: 29 / 23).
+#: Beide Zahlen duerfen sinken, nicht steigen.
+BASELINE_LEBEND = 28
+BASELINE_RUHEND = 19
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")
 FRONTEND = pathlib.Path("packages/frontend-web/src")
