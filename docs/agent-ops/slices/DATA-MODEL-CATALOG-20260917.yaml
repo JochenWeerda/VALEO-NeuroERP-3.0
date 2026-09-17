@@ -7,51 +7,51 @@ owner: unassigned
 date: 2026-09-17
 created_at: 2026-09-17
 coordination: >
-  P2 geliefert. Naechster Claim ist P3 (Verbraucher-Lineage Tabelle →
-  Endpunkt → ScreenDefinition), nicht P4 gleichzeitig. Keine FSX-/Rechnungsdateien.
+  P3 geliefert. Naechster Claim ist P4 (Feldvertrag Maske ↔ JSON), nicht P5/P6
+  gleichzeitig. Keine FSX-/Rechnungsdateien.
 goal: >
-  Jede domain_*-Tabelle hat Schema-Custodian und Architecture-Domain.
-  Unbekanntes Schema und Praefix-Konflikt ohne Legacy-Zeile fallen (only-up).
+  Tabelle → Code unter app/ → native ScreenDefinition. crm_consents und
+  crm_contact_consents listen ihre Verbraucher. Native entity.table muss im
+  Katalog stehen.
 file_ownership:
   - docs/agent-ops/todo-datenmodell-katalog.md
   - docs/entwickler/datenmodell-tenancy.md
   - scripts/generate_table_catalog.py
   - scripts/table_ownership.py
+  - scripts/table_lineage.py
   - scripts/check_domain_table_ownership.py
   - tests/test_generate_table_catalog.py
   - tests/test_table_ownership.py
+  - tests/test_table_lineage.py
   - docs/admin/table-catalog.md
   - docs/admin/table-catalog.json
+  - packages/frontend-web/src/components/mask-builder/schema.ts
 acceptance:
-  - python scripts/check_domain_table_ownership.py Exit 0 (635 Tabellen, 13 Legacy)
-  - Katalog-JSON nennt owner_domain und placement je Tabelle
-  - Architecture Index database_schemas listet die physischen Schemas je Domain
+  - crm_consents.written_by enthaelt app/crm/router.py
+  - crm_contact_consents.read_by enthaelt app/api/v1/endpoints/crm_consents.py
+  - Native dataSources.entity.table ohne Katalog-Treffer faellt --check
 tests:
-  - tests/test_table_ownership.py
+  - tests/test_table_lineage.py
   - tests/test_generate_table_catalog.py
 risks:
-  - Praefixe crm_/finance_/hrm_ wurden bewusst nicht erweitert (zu viele Altlagen)
-  - Legacy-Liste darf nur wachsen mit Begruendung, nicht als stilles Schlupfloch
+  - Code nennt Tabellen in falschem Schema (109 Refs); das ist kein Gate
+  - Screen-Bindung nur ueber APIRouter-prefix oder explizites table-Feld
 ai_harness:
   fachlicher_vertrag: >
-    Agenten und Entwickler sehen Schema, Tabelle und Spalten aus der laufenden
-    DB, nicht aus einem handgezeichneten UML. Zwei Fachmodelle bleiben zwei
-    Tabellen.
+    Impact Analysis beginnt im Katalog-Abschnitt Verbraucher, nicht im UML.
+    Zwei Fachmodelle bleiben zwei Tabellen.
   architektur_vertrag: >
-    ADR-003 bleibt logisch. Physische Wahrheit ist information_schema.
-    Architecture-OS-Generator-Muster (--check, nicht manuell editieren).
+    Lineage wird geerntet, nicht gezeichnet. Architecture-OS-Muster (--check).
   daten_vertrag: >
-    Nur domain_*-BASE TABLE. Tenant-Spalten werden gelistet, nicht interpretiert.
-    Kein DROP, kein Rewrite fremder Migrationen.
+    Kein DROP. Maske loeschen sucht Verbraucher, droppt keine Spalte.
   test_vertrag: >
-    Unit-Render gegen Fixture. Integration gegen echte Postgres (require_db).
+    Unit gegen Fixtures und echte Consent-Dateien. Harvest mit require_db.
   security_vertrag: >
-    DATABASE_URL aus der Umgebung, keine Secrets im Katalog. Nur Metadata-SELECT.
+    Nur Dateilesen unter app/ plus Metadata-SELECT. Keine Secrets.
   betriebs_vertrag: >
-    Qualitaetsgate nach Alembic. Rollback = Generator-Commit revertieren;
-    die Datenbank bleibt unangetastet.
+    Qualitaetsgate nach Alembic. Rollback = Generator-Commit revertieren.
   dokumentations_vertrag: >
-    Workboard, todo-datenmodell-katalog.md P2, table_ownership.py, Architecture Index database_schemas.
+    Workboard, todo-datenmodell-katalog.md P3, table_lineage.py, Katalog Verbraucher.
 external_gates:
   - not_applicable
 ---

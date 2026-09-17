@@ -90,6 +90,26 @@ def test_catalog_for_check_laesst_schemas() -> None:
     assert "crm_consents" in checked["schemas"]["domain_crm"]["tables"]
 
 
+def test_markdown_nennt_verbraucher() -> None:
+    from scripts.table_lineage import attach_lineage
+
+    payload = _sample_catalog()
+    attach_lineage(
+        payload,
+        {
+            ("domain_crm", "crm_consents"): {
+                "read_by": ["app/crm/router.py"],
+                "written_by": ["app/crm/router.py"],
+                "screens": ["crm/consent"],
+            }
+        },
+    )
+    md = render_markdown(payload, today="2026-09-17")
+    assert "## Verbraucher" in md
+    assert "`app/crm/router.py`" in md
+    assert "`crm/consent`" in md
+
+
 @pytest.mark.integration
 def test_ernte_enthaelt_beide_consent_tabellen(require_db) -> None:
     from scripts.generate_table_catalog import harvest
@@ -103,3 +123,7 @@ def test_ernte_enthaelt_beide_consent_tabellen(require_db) -> None:
     assert "partner_id" in partner_cols
     assert "contact_id" in contact_cols
     assert "contact_id" not in partner_cols
+    assert "app/crm/router.py" in crm["crm_consents"].get("written_by", [])
+    assert "app/api/v1/endpoints/crm_consents.py" in crm["crm_contact_consents"].get(
+        "read_by", []
+    )

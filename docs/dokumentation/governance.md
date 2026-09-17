@@ -31,7 +31,7 @@ erfordern Review der jeweils Verantwortlichen.
 | `doc-drift-report.yml` (woechentlich) | Informativer Drift-Snapshot Code↔Doku; Artifact `doc_drift_report.json`. |
 | `quality-gate.yml`: `doc_drift_report.py --fail-over 0` | Blockierendes Code-Doku-Drift-Gate; kein Drift-Item erlaubt. |
 | `generate_code_inventories.py --check` | Endpoint-/Service-/Migrations-Inventare synchron zu Code (docs.yml). |
-| `generate_table_catalog.py --check` | Physischer domain_*-Katalog synchron zur migrierten DB (Quality-Gate nach Alembic). |
+| `generate_table_catalog.py --check` | Physischer domain_*-Katalog plus Verbraucher-Lineage; native `entity.table` muss existieren. |
 | `check_domain_table_ownership.py` | Jede domain_*-Tabelle hat Schema-Custodian; unbekanntes Schema faellt. |
 | `generate_agent_handbuch.py --check` | Agent-Handbuch synchron zu Flow Spine, ScreenDefinitions, MCP, Events. |
 

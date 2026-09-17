@@ -79,6 +79,11 @@ Der physische Katalog nennt `owner_domain` und `placement`
 Architecture Index (`database_schemas`). Zwei Modelle duerfen nicht denselben
 Tabellennamen in einem Schema teilen.
 
+**Verbraucher** stehen im Katalog (`read_by`, `written_by`, `screens`), geerntet
+aus SQL/ORM unter `app/` (`scripts/table_lineage.py`). Native ScreenDefinitions
+duerfen `dataSources.entity.table` setzen — der Wert muss im Katalog vorkommen.
+Vor dem Loeschen einer Maske die Verbraucher-Suche, nicht `DROP COLUMN`.
+
 ## Module & Feature-Flags
 
 Installierte Module pro Mandant: `INSTALLED_MODULES` / `TENANT_MODULE_FLAGS`

@@ -106,22 +106,21 @@ Heute wies der Check nur Anker und fuenf Praefixe. Jetzt hat jede
 Legacy. `sales_orders` in `domain_crm` und Kontrakte in `domain_inventory`
 bleiben begruendet.
 
-### P3 — Verbraucher-Lineage — offen
+### P3 — Verbraucher-Lineage — erledigt 2026-09-17
 
-Catalogs 2026: ohne Lineage ist Impact Analysis Ratei. Fuer uns reicht
-Tabelle → schreibender/lesender Endpunkt → ScreenDefinition, nicht
-Spalte-durch-alle-dbt-Modelle.
+Catalogs 2026: ohne Lineage ist Impact Analysis Ratei. Erntet wird
+Tabelle → Code unter `app/` → native ScreenDefinition, nicht Spalte durch dbt.
 
-- [ ] Katalog-Feld `written_by` / `read_by` aus SQL in `app/` (Roh-SQL und ORM
-      `__tablename__`) und aus ScreenDefinition-`dataSources`
-- [ ] Gate: ScreenDefinition-Entity darf nicht auf eine Tabelle zeigen, die
-      der Katalog nicht kennt (das haette die Bruecken-Leerlese gefangen)
-- [ ] Beim Loeschen oder Umbauen einer Maske: Verbraucher-Suche ist Pflicht,
-      Spalten-Drop bleibt verboten ohne eigene Migration
+- [x] Katalog-Felder `written_by` / `read_by` / `screens` aus SQL, ORM
+      `__tablename__` und ScreenDefinition-`dataSources` (Router-Praefix oder
+      optionales Feld `table`)
+- [x] Gate: `dataSources.entity.table` muss im Katalog stehen (`--check` und Test)
+- [x] Verbraucher-Suche vor Maskenumbau: Abschnitt Verbraucher im Katalog;
+      Spalten-Drop bleibt eine eigene Migration
 
 **Abnahme:** `crm_consents` listet `app/crm/router.py`; `crm_contact_consents`
-listet `app/api/v1/endpoints/crm_consents.py`. Ein Test oder `--check` fällt,
-wenn eine native Entity-Quelle ohne Katalog-Treffer bleibt.
+listet `app/api/v1/endpoints/crm_consents.py`. Native Entity mit unbekanntem
+`table`-Feld faellt.
 
 ### P4 — Feldvertrag Maske ↔ JSON — offen
 
@@ -180,5 +179,5 @@ Owner an Tabellen, die der Check nicht sieht.
 ## Einstieg fuer den naechsten Slice
 
 Datei: `docs/agent-ops/slices/DATA-MODEL-CATALOG-20260917.yaml`.
-Naechster Claim: **P3** (Verbraucher-Lineage), nicht P4 gleichzeitig.
+Naechster Claim: **P4** (Feldvertrag Maske ↔ JSON), nicht P5/P6 gleichzeitig.
 Alembic-Head zum Zeitpunkt der Liste: `crm_kreditlimite_20260917`.

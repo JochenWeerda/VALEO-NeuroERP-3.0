@@ -48,6 +48,8 @@ export type ScreenFieldType =
 export interface ScreenDataSource {
   key: string
   endpoint: string
+  /** Qualifizierte Katalog-Tabelle (`domain_crm.customers`), wenn die Quelle an Persistenz bindet. */
+  table?: string
   method?: 'GET' | 'POST'
   staleTimeMs?: number
   pageSize?: number

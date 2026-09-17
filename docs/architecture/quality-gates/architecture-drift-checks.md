@@ -11,7 +11,7 @@ Katalog der Gates für Architecture OS (bestehend + neu).
 | Container Inventar | `scripts/generate_container_inventory.py --check` |
 | OpenAPI | `scripts/generate_openapi.py --check` |
 | Code-Inventare | `scripts/generate_code_inventories.py --check` |
-| Tabellenkatalog | `scripts/generate_table_catalog.py --check` (nach Alembic) |
+| Tabellenkatalog | `scripts/generate_table_catalog.py --check` (nach Alembic, inkl. Lineage) |
 | Tabellenbesitz | `scripts/check_domain_table_ownership.py` (nach Alembic, only-up) |
 | Agent-Handbuch | `scripts/generate_agent_handbuch.py --check` |
 

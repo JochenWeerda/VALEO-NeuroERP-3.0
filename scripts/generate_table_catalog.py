@@ -26,6 +26,7 @@ from typing import Any
 
 from sqlalchemy import create_engine, text
 
+from scripts.table_lineage import attach_lineage, collect_lineage
 from scripts.table_ownership import SCHEMA_TO_DOMAIN, classify_table
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -101,7 +102,16 @@ def harvest(url: str | None = None) -> dict[str, Any]:
             fks = list(conn.execute(text(_FK_SQL)))
     finally:
         engine.dispose()
-    return assemble_catalog(tables, columns, pks, fks)
+    payload = assemble_catalog(tables, columns, pks, fks)
+    keys = {
+        (schema, table)
+        for schema, body in payload["schemas"].items()
+        for table in body.get("tables") or {}
+    }
+    lineage, failures = collect_lineage(REPO_ROOT, catalog_tables=keys)
+    attach_lineage(payload, lineage)
+    payload["lineage_failures"] = failures
+    return payload
 
 
 def assemble_catalog(
@@ -223,8 +233,8 @@ def render_markdown(payload: dict[str, Any], today: str | None = None) -> str:
         "",
         "> Automatisch generiert via `python scripts/generate_table_catalog.py`. **Nicht manuell bearbeiten.**",
         "",
-        "Quelle: `information_schema` nach `alembic upgrade head`. Logisches Modell:",
-        "[ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).",
+        "Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM unter `app/`.",
+        "Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).",
         "Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).",
         "",
         f"**{len(schemas)} Schemas, {table_count} Tabellen, {column_count} Spalten.**",
@@ -252,6 +262,31 @@ def render_markdown(payload: dict[str, Any], today: str | None = None) -> str:
         for item in cross:
             joined = ", ".join(f"`{s}`" for s in item["schemas"])
             lines.append(f"- `{item['table']}` in {joined}")
+
+    consumer_rows: list[str] = []
+    for schema in sorted(schemas):
+        tables = schemas[schema].get("tables") or {}
+        for table in sorted(tables):
+            body = tables[table]
+            if not (body.get("read_by") or body.get("written_by") or body.get("screens")):
+                continue
+            reads = ", ".join(f"`{p}`" for p in body.get("read_by") or []) or "—"
+            writes = ", ".join(f"`{p}`" for p in body.get("written_by") or []) or "—"
+            screens = ", ".join(f"`{s}`" for s in body.get("screens") or []) or "—"
+            consumer_rows.append(f"| `{schema}.{table}` | {reads} | {writes} | {screens} |")
+    if consumer_rows:
+        lines.extend(
+            [
+                "",
+                "## Verbraucher",
+                "",
+                "Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.",
+                "",
+                "| Tabelle | gelesen von | geschrieben von | Masken |",
+                "|---|---|---|---|",
+                *consumer_rows,
+            ]
+        )
 
     for schema in sorted(schemas):
         lines.extend(["", f"## `{schema}`", "", "| Tabelle | Domain | Lage | PK | Spalten |", "|---|---|---|---|---|"])
@@ -309,6 +344,15 @@ def main() -> int:
             problems.append(str(JSON_OUTPUT.relative_to(REPO_ROOT)))
         if normalize_markdown(MD_OUTPUT.read_text(encoding="utf-8")) != normalize_markdown(md):
             problems.append(str(MD_OUTPUT.relative_to(REPO_ROOT)))
+        lineage_failures = payload.get("lineage_failures") or []
+        if lineage_failures:
+            print(
+                "FEHLER: Native Entity-Quelle zeigt auf eine Tabelle, die der Katalog nicht kennt:",
+                file=sys.stderr,
+            )
+            for item in lineage_failures:
+                print(f"  - {item}", file=sys.stderr)
+            return 1
         if problems:
             print(
                 "DRIFT: Tabellenkatalog nicht aktuell. "
