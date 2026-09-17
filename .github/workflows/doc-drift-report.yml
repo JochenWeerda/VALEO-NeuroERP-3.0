@@ -55,7 +55,7 @@ jobs:
           fi
 
       - name: Upload report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: doc-drift-report
           path: artifacts/doc_drift_report.json

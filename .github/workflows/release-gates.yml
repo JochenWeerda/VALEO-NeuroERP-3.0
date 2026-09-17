@@ -123,7 +123,7 @@ jobs:
             --fail-on-red \
             --sha "${{ inputs.release_sha || github.sha }}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-gate-evidence
           path: |
