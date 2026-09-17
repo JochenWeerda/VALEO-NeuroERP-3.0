@@ -216,7 +216,7 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT bs.id, w.name AS warehouse_name, bs.quantity_kg, bs.reserved_kg
+                    SELECT bs.id, w.warehouse_code, w.name AS warehouse_name, bs.quantity_kg, bs.reserved_kg
                     FROM domain_inventory.bin_stock bs
                     JOIN domain_inventory.warehouse_bins wb ON wb.id = bs.bin_id
                     JOIN domain_inventory.warehouse_zones wz ON wz.id = wb.zone_id
@@ -230,6 +230,11 @@ class MaskRolloutSummaryService:
             ).mappings().all()
             items = [
                 {
+                    "lagerort_nr": r["warehouse_code"],
+                    "lagerort_bezeichnung": r["warehouse_name"],
+                    "bestand_menge": float(r["quantity_kg"] or 0),
+                    "reserviert": float(r["reserved_kg"] or 0),
+                    "einheit": "kg",
                     "warehouse_name": r["warehouse_name"],
                     "quantity_kg": float(r["quantity_kg"] or 0),
                     "reserved_kg": float(r["reserved_kg"] or 0),
@@ -251,7 +256,13 @@ class MaskRolloutSummaryService:
             )
             items = [
                 {
+                    "id": str(r.id),
                     "movement_id": str(r.id),
+                    "datum": format_optional_date(r.movement_date) or format_optional_date(r.created_at),
+                    "typ": r.movement_type,
+                    "menge": float(r.quantity or 0),
+                    "einheit": r.unit or "kg",
+                    "beleg_nr": r.movement_number or r.reference_number,
                     "movement_number": r.movement_number,
                     "movement_type": r.movement_type,
                     "quantity": float(r.quantity or 0),

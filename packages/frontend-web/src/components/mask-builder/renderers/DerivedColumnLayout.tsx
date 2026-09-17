@@ -205,6 +205,7 @@ export function DerivedColumnLayout({
                     tableLoadError={tableLoadError}
                     onRetry={onRetry}
                     hideTableKeys={hideTableKeys}
+                    onRowAction={onAction}
                     tableSelection={{
                       [listKey]: {
                         selectedRowKey: selectedListKey,

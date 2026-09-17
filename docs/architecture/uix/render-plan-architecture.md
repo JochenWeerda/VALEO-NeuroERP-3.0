@@ -86,7 +86,7 @@ Invalidierung bei Logout oder `schemaVersion`-Wechsel.
 
 ## Renderer-Verdrahtung (opt-in)
 
-`FastTableRenderer` und `FastTabRenderer` akzeptieren optionale Props `total`, `page`, `onQueryChange`. Wenn `serverPagination === true` und `onQueryChange` gesetzt, entfaellt das client-seitige Slice; Vor-/Zurueck-Controls werden eingeblendet. `FastFormRenderer` liest `lookupEndpoint` aus `LookupBindingContext`.
+`FastTableRenderer` und `FastTabRenderer` akzeptieren optionale Props `total`, `page`, `onQueryChange`. Wenn `serverPagination === true` und `onQueryChange` gesetzt, entfaellt das client-seitige Slice; Vor-/Zurueck-Controls werden eingeblendet. `FastTabRenderer` reicht `onRowAction` an jede Registertabelle weiter — ohne diesen Prop bleiben deklarierte `rowActions` in Tabs tot. `FastFormRenderer` liest `lookupEndpoint` aus `LookupBindingContext`.
 
 ## Performance-Vertrag
 

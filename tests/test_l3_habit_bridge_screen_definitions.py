@@ -25,6 +25,8 @@ def test_article_stock_uses_dense_record_work_pattern() -> None:
     } == screen["layout"]
     assert screen["interaction"]["enterMovesFocus"] is True
     assert _action(screen, "edit")["zone"] == "commit"
+    bewegungen = next(tab["tables"][0] for tab in screen["tabs"] if tab["key"] == "bewegungen")
+    assert bewegungen["rowRouteTemplate"] == "/lager/stock-movement/{movement_id}"
     _assert_ready(screen)
 
 

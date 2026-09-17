@@ -358,6 +358,7 @@ function RenderFromPlan({
                 onResetOverlay={onOverlayReset}
                 tableLoadError={tableLoadError}
                 onRetry={onRetry}
+                onRowAction={onAction}
               />
             ),
           }))}

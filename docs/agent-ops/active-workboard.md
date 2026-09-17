@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-L3-HABIT-DECLARE — Zeilensprung aus L3-Gewohnheit 2026-09-17, Cursor
+
+**Stand:** abgeschlossen 2026-09-17. L3-PNGs bleiben lokal. Registertabellen
+feuern `rowActions`. Artikelstamm-Bewegung springt nach
+`/lager/stock-movement/{movement_id}`. Beleg-Kontrolle oeffnet `{source_route}`
+aus der Worklist-Vorschau. Auftrag/Rechnung und FSX bleiben Claude.
+
+**Dateibesitz:** `FastTabRenderer.tsx`, `UniversalMaskRenderer.tsx`,
+`DerivedColumnLayout.tsx`, `row-identity.ts`, `screen_definitions.py`
+(nur article-stock + beleg-kontrolle), `mask_rollout_summary_service.py`,
+`tests/test_l3_habit_bridge_screen_definitions.py`,
+`tests/test_document_control.py`, Mask-Builder-Vitest, Paritaetsmatrix.
+
+## MASK-FELDVERTRAG-BRUECKEN-STUBS — leere P4-Register 2026-09-17, Cursor
+
+**Stand:** abgeschlossen 2026-09-17. Dreizehn leere `/masks/.../tabs/`-Routen
+mit Zeilenform, `ZEILEN_NICHT_PRUEFBAR_MAX = 27`. Auftrag, Rechnung und
+`screen_definitions.py` unangetastet.
+
 ## MASK-FELDVERTRAG-BRUECKEN-ZEILE — Bestellung, Lieferant, ER 2026-09-17, Cursor
 
 **Stand:** abgeschlossen 2026-09-17. Sechs Tabellen, `ZEILEN_NICHT_PRUEFBAR_MAX = 43`.

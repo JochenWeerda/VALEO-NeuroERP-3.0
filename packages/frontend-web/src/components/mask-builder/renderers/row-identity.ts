@@ -10,9 +10,19 @@ export function rowIdentity(row: Record<string, unknown>, index?: number): strin
 
 export function resolveRowRoute(template: string | undefined, row: Record<string, unknown>): string | undefined {
   if (!template) return undefined
-  const target = template.replace(/\{([^}]+)\}/g, (_match, key: string) =>
-    encodeURIComponent(String(row[key] ?? '')),
-  )
+  const target = template.replace(/\{([^}]+)\}/g, (match, key: string) => {
+    const raw = row[key]
+    if (raw == null) return ''
+    const value = String(raw)
+    if (!value) return ''
+    // Whole-template token is already a route (`{source_route}`). Encoding
+    // would turn `/verkauf/auftrag/1` into `%2Fverkauf%2F...`.
+    if (match === template) {
+      if (!value.startsWith('/') || value.startsWith('//')) return ''
+      return value
+    }
+    return encodeURIComponent(value)
+  })
   if (!target || target.includes('{')) return undefined
   return target
 }

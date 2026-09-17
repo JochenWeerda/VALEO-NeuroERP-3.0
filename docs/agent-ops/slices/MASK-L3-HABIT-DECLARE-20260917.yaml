@@ -1,0 +1,65 @@
+---
+slice_id: MASK-L3-HABIT-DECLARE
+id: MASK-L3-HABIT-DECLARE
+title: L3-Zeilensprung in ScreenDefinition deklarieren
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  L3-PNGs lokal, nie in Git. sales_invoices.py, sales_orders.py und Claude-
+  Auftrag/Rechnung-Hunks in screen_definitions.py unangetastet. Keine FSX-
+  Dateien. lager/leitstand nicht anfassen. coverage_path_check.xml nicht
+  committen.
+goal: >
+  Aus den vorhandenen L3-Aufnahmen die Gewohnheit Zeile-oeffnet-Detail in
+  ScreenDefinition und Runtime verdrahten, ohne Pixelkopie und ohne autonome
+  Studio-Ueberschreibung nativer IDs.
+file_ownership:
+  - packages/frontend-web/src/components/mask-builder/renderers/FastTabRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/UniversalMaskRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/DerivedColumnLayout.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/row-identity.ts
+  - app/core/screen_definitions.py
+  - app/services/mask_rollout_summary_service.py
+  - tests/test_l3_habit_bridge_screen_definitions.py
+  - tests/test_document_control.py
+  - packages/frontend-web/src/__tests__/components/mask-builder/mde-row-actions.test.tsx
+  - packages/frontend-web/src/__tests__/components/mask-builder/row-identity.test.ts
+  - docs/design/l3-to-meridian-habit-parity.md
+acceptance:
+  - FastTabRenderer reicht onRowAction an FastTableRenderer
+  - lager/article-stock Bewegungen haben rowRouteTemplate /lager/stock-movement/{movement_id}
+  - Tab-Zeilen liefern datum/typ/menge/einheit/beleg_nr und lagerort_* Aliasse
+  - auswertungen/beleg-kontrolle und Varianten haben rowRouteTemplate {source_route}
+  - resolveRowRoute laesst {source_route} unkodiert, wenn der Wert mit / beginnt
+  - keine L3-PNG in Git
+tests:
+  - tests/test_l3_habit_bridge_screen_definitions.py
+  - tests/test_document_control.py
+  - packages/frontend-web/src/__tests__/components/mask-builder/mde-row-actions.test.tsx
+  - packages/frontend-web/src/__tests__/components/mask-builder/row-identity.test.ts
+risks:
+  - parallele Schreibvorgaenge auf screen_definitions.py (Auftrag/Rechnung Claude)
+  - Worklist onRowSelect gewinnt gegen rowRouteTemplate; Sprung nur ueber Vorschau
+ai_harness:
+  fachlicher_vertrag: >
+    Zeilenklick folgt der L3-Gewohnheit zum Beleg bzw. zur Bewegung. Keine
+    erfundenen Commands ohne commandEndpoint.
+  architektur_vertrag: >
+    ScreenDefinition -> RenderPlan -> UniversalMaskRenderer. Kein maskenspezifischer
+    Sonderrenderer.
+  daten_vertrag: >
+    Alias-Felder zusaetzlich zu den API-Schluesseln. Kein DROP. L3-Bilder bleiben
+    lokal.
+  test_vertrag: >
+    SD-Vertrag, resolveRowRoute, FastTabRenderer-Dispatch.
+  security_vertrag: >
+    source_route nur interne Pfade mit führendem Slash, nicht //.
+  betriebs_vertrag: >
+    Rollback = Commit revertieren.
+  dokumentations_vertrag: >
+    Workboard, Slice, Paritaetsmatrix, Runtime-Status.
+external_gates:
+  - Fachabnahme L3-Anwender bleibt extern
+---

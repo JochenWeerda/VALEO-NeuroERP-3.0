@@ -1,6 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { FastTableRenderer } from '@/components/mask-builder/renderers/FastTableRenderer'
+import { FastTabRenderer } from '@/components/mask-builder/renderers/FastTabRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
 import type { RenderTablePlan } from '@/components/mask-builder/render-plan/types'
 
 const table: RenderTablePlan = {
@@ -78,5 +81,61 @@ describe('FastTableRenderer row actions', () => {
 
     rerender(<FastTableRenderer {...props} page={2} />)
     await waitFor(() => expect(screen.getByLabelText('Zeile lot-1 auswaehlen')).not.toBeChecked())
+  })
+
+  it('navigiert aus einer Zeile ueber rowRouteTemplate', () => {
+    const pushState = vi.spyOn(window.history, 'pushState')
+    render(
+      <FastTableRenderer
+        table={{
+          ...table,
+          rowActions: [],
+          rowRouteTemplate: '/lager/stock-movement/{movement_id}',
+        }}
+        rows={[{ movement_id: 'mv-9', device_id: 'MDE-9', sync_status: 'done' }]}
+      />,
+    )
+    fireEvent.click(screen.getByText('MDE-9'))
+    expect(pushState).toHaveBeenCalledWith(null, '', '/lager/stock-movement/mv-9')
+    pushState.mockRestore()
+  })
+})
+
+describe('FastTabRenderer row actions', () => {
+  const definition: ScreenDefinition = {
+    id: 'test/tab-actions',
+    schemaVersion: 1,
+    domain: 'lager',
+    mode: 'detail',
+    title: 'Artikel',
+    layout: { floorplan: 'objectPage', contextRail: 'none' },
+    tabs: [{
+      key: 'bewegungen',
+      label: 'Bewegungen',
+      tables: [{
+        key: 'bewegungen',
+        label: 'Bewegungen',
+        columns: [{ key: 'typ', label: 'Typ' }],
+        rowActions: [{ key: 'open_movement', label: 'Zur Bewegung' }],
+        pageSize: 25,
+        virtualized: true,
+        rowHeight: 44,
+      }],
+    }],
+  }
+
+  it('reicht Zeilenaktionen aus Registertabellen an onRowAction weiter', () => {
+    const onRowAction = vi.fn()
+    render(
+      <FastTabRenderer
+        plan={compileRenderPlanFromScreenDefinition(definition)}
+        tabKey="bewegungen"
+        payload={{}}
+        tables={{ bewegungen: [{ id: 'mv-1', typ: 'Zugang' }] }}
+        onRowAction={onRowAction}
+      />,
+    )
+    fireEvent.click(screen.getByTestId('row-action-open_movement'))
+    expect(onRowAction).toHaveBeenCalledWith('open_movement', expect.objectContaining({ id: 'mv-1' }))
   })
 })

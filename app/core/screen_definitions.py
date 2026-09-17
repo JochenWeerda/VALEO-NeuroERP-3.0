@@ -639,6 +639,7 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
                 "key": "bewegungen", "label": "Lagerbewegungen", "lazy": True, "keepAlive": False,
                 "tables": [{"key": "bewegungen", "label": "Bewegungen", "dataSourceKey": "bewegungen",
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "rowRouteTemplate": "/lager/stock-movement/{movement_id}",
                             "columns": [
                                 {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
                                 {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
@@ -3477,6 +3478,7 @@ def build_document_control_screen_definition() -> dict[str, Any]:
                 {"key": "notes", "label": "Hinweis", "width": 220},
                 {"key": "created_at", "label": "Erfasst", "renderKind": "datetime", "sortable": True, "width": 150},
             ],
+            "rowRouteTemplate": "{source_route}",
             "rowActions": [
                 {"key": "assign_me", "label": "Zuweisen", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
                 {"key": "start_work", "label": "In Arbeit", "visibleWhen": {"field": "status", "values": ["open", "assigned"]}},

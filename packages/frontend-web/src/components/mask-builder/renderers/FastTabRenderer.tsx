@@ -20,6 +20,7 @@ export const FastTabRenderer = memo(function FastTabRenderer({
   onRetry,
   hideTableKeys,
   tableSelection,
+  onRowAction,
 }: {
   plan: RenderPlan
   tabKey: string
@@ -37,6 +38,7 @@ export const FastTabRenderer = memo(function FastTabRenderer({
     selectedRowKey?: string
     onRowSelect?: (_row: Record<string, unknown>) => void
   }>
+  onRowAction?: (_actionKey: string, _row: Record<string, unknown>) => void | Promise<void>
 }): JSX.Element {
   const content = plan.tabContent[tabKey]
   const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
@@ -73,6 +75,7 @@ export const FastTabRenderer = memo(function FastTabRenderer({
             onRetry={onRetry}
             selectedRowKey={selection?.selectedRowKey}
             onRowSelect={selection?.onRowSelect}
+            onRowAction={onRowAction}
           />
         )
       })}

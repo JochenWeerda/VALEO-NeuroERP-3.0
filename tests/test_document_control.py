@@ -61,6 +61,7 @@ def test_document_control_screen_is_native_and_generator_ready() -> None:
     assert definition is not None
     assert definition["adapter"]["temporary"] is False
     assert definition["tables"][0]["serverPagination"] is True
+    assert definition["tables"][0]["rowRouteTemplate"] == "{source_route}"
     assert definition["layout"]["floorplan"] == "worklist"
     assert _check_readiness(definition)["generatorReady"] is True
     for screen_id, expected_filter in (
@@ -70,6 +71,7 @@ def test_document_control_screen_is_native_and_generator_ready() -> None:
     ):
         variant = get_screen_definition(screen_id)
         assert expected_filter in variant["dataSources"][1]["endpoint"]
+        assert variant["tables"][0]["rowRouteTemplate"] == "{source_route}"
         assert _check_readiness(variant)["generatorReady"] is True
 
 

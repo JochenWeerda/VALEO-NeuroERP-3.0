@@ -4,8 +4,8 @@ type: reference
 audience: [fachlich, design, entwickler, qa, agent]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-08-23
-version: 1.1.0
+last_reviewed: 2026-09-17
+version: 1.2.0
 description: Redigierte, datenfreie Ableitung von L3-Arbeitsgewohnheiten in herstellerneutrale Meridian-Vertraege.
 ---
 
@@ -46,6 +46,8 @@ zentral ueber:
 | Verkaufs-Lieferschein | Kopf und Adressregister, grosses Positionsraster | `transaction`, Register-Tabs, Tabellenprofil | `sales/delivery-note` | umgesetzt |
 | Verkaufs-Lieferschein | Summen nach Positionen, danach feste Aktionsleiste | `layout.summaryPlacement=footer`, `stickyFooter` | `sales/delivery-note` | umgesetzt |
 | Verkaufs-Lieferschein | Drucken als direkter Tastaturweg | `keyboardShortcut=Ctrl+P` | `sales/delivery-note` | umgesetzt; ActionRuntime bleibt autoritativ |
+| Artikelstamm | Zeile in Lagerbewegungen oeffnet die Bewegung | Registertabelle `rowRouteTemplate=/lager/stock-movement/{movement_id}`; Tab-Alias `datum/typ/menge/einheit/beleg_nr` | `lager/article-stock` Register Bewegungen | umgesetzt 2026-09-17 |
+| Beleg-Kontrolle | Zeile oeffnet den Ursprungsbeleg | Worklist `rowRouteTemplate={source_route}` plus bestehende `rowAction open_source`; Vollansicht aus der Vorschau | `auswertungen/beleg-kontrolle` und Varianten | umgesetzt 2026-09-17 |
 | Alle drei | Enter folgt dem sichtbaren Feldfluss | `interaction.enterMovesFocus=true` | alle drei nativen ScreenDefinitions | umgesetzt |
 
 ## Vollabnahme 2026-08-23

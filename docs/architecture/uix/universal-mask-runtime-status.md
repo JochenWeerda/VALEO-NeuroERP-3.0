@@ -4,12 +4,18 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-08-23
-version: 2.4.0
+last_reviewed: 2026-09-17
+version: 2.5.0
 description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+> **Nachtrag 2026-09-17 (`MASK-L3-HABIT-DECLARE`):** L3-Gewohnheit Zeilenklick
+> ohne Pixelkopie: Registertabellen feuern `rowActions` ueber `FastTabRenderer`,
+> Artikelstamm-Bewegungen springen nach `/lager/stock-movement/{movement_id}`,
+> Beleg-Kontrolle oeffnet `{source_route}` aus der Worklist-Vorschau. L3-PNGs
+> bleiben lokal und unversioniert.
 
 > **Nachtrag 2026-08-23 (`L3-VISUAL-PARITY-AUDIT-031`):** Alle 69
 > produktiven nativen ScreenDefinitions sind generator-ready und werden auf
