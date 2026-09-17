@@ -37,7 +37,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 FRONTEND = pathlib.Path("packages/frontend-web/src")
 #: Stand bei Einfuehrung des Gates. Die Zahl darf sinken, nicht steigen.
-BASELINE = 101
+BASELINE = 40
 
 _PFAD = re.compile(r"['\"`](/api/v1/[^'\"`\s]*)['\"`]")
 _AUFRUF = re.compile(r"apiClient\.(get|post|put|patch|delete)|fetch\(")
@@ -58,18 +58,64 @@ def _route_muster() -> list[re.Pattern[str]]:
     return muster
 
 
+def _varianten(endpunkt: str) -> list[str]:
+    """Lesarten eines Aufrufs, die alle dieselbe Route treffen koennen.
+
+    ``/api/v1/artikel${params}`` ist in Wahrheit ``/api/v1/artikel`` plus
+    Abfrageteil — ein angehaengtes Template ist deshalb **keine** eigene
+    Pfadstufe. Ohne diese Lesart meldet die Pruefung Phantome.
+    """
+    roh = endpunkt.split("?")[0]
+    mit_x = re.sub(r"\{[^}]+\}", "x", re.sub(r"\$\{[^}]*\}", "x", roh)).rstrip("/")
+    varianten = [mit_x]
+    # Template direkt an ein Segment geklebt: einmal ohne den Anhang lesen.
+    ohne_anhang = re.sub(r"\$\{[^}]*\}$", "", roh).rstrip("/")
+    if ohne_anhang and ohne_anhang != roh:
+        varianten.append(re.sub(r"\{[^}]+\}", "x", re.sub(r"\$\{[^}]*\}", "x", ohne_anhang)).rstrip("/"))
+    return [v for v in varianten if v]
+
+
 def _vereinfacht(endpunkt: str) -> str:
-    """Template-Literale und Parameter auf je ein Segment reduzieren."""
-    pfad = re.sub(r"\$\{[^}]*\}", "x", endpunkt)
-    pfad = re.sub(r"\{[^}]+\}", "x", pfad)
-    return pfad.split("?")[0].rstrip("/")
+    return _varianten(endpunkt)[0]
+
+
+def _route_segmente() -> list[list[str]]:
+    from app.main import app
+
+    segmente: list[list[str]] = []
+    for route in app.routes:
+        pfad = getattr(route, "path", "")
+        if pfad.startswith("/api/"):
+            segmente.append([s for s in pfad.split("/") if s])
+    return segmente
 
 
 def finde_tote_aufrufe() -> dict[str, list[str]]:
     muster = _route_muster()
+    route_segmente = _route_segmente()
+
+    def platzhalter_treffer(pfad: str) -> bool:
+        """``/foreign-goods/x/x`` trifft ``/foreign-goods/{id}/complete``.
+
+        Ein ``x`` steht fuer ein eingesetztes Template. Es kann einen Parameter
+        **und** ein festes Segment meinen — ``${id}/${aktion}`` ist beides.
+        Ohne diese Lesart meldet die Pruefung Aktionen als fehlend, die es gibt.
+        """
+        teile = [s for s in pfad.split("/") if s]
+        for route in route_segmente:
+            if len(route) != len(teile):
+                continue
+            if all(
+                r.startswith("{") or r == t or t == "x"
+                for r, t in zip(route, teile)
+            ):
+                return True
+        return False
 
     def erreichbar(pfad: str) -> bool:
-        return any(m.match(pfad) or m.match(pfad + "/") for m in muster)
+        if any(m.match(pfad) or m.match(pfad + "/") for m in muster):
+            return True
+        return "x" in pfad.split("/") and platzhalter_treffer(pfad)
 
     fund: dict[str, list[str]] = {}
     for datei in FRONTEND.rglob("*.ts*"):
@@ -84,8 +130,9 @@ def finde_tote_aufrufe() -> dict[str, list[str]]:
             if not _AUFRUF.search(zeile):
                 continue
             for treffer in _PFAD.findall(zeile):
-                pfad = _vereinfacht(treffer)
-                if not erreichbar(pfad):
+                varianten = _varianten(treffer)
+                if not any(erreichbar(v) for v in varianten):
+                    pfad = varianten[0]
                     stelle = name.split("src", 1)[-1].lstrip("\\/") + f":{nummer}"
                     fund.setdefault(pfad, []).append(stelle)
     return fund

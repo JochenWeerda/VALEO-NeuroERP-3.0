@@ -57,11 +57,11 @@ export default function GS1ScannerPage(): JSX.Element {
   const parseMutation = useMutation({
     mutationFn: async (lines: string[]) => {
       if (lines.length === 1) {
-        const res = await apiClient.post<ParseResult>('/api/v1/gs1/parse', { barcode_string: lines[0], format: 'AUTO' })
+        const res = await apiClient.post<ParseResult>('/api/v1/gs1/barcode/parse', { barcode_string: lines[0], format: 'AUTO' })
         return [res.data]
       }
       const body = lines.map((l) => ({ barcode_string: l, format: 'AUTO' }))
-      const res = await apiClient.post<ParseResult[]>('/api/v1/gs1/batch-parse', body)
+      const res = await apiClient.post<ParseResult[]>('/api/v1/gs1/barcode/batch-parse', body)
       return res.data
     },
     onSuccess: (data) => setParseResults(data),

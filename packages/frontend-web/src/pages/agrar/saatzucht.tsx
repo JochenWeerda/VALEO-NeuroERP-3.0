@@ -9,14 +9,23 @@ import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { Plus, Search, Leaf } from 'lucide-react'
 
+/**
+ * Schluessel wie im Endpunkt `GET /saatgut/partien`.
+ *
+ * Vorher stand hier ein Wunschmodell (`sorte`, `generation`, `zertifikat_nr`)
+ * und der Abruf ging an `/api/v1/saatzucht` — eine Route, die es nicht gibt.
+ * Der Fehler war doppelt: falscher Pfad und falsche Felder.
+ */
 type SaatzuchtPartie = {
   id: string
   partie_nr: string
-  sorte: string
-  generation: 'Z1' | 'Z2' | 'Z3' | 'ZA'
+  sorte_bezeichnung: string | null
+  /** Vermehrungsstufe (Z1/Z2/…) — im Beleg heisst sie `z_stufe`. */
+  z_stufe: string | null
   status: string
-  anbauflaeche_ha: number
-  zertifikat_nr: string
+  anbauflaeche_ha: number | null
+  anerkennungsnr: string | null
+  vermehrungsbetrieb: string | null
 }
 
 const GEN_VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
@@ -31,24 +40,27 @@ export default function SaatzuchtPage(): JSX.Element {
 
   const { data: partien = [], isError, error, refetch } = useQuery<SaatzuchtPartie[]>({
     queryKey: ['saatzucht'],
-    queryFn: async () => (await apiClient.get<SaatzuchtPartie[]>('/api/v1/saatzucht')).data,
+    queryFn: async () => (await apiClient.get<SaatzuchtPartie[]>('/api/v1/saatzucht/partien')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
 
+  const suche = search.toLowerCase()
   const filtered = partien.filter(
     (p) =>
-      p.partie_nr.toLowerCase().includes(search.toLowerCase()) ||
-      p.sorte.toLowerCase().includes(search.toLowerCase()),
+      (p.partie_nr ?? '').toLowerCase().includes(suche) ||
+      (p.sorte_bezeichnung ?? '').toLowerCase().includes(suche),
   )
 
   const columns = [
     { key: 'partie_nr' as const, label: 'Partie-Nr', render: (p: SaatzuchtPartie) => <span className="font-mono">{p.partie_nr}</span> },
-    { key: 'sorte' as const, label: 'Sorte' },
-    { key: 'generation' as const, label: 'Generation', render: (p: SaatzuchtPartie) => <Badge variant={GEN_VARIANT[p.generation] ?? 'outline'}>{p.generation}</Badge> },
+    { key: 'sorte_bezeichnung' as const, label: 'Sorte', render: (p: SaatzuchtPartie) => p.sorte_bezeichnung ?? '—' },
+    { key: 'z_stufe' as const, label: 'Vermehrungsstufe', render: (p: SaatzuchtPartie) => (p.z_stufe ? <Badge variant={GEN_VARIANT[p.z_stufe] ?? 'outline'}>{p.z_stufe}</Badge> : '—') },
+    { key: 'vermehrungsbetrieb' as const, label: 'Vermehrungsbetrieb', render: (p: SaatzuchtPartie) => p.vermehrungsbetrieb ?? '—' },
     { key: 'status' as const, label: 'Status' },
-    { key: 'anbauflaeche_ha' as const, label: 'Anbaufläche (ha)', render: (p: SaatzuchtPartie) => `${p.anbauflaeche_ha.toLocaleString('de-DE')} ha` },
-    { key: 'zertifikat_nr' as const, label: 'Zertifikat-Nr', render: (p: SaatzuchtPartie) => <span className="font-mono text-sm">{p.zertifikat_nr}</span> },
+    // Ohne Flaeche kein "0 ha": Nicht erfasst ist etwas anderes als null.
+    { key: 'anbauflaeche_ha' as const, label: 'Anbaufläche (ha)', render: (p: SaatzuchtPartie) => (p.anbauflaeche_ha == null ? '—' : `${p.anbauflaeche_ha.toLocaleString('de-DE')} ha`) },
+    { key: 'anerkennungsnr' as const, label: 'Anerkennungs-Nr', render: (p: SaatzuchtPartie) => <span className="font-mono text-sm">{p.anerkennungsnr ?? '—'}</span> },
   ]
 
   return (
@@ -66,7 +78,7 @@ export default function SaatzuchtPage(): JSX.Element {
           {(['Z1', 'Z2', 'Z3', 'ZA'] as const).map((gen) => (
             <Card key={gen}>
               <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Leaf className="h-4 w-4" />Generation {gen}</CardTitle></CardHeader>
-              <CardContent><span className="text-2xl font-bold">{partien.filter((p) => p.generation === gen).length}</span></CardContent>
+              <CardContent><span className="text-2xl font-bold">{partien.filter((p) => p.z_stufe === gen).length}</span></CardContent>
             </Card>
           ))}
         </div>

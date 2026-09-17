@@ -228,7 +228,7 @@ export const financeService = {
   },
 
   async getAccount(id: string) {
-    const response = await apiClient.get<{ data: Account }>(`/api/v1/chart-of-accounts/${id}`)
+    const response = await apiClient.get<{ data: Account }>(`/api/v1/finance/chart-of-accounts/${id}`)
     return response.data.data
   },
 
@@ -238,12 +238,12 @@ export const financeService = {
   },
 
   async updateAccount(id: string, data: AccountUpdate) {
-    const response = await apiClient.put<{ data: Account }>(`/api/v1/chart-of-accounts/${id}`, data)
+    const response = await apiClient.put<{ data: Account }>(`/api/v1/finance/chart-of-accounts/${id}`, data)
     return response.data.data
   },
 
   async deleteAccount(id: string) {
-    await apiClient.delete(`/api/v1/chart-of-accounts/${id}`)
+    await apiClient.delete(`/api/v1/finance/chart-of-accounts/${id}`)
   },
 
   // Journal Entries
