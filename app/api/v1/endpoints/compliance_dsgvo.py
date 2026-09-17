@@ -8,7 +8,7 @@ from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -36,41 +36,155 @@ class ErasureProcessIn(BaseModel):
     deletion_notes: str | None = None
 
 
+class ErasureLogEntry(BaseModel):
+    """Eine Zeile des Loeschprotokolls."""
+
+    model_config = ConfigDict(extra="allow")
+
+    table: str | None = None
+    rows_affected: int = 0
+    action: str | None = None
+    error: str | None = None
+    note: str | None = None
+
+
+class ErasureProcessOut(BaseModel):
+    """Was die Verarbeitung eines Loeschantrags zurueckmeldet.
+
+    Zuvor antwortete der Endpunkt mit ``IDResponse`` — das Protokoll, also die
+    einzige Auskunft darueber, *was* geloescht wurde, fiel bei der Serialisierung
+    weg. Der Aufrufer bekam eine ID und musste glauben, dass etwas geschah.
+    """
+
+    id: str
+    status: str
+    deletion_log: list[ErasureLogEntry] = Field(default_factory=list)
+
+
 class ErasureRejectIn(BaseModel):
     reason: str = Field(..., max_length=1000, description="z.B. gesetzliche Aufbewahrungspflicht")
 
 
+def _namen_des_betroffenen(
+    db: Session, subject_type: str, subject_id: str, tenant_id: str
+) -> list[str]:
+    """Unter welchen Namen ist der Betroffene sonst noch vermerkt?
+
+    ``domain_crm.activities`` kennt seinen Kunden nur als Text (`customer` ist
+    ein String(100), keine Referenz). Ohne den Namen ist die Aktivitaet nicht
+    auffindbar — sie muss also **vor** dem Anonymisieren gelesen werden.
+    """
+    abfragen = {
+        "CUSTOMER": [
+            "SELECT company_name FROM domain_crm.customers WHERE id::text = :sid AND tenant_id::text = :tid",
+            "SELECT company_name FROM domain_crm.crm_customers WHERE id::text = :sid AND tenant_id::text = :tid",
+        ],
+        "LEAD": [
+            "SELECT company_name FROM domain_crm.leads WHERE id::text = :sid AND tenant_id::text = :tid",
+            "SELECT contact_person FROM domain_crm.leads WHERE id::text = :sid AND tenant_id::text = :tid",
+        ],
+    }
+    namen: list[str] = []
+    for sql in abfragen.get(subject_type, []):
+        try:
+            wert = db.execute(text(sql), {"sid": subject_id, "tid": tenant_id}).scalar()
+        except Exception:  # noqa: BLE001 — eine fehlende Quelle ist kein Name, kein Abbruch
+            continue
+        if wert and wert not in namen:
+            namen.append(wert)
+    return namen
+
+
 def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_id: str) -> list[dict]:
-    """Anonymisiert/löscht Datensätze und gibt ein Protokoll zurück."""
+    """Anonymisiert/loescht Datensaetze und gibt ein Protokoll zurueck.
+
+    Jede einzelne Anweisung hier zeigte auf Tabellen oder Spalten, die es nicht
+    gibt: ``domain_crm.crm_customers`` hat kein `name`, `telefon`, `adresse`;
+    ``domain_crm.contacts`` hat kein `tenant_id`; ``domain_crm.activities`` hat
+    weder `customer_id` noch `lead_id`; ``domain_hr.employees`` gibt es gar
+    nicht. Der Fehler landete im Protokoll, der Antrag wurde trotzdem auf
+    ABGESCHLOSSEN gesetzt — eine Rechtspflicht (Art. 17 DSGVO) galt als
+    erfuellt, waehrend kein einziger Datensatz angefasst worden war.
+
+    Gefuehrt werden die Kunden in ``domain_crm.customers``; ``crm_customers``
+    steht daneben. Beide werden bedient, damit die Loeschung nicht davon
+    abhaengt, in welcher der Kunde liegt.
+    """
     log: list[dict] = []
     anon_name = "ANONYM (DSGVO Art.17)"
     anon_email = "geloescht@dsgvo.invalid"
+    namen = _namen_des_betroffenen(db, subject_type, subject_id, tenant_id)
 
-    table_map = {
-        "CUSTOMER": [
-            ("domain_crm.crm_customers", "UPDATE domain_crm.crm_customers SET name = :anon_name, email = :anon_email, telefon = NULL, adresse = NULL WHERE id = :sid AND tenant_id = :tid"),
-            ("domain_crm.contacts", "DELETE FROM domain_crm.contacts WHERE customer_id = :sid AND tenant_id = :tid"),
-            ("domain_crm.activities", "DELETE FROM domain_crm.activities WHERE customer_id = :sid AND tenant_id = :tid"),
-        ],
-        "EMPLOYEE": [
-            ("domain_hr.employees", "UPDATE domain_hr.employees SET name = :anon_name, email = :anon_email, telefon = NULL WHERE id = :sid AND tenant_id = :tid"),
-        ],
-        "LEAD": [
-            ("domain_crm.leads", "UPDATE domain_crm.leads SET name = :anon_name, email = :anon_email, telefon = NULL WHERE id = :sid AND tenant_id = :tid"),
-            ("domain_crm.activities", "DELETE FROM domain_crm.activities WHERE lead_id = :sid AND tenant_id = :tid"),
-        ],
-    }
+    def anweisungen(typ: str) -> list[tuple[str, str, dict]]:
+        basis = {"anon_name": anon_name, "anon_email": anon_email,
+                 "sid": subject_id, "tid": tenant_id}
+        if typ == "CUSTOMER":
+            schritte = [
+                ("domain_crm.customers",
+                 "UPDATE domain_crm.customers SET company_name = :anon_name,"
+                 " contact_person = :anon_name, email = :anon_email, phone = NULL,"
+                 " address = NULL, city = NULL, postal_code = NULL, website = NULL,"
+                 " chefanweisung = NULL"
+                 " WHERE id::text = :sid AND tenant_id::text = :tid", basis),
+                ("domain_crm.crm_customers",
+                 # street/postal_code/city sind NOT NULL — anonymisieren, nicht leeren.
+                 "UPDATE domain_crm.crm_customers SET company_name = :anon_name,"
+                 " first_name = NULL, last_name = :anon_name, email = :anon_email,"
+                 " phone = NULL, mobile = NULL, street = :anon_name,"
+                 " postal_code = '00000', city = :anon_name"
+                 " WHERE id::text = :sid AND tenant_id::text = :tid", basis),
+                ("domain_crm.contacts",
+                 # Kein tenant_id in der Tabelle — der Mandant haengt am Kunden,
+                 # der oben bereits mandantenrein geprueft wurde.
+                 "DELETE FROM domain_crm.contacts WHERE customer_id::text = :sid", basis),
+            ]
+        elif typ == "LEAD":
+            schritte = [
+                ("domain_crm.leads",
+                 "UPDATE domain_crm.leads SET company_name = :anon_name,"
+                 " contact_person = :anon_name, email = :anon_email, phone = NULL"
+                 " WHERE id::text = :sid AND tenant_id::text = :tid", basis),
+            ]
+        elif typ == "EMPLOYEE":
+            # Einen Personalstamm gibt es in dieser Datenbank nicht. Das als
+            # „nichts zu tun" zu protokollieren waere eine Auskunft, die nicht
+            # stimmt — es ist eine offene Luecke.
+            return []
+        else:
+            return []
 
-    for table, sql in table_map.get(subject_type, []):
+        for name in namen:
+            schritte.append((
+                "domain_crm.activities",
+                "DELETE FROM domain_crm.activities"
+                " WHERE customer = :kunde AND (tenant_id IS NULL OR tenant_id::text = :tid)",
+                {**basis, "kunde": name},
+            ))
+        return schritte
+
+    schritte = anweisungen(subject_type)
+    if not schritte:
+        log.append({
+            "table": "-",
+            "rows_affected": 0,
+            "error": f"Fuer subject_type {subject_type} gibt es in dieser Datenbank "
+                     f"keinen Datenbestand, der geloescht werden koennte.",
+        })
+        return log
+
+    for table, sql, params in schritte:
         try:
-            result = db.execute(
-                text(sql),
-                {"anon_name": anon_name, "anon_email": anon_email, "sid": subject_id, "tid": tenant_id},
-            )
-            log.append({"table": table, "rows_affected": result.rowcount, "action": "anonymized_or_deleted"})
-        except Exception as exc:
+            result = db.execute(text(sql), params)
+            log.append({"table": table, "rows_affected": result.rowcount,
+                        "action": "anonymized_or_deleted"})
+        except Exception as exc:  # noqa: BLE001 — jeder Fehlschlag muss sichtbar bleiben
             log.append({"table": table, "rows_affected": 0, "error": str(exc)})
     return log
+
+
+def _loeschung_ist_vollstaendig(log: list[dict]) -> bool:
+    """Kein Eintrag mit Fehler — sonst ist der Antrag nicht abgeschlossen."""
+    return bool(log) and not any(eintrag.get("error") for eintrag in log)
 
 
 @router.post("/erasure-requests", status_code=201, summary="Erasure request anlegen",
@@ -159,7 +273,7 @@ async def get_erasure_request(
 
 
 @router.post("/erasure-requests/{request_id}/process", summary="Erasure request verarbeiten",
-    response_model=IDResponse
+    response_model=ErasureProcessOut
 )
 async def process_erasure_request(
     request_id: str,
@@ -187,20 +301,48 @@ async def process_erasure_request(
     if payload.deletion_notes:
         deletion_log.append({"note": payload.deletion_notes})
 
+    # Ein Loeschantrag gilt nur als abgeschlossen, wenn wirklich geloescht
+    # wurde. Zuvor wurde der Status unabhaengig vom Protokoll auf
+    # ABGESCHLOSSEN gesetzt — ein Antrag, bei dem jede einzelne Anweisung
+    # scheiterte, sah damit aus wie erledigt. Bleibt etwas offen, bleibt der
+    # Antrag IN_BEARBEITUNG und der Aufrufer bekommt das Protokoll zu sehen.
+    vollstaendig = _loeschung_ist_vollstaendig(
+        [e for e in deletion_log if "note" not in e]
+    )
+    neuer_status = "ABGESCHLOSSEN" if vollstaendig else "IN_BEARBEITUNG"
+
     try:
         db.execute(
             text("""
                 UPDATE domain_compliance.data_erasure_requests
-                SET status = 'ABGESCHLOSSEN', completion_date = NOW(),
+                SET status = :neuer_status,
+                    completion_date = CASE WHEN :vollstaendig THEN NOW() ELSE NULL END,
                     deletion_log = CAST(:deletion_log AS jsonb)
                 WHERE id = :id AND tenant_id = :tenant_id
             """),
-            {"deletion_log": json.dumps(deletion_log), "id": request_id, "tenant_id": tenant_id},
+            {
+                "deletion_log": json.dumps(deletion_log),
+                "neuer_status": neuer_status,
+                "vollstaendig": vollstaendig,
+                "id": request_id,
+                "tenant_id": tenant_id,
+            },
         )
         db.commit()
     except Exception:
         db.rollback()
         raise HTTPException(status_code=503, detail="Failed to update erasure request")
+
+    if not vollstaendig:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "Die Loeschung ist unvollstaendig — der Antrag bleibt offen.",
+                "id": request_id,
+                "status": neuer_status,
+                "deletion_log": deletion_log,
+            },
+        )
     return {"id": request_id, "status": "ABGESCHLOSSEN", "deletion_log": deletion_log}
 
 
