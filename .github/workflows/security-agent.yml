@@ -148,7 +148,7 @@ jobs:
             tests/test_neuro_tool_execution.py \
             -q --no-cov
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - uses: actions/setup-node@v4
         with:
