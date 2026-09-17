@@ -38,7 +38,7 @@ NICHT_PRUEFBAR_MAX = 0
 
 #: 49 (8da5d757b) minus 6 Bruecken-Tabellen: Bestellung, Lieferant, Eingangsrechnung.
 #: Darf sinken, nicht steigen. Auftrag/Rechnung bleiben Claude.
-ZEILEN_NICHT_PRUEFBAR_MAX = 43
+ZEILEN_NICHT_PRUEFBAR_MAX = 40
 
 
 @pytest.fixture(scope="module")
