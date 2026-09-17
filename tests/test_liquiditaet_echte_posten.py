@@ -157,3 +157,18 @@ def test_fremde_posten_bleiben_draussen(client) -> None:
     }
     daten = client.get("/api/v1/finance/liquidity/overview", headers=fremd).json()
     assert float(daten["forderungen_offen"]) == 0.0
+
+
+def test_management_dashboard_zeigt_dieselben_offenen_posten(client, kopf) -> None:
+    """Dasselbe Haus, dieselbe Zahl.
+
+    Das Management-Dashboard las ebenfalls eine leere Tabelle und wies die
+    offenen Posten mit 0 aus — waehrend die Belegseite 1.900 EUR fuehrte.
+    """
+    antwort = client.get("/api/v1/management/dashboard", headers=kopf)
+    assert antwort.status_code == 200, antwort.text
+    kennzahlen = {k["label"]: k["value"] for k in antwort.json().get("kpis", [])}
+    assert "Offene Posten" in kennzahlen
+    # 1.500 Debitoren + 400 Kreditoren, stornierte bleiben draussen.
+    roh = str(kennzahlen["Offene Posten"]).replace("K", "000").replace(",", ".")
+    assert float(roh) >= 1900 * 0.9

@@ -3168,17 +3168,23 @@ async def management_dashboard(
         auftraege = int(sales_row.cnt) if sales_row else 0
 
         oi_row = db.execute(text("""
-            SELECT COALESCE(SUM(amount), 0) AS total
-            FROM domain_shared.open_items
-            WHERE tenant_id = :tid AND status = 'open'
+            -- Die offenen Posten stehen in domain_erp.offene_posten; die hier
+            -- gelesene Tabelle ist leer.
+            SELECT COALESCE(SUM(offen), 0) AS total
+            FROM domain_erp.offene_posten
+            WHERE tenant_id = :tid AND op_status = 'offen'
         """), {"tid": tenant_id}).fetchone()
         offene_posten = float(oi_row.total) if oi_row else 0
 
         top_products = db.execute(text("""
-            SELECT a.name, COALESCE(SUM(sol.total), 0) AS umsatz
-            FROM domain_crm.sales_order_lines sol
-            JOIN domain_inventory.articles a ON a.id = sol.article_id
-            JOIN domain_crm.sales_orders so ON so.id = sol.order_id AND so.tenant_id = :tid
+            -- Die Auftragsposition heisst `sales_order_items`, ihr Betrag
+            -- `line_total`, und sie fuehrt die **Artikelnummer**, keine
+            -- Artikel-ID. Der Join ging deshalb dreifach ins Leere; die
+            -- Auswertung blieb leer und sah aus wie „kein Umsatz".
+            SELECT a.name, COALESCE(SUM(soi.line_total), 0) AS umsatz
+            FROM domain_crm.sales_order_items soi
+            JOIN domain_inventory.articles a ON a.article_number = soi.article_number
+            JOIN domain_crm.sales_orders so ON so.id = soi.order_id AND so.tenant_id = :tid
             GROUP BY a.name ORDER BY umsatz DESC LIMIT 5
         """), {"tid": tenant_id}).fetchall()
 

@@ -91,19 +91,31 @@ def _ensure_account(
     return account_id
 
 
-def _resolve_customer_name(db: Session, customer_id: str) -> str:
+def _resolve_customer_name(db: Session, customer_id: str, tenant_id: str | None = None) -> str:
+    """Den Namen zur Partnerkennung holen — sonst steht die Kennung im Beleg.
+
+    Gelesen wurde ``domain_shared.business_partners``: eine Tabelle, die es
+    nicht gibt. Das ``except`` fing das ab, und im Beleg stand statt des Namens
+    die Kennung — was aussieht, als sei der Kunde so benannt.
+
+    Der Partnerstamm liegt in ``domain_crm.business_partners``, und der Name
+    heisst dort ``name_1`` (es gibt ein ``name_2`` daneben). Der Mandant gehoert
+    in die Abfrage: Ein Partnername ist nichts, was ueber Mandantengrenzen
+    hinweg beantwortet wird.
+    """
     customer_name = customer_id
     try:
         row = db.execute(
             text(
                 """
-                SELECT name
-                FROM domain_shared.business_partners
+                SELECT name_1
+                FROM domain_crm.business_partners
                 WHERE partner_id = :partner_id
+                  AND (:tenant_id IS NULL OR tenant_id = :tenant_id)
                 LIMIT 1
                 """
             ),
-            {"partner_id": customer_id},
+            {"partner_id": customer_id, "tenant_id": tenant_id},
         ).fetchone()
         if row and row[0]:
             customer_name = str(row[0])
@@ -135,7 +147,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
             detail=f"Period {period} is {period_status[0]}. Posting is blocked.",
         )
 
-    customer_name = _resolve_customer_name(db, invoice.customerId)
+    customer_name = _resolve_customer_name(db, invoice.customerId, tenant_id)
 
     total_net = Decimal(str(invoice.subtotalNet or 0)).quantize(Decimal("0.01"))
     total_tax = Decimal(str(invoice.totalTax or 0)).quantize(Decimal("0.01"))
