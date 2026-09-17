@@ -139,12 +139,26 @@ def berechne_preis(
     # 4. Kontrakt-Preis-Override
     if payload.kontrakt_nr:
         try:
+            # Gelesen wurde ``domain_agrar.kontrakte`` — das Schema gibt es
+            # nicht. Gefuehrt wird der Kontrakt in ``domain_einkauf.kontrakte``,
+            # und der Preis steht dort nicht im Kopf, sondern an der Position
+            # (ein Kontrakt kann mehrere Artikel zu je eigenem Preis binden).
+            # Ein `is_active` gibt es nicht; gueltig ist eine Position, deren
+            # Zeitfenster heute traegt und deren Kopf nicht abgeschlossen ist.
             row = db.execute(
                 text(
-                    "SELECT preis FROM domain_agrar.kontrakte"
-                    " WHERE kontraktnummer=:kontrakt_nr AND is_active=TRUE LIMIT 1"
+                    "SELECT p.preis"
+                    " FROM domain_einkauf.kontrakt_positionen p"
+                    " JOIN domain_einkauf.kontrakte k ON k.id = p.kontrakt_id"
+                    " WHERE k.kontraktnummer = :kontrakt_nr"
+                    "   AND k.tenant_id::text = :tid"
+                    "   AND k.status NOT IN ('storniert', 'abgeschlossen')"
+                    "   AND p.preis IS NOT NULL"
+                    "   AND (p.gueltig_von IS NULL OR p.gueltig_von <= CURRENT_DATE)"
+                    "   AND (p.gueltig_bis IS NULL OR p.gueltig_bis >= CURRENT_DATE)"
+                    " ORDER BY p.pos_nr LIMIT 1"
                 ),
-                {"kontrakt_nr": payload.kontrakt_nr},
+                {"kontrakt_nr": payload.kontrakt_nr, "tid": tenant_id},
             ).first()
             if row:
                 kontrakt_preis = float(row[0])

@@ -18,6 +18,12 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
+# Der Mandant kam hier aus einem **Query-Parameter** (`?tenant_id=`), den kein
+# Aufrufer setzt — weder die Kunden-360-Maske noch das Frontend. Damit war der
+# Filter in jeder Abfrage (`:tid IS NULL OR ...`) dauerhaft offen und jeder
+# Aufruf sah die Kunden, Auftraege und Kontrakte *aller* Mandanten. Der Mandant
+# kommt aus dem Header `X-Tenant-ID`, wie ueberall sonst im Haus.
+
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.crm_360_schemas import Crm360Out
 
@@ -160,7 +166,7 @@ def build_customer_screen_summary(
 )
 async def get_customer_screen_summary(
     customer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Kompakter Startvertrag fuer den Universal Mask Generator.
@@ -357,7 +363,7 @@ def _paginate_items(
 async def get_customer_tab_data(
     customer_id: str,
     tab_key: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     page: int = Query(1, ge=1),
     limit: int = Query(25, ge=1, le=50),
     q: Optional[str] = Query(None),
@@ -413,7 +419,7 @@ async def get_customer_tab_data(
 @router.get("/{customer_id}/360", response_model=Crm360Out, tags=["crm", "customers"], summary="Customer 360 abrufen")
 async def get_customer_360(
     customer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """360°-Kundensicht: aggregiert Aufträge, Rechnungen, OP, Kontrakte,
@@ -476,19 +482,28 @@ async def get_customer_360(
     # Summe offener OP
     op_summe = sum(r.get("amount") or 0.0 for r in open_payments)
 
-    # 4. Aktive Kontrakte (domain_agrar.agrar_contracts)
+    # 4. Laufende Kontrakte
+    #
+    # Gelesen wurde ``domain_agrar.agrar_contracts`` — das Schema gibt es nicht.
+    # Gefuehrt werden die Kontrakte in ``domain_inventory.agrar_contracts``, und
+    # zwar mit anderen Spalten *und* anderen Statuswerten: `open` und
+    # `partially_allocated`, nicht `AKTIV`. Beides zusammen haette auch nach dem
+    # blossen Umhaengen des Schemas noch eine leere Liste ergeben.
+    #
+    # Der Partner ist ein fachlicher Schluessel (`BP-001`), kein UUID-Verweis —
+    # gefunden wird der Kontrakt also ueber die Partnernummer.
     active_contracts = _query_many(
         db,
         """
-        SELECT id, contract_number, status,
-               lieferbeginn::text AS start_date,
-               lieferende::text AS end_date,
-               COALESCE(gesamtmenge_t * preis_eur_per_t, 0)::float AS total_value
-        FROM domain_agrar.agrar_contracts
-        WHERE (customer_id = :cid OR lieferant_id = :cid OR partner_id = :cid)
+        SELECT id::text AS id, contract_number, status,
+               valid_from::text AS start_date,
+               valid_until::text AS end_date,
+               COALESCE(total_quantity_kg / 1000.0 * fixed_price, 0)::float AS total_value
+        FROM domain_inventory.agrar_contracts
+        WHERE partner_id::text = :cid
           AND (:tid IS NULL OR tenant_id::text = :tid)
-          AND status IN ('AKTIV', 'aktiv', 'OFFEN')
-        ORDER BY lieferbeginn DESC
+          AND status IN ('open', 'partially_allocated')
+        ORDER BY valid_from DESC
         LIMIT 10
         """,
         {"cid": customer_id, "tid": tenant_id},
