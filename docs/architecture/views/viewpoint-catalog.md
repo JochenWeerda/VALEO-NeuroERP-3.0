@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-27
+last_reviewed: 2026-09-17
 version: 1.0.0
 ---
 
@@ -23,6 +23,7 @@ Welche Sicht für welche Frage — Schnellnavigation.
 | Wie läuft O2C technisch ab? | UML Sequenz | [sequences/seq-o2c-fibu.md](sequences/seq-o2c-fibu.md) |
 | Welche Kern-Entitäten gibt es? | ERD | [erd-canonical-domain.md](erd-canonical-domain.md) |
 | Wie sehen Aggregate + Operationen aus? | UML Klassen | [uml-canonical-domain-class.md](uml-canonical-domain-class.md) |
+| Wem gehoert welche Tabelle, was liest die Maske? | Katalog (physisch) | [table-catalog.md](../../admin/table-catalog.md) — erzeugt aus `information_schema`; Plan: [todo-datenmodell-katalog.md](../../agent-ops/todo-datenmodell-katalog.md) |
 | Welche Geschäftskette gilt? | Prozess (Mermaid) | [process-map.md](../process-map.md) |
 | Was ist implementiert / getestet? | Delivery | [process-kernel/STATUS.md](../process-kernel/STATUS.md) |
 | Warum wurde X so entschieden? | ADR | [adr/README.md](../../adr/README.md) |

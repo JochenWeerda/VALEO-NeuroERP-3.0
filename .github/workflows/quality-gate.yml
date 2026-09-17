@@ -294,6 +294,9 @@ jobs:
       - name: Check domain table ownership
         run: python scripts/check_domain_table_ownership.py
 
+      - name: Check physical table catalog
+        run: python scripts/generate_table_catalog.py --check
+
       - name: Run tests
         run: pytest -q
 

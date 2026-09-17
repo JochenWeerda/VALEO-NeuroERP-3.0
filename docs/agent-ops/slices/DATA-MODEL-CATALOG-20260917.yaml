@@ -1,0 +1,54 @@
+---
+slice_id: DATA-MODEL-CATALOG
+id: DATA-MODEL-CATALOG
+title: Tabellenkatalog, Besitz und Masken-Lebenszyklus
+status: offen
+owner: unassigned
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  P1 geliefert. Naechster Claim ist P2 (Ownership-Check only-up), nicht P3/P4
+  gleichzeitig. Keine FSX-/Rechnungsdateien.
+goal: >
+  Nach alembic upgrade head das physische domain_*-Schema ernten und als
+  versionierten Katalog mit --check-Gate halten. crm_consents und
+  crm_contact_consents stehen getrennt.
+file_ownership:
+  - docs/agent-ops/todo-datenmodell-katalog.md
+  - docs/entwickler/datenmodell-tenancy.md
+  - scripts/generate_table_catalog.py
+  - tests/test_generate_table_catalog.py
+  - docs/admin/table-catalog.md
+  - docs/admin/table-catalog.json
+acceptance:
+  - python scripts/generate_table_catalog.py --check Exit 0 nach Migration
+  - Katalog listet domain_crm.crm_consents und crm_contact_consents mit Spalten
+  - Qualitaetsgate laeuft nach Alembic, nicht im Doc-Meta-Check ohne DB
+tests:
+  - tests/test_generate_table_catalog.py (Render ohne DB, Harvest mit require_db)
+risks:
+  - Katalog-Markdown wird lang; JSON ist die Vergleichsquelle fuer --check
+  - CI muss nach init_db.py laufen, sonst ist der Katalog leer oder veraltet
+ai_harness:
+  fachlicher_vertrag: >
+    Agenten und Entwickler sehen Schema, Tabelle und Spalten aus der laufenden
+    DB, nicht aus einem handgezeichneten UML. Zwei Fachmodelle bleiben zwei
+    Tabellen.
+  architektur_vertrag: >
+    ADR-003 bleibt logisch. Physische Wahrheit ist information_schema.
+    Architecture-OS-Generator-Muster (--check, nicht manuell editieren).
+  daten_vertrag: >
+    Nur domain_*-BASE TABLE. Tenant-Spalten werden gelistet, nicht interpretiert.
+    Kein DROP, kein Rewrite fremder Migrationen.
+  test_vertrag: >
+    Unit-Render gegen Fixture. Integration gegen echte Postgres (require_db).
+  security_vertrag: >
+    DATABASE_URL aus der Umgebung, keine Secrets im Katalog. Nur Metadata-SELECT.
+  betriebs_vertrag: >
+    Qualitaetsgate nach Alembic. Rollback = Generator-Commit revertieren;
+    die Datenbank bleibt unangetastet.
+  dokumentations_vertrag: >
+    Workboard, todo-datenmodell-katalog.md P1, MkDocs Admin-Nav, Viewpoint-Katalog.
+external_gates:
+  - not_applicable
+---

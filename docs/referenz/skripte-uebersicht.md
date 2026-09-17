@@ -22,6 +22,7 @@ version: 3.1.0
 | `scripts/maybe_regenerate_agent_handbuch.py` | Pre-Commit: Agent-Handbuch bei Aenderung an Flow Spine / SDs / MCP |
 | `scripts/generate_adr_nav.py` | MkDocs ADR-Navigation patchen |
 | `scripts/generate_code_inventories.py` | Endpoint-/Service-/Migrations-Inventare |
+| `scripts/generate_table_catalog.py` | Physischer domain_*-Tabellenkatalog (`information_schema`) |
 | `scripts/generate_container_inventory.py` | Docker-Compose-Container-Inventar → C4-Drift-Check |
 | `scripts/doc_drift_report.py` | Code↔Doku-Drift-Report → `artifacts/` |
 | `scripts/docs-legacy-migrate.py` | Alt-Doku inventarisieren/archivieren |

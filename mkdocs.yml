@@ -257,6 +257,7 @@ nav:
       - Backup & Restore: admin/backup-restore.md
       - Datenbank-Migrationen: admin/datenbank-migrationen.md
       - Migrations-Inventar: admin/migration-inventory.md
+      - Tabellenkatalog: admin/table-catalog.md
       - Monitoring & SLO: admin/monitoring-und-slo.md
       - Incident-Response: admin/incident-response.md
       - Skalierung & Performance: admin/skalierung-performance.md

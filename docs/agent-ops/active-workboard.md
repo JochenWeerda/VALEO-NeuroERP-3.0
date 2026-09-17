@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DATA-MODEL-CATALOG — Tabellenkatalog statt Gesamt-UML 2026-09-17, Cursor
+
+**Stand:** P1 abgeschlossen (Katalog, 635 Tabellen). Naechster Claim: **P2**
+(Ownership only-up). Liste: `docs/agent-ops/todo-datenmodell-katalog.md`.
+
+**Befund:** Maske, Tabelle und schreibender Code hängen nicht in einem Artefakt.
+`crm_consents` hatte zwei Fachmodelle unter einem Namen. Das Canonical-UML
+(ADR-003, Stand Juni) beschreibt Aggregate, nicht Spalten.
+
+**Best Practice, nicht Collibra:** SAP-DD und tbls ernten das laufende Schema;
+Odoo loescht Spalten nur explizit; Data Catalogs 2026 gehen Ernten → Besitz →
+Lineage. Welle 1 bleibt im Repo: Generator aus `information_schema`, Ownership-Check
+only-up, Verbraucher-Linie Tabelle → Endpunkt → ScreenDefinition.
+
+**Erster Claim:** P1 (Katalog-Generator). P0 (Regel) steht in
+`datenmodell-tenancy.md`. P2–P4 nicht in denselben Slice. Maske loeschen darf
+keine Spalte droppen.
+
 ## SALES-SAMMELRECHNUNG-ECHT - die Sammelrechnung war nie moeglich 2026-09-17, Claude Code
 
 **Drei Fehler in einem Weg**, alle drei still:

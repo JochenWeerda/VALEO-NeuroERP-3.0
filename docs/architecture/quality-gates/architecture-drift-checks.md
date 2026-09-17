@@ -11,9 +11,11 @@ Katalog der Gates für Architecture OS (bestehend + neu).
 | Container Inventar | `scripts/generate_container_inventory.py --check` |
 | OpenAPI | `scripts/generate_openapi.py --check` |
 | Code-Inventare | `scripts/generate_code_inventories.py --check` |
+| Tabellenkatalog | `scripts/generate_table_catalog.py --check` (nach Alembic) |
 | Agent-Handbuch | `scripts/generate_agent_handbuch.py --check` |
 
-Aufruf gebündelt: `scripts/check_all_doc_generators.sh --check`
+Aufruf gebündelt (ohne Tabellenkatalog): `scripts/check_all_doc_generators.sh --check`.
+Der Tabellenkatalog braucht eine migrierte Datenbank und laeuft im Quality-Gate **nach** Alembic.
 
 ## Domänen-Drift (`pnpm arch:drift`)
 
