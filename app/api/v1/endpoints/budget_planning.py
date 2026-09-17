@@ -162,10 +162,15 @@ def budget_summary(
         try:
             actual = db.execute(
                 text(
-                    """SELECT COALESCE(SUM(ABS(amount)), 0)
-                    FROM domain_finance.journal_entries
-                    WHERE tenant_id = :tid
-                    AND EXTRACT(YEAR FROM posting_date) = :yr"""
+                    # domain_finance.journal_entries gibt es nicht. Gebucht
+                    # wird in domain_erp: der Kopf traegt das Buchungsdatum,
+                    # die Zeile das Konto und den Betrag — ein `amount` gibt es
+                    # nirgends, nur debit und credit.
+                    """SELECT COALESCE(SUM(ABS(z.debit - z.credit)), 0)
+                    FROM domain_erp.journal_entry_lines z
+                    JOIN domain_erp.journal_entries k ON k.id = z.journal_entry_id
+                    WHERE k.tenant_id::text = :tid
+                    AND EXTRACT(YEAR FROM k.posting_date) = :yr"""
                 ),
                 {"tid": tenant_id, "yr": plan["plan_year"]},
             ).scalar() or 0.0
@@ -290,12 +295,13 @@ def budget_vs_actual(
             try:
                 actual_row = db.execute(
                     text(
-                        """SELECT COALESCE(SUM(ABS(amount)), 0)
-                        FROM domain_finance.journal_entries
-                        WHERE tenant_id = :tid
-                        AND account_id = :aid
-                        AND EXTRACT(YEAR FROM posting_date) = :yr
-                        AND EXTRACT(MONTH FROM posting_date) = :mo"""
+                        """SELECT COALESCE(SUM(ABS(z.debit - z.credit)), 0)
+                        FROM domain_erp.journal_entry_lines z
+                        JOIN domain_erp.journal_entries k ON k.id = z.journal_entry_id
+                        WHERE k.tenant_id::text = :tid
+                        AND z.account_id::text = :aid
+                        AND EXTRACT(YEAR FROM k.posting_date) = :yr
+                        AND EXTRACT(MONTH FROM k.posting_date) = :mo"""
                     ),
                     {
                         "tid": tenant_id,
