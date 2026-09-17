@@ -11,6 +11,54 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-FELDVERTRAG - 200 mit leerem Kopf 2026-09-17, Claude Code
+
+**Die Folgerung aus dem Verdrahtungs-Audit war richtig:** Der Zaehler misst
+Adressen, nicht Sprache. Ein Endpunkt kann mit 200 antworten und trotzdem
+andere Schluessel liefern, als die Maske erwartet — dann bleibt der Kopf leer,
+und **leer sieht aus wie „nichts erfasst"**. Dafuer gab es kein Gate. Jetzt
+gibt es eins: `scripts/check_field_contracts.py` und
+`tests/test_mask_field_contracts.py`.
+
+**Beim ersten Lauf: 52 Abweichungen.** Davon waren 23 ein Messfehler meines
+eigenen Gates — eine Huelle, die zusaetzliche Felder ausdruecklich zulaesst und
+selbst nur `id` nennt, ist kein Vertrag, sondern ein Platzhalter. Daraus laesst
+sich nicht folgern, dass ein Feld fehlt; nur, dass niemand es zugesagt hat.
+Diese Faelle zaehlen jetzt als **nicht pruefbar**.
+
+**Blieben 29 echte, in sechs Masken** — dieselbe Handschrift wie bei den acht
+aus dem Audit: deutsche Wunschnamen gegen die tatsaechlichen Felder.
+
+- `sales/delivery-note`: `ls_nr` -> `delivery_note_number`, `kunde` ->
+  `customer_id`, `datum` -> `delivery_date`. **Versandart und Lagerort fuehrt
+  der Lieferschein gar nicht** — statt zwei leerer Felder stehen jetzt
+  Selbstabholer, Kennzeichen und Niederlassung da, die es wirklich gibt.
+- `lager/stock-movement`: Nummer, Typ, Datum, Beleg und Lagerort korrigiert.
+  Einen **Status** fuehrt die Bewegung nicht; ihre Aussage sind Menge und
+  Bestand davor/danach — die stehen jetzt in der Maske.
+- `lager/article-stock`: `artikel_nr` -> `article_number` und so fort. Einen
+  **Meldebestand** gibt es nicht; Bestand, Reserviert und Verfuegbar sind drei
+  Zahlen und nicht eine.
+- `crm/opportunity`: `wert` -> `amount`, `phase` -> `stage`, `verantwortlich` ->
+  `assigned_to`. Eine **Opportunity-Nummer** fuehrt das Objekt nicht — das Feld
+  ist raus statt leer.
+- `agrar/duenger` und `agrar/saatgut`: `ist_aktiv` -> `is_active`.
+
+**Stand jetzt:** 110 Felder geprueft, **0 Abweichungen**, 13 Maskenquellen ohne
+deklarierte Antwort. Die 13 sind der ehrliche Rest: Dort ist das Gate **blind**,
+weil der Endpunkt nichts zusagt (`extra="allow"` ohne Modell). Sie stehen
+namentlich in `docs/quality-assurance/feldvertrag-masken-2026-09-17.md`, und der
+Test haelt die Zahl als Obergrenze — sie darf sinken, nicht steigen.
+
+**Was das Gate weiterhin nicht kann:** Es liest das deklarierte Schema, nicht
+die Antwort. Es prueft Kopffelder, nicht Tabellenspalten (die haengen an
+Seiten-Huellen, deren Zeilenform niemand deklariert). Und es sagt nichts ueber
+Bedeutung: Ein Feld kann heissen wie vereinbart und etwas anderes meinen.
+
+**Abnahme:** 51 Tests im Masken- und Kettensweep gruen, 3 neue Gate-Tests,
+Agent-Handbuch regeneriert, openapi.json driftfrei.
+
+
 ## DATA-MODEL-CATALOG — Tabellenkatalog statt Gesamt-UML 2026-09-17, Cursor
 
 **Stand:** P3 abgeschlossen (Verbraucher-Lineage). Naechster Claim: **P4**

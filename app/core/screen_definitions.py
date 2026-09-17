@@ -475,14 +475,18 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
                 "keepAlive": True,
                 "dataSourceKey": "entity",
                 "fields": [
-                    {"key": "opportunity_nr", "label": "Opportunity-Nr.", "type": "text", "readOnly": True},
-                    {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
-                    {"key": "kunde", "label": "Kunde", "type": "text"},
-                    {"key": "verantwortlich", "label": "Verantwortlich", "type": "text"},
-                    {"key": "phase", "label": "Phase", "type": "text"},
-                    {"key": "wert", "label": "Wert", "type": "currency"},
-                    {"key": "wahrscheinlichkeit", "label": "Wahrscheinlichkeit %", "type": "number"},
-                    {"key": "abschluss_datum", "label": "Abschlussdatum", "type": "date"},
+                    # Die Opportunity fuehrt keine eigene Nummer, sondern
+                    # einen Namen. Ein Nummernfeld zu behalten hiesse, eine
+                    # Nummer zu zeigen, die es nicht gibt.
+                    {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                    {"key": "customer_id", "label": "Kunde", "type": "text"},
+                    {"key": "assigned_to", "label": "Verantwortlich", "type": "text"},
+                    {"key": "stage", "label": "Phase", "type": "text"},
+                    {"key": "amount", "label": "Wert", "type": "currency"},
+                    {"key": "probability", "label": "Wahrscheinlichkeit %", "type": "number"},
+                    {"key": "expected_close_date", "label": "Erwarteter Abschluss", "type": "date"},
+                    {"key": "actual_close_date", "label": "Tatsaechlicher Abschluss", "type": "date", "readOnly": True},
+                    {"key": "lead_source", "label": "Quelle", "type": "text"},
                     {"key": "status", "label": "Status", "type": "text"},
                 ],
             },
@@ -598,13 +602,19 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
             {
                 "key": "kopf", "label": "Artikelstamm", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
                 "fields": [
-                    {"key": "artikel_nr", "label": "Artikel-Nr.", "type": "text", "readOnly": True},
-                    {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
-                    {"key": "artikel_gruppe", "label": "Artikelgruppe", "type": "text"},
-                    {"key": "einheit", "label": "Basiseinheit", "type": "text"},
-                    {"key": "mindestbestand", "label": "Mindestbestand", "type": "number"},
-                    {"key": "meldebestand", "label": "Meldebestand", "type": "number"},
-                    {"key": "status", "label": "Status", "type": "text"},
+                    {"key": "article_number", "label": "Artikel-Nr.", "type": "text", "readOnly": True},
+                    {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                    {"key": "category", "label": "Warengruppe", "type": "text", "readOnly": True},
+                    {"key": "unit", "label": "Basiseinheit", "type": "text", "readOnly": True},
+                    {"key": "min_stock", "label": "Mindestbestand", "type": "number", "readOnly": True},
+                    {"key": "max_stock", "label": "Hoechstbestand", "type": "number", "readOnly": True},
+                    # Bestand, Reservierung und verfuegbare Menge sind drei
+                    # Zahlen und nicht eine; einen Meldebestand fuehrt der
+                    # Artikelstamm nicht.
+                    {"key": "current_stock", "label": "Bestand", "type": "number", "readOnly": True},
+                    {"key": "reserved_stock", "label": "Reserviert", "type": "number", "readOnly": True},
+                    {"key": "available_stock", "label": "Verfuegbar", "type": "number", "readOnly": True},
+                    {"key": "is_active", "label": "Aktiv", "type": "boolean", "readOnly": True},
                 ],
             },
             {
@@ -677,13 +687,20 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
             {
                 "key": "kopf", "label": "Lieferschein-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
                 "fields": [
-                    {"key": "ls_nr", "label": "LS-Nr.", "type": "text", "readOnly": True},
-                    {"key": "auftrag_nr", "label": "Auftrag-Nr.", "type": "text", "readOnly": True},
-                    {"key": "kunde", "label": "Kunde", "type": "text"},
-                    {"key": "datum", "label": "Datum", "type": "date"},
-                    {"key": "versandart", "label": "Versandart", "type": "text"},
-                    {"key": "lagerort", "label": "Lagerort", "type": "text"},
-                    {"key": "status", "label": "Status", "type": "text"},
+                    # Schluessel wie im Endpunkt. Vorher standen hier
+                    # Wunschnamen (ls_nr, auftrag_nr, kunde) — der Beleg kam
+                    # mit 200 und der Kopf blieb leer.
+                    {"key": "delivery_note_number", "label": "LS-Nr.", "type": "text", "readOnly": True},
+                    {"key": "sales_order_id", "label": "Auftrag", "type": "text", "readOnly": True},
+                    {"key": "customer_id", "label": "Kunde", "type": "text", "readOnly": True},
+                    {"key": "delivery_date", "label": "Lieferdatum", "type": "date", "readOnly": True},
+                    # Versandart und Lagerort fuehrt der Lieferschein nicht.
+                    # Was er fuehrt: Selbstabholung, Fahrzeug, Niederlassung.
+                    {"key": "is_self_pickup", "label": "Selbstabholer", "type": "boolean", "readOnly": True},
+                    {"key": "truck_number", "label": "Kennzeichen", "type": "text", "readOnly": True},
+                    {"key": "branch_id", "label": "Niederlassung", "type": "text", "readOnly": True},
+                    {"key": "invoice_number", "label": "Rechnungsnr.", "type": "text", "readOnly": True},
+                    {"key": "status", "label": "Status", "type": "text", "readOnly": True},
                 ],
             },
             {
@@ -1133,12 +1150,18 @@ def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
             {
                 "key": "kopf", "label": "Bewegungs-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
                 "fields": [
-                    {"key": "bewegungs_nr", "label": "Bewegungs-Nr.", "type": "text", "readOnly": True},
-                    {"key": "typ", "label": "Typ", "type": "text"},
-                    {"key": "datum", "label": "Datum", "type": "date"},
-                    {"key": "beleg_nr", "label": "Beleg-Nr.", "type": "text"},
-                    {"key": "lagerort", "label": "Lagerort", "type": "text"},
-                    {"key": "status", "label": "Status", "type": "text"},
+                    {"key": "movement_number", "label": "Bewegungs-Nr.", "type": "text", "readOnly": True},
+                    {"key": "movement_type", "label": "Bewegungstyp", "type": "text", "readOnly": True},
+                    {"key": "movement_date", "label": "Datum", "type": "date", "readOnly": True},
+                    {"key": "reference_number", "label": "Beleg-Nr.", "type": "text", "readOnly": True},
+                    {"key": "warehouse_id", "label": "Lager", "type": "text", "readOnly": True},
+                    {"key": "warehouse_location", "label": "Lagerort", "type": "text", "readOnly": True},
+                    # Die Bewegung fuehrt keinen Status, sondern Mengen und
+                    # den Bestand davor und danach — das ist ihre Aussage.
+                    {"key": "quantity", "label": "Menge", "type": "number", "readOnly": True},
+                    {"key": "unit", "label": "Einheit", "type": "text", "readOnly": True},
+                    {"key": "previous_stock", "label": "Bestand vorher", "type": "number", "readOnly": True},
+                    {"key": "new_stock", "label": "Bestand nachher", "type": "number", "readOnly": True},
                 ],
             },
             {
@@ -1365,7 +1388,7 @@ def build_agrar_duenger_screen_definition() -> dict[str, Any]:
                  {"key": "p_gehalt", "label": "P2O5 %", "type": "number"},
                  {"key": "k_gehalt", "label": "K2O %", "type": "number"},
                  {"key": "lagerbestand", "label": "Lagerbestand", "type": "number"},
-                 {"key": "ist_aktiv", "label": "Aktiv", "type": "boolean"},
+                 {"key": "is_active", "label": "Aktiv", "type": "boolean"},
              ]},
             {"key": "verwendung", "label": "Verwendung", "lazy": True, "keepAlive": False,
              "tables": [{"key": "verwendung", "label": "Verwendungs-Historie", "dataSourceKey": "verwendung",
@@ -1418,7 +1441,7 @@ def build_agrar_saatgut_screen_definition() -> dict[str, Any]:
                  {"key": "art", "label": "Kulturart", "type": "text"},
                  {"key": "zulassungsnummer", "label": "Zulassungs-Nr.", "type": "text"},
                  {"key": "tkm", "label": "TKG (g)", "type": "number"},
-                 {"key": "ist_aktiv", "label": "Aktiv", "type": "boolean"},
+                 {"key": "is_active", "label": "Aktiv", "type": "boolean"},
              ]},
             {"key": "lagerbestaende", "label": "Lagerbestaende", "lazy": True, "keepAlive": False,
              "tables": [{"key": "lagerbestaende", "label": "Bestaende", "dataSourceKey": "lagerbestaende",
