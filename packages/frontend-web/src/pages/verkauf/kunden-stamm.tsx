@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-rou
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -51,6 +51,15 @@ type KundeData = {
   steuernummer: string
   zahlungsziel: string
   kreditlimit: number
+  // Die Bankverbindung stand im Absende-Payload als fester Rumpf aus lauter
+  // `null` und wurde beim Bearbeiten nur durchgereicht: eintragen oder aendern
+  // konnte man sie nirgends. Spalten (iban, bic, bank_name, sepa_mandate_*) und
+  // Schreibpfad im Backend gab es die ganze Zeit.
+  iban: string
+  bic: string
+  bank_name: string
+  sepa_mandat_ref: string
+  sepa_mandat_datum: string
   status: 'active' | 'inactive' | 'blocked'
   fax_blocked: boolean
   tab23: Tab23Stammdaten
@@ -252,6 +261,11 @@ const DEFAULT_KUNDE: KundeData = {
   steuernummer: '',
   zahlungsziel: '',
   kreditlimit: 0,
+  iban: '',
+  bic: '',
+  bank_name: '',
+  sepa_mandat_ref: '',
+  sepa_mandat_datum: '',
   status: 'active',
   fax_blocked: false,
   tab23: { ...EMPTY_TAB23_STAMMDATEN },
@@ -404,6 +418,11 @@ function toForm(envelope: BusinessPartnerEnvelope): KundeData {
     steuernummer: String(bp.finance.tax_number ?? ''),
     zahlungsziel: String(bp.finance.payment_terms_id ?? ''),
     kreditlimit: Number(bp.finance.credit_limit ?? 0),
+    iban: String(bp.banking.iban ?? ''),
+    bic: String(bp.banking.bic ?? ''),
+    bank_name: String(bp.banking.bank_name ?? ''),
+    sepa_mandat_ref: String(bp.banking.sepa_mandate_reference ?? ''),
+    sepa_mandat_datum: String(bp.banking.sepa_mandate_signed_at ?? '').slice(0, 10),
     status: bp.core_identity.status,
     fax_blocked: Boolean(leg?.fax_blocked),
     tab23: mergeTab23FromBp(bp),
@@ -512,12 +531,12 @@ function mergePayload(form: KundeData, base: BusinessPartnerEnvelope | null): Bu
         website: form.website || null,
         fax: form.fax || null,
       },
-      banking: b?.banking ?? {
-        iban: null,
-        bic: null,
-        bank_name: null,
-        sepa_mandate_reference: null,
-        sepa_mandate_signed_at: null,
+      banking: {
+        iban: form.iban.replace(/\s+/g, '').toUpperCase() || null,
+        bic: form.bic.replace(/\s+/g, '').toUpperCase() || null,
+        bank_name: form.bank_name || null,
+        sepa_mandate_reference: form.sepa_mandat_ref || null,
+        sepa_mandate_signed_at: form.sepa_mandat_datum || null,
       },
       finance: {
         debtor_account: form.tab23.debtor_account || null,
@@ -1212,8 +1231,14 @@ export default function KundenStammPage(): JSX.Element {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label>Firmenname (Zeile 1)</Label>
-                  <Input value={kunde.name} onChange={(e) => setKunde((prev) => ({ ...prev, name: e.target.value }))} />
+                  {/* Label und Feld waren nicht verbunden: weder ein Screenreader
+                      noch ein Test findet das Feld ueber seine Beschriftung. */}
+                  <Label htmlFor="kunde-name">Firmenname (Zeile 1)</Label>
+                  <Input
+                    id="kunde-name"
+                    value={kunde.name}
+                    onChange={(e) => setKunde((prev) => ({ ...prev, name: e.target.value }))}
+                  />
                 </div>
                 <div>
                   <Label>Name Zeile 2</Label>
@@ -1445,6 +1470,71 @@ export default function KundenStammPage(): JSX.Element {
                   value={kunde.kreditlimit}
                   onChange={(e) => setKunde((prev) => ({ ...prev, kreditlimit: Number(e.target.value || 0) }))}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/*
+            Bankverbindung und SEPA-Mandat.
+
+            Ohne diesen Abschnitt liess sich am Kunden keine Bankverbindung
+            hinterlegen — der Lastschrifteinzug haette keine Grundlage. Die
+            Felder entsprechen dem, was das Backend schon schreibt und was L3
+            in KUNDEN_BANKEN und FIBU_ZV_SEPA_MANDATE fuehrt.
+          */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Bankverbindung</CardTitle>
+              <CardDescription>
+                Grundlage fuer den Lastschrifteinzug. Ohne gueltiges Mandat wird nicht eingezogen.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="kunde-iban">IBAN</Label>
+                  <Input
+                    id="kunde-iban"
+                    value={kunde.iban}
+                    placeholder="DE00 0000 0000 0000 0000 00"
+                    onChange={(e) => setKunde((prev) => ({ ...prev, iban: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="kunde-bic">BIC</Label>
+                  <Input
+                    id="kunde-bic"
+                    value={kunde.bic}
+                    onChange={(e) => setKunde((prev) => ({ ...prev, bic: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="kunde-bank">Kreditinstitut</Label>
+                <Input
+                  id="kunde-bank"
+                  value={kunde.bank_name}
+                  onChange={(e) => setKunde((prev) => ({ ...prev, bank_name: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="kunde-mandat">SEPA-Mandatsreferenz</Label>
+                  <Input
+                    id="kunde-mandat"
+                    value={kunde.sepa_mandat_ref}
+                    onChange={(e) => setKunde((prev) => ({ ...prev, sepa_mandat_ref: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="kunde-mandat-datum">Mandat unterschrieben am</Label>
+                  <Input
+                    id="kunde-mandat-datum"
+                    type="date"
+                    value={kunde.sepa_mandat_datum}
+                    onChange={(e) => setKunde((prev) => ({ ...prev, sepa_mandat_datum: e.target.value }))}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
