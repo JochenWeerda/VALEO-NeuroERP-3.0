@@ -1,0 +1,27 @@
+---
+id: MASK-GEN-STUB-BACKENDS
+title: Zehn Masken-Entity-Stubs auf Fachendpunkte
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+---
+
+ziel: >
+  Die zehn nativen ScreenDefinitions, die den Kopf noch vom masks/-Stub lasen,
+  auf echte Fachendpunkte legen. Feldschluessel an die API anpassen. Fehlende
+  GET-by-id und den CRM-Consent-Stamm bauen. Studio-Katalog erweitern.
+  lager/leitstand nicht dekorativ verdrahten.
+
+abnahme:
+  - tests/test_mask_endpoint_inventory.py: 0 Entity-Stubs
+  - tests/test_mask_entity_backends.py: Einkauf-GET 200/404, Routen registriert
+  - check_openapi_docs.py --threshold 0
+  - check_frontend_api_calls.py Schwelle 40
+
+dateibesitz:
+  - app/domains/agrar/api/duenger.py
+  - app/domains/agrar/api/saatgut.py
+  - app/api/v1/endpoints/finance_stammdaten.py
+  - app/api/v1/endpoints/crm_consents.py
+  - app/core/screen_definitions.py
+  - tests/test_mask_entity_backends.py

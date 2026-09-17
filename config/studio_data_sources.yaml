@@ -17,6 +17,27 @@ data_sources:
   - key: open_items
     label: Offene Posten
     endpoint: /api/v1/finance/open-items
+  - key: duenger
+    label: Duenger
+    endpoint: /api/v1/agrar/duenger
+  - key: saatgut
+    label: Saatgut
+    endpoint: /api/v1/agrar/saatgut
+  - key: purchase_inquiries
+    label: Einkaufsanfragen
+    endpoint: /api/v1/einkauf/anfragen
+  - key: purchase_offers
+    label: Lieferantenangebote
+    endpoint: /api/v1/einkauf/angebote
+  - key: debtors
+    label: Debitoren
+    endpoint: /api/v1/finance/debitoren
+  - key: creditors
+    label: Kreditoren
+    endpoint: /api/v1/finance/kreditoren
+  - key: consents
+    label: Einwilligungen
+    endpoint: /api/v1/crm/consents
 
 # Zulaessige Command-Actions mit vorgegebenem dangerLevel (Studio darf ERHOEHEN,
 # nie senken) und forbiddenForAgents-Basis (darf nicht aufgehoben werden).

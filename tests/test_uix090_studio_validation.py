@@ -33,10 +33,13 @@ def _v(draft):
 
 
 def test_catalog_loads():
+    load_studio_catalog.cache_clear()
     cat = load_studio_catalog()
     assert cat["version"] == "2026-07"
     assert "create_activity" in cat["actions"]
     assert cat["actions"]["stornieren"]["forbiddenForAgents"] is True
+    keys = {ds["key"] for ds in cat["data_sources"]}
+    assert {"duenger", "saatgut", "debtors", "consents", "purchase_offers"} <= keys
 
 
 def test_valider_draft_ohne_verletzung():

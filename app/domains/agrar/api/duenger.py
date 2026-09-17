@@ -20,7 +20,7 @@ router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
-@router.get("/", response_model=PaginatedResponse[Duenger])
+@router.get("/", response_model=PaginatedResponse[Duenger], summary="Duenger auflisten")
 async def list_duenger(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in name, article number, manufacturer"),
@@ -76,7 +76,90 @@ async def list_duenger(
     )
 
 
-@router.get("/{duenger_id}", response_model=Duenger)
+@router.get("/search", response_model=list[Duenger], summary="Duenger suchen")
+async def search_duenger(
+    q: str = Query(..., min_length=2, description="Search term"),
+    limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Lightweight search endpoint for Dünger."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    like = f"%{q}%"
+
+    query = (
+        db.query(DuengerModel)
+        .filter(DuengerModel.ist_aktiv == True)
+        .filter(DuengerModel.tenant_id == effective_tenant)
+        .filter(
+            or_(
+                DuengerModel.name.ilike(like),
+                DuengerModel.artikelnummer.ilike(like),
+                DuengerModel.hersteller.ilike(like),
+            )
+        )
+        .order_by(DuengerModel.name.asc())
+        .limit(limit)
+    )
+
+    return [Duenger.model_validate(item) for item in query.all()]
+
+
+@router.get("/stats/overview", summary="Duenger-Kennzahlen")
+async def get_duenger_stats(
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Get Dünger statistics overview."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
+
+    type_stats = {}
+    types = db.query(DuengerModel.typ, func.count(DuengerModel.id)).filter(
+        DuengerModel.tenant_id == effective_tenant,
+        DuengerModel.ist_aktiv == True
+    ).group_by(DuengerModel.typ).all()
+
+    for typ, count in types:
+        type_stats[typ or "Unbekannt"] = count
+
+    safety_stats = {}
+    safety = db.query(
+        func.concat(
+            case((DuengerModel.wassergefaehrdend == True, "WG"), else_=""),
+            case((DuengerModel.gefahrstoff_klasse.isnot(None), "+GHS"), else_="")
+        ),
+        func.count(DuengerModel.id)
+    ).filter(
+        DuengerModel.tenant_id == effective_tenant,
+        DuengerModel.ist_aktiv == True
+    ).group_by(
+        DuengerModel.wassergefaehrdend,
+        DuengerModel.gefahrstoff_klasse
+    ).all()
+
+    for safety_type, count in safety:
+        safety_stats[safety_type or "Standard"] = count
+
+    stock_stats = db.query(
+        func.sum(DuengerModel.lagerbestand),
+        func.avg(DuengerModel.vk_preis)
+    ).filter(
+        DuengerModel.tenant_id == effective_tenant,
+        DuengerModel.ist_aktiv == True
+    ).first()
+
+    return {
+        "total_duenger": sum(type_stats.values()),
+        "by_type": type_stats,
+        "by_safety": safety_stats,
+        "stock_summary": {
+            "total_stock": float(stock_stats[0] or 0),
+            "avg_price": float(stock_stats[1] or 0)
+        }
+    }
+
+
+@router.get("/{duenger_id}", response_model=Duenger, summary="Duenger abrufen")
 async def get_duenger(
     duenger_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -100,7 +183,7 @@ async def get_duenger(
     return Duenger.model_validate(duenger)
 
 
-@router.post("/", response_model=Duenger, status_code=201)
+@router.post("/", response_model=Duenger, status_code=201, summary="Duenger anlegen")
 async def create_duenger(
     duenger_data: DuengerCreate,
     tenant_id: Optional[str] = Query(None),
@@ -146,7 +229,7 @@ async def create_duenger(
         )
 
     duenger = DuengerModel(
-        **duenger_data.model_dump(),
+        **duenger_data.model_dump(exclude={"tenant_id"}),
         tenant_id=effective_tenant
     )
 
@@ -157,7 +240,8 @@ async def create_duenger(
     return Duenger.model_validate(duenger)
 
 
-@router.put("/{duenger_id}", response_model=Duenger)
+@router.put("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren")
+@router.patch("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren")
 async def update_duenger(
     duenger_id: str,
     duenger_data: DuengerUpdate,
@@ -225,7 +309,7 @@ async def update_duenger(
     return Duenger.model_validate(duenger)
 
 
-@router.delete("/{duenger_id}", status_code=204)
+@router.delete("/{duenger_id}", status_code=204, summary="Duenger deaktivieren")
 async def delete_duenger(
     duenger_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -250,89 +334,3 @@ async def delete_duenger(
     db.commit()
 
     return None
-
-
-@router.get("/search", response_model=list[Duenger])
-async def search_duenger(
-    q: str = Query(..., min_length=2, description="Search term"),
-    limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
-    tenant_id: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-):
-    """Lightweight search endpoint for Dünger."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    like = f"%{q}%"
-
-    query = (
-        db.query(DuengerModel)
-        .filter(DuengerModel.ist_aktiv == True)
-        .filter(DuengerModel.tenant_id == effective_tenant)
-        .filter(
-            or_(
-                DuengerModel.name.ilike(like),
-                DuengerModel.artikelnummer.ilike(like),
-                DuengerModel.hersteller.ilike(like),
-            )
-        )
-        .order_by(DuengerModel.name.asc())
-        .limit(limit)
-    )
-
-    return [Duenger.model_validate(item) for item in query.all()]
-
-
-@router.get("/stats/overview")
-async def get_duenger_stats(
-    tenant_id: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-):
-    """Get Dünger statistics overview."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-
-    # Count by type
-    type_stats = {}
-    types = db.query(DuengerModel.typ, func.count(DuengerModel.id)).filter(
-        DuengerModel.tenant_id == effective_tenant,
-        DuengerModel.ist_aktiv == True
-    ).group_by(DuengerModel.typ).all()
-
-    for typ, count in types:
-        type_stats[typ or "Unbekannt"] = count
-
-    # Safety stats
-    safety_stats = {}
-    safety = db.query(
-        func.concat(
-            case((DuengerModel.wassergefaehrdend == True, "WG"), else_=""),
-            case((DuengerModel.gefahrstoff_klasse.isnot(None), "+GHS"), else_="")
-        ),
-        func.count(DuengerModel.id)
-    ).filter(
-        DuengerModel.tenant_id == effective_tenant,
-        DuengerModel.ist_aktiv == True
-    ).group_by(
-        DuengerModel.wassergefaehrdend,
-        DuengerModel.gefahrstoff_klasse
-    ).all()
-
-    for safety_type, count in safety:
-        safety_stats[safety_type or "Standard"] = count
-
-    # Stock stats
-    stock_stats = db.query(
-        func.sum(DuengerModel.lagerbestand),
-        func.avg(DuengerModel.vk_preis)
-    ).filter(
-        DuengerModel.tenant_id == effective_tenant,
-        DuengerModel.ist_aktiv == True
-    ).first()
-
-    return {
-        "total_duenger": sum(type_stats.values()),
-        "by_type": type_stats,
-        "by_safety": safety_stats,
-        "stock_summary": {
-            "total_stock": float(stock_stats[0] or 0),
-            "avg_price": float(stock_stats[1] or 0)
-        }
-    }

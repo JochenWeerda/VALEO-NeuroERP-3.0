@@ -91,6 +91,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | MERIDIAN-SCREEN-STUDIO | No-Code/Agent-Editor für ScreenDefinitions + Live-Vorschau | ✅ | `/admin/screen-studio`; pytest `test_meridian_screen_studio_api.py`; Vitest `screen-studio` |
 | MERIDIAN-SCREEN-STUDIO-E2E | Playwright-Abnahme Lieferanten-Bewertung + Confirmation-Gate | ✅ | `tests/e2e/meridian-screen-studio.spec.ts`; pytest Confirmation-Gate |
 | MERIDIAN-SCREEN-STUDIO-GATES | tsc AgentMaskContract + OpenAPI-Summaries der 9 Studio-Routen | ✅ | `tsc --noEmit` Exit 0; `check_openapi_docs.py` 3468/3468 |
+| MASK-GEN-STUB-BACKENDS | 10 native Entity-Stubs auf Fachendpunkte; Studio-Katalog + CRM-Consents | ✅ | pytest Inventar 0 Stubs; `test_mask_entity_backends.py` |
 | L3-HABIT-BRIDGE-001 | Herstellerneutrale Desktop-Gewohnheitsvertraege + 3 Referenzmasken | ✅ technisch abgeschlossen, Human Review vor Rollout | 125 Mask-Builder/RenderPlan-Tests, 4 Backend-Tests, 12 Visual-Audits; ADR-056 + Paritaetsmatrix |
 
 | L3-MDE-INBOX-003 | Native MDE-Worklist + zentrale statusabhaengige Tabellenzeilen-Aktionen | technisch abgeschlossen, Provider-Pilot extern | `schnittstelle/mde-inbox`, Quarantaene/Retry-Audit, ADR-057 |

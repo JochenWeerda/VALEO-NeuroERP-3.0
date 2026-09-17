@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16",
+  "generatedAt": "2026-09-17",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -881,7 +881,7 @@
         }
       ],
       "sensitive_fields": [
-        "preis"
+        "vk_preis"
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -2195,7 +2195,6 @@
         }
       ],
       "sensitive_fields": [
-        "konto_nr",
         "iban",
         "bic",
         "saldo"
@@ -2262,7 +2261,6 @@
         }
       ],
       "sensitive_fields": [
-        "iban",
         "steuernummer",
         "ust_id"
       ],
@@ -2475,9 +2473,7 @@
           "stubReason": null
         }
       ],
-      "sensitive_fields": [
-        "preis_je_t"
-      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {

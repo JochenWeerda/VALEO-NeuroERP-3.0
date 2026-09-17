@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-17
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -121,6 +121,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_call_transcript` | KIM Telefon-Transkript-Connector — Anrufe automatisch als Kontakt erfassen. |
 | `crm_campaigns` | — |
 | `crm_capture_inbox` | KIM Klärfall-Inbox — nicht zuordenbare Auto-Captures sichten und zuordnen. |
+| `crm_consents` | CRM-Einwilligungen (DSGVO) fuer Maskengenerator und Consent-Masken. |
 | `crm_contacts_ext` | KIM-S4 — Ansprechpartner-Erweiterung: Werbe-Präferenzen + Pseudonymisierung. |
 | `crm_duplicates` | Kunden-Dubletten (DOM-CRM-004) — Erkennung wahrscheinlicher Doppelanlagen. |
 | `crm_gifts` | KIM-S3 — Kunden-Präsente-Endpoints (eigener Router, prefix /crm/kim). |
@@ -150,6 +151,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `docflow_followup` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
 | `docflow_gobd` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
 | `docflow_return` | Document return and shipping-status API. |
+| `document_allocations` | FSX-MENGENMODELL — Endpunkte fuer die positionsbezogene Mengenzuordnung. |
 | `document_control` | Document control (Beleg-Kontrolle) API. |
 | `dokumente` | Dokumente API - Dokumentenverwaltung (SQLAlchemy Version) |
 | `dunning` | Dunning System API |
@@ -205,6 +207,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_op` | Offene-Posten-Cockpit / OP-Aging (DOM-FIN-004) — read-only. |
 | `finance_period` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_read_models` | Finance Read-Models — Wave 2 AP2 |
+| `finance_stammdaten` | Finance-Stamm fuer Debitoren und Kreditoren — Maskengenerator und Listen. |
 | `financial_reports` | Financial Reports API |
 | `flow_spines` | — |
 | `foerderung` | Foerderung API - DB-backed endpoints. |
@@ -382,6 +385,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_credit_notes` | Sales Credit Notes (Gutschriften) and Returns (Retouren) endpoints. |
 | `sales_delivery_notes` | Sales Delivery Notes (Lieferscheine) CRUD endpoints. |
 | `sales_invoice_einvoice` | Slice-006: XRechnung/ZUGFeRD Export Endpoints für SalesInvoice. |
+| `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |
 | `sales_offers` | Domain sales offers (Angebote) CRUD endpoints. |
 | `sales_orders` | Domain sales orders CRUD endpoints. |
@@ -402,6 +406,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `stmd_duplikat` | STMD-DUP-001: Cross-Domain-Dublettenprüfung für Stammdaten. |
 | `strecke` | Strecke – Streckengeschaefte CRUD |
 | `strecke_speditionen` | Strecke – Speditionen / Frachttarife nach PLZ |
+| `studio_drafts` | ScreenDefinition Studio API — catalog, validate, propose, drafts. |
 | `stuecklisten` | Stücklisten / Rezepturen [ARTSTLI] — Artikelkomponenten-Stammdaten. |
 | `subsidiary_ledger_reconciliation` | Subsidiary Ledger Reconciliation API |
 | `supplier_portal` | — |

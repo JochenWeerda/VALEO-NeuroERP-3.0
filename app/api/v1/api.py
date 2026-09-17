@@ -337,7 +337,7 @@ from app.api.v1.endpoints import (
 from app.api.v1.endpoints import kostenrechnung
 
 # Import domain routers
-from app.domains.agrar.api import psm, psm_proplanta
+from app.domains.agrar.api import duenger, psm, psm_proplanta, saatgut
 from app.domains.inventory.api import router as inventory_domain_router
 from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
@@ -1229,6 +1229,16 @@ api_router.include_router(
 
 # Agrar domain routers
 api_router.include_router(
+    duenger.router,
+    prefix="/agrar/duenger",
+    tags=["agrar", "duenger"],
+)
+api_router.include_router(
+    saatgut.router,
+    prefix="/agrar/saatgut",
+    tags=["agrar", "saatgut"],
+)
+api_router.include_router(
     psm.router,
     prefix="/agrar/psm",
     tags=["agrar", "psm"]
@@ -1830,6 +1840,8 @@ from app.api.v1.endpoints import (
     mask_rollout_summaries,
     mask_screen_definition,
     studio_drafts,
+    finance_stammdaten,
+    crm_consents,
     operational_governance,
     planung_kalender,
     pricing_governance,
@@ -1870,6 +1882,8 @@ api_router.include_router(mask_actions.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)
+api_router.include_router(finance_stammdaten.router)
+api_router.include_router(crm_consents.router)
 api_router.include_router(operational_governance.router)
 api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)

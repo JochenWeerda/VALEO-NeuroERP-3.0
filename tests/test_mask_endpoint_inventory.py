@@ -90,20 +90,7 @@ def test_keine_maske_zeigt_auf_den_entity_stub() -> None:
 
     Die Liste ist der Rest, nicht der Plan: Sie darf schrumpfen, nicht wachsen.
     """
-    erlaubt = {
-        # Fuer diese Masken gibt es (noch) keinen Fachendpunkt. Die Liste ist
-        # der Rest, nicht der Plan.
-        "agrar/duenger",
-        "agrar/saatgut",
-        "einkauf/anfrage",
-        "einkauf/angebot",
-        "einkauf/anlieferavis",
-        "einkauf/auftragsbestaetigung",
-        "finance/bankkonto",
-        "finance/debitor",
-        "finance/kreditor",
-        "futtermittel/mischfuttermittel",
-    }
+    erlaubt: set[str] = set()
     auf_stub = set()
     for screen_id in SCREEN_DEFINITION_BUILDERS:
         screen = get_screen_definition(screen_id)

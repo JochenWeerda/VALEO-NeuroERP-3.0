@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-17
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -133,6 +133,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_campaigns_20260524` | CRM: campaign_templates, campaigns, campaign_recipients |
 | `crm_capture_inbox_kim_20260609` | crm_capture_inbox — Klärfall-Inbox für nicht zuordenbare Auto-Captures (KIM) |
 | `crm_consent_segments_20260305` | CRM: consent, segments and segment_members tables |
+| `crm_consents_20260917` | CRM-Einwilligungen (DSGVO) in domain_crm. |
 | `crm_contacts_ext_kim_s4_20260609` | crm_contacts_ext — Ansprechpartner-Erweiterung (KIM-S4) |
 | `crm_customers_business_partner_id_20260404` | domain_crm.customers.business_partner_id — Verknüpfung CRM-Kunde ↔ Business Partner (Stammdaten) |
 | `crm_customers_search_index_20260414` | domain_crm.customers — pg_trgm GIN-Indizes fuer schnelle Typeahead-Suche |
@@ -143,6 +144,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_ownership_log_20260610` | crm_ownership_log — Übergabe-/Zuordnungs-Audit (DOM-CRM-004.3) |
 | `crm_phase4_opportunity_links_20260305` | CRM Phase 4: Opportunity links to offer/order, loss_reason |
 | `desktop_runtime_repair_20260909` | Repair missing historical tables in a database already stamped at head. |
+| `doc_allocations_20260915` | FSX-MENGENMODELL: positionsbezogene n:m-Zuordnung zwischen Belegen |
 | `doc_artifact_version_20260611` | DOM-DOC-004.2 — Artefakt-Versionierung + Freigabe-Status. |
 | `doc_followup_20260611` | DOM-DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage am Vorgang. |
 | `doc_nachweisraum_lifecycle_20260623` | DOM-DOC-004 — Nachweisraum Dokument-Lifecycle + GoBD-Export Tabellen |
@@ -233,6 +235,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `finance_followup_exports_einkauf_uq_20260406` | finance_followup_exports + optional unique (tenant_id, bestellnummer) |
 | `finance_hr_einkauf_repair_20260626` | FINANCE-HR-EINKAUF-REPAIR-001: Finance + HR + Einkauf Batch-Repair Wave 12. |
 | `finance_sepa_ratenzahlung_20260623` | DOM-FINANCE-004: finance_sepa_mandate, sepa_batches, ratenzahlungsplaene, ratenzahlungsraten, mahnstufen_audit |
+| `flow_spine_document_link_unique_20260915` | FSX-011: eindeutiger Belegbezug fuer offene Flow-Spine-Vorgaenge |
+| `flow_spine_instance_documents_20260915` | FSX-DOC-LINKS: beteiligte Belege je Flow-Spine-Vorgang |
 | `flow_spine_instances_20260326` | Flow Spine Instance persistence table |
 | `flow_spine_lifecycle_20260417` | Extend flow spine instances with lifecycle state and timeline events |
 | `foreign_goods_worklist_20260821` | Audit trail for the foreign-goods operator worklist. |
@@ -353,8 +357,10 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `sales_credit_returns_pricing_20260305` | Sales: credit notes, returns, price list items |
 | `sales_delivery_notes_branches_audit_20260216` | Add sales delivery notes, branches, and audit attestations tables. |
 | `sales_delivery_storno_20260611` | DOM-SALES-004.4 — Lieferungs-Storno (Grund am Lieferschein). |
+| `sales_invoice_lines_20260915` | Ausgangsrechnung und Rechnungsposition als eigene Objekte |
 | `sales_o2c_link_20260610` | sales O2C-Link — Auftrag→Lieferschein-Verknüpfung (DOM-SALES-004.1) |
 | `sales_orders_items_shipping_20260215` | Add sales_order_items relation and shipping_method on sales_orders. |
+| `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |

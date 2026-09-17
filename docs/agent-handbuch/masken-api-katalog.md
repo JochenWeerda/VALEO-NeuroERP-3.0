@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-17
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -107,7 +107,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/agrar/duenger/entity/{entity_id}`
+- `entity` → `/api/v1/agrar/duenger/{entity_id}`
 - `verwendung` → `/api/v1/masks/agrar/duenger/entity/{entity_id}/tabs/verwendung`
 - `preise` → `/api/v1/masks/agrar/duenger/entity/{entity_id}/tabs/preise`
 
@@ -121,7 +121,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche Naehrstoffgehalte hat Duenger {entity_id}?
 - Zeige die Preisentwicklung von Duenger {entity_id}.
 
-**Sensible Felder:** `preis`
+**Sensible Felder:** `vk_preis`
 
 **Actions:**
 
@@ -631,7 +631,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/agrar/saatgut/entity/{entity_id}`
+- `entity` → `/api/v1/agrar/saatgut/{entity_id}`
 - `lagerbestaende` → `/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/lagerbestaende`
 - `vertraege` → `/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/vertraege`
 
@@ -1092,7 +1092,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/anfrage/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/anfragen/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/anfragen/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -1126,7 +1126,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/angebot/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/angebote/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/angebote/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -1162,7 +1162,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/anlieferavis/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/anlieferavis/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -1196,7 +1196,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/auftragsbestaetigung/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/auftragsbestaetigungen/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/auftragsbestaetigungen/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -1544,7 +1544,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/bankkonto/entity/{entity_id}`
+- `entity` → `/api/v1/banken/konten/{entity_id}`
 - `buchungen` → `/api/v1/masks/finance/bankkonten/entity/{entity_id}/tabs/buchungen`
 
 **MCP-Tools (Domäne):**
@@ -1557,7 +1557,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Was ist der aktuelle Saldo von Bankkonto {entity_id}?
 - Zeige die letzten Buchungen auf Bankkonto {entity_id}.
 
-**Sensible Felder:** `konto_nr, iban, bic, saldo`
+**Sensible Felder:** `iban, bic, saldo`
 
 **Actions:**
 
@@ -1581,7 +1581,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/debitor/entity/{entity_id}`
+- `entity` → `/api/v1/finance/debitoren/{entity_id}`
 - `offene_posten` → `/api/v1/masks/finance/debitoren/entity/{entity_id}/tabs/offene-posten`
 - `umsaetze` → `/api/v1/masks/finance/debitoren/entity/{entity_id}/tabs/umsaetze`
 
@@ -1619,7 +1619,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/kreditor/entity/{entity_id}`
+- `entity` → `/api/v1/finance/kreditoren/{entity_id}`
 - `offene_posten` → `/api/v1/masks/finance/kreditoren/entity/{entity_id}/tabs/offene-posten`
 - `bestellungen` → `/api/v1/masks/finance/kreditoren/entity/{entity_id}/tabs/bestellungen`
 
@@ -1633,7 +1633,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche offenen Posten hat Kreditor {entity_id}?
 - Zeige alle Bestellungen bei Kreditor {entity_id}.
 
-**Sensible Felder:** `iban, steuernummer, ust_id`
+**Sensible Felder:** `steuernummer, ust_id`
 
 **Actions:**
 
@@ -1853,7 +1853,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}`
+- `entity` → `/api/v1/futter/mischfuttermittel/{entity_id}`
 - `rezeptur` → `/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/rezeptur`
 - `naehrstoffe` → `/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/naehrstoffe`
 
@@ -1861,8 +1861,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Welche Komponenten hat Mischfutter {entity_id}?
 - Zeige die berechneten Naehrstoffgehalte von Mischfutter {entity_id}.
-
-**Sensible Felder:** `preis_je_t`
 
 **Actions:**
 

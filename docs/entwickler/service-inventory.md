@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-12
+last_reviewed: 2026-09-17
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -40,6 +40,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `ap_invoice_kernel_posting` | Kernel PostAPInvoice: gleiche Fachlogik wie POST /ap/invoices/{id}/post, aber ohne |
 | `archive_service` | Archive Service |
 | `article_image_enrichment` | Article Image Enrichment Service |
+| `article_import` | FSX-ARTIKEL-IMPORT — kanonisches Zwischenformat fuer den Artikelstamm. |
+| `article_units_bridge` | Bruecke vom Importformat in das Mengenmodell. |
 | `articles_service` | Helper functions for the Articles domain. |
 | `atlas_customs_service` | ATLAS Zollausfuhr Service — Implementierung nach Zollkodex der Union (UZK). |
 | `audit_hardening` | Audit Hardening Service — NC-D1/D2 |
@@ -89,6 +91,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
 | `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |
+| `docflow_source_proposals` | Read-only source proposals over existing contracts and customer-owned stock. |
+| `document_allocation_service` | FSX-MENGENMODELL — Zuordnen von Teilmengen zwischen Belegpositionen. |
 | `document_control_projection` | Project document-control exceptions from canonical source documents. |
 | `document_control_service` | Central document-control exception worklist (Beleg-Kontrolle). |
 | `einkauf_compat_service` | Service layer for compat einkauf domain routes. |
@@ -236,6 +240,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `rfq_service` | RFQ-Service (Anfrage → Angebot → Zuschlag → Bestellung). |
 | `sales_ab_lifecycle_service` | DOM-SALES-004.2 — Auftragsbestätigung Lifecycle Service (Statusmaschine). |
 | `sales_credit_service` | Kreditlimit-Prüfung & Rechnungs-/Billing-Status im O2C-Kontext (DOM-SALES-004.3). |
+| `sales_invoice_mask` | Die Rechnungsmaske als Daten — Kopf, Positionen und Herkunft fuer den Builder. |
+| `sales_invoice_service` | Aus Lieferscheinpositionen wird eine Rechnung mit eigenen Positionen. |
 | `sales_lieferschein_close_service` | DOM-SALES-004.3 — Lieferschein-Closing-Flow Service. |
 | `sales_match_service` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2). |
 | `sales_posting_service` | Service for creating FIBU journal entries along the Auftrag → Lieferschein → Rechnung chain. |
@@ -250,6 +256,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
+| `studio_draft_store` | Studio drafts with tenant isolation, four-eyes publish, and optional Postgres. |
+| `studio_propose` | Deterministic ScreenDefinition proposals for humans and agents. |
 | `studio_validation` | SD-Studio Draft-Validierung (UIX-090) — harte Sicherheitsregeln. |
 | `supply_chain_event_service` | Append-only Ketten-Ereignis-Log + kanonischer Übergabestatus (DOM-SUPPLY-004.2). |
 | `supply_chain_lot_service` | Lager-Lot-Folgeaktionen mit Abweichungsgrund (DOM-SUPPLY-004.3). |

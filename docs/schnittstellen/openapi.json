@@ -31570,62 +31570,6 @@
         "title": "ConsentCheckRequest",
         "type": "object"
       },
-      "ConsentCreate": {
-        "properties": {
-          "channel": {
-            "$ref": "#/components/schemas/ConsentChannel"
-          },
-          "granted": {
-            "default": true,
-            "title": "Granted",
-            "type": "boolean"
-          },
-          "ip_address": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ip Address"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "partner_id": {
-            "title": "Partner Id",
-            "type": "string"
-          },
-          "purpose": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Purpose",
-            "type": "string"
-          },
-          "source": {
-            "default": "manual",
-            "title": "Source",
-            "type": "string"
-          }
-        },
-        "required": [
-          "partner_id",
-          "channel",
-          "purpose"
-        ],
-        "title": "ConsentCreate",
-        "type": "object"
-      },
       "ConsentGrantRequest": {
         "properties": {
           "consent_type": {
@@ -31768,6 +31712,46 @@
           "consent_type"
         ],
         "title": "ConsentRevokeRequest",
+        "type": "object"
+      },
+      "ConsentUpdate": {
+        "properties": {
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "ConsentUpdate",
         "type": "object"
       },
       "ConsultingCaseDetailOut": {
@@ -38131,6 +38115,181 @@
         "title": "CreditorUpdate",
         "type": "object"
       },
+      "CreditorWrite": {
+        "properties": {
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "creditor_number": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creditor Number"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "payment_terms_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Terms Days"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
+          "street": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street"
+          },
+          "tax_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Number"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "vat_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Id"
+          }
+        },
+        "title": "CreditorWrite",
+        "type": "object"
+      },
       "CreditorsOut": {
         "additionalProperties": true,
         "description": "Response schema for creditors endpoints.",
@@ -40967,6 +41126,34 @@
           "reason"
         ],
         "title": "DebitMemoResponse",
+        "type": "object"
+      },
+      "DebitorPatch": {
+        "properties": {
+          "credit_limit": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Limit"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "title": "DebitorPatch",
         "type": "object"
       },
       "Debtor": {
@@ -50071,9 +50258,16 @@
             "title": "S Gehalt"
           },
           "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "Tenant ID",
-            "title": "Tenant Id",
-            "type": "string"
+            "title": "Tenant Id"
           },
           "typ": {
             "description": "Type (Mineraldünger, Organisch, etc.)",
@@ -50128,8 +50322,7 @@
         "required": [
           "artikelnummer",
           "name",
-          "typ",
-          "tenant_id"
+          "typ"
         ],
         "title": "DuengerCreate",
         "type": "object"
@@ -127683,9 +127876,16 @@
             "type": "string"
           },
           "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "Tenant ID",
-            "title": "Tenant Id",
-            "type": "string"
+            "title": "Tenant Id"
           },
           "tkm": {
             "anyOf": [
@@ -127771,8 +127971,7 @@
           "artikelnummer",
           "name",
           "sorte",
-          "art",
-          "tenant_id"
+          "art"
         ],
         "title": "SaatgutCreate",
         "type": "object"
@@ -160592,6 +160791,60 @@
         "title": "AssignIn",
         "type": "object"
       },
+      "app__api__v1__endpoints__crm_consents__ConsentCreate": {
+        "properties": {
+          "channel": {
+            "minLength": 1,
+            "title": "Channel",
+            "type": "string"
+          },
+          "consent_type": {
+            "minLength": 1,
+            "title": "Consent Type",
+            "type": "string"
+          },
+          "contact_id": {
+            "minLength": 1,
+            "title": "Contact Id",
+            "type": "string"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "source": {
+            "default": "manual",
+            "title": "Source",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "required": [
+          "contact_id",
+          "channel",
+          "consent_type"
+        ],
+        "title": "ConsentCreate",
+        "type": "object"
+      },
       "app__api__v1__endpoints__crm_kim__Customer": {
         "properties": {
           "abcStatus": {
@@ -166350,6 +166603,62 @@
           }
         },
         "title": "ActivityUpdate",
+        "type": "object"
+      },
+      "app__crm__schemas__ConsentCreate": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ConsentChannel"
+          },
+          "granted": {
+            "default": true,
+            "title": "Granted",
+            "type": "boolean"
+          },
+          "ip_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Address"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "partner_id": {
+            "title": "Partner Id",
+            "type": "string"
+          },
+          "purpose": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "source": {
+            "default": "manual",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "partner_id",
+          "channel",
+          "purpose"
+        ],
+        "title": "ConsentCreate",
         "type": "object"
       },
       "app__crm__schemas__Contact": {
@@ -190313,7 +190622,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "List Duenger",
+        "summary": "Duenger auflisten",
         "tags": [
           "Agrar",
           "duenger"
@@ -190372,7 +190681,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create Duenger",
+        "summary": "Duenger anlegen",
         "tags": [
           "Agrar",
           "duenger"
@@ -190453,7 +190762,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Search Duenger",
+        "summary": "Duenger suchen",
         "tags": [
           "Agrar",
           "duenger"
@@ -190502,7 +190811,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Duenger Stats",
+        "summary": "Duenger-Kennzahlen",
         "tags": [
           "Agrar",
           "duenger"
@@ -190555,7 +190864,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Delete Duenger",
+        "summary": "Duenger deaktivieren",
         "tags": [
           "Agrar",
           "duenger"
@@ -190613,7 +190922,75 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Duenger",
+        "summary": "Duenger abrufen",
+        "tags": [
+          "Agrar",
+          "duenger"
+        ]
+      },
+      "patch": {
+        "description": "Update an existing Dünger.",
+        "operationId": "update_duenger_api_v1_agrar_duenger__duenger_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "duenger_id",
+            "required": true,
+            "schema": {
+              "title": "Duenger Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuengerUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Duenger"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Duenger aktualisieren",
         "tags": [
           "Agrar",
           "duenger"
@@ -190681,7 +191058,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Update Duenger",
+        "summary": "Duenger aktualisieren",
         "tags": [
           "Agrar",
           "duenger"
@@ -211866,7 +212243,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "List Saatgut",
+        "summary": "Saatgut auflisten",
         "tags": [
           "Agrar",
           "saatgut"
@@ -211925,7 +212302,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create Saatgut",
+        "summary": "Saatgut anlegen",
         "tags": [
           "Agrar",
           "saatgut"
@@ -212006,7 +212383,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Search Saatgut",
+        "summary": "Saatgut suchen",
         "tags": [
           "Agrar",
           "saatgut"
@@ -212055,7 +212432,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Saatgut Stats",
+        "summary": "Saatgut-Kennzahlen",
         "tags": [
           "Agrar",
           "saatgut"
@@ -212108,7 +212485,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Delete Saatgut",
+        "summary": "Saatgut deaktivieren",
         "tags": [
           "Agrar",
           "saatgut"
@@ -212166,7 +212543,75 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Saatgut",
+        "summary": "Saatgut abrufen",
+        "tags": [
+          "Agrar",
+          "saatgut"
+        ]
+      },
+      "patch": {
+        "description": "Update an existing Saatgut.",
+        "operationId": "update_saatgut_api_v1_agrar_saatgut__saatgut_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "saatgut_id",
+            "required": true,
+            "schema": {
+              "title": "Saatgut Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaatgutUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saatgut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Saatgut aktualisieren",
         "tags": [
           "Agrar",
           "saatgut"
@@ -212234,7 +212679,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Update Saatgut",
+        "summary": "Saatgut aktualisieren",
         "tags": [
           "Agrar",
           "saatgut"
@@ -247661,7 +248106,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ConsentCreate"
+                "$ref": "#/components/schemas/app__crm__schemas__ConsentCreate"
               }
             }
           },
@@ -247693,6 +248138,641 @@
         "tags": [
           "CRM",
           "CRM"
+        ]
+      }
+    },
+    "/api/v1/crm/consents/": {
+      "get": {
+        "operationId": "list_consents_api_v1_crm_consents__get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "contact_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contact Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Channel"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TypedObjectOut"
+                  },
+                  "title": "Response List Consents Api V1 Crm Consents  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligungen auflisten",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      },
+      "post": {
+        "operationId": "create_consent_api_v1_crm_consents__post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/app__api__v1__endpoints__crm_consents__ConsentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligung anlegen",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      }
+    },
+    "/api/v1/crm/consents/contact/{contact_id}": {
+      "get": {
+        "operationId": "list_contact_consents_api_v1_crm_consents_contact__contact_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contact_id",
+            "required": true,
+            "schema": {
+              "title": "Contact Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TypedObjectOut"
+                  },
+                  "title": "Response List Contact Consents Api V1 Crm Consents Contact  Contact Id  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligungen eines Kontakts",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      }
+    },
+    "/api/v1/crm/consents/{consent_id}": {
+      "delete": {
+        "operationId": "delete_consent_api_v1_crm_consents__consent_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_id",
+            "required": true,
+            "schema": {
+              "title": "Consent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligung loeschen",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      },
+      "get": {
+        "operationId": "get_consent_api_v1_crm_consents__consent_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_id",
+            "required": true,
+            "schema": {
+              "title": "Consent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligung abrufen",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      },
+      "put": {
+        "operationId": "update_consent_api_v1_crm_consents__consent_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_id",
+            "required": true,
+            "schema": {
+              "title": "Consent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligung aktualisieren",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      }
+    },
+    "/api/v1/crm/consents/{consent_id}/confirm": {
+      "post": {
+        "operationId": "confirm_consent_api_v1_crm_consents__consent_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_id",
+            "required": true,
+            "schema": {
+              "title": "Consent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "Token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Double-Opt-In bestaetigen",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      }
+    },
+    "/api/v1/crm/consents/{consent_id}/history": {
+      "get": {
+        "operationId": "get_consent_history_api_v1_crm_consents__consent_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_id",
+            "required": true,
+            "schema": {
+              "title": "Consent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TypedObjectOut"
+                  },
+                  "title": "Response Get Consent History Api V1 Crm Consents  Consent Id  History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligungshistorie",
+        "tags": [
+          "crm",
+          "dsgvo"
+        ]
+      }
+    },
+    "/api/v1/crm/consents/{consent_id}/resend-confirmation": {
+      "post": {
+        "operationId": "resend_confirmation_api_v1_crm_consents__consent_id__resend_confirmation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consent_id",
+            "required": true,
+            "schema": {
+              "title": "Consent Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Double-Opt-In erneut senden",
+        "tags": [
+          "crm",
+          "dsgvo"
         ]
       }
     },
@@ -265951,6 +267031,69 @@
         ]
       }
     },
+    "/api/v1/einkauf/angebote/{angebot_id}": {
+      "get": {
+        "operationId": "einkauf_angebot_get_api_v1_einkauf_angebote__angebot_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "angebot_id",
+            "required": true,
+            "schema": {
+              "title": "Angebot Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufDocOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Angebot get einkauf",
+        "tags": [
+          "compat"
+        ]
+      }
+    },
     "/api/v1/einkauf/angebote/{angebot_id}/approve": {
       "post": {
         "operationId": "einkauf_angebot_approve_api_v1_einkauf_angebote__angebot_id__approve_post",
@@ -266256,6 +267399,69 @@
           }
         ],
         "summary": "Anlieferavis list einkauf",
+        "tags": [
+          "compat"
+        ]
+      }
+    },
+    "/api/v1/einkauf/anlieferavis/{avis_id}": {
+      "get": {
+        "operationId": "einkauf_anlieferavis_get_api_v1_einkauf_anlieferavis__avis_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "avis_id",
+            "required": true,
+            "schema": {
+              "title": "Avis Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufDocOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlieferavis get einkauf",
         "tags": [
           "compat"
         ]
@@ -266777,6 +267983,69 @@
           }
         ],
         "summary": "Auftragsbestaetigungen list einkauf",
+        "tags": [
+          "compat"
+        ]
+      }
+    },
+    "/api/v1/einkauf/auftragsbestaetigungen/{bestaetigung_id}": {
+      "get": {
+        "operationId": "einkauf_auftragsbestaetigung_get_api_v1_einkauf_auftragsbestaetigungen__bestaetigung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bestaetigung_id",
+            "required": true,
+            "schema": {
+              "title": "Bestaetigung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufDocOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auftragsbestaetigung get einkauf",
         "tags": [
           "compat"
         ]
@@ -288476,6 +289745,128 @@
         ]
       }
     },
+    "/api/v1/finance/creditors": {
+      "get": {
+        "operationId": "list_kreditoren_api_v1_finance_creditors_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TypedObjectOut"
+                  },
+                  "title": "Response List Kreditoren Api V1 Finance Creditors Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditoren auflisten",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      },
+      "post": {
+        "operationId": "create_kreditor_api_v1_finance_creditors_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreditorWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditor anlegen",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      }
+    },
     "/api/v1/finance/creditors/": {
       "get": {
         "description": "List creditors with pagination and optional filters.",
@@ -288922,6 +290313,269 @@
         ]
       }
     },
+    "/api/v1/finance/creditors/{kreditor_id}": {
+      "delete": {
+        "operationId": "delete_kreditor_api_v1_finance_creditors__kreditor_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kreditor_id",
+            "required": true,
+            "schema": {
+              "title": "Kreditor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditor loeschen",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      },
+      "get": {
+        "operationId": "get_kreditor_api_v1_finance_creditors__kreditor_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kreditor_id",
+            "required": true,
+            "schema": {
+              "title": "Kreditor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditor abrufen",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      },
+      "patch": {
+        "operationId": "update_kreditor_api_v1_finance_creditors__kreditor_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kreditor_id",
+            "required": true,
+            "schema": {
+              "title": "Kreditor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreditorWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditor aktualisieren",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      },
+      "put": {
+        "operationId": "update_kreditor_api_v1_finance_creditors__kreditor_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kreditor_id",
+            "required": true,
+            "schema": {
+              "title": "Kreditor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreditorWrite"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditor aktualisieren",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      }
+    },
     "/api/v1/finance/datev-export": {
       "get": {
         "operationId": "datev_export_api_v1_finance_datev_export_get",
@@ -289078,6 +290732,201 @@
           "finance",
           "fibu",
           "datev"
+        ]
+      }
+    },
+    "/api/v1/finance/debitoren": {
+      "get": {
+        "operationId": "list_debitoren_api_v1_finance_debitoren_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TypedObjectOut"
+                  },
+                  "title": "Response List Debitoren Api V1 Finance Debitoren Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitoren auflisten",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      }
+    },
+    "/api/v1/finance/debitoren/{debitor_id}": {
+      "get": {
+        "operationId": "get_debitor_api_v1_finance_debitoren__debitor_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "debitor_id",
+            "required": true,
+            "schema": {
+              "title": "Debitor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitor abrufen",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_debitor_api_v1_finance_debitoren__debitor_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "debitor_id",
+            "required": true,
+            "schema": {
+              "title": "Debitor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DebitorPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitor aktualisieren",
+        "tags": [
+          "finance",
+          "stammdaten"
         ]
       }
     },
@@ -289249,6 +291098,80 @@
           "debtors",
           "finance",
           "debtors"
+        ]
+      }
+    },
+    "/api/v1/finance/debtors/{debitor_id}": {
+      "patch": {
+        "operationId": "patch_debitor_api_v1_finance_debtors__debitor_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "debitor_id",
+            "required": true,
+            "schema": {
+              "title": "Debitor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DebitorPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitor aktualisieren",
+        "tags": [
+          "finance",
+          "stammdaten"
         ]
       }
     },
@@ -294257,6 +296180,129 @@
         "tags": [
           "Finance",
           "Finance Advanced"
+        ]
+      }
+    },
+    "/api/v1/finance/kreditoren": {
+      "get": {
+        "operationId": "list_kreditoren_api_v1_finance_kreditoren_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TypedObjectOut"
+                  },
+                  "title": "Response List Kreditoren Api V1 Finance Kreditoren Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditoren auflisten",
+        "tags": [
+          "finance",
+          "stammdaten"
+        ]
+      }
+    },
+    "/api/v1/finance/kreditoren/{kreditor_id}": {
+      "get": {
+        "operationId": "get_kreditor_api_v1_finance_kreditoren__kreditor_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kreditor_id",
+            "required": true,
+            "schema": {
+              "title": "Kreditor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditor abrufen",
+        "tags": [
+          "finance",
+          "stammdaten"
         ]
       }
     },

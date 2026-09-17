@@ -632,6 +632,24 @@ async def einkauf_angebote_list(
     return EinkaufCompatService(db, tenant_id).list_angebote()
 
 
+def _load_einkauf_angebot(db: Session, angebot_id: str):
+    from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
+    try:
+        return _Svc(db, "default").get_angebot(angebot_id)
+    except EntityNotFoundError:
+        return None
+
+
+@router.get("/einkauf/angebote/{angebot_id}", response_model=EinkaufDocOut, summary="Angebot get einkauf")
+async def einkauf_angebot_get(
+    angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    result = _load_einkauf_angebot(db, angebot_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Angebot not found")
+    return result
+
+
 @router.post("/einkauf/angebote/{angebot_id}/review", response_model=EinkaufDocOut, summary="Angebot review einkauf")
 async def einkauf_angebot_review(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -679,6 +697,24 @@ async def einkauf_anlieferavis_list(
     return EinkaufCompatService(db, tenant_id).list_anlieferavis()
 
 
+def _load_einkauf_anlieferavis(db: Session, avis_id: str):
+    from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
+    try:
+        return _Svc(db, "default").get_anlieferavis(avis_id)
+    except EntityNotFoundError:
+        return None
+
+
+@router.get("/einkauf/anlieferavis/{avis_id}", response_model=EinkaufDocOut, summary="Anlieferavis get einkauf")
+async def einkauf_anlieferavis_get(
+    avis_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    result = _load_einkauf_anlieferavis(db, avis_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Anlieferavis not found")
+    return result
+
+
 @router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=EinkaufDocOut, summary="Anlieferavis transition einkauf")
 async def einkauf_anlieferavis_transition(
     avis_id: str, action: str,
@@ -697,6 +733,28 @@ async def einkauf_auftragsbestaetigungen_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_auftragsbestaetigungen()
+
+
+def _load_einkauf_auftragsbestaetigung(db: Session, bestaetigung_id: str):
+    from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
+    try:
+        return _Svc(db, "default").get_auftragsbestaetigung(bestaetigung_id)
+    except EntityNotFoundError:
+        return None
+
+
+@router.get(
+    "/einkauf/auftragsbestaetigungen/{bestaetigung_id}",
+    response_model=EinkaufDocOut,
+    summary="Auftragsbestaetigung get einkauf",
+)
+async def einkauf_auftragsbestaetigung_get(
+    bestaetigung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    result = _load_einkauf_auftragsbestaetigung(db, bestaetigung_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Auftragsbestaetigung not found")
+    return result
 
 
 @router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=EinkaufDocOut, summary="Auftragsbestaetigung transition einkauf")

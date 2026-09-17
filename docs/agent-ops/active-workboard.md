@@ -11,6 +11,45 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-GEN-STUB-BACKENDS - zehn Entity-Stubs auf Fachendpunkte 2026-09-17, Cursor
+
+**Claudes Verdrahtungsbericht hat Restluecken gemessen, keine Schaetzungen.**
+Zehn native Masken lasen den Kopf noch vom `_stub: true`-Platzhalter. Der
+Maskengenerator haette damit leere Felder produziert, die wie „nichts erfasst"
+aussehen.
+
+**Was jetzt verdrahtet ist:**
+
+- `agrar/duenger` und `agrar/saatgut` — die Domain-Router existierten, waren
+  aber nicht unter `/api/v1/agrar/...` eingehaengt. Kopffelder stehen auf den
+  echten Schluesseln (`artikelnummer`, `n_gehalt`, `tkm`).
+- `einkauf/anfrage` zeigte schon auf GET `/einkauf/anfragen/{id}`; Angebot,
+  Anlieferavis und Auftragsbestaetigung hatten nur Listen. GET-by-id ist da,
+  Felder folgen `angebotNummer`/`avisNummer`/`bestaetigungsNummer`.
+- `finance/debitor` und `finance/kreditor` lesen `/finance/debitoren/{id}` bzw.
+  `/finance/kreditoren/{id}` (Adapter ueber Kunden bzw. Lieferanten, deutsche
+  Kopffelder plus Listen-Schluessel der Debitoren-Seite).
+- `finance/bankkonto` liest `/banken/konten/{id}` (`bank`, nicht `bank_name`).
+- `futtermittel/mischfuttermittel` liest `/futter/mischfuttermittel/{id}`.
+
+**Neue Backends, die der Generator und die handgeschriebenen Masken brauchen:**
+CRM-Einwilligungen (`/crm/consents`, Schema `domain_crm.crm_consents`) und die
+Finance-Stamm-Adapter. Studio-Katalog um Duenger, Saatgut, Anfragen, Angebote,
+Debitoren, Kreditoren, Einwilligungen erweitert.
+
+**Nicht dekoriert:** `lager/leitstand` bleibt ein Twin-Read-Model-Cockpit ohne
+Kacheln/Tabellen. Eine leere Seite waere Dekoration; die Fachfrage (was der
+Leitstand zeigen soll) ist offen.
+
+**Dateibesitz:** `app/domains/agrar/api/duenger.py`, `saatgut.py`,
+`app/api/v1/endpoints/finance_stammdaten.py`, `crm_consents.py`,
+`app/core/screen_definitions.py` (nur die zehn Stub-Masken),
+`tests/test_mask_entity_backends.py`, `tests/test_mask_endpoint_inventory.py`.
+FSX/Rechnung und UIX-090-JSON-Schema bleiben bei Claude.
+
+**Abnahme:** Inventar 0 Entity-Stubs, Route-Gate fuer alle nativen Quellen,
+Einkauf-GET 200/404, Major-Router-Registrierung.
+
 ## MASK-VERDRAHTUNG-AUDIT - acht Masken zeigten ins Leere 2026-09-16, Claude Code
 
 **Die Frage war: Ist alles verdrahtet, was verdrahtet gehoert?** Die Antwort ist

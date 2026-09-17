@@ -429,6 +429,12 @@ class EinkaufCompatService:
             return []
         return [self._angebot_row_to_dict(r._mapping) for r in rows]
 
+    def get_angebot(self, angebot_id: str) -> dict:
+        row = self._load_angebot_raw_row(angebot_id)
+        if row is None:
+            raise EntityNotFoundError(f"Angebot {angebot_id} not found")
+        return self._angebot_row_to_dict(row._mapping)
+
     def _load_angebot_raw_row(self, angebot_id: str) -> Any:
         from sqlalchemy import text
         try:
@@ -504,6 +510,22 @@ class EinkaufCompatService:
             return []
         return [self._anlieferavis_row_to_dict(r._mapping) for r in rows]
 
+    def get_anlieferavis(self, avis_id: str) -> dict:
+        from sqlalchemy import text
+        try:
+            row = self.db.execute(text(
+                "SELECT id, avis_nummer, bestellung_id, lieferant_name, status, "
+                "geplantes_anliefer_datum, kennzeichen, created_at "
+                "FROM einkauf_anlieferavis "
+                "WHERE (id = :aid OR avis_nummer = :aid) AND tenant_id = :tid "
+                "ORDER BY created_at DESC LIMIT 1"
+            ), {"aid": avis_id, "tid": self.tenant_id}).fetchone()
+        except Exception:
+            row = None
+        if row is None:
+            raise EntityNotFoundError(f"Anlieferavis {avis_id} not found")
+        return self._anlieferavis_row_to_dict(row._mapping)
+
     def transition_anlieferavis(self, avis_id: str, action: str) -> dict:
         from sqlalchemy import text
         status_map = {"send": "GESENDET", "confirm": "BESTAETIGT", "cancel": "STORNIERT"}
@@ -542,6 +564,21 @@ class EinkaufCompatService:
         except Exception:
             return []
         return [self._auftragsbestaetigung_row_to_dict(r._mapping) for r in rows]
+
+    def get_auftragsbestaetigung(self, bestaetigung_id: str) -> dict:
+        from sqlalchemy import text
+        try:
+            row = self.db.execute(text(
+                "SELECT id, bestaetigungs_nummer, bestellung_id, lieferant_name, status, created_at "
+                "FROM einkauf_auftragsbestaetigungen "
+                "WHERE (id = :aid OR bestaetigungs_nummer = :aid) AND tenant_id = :tid "
+                "ORDER BY created_at DESC LIMIT 1"
+            ), {"aid": bestaetigung_id, "tid": self.tenant_id}).fetchone()
+        except Exception:
+            row = None
+        if row is None:
+            raise EntityNotFoundError(f"Auftragsbestaetigung {bestaetigung_id} not found")
+        return self._auftragsbestaetigung_row_to_dict(row._mapping)
 
     def transition_auftragsbestaetigung(self, bestaetigung_id: str, action: str) -> dict:
         from sqlalchemy import text

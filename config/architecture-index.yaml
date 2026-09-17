@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-09-16
+# Architecture Index — generiert 2026-09-17
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-09-16T20:46:36Z'
+generated_at: '2026-09-17T04:44:03Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -734,6 +734,8 @@ domains:
     - portal_preisspiegel_service
     - sales_ab_lifecycle_service
     - sales_credit_service
+    - sales_invoice_mask
+    - sales_invoice_service
     - sales_lieferschein_close_service
     - sales_match_service
     - sales_posting_service
@@ -759,6 +761,7 @@ domains:
     - crm_call_transcript
     - crm_campaigns
     - crm_capture_inbox
+    - crm_consents
     - crm_contacts_ext
     - crm_duplicates
     - crm_gifts
@@ -796,6 +799,7 @@ domains:
     - sales_credit_notes
     - sales_delivery_notes
     - sales_invoice_einvoice
+    - sales_invoices
     - sales_match
     - sales_offers
     - sales_orders
@@ -911,6 +915,7 @@ domains:
     - docflow_gobd_service
     - docflow_return_service
     - docflow_service
+    - docflow_source_proposals
     - document_control_projection
     - document_control_service
     - pii_detector
@@ -1230,6 +1235,7 @@ domains:
     - finance_op
     - finance_period
     - finance_read_models
+    - finance_stammdaten
     - financial_reports
     - forderungsgruppen
     - gelangensbestaetigung
@@ -1407,6 +1413,8 @@ domains:
     - /stammdaten/mengeneinheiten
     - /stock-management
     backend_services:
+    - article_import
+    - article_units_bridge
     - articles_service
     - foreign_goods_worklist_service
     - inventory_auxiliary_service
@@ -1987,14 +1995,19 @@ domains:
 mapping_stats:
   frontend_routes_total: 930
   frontend_routes_mapped: 930
-  backend_services_total: 251
-  backend_services_mapped: 251
-  backend_endpoints_total: 441
-  backend_endpoints_mapped: 441
+  backend_services_total: 259
+  backend_services_mapped: 256
+  backend_endpoints_total: 446
+  backend_endpoints_mapped: 444
 unmapped:
   frontend_routes: []
-  backend_services: []
-  backend_endpoints: []
+  backend_services:
+  - document_allocation_service
+  - studio_draft_store
+  - studio_propose
+  backend_endpoints:
+  - document_allocations
+  - studio_drafts
 status:
   architecture_os_mvp: active
   last_review: 2026-06-27
