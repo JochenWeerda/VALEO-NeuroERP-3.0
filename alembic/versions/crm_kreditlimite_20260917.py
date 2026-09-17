@@ -10,7 +10,7 @@ die **Ausnahme vom Stammsatz**, nicht sein Ersatz. Darum keine Pflichtzeile je
 Kunde und kein Vorbelegen: Eine leere Tabelle heisst „es gilt der Stamm".
 
 Revision ID: crm_kreditlimite_20260917
-Revises: sales_beleg_druck_buchung_20260917
+Revises: mask_frontend_bridges_20260917
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "crm_kreditlimite_20260917"
-down_revision = "sales_beleg_druck_buchung_20260917"
+down_revision = "mask_frontend_bridges_20260917"
 branch_labels = None
 depends_on = None
 

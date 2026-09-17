@@ -10184,6 +10184,31 @@
         "title": "AnfragePositionCreate",
         "type": "object"
       },
+      "AnfrageSendIn": {
+        "additionalProperties": true,
+        "properties": {
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "supplierIds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supplierids",
+            "type": "array"
+          }
+        },
+        "title": "AnfrageSendIn",
+        "type": "object"
+      },
       "AnfrageUpdate": {
         "properties": {
           "abteilung": {
@@ -10488,6 +10513,79 @@
           "buchwert"
         ],
         "title": "Anlage",
+        "type": "object"
+      },
+      "AnlageIn": {
+        "additionalProperties": true,
+        "properties": {
+          "afa_satz": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Afa Satz"
+          },
+          "anlagennr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anlagennr"
+          },
+          "anschaffung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anschaffung"
+          },
+          "anschaffungswert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anschaffungswert"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "nutzungsdauer": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nutzungsdauer"
+          }
+        },
+        "title": "AnlageIn",
         "type": "object"
       },
       "AnlagePatch": {
@@ -15090,6 +15188,33 @@
           "created_at"
         ],
         "title": "ArtikelVerpackungOut",
+        "type": "object"
+      },
+      "AskIn": {
+        "properties": {
+          "context": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          },
+          "prompt": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Prompt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "title": "AskIn",
         "type": "object"
       },
       "AssetAccountingOut": {
@@ -21263,6 +21388,599 @@
         "title": "BinTransferIn",
         "type": "object"
       },
+      "Biostimulanz": {
+        "description": "Full Biostimulanz schema",
+        "properties": {
+          "ablauf_zulassung": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Approval expiry",
+            "title": "Ablauf Zulassung"
+          },
+          "anwendungsbereich": {
+            "description": "Application areas",
+            "items": {
+              "type": "string"
+            },
+            "title": "Anwendungsbereich",
+            "type": "array"
+          },
+          "artikelnummer": {
+            "description": "Unique article number",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Artikelnummer",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Creation timestamp",
+            "title": "Created At"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Deletion timestamp",
+            "title": "Deleted At"
+          },
+          "dosierung": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dosage",
+            "title": "Dosierung"
+          },
+          "ek_preis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Purchase price",
+            "title": "Ek Preis"
+          },
+          "eu_zulassung": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "EU approval",
+            "title": "Eu Zulassung"
+          },
+          "hersteller": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Manufacturer",
+            "title": "Hersteller"
+          },
+          "id": {
+            "description": "Biostimulanz ID",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "description": "Whether the record is active",
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "lagerbestand": {
+            "default": 0,
+            "description": "Stock quantity",
+            "title": "Lagerbestand",
+            "type": "string"
+          },
+          "name": {
+            "description": "Product name",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "tenant_id": {
+            "description": "Tenant ID",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "typ": {
+            "description": "Type",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Typ",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Last update timestamp",
+            "title": "Updated At"
+          },
+          "vk_preis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sales price",
+            "title": "Vk Preis"
+          },
+          "waehrung": {
+            "default": "EUR",
+            "description": "Currency",
+            "maxLength": 3,
+            "title": "Waehrung",
+            "type": "string"
+          },
+          "zusammensetzung": {
+            "additionalProperties": true,
+            "description": "Composition",
+            "title": "Zusammensetzung",
+            "type": "object"
+          }
+        },
+        "required": [
+          "artikelnummer",
+          "name",
+          "typ",
+          "id",
+          "tenant_id"
+        ],
+        "title": "Biostimulanz",
+        "type": "object"
+      },
+      "BiostimulanzCreate": {
+        "description": "Schema for creating Biostimulanz",
+        "properties": {
+          "ablauf_zulassung": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Approval expiry",
+            "title": "Ablauf Zulassung"
+          },
+          "anwendungsbereich": {
+            "description": "Application areas",
+            "items": {
+              "type": "string"
+            },
+            "title": "Anwendungsbereich",
+            "type": "array"
+          },
+          "artikelnummer": {
+            "description": "Unique article number",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Artikelnummer",
+            "type": "string"
+          },
+          "dosierung": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dosage",
+            "title": "Dosierung"
+          },
+          "ek_preis": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Purchase price",
+            "title": "Ek Preis"
+          },
+          "eu_zulassung": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "EU approval",
+            "title": "Eu Zulassung"
+          },
+          "hersteller": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Manufacturer",
+            "title": "Hersteller"
+          },
+          "lagerbestand": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": 0,
+            "description": "Stock quantity",
+            "title": "Lagerbestand"
+          },
+          "name": {
+            "description": "Product name",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Tenant ID",
+            "title": "Tenant Id"
+          },
+          "typ": {
+            "description": "Type",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Typ",
+            "type": "string"
+          },
+          "vk_preis": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sales price",
+            "title": "Vk Preis"
+          },
+          "waehrung": {
+            "default": "EUR",
+            "description": "Currency",
+            "maxLength": 3,
+            "title": "Waehrung",
+            "type": "string"
+          },
+          "zusammensetzung": {
+            "additionalProperties": true,
+            "description": "Composition",
+            "title": "Zusammensetzung",
+            "type": "object"
+          }
+        },
+        "required": [
+          "artikelnummer",
+          "name",
+          "typ"
+        ],
+        "title": "BiostimulanzCreate",
+        "type": "object"
+      },
+      "BiostimulanzListOut": {
+        "additionalProperties": true,
+        "properties": {
+          "has_next": {
+            "title": "Has Next",
+            "type": "boolean"
+          },
+          "has_prev": {
+            "title": "Has Prev",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pages",
+          "size",
+          "has_next",
+          "has_prev"
+        ],
+        "title": "BiostimulanzListOut",
+        "type": "object"
+      },
+      "BiostimulanzUpdate": {
+        "description": "Schema for updating Biostimulanz",
+        "properties": {
+          "ablauf_zulassung": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ablauf Zulassung"
+          },
+          "anwendungsbereich": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anwendungsbereich"
+          },
+          "artikelnummer": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikelnummer"
+          },
+          "dosierung": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dosierung"
+          },
+          "ek_preis": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ek Preis"
+          },
+          "eu_zulassung": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eu Zulassung"
+          },
+          "hersteller": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hersteller"
+          },
+          "ist_aktiv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ist Aktiv"
+          },
+          "lagerbestand": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lagerbestand"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
+          },
+          "vk_preis": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vk Preis"
+          },
+          "waehrung": {
+            "anyOf": [
+              {
+                "maxLength": 3,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waehrung"
+          },
+          "zusammensetzung": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zusammensetzung"
+          }
+        },
+        "title": "BiostimulanzUpdate",
+        "type": "object"
+      },
       "BlanketOrderCreate": {
         "properties": {
           "article_id": {
@@ -23203,6 +23921,12 @@
           "updated_at"
         ],
         "title": "BreachOut",
+        "type": "object"
+      },
+      "BridgeOut": {
+        "additionalProperties": true,
+        "properties": {},
+        "title": "BridgeOut",
         "type": "object"
       },
       "Buchung-Input": {
@@ -44440,6 +45164,24 @@
         "title": "DimensionResult",
         "type": "object"
       },
+      "DirectDebitActionIn": {
+        "additionalProperties": true,
+        "properties": {
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          }
+        },
+        "title": "DirectDebitActionIn",
+        "type": "object"
+      },
       "DirectDebitItemCreate": {
         "properties": {
           "amount": {
@@ -53647,6 +54389,107 @@
           "results"
         ],
         "title": "EnrichImagesResponse",
+        "type": "object"
+      },
+      "EpcisEventIn": {
+        "additionalProperties": true,
+        "properties": {
+          "biz_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Biz Step"
+          },
+          "event_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Time"
+          },
+          "event_type": {
+            "default": "ObjectEvent",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "extensions": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extensions"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "lot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lot Id"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity"
+          },
+          "read_point": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Read Point"
+          },
+          "sku": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sku"
+          }
+        },
+        "title": "EpcisEventIn",
         "type": "object"
       },
       "EpodSettleIn": {
@@ -111198,6 +112041,68 @@
         "title": "PregnancyStatus",
         "type": "string"
       },
+      "PreisBerechnenIn": {
+        "additionalProperties": true,
+        "properties": {
+          "artikel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Id"
+          },
+          "kontrakt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Id"
+          },
+          "kundengruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kundengruppe"
+          },
+          "menge_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Kg"
+          },
+          "sorte_klasse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sorte Klasse"
+          }
+        },
+        "title": "PreisBerechnenIn",
+        "type": "object"
+      },
       "PreisKalkulationInput": {
         "properties": {
           "artikel_nr": {
@@ -129378,6 +130283,13 @@
         "title": "SalesOfferItemOut",
         "type": "object"
       },
+      "SalesOfferPrintOut": {
+        "additionalProperties": true,
+        "description": "Was der Druck hinterlassen hat — nicht das Angebot selbst.",
+        "properties": {},
+        "title": "SalesOfferPrintOut",
+        "type": "object"
+      },
       "SalesOfferUpdate": {
         "properties": {
           "contact_person": {
@@ -130053,6 +130965,13 @@
           "line_total"
         ],
         "title": "SalesOrderItemOut",
+        "type": "object"
+      },
+      "SalesOrderPrintOut": {
+        "additionalProperties": true,
+        "description": "Was der Druck hinterlassen hat — nicht der Beleg selbst.",
+        "properties": {},
+        "title": "SalesOrderPrintOut",
         "type": "object"
       },
       "SalesOrderUpdate": {
@@ -132424,6 +133343,12 @@
         "title": "SecuritySimulationOut",
         "type": "object"
       },
+      "SeedOrderIn": {
+        "additionalProperties": true,
+        "properties": {},
+        "title": "SeedOrderIn",
+        "type": "object"
+      },
       "Segment": {
         "properties": {
           "created_at": {
@@ -132504,6 +133429,18 @@
           "tenant_id"
         ],
         "title": "Segment",
+        "type": "object"
+      },
+      "SegmentCalculateIn": {
+        "additionalProperties": true,
+        "properties": {
+          "force_full": {
+            "default": false,
+            "title": "Force Full",
+            "type": "boolean"
+          }
+        },
+        "title": "SegmentCalculateIn",
         "type": "object"
       },
       "SegmentCreate": {
@@ -151075,6 +152012,22 @@
         "title": "WaageOut",
         "type": "object"
       },
+      "WaageVorlageIn": {
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "WaageVorlageIn",
+        "type": "object"
+      },
       "WaagenQuittungBatch": {
         "properties": {
           "device_id": {
@@ -154492,6 +155445,73 @@
           "end"
         ],
         "title": "Window",
+        "type": "object"
+      },
+      "WorkPlanAssignmentIn": {
+        "properties": {
+          "datum": {
+            "title": "Datum",
+            "type": "string"
+          },
+          "employeeRef": {
+            "title": "Employeeref",
+            "type": "string"
+          },
+          "endTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endtime"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "roleCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rolecode"
+          },
+          "startTime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starttime"
+          }
+        },
+        "required": [
+          "datum",
+          "employeeRef",
+          "label"
+        ],
+        "title": "WorkPlanAssignmentIn",
         "type": "object"
       },
       "WorkPlanAssignmentOut": {
@@ -189024,6 +190044,418 @@
         ]
       }
     },
+    "/api/v1/agrar/biostimulanzien": {
+      "get": {
+        "operationId": "list_biostimulanzien_api_v1_agrar_biostimulanzien_get",
+        "parameters": [
+          {
+            "description": "Filter by tenant ID",
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by tenant ID",
+              "title": "Tenant Id"
+            }
+          },
+          {
+            "description": "Suche in Name, Artikelnummer, Hersteller",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Suche in Name, Artikelnummer, Hersteller",
+              "title": "Search"
+            }
+          },
+          {
+            "description": "Filter nach Typ",
+            "in": "query",
+            "name": "typ",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter nach Typ",
+              "title": "Typ"
+            }
+          },
+          {
+            "description": "Filter nach Aktiv-Status",
+            "in": "query",
+            "name": "ist_aktiv",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter nach Aktiv-Status",
+              "title": "Ist Aktiv"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiostimulanzListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Biostimulanzien auflisten",
+        "tags": [
+          "agrar",
+          "biostimulanzien"
+        ]
+      },
+      "post": {
+        "operationId": "create_biostimulanz_api_v1_agrar_biostimulanzien_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BiostimulanzCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Biostimulanz"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Biostimulanz anlegen",
+        "tags": [
+          "agrar",
+          "biostimulanzien"
+        ]
+      }
+    },
+    "/api/v1/agrar/biostimulanzien/search": {
+      "get": {
+        "operationId": "search_biostimulanzien_api_v1_agrar_biostimulanzien_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Biostimulanz"
+                  },
+                  "title": "Response Search Biostimulanzien Api V1 Agrar Biostimulanzien Search Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Biostimulanzien suchen",
+        "tags": [
+          "agrar",
+          "biostimulanzien"
+        ]
+      }
+    },
+    "/api/v1/agrar/biostimulanzien/{item_id}": {
+      "get": {
+        "operationId": "get_biostimulanz_api_v1_agrar_biostimulanzien__item_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Biostimulanz abrufen",
+        "tags": [
+          "agrar",
+          "biostimulanzien"
+        ]
+      },
+      "patch": {
+        "operationId": "update_biostimulanz_api_v1_agrar_biostimulanzien__item_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BiostimulanzUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Biostimulanz"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Biostimulanz aktualisieren",
+        "tags": [
+          "agrar",
+          "biostimulanzien"
+        ]
+      }
+    },
     "/api/v1/agrar/compliance/lea-export": {
       "post": {
         "description": "AGR-COM-05: LEA-Export-Stub (Förderanträge).\nLiefert aggregierte Flächen- und Kulturdaten für LEA-Anträge.",
@@ -194663,6 +196095,127 @@
           "wetter",
           "agrar",
           "wetter"
+        ]
+      }
+    },
+    "/api/v1/agrar/kunden": {
+      "get": {
+        "operationId": "list_agrar_kunden_api_v1_agrar_kunden_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Agrar Kunden Api V1 Agrar Kunden Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Agrar-Kunden auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/agrar/kunden/{kunde_id}": {
+      "get": {
+        "operationId": "get_agrar_kunde_api_v1_agrar_kunden__kunde_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kunde_id",
+            "required": true,
+            "schema": {
+              "title": "Kunde Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Agrar-Kunde abrufen",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -213598,6 +215151,70 @@
         ]
       }
     },
+    "/api/v1/agrar/seed-orders": {
+      "post": {
+        "operationId": "create_seed_order_api_v1_agrar_seed_orders_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeedOrderIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Saatgutbestellung anlegen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/agrar/self-billing/harvest-acceptance/{harvest_acceptance_id}": {
       "get": {
         "description": "Ruft die Gutschrift für eine Ernte-Annahme ab.",
@@ -218245,6 +219862,52 @@
         ]
       }
     },
+    "/api/v1/ai/ask": {
+      "post": {
+        "operationId": "ai_ask_api_v1_ai_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fachfrage beantworten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/analytics": {
       "get": {
         "operationId": "contract_analytics_api_v1_analytics_get",
@@ -218376,6 +220039,60 @@
           "dashboard",
           "analytics",
           "dashboard"
+        ]
+      }
+    },
+    "/api/v1/analytics/cubes/contract-positions": {
+      "get": {
+        "operationId": "analytics_contract_positions_api_v1_analytics_cubes_contract_positions_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontraktpositionen-Cube",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -225389,6 +227106,78 @@
           "audit",
           "evidence",
           "gobd"
+        ]
+      }
+    },
+    "/api/v1/audit/change-logs/audit-trail/{entity_type}/{entity_id}": {
+      "get": {
+        "operationId": "audit_trail_api_v1_audit_change_logs_audit_trail__entity_type___entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_type",
+            "required": true,
+            "schema": {
+              "title": "Entity Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Änderungshistorie",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -257910,6 +259699,73 @@
         ]
       }
     },
+    "/api/v1/crm/opportunities/{opportunity_id}/quotes": {
+      "get": {
+        "operationId": "list_opportunity_quotes_api_v1_crm_opportunities__opportunity_id__quotes_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "opportunity_id",
+            "required": true,
+            "schema": {
+              "title": "Opportunity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Opportunity Quotes Api V1 Crm Opportunities  Opportunity Id  Quotes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Angebote zur Opportunity",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/crm/opportunities/{opportunity_id}/stage": {
       "patch": {
         "description": "Stage-Wechsel mit Timestamp-Log in stage_history.",
@@ -259122,6 +260978,209 @@
           "segments",
           "crm",
           "segments"
+        ]
+      }
+    },
+    "/api/v1/crm/segments/{segment_id}/calculate": {
+      "post": {
+        "operationId": "calculate_segment_api_v1_crm_segments__segment_id__calculate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SegmentCalculateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Segment neu berechnen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/crm/segments/{segment_id}/members": {
+      "get": {
+        "operationId": "list_segment_members_api_v1_crm_segments__segment_id__members_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Segment Members Api V1 Crm Segments  Segment Id  Members Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Segmentmitglieder auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/crm/segments/{segment_id}/performance": {
+      "get": {
+        "operationId": "get_segment_performance_api_v1_crm_segments__segment_id__performance_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "segment_id",
+            "required": true,
+            "schema": {
+              "title": "Segment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Segment-Performance",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -273614,6 +275673,115 @@
         ]
       }
     },
+    "/api/v1/einkauf/lieferscheine/{ls_id}/print": {
+      "post": {
+        "operationId": "print_einkauf_lieferschein_api_v1_einkauf_lieferscheine__ls_id__print_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ls_id",
+            "required": true,
+            "schema": {
+              "title": "Ls Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "template",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Template"
+            }
+          },
+          {
+            "in": "query",
+            "name": "copies",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Copies",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "attestation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 500,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Attestation"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einkauf-Lieferschein drucken",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/einkauf/paletten-konto": {
       "post": {
         "operationId": "create_paletten_buchung_api_v1_einkauf_paletten_konto_post",
@@ -273917,6 +276085,318 @@
           "lager-konten",
           "einkauf",
           "bestellvorschlag"
+        ]
+      }
+    },
+    "/api/v1/einkauf/rechnungen": {
+      "get": {
+        "operationId": "list_einkauf_rechnungen_api_v1_einkauf_rechnungen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Einkauf Rechnungen Api V1 Einkauf Rechnungen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangsrechnungen auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      },
+      "post": {
+        "operationId": "create_einkauf_rechnung_api_v1_einkauf_rechnungen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangsrechnung anlegen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/einkauf/rechnungen/{rechnung_id}": {
+      "delete": {
+        "operationId": "delete_einkauf_rechnung_api_v1_einkauf_rechnungen__rechnung_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rechnung_id",
+            "required": true,
+            "schema": {
+              "title": "Rechnung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangsrechnung löschen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      },
+      "get": {
+        "operationId": "get_einkauf_rechnung_api_v1_einkauf_rechnungen__rechnung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rechnung_id",
+            "required": true,
+            "schema": {
+              "title": "Rechnung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangsrechnung abrufen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_einkauf_rechnung_api_v1_einkauf_rechnungen__rechnung_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rechnung_id",
+            "required": true,
+            "schema": {
+              "title": "Rechnung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eingangsrechnung aktualisieren",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -291747,6 +294227,142 @@
         ]
       }
     },
+    "/api/v1/finance/direct-debits/{run_id}/approve": {
+      "post": {
+        "operationId": "approve_direct_debit_api_v1_finance_direct_debits__run_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectDebitActionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lastschriftlauf freigeben",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/finance/direct-debits/{run_id}/execute": {
+      "post": {
+        "operationId": "execute_direct_debit_api_v1_finance_direct_debits__run_id__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lastschriftlauf ausführen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/finance/direct-debits/{run_id}/export": {
       "post": {
         "description": "Lastschriftlauf exportieren — setzt alle pending Positionen auf 'exported'.",
@@ -292807,6 +295423,102 @@
         ]
       }
     },
+    "/api/v1/finance/export/datev": {
+      "get": {
+        "operationId": "export_datev_api_v1_finance_export_datev_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "typ",
+            "required": false,
+            "schema": {
+              "default": "alle",
+              "title": "Typ",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "datum_von",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Datum Von"
+            }
+          },
+          {
+            "in": "query",
+            "name": "datum_bis",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Datum Bis"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "DATEV-Export",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/finance/financial-reports/balance-sheet": {
       "get": {
         "description": "Get balance sheet for a period.",
@@ -293356,6 +296068,311 @@
           "reports",
           "finance",
           "reports"
+        ]
+      }
+    },
+    "/api/v1/finance/fixed-assets": {
+      "get": {
+        "operationId": "list_fixed_assets_api_v1_finance_fixed_assets_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Fixed Assets Api V1 Finance Fixed Assets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlagen auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      },
+      "post": {
+        "operationId": "create_fixed_asset_api_v1_finance_fixed_assets_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnlageIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlage anlegen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/finance/fixed-assets/detail": {
+      "get": {
+        "operationId": "list_fixed_assets_detail_api_v1_finance_fixed_assets_detail_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Fixed Assets Detail Api V1 Finance Fixed Assets Detail Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlagen-Detailauflistung",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/finance/fixed-assets/{asset_id}/depreciation": {
+      "get": {
+        "operationId": "get_fixed_asset_depreciation_api_v1_finance_fixed_assets__asset_id__depreciation_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "default": 2026,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "AfA einer Anlage",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/finance/followup/fibu/cockpit": {
+      "get": {
+        "operationId": "fibu_cockpit_api_v1_finance_followup_fibu_cockpit_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fibu-Cockpit",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -300096,6 +303113,69 @@
         ]
       }
     },
+    "/api/v1/finance/periods/{period_id}/close": {
+      "post": {
+        "operationId": "close_finance_period_api_v1_finance_periods__period_id__close_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "period_id",
+            "required": true,
+            "schema": {
+              "title": "Period Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Buchungsperiode abschliessen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/finance/quadriga-connector/config": {
       "get": {
         "description": "Quadriga-Konfiguration des Mandanten abrufen (eine pro Mandant).",
@@ -301326,6 +304406,60 @@
           "actions",
           "finance",
           "actions"
+        ]
+      }
+    },
+    "/api/v1/finance/stats": {
+      "get": {
+        "operationId": "finance_stats_api_v1_finance_stats_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fibu-Kennzahlen",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -307946,6 +311080,81 @@
         "summary": "Stats futter",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/futter/{kategorie}/bulk-delete": {
+      "post": {
+        "operationId": "futter_bulk_delete_api_v1_futter__kategorie__bulk_delete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kategorie",
+            "required": true,
+            "schema": {
+              "title": "Kategorie",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "default": {},
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Futtermittel sammeln löschen",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -318280,6 +321489,134 @@
           "inventory",
           "counts",
           "inventory"
+        ]
+      }
+    },
+    "/api/v1/inventory/epcis/events": {
+      "get": {
+        "operationId": "list_epcis_events_api_v1_inventory_epcis_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "EPCIS-Ereignisse auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      },
+      "post": {
+        "operationId": "create_epcis_event_api_v1_inventory_epcis_events_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EpcisEventIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "EPCIS-Ereignis anlegen",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -348071,6 +351408,64 @@
         ]
       }
     },
+    "/api/v1/operations/exceptions": {
+      "get": {
+        "operationId": "list_operations_exceptions_api_v1_operations_exceptions_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Operations Exceptions Api V1 Operations Exceptions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Betriebsausnahmen auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/personal/absences": {
       "get": {
         "operationId": "list_absences_api_v1_personal_absences_get",
@@ -352757,6 +356152,70 @@
           "hr",
           "personal",
           "hr"
+        ]
+      }
+    },
+    "/api/v1/personal/work-plan/assignments": {
+      "post": {
+        "operationId": "create_work_plan_assignment_api_v1_personal_work_plan_assignments_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkPlanAssignmentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dienstplan-Zuweisung anlegen",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -359880,6 +363339,64 @@
         ]
       }
     },
+    "/api/v1/pos/gift-cards": {
+      "get": {
+        "operationId": "list_gift_cards_api_v1_pos_gift_cards_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Gift Cards Api V1 Pos Gift Cards Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gutscheine auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/pos/payment-methods": {
       "get": {
         "operationId": "list_payment_methods_api_v1_pos_payment_methods_get",
@@ -360149,6 +363666,64 @@
           "pos",
           "payments",
           "promotions"
+        ]
+      }
+    },
+    "/api/v1/pos/rabatte": {
+      "get": {
+        "operationId": "list_pos_rabatte_api_v1_pos_rabatte_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Pos Rabatte Api V1 Pos Rabatte Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "POS-Rabatte auflisten",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -360516,6 +364091,64 @@
         "tags": [
           "pos-tagesabschluss",
           "pos-tagesabschluss"
+        ]
+      }
+    },
+    "/api/v1/pos/tse-journal": {
+      "get": {
+        "operationId": "list_tse_journal_api_v1_pos_tse_journal_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Tse Journal Api V1 Pos Tse Journal Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "TSE-Journal auflisten",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -362202,6 +365835,106 @@
         ]
       }
     },
+    "/api/v1/preise/berechnen": {
+      "post": {
+        "operationId": "preise_berechnen_api_v1_preise_berechnen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreisBerechnenIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preis kalkulieren",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
+    "/api/v1/preise/historie": {
+      "get": {
+        "operationId": "preise_historie_api_v1_preise_historie_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preishistorie",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/preise/individualpreise": {
       "get": {
         "operationId": "list_individualpreise_api_v1_preise_individualpreise_get",
@@ -362542,6 +366275,60 @@
         "summary": "Individualpreis löschen",
         "tags": [
           "Preise & Konditionen - Individualpreise"
+        ]
+      }
+    },
+    "/api/v1/preise/konditionen": {
+      "get": {
+        "operationId": "preise_konditionen_api_v1_preise_konditionen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preiskondition",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -383137,6 +386924,64 @@
         ]
       }
     },
+    "/api/v1/qualitaet/reklamationen": {
+      "get": {
+        "operationId": "list_qualitaet_reklamationen_api_v1_qualitaet_reklamationen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Qualitaet Reklamationen Api V1 Qualitaet Reklamationen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reklamationen auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/qualitaet/stats": {
       "get": {
         "operationId": "get_labor_stats_api_v1_qualitaet_stats_get",
@@ -383578,6 +387423,86 @@
         "tags": [
           "reporting",
           "query-center"
+        ]
+      }
+    },
+    "/api/v1/rag/search": {
+      "get": {
+        "operationId": "rag_search_api_v1_rag_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "Query",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response Rag Search Api V1 Rag Search Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Semantische Suche",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -392737,6 +396662,188 @@
         ]
       }
     },
+    "/api/v1/sales/offers/{offer_id}/post": {
+      "post": {
+        "description": "Bucht das Angebot — aus dem Entwurf wird ein herausgegebener Beleg.\n\nZweimal buchen ist kein Fehler: Die Maske druckt und bucht in einem Zug.\nEin angenommenes oder abgelehntes Angebot faellt aber nicht auf\n`versendet` zurueck — der spaetere Stand bleibt stehen.",
+        "operationId": "post_sales_offer_api_v1_sales_offers__offer_id__post_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOffer-Output"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sales offer buchen",
+        "tags": [
+          "sales",
+          "offers"
+        ]
+      }
+    },
+    "/api/v1/sales/offers/{offer_id}/print": {
+      "post": {
+        "description": "Haelt fest, dass das Angebot gedruckt wurde.\n\nGezaehlt, nicht ueberschrieben: Ein zweites Exemplar ist ein eigener\nVorgang. Der Wiederholungsdruck verlangt eine Begruendung — dieselbe Regel\nwie bei Auftrag und Lieferschein, damit sie nicht je Beleg anders ist.",
+        "operationId": "print_sales_offer_api_v1_sales_offers__offer_id__print_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offer_id",
+            "required": true,
+            "schema": {
+              "title": "Offer Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Formatvorlage",
+            "in": "query",
+            "name": "template",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Formatvorlage",
+              "title": "Template"
+            }
+          },
+          {
+            "description": "Anzahl Ausdrucke",
+            "in": "query",
+            "name": "copies",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "description": "Anzahl Ausdrucke",
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Copies",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Begruendung fuer den Wiederholungsdruck",
+            "in": "query",
+            "name": "attestation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 500,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Begruendung fuer den Wiederholungsdruck",
+              "title": "Attestation"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOfferPrintOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sales offer drucken",
+        "tags": [
+          "sales",
+          "offers"
+        ]
+      }
+    },
     "/api/v1/sales/orders/": {
       "get": {
         "operationId": "list_sales_orders_api_v1_sales_orders__get",
@@ -393669,6 +397776,188 @@
           }
         ],
         "summary": "Delivery from order anlegen",
+        "tags": [
+          "sales",
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/sales/orders/{order_id}/post": {
+      "post": {
+        "description": "Bucht den Auftrag — aus dem Entwurf wird ein verbindlicher Beleg.\n\n**Zweimal buchen ist kein Fehler.** Die Maske druckt und bucht in einem\nZug; wer ein zweites Exemplar druckt, bucht dabei erneut. Ein bereits\ngebuchter Auftrag bleibt deshalb unveraendert und antwortet mit 200 statt\nmit einem Fehler, der nichts zu bedeuten haette.\n\nEin stornierter Auftrag laesst sich nicht buchen — das waere eine\nWiederbelebung durch die Hintertuer.",
+        "operationId": "post_sales_order_api_v1_sales_orders__order_id__post_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrder-Output"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sales order buchen",
+        "tags": [
+          "sales",
+          "orders"
+        ]
+      }
+    },
+    "/api/v1/sales/orders/{order_id}/print": {
+      "post": {
+        "description": "Haelt fest, dass der Auftrag gedruckt wurde.\n\n**Gezaehlt, nicht ueberschrieben:** Der zweite Druck ist ein eigener\nVorgang — der Kunde hat den ersten nicht bekommen, der Fahrer braucht ein\nweiteres Exemplar. Deshalb `print_count` und nicht `is_printed`.\n\nEin Wiederholungsdruck verlangt eine **Begruendung**, wie beim\nLieferschein: Wer einen bereits gedruckten Beleg erneut ausgibt, soll\nsagen warum. Ohne sie antwortet der Endpunkt mit 400 und aendert nichts.",
+        "operationId": "print_sales_order_api_v1_sales_orders__order_id__print_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "order_id",
+            "required": true,
+            "schema": {
+              "title": "Order Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Formatvorlage",
+            "in": "query",
+            "name": "template",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 60,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Formatvorlage",
+              "title": "Template"
+            }
+          },
+          {
+            "description": "Anzahl Ausdrucke",
+            "in": "query",
+            "name": "copies",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "description": "Anzahl Ausdrucke",
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Copies",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Begruendung fuer den Wiederholungsdruck",
+            "in": "query",
+            "name": "attestation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 500,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Begruendung fuer den Wiederholungsdruck",
+              "title": "Attestation"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrderPrintOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sales order drucken",
         "tags": [
           "sales",
           "orders"
@@ -409468,6 +413757,55 @@
         ]
       }
     },
+    "/api/v1/vies/validate/{vat_id}": {
+      "get": {
+        "operationId": "vies_validate_api_v1_vies_validate__vat_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vat_id",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "minLength": 4,
+              "title": "Vat Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "USt-IdNr. gegen VIES prüfen",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      }
+    },
     "/api/v1/voice/resolve": {
       "post": {
         "operationId": "resolve_voice_api_v1_voice_resolve_post",
@@ -410157,6 +414495,126 @@
           "waage",
           "mobile",
           "logistik"
+        ]
+      }
+    },
+    "/api/v1/waage/vorlagen": {
+      "get": {
+        "operationId": "list_waage_vorlagen_api_v1_waage_vorlagen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BridgeOut"
+                  },
+                  "title": "Response List Waage Vorlagen Api V1 Waage Vorlagen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Waagenvorlagen auflisten",
+        "tags": [
+          "mask-frontend-bridges"
+        ]
+      },
+      "post": {
+        "operationId": "create_waage_vorlage_api_v1_waage_vorlagen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaageVorlageIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Waagenvorlage anlegen",
+        "tags": [
+          "mask-frontend-bridges"
         ]
       }
     },

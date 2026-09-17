@@ -3,7 +3,7 @@ title: Arbeitsliste Frontend-Backend-Luecken
 type: reference
 audience: [agent, entwickler]
 owner: Cursor
-status: aktiv
+status: abgeschlossen
 last_reviewed: 2026-09-17
 version: 1.1.0
 description: Abarbeitungsliste der Frontend-Aufrufe ohne Backend — je Eintrag Pfadkorrektur oder fehlender Endpunkt, mit Stand.
