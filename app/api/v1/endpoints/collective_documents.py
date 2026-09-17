@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from app.services.sales_posting_service import SalesPostingService
+from app.services.sales_invoice_service import InvoiceCreationError, SalesInvoiceService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.collective_documents_schemas import CollectiveDocumentsOut
@@ -80,6 +81,15 @@ class EligibleDeliveryNoteOut(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
+def _als_datum(wert: str):
+    """ISO-Zeichenkette als Datum — der Dienst rechnet mit einem Datum, nicht mit Text."""
+    from datetime import date as _date
+
+    if isinstance(wert, _date):
+        return wert
+    return _date.fromisoformat(str(wert)[:10])
+
+
 def _next_invoice_number(db: Session) -> str:
     return f"SR-{uuid4().hex[:8].upper()}"
 
@@ -99,15 +109,20 @@ async def create_collective_invoice(
     db: Session = Depends(get_db),
 ):
     now = datetime.now(timezone.utc)
-    # Validate and aggregate — only shipped/delivered DNs may be invoiced
-    total_amount = Decimal("0.00")
-    _INVOICEABLE = ("shipped", "delivered")
+
+    # Abrechenbar ist ein Lieferschein, der heraus ist: gebucht, gedruckt,
+    # verladen oder zugestellt. Die Einzelrechnung verlangt dasselbe — vorher
+    # liessen die beiden Wege unterschiedliche Staende zu, was niemand erklaeren
+    # konnte.
+    _INVOICEABLE = ("shipped", "delivered", "posted", "printed", "gebucht", "gedruckt")
+    _BEREITS_BERECHNET = ("BERECHNET", "invoiced", "berechnet")
+
     for dn_id in payload.delivery_note_ids:
         try:
             row = db.execute(
                 text(
                     """
-                    SELECT total_amount, status FROM domain_sales.delivery_notes
+                    SELECT status FROM domain_sales.delivery_notes
                     WHERE id = :id AND tenant_id = :tid
                     """
                 ),
@@ -117,51 +132,62 @@ async def create_collective_invoice(
             raise HTTPException(status_code=503, detail="Datenbankfehler")
         if not row:
             raise HTTPException(status_code=404, detail=f"Lieferschein {dn_id} nicht gefunden")
-        if row["status"] == "BERECHNET":
+        if row["status"] in _BEREITS_BERECHNET:
             raise HTTPException(status_code=409, detail=f"Lieferschein {dn_id} ist bereits berechnet")
         if row["status"] not in _INVOICEABLE:
             raise HTTPException(
                 status_code=422,
-                detail=f"Lieferschein {dn_id} hat Status '{row['status']}' — nur shipped/delivered sind abrechnungsfähig",
+                detail=(
+                    f"Lieferschein {dn_id} hat Status '{row['status']}' — abgerechnet "
+                    "wird nur ein herausgegebener Beleg (gebucht, gedruckt, verladen "
+                    "oder zugestellt)."
+                ),
             )
-        total_amount += Decimal(str(row["total_amount"] or 0))
 
-    invoice_id = str(uuid4())
+    # Die Sammelrechnung ist kein eigenes Objekt, sondern eine laengere
+    # Quellenliste: Sie entsteht ueber denselben Dienst wie die Einzelrechnung,
+    # Position fuer Position und Menge fuer Menge zugeordnet.
+    #
+    # Vorher schrieb dieser Endpunkt in domain_finance.finance_invoices — eine
+    # Tabelle, die es nicht gibt. Der Fehler wurde als 503 "Datenbankfehler"
+    # ausgeliefert; die Sammelrechnung war damit nie moeglich.
+    from app.api.v1.endpoints.sales_invoices import _delivery_note_sources
+
+    quellen = _delivery_note_sources(db, tenant_id, list(payload.delivery_note_ids))
     invoice_number = _next_invoice_number(db)
-    dn_ids_json = json.dumps(payload.delivery_note_ids)
+    try:
+        ergebnis = SalesInvoiceService(db, tenant_id).create_from_sources(
+            invoice_number=invoice_number,
+            customer_id=payload.customer_id,
+            invoice_date=_als_datum(payload.invoice_date),
+            sources=quellen,
+            reason="sammelrechnung",
+        )
+    except InvoiceCreationError as fehler:
+        db.rollback()
+        # 409: In aller Regel ist schon berechnet worden. Das ist eine Lage,
+        # kein Fehler im Programm.
+        raise HTTPException(status_code=409, detail=str(fehler)) from fehler
+
+    invoice_id = ergebnis.invoice.id
+    netto = Decimal(str(ergebnis.invoice.net_amount or 0))
+    steuer = Decimal(str(ergebnis.invoice.vat_amount or 0))
+    total_amount = Decimal(str(ergebnis.invoice.gross_amount or 0))
 
     try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_finance.finance_invoices
-                  (id, tenant_id, customer_id, invoice_number, invoice_date, total_amount,
-                   status, source_document_ids, created_at)
-                VALUES
-                  (:id, :tid, :cid, :inv_no, :inv_date, :amount,
-                   'OFFEN', CAST(:src_ids AS jsonb), :now)
-                """
-            ),
-            {
-                "id": invoice_id,
-                "tid": tenant_id,
-                "cid": payload.customer_id,
-                "inv_no": invoice_number,
-                "inv_date": payload.invoice_date,
-                "amount": float(total_amount),
-                "src_ids": dn_ids_json,
-                "now": now,
-            },
-        )
         # Mark source delivery notes as invoiced — prevents double-billing
         for dn_id in payload.delivery_note_ids:
+            # `invoice_id` gibt es an der Tabelle nicht — der Lieferschein
+            # traegt die **Rechnungsnummer** (`invoice_number`). Der alte
+            # Schreibversuch lief deshalb in einen Datenbankfehler, den der
+            # Endpunkt als 503 auslieferte.
             db.execute(
                 text(
                     "UPDATE domain_sales.delivery_notes "
-                    "SET status = 'BERECHNET', invoice_id = :inv_id, updated_at = :now "
+                    "SET status = 'BERECHNET', invoice_number = :inv_no, updated_at = :now "
                     "WHERE id = :dn_id AND tenant_id = :tid"
                 ),
-                {"inv_id": invoice_id, "now": now, "dn_id": dn_id, "tid": tenant_id},
+                {"inv_no": invoice_number, "now": now, "dn_id": dn_id, "tid": tenant_id},
             )
         db.commit()
     except HTTPException:
@@ -201,16 +227,15 @@ async def create_collective_invoice(
     try:
         if _is_test_double_session(db):
             raise RuntimeError("skip optional posting for unit-test double")
-        _VAT = Decimal("0.19")
-        gross = total_amount.quantize(Decimal("0.01"))
-        tax = (gross * _VAT / (1 + _VAT)).quantize(Decimal("0.01"))
-        net = (gross - tax).quantize(Decimal("0.01"))
+        # Die Betraege kommen aus dem Beleg. Vorher wurden hier 19 % aus dem
+        # Brutto herausgerechnet — bei 7 % auf Agrarerzeugnisse ist das schlicht
+        # falsch, und die Steuer stand danach in zwei Hoehen im Haus.
         SalesPostingService(db, tenant_id).book_ausgangsrechnung(
             invoice_number=invoice_number,
             invoice_date=payload.invoice_date,
-            net_amount=net,
-            tax_amount=tax,
-            gross_amount=gross,
+            net_amount=netto.quantize(Decimal("0.01")),
+            tax_amount=steuer.quantize(Decimal("0.01")),
+            gross_amount=total_amount.quantize(Decimal("0.01")),
         )
     except Exception:  # noqa: BLE001 — GL posting must not block the invoice document
         pass
@@ -320,25 +345,46 @@ async def get_collective_invoice(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
+    # Gelesen wird die echte Rechnung. Die Quellbelege stehen nicht mehr als
+    # JSON-Liste am Kopf, sondern ergeben sich aus den Mengenzuordnungen — das
+    # ist dieselbe Wahrheit, nur ohne zweite Fassung.
     try:
         row = db.execute(
             text(
                 """
-                SELECT * FROM domain_finance.finance_invoices
+                SELECT id, tenant_id, invoice_number, customer_id, invoice_date,
+                       status, currency, net_amount, vat_amount, gross_amount, created_at
+                FROM domain_sales.sales_invoices
                 WHERE id = :id AND tenant_id = :tid
                 """
             ),
             {"id": invoice_id, "tid": tenant_id},
         ).mappings().first()
+        quellen = db.execute(
+            text(
+                """
+                SELECT DISTINCT s.document_id
+                FROM domain_docs.doc_allocations a
+                JOIN domain_docs.doc_allocation_sources s ON s.id = a.source_id
+                WHERE a.tenant_id = :tid
+                  AND a.target_document_type = 'sales_invoice'
+                  AND a.target_document_id = :id
+                """
+            ),
+            {"id": invoice_id, "tid": tenant_id},
+        ).scalars().all()
     except Exception:
         raise HTTPException(status_code=503, detail="Datenbankfehler")
     if not row:
         raise HTTPException(status_code=404, detail="Sammelrechnung nicht gefunden")
-    r = dict(row)
-    src_ids = r.get("source_document_ids") or []
-    if isinstance(src_ids, str):
-        src_ids = json.loads(src_ids)
-    return {**r, "source_document_ids": src_ids}
+
+    rechnung = dict(row)
+    return {
+        **rechnung,
+        "total_amount": float(rechnung.get("gross_amount") or 0),
+        "source_document_ids": [str(q) for q in quellen],
+        "delivery_note_ids": [str(q) for q in quellen],
+    }
 
 
 @router.get("/customers/{customer_id}/collective-eligible", response_model=list[EligibleDeliveryNoteOut], summary="Eligible collective")

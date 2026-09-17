@@ -11,6 +11,56 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SALES-SAMMELRECHNUNG-ECHT - die Sammelrechnung war nie moeglich 2026-09-17, Claude Code
+
+**Drei Fehler in einem Weg**, alle drei still:
+
+1. Die Sammelrechnung schrieb in `domain_finance.finance_invoices` — **eine
+   Tabelle, die es nicht gibt**. Der Endpunkt fing den Datenbankfehler ab und
+   antwortete mit 503 „Datenbankfehler". Eine Sammelrechnung konnte damit nie
+   entstehen.
+2. Danach haette sie die Quell-Lieferscheine mit `invoice_id` markiert — **eine
+   Spalte, die es nicht gibt**; der Beleg traegt `invoice_number`. Der zweite
+   Fehler war hinter dem ersten versteckt.
+3. Dieselbe Phantomtabelle las die **Kreditpruefung**, um offene Forderungen zu
+   summieren. Das Ergebnis war immer null: Jeder Kunde galt als unbelastet,
+   egal wie viel offen war. Das ist der gefaehrlichste der drei, weil er nichts
+   kaputtmacht — er sagt nur immer ja.
+
+**Die Sammelrechnung ist jetzt keine eigene Welt mehr.** Sie entsteht ueber
+denselben `SalesInvoiceService` wie die Einzelrechnung: Positionen, Mengen,
+Zuordnungen. Damit gilt fuer sie automatisch, was das Mengenmodell zusichert —
+berechnet wird die **offene** Menge, zweimal abrechnen geht nicht, und jede
+Position weiss, aus welchem Lieferschein sie kommt. Beim Lesen kommen die
+Quellbelege aus den Zuordnungen statt aus einer JSON-Liste am Kopf: eine
+Wahrheit statt zweier.
+
+**Nebenbei zwei Dinge geradegezogen:**
+- Die Steuer wurde bisher mit **19 %** aus dem Brutto herausgerechnet. Bei 7 %
+  auf Agrarerzeugnisse ist das schlicht falsch; jetzt kommen Netto, Steuer und
+  Brutto aus dem Beleg.
+- Einzel- und Sammelweg liessen **unterschiedliche Lieferscheinstaende** zu.
+  Jetzt beide dasselbe: abgerechnet wird ein herausgegebener Beleg (gebucht,
+  gedruckt, verladen, zugestellt).
+
+**Neues Schema:** `domain_crm.credit_limits` und `credit_overrides`
+(`crm_kreditlimite_20260917`) — die Kreditpruefung las sie, es gab sie nicht,
+und der 503 machte die ganze Pruefung unbenutzbar. Ohne Eintrag gilt weiterhin
+das Limit am Kundensatz: Die Tabelle ist die Ausnahme vom Stamm, nicht sein
+Ersatz.
+
+**Abnahme:** 6 neue Integrationstests (Positionen mit Herkunft, BERECHNET-Stand,
+Doppelabrechnung, Entwurf abgewiesen, Quellbelege beim Lesen, und die
+Kreditpruefung, die die Forderung endlich sieht), 38 Tests in den beruehrten
+Sales-Suiten gruen. Ein Attrappentest aus SALES-COLL-001 ist entfallen: Er
+pinnte die alte Implementierung und koennte jetzt nur noch nachzeichnen, was er
+selbst vorgibt — sein Nachweis steht als Integrationstest neu.
+
+**Weiterhin blockiert:** `alembic upgrade head` (siehe Handshake oben). Meine
+beiden Revisionen haengen hinter `crm_consents_20260917`; die Tabellen sind
+lokal von Hand angelegt, damit die Tests laufen.
+
+
 ## HANDSHAKE: crm_consents blockiert die Migrationskette 2026-09-17, Claude Code an Cursor
 
 **Kein Vorwurf, ein Befund mit Belegen** — und er ist blockierend, deshalb steht
