@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.agrar.rations.authz import APPROVE_ROLES, READ_ROLES, WRITE_ROLES, require_roles
 from app.agrar.rations.feeding_plan import FeedingPlanValidationError
+from app.api.v1.schemas.base import BaseSchema
 from app.auth.deps import User, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -110,7 +111,28 @@ async def list_current_plans(db: Session = Depends(get_db), tenant_id: str = Dep
     )
 
 
-@router.get("/{version_id}/instructions", summary="Fuetterungsanweisungen der Planversion")
+class MixingInstructionRowOut(BaseSchema):
+    """Eine Zeile der Mischfolge — was in welcher Reihenfolge wie viel wiegt.
+
+    Der Endpunkt antwortete als ``list[dict[str, Any]]``; an einer solchen Form
+    kann das Feldvertrags-Gate nichts pruefen. Am Mischwagen ist eine leere
+    Zelle keine Kleinigkeit: `rounding_delta_kg` sagt, wie weit die dosierbare
+    Menge vom rechnerischen Ziel abweicht.
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    sequence: int
+    feed_id: str | None = None
+    feed_name: str | None = None
+    kg_fm_per_animal: float | None = None
+    raw_batch_kg: float | None = None
+    target_batch_kg: float | None = None
+    rounding_delta_kg: float | None = None
+
+
+@router.get("/{version_id}/instructions", response_model=list[MixingInstructionRowOut], summary="Fuetterungsanweisungen der Planversion")
 async def list_plan_instructions(version_id: str, db: Session = Depends(get_db),
                                  tenant_id: str = Depends(get_tenant_id),
                                  user: User = Depends(get_current_user)) -> list[dict[str, Any]]:

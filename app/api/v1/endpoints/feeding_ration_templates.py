@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.agrar.rations.authz import APPROVE_ROLES, READ_ROLES, WRITE_ROLES, require_roles
 from app.agrar.rations.ration_templates import RationTemplateValidationError
+from app.api.v1.schemas.base import BaseSchema
 from app.auth.deps import User, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -173,21 +174,78 @@ async def business_overview(business_id: str, db: Session = Depends(get_db),
         raise _translate(exc) from exc
 
 
-@router.get("/businesses/{business_id}/groups", summary="Fuetterungsgruppen des Betriebs auflisten")
+# Zeilenformen der Betriebsakte
+# ----------------------------
+#
+# Die drei Register antworteten als ``list[dict[str, Any]]`` — eine Form, an
+# der das Feldvertrags-Gate nichts pruefen kann. Solange die Zeile nicht
+# deklariert ist, faellt eine Spalte, die ins Leere zeigt, nur als leere Zelle
+# auf. Deklariert sind sie hier so, wie der Service sie liefert.
+
+
+class BusinessGroupRowOut(BaseSchema):
+    """Eine Tiergruppe des Betriebs."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    name: str | None = None
+    animal_count: int | None = None
+    profile_code: str | None = None
+    risk_level: str | None = None
+    active: bool = True
+    updated_at: datetime | None = None
+    ration_count: int = 0
+
+
+class BusinessRationRowOut(BaseSchema):
+    """Der neueste Stand je Ration des Betriebs, mit Analysereife."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    name: str | None = None
+    group_id: str | None = None
+    group_name: str | None = None
+    version_id: str | None = None
+    version_no: int | None = None
+    status: str | None = None
+    updated_at: datetime | None = None
+    readiness_status: str = "not_checked"
+    readiness_blockers: int = 0
+    readiness_warnings: int = 0
+
+
+class BusinessFindingRowOut(BaseSchema):
+    """Ein Befund aus der juengsten Bewertung, priorisiert nach Schwere."""
+
+    model_config = ConfigDict(extra="allow")
+
+    evaluation_id: str
+    ration_id: str | None = None
+    ration_name: str | None = None
+    group_name: str | None = None
+    code: str | None = None
+    severity: str | None = None
+    message: str | None = None
+    evaluated_at: datetime | None = None
+
+
+@router.get("/businesses/{business_id}/groups", response_model=list[BusinessGroupRowOut], summary="Fuetterungsgruppen des Betriebs auflisten")
 async def business_groups(business_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                           user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES); _require_business(db, tenant_id, user, business_id, "read")
     return _template_service(db, tenant_id, user).list_business_groups(business_id)
 
 
-@router.get("/businesses/{business_id}/rations", summary="Rationen des Betriebs auflisten")
+@router.get("/businesses/{business_id}/rations", response_model=list[BusinessRationRowOut], summary="Rationen des Betriebs auflisten")
 async def business_rations(business_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                            user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES); _require_business(db, tenant_id, user, business_id, "read")
     return _template_service(db, tenant_id, user).list_business_rations(business_id)
 
 
-@router.get("/businesses/{business_id}/findings", summary="Befunde des Betriebs auflisten")
+@router.get("/businesses/{business_id}/findings", response_model=list[BusinessFindingRowOut], summary="Befunde des Betriebs auflisten")
 async def business_findings(business_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
                             user: User = Depends(get_current_user)) -> list[dict[str, Any]]:
     require_roles(user, READ_ROLES); _require_business(db, tenant_id, user, business_id, "read")
