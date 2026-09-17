@@ -7,6 +7,7 @@ from decimal import Decimal
 from typing import Any, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from pydantic import ConfigDict, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -38,7 +39,7 @@ from app.services.kontrakte_service import (
     _text,
     _contract_reference_price,
 )
-from app.api.v1.schemas.base import TypedObjectOut
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 
 # Backwards-compatible alias for tests
 _line_to_out = line_to_dict
@@ -266,6 +267,120 @@ async def get_kontrakt_screen_summary(
     )
 
 
+# Zwei benannte Register vor der generischen Route
+# ----------------------------------------------
+#
+# Die generische Route antwortet mit ``TypedObjectOut`` — einer Huelle, durch
+# die jede Form durchgeht. Das Feldvertrags-Gate kann damit nicht pruefen, ob
+# die Spalten der Maske (ScreenDefinition `agrar/kontrakte`) den Schluesseln
+# der Antwort entsprechen. Deshalb je Register eine eigene Route mit
+# deklarierter Zeilenform — sie muss **vor** der generischen stehen, sonst
+# verschluckt `{tab_key}` sie.
+
+
+class KontraktTabOut(BaseSchema):
+    """Die Huelle jeder Register-Antwort der Kontraktmaske."""
+
+    model_config = ConfigDict(extra="allow")
+
+    tab_key: str
+    table_key: str
+    total: int = 0
+    page: int = 1
+    limit: int = 25
+
+
+class KontraktPositionRowOut(BaseSchema):
+    """Eine Kontraktposition — mit der offenen Restmenge."""
+
+    model_config = ConfigDict(extra="allow")
+
+    line_id: str
+    position_no: int | None = None
+    article_id: str | None = None
+    description1: str | None = None
+    description2: str | None = None
+    qty_contract: float = 0.0
+    qty_remaining: float | None = None
+    price_unit: str | None = None
+    unit_price: float | None = None
+    discount_pct: float | None = None
+    surcharge: float | None = None
+    rebate_type: str | None = None
+    is_bio: bool = False
+    is_matif: bool = False
+
+
+class KontraktUmsatzRowOut(BaseSchema):
+    """Eine Bewegung auf dem Kontrakt — Abruf, Lieferung, Rechnung."""
+
+    model_config = ConfigDict(extra="allow")
+
+    movement_id: str
+    line_id: str | None = None
+    order_no: str | None = None
+    delivery_note_no: str | None = None
+    invoice_no: str | None = None
+    movement_date: str | None = None
+    quantity: float = 0.0
+    unit_price: float | None = None
+    amount: float = 0.0
+    route_no: str | None = None
+    is_invoiced: bool = False
+
+
+class KontraktPositionenTabOut(KontraktTabOut):
+    items: list[KontraktPositionRowOut] = Field(default_factory=list)
+
+
+class KontraktUmsaetzeTabOut(KontraktTabOut):
+    items: list[KontraktUmsatzRowOut] = Field(default_factory=list)
+
+
+@router.get(
+    "/{contract_id}/tabs/positionen",
+    response_model=KontraktPositionenTabOut,
+    tags=["kontrakte", "screen-summary"],
+    summary="Kontrakt: Positionen",
+)
+async def get_kontrakt_tab_positionen(
+    contract_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Die Kontraktpositionen mit ihrer offenen Restmenge."""
+    return await get_kontrakt_tab_data(
+        contract_id=contract_id, tab_key="positionen", page=page, limit=limit,
+        q=q, db=db, tenant_id=tenant_id, user=user,
+    )
+
+
+@router.get(
+    "/{contract_id}/tabs/umsaetze",
+    response_model=KontraktUmsaetzeTabOut,
+    tags=["kontrakte", "screen-summary"],
+    summary="Kontrakt: Umsaetze",
+)
+async def get_kontrakt_tab_umsaetze(
+    contract_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Die Bewegungen auf dem Kontrakt."""
+    return await get_kontrakt_tab_data(
+        contract_id=contract_id, tab_key="umsaetze", page=page, limit=limit,
+        q=q, db=db, tenant_id=tenant_id, user=user,
+    )
+
+
 @router.get(
     "/{contract_id}/tabs/{tab_key}",
     response_model=TypedObjectOut,
@@ -318,6 +433,10 @@ async def get_kontrakt_tab_data(
                 "movement_date": _format_optional_date(r.movement_date),
                 "quantity": float(r.quantity or 0),
                 "unit_price": float(r.unit_price) if r.unit_price is not None else None,
+                # Die Maske fragt nach dem Betrag der Bewegung. Menge und Preis
+                # stehen da — den Wert daraus auszurechnen ist Aufgabe des
+                # Endpunkts, nicht der Maske.
+                "amount": round(float(r.quantity or 0) * float(r.unit_price or 0), 2),
                 "route_no": r.route_no,
                 "is_invoiced": bool(r.is_invoiced),
             }
