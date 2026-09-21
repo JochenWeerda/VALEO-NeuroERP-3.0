@@ -5,7 +5,7 @@ type: reference
 audience: [entwickler, lead]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-09-08
+last_reviewed: 2026-09-21
 version: 3.0.0
 ---
 
@@ -18,9 +18,9 @@ version: 3.0.0
 
 | Metrik | Wert |
 |---|---|
-| Gesamter Drift | **0** |
-| Status | **GRUEN** |
-| Stand | 2026-09-08 14:33 UTC |
+| Gesamter Drift | **3** |
+| Status | **GELB** |
+| Stand | 2026-09-21 10:24 UTC |
 | Gate | `--fail-over 0` (DOC-DRIFT-GATE-002) |
 
 ## Dimensionen
@@ -28,13 +28,17 @@ version: 3.0.0
 | Dimension | Anzahl | Status |
 |---|---|---|
 | Endpoints ohne Doku | 0 | GRUEN |
-| Migrationen ohne Runbook | 0 | GRUEN |
+| Migrationen ohne Runbook | 3 | GELB |
 | Services ohne Doku | 0 | GRUEN |
 | Frontend-Seiten ohne Route/Nav | 0 | GRUEN |
 
 ## Offene Punkte
 
-Kein Drift erkannt — Gate ist grün.
+| Typ | Datei/Stem |
+|---|---|
+| `migration_no_runbook` | `alembic/versions/audit_attestations_20260917.py` |
+| `migration_no_runbook` | `alembic/versions/dsgvo_loeschantraege_20260917.py` |
+| `migration_no_runbook` | `alembic/versions/einkauf_bestellung_fuehrend_20260918.py` |
 
 ## Gate-Verhalten
 
@@ -55,4 +59,4 @@ Bei neuem Drift sofort beheben:
 > Historische Drift-Reports werden als CI-Artefakte unter `.github/workflows/doc-drift-report.yml`
 > für 90 Tage aufbewahrt (retention-days: 90).
 
-*Stand: 2026-09-08 14:33 UTC · 0 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
+*Stand: 2026-09-21 10:24 UTC · 3 Drift-Items · Slice: DOC-DRIFT-DASHBOARD-002*
