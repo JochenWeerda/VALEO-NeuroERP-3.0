@@ -37,6 +37,14 @@ Die **Objekte** der Belegkette (Auftrag, Lieferung, Rechnung, Kontrakt, Charge) 
 #### Einkauf (Procurement)
 1. **Angebot** → 2. **Bestellung** → 3. **Wareneingang** → 4. **Rechnung**
    - Ähnliche Struktur wie Verkauf, aber mit Lieferanten statt Kunden
+   - **Führende Bestellmaske** ist native `einkauf/purchase-order`
+     (`/einkauf/bestellung/:id`). Register: Bestell-Kopf, Positionen,
+     Anfrage/Angebot/Auftrag, Zahlungsbedingungen, Bedarf und Fall,
+     Kommunikation. Der Bestellfall steht im Kopf (Bestand/Abverkauf,
+     Direktlieferung, Innovation). Ladetermin ist vom Liefertermin getrennt.
+   - Anlage über `/einkauf/bestellungen/neu` wählt zuerst den Bestellfall.
+     Die Liste liegt noch auf Compat-`purchase-orders`; das ist ein bekannter
+     zweiter Speicher, keine zweite führende Maske.
 
 #### Lager (Inventory)
 1. **Lagerbuchung** → 2. **Inventur** → 3. **Umlagerung**

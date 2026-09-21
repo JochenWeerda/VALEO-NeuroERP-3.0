@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-17",
+  "generatedAt": "2026-09-21",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1934,7 +1934,7 @@
       "agent_contract_url": "/api/v1/masks/einkauf/purchase-order/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/purchase-order/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/purchase-order/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
           "key": "edit",
@@ -1946,10 +1946,34 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        },
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "versenden",
+          "label": "Versenden",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.bestellung.send",
+          "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/versenden",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
-        "zahlungsbedingungen",
+        "zahlungsbedingung",
+        "skonto1_prozent",
+        "skonto2_prozent",
         "betrag"
       ],
       "mcp_tool_ids": [

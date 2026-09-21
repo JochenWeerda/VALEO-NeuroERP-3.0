@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-21
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -53,7 +53,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
 | `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
-| `einkauf/purchase-order` | Bestellung | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
+| `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
@@ -1220,7 +1220,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `einkauf/purchase-order` — Bestellung
 
-**Zweck:** Einkaufs-Bestellung: Kopfdaten, Positionen und Kommunikation fuer Beschaffungssteuerung.
+**Zweck:** Fuehrende Einkaufsbestellung: Bestellfall, L3-Kopf, Positionen mit Kontrakt und Ladetermin, Skontostaffel, Bedarf und Direktlieferung.
 
 | | |
 |---|---|
@@ -1244,16 +1244,20 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Was ist der Status von Bestellung {entity_id} und wann ist der Liefertermin?
-- Zeige alle Positionen und bestellten Mengen von Bestellung {entity_id}.
+- Welcher Bestellfall gilt fuer Bestellung {entity_id}?
+- Wann ist Ladetermin und Liefertermin von Bestellung {entity_id}?
+- Welche Positionen haben noch offene Restmenge?
+- Ist Bestellung {entity_id} eine Direktlieferung mit Ueberschlag am Lager?
 
-**Sensible Felder:** `zahlungsbedingungen, betrag`
+**Sensible Felder:** `zahlungsbedingung, skonto1_prozent, skonto2_prozent, betrag`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+| `speichern` | Speichern | safe | nein | `—` |
+| `versenden` | Versenden | moderate | nein | `/api/v1/einkauf/bestellungen/{entity_id}/versenden` |
 
 ---
 

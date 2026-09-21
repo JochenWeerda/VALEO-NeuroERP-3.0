@@ -10,6 +10,26 @@ from fastapi import APIRouter, Depends, HTTPException
 from ....core.screen_definitions import get_screen_definition
 from ....core.tenant import get_tenant_id
 from app.api.v1.schemas.base import TypedObjectOut
+from app.api.v1.schemas.mask_entity_contracts import (
+    DuengerPreisTabOut,
+    DuengerVerwendungTabOut,
+    EinkaufAbPositionTabOut,
+    EinkaufAnfragePositionTabOut,
+    EinkaufAngebotPositionTabOut,
+    EinkaufAnlieferavisPositionTabOut,
+    FinanceBankkontoBuchungTabOut,
+    FinanceDebitorUmsatzTabOut,
+    FinanceKreditorBestellungTabOut,
+    FinanceOffenePostenTabOut,
+    LeadAktivitaetTabOut,
+    LeadAufgabeTabOut,
+    MischfuttermittelNaehrstoffTabOut,
+    MischfuttermittelRezepturTabOut,
+    ReklamationDokumentTabOut,
+    ReklamationMassnahmeTabOut,
+    SaatgutLagerbestandTabOut,
+    SaatgutVertragTabOut,
+)
 
 
 router = APIRouter(prefix="/masks", tags=["ui", "masks", "screen-definition"])
@@ -371,6 +391,222 @@ async def get_mask_entity_stub(
     for f in fields:
         stub.setdefault(f["key"], None)
     return stub
+
+
+def _leere_registerseite(
+    screen_id: str,
+    tab_key: str,
+    *,
+    page: int,
+    page_size: int,
+    tenant_id: str,
+) -> dict[str, Any]:
+    """Leere Seite mit zugesagter Zeilenform — die Maske darf die Spalten kennen."""
+    definition = get_screen_definition(screen_id, tenant_id=tenant_id)
+    if definition is None:
+        raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {screen_id}")
+    return {
+        "tab_key": tab_key,
+        "table_key": tab_key,
+        "page": page,
+        "limit": page_size,
+        "total": 0,
+        "items": [],
+    }
+
+
+#: Kanonische Screen-ID, nicht der Plural im URL-Pfad.
+_LEERE_BRUECKEN_TABS: tuple[tuple[str, type, str, str, str, str], ...] = (
+    (
+        "/einkauf/anfragen/entity/{entity_id}/tabs/positionen",
+        EinkaufAnfragePositionTabOut,
+        "Einkaufsanfrage: Positionen (leerer Stub)",
+        "einkauf/anfrage",
+        "positionen",
+        "get_einkauf_anfrage_positionen_tab",
+    ),
+    (
+        "/einkauf/angebote/entity/{entity_id}/tabs/positionen",
+        EinkaufAngebotPositionTabOut,
+        "Lieferantenangebot: Positionen (leerer Stub)",
+        "einkauf/angebot",
+        "positionen",
+        "get_einkauf_angebot_positionen_tab",
+    ),
+    (
+        "/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen",
+        EinkaufAnlieferavisPositionTabOut,
+        "Anlieferavis: Positionen (leerer Stub)",
+        "einkauf/anlieferavis",
+        "positionen",
+        "get_einkauf_anlieferavis_positionen_tab",
+    ),
+    (
+        "/einkauf/auftragsbestaetigungen/entity/{entity_id}/tabs/positionen",
+        EinkaufAbPositionTabOut,
+        "Auftragsbestaetigung: Positionen (leerer Stub)",
+        "einkauf/auftragsbestaetigung",
+        "positionen",
+        "get_einkauf_auftragsbestaetigung_positionen_tab",
+    ),
+    (
+        "/finance/bankkonten/entity/{entity_id}/tabs/buchungen",
+        FinanceBankkontoBuchungTabOut,
+        "Bankkonto: Buchungen (leerer Stub)",
+        "finance/bankkonto",
+        "buchungen",
+        "get_finance_bankkonto_buchungen_tab",
+    ),
+    (
+        "/finance/debitoren/entity/{entity_id}/tabs/offene-posten",
+        FinanceOffenePostenTabOut,
+        "Debitor: Offene Posten (leerer Stub)",
+        "finance/debitor",
+        "offene_posten",
+        "get_finance_debitor_offene_posten_tab",
+    ),
+    (
+        "/finance/debitoren/entity/{entity_id}/tabs/umsaetze",
+        FinanceDebitorUmsatzTabOut,
+        "Debitor: Umsaetze (leerer Stub)",
+        "finance/debitor",
+        "umsaetze",
+        "get_finance_debitor_umsaetze_tab",
+    ),
+    (
+        "/finance/kreditoren/entity/{entity_id}/tabs/offene-posten",
+        FinanceOffenePostenTabOut,
+        "Kreditor: Offene Posten (leerer Stub)",
+        "finance/kreditor",
+        "offene_posten",
+        "get_finance_kreditor_offene_posten_tab",
+    ),
+    (
+        "/finance/kreditoren/entity/{entity_id}/tabs/bestellungen",
+        FinanceKreditorBestellungTabOut,
+        "Kreditor: Bestellungen (leerer Stub)",
+        "finance/kreditor",
+        "bestellungen",
+        "get_finance_kreditor_bestellungen_tab",
+    ),
+    (
+        "/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/rezeptur",
+        MischfuttermittelRezepturTabOut,
+        "Mischfuttermittel: Rezeptur (leerer Stub)",
+        "futtermittel/mischfuttermittel",
+        "rezeptur",
+        "get_mischfuttermittel_rezeptur_tab",
+    ),
+    (
+        "/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/naehrstoffe",
+        MischfuttermittelNaehrstoffTabOut,
+        "Mischfuttermittel: Naehrstoffe (leerer Stub)",
+        "futtermittel/mischfuttermittel",
+        "naehrstoffe",
+        "get_mischfuttermittel_naehrstoffe_tab",
+    ),
+    (
+        "/qualitaet/reklamationen/entity/{entity_id}/tabs/massnahmen",
+        ReklamationMassnahmeTabOut,
+        "Reklamation: Massnahmen (leerer Stub)",
+        "qualitaet/reklamation",
+        "massnahmen",
+        "get_reklamation_massnahmen_tab",
+    ),
+    (
+        "/qualitaet/reklamationen/entity/{entity_id}/tabs/dokumente",
+        ReklamationDokumentTabOut,
+        "Reklamation: Dokumente (leerer Stub)",
+        "qualitaet/reklamation",
+        "dokumente",
+        "get_reklamation_dokumente_tab",
+    ),
+    (
+        "/agrar/duenger/entity/{entity_id}/tabs/verwendung",
+        DuengerVerwendungTabOut,
+        "Duenger: Verwendung (leerer Stub)",
+        "agrar/duenger",
+        "verwendung",
+        "get_agrar_duenger_verwendung_tab",
+    ),
+    (
+        "/agrar/duenger/entity/{entity_id}/tabs/preise",
+        DuengerPreisTabOut,
+        "Duenger: Preise (leerer Stub)",
+        "agrar/duenger",
+        "preise",
+        "get_agrar_duenger_preise_tab",
+    ),
+    (
+        "/agrar/saatgut/entity/{entity_id}/tabs/lagerbestaende",
+        SaatgutLagerbestandTabOut,
+        "Saatgut: Lagerbestaende (leerer Stub)",
+        "agrar/saatgut",
+        "lagerbestaende",
+        "get_agrar_saatgut_lagerbestaende_tab",
+    ),
+    (
+        "/agrar/saatgut/entity/{entity_id}/tabs/vertraege",
+        SaatgutVertragTabOut,
+        "Saatgut: Vertraege (leerer Stub)",
+        "agrar/saatgut",
+        "vertraege",
+        "get_agrar_saatgut_vertraege_tab",
+    ),
+    (
+        "/crm/leads/entity/{entity_id}/tabs/aktivitaeten",
+        LeadAktivitaetTabOut,
+        "Lead: Aktivitaeten (leerer Stub)",
+        "crm/lead",
+        "aktivitaeten",
+        "get_crm_lead_aktivitaeten_tab",
+    ),
+    (
+        "/crm/leads/entity/{entity_id}/tabs/aufgaben",
+        LeadAufgabeTabOut,
+        "Lead: Aufgaben (leerer Stub)",
+        "crm/lead",
+        "aufgaben",
+        "get_crm_lead_aufgaben_tab",
+    ),
+)
+
+
+def _register_leere_bruecken_tabs() -> None:
+    """Eigene Route je Register, bevor der Catch-all die Zeilenform verschluckt."""
+    for path, model, summary, screen_id, tab_key, op_id in _LEERE_BRUECKEN_TABS:
+        def _make(bound_screen: str, bound_tab: str):
+            async def get_empty_tab(
+                entity_id: str,
+                page: int = 1,
+                page_size: int = 25,
+                tenant_id: str = Depends(get_tenant_id),
+            ) -> dict[str, Any]:
+                _ = entity_id
+                return _leere_registerseite(
+                    bound_screen,
+                    bound_tab,
+                    page=page,
+                    page_size=page_size,
+                    tenant_id=tenant_id,
+                )
+
+            return get_empty_tab
+
+        handler = _make(screen_id, tab_key)
+        handler.__name__ = op_id
+        handler.__qualname__ = op_id
+        router.add_api_route(
+            path,
+            handler,
+            methods=["GET"],
+            response_model=model,
+            summary=summary,
+            name=op_id,
+        )
+
+
+_register_leere_bruecken_tabs()
 
 
 @router.get(

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Optional
 from sqlalchemy import func as sqlfunc
 from sqlalchemy.exc import DataError
@@ -38,6 +38,176 @@ from app.services.finance_transaction_service import FinanceTransactionService
 def _model_cols(obj) -> dict[str, Any]:
     return {c.name: getattr(obj, c.name) for c in obj.__table__.columns
             if c.name not in ("created_at", "updated_at")}
+
+
+def _iso(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    return str(value)
+
+
+def _num(value: Any) -> float | None:
+    if value is None:
+        return None
+    return float(value)
+
+
+def _bool(value: Any) -> bool | None:
+    if value is None:
+        return None
+    return bool(value)
+
+
+BESTELLUNG_HEADER_KEYS = frozenset({
+    "lieferant_id", "vorschlag_id", "niederlassung_id", "bestelldatum",
+    "lieferdatum_wunsch", "lieferdatum_zugesagt", "lieferdatum_ist",
+    "status", "versand_art", "netto_summe", "mwst_betrag", "brutto_summe",
+    "waehrung", "zahlungsziel_tage", "skonto_prozent", "skonto_frist_tage",
+    "unsere_referenz", "ihre_referenz", "kontrakt_id", "freitext_kopf",
+    "freitext_fuss", "notiz", "bestellfall", "ansprechpartner", "kreditor_konto",
+    "lieferant_nr", "kostenstelle", "kommission", "ladetermin", "ladetermin_ab",
+    "lade_datum", "incoterms", "lieferadresse", "zahlungsbedingung",
+    "skonto1_tage", "skonto1_prozent", "skonto2_tage", "skonto2_prozent",
+    "netto_tage", "fremdwaehrung", "umrechnungsfaktor", "anfrage_nr",
+    "angebot_nr", "auftrag_nr", "abverkauf_horizont", "bedarfsmenge",
+    "mindestbestellmenge", "maximalbestellmenge", "artikelgruppe",
+    "lagerplatz_opt", "fracht_opt", "opportunitaetskostensatz",
+    "palettenstellplatz_kosten", "lagerkosten_satz", "verkaufsbeleg_id",
+    "kunden_id", "direktlieferung", "ueberschlag_lager", "neuer_artikel",
+    "innovationshinweis", "erstellt_von",
+})
+
+BESTELLUNG_UPDATE_KEYS = BESTELLUNG_HEADER_KEYS - {"lieferant_id"}
+
+POSITION_CREATE_KEYS = frozenset({
+    "article_id", "artikel_nr", "artikel_bezeichnung", "lieferanten_artnr",
+    "menge", "einheit", "einzelpreis", "preis_einheit", "rabatt_prozent",
+    "netto_betrag", "mwst_satz", "mwst_betrag", "brutto_betrag",
+    "kontrakt_pos_id", "lieferdatum", "lagerort", "notiz",
+    "gebinde_menge", "gebinde_einheit", "gebinde_schluessel", "gewicht_kg",
+    "kontrakt_nr", "lagerhalle", "lagerfach", "mindestmenge", "maximalmenge",
+})
+
+
+def _clean_fields(data: dict[str, Any], allowed: frozenset[str]) -> dict[str, Any]:
+    cleaned: dict[str, Any] = {}
+    for key, value in data.items():
+        if key not in allowed:
+            continue
+        if value == "":
+            value = None
+        cleaned[key] = value
+    return cleaned
+
+
+def bestellung_to_mask(b: EinkaufBestellung) -> dict[str, Any]:
+    """Kopf und Positionen in der Sprache der fuehrenden Maske."""
+    return {
+        "id": str(b.id),
+        "bestellnummer": b.bestellnummer,
+        "lieferant_id": str(b.lieferant_id) if b.lieferant_id else None,
+        "lieferant_name": b.lieferant.firmenname if b.lieferant else None,
+        "bestelldatum": _iso(b.bestelldatum),
+        "lieferdatum_wunsch": _iso(b.lieferdatum_wunsch),
+        "lieferdatum_zugesagt": _iso(b.lieferdatum_zugesagt),
+        "lieferdatum_ist": _iso(b.lieferdatum_ist),
+        "status": b.status,
+        "versand_art": b.versand_art,
+        "netto_summe": _num(b.netto_summe),
+        "mwst_betrag": _num(b.mwst_betrag),
+        "brutto_summe": _num(b.brutto_summe),
+        "waehrung": b.waehrung,
+        "zahlungsziel_tage": b.zahlungsziel_tage,
+        "skonto_prozent": _num(b.skonto_prozent),
+        "skonto_frist_tage": b.skonto_frist_tage,
+        "unsere_referenz": b.unsere_referenz,
+        "ihre_referenz": b.ihre_referenz,
+        "kontrakt_id": str(b.kontrakt_id) if b.kontrakt_id else None,
+        "freitext_kopf": b.freitext_kopf,
+        "freitext_fuss": b.freitext_fuss,
+        "notiz": b.notiz,
+        "niederlassung_id": b.niederlassung_id,
+        "bestellfall": b.bestellfall or "bestand_abgleich",
+        "ansprechpartner": b.ansprechpartner,
+        "kreditor_konto": b.kreditor_konto,
+        "lieferant_nr": b.lieferant_nr,
+        "kostenstelle": b.kostenstelle,
+        "kommission": b.kommission,
+        "ladetermin": _iso(b.ladetermin),
+        "ladetermin_ab": _iso(b.ladetermin_ab),
+        "lade_datum": _iso(b.lade_datum),
+        "incoterms": b.incoterms,
+        "lieferadresse": b.lieferadresse,
+        "zahlungsbedingung": b.zahlungsbedingung,
+        "skonto1_tage": b.skonto1_tage,
+        "skonto1_prozent": _num(b.skonto1_prozent),
+        "skonto2_tage": b.skonto2_tage,
+        "skonto2_prozent": _num(b.skonto2_prozent),
+        "netto_tage": b.netto_tage,
+        "fremdwaehrung": b.fremdwaehrung,
+        "umrechnungsfaktor": _num(b.umrechnungsfaktor),
+        "anfrage_nr": b.anfrage_nr,
+        "angebot_nr": b.angebot_nr,
+        "auftrag_nr": b.auftrag_nr,
+        "abverkauf_horizont": b.abverkauf_horizont,
+        "bedarfsmenge": _num(b.bedarfsmenge),
+        "mindestbestellmenge": _num(b.mindestbestellmenge),
+        "maximalbestellmenge": _num(b.maximalbestellmenge),
+        "artikelgruppe": b.artikelgruppe,
+        "lagerplatz_opt": _bool(b.lagerplatz_opt),
+        "fracht_opt": _bool(b.fracht_opt),
+        "opportunitaetskostensatz": _num(b.opportunitaetskostensatz),
+        "palettenstellplatz_kosten": _num(b.palettenstellplatz_kosten),
+        "lagerkosten_satz": _num(b.lagerkosten_satz),
+        "verkaufsbeleg_id": b.verkaufsbeleg_id,
+        "kunden_id": b.kunden_id,
+        "direktlieferung": _bool(b.direktlieferung),
+        "ueberschlag_lager": _bool(b.ueberschlag_lager),
+        "neuer_artikel": _bool(b.neuer_artikel),
+        "innovationshinweis": b.innovationshinweis,
+        "erstellt_von": b.erstellt_von,
+        "positionen": [position_to_mask(p) for p in b.positionen],
+    }
+
+
+def position_to_mask(p: EinkaufBestellungPosition) -> dict[str, Any]:
+    menge = _num(p.menge) or 0
+    geliefert = _num(p.menge_geliefert) or 0
+    return {
+        "id": str(p.id),
+        "pos_nr": p.pos_nr,
+        "article_id": p.article_id,
+        "artikel_nr": p.artikel_nr,
+        "artikel_bezeichnung": p.artikel_bezeichnung,
+        "bezeichnung": p.artikel_bezeichnung,
+        "lieferanten_artnr": p.lieferanten_artnr,
+        "menge": menge,
+        "menge_geliefert": geliefert,
+        "menge_offen": _num(p.menge_offen) if p.menge_offen is not None else menge - geliefert,
+        "einheit": p.einheit,
+        "einzelpreis": _num(p.einzelpreis),
+        "preis_einheit": p.preis_einheit,
+        "netto_betrag": _num(p.netto_betrag),
+        "betrag": _num(p.netto_betrag),
+        "status": p.status,
+        "lagerort": p.lagerort,
+        "lager": p.lagerort,
+        "gebinde_menge": _num(p.gebinde_menge),
+        "gebinde_einheit": p.gebinde_einheit,
+        "gebinde_schluessel": p.gebinde_schluessel,
+        "gewicht_kg": _num(p.gewicht_kg),
+        "kontrakt_nr": p.kontrakt_nr,
+        "lagerhalle": p.lagerhalle,
+        "lagerfach": p.lagerfach,
+        "mindestmenge": _num(p.mindestmenge),
+        "maximalmenge": _num(p.maximalmenge),
+        "lieferdatum": _iso(p.lieferdatum),
+        "notiz": p.notiz,
+    }
 
 
 class ProcurementService:
@@ -362,23 +532,36 @@ class ProcurementService:
 
     def create_bestellung(self, data: dict) -> dict:
         ts = datetime.now().strftime("%y%m%d%H%M%S")
+        header = _clean_fields(data, BESTELLUNG_HEADER_KEYS)
+        if not header.get("bestelldatum"):
+            header["bestelldatum"] = datetime.now().date()
+        if not header.get("bestellfall"):
+            header["bestellfall"] = "bestand_abgleich"
+        if header.get("bestellfall") == "direktlieferung":
+            header.setdefault("direktlieferung", True)
+        if header.get("bestellfall") == "innovation":
+            header.setdefault("neuer_artikel", True)
         bestellung = EinkaufBestellung(
             id=uuid7(), tenant_id=self.tenant_id, bestellnummer=f"EK-{ts}",
-            **{k: v for k, v in data.items() if k != "positionen"},
+            **header,
         )
         self.db.add(bestellung)
         self.db.flush()
         for i, pos_data in enumerate(data.get("positionen", []), start=1):
+            pos_fields = _clean_fields(pos_data, POSITION_CREATE_KEYS)
+            menge = pos_fields.get("menge", 0)
+            pos_fields.setdefault("preis_einheit", "100kg")
             pos = EinkaufBestellungPosition(
                 id=uuid7(), bestellung_id=bestellung.id, pos_nr=i,
-                artikel_nr=pos_data.get("artikel_nr", ""),
-                artikel_bezeichnung=pos_data.get("artikel_bezeichnung", ""),
-                article_id=pos_data.get("article_id"),
-                menge=pos_data.get("menge", 0), menge_geliefert=0,
-                menge_offen=pos_data.get("menge", 0),
-                einheit=pos_data.get("einheit", "t"),
-                einzelpreis=pos_data.get("einzelpreis"),
-                preis_einheit=pos_data.get("preis_einheit", "100kg"),
+                artikel_nr=pos_fields.get("artikel_nr") or "",
+                artikel_bezeichnung=pos_fields.get("artikel_bezeichnung") or "",
+                menge=menge,
+                menge_geliefert=0,
+                menge_offen=menge,
+                einheit=pos_fields.get("einheit") or "t",
+                **{k: v for k, v in pos_fields.items() if k not in {
+                    "artikel_nr", "artikel_bezeichnung", "menge", "einheit",
+                }},
             )
             self.db.add(pos)
         self.db.commit()
@@ -391,30 +574,7 @@ class ProcurementService:
         ).first()
         if not b:
             raise EntityNotFoundError("EinkaufBestellung", bestellung_id)
-        return {
-            "id": str(b.id), "bestellnummer": b.bestellnummer, "lieferant_id": str(b.lieferant_id),
-            "lieferant_name": b.lieferant.firmenname if b.lieferant else None,
-            "bestelldatum": b.bestelldatum.isoformat() if b.bestelldatum else None,
-            "lieferdatum_wunsch": b.lieferdatum_wunsch.isoformat() if b.lieferdatum_wunsch else None,
-            "lieferdatum_zugesagt": b.lieferdatum_zugesagt.isoformat() if b.lieferdatum_zugesagt else None,
-            "status": b.status, "versand_art": b.versand_art,
-            "netto_summe": float(b.netto_summe) if b.netto_summe else None,
-            "mwst_betrag": float(b.mwst_betrag) if b.mwst_betrag else None,
-            "brutto_summe": float(b.brutto_summe) if b.brutto_summe else None,
-            "unsere_referenz": b.unsere_referenz, "ihre_referenz": b.ihre_referenz,
-            "freitext_kopf": b.freitext_kopf, "freitext_fuss": b.freitext_fuss, "notiz": b.notiz,
-            "positionen": [
-                {"id": str(p.id), "pos_nr": p.pos_nr, "article_id": p.article_id,
-                 "artikel_nr": p.artikel_nr, "artikel_bezeichnung": p.artikel_bezeichnung,
-                 "lieferanten_artnr": p.lieferanten_artnr, "menge": float(p.menge),
-                 "menge_geliefert": float(p.menge_geliefert or 0),
-                 "menge_offen": float(p.menge_offen or p.menge),
-                 "einheit": p.einheit, "einzelpreis": float(p.einzelpreis) if p.einzelpreis else None,
-                 "preis_einheit": p.preis_einheit,
-                 "netto_betrag": float(p.netto_betrag) if p.netto_betrag else None, "status": p.status}
-                for p in b.positionen
-            ],
-        }
+        return bestellung_to_mask(b)
 
     def update_bestellung(self, bestellung_id: str, data: dict) -> dict:
         b = self.db.query(EinkaufBestellung).filter(
@@ -422,12 +582,14 @@ class ProcurementService:
         ).first()
         if not b:
             raise EntityNotFoundError("EinkaufBestellung", bestellung_id)
-        for field in ("status", "lieferdatum_zugesagt", "lieferdatum_wunsch",
-                      "notiz", "freitext_kopf", "freitext_fuss", "unsere_referenz", "ihre_referenz"):
-            if field in data:
-                setattr(b, field, data[field])
+        for field, value in _clean_fields(data, BESTELLUNG_UPDATE_KEYS).items():
+            setattr(b, field, value)
+        if b.bestellfall == "direktlieferung" and "direktlieferung" not in data:
+            b.direktlieferung = True
+        if b.bestellfall == "innovation" and "neuer_artikel" not in data:
+            b.neuer_artikel = True
         self.db.commit()
-        return {"id": str(b.id), "status": b.status}
+        return {"id": str(b.id), "status": b.status, "bestellfall": b.bestellfall}
 
     def versende_bestellung_svc(self, bestellung_id: str, versand_art: str, empfaenger=None) -> dict:
         b = self.db.query(EinkaufBestellung).filter(

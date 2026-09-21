@@ -21,7 +21,28 @@ import {
 } from '@/lib/workflow/purchase-order-flow-spine'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
+type Bestellfall = 'bestand_abgleich' | 'direktlieferung' | 'innovation'
+
+const BESTELLFALL_OPTIONS: Array<{ value: Bestellfall; title: string; text: string }> = [
+  {
+    value: 'bestand_abgleich',
+    title: 'Bestand / Abverkauf',
+    text: 'Tages-, Wochen-, Monats- oder Saisonbedarf mit Mindest- und Maximalmenge, Lagerplatz- und Frachtoptimierung, Opportunitaetskosten.',
+  },
+  {
+    value: 'direktlieferung',
+    title: 'Direktlieferung aus Verkauf',
+    text: 'Bestellung aus dem Auftrag, Lieferung an den Kunden, mit oder ohne Ueberschlag am Lager.',
+  },
+  {
+    value: 'innovation',
+    title: 'Neuer Artikel / Innovation',
+    text: 'Einfuehrung eines Produkts, das der Vertrieb testen will — ohne historischen Abverkauf.',
+  },
+]
+
 type BestellungData = {
+  bestellfall: Bestellfall
   lieferant: string
   liefertermin: string
   zahlungsbedingung: string
@@ -143,6 +164,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
       requisitionId: bestellung.requisitionId,
       contractId: bestellung.contractId,
       rfqId: bestellung.rfqId,
+      bestellfall: bestellung.bestellfall,
       notes: bestellung.notizen || undefined,
       taxRate: 19,
       items: bestellung.positionen.map((pos) => ({
@@ -185,6 +207,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
   }
   
   const [bestellung, setBestellung] = useState<BestellungData>({
+    bestellfall: 'bestand_abgleich',
     lieferant: '',
     liefertermin: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     zahlungsbedingung: 'net30',
@@ -468,6 +491,31 @@ export default function BestellungAnlegenPage(): JSX.Element {
       title: t('crud.entities.supplier'),
       content: (
         <div className="space-y-4">
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium">Bestellfall *</legend>
+            <div className="grid gap-3 md:grid-cols-3">
+              {BESTELLFALL_OPTIONS.map((option) => {
+                const selected = bestellung.bestellfall === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    data-testid={`bestellfall-${option.value}`}
+                    aria-pressed={selected}
+                    onClick={() => updateField('bestellfall', option.value)}
+                    className={`min-h-11 rounded-md border p-3 text-left ${
+                      selected
+                        ? 'border-primary bg-primary/5'
+                        : 'border-input bg-background'
+                    }`}
+                  >
+                    <div className="font-medium">{option.title}</div>
+                    <p className="mt-1 text-sm text-muted-foreground">{option.text}</p>
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
           <div>
             <Label htmlFor="lieferant">{t('crud.entities.supplier')} *</Label>
             <Input

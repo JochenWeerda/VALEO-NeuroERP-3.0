@@ -94,6 +94,23 @@ Das ist kein Feinschliff. Ohne Kontraktbezug und Ladetermin ist die Maske für
 den Agrarhandel nicht benutzbar — sie beschreibt eine allgemeine Bestellung,
 nicht die des Hauses.
 
+## Stand 2026-09-18 — Fuehrende Bestellmaske
+
+Fuehrend ist native `einkauf/purchase-order` (`/einkauf/bestellung/:id`), nicht
+eine fuenfte Custom-Seite. Layout: MASKEN.md-Belegkette plus L3-Gruppen aus den
+Captures (Kopf links Beleg/Niederlassung/Termine, Lieferant rechts, Positionen
+mit Lief-Artikel/Gebinde/Kontrakt/Lager, Register Anfrage-Angebot-Auftrag und
+Zahlungsbedingungen). Pixelgruen von L3 und zvoove-1:1 sind nicht die Vorlage.
+
+Neu im Vertrag: Bestellfall (`bestand_abgleich` | `direktlieferung` |
+`innovation`), Ladetermin getrennt vom Liefertermin, Skontostaffel, Kontrakt
+an der Position, Lieferantenartikel, Gebinde, Gewicht, Lagerhalle/Fach,
+Mindest/Max, Opportunitaetskosten, Direktlieferung mit Ueberschlag, Innovation.
+
+Die Erfassung (`bestellung-anlegen`) waehlt den Fall im ersten Schritt und
+schreibt ihn mit. `bestellung-stamm` und die Liste bleiben Compat-Belege, bis
+der Speicher zusammengelegt ist.
+
 ## Befund 3 — Maskenvermehrung
 
 Drei Kundenmasken, vier Bestellmasken. Das ist die Ursache hinter „überfrachtet":

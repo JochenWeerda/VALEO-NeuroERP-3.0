@@ -166,6 +166,7 @@ class BestellungCreate(BaseModel):
     bestelldatum: date
     niederlassung_id: Optional[str] = None
     lieferdatum_wunsch: Optional[date] = None
+    lieferdatum_zugesagt: Optional[date] = None
     versand_art: str = "email"
     kontrakt_id: Optional[str] = None
     unsere_referenz: Optional[str] = None
@@ -173,6 +174,44 @@ class BestellungCreate(BaseModel):
     freitext_kopf: Optional[str] = None
     freitext_fuss: Optional[str] = None
     notiz: Optional[str] = None
+    bestellfall: Optional[str] = "bestand_abgleich"
+    ansprechpartner: Optional[str] = None
+    kreditor_konto: Optional[str] = None
+    lieferant_nr: Optional[str] = None
+    kostenstelle: Optional[str] = None
+    kommission: Optional[str] = None
+    ladetermin: Optional[date] = None
+    ladetermin_ab: Optional[date] = None
+    lade_datum: Optional[date] = None
+    incoterms: Optional[str] = None
+    lieferadresse: Optional[str] = None
+    zahlungsbedingung: Optional[str] = None
+    skonto1_tage: Optional[int] = None
+    skonto1_prozent: Optional[float] = None
+    skonto2_tage: Optional[int] = None
+    skonto2_prozent: Optional[float] = None
+    netto_tage: Optional[int] = None
+    fremdwaehrung: Optional[str] = None
+    umrechnungsfaktor: Optional[float] = None
+    anfrage_nr: Optional[str] = None
+    angebot_nr: Optional[str] = None
+    auftrag_nr: Optional[str] = None
+    abverkauf_horizont: Optional[str] = None
+    bedarfsmenge: Optional[float] = None
+    mindestbestellmenge: Optional[float] = None
+    maximalbestellmenge: Optional[float] = None
+    artikelgruppe: Optional[str] = None
+    lagerplatz_opt: Optional[bool] = None
+    fracht_opt: Optional[bool] = None
+    opportunitaetskostensatz: Optional[float] = None
+    palettenstellplatz_kosten: Optional[float] = None
+    lagerkosten_satz: Optional[float] = None
+    verkaufsbeleg_id: Optional[str] = None
+    kunden_id: Optional[str] = None
+    direktlieferung: Optional[bool] = None
+    ueberschlag_lager: Optional[bool] = None
+    neuer_artikel: Optional[bool] = None
+    innovationshinweis: Optional[str] = None
     positionen: list[dict[str, Any]] = []
 
 
