@@ -309,3 +309,64 @@ def test_die_offene_auftragsmenge_vergiftet_die_sitzung_nicht(db, artikel_mit_ab
     assert menge >= 0
     # Die Sitzung muss danach noch brauchbar sein.
     assert db.execute(text("SELECT 1")).scalar() == 1
+
+
+def test_der_vorschlag_aus_dem_verkauf_findet_seine_auftraege(db, engine, artikel_mit_abverkauf) -> None:
+    """Der Weg fuer die Direktlieferung: offener Auftrag, zu wenig Bestand.
+
+    Gelesen wurde ``domain_sales.sales_order_items`` — ein Schema, das es nicht
+    gibt. Der Fehler lief in ein ``except``, die Zeilenliste blieb leer, und
+    der Vorschlag meldete "nichts zu bestellen", waehrend die Auftraege offen
+    dastanden. Eine leere Liste sieht aus wie ein Ergebnis, nicht wie ein
+    Fehler — deshalb ist das jahrelang niemandem aufgefallen.
+    """
+    from sqlalchemy import text
+    from modules.einkauf.services.bestellvorschlag_service import engine_verkauf
+
+    mandant = artikel_mit_abverkauf["mandant"]
+    auftrag_id = str(uuid.uuid4())
+
+    # Die Artikelnummer des Testartikels holen — die Position verweist ueber
+    # sie, nicht ueber eine Id.
+    with engine.begin() as v:
+        artikel_nr = v.execute(
+            text("SELECT article_number FROM domain_inventory.articles WHERE id = :a"),
+            {"a": artikel_mit_abverkauf["artikel_id"]},
+        ).scalar()
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_orders "
+                "(id, tenant_id, order_number, customer_name, status, delivery_date) "
+                "VALUES (:id, :t, :nr, 'Testkunde', 'open', CURRENT_DATE + 7)"
+            ),
+            {"id": auftrag_id, "t": mandant, "nr": f"AU-{uuid.uuid4().hex[:6].upper()}"},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_order_items "
+                "(id, tenant_id, order_id, line_number, article_number, description, "
+                " quantity, unit) "
+                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't')"
+            ),
+            {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
+        )
+
+    try:
+        zeilen = engine_verkauf(db, tenant_id=mandant)
+        assert zeilen, "Der Vorschlag aus dem Verkauf findet den offenen Auftrag nicht"
+        zeile = next(z for z in zeilen if z["artikel_nr"] == artikel_nr)
+
+        # 500 t bestellt, 70 t am Lager — 430 t fehlen, plus 20 % Puffer.
+        assert zeile["offene_auftraege"] == pytest.approx(500.0, abs=0.01)
+        assert zeile["ist_bestand"] == pytest.approx(70.0, abs=0.01)
+        assert zeile["bedarf"] == pytest.approx(430.0, abs=0.01)
+        assert zeile["vorschlag_menge"] == pytest.approx(430.0 * 1.2, rel=0.01)
+    finally:
+        with engine.begin() as v:
+            v.execute(
+                text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :o"),
+                {"o": auftrag_id},
+            )
+            v.execute(
+                text("DELETE FROM domain_crm.sales_orders WHERE id = :o"), {"o": auftrag_id}
+            )

@@ -535,50 +535,67 @@ def engine_verkauf(
     von_datum: date | None = None,
     bis_datum: date | None = None,
 ) -> list[dict[str, Any]]:
-    """
-    Bestellvorschläge aus offenen VK-Auftrags-Positionen.
-    Vergleicht offene Auftragsmengen mit verfügbarem Bestand.
-    Fehlmenge = Bedarf für Bestellvorschlag.
+    """Bestellvorschlaege aus offenen Verkaufsauftraegen.
+
+    Gelesen wurde ``domain_sales.sales_order_items`` — dieses Schema gibt es
+    nicht. Der Fehler lief in ein ``except``, die Zeilenliste blieb leer, und
+    der Vorschlag meldete "nichts zu bestellen", waehrend die Auftraege offen
+    dastanden. Eine leere Liste sieht aus wie ein Ergebnis.
+
+    Gefuehrt werden die Auftraege in ``domain_crm``. Die Position verweist dort
+    ueber ``article_number`` auf den Artikel, nicht ueber eine Id, und fuehrt
+    **keine** gelieferte Menge: Die offene Menge ist deshalb die Auftragsmenge
+    auf Auftraegen, die weder storniert noch abgeschlossen oder ausgeliefert
+    sind — eine Naeherung nach oben, bis der Auftrag im Mengenmodell
+    (``domain_docs.doc_allocation_sources``) als Quelle gefuehrt wird.
     """
     # Alle offenen VK-Auftrags-Artikel ermitteln
     try:
         params: dict[str, Any] = {"tenant_id": tenant_id}
         where_extra = ""
         if von_datum:
-            where_extra += " AND so.order_date >= :von_datum"
+            where_extra += " AND so.delivery_date >= :von_datum"
             params["von_datum"] = von_datum
         if bis_datum:
-            where_extra += " AND so.order_date <= :bis_datum"
+            where_extra += " AND so.delivery_date <= :bis_datum"
             params["bis_datum"] = bis_datum
-        if niederlassung_id:
-            where_extra += " AND so.branch_id = :niederlassung_id"
-            params["niederlassung_id"] = niederlassung_id
+        # Eine Niederlassung fuehrt der Auftragskopf in domain_crm nicht; der
+        # Parameter bleibt in der Signatur, damit die Aufrufer gleich bleiben.
 
         # Offene Mengen je Artikel summieren
         sql = text(f"""
             SELECT
-                soi.article_id,
+                a.id AS article_id,
                 a.article_number,
                 a.name AS artikel_bezeichnung,
                 a.warengruppe,
-                SUM(soi.quantity - COALESCE(soi.delivered_quantity, 0)) AS offene_menge,
-                a.gebinde_einheit AS einheit
-            FROM domain_sales.sales_order_items soi
-            JOIN domain_sales.sales_orders so ON so.id = soi.order_id
-            JOIN domain_inventory.articles a ON a.id = soi.article_id
-            WHERE so.tenant_id = :tenant_id
-              AND so.status NOT IN ('cancelled', 'completed', 'delivered')
-              AND soi.quantity > COALESCE(soi.delivered_quantity, 0)
+                SUM(soi.quantity) AS offene_menge,
+                COALESCE(MAX(soi.unit), a.gebinde_einheit) AS einheit
+            FROM domain_crm.sales_order_items soi
+            JOIN domain_crm.sales_orders so ON so.id = soi.order_id
+            JOIN domain_inventory.articles a
+              ON a.article_number = soi.article_number
+             AND a.tenant_id::text = so.tenant_id::text
+            WHERE so.tenant_id::text = :tenant_id
+              AND so.deleted_at IS NULL
+              AND lower(COALESCE(so.status, '')) NOT IN (
+                  'cancelled', 'storniert', 'completed', 'abgeschlossen',
+                  'delivered', 'geliefert'
+              )
+              AND soi.quantity > 0
               {where_extra}
             {'AND a.warengruppe = :artikelgruppe' if artikelgruppe else ''}
-            GROUP BY soi.article_id, a.article_number, a.name, a.warengruppe, a.gebinde_einheit
+            GROUP BY a.id, a.article_number, a.name, a.warengruppe, a.gebinde_einheit
             ORDER BY a.name
-        """)
+        """)  # nosec B608  # reviewed-safe: Fragmente code-kontrolliert, Werte parametrisiert
         if artikelgruppe:
             params["artikelgruppe"] = artikelgruppe
 
         rows = db.execute(sql, params).fetchall()
-    except Exception:
+    except SQLAlchemyError:
+        # Ohne Rollback bleibt die Sitzung vergiftet und reisst jede weitere
+        # Abfrage mit, die nichts dafuer kann.
+        db.rollback()
         rows = []
 
     result = []
