@@ -47,13 +47,14 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.api.v1.schemas.base import BaseSchema
 from app.services.procurement_service import ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
@@ -291,6 +292,78 @@ def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bestell-Vorschlag Engines
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+class BedarfsVorschlagOut(BaseSchema):
+    """Eine Zeile der Bedarfsrechnung — mit der Herkunft der Zahl.
+
+    Die Begruendung gehoert in die Antwort, nicht ins Log: Wer eine
+    Bestellmenge vorgeschlagen bekommt, muss sehen koennen, woraus sie
+    entstanden ist — sonst ist sie ein Orakel, dem niemand folgt.
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    article_id: str
+    artikel_nr: Optional[str] = None
+    artikel_bezeichnung: Optional[str] = None
+    artikel_gruppe: Optional[str] = None
+    einheit: Optional[str] = None
+    horizont: str
+    abverkauf_fenster_von: Optional[str] = None
+    abverkauf_fenster_bis: Optional[str] = None
+    abverkauf_menge: float = 0.0
+    abverkauf_pro_tag: float = 0.0
+    ist_bestand: float = 0.0
+    offene_auftraege: float = 0.0
+    mindestbestand: float = 0.0
+    maximalbestand: float = 0.0
+    wiederbeschaffungs_tage: int = 0
+    bedarf: float = 0.0
+    reichweite_tage: Optional[float] = None
+    vorschlag_menge: float = 0.0
+    lagerkosten: float = 0.0
+    frachtkosten: float = 0.0
+    begruendung: Optional[str] = None
+    lieferant_id: Optional[str] = None
+    lieferant_name: Optional[str] = None
+    letzter_preis: Optional[float] = None
+    preis_einheit: Optional[str] = None
+
+
+@router.get(
+    "/einkauf/bestellvorschlaege/bedarf",
+    summary="Bedarf aus Bestand und Abverkauf",
+    response_model=list[BedarfsVorschlagOut],
+)
+async def vorschlag_bedarf(
+    horizont: str = Query("monatlich", pattern="^(taeglich|woechentlich|monatlich|saisonal)$"),
+    stichtag: Optional[date] = Query(None),
+    niederlassung_id: Optional[str] = Query(None),
+    artikelgruppe: Optional[str] = Query(None),
+    artikel_nr: Optional[str] = Query(None, alias="artikelNr"),
+    warehouse_id: Optional[str] = Query(None),
+    lagerkosten_satz: Optional[float] = Query(
+        None, description="EUR je Einheit und Tag — Halle, Silozelle, Palettenstellplatz, Kapital"
+    ),
+    frachtkosten_fix: Optional[float] = Query(None, description="EUR je Anlieferung"),
+    nur_mit_bedarf: bool = Query(True),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """Was wird im gewaehlten Horizont wirklich gebraucht?
+
+    Anders als `/lager` vergleicht dieser Weg den Bestand nicht mit einem
+    gepflegten Sollbestand, sondern mit dem, was tatsaechlich rausgegangen ist.
+    Mit Lagerkosten- und Frachtkostensatz kommt zusaetzlich die Losgroesse
+    heraus, bei der beides zusammen am kleinsten ist.
+    """
+    return _svc(db, tenant_id).compute_vorschlag_bedarf(
+        horizont=horizont, stichtag=stichtag, niederlassung_id=niederlassung_id,
+        artikelgruppe=artikelgruppe, artikel_nr=artikel_nr, warehouse_id=warehouse_id,
+        lagerkosten_satz=lagerkosten_satz, frachtkosten_fix=frachtkosten_fix,
+        nur_mit_bedarf=nur_mit_bedarf,
+    )
+
 
 @router.get("/einkauf/bestellvorschlaege/lager", summary="Lager vorschlag",
     response_model=list[BestellvorschlagOut]

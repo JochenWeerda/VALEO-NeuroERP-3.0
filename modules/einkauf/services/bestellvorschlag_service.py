@@ -15,11 +15,12 @@ Engine 3: aus Rohstoff-Bedarf (rohware)
 """
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import and_, func, or_, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.uuid7 import uuid7
@@ -66,41 +67,65 @@ def _current_stock(db: Session, article_id: str, tenant_id: str,
 def _open_sales_quantity(db: Session, article_id: str, tenant_id: str,
                          von_datum: date | None = None,
                          bis_datum: date | None = None,
-                         niederlassung_id: str | None = None) -> Decimal:
-    """
-    Offene VK-Auftrags-Menge für einen Artikel.
-    Liest aus `domain_sales.sales_order_items` (falls vorhanden),
-    Fallback: 0 (kein Fehler wenn Tabelle noch nicht existiert).
-    """
-    try:
-        params: dict[str, Any] = {
-            "tenant_id": tenant_id,
-            "article_id": article_id,
-        }
-        where_extra = ""
-        if von_datum:
-            where_extra += " AND so.order_date >= :von_datum"
-            params["von_datum"] = von_datum
-        if bis_datum:
-            where_extra += " AND so.order_date <= :bis_datum"
-            params["bis_datum"] = bis_datum
-        if niederlassung_id:
-            where_extra += " AND so.branch_id = :niederlassung_id"
-            params["niederlassung_id"] = niederlassung_id
+                         niederlassung_id: str | None = None,
+                         artikel_nr: str | None = None) -> Decimal:
+    """Wieviel ist verkauft, aber noch nicht geliefert?
 
-        sql = text(f"""
-            SELECT COALESCE(SUM(soi.quantity - soi.delivered_quantity), 0)
-            FROM domain_sales.sales_order_items soi
-            JOIN domain_sales.sales_orders so ON so.id = soi.order_id
-            WHERE soi.article_id = :article_id
-              AND so.tenant_id   = :tenant_id
-              AND so.status NOT IN ('cancelled', 'completed', 'delivered')
-              AND soi.quantity   > soi.delivered_quantity
-              {where_extra}
-        """)
-        result = db.execute(sql, params).scalar()
-        return Decimal(str(result or 0))
-    except Exception:
+    Gelesen wurde ``domain_sales.sales_order_items`` — dieses Schema gibt es
+    nicht. Der Fehler lief in ein ``except``, die Antwort war 0, und "nichts
+    offen" sieht aus wie eine Auskunft. Schlimmer noch: Eine gescheiterte
+    Anweisung macht die ganze Transaktion unbrauchbar, und **jede** folgende
+    Abfrage derselben Sitzung scheitert an einem Fehler, den sie nicht
+    verursacht hat.
+
+    Gefuehrt werden die Auftraege in ``domain_crm.sales_orders`` und
+    ``domain_crm.sales_order_items``. Die Position kennt dort keine
+    gelieferte Menge, sondern nur ``article_number`` und ``quantity`` —
+    offen ist deshalb die Menge der Positionen auf Auftraegen, die weder
+    storniert noch abgeschlossen oder ausgeliefert sind. Das ist eine
+    Naeherung nach oben: Teillieferungen sind darin noch nicht abgezogen,
+    weil der Auftrag im Mengenmodell (``domain_docs.doc_allocation_sources``)
+    bisher nicht als Quelle gefuehrt wird — dort stehen nur Lieferscheine.
+    Sobald er dort steht, gehoert die Differenz hierher.
+    """
+    if not artikel_nr:
+        artikel_nr = db.query(Article.article_number).filter(
+            Article.id == article_id
+        ).scalar()
+    if not artikel_nr:
+        return Decimal("0")
+
+    params: dict[str, Any] = {"tenant_id": tenant_id, "artikel_nr": artikel_nr}
+    where_extra = ""
+    if von_datum:
+        where_extra += " AND so.delivery_date >= :von_datum"
+        params["von_datum"] = von_datum
+    if bis_datum:
+        where_extra += " AND so.delivery_date <= :bis_datum"
+        params["bis_datum"] = bis_datum
+    # Eine Niederlassung fuehrt der Auftragskopf hier nicht; der Parameter
+    # bleibt in der Signatur, damit die Aufrufer unveraendert bleiben.
+
+    sql = text(f"""
+        SELECT COALESCE(SUM(soi.quantity), 0)
+        FROM domain_crm.sales_order_items soi
+        JOIN domain_crm.sales_orders so ON so.id = soi.order_id
+        WHERE soi.article_number = :artikel_nr
+          AND so.tenant_id::text = :tenant_id
+          AND so.deleted_at IS NULL
+          AND lower(COALESCE(so.status, '')) NOT IN (
+              'cancelled', 'storniert', 'completed', 'abgeschlossen',
+              'delivered', 'geliefert'
+          )
+          {where_extra}
+    """)  # nosec B608  # reviewed-safe: where_extra ist code-kontrolliert, Werte sind Parameter
+    try:
+        return Decimal(str(db.execute(sql, params).scalar() or 0))
+    except SQLAlchemyError:
+        # Ohne Rollback bleibt die Sitzung vergiftet und reisst alles mit,
+        # was danach kommt. Die 0 ist hier eine bewusste Notauskunft fuer den
+        # Fall, dass der Auftragsbestand (noch) nicht erreichbar ist.
+        db.rollback()
         return Decimal("0")
 
 
@@ -253,6 +278,248 @@ def engine_lager(
         })
 
     return sorted(result, key=lambda x: x["artikel_bezeichnung"])
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Engine 1b: Bestand gegen Abverkauf, Bedarf ueber einen Horizont
+# ─────────────────────────────────────────────────────────────────────────────
+
+#: Wie weit zurueckgeschaut wird und wie weit nach vorn gerechnet, je Horizont.
+#:
+#: Die Rueckschau ist laenger als die Vorschau: Ein einziger Tag sagt nichts
+#: ueber den Tagesbedarf, deshalb wird der Tagesabverkauf ueber mehrere Wochen
+#: gemittelt. Saisonal ist der Sonderfall — dort ist nicht der letzte Monat
+#: massgeblich, sondern dasselbe Fenster im Vorjahr.
+HORIZONTE: dict[str, dict[str, int]] = {
+    "taeglich": {"vorschau_tage": 1, "rueckschau_tage": 28},
+    "woechentlich": {"vorschau_tage": 7, "rueckschau_tage": 56},
+    "monatlich": {"vorschau_tage": 30, "rueckschau_tage": 90},
+    "saisonal": {"vorschau_tage": 120, "rueckschau_tage": 365},
+}
+
+
+def _abverkauf_menge(
+    db: Session,
+    article_id: str,
+    tenant_id: str,
+    von: date,
+    bis: date,
+    warehouse_id: str | None = None,
+) -> Decimal:
+    """Wieviel ist in diesem Zeitraum rausgegangen?
+
+    Gezaehlt werden Abgangsbewegungen (``out``) — Auslieferung, Verkauf,
+    Abholung. Die Einlagerungsarten bleiben draussen, sonst hebt sich der
+    Abverkauf gegen den Wareneingang auf und der Bedarf sieht aus wie null.
+    """
+    q = db.query(func.coalesce(func.sum(StockMovement.quantity), 0)).filter(
+        StockMovement.article_id == article_id,
+        StockMovement.tenant_id == tenant_id,
+        func.lower(StockMovement.movement_type) == "out",
+        StockMovement.movement_date >= von,
+        StockMovement.movement_date <= bis,
+    )
+    if warehouse_id:
+        q = q.filter(StockMovement.warehouse_id == warehouse_id)
+    return Decimal(str(abs(q.scalar() or 0)))
+
+
+def _optimale_menge(
+    bedarf: Decimal,
+    *,
+    lagerkosten_satz: Decimal,
+    frachtkosten_fix: Decimal,
+    abverkauf_pro_tag: Decimal,
+) -> tuple[Decimal, Decimal, Decimal, str]:
+    """Die Menge, bei der Lager- und Frachtkosten zusammen am kleinsten sind.
+
+    Der Zielkonflikt ist alt und einfach: Wer viel auf einmal bestellt, spart
+    Fracht und Abwicklung, zahlt aber Lagerplatz — Halle, Silozelle,
+    Palettenstellplatz, gebundenes Kapital. Wer knapp bestellt, hat wenig
+    Lager und viele Anlieferungen.
+
+    Gerechnet wird die klassische Losgroesse: Bei einer Bestellmenge ``m``
+    liegt im Mittel ``m/2`` am Lager, und pro Zeitraum sind ``bedarf/m``
+    Anlieferungen noetig; das Minimum der Summe liegt bei
+    ``sqrt(2 · bedarf · fracht / lagerkosten)``.
+
+    Ohne Kostensaetze wird nicht geraten: Dann kommt der Bedarf unveraendert
+    zurueck, und die Begruendung sagt, dass nicht optimiert wurde. Eine
+    erfundene Zahl waere hier schlimmer als keine.
+    """
+    if bedarf <= 0:
+        return Decimal("0"), Decimal("0"), Decimal("0"), "Kein Bedarf im Horizont."
+    if lagerkosten_satz <= 0 or frachtkosten_fix <= 0:
+        return (
+            bedarf,
+            Decimal("0"),
+            Decimal("0"),
+            "Ohne Lagerkosten- und Frachtkostensatz keine Optimierung — "
+            "die Menge deckt den Bedarf.",
+        )
+    if abverkauf_pro_tag <= 0:
+        # Die Losgroessenformel setzt laufenden Umschlag voraus: Sie verteilt
+        # Frachtkosten auf einen Bedarf, der sich wiederholt. Bei einem Artikel
+        # ohne Abverkauf gibt es nichts zu verteilen — die Formel wuerde die
+        # Menge aufblasen und zu einem Lager raten, das niemand leert. Dann
+        # gilt schlicht die Fehlmenge.
+        return (
+            bedarf,
+            Decimal("0"),
+            Decimal("0"),
+            "Kein Abverkauf im Fenster — keine Losgroessenrechnung, "
+            "die Menge deckt nur die Fehlmenge.",
+        )
+
+    optimal = Decimal(
+        str((2 * float(bedarf) * float(frachtkosten_fix) / float(lagerkosten_satz)) ** 0.5)
+    ).quantize(Decimal("0.01"))
+
+    menge = max(optimal, Decimal("0"))
+    reichweite = (menge / abverkauf_pro_tag) if abverkauf_pro_tag > 0 else Decimal("0")
+    lagerkosten = (menge / 2) * lagerkosten_satz * reichweite
+    anlieferungen = (bedarf / menge) if menge > 0 else Decimal("0")
+    frachtkosten = anlieferungen * frachtkosten_fix
+
+    begruendung = (
+        f"Losgroesse {menge} bei {lagerkosten_satz} je Einheit und Tag und "
+        f"{frachtkosten_fix} je Anlieferung: "
+        f"{lagerkosten.quantize(Decimal('0.01'))} Lager gegen "
+        f"{frachtkosten.quantize(Decimal('0.01'))} Fracht."
+    )
+    return menge, lagerkosten.quantize(Decimal("0.01")), frachtkosten.quantize(Decimal("0.01")), begruendung
+
+
+def engine_bedarf(
+    db: Session,
+    *,
+    tenant_id: str,
+    horizont: str = "monatlich",
+    stichtag: date | None = None,
+    niederlassung_id: str | None = None,
+    artikelgruppe: str | None = None,
+    artikel_nr: str | None = None,
+    warehouse_id: str | None = None,
+    lagerkosten_satz: float | None = None,
+    frachtkosten_fix: float | None = None,
+    nur_mit_bedarf: bool = True,
+) -> list[dict[str, Any]]:
+    """Bestand gegen Abverkauf — was wird im Horizont wirklich gebraucht?
+
+    ``engine_lager`` vergleicht den Bestand mit einem **gepflegten** Melde- und
+    Sollbestand. Das ist eine Annahme aus dem Stammsatz, kein Bedarf: Sie weiss
+    nicht, ob ein Artikel gerade laeuft oder steht. Hier kommt die Zahl aus den
+    Bewegungen — was in den letzten Wochen rausgegangen ist, auf den Horizont
+    hochgerechnet, plus Wiederbeschaffungszeit, minus dem, was da ist und was
+    schon verkauft, aber noch nicht geliefert ist.
+
+    Saisonal rechnet nicht mit dem juengsten Schnitt, sondern mit demselben
+    Fenster im Vorjahr: Im Duengergeschaeft sagt der November nichts ueber den
+    Maerz.
+    """
+    fenster = HORIZONTE.get(horizont) or HORIZONTE["monatlich"]
+    heute = stichtag or date.today()
+
+    if horizont == "saisonal":
+        von = heute - timedelta(days=365)
+        bis = von + timedelta(days=fenster["vorschau_tage"])
+        messtage = Decimal(str(fenster["vorschau_tage"]))
+    else:
+        von = heute - timedelta(days=fenster["rueckschau_tage"])
+        bis = heute
+        messtage = Decimal(str(fenster["rueckschau_tage"]))
+
+    q = db.query(ArtikelLagerParameter, Article).join(
+        Article, Article.id == ArtikelLagerParameter.article_id
+    ).filter(
+        ArtikelLagerParameter.tenant_id == tenant_id,
+        ArtikelLagerParameter.aktiv == True,  # noqa: E712 — SQLAlchemy-Ausdruck
+    )
+    if niederlassung_id:
+        q = q.filter(ArtikelLagerParameter.niederlassung_id == niederlassung_id)
+    if warehouse_id:
+        q = q.filter(ArtikelLagerParameter.warehouse_id == warehouse_id)
+    if artikelgruppe:
+        q = q.filter(Article.warengruppe == artikelgruppe)
+    if artikel_nr:
+        q = q.filter(Article.article_number == artikel_nr)
+
+    satz_lager = Decimal(str(lagerkosten_satz or 0))
+    satz_fracht = Decimal(str(frachtkosten_fix or 0))
+
+    ergebnis: list[dict[str, Any]] = []
+    for alp, art in q.all():
+        lager = warehouse_id or alp.warehouse_id
+        ist = _current_stock(db, art.id, tenant_id, lager)
+        offen = _open_sales_quantity(db, art.id, tenant_id)
+
+        abverkauf = _abverkauf_menge(db, art.id, tenant_id, von, bis, lager)
+        pro_tag = (abverkauf / messtage) if messtage > 0 else Decimal("0")
+
+        # Bis die Ware da ist, laeuft der Verkauf weiter.
+        wbz = Decimal(str(alp.wiederbeschaffungs_tage or 0))
+        deckungstage = Decimal(str(fenster["vorschau_tage"])) + wbz
+        bedarf = (pro_tag * deckungstage).quantize(Decimal("0.001"))
+
+        sicherheit = Decimal(str(alp.mindestbestand or 0))
+        fehlmenge = max(bedarf + sicherheit - ist + offen, Decimal("0"))
+
+        menge, lagerkosten, frachtkosten, begruendung = _optimale_menge(
+            fehlmenge,
+            lagerkosten_satz=satz_lager,
+            frachtkosten_fix=satz_fracht,
+            abverkauf_pro_tag=pro_tag,
+        )
+
+        # Die gepflegten Grenzen gewinnen gegen die Rechnung: Ein Silo wird
+        # nicht groesser, weil die Losgroesse es vorschlaegt.
+        maxi = Decimal(str(alp.maximalbestand or 0))
+        if maxi > 0 and ist + menge > maxi:
+            menge = max(maxi - ist, Decimal("0"))
+            begruendung += f" Gekappt auf Maximalbestand {maxi}."
+        if alp.std_bestellmenge and menge > 0:
+            std = Decimal(str(alp.std_bestellmenge))
+            if std > 0 and menge % std != 0:
+                menge = (menge // std + 1) * std
+                begruendung += f" Aufgerundet auf Gebinde {std}."
+
+        if nur_mit_bedarf and menge <= 0:
+            continue
+
+        lf_id, lf_name, letzter_preis = _preferred_supplier(db, art.id, tenant_id)
+        reichweite_ist = (ist / pro_tag) if pro_tag > 0 else None
+
+        ergebnis.append({
+            "article_id": art.id,
+            "artikel_nr": art.article_number,
+            "artikel_bezeichnung": art.name,
+            "artikel_gruppe": art.warengruppe,
+            "einheit": alp.std_einheit or art.gebinde_einheit or "t",
+            "horizont": horizont,
+            "abverkauf_fenster_von": von.isoformat(),
+            "abverkauf_fenster_bis": bis.isoformat(),
+            "abverkauf_menge": float(abverkauf),
+            "abverkauf_pro_tag": float(pro_tag.quantize(Decimal("0.001"))),
+            "ist_bestand": float(ist),
+            "offene_auftraege": float(offen),
+            "mindestbestand": float(sicherheit),
+            "maximalbestand": float(maxi),
+            "wiederbeschaffungs_tage": int(wbz),
+            "bedarf": float(bedarf),
+            "reichweite_tage": (
+                float(reichweite_ist.quantize(Decimal("0.1"))) if reichweite_ist is not None else None
+            ),
+            "vorschlag_menge": float(menge),
+            "lagerkosten": float(lagerkosten),
+            "frachtkosten": float(frachtkosten),
+            "begruendung": begruendung,
+            "lieferant_id": lf_id,
+            "lieferant_name": lf_name,
+            "letzter_preis": float(letzter_preis) if letzter_preis else None,
+            "preis_einheit": "100kg",
+        })
+
+    return sorted(ergebnis, key=lambda x: (-x["vorschlag_menge"], x["artikel_bezeichnung"]))
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -41,7 +41,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 #: Stand 2026-09-17 nach den Verweisfixes (Einfuehrung: 29 / 23).
 #: Beide Zahlen duerfen sinken, nicht steigen.
-BASELINE_LEBEND = 27
+BASELINE_LEBEND = 26
 BASELINE_RUHEND = 19
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

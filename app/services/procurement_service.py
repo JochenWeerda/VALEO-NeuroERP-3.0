@@ -25,6 +25,7 @@ from app.infrastructure.models.einkauf_models import (
     PfandKontoBuchung,
 )
 from modules.einkauf.services.bestellvorschlag_service import (
+    engine_bedarf,
     engine_lager,
     engine_rohware,
     engine_verkauf,
@@ -221,6 +222,20 @@ class ProcurementService:
         return engine_lager(self.db, tenant_id=self.tenant_id, niederlassung_id=niederlassung_id,
                             artikelgruppe=artikelgruppe, artikel_nr=artikel_nr,
                             warehouse_id=warehouse_id, nur_unter_meldebestand=nur_unter_meldebestand)
+
+    def compute_vorschlag_bedarf(
+        self, horizont, stichtag=None, niederlassung_id=None, artikelgruppe=None,
+        artikel_nr=None, warehouse_id=None, lagerkosten_satz=None,
+        frachtkosten_fix=None, nur_mit_bedarf=True,
+    ) -> list[dict]:
+        """Bestand gegen Abverkauf statt gegen einen gepflegten Sollbestand."""
+        return engine_bedarf(
+            self.db, tenant_id=self.tenant_id, horizont=horizont, stichtag=stichtag,
+            niederlassung_id=niederlassung_id, artikelgruppe=artikelgruppe,
+            artikel_nr=artikel_nr, warehouse_id=warehouse_id,
+            lagerkosten_satz=lagerkosten_satz, frachtkosten_fix=frachtkosten_fix,
+            nur_mit_bedarf=nur_mit_bedarf,
+        )
 
     def compute_vorschlag_verkauf(self, niederlassung_id, artikelgruppe, von_datum, bis_datum) -> list[dict]:
         return engine_verkauf(self.db, tenant_id=self.tenant_id, niederlassung_id=niederlassung_id,
