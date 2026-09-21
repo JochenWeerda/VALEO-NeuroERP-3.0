@@ -22,7 +22,8 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-11 px-5 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
+        // Compact typography, shared 44px target even in dense toolbars.
+        sm: "h-11 min-h-touch min-w-touch rounded-md px-3 text-xs",
         lg: "h-[52px] rounded-(--radius) px-8",
         icon: "h-11 w-11",
         // Touch-optimized sizes (Gap 024) — min 44px touch target per WCAG 2.5.5

@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-SM-TOUCH-20260921 — reserviert, Codex
+## UIX-SM-TOUCH-20260921 — abgeschlossen, Codex
 
 **Ziel:** Gemeinsame kleine Button-Variante mit mindestens 44 px Hoehe,
 auch in bisher nicht einzeln nachgezogenen Masken.
@@ -19,7 +19,12 @@ auch in bisher nicht einzeln nachgezogenen Masken.
 eigene Slice-/QA-Dokumentation. Keine FSX-/KIM-Fachdateien; HOME-UIX bleibt Cursor.
 **Abnahme:** kleine Buttons mindestens 44 px; Events, disabled und asChild
 unveraendert; gezielte UIX-Tests. Browser-Nachweis separat ausweisen.
-**Risiken:** dichtere Toolbars koennen umbrechen; MCP-Write bleibt offen.
+**Ergebnis:** zentrale Variante `sm` jetzt `h-11 min-h-touch min-w-touch`.
+13 gezielte Vitest-Tests gruen; 48 Browser-Messungen bei 390/1366/1440/1920 px
+mit echter Button-Komponente und App-CSS bestanden, auch mit `h-6`.
+Nachweis: [QA](../quality-assurance/uix-sm-touch-20260921.md).
+**Risiken/offen:** komplette FSX-/KIM-Seitenabnahme, explizite kleinere
+min-height-Overrides, Kartenstapel-Integration und MCP-Write. UIX insgesamt offen.
 
 ## HOME-BELEG-FIRST — Flow Spine von der Startseite 2026-09-17, Cursor
 
