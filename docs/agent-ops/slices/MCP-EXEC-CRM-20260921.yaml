@@ -1,0 +1,37 @@
+id: MCP-EXEC-CRM-20260921
+owner: Codex
+status: abgeschlossen
+goal: Realer authentifizierter Kontakt-Schreibadapter mit atomarem Audit und Replay.
+scope: crm.contact.log; weitere Tools und vollstaendiger MCP-Transport bleiben offen.
+file_ownership:
+  - app/api/v1/endpoints/mcp_tool_registry.py
+  - app/services/mcp_execution_service.py
+  - alembic/versions/mcp_tool_executions_20260921.py
+  - tests/test_mcp_execution.py
+  - config/mcp_erp_tools.yaml
+  - config/architecture-domain-prefixes.yaml
+  - config/architecture-index.yaml
+  - docs/architecture/domains/crm/api.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/quality-assurance/mcp-execution-crm-20260921.md
+acceptance:
+  - Token-Tenant und crm:write; keine Identitaet aus Parametern.
+  - Kontakt, Audit und Replay-Journal atomar; keine doppelte Wiederholung.
+tests:
+  - 41 Python-Tests bestanden.
+  - PostgreSQL-Persistenz und Fehler-Rollback mit synthetischen Daten bestanden.
+  - Architektur-Validate, Drift und MCP-Referenz-Gate bestanden.
+risks:
+  - Echter OIDC-Login noch separat abzunehmen.
+  - Legacy-Kunden ohne Business-Partner-Mandantenzuordnung bleiben gesperrt.
+  - Weitere Schreibadapter und Approval-Bindung bleiben offen.
+ai_harness:
+  fachlicher_vertrag: Kontakt ueber denselben Fachservice wie die UI speichern.
+  architektur_vertrag: Backend-Adapter im vorhandenen MCP-Modul, keine neue Systemgrenze.
+  daten_vertrag: Token-Tenant, transaktionaler Advisory-Lock und Replay-Journal.
+  test_vertrag: HTTP-Vertrag, Negativpfade und reale PostgreSQL-Transaktion.
+  security_vertrag: OIDC, Scope, Tenantbindung, keine Client-Freigabe, keine freien Endpoints.
+  betriebs_vertrag: Additive Migration lokal angewendet; Journal bei Rollback behalten.
+  dokumentations_vertrag: Registry, generierte Referenz, Domain-API, Workboard und QA.
+external_gates:
+  - Synthetischer PostgreSQL-Integrationstest fuer Kontakt, Audit und Replay bestanden.

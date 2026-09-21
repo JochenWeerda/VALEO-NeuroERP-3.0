@@ -3112,10 +3112,10 @@
       "tool_id": "crm.contact.log",
       "domain": "crm",
       "scope": "crm:write",
-      "idempotent": false,
+      "idempotent": true,
       "risk_class": "medium",
       "human_approval_required": false,
-      "endpoint": "POST /api/v1/crm/kontakte"
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "sales.order.status",

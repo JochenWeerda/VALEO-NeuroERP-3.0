@@ -22,7 +22,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 18 Tools in 10 Domaenen.
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein |
-| `crm.contact.log` | crm | `crm:write` | nein | mittel | nein |
+| `crm.contact.log` | crm | `crm:write` | ja | mittel | nein |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein |
 | `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein |
 | `dms.document.search` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein |
@@ -290,14 +290,14 @@ Gibt Status ausstehender externer Abnahmen (ELSTER, DATEV, TSE, Auditor) zurueck
 
 ### `crm.contact.log` — Kontaktprotokoll erfassen
 
-Erfasst einen Kundenkontakt (Anruf, E-Mail, Besuch) mit Ergebnis und Wiedervorlage.
+Erfasst einen Kundenkontakt mit Ergebnis und Wiedervorlage. HTTP-Aufruf mit tool_name=crm.contact.log, parameters gemaess Eingabe-Schema, mode und idempotency_key. Default dryRun; execute erfordert einen stabilen Schluessel. OIDC-Token mit crm:write und tenant_id erforderlich.
 
 - **Scope:** `crm:write`
-- **Idempotent:** nein
+- **Idempotent:** ja
 - **Risikoklasse:** mittel
 - **Audit:** write
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `POST /api/v1/crm/kontakte`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 

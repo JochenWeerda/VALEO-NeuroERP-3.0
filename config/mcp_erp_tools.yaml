@@ -59,9 +59,9 @@ tools:
   - tool_id: crm.contact.log
     domain: crm
     name: "Kontaktprotokoll erfassen"
-    description: "Erfasst einen Kundenkontakt (Anruf, E-Mail, Besuch) mit Ergebnis und Wiedervorlage."
+    description: "Erfasst einen Kundenkontakt mit Ergebnis und Wiedervorlage. HTTP-Aufruf mit tool_name=crm.contact.log, parameters gemaess Eingabe-Schema, mode und idempotency_key. Default dryRun; execute erfordert einen stabilen Schluessel. OIDC-Token mit crm:write und tenant_id erforderlich."
     scope: crm:write
-    idempotent: false
+    idempotent: true
     risk_class: medium
     data_classification: LOCAL_ONLY
     input_schema:
@@ -78,7 +78,7 @@ tools:
         kontakt_id: { type: string }
         erfasst_am: { type: string }
     audit: write
-    endpoint: "POST /api/v1/crm/kontakte"
+    endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
   # ── Sales / O2C ────────────────────────────────────────────────────────────

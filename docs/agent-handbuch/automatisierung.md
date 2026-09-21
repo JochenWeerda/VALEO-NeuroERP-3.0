@@ -33,7 +33,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/contracts/{kontrakt_id}` |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/weighing-tickets` |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `GET /api/v1/compliance/external-gates` |
-| `crm.contact.log` | crm | `crm:write` | nein | mittel | nein | `POST /api/v1/crm/kontakte` |
+| `crm.contact.log` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/kunden?search={query}&limit={limit}` |
 | `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/crm/kunden/{kunden_nr}/360` |
 | `dms.document.search` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein | `GET /api/v1/nachweisraum/dokumente` |

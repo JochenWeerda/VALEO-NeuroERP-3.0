@@ -581,6 +581,9 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  document_allocation_service: platform
+  studio_draft_store: platform
+  studio_propose: platform
   billing_batch_service: finance
   document_control_projection: dms-compliance
   document_control_service: dms-compliance
@@ -610,6 +613,8 @@ exact_service_stems:
   kaeufergruppe: crm
 
 exact_endpoint_stems:
+  document_allocations: platform
+  studio_drafts: platform
   billing_batch: finance
   document_control: dms-compliance
   foreign_goods_worklist: inventory

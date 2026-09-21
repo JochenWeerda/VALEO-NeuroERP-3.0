@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-09-17
+# Architecture Index — generiert 2026-09-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-09-17T07:47:08Z'
+generated_at: '2026-09-21T10:39:04Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -259,6 +259,7 @@ domains:
     - /produktion/mischfutter-produktion
     - /produktion/produktions-dokumente-drucken
     - /produktion/produktionsleitstand
+    - /produktion/rezepturgruppen
     - /rezepte/editor
     - /silo
     - /silo/kapazitaeten
@@ -559,6 +560,7 @@ domains:
     - /crm/gdpr-request/new
     - /crm/gdpr-requests
     - /crm/kim
+    - /crm/klaerfall-inbox
     - /crm/kontakt-detail
     - /crm/kontakt-management
     - /crm/kontakt/:id
@@ -621,7 +623,6 @@ domains:
     - /portal/onboarding
     - /portal/portal
     - /portal/preisspiegel
-    - /portal/profil
     - /portal/rationsoptimierung
     - /portal/rechnungen
     - /portal/shop
@@ -830,6 +831,7 @@ domains:
     - docs/adr/adr-067-governed-l3-report-catalog.md
     - docs/adr/adr-069-gated-l3-standard-unimet-adapters.md
     - docs/adr/adr-071-security-dependency-gate.md
+    - docs/adr/adr-072-mcp-execution-adapters.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1004,6 +1006,7 @@ domains:
     - /auswertungen/abfrage-center
     - /auswertungen/aenderungshistorie
     - /auswertungen/auftrags-kontrolle
+    - /auswertungen/beleg-kontrolle
     - /auswertungen/bonus-berechnung
     - /auswertungen/dms-volltext
     - /auswertungen/duengemittelmengen
@@ -1589,6 +1592,7 @@ domains:
     - docs/adr/adr-008-eventing-outbox-standard.md
     - docs/adr/adr-040-contract-gated-herd-data-connectors.md
     - docs/adr/adr-056-vendor-neutral-erp-habit-contract.md
+    - docs/adr/adr-072-mcp-execution-adapters.md
   platform:
     owner: platform
     frontend_route_prefixes:
@@ -1745,6 +1749,7 @@ domains:
     - calendar_projection_service
     - compat_helpers
     - compensation_engine
+    - document_allocation_service
     - event_schema_registry
     - external_mock_harness_service
     - fast_track
@@ -1778,6 +1783,8 @@ domains:
     - secrets_vault
     - security_observability
     - stt_client
+    - studio_draft_store
+    - studio_propose
     - studio_validation
     - sync_scheduler
     - voice_adapter
@@ -1816,6 +1823,7 @@ domains:
     - config_service
     - copilot_ws
     - data_quality
+    - document_allocations
     - e2e_chain
     - external_agent_integrations
     - external_gates
@@ -1874,6 +1882,7 @@ domains:
     - security_monitoring
     - service_anfragen
     - sla_escalation_api
+    - studio_drafts
     - supply_chain_blockchain
     - system_metrics
     - tapi
@@ -2016,21 +2025,16 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 930
-  frontend_routes_mapped: 930
+  frontend_routes_total: 932
+  frontend_routes_mapped: 932
   backend_services_total: 259
-  backend_services_mapped: 256
+  backend_services_mapped: 259
   backend_endpoints_total: 447
-  backend_endpoints_mapped: 445
+  backend_endpoints_mapped: 447
 unmapped:
   frontend_routes: []
-  backend_services:
-  - document_allocation_service
-  - studio_draft_store
-  - studio_propose
-  backend_endpoints:
-  - document_allocations
-  - studio_drafts
+  backend_services: []
+  backend_endpoints: []
 status:
   architecture_os_mvp: active
   last_review: 2026-06-27

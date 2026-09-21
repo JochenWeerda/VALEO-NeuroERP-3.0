@@ -11,15 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MCP-EXEC-CRM-20260921 — reserviert, Codex
+## MCP-EXEC-CRM-20260921 — abgeschlossen, Codex
 
 **Ziel:** Erster realer MCP-Schreibadapter fuer crm.contact.log ueber den
 bestehenden Kontaktservice, mit OIDC-Scope, Token-Tenant, Audit und Replay.
 **Dateibesitz:** MCP-Registry-Endpunkt, neuer MCP-Ausfuehrungsservice,
-Migration fuer Ausfuehrungsjournal, Registry-Vertrag, eigene Tests/Doku.
+Migration fuer Ausfuehrungsjournal, Registry-Vertrag, eigene Tests/Doku,
+Architektur-Mapping/Index und generierte MCP-/Agent-Referenz.
 Keine KIM-Fachdateien und kein Umbau des Kontaktservices.
-**Abnahme:** echte Kontaktpersistenz, kein Doppelschreiben, fremde Mandanten
-und fehlender Scope abgewiesen; validate/dryRun ohne Mutation.
+**Abnahme:** 41 Tests gruen. PostgreSQL: reale Kontaktanlage, Audit, Replay,
+Payload-Konflikt und Rollback bei Audit-Ausfall nachgewiesen. Journal lokal
+migriert; Architektur-Validate/Drift gruen. [QA](../quality-assurance/mcp-execution-crm-20260921.md).
 **Risiken:** weitere Maskenaktionen und Approval-pflichtige Tools bleiben offen.
 
 ## UIX-ACTION-ATOMIC-20260921 — abgeschlossen, Codex
