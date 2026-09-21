@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-SM-TOUCH-20260921 — reserviert, Codex
+
+**Ziel:** Gemeinsame kleine Button-Variante mit mindestens 44 px Hoehe,
+auch in bisher nicht einzeln nachgezogenen Masken.
+**Dateibesitz:** `components/ui/button.tsx`, neuer Button-Regressionstest,
+eigene Slice-/QA-Dokumentation. Keine FSX-/KIM-Fachdateien; HOME-UIX bleibt Cursor.
+**Abnahme:** kleine Buttons mindestens 44 px; Events, disabled und asChild
+unveraendert; gezielte UIX-Tests. Browser-Nachweis separat ausweisen.
+**Risiken:** dichtere Toolbars koennen umbrechen; MCP-Write bleibt offen.
+
 ## HOME-BELEG-FIRST — Flow Spine von der Startseite 2026-09-17, Cursor
 
 **Stand:** abgeschlossen 2026-09-17. Sechs Arbeitswelten statt Modulraster:
