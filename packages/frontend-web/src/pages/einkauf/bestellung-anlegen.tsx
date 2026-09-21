@@ -41,6 +41,33 @@ const BESTELLFALL_OPTIONS: Array<{ value: Bestellfall; title: string; text: stri
   },
 ]
 
+type Horizont = 'taeglich' | 'woechentlich' | 'monatlich' | 'saisonal'
+
+const HORIZONT_OPTIONS: Array<{ value: Horizont; label: string }> = [
+  { value: 'taeglich', label: 'Taeglich' },
+  { value: 'woechentlich', label: 'Woechentlich' },
+  { value: 'monatlich', label: 'Monatlich' },
+  { value: 'saisonal', label: 'Saisonal (Vorjahresfenster)' },
+]
+
+/** Eine Zeile der Bedarfsrechnung, so wie der Endpunkt sie liefert. */
+type BedarfsZeile = {
+  article_id: string
+  artikel_nr?: string | null
+  artikel_bezeichnung?: string | null
+  einheit?: string | null
+  abverkauf_pro_tag: number
+  ist_bestand: number
+  bedarf: number
+  reichweite_tage?: number | null
+  vorschlag_menge: number
+  lagerkosten: number
+  frachtkosten: number
+  begruendung?: string | null
+  lieferant_name?: string | null
+  letzter_preis?: number | null
+}
+
 type BestellungData = {
   bestellfall: Bestellfall
   lieferant: string
@@ -206,6 +233,14 @@ export default function BestellungAnlegenPage(): JSX.Element {
     })
   }
   
+  const [horizont, setHorizont] = useState<Horizont>('monatlich')
+  const [lagerkostenSatz, setLagerkostenSatz] = useState('')
+  const [frachtkostenFix, setFrachtkostenFix] = useState('')
+  const [bedarf, setBedarf] = useState<BedarfsZeile[]>([])
+  const [bedarfLaeuft, setBedarfLaeuft] = useState(false)
+  const [bedarfFehler, setBedarfFehler] = useState<string | null>(null)
+  const [bedarfGeholt, setBedarfGeholt] = useState(false)
+
   const [bestellung, setBestellung] = useState<BestellungData>({
     bestellfall: 'bestand_abgleich',
     lieferant: '',
@@ -329,6 +364,56 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   function updateField<K extends keyof BestellungData>(key: K, value: BestellungData[K]): void {
     setBestellung((prev) => ({ ...prev, [key]: value }))
+  }
+
+  /**
+   * Den Bedarf holen.
+   *
+   * Ein Lesevorgang, kein Schreibvorgang — er braucht keinen Doppelklick-Schutz,
+   * aber sehr wohl eine sichtbare Rueckmeldung: Wer eine Bestellmenge
+   * vorgeschlagen bekommt, muss wissen, woher sie kommt, und wer keine bekommt,
+   * muss den Grund sehen statt einer leeren Liste.
+   */
+  const bedarfHolen = async () => {
+    setBedarfLaeuft(true)
+    setBedarfFehler(null)
+    try {
+      const params = new URLSearchParams({ horizont, nur_mit_bedarf: 'true' })
+      if (lagerkostenSatz.trim()) params.set('lagerkosten_satz', lagerkostenSatz.trim())
+      if (frachtkostenFix.trim()) params.set('frachtkosten_fix', frachtkostenFix.trim())
+      const antwort = await apiClient.get<BedarfsZeile[]>(
+        `/api/v1/einkauf/bestellvorschlaege/bedarf?${params.toString()}`,
+      )
+      setBedarf(Array.isArray(antwort.data) ? antwort.data : [])
+      setBedarfGeholt(true)
+    } catch (fehler) {
+      const text =
+        fehler instanceof Error ? fehler.message : 'Der Bedarf konnte nicht geladen werden.'
+      setBedarfFehler(text)
+      toast({ title: 'Bedarf nicht geladen', description: text, variant: 'destructive' })
+    } finally {
+      setBedarfLaeuft(false)
+    }
+  }
+
+  /** Eine Vorschlagszeile als Position uebernehmen. */
+  const vorschlagUebernehmen = (zeile: BedarfsZeile) => {
+    setBestellung((prev) => ({
+      ...prev,
+      positionen: [
+        ...prev.positionen,
+        {
+          artikel: zeile.artikel_nr || zeile.artikel_bezeichnung || '',
+          menge: zeile.vorschlag_menge,
+          einheit: zeile.einheit || 't',
+          preis: zeile.letzter_preis ?? 0,
+        },
+      ],
+    }))
+    toast({
+      title: 'Position uebernommen',
+      description: `${zeile.artikel_bezeichnung ?? zeile.artikel_nr}: ${zeile.vorschlag_menge} ${zeile.einheit ?? 't'}`,
+    })
   }
 
   function addPosition(): void {
@@ -516,6 +601,143 @@ export default function BestellungAnlegenPage(): JSX.Element {
               })}
             </div>
           </fieldset>
+
+          {bestellung.bestellfall === 'bestand_abgleich' ? (
+            <Card>
+              <CardContent className="space-y-4 pt-6">
+                <div>
+                  <h2 className="text-sm font-medium">Bedarf aus Bestand und Abverkauf</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Gerechnet wird aus den Lagerbewegungen: Abverkauf im Fenster, auf den
+                    Horizont hochgerechnet, plus Wiederbeschaffungszeit, minus Bestand und
+                    offenen Auftraegen. Mit Lager- und Frachtkosten kommt zusaetzlich die
+                    Losgroesse heraus, bei der beides zusammen am kleinsten ist.
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div>
+                    <Label htmlFor="bedarf-horizont">Horizont</Label>
+                    <NativeSelect
+                      id="bedarf-horizont"
+                      value={horizont}
+                      onChange={(e) => setHorizont(e.target.value as Horizont)}
+                    >
+                      {HORIZONT_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                  </div>
+                  <div>
+                    <Label htmlFor="bedarf-lagerkosten">Lagerkosten je Einheit und Tag</Label>
+                    <Input
+                      id="bedarf-lagerkosten"
+                      type="number"
+                      step="0.001"
+                      value={lagerkostenSatz}
+                      onChange={(e) => setLagerkostenSatz(e.target.value)}
+                      placeholder="z. B. 0,02"
+                    />
+                    <p className="mt-1 text-2xs uppercase tracking-wide text-muted-foreground">
+                      Halle, Silozelle, Palettenstellplatz, gebundenes Kapital
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="bedarf-fracht">Frachtkosten je Anlieferung</Label>
+                    <Input
+                      id="bedarf-fracht"
+                      type="number"
+                      step="1"
+                      value={frachtkostenFix}
+                      onChange={(e) => setFrachtkostenFix(e.target.value)}
+                      placeholder="z. B. 250"
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void bedarfHolen()}
+                  disabled={bedarfLaeuft}
+                >
+                  {bedarfLaeuft ? 'Bedarf wird gerechnet…' : 'Bedarf berechnen'}
+                </Button>
+
+                {bedarfFehler ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>Bedarf nicht geladen</AlertTitle>
+                    <AlertDescription>{bedarfFehler}</AlertDescription>
+                  </Alert>
+                ) : null}
+
+                {bedarfGeholt && bedarf.length === 0 && !bedarfFehler ? (
+                  <p className="text-sm text-muted-foreground">
+                    Kein Artikel unterschreitet im gewaehlten Horizont seinen Bedarf. Das ist
+                    eine Auskunft, kein Fehler — mit einem laengeren Horizont sieht es anders
+                    aus.
+                  </p>
+                ) : null}
+
+                {bedarf.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-left">
+                          <th className="py-2 pr-3">Artikel</th>
+                          <th className="py-2 pr-3 text-right">Bestand</th>
+                          <th className="py-2 pr-3 text-right">Abverkauf/Tag</th>
+                          <th className="py-2 pr-3 text-right">Reichweite</th>
+                          <th className="py-2 pr-3 text-right">Bedarf</th>
+                          <th className="py-2 pr-3 text-right">Vorschlag</th>
+                          <th className="py-2 pr-3">Herkunft der Menge</th>
+                          <th className="py-2" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bedarf.map((zeile) => (
+                          <tr key={zeile.article_id} className="border-b align-top">
+                            <td className="py-2 pr-3">
+                              <div className="font-medium">
+                                {zeile.artikel_bezeichnung ?? zeile.artikel_nr}
+                              </div>
+                              <div className="text-2xs uppercase tracking-wide text-muted-foreground">
+                                {zeile.artikel_nr}
+                                {zeile.lieferant_name ? ` · ${zeile.lieferant_name}` : ''}
+                              </div>
+                            </td>
+                            <td className="py-2 pr-3 text-right tabular-nums">{zeile.ist_bestand}</td>
+                            <td className="py-2 pr-3 text-right tabular-nums">
+                              {zeile.abverkauf_pro_tag}
+                            </td>
+                            <td className="py-2 pr-3 text-right tabular-nums">
+                              {zeile.reichweite_tage == null ? '—' : `${zeile.reichweite_tage} T`}
+                            </td>
+                            <td className="py-2 pr-3 text-right tabular-nums">{zeile.bedarf}</td>
+                            <td className="py-2 pr-3 text-right font-medium tabular-nums">
+                              {zeile.vorschlag_menge} {zeile.einheit ?? 't'}
+                            </td>
+                            <td className="py-2 pr-3 text-muted-foreground">{zeile.begruendung}</td>
+                            <td className="py-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => vorschlagUebernehmen(zeile)}
+                              >
+                                Uebernehmen
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
+
           <div>
             <Label htmlFor="lieferant">{t('crud.entities.supplier')} *</Label>
             <Input
