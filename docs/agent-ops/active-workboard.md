@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MCP-WRITE-TRUTH-20260921 — reserviert, Codex
+
+**Ziel:** Falsche MCP-Erfolgsmeldungen ohne Fachpersistenz beseitigen als
+Voraussetzung fuer echten Masken-Schreibzugriff.
+**Dateibesitz:** `services/ai/app/mcp/server.py`, AI-MCP-HTTP-Endpunkt,
+eigene Regressionstests und Slice-/QA-Doku. Keine Einkaufs-Fachdateien.
+**Abnahme:** nicht angebundene Operationen liefern explizit nicht implementiert,
+niemals erfundene Belegnummern oder scheinbar echte leere Suchergebnisse.
+**Offen:** echte MCP-Schreibadapter mit Auth, Tenant, Approval und Audit.
+
 ## UIX-SM-TOUCH-20260921 — abgeschlossen, Codex
 
 **Ziel:** Gemeinsame kleine Button-Variante mit mindestens 44 px Hoehe,
