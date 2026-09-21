@@ -1,0 +1,28 @@
+id: MCP-WRITE-TRUTH-20260921
+owner: Codex
+status: abgeschlossen
+goal: MCP darf ohne angeschlossenen Fachadapter keinen Erfolg behaupten.
+scope: AI-MCP-Platzhalter; echte Schreibadapter bleiben Folgearbeit.
+file_ownership:
+  - services/ai/app/mcp/server.py
+  - services/ai/app/api/v1/endpoints/mcp.py
+  - tests/test_ai_mcp_truth.py
+  - docs/quality-assurance/mcp-write-truth-20260921.md
+acceptance:
+  - Kein erfundener Bestellungserfolg und keine simulierten Suchergebnisse.
+  - Nicht angeschlossene Tools als unavailable und HTTP 501.
+tests:
+  - 9 isolierte Python-Tests inklusive FastAPI-HTTP-Vertrag bestanden.
+risks:
+  - Produktiver MCP-Schreibzugriff bleibt offen.
+  - AI-Resource-Provider bleiben Platzhalter.
+ai_harness:
+  fachlicher_vertrag: Ein Erfolg darf nur nach realer Ausfuehrung gemeldet werden.
+  architektur_vertrag: Minor-Defektfix an bestehenden AI-MCP-Handlern.
+  daten_vertrag: Keine Persistenz oder Migration; keine Belegnummer erfinden.
+  test_vertrag: Direkte Handler und HTTP inklusive Negativpfade.
+  security_vertrag: Keine Parameter in Stub-Logs; interne Fehler nicht offenlegen.
+  betriebs_vertrag: HTTP 501 ist sichtbar; Rollback durch gezielten Revert.
+  dokumentations_vertrag: Workboard, Slice, QA mit offenem Adapterumfang.
+external_gates:
+  - not_applicable

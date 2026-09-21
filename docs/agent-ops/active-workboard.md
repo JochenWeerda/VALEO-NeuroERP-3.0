@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MCP-WRITE-TRUTH-20260921 — reserviert, Codex
+## MCP-WRITE-TRUTH-20260921 — abgeschlossen, Codex
 
 **Ziel:** Falsche MCP-Erfolgsmeldungen ohne Fachpersistenz beseitigen als
 Voraussetzung fuer echten Masken-Schreibzugriff.
@@ -19,7 +19,11 @@ Voraussetzung fuer echten Masken-Schreibzugriff.
 eigene Regressionstests und Slice-/QA-Doku. Keine Einkaufs-Fachdateien.
 **Abnahme:** nicht angebundene Operationen liefern explizit nicht implementiert,
 niemals erfundene Belegnummern oder scheinbar echte leere Suchergebnisse.
+**Nachweis:** 9 Tests bestanden inklusive HTTP-501 statt erfundenem Erfolg,
+HTTP-404 bei unbekanntem Tool und funktionierendem angeschlossenem Handler.
+[QA und offene Umsetzung](../quality-assurance/mcp-write-truth-20260921.md).
 **Offen:** echte MCP-Schreibadapter mit Auth, Tenant, Approval und Audit.
+Das Gesamtziel UIX/MCP ist weiterhin in Arbeit.
 
 ## UIX-SM-TOUCH-20260921 — abgeschlossen, Codex
 

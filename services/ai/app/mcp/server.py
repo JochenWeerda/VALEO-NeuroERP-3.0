@@ -18,6 +18,7 @@ class MCPTool:
     description: str
     parameters: Dict[str, Any]
     handler: callable
+    available: bool = True
 
 
 @dataclass
@@ -68,7 +69,8 @@ class MCPServer:
                 "query": {"type": "string", "description": "SQL query or natural language"},
                 "domain": {"type": "string", "description": "Domain to query"}
             },
-            handler=self._handle_database_query
+            handler=self._handle_database_query,
+            available=False
         ))
         
         # Tool: Search Documents
@@ -79,7 +81,8 @@ class MCPServer:
                 "query": {"type": "string", "description": "Search query"},
                 "top_k": {"type": "integer", "description": "Number of results"}
             },
-            handler=self._handle_document_search
+            handler=self._handle_document_search,
+            available=False
         ))
         
         # Tool: Create Order
@@ -92,7 +95,8 @@ class MCPServer:
                 "supplier": {"type": "string"},
                 "reason": {"type": "string"}
             },
-            handler=self._handle_create_order
+            handler=self._handle_create_order,
+            available=False
         ))
     
     def _register_built_in_resources(self):
@@ -153,19 +157,15 @@ Gib konkrete Warnungen oder OK zurück.""",
     # Tool Handlers
     async def _handle_database_query(self, **params) -> Dict[str, Any]:
         """Handle database query tool"""
-        logger.info(f"Database query: {params}")
-        # Mock - später echte DB-Abfrage
-        return {"results": [], "count": 0}
+        raise NotImplementedError("ERP database query adapter is not connected")
     
     async def _handle_document_search(self, **params) -> Dict[str, Any]:
         """Handle document search tool"""
-        logger.info(f"Document search: {params}")
-        return {"documents": [], "count": 0}
+        raise NotImplementedError("Document search adapter is not connected")
     
     async def _handle_create_order(self, **params) -> Dict[str, Any]:
         """Handle create order tool"""
-        logger.info(f"Create order: {params}")
-        return {"order_id": "PO-2025-001", "status": "created"}
+        raise NotImplementedError("Procurement write adapter is not connected; no order was created")
     
     # Resource Providers
     async def _get_procurement_policies(self) -> str:
@@ -183,7 +183,8 @@ Gib konkrete Warnungen oder OK zurück.""",
             {
                 "name": tool.name,
                 "description": tool.description,
-                "parameters": tool.parameters
+                "parameters": tool.parameters,
+                "available": tool.available
             }
             for tool in self.tools
         ]
@@ -216,6 +217,8 @@ Gib konkrete Warnungen oder OK zurück.""",
         tool = next((t for t in self.tools if t.name == tool_name), None)
         if not tool:
             raise ValueError(f"Tool '{tool_name}' not found")
+        if not tool.available:
+            raise NotImplementedError(f"Tool '{tool_name}' has no connected ERP adapter")
         return await tool.handler(**params)
     
     async def get_resource(self, uri: str) -> str:
