@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Any, Optional
-from sqlalchemy import func as sqlfunc
+from sqlalchemy import func as sqlfunc, text as sqltext
 from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Session, selectinload
 
@@ -25,6 +26,8 @@ from app.infrastructure.models.einkauf_models import (
     PfandKontoBuchung,
 )
 from modules.einkauf.services.bestellvorschlag_service import (
+    _current_stock,
+    _preferred_supplier,
     engine_bedarf,
     engine_lager,
     engine_rohware,
@@ -92,6 +95,17 @@ POSITION_CREATE_KEYS = frozenset({
     "gebinde_menge", "gebinde_einheit", "gebinde_schluessel", "gewicht_kg",
     "kontrakt_nr", "lagerhalle", "lagerfach", "mindestmenge", "maximalmenge",
 })
+
+
+def _query_one(db: Session, sql: str, params: dict[str, Any]) -> dict[str, Any] | None:
+    """Eine Zeile als Dict — oder None."""
+    zeile = db.execute(sqltext(sql), params).mappings().first()
+    return dict(zeile) if zeile is not None else None
+
+
+def _query_many(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, Any]]:
+    """Alle Zeilen als Dicts."""
+    return [dict(z) for z in db.execute(sqltext(sql), params).mappings().all()]
 
 
 def _clean_fields(data: dict[str, Any], allowed: frozenset[str]) -> dict[str, Any]:
@@ -545,6 +559,160 @@ class ProcurementService:
             for b in q.order_by(EinkaufBestellung.bestelldatum.desc()).all()
         ]
 
+    def bestellung_aus_auftrag(
+        self,
+        auftrag_id: str,
+        *,
+        ueberschlag_lager: bool = False,
+        lieferant_id: str | None = None,
+        lieferdatum: date | None = None,
+    ) -> dict:
+        """Aus einem Verkaufsauftrag eine Bestellung machen.
+
+        Zwei Wege, und der Unterschied ist nicht kosmetisch:
+
+        **Ohne Ueberschlag** geht die Ware vom Lieferanten direkt zum Kunden.
+        Bestellt wird die volle Auftragsmenge — der eigene Bestand hilft nicht,
+        er liegt am falschen Ort. Die Lieferadresse ist die des Kunden.
+
+        **Mit Ueberschlag** laeuft die Ware ueber den eigenen Hof. Dann deckt
+        der vorhandene Bestand einen Teil, und bestellt wird nur die Fehlmenge;
+        die Lieferadresse bleibt die eigene. Eine Position, die der Bestand
+        voll deckt, entsteht gar nicht erst.
+
+        Der Auftrag bleibt am Beleg stehen (``verkaufsbeleg_id``,
+        ``kunden_id``, Kommission = Auftragsnummer). Ohne diesen Rueckverweis
+        weiss spaeter niemand mehr, fuer wen die Ware kam — und bei einer
+        Direktlieferung steht sie nie im eigenen Lager, wo man nachsehen
+        koennte.
+        """
+        kopf = _query_one(
+            self.db,
+            """
+            SELECT id::text AS id, order_number, customer_id::text AS customer_id,
+                   customer_name, delivery_address, delivery_date, status
+            FROM domain_crm.sales_orders
+            WHERE id::text = :aid AND tenant_id::text = :tid AND deleted_at IS NULL
+            """,
+            {"aid": auftrag_id, "tid": self.tenant_id},
+        )
+        if kopf is None:
+            raise EntityNotFoundError("SalesOrder", auftrag_id)
+
+        zeilen = _query_many(
+            self.db,
+            """
+            SELECT line_number, article_number, description, quantity, unit, ek_price
+            FROM domain_crm.sales_order_items
+            WHERE order_id::text = :aid AND tenant_id::text = :tid
+            ORDER BY line_number
+            """,
+            {"aid": auftrag_id, "tid": self.tenant_id},
+        )
+        if not zeilen:
+            raise ValidationFailedError(
+                f"Auftrag {kopf.get('order_number') or auftrag_id} hat keine Positionen."
+            )
+
+        positionen: list[dict] = []
+        uebersprungen: list[str] = []
+        for zeile in zeilen:
+            artikel_nr = zeile.get("article_number")
+            menge = Decimal(str(zeile.get("quantity") or 0))
+            if menge <= 0 or not artikel_nr:
+                continue
+
+            artikel = _query_one(
+                self.db,
+                """
+                SELECT id::text AS id, gebinde_einheit
+                FROM domain_inventory.articles
+                WHERE article_number = :nr AND tenant_id::text = :tid
+                LIMIT 1
+                """,
+                {"nr": artikel_nr, "tid": self.tenant_id},
+            )
+
+            zu_bestellen = menge
+            gedeckt = Decimal("0")
+            if ueberschlag_lager and artikel:
+                # Nur beim Ueberschlag hilft der eigene Bestand: Bei einer
+                # echten Direktlieferung liegt er am falschen Ort.
+                bestand = _current_stock(self.db, artikel["id"], self.tenant_id)
+                gedeckt = min(bestand, menge)
+                zu_bestellen = max(menge - bestand, Decimal("0"))
+
+            if zu_bestellen <= 0:
+                uebersprungen.append(
+                    f"{artikel_nr}: {menge} durch Bestand gedeckt"
+                )
+                continue
+
+            positionen.append({
+                "article_id": artikel["id"] if artikel else None,
+                "artikel_nr": artikel_nr,
+                "artikel_bezeichnung": zeile.get("description") or artikel_nr,
+                "menge": float(zu_bestellen),
+                "einheit": zeile.get("unit") or (artikel or {}).get("gebinde_einheit") or "t",
+                "einzelpreis": float(zeile.get("ek_price") or 0),
+                "notiz": (
+                    f"Auftrag {kopf.get('order_number')} Pos. {zeile.get('line_number')}"
+                    + (f", {gedeckt} aus Bestand" if gedeckt > 0 else "")
+                ),
+            })
+
+        if not positionen:
+            raise ValidationFailedError(
+                "Der Bestand deckt den Auftrag vollstaendig — es ist nichts zu bestellen. "
+                + "; ".join(uebersprungen)
+            )
+
+        # Ohne Lieferant gibt es keine Bestellung — die Spalte ist zu Recht
+        # NOT NULL. Ist keiner genannt, wird der bevorzugte Lieferant des ersten
+        # Artikels genommen; gibt es auch den nicht, wird gefragt statt geraten.
+        if not lieferant_id:
+            for pos in positionen:
+                if not pos.get("article_id"):
+                    continue
+                gefunden, _name, _preis = _preferred_supplier(
+                    self.db, pos["article_id"], self.tenant_id
+                )
+                if gefunden:
+                    lieferant_id = gefunden
+                    break
+        if not lieferant_id:
+            raise ValidationFailedError(
+                "Kein Lieferant: Weder wurde einer genannt, noch ist an den Artikeln "
+                "ein bevorzugter Lieferant gepflegt."
+            )
+
+        daten = {
+            "bestellfall": "direktlieferung",
+            "direktlieferung": not ueberschlag_lager,
+            "ueberschlag_lager": ueberschlag_lager,
+            "verkaufsbeleg_id": kopf["id"],
+            "kunden_id": kopf.get("customer_id"),
+            # Die Kommission traegt die Auftragsnummer: Daran erkennt der
+            # Wareneingang, wofuer die Ware kam.
+            "kommission": kopf.get("order_number"),
+            "lieferdatum_wunsch": lieferdatum or kopf.get("delivery_date"),
+            "positionen": positionen,
+        }
+        daten["lieferant_id"] = lieferant_id
+        if not ueberschlag_lager:
+            # Direkt zum Kunden — ohne Adresse faehrt der Lieferant zu uns.
+            daten["lieferadresse"] = (
+                kopf.get("delivery_address")
+                or kopf.get("customer_name")
+                or ""
+            )
+
+        ergebnis = self.create_bestellung(daten)
+        ergebnis["aus_auftrag"] = kopf.get("order_number")
+        if uebersprungen:
+            ergebnis["uebersprungen"] = uebersprungen
+        return ergebnis
+
     def create_bestellung(self, data: dict) -> dict:
         ts = datetime.now().strftime("%y%m%d%H%M%S")
         header = _clean_fields(data, BESTELLUNG_HEADER_KEYS)
@@ -634,7 +802,6 @@ class ProcurementService:
 
     def _book_bestellung_obligo(self, b: EinkaufBestellung) -> None:
         """Create a commitment (Obligo) JournalEntry when a Bestellung is approved."""
-        from decimal import Decimal
         netto = Decimal(str(b.netto_summe or 0))
         if netto == 0:
             return

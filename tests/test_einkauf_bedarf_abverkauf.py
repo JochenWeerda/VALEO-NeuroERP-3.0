@@ -370,3 +370,202 @@ def test_der_vorschlag_aus_dem_verkauf_findet_seine_auftraege(db, engine, artike
             v.execute(
                 text("DELETE FROM domain_crm.sales_orders WHERE id = :o"), {"o": auftrag_id}
             )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Direktlieferung: aus dem Auftrag wird eine Bestellung
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.fixture()
+def auftrag_mit_position(engine, artikel_mit_abverkauf):
+    """Ein offener Auftrag ueber 500 t des Testartikels.
+
+    Am Lager liegen 70 t. Der Unterschied zwischen den beiden Wegen haengt
+    genau daran: Mit Ueberschlag decken die 70 t einen Teil, ohne Ueberschlag
+    liegen sie am falschen Ort.
+    """
+    from sqlalchemy import text
+
+    mandant = artikel_mit_abverkauf["mandant"]
+    auftrag_id = str(uuid.uuid4())
+    kunden_id = str(uuid.uuid4())
+    lieferant_id = str(uuid.uuid4())
+    nummer = f"AU-{uuid.uuid4().hex[:6].upper()}"
+
+    with engine.begin() as v:
+        # Ohne Lieferant gibt es keine Bestellung — die Spalte ist NOT NULL,
+        # und das ist richtig so.
+        v.execute(
+            text(
+                "INSERT INTO domain_einkauf.lieferanten "
+                "(id, tenant_id, lieferantennummer, firmenname) "
+                "VALUES (:id, :t, :nr, 'Testlieferant eG')"
+            ),
+            {"id": lieferant_id, "t": mandant, "nr": f"LF-{uuid.uuid4().hex[:5].upper()}"},
+        )
+        artikel_nr = v.execute(
+            text("SELECT article_number FROM domain_inventory.articles WHERE id = :a"),
+            {"a": artikel_mit_abverkauf["artikel_id"]},
+        ).scalar()
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_orders "
+                "(id, tenant_id, order_number, customer_id, customer_name, status, "
+                " delivery_date, delivery_address) "
+                "VALUES (:id, :t, :nr, :k, 'Hof Sonnenacker', 'open', "
+                "        CURRENT_DATE + 14, 'Sonnenweg 3, 26123 Testdorf')"
+            ),
+            {"id": auftrag_id, "t": mandant, "nr": nummer, "k": kunden_id},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_order_items "
+                "(id, tenant_id, order_id, line_number, article_number, description, "
+                " quantity, unit, ek_price) "
+                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 210)"
+            ),
+            {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
+        )
+
+    try:
+        yield {
+            "mandant": mandant,
+            "auftrag_id": auftrag_id,
+            "kunden_id": kunden_id,
+            "lieferant_id": lieferant_id,
+            "nummer": nummer,
+            "artikel_nr": artikel_nr,
+        }
+    finally:
+        with engine.begin() as v:
+            # Die Position fuehrt keinen Mandanten — sie haengt am Kopf.
+            v.execute(
+                text(
+                    "DELETE FROM domain_einkauf.bestellung_positionen WHERE bestellung_id IN "
+                    "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = :t)"
+                ),
+                {"t": mandant},
+            )
+            v.execute(
+                text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = :t"),
+                {"t": mandant},
+            )
+            v.execute(
+                text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :o"),
+                {"o": auftrag_id},
+            )
+            v.execute(text("DELETE FROM domain_crm.sales_orders WHERE id = :o"), {"o": auftrag_id})
+            v.execute(
+                text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = :t"),
+                {"t": mandant},
+            )
+
+
+def dienst(db, mandant: str):
+    from app.services.procurement_service import ProcurementService
+
+    return ProcurementService(db, mandant)
+
+
+def test_ohne_ueberschlag_geht_die_volle_menge_zum_kunden(db, auftrag_mit_position) -> None:
+    """Der eigene Bestand hilft nicht — er liegt am falschen Ort."""
+    from sqlalchemy import text
+
+    ergebnis = dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(
+        auftrag_mit_position["auftrag_id"],
+        ueberschlag_lager=False,
+        lieferant_id=auftrag_mit_position["lieferant_id"],
+    )
+    db.commit()
+
+    kopf = db.execute(
+        text(
+            "SELECT bestellfall, direktlieferung, ueberschlag_lager, verkaufsbeleg_id, "
+            "       kunden_id, kommission, lieferadresse "
+            "FROM domain_einkauf.bestellungen WHERE id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).mappings().first()
+
+    assert kopf["bestellfall"] == "direktlieferung"
+    assert kopf["direktlieferung"] is True
+    assert kopf["ueberschlag_lager"] is False
+    assert kopf["verkaufsbeleg_id"] == auftrag_mit_position["auftrag_id"]
+    assert kopf["kunden_id"] == auftrag_mit_position["kunden_id"]
+    # Ohne Adresse faehrt der Lieferant zu uns statt zum Kunden.
+    assert "Sonnenweg" in (kopf["lieferadresse"] or "")
+    # Die Kommission traegt die Auftragsnummer — daran erkennt der
+    # Wareneingang, wofuer die Ware kam.
+    assert kopf["kommission"] == auftrag_mit_position["nummer"]
+
+    menge = db.execute(
+        text(
+            "SELECT menge FROM domain_einkauf.bestellung_positionen "
+            "WHERE bestellung_id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).scalar()
+    assert float(menge) == pytest.approx(500.0, abs=0.01)
+
+
+def test_mit_ueberschlag_deckt_der_bestand_einen_teil(db, auftrag_mit_position) -> None:
+    """Ueber den eigenen Hof: 70 t liegen da, 430 t fehlen."""
+    from sqlalchemy import text
+
+    ergebnis = dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(
+        auftrag_mit_position["auftrag_id"],
+        ueberschlag_lager=True,
+        lieferant_id=auftrag_mit_position["lieferant_id"],
+    )
+    db.commit()
+
+    kopf = db.execute(
+        text(
+            "SELECT direktlieferung, ueberschlag_lager, lieferadresse "
+            "FROM domain_einkauf.bestellungen WHERE id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).mappings().first()
+    assert kopf["ueberschlag_lager"] is True
+    assert kopf["direktlieferung"] is False
+    # Die Ware kommt zu uns — die Kundenadresse waere hier falsch.
+    assert not (kopf["lieferadresse"] or "").strip()
+
+    zeile = db.execute(
+        text(
+            "SELECT menge, notiz FROM domain_einkauf.bestellung_positionen "
+            "WHERE bestellung_id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).mappings().first()
+    assert float(zeile["menge"]) == pytest.approx(430.0, abs=0.01)
+    assert "aus Bestand" in (zeile["notiz"] or "")
+
+
+def test_ein_auftrag_den_es_nicht_gibt_bleibt_ein_fehler(db, auftrag_mit_position) -> None:
+    from app.core.exceptions import EntityNotFoundError
+
+    with pytest.raises(EntityNotFoundError):
+        dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(str(uuid.uuid4()))
+
+
+def test_deckt_der_bestand_alles_entsteht_keine_bestellung(db, engine, auftrag_mit_position) -> None:
+    """Eine Bestellung ueber null Tonnen waere schlimmer als keine."""
+    from sqlalchemy import text
+    from app.core.exceptions import ValidationFailedError
+
+    # Die Auftragsmenge unter den Bestand druecken.
+    with engine.begin() as v:
+        v.execute(
+            text("UPDATE domain_crm.sales_order_items SET quantity = 50 WHERE order_id = :o"),
+            {"o": auftrag_mit_position["auftrag_id"]},
+        )
+
+    with pytest.raises(ValidationFailedError) as fehler:
+        dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(
+            auftrag_mit_position["auftrag_id"],
+            ueberschlag_lager=True,
+            lieferant_id=auftrag_mit_position["lieferant_id"],
+        )
+    assert "Bestand deckt" in str(fehler.value)

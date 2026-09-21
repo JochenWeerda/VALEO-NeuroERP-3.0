@@ -47,7 +47,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -292,6 +292,72 @@ def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bestell-Vorschlag Engines
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+class BestellungAusAuftragIn(BaseModel):
+    """Was die Direktlieferung wissen muss."""
+
+    auftrag_id: str = Field(..., description="Verkaufsauftrag, aus dem bestellt wird")
+    ueberschlag_lager: bool = Field(
+        False,
+        description=(
+            "Laeuft die Ware ueber den eigenen Hof? Dann deckt der Bestand einen Teil "
+            "und die Lieferadresse bleibt die eigene. Ohne Ueberschlag geht die volle "
+            "Menge direkt zum Kunden."
+        ),
+    )
+    lieferant_id: Optional[str] = None
+    lieferdatum: Optional[date] = None
+
+
+class BestellungAusAuftragOut(BaseSchema):
+    """Was dabei herauskam."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    bestellnummer: Optional[str] = None
+    status: Optional[str] = None
+    aus_auftrag: Optional[str] = None
+    uebersprungen: list[str] = Field(
+        default_factory=list,
+        description="Positionen, die der Bestand bereits deckt — sie entstehen nicht.",
+    )
+
+
+@router.post(
+    "/einkauf/bestellungen/aus-auftrag",
+    status_code=201,
+    summary="Bestellung aus Verkaufsauftrag",
+    response_model=BestellungAusAuftragOut,
+)
+async def bestellung_aus_auftrag(
+    payload: BestellungAusAuftragIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Aus einem Verkaufsauftrag eine Bestellung machen.
+
+    Ohne Ueberschlag geht die Ware vom Lieferanten direkt zum Kunden: bestellt
+    wird die volle Auftragsmenge, Lieferadresse ist die des Kunden. Mit
+    Ueberschlag laeuft sie ueber den eigenen Hof, der Bestand deckt einen Teil,
+    und bestellt wird nur die Fehlmenge.
+
+    Der Auftrag bleibt am Beleg stehen. Ohne diesen Rueckverweis weiss spaeter
+    niemand mehr, fuer wen die Ware kam — und bei einer Direktlieferung steht
+    sie nie im eigenen Lager, wo man nachsehen koennte.
+    """
+    try:
+        return _svc(db, tenant_id).bestellung_aus_auftrag(
+            payload.auftrag_id,
+            ueberschlag_lager=payload.ueberschlag_lager,
+            lieferant_id=payload.lieferant_id,
+            lieferdatum=payload.lieferdatum,
+        )
+    except EntityNotFoundError as exc:
+        raise _not_found(exc, "Verkaufsauftrag") from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
 
 class BedarfsVorschlagOut(BaseSchema):
     """Eine Zeile der Bedarfsrechnung — mit der Herkunft der Zahl.
