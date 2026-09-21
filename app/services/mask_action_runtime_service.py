@@ -35,7 +35,9 @@ class MaskActionResult(BaseModel):
 def parse_action_body(body: dict[str, Any]) -> tuple[ActionMode, str | None, str | None, dict[str, Any]]:
     payload = dict(body)
     mode_raw = payload.pop("_mode", "execute")
-    mode: ActionMode = mode_raw if mode_raw in ("execute", "dryRun", "validate", "propose") else "execute"
+    if mode_raw not in ("execute", "dryRun", "validate", "propose"):
+        raise ValueError("Unbekannter Aktionsmodus.")
+    mode: ActionMode = mode_raw
     audit_reason = payload.pop("_auditReason", None)
     idempotency_key = payload.pop("_idempotencyKey", None)
     return mode, audit_reason, idempotency_key, payload
@@ -54,30 +56,27 @@ def _write_audit(
 ) -> str:
     audit_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
-    try:
-        db.execute(
-            text("""
-                INSERT INTO domain_crm.crm_action_audit_log
-                  (id, tenant_id, action_key, entity_type, entity_id, idempotency_key,
-                   audit_reason, performed_at, result_summary)
-                VALUES
-                  (:id, :tid, :akey, :etype, :eid, :ikey, :areason, :now, :summary)
-                ON CONFLICT DO NOTHING
-            """),
-            {
-                "id": audit_id,
-                "tid": tenant_id,
-                "akey": action_key,
-                "etype": entity_type,
-                "eid": entity_id,
-                "ikey": idempotency_key,
-                "areason": audit_reason,
-                "now": now,
-                "summary": summary,
-            },
-        )
-    except Exception as exc:
-        logger.debug("Mask action audit skipped: %s", exc)
+    db.execute(
+        text("""
+            INSERT INTO domain_crm.crm_action_audit_log
+              (id, tenant_id, action_key, entity_type, entity_id, idempotency_key,
+               audit_reason, performed_at, result_summary)
+            VALUES
+              (:id, :tid, :akey, :etype, :eid, :ikey, :areason, :now, :summary)
+        """),
+        {
+            "id": audit_id,
+            "tid": tenant_id,
+            "akey": action_key,
+            "etype": entity_type,
+            "eid": entity_id,
+            "ikey": idempotency_key,
+            "areason": audit_reason,
+            "now": now,
+            "summary": summary,
+        },
+    )
+
     return audit_id
 
 
@@ -90,25 +89,22 @@ def _write_outbox(
     payload: dict[str, Any],
 ) -> str:
     event_id = str(uuid.uuid4())
-    try:
-        db.execute(
-            text("""
-                INSERT INTO outbox_events
-                  (id, event_type, aggregate_id, payload, timestamp, published, retry_count, tenant_id)
-                VALUES
-                  (:id, :event_type, :aggregate_id, :payload, NOW(), FALSE, 0, :tenant_id)
-            """),
-            {
-                "id": event_id,
-                "event_type": event_type,
-                "aggregate_id": aggregate_id,
-                "payload": json.dumps(payload),
-                "tenant_id": tenant_id,
-            },
-        )
-    except Exception as exc:
-        logger.debug("Mask action outbox skipped: %s", exc)
-        return ""
+    db.execute(
+        text("""
+            INSERT INTO outbox_events
+              (id, event_type, aggregate_id, payload, timestamp, published, retry_count, tenant_id)
+            VALUES
+              (:id, :event_type, :aggregate_id, :payload, NOW(), FALSE, 0, :tenant_id)
+        """),
+        {
+            "id": event_id,
+            "event_type": event_type,
+            "aggregate_id": aggregate_id,
+            "payload": json.dumps(payload),
+            "tenant_id": tenant_id,
+        },
+    )
+
     return event_id
 
 
@@ -129,7 +125,14 @@ def run_mask_action(
     outbox_event_type: str | None = None,
     require_audit_reason: bool = False,
 ) -> MaskActionResult:
-    mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey=action_key, mode="invalid", success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[{"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}],
+        )
 
     if mode == "propose":
         proposal = (propose_fn or _default_propose)(entity_id, payload)
@@ -222,22 +225,12 @@ def run_mask_action(
         )
     except Exception as exc:
         db.rollback()
-        if "does not exist" in str(exc) or "UndefinedTable" in type(exc).__name__:
-            audit_id = str(uuid.uuid4())
-            return MaskActionResult(
-                actionKey=action_key,
-                mode=mode,
-                success=True,
-                summary=f"{action_key} simuliert (Schema noch nicht vollständig).",
-                affectedIds=[entity_id],
-                auditEntryId=audit_id,
-            )
         logger.exception("Mask action %s failed", action_key)
         return MaskActionResult(
             actionKey=action_key,
             mode=mode,
             success=False,
-            error=str(exc),
+            error="Aktion konnte nicht gespeichert werden. Es wurde kein Erfolg bestaetigt.",
         )
 
 

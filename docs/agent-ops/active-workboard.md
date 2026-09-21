@@ -11,13 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-ACTION-ATOMIC-20260921 — reserviert, Codex
+## UIX-ACTION-ATOMIC-20260921 — abgeschlossen, Codex
 
 **Ziel:** Maskenaktionen melden erst nach erfolgreichem Commit Erfolg;
 Audit-/Outbox-Fehler rollen zurueck, unbekannte Modi schreiben niemals.
 **Dateibesitz:** `app/services/mask_action_runtime_service.py`, eigene
-Tests und QA-/Slice-Doku. Bestehende Fachhandler bleiben separat.
-**Abnahme:** reale Rollback-Probe, Negativtests fuer Modi/Audit/Outbox/Commit.
+Tests und QA-/Slice-Doku; fehlende Migration `mask_action_audit_20260921`.
+Bestehende Fachhandler bleiben separat.
+**Abnahme:** 22 Tests gruen; echte SQLite- und PostgreSQL-Proben fuer
+Mutation/Audit/Outbox/Rollback. Fehlende Audit-Tabelle migriert und lokal
+verifiziert. [QA](../quality-assurance/uix-action-atomic-20260921.md).
 **Offen:** MCP-Adapter, Fachhandler-Persistenz und Idempotenz insgesamt.
 
 ## MCP-WRITE-TRUTH-20260921 — abgeschlossen, Codex
