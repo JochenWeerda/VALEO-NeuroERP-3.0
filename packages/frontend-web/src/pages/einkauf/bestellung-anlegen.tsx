@@ -50,6 +50,17 @@ const HORIZONT_OPTIONS: Array<{ value: Horizont; label: string }> = [
   { value: 'saisonal', label: 'Saisonal (Vorjahresfenster)' },
 ]
 
+/** Ein offener Verkaufsauftrag, aus dem direkt bestellt werden kann. */
+type AuftragsZeile = {
+  id: string
+  order_number?: string | null
+  customer_name?: string | null
+  delivery_date?: string | null
+  delivery_address?: string | null
+  total_amount?: number | null
+  status?: string | null
+}
+
 /** Eine Zeile der Bedarfsrechnung, so wie der Endpunkt sie liefert. */
 type BedarfsZeile = {
   article_id: string
@@ -233,6 +244,13 @@ export default function BestellungAnlegenPage(): JSX.Element {
     })
   }
   
+  const [auftraege, setAuftraege] = useState<AuftragsZeile[]>([])
+  const [auftragId, setAuftragId] = useState('')
+  const [ueberschlagLager, setUeberschlagLager] = useState(false)
+  const [auftraegeLaufen, setAuftraegeLaufen] = useState(false)
+  const [direktFehler, setDirektFehler] = useState<string | null>(null)
+  const [direktLaeuft, setDirektLaeuft] = useState(false)
+
   const [horizont, setHorizont] = useState<Horizont>('monatlich')
   const [lagerkostenSatz, setLagerkostenSatz] = useState('')
   const [frachtkostenFix, setFrachtkostenFix] = useState('')
@@ -364,6 +382,84 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   function updateField<K extends keyof BestellungData>(key: K, value: BestellungData[K]): void {
     setBestellung((prev) => ({ ...prev, [key]: value }))
+  }
+
+  /**
+   * Die offenen Auftraege holen, sobald der Fall Direktlieferung gewaehlt ist.
+   *
+   * Ein Lesevorgang — kein Doppelklick-Schutz noetig, aber eine sichtbare
+   * Rueckmeldung: Ohne Auftrag laesst sich keine Direktlieferung bestellen,
+   * und eine leere Auswahl ohne Grund waere eine Sackgasse.
+   */
+  useEffect(() => {
+    if (bestellung.bestellfall !== 'direktlieferung' || auftraege.length > 0) {
+      return
+    }
+    let abgebrochen = false
+    const laden = async () => {
+      setAuftraegeLaufen(true)
+      setDirektFehler(null)
+      try {
+        const antwort = await apiClient.get<{ items?: AuftragsZeile[] } | AuftragsZeile[]>(
+          '/api/v1/sales/orders/?limit=50',
+        )
+        const daten = antwort.data
+        const liste = Array.isArray(daten) ? daten : (daten.items ?? [])
+        if (!abgebrochen) setAuftraege(liste)
+      } catch (fehler) {
+        if (!abgebrochen) {
+          setDirektFehler(
+            fehler instanceof Error
+              ? fehler.message
+              : 'Die offenen Auftraege konnten nicht geladen werden.',
+          )
+        }
+      } finally {
+        if (!abgebrochen) setAuftraegeLaufen(false)
+      }
+    }
+    void laden()
+    return () => {
+      abgebrochen = true
+    }
+  }, [bestellung.bestellfall, auftraege.length])
+
+  /**
+   * Aus dem gewaehlten Auftrag eine Bestellung erzeugen.
+   *
+   * Das ist ein Schreibvorgang: Guard, deaktivierter Knopf, Aufraeumen im
+   * finally, sichtbarer Erfolg und sichtbarer Fehler.
+   */
+  const direktlieferungErzeugen = async () => {
+    if (!auftragId || direktLaeuft) return
+    setDirektLaeuft(true)
+    setDirektFehler(null)
+    try {
+      const antwort = await apiClient.post<{ id: string; bestellnummer?: string; aus_auftrag?: string; uebersprungen?: string[] }>(
+        '/api/v1/einkauf/bestellungen/aus-auftrag',
+        {
+          auftrag_id: auftragId,
+          ueberschlag_lager: ueberschlagLager,
+          lieferant_id: bestellung.lieferant || undefined,
+        },
+      )
+      const beleg = antwort.data
+      toast({
+        title: 'Bestellung erzeugt',
+        description: [
+          `${beleg.bestellnummer ?? beleg.id} aus Auftrag ${beleg.aus_auftrag ?? ''}`.trim(),
+          ...(beleg.uebersprungen ?? []),
+        ].join(' · '),
+      })
+      navigate(`/einkauf/bestellung/${beleg.id}`)
+    } catch (fehler) {
+      const text =
+        fehler instanceof Error ? fehler.message : 'Die Bestellung konnte nicht erzeugt werden.'
+      setDirektFehler(text)
+      toast({ title: 'Nicht erzeugt', description: text, variant: 'destructive' })
+    } finally {
+      setDirektLaeuft(false)
+    }
   }
 
   /**
@@ -601,6 +697,84 @@ export default function BestellungAnlegenPage(): JSX.Element {
               })}
             </div>
           </fieldset>
+
+          {bestellung.bestellfall === 'direktlieferung' ? (
+            <Card>
+              <CardContent className="space-y-4 pt-6">
+                <div>
+                  <h2 className="text-sm font-medium">Aus welchem Auftrag?</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ohne Ueberschlag geht die Ware vom Lieferanten direkt zum Kunden: bestellt
+                    wird die volle Auftragsmenge, Lieferadresse ist die des Kunden. Mit
+                    Ueberschlag laeuft sie ueber den eigenen Hof, der Bestand deckt einen Teil,
+                    und bestellt wird nur die Fehlmenge.
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="direkt-auftrag">Verkaufsauftrag *</Label>
+                  <NativeSelect
+                    id="direkt-auftrag"
+                    value={auftragId}
+                    onChange={(e) => setAuftragId(e.target.value)}
+                    disabled={auftraegeLaufen}
+                  >
+                    <option value="">
+                      {auftraegeLaufen ? 'Auftraege werden geladen…' : 'Auftrag waehlen'}
+                    </option>
+                    {auftraege.map((auftrag) => (
+                      <option key={auftrag.id} value={auftrag.id}>
+                        {[
+                          auftrag.order_number ?? auftrag.id.slice(0, 8),
+                          auftrag.customer_name,
+                          auftrag.delivery_date ? `Liefertermin ${auftrag.delivery_date}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                  {!auftraegeLaufen && auftraege.length === 0 && !direktFehler ? (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Kein offener Auftrag vorhanden. Eine Direktlieferung braucht einen — ohne
+                      Auftrag gibt es keinen Kunden, an den geliefert wird.
+                    </p>
+                  ) : null}
+                </div>
+
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={ueberschlagLager}
+                    onChange={(e) => setUeberschlagLager(e.target.checked)}
+                  />
+                  <span>
+                    <span className="font-medium">Ueberschlag am Lager</span>
+                    <span className="block text-muted-foreground">
+                      Die Ware laeuft ueber den eigenen Hof. Der vorhandene Bestand deckt einen
+                      Teil, und die Lieferadresse bleibt die eigene.
+                    </span>
+                  </span>
+                </label>
+
+                {direktFehler ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>Nicht erzeugt</AlertTitle>
+                    <AlertDescription>{direktFehler}</AlertDescription>
+                  </Alert>
+                ) : null}
+
+                <Button
+                  type="button"
+                  onClick={() => void direktlieferungErzeugen()}
+                  disabled={!auftragId || direktLaeuft}
+                >
+                  {direktLaeuft ? 'Bestellung wird erzeugt…' : 'Bestellung aus Auftrag erzeugen'}
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
 
           {bestellung.bestellfall === 'bestand_abgleich' ? (
             <Card>

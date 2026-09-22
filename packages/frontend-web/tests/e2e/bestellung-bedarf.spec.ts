@@ -84,3 +84,48 @@ test('ohne Bedarf steht dort ein Satz und keine leere Flaeche', async ({ page })
     page.getByText(/Kein Artikel unterschreitet|Bedarf nicht geladen/).first(),
   ).toBeVisible({ timeout: 20_000 })
 })
+
+test('die Direktlieferung fragt nach dem Auftrag und dem Ueberschlag', async ({ page }) => {
+  /**
+   * Ohne Auftrag gibt es keine Direktlieferung — er nennt den Kunden, an den
+   * geliefert wird. Und der Ueberschlag entscheidet, ob der eigene Bestand
+   * ueberhaupt hilft: Bei einer echten Direktlieferung liegt er am falschen Ort.
+   */
+  await maskeOeffnen(page)
+  await page.getByTestId('bestellfall-direktlieferung').click()
+
+  await expect(page.getByLabel('Verkaufsauftrag *')).toBeVisible()
+  // Ueber die Rolle, nicht ueber den Text: "Ueberschlag am Lager" steht auch
+  // in der Beschreibung des Bestellfalls.
+  await expect(page.getByRole('checkbox', { name: /Ueberschlag am Lager/ })).toBeVisible()
+
+  // Ohne gewaehlten Auftrag bleibt der Knopf zu.
+  const knopf = page.getByRole('button', { name: /Bestellung aus Auftrag erzeugen/i })
+  await expect(knopf).toBeDisabled()
+})
+
+test('mit gewaehltem Auftrag geht die Anfrage mit dem Ueberschlag raus', async ({ page }) => {
+  await maskeOeffnen(page)
+  await page.getByTestId('bestellfall-direktlieferung').click()
+
+  const auswahl = page.getByLabel('Verkaufsauftrag *')
+  await expect(auswahl).toBeEnabled({ timeout: 20_000 })
+
+  const werte = await auswahl.locator('option').evaluateAll((opts) =>
+    opts.map((o) => (o as HTMLOptionElement).value).filter(Boolean),
+  )
+  test.skip(werte.length === 0, 'Kein offener Auftrag im Bestand — nichts zu waehlen')
+
+  await auswahl.selectOption(werte[0])
+  await page.getByRole('checkbox', { name: /Ueberschlag am Lager/ }).check()
+
+  const anfrage = page.waitForRequest(
+    (r) => r.url().includes('/einkauf/bestellungen/aus-auftrag') && r.method() === 'POST',
+    { timeout: 20_000 },
+  )
+  await page.getByRole('button', { name: /Bestellung aus Auftrag erzeugen/i }).click()
+  const rumpf = JSON.parse((await anfrage).postData() ?? '{}')
+
+  expect(rumpf.auftrag_id).toBe(werte[0])
+  expect(rumpf.ueberschlag_lager, 'Der Ueberschlag kommt nicht am Server an').toBe(true)
+})
