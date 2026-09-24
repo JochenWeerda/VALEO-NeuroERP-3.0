@@ -1043,11 +1043,14 @@ async def bestellung_freigeben(
 )
 async def bestellung_stornieren(
     bestellung_id: str,
+    grund: Optional[str] = Query(
+        None, description="Warum storniert wird — bleibt am Beleg stehen"
+    ),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     try:
-        return _svc(db, tenant_id).storniere_bestellung(bestellung_id)
+        return _svc(db, tenant_id).storniere_bestellung(bestellung_id, grund)
     except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
     except ValidationFailedError as exc:

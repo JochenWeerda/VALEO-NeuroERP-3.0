@@ -963,7 +963,17 @@ class ProcurementService:
             period=str(entry_date)[:7],
         )
 
-    def storniere_bestellung(self, bestellung_id: str) -> dict:
+    def storniere_bestellung(self, bestellung_id: str, grund: str | None = None) -> dict:
+        """Eine Bestellung stornieren — mit dem Grund, warum.
+
+        Die Maske fragt danach, der Beleg hielt ihn bisher nicht fest. Ein
+        Storno ohne Grund ist spaeter nicht mehr zu erklaeren: Weder der
+        Lieferant noch die Revision koennen nachvollziehen, ob storniert wurde,
+        weil falsch erfasst, weil nicht lieferbar oder weil der Kunde absprang.
+        Der Grund wird an die Notiz gehaengt, nicht in sie hinein — was vorher
+        dastand, bleibt stehen.
+        """
+
         try:
             b = self.db.query(EinkaufBestellung).filter(
                 EinkaufBestellung.id == bestellung_id, EinkaufBestellung.tenant_id == self.tenant_id,
@@ -975,8 +985,16 @@ class ProcurementService:
         if b.status in ("storniert", "abgeschlossen"):
             raise ValidationFailedError(f"Bestellung hat Status '{b.status}' und kann nicht storniert werden")
         b.status = "storniert"
+        if grund and grund.strip():
+            vermerk = f"Storniert: {grund.strip()}"
+            b.notiz = f"{b.notiz}\n{vermerk}" if b.notiz else vermerk
         self.db.commit()
-        return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "status": b.status}
+        return {
+            "bestellung_id": str(b.id),
+            "bestellnummer": b.bestellnummer,
+            "status": b.status,
+            "grund": grund,
+        }
 
     # ── LagerKontenzuordnung CRUD ─────────────────────────────────────────────
 

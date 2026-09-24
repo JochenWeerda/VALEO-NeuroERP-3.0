@@ -20,7 +20,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { History, XCircle, AlertTriangle, Mail, Globe } from 'lucide-react'
 import { usePoCommunications, useSendPoCommunication } from '@/lib/api/procurement-plus'
-import { useApprovePurchaseOrder, useCancelPurchaseOrder } from '@/lib/api/purchase-orders'
+import { useFreigebenBestellung, useStornierenBestellung } from '@/lib/api/purchase-orders'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel'
@@ -44,14 +44,14 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
       label: t('crud.detail.basicInfo'),
       fields: [
         {
-          name: 'nummer',
+          name: 'bestellnummer',
           label: t('crud.fields.number'),
           type: 'text',
           required: true,
           readonly: true
         },
         {
-          name: 'lieferantId',
+          name: 'lieferant_id',
           label: t('crud.entities.supplier'),
           type: 'lookup',
           required: true,
@@ -149,7 +149,7 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
           required: true,
           columns: [
             {
-              key: 'artikelId',
+              key: 'artikel_nr',
               label: t('crud.fields.product'),
               type: 'lookup',
               required: true
@@ -167,12 +167,12 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
               required: true
             },
             {
-              key: 'preis',
+              key: 'einzelpreis',
               label: t('crud.fields.price'),
               type: 'number'
             },
             {
-              key: 'wunschtermin',
+              key: 'lieferdatum_wunsch',
               label: t('crud.fields.dueDate'),
               type: 'date'
             }
@@ -186,7 +186,7 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
       label: t('crud.detail.additionalInfo'),
       fields: [
         {
-          name: 'bemerkungen',
+          name: 'notiz',
           label: t('crud.fields.notes'),
           type: 'textarea',
           placeholder: t('crud.fields.notes')
@@ -216,14 +216,21 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
       type: 'secondary',
     }
   ],
+  // Der fuehrende Bestellbestand, nicht der Compat-Dokumentenspeicher.
+  //
+  // Die Maske las /api/v1/purchase-orders — dort liegen Dokumente eines
+  // generischen Speichers, waehrend die Bestellungen selbst in
+  // domain_einkauf.bestellungen stehen. Sie zeigte damit dieselbe halbe
+  // Wahrheit wie die Liste: Belege aus einem Verkaufsauftrag fehlten ganz.
+  // Der Nummernkreis ist EK-.
   api: {
-    baseUrl: '/api/v1/purchase-orders',
+    baseUrl: '/api/v1/einkauf/bestellungen',
     endpoints: {
-      list: '/api/v1/purchase-orders',
-      get: '/api/v1/purchase-orders/{id}',
-      create: '/api/v1/purchase-orders',
-      update: '/api/v1/purchase-orders/{id}',
-      delete: '/api/v1/purchase-orders/{id}'
+      list: '/api/v1/einkauf/bestellungen',
+      get: '/api/v1/einkauf/bestellungen/{id}',
+      create: '/api/v1/einkauf/bestellungen',
+      update: '/api/v1/einkauf/bestellungen/{id}',
+      delete: '/api/v1/einkauf/bestellungen/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write']
@@ -255,12 +262,12 @@ export default function BestellungStammPage(): JSX.Element {
     apiUrl: bestellungConfig.api.baseUrl,
     id: id || undefined
   })
-  const poCommunicationId = stringValue(id || data?.nummer || data?.purchaseOrderNumber || data?.id)
+  const poCommunicationId = stringValue(id || data?.bestellnummer || data?.nummer || data?.id)
   const { data: poCommunications = [] } = usePoCommunications(poCommunicationId)
   const sendPoEmail = useSendPoCommunication(poCommunicationId, 'email')
   const sendPoPortal = useSendPoCommunication(poCommunicationId, 'portal')
-  const approvePurchaseOrder = useApprovePurchaseOrder()
-  const cancelPurchaseOrder = useCancelPurchaseOrder()
+  const approvePurchaseOrder = useFreigebenBestellung()
+  const cancelPurchaseOrder = useStornierenBestellung()
 
   // Audit Trail
   const { changeLogs, isLoading: isLoadingAudit, refetch: refetchAudit } = useCrudAuditTrail({
@@ -363,7 +370,7 @@ export default function BestellungStammPage(): JSX.Element {
   }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (key: string, formData: Record<string, unknown>) => {
-    const purchaseOrderId = id || formData?.id || data?.id || data?.nummer || data?.purchaseOrderNumber
+    const purchaseOrderId = id || formData?.id || data?.id || data?.bestellnummer || data?.nummer
     if (key === 'freigeben') {
       if (!purchaseOrderId) {
         toast({
@@ -374,7 +381,7 @@ export default function BestellungStammPage(): JSX.Element {
         return
       }
       await approvePurchaseOrder.mutateAsync(String(purchaseOrderId))
-      toast({ title: 'Bestellung freigegeben', description: `Bestellung ${data?.nummer || data?.purchaseOrderNumber || purchaseOrderId} wurde freigegeben.` })
+      toast({ title: 'Bestellung freigegeben', description: `Bestellung ${data?.bestellnummer || data?.nummer || purchaseOrderId} wurde freigegeben.` })
       navigate('/einkauf/bestellungen')
     } else if (key === 'stornieren') {
       setStornoDialogOpen(true)
@@ -383,7 +390,7 @@ export default function BestellungStammPage(): JSX.Element {
         window.open(`/api/mcp/documents/purchase_order/${purchaseOrderId}/print?locale=${sendLanguage}`, '_blank')
       }
     } else if (key === 'senden') {
-      if (formData?.lieferantId || data?.lieferantId) {
+      if (formData?.lieferant_id || data?.lieferant_id) {
         setSendDialogOpen(true)
       }
     }
@@ -401,7 +408,7 @@ export default function BestellungStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const purchaseOrderId = id || data?.id || data?.nummer || data?.purchaseOrderNumber
+      const purchaseOrderId = id || data?.id || data?.bestellnummer || data?.nummer
       if (!purchaseOrderId) {
         throw new Error('Bestellung muss zuerst gespeichert werden.')
       }
@@ -467,7 +474,7 @@ export default function BestellungStammPage(): JSX.Element {
     data?.createdAt
       ? {
           label: 'Bestellung angelegt',
-          detail: `Beleg ${data?.nummer || data?.purchaseOrderNumber || id || 'neu'} wurde als Vorgang erfasst.`,
+          detail: `Beleg ${data?.bestellnummer || data?.nummer || id || 'neu'} wurde als Vorgang erfasst.`,
           timestamp: data.createdAt,
         }
       : null,
@@ -796,7 +803,7 @@ export default function BestellungStammPage(): JSX.Element {
                   const poId = id || data?.nummer
                   const sendPayload = {
                     subject: `Bestellung ${stringValue(data?.nummer ?? data?.purchaseOrderNumber ?? poId)}`,
-                    recipient: sendRecipients[0] || stringValue(data?.lieferantId ?? data?.supplierId),
+                    recipient: sendRecipients[0] || stringValue(data?.lieferant_id ?? data?.supplierId),
                     message: sendMessage || undefined,
                     language: sendLanguage,
                   }

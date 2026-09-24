@@ -299,3 +299,49 @@ export function usePurchaseOrderChangelog(id: string) {
     initialData: EMPTY_PURCHASE_ORDER_CHANGELOG,
   })
 }
+
+// ── Fuehrender Bestellbestand ────────────────────────────────────────────
+//
+// Die Haken darueber sprechen mit dem Compat-Dokumentenspeicher
+// (/api/v1/purchase-orders). Der fuehrende Beleg liegt in
+// domain_einkauf.bestellungen und hat eigene Aktionen: freigeben und
+// stornieren statt approve und cancel-with-reason. Der Nummernkreis ist EK-.
+
+/** Eine Bestellung im fuehrenden Bestand freigeben. */
+export function useFreigebenBestellung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiClient.post<Record<string, unknown>>(
+        `/api/v1/einkauf/bestellungen/${id}/freigeben`,
+      )
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: purchaseOrderKeys.all })
+    },
+  })
+}
+
+/**
+ * Eine Bestellung im fuehrenden Bestand stornieren.
+ *
+ * Der Grund geht mit: Ein Storno ohne Grund ist spaeter nicht mehr zu
+ * erklaeren — weder der Lieferant noch die Revision koennen nachvollziehen,
+ * ob falsch erfasst, nicht lieferbar oder der Kunde abgesprungen war.
+ */
+export function useStornierenBestellung() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      const query = reason ? `?grund=${encodeURIComponent(reason)}` : ''
+      const response = await apiClient.post<Record<string, unknown>>(
+        `/api/v1/einkauf/bestellungen/${id}/stornieren${query}`,
+      )
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: purchaseOrderKeys.all })
+    },
+  })
+}

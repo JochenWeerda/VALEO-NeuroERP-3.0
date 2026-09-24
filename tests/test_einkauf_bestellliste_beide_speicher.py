@@ -160,3 +160,40 @@ def test_ein_fremder_mandant_sieht_sie_nicht(client, bestellung_im_einkauf) -> N
     assert antwort.status_code == 200
     nummern = [z.get("purchaseOrderNumber") for z in antwort.json().get("data", [])]
     assert bestellung_im_einkauf["nummer"] not in nummern
+
+
+def test_der_stornogrund_bleibt_am_beleg_stehen(client, engine, bestellung_im_einkauf) -> None:
+    """Ein Storno ohne Grund ist spaeter nicht mehr zu erklaeren.
+
+    Die Maske fragt danach, der Beleg hielt ihn bisher nicht fest. Weder der
+    Lieferant noch die Revision koennen sonst nachvollziehen, ob storniert
+    wurde, weil falsch erfasst, weil nicht lieferbar oder weil der Kunde
+    absprang.
+    """
+    from sqlalchemy import text
+
+    antwort = client.post(
+        f"/api/v1/einkauf/bestellungen/{bestellung_im_einkauf['id']}/stornieren",
+        params={"grund": "Lieferant kann nicht liefern"},
+        headers=kopf(bestellung_im_einkauf["mandant"]),
+    )
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["status"] == "storniert"
+
+    with engine.connect() as v:
+        zeile = v.execute(
+            text("SELECT status, notiz FROM domain_einkauf.bestellungen WHERE id::text = :id"),
+            {"id": bestellung_im_einkauf["id"]},
+        ).mappings().first()
+    assert zeile["status"] == "storniert"
+    assert "Lieferant kann nicht liefern" in (zeile["notiz"] or "")
+
+
+def test_ohne_grund_wird_trotzdem_storniert(client, bestellung_im_einkauf) -> None:
+    """Der Grund ist wichtig, aber kein Zwang — sonst blockiert er die Korrektur."""
+    antwort = client.post(
+        f"/api/v1/einkauf/bestellungen/{bestellung_im_einkauf['id']}/stornieren",
+        headers=kopf(bestellung_im_einkauf["mandant"]),
+    )
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["status"] == "storniert"
