@@ -129,3 +129,19 @@ test('mit gewaehltem Auftrag geht die Anfrage mit dem Ueberschlag raus', async (
   expect(rumpf.auftrag_id).toBe(werte[0])
   expect(rumpf.ueberschlag_lager, 'Der Ueberschlag kommt nicht am Server an').toBe(true)
 })
+
+test('der Innovationsfall fragt nach dem Grund, nicht nach einer Rechnung', async ({ page }) => {
+  /**
+   * Ein neuer Artikel hat keine Historie — hier laesst sich nichts
+   * hochrechnen. Was bleibt, ist die Frage, warum die Probe laeuft; steht das
+   * nirgends, weiss in drei Monaten niemand mehr, warum der Artikel im Lager
+   * liegt.
+   */
+  await maskeOeffnen(page)
+  await page.getByTestId('bestellfall-innovation').click()
+
+  await expect(page.getByLabel('Warum diese Probe?')).toBeVisible()
+  // Keine Bedarfsrechnung und keine Auftragsauswahl — beide waeren hier falsch.
+  await expect(page.getByLabel('Horizont')).toHaveCount(0)
+  await expect(page.getByLabel('Verkaufsauftrag *')).toHaveCount(0)
+})

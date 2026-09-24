@@ -203,6 +203,8 @@ export default function BestellungAnlegenPage(): JSX.Element {
       contractId: bestellung.contractId,
       rfqId: bestellung.rfqId,
       bestellfall: bestellung.bestellfall,
+      innovationshinweis:
+        bestellung.bestellfall === 'innovation' ? innovationshinweis || undefined : undefined,
       notes: bestellung.notizen || undefined,
       taxRate: 19,
       items: bestellung.positionen.map((pos) => ({
@@ -244,6 +246,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
     })
   }
   
+  const [innovationshinweis, setInnovationshinweis] = useState('')
   const [auftraege, setAuftraege] = useState<AuftragsZeile[]>([])
   const [auftragId, setAuftragId] = useState('')
   const [ueberschlagLager, setUeberschlagLager] = useState(false)
@@ -697,6 +700,41 @@ export default function BestellungAnlegenPage(): JSX.Element {
               })}
             </div>
           </fieldset>
+
+          {bestellung.bestellfall === 'innovation' ? (
+            <Card>
+              <CardContent className="space-y-4 pt-6">
+                <div>
+                  <h2 className="text-sm font-medium">Probe statt Bedarf</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ein neuer Artikel hat keine Historie — hier laesst sich nichts
+                    hochrechnen. Die Menge ist eine Entscheidung: klein genug, dass ein
+                    Fehlgriff nichts kostet, gross genug, dass der Verkauf etwas zu zeigen
+                    hat.
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="innovationshinweis">Warum diese Probe?</Label>
+                  <Textarea
+                    id="innovationshinweis"
+                    value={innovationshinweis}
+                    onChange={(e) => setInnovationshinweis(e.target.value)}
+                    placeholder="Wer hat es angeregt, was soll sich zeigen, bis wann?"
+                    rows={2}
+                  />
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Steht das nirgends, weiss in drei Monaten niemand mehr, warum der
+                    Artikel im Lager liegt.
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Die Nachschau laeuft ab der ersten Lieferung: Unter
+                  <span className="mx-1 font-medium">/einkauf/innovationen</span>
+                  steht je Probe, wieviel verkauft ist und ob das fuer eine Listung reicht.
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
 
           {bestellung.bestellfall === 'direktlieferung' ? (
             <Card>

@@ -293,6 +293,50 @@ def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
 # Bestell-Vorschlag Engines
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+class InnovationsStandOut(BaseSchema):
+    """Wie eine Artikelprobe laeuft — mit dem Grund fuer die Empfehlung."""
+
+    model_config = ConfigDict(extra="allow")
+
+    bestellung_id: str
+    bestellnummer: Optional[str] = None
+    artikel_nr: Optional[str] = None
+    artikel_bezeichnung: Optional[str] = None
+    einheit: Optional[str] = None
+    hinweis: Optional[str] = None
+    bestelldatum: Optional[str] = None
+    erste_lieferung: Optional[str] = None
+    tage_im_regal: int = 0
+    testmenge: float = 0.0
+    verkauft: float = 0.0
+    abverkaufsquote: float = 0.0
+    abverkauf_pro_tag: float = 0.0
+    stand: str
+    empfehlung: str
+
+
+@router.get(
+    "/einkauf/innovationen",
+    summary="Laufende Artikelproben",
+    response_model=list[InnovationsStandOut],
+)
+async def innovationen(
+    fenster_tage: Optional[int] = Query(
+        None, ge=7, le=730, description="Bewertungsfenster in Tagen (Vorgabe 90)"
+    ),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """Was wurde zur Probe bestellt, und was ist daraus geworden?
+
+    Gerechnet wird ab der ersten Lieferung, nicht ab der Bestellung: Solange
+    die Ware nicht da ist, kann sie sich nicht verkaufen. Die Empfehlung ist
+    ein Vorschlag mit Begruendung, keine Buchung — ob ein Artikel ins Sortiment
+    kommt, entscheidet der Vertrieb.
+    """
+    return _svc(db, tenant_id).innovationen_bewerten(fenster_tage)
+
+
 class BestellungAusAuftragIn(BaseModel):
     """Was die Direktlieferung wissen muss."""
 

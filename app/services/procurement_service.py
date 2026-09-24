@@ -559,6 +559,146 @@ class ProcurementService:
             for b in q.order_by(EinkaufBestellung.bestelldatum.desc()).all()
         ]
 
+    #: Ab wann eine Probe etwas aussagt und wann sie entschieden ist.
+    #:
+    #: Die Schwellen sind eine Verabredung, keine Wahrheit — deshalb stehen sie
+    #: hier benannt und nicht verstreut im Code. Wer sie anders will, aendert
+    #: sie hier und sieht sofort, was davon abhaengt.
+    INNOVATION_FENSTER_TAGE = 90
+    INNOVATION_MINDESTTAGE = 14      # darunter ist jedes Urteil verfrueht
+    INNOVATION_QUOTE_GUT = 0.7       # so viel der Probe verkauft -> aufnehmen
+    INNOVATION_QUOTE_SCHWACH = 0.3   # darunter, nach der Haelfte -> auslisten
+
+    def innovationen_bewerten(self, fenster_tage: int | None = None) -> list[dict]:
+        """Wie laufen die Artikel, die zur Probe bestellt wurden?
+
+        Ein neuer Artikel hat keine Historie — genau deshalb ist er ein eigener
+        Bestellfall und keine Bedarfsrechnung. Was er stattdessen braucht, ist
+        eine Nachschau: Was wurde zur Probe bestellt, was ist davon verkauft,
+        und reicht das fuer eine Entscheidung?
+
+        Gerechnet wird ab der **ersten Lieferung**, nicht ab der Bestellung:
+        Solange die Ware nicht da ist, kann sie sich nicht verkaufen, und ein
+        Urteil waere unfair. Vor ``INNOVATION_MINDESTTAGE`` gibt es deshalb
+        keine Empfehlung, sondern die Auskunft, dass es zu frueh ist.
+
+        Die Empfehlung ist ein Vorschlag, keine Buchung: Ob ein Artikel ins
+        Sortiment kommt, entscheidet der Vertrieb, nicht eine Quote.
+        """
+        fenster = fenster_tage or self.INNOVATION_FENSTER_TAGE
+        heute = business_today()
+
+        zeilen = _query_many(
+            self.db,
+            """
+            SELECT b.id::text        AS bestellung_id,
+                   b.bestellnummer,
+                   b.bestelldatum,
+                   b.innovationshinweis,
+                   p.artikel_nr,
+                   p.artikel_bezeichnung,
+                   p.article_id::text AS article_id,
+                   p.menge            AS testmenge,
+                   p.einheit
+            FROM domain_einkauf.bestellungen b
+            JOIN domain_einkauf.bestellung_positionen p ON p.bestellung_id = b.id
+            WHERE b.tenant_id = :tid
+              AND b.neuer_artikel IS TRUE
+              AND COALESCE(b.status, '') <> 'storniert'
+            ORDER BY b.bestelldatum DESC NULLS LAST, p.pos_nr
+            """,
+            {"tid": self.tenant_id},
+        )
+
+        ergebnis: list[dict] = []
+        for zeile in zeilen:
+            testmenge = Decimal(str(zeile.get("testmenge") or 0))
+            article_id = zeile.get("article_id")
+
+            erste_lieferung = None
+            verkauft = Decimal("0")
+            if article_id:
+                erste_lieferung = _query_one(
+                    self.db,
+                    """
+                    SELECT MIN(movement_date) AS datum
+                    FROM domain_inventory.inventory_stock_movements
+                    WHERE article_id::text = :aid
+                      AND tenant_id = :tid
+                      AND lower(movement_type) IN ('in', 'wareneingang', 'einlagerung')
+                      AND (:ab IS NULL OR movement_date >= :ab)
+                    """,
+                    {"aid": article_id, "tid": self.tenant_id, "ab": zeile.get("bestelldatum")},
+                )
+                erste_lieferung = (erste_lieferung or {}).get("datum")
+
+            if erste_lieferung:
+                gemessen = _query_one(
+                    self.db,
+                    """
+                    SELECT COALESCE(SUM(quantity), 0) AS menge
+                    FROM domain_inventory.inventory_stock_movements
+                    WHERE article_id::text = :aid
+                      AND tenant_id = :tid
+                      AND lower(movement_type) = 'out'
+                      AND movement_date >= :ab
+                    """,
+                    {"aid": article_id, "tid": self.tenant_id, "ab": erste_lieferung},
+                )
+                verkauft = Decimal(str(abs((gemessen or {}).get("menge") or 0)))
+
+            tage = (heute - erste_lieferung).days if erste_lieferung else 0
+            quote = float(verkauft / testmenge) if testmenge > 0 else 0.0
+            pro_tag = float(verkauft / tage) if tage > 0 else 0.0
+
+            if not erste_lieferung:
+                stand, empfehlung = "wartet_auf_lieferung", (
+                    "Die Probe ist noch nicht angekommen — bis dahin gibt es nichts zu messen."
+                )
+            elif tage < self.INNOVATION_MINDESTTAGE:
+                stand, empfehlung = "zu_frueh", (
+                    f"Erst {tage} Tage im Regal. Ein Urteil vor "
+                    f"{self.INNOVATION_MINDESTTAGE} Tagen sagt mehr ueber den Zufall "
+                    f"als ueber den Artikel."
+                )
+            elif quote >= self.INNOVATION_QUOTE_GUT:
+                stand, empfehlung = "aufnehmen", (
+                    f"{quote:.0%} der Probe verkauft, {pro_tag:.2f} je Tag — "
+                    f"das traegt eine Listung."
+                )
+            elif quote < self.INNOVATION_QUOTE_SCHWACH and tage >= fenster / 2:
+                stand, empfehlung = "auslisten", (
+                    f"Nach {tage} Tagen erst {quote:.0%} verkauft. Der Artikel bindet "
+                    f"Platz, den ein laufender braucht."
+                )
+            else:
+                stand, empfehlung = "beobachten", (
+                    f"{quote:.0%} nach {tage} Tagen — noch keine Entscheidung, "
+                    f"weiter beobachten."
+                )
+
+            ergebnis.append({
+                "bestellung_id": zeile["bestellung_id"],
+                "bestellnummer": zeile.get("bestellnummer"),
+                "artikel_nr": zeile.get("artikel_nr"),
+                "artikel_bezeichnung": zeile.get("artikel_bezeichnung"),
+                "einheit": zeile.get("einheit"),
+                "hinweis": zeile.get("innovationshinweis"),
+                "bestelldatum": (
+                    zeile["bestelldatum"].isoformat() if zeile.get("bestelldatum") else None
+                ),
+                "erste_lieferung": erste_lieferung.isoformat() if erste_lieferung else None,
+                "tage_im_regal": tage,
+                "testmenge": float(testmenge),
+                "verkauft": float(verkauft),
+                "abverkaufsquote": round(quote, 4),
+                "abverkauf_pro_tag": round(pro_tag, 3),
+                "stand": stand,
+                "empfehlung": empfehlung,
+            })
+
+        return ergebnis
+
     def bestellung_aus_auftrag(
         self,
         auftrag_id: str,
