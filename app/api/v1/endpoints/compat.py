@@ -287,6 +287,70 @@ async def crm_suppliers(
 # Purchase orders -----------------------------------------------------------
 
 
+def _bestellungen_als_compat(db: Session, tenant_id: str) -> list[dict[str, Any]]:
+    """Die Bestellungen aus ``domain_einkauf`` in der Form der Compat-Liste.
+
+    Es gibt zwei Bestellwelten: Diese Compat-Schnittstelle legt Dokumente in
+    einem generischen Dokumentenspeicher ab, die fuehrende Maske
+    (``einkauf/purchase-order``) schreibt nach ``domain_einkauf.bestellungen``.
+    Wer die Liste aufrief, sah deshalb nur die eine Haelfte — und gerade die
+    Bestellungen, die aus einem Verkaufsauftrag entstanden sind, fehlten
+    vollstaendig.
+
+    Zusammengelegt sind die beiden Speicher damit nicht; das ist ein eigener
+    Schritt mit Migration und einem Nummernkreis. Was hier passiert, ist das
+    Noetige: **Lesen zeigt beides.** Doppelt kann nichts erscheinen, weil ein
+    Beleg immer nur in einem der beiden Speicher entsteht.
+    """
+    zeilen = db.execute(
+        text(
+            """
+            SELECT b.id::text AS id, b.bestellnummer, b.status, b.bestelldatum,
+                   b.lieferdatum_wunsch, b.lieferant_id::text AS lieferant_id,
+                   b.netto_summe, b.brutto_summe, b.waehrung, b.incoterms,
+                   b.lieferadresse, b.notiz, b.bestellfall, b.kommission,
+                   b.created_at, b.updated_at,
+                   l.firmenname AS lieferant_name
+            FROM domain_einkauf.bestellungen b
+            LEFT JOIN domain_einkauf.lieferanten l ON l.id = b.lieferant_id
+            WHERE b.tenant_id = :tid
+            ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC
+            LIMIT 5000
+            """
+        ),
+        {"tid": tenant_id},
+    ).mappings().all()
+
+    ergebnis: list[dict[str, Any]] = []
+    for z in zeilen:
+        ergebnis.append({
+            "id": z["id"],
+            "purchaseOrderNumber": z["bestellnummer"],
+            "supplierId": z["lieferant_id"],
+            "supplierName": z["lieferant_name"],
+            "subject": z["kommission"] or z["bestellfall"] or "",
+            "description": z["notiz"] or "",
+            "status": (z["status"] or "").upper(),
+            "orderDate": z["bestelldatum"].isoformat() if z["bestelldatum"] else None,
+            "deliveryDate": (
+                z["lieferdatum_wunsch"].isoformat() if z["lieferdatum_wunsch"] else None
+            ),
+            "currency": z["waehrung"] or "EUR",
+            "incoterms": z["incoterms"],
+            "shippingAddress": z["lieferadresse"],
+            "subtotal": float(z["netto_summe"] or 0),
+            "totalAmount": float(z["brutto_summe"] or 0),
+            "createdAt": z["created_at"].isoformat() if z["created_at"] else None,
+            "updatedAt": z["updated_at"].isoformat() if z["updated_at"] else None,
+            "tenantId": tenant_id,
+            # Damit sichtbar bleibt, woher der Beleg kommt, solange es zwei
+            # Speicher gibt.
+            "herkunft": "einkauf",
+            "bestellfall": z["bestellfall"],
+        })
+    return ergebnis
+
+
 @router.get("/purchase-orders", response_model=PurchaseOrderListOut, summary="List po")
 async def po_list(
     status: Optional[str] = Query(None),
@@ -297,9 +361,11 @@ async def po_list(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
+    # Der Rueckfall auf *alle* Mandanten ist raus: Er sprang ein, sobald der
+    # eigene Mandant nichts hatte, und zeigte dann fremde Bestellungen — mit
+    # Lieferant, Betrag und Adresse.
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
-    if not docs:
-        docs = _list_docs(db, "purchase_order", limit=5000)
+    docs = [*docs, *_bestellungen_als_compat(db, tenant_id)]
 
     def _match(d: dict[str, Any]) -> bool:
         if status and str(d.get("status")) != status:
@@ -313,6 +379,8 @@ async def po_list(
         return True
 
     filtered = [d for d in docs if _match(d)]
+    # Zwei Quellen, eine Liste: ohne Sortierung stuenden die einen immer oben.
+    filtered.sort(key=lambda d: str(d.get("orderDate") or d.get("createdAt") or ""), reverse=True)
     total = len(filtered)
     start = (page - 1) * pageSize
     items = filtered[start : start + pageSize]
@@ -323,8 +391,7 @@ async def po_list(
 @router.get("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Get po")
 async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
-    if not docs:
-        docs = _list_docs(db, "purchase_order", limit=5000)
+    docs = [*docs, *_bestellungen_als_compat(db, tenant_id)]
     for d in docs:
         if str(d.get("id")) == po_id or str(d.get("purchaseOrderNumber")) == po_id:
             return d
