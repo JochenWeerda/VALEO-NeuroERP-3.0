@@ -119,6 +119,40 @@ def _clean_fields(data: dict[str, Any], allowed: frozenset[str]) -> dict[str, An
     return cleaned
 
 
+def _summen_rechnen(bestellung: Any, mwst_satz: float = 19.0) -> None:
+    """Netto, Steuer und Brutto aus den Positionen setzen.
+
+    Gerechnet wurde das nie: Eine Bestellung mit Positionen stand auf 0,00 —
+    im Beleg, in der Liste und in jeder Auswertung. Aufgefallen ist es erst,
+    als die Compat-Anlage auf diesen Weg gelegt wurde und eine frisch
+    angelegte Bestellung ueber zehn Sack Grassaat einen Betrag von null
+    zurueckmeldete.
+
+    Der Steuersatz ist eine Annahme (19 %), solange die Position keinen
+    eigenen fuehrt. Das ist besser als keine Zahl, aber es bleibt eine
+    Annahme — ein ermaessigter Satz gehoert an die Position.
+    """
+    netto = Decimal("0")
+    for pos in bestellung.positionen or []:
+        menge = Decimal(str(pos.menge or 0))
+        preis = Decimal(str(pos.einzelpreis or 0))
+        rabatt = Decimal(str(pos.rabatt_prozent or 0))
+        betrag = (menge * preis * (Decimal("100") - rabatt) / Decimal("100")).quantize(
+            Decimal("0.01")
+        )
+        if pos.netto_betrag in (None, 0):
+            pos.netto_betrag = betrag
+        satz = Decimal(str(pos.mwst_satz if pos.mwst_satz is not None else mwst_satz))
+        pos.mwst_betrag = (betrag * satz / Decimal("100")).quantize(Decimal("0.01"))
+        pos.brutto_betrag = betrag + pos.mwst_betrag
+        netto += Decimal(str(pos.netto_betrag))
+
+    steuer = (netto * Decimal(str(mwst_satz)) / Decimal("100")).quantize(Decimal("0.01"))
+    bestellung.netto_summe = netto
+    bestellung.mwst_betrag = steuer
+    bestellung.brutto_summe = netto + steuer
+
+
 def bestellung_to_mask(b: EinkaufBestellung) -> dict[str, Any]:
     """Kopf und Positionen in der Sprache der fuehrenden Maske."""
     return {
@@ -887,9 +921,16 @@ class ProcurementService:
                 }},
             )
             self.db.add(pos)
+        self.db.flush()
+        _summen_rechnen(bestellung)
         self.db.commit()
         self.db.refresh(bestellung)
-        return {"id": str(bestellung.id), "bestellnummer": bestellung.bestellnummer}
+        return {
+            "id": str(bestellung.id),
+            "bestellnummer": bestellung.bestellnummer,
+            "netto_summe": float(bestellung.netto_summe or 0),
+            "brutto_summe": float(bestellung.brutto_summe or 0),
+        }
 
     def get_bestellung(self, bestellung_id: str) -> dict:
         b = self.db.query(EinkaufBestellung).filter(

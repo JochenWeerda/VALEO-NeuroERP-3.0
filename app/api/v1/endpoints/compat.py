@@ -398,12 +398,124 @@ async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Sessio
     raise HTTPException(status_code=404, detail="Purchase order not found")
 
 
+def _lieferant_aufloesen(db: Session, tenant_id: str, roh: Any) -> str | None:
+    """Den Lieferanten finden — ueber Id, Nummer oder Namen.
+
+    Der Dokumentenspeicher nahm als ``supplierId`` alles entgegen, auch einen
+    blossen Namen ("Stroetmann"). Der fuehrende Beleg verlangt einen echten
+    Stammsatz, und das zu Recht: Ohne ihn gibt es keine Anschrift, keine
+    Zahlungsbedingung und keine Auswertung je Lieferant.
+
+    Erfunden wird hier nichts. Wer nicht gefunden wird, fuehrt zu einer klaren
+    Absage statt zu einem Stammsatz, den niemand gepflegt hat.
+    """
+    wert = str(roh or "").strip()
+    if not wert:
+        return None
+    return db.execute(
+        text(
+            "SELECT id::text FROM domain_einkauf.lieferanten "
+            "WHERE tenant_id = :t AND (id::text = :s OR lieferantennummer = :s "
+            "      OR lower(firmenname) = lower(:s)) LIMIT 1"
+        ),
+        {"t": tenant_id, "s": wert},
+    ).scalar()
+
+
+def _bestellung_finden(db: Session, tenant_id: str, kennung: str) -> dict[str, Any] | None:
+    """Einen Beleg ueber Id **oder** Bestellnummer finden."""
+    zeile = db.execute(
+        text(
+            "SELECT id::text AS id, bestellnummer, status "
+            "FROM domain_einkauf.bestellungen "
+            "WHERE tenant_id = :t AND (id::text = :k OR bestellnummer = :k) LIMIT 1"
+        ),
+        {"t": tenant_id, "k": str(kennung)},
+    ).mappings().first()
+    return dict(zeile) if zeile else None
+
+
+def _compat_zeile(db: Session, tenant_id: str, bestell_id: str) -> dict[str, Any]:
+    """Einen Beleg in der Form zurueckgeben, die die Compat-Aufrufer kennen."""
+    for zeile in _bestellungen_als_compat(db, tenant_id):
+        if zeile["id"] == bestell_id:
+            return zeile
+    raise HTTPException(status_code=404, detail="Purchase order not found")
+
+
 async def _create_compat_purchase_order(
     db: Session,
     *,
     tenant_id: str,
     payload: dict[str, Any],
 ) -> dict[str, Any]:
+    # Angelegt wird jetzt im fuehrenden Bestand (domain_einkauf.bestellungen,
+    # Nummernkreis EK-), nicht mehr als Dokument. Sonst waechst die alte Welt
+    # weiter, waehrend beide Masken schon richtig lesen.
+    from app.services.procurement_service import ProcurementService
+
+    lieferant_id = _lieferant_aufloesen(db, tenant_id, payload.get("supplierId"))
+    if not lieferant_id:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Lieferant '{payload.get('supplierId')}' ist im Lieferantenstamm nicht "
+                f"zu finden — weder als Id noch als Nummer noch als Name. "
+                f"Ohne Stammsatz keine Bestellung."
+            ),
+        )
+
+    positionen = []
+    for nr, position in enumerate(payload.get("items", []) or [], start=1):
+        bezeichnung = position.get("description") or f"Position {nr}"
+        positionen.append({
+            "artikel_nr": position.get("articleNumber") or bezeichnung[:50],
+            "artikel_bezeichnung": bezeichnung,
+            "menge": float(position.get("quantity") or 0),
+            "einheit": position.get("unit") or "Stk",
+            "einzelpreis": float(position.get("unitPrice") or 0),
+            "rabatt_prozent": float(position.get("discountPercent") or 0),
+        })
+
+    dienst = ProcurementService(db, tenant_id)
+    angelegt = dienst.create_bestellung({
+        "lieferant_id": lieferant_id,
+        "bestelldatum": payload.get("orderDate"),
+        "lieferdatum_wunsch": payload.get("deliveryDate"),
+        "waehrung": payload.get("currency") or "EUR",
+        "incoterms": payload.get("incoterms"),
+        "lieferadresse": payload.get("shippingAddress"),
+        "zahlungsbedingung": payload.get("paymentTerms"),
+        "ansprechpartner": payload.get("contactPerson"),
+        "unsere_referenz": payload.get("externalReference"),
+        "notiz": payload.get("notes") or payload.get("description"),
+        "kommission": payload.get("subject"),
+        "positionen": positionen,
+    })
+
+    await _enqueue_event(
+        db,
+        event_type="purchase_order.created",
+        aggregate_id=angelegt["id"],
+        payload={
+            "purchaseOrderNumber": angelegt.get("bestellnummer"),
+            "supplierId": lieferant_id,
+            "status": angelegt.get("status"),
+            "createdAt": _now_iso(),
+        },
+        tenant_id=tenant_id,
+    )
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    return _compat_zeile(db, tenant_id, angelegt["id"])
+
+
+async def _create_compat_purchase_order_dokument(
+    db: Session,
+    *,
+    tenant_id: str,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Der alte Weg — bleibt lesbar, wird aber nicht mehr gerufen."""
     now = _now_iso()
     po_number = payload.get("purchaseOrderNumber") or f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid4())[:6].upper()}"
     item_list = payload.get("items", [])
@@ -466,6 +578,27 @@ async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant
 
 @router.patch("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Patch po")
 async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    from app.services.procurement_service import ProcurementService
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if beleg:
+        felder = {
+            "deliveryDate": "lieferdatum_wunsch",
+            "shippingAddress": "lieferadresse",
+            "paymentTerms": "zahlungsbedingung",
+            "contactPerson": "ansprechpartner",
+            "incoterms": "incoterms",
+            "currency": "waehrung",
+            "notes": "notiz",
+            "externalReference": "unsere_referenz",
+            "subject": "kommission",
+        }
+        daten = {ziel: payload[quelle] for quelle, ziel in felder.items() if quelle in payload}
+        if daten:
+            ProcurementService(db, tenant_id).update_bestellung(beleg["id"], daten)
+        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+        return _compat_zeile(db, tenant_id, beleg["id"])
+
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
     changes = []
@@ -490,6 +623,18 @@ async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends
 
 @router.post("/purchase-orders/{po_id}/approve", response_model=PurchaseOrderOut, summary="Approve po")
 async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    from app.core.exceptions import ValidationFailedError
+    from app.services.procurement_service import ProcurementService
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if beleg:
+        try:
+            ProcurementService(db, tenant_id).freigebe_bestellung(beleg["id"])
+        except ValidationFailedError as fehler:
+            raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+        return _compat_zeile(db, tenant_id, beleg["id"])
+
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
     doc["status"] = "FREIGEGEBEN"
@@ -520,6 +665,20 @@ async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Se
 
 @router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=PurchaseOrderOut, summary="Cancel po")
 async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    from app.core.exceptions import ValidationFailedError
+    from app.services.procurement_service import ProcurementService
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if beleg:
+        try:
+            ProcurementService(db, tenant_id).storniere_bestellung(
+                beleg["id"], payload.get("reason")
+            )
+        except ValidationFailedError as fehler:
+            raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+        return _compat_zeile(db, tenant_id, beleg["id"])
+
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
     reason = payload.get("reason") or ""

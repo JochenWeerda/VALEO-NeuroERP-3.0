@@ -197,3 +197,149 @@ def test_ohne_grund_wird_trotzdem_storniert(client, bestellung_im_einkauf) -> No
     )
     assert antwort.status_code == 200, antwort.text
     assert antwort.json()["status"] == "storniert"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Der Schreibweg: Compat legt im fuehrenden Bestand an, nicht mehr als Dokument
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.fixture()
+def lieferant(engine):
+    """Ein Lieferant mit Stammsatz — ohne den gibt es keine Bestellung."""
+    from sqlalchemy import text
+
+    mandant = f"test-{uuid.uuid4().hex[:8]}"
+    lieferant_id = str(uuid.uuid4())
+    name = f"Saatgut {uuid.uuid4().hex[:5]}"
+
+    with engine.begin() as v:
+        v.execute(
+            text(
+                "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
+                "VALUES (:id, :id, :d, true) ON CONFLICT (id) DO NOTHING"
+            ),
+            {"id": mandant, "d": f"{mandant}.test"},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_einkauf.lieferanten "
+                "(id, tenant_id, lieferantennummer, firmenname) "
+                "VALUES (:id, :t, :nr, :name)"
+            ),
+            {
+                "id": lieferant_id, "t": mandant,
+                "nr": f"LF-{uuid.uuid4().hex[:5].upper()}", "name": name,
+            },
+        )
+
+    try:
+        yield {"mandant": mandant, "id": lieferant_id, "name": name}
+    finally:
+        with engine.begin() as v:
+            for sql in (
+                "DELETE FROM domain_einkauf.bestellung_positionen WHERE bestellung_id IN "
+                "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = :t)",
+                "DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = :t",
+                "DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = :t",
+                "DELETE FROM domain_shared.tenants WHERE id = :t",
+            ):
+                v.execute(text(sql), {"t": mandant})
+
+
+def test_compat_legt_im_fuehrenden_bestand_an(client, engine, lieferant) -> None:
+    """Der Nummernkreis ist EK-, und der Beleg steht in domain_einkauf.
+
+    Vorher entstand hier ein Dokument mit PO-Nummer. Damit waere die alte Welt
+    weitergewachsen, obwohl beide Masken schon richtig lesen.
+    """
+    from sqlalchemy import text
+
+    antwort = client.post(
+        "/api/v1/purchase-orders",
+        headers=kopf(lieferant["mandant"]),
+        json={
+            "supplierId": lieferant["name"],
+            "subject": "Fruehjahrssaat",
+            "items": [{"description": "Grassaat", "quantity": 10, "unitPrice": 3.15}],
+        },
+    )
+    assert antwort.status_code == 201, antwort.text
+    beleg = antwort.json()
+    assert beleg["purchaseOrderNumber"].startswith("EK-"), beleg["purchaseOrderNumber"]
+    assert beleg["herkunft"] == "einkauf"
+
+    with engine.connect() as v:
+        vorhanden = v.execute(
+            text("SELECT count(*) FROM domain_einkauf.bestellungen WHERE id::text = :id"),
+            {"id": beleg["id"]},
+        ).scalar()
+    assert vorhanden == 1
+
+
+def test_die_summen_werden_gerechnet(client, lieferant) -> None:
+    """Gerechnet wurde nie — jede Bestellung stand auf 0,00.
+
+    Aufgefallen ist es erst, als die Compat-Anlage auf diesen Weg kam und eine
+    frische Bestellung ueber zehn Sack Grassaat null zurueckmeldete.
+    """
+    antwort = client.post(
+        "/api/v1/purchase-orders",
+        headers=kopf(lieferant["mandant"]),
+        json={
+            "supplierId": lieferant["name"],
+            "items": [
+                {"description": "Grassaat", "quantity": 10, "unitPrice": 3.15},
+                {"description": "Nachsaat", "quantity": 4, "unitPrice": 2.50,
+                 "discountPercent": 10},
+            ],
+        },
+    )
+    beleg = antwort.json()
+    netto = 10 * 3.15 + 4 * 2.50 * 0.9
+    assert beleg["subtotal"] == pytest.approx(netto, abs=0.01)
+    assert beleg["totalAmount"] == pytest.approx(netto * 1.19, abs=0.01)
+
+
+def test_ohne_stammsatz_keine_bestellung(client, lieferant) -> None:
+    """Der Dokumentenspeicher nahm jeden Namen entgegen, auch erfundene.
+
+    Der fuehrende Beleg verlangt einen echten Lieferanten — ohne ihn gibt es
+    keine Anschrift, keine Zahlungsbedingung und keine Auswertung. Erfunden
+    wird hier nichts; wer fehlt, bekommt eine klare Absage.
+    """
+    antwort = client.post(
+        "/api/v1/purchase-orders",
+        headers=kopf(lieferant["mandant"]),
+        json={"supplierId": "Gibtsnicht GmbH", "items": []},
+    )
+    assert antwort.status_code == 422, antwort.text
+    assert "nicht zu finden" in str(antwort.json().get("detail", ""))
+
+
+def test_storno_ueber_compat_wirkt_am_beleg(client, engine, lieferant) -> None:
+    from sqlalchemy import text
+
+    beleg = client.post(
+        "/api/v1/purchase-orders",
+        headers=kopf(lieferant["mandant"]),
+        json={
+            "supplierId": lieferant["name"],
+            "items": [{"description": "Test", "quantity": 1, "unitPrice": 1}],
+        },
+    ).json()
+
+    antwort = client.post(
+        f"/api/v1/purchase-orders/{beleg['id']}/cancel-with-reason",
+        headers=kopf(lieferant["mandant"]),
+        json={"reason": "Doppelt erfasst"},
+    )
+    assert antwort.status_code == 200, antwort.text
+
+    with engine.connect() as v:
+        zeile = v.execute(
+            text("SELECT status, notiz FROM domain_einkauf.bestellungen WHERE id::text = :id"),
+            {"id": beleg["id"]},
+        ).mappings().first()
+    assert zeile["status"] == "storniert"
+    assert "Doppelt erfasst" in (zeile["notiz"] or "")
