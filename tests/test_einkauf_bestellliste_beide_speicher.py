@@ -242,6 +242,11 @@ def lieferant(engine):
                 "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = :t)",
                 "DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = :t",
                 "DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = :t",
+                # Die Freigabe bucht wirklich — die Buchungssaetze haengen am
+                # Mandanten und muessen vor ihm weg.
+                "DELETE FROM domain_erp.journal_entry_lines WHERE journal_entry_id IN "
+                "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
+                "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
                 "DELETE FROM domain_shared.tenants WHERE id = :t",
             ):
                 v.execute(text(sql), {"t": mandant})
@@ -343,3 +348,64 @@ def test_storno_ueber_compat_wirkt_am_beleg(client, engine, lieferant) -> None:
         ).mappings().first()
     assert zeile["status"] == "storniert"
     assert "Doppelt erfasst" in (zeile["notiz"] or "")
+
+
+def test_die_freigabe_bucht_und_geht_durch(client, engine, lieferant) -> None:
+    """Die Freigabe setzt kein Kennzeichen, sie bucht.
+
+    Solange der Kontenrahmen leer war, scheiterte sie an "Active
+    chart-of-accounts entry not found: 6000" — und das zu Recht: Eine Freigabe,
+    die nicht buchen kann, soll nicht so tun als ob. Seit die Konten gesaet
+    sind, geht sie durch.
+    """
+    from sqlalchemy import text
+
+    beleg = client.post(
+        "/api/v1/purchase-orders",
+        headers=kopf(lieferant["mandant"]),
+        json={
+            "supplierId": lieferant["name"],
+            "items": [{"description": "Grassaat", "quantity": 10, "unitPrice": 3.15}],
+        },
+    ).json()
+
+    antwort = client.post(
+        f"/api/v1/purchase-orders/{beleg['id']}/approve",
+        headers=kopf(lieferant["mandant"]),
+    )
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["status"] == "FREIGEGEBEN"
+
+    with engine.connect() as v:
+        status = v.execute(
+            text("SELECT status FROM domain_einkauf.bestellungen WHERE id::text = :id"),
+            {"id": beleg["id"]},
+        ).scalar()
+    assert status == "freigegeben"
+
+
+def test_die_gebuchten_konten_gibt_es_wirklich(engine) -> None:
+    """Jedes Konto, gegen das gebucht wird, muss im Kontenrahmen stehen.
+
+    Sonst scheitert die Buchung erst im Betrieb — und zwar an der Stelle, an
+    der jemand gerade freigeben wollte.
+    """
+    from sqlalchemy import text
+
+    # Die Konten, die die Buchungsdienste fest verdrahtet haben.
+    gebucht = {"1000", "1200", "1400", "1576", "1600", "1776", "3100", "3200",
+               "3300", "4820", "5800", "6000", "6800", "7000", "8400"}
+
+    with engine.connect() as v:
+        vorhanden = {
+            r[0]
+            for r in v.execute(
+                text(
+                    "SELECT account_number FROM domain_erp.chart_of_accounts "
+                    "WHERE is_active = TRUE"
+                )
+            )
+        }
+
+    fehlend = sorted(gebucht - vorhanden)
+    assert not fehlend, f"Diese Konten fehlen im Kontenrahmen: {fehlend}"
