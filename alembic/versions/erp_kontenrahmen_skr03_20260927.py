@@ -82,7 +82,7 @@ KONTEN: list[tuple[str, str, str, str, str]] = [
      "produktion_mischfutter"),
     ("3300", "Kreditorenkonto (Sammelkonto)", "liability", "current_liabilities",
      "ap_invoice_kernel_posting"),
-    ("3800", "Wareneinsatz", "expense", "cost_of_sales", "inventory_operations"),
+    ("3800", "Wareneinsatz", "expense", "cost_of_goods_sold", "inventory_operations"),
     # ── Erloese ─────────────────────────────────────────────────────────
     ("4200", "Erloese Landwirtschaft", "revenue", "revenue", "agrar_settlements"),
     ("4400", "Erloese (Sammelkonto)", "revenue", "revenue", "finance/router"),
@@ -90,13 +90,13 @@ KONTEN: list[tuple[str, str, str, str, str]] = [
     ("8100", "Erloese", "revenue", "revenue", "finance/router"),
     ("8400", "Umsatzerloese 19 % USt", "revenue", "revenue", "pos_accounting_service"),
     # ── Aufwand ─────────────────────────────────────────────────────────
-    ("5100", "Einkauf Handelswaren", "expense", "cost_of_sales", "finance/router"),
-    ("5200", "Erhaltene Skonti", "expense", "cost_of_sales", "finance/router"),
-    ("5800", "Bestandsveraenderungen", "expense", "cost_of_sales", "inventory_operations"),
+    ("5100", "Einkauf Handelswaren", "expense", "cost_of_goods_sold", "finance/router"),
+    ("5200", "Erhaltene Skonti", "expense", "cost_of_goods_sold", "finance/router"),
+    ("5800", "Bestandsveraenderungen", "expense", "cost_of_goods_sold", "inventory_operations"),
     ("5810", "Lagerschwund", "expense", "operating_expenses", "inventory_operations"),
     ("6000", "Loehne und Gehaelter", "expense", "operating_expenses", "lohn_service"),
     ("6800", "Herstellungskosten", "expense", "operating_expenses", "produktion_mischfutter"),
-    ("7000", "Wareneinsatz (Kostenrechnung)", "expense", "cost_of_sales",
+    ("7000", "Wareneinsatz (Kostenrechnung)", "expense", "cost_of_goods_sold",
      "sales_posting_service"),
 ]
 
@@ -138,6 +138,18 @@ def upgrade() -> None:
                 ),
             },
         )
+
+
+    # Nachziehen, falls diese Saat mit der falschen Kategorie gelaufen ist:
+    # "cost_of_sales" gibt es im Schema nicht, erlaubt ist
+    # "cost_of_goods_sold". Die Antwort des Kontenplans scheiterte daran mit
+    # einem Validierungsfehler — die Konten waren da, aber nicht lesbar.
+    verbindung.execute(
+        sa.text(
+            "UPDATE domain_erp.chart_of_accounts SET category = 'cost_of_goods_sold' "
+            "WHERE category = 'cost_of_sales'"
+        )
+    )
 
 
 def downgrade() -> None:

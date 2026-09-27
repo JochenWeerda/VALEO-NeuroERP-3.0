@@ -409,3 +409,59 @@ def test_die_gebuchten_konten_gibt_es_wirklich(engine) -> None:
 
     fehlend = sorted(gebucht - vorhanden)
     assert not fehlend, f"Diese Konten fehlen im Kontenrahmen: {fehlend}"
+
+
+def test_der_kontenplan_zeigt_den_gemeinsamen_rahmen(client, engine) -> None:
+    """Wer den Kontenrahmen pflegen soll, muss ihn sehen.
+
+    Der Kontenplan filterte streng nach Mandant und zeigte deshalb einen
+    einzigen Eintrag, waehrend gegen achtundzwanzig Konten gebucht wurde. Das
+    passte auch nicht zusammen: Der Buchungsdienst sucht ohne Mandantenfilter,
+    behandelt den Rahmen also als gemeinsam.
+    """
+    from sqlalchemy import text
+
+    mandant = f"test-{uuid.uuid4().hex[:8]}"
+    antwort = client.get("/api/v1/finance/chart-of-accounts?limit=200", headers=kopf(mandant))
+    assert antwort.status_code == 200, antwort.text
+
+    daten = antwort.json()
+    nummern = {z["account_number"] for z in daten["items"]}
+    with engine.connect() as v:
+        gemeinsam = {
+            r[0]
+            for r in v.execute(
+                text(
+                    "SELECT account_number FROM domain_erp.chart_of_accounts "
+                    "WHERE tenant_id = 'system' AND is_active = TRUE"
+                )
+            )
+        }
+    assert gemeinsam, "Kein gemeinsamer Kontenrahmen vorhanden"
+    assert gemeinsam <= nummern, f"Im Kontenplan fehlen: {sorted(gemeinsam - nummern)}"
+
+
+def test_die_kategorien_sind_solche_die_das_schema_kennt(engine) -> None:
+    """`cost_of_sales` gibt es nicht — erlaubt ist `cost_of_goods_sold`.
+
+    Die Saat hatte den Wert zuerst falsch. Die Konten standen da, aber der
+    Kontenplan scheiterte beim Lesen an der Validierung: 500 statt Liste.
+    """
+    from sqlalchemy import text
+
+    erlaubt = {
+        "current_assets", "fixed_assets", "current_liabilities",
+        "long_term_liabilities", "equity", "revenue", "cost_of_goods_sold",
+        "operating_expenses", "other_expenses", "other_income",
+    }
+    with engine.connect() as v:
+        benutzt = {
+            r[0]
+            for r in v.execute(
+                text(
+                    "SELECT DISTINCT category FROM domain_erp.chart_of_accounts "
+                    "WHERE category IS NOT NULL"
+                )
+            )
+        }
+    assert benutzt <= erlaubt, f"Unbekannte Kategorien: {sorted(benutzt - erlaubt)}"

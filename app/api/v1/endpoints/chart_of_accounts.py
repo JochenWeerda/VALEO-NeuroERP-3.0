@@ -36,6 +36,10 @@ class ValidateResponse(BaseModel):
     errors: List[str] = Field(default_factory=list)
 
 
+#: Unter dieser Kennung liegt der gemeinsame Kontenrahmen (SKR03-Saat).
+SHARED_TENANT = "system"
+
+
 @router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten")
 async def list_accounts(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
@@ -44,11 +48,25 @@ async def list_accounts(
     limit: int = Query(50, ge=1, le=200, description="Maximum number of records"),
     db: Session = Depends(get_db),
 ):
-    """Return a paginated list of chart-of-account entries."""
+    """Kontenplan: die eigenen Konten und die gemeinsamen.
+
+    Gefiltert wurde streng nach Mandant — und damit war der gemeinsame
+    Kontenrahmen unsichtbar. Der Kontenplan zeigte einen einzigen Eintrag,
+    waehrend gegen achtundzwanzig Konten gebucht wurde.
+
+    Das passte auch nicht zusammen: ``FinanceTransactionService`` sucht das
+    Buchungskonto ohne Mandantenfilter, behandelt den Rahmen also als
+    gemeinsam. Wer ihn pflegen soll, muss ihn auch sehen. Die Herkunft bleibt
+    am Eintrag (``tenant_id``) erkennbar: ``system`` ist gemeinsam, alles
+    andere gehoert dem Mandanten.
+    """
     effective_tenant = tenant_id or DEFAULT_TENANT
 
     query = db.query(AccountModel).filter(AccountModel.is_active == True)  # noqa: E712
-    query = query.filter(AccountModel.tenant_id == effective_tenant)
+    query = query.filter(
+        (AccountModel.tenant_id == effective_tenant)
+        | (AccountModel.tenant_id == SHARED_TENANT)
+    )
 
     if search:
         like = f"%{search}%"
