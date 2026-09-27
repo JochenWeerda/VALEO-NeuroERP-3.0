@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.agrar.rations.authz import APPROVE_ROLES, READ_ROLES, WRITE_ROLES, require_roles
 from app.agrar.rations.groups import GroupProfile, GroupRiskLevel, PregnancyStatus, validate_group_parameters
-from app.agrar.rations.lifecycle import RationStatus, TransitionError
+from app.agrar.rations.lifecycle import RationStatus, TransitionError, validate_transition
 from app.auth.deps import User, get_current_user
 from app.api.v1.schemas.rations_lifecycle_schemas import (
     ActiveRationOut,
@@ -23,6 +23,7 @@ from app.api.v1.schemas.rations_lifecycle_schemas import (
 )
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 from app.services.rations_lifecycle_service import (
     RationLifecycleConflict,
     RationLifecycleNotFound,
@@ -175,6 +176,77 @@ class RationTransitionIn(BaseModel):
     expected_status: RationStatus
     reason: str | None = Field(default=None, max_length=2_000)
     feeding_start: datetime | None = None
+
+
+RationActionKey = Literal[
+    "submit_review",
+    "approve",
+    "schedule",
+    "activate",
+    "retire",
+    "archive",
+]
+
+_RATION_ACTION_TARGETS: dict[RationActionKey, RationStatus] = {
+    "submit_review": RationStatus.IN_REVIEW,
+    "approve": RationStatus.APPROVED,
+    "schedule": RationStatus.SCHEDULED,
+    "activate": RationStatus.ACTIVE,
+    "retire": RationStatus.RETIRED,
+    "archive": RationStatus.ARCHIVED,
+}
+
+_RATION_ACTION_LABELS: dict[RationActionKey, str] = {
+    "submit_review": "Zur Pruefung gestellt",
+    "approve": "Freigegeben",
+    "schedule": "Fuetterungsbeginn geplant",
+    "activate": "Aktiviert",
+    "retire": "Fuetterung beendet",
+    "archive": "Archiviert",
+}
+
+
+def _action_transition_input(
+    *,
+    action_key: RationActionKey,
+    payload: dict[str, Any],
+    audit_reason: str | None,
+    current_status: str,
+) -> tuple[RationTransitionIn | None, list[dict[str, str]]]:
+    """Build and validate the canonical lifecycle command without writing."""
+    expected_status = payload.get("expected_status") or payload.get("latest_status") or current_status
+    feeding_start = payload.get("feeding_start_input") or payload.get("feeding_start")
+    reason = payload.get("reason") or audit_reason
+    errors: list[dict[str, str]] = []
+
+    if str(expected_status) != current_status:
+        errors.append({
+            "field": "latest_status",
+            "message": (
+                "Der angezeigte Status ist veraltet. Bitte die Ration neu laden "
+                f"(angezeigt {expected_status}, aktuell {current_status})."
+            ),
+            "severity": "blocking",
+        })
+        return None, errors
+
+    try:
+        transition = RationTransitionIn.model_validate({
+            "target_status": _RATION_ACTION_TARGETS[action_key],
+            "expected_status": expected_status,
+            "reason": reason,
+            "feeding_start": feeding_start,
+        })
+        validate_transition(
+            transition.expected_status,
+            transition.target_status,
+            reason=transition.reason,
+            feeding_start=transition.feeding_start,
+        )
+    except (ValueError, TransitionError) as exc:
+        errors.append({"field": "transition", "message": str(exc), "severity": "blocking"})
+        return None, errors
+    return transition, errors
 
 
 def _require(user: User, allowed: set[str]) -> None:
@@ -399,6 +471,135 @@ async def transition_ration_version(
             expected_status=body.expected_status,
             reason=body.reason,
             feeding_start=body.feeding_start,
+        )
+    except Exception as exc:
+        db.rollback()
+        raise _translate_error(exc) from exc
+
+
+@router.post(
+    "/rations/{ration_id}/actions/{action_key}",
+    response_model=MaskActionResult,
+    summary="Rations-Lifecycle ueber die Mask ActionRuntime ausfuehren",
+)
+async def run_ration_action(
+    ration_id: str,
+    action_key: RationActionKey,
+    body: dict[str, Any],
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> MaskActionResult:
+    """Adapter from the central mask action contract to the canonical lifecycle."""
+    approval_action = action_key in {"approve", "activate"}
+    _require(user, APPROVE_ROLES if approval_action else WRITE_ROLES)
+    try:
+        mode, audit_reason, _idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey=action_key,
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[{
+                "field": "_mode",
+                "message": "Ungueltiger Aktionsmodus",
+                "severity": "blocking",
+            }],
+        )
+
+    try:
+        service = _service(db, tenant_id, user)
+        detail = service.get_ration(ration_id, include_audit=False)
+        version_id = str(detail["latest_version_id"])
+        current_status = str(detail["latest_status"])
+        transition, validation_errors = _action_transition_input(
+            action_key=action_key,
+            payload=payload,
+            audit_reason=audit_reason,
+            current_status=current_status,
+        )
+        blockers = int(detail.get("latest_readiness_blockers") or 0)
+        if (
+            transition is not None
+            and transition.target_status in {RationStatus.APPROVED, RationStatus.ACTIVE}
+            and blockers > 0
+            and not (transition.reason or "").startswith("OVERRIDE:")
+        ):
+            validation_errors.append({
+                "field": "reason",
+                "message": (
+                    f"Readiness blockiert diesen Schritt ({blockers} Befund(e)). "
+                    "Begruendete Ausnahme mit 'OVERRIDE:' erforderlich."
+                ),
+                "severity": "blocking",
+            })
+            transition = None
+
+        proposed_changes = [{
+            "field": "status",
+            "from": current_status,
+            "to": _RATION_ACTION_TARGETS[action_key].value,
+            "description": (
+                f"Rationsversion {version_id} wechselt von {current_status} "
+                f"nach {_RATION_ACTION_TARGETS[action_key].value}."
+            ),
+        }]
+        if action_key == "schedule":
+            proposed_changes.append({
+                "field": "feeding_start",
+                "to": payload.get("feeding_start_input") or payload.get("feeding_start"),
+                "description": "Der angegebene Fuetterungsbeginn wird verbindlich terminiert.",
+            })
+
+        if mode == "propose":
+            return MaskActionResult(
+                actionKey=action_key,
+                mode=mode,
+                success=True,
+                summary=f"Vorschlag fuer {_RATION_ACTION_LABELS[action_key]}",
+                proposedChanges=proposed_changes,
+            )
+        if mode in {"validate", "dryRun"}:
+            valid = transition is not None and not validation_errors
+            return MaskActionResult(
+                actionKey=action_key,
+                mode=mode,
+                success=valid,
+                summary=(
+                    "Validierung erfolgreich — keine Aenderungen geschrieben."
+                    if valid
+                    else "Validierung fehlgeschlagen."
+                ),
+                proposedChanges=proposed_changes if valid else None,
+                validationErrors=validation_errors or None,
+            )
+        if transition is None or validation_errors:
+            return MaskActionResult(
+                actionKey=action_key,
+                mode=mode,
+                success=False,
+                error="Validierung fehlgeschlagen; der Rationsstatus wurde nicht geaendert.",
+                validationErrors=validation_errors or None,
+            )
+
+        result = service.transition(
+            version_id=version_id,
+            target=transition.target_status,
+            expected_status=transition.expected_status,
+            reason=transition.reason,
+            feeding_start=transition.feeding_start,
+        )
+        affected_ids = [
+            version_id,
+            *[str(item) for item in result.get("superseded_version_ids", [])],
+        ]
+        return MaskActionResult(
+            actionKey=action_key,
+            mode=mode,
+            success=True,
+            summary=f"{_RATION_ACTION_LABELS[action_key]}: Version {version_id}.",
+            affectedIds=affected_ids,
         )
     except Exception as exc:
         db.rollback()

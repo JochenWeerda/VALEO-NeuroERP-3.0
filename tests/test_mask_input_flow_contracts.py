@@ -15,7 +15,7 @@ def flows():
 
 def test_all_current_human_flows_have_guarded_submit_contracts():
     actions = flows()
-    assert len(actions) == 13
+    assert len(actions) == 9
     assert all(valid_input_flow(action) for action in actions)
 
 

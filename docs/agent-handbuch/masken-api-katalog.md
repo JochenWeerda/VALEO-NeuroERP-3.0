@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-21
+last_reviewed: 2026-09-27
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -570,12 +570,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `submit_review` | Zur Pruefung | safe | nein | `—` |
-| `approve` | Freigeben | moderate | ja | `—` |
-| `schedule` | Fuetterungsbeginn planen | moderate | nein | `—` |
-| `activate` | Jetzt aktivieren | moderate | ja | `—` |
-| `retire` | Fuetterung beenden | high | nein | `—` |
-| `archive` | Archivieren | high | nein | `—` |
+| `submit_review` | Zur Pruefung | safe | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/submit_review` |
+| `approve` | Freigeben | moderate | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/approve` |
+| `schedule` | Fuetterungsbeginn planen | moderate | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/schedule` |
+| `activate` | Jetzt aktivieren | moderate | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/activate` |
+| `retire` | Fuetterung beenden | high | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire` |
+| `archive` | Archivieren | high | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive` |
 
 ---
 

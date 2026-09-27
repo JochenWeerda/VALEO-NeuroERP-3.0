@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-RATION-ACTIONS-20260927 — reserviert, Codex
+## UIX-RATION-ACTIONS-20260927 — abgeschlossen, Codex
 
 **Ziel:** Die fuenf Lifecycle-Aktionen der nativen Rationsfreigabe ueber den
 zentralen ActionRuntime-Vertrag ausfuehrbar machen, ohne die kanonische
@@ -19,12 +19,15 @@ Rations-Fachlogik zu duplizieren.
 **Dateibesitz:** `app/api/v1/endpoints/rations_lifecycle.py`,
 `app/core/screen_definitions.py`, eigener Vertragstest, Agrar-Domain-Pack,
 eigene Slice-/QA-Doku und dieser Workboard-Abschnitt.
-**Abnahme:** `approve`, `schedule`, `activate`, `retire` und `archive` besitzen
+**Abnahme:** `submit_review`, `approve`, `schedule`, `activate`, `retire` und `archive` besitzen
 typisierte Command-Endpunkte; `validate`, `dryRun` und `propose` schreiben nie;
 `execute` delegiert tenant- und rollenbegrenzt an den bestehenden Lifecycle-
 Service. Keine zweite Statusmaschine und keine Schein-Mutation.
-**Risiken:** Terminierung braucht weiterhin einen vom Benutzer oder Agenten
-gelieferten Fuetterungsbeginn; optimistische Statuskonflikte bleiben fachlich 409.
+**Ergebnis:** Sechs Maskenaktionen laufen ueber den zentralen ActionRuntime-
+Vertrag auf die neueste unveraenderliche Rationsversion. Veraltete Maskenstaende,
+ungueltige Statuswechsel, fehlender Fuetterungsbeginn und Readiness-Blocker werden
+vor der Mutation sichtbar. 38 gezielte Tests bestanden.
+[QA](../quality-assurance/uix-ration-actions-20260927.md).
 
 ## MCP-OIDC-VERIFY-20260925 — abgeschlossen, Codex
 

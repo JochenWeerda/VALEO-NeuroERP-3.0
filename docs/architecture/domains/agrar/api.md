@@ -69,6 +69,10 @@ Entscheidung: [ADR-040](../../../adr/adr-040-contract-gated-herd-data-connectors
 - `POST /api/v1/agrar/rations-optimization/lifecycle/versions/{id}/transitions`
   - optimistisch gepruefter Statuswechsel mit Grund und optionalem
   Aktivierungszeitpunkt.
+- `POST /api/v1/agrar/rations-optimization/lifecycle/rations/{id}/actions/{action}`
+  - Mask-ActionRuntime-Adapter fuer `submit_review`, `approve`, `schedule`,
+    `activate`, `retire` und `archive`; Vorschau-/Validierungsmodi sind strikt
+    schreibfrei, `execute` delegiert an denselben kanonischen Lifecycle-Service.
 - `GET /api/v1/agrar/rations-optimization/lifecycle/rations/{id}/audit`
   - unveraenderliche fachliche Ereignisspur.
 - `GET /api/v1/agrar/rations-optimization/lifecycle/active-rations`

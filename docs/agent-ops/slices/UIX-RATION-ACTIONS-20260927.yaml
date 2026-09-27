@@ -1,0 +1,31 @@
+id: UIX-RATION-ACTIONS-20260927
+owner: Codex
+status: abgeschlossen
+goal: Native Rationsfreigabe vollstaendig an die zentrale Mask ActionRuntime anbinden.
+scope: Sechs Lifecycle-Aktionen als Adapter auf den bestehenden Rationsservice; keine zweite Statusmaschine.
+file_ownership:
+  - app/api/v1/endpoints/rations_lifecycle.py
+  - app/core/screen_definitions.py
+  - tests/test_rations_action_runtime.py
+  - tests/test_mask_input_flow_contracts.py
+  - docs/architecture/domains/agrar/api.md
+  - docs/quality-assurance/uix-ration-actions-20260927.md
+acceptance:
+  - Alle sechs Maskenaktionen besitzen per entity_id aufloesbare Command-Endpunkte.
+  - validate, dryRun und propose schreiben keine Fach- oder Auditdaten.
+  - execute delegiert rollen- und tenantgebunden an den kanonischen Lifecycle-Service.
+  - Veraltete Statusdaten und fachlich ungueltige Wechsel werden vor der Mutation abgewiesen.
+tests:
+  - 38 gezielte Rations-, Masken- und Agentenvertragstests bestanden.
+risks:
+  - Terminierung benoetigt weiterhin einen expliziten Fuetterungsbeginn.
+  - Vier-Augen-Pruefung und atomare Audit-/Outbox-Persistenz bleiben im bestehenden Service.
+ai_harness:
+  fachlicher_vertrag: Statuswechsel folgen ausschliesslich der kanonischen Rations-Statusmaschine.
+  architektur_vertrag: ScreenDefinition zu ActionRuntime zu bestehendem Lifecycle-Service.
+  daten_vertrag: Keine neue Tabelle; unveraenderliche Versionen und vorhandenes Audit bleiben fuehrend.
+  test_vertrag: Schreibfreie Modi, Stale-State, Readiness und echte Delegation sind regressionsgesichert.
+  security_vertrag: Approve und Activate verlangen Approver-Rolle; andere Aktionen mindestens Schreibrolle.
+  betriebs_vertrag: Keine neue Runtime oder Migration.
+  dokumentations_vertrag: Workboard, Open-Gaps, Agrar-Domain-Pack, Slice und QA aktualisiert.
+external_gates: []

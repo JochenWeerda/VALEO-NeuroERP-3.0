@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21",
+  "generatedAt": "2026-09-27",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1301,8 +1301,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "futtermittel.rations.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/submit_review",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -1312,8 +1312,8 @@
           "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "futtermittel.rations.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/approve",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -1323,8 +1323,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "futtermittel.rations.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/schedule",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -1334,8 +1334,8 @@
           "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "futtermittel.rations.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/activate",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -1345,8 +1345,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": "futtermittel.rations.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -1356,8 +1356,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": "futtermittel.rations.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive",
+          "method": "POST",
           "stubReason": null
         }
       ],
