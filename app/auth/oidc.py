@@ -89,6 +89,8 @@ class OIDC:
             ValueError: Token ungültig oder Key nicht gefunden
             jwt.InvalidTokenError: Token-Validierung fehlgeschlagen
         """
+        if not OIDC_ISSUER or not OIDC_AUDIENCE:
+            raise ValueError("OIDC issuer and audience must be configured")
         await self._ensure_keys()
 
         # Header lesen um KID zu kriegen
@@ -121,8 +123,11 @@ class OIDC:
             algorithms=[key.get("alg", "RS256")],
             audience=OIDC_AUDIENCE,
             issuer=OIDC_ISSUER,
-            options={"verify_at_hash": False},
+            options={"verify_at_hash": False, "require": ["exp", "iss", "aud", "sub"]},
         )
+
+        if not isinstance(claims["sub"], str) or not claims["sub"].strip():
+            raise ValueError("Token subject must be a nonempty string")
 
         logger.debug(f"Token verified for sub: {claims.get('sub')}")
         return claims

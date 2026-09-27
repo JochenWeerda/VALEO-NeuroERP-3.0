@@ -11,13 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MCP-OIDC-VERIFY-20260925 — reserviert, Codex
+## MCP-OIDC-VERIFY-20260925 — abgeschlossen, Codex
 
 **Ziel:** Kryptografischer Token-Nachweis am MCP-HTTP-Endpunkt ohne Auth-Override;
 Ablaufdatum, Issuer, Audience und Subject werden verpflichtend.
 **Dateibesitz:** `app/auth/oidc.py`, eigener Test, Slice-/QA-Doku.
 **Abnahme:** gueltiger signierter Token; ungueltige Signatur, fehlende/abgelaufene
 Claims und falscher Scope/Mandant abgewiesen, ohne Datenbankmutation.
+31 Tests bestanden. [QA](../quality-assurance/mcp-oidc-verification-20260925.md).
 **Offen:** echter Provider-Login, MCP-Transport und weitere Schreibadapter.
 
 ## MCP-EXEC-CRM-20260921 — abgeschlossen, Codex

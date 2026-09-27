@@ -1,0 +1,26 @@
+id: MCP-OIDC-VERIFY-20260925
+owner: Codex
+status: abgeschlossen
+goal: Kryptografischer Token-Nachweis am MCP-Endpunkt ohne Auth-Override.
+scope: Gemeinsamer OIDC-Verifier und HTTP-Regression; echter Provider-Login separat.
+file_ownership:
+  - app/auth/oidc.py
+  - tests/test_mcp_oidc_verification.py
+  - docs/quality-assurance/mcp-oidc-verification-20260925.md
+acceptance:
+  - Ablaufdatum, Issuer, Audience und Subject verpflichtend.
+  - Ungueltige Tokens und falsche Berechtigungen erreichen keine Datenbank.
+tests:
+  - 31 Tests mit echten RSA-Signaturen und bestehendem HTTP-Auth-Pfad bestanden.
+risks:
+  - Echter Provider-Login, Discovery und Key-Rotation noch separat abzunehmen.
+ai_harness:
+  fachlicher_vertrag: Nur authentifizierte und berechtigte Agenten erreichen den Adapter.
+  architektur_vertrag: Bestehender OIDC-Verifier, kein neues Auth-Modell.
+  daten_vertrag: Keine Persistenz oder Migration in diesem Slice.
+  test_vertrag: Signierte JWTs, HTTP-Vertrag, Negativpfade ohne Auth-Override.
+  security_vertrag: Verpflichtende Claims und konfigurierte Issuer/Audience.
+  betriebs_vertrag: Anbieter muessen Standardclaims liefern; keine Ausweichauthentifizierung.
+  dokumentations_vertrag: Workboard, Slice und QA mit Provider-Abnahme als Restpunkt.
+external_gates:
+  - Synthetischer RSA-Signaturtest ueber den echten Verifier bestanden.
