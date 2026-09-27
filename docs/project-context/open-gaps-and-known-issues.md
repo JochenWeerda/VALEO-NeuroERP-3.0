@@ -462,7 +462,7 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 |-------|-------------|-----------|
 | commandEndpoints | ✅ 2026-09-27: `agrar/ration` bindet `submit_review`, `approve`, `schedule`, `activate`, `retire` und `archive` ueber schreibfreie Vorschau-/Validierungsmodi und den kanonischen Lifecycle-Service an die zentrale ActionRuntime. | P1 |
 | Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
-| Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
+| Agent E2E Coverage | ✅ 2026-09-27: Registry-dynamisches AgentMaskContract-/Readiness-Ratchet ueber alle 71 nativen ScreenDefinitions; blockierender Schritt in `universal-mask-ci`. | P3 |
 | UIX-054 Route Inventory | Generierte Route-Wahrheit (`route-inventory.gen.json`) | P1 | ✅ |
 | UIX-055 universal-mask-ci | GitHub Actions sichtbar grün | P1 | ✅ Run 28540744515 |
 | UIX-056 Native Route Smoke | Playwright über 5 repräsentative `/:id`-Routen | P1 | ✅ lokal |

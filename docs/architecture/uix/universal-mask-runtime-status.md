@@ -229,7 +229,7 @@ pytest tests/test_agent_mask_contract.py
 Ergebnis wird nach jedem Lauf hier aktualisiert:
 
 | pytest rollout batch | 2026-06-29 | ✅ 24/24 | `--no-cov` |
-| pytest agent/readiness | 2026-06-29 | ✅ 22/22 | `test_agent_mask_contract.py` |
+| pytest agent/readiness | 2026-09-27 | ✅ 25/25 | Registry-Gate ueber alle 71 nativen ScreenDefinitions |
 | pytest UIX-046/048 Safety | 2026-07-01 | ✅ 219/219 | alle 26 SDs, dynamisch aus Registry |
 | pytest UIX-050/053 Advanced | 2026-07-01 | ✅ 15/16 | BFF-File-Checks + dryRun-Stubs |
 | pytest UIX-044 FilterPlan | 2026-06-30 | ✅ 3/3 | `test_uix044_filter_plan_contract.py` |

@@ -13,6 +13,7 @@ on:
       - 'packages/frontend-web/src/components/mask-builder/**'
       - 'packages/bff/bff-web/src/**'
       - 'tests/test_mask_*.py'
+      - 'tests/test_agent_mask_contract.py'
       - 'tests/test_uix04*.py'
       - 'tests/test_uix05*.py'
       - 'packages/frontend-web/src/app/route-aliases.json'
@@ -31,6 +32,7 @@ on:
       - 'packages/frontend-web/src/components/mask-builder/**'
       - 'packages/bff/bff-web/src/**'
       - 'tests/test_mask_*.py'
+      - 'tests/test_agent_mask_contract.py'
       - 'tests/test_uix04*.py'
       - 'tests/test_uix05*.py'
       - 'packages/frontend-web/src/app/route-aliases.json'
@@ -64,6 +66,12 @@ jobs:
         run: |
           pytest \
             tests/test_mask_screen_definition.py \
+            -v --tb=short --no-cov -m unit
+
+      - name: Run registry-wide AgentMaskContract and readiness gate
+        run: |
+          pytest \
+            tests/test_agent_mask_contract.py \
             -v --tb=short --no-cov -m unit
 
       - name: Run UIX-046/048 CommandEndpoints + Agent Safety (alle 26 SDs)
