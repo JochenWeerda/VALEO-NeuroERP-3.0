@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-AGENT-CONTRACT-ALL-20260927 — reserviert, Codex
+
+**Ziel:** AgentMaskContract und Generator-Readiness fuer jede native
+ScreenDefinition automatisch pruefen, statt nur drei Beispielmasken.
+**Dateibesitz:** `tests/test_agent_mask_contract.py`,
+`.github/workflows/universal-mask-ci.yml`, UIX-Status, eigene Slice-/QA-Doku und
+dieser Workboard-Abschnitt.
+**Abnahme:** Registry-dynamischer Gate-Lauf ueber alle aktuell 71 nativen Masken;
+unvollstaendige Agentenvertraege oder Readiness-Fehler blockieren die Masken-CI.
+
 ## UIX-RATION-ACTIONS-20260927 — abgeschlossen, Codex
 
 **Ziel:** Die fuenf Lifecycle-Aktionen der nativen Rationsfreigabe ueber den
