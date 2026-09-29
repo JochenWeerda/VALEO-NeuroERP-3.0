@@ -2,10 +2,18 @@
 slice_id: EK-BESTELLUNG-FUEHREND
 id: EK-BESTELLUNG-FUEHREND
 title: Fuehrende Einkaufsbestellung gegen L3 und drei Bestellfaelle
-status: in arbeit
+status: abgeschlossen
 owner: Cursor
 date: 2026-09-18
 created_at: 2026-09-18
+closed_at: 2026-09-29
+result: >
+  Auf main: 58d9d5d6e (fuehrende Bestellmaske mit L3-Kopf, drei Bestellfaellen,
+  Migration), be38c69f0 (Bedarf aus dem Abverkauf), dfad5118f (Bestellliste liest
+  beide Speicher), c40649364 (bestellung-stamm auf dem fuehrenden Beleg). Handshake
+  MERIDIAN-BELEG-ONEPAGE in 15c95552f nur additiv (sectionNavigation, rowDetail,
+  identityField). Nachweis 2026-09-29 auf main: pytest 61/61 ueber die sechs
+  Slice-Testdateien; Feldvertrag 0 Abweichungen.
 coordination: >
   Nur build_einkauf_purchase_order_screen_definition in screen_definitions.py.
   Keine FSX-Dateien. Auftrag, Rechnung, crm_360.py und KIM bleiben Claude.
@@ -43,8 +51,8 @@ tests:
   - tests/test_mask_entity_contracts.py
   - packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx
 risks:
-  - Zwei Speicher: domain_einkauf.bestellungen (native) und Compat-purchase_order (Liste/Wizard)
-  - Listen-Klick bleibt auf stamm, solange Compat-IDs nicht in domain_einkauf liegen
+  - Zwei Speicher bleiben, domain_einkauf.bestellungen (native) und Compat-purchase_order (Wizard); die Liste liest seit dfad5118f beide
+  - Die Zusammenlegung beider Speicher ist nicht Teil dieses Slices
 ai_harness:
   fachlicher_vertrag: >
     Drei Bestellfaelle sind Pflicht: Bestand/Abverkauf, Direktlieferung mit oder
@@ -66,4 +74,3 @@ ai_harness:
     Workboard, Slice, MASKEN.md, maskeninhalt, open-gaps.
 external_gates:
   - not_applicable
----

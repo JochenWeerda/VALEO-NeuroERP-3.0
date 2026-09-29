@@ -1,0 +1,58 @@
+slice_id: MERIDIAN-BELEG-SYSTEMWEIT
+id: MERIDIAN-BELEG-SYSTEMWEIT
+title: Beleg-Look-and-Feel als zentrale Voreinstellung fuer alle nativen ScreenDefinitions
+status: in arbeit
+owner: Cursor
+date: 2026-09-29
+created_at: 2026-09-29
+coordination: >
+  Folgt MERIDIAN-BELEG-ONEPAGE. Builder-Funktionen anderer Slices in
+  screen_definitions.py nur additiv; jede Aenderung dort bekommt eine
+  Handshake-Zeile im Workboard. coverage_path_check.xml nicht committen.
+goal: >
+  Durchgehende Belegseite mit Sprungmarken, Belegnummer als Ueberschrift,
+  Positionsdetail und lesbare Koepfe gelten fuer alle objectPage- und
+  transaction-Masken ohne Eintrag pro Maske. Opt-out bleibt explizit.
+file_ownership:
+  - packages/frontend-web/src/components/mask-builder/floorplans.ts
+  - packages/frontend-web/src/components/mask-builder/schema.ts
+  - packages/frontend-web/src/components/mask-builder/render-plan/schema-compiler.ts
+  - packages/frontend-web/src/components/mask-builder/render-plan/types.ts
+  - app/core/screen_definitions.py (nur Normalisierer und additive Kopf-Felder)
+  - app/services/customer_reference.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - scripts/check_field_contracts.py
+  - tests/test_meridian_beleg_systemweit.py
+acceptance:
+  - objectPage/transaction ohne Deklaration rendert Sprungmarken; tabs schaltet ab
+  - identityField wird aus dem Kopf abgeleitet, explizite Werte gewinnen
+  - rowDetail ab sechs Spalten auf Sprungmarken-Seiten, Opt-out rowDetail false
+  - Gate - keine rohen _id-Kopffelder ohne Anzeige-Gegenstueck
+tests:
+  - tests/test_meridian_beleg_systemweit.py
+  - tests/test_l3_habit_bridge_screen_definitions.py
+  - packages/frontend-web/src/__tests__/components/mask-builder/section-page.test.tsx
+  - packages/frontend-web/src/__tests__/render-plan
+risks:
+  - Masken mit vielen Registern werden lange Seiten; fachlich falsche bekommen tabs mit Begruendung
+  - Identitaets-Heuristik kann ein falsches Feld waehlen; Snapshot-Test zwingt zum Review
+ai_harness:
+  fachlicher_vertrag: >
+    Ein Beleg liest sich wie ein Beleg - Nummer oben, Namen statt IDs,
+    alle Abschnitte auf einer Seite.
+  architektur_vertrag: >
+    ScreenDefinition zu RenderPlan zu UniversalMaskRenderer; keine Maske wird
+    einzeln umgebaut.
+  daten_vertrag: >
+    Keine Migration. Kopf-Endpunkte liefern Anzeige-Felder zusaetzlich.
+  test_vertrag: >
+    Pure Unit-Tests fuer Normalisierer und Compiler; HTTP-Vertraege gegen
+    Postgres fuer neue Kopf-Felder; kein MagicMock-DB.
+  security_vertrag: >
+    Namensaufloesung immer mit Tenant-Filter.
+  betriebs_vertrag: >
+    Reine Anzeige-Aenderung; Opt-out pro Maske ohne Deployment-Schalter.
+  dokumentations_vertrag: >
+    Meridian-Experience, Runtime-Status, Open-Gaps, Workboard, Slice, Handbuch.
+external_gates:
+  - not_applicable

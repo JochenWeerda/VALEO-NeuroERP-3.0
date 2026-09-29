@@ -12,6 +12,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 # Active Workboard
 
 
+## MERIDIAN-BELEG-SYSTEMWEIT-20260929 — in Arbeit, Cursor
+
+**Ziel:** Durchgehende Belegseite, Belegnummer als Überschrift, Positionsdetail und
+lesbare Köpfe als zentrale Voreinstellung für alle nativen `objectPage`/`transaction`-Masken.
+**Dateibesitz:** `floorplans.ts`, `schema.ts`, `schema-compiler.ts`, `render-plan/types.ts`,
+Normalisierer in `screen_definitions.py`, `customer_reference.py`, `mask_screen_definition.py`,
+`check_field_contracts.py`, `tests/test_meridian_beleg_systemweit.py`.
+**Abnahme:** Sprungmarken ohne Deklaration, `tabs` als Opt-out; abgeleitete Belegidentität;
+`rowDetail` ab sechs Spalten; Gate gegen rohe `_id`-Kopffelder.
+[Slice](slices/MERIDIAN-BELEG-SYSTEMWEIT-20260929.yaml).
+
 ## MERIDIAN-BELEG-ONEPAGE-20260929 — abgeschlossen, Browser-Abnahme erfolgt, Cursor
 
 **Ziel:** Belege als durchgehende Seite mit Sprungmarken statt Registerwechsel,
@@ -270,6 +281,38 @@ mit echter Button-Komponente und App-CSS bestanden, auch mit `h-6`.
 Nachweis: [QA](../quality-assurance/uix-sm-touch-20260921.md).
 **Risiken/offen:** komplette FSX-/KIM-Seitenabnahme, explizite kleinere
 min-height-Overrides, Kartenstapel-Integration und MCP-Write. UIX insgesamt offen.
+
+## EK-BESTELLUNG-FUEHREND — Native Bestellmaske gegen L3 2026-09-18, abgeschlossen, Cursor
+
+**Stand:** abgeschlossen 2026-09-29, auf main in `58d9d5d6e`, `be38c69f0`,
+`dfad5118f` und `c40649364`. Fuehrend ist `einkauf/purchase-order`
+(`/einkauf/bestellung/:id`); `bestellung-stamm` liegt auf dem fuehrenden Beleg, die
+Liste liest beide Speicher. Der Wizard bleibt auf Compat-`purchase-orders`, bis der
+Speicher zusammengelegt ist (nicht Teil dieses Slices). HOME-UIX behaelt
+`bestellungen-liste.tsx`.
+
+**Ziel:** Eine vollstaendige Bestellmaske mit L3-Kopffeldern, Positionsgrid und
+drei Bestellfaellen (Bestand/Abverkauf, Direktlieferung, Innovation), angeordnet
+nach MASKEN.md plus L3-Captures — nicht als fuenfte Custom-Seite.
+
+**Dateibesitz:** `build_einkauf_purchase_order_screen_definition` in
+`screen_definitions.py`, `einkauf_models.py`, `procurement_service.py`,
+`mask_rollout_summary_service.py`, `mask_entity_contracts.py`,
+`einkauf_bestellvorschlag.py`, Alembic `einkauf_bestellung_fuehrend_20260918`,
+`bestellung-anlegen.tsx`, `bestellung-native.tsx`, Tests, MASKEN.md,
+`maskeninhalt-gegen-referenz-2026-09-17.md`.
+
+**Handshake 2026-09-29 (MERIDIAN-BELEG-ONEPAGE):** in
+`build_einkauf_purchase_order_screen_definition` additiv `layout.sectionNavigation=anchors`
+und `rowDetail: {}` an der Positionstabelle (Band zeigt alle Spalten). Keine Felder,
+Datenquellen oder Aktionen geändert.
+
+**Abnahme:** Feldvertrag 0 Abweichungen; Prozesskette `k3_einkauf/bestellung`;
+Maske fragt Ladetermin, Kontrakt, Skonto, Lieferantenartikel, Gebinde, Gewicht
+und Bestellfall an; GET liefert dieselben Schluessel.
+**Nachweis 2026-09-29 auf main:** pytest 61/61 ueber die sechs Slice-Testdateien
+(Bestellmaske, Abverkauf, Bestellliste, Prozesskette, Feldvertraege); Feldvertrag
+0 Abweichungen. Slice-YAML ohne zweites YAML-Dokument, damit `valeo_slice.py` sie laedt.
 
 ## HOME-UIX-ANWENDER-BEDIENWEGE — Touch, Sprache, Agent 2026-09-17, Cursor
 
