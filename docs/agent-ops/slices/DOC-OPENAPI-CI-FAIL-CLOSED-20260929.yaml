@@ -1,0 +1,21 @@
+id: DOC-OPENAPI-CI-FAIL-CLOSED-20260929
+slice_id: DOC-OPENAPI-CI-FAIL-CLOSED-20260929
+title: OpenAPI-Drift ohne Branch-Selbstmutation pruefen
+owner: Codex
+status: abgeschlossen
+goal: OpenAPI-Drift als read-only CI-Gate ausfuehren.
+scope: OpenAPI-Drift-Workflow und dessen Governance-Vertrag.
+file_ownership:
+  - .github/workflows/openapi-drift.yml
+  - tests/test_openapi_drift_workflow.py
+  - docs/quality-assurance/openapi-drift-fail-closed-20260929.md
+acceptance:
+  - Der Workflow besitzt nur contents read.
+  - Drift laesst den Job fehlschlagen.
+  - Der Workflow regeneriert, committet und pusht keine Spec.
+tests:
+  - Workflow-Vertrag und YAML-Parse bestanden.
+risks:
+  - API-Aenderungen muessen die erzeugte Spec im selben Review mitliefern.
+external_gates: []
+

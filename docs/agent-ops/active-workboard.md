@@ -12,7 +12,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 # Active Workboard
 
 
-## DOC-OPENAPI-CI-FAIL-CLOSED-20260929 — reserviert, Codex
+## DOC-OPENAPI-CI-FAIL-CLOSED-20260929 — abgeschlossen, Codex
 
 **Ziel:** OpenAPI-Drift in CI nur pruefen und bei Abweichung fehlschlagen lassen,
 ohne Schreibrecht oder selbsttaetigen Push auf geschuetzte Branches.
@@ -20,8 +20,9 @@ ohne Schreibrecht oder selbsttaetigen Push auf geschuetzte Branches.
 Regressionstest, eigene Slice-/QA-Doku und dieser Abschnitt.
 **Abnahme:** Workflow besitzt nur `contents: read`; Drift fuehrt direkt zu einem
 roten Job; kein `git commit`, `git push` oder Regenerationsschritt in Actions.
-**Risiken:** Die aktualisierte Spec muss zusammen mit der verursachenden API-
-Aenderung im normalen Review-/Merge-Weg eingecheckt werden.
+**Ergebnis:** Der Workflow ist read-only und fail-closed. Die Spec wird mit der
+verursachenden API-Aenderung ueber den normalen Review-/Merge-Weg geliefert.
+[QA](../quality-assurance/openapi-drift-fail-closed-20260929.md).
 
 
 ## BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929 — abgeschlossen, Codex
@@ -11687,8 +11688,8 @@ Parallele Fix-Slices aus Cards-Inventar-Audit (`CARD-AUDIT-001`). Claim-Protokol
 
 **Von:** Claude Code
 **Owner:** Claude Code
-**Stand:** abgeschlossen 2026-06-26 — `--check`-Step in quality-gate.yml (blockiert PRs bei Drift); `openapi-drift.yml` (Auto-Commit auf main bei API-Änderungen).
-**Ziel:** `generate_openapi.py --check` als blockierendes CI-Gate; bei Drift auto-commit durch CI statt manuellem Schritt.
+**Stand:** abgeschlossen 2026-06-26; Governance-Nachzug 2026-09-29 — `--check` blockiert bei Drift. `openapi-drift.yml` ist read-only und schreibt nicht auf geschuetzte Branches.
+**Ziel:** `generate_openapi.py --check` als blockierendes CI-Gate; die aktualisierte Spec wird mit der verursachenden API-Aenderung reviewed und gemerged.
 **Dateibesitz:** `.github/workflows/openapi-drift.yml`, `docs/agent-ops/slices/DOC-OPENAPI-CI-001.yaml`
 
 ## DOC-ASYNCAPI-001 — AsyncAPI 2.6 Event-Katalog
