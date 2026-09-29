@@ -19,7 +19,18 @@ ACCOUNT_DEFINITIONS: dict[str, PosAccountDefinition] = {
     "1200": PosAccountDefinition("Bank / EC", "asset", "current_assets"),
     "1210": PosAccountDefinition("PayPal / Verrechnung", "asset", "current_assets"),
     "1400": PosAccountDefinition("Forderungen aus Lieferungen und Leistungen", "asset", "current_assets"),
-    "1600": PosAccountDefinition("Gutscheinverbindlichkeiten", "liability", "current_liabilities"),
+    # Gutscheine stehen auf einem eigenen Konto.
+    #
+    # Gebucht wurde auf 1600 — dort liegen die Verbindlichkeiten aus
+    # Lieferungen und Leistungen, also das, was wir Lieferanten schulden. Ein
+    # ausgegebener Gutschein ist etwas anderes: eine Leistungsverpflichtung
+    # gegenueber einem Kunden. Beides auf einem Konto heisst, dass weder der
+    # Lieferantensaldo noch der Gutscheinbestand stimmt — und keiner von
+    # beiden ist aus dem Konto heraus zu erklaeren. GoBD (Rz. 30 ff.,
+    # Klarheit und Nachvollziehbarkeit) verlangt die Trennung.
+    "1700": PosAccountDefinition(
+        "Verbindlichkeiten aus ausgegebenen Gutscheinen", "liability", "current_liabilities"
+    ),
     "1800": PosAccountDefinition("Privatentnahmen / Barauszahlungen", "equity", "equity"),
     "2150": PosAccountDefinition("Kassendifferenzen", "expense", "operating_expenses"),
     "8400": PosAccountDefinition("Umsatzerloese POS", "revenue", "revenue"),
@@ -70,13 +81,13 @@ def build_pos_closing_lines(amounts: PosClosingAmounts) -> list[PosAccountingLin
         lines.append(PosAccountingLine("1400", amounts.b2b_sales, ZERO, "B2B-Forderungen"))
     if amounts.voucher_redemptions > ZERO:
         lines.append(
-            PosAccountingLine("1600", amounts.voucher_redemptions, ZERO, "Eingeloeste Gutscheine")
+            PosAccountingLine("1700", amounts.voucher_redemptions, ZERO, "Eingeloeste Gutscheine")
         )
     if amounts.sales_total > ZERO:
         lines.append(PosAccountingLine("8400", ZERO, amounts.sales_total, "Umsatzerloese POS"))
     if amounts.voucher_issues > ZERO:
         lines.append(
-            PosAccountingLine("1600", ZERO, amounts.voucher_issues, "Ausgegebene Gutscheine")
+            PosAccountingLine("1700", ZERO, amounts.voucher_issues, "Ausgegebene Gutscheine")
         )
     if amounts.cash_withdrawals > ZERO:
         lines.extend(

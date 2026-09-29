@@ -29,7 +29,15 @@ class SalesPostingService:
     ACCOUNT_COGS = "7000"         # Wareneinsatz / cost of goods sold
     ACCOUNT_INVENTORY = "2000"    # Warenbestand
     ACCOUNT_REVENUE = "8400"      # Umsatzerlöse
-    ACCOUNT_RECEIVABLES = "1200"  # Forderungen L+L
+    # Forderungen aus Lieferungen und Leistungen.
+    #
+    # Gebucht wurde auf 1200 — das ist in SKR03 die Bank, und der Kassendienst
+    # fuehrt es auch so ("Bank / EC"). Eine Forderung auf dem Bankkonto ist
+    # nicht nur unsauber, sie ist sachlich falsch: Sie behauptet Geld, das
+    # noch nicht da ist. GoBD verlangt Richtigkeit und Klarheit (Rz. 30 ff.) —
+    # ein Konto, das zugleich Bestand und Forderung traegt, kann ein
+    # sachverstaendiger Dritter nicht in angemessener Zeit nachvollziehen.
+    ACCOUNT_RECEIVABLES = "1400"  # Forderungen aus Lieferungen und Leistungen
     ACCOUNT_TAX = "1776"          # Umsatzsteuer 19%
 
     def __init__(self, db: Session, tenant_id: str) -> None:

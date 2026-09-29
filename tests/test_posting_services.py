@@ -230,7 +230,10 @@ def test_obligo_creates_entry_correct_accounts():
         lines = kwargs["lines"]
         debit = next(l for l in lines if l["debit_amount"] > 0)
         credit = next(l for l in lines if l["credit_amount"] > 0)
-        assert debit["account_id"] == "6000"
+        # Einkauf Handelswaren, nicht 6000: Das ist Loehne und Gehaelter, und
+        # Wareneinkauf darauf vermischt Personal- mit Materialaufwand. Die
+        # GoBD verlangen Klarheit (Rz. 30 ff.) — ein Konto, eine Sache.
+        assert debit["account_id"] == "5100"
         assert credit["account_id"] == "1600"
         assert debit["debit_amount"] == pytest.approx(1500.0)
         assert credit["credit_amount"] == pytest.approx(1500.0)

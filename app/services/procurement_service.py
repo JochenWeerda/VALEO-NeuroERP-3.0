@@ -993,8 +993,17 @@ class ProcurementService:
             description=f"Bestellobligo {b.bestellnummer}",
             entry_date=entry_date,
             lines=[
-                {"account_id": "6000", "debit_amount": float(netto), "credit_amount": 0,
-                 "description": "Warenaufwand Bestellung"},
+                # Einkauf Handelswaren, nicht 6000.
+                #
+                # 6000 ist in SKR03 "Loehne und Gehaelter", und lohn_service
+                # bucht den Bruttolohn folgerichtig dorthin. Wareneinkauf auf
+                # demselben Konto vermischt Personal- und Materialaufwand: Die
+                # Gewinn- und Verlustrechnung wird damit unbrauchbar, und die
+                # von GoBD geforderte Klarheit ist dahin. 5100 ist das Konto,
+                # das dieses Haus in finance/router.py ohnehin fuer die
+                # Eingangsrechnung vorsieht (ER -> 5100 / 1600).
+                {"account_id": "5100", "debit_amount": float(netto), "credit_amount": 0,
+                 "description": "Einkauf Handelswaren (Bestellobligo)"},
                 {"account_id": "1600", "debit_amount": 0, "credit_amount": float(netto),
                  "description": "Verbindlichkeiten Lieferant"},
             ],
