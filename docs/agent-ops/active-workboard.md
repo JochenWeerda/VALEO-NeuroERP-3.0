@@ -12,15 +12,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 # Active Workboard
 
 
-## DOC-SLICE-METADATA-PORTAL-20260929 — reserviert, Codex
+## DOC-SLICE-METADATA-PORTAL-20260929 — abgeschlossen, Codex
 
 **Ziel:** Den abgeschlossenen Portal-Business-Time-Slice wieder auf den
 kanonischen Metadatenvertrag bringen.
 **Dateibesitz:** `docs/agent-ops/slices/BUSINESS-TIME-PORTAL-20260929.yaml`,
 eigener Doku-Nachweis und dieser Abschnitt.
-**Abnahme:** `slice_id` entspricht `id`; `title` ist gesetzt; YAML-, Slice- und
-Doku-Gates sind gruen.
-**Risiken:** Reine Metadatenkorrektur ohne Aenderung an Portal-Fachlogik.
+**Abnahme:** `slice_id` entspricht `id`; `title` und `created_at` sind gesetzt;
+YAML-, Slice- und Doku-Gates sind gruen.
+**Ergebnis:** Der Slice-Validator meldet `Schema: OK`; Fach- und Testvertraege
+des abgeschlossenen Portal-Slices blieben unveraendert.
+[QA](../quality-assurance/business-time-portal-slice-metadata-20260929.md).
 
 
 ## DOC-OPENAPI-CI-FAIL-CLOSED-20260929 — abgeschlossen, Codex
