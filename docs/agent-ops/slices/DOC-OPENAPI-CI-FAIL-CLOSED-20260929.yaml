@@ -17,5 +17,14 @@ tests:
   - Workflow-Vertrag und YAML-Parse bestanden.
 risks:
   - API-Aenderungen muessen die erzeugte Spec im selben Review mitliefern.
-external_gates: []
+ai_harness:
+  fachlicher_vertrag: Die veroeffentlichte OpenAPI-Spec beschreibt die laufende App.
+  architektur_vertrag: Der Drift-Job prueft nur und schreibt nicht auf main.
+  daten_vertrag: Keine Fachdaten; die Spec ist ein generiertes Artefakt.
+  test_vertrag: Workflow-YAML bleibt read-only und ohne Commit-Schritt.
+  security_vertrag: Der Job hat contents read und pusht kein Token auf main.
+  betriebs_vertrag: Drift faellt rot, bis die Spec im normalen Commit mitkommt.
+  dokumentations_vertrag: Slice, QA und Workboard nennen das read-only Gate.
+external_gates:
+  - not_applicable
 
