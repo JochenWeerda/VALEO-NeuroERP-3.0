@@ -11,6 +11,30 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-GATE-REPARATUR-20260930 — abgeschlossen, Claude Code
+
+**Ziel:** Kein Workflow ist mehr rot, ohne dass die Ursache benannt ist. Die
+Tests laufen gegen eine frisch migrierte Datenbank, nicht gegen eine gewachsene.
+**Dateibesitz:** `lieferschein_status_bedingung_20260929.py`,
+`verkauf_fehlende_spalten_20260929.py`, `compliance_dsgvo.py`, `requirements.txt`,
+`check_table_references.py`, das `nosec` in `customer_reference.py`, die
+Optional-Chain-Zeile in `schema-compiler.ts`.
+**Stand:** Neunundzwanzig Fehlschlaege und dreissig Fehler hatten eine Wurzel —
+geprueft wurde gegen eine gewachsene Entwicklungsdatenbank. Die hat Bedingungen
+verloren (Fremdschluessel, `ck_delivery_notes_status`, NOT-NULL auf
+`sales_orders`) und Spalten gewonnen, die keine Migration anlegt. Drei echte
+Produktfehler: Lieferschein kam ueber den Entwurf nicht hinaus, ein Angebot liess
+sich nicht anlegen, und der DSGVO-Loeschlauf tat nichts und meldete 503.
+**Abnahme:** Pytest, CI/CD Pipeline, Docs Build, Docs Governance, OpenAPI Drift
+und E2E gruen; 14 289 Tests gegen eine frisch migrierte Datenbank.
+**Offen, gehoert anderen:** `CVE-2026-82049` ohne Backport (Codex), drei
+`chromadb`-Meldungen ohne Patch (Codex), Branchschutz fuer die drei
+selbstschreibenden Workflows (Hausentscheidung), die Statuswerte des
+Lieferscheins (Fachbereich).
+**Doku:** `docs/quality-assurance/ci-rotlauf-ursachen-2026-09-29.md`,
+`docs/project-context/lieferschein-statuswerte-2026-09-29.md`.
+
+
 
 ## MERIDIAN-BELEG-SYSTEMWEIT-20260929 — abgeschlossen, Browser-Abnahme erfolgt, Cursor
 
