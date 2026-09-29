@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BUSINESS-TIME-TOURS-20260929 — reserviert, Codex
+## BUSINESS-TIME-TOURS-20260929 — abgeschlossen, Codex
 
 **Ziel:** `/tours/today` am konfigurierten Geschaeftstag statt an UTC- oder
 Host-Kalendertagen ausrichten.
@@ -20,6 +20,9 @@ eigene Slice-/QA-Doku, BUSINESS-TIME-Restpunkt in Open-Gaps und dieser Abschnitt
 **Abnahme:** Der Repository-Filter erhaelt `business_today()`; tote doppelte
 Datumslogik ist entfernt; gezielter Test und Doku-Gates sind gruen.
 **Risiken:** Keine Aenderung an Tourzeitpunkten oder Wochenfiltern.
+**Ergebnis:** `/tours/today` delegiert mit `business_today()` an das Repository;
+die tote UTC- und Host-Datumslogik ist entfernt. 10 fokussierte Tests bestanden.
+[QA](../quality-assurance/business-time-tours-20260929.md).
 
 ## BUSINESS-TIME-PORTAL-20260929 — abgeschlossen, Codex
 

@@ -1,0 +1,26 @@
+id: BUSINESS-TIME-TOURS-20260929
+owner: Codex
+status: abgeschlossen
+goal: Die Heute-Touren am konfigurierten Geschaeftstag abgrenzen.
+scope: Tours-Heute-Endpunkt und fokussierter Regressionstest.
+file_ownership:
+  - app/api/v1/endpoints/tours.py
+  - tests/test_tours_business_time.py
+  - docs/quality-assurance/business-time-tours-20260929.md
+acceptance:
+  - Das Repository erhaelt business_today als Datumsfilter.
+  - Doppelte UTC- und Host-Datumslogik ist entfernt.
+  - Wochenfilter und Tourzeitpunkte bleiben unveraendert.
+tests:
+  - 10 Tours- und Business-Time-Tests bestanden.
+risks:
+  - Andere Logistikzeitpunkte sind nicht Bestandteil dieses Slices.
+ai_harness:
+  fachlicher_vertrag: Heute bedeutet den konfigurierten lokalen Geschaeftstag.
+  architektur_vertrag: Wiederverwendung des zentralen Business-Time-Moduls.
+  daten_vertrag: Keine Schema- oder Persistenzaenderung.
+  test_vertrag: Repository-Aufruf wird mit einem abweichenden lokalen Tag geprueft.
+  security_vertrag: Keine Aenderung an Zugriff oder Mandantengrenzen.
+  betriebs_vertrag: BUSINESS_TIMEZONE steuert die Tagesgrenze.
+  dokumentations_vertrag: Workboard, Open-Gaps, Slice und QA aktualisiert.
+external_gates: []

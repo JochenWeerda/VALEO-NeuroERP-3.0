@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.business_time import business_today
 from app.domains.verladung.repository import (
     TourRepository,
     TourStopRepository,
@@ -215,11 +216,7 @@ async def get_tours_by_week(week: str, db: Session = Depends(get_db)):
 async def get_today_tours(db: Session = Depends(get_db)):
     """Get all tours for today"""
     repo = TourRepository(db)
-    _today = datetime.utcnow().date()  # noqa: F841
-    # Create a date object for comparison
-    from datetime import date
-    today_date = date.today()
-    return repo.get_by_date(today_date)
+    return repo.get_by_date(business_today())
 
 
 @router.get("/{tour_id}", response_model=TourResponse, summary="Tour abrufen")
