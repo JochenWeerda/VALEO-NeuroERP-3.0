@@ -291,6 +291,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `l3_recent_documents_20260821` | Personal authorized recent-document projection. |
 | `l3_report_catalog_20260821` | Governed L3 report catalog fact projection. |
 | `l3_runtime_hardening_20260822` | L3 runtime tenant and uniqueness hardening. |
+| `lieferschein_status_bedingung_20260929` | Die Statusbedingung des Lieferscheins kennt die Zustaende, die es gibt. |
 | `lkw_annahme_queue_article_reference_20260328` | LKW-Annahme-Queue article reference |
 | `lkw_annahme_queue_klaerung_20260328` | LKW-Annahme-Queue Klaerungsdaten |
 | `log_carrier_invoices_20260618` | LOG-FRACHT-001: Spediteur-Rechnungen (carrier_invoices) |
@@ -381,6 +382,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `team_calendar_20260821` | Team calendar ownership and privacy model. |
 | `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
+| `verkauf_fehlende_spalten_20260929` | Fuenf Spalten, die der Code schreibt und keine Migration anlegt. |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |
