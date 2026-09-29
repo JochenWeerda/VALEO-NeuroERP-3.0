@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+
+## BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929 — reserviert, Codex
+
+**Ziel:** Fachliche Datumswerte in OCR-Fallback, ATLAS und Compliance-Trend am
+konfigurierten Geschaeftstag ausrichten.
+**Dateibesitz:** `app/einkauf/ocr_invoice.py`,
+`app/services/atlas_customs_service.py`, `app/security/compliance_monitor.py`,
+eigener fokussierter Vertragstest, eigene Slice-/QA-Doku, BUSINESS-TIME-Restpunkt
+in Open-Gaps und dieser Abschnitt.
+**Abnahme:** Rechnungsdatum, MRN-Jahr, Ausgangsdatum und Trendtage verwenden
+`business_today()`; technische Verarbeitungs-, Audit- und Laufzeitstempel bleiben
+UTC; Grenzfaelle mit abweichendem UTC-/Ortsdatum sind getestet.
+**Risiken:** Mock-Inhalte bleiben als solche sichtbar; dieser Slice ersetzt keine
+noch fehlenden Provider- oder Persistenzanbindungen.
+
 ## BUSINESS-TIME-AGRAR-VALIDITY-20260929 — abgeschlossen, Codex
 
 **Ziel:** Zulassungsablauf und 90-Tage-Fristen in PSM-, Saatgut- und
