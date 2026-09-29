@@ -404,7 +404,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <Label className="w-32">Liefersch.-Nr.:</Label>
               <Input value={deliveryNote.deliveryNumber} readOnly className="flex-1" />
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation" aria-label="Lieferschein suchen">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </div>
@@ -488,14 +488,14 @@ export default function DeliveryEditorNewPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <Label className="w-32">Niederlassung:</Label>
               <Input value={deliveryNote.branch} className="flex-1" />
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation" aria-label="Niederlassung auswählen">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </div>
             <div className="flex items-center gap-2">
               <Label className="w-32">Vertreter:</Label>
               <Input value={deliveryNote.representative} className="flex-1" />
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation" aria-label="Vertreter auswählen">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </div>
@@ -521,7 +521,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <Label className="w-32">Debitor-Kto.:</Label>
               <Input value={deliveryNote.customerAccount} readOnly className="flex-1" />
-              <Button variant="ghost" size="sm" onClick={() => setShowCustomerDialog(true)}>
+              <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation" aria-label="Kunde auswählen" onClick={() => setShowCustomerDialog(true)}>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </div>
@@ -597,7 +597,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
                 }
                 className="flex-1"
               />
-              <Button variant="ghost" size="sm" onClick={() => setShowArticleDialog(true)}>
+              <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation" aria-label="Artikel auswählen" onClick={() => setShowArticleDialog(true)}>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </div>

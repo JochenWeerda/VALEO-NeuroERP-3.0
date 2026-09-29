@@ -157,7 +157,6 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
     <Button
       key={a.action}
       variant="outline"
-      size="sm"
       onClick={() => onActionClick(a.action)}
       data-action-id={a.actionId}
       data-global-button-handler={a.action === 'printCustomer' ? 'ignore' : undefined}
@@ -180,7 +179,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         {isVisible('crm360.customer.info') && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" data-action-id="crm360.customer.info" title="Kunden-Informationsmodule" className="gap-1.5">
+              <Button variant="outline" data-action-id="crm360.customer.info" title="Kunden-Informationsmodule" className="gap-1.5">
                 <span className="text-primary"><Info size={14} /></span>
                 Information
                 <ChevronDown size={13} className="opacity-60" />
@@ -210,7 +209,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         {isVisible('crm360.offer.create') && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" data-action-id="crm360.offer.create" title="Angebote / Aufträge / Belege [Alt + A]" className="gap-1.5">
+              <Button variant="outline" data-action-id="crm360.offer.create" title="Angebote / Aufträge / Belege [Alt + A]" className="gap-1.5">
                 <span className="text-primary"><FileSignature size={14} /></span>
                 Ang./Auf.
                 <ChevronDown size={13} className="opacity-60" />
@@ -243,7 +242,7 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         {/* S5: Toolbar-Konfiguration (Sichtbarkeit, benutzerbezogen) — kein data-action-id (Zähl-neutral) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8" title="Toolbar anpassen" id="btn-toolbar-config">
+            <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation" aria-label="Toolbar anpassen" title="Toolbar anpassen" id="btn-toolbar-config">
               <Settings2 size={15} />
             </Button>
           </DropdownMenuTrigger>
@@ -267,7 +266,6 @@ export default function CustomerActionBar({ onActionClick, isLoadingAI }: Custom
         </DropdownMenu>
 
         <Button
-          size="sm"
           onClick={() => onActionClick('neuroIntelligence')}
           data-action-id="crm360.ai.summary"
           disabled={isLoadingAI}

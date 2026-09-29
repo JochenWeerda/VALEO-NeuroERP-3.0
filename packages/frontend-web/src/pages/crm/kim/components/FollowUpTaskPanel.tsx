@@ -77,7 +77,7 @@ export default function FollowUpTaskPanel({ logs, customer, onResolveTask }: Fol
                   </div>
                 </div>
 
-                <Button size="sm" onClick={() => onResolveTask(task.id)} title="Folgekontakt abschließen" className="gap-1 shrink-0">
+                <Button onClick={() => onResolveTask(task.id)} title="Folgekontakt abschließen" className="gap-1 shrink-0">
                   <CheckCircle2 size={13} />
                   Erledigen
                 </Button>

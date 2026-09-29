@@ -16,6 +16,7 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { inputValue, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { Callout } from '@/components/ui/callout'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -307,6 +308,7 @@ function BankImportErrorList({ errors }: { errors: string[] }) {
 
 export default function BankAbgleichPage(): JSX.Element {
   const { t } = useTranslation()
+  const isTouch = useTouchDevice()
   const navigate = useNavigate()
   const { tenantId } = useTenant()
   const [isDirty, setIsDirty] = useState(false)
@@ -628,21 +630,7 @@ export default function BankAbgleichPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <OperationalCaseHeader
-        title="Bankabgleich"
-        description="Import, Validierung und Buchung von Bankkontoauszuegen ohne Medienbruch."
-        status={operationalStatus}
-        owner="Finanzbuchhaltung"
-        blocker={Math.abs(Number(data?.abgleichsDifferenz || 0)) >= 0.01 ? 'Abgleichsdifferenz ist noch nicht null.' : Number(data?.nichtZugeordnet || 0) > 0 ? 'Es gibt noch nicht zugeordnete Umsatzzeilen.' : null}
-        nextAction={Number(data?.nichtZugeordnet || 0) > 0 ? 'Zuordnung abschliessen' : data?.statementId ? 'Validieren und verbuchen' : 'Kontoauszug importieren'}
-        caseLabel={stringValue(data?.statementId, 'Neuer Abgleich')}
-        tags={['FIBU', 'Bank']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <OperationalTimeline title="Abgleichsverlauf" items={timelineItems} />
-        <OperationalContextPanel sections={contextSections} />
-      </div>
+    <div className="space-y-4 p-3 md:p-4">
       <ObjectPage
         config={bankAbgleichConfig}
         data={data}
@@ -652,6 +640,24 @@ export default function BankAbgleichPage(): JSX.Element {
         onAction={(key, formData) => handleAction(key, formData)}
         loadingActionKey={loadingActionKey}
       />
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title="Bankabgleich"
+            description="Import, Validierung und Buchung von Bankkontoauszuegen ohne Medienbruch."
+            status={operationalStatus}
+            owner="Finanzbuchhaltung"
+            blocker={Math.abs(Number(data?.abgleichsDifferenz || 0)) >= 0.01 ? 'Abgleichsdifferenz ist noch nicht null.' : Number(data?.nichtZugeordnet || 0) > 0 ? 'Es gibt noch nicht zugeordnete Umsatzzeilen.' : null}
+            nextAction={Number(data?.nichtZugeordnet || 0) > 0 ? 'Zuordnung abschliessen' : data?.statementId ? 'Validieren und verbuchen' : 'Kontoauszug importieren'}
+            caseLabel={stringValue(data?.statementId, 'Neuer Abgleich')}
+            tags={['FIBU', 'Bank']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+            <OperationalTimeline title="Abgleichsverlauf" items={timelineItems} />
+            <OperationalContextPanel sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

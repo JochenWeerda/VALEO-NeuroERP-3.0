@@ -130,7 +130,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
             <button
               key={tab.key}
               onClick={() => handleTabChange(tab.key)}
-              className={`whitespace-nowrap px-3 py-1.5 text-xs font-medium transition rounded-t-md border-t border-x ${
+              className={`min-h-touch touch-manipulation whitespace-nowrap rounded-t-md border-t border-x px-3 py-1.5 text-xs font-medium transition ${
                 activeTab === tab.key
                   ? 'bg-card border-border text-primary font-semibold'
                   : 'bg-transparent border-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -143,7 +143,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
           ))}
         </div>
 
-        <Button variant="outline" size="sm" onClick={() => setShowAddLog(!showAddLog)} className="gap-1 mb-1" id="btn-trigger-history-form">
+        <Button variant="outline" onClick={() => setShowAddLog(!showAddLog)} className="gap-1 mb-1" id="btn-trigger-history-form">
           {showAddLog ? <X size={13} /> : <Plus size={13} />}
           {showAddLog ? 'Eingabe schließen' : 'Aktivität erfassen'}
         </Button>
@@ -239,7 +239,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
               </label>
             </div>
 
-            <Button type="submit" size="sm" className="gap-1.5" id="btn-save-activity-vorgang" disabled={isSaving || !logDesc.trim()}>
+            <Button type="submit" className="gap-1.5" id="btn-save-activity-vorgang" disabled={isSaving || !logDesc.trim()}>
               <Check size={13} />
               Aktivität speichern
             </Button>

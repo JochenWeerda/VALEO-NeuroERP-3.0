@@ -425,16 +425,15 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
         />
         {docId && (
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => void recordPrint()}>
+            <Button type="button" variant="outline" onClick={() => void recordPrint()}>
               Druck protokollieren
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => void recordExport()}>
+            <Button type="button" variant="outline" onClick={() => void recordExport()}>
               Export protokollieren
             </Button>
             <Button
               type="button"
               variant="default"
-              size="sm"
               onClick={() => void exportEInvoice('xrechnung')}
               disabled={einvoicePending !== null || !invoice.number?.trim()}
               data-testid="einvoice-xrechnung"
@@ -444,7 +443,6 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
             <Button
               type="button"
               variant="default"
-              size="sm"
               onClick={() => void exportEInvoice('zugferd')}
               disabled={einvoicePending !== null || !invoice.number?.trim()}
               data-testid="einvoice-zugferd"
@@ -455,7 +453,6 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
               <Button
                 type="button"
                 variant="secondary"
-                size="sm"
                 onClick={() => navigate(buildSalesHandoverPath('/finance/op-debitoren', {
                   customerId: salesHandover.customerId || invoice.customerId,
                   customerNumber: salesHandover.customerNumber,

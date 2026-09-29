@@ -25,6 +25,7 @@ describe('Tabs (Register-Variante)', () => {
 
     expect(screen.getByRole('tablist', { name: 'Beleg-Register' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Allgemein' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Allgemein' }).className).toContain('min-h-touch')
     expect(screen.getByText('Allgemein Inhalt')).toBeInTheDocument()
     expect(screen.queryByText('Positionen Inhalt')).not.toBeInTheDocument()
 

@@ -163,12 +163,12 @@ export default function CustomerListSidebar({
             placeholder="Suchname / Ort / Debitor-Nr…"
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setFocusedIndex(-1); }}
-            className="pl-8 pr-8 h-9"
+            className="min-h-touch pl-8 pr-8"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-1 top-1/2 flex min-h-touch min-w-touch -translate-y-1/2 items-center justify-center text-muted-foreground hover:text-foreground"
               aria-label="Suche leeren"
             >
               <X size={14} />
@@ -184,7 +184,7 @@ export default function CustomerListSidebar({
               <button
                 key={f.key}
                 onClick={() => { setActiveFilter(f.key); setSelectedAlphabet(null); }}
-                className={`py-1.5 rounded-md border transition-colors leading-none ${
+                className={`min-h-touch touch-manipulation rounded-md border py-1.5 transition-colors leading-none ${
                   active
                     ? f.danger
                       ? 'bg-destructive text-destructive-foreground border-transparent'
@@ -207,7 +207,7 @@ export default function CustomerListSidebar({
       <div className="flex items-center border-b border-border bg-background px-1.5 py-1 text-xs font-medium text-muted-foreground overflow-x-auto gap-0.5" id="alphabetical-nav-scroller">
         <button
           onClick={() => setSelectedAlphabet(null)}
-          className={`px-1.5 py-0.5 rounded transition shrink-0 ${
+          className={`min-h-touch min-w-touch touch-manipulation shrink-0 rounded px-1.5 py-0.5 transition ${
             selectedAlphabet === null ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-primary'
           }`}
           title="Gesamte Liste"
@@ -221,7 +221,7 @@ export default function CustomerListSidebar({
             <button
               key={letter}
               onClick={() => setSelectedAlphabet(active ? null : letter)}
-              className={`px-1 py-0.5 rounded transition shrink-0 ${
+              className={`min-h-touch min-w-touch touch-manipulation shrink-0 rounded px-1 py-0.5 transition ${
                 active
                   ? 'bg-primary text-primary-foreground'
                   : has
@@ -300,7 +300,7 @@ export default function CustomerListSidebar({
         {remainingCount > 0 && (
           <button
             onClick={() => setVisibleCount(c => c + RENDER_STEP)}
-            className="w-full py-1.5 rounded-md border border-dashed border-border text-xs font-medium text-muted-foreground hover:bg-muted transition"
+            className="min-h-touch w-full touch-manipulation rounded-md border border-dashed border-border py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted"
             id="btn-sidebar-load-more"
           >
             Weitere {Math.min(remainingCount, RENDER_STEP)} von {remainingCount} anzeigen
@@ -312,14 +312,14 @@ export default function CustomerListSidebar({
       <div className="p-2 border-t border-border bg-muted/60 flex gap-1.5">
         <button
           onClick={onOpenEnterprise}
-          className="flex-1 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-foreground hover:bg-muted transition"
+          className="min-h-touch flex-1 touch-manipulation rounded-md border border-border bg-card py-1.5 text-xs font-medium text-foreground transition hover:bg-muted"
           id="btn-sidebar-corporate"
         >
           Folkerts GmbH
         </button>
         <button
           onClick={onOpenGlobalDocs}
-          className="flex-1 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-foreground hover:bg-muted transition"
+          className="min-h-touch flex-1 touch-manipulation rounded-md border border-border bg-card py-1.5 text-xs font-medium text-foreground transition hover:bg-muted"
           id="btn-sidebar-handbooks"
         >
           Richtlinien

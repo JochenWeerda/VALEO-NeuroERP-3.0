@@ -42,7 +42,7 @@ export default function AuftragLieferscheinAbgleichPage() {
       <div className="flex items-center gap-2">
         <PackageCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Auftrag-Lieferschein-Abgleich</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
+        <Button variant="outline" className="ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
           {orders.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -54,7 +54,7 @@ export default function AuftragLieferscheinAbgleichPage() {
             <CardTitle className="text-sm">Aufträge</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="min-h-touch pl-7" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">

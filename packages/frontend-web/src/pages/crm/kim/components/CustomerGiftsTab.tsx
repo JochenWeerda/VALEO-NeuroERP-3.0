@@ -152,7 +152,7 @@ export default function CustomerGiftsTab({ customer, contacts, initialContactId 
             />
           </div>
         </div>
-        <Button size="sm" onClick={openNew} className="gap-1" id="btn-gift-new">
+        <Button onClick={openNew} className="gap-1" id="btn-gift-new">
           <Plus size={14} /> Präsent erfassen
         </Button>
       </div>
@@ -197,8 +197,8 @@ export default function CustomerGiftsTab({ customer, contacts, initialContactId 
             <Input value={form.salesRepId} onChange={e => setForm(f => ({ ...f, salesRepId: e.target.value }))} className="text-center" />
           </div>
           <div className="col-span-12 flex justify-end gap-2 border-t border-dashed border-border pt-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(false)}><X size={13} /> Abbrechen</Button>
-            <Button type="submit" size="sm" disabled={saving} className="gap-1" id="btn-gift-save">
+            <Button type="button" variant="outline" onClick={() => setShowForm(false)}><X size={13} /> Abbrechen</Button>
+            <Button type="submit" disabled={saving} className="gap-1" id="btn-gift-save">
               {saving ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />} Zeile OK
             </Button>
           </div>
@@ -244,9 +244,9 @@ export default function CustomerGiftsTab({ customer, contacts, initialContactId 
                     <td className="p-2 text-center text-muted-foreground">{g.operator || '—'}</td>
                     <td className="p-2">
                       <div className="flex justify-end gap-1">
-                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => openEdit(g)} title="Bearbeiten"><Pencil size={13} /></Button>
-                        <Button variant="outline" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" disabled={pendingDelete === g.id} onClick={() => handleDelete(g.id)} title="Löschen">
-                          {pendingDelete === g.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => openEdit(g)} title="Bearbeiten"><Pencil size={13} /> Bearbeiten</Button>
+                        <Button variant="outline" className="min-h-touch touch-manipulation text-destructive hover:text-destructive" disabled={pendingDelete === g.id} onClick={() => handleDelete(g.id)} title="Löschen">
+                          {pendingDelete === g.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />} Löschen
                         </Button>
                       </div>
                     </td>

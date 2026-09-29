@@ -68,7 +68,7 @@ export default function SalesDocumentsPanel({
               setSelectedDocumentId('');
             }}
             aria-pressed={activeCategory === category.key}
-            className={`px-3 py-1.5 text-xs font-medium transition rounded-t-md border-b-2 ${
+            className={`min-h-touch touch-manipulation px-3 py-1.5 text-xs font-medium transition rounded-t-md border-b-2 ${
               activeCategory === category.key
                 ? 'border-primary text-primary bg-primary/5 font-semibold'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -81,7 +81,6 @@ export default function SalesDocumentsPanel({
         ))}
         <Button
           variant="outline"
-          size="sm"
           disabled={!selectedDocument}
           onClick={() => selectedDocument && onOpenDocument(selectedDocument)}
           className="ml-auto gap-1 mb-1"
@@ -90,7 +89,6 @@ export default function SalesDocumentsPanel({
           <FolderOpen size={13} /> Öffnen
         </Button>
         <Button
-          size="sm"
           disabled={activeCategory === 'ALL'}
           onClick={() => onCreateDocument(activeCategory)}
           className="gap-1 mb-1"

@@ -168,7 +168,6 @@ export default function CustomerContactMarketing({ customer, contacts }: Props) 
             </span>
             <Button
               variant="outline"
-              size="sm"
               className="gap-1 text-destructive hover:text-destructive"
               onClick={() => setConfirmPseudo(true)}
               id="btn-contact-pseudonymize"

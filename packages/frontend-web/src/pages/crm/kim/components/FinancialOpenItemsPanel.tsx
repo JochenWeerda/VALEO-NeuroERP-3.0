@@ -158,7 +158,7 @@ export default function FinancialOpenItemsPanel({ customer, openItems, onAddOpen
             <Receipt size={15} className="text-primary" />
             <h3 className="font-semibold text-sm">Offene Posten (OP-Warenrechnungen)</h3>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setShowAddForm(!showAddForm)} className="gap-1">
+          <Button variant="outline" onClick={() => setShowAddForm(!showAddForm)} className="gap-1">
             {showAddForm ? <X size={13} /> : <Plus size={13} />}
             {showAddForm ? 'Schließen' : 'Warenrechnung anlegen'}
           </Button>
@@ -208,7 +208,7 @@ export default function FinancialOpenItemsPanel({ customer, openItems, onAddOpen
                   <span>Direktgeschäft / Streckenbezug?</span>
                 </label>
               </div>
-              <Button type="submit" size="sm" className="gap-1.5">
+              <Button type="submit" className="gap-1.5">
                 <Check size={13} />
                 OP verbuchen
               </Button>

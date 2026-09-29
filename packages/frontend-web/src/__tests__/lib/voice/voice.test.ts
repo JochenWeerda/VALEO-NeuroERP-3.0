@@ -5,12 +5,15 @@ import { describe, it, expect, vi } from 'vitest'
 import { FakeSttProvider, selectSttProvider, type SttProvider } from '@/lib/voice/stt-provider'
 import { compileVoiceNavigation, stripNavPrefix } from '@/lib/voice/voice-navigation'
 import type { PaletteCommand } from '@/components/navigation/command-palette-model'
+import { buildPaletteCommands } from '@/components/navigation/command-palette-model'
 
 const icon = (() => null) as unknown as PaletteCommand['icon']
 
 const COMMANDS: PaletteCommand[] = [
   { id: 'op', label: 'Offene Posten Debitoren', keywords: ['offene posten', 'op', 'debitoren'], icon, actionId: 'op', actionParams: { path: '/finance/op-debitoren' }, category: 'Finance' },
   { id: 'kunden', label: 'Kunden', keywords: ['kunde', 'kunden'], icon, actionId: 'kunden', actionParams: { path: '/verkauf/kunden-liste' }, category: 'Verkauf' },
+  { id: 'warteschlange', label: 'Warteschlange', keywords: ['warteschlange', 'waage', 'annahme', 'lkw'], icon, actionId: 'nav-warteschlange', actionParams: { path: '/annahme/warteschlange' }, category: 'Annahme' },
+  { id: 'wiegungen', label: 'Wiegungen', keywords: ['wiegung', 'wiegen', 'waage'], icon, actionId: 'nav-wiegungen', actionParams: { path: '/waage/wiegungen' }, category: 'Annahme' },
 ]
 
 describe('FakeSttProvider', () => {
@@ -111,5 +114,89 @@ describe('compileVoiceNavigation — Voice-Gate (nur navigate|none)', () => {
 
   it('leere Eingabe → none', () => {
     expect(compileVoiceNavigation('   ', COMMANDS).kind).toBe('none')
+  })
+
+  it('navigiert Annahme/Waage, armert kein Wiegen', () => {
+    const queue = compileVoiceNavigation('oeffne warteschlange', COMMANDS)
+    expect(queue.kind).toBe('navigate')
+    if (queue.kind === 'navigate') expect(queue.routePath).toBe('/annahme/warteschlange')
+    const weigh = compileVoiceNavigation('zeige wiegungen', COMMANDS)
+    expect(weigh.kind).toBe('navigate')
+    if (weigh.kind === 'navigate') expect(weigh.routePath).toBe('/waage/wiegungen')
+    expect(compileVoiceNavigation('wiegen lkw', COMMANDS).kind).not.toBe('commandDraft')
+  })
+
+  it('oeffnet Rechnungen als Worklist, nicht den Editor', () => {
+    const commands = buildPaletteCommands({
+      agrarEnabled: false,
+      navigationShortcuts: [],
+    })
+    const plan = compileVoiceNavigation('oeffne rechnungen', commands)
+    expect(plan.kind).toBe('navigate')
+    if (plan.kind === 'navigate') {
+      expect(plan.routePath).toBe('/verkauf/rechnungen')
+      expect(plan.routePath).not.toContain('/sales/invoice')
+    }
+  })
+
+  it('navigiert Kreditoren, Zahlungsvorschlaege und Anlieferavis', () => {
+    const commands = buildPaletteCommands({
+      agrarEnabled: false,
+      navigationShortcuts: [],
+    })
+    const kreditoren = compileVoiceNavigation('oeffne kreditorenbuchhaltung', commands)
+    expect(kreditoren.kind).toBe('navigate')
+    if (kreditoren.kind === 'navigate') expect(kreditoren.routePath).toBe('/fibu/kreditoren')
+    const vorschlaege = compileVoiceNavigation('oeffne zahlungsvorschlaege', commands)
+    expect(vorschlaege.kind).toBe('navigate')
+    if (vorschlaege.kind === 'navigate') expect(vorschlaege.routePath).toBe('/fibu/zahlungsvorschlaege')
+    const avis = compileVoiceNavigation('oeffne anlieferavis', commands)
+    expect(avis.kind).toBe('navigate')
+    if (avis.kind === 'navigate') expect(avis.routePath).toBe('/einkauf/anlieferavis-liste')
+    const opVerwaltung = compileVoiceNavigation('oeffne op verwaltung', commands)
+    expect(opVerwaltung.kind).toBe('navigate')
+    if (opVerwaltung.kind === 'navigate') expect(opVerwaltung.routePath).toBe('/fibu/op-verwaltung')
+    const auftrag = compileVoiceNavigation('oeffne auftragsbestaetigungen', commands)
+    expect(auftrag.kind).toBe('navigate')
+    if (auftrag.kind === 'navigate') expect(auftrag.routePath).toBe('/einkauf/auftragsbestaetigungen')
+    const lauf = compileVoiceNavigation('oeffne zahlungslaeufe', commands)
+    expect(lauf.kind).toBe('navigate')
+    if (lauf.kind === 'navigate') expect(lauf.routePath).toBe('/fibu/zahlungslaeufe')
+    const anfragen = compileVoiceNavigation('oeffne einkaufsanfragen', commands)
+    expect(anfragen.kind).toBe('navigate')
+    if (anfragen.kind === 'navigate') expect(anfragen.routePath).toBe('/einkauf/anfragen')
+    const opListe = compileVoiceNavigation('oeffne forderungsmanagement', commands)
+    expect(opListe.kind).toBe('navigate')
+    if (opListe.kind === 'navigate') expect(opListe.routePath).toBe('/fibu/offene-posten')
+    const journal = compileVoiceNavigation('oeffne buchungsjournal', commands)
+    expect(journal.kind).toBe('navigate')
+    if (journal.kind === 'navigate') expect(journal.routePath).toBe('/fibu/buchungsjournal')
+    const hauptbuch = compileVoiceNavigation('oeffne hauptbuch', commands)
+    expect(hauptbuch.kind).toBe('navigate')
+    if (hauptbuch.kind === 'navigate') expect(hauptbuch.routePath).toBe('/fibu/hauptbuch')
+    const schnittstelle = compileVoiceNavigation('oeffne buchungsuebergabe', commands)
+    expect(schnittstelle.kind).toBe('navigate')
+    if (schnittstelle.kind === 'navigate') expect(schnittstelle.routePath).toBe('/fibu/schnittstelle-fibu')
+    const buchungsimport = compileVoiceNavigation('oeffne massen-buchungsimport', commands)
+    expect(buchungsimport.kind).toBe('navigate')
+    if (buchungsimport.kind === 'navigate') expect(buchungsimport.routePath).toBe('/finance/buchungsimport')
+    const bwa = compileVoiceNavigation('oeffne bwa-auswertung', commands)
+    expect(bwa.kind).toBe('navigate')
+    if (bwa.kind === 'navigate') expect(bwa.routePath).toBe('/fibu/bwa')
+    const guv = compileVoiceNavigation('oeffne guv-rechnung', commands)
+    expect(guv.kind).toBe('navigate')
+    if (guv.kind === 'navigate') expect(guv.routePath).toBe('/fibu/guv')
+    const lastschriften = compileVoiceNavigation('oeffne lastschriften-debitoren', commands)
+    expect(lastschriften.kind).toBe('navigate')
+    if (lastschriften.kind === 'navigate') expect(lastschriften.routePath).toBe('/finance/lastschriften-debitoren')
+    const elster = compileVoiceNavigation('oeffne elster-online', commands)
+    expect(elster.kind).toBe('navigate')
+    if (elster.kind === 'navigate') expect(elster.routePath).toBe('/fibu/elster-online')
+    const bank = compileVoiceNavigation('oeffne bankabgleich', commands)
+    expect(bank.kind).toBe('navigate')
+    if (bank.kind === 'navigate') expect(bank.routePath).toBe('/finance/bank-abgleich')
+    const bilanz = compileVoiceNavigation('oeffne bilanz', commands)
+    expect(bilanz.kind).toBe('navigate')
+    if (bilanz.kind === 'navigate') expect(bilanz.routePath).toBe('/fibu/bilanz')
   })
 })

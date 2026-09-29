@@ -153,14 +153,14 @@ export default function DocumentPanel({ customer }: DocumentPanelProps) {
                 </div>
 
                 <div className="flex gap-1 items-center shrink-0">
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => alert(`Anzeige der Datei: ${file.fileName}`)} title="Vorschau">
-                    <Eye size={14} />
+                  <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => alert(`Anzeige der Datei: ${file.fileName}`)} title="Vorschau">
+                    <Eye size={14} /> Vorschau
                   </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => alert(`Download gestartet: ${file.fileName}`)} title="Herunterladen">
-                    <Download size={14} />
+                  <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => alert(`Download gestartet: ${file.fileName}`)} title="Herunterladen">
+                    <Download size={14} /> Herunterladen
                   </Button>
-                  <Button variant="outline" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(file.id)} title="Löschen">
-                    <Trash2 size={14} />
+                  <Button variant="outline" className="min-h-touch touch-manipulation text-destructive hover:text-destructive" onClick={() => handleDelete(file.id)} title="Löschen">
+                    <Trash2 size={14} /> Löschen
                   </Button>
                 </div>
               </div>

@@ -47,12 +47,12 @@ export const TabsTrigger = (props: TabsPrimitive.TabsTriggerProps): JSX.Element 
         'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
         variant === 'register'
           ? cn(
-              'whitespace-nowrap rounded-t-md border-x border-t border-transparent px-3 py-2 text-muted-foreground',
+              'min-h-touch touch-manipulation whitespace-nowrap rounded-t-md border-x border-t border-transparent px-3 py-2 text-muted-foreground',
               'hover:bg-muted hover:text-foreground',
               'data-[state=active]:translate-y-px data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:font-semibold data-[state=active]:text-foreground',
             )
           : cn(
-              'inline-flex min-w-0 sm:min-w-[120px] items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium',
+              'inline-flex min-h-touch min-w-0 touch-manipulation sm:min-w-[120px] items-center justify-center rounded-sm px-3 py-1.5 text-sm font-medium',
               'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
             ),
         className,

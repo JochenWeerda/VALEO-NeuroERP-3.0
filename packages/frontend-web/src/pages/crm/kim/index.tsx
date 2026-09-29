@@ -713,7 +713,7 @@ export default function KimCockpitPage() {
                         Internes Postfach – {currentOperator}
                         {unreadCount > 0 && <Badge variant="info" className="ml-2">{unreadCount} ungelesen</Badge>}
                       </h3>
-                      <Button variant="outline" size="sm" onClick={() => void loadNotifications()} disabled={notifLoading} id="btn-postfach-refresh">
+                      <Button variant="outline" onClick={() => void loadNotifications()} disabled={notifLoading} id="btn-postfach-refresh">
                         {notifLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Aktualisieren'}
                       </Button>
                     </div>
@@ -726,7 +726,7 @@ export default function KimCockpitPage() {
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-medium text-foreground">{n.betreff ?? '(kein Betreff)'}</span>
                           {n.status !== 'read' && (
-                            <Button variant="ghost" size="sm" className="text-xs h-6 px-2" disabled={markingReadId === n.id}
+                            <Button variant="ghost" className="min-h-touch touch-manipulation px-2" disabled={markingReadId === n.id}
                               onClick={() => void handleMarkRead(n.id)} id={`btn-mark-read-${n.id}`}>
                               {markingReadId === n.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Gelesen'}
                             </Button>
@@ -1128,7 +1128,7 @@ export default function KimCockpitPage() {
                   <h4 className="font-medium text-foreground">{d.t}</h4>
                   <p className="text-xs text-muted-foreground">{d.m}</p>
                 </div>
-                <Button variant="link" size="sm" className="h-auto p-0" onClick={(e) => e.preventDefault()}>Öffnen</Button>
+                <Button variant="link" className="min-h-touch px-2" onClick={(e) => e.preventDefault()}>Öffnen</Button>
               </div>
             ))}
           </div>
