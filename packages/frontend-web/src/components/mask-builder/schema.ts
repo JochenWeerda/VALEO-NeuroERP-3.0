@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { FLOORPLAN_RULES } from './floorplans'
 
-export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation } from './floorplans'
+export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation, resolveSectionNavigation } from './floorplans'
 
 export type ScreenDomain =
   | 'crm'
@@ -22,6 +22,8 @@ export type ScreenMode = 'list' | 'detail' | 'cockpit' | 'workflow' | 'wizard'
 export type ScreenLayoutMode = 'desktopDense' | 'tabletTouch' | 'mobileStack'
 export type ScreenFloorplan = 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard' | 'analyticalList'
 export type ScreenColumnNavigation = 'single' | 'listDetail' | 'listDetailDetail'
+/** `tabs`: Register, eines sichtbar. `anchors`: alle Abschnitte untereinander, Register als Sprungmarken. */
+export type ScreenSectionNavigation = 'tabs' | 'anchors'
 export type ScreenDensity = 'comfortable' | 'compact' | 'expertDense'
 export type ScreenContextRail = 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
 export type ScreenContextRailSection = 'audit' | 'workflow' | 'copilot' | 'collab'
@@ -116,6 +118,17 @@ export interface ScreenTableDefinition {
     label: string
     dangerLevel?: ActionDangerLevel
   }>
+  /**
+   * Details der gewaehlten Zeile als Band direkt unter der Tabelle — statt Dialog
+   * oder Vollansicht. Ohne `fields` zeigt das Band alle Spalten der Tabelle.
+   */
+  rowDetail?: { fields?: ScreenRowDetailField[] }
+}
+
+export interface ScreenRowDetailField {
+  key: string
+  label: string
+  renderKind?: ScreenColumnRenderKind
 }
 
 export type ActionDangerLevel = 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
@@ -356,6 +369,11 @@ export interface ScreenDefinition {
   mode: ScreenMode
   title: string
   subtitle?: string
+  /**
+   * Feld, dessen Wert den Beleg benennt (z. B. `invoice_number`). Hat der Beleg
+   * einen Wert, wird er zum `h1` und `title` zur Kennzeile darüber.
+   */
+  identityField?: string
   permissions?: string[]
   adapter?: {
     type: ScreenAdapterType
@@ -393,6 +411,7 @@ export interface ScreenDefinition {
     touchTargetPx?: number
     floorplan?: ScreenFloorplan
     columnNavigation?: ScreenColumnNavigation
+    sectionNavigation?: ScreenSectionNavigation
     density?: ScreenDensity
     contextRail?: ScreenContextRail
     contextRailSections?: ScreenContextRailSection[]
@@ -426,6 +445,18 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   }
   if (screen.layout?.columnNavigation && !['single', 'listDetail', 'listDetailDetail'].includes(screen.layout.columnNavigation)) {
     errors.push('layout.columnNavigation is invalid')
+  }
+  const sectionNavigation = screen.layout?.sectionNavigation
+  if (sectionNavigation && !['tabs', 'anchors'].includes(sectionNavigation)) {
+    errors.push(`layout.sectionNavigation is invalid: ${sectionNavigation}`)
+  }
+  if (sectionNavigation === 'anchors') {
+    if (screen.layout?.floorplan && !FLOORPLAN_RULES[screen.layout.floorplan]?.allowsSectionAnchors) {
+      errors.push('layout.sectionNavigation=anchors is only supported for objectPage and transaction')
+    }
+    if (screen.layout?.columnNavigation && screen.layout.columnNavigation !== 'single') {
+      errors.push('layout.sectionNavigation=anchors requires columnNavigation=single')
+    }
   }
   if (screen.layout?.floorplan && !(screen.layout.floorplan in FLOORPLAN_RULES)) {
     errors.push(`layout.floorplan is invalid: ${screen.layout.floorplan}`)
@@ -484,6 +515,30 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   for (const table of screen.tables ?? []) {
     if (table.virtualized === true && (table.pageSize ?? 0) > 100) {
       errors.push(`table ${table.key} pageSize must stay <= 100 for generator v1`)
+    }
+  }
+
+  const allTables = [...(screen.tables ?? []), ...(screen.tabs ?? []).flatMap((tab) => tab.tables ?? [])]
+  for (const table of allTables) {
+    const detailKeys = new Set<string>()
+    for (const field of table.rowDetail?.fields ?? []) {
+      if (!field.key?.trim() || !field.label?.trim()) {
+        errors.push(`table ${table.key} rowDetail field requires key and label`)
+      } else if (detailKeys.has(field.key)) {
+        errors.push(`table ${table.key} rowDetail field is duplicated: ${field.key}`)
+      } else {
+        detailKeys.add(field.key)
+      }
+    }
+  }
+
+  if (screen.identityField !== undefined) {
+    const fieldKeys = new Set([
+      ...(screen.fields ?? []).map((field) => field.key),
+      ...(screen.tabs ?? []).flatMap((tab) => (tab.fields ?? []).map((field) => field.key)),
+    ])
+    if (!fieldKeys.has(screen.identityField)) {
+      errors.push(`identityField ${screen.identityField} is not a declared field`)
     }
   }
 

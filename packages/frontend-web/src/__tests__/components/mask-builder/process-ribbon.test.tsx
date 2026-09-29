@@ -82,7 +82,21 @@ describe('ProcessRibbonRenderer', () => {
         <ProcessRibbonRenderer ribbon={ribbon} />
       </MemoryRouter>,
     )
-    expect(screen.getByTestId('ribbon-step-auftrag')).toBeDisabled()
+    expect(screen.getByTestId('ribbon-step-lieferschein')).toBeDisabled()
+  })
+
+  it('aktueller Schritt ist markierter Text, kein Link auf die offene Maske', () => {
+    const { ribbon } = compileProcessRibbon('k2_verkauf', 'lieferschein', CHAINS, resolve)
+    render(
+      <MemoryRouter>
+        <ProcessRibbonRenderer ribbon={ribbon} />
+      </MemoryRouter>,
+    )
+    const current = screen.getByTestId('ribbon-step-lieferschein')
+    expect(current.tagName).toBe('SPAN')
+    expect(current).toHaveAttribute('aria-current', 'step')
+    fireEvent.click(current)
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
   it('null-Ribbon rendert nichts', () => {

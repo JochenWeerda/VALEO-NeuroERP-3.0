@@ -6,6 +6,7 @@ import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
 import type { RenderColumnKind, RenderTablePlan } from '../render-plan/types'
 import type { FilterPlan, TableQueryState } from '../runtime/types'
 import { navigateRowRoute, rowIdentity } from './row-identity'
+import { statusLabel } from './status-labels'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -26,7 +27,7 @@ interface FastTableRendererProps {
   onRowSelect?: (_row: Record<string, unknown>) => void
 }
 
-function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
+export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
   if (value == null) return '–'
   switch (renderKind) {
     case 'currency':
@@ -40,7 +41,7 @@ function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefine
     case 'status':
       return (
         <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ring-border">
-          {String(value)}
+          {statusLabel(String(value))}
         </span>
       )
     default:
@@ -53,13 +54,6 @@ function isProfileNumeric(table: RenderTablePlan, column: RenderTablePlan['colum
   if (table.tableProfile === 'financial') return /betrag|saldo|soll|haben|steuer|skonto|summe|differenz|amount|debit|credit/i.test(column.key)
   if (table.tableProfile === 'inventory') return /menge|bestand|reserv|verfueg|block|quantity|qty|stock|unit/i.test(column.key)
   return false
-}
-
-function profileLabel(profile: RenderTablePlan['tableProfile']): string {
-  if (profile === 'financial') return 'Financial Table Profile'
-  if (profile === 'inventory') return 'Inventory Table Profile'
-  if (profile === 'audit') return 'Audit Table Profile'
-  return 'Standard Table Profile'
 }
 
 function FilterChips({
@@ -260,12 +254,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
     <Card data-table-profile={table.tableProfile} data-testid={`table-${table.key}`}>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <CardTitle className="text-base">{table.label}</CardTitle>
-            <p className="mt-0.5 text-[11px] uppercase tracking-normal text-muted-foreground">
-              {profileLabel(table.tableProfile)}
-            </p>
-          </div>
+          <CardTitle className="text-base">{table.label}</CardTitle>
           {table.bulkActions?.length && onRowAction ? (
             <div className="flex items-center gap-1" data-testid={`bulk-actions-${table.key}`}>
               <span className="mr-1 text-xs text-muted-foreground">{selectedIds.size} gewaehlt</span>
@@ -424,6 +413,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
           <VirtualDataTable
             data={visibleRows}
             rowHeight={table.rowHeight}
+            fitToContent
             sortColumn={sort}
             sortDir={sortDir}
             onSortChange={

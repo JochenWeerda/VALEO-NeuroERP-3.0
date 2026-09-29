@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from decimal import Decimal
 
 import pytest
 
@@ -86,7 +87,7 @@ def kopf(mandant: str) -> dict[str, str]:
     }
 
 
-def lieferschein(client, kopf, menge: str = "100", preis: str = "25.00") -> str:
+def lieferschein(client, kopf, menge: str = "100", preis: str = "25.00", mwst: str = "7") -> str:
     antwort = client.post(
         "/api/v1/sales/delivery-notes",
         headers=kopf,
@@ -102,7 +103,7 @@ def lieferschein(client, kopf, menge: str = "100", preis: str = "25.00") -> str:
                     "menge": menge,
                     "einheit": "dt",
                     "netto_preis": preis,
-                    "mwst_prozent": "7",
+                    "mwst_prozent": mwst,
                 }
             ],
         },
@@ -158,6 +159,47 @@ def test_sammelrechnung_ist_nur_eine_laengere_quellenliste(client, kopf) -> None
     quellen = {z["origins"][0]["source_document_id"] for z in gelesen["lines"]}
     assert quellen == {erster, zweiter}
     assert gelesen["net_amount"] == "3500"
+
+
+def test_kopf_nennt_den_kunden_statt_der_referenz(client, kopf, mandant) -> None:
+    """``customer_id`` ist hier die Kundennummer; Rechnung und Lieferschein zeigen den Namen."""
+    from sqlalchemy import create_engine, text
+
+    ohne_crm = client.get(
+        f"/api/v1/sales/invoices/{rechnung(client, kopf, lieferschein(client, kopf)).json()['id']}",
+        headers=kopf,
+    ).json()
+    # Kein CRM-Kunde: kein erfundener Name, die Referenz bleibt als Nummer sichtbar.
+    assert ohne_crm["customer_name"] is None
+    assert ohne_crm["customer_number"] == "K-100"
+
+    engine = create_engine(DB_URL)
+    kunden_id = f"cust-{uuid.uuid4().hex[:8]}"
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+                "VALUES (:id, :tid, 'K-100', 'Raiffeisen Warengenossenschaft Nord eG')"
+            ),
+            {"id": kunden_id, "tid": mandant},
+        )
+    try:
+        ls_id = lieferschein(client, kopf)
+        angelegt = rechnung(client, kopf, ls_id)
+        assert angelegt.status_code == 201, angelegt.text
+
+        beleg = client.get(f"/api/v1/sales/invoices/{angelegt.json()['id']}", headers=kopf).json()
+        assert beleg["customer_id"] == "K-100"
+        assert beleg["customer_name"] == "Raiffeisen Warengenossenschaft Nord eG"
+        assert beleg["customer_number"] == "K-100"
+
+        ls = client.get(f"/api/v1/sales/delivery-notes/{ls_id}", headers=kopf)
+        assert ls.status_code == 200, ls.text
+        assert ls.json()["customer_name"] == "Raiffeisen Warengenossenschaft Nord eG"
+        assert ls.json()["customer_number"] == "K-100"
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(text("DELETE FROM domain_crm.customers WHERE id = :id"), {"id": kunden_id})
 
 
 def test_zweimal_berechnen_wird_abgewiesen_statt_doppelt_gebucht(client, kopf) -> None:
@@ -325,6 +367,74 @@ def test_maske_bekommt_kopf_positionen_und_herkunft_als_register(client, kopf) -
     assert quelle["source_document_id"] == ls_id
     assert quelle["source_line_id"] == "1"
     assert quelle["quantity"] == 100.0
+
+
+def test_steuerausweis_trennt_die_saetze_und_ergibt_den_kopfbetrag(client, kopf) -> None:
+    """Sammelrechnung ueber 7 % und 19 %: je Satz eine Zeile, Summe = Kopf."""
+    ermaessigt = lieferschein(client, kopf, "100", "25.00", "7")
+    regulaer = lieferschein(client, kopf, "40", "25.00", "19")
+    angelegt = rechnung(client, kopf, ermaessigt, regulaer)
+    assert angelegt.status_code == 201, angelegt.text
+    rid = angelegt.json()["id"]
+
+    antwort = client.get(f"/api/v1/sales/invoices/{rid}/tabs/steuer", headers=kopf)
+    assert antwort.status_code == 200, antwort.text
+    seite = antwort.json()
+    assert seite["table_key"] == "invoice_taxes"
+    assert seite["total"] == 2
+    assert seite["items"] == [
+        {"steuersatz": "7 %", "vat_rate": 7.0, "net_amount": 2500.0, "vat_amount": 175.0,
+         "gross_amount": 2675.0, "positionen": 1},
+        {"steuersatz": "19 %", "vat_rate": 19.0, "net_amount": 1000.0, "vat_amount": 190.0,
+         "gross_amount": 1190.0, "positionen": 1},
+    ]
+
+    beleg = client.get(f"/api/v1/sales/invoices/{rid}", headers=kopf).json()
+    assert Decimal(beleg["vat_amount"]) == Decimal("365")
+    assert Decimal(beleg["gross_amount"]) == Decimal("3865")
+
+
+def test_positionen_stehen_in_zahlenfolge_nicht_in_textfolge(client, kopf) -> None:
+    """Ab der zehnten Position darf "10" nicht vor "2" stehen."""
+    antwort = client.post(
+        "/api/v1/sales/delivery-notes",
+        headers=kopf,
+        json={
+            "customer_id": "K-100",
+            "delivery_date": "2026-09-15",
+            "positionen": [
+                {
+                    "pos_nr": nr,
+                    "artikel_id": f"ART-{nr}",
+                    "artikel_nr": f"{10000 + nr}",
+                    "bezeichnung": f"Sorte {nr}",
+                    "menge": "10",
+                    "einheit": "dt",
+                    "netto_preis": "20.00",
+                    "mwst_prozent": "7",
+                }
+                for nr in range(1, 12)
+            ],
+        },
+    )
+    assert antwort.status_code == 201, antwort.text
+    angelegt = rechnung(client, kopf, antwort.json()["id"])
+    assert angelegt.status_code == 201, angelegt.text
+
+    seite = client.get(
+        f"/api/v1/sales/invoices/{angelegt.json()['id']}/tabs/positionen", headers=kopf
+    ).json()
+    assert [zeile["line_no"] for zeile in seite["items"]] == [str(nr) for nr in range(1, 12)]
+
+
+def test_steuerausweis_einer_fremden_rechnung_bleibt_verschlossen(client, kopf) -> None:
+    rid = rechnung(client, kopf, lieferschein(client, kopf)).json()["id"]
+    fremd = {
+        "Authorization": "Bearer dev-token",
+        "X-Tenant-ID": "test-fremder-mandant",
+        "X-Tenant-Id": "test-fremder-mandant",
+    }
+    assert client.get(f"/api/v1/sales/invoices/{rid}/tabs/steuer", headers=fremd).status_code == 404
 
 
 def test_unbekanntes_register_bleibt_leer_statt_die_maske_zu_zerlegen(client, kopf) -> None:

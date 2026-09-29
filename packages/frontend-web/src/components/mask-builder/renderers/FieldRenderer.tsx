@@ -5,8 +5,46 @@ import { Textarea } from '@/components/ui/textarea'
 import { NativeSelect } from '@/components/ui/native-select'
 import type { ScreenFieldDefinition } from '../schema'
 import { renderValue } from './render-utils'
+import { statusLabel } from './status-labels'
 import { VoiceBar } from './VoiceBar'
 import { createDefaultSttProvider, type SttProvider } from '@/lib/voice/stt-provider'
+
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})/
+
+/**
+ * Anzeige eines Nur-Lese-Werts im deutschen Format. Ohne Formatregel oder bei
+ * unlesbarem Wert bleibt der Rohwert stehen, damit nichts verschluckt wird.
+ */
+export function formatReadOnlyValue(type: ScreenFieldDefinition['type'], value: unknown): string {
+  const raw = renderValue(value)
+  if (raw === '') return ''
+  const number = Number(raw)
+  switch (type) {
+    case 'currency':
+      return Number.isFinite(number)
+        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(number)
+        : raw
+    case 'number':
+      return Number.isFinite(number) ? new Intl.NumberFormat('de-DE').format(number) : raw
+    case 'percentage':
+      return Number.isFinite(number) ? `${new Intl.NumberFormat('de-DE').format(number)} %` : raw
+    case 'date': {
+      // Parsed by hand: `new Date('2026-09-15')` is UTC midnight and can shift a day in local time.
+      const match = ISO_DATE.exec(raw)
+      return match ? `${match[3]}.${match[2]}.${match[1]}` : raw
+    }
+    case 'datetime': {
+      const date = new Date(raw)
+      return Number.isNaN(date.getTime()) ? raw : date.toLocaleString('de-DE')
+    }
+    case 'boolean':
+      if (raw === 'true') return 'Ja'
+      if (raw === 'false') return 'Nein'
+      return raw
+    default:
+      return raw
+  }
+}
 
 export function FieldRenderer({
   field,
@@ -81,6 +119,13 @@ export function FieldRenderer({
           placeholder={field.placeholder}
           options={(field.options ?? []).map((option) => ({ value: String(option.value), label: option.label }))}
           onValueChange={onChange ? (v) => onChange(v) : () => undefined}
+        />
+      ) : isReadOnly ? (
+        <Input
+          {...commonProps}
+          ref={inputRef}
+          type="text"
+          value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value)}
         />
       ) : (
         <Input

@@ -385,7 +385,7 @@ for (const viewport of VIEWPORTS) {
         const table = page.getByTestId(`table-${c.tableKey}`)
         await expect(table).toBeVisible()
         await expect(table).toHaveAttribute('data-table-profile', c.tableProfile)
-        await expect(table.getByText(`${c.tableProfile[0].toUpperCase()}${c.tableProfile.slice(1)} Table Profile`)).toBeVisible()
+        await expect(table.getByText(/Table Profile/i)).toHaveCount(0)
         const firstDataRow = table.locator('[role="row"]').first()
         await expect(firstDataRow).toBeVisible()
         const rowBox = await firstDataRow.boundingBox()

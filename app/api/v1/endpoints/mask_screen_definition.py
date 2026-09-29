@@ -186,6 +186,37 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     layout = definition.get("layout") or {}
     if layout.get("summaryPlacement") not in (None, "header", "footer"):
         schema_errors.append(f"layout.summaryPlacement is invalid: {layout.get('summaryPlacement')}")
+    section_navigation = layout.get("sectionNavigation")
+    if section_navigation not in (None, "tabs", "anchors"):
+        schema_errors.append(f"layout.sectionNavigation is invalid: {section_navigation}")
+    elif section_navigation == "anchors":
+        if layout.get("floorplan") not in (None, "objectPage", "transaction"):
+            schema_errors.append("layout.sectionNavigation=anchors is only supported for objectPage and transaction")
+        if layout.get("columnNavigation") not in (None, "single"):
+            schema_errors.append("layout.sectionNavigation=anchors requires columnNavigation=single")
+    for table in all_tables:
+        row_detail = table.get("rowDetail")
+        if row_detail is None:
+            continue
+        if not isinstance(row_detail, dict):
+            schema_errors.append(f"table {table.get('key')} rowDetail must be an object")
+            continue
+        detail_keys: set[str] = set()
+        for field in row_detail.get("fields") or []:
+            key = str(field.get("key") or "").strip() if isinstance(field, dict) else ""
+            label = str(field.get("label") or "").strip() if isinstance(field, dict) else ""
+            if not key or not label:
+                schema_errors.append(f"table {table.get('key')} rowDetail field requires key and label")
+            elif key in detail_keys:
+                schema_errors.append(f"table {table.get('key')} rowDetail field is duplicated: {key}")
+            else:
+                detail_keys.add(key)
+    identity_field = definition.get("identityField")
+    declared_field_keys = {f.get("key") for f in definition.get("fields") or []} | {
+        f.get("key") for tab in definition.get("tabs") or [] for f in tab.get("fields") or []
+    }
+    if identity_field is not None and identity_field not in declared_field_keys:
+        schema_errors.append(f"identityField {identity_field} is not a declared field")
     shortcuts: set[str] = set()
     for action in definition.get("actions") or []:
         if action.get("zone") not in (None, "header", "footer", "commit"):

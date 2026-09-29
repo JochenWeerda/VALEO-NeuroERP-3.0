@@ -20,8 +20,10 @@ from app.services.sales_invoice_mask import (
     bewerte_herkunft,
     herkunfts_zeilen,
     positions_zeilen,
+    steuer_zeilen,
     ungedeckte_positionen,
 )
+from app.services.sales_invoice_service import positionsfolge
 
 pytestmark = pytest.mark.unit
 
@@ -118,6 +120,65 @@ def test_position_ohne_zuordnung_bleibt_als_befund_stehen() -> None:
 def test_belegte_positionen_erzeugen_keine_meldung() -> None:
     zeilen = positions_zeilen([Position()], {"1": [herkunft()]})
     assert ungedeckte_positionen(zeilen) == []
+
+
+def test_steuerausweis_trennt_7_und_19_prozent() -> None:
+    zeilen = steuer_zeilen(
+        [
+            Position(line_no="1", net_amount=Decimal("2500"), vat_rate=Decimal("7")),
+            Position(line_no="2", net_amount=Decimal("100"), vat_rate=Decimal("19")),
+            Position(line_no="3", net_amount=Decimal("500"), vat_rate=Decimal("7")),
+        ]
+    )
+    assert [z["steuersatz"] for z in zeilen] == ["7 %", "19 %"]
+    assert zeilen[0] == {
+        "steuersatz": "7 %",
+        "vat_rate": 7.0,
+        "net_amount": 3000.0,
+        "vat_amount": 210.0,
+        "gross_amount": 3210.0,
+        "positionen": 2,
+    }
+    assert zeilen[1]["vat_amount"] == 19.0
+    assert zeilen[1]["gross_amount"] == 119.0
+
+
+def test_steuer_wird_wie_beim_anlegen_je_position_gerundet() -> None:
+    """Die Summe des Ausweises muss auf den Cent den Kopfbetrag ergeben.
+
+    Zweimal 0,05 EUR zu 7 %: je Position 0,0035 -> 0,00 EUR. Auf der Satzsumme
+    gerechnet waeren es 0,007 -> 0,01 EUR — ein Cent, den der Kopf nicht hat.
+    """
+    zeilen = steuer_zeilen(
+        [
+            Position(line_no="1", net_amount=Decimal("0.05"), vat_rate=Decimal("7")),
+            Position(line_no="2", net_amount=Decimal("0.05"), vat_rate=Decimal("7")),
+        ]
+    )
+    assert zeilen[0]["vat_amount"] == 0.0
+    assert zeilen[0]["net_amount"] == 0.1
+
+
+def test_position_ohne_steuersatz_steht_als_eigene_zeile_am_ende() -> None:
+    zeilen = steuer_zeilen(
+        [
+            Position(line_no="1", net_amount=Decimal("80"), vat_rate=None),
+            Position(line_no="2", net_amount=Decimal("200"), vat_rate=Decimal("5.5")),
+        ]
+    )
+    assert [z["steuersatz"] for z in zeilen] == ["5,5 %", "Ohne Steuersatz"]
+    assert zeilen[1]["vat_rate"] is None
+    assert zeilen[1]["vat_amount"] == 0.0
+    assert zeilen[1]["gross_amount"] == 80.0
+
+
+def test_positionsnummern_folgen_der_zahl_nicht_dem_text() -> None:
+    nummern = ["10", "2", "1.10", "1.2", "1", "A3", "A10"]
+    assert sorted(nummern, key=positionsfolge) == ["1", "1.2", "1.10", "2", "10", "A3", "A10"]
+
+
+def test_rechnung_ohne_positionen_hat_keinen_steuerausweis() -> None:
+    assert steuer_zeilen([]) == []
 
 
 def test_herkunftstabelle_hat_eine_zeile_je_zuordnung() -> None:

@@ -17,6 +17,8 @@ interface VirtualDataTableProps<T extends Record<string, unknown>> {
   data: T[]
   rowHeight?: number
   height?: number
+  /** Shrinks the body to the rows it holds; `height` stays the upper bound. */
+  fitToContent?: boolean
   loading?: boolean
   emptyMessage?: string
   onRowClick?: (_row: T) => void
@@ -32,6 +34,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
   data,
   rowHeight = 52,
   height = 420,
+  fitToContent = false,
   loading = false,
   emptyMessage = 'Keine Eintraege vorhanden.',
   onRowClick,
@@ -63,6 +66,9 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
       size: rowHeight,
     }))
   }, [data, height, rowHeight])
+  const contentHeight = virtualItems.length > 0 ? virtualizer.getTotalSize() : data.length * rowHeight
+  const bodyHeight = fitToContent ? Math.min(height, contentHeight) : height
+  const emptyHeight = fitToContent ? Math.min(height, 96) : height
   const renderedItems = virtualItems.length > 0 ? virtualItems : fallbackItems
 
   function renderCell(column: VirtualDataTableColumn<T>, row: T): ReactNode {
@@ -87,7 +93,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center rounded-md border border-border p-8 text-sm text-muted-foreground" style={{ height }}>
+      <div className="flex items-center justify-center rounded-md border border-border p-8 text-sm text-muted-foreground" style={{ height: emptyHeight }}>
         {emptyMessage}
       </div>
     )
@@ -97,9 +103,11 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
     <div className="rounded-md border border-border" data-testid="virtual-data-table">
       <div className="overflow-x-auto">
         <div className="min-w-full" style={{ width: 'max-content' }}>
+          {/* Header and body reserve the same scrollbar gutter: columns stay aligned and the
+              body's vertical scrollbar cannot push the rows into a second horizontal scrollbar. */}
           <div
-            className="grid border-b bg-muted text-[11px] font-semibold uppercase tracking-normal text-muted-foreground"
-            style={{ gridTemplateColumns }}
+            className="grid overflow-y-hidden border-b bg-muted text-[11px] font-semibold uppercase tracking-normal text-muted-foreground"
+            style={{ gridTemplateColumns, scrollbarGutter: 'stable' }}
           >
             {columns.map((column) => {
               const colKey = String(column.key)
@@ -129,7 +137,11 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
               )
             })}
           </div>
-          <div ref={parentRef} className="relative overflow-auto" style={{ height }}>
+          <div
+            ref={parentRef}
+            className="relative overflow-y-auto overflow-x-hidden"
+            style={{ height: bodyHeight, scrollbarGutter: 'stable' }}
+          >
             <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
               {renderedItems.map((virtualRow) => {
                 const row = data[virtualRow.index]

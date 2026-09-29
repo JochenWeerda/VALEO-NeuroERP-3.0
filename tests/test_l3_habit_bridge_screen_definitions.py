@@ -53,6 +53,144 @@ def test_delivery_note_places_totals_after_positions_and_print_in_footer() -> No
     _assert_ready(screen)
 
 
+def test_delivery_note_is_a_single_page_with_section_anchors() -> None:
+    screen = get_screen_definition("sales/delivery-note")
+    assert screen is not None
+    assert screen["layout"]["sectionNavigation"] == "anchors"
+    assert [tab["key"] for tab in screen["tabs"]] == ["kopf", "positionen", "dokumente"]
+    _assert_ready(screen)
+
+
+def _table(screen: dict, tab_key: str, table_key: str) -> dict:
+    tab = next(tab for tab in screen["tabs"] if tab["key"] == tab_key)
+    return next(table for table in tab["tables"] if table["key"] == table_key)
+
+
+def test_document_chain_uses_one_page_layout() -> None:
+    """Auftrag, Lieferschein, Rechnung und Bestellung lesen sich gleich (Gewohnheits-Prinzip)."""
+    for screen_id in ("sales/sales-order", "sales/delivery-note", "sales/invoice", "einkauf/purchase-order"):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None, screen_id
+        assert screen["layout"]["sectionNavigation"] == "anchors", screen_id
+        _assert_ready(screen)
+
+
+def test_sales_order_head_is_not_an_empty_section() -> None:
+    screen = get_screen_definition("sales/sales-order")
+    assert screen is not None
+    kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
+    assert kopf["dataSourceKey"] == "entity"
+    keys = {f["key"] for f in kopf["fields"]}
+    assert {"order_number", "customer_name", "delivery_date", "total_amount"} <= keys
+    assert "customer_id" not in keys, "interner Partnerschluessel gehoert nicht in den Kopf"
+    status = next(f for f in kopf["fields"] if f["key"] == "status")
+    assert {o["value"] for o in status["options"]} == {"open", "confirmed", "in_delivery", "completed", "cancelled"}
+
+
+def test_sales_chain_heads_name_the_customer_the_same_way() -> None:
+    """Auftrag, Lieferschein und Rechnung: Kunde und Kunden-Nr. statt Referenzschluessel."""
+    for screen_id in ("sales/sales-order", "sales/delivery-note", "sales/invoice"):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None, screen_id
+        kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
+        labels = {f["key"]: f["label"] for f in kopf["fields"]}
+        assert labels.get("customer_name") == "Kunde", screen_id
+        assert labels.get("customer_number") == "Kunden-Nr.", screen_id
+        assert not {"customer_id", "sales_order_id"} & labels.keys(), screen_id
+
+
+def test_invoice_shows_tax_per_rate_and_position_details() -> None:
+    screen = get_screen_definition("sales/invoice")
+    assert screen is not None
+    steuer = _table(screen, "kopf", "steuer")
+    assert [c["key"] for c in steuer["columns"]] == ["steuersatz", "positionen", "net_amount", "vat_amount", "gross_amount"]
+    assert {"key": "steuer", "endpoint": "/api/v1/sales/invoices/{entity_id}/tabs/steuer", "pageSize": 25} in screen["dataSources"]
+    detail_keys = [f["key"] for f in _table(screen, "positionen", "positionen")["rowDetail"]["fields"]]
+    assert "vat_rate" in detail_keys and "quellen" in detail_keys
+
+
+def test_readiness_rejects_row_detail_without_label_or_duplicates() -> None:
+    screen = get_screen_definition("sales/invoice")
+    assert screen is not None
+    _table(screen, "positionen", "positionen")["rowDetail"]["fields"] = [
+        {"key": "line_no", "label": ""},
+        {"key": "unit", "label": "Einheit"},
+        {"key": "unit", "label": "Einheit"},
+    ]
+    passed, detail = _schema_gate_detail(screen)
+    assert passed is False
+    assert "table positionen rowDetail field requires key and label" in detail
+    assert "table positionen rowDetail field is duplicated: unit" in detail
+
+
+def test_readiness_rejects_row_detail_that_is_not_an_object() -> None:
+    screen = get_screen_definition("sales/invoice")
+    assert screen is not None
+    _table(screen, "positionen", "positionen")["rowDetail"] = ["line_no"]
+    passed, detail = _schema_gate_detail(screen)
+    assert passed is False
+    assert "table positionen rowDetail must be an object" in detail
+
+
+def test_documents_are_named_by_their_number() -> None:
+    """Der h1 eines Belegs ist seine Nummer, nicht der Maskentyp."""
+    expected = {
+        "sales/sales-order": "order_number",
+        "sales/delivery-note": "delivery_note_number",
+        "sales/invoice": "invoice_number",
+        "einkauf/purchase-order": "bestellnummer",
+    }
+    for screen_id, identity_field in expected.items():
+        screen = get_screen_definition(screen_id)
+        assert screen is not None, screen_id
+        assert screen["identityField"] == identity_field, screen_id
+        kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
+        assert identity_field in {f["key"] for f in kopf["fields"]}, screen_id
+
+
+def test_readiness_rejects_identity_field_that_the_mask_does_not_show() -> None:
+    screen = get_screen_definition("sales/invoice")
+    assert screen is not None
+    screen["identityField"] = "belegnummer"
+    passed, detail = _schema_gate_detail(screen)
+    assert passed is False
+    assert "identityField belegnummer is not a declared field" in detail
+
+
+def _schema_gate_detail(screen: dict) -> tuple[bool, str]:
+    report = _check_readiness(screen)
+    gate = next(gate for gate in report["gates"] if gate["gate"] == "schema_valid")
+    return gate["passed"], gate["detail"]
+
+
+def test_readiness_rejects_unknown_section_navigation() -> None:
+    screen = get_screen_definition("sales/delivery-note")
+    assert screen is not None
+    screen["layout"]["sectionNavigation"] = "accordion"
+    passed, detail = _schema_gate_detail(screen)
+    assert passed is False
+    assert "layout.sectionNavigation is invalid: accordion" in detail
+
+
+def test_readiness_rejects_section_anchors_outside_document_floorplans() -> None:
+    screen = get_screen_definition("sales/delivery-note")
+    assert screen is not None
+    screen["layout"]["floorplan"] = "worklist"
+    passed, detail = _schema_gate_detail(screen)
+    assert passed is False
+    assert "only supported for objectPage and transaction" in detail
+
+
+def test_readiness_rejects_section_anchors_with_column_split() -> None:
+    screen = get_screen_definition("sales/delivery-note")
+    assert screen is not None
+    screen["layout"]["floorplan"] = "objectPage"
+    screen["layout"]["columnNavigation"] = "listDetail"
+    passed, detail = _schema_gate_detail(screen)
+    assert passed is False
+    assert "requires columnNavigation=single" in detail
+
+
 def test_readiness_rejects_duplicate_shortcuts_and_unknown_zones() -> None:
     screen = get_screen_definition("sales/delivery-note")
     assert screen is not None

@@ -22,4 +22,25 @@ describe('VirtualDataTable', () => {
     expect(screen.getByText('Zeile 0')).toBeInTheDocument()
     expect(screen.queryByText('Zeile 499')).not.toBeInTheDocument()
   })
+
+  it('passt die Hoehe kurzer Tabellen an ihre Zeilen an und deckelt lange', () => {
+    const rows = (count: number) => Array.from({ length: count }, (_, index) => ({
+      id: `row-${index}`,
+      satz: `${index} %`,
+    }))
+    const columns = [{ key: 'satz', label: 'Steuersatz', width: 120 }]
+    const body = (container: HTMLElement) =>
+      container.querySelector<HTMLElement>('div.relative.overflow-y-auto')
+
+    const short = render(<VirtualDataTable height={220} rowHeight={44} fitToContent data={rows(2)} columns={columns} />)
+    expect(body(short.container)?.style.height).toBe('88px')
+    short.unmount()
+
+    const long = render(<VirtualDataTable height={220} rowHeight={44} fitToContent data={rows(50)} columns={columns} />)
+    expect(body(long.container)?.style.height).toBe('220px')
+    long.unmount()
+
+    const fixed = render(<VirtualDataTable height={220} rowHeight={44} data={rows(2)} columns={columns} />)
+    expect(body(fixed.container)?.style.height).toBe('220px')
+  })
 })

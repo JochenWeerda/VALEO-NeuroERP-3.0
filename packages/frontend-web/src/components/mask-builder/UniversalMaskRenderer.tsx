@@ -25,9 +25,22 @@ import {
   TileGridRenderer,
   TwinReadModelRenderer,
   ProcessRibbonRenderer,
+  SectionPageRenderer,
   WorkflowPanelRenderer,
   layoutClasses,
+  type PageSection,
 } from './renderers'
+import { UnsavedChangesGuard } from './renderers/UnsavedChangesGuard'
+import { getValue } from './renderers/render-utils'
+
+const PROCESS_FLOW_SECTION_KEY = 'belegfluss'
+
+function documentIdentity(identityField: string | undefined, payload: Record<string, unknown>): string | undefined {
+  if (!identityField) return undefined
+  const value = getValue(payload, identityField)
+  if (value == null || typeof value === 'object') return undefined
+  return String(value).trim() || undefined
+}
 
 interface UniversalMaskRendererProps {
   columns?: NavigationColumn[]
@@ -227,39 +240,65 @@ function RenderFromPlan({
   const headerActions = plan.actions.filter((action) => action.zone === 'header')
   const footerActions = plan.actions.filter((action) => action.zone !== 'header')
   const deriveColumns = shouldDeriveColumns(plan, columns)
+  const onePage = plan.shell.sectionNavigation === 'anchors' && !deriveColumns && !columns
 
-  return (
-    <FormStateContext.Provider value={formState}>
-    <div
-      ref={container}
-      className={classes.root}
-      onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, onAction)}
-      data-screen-definition={plan.screenId}
-      data-testid={`screen-${plan.screenId}`}
-      data-layout-mode={plan.shell.layoutMode}
-      data-mobile-layout={plan.shell.mobileMode}
-      data-render-plan-cache-key={plan.cacheKey}
-      data-floorplan={plan.shell.floorplan}
-      data-column-navigation={plan.shell.columnNavigation ?? 'single'}
-      data-density={plan.shell.density}
-      data-context-rail={plan.shell.contextRail}
-      data-context-rail-sections={plan.shell.contextRailSections.join(',')}
-      data-table-profile={plan.shell.tableProfile}
-    >
-      <ActionBarRenderer
-        domain={plan.shell.domain}
-        mode={plan.shell.mode}
-        title={plan.shell.title}
-        subtitle={plan.shell.subtitle}
-        actions={headerActions}
-        floorplan={plan.shell.floorplan}
-        density={plan.shell.density}
-        contextRail={plan.shell.contextRail}
-        headerClassName={cn(classes.header, plan.shell.stickyHeader && 'sticky top-0 z-20')}
-        touchTargetClass={classes.touchTarget}
-        onAction={onAction}
-        payload={effectivePayload}
-      />
+  const renderHeader = (condensed: boolean, sticky: boolean): JSX.Element => (
+    <ActionBarRenderer
+      domain={plan.shell.domain}
+      mode={plan.shell.mode}
+      title={plan.shell.title}
+      subtitle={plan.shell.subtitle}
+      identity={documentIdentity(plan.shell.identityField, effectivePayload)}
+      actions={headerActions}
+      floorplan={plan.shell.floorplan}
+      density={plan.shell.density}
+      contextRail={plan.shell.contextRail}
+      headerClassName={cn(classes.header, sticky && 'sticky top-0 z-20')}
+      touchTargetClass={classes.touchTarget}
+      onAction={onAction}
+      payload={effectivePayload}
+      condensed={condensed}
+    />
+  )
+
+  const renderTab = (tabKey: string): JSX.Element => (
+    <FastTabRenderer
+      plan={plan}
+      tabKey={tabKey}
+      payload={effectivePayload}
+      tables={tables}
+      tableQueryStates={tableQueryStates}
+      tableTotals={tableTotals}
+      onQueryChange={onTableQueryChange}
+      onVisibleColumnsChange={onOverlayChange}
+      onResetOverlay={onOverlayReset}
+      tableLoadError={tableLoadError}
+      onRetry={onRetry}
+      onRowAction={onAction}
+    />
+  )
+
+  const pageSections: PageSection[] = onePage
+    ? [
+        ...plan.visibleTabs.map((tab) => ({
+          key: tab.key,
+          label: tab.label,
+          lazy: tab.lazy,
+          render: () => renderTab(tab.key),
+        })),
+        ...(plan.shell.processRibbon && !plan.visibleTabs.some((tab) => tab.key === PROCESS_FLOW_SECTION_KEY)
+          ? [{
+              key: PROCESS_FLOW_SECTION_KEY,
+              label: 'Belegfluss',
+              lazy: false,
+              render: () => <ProcessRibbonRenderer ribbon={plan.shell.processRibbon ?? null} embedded />,
+            }]
+          : []),
+      ]
+    : []
+
+  const pageBody = (
+    <>
       <MessagePanelRenderer messages={visibleMessages} onRetry={onRetry}
         onLocateField={(key) => {
           const field = plan.fieldsByKey[key]
@@ -285,7 +324,7 @@ function RenderFromPlan({
           onRetry={onRetry}
         />
       ) : null}
-      {plan.shell.processRibbon ? <ProcessRibbonRenderer ribbon={plan.shell.processRibbon} /> : null}
+      {plan.shell.processRibbon && !onePage ? <ProcessRibbonRenderer ribbon={plan.shell.processRibbon} /> : null}
 
       <WorkflowPanelRenderer
         workflow={plan.workflow}
@@ -335,35 +374,57 @@ function RenderFromPlan({
         )
       })}
 
-      {plan.visibleTabs.length > 0 && (
-        <LazyTabs
-          value={activeTab}
-          variant="register"
-          onValueChange={(key) => { setActiveTab(key); onTabChange?.(key) }}
-          tabs={plan.visibleTabs.map((tab) => ({
-            key: tab.key,
-            label: tab.label,
-            lazy: tab.lazy,
-            keepAlive: tab.keepAlive,
-            content: () => (
-              <FastTabRenderer
-                plan={plan}
-                tabKey={tab.key}
-                payload={effectivePayload}
-                tables={tables}
-                tableQueryStates={tableQueryStates}
-                tableTotals={tableTotals}
-                onQueryChange={onTableQueryChange}
-                onVisibleColumnsChange={onOverlayChange}
-                onResetOverlay={onOverlayReset}
-                tableLoadError={tableLoadError}
-                onRetry={onRetry}
-                onRowAction={onAction}
-              />
-            ),
-          }))}
-        />
+        </>
       )}
+    </>
+  )
+
+  return (
+    <FormStateContext.Provider value={formState}>
+    <div
+      ref={container}
+      className={classes.root}
+      onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, onAction)}
+      data-screen-definition={plan.screenId}
+      data-testid={`screen-${plan.screenId}`}
+      data-layout-mode={plan.shell.layoutMode}
+      data-mobile-layout={plan.shell.mobileMode}
+      data-render-plan-cache-key={plan.cacheKey}
+      data-floorplan={plan.shell.floorplan}
+      data-column-navigation={plan.shell.columnNavigation ?? 'single'}
+      data-section-navigation={onePage ? 'anchors' : 'tabs'}
+      data-density={plan.shell.density}
+      data-context-rail={plan.shell.contextRail}
+      data-context-rail-sections={plan.shell.contextRailSections.join(',')}
+      data-table-profile={plan.shell.tableProfile}
+    >
+      {onePage ? (
+        <SectionPageRenderer
+          header={(condensed) => renderHeader(condensed, false)}
+          sections={pageSections}
+          requestedSectionKey={activeTab}
+          onRequestHandled={() => setActiveTab(undefined)}
+        >
+          {pageBody}
+        </SectionPageRenderer>
+      ) : (
+        <>
+          {renderHeader(false, plan.shell.stickyHeader)}
+          {pageBody}
+          {!deriveColumns && plan.visibleTabs.length > 0 && (
+            <LazyTabs
+              value={activeTab}
+              variant="register"
+              onValueChange={(key) => { setActiveTab(key); onTabChange?.(key) }}
+              tabs={plan.visibleTabs.map((tab) => ({
+                key: tab.key,
+                label: tab.label,
+                lazy: tab.lazy,
+                keepAlive: tab.keepAlive,
+                content: () => renderTab(tab.key),
+              }))}
+            />
+          )}
         </>
       )}
 
@@ -413,6 +474,7 @@ function RenderFromPlan({
           </div>
         </div>
       )}
+      {formState?.dirtyState.isDirty ? <UnsavedChangesGuard /> : null}
     </div>
     </FormStateContext.Provider>
   )
@@ -461,6 +523,7 @@ function RenderFromScreen({
         mode={screen.mode}
         title={screen.title}
         subtitle={screen.subtitle}
+        identity={documentIdentity(screen.identityField, payload)}
         actions={visibleActions}
         floorplan={screen.layout?.floorplan ?? 'objectPage'}
         density={screen.layout?.density ?? 'compact'}

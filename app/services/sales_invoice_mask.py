@@ -194,6 +194,50 @@ def herkunfts_zeilen(herkunft: dict[str, list[dict[str, Any]]]) -> list[dict[str
     return zeilen
 
 
+CENT = Decimal("0.01")
+
+
+def steuersatz_label(satz: Decimal | None) -> str:
+    if satz is None:
+        return "Ohne Steuersatz"
+    return f"{_zahl(satz).replace('.', ',')} %"
+
+
+def steuer_zeilen(positionen: list[Any]) -> list[dict[str, Any]]:
+    """Der Steuerausweis: je Steuersatz Netto, Umsatzsteuer und Brutto.
+
+    Die Steuer wird wie beim Anlegen der Rechnung je Position auf Cent
+    gerundet und dann summiert. Nur so ergibt die Summe des Ausweises auf den
+    Cent den Steuerbetrag im Kopf — eine Neuberechnung auf der Satzsumme
+    wuerde um Rundungscent abweichen.
+
+    Positionen ohne Steuersatz stehen als eigene Zeile da. Das ist eine
+    Auskunft, die geprueft gehoert, keine stille Null.
+    """
+    gruppen: dict[Decimal | None, list[Any]] = {}
+    for position in positionen:
+        satz = _dezimal(position.vat_rate) if position.vat_rate is not None else None
+        netto = _dezimal(position.net_amount) or Decimal(0)
+        steuer = (netto * satz / Decimal(100)).quantize(CENT) if satz is not None else Decimal(0)
+        eintrag = gruppen.setdefault(satz, [Decimal(0), Decimal(0), 0])
+        eintrag[0] += netto
+        eintrag[1] += steuer
+        eintrag[2] += 1
+
+    saetze = sorted((s for s in gruppen if s is not None)) + ([None] if None in gruppen else [])
+    return [
+        {
+            "steuersatz": steuersatz_label(satz),
+            "vat_rate": float(satz) if satz is not None else None,
+            "net_amount": float(gruppen[satz][0]),
+            "vat_amount": float(gruppen[satz][1]),
+            "gross_amount": float(gruppen[satz][0] + gruppen[satz][1]),
+            "positionen": gruppen[satz][2],
+        }
+        for satz in saetze
+    ]
+
+
 def ungedeckte_positionen(zeilen: list[dict[str, Any]]) -> list[str]:
     """Positionsnummern, deren Menge nicht vollstaendig belegt ist."""
     return [

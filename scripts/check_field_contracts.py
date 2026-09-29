@@ -197,6 +197,11 @@ def pruefe() -> dict:
         for tab in screen.get("tabs") or []:
             for tabelle in tab.get("tables") or []:
                 spalten = [c.get("key") for c in tabelle.get("columns") or [] if c.get("key")]
+                # Das Detailband liest dieselbe Zeile; ein falscher Schluessel
+                # bleibt dort genauso leer wie in einer Spalte.
+                for detail in (tabelle.get("rowDetail") or {}).get("fields") or []:
+                    if detail.get("key") and detail["key"] not in spalten:
+                        spalten.append(detail["key"])
                 endpunkt = quellen.get(tabelle.get("dataSourceKey"))
                 if not spalten or not endpunkt or not endpunkt.startswith("/api/"):
                     continue

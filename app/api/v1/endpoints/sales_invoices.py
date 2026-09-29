@@ -37,11 +37,13 @@ from app.domains.documents.allocation_models import (
     DocumentAllocationSource,
 )
 from app.domains.documents.sales_invoice_models import SalesInvoice, SalesInvoiceLine
+from app.services.customer_reference import resolve_customer
 from app.services.document_allocation_service import LineToRegister
 from app.services.sales_invoice_mask import (
     herkunfts_zeilen,
     lade_herkunft,
     positions_zeilen,
+    steuer_zeilen,
     ungedeckte_positionen,
 )
 from app.services.sales_invoice_service import (
@@ -164,6 +166,17 @@ class InvoiceOriginRowOut(BaseSchema):
     reason: str
 
 
+class InvoiceTaxRowOut(BaseSchema):
+    """Eine Zeile im Steuerausweis — ein Steuersatz mit seinen Summen."""
+
+    steuersatz: str
+    vat_rate: Optional[float] = None
+    net_amount: float
+    vat_amount: float
+    gross_amount: float
+    positionen: int
+
+
 class InvoiceTabOut(BaseSchema):
     """Eine Registerseite des Builders."""
 
@@ -183,6 +196,10 @@ class InvoiceOriginTabOut(InvoiceTabOut):
     items: list[InvoiceOriginRowOut] = Field(default_factory=list)
 
 
+class InvoiceTaxTabOut(InvoiceTabOut):
+    items: list[InvoiceTaxRowOut] = Field(default_factory=list)
+
+
 class SalesInvoiceDetailOut(BaseSchema):
     """Der Beleg, wie die Maske ihn liest.
 
@@ -195,6 +212,9 @@ class SalesInvoiceDetailOut(BaseSchema):
     id: str
     invoice_number: str
     customer_id: str
+    #: Aus dem CRM aufgeloest (``customer_id`` ist CRM-ID oder Kundennummer).
+    customer_name: Optional[str] = None
+    customer_number: Optional[str] = None
     invoice_date: str
     due_date: Optional[str] = None
     status: str
@@ -567,10 +587,13 @@ def get_invoice(
             }
         )
 
+    kunde = resolve_customer(db, tenant_id, rechnung.customer_id)
     return {
         "id": rechnung.id,
         "invoice_number": rechnung.invoice_number,
         "customer_id": rechnung.customer_id,
+        "customer_name": kunde.name,
+        "customer_number": kunde.number,
         "invoice_date": rechnung.invoice_date.isoformat(),
         "due_date": rechnung.due_date.isoformat() if rechnung.due_date else None,
         "status": rechnung.status,
@@ -637,16 +660,19 @@ def get_invoice_screen_summary(
     herkunft = lade_herkunft(db, tenant_id, invoice_id)
     zeilen = positions_zeilen(positionen, herkunft)
     ungedeckt = ungedeckte_positionen(zeilen)
+    kunde = resolve_customer(db, tenant_id, rechnung.customer_id)
 
     return build_screen_summary_payload(
         screen_id=SCREEN_ID,
         entity_id=invoice_id,
         tenant_id=tenant_id,
         title=rechnung.invoice_number,
-        subtitle=rechnung.customer_id,
+        subtitle=kunde.name or kunde.number or "",
         summary={
             "invoice_number": rechnung.invoice_number,
             "customer_id": rechnung.customer_id,
+            "customer_name": kunde.name,
+            "customer_number": kunde.number,
             "invoice_date": rechnung.invoice_date.isoformat(),
             "due_date": rechnung.due_date.isoformat() if rechnung.due_date else None,
             "status": rechnung.status,
@@ -697,6 +723,9 @@ def _register_daten(
     elif tab_key == "herkunft":
         items = herkunfts_zeilen(herkunft)
         table_key = "invoice_origins"
+    elif tab_key == "steuer":
+        items = steuer_zeilen(positionen)
+        table_key = "invoice_taxes"
     else:
         items, table_key = [], tab_key
 
@@ -751,6 +780,27 @@ def get_invoice_origins_tab(
     """Eine Zeile je Zuordnung — sortier- und filterbar, statt zwanzigmal aufklappen."""
     return _register_daten(
         db, invoice_id, "herkunft",
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/steuer",
+    response_model=InvoiceTaxTabOut,
+    summary="Rechnungsmaske: Steuerausweis je Steuersatz",
+)
+def get_invoice_tax_tab(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Netto, Umsatzsteuer und Brutto je Steuersatz — die Summe ergibt den Kopfbetrag."""
+    return _register_daten(
+        db, invoice_id, "steuer",
         page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
     )
 

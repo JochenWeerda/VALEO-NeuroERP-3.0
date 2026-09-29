@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-27
+last_reviewed: 2026-09-29
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -2414,6 +2414,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `entity` → `/api/v1/sales/invoices/{entity_id}`
 - `positionen` → `/api/v1/sales/invoices/{entity_id}/tabs/positionen`
 - `herkunft` → `/api/v1/sales/invoices/{entity_id}/tabs/herkunft`
+- `steuer` → `/api/v1/sales/invoices/{entity_id}/tabs/steuer`
 
 **MCP-Tools (Domäne):**
 

@@ -12,6 +12,54 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 # Active Workboard
 
 
+## MERIDIAN-BELEG-ONEPAGE-20260929 — abgeschlossen, Browser-Abnahme erfolgt, Cursor
+
+**Ziel:** Belege als durchgehende Seite mit Sprungmarken statt Registerwechsel,
+zentral über den Builder (ScreenDefinition → RenderPlan → UniversalMaskRenderer).
+**Dateibesitz:** `mask-builder/schema.ts`, `floorplans.ts`, `render-plan/types.ts`,
+`schema-compiler.ts`, `plan-to-screen.ts`, `UniversalMaskRenderer.tsx`,
+`renderers/SectionPageRenderer.tsx` (neu), `renderers/UnsavedChangesGuard.tsx` (neu),
+`renderers/ActionBarRenderer.tsx`, `renderers/ProcessRibbonRenderer.tsx`,
+`renderers/index.ts`, Readiness `schema_valid` in `mask_screen_definition.py`,
+Pilot `sales/delivery-note` in `app/core/screen_definitions.py`, Tests
+`section-page.test.tsx`, `process-ribbon.test.tsx`, `test_l3_habit_bridge_screen_definitions.py`.
+**Abnahme:** Vitest Mask-Builder 157/157, RenderPlan-Suiten grün; pytest 44/44;
+`tsc --noEmit` 0 Fehler; Handbuch-Drift-Gate aktuell.
+**Zweite Runde (Folgepunkte):** `table.rowDetail` + `renderers/RowDetailBand.tsx` (neu),
+`FastTabRenderer.tsx`; Steuerausweis `tabs/steuer` (`sales_invoice_mask.steuer_zeilen`,
+`sales_invoices.py`); `positionsfolge` in `sales_invoice_service.py`;
+`VirtualDataTable` `fitToContent` + gemessene Touch-Karten; Sticky-Versatz in
+`SectionPageRenderer`; `formatReadOnlyValue` in `FieldRenderer`; Rollout
+`sales/sales-order`, `sales/invoice`, `einkauf/purchase-order` in `screen_definitions.py`;
+Feldvertrags-Gate prüft `rowDetail`. Tests: `row-detail-band.test.tsx`,
+`field-renderer-readonly.test.tsx` (neu), Ergänzungen in `section-page`, `VirtualDataTable`,
+`test_sales_invoice_mask.py`, `test_sales_invoices_api.py`, `test_l3_habit_bridge_screen_definitions.py`.
+**Abnahme 2:** Vitest ui + Mask-Builder 184/184, Gesamtlauf 885/886 (Rest fremd:
+`debitoren.test.tsx`); pytest 48/48 mit Postgres; Feldvertrag 591/0; Handbuch aktuell;
+`tsc` 0. Browser: Rechnung 15 Positionen (7 %/19 %) bei 1440/1920/390 px.
+**Handshake EK-BESTELLUNG-FUEHREND:** in `einkauf/purchase-order` nur additiv
+`layout.sectionNavigation=anchors` und `rowDetail: {}` an der Positionstabelle;
+dritte Runde zusätzlich `identityField: "bestellnummer"`.
+**Dritte Runde (Restpunkte):** `identityField` (Schema, RenderPlan, `ActionBarRenderer`-Kicker,
+Readiness); `VirtualDataTable` Scrollleisten-Rinne statt doppelter Leiste;
+`sales_orders.py` `customer_name` in der Einzelabfrage + `_fetch_customer_name` liest
+`domain_crm.customers` (vorher falsche Tabelle/Spalte, Fehler still geschluckt);
+`renderers/status-labels.ts` (neu) in `FastTableRenderer`/`FieldRenderer`; Tabellenprofil-
+Text entfernt (`meridian-visual-audit.spec.ts` angepasst); `debitoren.test.tsx` lokal nachgezogen (haengt an der fremden, noch nicht committeten `debitoren.tsx` und ist nicht Teil dieses Commits).
+**Abnahme 3:** Vitest ui + Mask-Builder + Debitoren 192/192, RenderPlan 27/27; pytest
+34/34 (`test_sales_orders_api.py` inkl. Kundenname-Vertrag, Habit-Bridge 16/16); Feldvertrag
+591/0; Handbuch aktuell; `tsc` 0. Browser: SO-00064, DEMO-PO-001, RE-95AB198A45 (1440 + 390 px).
+**Vierte Runde (Rest geschlossen):** `app/services/customer_reference.py` (neu) in
+`sales_orders.py`, `sales_delivery_notes.py`, `sales_invoices.py` (`customer_name`,
+`customer_number`, Lieferschein zusätzlich `sales_order_number`); Köpfe der drei
+Verkaufsbelege in `screen_definitions.py`; Status-Wörterbuch gegen die Dev-Datenbank
+vervollständigt; Boolean Ja/Nein in `FieldRenderer`.
+**Abnahme 4:** pytest 78/78 (Aufträge, Lieferscheine, Rechnungen, Rechnungsmaske,
+Habit-Bridge); Vitest 216/216; Feldvertrag 594/0; Handbuch aktuell; `tsc` 0.
+Browser: DEMO-LS-001 (Kopf ohne UUID), SO-00064 (Name + KD-10001).
+**Risiken:** keine offenen Restpunkte (Open-Gaps § MERIDIAN-BELEG-ONEPAGE).
+Kein Claim-Commit, weil der Arbeitsbaum fremde Änderungen enthält; selektiv committet (nur eigene Hunks).
+
 ## DOC-SLICE-METADATA-PORTAL-20260929 — abgeschlossen, Codex
 
 **Ziel:** Den abgeschlossenen Portal-Business-Time-Slice wieder auf den

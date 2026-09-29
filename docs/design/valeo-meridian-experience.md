@@ -62,6 +62,7 @@ layout: {
   summaryPlacement?: 'header' | 'footer'
   stickyHeader?: boolean
   stickyFooter?: boolean
+  sectionNavigation?: 'tabs' | 'anchors'
 }
 ```
 
@@ -113,6 +114,64 @@ aussehen. Coverage: `tests/test_meridian_column_navigation_inventory.py`.
 Der `RenderPlan.shell` uebernimmt diese Felder zentral. Renderer lesen den Plan
 und erzeugen daraus Header, Aktionshierarchie, Summary, Tabs, Tabellenprofil,
 Dichte und Kontextbereich.
+
+### Durchgehende Belegseite (`sectionNavigation=anchors`, MERIDIAN-BELEG-ONEPAGE)
+
+Belege mit wenigen Registern (Kopf, Positionen, Dokumente) stehen als eine
+durchgehende Seite untereinander. Die Register bleiben als Sprungmarken
+erhalten; man scrollt durch den Beleg oder springt gezielt.
+
+- Erlaubt nur für `objectPage` und `transaction` mit `columnNavigation=single`.
+  Andere Kombinationen fallen im Compiler auf `tabs` zurück und werden von
+  `validateScreenDefinition` sowie vom Backend-Gate `schema_valid` abgelehnt.
+- Kopf und Sprungleiste sind gemeinsam sticky. Der Kopf schrumpft ab 96 px
+  Scrolltiefe und wächst erst unter 48 px wieder (Puffer gegen Flackern);
+  im schmalen Kopf bleibt nur die Belegidentität (ein `h1`).
+- Die Sprungleiste markiert den sichtbaren Abschnitt (`aria-current`).
+  `Alt+1` bis `Alt+9` springen und setzen den Fokus auf die Abschnittsüberschrift.
+  Bei reduzierter Bewegung wird ohne Animation gescrollt.
+- Nachrangige Abschnitte werden erst kurz vor dem Sichtbereich geladen
+  (Lazy-Mount); ein Sprung lädt den Abschnitt sofort.
+- Hat die Maske eine Belegkette (`ProcessRibbonRenderer`), steht sie als
+  letzter Abschnitt „Belegfluss“. Der aktuelle Schritt ist nicht klickbar,
+  Schritte ohne Zielmaske sind deaktiviert. Das `ProcessBand` (Stand des
+  Vorgangs) bleibt davon getrennt.
+- `stickyHeader` und `stickyFooter` sind in diesem Modus standardmäßig aktiv.
+- Bei ungespeicherten Änderungen fragt die Maske vor dem Verlassen nach
+  („Zurück zur Maske“ / „Änderungen verwerfen“). „Speichern und verlassen“
+  gibt es bewusst nicht, weil ein fehlgeschlagenes Speichern sonst trotzdem
+  zur Navigation führen würde.
+
+Pilot: `sales/delivery-note`; umgestellt sind außerdem `sales/sales-order`,
+`sales/invoice` und `einkauf/purchase-order`. Weitere Belege werden über die
+ScreenDefinition umgestellt, nicht über eigenes JSX.
+
+### Belegidentität und Anzeigewerte
+
+- `identityField` in der ScreenDefinition benennt das Feld mit der Belegnummer.
+  Der `h1` zeigt dann die Nummer („SO-00064“), der Maskentitel steht als Kicker
+  darüber (`text-2xs uppercase tracking-wide`). Das Feld muss in der Maske
+  deklariert sein (Frontend-Validierung und Readiness `schema_valid`). Ohne Wert
+  fällt der `h1` auf den Maskentitel zurück.
+- Masken zeigen keine Schlüssel: Kunden über Name und Kunden-Nr. statt über die ID
+  (Backend `resolve_customer`, gleich in Auftrag, Lieferschein und Rechnung),
+  Vorgängerbelege über ihre Nummer, Wahrheitswerte als Ja/Nein,
+  Status über `statusLabel()` (`renderers/status-labels.ts`) — für Tabellen-Chips
+  und Nur-Lese-Felder mit Schlüssel `status`. Neue Status werden dort ergänzt,
+  nicht in der einzelnen Maske.
+- Unter Tabellen steht kein technisches Profil; das Tabellenprofil ist nur als
+  `data-table-profile` für Tests und Styling vorhanden.
+
+- **Positions-Detailband (`table.rowDetail`):** Ein Klick auf eine Position öffnet
+  ihre Details als Band direkt unter dem Raster, nicht als Dialog. `fields` legt
+  die Felder fest; ohne Angabe zeigt das Band alle Spalten. Erneuter Klick, der
+  Schließen-Knopf oder Escape schließen es. Führt die Tabelle eine
+  `rowRouteTemplate`, bietet das Band „In Vollansicht öffnen“.
+- **Steuerausweis:** Die Rechnung zeigt im Kopf je Steuersatz Netto, Umsatzsteuer
+  und Brutto. Gerundet wird je Position wie beim Anlegen, damit die Summe dem
+  Kopfbetrag entspricht.
+- **Tabellenhöhe:** Kurze Tabellen schrumpfen auf ihre Zeilen; 420 px bleibt
+  die Obergrenze langer Listen.
 
 ## Gewohnheitsbruecken
 

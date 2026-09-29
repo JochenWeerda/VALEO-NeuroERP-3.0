@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....services.customer_reference import resolve_customer
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_delivery
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ....services.numbering_service import get_numbering
@@ -139,6 +140,9 @@ class SalesOrder(SalesOrderBase):
     deleted_at: Optional[datetime] = None
     version: int = 1
     items: list[SalesOrderItemOut] = Field(default_factory=list)
+    #: Nur in der Einzelabfrage gefuellt; die Liste spart sich die Abfrage je Zeile.
+    customer_name: Optional[str] = None
+    customer_number: Optional[str] = None
 
 
 def _line_total(quantity: float, unit_price: float, discount_percent: float) -> Decimal:
@@ -300,7 +304,11 @@ async def get_sales_order(
     db: Session = Depends(get_db),
 ):
     row = _get_sales_order_row(db, order_id, tenant_id)
-    return _row_to_order(row, _fetch_items(db, order_id, tenant_id))
+    order = _row_to_order(row, _fetch_items(db, order_id, tenant_id))
+    kunde = resolve_customer(db, tenant_id, order.customer_id)
+    order.customer_name = kunde.name
+    order.customer_number = kunde.number
+    return order
 
 
 def _sales_order_tab_endpoint(order_id: str, tab_key: str) -> str:
@@ -352,24 +360,7 @@ def build_sales_order_screen_summary(
 
 
 def _fetch_customer_name(db: Session, customer_id: str | None, tenant_id: str) -> str | None:
-    if not customer_id:
-        return None
-    try:
-        row = db.execute(
-            text(
-                """
-                SELECT name
-                FROM domain_erp.business_partners
-                WHERE id = :cid AND tenant_id::text = :tid
-                LIMIT 1
-                """
-            ),
-            {"cid": customer_id, "tid": tenant_id},
-        ).mappings().first()
-        return str(row["name"]) if row and row.get("name") else None
-    except Exception:
-        db.rollback()
-        return None
+    return resolve_customer(db, tenant_id, customer_id).name
 
 
 def _fetch_delivery_notes_for_order(db: Session, order_id: str, tenant_id: str) -> list[dict[str, Any]]:

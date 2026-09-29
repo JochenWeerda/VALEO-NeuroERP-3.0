@@ -37,6 +37,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
       rowHeight: table.rowHeight,
       serverPagination: table.serverPagination,
       rowRouteTemplate: table.rowRouteTemplate,
+      rowDetail: table.rowDetail,
     })),
   }))
 
@@ -47,6 +48,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
     mode: plan.shell.mode,
     title: plan.shell.title,
     subtitle: plan.shell.subtitle,
+    identityField: plan.shell.identityField,
     summaryEndpoint: plan.shell.summaryEndpoint,
     summary: plan.summaryItems,
     fields: fieldsFromKeys(plan.rootFieldKeys),
@@ -64,6 +66,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
         rowHeight: table.rowHeight,
         serverPagination: table.serverPagination,
         rowRouteTemplate: table.rowRouteTemplate,
+        rowDetail: table.rowDetail,
       })),
     actions: plan.actions.map((action) => ({
       key: action.key,
@@ -84,6 +87,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
       mobileMode: plan.shell.mobileMode,
       touchTargetPx: plan.shell.touchTargetPx,
       floorplan: plan.shell.floorplan,
+      sectionNavigation: plan.shell.sectionNavigation,
       density: plan.shell.density,
       contextRail: plan.shell.contextRail,
       contextRailSections: plan.shell.contextRailSections,

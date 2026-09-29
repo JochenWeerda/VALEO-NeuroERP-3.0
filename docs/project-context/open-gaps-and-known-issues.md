@@ -488,6 +488,71 @@ Status: abgeschlossen — zehn Rollout-Kandidaten mit zentralem `/api/v1/mask-ro
 - Grenzen: Adapter-Parität (Felder aus MaskConfig); generische Tab-Spalten; keine Detail-Route-Switches pro Legacy-Seite.
 - ~~**Naechster Architekturschritt:** UniversalMaskRuntime (`UIX-RUNTIME-020`…`024`)~~ → **abgeschlossen in UIX-022…030** (siehe unten).
 
+## MERIDIAN-BELEG-ONEPAGE — durchgehende Belegseite (2026-09-29)
+
+Status: **geliefert und im Browser abgenommen** (1440/1920/390 px). `layout.sectionNavigation=anchors`
+(nur `objectPage`/`transaction` mit `columnNavigation=single`) rendert Register als
+Abschnitte mit Sprungleiste, Scroll-Spy, `Alt+1..9`, Lazy-Mount, schrumpfendem Kopf,
+Belegfluss als letztem Abschnitt und Verwerfen-Rückfrage. Pilot `sales/delivery-note`.
+Die Google-Studio-Entwürfe dienten nur als visuelle Referenz, es wurde kein Code übernommen.
+
+Folgearbeiten (Stand 2026-09-29, zweite Runde):
+
+- ~~Positions-Detailband~~ → `table.rowDetail` (ScreenDefinition, RenderPlan, Readiness
+  `schema_valid`, Feldvertrags-Gate). `RowDetailBand` zeigt die gewählte Zeile unter dem
+  Raster, Escape oder erneuter Klick schließen. Nur für Tab-Tabellen ohne externe
+  Zeilenauswahl; Wurzeltabellen bekommen kein Band. Pilot: Rechnungspositionen.
+- ~~USt-Aufteilung 7 %/19 %~~ → Steuerausweis `GET /sales/invoices/{id}/tabs/steuer`,
+  je Position auf den Cent gerundet wie beim Anlegen, Summe = Kopf-USt. Nur Rechnung:
+  Auftrag und Lieferschein führen keinen Steuersatz je Position.
+- ~~Mobile Kartenliste~~ → bestand bereits (`VirtualDataTable` unter 768 px / grober
+  Zeiger). Neu: Karten werden gemessen statt mit 160 px geschätzt (vorher abgeschnitten).
+- ~~Sticky Tabellenkopf~~ → Kopfzeile stand bereits außerhalb des vertikalen Scrollbereichs.
+  Neu: `fitToContent` — kurze Tabellen schrumpfen auf ihre Zeilen (420 px bleibt Obergrenze).
+- ~~Browser-Abnahme~~ → Rechnung mit 15 Positionen (7 % und 19 %) bei 1440, 1920 und 390 px.
+  Dabei behoben: Sticky-Kopf klebte 32 px unter der Containerkante (AppShell-Padding);
+  Rechnungspositionen standen in Textfolge (1, 10, 11 … 2) → `positionsfolge`;
+  Nur-Lese-Beträge/-Datum ungeformt („19315“, „mm/dd/yyyy“) → `formatReadOnlyValue`.
+- ~~Rollout~~ → `sales/sales-order` (Kopf jetzt aus der Entität statt leerem Lazy-Tab),
+  `sales/invoice`, `einkauf/purchase-order` auf `sectionNavigation=anchors`.
+
+Dritte Runde (2026-09-29):
+
+- ~~Doppelte horizontale Scrollleiste~~ → Kopf und Körper des Desktop-Rasters reservieren
+  beide die Scrollleisten-Rinne (`scrollbarGutter: stable`), der Körper scrollt nur
+  vertikal. Browser: kein horizontaler Überlauf im Körper (Auftrag, Rechnung).
+- ~~`h1` der Rechnung~~ → neuer Vertrag `ScreenDefinition.identityField` (Frontend-
+  Validierung + Readiness `schema_valid`): `h1` = Belegnummer, Maskentitel wird Kicker.
+  Gesetzt für Auftrag, Lieferschein, Rechnung, Bestellung.
+- ~~Auftrag/Bestellung im Browser~~ → SO-00064 und DEMO-PO-001 (Default-Mandant) abgenommen.
+  Dabei behoben: Auftragskopf zeigte die Kunden-UUID — `_fetch_customer_name` las eine
+  nicht existierende Spalte in der falschen Tabelle und schluckte den Fehler still; liest
+  jetzt `domain_crm.customers.company_name`, Einzelabfrage liefert `customer_name`.
+- ~~Status-Schlüssel in Masken~~ („open“, „entwurf“, „bestellt“) → zentral `statusLabel()`
+  (`mask-builder/renderers/status-labels.ts`) für Tabellen-Chips (`renderKind: status`) und
+  Nur-Lese-Felder mit Schlüssel `status`; Unbekanntes bleibt stehen.
+- ~~„Standard Table Profile“~~ unter jeder Tabelle entfernt (interne Klassifikation,
+  englisch); maschinenlesbar bleibt `data-table-profile`.
+- ~~`debitoren.test.tsx`~~ → an die neue Unterzeile angepasst, Suchfilter-Test ergänzt; haengt an der fremden, noch nicht committeten `debitoren.tsx` und ist nicht Teil dieses Commits.
+
+Vierte Runde (2026-09-29) — Rest geschlossen:
+
+- ~~`customer_id` in Rechnungs-/Lieferscheinkopf~~ → `app/services/customer_reference.py`
+  (`resolve_customer`) nimmt CRM-ID **oder** Kundennummer (beide Formen sind im Umlauf:
+  Lieferschein/Auftrag führen die CRM-ID, Rechnungen aus MCP/Import die Nummer; bei
+  Gleichstand gilt die ID). Einzelabfragen von Auftrag, Lieferschein und Rechnung liefern
+  `customer_name` + `customer_number`; alle drei Köpfe zeigen „Kunde“ und „Kunden-Nr.“
+  (Gewohnheits-Prinzip). Ohne CRM-Treffer bleibt der Name leer und die Referenz steht als
+  Nummer — kein erfundener Name. Rechnungs-Summary-Untertitel nennt ebenfalls den Namen.
+- ~~Auftrags-UUID im Lieferscheinkopf~~ → `sales_order_number` statt `sales_order_id`.
+- ~~Status-Wörterbuch lückenhaft~~ → gegen alle 229 Tabellen mit `status`-Spalte der
+  Dev-Datenbank abgeglichen, alle vorkommenden Werte abgedeckt; Schreibweise egal
+  (`in-bearbeitung`, `PENDING_APPROVAL`).
+- ~~Nur-Lese-Boolean als „false“~~ → `formatReadOnlyValue` zeigt Ja/Nein.
+
+Keine offenen Punkte aus MERIDIAN-BELEG-ONEPAGE. Neue Status werden in
+`renderers/status-labels.ts` ergänzt; unbekannte Werte erscheinen unverändert.
+
 ## MERIDIAN-SCREEN-STUDIO-PERSIST — Drafts in Postgres (2026-09-16)
 
 Status: **geschlossen**. `domain_shared.screen_definition_drafts` persistiert Studio-Entwürfe;

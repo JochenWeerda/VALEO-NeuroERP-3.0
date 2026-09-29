@@ -173,7 +173,8 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
         "domain": "sales",
         "mode": "detail",
         "title": "Verkaufsauftrag",
-        "subtitle": "Sales Order",
+        "subtitle": "Verkauf / Auftrag",
+        "identityField": "order_number",
         "adapter": {
             "type": "native",
             "sourceId": "sales/sales-order",
@@ -187,7 +188,35 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
             {"key": "dokumente", "endpoint": "/api/v1/sales/orders/{entity_id}/tabs/dokumente",  "pageSize": 25},
         ],
         "tabs": [
-            {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True},
+            {
+                # Schluessel wie im Auftrags-Endpunkt (`SalesOrder`). Vorher war
+                # das Register leer; auf der durchgehenden Belegseite stuende
+                # sonst ein leerer Abschnitt ganz oben.
+                "key": "kopf", "label": "Kopfdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "order_number", "label": "Auftrags-Nr.", "type": "text", "readOnly": True},
+                    # Name statt Partner-ID: die ID ist ein interner Schluessel.
+                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
+                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
+                    {"key": "subject", "label": "Betreff", "type": "text", "readOnly": True},
+                    {"key": "status", "label": "Status", "type": "select", "readOnly": True,
+                     "options": [
+                         {"value": "open", "label": "Offen"},
+                         {"value": "confirmed", "label": "Bestaetigt"},
+                         {"value": "in_delivery", "label": "In Lieferung"},
+                         {"value": "completed", "label": "Abgeschlossen"},
+                         {"value": "cancelled", "label": "Storniert"},
+                     ]},
+                    {"key": "delivery_date", "label": "Liefertermin", "type": "date", "readOnly": True},
+                    {"key": "contact_person", "label": "Ansprechpartner", "type": "text", "readOnly": True},
+                    {"key": "shipping_method", "label": "Versandart", "type": "text", "readOnly": True},
+                    {"key": "payment_terms", "label": "Zahlungsbedingung", "type": "text", "readOnly": True},
+                    {"key": "total_amount", "label": "Auftragswert", "type": "currency", "readOnly": True},
+                    {"key": "currency", "label": "Waehrung", "type": "text", "readOnly": True},
+                    {"key": "delivery_address", "label": "Lieferadresse", "type": "textarea", "readOnly": True},
+                    {"key": "notes", "label": "Notiz", "type": "textarea", "readOnly": True},
+                ],
+            },
             {
                 "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True,
                 "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
@@ -248,6 +277,9 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
             "touchTargetPx": 44,
+            "floorplan": "objectPage",
+            "columnNavigation": "single",
+            "sectionNavigation": "anchors",
         },
         "performance": {
             "initialPayloadBudgetKb": 56,
@@ -683,6 +715,7 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
         "mode": "detail",
         "title": "Lieferschein",
         "subtitle": "Verkauf / Warenausgang",
+        "identityField": "delivery_note_number",
         "adapter": {"type": "native", "sourceId": "sales/delivery-note", "temporary": False},
         "summaryEndpoint": "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/screen-summary",
         "dataSources": [
@@ -698,8 +731,9 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
                     # Wunschnamen (ls_nr, auftrag_nr, kunde) — der Beleg kam
                     # mit 200 und der Kopf blieb leer.
                     {"key": "delivery_note_number", "label": "LS-Nr.", "type": "text", "readOnly": True},
-                    {"key": "sales_order_id", "label": "Auftrag", "type": "text", "readOnly": True},
-                    {"key": "customer_id", "label": "Kunde", "type": "text", "readOnly": True},
+                    {"key": "sales_order_number", "label": "Auftrag", "type": "text", "readOnly": True},
+                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
+                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
                     {"key": "delivery_date", "label": "Lieferdatum", "type": "date", "readOnly": True},
                     # Versandart und Lagerort fuehrt der Lieferschein nicht.
                     # Was er fuehrt: Selbstabholung, Fahrzeug, Niederlassung.
@@ -759,7 +793,9 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
             "sensitiveFields": [],
             "testSelectors": {"screenRoot": "[data-testid='sales-delivery-note']", "primaryAction": "[data-testid='action-drucken']", "summaryArea": "[data-testid='mask-summary']"},
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "transaction", "summaryPlacement": "footer", "stickyHeader": True, "stickyFooter": True},
+        # Durchgehende Belegseite: Kopf, Positionen und Dokumente untereinander,
+        # die Register bleiben als Sprungmarken (MERIDIAN-BELEG-ONEPAGE).
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "transaction", "sectionNavigation": "anchors", "summaryPlacement": "footer", "stickyHeader": True, "stickyFooter": True},
         "interaction": {"enterMovesFocus": True},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
     }
@@ -854,19 +890,22 @@ def build_sales_invoice_screen_definition() -> dict[str, Any]:
         "mode": "detail",
         "title": "Ausgangsrechnung",
         "subtitle": "Verkauf / Faktura",
+        "identityField": "invoice_number",
         "adapter": {"type": "native", "sourceId": "sales/invoice", "temporary": False},
         "summaryEndpoint": "/api/v1/sales/invoices/{entity_id}/screen-summary",
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/sales/invoices/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/sales/invoices/{entity_id}/tabs/positionen", "pageSize": 50},
             {"key": "herkunft", "endpoint": "/api/v1/sales/invoices/{entity_id}/tabs/herkunft", "pageSize": 50},
+            {"key": "steuer", "endpoint": "/api/v1/sales/invoices/{entity_id}/tabs/steuer", "pageSize": 25},
         ],
         "tabs": [
             {
                 "key": "kopf", "label": "Rechnungskopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
                 "fields": [
                     {"key": "invoice_number", "label": "Rechnungsnr.", "type": "text", "readOnly": True},
-                    {"key": "customer_id", "label": "Kunde", "type": "text", "readOnly": True},
+                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
+                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
                     {"key": "invoice_date", "label": "Rechnungsdatum", "type": "date", "readOnly": True},
                     {"key": "due_date", "label": "Faellig", "type": "date", "readOnly": True},
                     {"key": "status", "label": "Status", "type": "text", "readOnly": True},
@@ -874,6 +913,17 @@ def build_sales_invoice_screen_definition() -> dict[str, Any]:
                     {"key": "vat_amount", "label": "Umsatzsteuer", "type": "currency", "readOnly": True},
                     {"key": "gross_amount", "label": "Brutto", "type": "currency", "readOnly": True},
                 ],
+                # Umsatzsteuer je Steuersatz wie auf der gedruckten Rechnung;
+                # die Summe ergibt auf den Cent den Kopfbetrag.
+                "tables": [{"key": "steuer", "label": "Steuerausweis", "dataSourceKey": "steuer",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "steuersatz", "label": "Steuersatz", "width": 150},
+                                {"key": "positionen", "label": "Positionen", "numeric": True, "renderKind": "number", "width": 110},
+                                {"key": "net_amount", "label": "Netto", "numeric": True, "renderKind": "currency"},
+                                {"key": "vat_amount", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency"},
+                                {"key": "gross_amount", "label": "Brutto", "numeric": True, "renderKind": "currency"},
+                            ]}],
             },
             {
                 "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
@@ -890,7 +940,19 @@ def build_sales_invoice_screen_definition() -> dict[str, Any]:
                                 # Der Deckungsstand steht an der Position: Wer die
                                 # Menge sieht, sieht auch, ob sie belegt ist.
                                 {"key": "herkunft", "label": "Herkunft", "width": 170, "filterable": True},
-                            ]}],
+                            ],
+                            "rowDetail": {"fields": [
+                                {"key": "line_no", "label": "Pos."},
+                                {"key": "article_number", "label": "Artikel-Nr."},
+                                {"key": "description", "label": "Bezeichnung"},
+                                {"key": "quantity", "label": "Menge", "renderKind": "number"},
+                                {"key": "unit", "label": "Einheit"},
+                                {"key": "unit_price", "label": "Einzelpreis", "renderKind": "currency"},
+                                {"key": "net_amount", "label": "Netto", "renderKind": "currency"},
+                                {"key": "vat_rate", "label": "Steuersatz %", "renderKind": "number"},
+                                {"key": "herkunft", "label": "Herkunft"},
+                                {"key": "quellen", "label": "Zuordnungen", "renderKind": "number"},
+                            ]}}],
             },
             {
                 "key": "herkunft", "label": "Herkunft", "lazy": True, "keepAlive": False,
@@ -919,7 +981,7 @@ def build_sales_invoice_screen_definition() -> dict[str, Any]:
             "sensitiveFields": [],
             "testSelectors": {"screenRoot": "[data-testid='sales-invoice']", "summaryArea": "[data-testid='mask-summary']"},
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "objectPage", "columnNavigation": "single", "tableProfile": "financial", "summaryPlacement": "header", "stickyHeader": True},
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "objectPage", "columnNavigation": "single", "sectionNavigation": "anchors", "tableProfile": "financial", "summaryPlacement": "header", "stickyHeader": True},
         "interaction": {"enterMovesFocus": True},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
     }
@@ -934,6 +996,7 @@ def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
         "mode": "detail",
         "title": "Bestellung",
         "subtitle": "Einkauf / Bestellvorgang",
+        "identityField": "bestellnummer",
         "adapter": {"type": "native", "sourceId": "einkauf/purchase-order", "temporary": False},
         "summaryEndpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/screen-summary",
         "dataSources": [
@@ -1015,7 +1078,10 @@ def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
                                 {"key": "lagerfach", "label": "Lagerfach", "width": 90},
                                 {"key": "mindestmenge", "label": "Min.", "numeric": True, "renderKind": "number", "width": 70},
                                 {"key": "maximalmenge", "label": "Max.", "numeric": True, "renderKind": "number", "width": 70},
-                            ]}],
+                            ],
+                            # 20 Spalten passen selten auf einen Blick; das Band zeigt
+                            # die gewaehlte Position vollstaendig unter dem Raster.
+                            "rowDetail": {}}],
             },
             {
                 "key": "kette", "label": "Anfrage / Angebot / Auftrag", "lazy": False, "keepAlive": True,
@@ -1135,6 +1201,7 @@ def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
             "summaryPlacement": "header",
             "stickyHeader": True,
             "columnNavigation": "single",
+            "sectionNavigation": "anchors",
         },
         "interaction": {"enterMovesFocus": True},
         "performance": {"initialPayloadBudgetKb": 56, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "einkauf"},

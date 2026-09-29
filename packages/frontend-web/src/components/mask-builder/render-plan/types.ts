@@ -9,6 +9,7 @@ import type {
   ScreenFloorplan,
   ScreenLayoutMode,
   ScreenMode,
+  ScreenSectionNavigation,
   ScreenSummaryItem,
   ScreenSummaryPlacement,
   ScreenActionZone,
@@ -34,6 +35,7 @@ export type RenderComponentKind =
 export interface RenderShellPlan {
   title: string
   subtitle?: string
+  identityField?: string
   domain: ScreenDomain
   mode: ScreenMode
   layoutMode: ScreenLayoutMode
@@ -41,6 +43,8 @@ export interface RenderShellPlan {
   touchTargetPx: number
   floorplan: ScreenFloorplan
   columnNavigation?: ScreenColumnNavigation
+  /** `anchors`: durchgehende Belegseite; Kopf und Fussleiste bleiben stehen, der Kopf schrumpft beim Scrollen. */
+  sectionNavigation: ScreenSectionNavigation
   density: ScreenDensity
   contextRail: ScreenContextRail
   contextRailSections: ScreenContextRailSection[]
@@ -204,6 +208,8 @@ export interface RenderTablePlan {
     label: string
     dangerLevel?: 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
   }>
+  /** Aufgeloestes Detailband der gewaehlten Zeile; `fields` ist nie leer. */
+  rowDetail?: { fields: Array<{ key: string; label: string; renderKind?: RenderColumnKind }> }
   /** Aktive Nutzer-Variante (UIX-071 Overlay) */
   activeVariant?: string
   /** Nutzer-definierte Varianten (UIX-071 Overlay) */

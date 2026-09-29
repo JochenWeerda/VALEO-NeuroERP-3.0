@@ -9,7 +9,7 @@ import {
   type ScreenTableProfile,
   type ScreenTileDefinition,
 } from '../schema'
-import { defaultColumnNavigation, FLOORPLAN_RULES } from '../floorplans'
+import { defaultColumnNavigation, FLOORPLAN_RULES, resolveSectionNavigation } from '../floorplans'
 import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
@@ -83,6 +83,13 @@ function compileTable(
     rowRouteTemplate: table.rowRouteTemplate,
     rowActions: table.rowActions,
     bulkActions: table.bulkActions,
+    rowDetail: table.rowDetail
+      ? {
+          fields: table.rowDetail.fields?.length
+            ? table.rowDetail.fields.map((field) => ({ key: field.key, label: field.label, renderKind: field.renderKind }))
+            : table.columns.map((column) => ({ key: column.key, label: column.label, renderKind: column.renderKind })),
+        }
+      : undefined,
   }
 }
 
@@ -282,6 +289,13 @@ export function compileRenderPlan(
   }
 
   const processRibbon = compileProcessRibbonPlan(schema)
+  const columnNavigation = defaultColumnNavigation(
+    floorplan,
+    Object.keys(tablesByKey).length > 0,
+    schema.layout?.columnNavigation,
+  )
+  const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
+  const onePage = sectionNavigation === 'anchors'
 
   const plan: RenderPlan = {
     cacheKey,
@@ -290,24 +304,22 @@ export function compileRenderPlan(
     shell: {
       title: context.summary?.title ?? schema.title,
       subtitle: context.summary?.subtitle ?? schema.subtitle,
+      identityField: schema.identityField,
       domain: schema.domain,
       mode: schema.mode,
       layoutMode: schema.layout?.preferredMode ?? 'desktopDense',
       mobileMode: schema.layout?.mobileMode ?? 'mobileStack',
       touchTargetPx: schema.layout?.touchTargetPx ?? 44,
       floorplan,
-      columnNavigation: defaultColumnNavigation(
-        floorplan,
-        Object.keys(tablesByKey).length > 0,
-        schema.layout?.columnNavigation,
-      ),
+      columnNavigation,
+      sectionNavigation,
       density,
       contextRail,
       contextRailSections,
       tableProfile,
       summaryPlacement: schema.layout?.summaryPlacement ?? 'header',
-      stickyHeader: schema.layout?.stickyHeader ?? false,
-      stickyFooter: schema.layout?.stickyFooter ?? false,
+      stickyHeader: schema.layout?.stickyHeader ?? onePage,
+      stickyFooter: schema.layout?.stickyFooter ?? onePage,
       summaryEndpoint: schema.summaryEndpoint,
       voice: {
         enabled: schema.voice?.enabled ?? true,

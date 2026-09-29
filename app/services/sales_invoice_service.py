@@ -37,6 +37,7 @@ entsteht der Beleg, nicht seine Verbuchung — und die Rechnung beginnt als
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
@@ -54,6 +55,18 @@ from app.services.document_allocation_service import (
 
 class InvoiceCreationError(RuntimeError):
     """Fachlicher Grund, warum keine Rechnung entstehen kann."""
+
+
+def positionsfolge(line_no: str) -> tuple[tuple[int, int, str], ...]:
+    """Sortierschluessel fuer Positionsnummern: "2" vor "10", "1.2" vor "1.10".
+
+    ``line_no`` ist Text; eine SQL-Sortierung stellt "10" vor "2".
+    """
+    return tuple(
+        (0, int(teil), "") if teil.isdigit() else (1, 0, teil)
+        for teil in re.split(r"(\d+)", line_no)
+        if teil
+    )
 
 
 @dataclass(frozen=True)
@@ -226,7 +239,7 @@ class SalesInvoiceService:
                 SalesInvoiceLine.invoice_id == invoice_id,
                 SalesInvoiceLine.tenant_id == self.tenant_id,
             )
-            .order_by(SalesInvoiceLine.line_no.asc())
             .all()
         )
+        positionen.sort(key=lambda zeile: positionsfolge(zeile.line_no))
         return rechnung, positionen
