@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-17
+last_reviewed: 2026-09-29
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -105,6 +105,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `articles_image_url_20260322` | Add image_url to articles |
 | `articles_master_fields_gap_83_20260215` | Close 8.3 article master-data field gaps. |
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
+| `audit_attestations_20260917` | Die Attestierung bekommt ihre Tabelle. |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
 | `billing_batch_20260821` | Billing batch orchestration and audit. |
@@ -133,12 +134,13 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `crm_campaigns_20260524` | CRM: campaign_templates, campaigns, campaign_recipients |
 | `crm_capture_inbox_kim_20260609` | crm_capture_inbox — Klärfall-Inbox für nicht zuordenbare Auto-Captures (KIM) |
 | `crm_consent_segments_20260305` | CRM: consent, segments and segment_members tables |
-| `crm_consents_20260917` | Kontakt-Einwilligungen (Double-Opt-in) in domain_crm.crm_contact_consents — Partner-Tabelle crm_consents bleibt unangetastet. |
+| `crm_consents_20260917` | Kontakt-Einwilligungen (DSGVO Double-Opt-in) neben dem Partner-Stamm. |
 | `crm_contacts_ext_kim_s4_20260609` | crm_contacts_ext — Ansprechpartner-Erweiterung (KIM-S4) |
 | `crm_customers_business_partner_id_20260404` | domain_crm.customers.business_partner_id — Verknüpfung CRM-Kunde ↔ Business Partner (Stammdaten) |
 | `crm_customers_search_index_20260414` | domain_crm.customers — pg_trgm GIN-Indizes fuer schnelle Typeahead-Suche |
 | `crm_gifts_kim_s3_20260609` | crm_gifts — Kunden-Präsente (KIM-S3) |
 | `crm_kim_perf_indexes_20260612` | CRM/KIM Cockpit-Performance — fehlende Indizes. |
+| `crm_kreditlimite_20260917` | Kreditlimite und Freigaben je Kunde. |
 | `crm_merge_20260610` | crm_merge — Kunden-Zusammenführung (DOM-CRM-004.2) |
 | `crm_notifications_kim_l3_backend_20260609` | crm_notifications — internes Benachrichtigungs-/Postfach-System fuer KIM (KIM-L3-BACKEND-001) |
 | `crm_ownership_log_20260610` | crm_ownership_log — Übergabe-/Zuordnungs-Audit (DOM-CRM-004.3) |
@@ -157,14 +159,17 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `document_control_20260821` | Document control exception worklist and audit. |
 | `domain_schemas_baseline_20260409` | domain_* PostgreSQL-Schemas: idempotent anlegen (Baseline fuer ORM/create_all) |
 | `driver_time_events_20260516` | add driver_time_events table |
+| `dsgvo_loeschantraege_20260917` | Loeschantraege nach Art. 17 DSGVO bekommen ihre Tabelle. |
 | `e7238c2e17a1_merge_inventory_operations_and_` | merge inventory_operations and futtermittel heads |
 | `eca81651f8ba_merge_multiple_heads` | Merge multiple heads |
 | `einkauf_3wm_invoice_verification_20260613` | Einkauf 3-Wege-Match: domain_einkauf.invoice_verification Alembic migration. |
+| `einkauf_bestellung_fuehrend_20260918` | L3-Felder und drei Bestellfaelle an domain_einkauf.bestellungen. |
 | `einkauf_bestellungen_dedupe_unique_20260407` | einkauf_bestellungen: Duplikate bereinigen + Unique-Index |
 | `einkauf_domain_tables_20260227` | einkauf domain tables — Lieferanten, Kontrakte, Bestellungen, Bestellvorschlaege, ArtikelLagerParameter, LagerKonten, PalettenKonto, PfandKonto, FremdwarenEinlagerung |
 | `einkauf_lieferschein_frachtauftrag_20260214` | Add procurement delivery note and freight order tables. |
 | `einkauf_ls_opportunities_repair_20260626` | EINKAUF-LS-REPAIR-001: Einkauf-Lieferschein + Opportunities Repair-Migration. |
 | `einkauf_missing_tables_20260305` | Einkauf: missing tables for RFQ, delivery advices, order confirmations, article groups, payment runs |
+| `einkauf_po_dokumente_migrieren_20260925` | Die Bestelldokumente ziehen in den fuehrenden Bestellbestand um. |
 | `einkauf_rechnungseingang_workflow_audit_20260301` | Add workflow audit columns to einkauf_rechnungseingaenge (Prüfen/Freigeben/Verbuchen) |
 | `ensure_chart_of_accounts_and_journal_entry_lines_20260303` | chart_of_accounts und journal_entry_lines anlegen (Nachlauf zu journal_entries) |
 | `ensure_controlling_tables_20260304` | ensure controlling tables exist |
@@ -172,6 +177,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `ensure_finance_api_tables_20260413` | Ensure finance API tables exist on all upgrade paths |
 | `ensure_journal_entries_table_20260303` | domain_erp.journal_entries und journal_entry_lines anlegen (GoBD) |
 | `entity_notes_uix062` | UIX-062 entity notes for collab rail. |
+| `erp_gutscheinkonto_20260928` | Gutscheine bekommen ein eigenes Konto. |
+| `erp_kontenrahmen_skr03_20260927` | Der Kontenrahmen bekommt die Konten, gegen die gebucht wird. |
 | `esg_charge_footprint_uix082` | UIX-082 ESG charge footprint read-model. |
 | `exchange_rates_compat_20260413` | Align exchange rate table with API contract |
 | `external_mock_sessions_20260623` | EXTERNAL-MOCK-HARNESS-001: Mock-Session-Log fuer Dev/Test. |
@@ -293,7 +300,9 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
 | `mail_workspace_20260821` | Role based ERP mail workspace. |
-| `mask_frontend_bridges_20260917` | Masken-Bruecken-Tabellen (Waagenvorlagen, Anlagen, Lastschrift) plus Nachzug crm_contact_consents; haengt hinter sales_beleg_druck_buchung. |
+| `mask_action_audit_20260921` | Persist the audit contract already used by native mask commands. |
+| `mask_frontend_bridges_20260917` | Tabellen fuer Masken-Bruecken, die bisher ins Leere zeigten. |
+| `mcp_tool_executions_20260921` | Transactional replay journal for authenticated ERP tool calls. |
 | `mde_inbox_hardening_20260821` | Harden the existing mobile sync queue for the MDE operator inbox. |
 | `meldewesen_lifecycle_20260623` | DOM-MEL-004 — Meldewesen Lifecycle Tabellen (Intrastat/ELSTER/ATLAS) |
 | `merge_agent_job_runner_20260626` | Merge Alembic heads: agent_proposals + job_runner_tables_repair. |
