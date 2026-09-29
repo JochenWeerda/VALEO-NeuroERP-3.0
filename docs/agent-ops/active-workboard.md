@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BUSINESS-TIME-HR-20260929 — reserviert, Codex
+
+**Ziel:** HR-Retention, Fahrerzeit-/Cockpit-Defaults und datumslose HR-Fallbacks
+am konfigurierten Geschaeftstag ausrichten.
+**Dateibesitz:** `app/services/personal_service.py`,
+`app/api/v1/endpoints/personal.py`, fokussierte Tests, eigene Slice-/QA-Doku,
+BUSINESS-TIME-Restpunkt in Open-Gaps und dieser Abschnitt.
+**Abnahme:** Alle fachlichen Heute-Vergleiche nutzen `business_today()`; explizite
+Eingabedaten bleiben unveraendert; Retention- und Endpoint-Tests sind gruen.
+**Risiken:** Ereigniszeitpunkte und Audit-Timestamps bleiben UTC.
+
 ## BUSINESS-TIME-TOURS-20260929 — abgeschlossen, Codex
 
 **Ziel:** `/tours/today` am konfigurierten Geschaeftstag statt an UTC- oder
