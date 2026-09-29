@@ -43,7 +43,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}` |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/bestand` |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/inventuren/status` |
-| `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
+| `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/sales-invoices/propose` |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `GET /api/v1/sales-orders/{auftrag_nr}/status` |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `GET /api/v1/silo/cells/{cell_code}/status` |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `GET /api/v1/inventory/lots/{lot_id}/trace` |

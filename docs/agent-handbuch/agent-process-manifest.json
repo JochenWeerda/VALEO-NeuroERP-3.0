@@ -3133,7 +3133,7 @@
       "idempotent": false,
       "risk_class": "high",
       "human_approval_required": true,
-      "endpoint": "POST /api/v1/mcp/tools/call"
+      "endpoint": "POST /api/v1/sales-invoices/propose"
     },
     {
       "tool_id": "fibu.open_items.list",
