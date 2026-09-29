@@ -104,6 +104,23 @@ KONTEN: list[tuple[str, str, str, str, str]] = [
 def upgrade() -> None:
     verbindung = op.get_bind()
 
+    # Den Mandanten fuer den gemeinsamen Rahmen sicherstellen.
+    #
+    # `chart_of_accounts.tenant_id` zeigt per Fremdschluessel auf `tenants`.
+    # In einer gewachsenen Datenbank gibt es die Zeile `system` laengst — die
+    # vorhandenen Konten 1400 und 8400 haengen daran. Auf einer **frischen**
+    # Datenbank gibt es sie nicht, und dann bricht nicht nur diese Migration,
+    # sondern jede danach: `alembic upgrade head` kommt nicht mehr durch.
+    # Genau daran ist der CI-Lauf gescheitert, waehrend es lokal lief.
+    verbindung.execute(
+        sa.text(
+            "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
+            "VALUES (:t, 'System', 'system.local', TRUE) "
+            "ON CONFLICT (id) DO NOTHING"
+        ),
+        {"t": MANDANT},
+    )
+
     for nummer, name, typ, kategorie, herkunft in KONTEN:
         # Nur anlegen, was fehlt — vorhandene Konten bleiben unberuehrt,
         # auch wenn sie anders heissen. Ein Name, den jemand gepflegt hat,
