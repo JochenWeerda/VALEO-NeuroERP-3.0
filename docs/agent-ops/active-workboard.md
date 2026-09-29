@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BUSINESS-TIME-TOURS-20260929 — reserviert, Codex
+
+**Ziel:** `/tours/today` am konfigurierten Geschaeftstag statt an UTC- oder
+Host-Kalendertagen ausrichten.
+**Dateibesitz:** `app/api/v1/endpoints/tours.py`, eigener fokussierter Test,
+eigene Slice-/QA-Doku, BUSINESS-TIME-Restpunkt in Open-Gaps und dieser Abschnitt.
+**Abnahme:** Der Repository-Filter erhaelt `business_today()`; tote doppelte
+Datumslogik ist entfernt; gezielter Test und Doku-Gates sind gruen.
+**Risiken:** Keine Aenderung an Tourzeitpunkten oder Wochenfiltern.
+
 ## BUSINESS-TIME-PORTAL-20260929 — abgeschlossen, Codex
 
 **Ziel:** Die Tagesstatistik des Portal-Shops am konfigurierten Geschaeftstag
