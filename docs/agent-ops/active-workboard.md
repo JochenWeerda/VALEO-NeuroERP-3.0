@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-LEGACY-ROUTES-VERIFY-20260927 — reserviert, Codex
+## UIX-LEGACY-ROUTES-VERIFY-20260927 — abgeschlossen, Codex
 
 **Ziel:** Den als offen gefuehrten UIX-Legacy-Routen-Gap gegen den aktuellen
 Route-Alias-Vertrag und das blockierende CI-Gate verifizieren und bei gruenem
@@ -24,6 +24,10 @@ UIX-051-Test; die CI fuehrt den Test blockierend aus; Status- und Gap-Doku
 widersprechen dem nachgewiesenen Stand nicht mehr.
 **Risiken:** Gleichzeitige HOME-UIX-Aenderungen an generierten Routen werden nicht
 uebernommen oder veraendert.
+**Ergebnis:** 49/49 UIX-051-Tests bestanden. Alle erwarteten nativen Wrapper und
+Detailrouten sind vorhanden; `universal-mask-ci` fuehrt den Test weiterhin als
+blockierenden Schritt aus. Der veraltete offene Gap wurde geschlossen.
+[QA](../quality-assurance/uix-legacy-routes-verify-20260927.md).
 
 ## UIX-AGENT-CONTRACT-ALL-20260927 — abgeschlossen, Codex
 

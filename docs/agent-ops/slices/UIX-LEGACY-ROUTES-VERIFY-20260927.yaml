@@ -1,0 +1,30 @@
+id: UIX-LEGACY-ROUTES-VERIFY-20260927
+owner: Codex
+status: abgeschlossen
+goal: Den als offen gefuehrten Legacy-Routen-Gap gegen Route-Vertrag und CI verifizieren und konsistent schliessen.
+scope: Bestehende UIX-051-Routenpruefung, CI-Verdrahtung und zugehoerige Statusdokumentation.
+file_ownership:
+  - tests/test_uix051_legacy_route_migration.py
+  - .github/workflows/universal-mask-ci.yml
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/quality-assurance/uix-legacy-routes-verify-20260927.md
+acceptance:
+  - Alle erwarteten nativen Wrapper existieren und verwenden die richtige screenId.
+  - Alle erwarteten Detailrouten zeigen auf das native Modul.
+  - Der UIX-051-Test laeuft blockierend in universal-mask-ci.
+  - Gap-Tracker und Runtime-Status bilden den geprueften Stand ab.
+tests:
+  - 49 UIX-051-Routen- und Wrapper-Tests bestanden.
+risks:
+  - Der Testvertrag umfasst die 26 migrierten Detail-SDs; weitere native Worklists benoetigen keine id-Route.
+  - Parallele HOME-UIX-Routenaenderungen sind nicht Bestandteil dieses Slices.
+ai_harness:
+  fachlicher_vertrag: Bestehende Detaillinks oeffnen weiterhin die native Fachmaske.
+  architektur_vertrag: Routing bleibt ueber Alias-Quelle und generierte Route-Wahrheit zentralisiert.
+  daten_vertrag: Keine Persistenz oder Migration.
+  test_vertrag: Wrapper, screenId und Detailroute werden automatisiert geprueft.
+  security_vertrag: Keine Aenderung an Authentisierung oder Berechtigungen.
+  betriebs_vertrag: universal-mask-ci blockiert bei Regressionen des UIX-051-Vertrags.
+  dokumentations_vertrag: Workboard, Open-Gaps, UIX-Status, Slice und QA sind konsistent.
+external_gates: []

@@ -78,7 +78,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-048 | Agent Safety auf alle 26 nativen SDs ausgeweitet (dynamisch aus Registry) | ✅ 219/219 | `test_uix046_048_command_endpoints_safety.py` |
 | UIX-049 | CI-Workflow: BFF-Build-Stage + UIX-050/053-Tests + `--no-cov` überall | ✅ | `.github/workflows/universal-mask-ci.yml` |
 | UIX-050/053 | 5 weitere CommandEndpoints (stornieren, bestellen, wareneingang, abschliessen, qualifizieren) + AuditReasonDialog + dryRun-Preview + BFF MCP-Tool | ✅ | `mask_actions.py`, `maskActions.ts` |
-| UIX-051 | Alle 26 nativen SDs mit `/:id`-Routen + native Wrapper (sales-order, kontrakte) | ✅ | `d87de90a5`, `test_uix051_legacy_route_migration.py` |
+| UIX-051 | Alle 26 migrierten Detail-SDs mit `/:id`-Routen + native Wrapper (sales-order, kontrakte); am 2026-09-27 mit 49/49 Tests revalidiert | ✅ | `d87de90a5`, `test_uix051_legacy_route_migration.py` |
 | UIX-054 | Finale Route-Wahrheit: `route-inventory.gen.json` + `route-tree.gen.tsx` | ✅ lokal | `test_uix054_route_inventory_verification.py` |
 | UIX-055 | GitHub Actions `universal-mask-ci` + `workflow_dispatch` | ✅ | Run `28540744515` — backend/frontend/bff/e2e grün |
 | UIX-056 | Browser-Smoke native `/:id`-Routen (5 repräsentative Masken) | ✅ lokal | `uix-056-native-route-smoke.spec.ts` |
