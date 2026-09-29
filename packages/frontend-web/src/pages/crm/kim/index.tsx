@@ -579,7 +579,7 @@ export default function KimCockpitPage() {
 
   return (
     <>
-    <div className="flex w-full h-full min-h-[calc(100vh-3.5rem)] bg-muted overflow-hidden print:hidden" id="app-root-frame">
+    <div className="flex h-full min-h-0 w-full overflow-hidden bg-muted print:hidden" id="app-root-frame">
 
       {/* COLUMN 1: LEFT SIDEBAR kundenliste & alphabetic selectors */}
       <CustomerListSidebar
@@ -593,10 +593,10 @@ export default function KimCockpitPage() {
 
       {/* WORKSPACE AREA */}
       {activeCustomer ? (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-background" id="crm-main-viewport">
+        <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-background" id="crm-main-viewport">
 
           {/* Top master Header card & action strip */}
-          <div className="p-3 bg-card border-b border-border space-y-2">
+          <div className="min-h-0 max-h-[40%] shrink overflow-y-auto space-y-2 border-b border-border bg-card p-3">
 
             {/* Master data board */}
             <CustomerHeader customer={activeCustomer} />
@@ -616,14 +616,14 @@ export default function KimCockpitPage() {
           </div>
 
           {/* MAIN HORIZONTAL SPLIT (Mitte Tabs & Belege | Rechts NeuroAI) */}
-          <div className="flex-1 flex overflow-hidden" id="central-split-workspace">
+          <div className="flex min-h-0 flex-1 overflow-hidden" id="central-split-workspace">
 
             {/* CENTRAL WORKSPACE (Mitte Tabs) — Registerleiste als echte ARIA-Tabs
                 (Pfeiltasten-Navigation, Fokusring) über die zentrale Register-Variante */}
             <Tabs
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as KimTab)}
-              className="flex-1 flex flex-col overflow-hidden border-r border-border"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden border-r border-border"
               id="center-tabbed-pane"
             >
               <TabsList variant="register" aria-label="Kundenakte-Register" className="shrink-0" id="center-pane-tabs">
@@ -640,7 +640,7 @@ export default function KimCockpitPage() {
               </TabsList>
 
               {/* Central contextual render workspace */}
-              <div className="flex-1 overflow-y-auto p-4 bg-background" id="center-tab-views">
+              <div className="min-h-0 flex-1 overflow-y-auto bg-background p-4" id="center-tab-views">
 
                 <TabsContent value="allgemein" className="mt-0">
                   <div className="space-y-4">
@@ -790,7 +790,7 @@ export default function KimCockpitPage() {
               </div>
 
               {/* BOTTOM CRM HISTORY TIMELINE (Unten Historie/Belege) */}
-              <div className="h-72 border-t border-border bg-background flex flex-col overflow-hidden" id="bottom-history-panel">
+              <div className="flex min-h-[11rem] max-h-72 flex-1 flex-col overflow-hidden border-t border-border bg-background" id="bottom-history-panel">
                 <ContactHistoryTable
                   key={`history-${workspaceResetKey}`}
                   logs={logs}

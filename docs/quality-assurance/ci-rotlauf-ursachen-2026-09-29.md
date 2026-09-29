@@ -91,10 +91,15 @@ schreibt, umgeht genau den Schutz, den der Branch haben soll.
 
 ## Offen, gehört anderen
 
-- **E2E Full UAT** — die CRM-360-Aktivitätsmaske: Der Speichern-Knopf ist
-  sichtbar und aktiv, aber ein Container fängt die Klicks ab
-  (`intercepts pointer events`). Der Knopf trägt `min-h-touch`; das deutet auf
-  die laufende Touch-Arbeit.
+- **E2E Full UAT** — die CRM-360-Aktivitätsmaske: `#btn-trigger-history-form`
+  war sichtbar, der Klickpunkt lag aber unter dem Seitencontainer
+  (`intercepts pointer events`). Auf 1280×720 fraßen Kopf und Aktionsleiste
+  die Höhe, das Historienpanel rutschte aus dem Outlet. Behoben: das Cockpit
+  bleibt in der vorhandenen Höhe, die Kopfzeile scrollt ab 40 %, das
+  Historienpanel behält mindestens 11 rem, die Registerleiste darin bricht
+  nicht um. Am 29.09. im Browser geprüft: Erfassen- und Speichern-Knopf
+  treffen ihren eigenen Klickpunkt. Der nächste nächtliche Lauf ist der
+  Nachweis auf GitHub.
 - **Security Scan** (Grype) und **Service Security**
   (`services/ai/requirements.txt`) — Abhängigkeitsbefunde, nicht untersucht.
 - **Deploy Production** (10.06.), **Deploy Staging** (06.07.),

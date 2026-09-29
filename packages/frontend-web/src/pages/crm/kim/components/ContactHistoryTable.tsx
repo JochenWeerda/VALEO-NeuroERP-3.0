@@ -124,7 +124,7 @@ export default function ContactHistoryTable({ logs, customer, onAddLog }: Contac
     <div className="bg-card border-0 overflow-hidden flex flex-col h-full" id="contact-history-workspace">
 
       {/* Sub-tab strip */}
-      <div className="bg-muted/60 border-b border-border flex flex-wrap items-end justify-between px-3 gap-2">
+      <div className="flex shrink-0 flex-nowrap items-end justify-between gap-2 overflow-x-auto border-b border-border bg-muted/60 px-3">
         <div className="flex gap-1 pt-1.5 overflow-x-auto">
           {tabs.map(tab => (
             <button
