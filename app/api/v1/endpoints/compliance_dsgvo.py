@@ -9,7 +9,9 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
+from psycopg2.errors import UndefinedTable
 from sqlalchemy import text
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -86,8 +88,18 @@ def _namen_des_betroffenen(
     }
     namen: list[str] = []
     for sql in abfragen.get(subject_type, []):
+        # Sicherungspunkt je Abfrage. Ohne ihn genuegt **eine** fehlende
+        # Tabelle (``domain_crm.crm_customers`` gibt es in einer frischen
+        # Datenbank nicht), um die Transaktion abzubrechen: Das `except`
+        # faengt zwar, aber jede weitere Anweisung scheitert danach mit
+        # InFailedSqlTransaction. Der Loeschlauf lief dann komplett ins
+        # Leere und meldete am Ende 503 — eine Rechtspflicht nach Art. 17
+        # DSGVO blieb unerfuellt, ohne dass jemand erfuhr, woran es lag.
         try:
-            wert = db.execute(text(sql), {"sid": subject_id, "tid": tenant_id}).scalar()
+            with db.begin_nested():
+                wert = db.execute(
+                    text(sql), {"sid": subject_id, "tid": tenant_id}
+                ).scalar()
         except Exception:  # noqa: BLE001 — eine fehlende Quelle ist kein Name, kein Abbruch
             continue
         if wert and wert not in namen:
@@ -173,10 +185,36 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
         return log
 
     for table, sql, params in schritte:
+        # Auch hier ein Sicherungspunkt je Schritt: Eine fehlende Tabelle
+        # soll ihren eigenen Eintrag im Protokoll bekommen und die uebrigen
+        # Loeschungen nicht mitreissen. Ohne ihn stand im Protokoll unter
+        # jedem weiteren Schritt nur noch "current transaction is aborted"
+        # — und der Antrag scheiterte am Ende ganz.
         try:
-            result = db.execute(text(sql), params)
+            with db.begin_nested():
+                result = db.execute(text(sql), params)
             log.append({"table": table, "rows_affected": result.rowcount,
                         "action": "anonymized_or_deleted"})
+        except ProgrammingError as exc:
+            # Eine Tabelle, die es nicht gibt, enthaelt keine Daten des
+            # Betroffenen. Das ist etwas anderes als ein fehlgeschlagener
+            # Loeschbefehl und darf den Antrag nicht offen halten — sonst
+            # bliebe jeder Loeschantrag auf einer Installation, die diese
+            # Nebentabellen nie angelegt hat, dauerhaft unerledigt.
+            #
+            # Sichtbar bleibt es trotzdem: Der Eintrag nennt die Tabelle und
+            # sagt, dass es sie nicht gibt. Jede andere Stoerung bleibt ein
+            # Fehler.
+            if isinstance(getattr(exc, "orig", None), UndefinedTable):
+                log.append({
+                    "table": table,
+                    "rows_affected": 0,
+                    "action": "table_missing",
+                    "note": "Tabelle existiert in dieser Installation nicht — "
+                            "sie kann keine Daten des Betroffenen enthalten.",
+                })
+            else:
+                log.append({"table": table, "rows_affected": 0, "error": str(exc)})
         except Exception as exc:  # noqa: BLE001 — jeder Fehlschlag muss sichtbar bleiben
             log.append({"table": table, "rows_affected": 0, "error": str(exc)})
     return log

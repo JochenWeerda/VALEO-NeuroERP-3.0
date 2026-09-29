@@ -70,7 +70,7 @@ def _bewegung(v, mandant: str, artikel_id: str, lager_id: str, art: str,
             "(id, tenant_id, article_id, warehouse_id, movement_type, quantity, "
             " previous_stock, new_stock, auto_created, ownership_type, "
             " storage_fee_relevant, movement_date, created_at) "
-            "VALUES (:id, :t, :a, :w, :art, :menge, 0, 0, false, 'own', false, :d, :d)"
+            "VALUES (:id, :t, :a, :w, :art, :menge, 0, 0, false, 'owned', false, :d, :d)"
         ),
         {
             "id": str(uuid.uuid4()), "t": mandant, "a": artikel_id, "w": lager_id,

@@ -70,6 +70,10 @@ def mandant():
                 ("domain_sales.sales_invoices", "tenant_id"),
                 ("domain_docs.doc_allocation_sources", "tenant_id"),
                 ("domain_sales.delivery_notes", "tenant_id"),
+                # Kunde und Artikel nach den Belegen, die auf sie zeigen —
+                # die Fremdschluessel gibt es nur in einer frischen Datenbank.
+                ("domain_crm.customers", "tenant_id"),
+                ("domain_inventory.articles", "tenant_id"),
                 ("domain_shared.tenants", "id"),
             ):
                 verbindung.execute(
@@ -79,7 +83,44 @@ def mandant():
 
 
 @pytest.fixture()
-def kopf(mandant: str) -> dict[str, str]:
+def kunde(mandant: str) -> str:
+    """K-100 muss es wirklich geben.
+
+    domain_sales.delivery_notes.customer_id zeigt per Fremdschluessel auf
+    domain_crm.customers, artikel_id auf domain_inventory.articles.
+    In einer gewachsenen Entwicklungsdatenbank fehlen
+    dieser Schluessel, in einer frischen ist er da — deshalb lief der Test
+    lokal gruen und in CI gegen einen 500er.
+    """
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(DB_URL)
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+                # Ohne company_name: Der Kundensatz muss es geben, weil
+                # delivery_notes.customer_id ein Fremdschluessel ist — aber
+                # ein Name steht erst da, wenn ihn jemand pflegt. Genau das
+                # prueft test_kopf_nennt_den_kunden_statt_der_referenz.
+                "VALUES ('K-100', :tid, 'K-100', NULL) "
+                "ON CONFLICT (id) DO NOTHING"
+            ),
+            {"tid": mandant},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.articles (id, tenant_id, article_number, name) "
+                "VALUES ('ART-WEIZEN', :tid, '10001', 'Weizen A') "
+                "ON CONFLICT (id) DO NOTHING"
+            ),
+            {"tid": mandant},
+        )
+    return "K-100"
+
+
+@pytest.fixture()
+def kopf(mandant: str, kunde: str) -> dict[str, str]:
     return {
         "Authorization": "Bearer dev-token",
         "X-Tenant-ID": mandant,
@@ -169,19 +210,23 @@ def test_kopf_nennt_den_kunden_statt_der_referenz(client, kopf, mandant) -> None
         f"/api/v1/sales/invoices/{rechnung(client, kopf, lieferschein(client, kopf)).json()['id']}",
         headers=kopf,
     ).json()
-    # Kein CRM-Kunde: kein erfundener Name, die Referenz bleibt als Nummer sichtbar.
+    # Kein gepflegter Name: kein erfundener Name, die Referenz bleibt als
+    # Nummer sichtbar.
     assert ohne_crm["customer_name"] is None
     assert ohne_crm["customer_number"] == "K-100"
 
+    # Jetzt bekommt derselbe Kundensatz einen Namen. Ein zweiter Satz waere
+    # nicht moeglich: customer_number ist eindeutig, und der Beleg zeigt per
+    # Fremdschluessel auf genau diese Kennung.
     engine = create_engine(DB_URL)
-    kunden_id = f"cust-{uuid.uuid4().hex[:8]}"
     with engine.begin() as verbindung:
         verbindung.execute(
             text(
-                "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
-                "VALUES (:id, :tid, 'K-100', 'Raiffeisen Warengenossenschaft Nord eG')"
+                "UPDATE domain_crm.customers "
+                "SET company_name = 'Raiffeisen Warengenossenschaft Nord eG' "
+                "WHERE id = 'K-100' AND tenant_id = :tid"
             ),
-            {"id": kunden_id, "tid": mandant},
+            {"tid": mandant},
         )
     try:
         ls_id = lieferschein(client, kopf)
@@ -198,8 +243,16 @@ def test_kopf_nennt_den_kunden_statt_der_referenz(client, kopf, mandant) -> None
         assert ls.json()["customer_name"] == "Raiffeisen Warengenossenschaft Nord eG"
         assert ls.json()["customer_number"] == "K-100"
     finally:
+        # Den Namen wieder wegnehmen; loeschen darf der Test den Satz nicht,
+        # die Belege zeigen darauf. Den Rest raeumt die mandant-Fixture ab.
         with engine.begin() as verbindung:
-            verbindung.execute(text("DELETE FROM domain_crm.customers WHERE id = :id"), {"id": kunden_id})
+            verbindung.execute(
+                text(
+                    "UPDATE domain_crm.customers SET company_name = NULL "
+                    "WHERE id = 'K-100' AND tenant_id = :tid"
+                ),
+                {"tid": mandant},
+            )
 
 
 def test_zweimal_berechnen_wird_abgewiesen_statt_doppelt_gebucht(client, kopf) -> None:
@@ -244,8 +297,13 @@ def test_liste_findet_die_rechnung_und_zaehlt_ihre_positionen(client, kopf) -> N
     assert daten["total"] >= 1
 
 
-def test_liste_zeigt_nur_die_rechnungen_des_eigenen_mandanten(client) -> None:
-    """Mandantentrennung an der Liste — hier faellt sie am ehesten auf."""
+def test_liste_zeigt_nur_die_rechnungen_des_eigenen_mandanten(client, kunde) -> None:
+    """Mandantentrennung an der Liste — hier faellt sie am ehesten auf.
+
+    ``kunde`` steht hier nur fuer den Fremdschluessel: Der Lieferschein
+    braucht die Kennung K-100 im Kundenstamm, gleich unter welchem Mandanten
+    sie gepflegt ist. Die Trennung, um die es geht, prueft der Test selbst.
+    """
     import uuid as _uuid
 
     from sqlalchemy import create_engine, text
@@ -394,8 +452,28 @@ def test_steuerausweis_trennt_die_saetze_und_ergibt_den_kopfbetrag(client, kopf)
     assert Decimal(beleg["gross_amount"]) == Decimal("3865")
 
 
-def test_positionen_stehen_in_zahlenfolge_nicht_in_textfolge(client, kopf) -> None:
+def test_positionen_stehen_in_zahlenfolge_nicht_in_textfolge(client, kopf, mandant) -> None:
     """Ab der zehnten Position darf "10" nicht vor "2" stehen."""
+    from sqlalchemy import create_engine, text
+
+    # Elf echte Artikel — delivery_note_positions.artikel_id ist ein
+    # Fremdschluessel auf domain_inventory.articles.
+    with create_engine(DB_URL).begin() as verbindung:
+        for nr in range(1, 12):
+            verbindung.execute(
+                text(
+                    "INSERT INTO domain_inventory.articles "
+                    "(id, tenant_id, article_number, name) "
+                    "VALUES (:id, :tid, :nr, :name) ON CONFLICT (id) DO NOTHING"
+                ),
+                {
+                    "id": f"ART-{nr}",
+                    "tid": mandant,
+                    "nr": f"{20000 + nr}",
+                    "name": f"Sorte {nr}",
+                },
+            )
+
     antwort = client.post(
         "/api/v1/sales/delivery-notes",
         headers=kopf,
@@ -406,7 +484,7 @@ def test_positionen_stehen_in_zahlenfolge_nicht_in_textfolge(client, kopf) -> No
                 {
                     "pos_nr": nr,
                     "artikel_id": f"ART-{nr}",
-                    "artikel_nr": f"{10000 + nr}",
+                    "artikel_nr": f"{20000 + nr}",
                     "bezeichnung": f"Sorte {nr}",
                     "menge": "10",
                     "einheit": "dt",

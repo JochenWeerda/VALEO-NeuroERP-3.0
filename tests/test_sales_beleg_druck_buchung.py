@@ -79,6 +79,11 @@ def mandant():
                 "domain_crm.sales_orders",
                 "domain_crm.sales_offer_items",
                 "domain_crm.sales_offers",
+                # Der Kunde zuletzt: sales_orders.customer_id zeigt auf ihn,
+                # und die Fremdschluessel gibt es nur in einer frischen
+                # Datenbank. Deshalb raeumt der Mandant ihn mit ab statt die
+                # kunde-Fixture, die vor ihm abgebaut wuerde.
+                "domain_crm.customers",
             ):
                 verbindung.execute(
                     text(f"DELETE FROM {tabelle} WHERE tenant_id = :id"),  # nosec B608
@@ -108,13 +113,9 @@ def kunde(mandant: str) -> str:
                 "name": "Testkunde Drucktest",
             },
         )
-    try:
-        yield kunden_id
-    finally:
-        with create_engine(DB_URL).begin() as verbindung:
-            verbindung.execute(
-                text("DELETE FROM domain_crm.customers WHERE id = :id"), {"id": kunden_id}
-            )
+    # Abgeraeumt wird der Kunde von der mandant-Fixture, nach den Auftraegen,
+    # die auf ihn zeigen.
+    return kunden_id
 
 
 @pytest.fixture()

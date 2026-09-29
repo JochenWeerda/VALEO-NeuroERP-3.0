@@ -116,6 +116,8 @@ def test_feeding_businesses_are_a_native_grant_aware_worklist() -> None:
         "density": "compact",
         "contextRail": "audit",
         "tableProfile": "standard",
+        # Liste und Detail nebeneinander — aus der durchgehenden Belegseite.
+        "columnNavigation": "listDetail",
     }
     assert definition["dataSources"][0]["endpoint"].endswith("/feeding/businesses")
     assert {column["key"] for column in definition["tables"][0]["columns"]} >= {

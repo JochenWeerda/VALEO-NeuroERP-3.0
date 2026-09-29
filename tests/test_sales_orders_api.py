@@ -156,8 +156,15 @@ def test_order_detail_names_the_crm_customer(require_db):
         )
         db.execute(
             text(
-                "INSERT INTO domain_crm.sales_orders (id, tenant_id, order_number, customer_id, subject) "
-                "VALUES (:id, :tid, :no, :cid, 'Weizen Ernte')"
+                # description, total_amount, currency und status sind NOT NULL
+                # (519e0d90cd66) — die dortigen `default=` sind Python-seitig
+                # und greifen bei rohem SQL nicht. Eine gewachsene
+                # Entwicklungsdatenbank hat die Bedingungen nicht mehr, eine
+                # frische schon; deshalb lief das lokal durch und in CI nicht.
+                "INSERT INTO domain_crm.sales_orders "
+                "(id, tenant_id, order_number, customer_id, subject, description, "
+                " total_amount, currency, status, version) "
+                "VALUES (:id, :tid, :no, :cid, 'Weizen Ernte', '', 0, 'EUR', 'ENTWURF', 1)"
             ),
             {"id": order_id, "tid": tenant, "no": f"SO-{suffix}", "cid": customer_id},
         )

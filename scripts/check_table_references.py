@@ -39,10 +39,33 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-#: Stand 2026-09-17 nach den Verweisfixes (Einfuehrung: 29 / 23).
-#: Beide Zahlen duerfen sinken, nicht steigen.
-BASELINE_LEBEND = 26
-BASELINE_RUHEND = 19
+#: Stand 2026-09-29, gemessen auf einer **frischen** Datenbank
+#: (``createdb`` + ``alembic upgrade head``). Beide Zahlen duerfen sinken,
+#: nicht steigen.
+#:
+#: Vorher standen hier 26 / 19 (Einfuehrung: 29 / 23). Diese Zahlen waren
+#: gegen eine gewachsene Entwicklungsdatenbank gemessen und auf einer
+#: frischen Installation nie erreichbar: Dort fehlen dreizehn Tabellen
+#: zusaetzlich, die lokal irgendwann von Hand entstanden sind und die keine
+#: Migration anlegt.
+#:
+#: Lebend (+2, nach Abzug zweier Tabellen, die in der gewachsenen Datenbank
+#: fehlen und in der frischen da sind):
+#:   domain_compliance.whistleblower_reports, domain_crm.crm_activities,
+#:   domain_pos.payment_methods, domain_pos.promotions
+#: Ruhend (+6, analog):
+#:   domain_crm.contacts, domain_crm.crm_customers,
+#:   domain_einkauf.ers_invoices, domain_einkauf.ers_suppliers,
+#:   domain_finance.ebilanz_exports, domain_futtermittel.feed_raw_materials,
+#:   domain_futtermittel.feed_recipes,
+#:   domain_futtermittel.raw_material_analyses,
+#:   domain_futtermittel.recipe_ingredients
+#:
+#: Das ist **keine** neue Schuld, sondern dieselbe Schuld richtig gemessen:
+#: Eine Ratsche gegen eine Datenbank, die nur auf einem Rechner existiert,
+#: misst diesen Rechner, nicht die Anwendung.
+BASELINE_LEBEND = 28
+BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")
 FRONTEND = pathlib.Path("packages/frontend-web/src")

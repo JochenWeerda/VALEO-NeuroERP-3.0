@@ -931,9 +931,12 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
     } == {
         ("1000", Decimal("219.00"), Decimal("0.00")),
         ("1200", Decimal("238.00"), Decimal("0.00")),
-        ("1600", Decimal("50.00"), Decimal("0.00")),
+        # Gutscheine stehen auf 1700, nicht bei den Lieferantenschulden:
+        # ein Gutschein ist eine Leistungsverpflichtung gegenueber dem
+        # Kunden (GoBD-Kontentrennung, erp_gutscheinkonto_20260928).
+        ("1700", Decimal("50.00"), Decimal("0.00")),
         ("8400", Decimal("0.00"), Decimal("407.00")),
-        ("1600", Decimal("0.00"), Decimal("100.00")),
+        ("1700", Decimal("0.00"), Decimal("100.00")),
         ("1800", Decimal("80.00"), Decimal("0.00")),
         ("1000", Decimal("0.00"), Decimal("80.00")),
     }

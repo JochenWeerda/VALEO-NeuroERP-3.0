@@ -70,6 +70,10 @@ def mandant():
                 ("domain_sales.sales_invoices", "tenant_id"),
                 ("domain_docs.doc_allocation_sources", "tenant_id"),
                 ("domain_sales.delivery_notes", "tenant_id"),
+                # Kunde und Artikel nach den Belegen, die auf sie zeigen —
+                # die Fremdschluessel gibt es nur in einer frischen Datenbank.
+                ("domain_crm.customers", "tenant_id"),
+                ("domain_inventory.articles", "tenant_id"),
                 ("domain_shared.tenants", "id"),
             ):
                 verbindung.execute(
@@ -79,7 +83,34 @@ def mandant():
 
 
 @pytest.fixture()
-def kopf(mandant: str) -> dict[str, str]:
+def kunde(mandant: str) -> str:
+    """K-XRECHNUNG muss es wirklich geben — delivery_notes.customer_id ist ein
+    Fremdschluessel auf domain_crm.customers, den nur eine frische Datenbank
+    traegt."""
+    from sqlalchemy import create_engine, text
+
+    with create_engine(DB_URL).begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+                "VALUES ('K-XRECHNUNG', :tid, 'K-XRECHNUNG', 'Testkunde XRechnung') "
+                "ON CONFLICT (id) DO NOTHING"
+            ),
+            {"tid": mandant},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.articles (id, tenant_id, article_number, name) "
+                "VALUES ('ART-WEIZEN', :tid, '10001', 'Weizen A') "
+                "ON CONFLICT (id) DO NOTHING"
+            ),
+            {"tid": mandant},
+        )
+    return "K-XRECHNUNG"
+
+
+@pytest.fixture()
+def kopf(mandant: str, kunde: str) -> dict[str, str]:
     return {
         "Authorization": "Bearer dev-token",
         "X-Tenant-ID": mandant,

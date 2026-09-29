@@ -107,7 +107,7 @@ def artikel_mit_abverkauf(engine):
                 # Nur 250 t Anfangsbestand: Nach 180 t Abverkauf bleiben 70 t,
                 # und damit liegt der Artikel unter dem Mindestbestand — sonst
                 # gibt es keine Fehlmenge und nichts zu optimieren.
-                "VALUES (:id, :t, :a, :w, 'in', 250, 0, 250, false, 'own', false, "
+                "VALUES (:id, :t, :a, :w, 'in', 250, 0, 250, false, 'owned', false, "
                 "        :d, :d)"
             ),
             {
@@ -126,7 +126,7 @@ def artikel_mit_abverkauf(engine):
                     "(id, tenant_id, article_id, warehouse_id, movement_type, quantity, "
                     " previous_stock, new_stock, auto_created, ownership_type, "
                     " storage_fee_relevant, movement_date, created_at) "
-                    "VALUES (:id, :t, :a, :w, 'out', :menge, :vor, :nach, false, 'own', "
+                    "VALUES (:id, :t, :a, :w, 'out', :menge, :vor, :nach, false, 'owned', "
                     "        false, :d, :d)"
                 ),
                 {
@@ -150,6 +150,10 @@ def artikel_mit_abverkauf(engine):
                 "DELETE FROM domain_einkauf.artikel_lager_parameter WHERE tenant_id = :t",
                 "DELETE FROM domain_inventory.articles WHERE tenant_id = :t",
                 "DELETE FROM domain_inventory.warehouses WHERE tenant_id = :t",
+                # Die Kunden der Auftragsfaelle zeigen auf den Mandanten und
+                # muessen vor ihm weg — die Auftraege raeumen ihre eigenen
+                # Fixtures schon ab.
+                "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
                 "DELETE FROM domain_shared.tenants WHERE id = :t",
             ):
                 v.execute(text(sql), {"t": mandant})
@@ -333,20 +337,39 @@ def test_der_vorschlag_aus_dem_verkauf_findet_seine_auftraege(db, engine, artike
             text("SELECT article_number FROM domain_inventory.articles WHERE id = :a"),
             {"a": artikel_mit_abverkauf["artikel_id"]},
         ).scalar()
+        # Kunde, Betreff, Beschreibung, Betrag, Waehrung und Version sind
+        # NOT NULL (519e0d90cd66). Eine gewachsene Entwicklungsdatenbank hat
+        # die Bedingungen nicht mehr, eine frische schon.
+        kunden_id = str(uuid.uuid4())
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.customers "
+                "(id, tenant_id, customer_number, company_name) "
+                "VALUES (:k, :t, :nr, 'Testkunde')"
+            ),
+            {"k": kunden_id, "t": mandant, "nr": f"K-{uuid.uuid4().hex[:6].upper()}"},
+        )
         v.execute(
             text(
                 "INSERT INTO domain_crm.sales_orders "
-                "(id, tenant_id, order_number, customer_name, status, delivery_date) "
-                "VALUES (:id, :t, :nr, 'Testkunde', 'open', CURRENT_DATE + 7)"
+                "(id, tenant_id, order_number, customer_id, customer_name, subject, "
+                " description, total_amount, currency, status, version, delivery_date) "
+                "VALUES (:id, :t, :nr, :k, 'Testkunde', 'Bedarf aus Verkauf', '', 0, "
+                "        'EUR', 'open', 1, CURRENT_DATE + 7)"
             ),
-            {"id": auftrag_id, "t": mandant, "nr": f"AU-{uuid.uuid4().hex[:6].upper()}"},
+            {
+                "id": auftrag_id,
+                "t": mandant,
+                "nr": f"AU-{uuid.uuid4().hex[:6].upper()}",
+                "k": kunden_id,
+            },
         )
         v.execute(
             text(
                 "INSERT INTO domain_crm.sales_order_items "
                 "(id, tenant_id, order_id, line_number, article_number, description, "
-                " quantity, unit) "
-                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't')"
+                " quantity, unit, unit_price, line_total) "
+                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 210, 105000)"
             ),
             {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
         )
@@ -404,6 +427,16 @@ def auftrag_mit_position(engine, artikel_mit_abverkauf):
             ),
             {"id": lieferant_id, "t": mandant, "nr": f"LF-{uuid.uuid4().hex[:5].upper()}"},
         )
+        # Den Kunden gibt es auch wirklich: sales_orders.customer_id ist ein
+        # Fremdschluessel auf domain_crm.customers.
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.customers "
+                "(id, tenant_id, customer_number, company_name) "
+                "VALUES (:k, :t, :nr, 'Hof Sonnenacker')"
+            ),
+            {"k": kunden_id, "t": mandant, "nr": f"K-{uuid.uuid4().hex[:6].upper()}"},
+        )
         artikel_nr = v.execute(
             text("SELECT article_number FROM domain_inventory.articles WHERE id = :a"),
             {"a": artikel_mit_abverkauf["artikel_id"]},
@@ -411,9 +444,11 @@ def auftrag_mit_position(engine, artikel_mit_abverkauf):
         v.execute(
             text(
                 "INSERT INTO domain_crm.sales_orders "
-                "(id, tenant_id, order_number, customer_id, customer_name, status, "
+                "(id, tenant_id, order_number, customer_id, customer_name, subject, "
+                " description, total_amount, currency, status, version, "
                 " delivery_date, delivery_address) "
-                "VALUES (:id, :t, :nr, :k, 'Hof Sonnenacker', 'open', "
+                "VALUES (:id, :t, :nr, :k, 'Hof Sonnenacker', 'Direktlieferung', '', 0, "
+                "        'EUR', 'open', 1, "
                 "        CURRENT_DATE + 14, 'Sonnenweg 3, 26123 Testdorf')"
             ),
             {"id": auftrag_id, "t": mandant, "nr": nummer, "k": kunden_id},
@@ -422,8 +457,8 @@ def auftrag_mit_position(engine, artikel_mit_abverkauf):
             text(
                 "INSERT INTO domain_crm.sales_order_items "
                 "(id, tenant_id, order_id, line_number, article_number, description, "
-                " quantity, unit, ek_price) "
-                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 210)"
+                " quantity, unit, unit_price, line_total, ek_price) "
+                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 230, 115000, 210)"
             ),
             {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
         )

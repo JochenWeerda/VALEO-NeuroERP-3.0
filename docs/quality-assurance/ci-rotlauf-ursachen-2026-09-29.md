@@ -89,6 +89,51 @@ Drei Wege, und das ist eine Entscheidung des Hauses:
 Der dritte Weg wäre der konsequente: Ein Workflow, der selbsttätig auf `main`
 schreibt, umgeht genau den Schutz, den der Branch haben soll.
 
+## 5. Eine gewachsene Datenbank als Prüfstand
+
+Die vierundzwanzig Fehlschläge in `Pytest` und `CI/CD Pipeline` hatten **eine**
+Wurzel: Getestet wurde gegen eine über Monate gewachsene
+Entwicklungsdatenbank. Die unterscheidet sich in beide Richtungen von einer
+frischen:
+
+- **Sie hat Bedingungen verloren.** Fremdschlüssel
+  (`delivery_notes.customer_id` → `customers`, `delivery_note_positions.artikel_id`
+  → `articles`), Prüfbedingungen (`ck_delivery_notes_status`) und NOT-NULL-Regeln
+  sind dort nicht mehr da. Tests, die Kunden und Artikel nie anlegten, liefen
+  deshalb grün.
+- **Sie hat Spalten und Tabellen gewonnen, die keine Migration anlegt.**
+  `sales_offers.customer_name`, `sales_offers.is_pauschale`,
+  `sales_orders.is_pauschale`, `sales_order_items.ek_price` und `.unit` gab es
+  nur lokal. Auf einer frischen Installation scheiterte schon das Anlegen
+  eines Angebots.
+
+Behoben:
+
+- `lieferschein_status_bedingung_20260929` — die Statusbedingung kennt jetzt
+  die neun Zustände, die der Code schreibt (vorher fünf). Buchen, Versenden,
+  Sammelrechnung und Storno liefen auf einer frischen Datenbank in einen 500er.
+  Der dabei sichtbare Widerspruch (drei Schreibweisen in einer Spalte) ist in
+  `docs/project-context/lieferschein-statuswerte-2026-09-29.md` festgehalten.
+- `verkauf_fehlende_spalten_20260929` — die fünf Spalten, `valid_until` wird
+  optional, und den Attestierenden `system` gibt es als Benutzer. Ohne ihn
+  scheiterte jeder Nachdruck eines gebuchten Lieferscheins am Fremdschlüssel
+  `attestations.created_by → users`.
+- Die Testfixtures legen Kunden, Artikel und Pflichtfelder wirklich an und
+  räumen in der Reihenfolge ab, die die Fremdschlüssel verlangen.
+- `scripts/check_table_references.py` — die Ratsche stand auf 26/19, gemessen
+  an der gewachsenen Datenbank. Auf einer frischen sind es 28/25. Dieselbe
+  Schuld, richtig gemessen.
+
+**Regel daraus, zum zweiten Mal an einem Tag:** Eine gewachsene
+Entwicklungsdatenbank ist kein Prüfstand.
+
+```bash
+createdb valeo_probe
+DATABASE_URL="postgresql://…/valeo_probe" python -m alembic upgrade head
+DATABASE_URL="postgresql://…/valeo_probe" pytest tests/…
+dropdb valeo_probe
+```
+
 ## Offen, gehört anderen
 
 - **E2E Full UAT** — die CRM-360-Aktivitätsmaske: `#btn-trigger-history-form`
@@ -101,7 +146,29 @@ schreibt, umgeht genau den Schutz, den der Branch haben soll.
   treffen ihren eigenen Klickpunkt. Der nächste nächtliche Lauf ist der
   Nachweis auf GitHub.
 - **Security Scan** (Grype) und **Service Security**
-  (`services/ai/requirements.txt`) — Abhängigkeitsbefunde, nicht untersucht.
+  (`services/ai/requirements.txt`) — noch offen: fünf CPython-Befunde
+  (vier davon in `config/security/cpython-3.13.15/` zurückportiert, für
+  `CVE-2026-82049` fehlt der Backport), drei Trivy-Funde in
+  `services/ai/requirements.txt` und eine SonarCloud-Meldung in
+  `services/crm-ai/main.py`.
+
+## Code-Scanning-Meldungen: 2515 → 12
+
+Die 2503 geschlossenen Meldungen stammten aus Juni und Juli und zeigten auf
+einen Image-Stand, den es nicht mehr gibt (`valeo-backend:59dcd8b6…`, mit
+`gcc`/`binutils` in der Laufzeit). `Dockerfile.backend` ist inzwischen
+mehrstufig mit schlanker Laufzeit; die aktuellen Läufe melden fünf
+Grype-Befunde und null im Trivy-Backend. GitHub schließt solche Meldungen
+nicht von selbst — jede trägt jetzt diese Begründung.
+
+Die **zwölf** verbliebenen sind aktuell und echt (siehe oben).
+
+Bei den Dependabot-Meldungen bleiben drei zu **chromadb 0.5.23** offen: Es
+gibt keinen veröffentlichten Patch. Die vierte (`stream-json`) ist mit
+Begründung geschlossen — `config/security/npm-patches/stream-json@1.9.1.patch`
+zieht die Tiefenschranke aus Upstream 3.5.0 in die 1.x-Fassung, weil 3.5.0
+die CommonJS-API bricht, die Detox benutzt
+(`node --test scripts/verify_node_dependency_security.cjs`, 8/8).
 - **Deploy Production** (10.06.), **Deploy Staging** (06.07.),
   **Rotate Secrets** (01.09.), **Procurement Domain CI/CD** (14.09.) — lange
   rot, vermutlich stillgelegt.
