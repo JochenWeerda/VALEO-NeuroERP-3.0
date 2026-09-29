@@ -9195,6 +9195,17 @@
             ],
             "title": "Probenart"
           },
+          "quelle_datei": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quelle Datei"
+          },
           "released_at": {
             "anyOf": [
               {
@@ -44227,6 +44238,17 @@
             ],
             "title": "Branch Id"
           },
+          "branch_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Name"
+          },
           "cost_center_id": {
             "anyOf": [
               {
@@ -44264,6 +44286,28 @@
               }
             ],
             "title": "Customer Id"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "customer_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Number"
           },
           "delivery_date": {
             "format": "date",
@@ -44366,6 +44410,17 @@
               }
             ],
             "title": "Sales Order Id"
+          },
+          "sales_order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Order Number"
           },
           "sales_rep_id": {
             "anyOf": [
@@ -54811,6 +54866,17 @@
             ],
             "title": "Kontrakt Id"
           },
+          "kontrakt_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Nummer"
+          },
           "kostenstelle": {
             "anyOf": [
               {
@@ -54843,6 +54909,17 @@
               }
             ],
             "title": "Kunden Id"
+          },
+          "kunden_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Name"
           },
           "lade_datum": {
             "anyOf": [
@@ -55053,6 +55130,17 @@
             ],
             "title": "Niederlassung Id"
           },
+          "niederlassung_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Niederlassung Name"
+          },
           "notiz": {
             "anyOf": [
               {
@@ -55206,6 +55294,17 @@
               }
             ],
             "title": "Verkaufsbeleg Id"
+          },
+          "verkaufsbeleg_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verkaufsbeleg Nummer"
           },
           "versand_art": {
             "anyOf": [
@@ -80842,6 +80941,91 @@
           "total"
         ],
         "title": "InvoicePositionTabOut",
+        "type": "object"
+      },
+      "InvoiceTaxRowOut": {
+        "description": "Eine Zeile im Steuerausweis — ein Steuersatz mit seinen Summen.",
+        "properties": {
+          "gross_amount": {
+            "title": "Gross Amount",
+            "type": "number"
+          },
+          "net_amount": {
+            "title": "Net Amount",
+            "type": "number"
+          },
+          "positionen": {
+            "title": "Positionen",
+            "type": "integer"
+          },
+          "steuersatz": {
+            "title": "Steuersatz",
+            "type": "string"
+          },
+          "vat_amount": {
+            "title": "Vat Amount",
+            "type": "number"
+          },
+          "vat_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Rate"
+          }
+        },
+        "required": [
+          "steuersatz",
+          "net_amount",
+          "vat_amount",
+          "gross_amount",
+          "positionen"
+        ],
+        "title": "InvoiceTaxRowOut",
+        "type": "object"
+      },
+      "InvoiceTaxTabOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceTaxRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key",
+          "page",
+          "limit",
+          "total"
+        ],
+        "title": "InvoiceTaxTabOut",
         "type": "object"
       },
       "InvoiceXmlCreate": {
@@ -129658,6 +129842,17 @@
             ],
             "title": "Kontrakt Id"
           },
+          "kontrakt_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Nummer"
+          },
           "lieferant_id": {
             "anyOf": [
               {
@@ -129669,6 +129864,28 @@
             ],
             "title": "Lieferant Id"
           },
+          "lieferant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Name"
+          },
+          "lieferant_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Nummer"
+          },
           "reklamation_id": {
             "anyOf": [
               {
@@ -129679,6 +129896,17 @@
               }
             ],
             "title": "Reklamation Id"
+          },
+          "reklamation_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reklamation Nr"
           },
           "sla_status": {
             "anyOf": [
@@ -135318,6 +135546,28 @@
             "title": "Customer Id",
             "type": "string"
           },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "customer_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Number"
+          },
           "due_date": {
             "anyOf": [
               {
@@ -136440,6 +136690,28 @@
             "minLength": 1,
             "title": "Customer Id",
             "type": "string"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "customer_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Number"
           },
           "deleted_at": {
             "anyOf": [
@@ -140995,6 +141267,17 @@
             ],
             "title": "Article Id"
           },
+          "article_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Name"
+          },
           "billing_quantity_kg": {
             "title": "Billing Quantity Kg",
             "type": "number"
@@ -141009,6 +141292,17 @@
               }
             ],
             "title": "Campaign Id"
+          },
+          "campaign_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campaign Name"
           },
           "can_post_fibu": {
             "default": false,
@@ -141025,6 +141319,17 @@
               }
             ],
             "title": "Contract Id"
+          },
+          "contract_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Number"
           },
           "correction_options": {
             "items": {
@@ -141116,6 +141421,28 @@
           "supplier_id": {
             "title": "Supplier Id",
             "type": "string"
+          },
+          "supplier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Name"
+          },
+          "supplier_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Number"
           },
           "ticket_id": {
             "anyOf": [
@@ -144548,6 +144875,18 @@
             ],
             "description": "Location text",
             "title": "Warehouse Location"
+          },
+          "warehouse_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Warehouse name; filled by the single-movement GET",
+            "title": "Warehouse Name"
           },
           "weighing_ticket_id": {
             "anyOf": [
@@ -173557,6 +173896,30 @@
             ],
             "description": "Related customer ID",
             "title": "Customer Id"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Customer name; filled by the single GET",
+            "title": "Customer Name"
+          },
+          "customer_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Customer number; filled by the single GET",
+            "title": "Customer Number"
           },
           "description": {
             "anyOf": [
@@ -406536,6 +406899,127 @@
           }
         ],
         "summary": "Rechnungsmaske: Positionen mit Deckungsstand",
+        "tags": [
+          "sales",
+          "invoices"
+        ]
+      }
+    },
+    "/api/v1/sales/invoices/{invoice_id}/tabs/steuer": {
+      "get": {
+        "description": "Netto, Umsatzsteuer und Brutto je Steuersatz — die Summe ergibt den Kopfbetrag.",
+        "operationId": "get_invoice_tax_tab_api_v1_sales_invoices__invoice_id__tabs_steuer_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invoice_id",
+            "required": true,
+            "schema": {
+              "title": "Invoice Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceTaxTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnungsmaske: Steuerausweis je Steuersatz",
         "tags": [
           "sales",
           "invoices"
