@@ -47,3 +47,22 @@ ai_harness:
   architektur_vertrag: >
     Dedizierte GET-Routen vor dem Catch-all. response_model ist die TabOut
     mit typisierter Zeile. Kein Eingriff in Claudes Dateien.
+  daten_vertrag: >
+    Kein DROP, kein UPDATE auf Bestandsdaten. Keine echten Daten in Beispielen.
+    screen_definitions.py, sales_orders.py, sales_invoices.py und crm_360.py
+    bleiben unangetastet.
+  test_vertrag: >
+    Unit gegen Modellfelder und _operation. HTTP 200 mit leerer Seite fuer eine
+    bekannte Maske, 404 fuer eine unbekannte. Die Ratsche
+    ZEILEN_NICHT_PRUEFBAR_MAX = 0 haelt den Stand fest.
+  security_vertrag: >
+    Keine Secrets, keine neuen Aussenschnittstellen. Der Mandantenbezug bleibt
+    an der vorhandenen Route.
+  betriebs_vertrag: >
+    pytest haelt die Ratsche. Rollback = Commit revertieren; es gibt keine
+    Migration und keinen Datenstand, der zurueckgedreht werden muesste.
+  dokumentations_vertrag: >
+    Workboard, todo-datenmodell-katalog P9, feldvertrag-masken.
+external_gates:
+  - not_applicable
+---
