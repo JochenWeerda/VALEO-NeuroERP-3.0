@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BUSINESS-TIME-AGRAR-VALIDITY-20260929 — reserviert, Codex
+## BUSINESS-TIME-AGRAR-VALIDITY-20260929 — abgeschlossen, Codex
 
 **Ziel:** Zulassungsablauf und 90-Tage-Fristen in PSM-, Saatgut- und
 Duenger-Stammdaten am konfigurierten Geschaeftstag ausrichten.
@@ -21,8 +21,9 @@ in Open-Gaps und dieser Abschnitt.
 **Abnahme:** Alle fachlichen Zulassungsvergleiche nutzen `business_today()`;
 Grenzfaelle mit abweichendem UTC-/Ortsdatum sind getestet; technische
 Zeitstempel bleiben unveraendert.
-**Risiken:** Der Zeitstempel fuer frei benannte Synchronisationslaeufe bleibt
-technischer Zeitstempel und ist nicht Teil dieses Slices.
+**Ergebnis:** Sechs Schreibpfade und das PSM-90-Tage-Warnfenster verwenden den
+konfigurierten Geschaeftstag. 16 fokussierte Tests bestanden.
+[QA](../quality-assurance/business-time-agrar-validity-20260929.md).
 
 ## BUSINESS-TIME-HR-20260929 — abgeschlossen, Codex
 

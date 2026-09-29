@@ -5,11 +5,11 @@ Full CRUD for Dünger-Stammdaten management
 
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, func, case
 
 from ....core.config import settings
+from ....core.business_time import business_today
 from ....core.database import get_db
 from ....infrastructure.models import Duenger as DuengerModel
 from ....api.v1.schemas.base import PaginatedResponse
@@ -209,7 +209,7 @@ async def create_duenger(
         )
 
     # Validate business rules
-    if duenger_data.ablauf_zulassung and duenger_data.ablauf_zulassung < datetime.utcnow().date():
+    if duenger_data.ablauf_zulassung and duenger_data.ablauf_zulassung.date() < business_today():
         raise HTTPException(
             status_code=400,
             detail="Approval expiry date cannot be in the past"
@@ -284,8 +284,7 @@ async def update_duenger(
 
     # Validate approval expiry
     if "ablauf_zulassung" in update_data and update_data["ablauf_zulassung"]:
-        from datetime import datetime
-        if update_data["ablauf_zulassung"] < datetime.utcnow().date():
+        if update_data["ablauf_zulassung"].date() < business_today():
             raise HTTPException(
                 status_code=400,
                 detail="Approval expiry date cannot be in the past"
