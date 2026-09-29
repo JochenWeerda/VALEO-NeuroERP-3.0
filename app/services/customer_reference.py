@@ -109,7 +109,7 @@ def resolve_reference(db: Session, tenant_id: str, kind: str, reference: object 
             WHERE tenant_id::text = :tid AND ({spec.id_column}::text = :ref{match_number})
             ORDER BY ({spec.id_column}::text = :ref) DESC
             LIMIT 1
-            """
+            """  # nosec B608  # Tabelle und Spalten kommen aus _REFERENCE_TABLES, die Werte sind gebunden
         ),
         {"tid": tenant_id, "ref": ref},
     ).mappings().first()

@@ -52,7 +52,7 @@ function compileRowDetail(table: ScreenTableDefinition, onePage: boolean): Rende
   if (declared === false) return undefined
   if (!declared && !(onePage && table.columns.length >= ROW_DETAIL_MIN_COLUMNS)) return undefined
   return {
-    fields: declared && declared.fields?.length
+    fields: declared?.fields?.length
       ? declared.fields.map((field) => ({ key: field.key, label: field.label, renderKind: field.renderKind }))
       : table.columns.map((column) => ({ key: column.key, label: column.label, renderKind: column.renderKind })),
   }
