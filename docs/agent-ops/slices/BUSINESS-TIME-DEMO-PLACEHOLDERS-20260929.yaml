@@ -1,0 +1,28 @@
+id: BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929
+owner: Codex
+status: abgeschlossen
+goal: Fachliche Demo- und Fallback-Daten am konfigurierten Geschaeftstag ausrichten.
+scope: OCR-Rechnungsdatum, ATLAS-MRN/Ausgangsdatum und Compliance-Trendtage.
+file_ownership:
+  - app/einkauf/ocr_invoice.py
+  - app/services/atlas_customs_service.py
+  - app/security/compliance_monitor.py
+  - tests/test_business_time_demo_placeholders.py
+  - docs/quality-assurance/business-time-demo-placeholders-20260929.md
+acceptance:
+  - Fachliche Fallback-Daten verwenden business_today.
+  - Technische Verarbeitungs-, Audit- und Laufzeitstempel bleiben UTC.
+  - Der Jahreswechsel mit abweichendem UTC- und Ortsdatum ist getestet.
+tests:
+  - 31 Business-Time-, OCR- und ATLAS-Tests bestanden.
+risks:
+  - Mock-Inhalte bleiben bis zur jeweiligen Provider- oder Persistenzanbindung sichtbar.
+ai_harness:
+  fachlicher_vertrag: Fachliche Tageswerte folgen der konfigurierten Betriebszeitzone.
+  architektur_vertrag: Wiederverwendung des zentralen Business-Time-Moduls.
+  daten_vertrag: Keine Schema- oder Persistenzaenderung.
+  test_vertrag: Fachliche Daten und technische UTC-Zeitpunkte werden getrennt geprueft.
+  security_vertrag: Keine Aenderung an Zugriff oder Mandantengrenzen.
+  betriebs_vertrag: BUSINESS_TIMEZONE steuert die Tagesgrenze.
+  dokumentations_vertrag: Workboard, Open-Gaps, Slice und QA aktualisiert.
+external_gates: []

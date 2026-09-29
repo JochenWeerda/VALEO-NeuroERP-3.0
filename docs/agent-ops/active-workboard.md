@@ -12,7 +12,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 # Active Workboard
 
 
-## BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929 — reserviert, Codex
+## BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929 — abgeschlossen, Codex
 
 **Ziel:** Fachliche Datumswerte in OCR-Fallback, ATLAS und Compliance-Trend am
 konfigurierten Geschaeftstag ausrichten.
@@ -23,8 +23,10 @@ in Open-Gaps und dieser Abschnitt.
 **Abnahme:** Rechnungsdatum, MRN-Jahr, Ausgangsdatum und Trendtage verwenden
 `business_today()`; technische Verarbeitungs-, Audit- und Laufzeitstempel bleiben
 UTC; Grenzfaelle mit abweichendem UTC-/Ortsdatum sind getestet.
-**Risiken:** Mock-Inhalte bleiben als solche sichtbar; dieser Slice ersetzt keine
-noch fehlenden Provider- oder Persistenzanbindungen.
+**Ergebnis:** Fachliche OCR-, ATLAS- und Compliance-Trenddaten verwenden den
+konfigurierten Geschaeftstag; technische UTC-Zeitpunkte bleiben getrennt.
+31 fokussierte und bestehende Regressionstests bestanden.
+[QA](../quality-assurance/business-time-demo-placeholders-20260929.md).
 
 ## BUSINESS-TIME-AGRAR-VALIDITY-20260929 — abgeschlossen, Codex
 

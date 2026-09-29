@@ -9,6 +9,8 @@ import re
 from datetime import datetime
 from typing import Any
 
+from app.core.business_time import business_today
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,7 +64,7 @@ def extract_invoice_pdf(
             dmatch = re.search(
                 r"(?:Datum|Date)[:\s]+(\d{1,2}[./]\d{1,2}[./]\d{2,4})", full_text, re.I
             )
-            rechnungs_datum = dmatch.group(1) if dmatch else datetime.utcnow().date().isoformat()
+            rechnungs_datum = dmatch.group(1) if dmatch else business_today().isoformat()
 
             money = re.findall(
                 r"(?:EUR|€)\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2})|\b(\d+[\.,]\d{2})\s*EUR\b",
@@ -116,7 +118,7 @@ def extract_invoice_pdf(
 
     extracted = {
         "rechnungs_nummer": f"OCR-{file_id[-8:]}",
-        "rechnungs_datum": datetime.utcnow().date().isoformat(),
+        "rechnungs_datum": business_today().isoformat(),
         "lieferant_name": "Muster-Lieferant GmbH",
         "lieferant_adresse": "Musterstraße 1, 12345 Musterstadt",
         "netto_betrag": 1500.00,
