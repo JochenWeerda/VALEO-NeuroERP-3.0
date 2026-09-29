@@ -121,10 +121,15 @@ export function usePilotRenderPlan({
         requiresVirtualTables: true,
         lookupMinChars: summary?.performance?.lookup_min_chars ?? 2,
       },
-      layout: mergedNative.layout ?? {
-        preferredMode: 'desktopDense',
-        mobileMode: 'mobileStack',
-        touchTargetPx: 44,
+      layout: {
+        ...(mergedNative.layout ?? {
+          preferredMode: 'desktopDense',
+          mobileMode: 'mobileStack',
+          touchTargetPx: 44,
+        }),
+        // Pilot pages load table data for the active register only; on one page with
+        // anchors no register becomes active and the sections would stay empty.
+        sectionNavigation: 'tabs',
       },
     }
   }, [

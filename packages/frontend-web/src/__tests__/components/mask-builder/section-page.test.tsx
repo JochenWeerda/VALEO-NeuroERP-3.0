@@ -104,7 +104,10 @@ describe('Meridian one-page document (sectionNavigation=anchors)', () => {
     })
     expect(split.shell.sectionNavigation).toBe('tabs')
 
-    const tabs = compileRenderPlanFromScreenDefinition({ ...deliveryNote({ sectionNavigation: undefined }), id: 'sales/tabs-default' })
+    const undeclared = compileRenderPlanFromScreenDefinition({ ...deliveryNote({ sectionNavigation: undefined }), id: 'sales/anchors-default' })
+    expect(undeclared.shell.sectionNavigation).toBe('anchors')
+
+    const tabs = compileRenderPlanFromScreenDefinition({ ...deliveryNote({ sectionNavigation: 'tabs' }), id: 'sales/tabs-opt-out' })
     expect(tabs.shell.sectionNavigation).toBe('tabs')
     expect(tabs.shell.stickyHeader).toBe(false)
   })

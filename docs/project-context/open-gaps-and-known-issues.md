@@ -11,6 +11,20 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## MERIDIAN-BELEG-SYSTEMWEIT — Beleg-Look als Voreinstellung (2026-09-29)
+
+Status: **abgeschlossen, Restpunkte offen.** Slice
+[`docs/agent-ops/slices/MERIDIAN-BELEG-SYSTEMWEIT-20260929.yaml`](../agent-ops/slices/MERIDIAN-BELEG-SYSTEMWEIT-20260929.yaml).
+
+| Lücke | Prio | Stand |
+|---|---|---|
+| Reklamation ohne fachliche Nummer; `reklamation_nr` ist der Primärschlüssel mit Präfix | P2 Qualität | offen |
+| Pilotseiten (`usePilotRenderPlan`: Auftrag, Kontrakt, Kunde-Altpfad) laden nur das aktive Register und erzwingen deshalb `tabs` | P2 UIX | offen, Umzug auf `useUniversalMaskRuntime` |
+| Register-Endpunkte `mask-rollouts/*/tabs/*` verlangen UUIDs, Ernteabrechnungen haben Text-IDs; die Register bleiben dann leer mit Fehlermeldung | P2 Agrar | offen (`mask_rollout_summary_service.py`, fremder Dateibesitz) |
+| Verkaufschance: Kopfdaten kommen aus dem externen crm-sales-Dienst; Browser-Abnahme ohne Dev-Daten, nur HTTP-Vertrag | P3 | offen |
+| Futteranalyse-Tests hinterlassen Daten im Dev-Mandanten (wie die bestehenden Tests) | P3 | offen |
+| Fremd, nicht Teil des Slices: `test_sales_invoices_api.py` (Kunden ohne `company_name`), `test_feed_advice_screen_definition.py::test_feeding_businesses_are_a_native_grant_aware_worklist` (erwartet Layout ohne `columnNavigation`) | P2 | offen |
+
 ## HOME-UIX-ANWENDER-BEDIENWEGE — Touch, Sprache, Agent (2026-09-17)
 
 Status: **in Arbeit.** Diagnose und erster Schnitt:

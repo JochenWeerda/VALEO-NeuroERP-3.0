@@ -196,10 +196,10 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
             schema_errors.append("layout.sectionNavigation=anchors requires columnNavigation=single")
     for table in all_tables:
         row_detail = table.get("rowDetail")
-        if row_detail is None:
+        if row_detail is None or row_detail is False:
             continue
         if not isinstance(row_detail, dict):
-            schema_errors.append(f"table {table.get('key')} rowDetail must be an object")
+            schema_errors.append(f"table {table.get('key')} rowDetail must be an object or false")
             continue
         detail_keys: set[str] = set()
         for field in row_detail.get("fields") or []:
@@ -365,6 +365,11 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
         "screenId": definition.get("id"),
         "generatorReady": len(failed_m) == 0,
         "advisoryScore": advisory_score,
+        "resolvedLayout": {
+            "floorplan": layout.get("floorplan"),
+            "sectionNavigation": layout.get("sectionNavigation") or "tabs",
+            "identityField": definition.get("identityField"),
+        },
         "gates": all_gates,
         "errors": [f"[{g['gate']}] {g['detail']}" for g in failed_m],
         "warnings": [f"[{g['gate']}] {g['detail']}" for g in failed_a],

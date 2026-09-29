@@ -142,9 +142,15 @@ erhalten; man scrollt durch den Beleg oder springt gezielt.
   gibt es bewusst nicht, weil ein fehlgeschlagenes Speichern sonst trotzdem
   zur Navigation führen würde.
 
-Pilot: `sales/delivery-note`; umgestellt sind außerdem `sales/sales-order`,
-`sales/invoice` und `einkauf/purchase-order`. Weitere Belege werden über die
-ScreenDefinition umgestellt, nicht über eigenes JSX.
+Seit MERIDIAN-BELEG-SYSTEMWEIT ist das die Voreinstellung: Jede native
+`objectPage`- oder `transaction`-Maske mit `columnNavigation=single` erhält
+Sprungmarken, ohne dass die ScreenDefinition etwas deklariert (Compiler
+`resolveSectionNavigation`, Backend-Normalisierer `_with_meridian_layout`).
+Wer Register braucht, setzt `layout.sectionNavigation: "tabs"` als Opt-out und
+begründet es. Die Readiness meldet die aufgelöste Einstellung unter
+`resolvedLayout`. Pilotseiten mit `usePilotRenderPlan` (Auftrag, Kontrakt,
+Kunde-Altpfad) bleiben vorerst auf Registern, weil sie nur die Tabelle des
+aktiven Registers laden.
 
 ### Belegidentität und Anzeigewerte
 
@@ -152,7 +158,16 @@ ScreenDefinition umgestellt, nicht über eigenes JSX.
   Der `h1` zeigt dann die Nummer („SO-00064“), der Maskentitel steht als Kicker
   darüber (`text-2xs uppercase tracking-wide`). Das Feld muss in der Maske
   deklariert sein (Frontend-Validierung und Readiness `schema_valid`). Ohne Wert
-  fällt der `h1` auf den Maskentitel zurück.
+  fällt der `h1` auf den Maskentitel zurück. Ohne Deklaration leitet der
+  Normalisierer `infer_identity_field` das Feld aus dem Kopf ab (Nummer-Schlüssel
+  oder „…-Nr.“-Label, keine Personen-, Artikel- oder Kontonummern); ein expliziter
+  Wert gewinnt immer. Welche Maske welches Feld erhält, hält ein Snapshot-Test
+  fest (`tests/test_meridian_beleg_systemweit.py`).
+- Kopf-Gate: Kein Kopf zeigt ein rohes `_id`-Feld, ohne dass daneben ein lesbares
+  Gegenstück steht (Name oder Nummer). Schlüssel, die zur Zuordnung nötig sind,
+  wandern in einen eigenen Abschnitt („Zuordnung“, „Provenienz“). Die Namen und
+  Nummern liefern die Einzel-GETs über `resolve_reference`
+  (`app/services/customer_reference.py`, immer mit Tenant-Filter).
 - Masken zeigen keine Schlüssel: Kunden über Name und Kunden-Nr. statt über die ID
   (Backend `resolve_customer`, gleich in Auftrag, Lieferschein und Rechnung),
   Vorgängerbelege über ihre Nummer, Wahrheitswerte als Ja/Nein,
@@ -166,7 +181,9 @@ ScreenDefinition umgestellt, nicht über eigenes JSX.
   ihre Details als Band direkt unter dem Raster, nicht als Dialog. `fields` legt
   die Felder fest; ohne Angabe zeigt das Band alle Spalten. Erneuter Klick, der
   Schließen-Knopf oder Escape schließen es. Führt die Tabelle eine
-  `rowRouteTemplate`, bietet das Band „In Vollansicht öffnen“.
+  `rowRouteTemplate`, bietet das Band „In Vollansicht öffnen“. Auf
+  Sprungmarken-Seiten erhält jede Tabelle ab sechs Spalten das Band automatisch;
+  `rowDetail: false` schaltet es ab.
 - **Steuerausweis:** Die Rechnung zeigt im Kopf je Steuersatz Netto, Umsatzsteuer
   und Brutto. Gerundet wird je Position wie beim Anlegen, damit die Summe dem
   Kopfbetrag entspricht.

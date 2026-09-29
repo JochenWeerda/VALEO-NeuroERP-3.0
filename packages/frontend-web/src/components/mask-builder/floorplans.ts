@@ -34,13 +34,19 @@ export function defaultColumnNavigation(
   return 'single'
 }
 
-/** Anchors only where the floorplan allows it and no column split competes for the page. */
+/**
+ * Document pages read top to bottom by default; `tabs` opts out. Anchors apply only where
+ * the floorplan allows them and no column split competes for the page.
+ */
 export function resolveSectionNavigation(
   floorplan: ScreenFloorplan,
   columnNavigation: ScreenColumnNavigation,
   declared?: ScreenSectionNavigation,
 ): ScreenSectionNavigation {
-  if (declared !== 'anchors') return 'tabs'
+  if (declared === 'tabs') return 'tabs'
   if (!FLOORPLAN_RULES[floorplan].allowsSectionAnchors || columnNavigation !== 'single') return 'tabs'
   return 'anchors'
 }
+
+/** Tables at least this wide keep columns out of the grid, so the selected row gets a detail band. */
+export const ROW_DETAIL_MIN_COLUMNS = 6

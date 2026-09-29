@@ -383,3 +383,5 @@ class Opportunity(OpportunityBase, TimestampMixin):
     """Full opportunity schema"""
     id: UUID = Field(..., description="Opportunity ID")
     tenant_id: str = Field(..., max_length=64, description="Tenant identifier")
+    customer_name: Optional[str] = Field(None, description="Customer name; filled by the single GET")
+    customer_number: Optional[str] = Field(None, description="Customer number; filled by the single GET")

@@ -380,7 +380,7 @@ for (const viewport of VIEWPORTS) {
           await expect(summary).toBeVisible()
           expect(await summary.evaluate((node, footerNode) => Boolean(node.compareDocumentPosition(footerNode as Node) & Node.DOCUMENT_POSITION_FOLLOWING), await footer.elementHandle())).toBe(true)
         }
-        await expect(page.getByTestId('workflow-panel-placeholder')).toBeVisible()
+        await expect(page.getByText(/^Workflow: /)).toHaveCount(0)
 
         const table = page.getByTestId(`table-${c.tableKey}`)
         await expect(table).toBeVisible()
@@ -391,7 +391,13 @@ for (const viewport of VIEWPORTS) {
         const rowBox = await firstDataRow.boundingBox()
         expect(rowBox?.height).toBe(c.density === 'expertDense' ? 36 : 44)
 
-        await page.getByRole('tab', { name: c.contextRail === 'audit' ? 'Audit' : 'Kontext' }).click()
+        const contextSection = c.contextRail === 'audit' ? 'Audit' : 'Kontext'
+        if (c.floorplan === 'cockpit') {
+          await page.getByRole('tab', { name: contextSection }).click()
+        } else {
+          await expect(page.getByRole('tablist')).toHaveCount(0)
+          await page.getByRole('navigation', { name: 'Abschnitte' }).getByRole('link', { name: contextSection }).click()
+        }
         await expect(page.getByText(c.primaryActionLabel).first()).toBeVisible()
 
         await assertNoViewportOverflow(page)

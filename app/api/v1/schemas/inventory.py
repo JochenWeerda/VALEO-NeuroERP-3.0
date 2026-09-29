@@ -314,6 +314,7 @@ class StockMovement(StockMovementBase, TimestampMixin):
     previous_stock: Decimal = Field(..., ge=0, description="Stock before movement")
     new_stock: Decimal = Field(..., ge=0, description="Stock after movement")
     total_cost: Optional[Decimal] = Field(None, ge=0, description="Total movement cost")
+    warehouse_name: Optional[str] = Field(None, description="Warehouse name; filled by the single-movement GET")
 
 
 # Inventory Count Schemas

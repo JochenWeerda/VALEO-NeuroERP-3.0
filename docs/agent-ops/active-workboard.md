@@ -12,15 +12,36 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 # Active Workboard
 
 
-## MERIDIAN-BELEG-SYSTEMWEIT-20260929 — in Arbeit, Cursor
+## MERIDIAN-BELEG-SYSTEMWEIT-20260929 — abgeschlossen, Browser-Abnahme erfolgt, Cursor
 
 **Ziel:** Durchgehende Belegseite, Belegnummer als Überschrift, Positionsdetail und
 lesbare Köpfe als zentrale Voreinstellung für alle nativen `objectPage`/`transaction`-Masken.
-**Dateibesitz:** `floorplans.ts`, `schema.ts`, `schema-compiler.ts`, `render-plan/types.ts`,
-Normalisierer in `screen_definitions.py`, `customer_reference.py`, `mask_screen_definition.py`,
-`check_field_contracts.py`, `tests/test_meridian_beleg_systemweit.py`.
-**Abnahme:** Sprungmarken ohne Deklaration, `tabs` als Opt-out; abgeleitete Belegidentität;
-`rowDetail` ab sechs Spalten; Gate gegen rohe `_id`-Kopffelder.
+**Dateibesitz:** `floorplans.ts`, `schema.ts`, `schema-compiler.ts`,
+`use-pilot-render-plan.ts`, Normalisierer und Kopf-Felder in `screen_definitions.py`,
+`customer_reference.py` (`resolve_reference`), `mask_screen_definition.py`, Einzel-GETs in
+`sales_delivery_notes.py`, `stock_movements.py` + `schemas/inventory.py`, `reklamation_api.py`,
+`agrar_settlements.py`, `opportunities.py` + `schemas/crm.py`, `procurement_service.py` +
+`mask_entity_contracts.py`, `feeding_feed_analyses.py`; Tests
+`tests/test_meridian_beleg_systemweit.py` (neu), `schema-compiler.test.ts`, `section-page.test.tsx`,
+`meridian-visual-audit.spec.ts` (Kontextabschnitt über die Sprungleiste, veraltete
+Platzhalter-Prüfung aus FSX-030 durch „kein interner Prozessschlüssel“ ersetzt).
+**Stand:** Sprungmarken ohne Deklaration (`tabs` als Opt-out, Readiness meldet
+`resolvedLayout`); `infer_identity_field` leitet die Belegnummer ab (Snapshot 31 Masken);
+`rowDetail` ab sechs Spalten, Opt-out `false`; Kopf-Gate gegen rohe `_id`-Felder. Neu lesbar:
+Niederlassung (Lieferschein), Lager (Lagerbewegung), Reklamations-Nr./Lieferant/Kontrakt,
+Erzeuger/Kampagne/Artikel/Kontrakt (Ernteabrechnung), Kunde (Verkaufschance),
+Niederlassung/Kontrakt/Verkaufsbeleg/Kunde (Bestellung), Originalbeleg (Futteranalyse).
+Schlüssel stehen in eigenen Abschnitten „Zuordnung“ bzw. „Provenienz“. Pilotseiten mit
+`usePilotRenderPlan` bleiben auf Registern.
+**Nachweis:** pytest `test_meridian_beleg_systemweit.py` 84/84 mit Postgres, Auswahl 1434
+grün (Rest fremd, siehe Open-Gaps); Vitest 209 Dateien / 894 Tests; Playwright
+`meridian-visual-audit.spec.ts` 12/12 (1366/1440/1920 px); Feldvertrag 604/0;
+Handbuch aktuell; `tsc` 0. Browser 1440/390 px: Reklamation, Ernteabrechnung,
+Lagerbewegung, Kreditor, Futteranalyse (Sprungmarken, h1 = Nummer, kein Überlauf).
+**Handshake EK-BESTELLUNG-FUEHREND:** in `einkauf/purchase-order` Kopf `niederlassung_name`
+statt ID, Register Kette mit Kontrakt-/Verkaufsbeleg-Nummer und Kundenname, neues Register
+`zuordnung` mit den vier IDs; `get_bestellung` liefert die Anzeigefelder zusätzlich.
+**Risiken:** Open-Gaps § MERIDIAN-BELEG-SYSTEMWEIT.
 [Slice](slices/MERIDIAN-BELEG-SYSTEMWEIT-20260929.yaml).
 
 ## MERIDIAN-BELEG-ONEPAGE-20260929 — abgeschlossen, Browser-Abnahme erfolgt, Cursor

@@ -28,7 +28,7 @@ from app.services.sales_invoice_service import (
 )
 from app.core.config import settings
 from app.core.tenant import get_tenant_id
-from app.services.customer_reference import resolve_customer
+from app.services.customer_reference import resolve_customer, resolve_reference
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_delivery
 from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 from app.services.sales_posting_service import SalesPostingService
@@ -169,6 +169,7 @@ class DeliveryNote(DeliveryNoteBase):
     customer_name: Optional[str] = None
     customer_number: Optional[str] = None
     sales_order_number: Optional[str] = None
+    branch_name: Optional[str] = None
 
 
 def _generate_delivery_note_number(db: Session, tenant_id: str) -> str:
@@ -421,19 +422,16 @@ async def get_delivery_note(
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)
     kunde = resolve_customer(db, tenant_id, row.get("customer_id"))
-    auftrag_nr = None
-    if row.get("sales_order_id"):
-        auftrag_nr = db.execute(
-            text("SELECT order_number FROM domain_crm.sales_orders WHERE id::text = :id AND tenant_id::text = :tid"),
-            {"id": str(row["sales_order_id"]), "tid": tenant_id},
-        ).scalar()
+    auftrag = resolve_reference(db, tenant_id, "sales_order", row.get("sales_order_id"))
+    niederlassung = resolve_reference(db, tenant_id, "branch", row.get("branch_id"))
 
     return DeliveryNote(
         **dict(row),
         positionen=[DeliveryNotePosition(**dict(p)) for p in positions],
         customer_name=kunde.name,
         customer_number=kunde.number,
-        sales_order_number=auftrag_nr,
+        sales_order_number=auftrag.number,
+        branch_name=niederlassung.name or niederlassung.number,
     )
 
 

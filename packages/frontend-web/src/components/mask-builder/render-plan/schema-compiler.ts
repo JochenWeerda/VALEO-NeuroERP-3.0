@@ -9,7 +9,7 @@ import {
   type ScreenTableProfile,
   type ScreenTileDefinition,
 } from '../schema'
-import { defaultColumnNavigation, FLOORPLAN_RULES, resolveSectionNavigation } from '../floorplans'
+import { defaultColumnNavigation, FLOORPLAN_RULES, resolveSectionNavigation, ROW_DETAIL_MIN_COLUMNS } from '../floorplans'
 import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
@@ -47,10 +47,22 @@ function compileField(
   }
 }
 
+function compileRowDetail(table: ScreenTableDefinition, onePage: boolean): RenderTablePlan['rowDetail'] {
+  const declared = table.rowDetail
+  if (declared === false) return undefined
+  if (!declared && !(onePage && table.columns.length >= ROW_DETAIL_MIN_COLUMNS)) return undefined
+  return {
+    fields: declared && declared.fields?.length
+      ? declared.fields.map((field) => ({ key: field.key, label: field.label, renderKind: field.renderKind }))
+      : table.columns.map((column) => ({ key: column.key, label: column.label, renderKind: column.renderKind })),
+  }
+}
+
 function compileTable(
   table: ScreenTableDefinition,
   tableProfile: ScreenTableProfile,
   density: ScreenDensity,
+  onePage: boolean,
   tabKey?: string,
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
@@ -83,13 +95,7 @@ function compileTable(
     rowRouteTemplate: table.rowRouteTemplate,
     rowActions: table.rowActions,
     bulkActions: table.bulkActions,
-    rowDetail: table.rowDetail
-      ? {
-          fields: table.rowDetail.fields?.length
-            ? table.rowDetail.fields.map((field) => ({ key: field.key, label: field.label, renderKind: field.renderKind }))
-            : table.columns.map((column) => ({ key: column.key, label: column.label, renderKind: column.renderKind })),
-        }
-      : undefined,
+    rowDetail: compileRowDetail(table, onePage),
   }
 }
 
@@ -252,7 +258,12 @@ export function compileRenderPlan(
     fieldsByKey[field.key] = field
   }
 
-  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density))
+  const hasTables = (schema.tables?.length ?? 0) > 0 || (schema.tabs ?? []).some((tab) => (tab.tables?.length ?? 0) > 0)
+  const columnNavigation = defaultColumnNavigation(floorplan, hasTables, schema.layout?.columnNavigation)
+  const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
+  const onePage = sectionNavigation === 'anchors'
+
+  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage))
   for (const table of rootTables) {
     tablesByKey[table.key] = table
   }
@@ -275,7 +286,7 @@ export function compileRenderPlan(
       fieldsByKey[field.key] = field
     }
 
-    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, tab.key))
+    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, tab.key))
     tablesByTab[tab.key] = tabTables
     for (const table of tabTables) {
       tablesByKey[table.key] = table
@@ -289,13 +300,6 @@ export function compileRenderPlan(
   }
 
   const processRibbon = compileProcessRibbonPlan(schema)
-  const columnNavigation = defaultColumnNavigation(
-    floorplan,
-    Object.keys(tablesByKey).length > 0,
-    schema.layout?.columnNavigation,
-  )
-  const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
-  const onePage = sectionNavigation === 'anchors'
 
   const plan: RenderPlan = {
     cacheKey,

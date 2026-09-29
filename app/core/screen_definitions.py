@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
@@ -517,7 +518,8 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
                     # einen Namen. Ein Nummernfeld zu behalten hiesse, eine
                     # Nummer zu zeigen, die es nicht gibt.
                     {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
-                    {"key": "customer_id", "label": "Kunde", "type": "text"},
+                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
+                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
                     {"key": "assigned_to", "label": "Verantwortlich", "type": "text"},
                     {"key": "stage", "label": "Phase", "type": "text"},
                     {"key": "amount", "label": "Wert", "type": "currency"},
@@ -526,6 +528,18 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
                     {"key": "actual_close_date", "label": "Tatsaechlicher Abschluss", "type": "date", "readOnly": True},
                     {"key": "lead_source", "label": "Quelle", "type": "text"},
                     {"key": "status", "label": "Status", "type": "text"},
+                ],
+            },
+            {
+                # Die Kundenzuordnung bleibt aenderbar, gehoert aber nicht in den
+                # Kopf: dort steht der Kunde mit Namen und Nummer.
+                "key": "zuordnung",
+                "label": "Zuordnung",
+                "lazy": False,
+                "keepAlive": True,
+                "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "customer_id", "label": "Kunden-ID", "type": "text"},
                 ],
             },
             {
@@ -739,7 +753,7 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
                     # Was er fuehrt: Selbstabholung, Fahrzeug, Niederlassung.
                     {"key": "is_self_pickup", "label": "Selbstabholer", "type": "boolean", "readOnly": True},
                     {"key": "truck_number", "label": "Kennzeichen", "type": "text", "readOnly": True},
-                    {"key": "branch_id", "label": "Niederlassung", "type": "text", "readOnly": True},
+                    {"key": "branch_name", "label": "Niederlassung", "type": "text", "readOnly": True},
                     {"key": "invoice_number", "label": "Rechnungsnr.", "type": "text", "readOnly": True},
                     {"key": "status", "label": "Status", "type": "text", "readOnly": True},
                 ],
@@ -1021,7 +1035,7 @@ def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
                     {"key": "lieferant_nr", "label": "Lieferanten-Nr.", "type": "text"},
                     {"key": "lieferant_name", "label": "Lieferant", "type": "text", "readOnly": True},
                     {"key": "ansprechpartner", "label": "Ansprechpartner Lieferant", "type": "text"},
-                    {"key": "niederlassung_id", "label": "Niederlassung", "type": "text"},
+                    {"key": "niederlassung_name", "label": "Niederlassung", "type": "text", "readOnly": True},
                     {"key": "kostenstelle", "label": "Kostenstelle", "type": "text"},
                     {"key": "kommission", "label": "Kommission", "type": "text"},
                     {"key": "bestelldatum", "label": "Bestelldatum", "type": "date"},
@@ -1091,12 +1105,24 @@ def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
                     {"key": "angebot_nr", "label": "Lieferantenangebot", "type": "text"},
                     {"key": "auftrag_nr", "label": "Verkaufsauftrag", "type": "text",
                      "helpText": "Bestellung aus dem Verkauf erzeugen."},
-                    {"key": "kontrakt_id", "label": "Kontrakt", "type": "text"},
-                    {"key": "verkaufsbeleg_id", "label": "Verkaufsbeleg", "type": "text"},
-                    {"key": "kunden_id", "label": "Kunde (Direktlieferung)", "type": "text"},
+                    {"key": "kontrakt_nummer", "label": "Kontrakt", "type": "text", "readOnly": True},
+                    {"key": "verkaufsbeleg_nummer", "label": "Verkaufsbeleg", "type": "text", "readOnly": True},
+                    {"key": "kunden_name", "label": "Kunde (Direktlieferung)", "type": "text", "readOnly": True},
                     {"key": "direktlieferung", "label": "Direktlieferung an Kunden", "type": "boolean"},
                     {"key": "ueberschlag_lager", "label": "Ueberschlag am Lager", "type": "boolean",
                      "helpText": "Ware beruehrt das Lager, ohne eingelagert zu werden."},
+                ],
+            },
+            {
+                # Die Bezuege bleiben aenderbar; Kopf und Belegkette zeigen sie
+                # mit Namen und Nummer.
+                "key": "zuordnung", "label": "Zuordnung", "lazy": False, "keepAlive": True,
+                "dataSourceKey": "entity",
+                "fields": [
+                    {"key": "niederlassung_id", "label": "Niederlassungs-ID", "type": "text"},
+                    {"key": "kontrakt_id", "label": "Kontrakt-ID", "type": "text"},
+                    {"key": "verkaufsbeleg_id", "label": "Verkaufsbeleg-ID", "type": "text"},
+                    {"key": "kunden_id", "label": "Kunden-ID", "type": "text"},
                 ],
             },
             {
@@ -1362,7 +1388,7 @@ def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
                     {"key": "movement_type", "label": "Bewegungstyp", "type": "text", "readOnly": True},
                     {"key": "movement_date", "label": "Datum", "type": "date", "readOnly": True},
                     {"key": "reference_number", "label": "Beleg-Nr.", "type": "text", "readOnly": True},
-                    {"key": "warehouse_id", "label": "Lager", "type": "text", "readOnly": True},
+                    {"key": "warehouse_name", "label": "Lager", "type": "text", "readOnly": True},
                     {"key": "warehouse_location", "label": "Lagerort", "type": "text", "readOnly": True},
                     # Die Bewegung fuehrt keinen Status, sondern Mengen und
                     # den Bestand davor und danach — das ist ihre Aussage.
@@ -1428,12 +1454,13 @@ def build_agrar_harvest_settlement_screen_definition() -> dict[str, Any]:
                 "key": "kopf", "label": "Abrechnungs-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
                 "fields": [
                     {"key": "settlement_number", "label": "Abrechnungs-Nr.", "type": "text", "readOnly": True},
-                    {"key": "supplier_id", "label": "Erzeuger", "type": "text", "readOnly": True},
+                    {"key": "supplier_name", "label": "Erzeuger", "type": "text", "readOnly": True},
+                    {"key": "supplier_number", "label": "Erzeuger-Nr.", "type": "text", "readOnly": True},
                     # Kampagne statt Erntejahr: Der Beleg fuehrt die Kampagne,
                     # ein Jahr waere daraus abgeleitet und damit geraten.
-                    {"key": "campaign_id", "label": "Kampagne", "type": "text", "readOnly": True},
-                    {"key": "article_id", "label": "Artikel", "type": "text", "readOnly": True},
-                    {"key": "contract_id", "label": "Kontrakt", "type": "text", "readOnly": True},
+                    {"key": "campaign_name", "label": "Kampagne", "type": "text", "readOnly": True},
+                    {"key": "article_name", "label": "Artikel", "type": "text", "readOnly": True},
+                    {"key": "contract_number", "label": "Kontrakt", "type": "text", "readOnly": True},
                     # Die Abrechnungsmenge steht in Kilogramm im Beleg; eine
                     # Anzeige in Tonnen waere eine stille Umrechnung.
                     {"key": "billing_quantity_kg", "label": "Abrechnungsmenge (kg)", "type": "number", "readOnly": True},
@@ -2023,10 +2050,11 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
         "tabs": [
             {"key": "kopf", "label": "Reklamation", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
              "fields": [
-                 {"key": "reklamation_id", "label": "Reklamations-Nr.", "type": "text", "readOnly": True},
+                 {"key": "reklamation_nr", "label": "Reklamations-Nr.", "type": "text", "readOnly": True},
                  {"key": "typ", "label": "Typ", "type": "text", "readOnly": True},
-                 {"key": "lieferant_id", "label": "Lieferant", "type": "text", "readOnly": True},
-                 {"key": "kontrakt_id", "label": "Kontrakt", "type": "text", "readOnly": True},
+                 {"key": "lieferant_name", "label": "Lieferant", "type": "text", "readOnly": True},
+                 {"key": "lieferant_nummer", "label": "Lieferanten-Nr.", "type": "text", "readOnly": True},
+                 {"key": "kontrakt_nummer", "label": "Kontrakt", "type": "text", "readOnly": True},
                  {"key": "erstellt_am", "label": "Erstellt am", "type": "date", "readOnly": True},
                  {"key": "frist_datum", "label": "Frist", "type": "date", "readOnly": True},
                  # Der SLA-Stand ist gerechnet, nicht erfasst — deshalb nur lesend.
@@ -2205,7 +2233,14 @@ def build_futtermittel_analyse_screen_definition() -> dict[str, Any]:
                  {"key": "status", "label": "Status", "type": "text", "readOnly": True},
                  {"key": "is_active", "label": "Aktive Analyse", "type": "boolean", "readOnly": True},
                  {"key": "revision", "label": "Revision", "type": "number", "readOnly": True},
-                 {"key": "original_document_id", "label": "Originalbeleg", "type": "text", "readOnly": True},
+                 {"key": "quelle_datei", "label": "Originalbeleg", "type": "text", "readOnly": True},
+             ]},
+            # Archivschluessel und Pruefsumme belegen die Provenienz, gehoeren
+            # aber nicht in den Kopf: dort steht der Dateiname des Originals.
+            {"key": "provenienz", "label": "Provenienz", "lazy": False, "keepAlive": True,
+             "dataSourceKey": "entity", "fields": [
+                 {"key": "original_document_id", "label": "Archiv-Dokument-ID", "type": "text", "readOnly": True},
+                 {"key": "original_sha256", "label": "SHA-256", "type": "text", "readOnly": True},
              ]},
             {"key": "values", "label": "Messwerte", "lazy": True, "keepAlive": False,
              "tables": [{"key": "values", "label": "Labor- und Rechenwerte", "dataSourceKey": "values",
@@ -4756,6 +4791,7 @@ def _has_tables(definition: dict[str, Any]) -> bool:
 
 
 _MERIDIAN_COLUMNS_FORBIDDEN = {"transaction", "cockpit", "wizard"}
+_MERIDIAN_SECTION_ANCHOR_FLOORPLANS = {"objectPage", "transaction"}
 _MERIDIAN_LIST_FLOORPLANS = {"worklist", "analyticalList"}
 
 
@@ -4813,7 +4849,56 @@ def _with_meridian_layout(definition: dict[str, Any]) -> dict[str, Any]:
             "columnNavigation",
             _default_column_navigation(resolved_floorplan, _has_tables(definition)),
         )
+    if resolved_floorplan in _MERIDIAN_SECTION_ANCHOR_FLOORPLANS and layout["columnNavigation"] == "single":
+        layout.setdefault("sectionNavigation", "anchors")
     definition["layout"] = layout
+    return definition
+
+
+_IDENTITY_KEY_PATTERN = re.compile(r"(_number|_nr|nummer|_no)$")
+_IDENTITY_LABEL_PATTERN = re.compile(r"(^|[\s-])Nr\.?(\s|$)")
+# Numbers that describe a contact or tax attribute, not the document itself.
+_IDENTITY_EXCLUDED_TOKENS = (
+    "phone", "telefon", "fax", "mobil", "vat", "ust", "steuer", "tax",
+    "house", "haus", "plz", "postal", "zip", "iban", "bic", "version",
+)
+
+
+_IDENTITY_NAME_KEYS = ("name", "company_name", "firmenname", "bezeichnung")
+
+
+def infer_identity_field(definition: dict[str, Any]) -> str | None:
+    """Head field that identifies the object: its number, else its name.
+
+    The head is the root field list, else the first tab.
+    """
+
+    head_fields = list(definition.get("fields") or [])
+    if not head_fields:
+        tabs = definition.get("tabs") or []
+        head_fields = list((tabs[0].get("fields") or []) if tabs else [])
+    visible = [f for f in head_fields if f.get("key") and not f.get("hidden")]
+    for field in visible:
+        key = str(field["key"])
+        label = str(field.get("label") or "")
+        if any(token in key.lower() for token in _IDENTITY_EXCLUDED_TOKENS):
+            continue
+        if _IDENTITY_KEY_PATTERN.search(key.lower()) or _IDENTITY_LABEL_PATTERN.search(label):
+            return key
+    for name_key in _IDENTITY_NAME_KEYS:
+        if any(field["key"] == name_key for field in visible):
+            return name_key
+    return None
+
+
+def _with_meridian_identity(definition: dict[str, Any]) -> dict[str, Any]:
+    """Document pages show their number as h1 unless the builder declares otherwise."""
+
+    floorplan = (definition.get("layout") or {}).get("floorplan")
+    if floorplan in _MERIDIAN_SECTION_ANCHOR_FLOORPLANS and "identityField" not in definition:
+        identity = infer_identity_field(definition)
+        if identity:
+            definition["identityField"] = identity
     return definition
 
 
@@ -5070,7 +5155,7 @@ def _apply_season_profile(definition: dict[str, Any], today: str | None) -> None
 
 
 def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: str | None) -> dict[str, Any]:
-    definition = _with_meridian_action_contract(_with_meridian_layout(definition))
+    definition = _with_meridian_action_contract(_with_meridian_identity(_with_meridian_layout(definition)))
     contract = definition.setdefault("agentContract", {})
     contract.setdefault("sensitiveFields", [])
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))

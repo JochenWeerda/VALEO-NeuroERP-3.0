@@ -78,6 +78,7 @@ class AnalysisDetailOut(AnalysisSummaryOut):
     sampled_at: datetime | None = None
     original_document_id: str | None = None
     original_sha256: str | None = None
+    quelle_datei: str | None = None
     released_at: datetime | None = None
     released_by: str | None = None
     values: list[AnalysisValueOut] = Field(default_factory=list)

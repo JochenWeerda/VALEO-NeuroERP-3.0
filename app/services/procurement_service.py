@@ -37,6 +37,7 @@ from modules.einkauf.services.bestellvorschlag_service import (
 )
 from modules.einkauf.services.versand_service import versende_bestellung
 from app.services.finance_transaction_service import FinanceTransactionService
+from app.services.customer_reference import resolve_customer, resolve_reference
 
 
 def _model_cols(obj) -> dict[str, Any]:
@@ -938,7 +939,20 @@ class ProcurementService:
         ).first()
         if not b:
             raise EntityNotFoundError("EinkaufBestellung", bestellung_id)
-        return bestellung_to_mask(b)
+        return {**bestellung_to_mask(b), **self._bestellung_reference_display(b)}
+
+    def _bestellung_reference_display(self, b: EinkaufBestellung) -> dict[str, Any]:
+        """Namen und Nummern zu den Bezuegen der Bestellung fuer Kopf und Belegkette."""
+        niederlassung = resolve_reference(self.db, self.tenant_id, "branch", b.niederlassung_id)
+        kontrakt = resolve_reference(self.db, self.tenant_id, "einkauf_contract", b.kontrakt_id)
+        verkaufsbeleg = resolve_reference(self.db, self.tenant_id, "sales_order", b.verkaufsbeleg_id)
+        kunde = resolve_customer(self.db, self.tenant_id, b.kunden_id)
+        return {
+            "niederlassung_name": niederlassung.name or niederlassung.number,
+            "kontrakt_nummer": kontrakt.number,
+            "verkaufsbeleg_nummer": verkaufsbeleg.number,
+            "kunden_name": kunde.name or kunde.number,
+        }
 
     def update_bestellung(self, bestellung_id: str, data: dict) -> dict:
         b = self.db.query(EinkaufBestellung).filter(

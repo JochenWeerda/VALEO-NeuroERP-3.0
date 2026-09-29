@@ -1,10 +1,19 @@
 slice_id: MERIDIAN-BELEG-SYSTEMWEIT
 id: MERIDIAN-BELEG-SYSTEMWEIT
 title: Beleg-Look-and-Feel als zentrale Voreinstellung fuer alle nativen ScreenDefinitions
-status: in arbeit
+status: abgeschlossen
 owner: Cursor
 date: 2026-09-29
 created_at: 2026-09-29
+closed_at: 2026-09-29
+result: >
+  Sprungmarken, abgeleitete Belegidentitaet und Positionsdetail sind zentrale
+  Voreinstellung fuer alle nativen objectPage/transaction-Masken (Opt-out tabs
+  bzw. rowDetail false). Kopf-Gate gegen rohe _id-Felder; sieben Einzel-GETs
+  liefern Namen und Nummern ueber resolve_reference. pytest 84/84 Postgres,
+  Vitest 894/895 (1 skip), Meridian-Audit 12/12, Feldvertrag 604/0, tsc 0,
+  Browser 1440/390 px.
+  Restpunkte in Open-Gaps MERIDIAN-BELEG-SYSTEMWEIT.
 coordination: >
   Folgt MERIDIAN-BELEG-ONEPAGE. Builder-Funktionen anderer Slices in
   screen_definitions.py nur additiv; jede Aenderung dort bekommt eine
@@ -17,12 +26,24 @@ file_ownership:
   - packages/frontend-web/src/components/mask-builder/floorplans.ts
   - packages/frontend-web/src/components/mask-builder/schema.ts
   - packages/frontend-web/src/components/mask-builder/render-plan/schema-compiler.ts
-  - packages/frontend-web/src/components/mask-builder/render-plan/types.ts
+  - packages/frontend-web/src/features/mask-pilot/use-pilot-render-plan.ts
   - app/core/screen_definitions.py (nur Normalisierer und additive Kopf-Felder)
   - app/services/customer_reference.py
   - app/api/v1/endpoints/mask_screen_definition.py
-  - scripts/check_field_contracts.py
+  - app/api/v1/endpoints/sales_delivery_notes.py (branch_name)
+  - app/domains/inventory/api/stock_movements.py
+  - app/api/v1/schemas/inventory.py (warehouse_name)
+  - app/api/v1/endpoints/reklamation_api.py
+  - app/api/v1/endpoints/agrar_settlements.py
+  - app/api/v1/endpoints/opportunities.py
+  - app/api/v1/schemas/crm.py (customer_name, customer_number)
+  - app/services/procurement_service.py (get_bestellung Anzeigefelder)
+  - app/api/v1/schemas/mask_entity_contracts.py (EinkaufBestellungOut)
+  - app/api/v1/endpoints/feeding_feed_analyses.py (quelle_datei)
   - tests/test_meridian_beleg_systemweit.py
+  - packages/frontend-web/src/__tests__/render-plan/schema-compiler.test.ts
+  - packages/frontend-web/src/__tests__/components/mask-builder/section-page.test.tsx
+  - packages/frontend-web/tests/e2e/meridian-visual-audit.spec.ts
 acceptance:
   - objectPage/transaction ohne Deklaration rendert Sprungmarken; tabs schaltet ab
   - identityField wird aus dem Kopf abgeleitet, explizite Werte gewinnen
@@ -34,6 +55,8 @@ tests:
   - packages/frontend-web/src/__tests__/components/mask-builder/section-page.test.tsx
   - packages/frontend-web/src/__tests__/render-plan
 risks:
+  - Pilotseiten mit usePilotRenderPlan erzwingen tabs, bis sie auf den Runtime umziehen
+  - Reklamation hat keine fachliche Nummer; reklamation_nr ist der Schluessel mit Praefix
   - Masken mit vielen Registern werden lange Seiten; fachlich falsche bekommen tabs mit Begruendung
   - Identitaets-Heuristik kann ein falsches Feld waehlen; Snapshot-Test zwingt zum Review
 ai_harness:

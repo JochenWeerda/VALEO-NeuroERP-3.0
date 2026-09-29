@@ -137,6 +137,11 @@ class EinkaufBestellungOut(_MaskEntityOut):
     ueberschlag_lager: Optional[bool] = None
     neuer_artikel: Optional[bool] = None
     innovationshinweis: Optional[str] = None
+    #: Nur in der Einzelabfrage gefuellt (Maskenkopf und Belegkette).
+    niederlassung_name: Optional[str] = None
+    kontrakt_nummer: Optional[str] = None
+    verkaufsbeleg_nummer: Optional[str] = None
+    kunden_name: Optional[str] = None
 
 
 class FinanceDebitorOut(_MaskEntityOut):

@@ -17,6 +17,7 @@ from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import StockMovement as StockMovementModel
 from ....core.module_registry import registry
+from ....services.customer_reference import resolve_reference
 from modules.bootstrap import initialize_module_registry
 from .inventory_auth import get_current_tenant_id, require_inventory_access
 
@@ -179,7 +180,8 @@ async def get_stock_movement(
     if not movement:
         raise HTTPException(status_code=404, detail="Stock movement not found")
 
-    return _to_schema(movement)
+    lager = resolve_reference(db, effective_tenant, "warehouse", movement.warehouse_id)
+    return _to_schema(movement).model_copy(update={"warehouse_name": lager.name or lager.number})
 
 
 @router.post("/", response_model=StockMovement, status_code=201)

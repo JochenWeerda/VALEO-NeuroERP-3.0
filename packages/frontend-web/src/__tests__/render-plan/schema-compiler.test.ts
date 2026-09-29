@@ -260,6 +260,71 @@ describe('schema-compiler', () => {
     expect(transaction.shell.columnNavigation).toBe('single')
   })
 
+  it('reads document pages as one page with anchors unless tabs are declared', () => {
+    const objectPage = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/beleg-default',
+      layout: { floorplan: 'objectPage' },
+    })
+    expect(objectPage.shell.sectionNavigation).toBe('anchors')
+    expect(objectPage.shell.stickyHeader).toBe(true)
+
+    const transaction = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'lager/beleg-default',
+      layout: { floorplan: 'transaction', contextRail: 'audit' },
+    })
+    expect(transaction.shell.sectionNavigation).toBe('anchors')
+
+    const register = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/beleg-register',
+      layout: { floorplan: 'objectPage', sectionNavigation: 'tabs' },
+    })
+    expect(register.shell.sectionNavigation).toBe('tabs')
+    expect(register.shell.stickyHeader).toBe(false)
+
+    const worklist = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/beleg-liste',
+      mode: 'list',
+      layout: { floorplan: 'worklist', contextRail: 'none' },
+      tables: [{ key: 'rows', label: 'Zeilen', columns: [{ key: 'nr', label: 'Nr' }] }],
+    })
+    expect(worklist.shell.sectionNavigation).toBe('tabs')
+
+    const split = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/beleg-split',
+      layout: { floorplan: 'objectPage', columnNavigation: 'listDetail' },
+    })
+    expect(split.shell.sectionNavigation).toBe('tabs')
+  })
+
+  it('gives wide tables on one-page documents a row detail band, with false as opt-out', () => {
+    const wideColumns = ['a', 'b', 'c', 'd', 'e', 'f'].map((key) => ({ key, label: key.toUpperCase() }))
+    const plan = (rowDetail?: false | { fields?: Array<{ key: string; label: string }> }, sectionNavigation?: 'tabs') =>
+      compileRenderPlanFromScreenDefinition({
+        ...crmSchema(),
+        id: `crm/row-detail-${String(rowDetail)}-${sectionNavigation ?? 'anchors'}`,
+        layout: { floorplan: 'objectPage', sectionNavigation },
+        tables: [{ key: 'lines', label: 'Positionen', columns: wideColumns, rowDetail }],
+      }).tablesByKey.lines
+
+    expect(plan().rowDetail?.fields.map((field) => field.key)).toEqual(['a', 'b', 'c', 'd', 'e', 'f'])
+    expect(plan(false).rowDetail).toBeUndefined()
+    expect(plan(undefined, 'tabs').rowDetail).toBeUndefined()
+    expect(plan({ fields: [{ key: 'b', label: 'B' }] }, 'tabs').rowDetail?.fields.map((field) => field.key)).toEqual(['b'])
+
+    const narrow = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      id: 'crm/row-detail-narrow',
+      layout: { floorplan: 'objectPage' },
+      tables: [{ key: 'lines', label: 'Positionen', columns: wideColumns.slice(0, 5) }],
+    }).tablesByKey.lines
+    expect(narrow.rowDetail).toBeUndefined()
+  })
+
   it('compiles voice capability into the RenderPlan shell', () => {
     const plan = compileRenderPlanFromScreenDefinition({
       ...crmSchema(),

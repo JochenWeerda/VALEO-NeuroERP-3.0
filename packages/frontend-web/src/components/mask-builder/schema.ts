@@ -121,8 +121,10 @@ export interface ScreenTableDefinition {
   /**
    * Details der gewaehlten Zeile als Band direkt unter der Tabelle — statt Dialog
    * oder Vollansicht. Ohne `fields` zeigt das Band alle Spalten der Tabelle.
+   * Auf durchgehenden Belegseiten ist das Band ab sechs Spalten Voreinstellung;
+   * `false` schaltet es ab.
    */
-  rowDetail?: { fields?: ScreenRowDetailField[] }
+  rowDetail?: { fields?: ScreenRowDetailField[] } | false
 }
 
 export interface ScreenRowDetailField {
@@ -521,7 +523,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   const allTables = [...(screen.tables ?? []), ...(screen.tabs ?? []).flatMap((tab) => tab.tables ?? [])]
   for (const table of allTables) {
     const detailKeys = new Set<string>()
-    for (const field of table.rowDetail?.fields ?? []) {
+    for (const field of (table.rowDetail || undefined)?.fields ?? []) {
       if (!field.key?.trim() || !field.label?.trim()) {
         errors.push(`table ${table.key} rowDetail field requires key and label`)
       } else if (detailKeys.has(field.key)) {

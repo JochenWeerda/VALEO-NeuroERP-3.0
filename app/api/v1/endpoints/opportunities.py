@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
+from ....services.customer_reference import resolve_customer
 from ....integrations.crm_core_client import (
     create_opportunity as crm_create_opportunity,
     delete_opportunity as crm_delete_opportunity,
@@ -413,7 +414,7 @@ async def add_opportunity_activity(
 
 
 @router.get("/{opportunity_id}", response_model=Opportunity, summary="Opportunity abrufen")
-async def get_opportunity(opportunity_id: str):
+async def get_opportunity(opportunity_id: str, db: Session = Depends(get_db)):
     """Get a specific sales opportunity by ID."""
     try:
         opportunity = await crm_get_opportunity(opportunity_id)
@@ -423,7 +424,13 @@ async def get_opportunity(opportunity_id: str):
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve opportunity: {exc}") from exc
-    return Opportunity.model_validate(opportunity)
+    result = Opportunity.model_validate(opportunity)
+    # Resolved within the opportunity's own tenant, so the name never crosses tenants.
+    customer_ref = str(result.customer_id) if result.customer_id else None
+    kunde = resolve_customer(db, result.tenant_id, customer_ref)
+    # customer_id is always a UUID; echoing it back as "number" would put a raw key in the head.
+    number = None if kunde.number == customer_ref else kunde.number
+    return result.model_copy(update={"customer_name": kunde.name, "customer_number": number})
 
 
 @router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren")
