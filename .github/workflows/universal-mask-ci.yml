@@ -123,27 +123,41 @@ jobs:
         with:
           node-version: '22'
 
+      # pnpm statt npm — wie in jedem anderen Workflow dieses Hauses.
+      #
+      # `packages/*` gehoert laut pnpm-workspace.yaml zum pnpm-Arbeitsbereich.
+      # `npm install` hat dort einen zweiten Abhaengigkeitsbaum aufgebaut und
+      # ist an der eigenen, sieben Monate alten package-lock.json zerbrochen:
+      # "Cannot read properties of null (reading 'edgesOut')". Die
+      # package.json wurde am 14.09. von der Security-Welle angehoben, die
+      # Sperrdatei stammt vom 10. Februar — npm kam mit dem Widerspruch nicht
+      # zurecht. Eine neu erzeugte npm-Sperrdatei waere keine Loesung: Sie
+      # erfasst im pnpm-Baum nur einen Bruchteil der Pakete.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Install frontend dependencies
-        working-directory: packages/frontend-web
-        run: npm install --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Route inventory drift check (generate-tanstack-routes)
         working-directory: packages/frontend-web
         run: |
-          npm run routes:generate
+          pnpm run routes:generate
           git diff --exit-code src/app/routing/route-inventory.gen.json src/app/routing/route-tree.gen.tsx
 
       - name: TypeScript type-check
         working-directory: packages/frontend-web
-        run: npx tsc --noEmit --skipLibCheck
+        run: pnpm exec tsc --noEmit --skipLibCheck
 
       - name: Build frontend
         working-directory: packages/frontend-web
-        run: npm run build
+        run: pnpm run build
 
       - name: Run Vitest unit tests
         working-directory: packages/frontend-web
-        run: npx vitest run
+        run: pnpm exec vitest run
         continue-on-error: true
 
   bff-build:
