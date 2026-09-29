@@ -1,0 +1,350 @@
+---
+slice_id: HOME-UIX-ANWENDER-BEDIENWEGE
+id: HOME-UIX-ANWENDER-BEDIENWEGE
+title: Produktive Seiten aus Anwendersicht — Touch, Sprache, Agent
+status: in arbeit
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  Kein SAP-Lookalike. Keine FSX-Dateien. Auftrag, Rechnung, crm_360.py,
+  screen_definitions.py und KIM Object Page bleiben Claude. R5 nicht raten.
+  coverage_path_check.xml nicht committen.
+goal: >
+  Jede geöffnete produktive Seite aus Rollen (Außendienst, Annahme/Waage,
+  Disposition, Buchhaltung, Leitung) auf Touch 44px, Sprache und Agent
+  CLI/MCP prüfen und dort nachschärfen, wo der Alltag hakt. Lücken ehrlich
+  dokumentieren statt so tun, als wäre Dynamics-MCP schon da.
+file_ownership:
+  - docs/design/uix-anwender-bedienwege.md
+  - packages/frontend-web/src/components/navigation/TopBar.tsx
+  - packages/frontend-web/src/hooks/useTouchDevice.ts
+  - packages/frontend-web/src/components/shortcuts/ShortcutHelpPanel.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/VoiceBar.tsx
+  - packages/frontend-web/src/components/navigation/Breadcrumbs.tsx
+  - packages/frontend-web/src/features/copilot/CopilotDockPanel.tsx
+  - packages/frontend-web/src/pages/annahme/warteschlange.tsx
+  - packages/frontend-web/src/pages/verkauf/kunden-liste.tsx
+  - packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx
+  - packages/frontend-web/src/pages/crm/aktivitaeten.tsx
+  - packages/frontend-web/src/pages/lager/bestandsuebersicht.tsx
+  - packages/frontend-web/src/pages/fibu/offene-posten.tsx
+  - packages/frontend-web/src/pages/waage/liste.tsx
+  - packages/frontend-web/src/pages/waage/hofliste.tsx
+  - packages/frontend-web/src/pages/workflow/leitstand.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellungen-liste.tsx
+  - packages/frontend-web/src/pages/sales/lieferungen-liste.tsx
+  - packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx
+  - packages/frontend-web/src/pages/einkauf/lieferschein-erfassung.tsx
+  - packages/frontend-web/src/components/patterns/Wizard.tsx
+  - packages/frontend-web/src/pages/sales/angebot-erstellen.tsx
+  - packages/frontend-web/src/pages/verkauf/kunden-stamm.tsx
+  - packages/frontend-web/src/pages/sales/angebote-liste.tsx
+  - packages/frontend-web/src/pages/waage/wiegungen.tsx
+  - packages/frontend-web/src/pages/waage/wiegeschein-detail.tsx
+  - packages/frontend-web/src/pages/annahme/abrechnung.tsx
+  - packages/frontend-web/src/pages/einkauf/angebote-liste.tsx
+  - packages/frontend-web/src/pages/finance/buchungsvorlagen.tsx
+  - packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx
+  - packages/frontend-web/src/pages/annahme/qualitaets-check.tsx
+  - packages/frontend-web/src/pages/lager/einlagerung.tsx
+  - packages/frontend-web/src/pages/lager/auslagerung.tsx
+  - packages/frontend-web/src/pages/verladung/lkw-beladung.tsx
+  - packages/frontend-web/src/pages/disposition/liste.tsx
+  - packages/frontend-web/src/pages/verladung/liste.tsx
+  - packages/frontend-web/src/pages/lager/inventur.tsx
+  - packages/frontend-web/src/pages/kontrakte/LstKontraktUebersicht.tsx
+  - packages/frontend-web/src/pages/qualitaet/reklamationen.tsx
+  - packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx
+  - packages/frontend-web/src/pages/annahme/rohware.tsx
+  - packages/frontend-web/src/pages/qualitaet/reklamation-detail.tsx
+  - packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx
+  - packages/frontend-web/src/pages/kontrakte/KontraktAlarmDashboard.tsx
+  - packages/frontend-web/src/pages/qualitaet/labor-liste.tsx
+  - packages/frontend-web/src/pages/einkauf/lieferanten-liste.tsx
+  - packages/frontend-web/src/pages/lager/rueckverfolgbarkeit.tsx
+  - packages/frontend-web/src/pages/qualitaet/labor-auftrag.tsx
+  - packages/frontend-web/src/pages/lager/gs1-scanner.tsx
+  - packages/frontend-web/src/pages/lager/silo-mobil.tsx
+  - packages/frontend-web/src/pages/kontrakte/mengenzeitraeume.tsx
+  - packages/frontend-web/src/pages/agrar/ernte/liste.tsx
+  - packages/frontend-web/src/pages/agrar/aussaat/liste.tsx
+  - packages/frontend-web/src/pages/agrar/psm/liste.tsx
+  - packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx
+  - packages/frontend-web/src/pages/agrar/bodenproben/liste.tsx
+  - packages/frontend-web/src/pages/agrar/saatgut/sortenregister.tsx
+  - packages/frontend-web/src/pages/agrar/saatgut-liste.tsx
+  - packages/frontend-web/src/pages/lager/lagerplaetze.tsx
+  - packages/frontend-web/src/pages/agrar/feldbuch/massnahmen.tsx
+  - packages/frontend-web/src/pages/agrar/kulturpflanzen/liste.tsx
+  - packages/frontend-web/src/pages/agrar/duenger-liste.tsx
+  - packages/frontend-web/src/pages/agrar/kunden-schlagkartei.tsx
+  - packages/frontend-web/src/pages/agrar/psm/sachkunde-register.tsx
+  - packages/frontend-web/src/pages/agrar/psm/auflagen-manager.tsx
+  - packages/frontend-web/src/pages/agrar/biostimulanzien-liste.tsx
+  - packages/frontend-web/src/pages/artikel/liste.tsx
+  - packages/frontend-web/src/pages/lager/lagerbewegungen.tsx
+  - packages/frontend-web/src/pages/agrar/duenger/liste.tsx
+  - packages/frontend-web/src/pages/charge/liste.tsx
+  - packages/frontend-web/src/pages/futter/einzel/liste.tsx
+  - packages/frontend-web/src/pages/futter/misch/liste.tsx
+  - packages/frontend-web/src/pages/zertifikate/liste.tsx
+  - packages/frontend-web/src/pages/versicherungen/liste.tsx
+  - packages/frontend-web/src/pages/projekte/liste.tsx
+  - packages/frontend-web/src/pages/foerderung/liste.tsx
+  - packages/frontend-web/src/pages/schaeden/liste.tsx
+  - packages/frontend-web/src/pages/agrar/feldbuch/schlag/neu.tsx
+  - packages/frontend-web/src/pages/agrar/wetter/prognose.tsx
+  - packages/frontend-web/src/pages/agrar/psm/wasserschutz.tsx
+  - packages/frontend-web/src/pages/agrar/duenger/mischungen.tsx
+  - packages/frontend-web/src/pages/agrar/zinsabrechnung.tsx
+  - packages/frontend-web/src/pages/agrar/vermehrungsvertraege.tsx
+  - packages/frontend-web/src/pages/agrar/rohwarengruppen.tsx
+  - packages/frontend-web/src/pages/lager/massebilanz.tsx
+  - packages/frontend-web/src/pages/fuhrpark/fahrzeuge.tsx
+  - packages/frontend-web/src/pages/einkauf/warengruppen.tsx
+  - packages/frontend-web/src/pages/benachrichtigungen/liste.tsx
+  - packages/frontend-web/src/pages/fibu/debitoren.tsx
+  - packages/frontend-web/src/pages/banken/konten.tsx
+  - packages/frontend-web/src/pages/marketing/kampagnen.tsx
+  - packages/frontend-web/src/pages/personal/schulungen.tsx
+  - packages/frontend-web/src/pages/fibu/verbindlichkeiten.tsx
+  - packages/frontend-web/src/pages/transporte/fahrer-liste.tsx
+  - packages/frontend-web/src/pages/service/anfragen.tsx
+  - packages/frontend-web/src/pages/einkauf/wareneingang.tsx
+  - packages/frontend-web/src/pages/annahme/klaerung-gesperrt.tsx
+  - packages/frontend-web/src/pages/einkauf/retouren.tsx
+  - packages/frontend-web/src/pages/service/rueckmeldung.tsx
+  - packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx
+  - packages/frontend-web/src/pages/crm/opportunities-liste.tsx
+  - packages/frontend-web/src/pages/compliance/qs-checkliste.tsx
+  - packages/frontend-web/src/pages/finance/zahlungslauf-kreditoren.tsx
+  - packages/frontend-web/src/pages/finance/ustva.tsx
+  - packages/frontend-web/src/pages/finance/abschluss.tsx
+  - packages/frontend-web/src/pages/einkauf/rechnungseingaenge-liste.tsx
+  - packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx
+  - packages/frontend-web/src/pages/einkauf/gutschriften-belastungen.tsx
+  - packages/frontend-web/src/pages/einkauf/lieferanten-stamm.tsx
+  - packages/frontend-web/src/pages/dashboard/sales-dashboard.tsx
+  - packages/frontend-web/src/pages/dashboard/einkauf-dashboard.tsx
+  - packages/frontend-web/src/pages/einkauf/edi-portal.tsx
+  - packages/frontend-web/src/pages/einkauf/lieferantenbewertung.tsx
+  - packages/frontend-web/src/pages/einkauf/service-entry-sheets.tsx
+  - packages/frontend-web/src/pages/admin/benutzer-liste.tsx
+  - packages/frontend-web/src/pages/admin/rollen-verwaltung.tsx
+  - packages/frontend-web/src/pages/admin/monitoring/alerts.tsx
+  - packages/frontend-web/src/pages/system/live-monitor.tsx
+  - packages/frontend-web/src/pages/strecke/speditionen-fracht-preise.tsx
+  - packages/frontend-web/src/pages/fuhrpark/ausgehende-belege-dokumente.tsx
+  - packages/frontend-web/src/pages/versand/frachtdokumente.tsx
+  - packages/frontend-web/src/pages/produktion/produktions-dokumente-drucken.tsx
+  - packages/frontend-web/src/pages/admin/setup/dms-integration.tsx
+  - packages/frontend-web/src/pages/personal/hrm-operations-gates.tsx
+  - packages/frontend-web/src/pages/document.tsx
+  - packages/frontend-web/src/pages/produktion/mischfutter-produktion.tsx
+  - packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx
+  - packages/frontend-web/src/pages/admin/monitoring/regeln.tsx
+  - packages/frontend-web/src/pages/weighing.tsx
+  - packages/frontend-web/src/pages/inventory.tsx
+  - packages/frontend-web/src/pages/contracts-v2.tsx
+  - packages/frontend-web/src/pages/annahme/annahme-qr.tsx
+  - packages/frontend-web/src/pages/agrar/kontrakt-engagement.tsx
+  - packages/frontend-web/src/pages/agrar/kontrakt-erfuellung.tsx
+  - packages/frontend-web/src/pages/agrar/kontrakt-fixierung.tsx
+  - packages/frontend-web/src/pages/agrar/kontrakt-settlement.tsx
+  - packages/frontend-web/src/pages/agrar/ernte/neu.tsx
+  - packages/frontend-web/src/pages/agribusiness/field-service-task-neu.tsx
+  - packages/frontend-web/src/pages/agribusiness/field-service-task-edit.tsx
+  - packages/frontend-web/src/pages/agrar/psm/beratung.tsx
+  - packages/frontend-web/src/pages/crm/aktivitaet-detail.tsx
+  - packages/frontend-web/src/pages/crm/kontakt-detail.tsx
+  - packages/frontend-web/src/pages/crm/wiedervorlagen.tsx
+  - packages/frontend-web/src/pages/agrar/saatgut-stamm.tsx
+  - packages/frontend-web/src/pages/agrar/duenger-stamm.tsx
+  - packages/frontend-web/src/pages/agribusiness/farmers.tsx
+  - packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx
+  - packages/frontend-web/src/pages/agrar/maschinenauslastung.tsx
+  - packages/frontend-web/src/pages/crm/kunden-stamm.tsx
+  - packages/frontend-web/src/pages/crm/dubletten.tsx
+  - packages/frontend-web/src/pages/crm/klaerfall-inbox.tsx
+  - packages/frontend-web/src/pages/crm/bestell-inbox.tsx
+  - packages/frontend-web/src/pages/crm/vertreterstamm.tsx
+  - packages/frontend-web/src/pages/crm/vertreterprovisionen.tsx
+  - packages/frontend-web/src/pages/crm/kunden-zuordnung.tsx
+  - packages/frontend-web/src/pages/crm/betriebsprofil-detail.tsx
+  - packages/frontend-web/src/pages/crm/lead-generierung.tsx
+  - packages/frontend-web/src/pages/crm/potential-analyse.tsx
+  - packages/frontend-web/src/pages/crm/bedarfsdeckung-cockpit.tsx
+  - packages/frontend-web/src/pages/crm/durchdringungs-pipeline.tsx
+  - packages/frontend-web/src/pages/finance/mahnlauf.tsx
+  - packages/frontend-web/src/pages/lager/kommissionierung.tsx
+  - packages/frontend-web/src/pages/mobile/scanner.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellvorschlag-lager.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellvorschlag-rohware.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellvorschlag-verkauf.tsx
+  - packages/frontend-web/src/pages/finance/op-kreditoren.tsx
+  - packages/frontend-web/src/pages/finance/offene-posten-cockpit.tsx
+  - packages/frontend-web/src/pages/finance/zahlungseingang.tsx
+  - packages/frontend-web/src/pages/finance/payment-matching.tsx
+  - packages/frontend-web/src/pages/finance/periods.tsx
+  - packages/frontend-web/src/pages/lager/silo-uebersicht.tsx
+  - packages/frontend-web/src/pages/fibu/zahlungseingaenge.tsx
+  - packages/frontend-web/src/pages/finance/periodenabschluss.tsx
+  - packages/frontend-web/src/pages/lager/qs-leitstand.tsx
+  - packages/frontend-web/src/pages/finance/ap-invoices-list.tsx
+  - packages/frontend-web/src/pages/einkauf/frachtauftraege-eingang.tsx
+  - packages/frontend-web/src/pages/fibu/buchhaltungsuebersicht.tsx
+  - packages/frontend-web/src/pages/einkauf/anfrage-erfassung.tsx
+  - packages/frontend-web/src/pages/lager/materialfluss.tsx
+  - packages/frontend-web/src/pages/artikel/stamm.tsx
+  - packages/frontend-web/src/pages/dokumente/ablage.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+  - packages/frontend-web/src/components/ui/data-table.tsx
+  - packages/frontend-web/src/components/list/TouchRecordStack.tsx
+  - packages/frontend-web/src/pages/personal/zeiterfassung.tsx
+  - packages/frontend-web/src/pages/einkauf/lieferanten-stamm.tsx
+  - packages/frontend-web/src/pages/pos/terminal.tsx
+  - packages/frontend-web/src/pages/fibu/monatswerte.tsx
+  - packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx
+  - packages/frontend-web/src/pages/lager/materialfluss-visualisierung.tsx
+  - packages/frontend-web/src/pages/portal/feldbuch.tsx
+  - packages/frontend-web/src/pages/einkauf/wareneingangsabgleich.tsx
+  - packages/frontend-web/src/pages/pos/retoure.tsx
+  - packages/frontend-web/src/pages/annahme/warteschlange.tsx
+  - packages/frontend-web/src/pages/logistik/tour-fracht-arbeitsraum.tsx
+  - packages/frontend-web/src/pages/pos/uebernahme-kasse.tsx
+  - packages/frontend-web/src/pages/disposition/FrmCoverageMonitor.tsx
+  - packages/frontend-web/src/pages/disposition/LstCommodityPositionMatrix.tsx
+  - packages/frontend-web/src/pages/finance/nebenbuch-abstimmung.tsx
+  - packages/frontend-web/src/pages/personal/stundenzettel.tsx
+  - packages/frontend-web/src/pages/management/executive-dashboard.tsx
+  - packages/frontend-web/src/pages/lager/permanente-inventur.tsx
+  - packages/frontend-web/src/pages/fibu/kostenstellenrechnung.tsx
+  - packages/frontend-web/src/pages/portal/index.tsx
+  - packages/frontend-web/src/pages/fibu/elster-online.tsx
+  - packages/frontend-web/src/pages/finance/bank-abgleich.tsx
+  - packages/frontend-web/src/pages/crm/kim/
+  - packages/frontend-web/src/pages/sales/OrderEditorLegacyPage.tsx
+  - packages/frontend-web/src/pages/sales/invoice-editor.tsx
+  - packages/frontend-web/src/pages/sales/delivery-editor.tsx
+  - packages/frontend-web/src/pages/sales/delivery-editor-new.tsx
+  - packages/frontend-web/src/pages/sales/auftragskette.tsx
+  - packages/frontend-web/src/pages/sales/auftrag-lieferschein-abgleich.tsx
+  - packages/frontend-web/src/components/ui/tabs.tsx
+  - packages/frontend-web/src/components/navigation/command-palette-model.ts
+  - packages/frontend-web/src/pages/fibu/schnittstelle-fibu.tsx
+  - packages/frontend-web/src/pages/fibu/anlagen-suite.tsx
+  - packages/frontend-web/src/pages/nawaro/raps-profil.tsx
+  - packages/frontend-web/src/pages/finance/datev-export.tsx
+  - packages/frontend-web/src/pages/finance/bank-stamm.tsx
+  - packages/frontend-web/src/pages/fibu/guv.tsx
+  - packages/frontend-web/src/pages/fibu/bilanz.tsx
+  - packages/frontend-web/src/pages/finance/chart-of-accounts.tsx
+  - packages/frontend-web/src/pages/finance/wechselkurse.tsx
+  - packages/frontend-web/src/pages/fibu/sachkonto.tsx
+  - packages/frontend-web/src/features/copilot/AdvisorDock.tsx
+  - packages/frontend-web/src/components/mask-builder/ListReport.tsx
+  - packages/frontend-web/src/components/workflow/ux-standard.tsx
+  - packages/frontend-web/src/components/navigation/ModuleToolbar.tsx
+acceptance:
+  - Start auf 390px: Suche ohne Ctrl+K, Mikrofon sichtbar, Ziele nicht unter 44px gequetscht
+  - Tastenkürzel-Hover-Panel auf Touch/schmal aus
+  - Annahme-Zeilen-CTAs und Kundenliste-Werkzeugleiste min-h-touch
+  - Doku nennt 18 MCP-Tools und was ein Agent nicht kann
+  - Ablage-Export traegt data-global-button-handler=ignore; Folgezeile nur Desktop
+  - KIM, Auftrag, Rechnung und Lieferschein ohne size=sm; Struktur bleibt Claude
+  - ELSTER und Bankabgleich: Arbeit vor OperationalCaseHeader, Theater nur ohne Touch
+  - Sprache oeffne elster-online und oeffne bankabgleich trifft die Routen
+tests:
+  - packages/frontend-web/src/__tests__/components/navigation/TopBar.test.tsx
+  - packages/frontend-web/src/__tests__/pages/annahme/annahme-flow.test.tsx
+  - packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx
+  - packages/frontend-web/src/__tests__/components/navigation/ModuleToolbar.test.tsx
+  - packages/frontend-web/src/__tests__/pages/waage/liste.test.tsx
+  - packages/frontend-web/src/__tests__/pages/crm/aktivitaeten-date.test.ts
+  - packages/frontend-web/src/__tests__/pages/sales/lieferungen-liste.test.tsx
+  - packages/frontend-web/src/__tests__/pages/einkauf/lieferschein-erfassung-map.test.ts
+  - packages/frontend-web/src/__tests__/pages/verkauf/kunden-stamm-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/sales/angebote-liste.test.tsx
+  - packages/frontend-web/src/__tests__/pages/waage/wiegungen.test.tsx
+  - packages/frontend-web/src/__tests__/pages/waage/wiegeschein-detail-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx
+  - packages/frontend-web/src/__tests__/pages/annahme/abrechnung-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/einkauf/angebote-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/finance/buchungsvorlagen-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx
+  - packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/einlagerung-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/auslagerung-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/verladung/lkw-beladung-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/disposition/liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/verladung/liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/inventur-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/kontrakte/LstKontraktUebersicht-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/qualitaet/reklamationen-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/qualitaet/reklamationen.test.tsx
+  - packages/frontend-web/src/__tests__/pages/kontrakte/FrmKontraktDetail-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/annahme/rohware-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/annahme/rohware.test.tsx
+  - packages/frontend-web/src/__tests__/pages/qualitaet/reklamation-detail-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/kontrakte/KontraktPositionsmonitor-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/kontrakte/KontraktAlarmDashboard-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/qualitaet/labor-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/einkauf/lieferanten-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/rueckverfolgbarkeit-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/qualitaet/labor-auftrag-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/gs1-scanner-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/silo-mobil-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/kontrakte/mengenzeitraeume-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/ernte-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/aussaat-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/psm-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/schlagkartei-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/bodenproben-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/sortenregister-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/saatgut-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/lagerplaetze-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/massnahmen-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/kulturpflanzen-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/duenger-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/kunden-schlagkartei-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/sachkunde-register-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/auflagen-manager-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/biostimulanzien-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/artikel/liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/lager/lagerbewegungen-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/agrar/duenger-stamm-liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/charge/liste-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/betrieb/listen-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/crm-fibu-logistik-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/logistik/dispo-copilot-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/service-annahme-feldservice-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/fibu-portal-nawaro-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/leitung-controlling-admin-uix.test.ts
+  - packages/frontend-web/src/__tests__/pages/uix-runtime-restmasken.test.ts
+  - packages/frontend-web/src/__tests__/pages/uix-rollen-chrome.test.ts
+  - packages/frontend-web/src/__tests__/components/ui/data-table.test.tsx
+  - packages/frontend-web/src/__tests__/components/ui/VirtualDataTable.test.tsx
+  - packages/frontend-web/src/__tests__/components/mask-builder/framework-navigation.test.tsx
+  - packages/frontend-web/src/__tests__/lib/voice/voice.test.ts
+  - packages/frontend-web/src/pages/dokumente/ablage.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+  - packages/frontend-web/src/pages/fibu/hauptbuch.tsx
+  - packages/frontend-web/src/pages/fibu/schnittstelle-fibu.tsx
+  - packages/frontend-web/src/pages/finance/buchungsimport.tsx
+  - packages/frontend-web/src/components/ui/data-table.tsx
+  - packages/frontend-web/src/components/list/TouchRecordStack.tsx
+risks:
+  - Claude FSX/KIM bleiben ohne Kartenstapel
+  - Voice ohne Mic-Permission im Browser-Audit nicht end-to-end beweisbar; Wiegen bleibt Voice-Gate
+  - MCP bleibt leselastig; kein form-level Agent in diesem Slice
+  - Ablage hat keine Datei-URL und keinen Upload-Endpunkt; Download ist Metadaten-Text
+  - Lookup-Typen in ScreenDefinition bleiben Claude (`screen_definitions.py`)
+ai_harness:
+  fachlicher_vertrag: >
+    Finger und Stimme sind Erstklass-Kanäle für Außendienst und Waage.
+    Tastatur bleibt Erstkanal für Buchhaltung am Desktop.
+  architektur_vertrag: >
+    Keine parallele Mobile-App. Dieselbe Web-UI, denselben MCP-Vertrag,
+    keine DOM-Steuerung als Produkt-API.

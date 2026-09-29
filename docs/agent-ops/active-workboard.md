@@ -11,7 +11,6 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-
 ## BUSINESS-TIME-AGRAR-VALIDITY-20260929 — reserviert, Codex
 
 **Ziel:** Zulassungsablauf und 90-Tage-Fristen in PSM-, Saatgut- und
@@ -179,6 +178,94 @@ mit echter Button-Komponente und App-CSS bestanden, auch mit `h-6`.
 Nachweis: [QA](../quality-assurance/uix-sm-touch-20260921.md).
 **Risiken/offen:** komplette FSX-/KIM-Seitenabnahme, explizite kleinere
 min-height-Overrides, Kartenstapel-Integration und MCP-Write. UIX insgesamt offen.
+
+## HOME-UIX-ANWENDER-BEDIENWEGE — Touch, Sprache, Agent 2026-09-17, Cursor
+
+**Stand:** in Arbeit 2026-09-29, Code auf main (`e7aa92913`). BWA, Bilanz, GuV und Lastschriften:
+Arbeit zuerst, Theater nur Desktop, 44 px. CSV-Export der Bilanz ohne Global-Intercept.
+Sprache findet BWA-Auswertung / GuV-Rechnung / Lastschriften-Debitoren / Bilanz.
+Ablage: Export umgeht den Global-Intercept, Folgezeile nur Desktop.
+KIM, Auftrag, Rechnung und Lieferschein: size=sm weg, Schaltflaechen 44 px, Struktur bleibt Claude.
+Register-Tabs zentral `min-h-touch`. ELSTER und Bankabgleich: Arbeit zuerst, Theater nur Desktop.
+Sprache findet elster-online und bankabgleich.
+Naechste: MCP-Write.
+
+**Ziel:** Produktive Einstiege per Finger, Stimme und ehrlichem Agent-Vertrag
+bedienbar machen; Lücken dokumentieren statt Dynamics-MCP vortäuschen.
+
+**Dateibesitz:** `TopBar.tsx`, `useTouchDevice.ts`, `ShortcutHelpPanel.tsx`,
+`VoiceButton.tsx`, `VoiceBar.tsx`, `Breadcrumbs.tsx`, `CopilotDockPanel.tsx`,
+`ModuleToolbar.tsx`, `ernte-annahme-erfassung.tsx`, `aktivitaeten.tsx`,
+`bestandsuebersicht.tsx`, `offene-posten.tsx`, `warteschlange.tsx`,
+`verkauf/kunden-liste.tsx`, `waage/liste.tsx`, `waage/hofliste.tsx`,
+`workflow/leitstand.tsx`, `einkauf/bestellungen-liste.tsx`,
+`sales/lieferungen-liste.tsx`, `mask-builder/ListReport.tsx`,
+`verkauf/lieferschein-erfassung.tsx`,
+`einkauf/lieferschein-erfassung.tsx`,
+`patterns/Wizard.tsx`, `ui/native-select.tsx`, `ai/AskVALEO.tsx`,
+`sales/angebot-erstellen.tsx`, `verkauf/kunden-stamm.tsx`,
+`sales/angebote-liste.tsx`, `list/AdvancedFilters.tsx`,
+`waage/wiegungen.tsx`, `waage/wiegeschein-detail.tsx`,
+`annahme/abrechnung.tsx`, `einkauf/angebote-liste.tsx`,
+`finance/buchungsvorlagen.tsx`,
+`annahme/lkw-registrierung.tsx`, `annahme/qualitaets-check.tsx`,
+`lager/einlagerung.tsx`, `lager/auslagerung.tsx`,
+`verladung/lkw-beladung.tsx`, `disposition/liste.tsx`,
+`verladung/liste.tsx`, `lager/inventur.tsx`,
+`kontrakte/LstKontraktUebersicht.tsx`, `qualitaet/reklamationen.tsx`,
+`kontrakte/FrmKontraktDetail.tsx`, `annahme/rohware.tsx`,
+`qualitaet/reklamation-detail.tsx`,
+`kontrakte/KontraktPositionsmonitor.tsx`, `kontrakte/KontraktAlarmDashboard.tsx`,
+`qualitaet/labor-liste.tsx`, `einkauf/lieferanten-liste.tsx`,
+`lager/rueckverfolgbarkeit.tsx`, `qualitaet/labor-auftrag.tsx`,
+`lager/gs1-scanner.tsx`, `lager/silo-mobil.tsx`,
+`kontrakte/mengenzeitraeume.tsx`, `agrar/ernte/liste.tsx`,
+`agrar/aussaat/liste.tsx`, `agrar/psm/liste.tsx`,
+`features/copilot/CopilotDockPanel.tsx`.
+`service/anfragen.tsx`, `einkauf/wareneingang.tsx`,
+`annahme/klaerung-gesperrt.tsx`, `einkauf/retouren.tsx`,
+`service/rueckmeldung.tsx`, `agribusiness/field-service-tasks.tsx`,
+`agribusiness/field-service-task-neu.tsx`, `agribusiness/field-service-task-edit.tsx`,
+`crm/opportunities-liste.tsx`, `compliance/qs-checkliste.tsx`.
+`agrar/kontrakt-engagement.tsx`, `agrar/kontrakt-erfuellung.tsx`,
+`agrar/kontrakt-fixierung.tsx`, `agrar/kontrakt-settlement.tsx`,
+`agrar/ernte/neu.tsx`, `agrar/psm/beratung.tsx`, `agrar/psm/wasserschutz.tsx`,
+`crm/aktivitaet-detail.tsx`, `crm/kontakt-detail.tsx`, `crm/wiedervorlagen.tsx`,
+`crm/dubletten.tsx`, `crm/klaerfall-inbox.tsx`, `crm/bestell-inbox.tsx`,
+`crm/vertreterstamm.tsx`, `crm/vertreterprovisionen.tsx`,
+`agrar/saatgut-stamm.tsx`, `agrar/duenger-stamm.tsx`, `agribusiness/farmers.tsx`,
+`agrar/erntefenster-konfig.tsx`, `agrar/maschinenauslastung.tsx`,
+`crm/kunden-stamm.tsx`, `crm/kunden-zuordnung.tsx`,
+`crm/betriebsprofil-detail.tsx`, `crm/lead-generierung.tsx`,
+`crm/potential-analyse.tsx`, `crm/bedarfsdeckung-cockpit.tsx`,
+`crm/durchdringungs-pipeline.tsx`, `finance/mahnlauf.tsx`,
+`lager/kommissionierung.tsx`, `mobile/scanner.tsx`,
+`einkauf/bestellvorschlag-lager.tsx`, `einkauf/bestellvorschlag-rohware.tsx`,
+`einkauf/bestellvorschlag-verkauf.tsx`, `finance/op-kreditoren.tsx`,
+`finance/offene-posten-cockpit.tsx`, `finance/zahlungseingang.tsx`,
+`finance/payment-matching.tsx`, `finance/periods.tsx`,
+`lager/silo-uebersicht.tsx`, `fibu/zahlungseingaenge.tsx`,
+`finance/periodenabschluss.tsx`, `lager/qs-leitstand.tsx`,
+`finance/ap-invoices-list.tsx`, `einkauf/frachtauftraege-eingang.tsx`,
+`fibu/buchhaltungsuebersicht.tsx`, `einkauf/anfrage-erfassung.tsx`,
+`lager/materialfluss.tsx`, `artikel/stamm.tsx`,
+`dokumente/ablage.tsx`, `einkauf/bestellung-anlegen.tsx`,
+`ui/data-table.tsx`, `list/TouchRecordStack.tsx`,
+`fibu/zahlungslaeufe.tsx`, `fibu/op-verwaltung.tsx`,
+`einkauf/auftragsbestaetigungen-liste.tsx`, `mask-builder/ListReport.tsx`,
+`einkauf/anfragen-liste.tsx`, `fibu/offene-posten.tsx`, `fibu/buchungsjournal.tsx`,
+`fibu/elster-online.tsx`, `finance/bank-abgleich.tsx`,
+`crm/kim/` (nur 44 px, Struktur bleibt Claude),
+`sales/OrderEditorLegacyPage.tsx`, `sales/invoice-editor.tsx`,
+`sales/delivery-editor.tsx`, `sales/delivery-editor-new.tsx`,
+`sales/auftragskette.tsx`, `sales/auftrag-lieferschein-abgleich.tsx`,
+`ui/tabs.tsx`, `navigation/command-palette-model.ts`.
+`docs/design/uix-anwender-bedienwege.md`, Vitest.
+
+**Abnahme:** 390 px Start ohne gequetschte 16-px-Icons; Sprache sichtbar;
+Kunden- und Queue-CTAs ≥44 px; Doku nennt, was MCP nicht kann.
+Ablage-Export, KIM/Belege 44 px, ELSTER und Bankabgleich Arbeit-zuerst sind
+auf main (`e7aa92913`). Naechste Abnahme ist MCP-Write.
 
 ## HOME-BELEG-FIRST — Flow Spine von der Startseite 2026-09-17, Cursor
 

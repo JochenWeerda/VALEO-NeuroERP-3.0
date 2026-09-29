@@ -268,6 +268,14 @@ ersetzt aber keine Fach-Tools.
 - Mischfutter-Produktion (`/produktion/mischfutter`): Wizard zuerst.
 - Meldewesen-Konsole: Export/Import und Tabs zuerst, Theater nur Desktop.
 - Monitoring-Regeln: Formulare zuerst, Loeschen 44 px mit Guard.
+- Ablage (`/dokumente/ablage`): Export umgeht den Global-Intercept, Folgezeile
+  nur Desktop. Download bleibt ein lokaler Metadaten-Text.
+- KIM, Auftrag, Rechnung und Lieferschein: Schaltflächen 44 px, Struktur bleibt
+  Claude. Register-Tabs zentral `min-h-touch`.
+- ELSTER (`/fibu/elster-online`): Schritte zuerst, Theater nur Desktop.
+  Sprache findet `elster-online`.
+- Bankabgleich (`/finance/bank-abgleich`): ObjectPage zuerst, Theater nur
+  Desktop. Sprache findet `bankabgleich`.
 
 ## Offen (ehrlich)
 
@@ -608,12 +616,12 @@ ersetzt aber keine Fach-Tools.
 320. Auftrag (`OrderEditorLegacyPage`) — Kopf-Lookups und Positionsaktionen 44 px, Suche im Auswahldialog 44 px
 321. Rechnung (`/sales/invoice-editor`) — Druck, Export, XRechnung, ZUGFeRD ohne size=sm
 322. Lieferschein (`delivery-editor`) — Lookup-Schaltflächen 44 px mit Namen
-319. `/fibu/bwa` — Periode und Schema zuerst, Theater nur Desktop
-320. `/fibu/bilanz` — Stichtag/CSV zuerst, Theater nur Desktop
-321. `/fibu/guv` — Periode und Positionen zuerst, Theater nur Desktop
-322. `/finance/lastschriften-debitoren` — ObjectPage zuerst, 44-px-Positionen, Theater nur Desktop
-323. `/fibu/elster-online` — Schritte zuerst, Periode und XML 44 px, Theater nur Desktop
-324. `/finance/bank-abgleich` — ObjectPage zuerst, Theater nur Desktop
+323. `/fibu/bwa` — Periode und Schema zuerst, Theater nur Desktop
+324. `/fibu/bilanz` — Stichtag/CSV zuerst, Theater nur Desktop
+325. `/fibu/guv` — Periode und Positionen zuerst, Theater nur Desktop
+326. `/finance/lastschriften-debitoren` — ObjectPage zuerst, 44-px-Positionen, Theater nur Desktop
+327. `/fibu/elster-online` — Schritte zuerst, Periode und XML 44 px, Theater nur Desktop
+328. `/finance/bank-abgleich` — ObjectPage zuerst, Theater nur Desktop
 
 Agent-Ist je Seite: Wiegeschein *listen* (`agrar.weighing_ticket.list`), OP *listen*
 (`fibu.open_items.list`), Bestand *lesen* (`lager.bestand.get`), Kontakt *loggen*

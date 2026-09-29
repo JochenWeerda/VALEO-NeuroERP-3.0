@@ -4,12 +4,118 @@ type: reference
 audience: [entwickler, agent]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-07-06
+last_reviewed: 2026-09-29
 version: 3.4.0
 description: Tracker aller bekannten offenen Luecken, Issues und technischen Schulden in VALEO NeuroERP — Referenz fuer Priorisierung und Gap-Closure.
 ---
 
 # Open Gaps and Known Issues
+
+## HOME-UIX-ANWENDER-BEDIENWEGE — Touch, Sprache, Agent (2026-09-17)
+
+Status: **in Arbeit.** Diagnose und erster Schnitt:
+[`docs/design/uix-anwender-bedienwege.md`](../design/uix-anwender-bedienwege.md).
+Chrome (Top-Leiste, Sprache, Tastenkürzel auf Touch), Queue, Kundenliste,
+Ernte-Annahme, Aktivitäten (Datumsfilter), Bestand, OP, Waage-Liste,
+Hofliste und Prozessleitstand nachgeschärft. Bestellungen- und Lieferungen-Liste
+Arbeit zuerst. Verkauf-Lieferschein 44 px. Einkauf-Wareneingang 44 px inkl.
+LS-Suche/Niederlassung. Wizard/NativeSelect 44 px. Angebot 44 px, DS nur Desktop.
+Kundenstamm Register 44 px ohne Tab-23-Copy. Copilot-FAB auf Touch aus,
+Öffnen über Benutzermenü. Angebotsliste Arbeit zuerst, DS nur Desktop.
+Wiegungen: Anlegen zuerst, Schließen 44 px. Wiegeschein-Detail Register 44 px.
+Annahme-Abrechnung: Lieferdaten zuerst, Korrekturen 44 px, kein Settlement-MCP.
+Einkauf-Angebotsliste: ListReport zuerst, DS-Theater nur Desktop.
+Buchungsvorlagen: Anwenden/Löschen 44 px, Anlegen ehrlich noch API.
+LKW-Registrierung und Qualitätsprüfung: Wizard zuerst, Scan/QS 44 px.
+Ein-/Auslagerung und Beladung: Wizard zuerst. Disposition: Tabelle zuerst.
+Verladung-Liste und Inventur: Arbeit zuerst. Kontraktliste: Tipp statt Doppelklick.
+Reklamationen: Tabelle zuerst, kein Rohrot.
+Kontrakt-Detail: Operator-h1, Register 44 px. Rohware: Wizard zuerst.
+Positionsmonitor/Alarme/Labor-Liste: Arbeit zuerst, 44 px.
+Lieferanten, Rückverfolgbarkeit, Labor-Auftrag nachgezogen.
+Silo-Terminal, Mengenzeiträume, Ernte/Aussaat/PSM-Listen nachgezogen.
+Schlagkartei, Bodenproben, Sortenregister, Saatgut-Liste, Lagerplätze nachgezogen.
+Maßnahmen, Kulturpflanzen, Dünger, Kunden-Schlagkartei nachgezogen.
+Sachkunde, Auflagen, Biostimulanzien, Artikel, Lagerbewegungen,
+Düngemittel-Stamm, Chargen, Futter, Zertifikate, Versicherungen, Projekte,
+Förderung, Schäden, Schlag-anlegen nachgezogen (Code; Browser folgt).
+Listen-Kartenstapel gilt für DataTable, ListReport und FastTable; form-level MCP bleibt offen.
+Commit `e7aa92913`: Ablage-Export ohne Global-Intercept; KIM, Auftrag, Rechnung
+und Lieferschein 44 px bei unveränderter Claude-Struktur; Register-Tabs
+`min-h-touch`; ELSTER und Bankabgleich Arbeit zuerst, Theater nur Desktop;
+Sprache findet `elster-online` und `bankabgleich`. MCP-Write bleibt offen.
+
+| Lücke | Prio | Stand |
+|---|---|---|
+| Top-Leiste auf 390 px unter 44 px gequetscht; Ctrl+K; Mikrofon `hidden sm:` | P1 | geschlossen im Chrome |
+| Tastenkürzel-Panel mit Hover-Modus auf Handy | P2 | geschlossen (`useTouchDevice` inkl. Breite) |
+| Queue-Zeilen-CTAs `size="sm"` ohne Touch-Höhe | P1 Annahme | geschlossen |
+| Kundenliste Rohblau-Link, knappe Toolbar | P2 Außendienst | geschlossen |
+| Ernte-Annahme 32-px-Felder, unbenannte Lookups | P1 Waage | geschlossen |
+| Aktivitäten KPI vor der Arbeit, Rohblau | P2 Außendienst | geschlossen |
+| Bestand Roh-Orange/Grün, kleine Drilldowns | P2 Disposition | geschlossen |
+| OP Rohblau, knappe Suche | P2 Buchhaltung | geschlossen |
+| Aktivitäten Heute/Diese Woche tot | P2 Außendienst | geschlossen |
+| Waage-Liste Arbeit unter DS-Theater | P1 Annahme | geschlossen |
+| Hofliste F-Tasten-Copy, knappe CTAs | P1 Annahme | geschlossen |
+| Prozessleitstand size=sm, Rohblau | P2 Leitung | geschlossen |
+| Bestellungen-Liste Arbeit unter DS-Theater | P1 Einkauf | geschlossen |
+| Lieferungen tot-Export, Rohblau, DS zuerst | P2 Versand | geschlossen |
+| Lieferschein-Erfassung 32-px-Felder | P1 Verkauf | geschlossen |
+| Einkauf-Wareneingang tote Lookups, 32 px | P1 Einkauf | geschlossen |
+| Angebot 32 px, tot-Chevrons, Doppelklick, DS zuerst | P1 Außendienst | geschlossen |
+| Kundenstamm Tab-23-Copy, 32-px-Zeilen, Header quetscht | P1 Außendienst | geschlossen |
+| Copilot-FAB verdeckt Felder auf 390 px | P1 Außendienst | geschlossen (Menü statt FAB) |
+| Angebotsliste Rollenfokus vor Suche, Rohblau | P1 Außendienst | geschlossen |
+| Wiegungen Theater vor Anlegen, Schließen size=sm | P1 Annahme | geschlossen |
+| Wiegeschein-Detail Eigenbau-Reiter, Theater zuerst | P1 Annahme | geschlossen |
+| Annahme-Abrechnung size=sm, Englisch, Theater zuerst | P1 Buchhaltung | geschlossen |
+| Einkauf-Angebotsliste Theater vor der Liste | P1 Einkauf | geschlossen |
+| Buchungsvorlagen size=sm, tote Neue-Vorlage | P1 Buchhaltung | geschlossen |
+| LKW-Registrierung Theater vor Wizard, Rohblau | P1 Annahme | geschlossen |
+| Qualitätsprüfung size=sm, Theater zuerst | P1 QS | geschlossen |
+| Einlagerung/Auslagerung Rohgrün, Fallkopf zuerst | P1 Disposition | geschlossen |
+| Disposition KPI vor der Tabelle | P1 Disposition | geschlossen |
+| Verladung-Liste KPI vor der Arbeit | P1 Disposition | geschlossen |
+| Inventur Fallkopf/KPI zuerst, 16-px-Checkbox | P1 Disposition | geschlossen |
+| Kontraktliste size=sm Pager, nur Doppelklick | P1 Handel | geschlossen |
+| Reklamationen Fallkopf/KPI zuerst, Hover-Blau | P1 QS | geschlossen |
+| Kontrakt-Detail Formularname, size=sm, Theater zuerst | P1 Handel | geschlossen |
+| Rohware Theater/KPI vor dem Wizard | P1 Annahme | geschlossen |
+| Reklamation-Detail Hover-Blau, Icon-Zurück | P1 QS | geschlossen |
+| Positionsmonitor Doppelklick, 16-px-Checkbox, KPI zuerst | P1 Handel | geschlossen |
+| Kontrakt-Alarme size=sm, KPI-Theater | P1 Handel | geschlossen |
+| Labor-Liste Hover-Blau, Theater zuerst | P1 QS | geschlossen |
+| Lieferanten Hover-Blau, KPI zuerst | P1 Einkauf | geschlossen |
+| Rückverfolgbarkeit size=sm, Hover-Punkte | P1 QS/Lager | geschlossen |
+| Labor-Auftrag 16-px-Checkbox, natives Select | P1 QS | geschlossen |
+| GS1-Scanner Eigenbau-Reiter, Rohindigo | P1 Lager | geschlossen |
+| Silo-Terminal Rohfarben, 40-px-Lagerwahl, nur Farbpunkte | P1 Disposition | geschlossen |
+| Mengenzeiträume Icon-Löschen, size=sm | P1 Handel | geschlossen |
+| Ernte/Aussaat/PSM Hover-Blau, tote Aussaat-Suche | P1 Agrar | geschlossen |
+| Schlagkartei Hover-Blau, Icon-Aktionen, Theater zuerst | P1 Agrar | geschlossen |
+| Bodenproben/Sorten Hover-Blau, KPI zuerst | P1 Agrar | geschlossen |
+| Saatgut-Liste size=sm Icons, KPI zuerst | P1 Agrar | geschlossen |
+| Lagerplätze size=sm, natives Select, Theater zuerst | P1 Disposition | geschlossen |
+| Maßnahmen Hover-Blau, Icon-Aktionen, Theater zuerst | P1 Agrar | geschlossen |
+| Kulturpflanzen Hover-Blau, KPI zuerst | P1 Agrar | geschlossen |
+| Dünger size=sm Icons, KPI zuerst | P1 Agrar | geschlossen |
+| Kunden-Schlagkartei size=sm, Rohamber, KPI zuerst | P1 Innendienst | geschlossen |
+| Sachkunde/Auflagen Hover-Blau, Icon-Erledigt | P1 Agrar | geschlossen |
+| Artikel toter Export, Hover-Blau | P1 Stamm | geschlossen |
+| Lagerbewegungen size=icon, englische Typen | P1 Disposition | geschlossen |
+| Chargen/Futter/Zertifikate/Versicherungen/Projekte/Förderung/Schäden Hover-Blau | P1 Betrieb | geschlossen |
+| Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
+| Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
+| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | dokumentiert, nicht gebaut |
+| KIM Object Page | P1 | Claude Sprint 3 |
+| Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
+| Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |
+| Ablage-Export vom Global-Handler geschluckt; Folgezeile abgeschnitten | P1 Dokumente | geschlossen 2026-09-29 (`e7aa92913`) |
+| KIM/Auftrag/Rechnung/Lieferschein `size=sm` unter 44 px | P1 Innendienst | geschlossen 2026-09-29; Struktur bleibt Claude |
+| ELSTER Theater vor den Schritten | P1 Buchhaltung | geschlossen 2026-09-29; Sprache `elster-online` |
+| Bankabgleich Theater vor der ObjectPage | P1 Buchhaltung | geschlossen 2026-09-29; Sprache `bankabgleich` |
+| Übrige Fachmasken Seite für Seite | P1 | Slice weiter; MCP-Write offen |
 
 ## HOME-IA-HIERARCHIE — Startseite zu viele Ebenen gleichzeitig (2026-09-17)
 
