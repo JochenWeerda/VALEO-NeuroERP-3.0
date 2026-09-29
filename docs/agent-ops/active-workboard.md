@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BUSINESS-TIME-PORTAL-20260929 — reserviert, Codex
+
+**Ziel:** Die Tagesstatistik des Portal-Shops am konfigurierten Geschaeftstag
+statt am UTC-Kalendertag abgrenzen.
+**Dateibesitz:** `app/api/v1/endpoints/portal_shop.py`, eigener fokussierter Test,
+eigene Slice-/QA-Doku, BUSINESS-TIME-Restpunkt in Open-Gaps und dieser Abschnitt.
+**Abnahme:** Zwischen lokalem und UTC-Mitternachtstag verwendet die Statistik
+den lokalen Geschaeftstag; bestehende Wochen- und technische Zeitstempel bleiben
+unveraendert; gezielter Test und Doku-Gates sind gruen.
+**Risiken:** Keine pauschale Umstellung aller UTC-Zeitstempel im Portal-Shop.
+
 ## UIX-LEGACY-ROUTES-VERIFY-20260927 — abgeschlossen, Codex
 
 **Ziel:** Den als offen gefuehrten UIX-Legacy-Routen-Gap gegen den aktuellen
