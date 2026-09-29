@@ -199,18 +199,24 @@ jobs:
         with:
           node-version: '22'
 
+      # Auch hier pnpm: Derselbe npm-Fehler hat diesen Job gerissen, nachdem
+      # der Frontend-Job schon gruen war.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Install frontend dependencies
-        working-directory: packages/frontend-web
-        run: npm install --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         working-directory: packages/frontend-web
-        run: npx playwright install chromium --with-deps
+        run: pnpm exec playwright install chromium --with-deps
 
       - name: Run Playwright smoke tests
         working-directory: packages/frontend-web
         run: |
-          npx playwright test \
+          pnpm exec playwright test \
             tests/e2e/universal-mask-filter-plan.spec.ts \
             tests/e2e/uix-056-native-route-smoke.spec.ts \
             --project=chromium
