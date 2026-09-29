@@ -33,12 +33,12 @@ function ArtifactActions({ doc, a }: { doc: string; a: ArtifactItem }) {
     })
   }
   if (a.freigabe_status === 'entwurf') {
-    return <Button size="sm" variant="ghost" onClick={() => act('freigegeben')} disabled={setFreigabe.isPending}>
+    return <Button variant="ghost" onClick={() => act('freigegeben')} disabled={setFreigabe.isPending} className="min-h-touch">
       {setFreigabe.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <CheckCircle2 size={13} className="mr-1 text-status-success" />}Freigeben
     </Button>
   }
   if (a.freigabe_status === 'freigegeben') {
-    return <Button size="sm" variant="ghost" onClick={() => act('archiviert')} disabled={setFreigabe.isPending}>
+    return <Button variant="ghost" onClick={() => act('archiviert')} disabled={setFreigabe.isPending} className="min-h-touch">
       {setFreigabe.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Archive size={13} className="mr-1" />}Archivieren
     </Button>
   }
@@ -72,7 +72,7 @@ function UploadForm({ doc }: { doc: string }) {
           </label>
         </div>
         <div className="flex justify-end">
-          <Button size="sm" onClick={submit} disabled={!valid || upload.isPending}>
+          <Button onClick={submit} disabled={!valid || upload.isPending} className="min-h-touch">
             {upload.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Upload size={14} className="mr-1" />}
             Hochladen
           </Button>
@@ -96,7 +96,7 @@ export default function ArtefaktFreigabePage() {
       <div className="flex items-center gap-2">
         <FileCheck2 size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Artefakt-Upload & Freigabe</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void docs.refetch()} disabled={docs.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => void docs.refetch()} disabled={docs.isFetching}>
           {docs.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>

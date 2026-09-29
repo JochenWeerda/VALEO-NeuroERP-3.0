@@ -78,7 +78,7 @@ export default function LeadGenerierungPage(): JSX.Element {
             <Input type="number" min={1} max={2000} className="w-28" value={form.maxLeads}
               onChange={(e) => set({ maxLeads: Number(e.target.value) || 200 })} />
           </label>
-          <Button onClick={() => setRun(true)} disabled={preview.isFetching && run}>
+          <Button onClick={() => setRun(true)} className="min-h-touch" disabled={preview.isFetching && run}>
             <Search className="mr-1 h-4 w-4" /> Vorschau generieren
           </Button>
         </CardContent>
@@ -96,7 +96,7 @@ export default function LeadGenerierungPage(): JSX.Element {
                 <Badge variant="secondary">{nf(leadsCount.data)} Leads im CRM</Badge>
               )}
               <Button
-                size="sm"
+                className="min-h-touch"
                 onClick={handleUebernehmen}
                 disabled={items.length === 0 || uebernehmen.isPending}
               >

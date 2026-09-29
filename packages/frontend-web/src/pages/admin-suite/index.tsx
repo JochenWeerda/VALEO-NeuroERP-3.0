@@ -86,7 +86,7 @@ function EvidenceCard({ item }: { item: ReadinessEvidence }): JSX.Element {
           </ul>
         ) : null}
         {link ? (
-          <Button asChild size="sm" variant="outline">
+          <Button asChild variant="outline" className="min-h-touch">
             <Link to={link}>Bereich oeffnen</Link>
           </Button>
         ) : (

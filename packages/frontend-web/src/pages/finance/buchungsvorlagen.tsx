@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FileText, Plus, Play, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 type TemplateLine = {
   account_number: string
@@ -66,15 +67,31 @@ function useApplyTemplate() {
 
 function useDeleteTemplate() {
   const qc = useQueryClient()
+  const { toast } = useToast()
   return useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/api/v1/finance/booking-templates/${id}`)
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['finance', 'booking-templates'] }),
+    onSuccess: () => {
+      toast({ title: 'Vorlage gelöscht' })
+      void qc.invalidateQueries({ queryKey: ['finance', 'booking-templates'] })
+    },
+    onError: () => {
+      toast({ title: 'Löschen fehlgeschlagen', description: 'Die Vorlage konnte nicht gelöscht werden.', variant: 'destructive' })
+    },
   })
 }
 
-const CATEGORIES = ['GENERAL', 'RECURRING', 'PAYROLL', 'DEPRECIATION', 'TAX', 'INTERCOMPANY']
+const CATEGORIES = ['GENERAL', 'RECURRING', 'PAYROLL', 'DEPRECIATION', 'TAX', 'INTERCOMPANY'] as const
+
+const CATEGORY_LABELS: Record<(typeof CATEGORIES)[number], string> = {
+  GENERAL: 'Allgemein',
+  RECURRING: 'Wiederkehrend',
+  PAYROLL: 'Personal',
+  DEPRECIATION: 'Abschreibung',
+  TAX: 'Steuer',
+  INTERCOMPANY: 'Konzern',
+}
 
 function ApplyDialog({ template, onClose }: { template: BookingTemplate; onClose: () => void }) {
   const apply = useApplyTemplate()
@@ -83,13 +100,17 @@ function ApplyDialog({ template, onClose }: { template: BookingTemplate; onClose
   const [result, setResult] = useState<ApplyResult | null>(null)
 
   const handleApply = async () => {
-    const res = await apply.mutateAsync({ id: template.id, amount: parseFloat(amount), entry_date: date })
-    setResult(res as unknown as ApplyResult)
+    try {
+      const res = await apply.mutateAsync({ id: template.id, amount: parseFloat(amount), entry_date: date })
+      setResult(res as unknown as ApplyResult)
+    } catch {
+      // Fehlertext unter den Knöpfen über apply.isError
+    }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3">
+      <Card className="max-h-[90vh] w-full max-w-md overflow-y-auto">
         <CardHeader>
           <CardTitle>Vorlage anwenden: {template.name}</CardTitle>
         </CardHeader>
@@ -100,14 +121,16 @@ function ApplyDialog({ template, onClose }: { template: BookingTemplate; onClose
               <p>Buchungs-Nr.: <span className="font-mono font-semibold">{result.entry_number}</span></p>
               <p>Soll: <span className="font-semibold">{Number(result.total_debit).toFixed(2)} {template.currency}</span></p>
               <p>Haben: <span className="font-semibold">{Number(result.total_credit).toFixed(2)} {template.currency}</span></p>
-              <Button className="w-full" onClick={onClose}>Schließen</Button>
+              <Button className="min-h-touch w-full touch-manipulation" onClick={onClose}>Schließen</Button>
             </div>
           ) : (
             <>
               <div className="space-y-1">
                 <Label>Betrag ({template.currency})</Label>
                 <Input
+                  className="min-h-touch text-base"
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min="0"
                   required
@@ -118,18 +141,19 @@ function ApplyDialog({ template, onClose }: { template: BookingTemplate; onClose
               <div className="space-y-1">
                 <Label>Buchungsdatum</Label>
                 <Input
+                  className="min-h-touch text-base"
                   type="date"
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2">
-                <Button onClick={handleApply} disabled={apply.isPending || !amount}>
+              <div className="flex flex-wrap gap-2">
+                <Button className="min-h-touch touch-manipulation" onClick={() => { void handleApply() }} disabled={apply.isPending || !amount}>
                   <Play className="h-4 w-4 mr-2" />
                   {apply.isPending ? 'Buche…' : 'Buchung erstellen'}
                 </Button>
-                <Button variant="outline" onClick={onClose}>Abbrechen</Button>
+                <Button variant="outline" className="min-h-touch touch-manipulation" onClick={onClose} disabled={apply.isPending}>Abbrechen</Button>
               </div>
               {apply.isError && (
                 <p className="text-status-error text-sm">Fehler beim Anwenden der Vorlage.</p>
@@ -160,7 +184,7 @@ function TemplateCard({ template }: { template: BookingTemplate }) {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline">{template.category}</Badge>
+              <Badge variant="outline">{CATEGORY_LABELS[template.category as (typeof CATEGORIES)[number]] ?? template.category}</Badge>
               <Badge variant={template.active ? 'default' : 'secondary'}>
                 {template.active ? 'Aktiv' : 'Inaktiv'}
               </Badge>
@@ -169,7 +193,7 @@ function TemplateCard({ template }: { template: BookingTemplate }) {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>Auslöser: <strong className="text-foreground">{template.trigger_type}</strong></span>
+            <span>Auslöser: <strong className="text-foreground">{template.trigger_type === 'manual' ? 'manuell' : template.trigger_type}</strong></span>
             <span>Währung: <strong className="text-foreground">{template.currency}</strong></span>
             {template.default_amount && (
               <span>Standardbetrag: <strong className="text-foreground">
@@ -179,7 +203,8 @@ function TemplateCard({ template }: { template: BookingTemplate }) {
           </div>
 
           <button
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            type="button"
+            className="inline-flex min-h-touch items-center gap-1 text-sm text-muted-foreground touch-manipulation hover:text-foreground"
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -211,16 +236,18 @@ function TemplateCard({ template }: { template: BookingTemplate }) {
             </div>
           )}
 
-          <div className="flex gap-2 pt-1">
-            <Button size="sm" onClick={() => setApplying(true)} disabled={!template.active}>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button className="min-h-touch touch-manipulation" onClick={() => setApplying(true)} disabled={!template.active}>
               <Play className="h-3 w-3 mr-1" />
               Anwenden
             </Button>
             <Button
-              size="sm"
               variant="ghost"
-              className="text-status-error hover:text-status-error"
-              onClick={() => deleteTemplate.mutate(template.id)}
+              className="min-h-touch touch-manipulation text-status-error hover:text-status-error"
+              onClick={() => {
+                if (!window.confirm(`Vorlage „${template.name}“ wirklich löschen?`)) return
+                deleteTemplate.mutate(template.id)
+              }}
               disabled={deleteTemplate.isPending}
             >
               <Trash2 className="h-3 w-3 mr-1" />
@@ -236,19 +263,28 @@ function TemplateCard({ template }: { template: BookingTemplate }) {
 export default function BuchungsvorlagenPage(): JSX.Element {
   const { data: templates = [], isLoading } = useBookingTemplates()
   const [filterCategory, setFilterCategory] = useState('')
+  const { toast } = useToast()
 
   const filtered = filterCategory
     ? templates.filter((t) => t.category === filterCategory)
     : templates
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Buchungsvorlagen</h1>
-          <p className="text-muted-foreground">Automatische Buchungsschemata für wiederkehrende Buchungen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Buchungsvorlagen</h1>
+          <p className="text-muted-foreground">Wiederkehrende Buchungsschemata anwenden</p>
         </div>
-        <Button>
+        <Button
+          className="min-h-touch touch-manipulation"
+          onClick={() => {
+            toast({
+              title: 'Anlegen folgt noch',
+              description: 'Neue Vorlagen legt die Buchhaltung derzeit über die API an. Anwenden und Löschen gehen hier.',
+            })
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Neue Vorlage
         </Button>
@@ -256,8 +292,8 @@ export default function BuchungsvorlagenPage(): JSX.Element {
 
       <div className="flex gap-2 flex-wrap">
         <Button
-          size="sm"
           variant={filterCategory === '' ? 'default' : 'outline'}
+          className="min-h-touch touch-manipulation"
           onClick={() => setFilterCategory('')}
         >
           Alle
@@ -265,11 +301,11 @@ export default function BuchungsvorlagenPage(): JSX.Element {
         {CATEGORIES.map((cat) => (
           <Button
             key={cat}
-            size="sm"
             variant={filterCategory === cat ? 'default' : 'outline'}
+            className="min-h-touch touch-manipulation"
             onClick={() => setFilterCategory(cat)}
           >
-            {cat}
+            {CATEGORY_LABELS[cat]}
           </Button>
         ))}
       </div>

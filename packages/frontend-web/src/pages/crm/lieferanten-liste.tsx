@@ -63,7 +63,7 @@ const createLieferantenListConfig = (t: TFunction): ListConfig => ({
     {
       key: 'email',
       label: t('crud.fields.email', { defaultValue: 'E-Mail' }),
-      render: (value) => value ? <a href={`mailto:${value}`} className="text-blue-600 hover:underline">{value}</a> : '-'
+      render: (value) => value ? <a href={`mailto:${value}`} className="min-h-11 inline-flex items-center text-primary touch-manipulation">{value}</a> : '-'
     },
     {
       key: 'zahlungsbedingungen',

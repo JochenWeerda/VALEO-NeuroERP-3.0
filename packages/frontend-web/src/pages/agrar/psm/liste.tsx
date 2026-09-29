@@ -55,8 +55,9 @@ export default function PSMListePage(): JSX.Element {
       label: 'Mittel',
       render: (psm: PSM) => (
         <button
+          type="button"
           onClick={() => navigate(`/agrar/psm/stamm/${psm.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {psm.mittel}
         </button>
@@ -133,13 +134,13 @@ export default function PSMListePage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Pflanzenschutzmittel</h1>
-          <p className="text-muted-foreground">PSM-Stammdaten</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Pflanzenschutzmittel</h1>
+          <p className="text-muted-foreground">Mittel suchen und öffnen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/psm/stamm/neu')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/psm/stamm/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neues PSM
         </Button>
@@ -150,17 +151,18 @@ export default function PSMListePage(): JSX.Element {
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Suche nach Mittel oder Wirkstoff..."
+                aria-label="Suche Pflanzenschutzmittel"
+                placeholder="Mittel oder Wirkstoff suchen"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="min-h-touch pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

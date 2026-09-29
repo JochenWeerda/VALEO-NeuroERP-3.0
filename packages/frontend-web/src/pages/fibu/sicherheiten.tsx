@@ -52,7 +52,7 @@ export default function SicherheitenPage(): JSX.Element {
       key: 'kunde' as const,
       label: 'Kunde',
       render: (s: Sicherheit) => (
-        <button onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {s.kunde}
         </button>
       ),

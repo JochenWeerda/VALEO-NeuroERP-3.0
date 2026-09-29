@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, ChevronDown, ChevronUp } from 'lucide-react'
 
 type GruppeFormData = {
   gruppe_nr: string
@@ -204,12 +204,11 @@ function StaffelPanel({ gruppe }: { gruppe: ProvisionsGruppe }) {
                     {fields.length > 1 && (
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon"
+                        variant="outline"
+                        className="min-h-touch"
                         onClick={() => remove(idx)}
-                        aria-label={`Staffelzeile ${idx + 1} entfernen`}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        Entfernen
                       </Button>
                     )}
                   </div>
@@ -218,7 +217,7 @@ function StaffelPanel({ gruppe }: { gruppe: ProvisionsGruppe }) {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                className="min-h-touch"
                 onClick={() =>
                   append({
                     zeile_nr: String(fields.length + 1),
@@ -231,7 +230,7 @@ function StaffelPanel({ gruppe }: { gruppe: ProvisionsGruppe }) {
                 Zeile
               </Button>
             </div>
-            <Button type="submit" disabled={isSubmitting} size="sm" aria-label="Staffel speichern">
+            <Button type="submit" disabled={isSubmitting} className="min-h-touch" aria-label="Staffel speichern">
               Staffel anlegen
             </Button>
           </form>
@@ -436,13 +435,12 @@ export default function VertreterprovisionsPage() {
                       </TableCell>
                       <TableCell>
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={`Provisionsgruppe ${g.gruppe_nr} löschen`}
+                          variant="outline"
+                          className="min-h-touch"
                           disabled={deletingKey === g.gruppe_nr}
                           onClick={() => handleDelete(g.gruppe_nr)}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          Deaktivieren
                         </Button>
                       </TableCell>
                     </TableRow>

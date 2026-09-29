@@ -11,9 +11,11 @@ import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertTriangle, Award, FileDown, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function SachkundeRegisterPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const searchRef = useRef<HTMLInputElement | null>(null)
   const { data: sachkunde = [], isError, error, refetch } = useSachkundeRegister()
@@ -41,7 +43,7 @@ export default function SachkundeRegisterPage(): JSX.Element {
       key: 'kunde' as const,
       label: 'Kunde',
       render: (s: Sachkundenachweis) => (
-        <button onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {s.kunde}
         </button>
       ),
@@ -71,19 +73,19 @@ export default function SachkundeRegisterPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">PSM-Sachkunde-Register</h1>
-          <p className="text-muted-foreground">Sachkundenachweis nach Paragraf 9 PflSchG</p>
+          <h1 className="text-2xl font-bold md:text-3xl">PSM-Sachkunde-Register</h1>
+          <p className="text-muted-foreground">Nachweise suchen und pruefen</p>
         </div>
-        <Button onClick={() => navigate('/compliance/sachkunde-neu')} className="gap-2"><Plus className="h-4 w-4" />Nachweis erfassen</Button>
+        <Button onClick={() => navigate('/compliance/sachkunde-neu')} className="min-h-touch gap-2 touch-manipulation"><Plus className="h-4 w-4" />Nachweis erfassen</Button>
       </div>
 
       {ablaufend > 0 && (
-        <Card className="border-orange-500 bg-orange-50">
+        <Card className="border-status-warning/40 bg-status-warning/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
+            <div className="flex items-center gap-2 text-status-warning">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{ablaufend} Nachweis(e) laufen in den naechsten 3 Monaten ab!</span>
             </div>
@@ -95,19 +97,21 @@ export default function SachkundeRegisterPage(): JSX.Element {
         <div className="flex items-center gap-2"><Award className="h-4 w-4" /><p className="font-semibold">Verkaufsvoraussetzung PSM</p></div>
       </Callout>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Nachweise Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{sachkunde.length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{sachkunde.filter((s) => s.status === 'gueltig').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laeuft ab (3 Mon.)</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{ablaufend}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgelaufen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-error">{sachkunde.filter((s) => s.status === 'abgelaufen').length}</span></CardContent></Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input ref={searchRef} placeholder="Suche Kunde oder Nachweis-Nr..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div>
-            <Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input ref={searchRef} aria-label="Suche Sachkundenachweise" placeholder="Kunde oder Nachweis-Nr" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" /></div>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation"><FileDown className="h-4 w-4" />Export</Button>
           </div>
         </CardContent>
       </Card>

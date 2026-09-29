@@ -234,12 +234,13 @@ export default function PartiestammPage(): JSX.Element {
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            className="min-h-touch"
             disabled={isMutating && deletePending === row.partie_nr}
             onClick={() => void removePartie(row.partie_nr)}
             aria-label={`${row.partie_nr} deaktivieren`}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Löschen
           </Button>
         </div>
       ),
@@ -257,12 +258,13 @@ export default function PartiestammPage(): JSX.Element {
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            className="min-h-touch"
             disabled={isMutating && deleteGruppePending === row.gruppe_nr}
             onClick={() => void removeGruppe(row.gruppe_nr)}
             aria-label={`${row.gruppe_nr} deaktivieren`}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Löschen
           </Button>
         </div>
       ),

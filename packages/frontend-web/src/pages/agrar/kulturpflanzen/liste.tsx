@@ -10,10 +10,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { useToast } from '@/hooks/use-toast'
 import { FileDown, Plus, Search, Sprout } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function KulturpflanzenListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useKulturen()
 
@@ -57,13 +59,17 @@ export default function KulturpflanzenListePage(): JSX.Element {
       key: 'name' as const,
       label: 'Kulturpflanze',
       render: (k: Kultur) => (
-        <button onClick={() => navigate(`/agrar/kulturpflanzen/${k.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button
+          type="button"
+          onClick={() => navigate(`/agrar/kulturpflanzen/${k.id}`)}
+          className="min-h-11 font-medium text-primary touch-manipulation"
+        >
           {k.name}
         </button>
       ),
     },
     { key: 'kategorie' as const, label: 'Kategorie', render: (k: Kultur) => <Badge variant="outline">{k.kategorie}</Badge> },
-    { key: 'flaeche' as const, label: 'Flaeche (ha)', render: (k: Kultur) => `${k.flaeche} ha` },
+    { key: 'flaeche' as const, label: 'Fläche (ha)', render: (k: Kultur) => `${k.flaeche} ha` },
     { key: 'ertrag' as const, label: 'Ertrag (t/ha)', render: (k: Kultur) => `${k.ertrag} t/ha` },
     {
       key: 'preis' as const,
@@ -80,18 +86,19 @@ export default function KulturpflanzenListePage(): JSX.Element {
   const gesamtFlaeche = kulturen.reduce((sum, k) => sum + k.flaeche, 0)
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Kulturpflanzen</h1>
-          <p className="text-muted-foreground">Anbau-Uebersicht & Deckungsbeitraege</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Kulturpflanzen</h1>
+          <p className="text-muted-foreground">Kulturen suchen und öffnen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/kulturpflanzen/neu')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/kulturpflanzen/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Kultur
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -107,7 +114,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gesamt-Flaeche</CardTitle>
+            <CardTitle className="text-sm font-medium">Gesamtfläche</CardTitle>
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">{gesamtFlaeche.toFixed(1)} ha</span>
@@ -125,18 +132,25 @@ export default function KulturpflanzenListePage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                aria-label="Suche Kulturpflanzen"
+                placeholder="Kultur suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

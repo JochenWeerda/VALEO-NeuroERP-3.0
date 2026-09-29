@@ -10,9 +10,14 @@ import { BackButton } from '@/components/BackButton'
 import { AlertTriangle, Euro, FileDown, Search } from 'lucide-react'
 import { useDebitorenOP, type DebitOP } from '@/lib/api/fibu'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 
 export default function DebitorenPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: items, isLoading, isError, error, refetch } = useDebitorenOP()
 
@@ -27,14 +32,22 @@ export default function DebitorenPage(): JSX.Element {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
-  const list = items ?? []
+  const list = (items ?? []).filter((op) => {
+    if (!searchTerm) return true
+    const term = searchTerm.toLowerCase()
+    return (
+      op.rechnungsnr?.toLowerCase().includes(term) ||
+      op.kunde?.toLowerCase().includes(term) ||
+      op.kundennr?.toLowerCase().includes(term)
+    )
+  })
 
   const columns = [
     {
       key: 'rechnungsnr' as const,
       label: 'Rechnung',
       render: (op: DebitOP) => (
-        <button onClick={() => navigate(`/sales/invoice/${op.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
+        <button type="button" onClick={() => navigate(`/sales/invoice/${op.id}`)} className="min-h-11 font-mono font-medium text-primary touch-manipulation">
           {op.rechnungsnr}
         </button>
       ),
@@ -90,18 +103,18 @@ export default function DebitorenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Debitorenbuchhaltung</h1>
-          <p className="text-muted-foreground">Offene Posten Kunden</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Debitorenbuchhaltung</h1>
+          <p className="text-muted-foreground">Offene Posten suchen und oeffnen</p>
         </div>
         <BackButton to="/fibu/op-verwaltung" label="Zurück zur OP-Verwaltung" />
       </div>
 
       {ueberfaellig > 0 && (
-        <Card className="border-orange-500 bg-orange-50">
+        <Card className="border-status-warning/40 bg-status-warning/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
+            <div className="flex items-center gap-2 text-status-warning">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{ueberfaellig} überfällige Rechnung(en)!</span>
             </div>
@@ -109,6 +122,7 @@ export default function DebitorenPage(): JSX.Element {
         </Card>
       )}
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -151,18 +165,51 @@ export default function DebitorenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Debitoren" placeholder="Kunde, Rechnung" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => {
+                if (list.length === 0) {
+                  toast({ title: 'Kein Export', description: 'Keine offenen Posten in der aktuellen Sicht.', variant: 'destructive' })
+                  return
+                }
+                exportToCSV(
+                  list.map((op) => ({
+                    rechnungsnr: op.rechnungsnr,
+                    kunde: op.kunde,
+                    kundennr: op.kundennr,
+                    datum: op.datum,
+                    faelligkeit: op.faelligkeit,
+                    betrag: op.betrag,
+                    offen: op.offen,
+                    mahnStufe: op.mahnStufe,
+                  })),
+                  `debitoren-${new Date().toISOString().slice(0, 10)}.csv`,
+                  [
+                    { key: 'rechnungsnr', label: 'Rechnung' },
+                    { key: 'kunde', label: 'Kunde' },
+                    { key: 'kundennr', label: 'Kd-Nr' },
+                    { key: 'datum', label: 'Re-Datum' },
+                    { key: 'faelligkeit', label: 'Faelligkeit' },
+                    { key: 'betrag', label: 'Betrag' },
+                    { key: 'offen', label: 'Offen' },
+                    { key: 'mahnStufe', label: 'Mahnstufe' },
+                  ],
+                )
+              }}
+            >
               <FileDown className="h-4 w-4" />
               DATEV Export
             </Button>

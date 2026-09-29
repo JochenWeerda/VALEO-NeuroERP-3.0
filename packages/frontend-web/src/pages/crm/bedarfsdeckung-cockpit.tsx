@@ -21,23 +21,23 @@ import { useToast } from '@/hooks/use-toast'
 const EUR = (n: number) => `${n.toLocaleString('de-DE', { maximumFractionDigits: 0 })  } €`
 
 const AKTION_BADGE: Record<string, string> = {
-  Einstieg: 'bg-violet-100 text-violet-700',
-  'Cross-Sell': 'bg-amber-100 text-amber-700',
-  Ausbauen: 'bg-blue-100 text-blue-700',
-  Halten: 'bg-emerald-100 text-emerald-700',
+  Einstieg: 'bg-primary/10 text-primary',
+  'Cross-Sell': 'bg-status-warning/10 text-status-warning',
+  Ausbauen: 'bg-primary/10 text-primary',
+  Halten: 'bg-status-success/10 text-status-success',
 }
 
 const SPARTE_LABEL: Record<string, string> = { milchvieh: 'Milchvieh', ackerbau: 'Ackerbau' }
 const SPARTE_BADGE: Record<string, string> = {
-  milchvieh: 'bg-sky-100 text-sky-700',
-  ackerbau: 'bg-lime-100 text-lime-700',
+  milchvieh: 'bg-primary/10 text-primary',
+  ackerbau: 'bg-status-success/10 text-status-success',
 }
 
 function deckungColor(pct: number): string {
-  if (pct >= 80) return 'bg-emerald-500'
-  if (pct >= 40) return 'bg-blue-500'
-  if (pct > 0) return 'bg-amber-500'
-  return 'bg-violet-500'
+  if (pct >= 80) return 'bg-status-success'
+  if (pct >= 40) return 'bg-primary'
+  if (pct > 0) return 'bg-status-warning'
+  return 'bg-muted-foreground'
 }
 
 function DeckungBar({ pct }: { pct: number }): JSX.Element {
@@ -133,7 +133,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
           <div className="flex flex-wrap gap-1.5">
             {quickPicks.map((p) => (
               <button key={p.kunden_nr} onClick={() => pick(p.kunden_nr)}
-                className={`rounded border px-2 py-1 text-xs hover:bg-muted ${p.kunden_nr === kundenNr ? 'border-blue-500 bg-blue-50' : ''}`}>
+                className={`min-h-touch rounded border px-2 py-1 text-xs ${p.kunden_nr === kundenNr ? 'border-primary bg-primary/10' : ''}`}>
                 {p.name} <span className="text-muted-foreground">· {EUR(p.luecke_eur_gesamt)} Lücke</span>
               </button>
             ))}
@@ -156,7 +156,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <p className="text-sm font-medium">{data.name}</p>
                   {data.sparten.map((s) => (
-                    <span key={s} className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${SPARTE_BADGE[s]}`}>{SPARTE_LABEL[s]}</span>
+                    <span key={s} className={`rounded px-1.5 py-0.5 text-2xs font-medium ${SPARTE_BADGE[s]}`}>{SPARTE_LABEL[s]}</span>
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -172,35 +172,35 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
           </div>
 
           {/* Käufergruppe */}
-          <Card className="border-indigo-200 bg-indigo-50/40">
+          <Card className="border-primary/30 bg-primary/5">
             <CardContent className="flex flex-wrap items-start gap-3 p-4">
               <UserRound className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
-                <p className="flex flex-wrap items-center gap-2 font-semibold text-indigo-900">
+                <p className="flex flex-wrap items-center gap-2 font-semibold text-foreground">
                   Käufergruppe: {data.kaeufergruppe.label}
-                  <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium text-indigo-700">
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 text-2xs font-medium text-primary">
                     {Math.round(data.kaeufergruppe.confidence * 100)} % · {data.kaeufergruppe.source === 'manual' ? 'bestätigt' : 'KI-Vorschlag'}
                   </span>
-                  <span className="text-xs font-normal text-indigo-700">Zielanteil {Math.round(data.kaeufergruppe.ziel_anteil_min * 100)}–{Math.round(data.kaeufergruppe.ziel_anteil_max * 100)} %</span>
+                  <span className="text-xs font-normal text-muted-foreground">Zielanteil {Math.round(data.kaeufergruppe.ziel_anteil_min * 100)}–{Math.round(data.kaeufergruppe.ziel_anteil_max * 100)} %</span>
                 </p>
-                {data.kaeufergruppe.reason && <p className="text-sm text-indigo-800">{data.kaeufergruppe.reason}</p>}
-                <p className="mt-0.5 text-sm font-medium text-indigo-900">→ {data.kaeufergruppe.ansatz}</p>
+                {data.kaeufergruppe.reason && <p className="text-sm text-muted-foreground">{data.kaeufergruppe.reason}</p>}
+                <p className="mt-0.5 text-sm font-medium text-foreground">→ {data.kaeufergruppe.ansatz}</p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <span className="text-[11px] text-muted-foreground">Korrigieren</span>
-                <NativeSelect value={data.kaeufergruppe.group} onValueChange={changeGruppe} className="w-52">
+                <NativeSelect ariaLabel="Käufergruppe" value={data.kaeufergruppe.group} onValueChange={changeGruppe} className="w-52">
                   {(katalog.data ?? []).map((k) => (
                     <option key={k.group} value={k.group}>{k.label}</option>
                   ))}
                 </NativeSelect>
                 <div className="flex flex-wrap gap-1">
-                  <Button size="sm" variant="outline" className="h-7 gap-1 text-xs" disabled={reklass.isPending} onClick={() => reklassifizieren('ki')}>
+                  <Button className="min-h-touch gap-1" variant="outline" disabled={reklass.isPending && reklass.variables?.modus === 'ki'} onClick={() => reklassifizieren('ki')}>
                     <Sparkles className="h-3 w-3" />KI-Einschätzung
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" disabled={reklass.isPending} onClick={() => reklassifizieren('belege')}>
+                  <Button className="min-h-touch" variant="outline" disabled={reklass.isPending && reklass.variables?.modus === 'belege'} onClick={() => reklassifizieren('belege')}>
                     Aus Belegen
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs" disabled={pgKlass.isPending} onClick={gruppenAbleiten}>
+                  <Button className="min-h-touch" variant="outline" disabled={pgKlass.isPending} onClick={gruppenAbleiten}>
                     je Produktgruppe
                   </Button>
                 </div>
@@ -210,14 +210,14 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
 
           {/* Next-Best-Offer */}
           {data.next_best_offer && (
-            <Card className="border-blue-200 bg-blue-50/50">
+            <Card className="border-primary/30 bg-primary/5">
               <CardContent className="flex flex-wrap items-start gap-3 p-4">
                 <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-blue-900">Next-Best-Offer · {data.next_best_offer.label} <span className="font-normal text-blue-700">({EUR(data.next_best_offer.realistische_luecke_eur)} realistisch gewinnbar)</span></p>
-                  <p className="text-sm text-blue-800">{data.next_best_offer.empfehlung}</p>
+                  <p className="font-semibold text-foreground">Next-Best-Offer · {data.next_best_offer.label} <span className="font-normal text-muted-foreground">({EUR(data.next_best_offer.realistische_luecke_eur)} realistisch gewinnbar)</span></p>
+                  <p className="text-sm text-muted-foreground">{data.next_best_offer.empfehlung}</p>
                 </div>
-                <Button size="sm" className="gap-2" onClick={() => angebot(data.next_best_offer?.produktgruppe)}>
+                <Button className="min-h-touch gap-2" onClick={() => angebot(data.next_best_offer?.produktgruppe)}>
                   Angebot erstellen <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardContent>
@@ -248,7 +248,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                         {(i === 0 || data.produktgruppen[i - 1].sparte !== g.sparte) && (
                           <tr className="bg-muted/40">
                             <td colSpan={8} className="px-4 py-1.5">
-                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${SPARTE_BADGE[g.sparte]}`}>{SPARTE_LABEL[g.sparte]}</span>
+                              <span className={`rounded px-1.5 py-0.5 text-2xs font-medium ${SPARTE_BADGE[g.sparte]}`}>{SPARTE_LABEL[g.sparte]}</span>
                             </td>
                           </tr>
                         )}
@@ -256,7 +256,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                         <td className="px-4 py-2.5">
                           <span className="font-medium">{g.label}</span>
                           {g.kaeufergruppe_eigen && (
-                            <span className="ml-2 rounded bg-indigo-50 px-1 py-0.5 text-[10px] font-medium text-indigo-600" title="produktgruppenspezifische Käufergruppe">
+                            <span className="ml-2 rounded bg-primary/10 px-1 py-0.5 text-2xs font-medium text-primary" title="produktgruppenspezifische Käufergruppe">
                               {g.kaeufergruppe_label}
                             </span>
                           )}
@@ -268,13 +268,13 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
                         <td className="px-4 py-2.5 text-right font-medium tabular-nums text-status-warning">
                           {EUR(g.realistische_luecke_eur)}
                           {g.luecke_eur > g.realistische_luecke_eur && (
-                            <span className="block text-[10px] font-normal text-slate-400 line-through">{EUR(g.luecke_eur)}</span>
+                            <span className="block text-2xs font-normal text-muted-foreground line-through">{EUR(g.luecke_eur)}</span>
                           )}
                         </td>
-                        <td className="px-4 py-2.5"><span className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${AKTION_BADGE[g.aktion] ?? 'bg-slate-100 text-slate-700'}`}>{g.aktion}</span></td>
+                        <td className="px-4 py-2.5"><span className={`rounded px-1.5 py-0.5 text-2xs font-medium ${AKTION_BADGE[g.aktion] ?? 'bg-muted text-muted-foreground'}`}>{g.aktion}</span></td>
                         <td className="px-4 py-2.5 text-right">
                           {g.realistische_luecke_eur > 0 && (
-                            <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={() => angebot(g.key)}>
+                            <Button className="min-h-touch gap-1" variant="outline" onClick={() => angebot(g.key)}>
                               Angebot <ArrowRight className="h-3 w-3" />
                             </Button>
                           )}

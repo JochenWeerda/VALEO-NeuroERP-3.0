@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { Callout, CalloutDescription, CalloutTitle } from '@/components/ui/callout'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
 import { apiClient } from '@/lib/api-client'
@@ -206,6 +208,7 @@ const createBestellungenConfig = (
 export default function BestellungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
   const [roleFocus, setRoleFocus] = useState<PurchaseRoleFocus>('all')
@@ -463,6 +466,26 @@ export default function BestellungenListePage(): JSX.Element {
 
   return (
     <div className="space-y-6">
+      {overdueCount > 0 ? (
+        <Callout variant="warning" className="mx-3 mt-3 md:mx-0 md:mt-0">
+          <CalloutTitle>{overdueCount} überfällige Liefertermine</CalloutTitle>
+          <CalloutDescription>{nextPurchaseAction}</CalloutDescription>
+        </Callout>
+      ) : null}
+      <ListReport
+        config={bestellungenConfig}
+        data={data}
+        total={data.length}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onExport={handleExport}
+        onImport={handleImportClick}
+        pendingRows={pendingRows}
+        onAction={handleAction}
+        isLoading={isLoading}
+      />
+      {!isTouch ? (
+        <>
       <RoleFocusBar
         roles={purchaseRoleProfiles}
         value={roleFocus}
@@ -494,20 +517,10 @@ export default function BestellungenListePage(): JSX.Element {
         />
       </div>
       <CrudCapabilityChecklist capabilities={purchaseCrudCapabilities} />
-      <ListReport
-        config={bestellungenConfig}
-        data={data}
-        total={data.length}
-        onCreate={handleCreate}
-        onEdit={handleEdit}
-        onExport={handleExport}
-        onImport={handleImportClick}
-        pendingRows={pendingRows}
-        onAction={handleAction}
-        isLoading={isLoading}
-      />
+        </>
+      ) : null}
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1.5rem)] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t('crud.messages.importInfo')}</DialogTitle>
           </DialogHeader>
@@ -519,13 +532,13 @@ export default function BestellungenListePage(): JSX.Element {
                 accept=".csv,.xlsx,.xls"
                 ref={fileInputRef}
                 onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
-                className="mt-1"
+                className="mt-1 min-h-touch"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setImportOpen(false)}>Abbrechen</Button>
-            <Button onClick={handleImportSubmit} disabled={importSubmitting || !importFile}>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setImportOpen(false)}>Abbrechen</Button>
+            <Button className="min-h-touch touch-manipulation" onClick={() => { void handleImportSubmit() }} disabled={importSubmitting || !importFile}>
               {importSubmitting ? 'Importiere…' : 'Import starten'}
             </Button>
           </DialogFooter>

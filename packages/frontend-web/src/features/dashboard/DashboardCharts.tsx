@@ -43,7 +43,7 @@ function ErrorChartState({ message, onRetry }: { message: string; onRetry: () =>
   return (
     <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-(--radius) border border-dashed border-border bg-muted">
       <p className="text-sm font-medium text-foreground">{message}</p>
-      <Button variant="outline" size="sm" onClick={onRetry}>
+      <Button variant="outline" onClick={onRetry} className="min-h-touch">
         Erneut laden
       </Button>
     </div>

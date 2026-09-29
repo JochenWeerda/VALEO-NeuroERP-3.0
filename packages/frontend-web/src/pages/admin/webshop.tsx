@@ -89,9 +89,8 @@ export default function WebshopPage(): JSX.Element {
                 </dl>
                 <div className="mt-3 flex items-center gap-2">
                   <Button
-                    size="sm"
                     variant="outline"
-                    className="gap-1"
+                    className="min-h-touch gap-1"
                     onClick={() => importMutation.mutate(c.id)}
                     disabled={importMutation.isPending}
                   >

@@ -365,6 +365,19 @@ describe('BestellungAnlegenPage', () => {
     expect(notesField.value).toContain('Vertragsbezug K-2026-004')
   })
 
+  it('bietet die drei Bestellfaelle im ersten Schritt', async () => {
+    render(
+      <MemoryRouter initialEntries={['/einkauf/bestellungen/neu']}>
+        <BestellungAnlegenPage />
+      </MemoryRouter>,
+    )
+    await goToStep('Lieferant')
+    expect(screen.getByTestId('bestellfall-bestand_abgleich')).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByTestId('bestellfall-direktlieferung'))
+    expect(screen.getByTestId('bestellfall-direktlieferung')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Neuer Artikel / Innovation')).toBeInTheDocument()
+  })
+
   it('zeigt einen Fehler-Toast, wenn die Bedarfsmeldungs-Vorbelegung fehlschlaegt', async () => {
     getMock.mockRejectedValueOnce(new Error('Backend offline'))
 

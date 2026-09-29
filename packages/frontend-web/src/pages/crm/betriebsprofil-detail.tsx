@@ -180,7 +180,7 @@ export default function BetriebsprofilePage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {!isNew && (
-            <Button variant="outline" size="sm" onClick={() => navigate('/crm/betriebsprofile')}>
+            <Button variant="outline" className="min-h-touch" onClick={() => navigate('/crm/betriebsprofile')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               {t('common.back')}
             </Button>
@@ -196,13 +196,13 @@ export default function BetriebsprofilePage(): JSX.Element {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/crm/betriebsprofile')}>
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate('/crm/betriebsprofile')}>
             {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
             disabled={createMutation.isPending || updateMutation.isPending}
-            className="gap-2"
+            className="min-h-touch gap-2"
           >
             {(createMutation.isPending || updateMutation.isPending) && (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -281,7 +281,7 @@ export default function BetriebsprofilePage(): JSX.Element {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t('crud.fields.cropAreas')}</CardTitle>
-              <Button onClick={addCrop} size="sm" className="gap-2">
+              <Button onClick={addCrop} className="min-h-touch gap-2">
                 <Plus className="h-4 w-4" />
                 {t('crud.actions.addCrop')}
               </Button>
@@ -310,11 +310,11 @@ export default function BetriebsprofilePage(): JSX.Element {
                     </div>
                     <Button
                       variant="outline"
-                      size="sm"
+                      className="mt-6 min-h-touch"
                       onClick={() => removeCrop(index)}
-                      className="mt-6"
                     >
-                      <Minus className="h-4 w-4" />
+                      <Minus className="h-4 w-4 mr-1" />
+                      Entfernen
                     </Button>
                   </div>
                 ))}
@@ -340,7 +340,7 @@ export default function BetriebsprofilePage(): JSX.Element {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t('crud.fields.livestock')}</CardTitle>
-              <Button onClick={addLivestock} size="sm" className="gap-2">
+              <Button onClick={addLivestock} className="min-h-touch gap-2">
                 <Plus className="h-4 w-4" />
                 {t('crud.actions.addLivestockType')}
               </Button>
@@ -378,11 +378,11 @@ export default function BetriebsprofilePage(): JSX.Element {
                     </div>
                     <Button
                       variant="outline"
-                      size="sm"
+                      className="mt-6 min-h-touch"
                       onClick={() => removeLivestock(index)}
-                      className="mt-6"
                     >
-                      <Minus className="h-4 w-4" />
+                      <Minus className="h-4 w-4 mr-1" />
+                      Entfernen
                     </Button>
                   </div>
                 ))}

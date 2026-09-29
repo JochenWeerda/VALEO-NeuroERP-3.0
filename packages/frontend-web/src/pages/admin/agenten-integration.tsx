@@ -762,7 +762,7 @@ export function AgentenIntegrationWorkspace({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant={section === 'overview' ? 'default' : 'outline'} size="sm">
+            <Button asChild variant={section === 'overview' ? 'default' : 'outline'} className="min-h-touch">
               <Link to="/admin/control-center">Zur Leitstandsuebersicht</Link>
             </Button>
           </CardContent>
@@ -775,7 +775,7 @@ export function AgentenIntegrationWorkspace({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant={section === 'superglue' ? 'default' : 'outline'} size="sm">
+            <Button asChild variant={section === 'superglue' ? 'default' : 'outline'} className="min-h-touch">
               <Link to="/admin/control-center/superglue">Superglue oeffnen</Link>
             </Button>
           </CardContent>
@@ -788,7 +788,7 @@ export function AgentenIntegrationWorkspace({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant={section === 'agents' ? 'default' : 'outline'} size="sm">
+            <Button asChild variant={section === 'agents' ? 'default' : 'outline'} className="min-h-touch">
               <Link to="/admin/control-center/agent-ops">Agent Ops oeffnen</Link>
             </Button>
           </CardContent>
@@ -862,7 +862,7 @@ export function AgentenIntegrationWorkspace({
             <p><strong>Execution:</strong> {superglueStatus?.execution_enabled ? 'aktiv' : 'deaktiviert'}</p>
             <p><strong>Quarantaene:</strong> {superglueQuarantine?.entry_count ?? 0} Eintraege</p>
             <p><strong>Sync-Historie:</strong> {superglueHistory?.entry_count ?? 0} Refreshes</p>
-            <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => void refreshSuperglueSnapshot()}>
+            <Button type="button" variant="outline" className="min-h-touch gap-2" onClick={() => void refreshSuperglueSnapshot()}>
               <Download className="h-4 w-4" />
               Sync aktualisieren
             </Button>
@@ -945,9 +945,9 @@ export function AgentenIntegrationWorkspace({
             <p><strong>Blocked Connectoren:</strong> {superglueOnboardingPack?.blocked_connector_count ?? 0}</p>
             <p><strong>AUTH_TOKEN Keys:</strong> {superglueOnboardingPack?.platform_secret_keys.AUTH_TOKEN?.length ?? 0}</p>
             <div className="flex flex-wrap gap-2 pt-1">
-              <Button type="button" variant="outline" size="sm" onClick={downloadSuperglueOnboardingJson}>Onboarding JSON</Button>
-              <Button type="button" variant="outline" size="sm" onClick={downloadSuperglueOnboardingEnv}>ENV Template</Button>
-              <Button type="button" variant="outline" size="sm" onClick={downloadSuperglueOnboardingVault}>Vault Template</Button>
+              <Button type="button" variant="outline" onClick={downloadSuperglueOnboardingJson} className="min-h-touch">Onboarding JSON</Button>
+              <Button type="button" variant="outline" onClick={downloadSuperglueOnboardingEnv} className="min-h-touch">ENV Template</Button>
+              <Button type="button" variant="outline" onClick={downloadSuperglueOnboardingVault} className="min-h-touch">Vault Template</Button>
             </div>
             {superglueOnboardingPack?.connectors?.slice(0, 2).map((connector) => (
               <div key={connector.connector_key} className="rounded border p-2">
@@ -996,7 +996,7 @@ export function AgentenIntegrationWorkspace({
                 {superglueQuarantine.open_entries.slice(-3).reverse().map((entry) => (
                   <div key={entry.entry_id} className="rounded border p-2">
                     <p><strong>{entry.tool_id}</strong> | {entry.reason}</p>
-                    <Button type="button" variant="outline" size="sm" onClick={() => void resolveQuarantineEntry(entry.entry_id)}>
+                    <Button type="button" variant="outline" onClick={() => void resolveQuarantineEntry(entry.entry_id)} className="min-h-touch">
                       Als erledigt markieren
                     </Button>
                   </div>
@@ -1241,13 +1241,13 @@ export function AgentenIntegrationWorkspace({
                   <p><strong>Blocker:</strong> {ticket.blocker_reasons?.join(', ')}</p>
                 ) : null}
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <Button type="button" size="sm" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'approve')}>
+                  <Button type="button" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'approve')} className="min-h-touch">
                     Freigeben
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'pause')}>
+                  <Button type="button" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'pause')} className="min-h-touch">
                     Pausieren
                   </Button>
-                  <Button type="button" size="sm" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'escalate')}>
+                  <Button type="button" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'escalate')} className="min-h-touch">
                     Eskalieren
                   </Button>
                 </div>
@@ -1314,7 +1314,7 @@ export function AgentenIntegrationWorkspace({
             <p><strong>Budgets:</strong> {agentTemplate?.budgets.length ?? 0}</p>
             <p><strong>Heartbeats:</strong> {agentTemplate?.heartbeats.length ?? 0}</p>
             <p><strong>Skill Packs:</strong> {agentTemplate?.skill_packs.length ?? 0}</p>
-            <Button type="button" variant="outline" size="sm" onClick={downloadAgentTemplate}>Template Export</Button>
+            <Button type="button" variant="outline" onClick={downloadAgentTemplate} className="min-h-touch">Template Export</Button>
           </CardContent>
         </Card>
       </div>

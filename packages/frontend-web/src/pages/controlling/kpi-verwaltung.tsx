@@ -185,11 +185,11 @@ export default function KpiVerwaltungPage(): JSX.Element {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={item.is_active ? 'outline' : 'secondary'}>{item.is_active ? 'aktiv' : 'inaktiv'}</Badge>
-                  <Button size="sm" variant="outline" onClick={() => startEdit(item)}>
+                  <Button variant="outline" onClick={() => startEdit(item)} className="min-h-touch">
                     Bearbeiten
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => remove(item.id)}>
-                    Loeschen
+                  <Button variant="destructive" onClick={() => remove(item.id)} className="min-h-touch">
+                    Löschen
                   </Button>
                 </div>
               </div>

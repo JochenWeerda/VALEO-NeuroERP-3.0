@@ -174,22 +174,24 @@ export default function PeriodischeBuchungenPage(): JSX.Element {
           <Button
             type="button"
             variant="outline"
-            size="sm"
             disabled={isMutating && sperrenId === row.id}
             onClick={() => void toggleSperren(row)}
             aria-label={`${row.bezeichnung} ${row.gesperrt ? 'entsperren' : 'sperren'}`}
+            className="min-h-touch"
           >
             <Lock className="h-4 w-4" aria-hidden="true" />
+            {row.gesperrt ? 'Entsperren' : 'Sperren'}
           </Button>
           <Button
             type="button"
             variant="outline"
-            size="sm"
             disabled={isMutating && deletingId === row.id}
             onClick={() => void handleDelete(row.id)}
             aria-label={`${row.bezeichnung} deaktivieren`}
+            className="min-h-touch"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Löschen
           </Button>
         </div>
       ),

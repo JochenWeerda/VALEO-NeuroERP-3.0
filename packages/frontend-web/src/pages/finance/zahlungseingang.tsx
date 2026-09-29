@@ -51,14 +51,14 @@ function PaymentForm({ op }: { op: OpItem }) {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           <label className="text-xs text-muted-foreground space-y-1">
             <span>Zahlungsbetrag</span>
-            <Input type="number" value={betrag} onChange={(e) => setBetrag(e.target.value)} placeholder="0,00" className="h-8" />
+            <Input type="number" value={betrag} onChange={(e) => setBetrag(e.target.value)} placeholder="0,00" className="min-h-touch" />
           </label>
           <label className="text-xs text-muted-foreground space-y-1">
             <span>Skonto {op.skonto_aktiv ? `(aktiv ${op.skonto_prozent}%)` : ''}</span>
-            <Input type="number" value={skonto} onChange={(e) => setSkonto(e.target.value)} placeholder="0,00" className="h-8" />
+            <Input type="number" value={skonto} onChange={(e) => setSkonto(e.target.value)} placeholder="0,00" className="min-h-touch" />
           </label>
           <div className="flex items-end">
-            <Button size="sm" className="w-full" onClick={submit} disabled={!valid || record.isPending}>
+            <Button className="min-h-touch w-full" onClick={submit} disabled={!valid || record.isPending}>
               {record.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Banknote size={14} className="mr-1" />}
               Ausziffern
             </Button>
@@ -95,7 +95,7 @@ function ClearingHistory({ rechnungsnr }: { rechnungsnr: string }) {
                   <td className="px-3 py-1.5 text-right tabular-nums">{eur(c.betrag)}</td>
                   <td className="px-3 py-1.5 text-right tabular-nums">{eur(c.skonto)}</td>
                   <td className="px-3 py-1.5 text-right tabular-nums font-medium">{eur(c.ausgleich)}</td>
-                  <td className="px-3 py-1.5"><Badge variant="secondary" className="text-[10px]">{c.status}</Badge></td>
+                  <td className="px-3 py-1.5"><Badge variant="secondary" className="text-2xs">{c.status}</Badge></td>
                 </tr>
               ))}
             </tbody>
@@ -122,7 +122,7 @@ export default function ZahlungseingangPage() {
       <div className="flex items-center gap-2">
         <Banknote size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Zahlungseingang / Auszifferung</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void op.refetch()} disabled={op.isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void op.refetch()} disabled={op.isFetching}>
           {op.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -134,7 +134,7 @@ export default function ZahlungseingangPage() {
             <CardTitle className="text-sm">Offene Debitoren-Posten</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="min-h-touch pl-7" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">

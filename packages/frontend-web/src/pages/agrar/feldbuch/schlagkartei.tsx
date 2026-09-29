@@ -40,8 +40,6 @@ import {
   Filter,
   Building2,
   Calendar,
-  Pencil,
-  Trash2
 } from 'lucide-react'
 import { FeldblockfinderIntegration, SchlagData } from '@/components/agrar/FeldblockfinderIntegration'
 import { SchlagKarte } from '@/components/agrar/SchlagKarte'
@@ -79,6 +77,7 @@ const agrarRoles = [
 // API hooks from centralized agrar module
 import { useAgrarKunden, useSchlaege, useDeleteSchlag } from '@/lib/api/agrar'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 // Skeleton-Komponente für Ladezustand
 function SchlagkarteiSkeleton() {
@@ -131,6 +130,8 @@ export default function SchlagkarteiPage(): JSX.Element {
   const [feldblockDialogOpen, setFeldblockDialogOpen] = useState(false)
   const [filterStatus, setFilterStatus] = useState<string>('alle')
   const [roleFocus, setRoleFocus] = useState<AgrarRole>('dienstleister')
+  const isTouch = useTouchDevice()
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   // Daten laden mit API-Hooks
   const { data: kunden, isLoading: kundenLoading } = useAgrarKunden()
@@ -207,6 +208,29 @@ export default function SchlagkarteiPage(): JSX.Element {
     toast({ title: 'Export', description: `${filteredSchlaege.length} Schläge exportiert.` })
   }
 
+  async function persistStilllegen(id: string): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+      deleteSchlag.mutate(id, {
+        onSuccess: () => resolve(),
+        onError: () => reject(new Error('Stilllegen fehlgeschlagen')),
+      })
+    })
+  }
+
+  async function handleStilllegen(id: string): Promise<void> {
+    if (deletingId) return
+    if (!confirm('Schlag stilllegen? Der Status wird auf „stillgelegt“ gesetzt.')) return
+    setDeletingId(id)
+    try {
+      await persistStilllegen(id)
+      toast({ title: 'Schlag stillgelegt' })
+    } catch {
+      toast({ variant: 'destructive', title: 'Stilllegen fehlgeschlagen' })
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   // Feldblockfinder Schlag-Übernahme
   const handleSchlagFromFeldblockfinder = (schlagData: SchlagData) => {
     // Hier würde der neue Schlag erstellt werden
@@ -229,9 +253,10 @@ export default function SchlagkarteiPage(): JSX.Element {
       label: 'Schlag',
       render: (s: Schlag) => (
         <div>
-          <button 
-            onClick={() => navigate(`/agrar/feldbuch/schlag/${s.id}`)} 
-            className="font-medium text-blue-600 hover:underline"
+          <button
+            type="button"
+            onClick={() => navigate(`/agrar/feldbuch/schlag/${s.id}`)}
+            className="min-h-11 font-medium text-primary touch-manipulation"
           >
             {s.name}
           </button>
@@ -296,26 +321,22 @@ export default function SchlagkarteiPage(): JSX.Element {
       key: 'aktionen' as const,
       label: 'Aktionen',
       render: (s: Schlag) => (
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/agrar/feldbuch/schlag/${s.id}`)} title="Bearbeiten">
-            <Pencil className="h-4 w-4" />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            variant="outline"
+            className="min-h-touch touch-manipulation"
+            onClick={() => navigate(`/agrar/feldbuch/schlag/${s.id}`)}
+          >
+            Öffnen
           </Button>
           {s.status === 'aktiv' && (
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                if (confirm('Schlag stilllegen? (Status wird auf „stillgelegt“ gesetzt)')) {
-                  deleteSchlag.mutate(s.id, {
-                    onSuccess: () => toast({ title: 'Schlag stillgelegt' }),
-                    onError: () => toast({ variant: 'destructive', title: 'Stilllegen fehlgeschlagen' })
-                  })
-                }
-              }}
-              disabled={deleteSchlag.isPending}
-              title="Stilllegen"
+              variant="outline"
+              className="min-h-touch touch-manipulation"
+              onClick={() => { void handleStilllegen(s.id) }}
+              disabled={deletingId === s.id || deleteSchlag.isPending}
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              Stilllegen
             </Button>
           )}
         </div>
@@ -331,20 +352,20 @@ export default function SchlagkarteiPage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl font-bold md:text-3xl flex items-center gap-3">
             <MapPin className="h-8 w-8 text-status-success" />
             Schlagkartei
           </h1>
           <p className="text-muted-foreground">
-            Mandantenfähige Ackerschlagverwaltung für Dienstleister
+            Schläge suchen und öffnen
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Dialog open={feldblockDialogOpen} onOpenChange={setFeldblockDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation">
                 <Map className="h-4 w-4" />
                 Feldblockfinder
               </Button>
@@ -363,7 +384,7 @@ export default function SchlagkarteiPage(): JSX.Element {
               />
             </DialogContent>
           </Dialog>
-          <Button onClick={() => navigate('/agrar/feldbuch/schlag/neu')} className="gap-2">
+          <Button onClick={() => navigate('/agrar/feldbuch/schlag/neu')} className="min-h-touch gap-2 touch-manipulation">
             <Plus className="h-4 w-4" />
             Neuer Schlag
           </Button>
@@ -383,6 +404,8 @@ export default function SchlagkarteiPage(): JSX.Element {
         </Alert>
       )}
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={agrarRoles}
         value={roleFocus}
@@ -481,7 +504,7 @@ export default function SchlagkarteiPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users className="h-4 w-4 text-purple-600" />
+              <Users className="h-4 w-4 text-primary" />
               Kunden
             </CardTitle>
           </CardHeader>
@@ -491,13 +514,15 @@ export default function SchlagkarteiPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="liste">Schlagliste</TabsTrigger>
-          <TabsTrigger value="karte">Kartenansicht</TabsTrigger>
-          <TabsTrigger value="kulturen">Kulturübersicht</TabsTrigger>
+        <TabsList className="h-auto min-h-11 w-full flex-wrap justify-start">
+          <TabsTrigger value="liste" className="min-h-11">Schlagliste</TabsTrigger>
+          <TabsTrigger value="karte" className="min-h-11">Kartenansicht</TabsTrigger>
+          <TabsTrigger value="kulturen" className="min-h-11">Kulturübersicht</TabsTrigger>
         </TabsList>
 
         <TabsContent value="liste" className="space-y-4">
@@ -515,11 +540,12 @@ export default function SchlagkarteiPage(): JSX.Element {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Kunde/Landwirt</label>
                   <NativeSelect
+                    ariaLabel="Kunde oder Landwirt"
                     value={selectedKundeId}
                     onValueChange={setSelectedKundeId}
                     options={(kunden ?? []).map((kunde) => ({
                       value: kunde.id,
-                      label: kunde.id !== 'all' ? `${kunde.name} (${kunde.schlagCount} Schlaege)` : kunde.name,
+                      label: kunde.id !== 'all' ? `${kunde.name} (${kunde.schlagCount} Schläge)` : kunde.name,
                     }))}
                   />
                 </div>
@@ -528,6 +554,7 @@ export default function SchlagkarteiPage(): JSX.Element {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Status</label>
                   <NativeSelect
+                    ariaLabel="Status"
                     value={filterStatus}
                     onValueChange={setFilterStatus}
                     options={[
@@ -546,13 +573,14 @@ export default function SchlagkarteiPage(): JSX.Element {
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input 
-                        placeholder="Schlag, Kultur, FLIK, Gemeinde..." 
+                        aria-label="Suche Schläge"
+                        placeholder="Schlag, Kultur, FLIK, Gemeinde"
                         value={searchTerm} 
                         onChange={(e) => setSearchTerm(e.target.value)} 
-                        className="pl-10" 
+                        className="min-h-touch pl-10"
                       />
                     </div>
-                    <Button variant="outline" className="gap-2" onClick={handleExport}>
+                    <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
                       <FileDown className="h-4 w-4" />
                       Export
                     </Button>

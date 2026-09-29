@@ -1170,34 +1170,35 @@ export default function KundenStammPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <User className="h-8 w-8" />
+            <User className="h-8 w-8 shrink-0" />
             <div>
-              <h1 className="text-3xl font-bold">{kunde.name || 'Neuer Kunde'}</h1>
+              <h1 className="text-2xl font-bold md:text-3xl">{kunde.name || 'Neuer Kunde'}</h1>
               <p className="text-muted-foreground">Kundennummer: {kunde.kundennummer}</p>
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {!isNew && kunde.id ? (
             <Button
               type="button"
               variant="secondary"
+              className="min-h-touch touch-manipulation"
               onClick={() => navigate(`/verkauf/kunde/neu?vorlage=${encodeURIComponent(kunde.id)}`)}
               disabled={saveMutation.isPending}
             >
               <Copy className="h-4 w-4 mr-2" />
-              Als Vorlage für Neuanlage
+              Als Vorlage
             </Button>
           ) : null}
-          <Button variant="outline" onClick={() => navigate('/verkauf/kunden-liste')} disabled={saveMutation.isPending}>
-            Zurueck
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/verkauf/kunden-liste')} disabled={saveMutation.isPending}>
+            Zurück
           </Button>
           <Button
-            className="gap-2"
+            className="min-h-touch min-w-[136px] gap-2 touch-manipulation"
             onClick={() => {
               void saveMutation.mutateAsync()
             }}
@@ -1210,17 +1211,17 @@ export default function KundenStammPage(): JSX.Element {
       </div>
 
       <Tabs defaultValue="stammdaten">
-        <TabsList>
-          <TabsTrigger value="stammdaten">Stammdaten</TabsTrigger>
-          <TabsTrigger value="konditionen">Konditionen</TabsTrigger>
-          <TabsTrigger value="tab21">Chef-Anweisung</TabsTrigger>
-          <TabsTrigger value="tab22">Ansprechpartner</TabsTrigger>
-          <TabsTrigger value="tab23">Tab 23 Anschriften</TabsTrigger>
-          <TabsTrigger value="tab24">Tab 24 Rechnung/Kontoauszug</TabsTrigger>
-          <TabsTrigger value="tab25">Tab 25 CPD-Konto</TabsTrigger>
-          <TabsTrigger value="rabatte">Rabatt-Listen</TabsTrigger>
-          <TabsTrigger value="preise">Preisvereinbarungen</TabsTrigger>
-          <TabsTrigger value="historie">Historie</TabsTrigger>
+        <TabsList variant="register" className="flex-wrap overflow-x-auto" aria-label="Kundenakte">
+          <TabsTrigger value="stammdaten" className="min-h-11">Stammdaten</TabsTrigger>
+          <TabsTrigger value="konditionen" className="min-h-11">Konditionen</TabsTrigger>
+          <TabsTrigger value="tab21" className="min-h-11">Chef-Anweisung</TabsTrigger>
+          <TabsTrigger value="tab22" className="min-h-11">Ansprechpartner</TabsTrigger>
+          <TabsTrigger value="tab23" className="min-h-11">Anschriften</TabsTrigger>
+          <TabsTrigger value="tab24" className="min-h-11">Kontoauszug</TabsTrigger>
+          <TabsTrigger value="tab25" className="min-h-11">CPD-Konto</TabsTrigger>
+          <TabsTrigger value="rabatte" className="min-h-11">Rabatte</TabsTrigger>
+          <TabsTrigger value="preise" className="min-h-11">Preise</TabsTrigger>
+          <TabsTrigger value="historie" className="min-h-11">Historie</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stammdaten">
@@ -1245,7 +1246,7 @@ export default function KundenStammPage(): JSX.Element {
                   <Input value={kunde.name_2} onChange={(e) => setKunde((prev) => ({ ...prev, name_2: e.target.value }))} />
                 </div>
                 <div>
-                  <Label>Name Zeile 3 (Tab 23)</Label>
+                  <Label>Name Zeile 3</Label>
                   <Input
                     value={kunde.tab23.name_3}
                     onChange={(e) =>
@@ -1296,7 +1297,7 @@ export default function KundenStammPage(): JSX.Element {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <Label>Anrede (Tab 23)</Label>
+                    <Label>Anrede</Label>
                     <Input
                       value={kunde.tab23.salutation}
                       onChange={(e) =>
@@ -1305,7 +1306,7 @@ export default function KundenStammPage(): JSX.Element {
                     />
                   </div>
                   <div>
-                    <Label>Briefanrede (Tab 23)</Label>
+                    <Label>Briefanrede</Label>
                     <Input
                       value={kunde.tab23.brief_salutation}
                       onChange={(e) =>
@@ -1373,7 +1374,7 @@ export default function KundenStammPage(): JSX.Element {
 
           <Card className="mt-6 border-dashed border-primary/30">
             <CardHeader>
-              <CardTitle>Tab 23 — Klassifikation, Konten, Freifelder</CardTitle>
+              <CardTitle>Klassifikation, Konten, Freifelder</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-3">
               {(
@@ -1414,7 +1415,7 @@ export default function KundenStammPage(): JSX.Element {
               <div>
                 <Label>ABC-Status (→ Marketing-Segment)</Label>
                 <select
-                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                   value={kunde.tab23.abc_status}
                   onChange={(e) =>
                     setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, abc_status: e.target.value } }))
@@ -1430,10 +1431,11 @@ export default function KundenStammPage(): JSX.Element {
                 <input
                   id="fax_blocked"
                   type="checkbox"
+                  className="min-h-11 min-w-11"
                   checked={kunde.fax_blocked}
                   onChange={(e) => setKunde((prev) => ({ ...prev, fax_blocked: e.target.checked }))}
                 />
-                <Label htmlFor="fax_blocked">Fax gesperrt (Legacy)</Label>
+                <Label htmlFor="fax_blocked">Fax gesperrt</Label>
               </div>
             </CardContent>
           </Card>
@@ -1543,7 +1545,7 @@ export default function KundenStammPage(): JSX.Element {
         <TabsContent value="tab21">
           <Card>
             <CardHeader>
-              <CardTitle>Chef-Anweisung (Tab 21)</CardTitle>
+              <CardTitle>Chef-Anweisung</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {!partnerId && (
@@ -1563,7 +1565,7 @@ export default function KundenStammPage(): JSX.Element {
                     <div>
                       <Label>Prioritaet</Label>
                       <select
-                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                         value={instructionForm.instruction_priority}
                         onChange={(e) =>
                           setInstructionForm((p) => ({
@@ -1637,8 +1639,8 @@ export default function KundenStammPage(): JSX.Element {
                             <td className="px-3 py-2 space-x-2">
                               <Button
                                 type="button"
-                                size="sm"
                                 variant="outline"
+                                className="min-h-touch touch-manipulation"
                                 onClick={() => {
                                   setEditingInstructionId(row.id)
                                   setInstructionForm(instructionToForm(row))
@@ -1648,10 +1650,10 @@ export default function KundenStammPage(): JSX.Element {
                               </Button>
                               <Button
                                 type="button"
-                                size="sm"
                                 variant="destructive"
+                                className="min-h-touch touch-manipulation"
                                 onClick={() => void deleteInstructionMutation.mutateAsync(row.id)}
-                                disabled={deleteInstructionMutation.isPending}
+                                disabled={deleteInstructionMutation.isPending && deleteInstructionMutation.variables === row.id}
                               >
                                 Loeschen
                               </Button>
@@ -1670,7 +1672,7 @@ export default function KundenStammPage(): JSX.Element {
         <TabsContent value="tab22">
           <Card>
             <CardHeader>
-              <CardTitle>Ansprechpartner (Tab 22)</CardTitle>
+              <CardTitle>Ansprechpartner</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {!partnerId && (
@@ -1717,7 +1719,7 @@ export default function KundenStammPage(): JSX.Element {
                     <div>
                       <Label>Typ</Label>
                       <select
-                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                         value={contactForm.contact_type}
                         onChange={(e) =>
                           setContactForm((p) => ({
@@ -1754,18 +1756,20 @@ export default function KundenStammPage(): JSX.Element {
                         onChange={(e) => setContactForm((p) => ({ ...p, email: e.target.value || null }))}
                       />
                     </div>
-                    <div className="flex items-center gap-4 md:col-span-3">
-                      <label className="flex items-center gap-2 text-sm">
+                    <div className="flex flex-wrap items-center gap-4 md:col-span-3">
+                      <label className="flex min-h-11 items-center gap-2 text-sm">
                         <input
                           type="checkbox"
+                          className="min-h-11 min-w-11"
                           checked={contactForm.invoice_email_recipient}
                           onChange={(e) => setContactForm((p) => ({ ...p, invoice_email_recipient: e.target.checked }))}
                         />
                         Rechnungs-E-Mail
                       </label>
-                      <label className="flex items-center gap-2 text-sm">
+                      <label className="flex min-h-11 items-center gap-2 text-sm">
                         <input
                           type="checkbox"
+                          className="min-h-11 min-w-11"
                           checked={contactForm.reminder_email_recipient}
                           onChange={(e) => setContactForm((p) => ({ ...p, reminder_email_recipient: e.target.checked }))}
                         />
@@ -1817,8 +1821,8 @@ export default function KundenStammPage(): JSX.Element {
                             <td className="px-3 py-2 space-x-2">
                               <Button
                                 type="button"
-                                size="sm"
                                 variant="outline"
+                                className="min-h-touch touch-manipulation"
                                 onClick={() => {
                                   setEditingContactId(c.id)
                                   setContactForm(contactToFormPayload(c))
@@ -1828,10 +1832,10 @@ export default function KundenStammPage(): JSX.Element {
                               </Button>
                               <Button
                                 type="button"
-                                size="sm"
                                 variant="destructive"
+                                className="min-h-touch touch-manipulation"
                                 onClick={() => void deleteContactMutation.mutateAsync(c.id)}
-                                disabled={deleteContactMutation.isPending}
+                                disabled={deleteContactMutation.isPending && deleteContactMutation.variables === c.id}
                               >
                                 Loeschen
                               </Button>
@@ -1857,13 +1861,13 @@ export default function KundenStammPage(): JSX.Element {
               {partnerId && (
                 <>
                   <p className="text-xs text-muted-foreground">
-                    Entspricht Tab 23 Zusatzfeldern je Anschriftenzeile (Name 2/3, Postfach, Freifelder, Gebietscode).
+                    Zusätzliche Felder je Anschrift (Name 2/3, Postfach, Freifelder, Gebietscode).
                   </p>
                   <div className="grid gap-4 md:grid-cols-4">
                     <div>
                       <Label>Typ</Label>
                       <select
-                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                         value={addressForm.address_type}
                         onChange={(e) => setAddressForm((p) => ({ ...p, address_type: e.target.value as AddressForm['address_type'] }))}
                       >
@@ -1961,6 +1965,7 @@ export default function KundenStammPage(): JSX.Element {
                       <input
                         id="addr_default"
                         type="checkbox"
+                  className="min-h-11 min-w-11"
                         checked={addressForm.is_default}
                         onChange={(e) => setAddressForm((p) => ({ ...p, is_default: e.target.checked }))}
                       />
@@ -2003,8 +2008,8 @@ export default function KundenStammPage(): JSX.Element {
                             <td className="px-3 py-2">{[item.street, item.house_number, item.postal_code, item.city].filter(Boolean).join(' ') || '-'}</td>
                             <td className="px-3 py-2">{item.email || item.phone || '-'}</td>
                             <td className="px-3 py-2 space-x-2">
-                              <Button size="sm" variant="outline" onClick={() => loadAddressForEdit(item)}>Bearbeiten</Button>
-                              <Button size="sm" variant="outline" onClick={() => deleteAddressMutation.mutate(item.id)}>Loeschen</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => loadAddressForEdit(item)}>Bearbeiten</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation text-status-error" onClick={() => deleteAddressMutation.mutate(item.id)} disabled={deleteAddressMutation.isPending && deleteAddressMutation.variables === item.id}>Loeschen</Button>
                             </td>
                           </tr>
                         ))}
@@ -2033,7 +2038,7 @@ export default function KundenStammPage(): JSX.Element {
                   <div>
                     <Label>Kundentyp</Label>
                     <select
-                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                       value={billingForm.customer_type}
                       onChange={(e) => setBillingForm((p) => ({ ...p, customer_type: e.target.value as BillingConfigForm['customer_type'] }))}
                     >
@@ -2054,7 +2059,7 @@ export default function KundenStammPage(): JSX.Element {
                   <div>
                     <Label>Settlement</Label>
                     <select
-                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                       value={billingForm.settlement_mode}
                       onChange={(e) => setBillingForm((p) => ({ ...p, settlement_mode: e.target.value as BillingConfigForm['settlement_mode'] }))}
                     >
@@ -2072,13 +2077,20 @@ export default function KundenStammPage(): JSX.Element {
                     <Input value={billingForm.invoice_number_range} onChange={(e) => setBillingForm((p) => ({ ...p, invoice_number_range: e.target.value }))} />
                   </div>
                   <div className="space-y-2 pt-7">
-                    <label className="flex items-center gap-2"><input type="checkbox" checked={billingForm.account_statement_print} onChange={(e) => setBillingForm((p) => ({ ...p, account_statement_print: e.target.checked }))} /> Kontoauszug drucken</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" checked={billingForm.account_statement_separate} onChange={(e) => setBillingForm((p) => ({ ...p, account_statement_separate: e.target.checked }))} /> getrennt</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" checked={billingForm.account_statement_reprint} onChange={(e) => setBillingForm((p) => ({ ...p, account_statement_reprint: e.target.checked }))} /> Nachdruck</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" checked={billingForm.bonus_eligible} onChange={(e) => setBillingForm((p) => ({ ...p, bonus_eligible: e.target.checked }))} /> Bonusberechtigt</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" checked={billingForm.self_billing_sales} onChange={(e) => setBillingForm((p) => ({ ...p, self_billing_sales: e.target.checked }))} /> Selbstabrechner Verkauf</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" checked={billingForm.self_billing_purchase} onChange={(e) => setBillingForm((p) => ({ ...p, self_billing_purchase: e.target.checked }))} /> Selbstabrechner Zukauf</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" checked={billingForm.vat_optimizer} onChange={(e) => setBillingForm((p) => ({ ...p, vat_optimizer: e.target.checked }))} /> USt-Optierer</label>
+                    <label className="flex min-h-11 items-center gap-2"><input type="checkbox"
+                  className="min-h-11 min-w-11" checked={billingForm.account_statement_print} onChange={(e) => setBillingForm((p) => ({ ...p, account_statement_print: e.target.checked }))} /> Kontoauszug drucken</label>
+                    <label className="flex min-h-11 items-center gap-2"><input type="checkbox"
+                  className="min-h-11 min-w-11" checked={billingForm.account_statement_separate} onChange={(e) => setBillingForm((p) => ({ ...p, account_statement_separate: e.target.checked }))} /> getrennt</label>
+                    <label className="flex min-h-11 items-center gap-2"><input type="checkbox"
+                  className="min-h-11 min-w-11" checked={billingForm.account_statement_reprint} onChange={(e) => setBillingForm((p) => ({ ...p, account_statement_reprint: e.target.checked }))} /> Nachdruck</label>
+                    <label className="flex min-h-11 items-center gap-2"><input type="checkbox"
+                  className="min-h-11 min-w-11" checked={billingForm.bonus_eligible} onChange={(e) => setBillingForm((p) => ({ ...p, bonus_eligible: e.target.checked }))} /> Bonusberechtigt</label>
+                    <label className="flex min-h-11 items-center gap-2"><input type="checkbox"
+                  className="min-h-11 min-w-11" checked={billingForm.self_billing_sales} onChange={(e) => setBillingForm((p) => ({ ...p, self_billing_sales: e.target.checked }))} /> Selbstabrechner Verkauf</label>
+                    <label className="flex min-h-11 items-center gap-2"><input type="checkbox"
+                  className="min-h-11 min-w-11" checked={billingForm.self_billing_purchase} onChange={(e) => setBillingForm((p) => ({ ...p, self_billing_purchase: e.target.checked }))} /> Selbstabrechner Zukauf</label>
+                    <label className="flex min-h-11 items-center gap-2"><input type="checkbox"
+                  className="min-h-11 min-w-11" checked={billingForm.vat_optimizer} onChange={(e) => setBillingForm((p) => ({ ...p, vat_optimizer: e.target.checked }))} /> USt-Optierer</label>
                   </div>
                   <div className="flex items-end">
                     <Button onClick={() => void billingMutation.mutateAsync()} disabled={billingMutation.isPending}>Speichern</Button>
@@ -2172,8 +2184,8 @@ export default function KundenStammPage(): JSX.Element {
                             <td className="px-3 py-2">{[item.postal_code, item.city].filter(Boolean).join(' ') || '-'}</td>
                             <td className="px-3 py-2">{item.debtor_account || '-'}</td>
                             <td className="px-3 py-2 space-x-2">
-                              <Button size="sm" variant="outline" onClick={() => loadCpdForEdit(item)}>Bearbeiten</Button>
-                              <Button size="sm" variant="outline" onClick={() => deleteCpdMutation.mutate(item.id)}>Loeschen</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => loadCpdForEdit(item)}>Bearbeiten</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation text-status-error" onClick={() => deleteCpdMutation.mutate(item.id)} disabled={deleteCpdMutation.isPending && deleteCpdMutation.variables === item.id}>Loeschen</Button>
                             </td>
                           </tr>
                         ))}
@@ -2248,7 +2260,7 @@ export default function KundenStammPage(): JSX.Element {
                     <div>
                       <Label>Typ</Label>
                       <select
-                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                         value={discountForm.source_type}
                         onChange={(e) => setDiscountForm((p) => ({ ...p, source_type: e.target.value as DiscountForm['source_type'] }))}
                       >
@@ -2307,8 +2319,8 @@ export default function KundenStammPage(): JSX.Element {
                             <td className="px-3 py-2">{item.discount_percent}</td>
                             <td className="px-3 py-2">{item.valid_to ? item.valid_to.slice(0, 10) : '-'}</td>
                             <td className="px-3 py-2 space-x-2">
-                              <Button size="sm" variant="outline" onClick={() => loadDiscountForEdit(item)}>Bearbeiten</Button>
-                              <Button size="sm" variant="outline" onClick={() => deleteDiscountMutation.mutate(item.id)}>Loeschen</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => loadDiscountForEdit(item)}>Bearbeiten</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation text-status-error" onClick={() => deleteDiscountMutation.mutate(item.id)} disabled={deleteDiscountMutation.isPending && deleteDiscountMutation.variables === item.id}>Loeschen</Button>
                             </td>
                           </tr>
                         ))}
@@ -2402,7 +2414,7 @@ export default function KundenStammPage(): JSX.Element {
                     <div>
                       <Label>Typ</Label>
                       <select
-                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        className="min-h-touch w-full rounded-md border px-3 py-2 text-sm touch-manipulation"
                         value={priceForm.source_type}
                         onChange={(e) => setPriceForm((p) => ({ ...p, source_type: e.target.value as PriceAgreementForm['source_type'] }))}
                       >
@@ -2465,8 +2477,8 @@ export default function KundenStammPage(): JSX.Element {
                             <td className="px-3 py-2">{item.price_incl_freight ?? '-'}</td>
                             <td className="px-3 py-2">{item.valid_to ? item.valid_to.slice(0, 10) : '-'}</td>
                             <td className="px-3 py-2 space-x-2">
-                              <Button size="sm" variant="outline" onClick={() => loadPriceForEdit(item)}>Bearbeiten</Button>
-                              <Button size="sm" variant="outline" onClick={() => deletePriceMutation.mutate(item.id)}>Loeschen</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => loadPriceForEdit(item)}>Bearbeiten</Button>
+                              <Button variant="outline" className="min-h-touch touch-manipulation text-status-error" onClick={() => deletePriceMutation.mutate(item.id)} disabled={deletePriceMutation.isPending && deletePriceMutation.variables === item.id}>Loeschen</Button>
                             </td>
                           </tr>
                         ))}

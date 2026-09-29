@@ -192,9 +192,9 @@ export function WizardFeedSections({ feeds, unit, minFm, maxFm,
                                onChange={(event) => onMaxChange(feed.id, Number(event.target.value))} />
                       </td>
                       <td className="py-1.5 text-right">
-                        <Button type="button" variant="ghost" size="sm"
+                        <Button type="button" variant="ghost"
                                 aria-label={`${feed.name} entfernen`}
-                                onClick={() => onRemove(feed.id)}>
+                                onClick={() => onRemove(feed.id)} className="min-h-touch">
                           ✕
                         </Button>
                       </td>

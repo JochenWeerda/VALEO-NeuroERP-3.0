@@ -347,7 +347,7 @@ export default function StartDashboardPage(): JSX.Element {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button asChild size="sm">
+                    <Button asChild className="min-h-touch">
                       <Link to={tile.path}>Oeffnen</Link>
                     </Button>
                   </CardContent>

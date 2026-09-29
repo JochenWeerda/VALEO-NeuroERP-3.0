@@ -53,7 +53,7 @@ export function SourceProposalRenderer({ context }: { context: unknown }): JSX.E
     <section aria-label="Kontrakt- und Fremdlagervorschlaege" className="rounded border p-3 space-y-2 text-sm">
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-semibold">Passende Kontrakte und Fremdlager</h2>
-        <Button type="button" variant="outline" size="sm" disabled={!ready} onClick={() => setRefresh((value) => value + 1)}>Erneut pruefen</Button>
+        <Button type="button" variant="outline" disabled={!ready} onClick={() => setRefresh((value) => value + 1)} className="min-h-touch">Erneut pruefen</Button>
       </div>
       {!ready ? <p>Partner, Artikel, Menge und Einheit erfassen.</p> : null}
       {error ? <p role="alert">{error}</p> : null}

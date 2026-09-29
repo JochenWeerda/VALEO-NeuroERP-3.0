@@ -502,23 +502,21 @@ function DetailPanel({ knowledgeId }: DetailPanelProps) {
 
       {/* Aktionsleiste */}
       <div className="p-4 border-t bg-white flex gap-2 flex-wrap">
-        <Button variant="outline" size="sm" onClick={() => setNeueVersionOpen(true)}>
+        <Button variant="outline" onClick={() => setNeueVersionOpen(true)} className="min-h-touch">
           Neue Version
         </Button>
         <Button
           variant="outline"
-          size="sm"
           onClick={toggleAgentenfreigabe}
           disabled={updateMutation.isPending}
-        >
+         className="min-h-touch">
           {item.agentenfreigabe ? 'Agenten-Freigabe entziehen' : 'Agenten-Freigabe erteilen'}
         </Button>
         <Button
           variant="destructive"
-          size="sm"
           onClick={handleArchive}
           disabled={archiveMutation.isPending || item.status === 'ARCHIVIERT'}
-        >
+         className="min-h-touch">
           Archivieren
         </Button>
       </div>

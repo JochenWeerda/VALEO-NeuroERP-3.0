@@ -172,11 +172,10 @@ export function FeedControllingTrends(): JSX.Element {
               <Button
                 key={range.days}
                 type="button"
-                size="sm"
                 variant={rangeDays === range.days ? 'default' : 'outline'}
                 aria-pressed={rangeDays === range.days}
                 onClick={() => setRangeDays(range.days)}
-              >
+               className="min-h-touch">
                 {range.label}
               </Button>
             ))}
@@ -192,7 +191,7 @@ export function FeedControllingTrends(): JSX.Element {
         <div className="rounded-lg border bg-muted/30 p-4 text-sm" role="alert">
           <p className="font-medium text-status-error">Trenddaten konnten nicht geladen werden.</p>
           <p className="mt-1 text-muted-foreground">{error}</p>
-          <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { void load() }}>Erneut laden</Button>
+          <Button type="button" variant="outline" className="min-h-touch mt-3" onClick={() => { void load() }}>Erneut laden</Button>
         </div>
       ) : !hasAnyValue ? (
         <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground" role="status">

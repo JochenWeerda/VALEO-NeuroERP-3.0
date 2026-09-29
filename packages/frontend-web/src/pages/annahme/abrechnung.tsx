@@ -12,6 +12,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { Calculator, FileText, Save, Truck } from 'lucide-react'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
@@ -225,11 +226,63 @@ type QualitaetsCheckState = {
   lieferscheinNr?: string
 }
 
+function settlementStatusLabel(status: string): string {
+  switch (status) {
+    case 'draft':
+      return 'Entwurf'
+    case 'posted':
+      return 'verbucht'
+    case 'cancelled':
+      return 'storniert'
+    default:
+      return status
+  }
+}
+
+function approvalStatusLabel(status: string): string {
+  switch (status) {
+    case 'ENTWURF':
+      return 'Entwurf'
+    case 'ZUR_FREIGABE':
+      return 'Zur Freigabe'
+    case 'TEILWEISE_FREIGEGEBEN':
+      return 'Teilweise freigegeben'
+    case 'FREIGEGEBEN':
+      return 'Freigegeben'
+    case 'ABGELEHNT':
+      return 'Abgelehnt'
+    case 'VERBUCHT':
+      return 'Verbucht'
+    default:
+      return status
+  }
+}
+
+function deductionTypeLabel(type: string): string {
+  switch (type) {
+    case 'drying':
+      return 'Trocknung'
+    case 'cleaning':
+      return 'Reinigung'
+    case 'freight':
+      return 'Fracht'
+    case 'other':
+      return 'Sonstiges'
+    default:
+      return type
+  }
+}
+
+function deductionModeLabel(mode: string): string {
+  return mode === 'per_ton' ? 'je t' : mode === 'fixed' ? 'fix' : mode
+}
+
 export default function AnnahmeAbrechnungPage(): JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const { data: chain } = useSupplyChainOverview()
   const [form, setForm] = useState<FormState>(initialForm)
@@ -264,7 +317,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
         deduction_type: 'drying',
         mode: 'per_ton',
         rate_per_ton_eur: form.dryingRate,
-        note: `Moisture ${form.feuchtigkeit.toFixed(1)}%`,
+        note: `Feuchte ${form.feuchtigkeit.toFixed(1)} %`,
       })
     }
     if (form.verunreinigung > 2) {
@@ -272,7 +325,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
         deduction_type: 'cleaning',
         mode: 'per_ton',
         rate_per_ton_eur: form.cleaningRate,
-        note: `Impurities ${form.verunreinigung.toFixed(1)}%`,
+        note: `Besatz ${form.verunreinigung.toFixed(1)} %`,
       })
     }
     if (form.freightFixed > 0) {
@@ -299,7 +352,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
         deduction_type: 'cleaning',
         mode: 'per_ton',
         rate_per_ton_eur: form.cleaningRate,
-        note: `Impurities ${form.verunreinigung.toFixed(1)}%`,
+        note: `Besatz ${form.verunreinigung.toFixed(1)} %`,
       })
     }
     if (form.freightFixed > 0) {
@@ -378,11 +431,11 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       return (await apiClient.post<Settlement>('/api/v1/agrar/settlements', payload)).data
     },
     onSuccess: () => {
-      toast({ title: 'Settlement erstellt', description: 'Self-billing Beleg wurde gespeichert.' })
+      toast({ title: 'Abrechnung gespeichert', description: 'Selbstabrechner-Beleg wurde angelegt.' })
       void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
     },
     onError: (e: unknown) => {
-      const message = e instanceof Error ? e.message : 'Settlement konnte nicht erstellt werden'
+      const message = e instanceof Error ? e.message : 'Abrechnung konnte nicht erstellt werden'
       toast({ title: 'Fehler', description: message, variant: 'destructive' })
     },
   })
@@ -398,7 +451,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       return (await apiClient.post(`/api/v1/agrar/settlements/${settlementId}/post-fibu`, payload)).data
     },
     onSuccess: () => {
-      toast({ title: 'Fibu-Buchung erstellt', description: 'Settlement wurde als Journal Entry verbucht.' })
+      toast({ title: 'Fibu-Buchung erstellt', description: 'Abrechnung wurde als Journalbuchung verbucht.' })
       void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
     },
     onError: (e: unknown) => {
@@ -499,13 +552,17 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
     },
   })
 
+  const approvePendingId = approveSettlement.variables?.settlementId
+  const postPendingId = postSettlement.variables?.settlementId
+  const cancelPendingId = cancelSettlement.variables?.settlementId
+
   function openCorrection(settlement: Settlement, memoType: 'credit' | 'debit'): void {
     navigate(`/einkauf/gutschriften-belastungen/${memoType}?settlementId=${settlement.id}`)
   }
 
   async function runPreview(): Promise<void> {
     if (!form.supplierId.trim()) {
-      toast({ title: 'Lieferant fehlt', description: 'Bitte supplier_id eingeben.', variant: 'destructive' })
+      toast({ title: 'Lieferant fehlt', description: 'Bitte den Lieferanten eingeben.', variant: 'destructive' })
       return
     }
     let billingWeightKg: number
@@ -523,7 +580,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
 
   async function saveSettlement(): Promise<void> {
     if (!form.supplierId.trim()) {
-      toast({ title: 'Lieferant fehlt', description: 'Bitte supplier_id eingeben.', variant: 'destructive' })
+      toast({ title: 'Lieferant fehlt', description: 'Bitte den Lieferanten eingeben.', variant: 'destructive' })
       return
     }
     let billingWeightKg: number
@@ -585,9 +642,9 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           : 'blockiert',
   )
   const operationalBlocker = previewData?.exception_hints?.length
-    ? 'Die Settlement-Vorschau meldet Ausnahmehinweise. Freigabe oder Korrektur ist vor dem Buchen erforderlich.'
+    ? 'Die Vorschau meldet Ausnahmehinweise. Freigabe oder Korrektur ist vor dem Buchen erforderlich.'
     : !qualityOk
-      ? 'Qualitaetsabzuege sind aktiv. Billing- und Settlement-Vorschau zuerst absichern.'
+      ? 'Qualitaetsabzuege sind aktiv. Vorschau zuerst absichern.'
       : null
   const contextSections = [
     {
@@ -595,7 +652,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       items: [
         { label: 'Lieferant', value: form.supplierId || 'Noch offen' },
         { label: 'Artikel', value: form.articleId || 'Noch offen' },
-        { label: 'Settlement', value: form.settlementNumber || 'Automatik / neu' },
+        { label: 'Abrechnung', value: form.settlementNumber || 'Automatik / neu' },
       ],
     },
     {
@@ -609,53 +666,46 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
     {
       title: 'Governance',
       items: [
-        { label: 'Offene Settlements', value: `${filteredOpenCount}` },
+        { label: 'Offene Abrechnungen', value: `${filteredOpenCount}` },
         { label: 'Netto gesamt', value: money(filteredNetTotal) },
         { label: 'Freigaberolle', value: approvalActor.actorType },
       ],
     },
   ]
   const timelineItems = [
-    { label: 'Abrechnungsfall aktiv', detail: campaignName ? `Kampagne ${campaignName}` : 'Settlement wird vorbereitet.' },
+    { label: 'Abrechnungsfall aktiv', detail: campaignName ? `Kampagne ${campaignName}` : 'Abrechnung wird vorbereitet.' },
     { label: 'Qualitaetslage', detail: qualityOk ? 'ohne kritische Abzuege' : 'Abzuege / Trocknung aktiv' },
-    ...(previewData ? [{ label: 'Settlement-Vorschau vorhanden', detail: `Netto ${money(previewData.net_amount_eur)}` }] : []),
+    ...(previewData ? [{ label: 'Vorschau vorhanden', detail: `Netto ${money(previewData.net_amount_eur)}` }] : []),
   ]
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Annahme-Abrechnung</h1>
-          <p className="text-muted-foreground">Self-billing mit Abzugsnachweis und Fibu-Posting</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Annahme-Abrechnung</h1>
+          <p className="text-muted-foreground">Selbstabrechner mit Abzügen, Freigabe und Buchung</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/annahme/warteschlange')}>Zurueck</Button>
-          <Button variant="outline" className="gap-2" onClick={() => { void runPreview() }} disabled={billingPreview.isPending || settlementPreview.isPending}>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/annahme/warteschlange')}>Zurück</Button>
+          <Button
+            variant="outline"
+            className="min-h-touch gap-2 touch-manipulation"
+            onClick={() => { void runPreview() }}
+            disabled={billingPreview.isPending || settlementPreview.isPending}
+          >
             <Calculator className="h-4 w-4" />
-            Vorschau
+            {billingPreview.isPending || settlementPreview.isPending ? 'Rechne...' : 'Vorschau'}
           </Button>
-          <Button onClick={() => { void saveSettlement() }} className="gap-2" disabled={createSettlement.isPending}>
+          <Button
+            onClick={() => { void saveSettlement() }}
+            className="min-h-touch min-w-[136px] gap-2 touch-manipulation"
+            disabled={createSettlement.isPending}
+          >
             <Save className="h-4 w-4" />
-            Settlement speichern
+            {createSettlement.isPending ? 'Speichere...' : 'Speichern'}
           </Button>
         </div>
-      </div>
-      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-        <div className="space-y-4">
-          <OperationalCaseHeader
-            title="Settlement-Fall steuern"
-            description="Die Abrechnung zeigt nur die entscheidende Lage aus Gewicht, Preis, Ausnahmen und naechster Aktion oberhalb des Settlement-Arbeitsplatzes."
-            status={operationalStatus}
-            owner="Annahme / Settlement"
-            blocker={operationalBlocker}
-            nextAction={previewData ? 'Settlement pruefen und speichern' : 'Billing- und Settlement-Vorschau erzeugen'}
-            caseLabel={form.settlementNumber || 'Settlement-Fall'}
-            tags={['Annahme', 'Settlement']}
-          />
-          <OperationalTimeline title="Abrechnungsverlauf" items={timelineItems} />
-        </div>
-        <OperationalContextPanel title="Abrechnungskontext" sections={contextSections} />
       </div>
 
       {campaignName ? (
@@ -669,7 +719,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
               <div className="font-semibold">{campaignStart} bis {campaignEnd}</div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Gefilterte Settlements</div>
+              <div className="text-xs text-muted-foreground">Gefilterte Abrechnungen</div>
               <div className="font-semibold">{filteredSettlements.length}</div>
             </div>
             <div>
@@ -680,47 +730,21 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
         </Card>
       ) : null}
 
-      {chain && (
-      <Card>
-        <CardHeader>
-          <CardTitle>Partie bis Abrechnung</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-4">
-          <div>
-            <div className="text-xs text-muted-foreground">Wartende Annahmen</div>
-            <div className="font-semibold">{chain.waitingInbound}</div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground">Offene Wiegungen</div>
-            <div className="font-semibold">{chain.openWeighingTickets}</div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground">Gesperrte Chargen</div>
-            <div className="font-semibold">{chain.blockedCharges}</div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground">Fracht in Transit</div>
-            <div className="font-semibold">{chain.freightInTransit}</div>
-          </div>
-        </CardContent>
-      </Card>
-      )}
-
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2"><Truck className="h-5 w-5" />Lieferdaten</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <Label htmlFor="supplierId">Supplier ID</Label>
-              <Input id="supplierId" value={form.supplierId} onChange={(e) => setForm((p) => ({ ...p, supplierId: e.target.value }))} placeholder="z.B. LW-10001" />
+              <Label htmlFor="supplierId">Lieferant</Label>
+              <Input id="supplierId" className="h-14 text-base" value={form.supplierId} onChange={(e) => setForm((p) => ({ ...p, supplierId: e.target.value }))} placeholder="z.B. LW-10001" />
             </div>
             <div>
-              <Label htmlFor="settlementNumber">Settlement Nummer (optional)</Label>
-              <Input id="settlementNumber" value={form.settlementNumber} onChange={(e) => setForm((p) => ({ ...p, settlementNumber: e.target.value }))} />
+              <Label htmlFor="settlementNumber">Abrechnungsnummer (optional)</Label>
+              <Input id="settlementNumber" className="h-14 text-base" value={form.settlementNumber} onChange={(e) => setForm((p) => ({ ...p, settlementNumber: e.target.value }))} />
             </div>
             <div>
               <Label htmlFor="articleId">Artikel</Label>
-              <Input id="articleId" value={form.articleId} onChange={(e) => setForm((p) => ({ ...p, articleId: e.target.value }))} />
+              <Input id="articleId" className="h-14 text-base" value={form.articleId} onChange={(e) => setForm((p) => ({ ...p, articleId: e.target.value }))} />
             </div>
           </CardContent>
         </Card>
@@ -731,22 +755,22 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="bruttoGewicht">Brutto (kg)</Label>
-                <Input id="bruttoGewicht" type="number" value={form.bruttoGewicht} onChange={(e) => setForm((p) => ({ ...p, bruttoGewicht: Number(e.target.value) }))} />
+                <Input id="bruttoGewicht" className="h-14 text-base" type="number" inputMode="decimal" value={form.bruttoGewicht} onChange={(e) => setForm((p) => ({ ...p, bruttoGewicht: Number(e.target.value) }))} />
               </div>
               <div>
                 <Label htmlFor="taraGewicht">Tara (kg)</Label>
-                <Input id="taraGewicht" type="number" value={form.taraGewicht} onChange={(e) => setForm((p) => ({ ...p, taraGewicht: Number(e.target.value) }))} />
+                <Input id="taraGewicht" className="h-14 text-base" type="number" inputMode="decimal" value={form.taraGewicht} onChange={(e) => setForm((p) => ({ ...p, taraGewicht: Number(e.target.value) }))} />
               </div>
             </div>
             <div className="rounded-md bg-muted p-3 text-sm">Netto: <span className="font-semibold">{nettoGewicht.toLocaleString('de-DE')} kg</span></div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="feuchtigkeit">Feuchtigkeit (%)</Label>
-                <Input id="feuchtigkeit" type="number" step="0.1" value={form.feuchtigkeit} onChange={(e) => setForm((p) => ({ ...p, feuchtigkeit: Number(e.target.value) }))} />
+                <Input id="feuchtigkeit" className="h-14 text-base" type="number" inputMode="decimal" step="0.1" value={form.feuchtigkeit} onChange={(e) => setForm((p) => ({ ...p, feuchtigkeit: Number(e.target.value) }))} />
               </div>
               <div>
                 <Label htmlFor="verunreinigung">Verunreinigung (%)</Label>
-                <Input id="verunreinigung" type="number" step="0.1" value={form.verunreinigung} onChange={(e) => setForm((p) => ({ ...p, verunreinigung: Number(e.target.value) }))} />
+                <Input id="verunreinigung" className="h-14 text-base" type="number" inputMode="decimal" step="0.1" value={form.verunreinigung} onChange={(e) => setForm((p) => ({ ...p, verunreinigung: Number(e.target.value) }))} />
               </div>
             </div>
             <Badge variant={qualityOk ? 'outline' : 'secondary'}>{qualityOk ? 'Qualitaet ok' : 'Abzuege erforderlich'}</Badge>
@@ -760,19 +784,19 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           <div className="grid gap-3 md:grid-cols-4">
             <div>
               <Label htmlFor="basisPreis">Basispreis (EUR/t)</Label>
-              <Input id="basisPreis" type="number" step="0.01" value={form.basisPreis} onChange={(e) => setForm((p) => ({ ...p, basisPreis: Number(e.target.value) }))} />
+              <Input id="basisPreis" className="min-h-touch text-base" type="number" inputMode="decimal" step="0.01" value={form.basisPreis} onChange={(e) => setForm((p) => ({ ...p, basisPreis: Number(e.target.value) }))} />
             </div>
             <div>
               <Label htmlFor="dryingRate">Trocknung (EUR/t)</Label>
-              <Input id="dryingRate" type="number" step="0.01" value={form.dryingRate} onChange={(e) => setForm((p) => ({ ...p, dryingRate: Number(e.target.value) }))} />
+              <Input id="dryingRate" className="min-h-touch text-base" type="number" inputMode="decimal" step="0.01" value={form.dryingRate} onChange={(e) => setForm((p) => ({ ...p, dryingRate: Number(e.target.value) }))} />
             </div>
             <div>
               <Label htmlFor="cleaningRate">Reinigung (EUR/t)</Label>
-              <Input id="cleaningRate" type="number" step="0.01" value={form.cleaningRate} onChange={(e) => setForm((p) => ({ ...p, cleaningRate: Number(e.target.value) }))} />
+              <Input id="cleaningRate" className="min-h-touch text-base" type="number" inputMode="decimal" step="0.01" value={form.cleaningRate} onChange={(e) => setForm((p) => ({ ...p, cleaningRate: Number(e.target.value) }))} />
             </div>
             <div>
               <Label htmlFor="freightFixed">Fracht fix (EUR)</Label>
-              <Input id="freightFixed" type="number" step="0.01" value={form.freightFixed} onChange={(e) => setForm((p) => ({ ...p, freightFixed: Number(e.target.value) }))} />
+              <Input id="freightFixed" className="min-h-touch text-base" type="number" inputMode="decimal" step="0.01" value={form.freightFixed} onChange={(e) => setForm((p) => ({ ...p, freightFixed: Number(e.target.value) }))} />
             </div>
           </div>
 
@@ -786,7 +810,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           {previewData && (
             <div className="rounded border bg-muted/40 p-4">
               <div className="flex justify-between"><span>Bruttobetrag</span><span className="font-semibold">{money(previewData.gross_amount_eur)}</span></div>
-              <div className="flex justify-between text-orange-700"><span>Abzuege gesamt</span><span className="font-semibold">{money(previewData.total_deductions_eur)}</span></div>
+              <div className="flex justify-between text-status-warning"><span>Abzuege gesamt</span><span className="font-semibold">{money(previewData.total_deductions_eur)}</span></div>
               <div className="mt-2 flex justify-between border-t pt-2 text-lg"><span className="font-bold">Nettobetrag</span><span className="font-bold">{money(previewData.net_amount_eur)}</span></div>
             </div>
           )}
@@ -812,7 +836,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
             </Callout>
           ) : null}
 
-          {previewData?.reference_context ? (
+          {previewData?.reference_context && !isTouch ? (
             <div className="rounded-md border p-3">
               <div className="text-sm font-semibold">Prozessreferenz</div>
               <div className="mt-2 text-xs text-muted-foreground">
@@ -828,15 +852,16 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
         <CardHeader><CardTitle>Freigabe-Kontext</CardTitle></CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           <div>
-            <Label htmlFor="approvalActorId">Aktor-ID</Label>
+            <Label htmlFor="approvalActorId">Freigabe durch (ID)</Label>
             <Input
               id="approvalActorId"
+              className="min-h-touch text-base"
               value={approvalActor.actorId}
               onChange={(e) => setApprovalActor((prev) => ({ ...prev, actorId: e.target.value }))}
             />
           </div>
           <div>
-            <Label htmlFor="approvalActorType">Aktor-Rolle</Label>
+            <Label htmlFor="approvalActorType">Rolle</Label>
             <NativeSelect
               value={approvalActor.actorType}
               onValueChange={(value) => setApprovalActor((prev) => ({ ...prev, actorType: value }))}
@@ -853,21 +878,21 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Bestehende Settlements</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Bestehende Abrechnungen</CardTitle></CardHeader>
         <CardContent>
-          {isLoading && <div className="text-sm text-muted-foreground">Lade Settlements...</div>}
-          {isError && <ErrorState error={(error as Error) ?? new Error('Settlements konnten nicht geladen werden')} onRetry={() => { void refetch() }} />}
+          {isLoading && <div className="text-sm text-muted-foreground">Lade Abrechnungen...</div>}
+          {isError && <ErrorState error={(error as Error) ?? new Error('Abrechnungen konnten nicht geladen werden')} onRetry={() => { void refetch() }} />}
           {!isLoading && !isError && (
             <div className="space-y-3">
-              {filteredSettlements.length === 0 && <div className="text-sm text-muted-foreground">Keine Settlements vorhanden.</div>}
+              {filteredSettlements.length === 0 && <div className="text-sm text-muted-foreground">Keine Abrechnungen vorhanden.</div>}
               {filteredSettlements.map((s) => (
                 <div key={s.id} className="rounded border p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="font-semibold">{s.settlement_number}</div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant={s.status === 'posted' ? 'outline' : 'secondary'}>{s.status}</Badge>
+                      <Badge variant={s.status === 'posted' ? 'outline' : 'secondary'}>{settlementStatusLabel(s.status)}</Badge>
                       <Badge variant={s.approval_status === 'FREIGEGEBEN' || s.approval_status === 'VERBUCHT' ? 'outline' : 'secondary'}>
-                        {s.approval_status}
+                        {approvalStatusLabel(s.approval_status)}
                       </Badge>
                     </div>
                   </div>
@@ -878,7 +903,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                     <div className="mt-2 space-y-1 text-sm">
                       {s.deductions.map((d) => (
                         <div key={d.id} className="flex justify-between">
-                          <span>{d.deduction_type} ({d.mode})</span>
+                          <span>{deductionTypeLabel(d.deduction_type)} ({deductionModeLabel(d.mode)})</span>
                           <span className="font-semibold">{money(d.amount_eur)}</span>
                         </div>
                       ))}
@@ -888,85 +913,85 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {s.allowed_transitions.includes('ZUR_FREIGABE') ? (
                         <Button
-                          size="sm"
                           variant="outline"
+                          className="min-h-touch touch-manipulation"
                           onClick={() => {
                             void approveSettlement.mutateAsync({
                               settlementId: s.id,
                               targetStatus: 'ZUR_FREIGABE',
-                              reason: 'Settlement aus UI zur Freigabe eingereicht.',
+                              reason: 'Abrechnung aus der Maske zur Freigabe eingereicht.',
                               expectedRowVersion: settlementRowVersion(s),
                             })
                           }}
-                          disabled={approveSettlement.isPending}
+                          disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
                           Zur Freigabe
                         </Button>
                       ) : null}
                       {s.allowed_transitions.includes('FREIGEGEBEN') ? (
                         <Button
-                          size="sm"
                           variant="outline"
+                          className="min-h-touch touch-manipulation"
                           onClick={() => {
                             void approveSettlement.mutateAsync({
                               settlementId: s.id,
                               targetStatus: 'FREIGEGEBEN',
-                              reason: 'Settlement fachlich freigegeben.',
+                              reason: 'Abrechnung fachlich freigegeben.',
                               expectedRowVersion: settlementRowVersion(s),
                             })
                           }}
-                          disabled={approveSettlement.isPending}
+                          disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
                           Freigeben
                         </Button>
                       ) : null}
                       {s.allowed_transitions.includes('ABGELEHNT') ? (
                         <Button
-                          size="sm"
                           variant="outline"
+                          className="min-h-touch touch-manipulation"
                           onClick={() => {
                             void approveSettlement.mutateAsync({
                               settlementId: s.id,
                               targetStatus: 'ABGELEHNT',
-                              reason: 'Settlement zur Korrektur abgelehnt.',
+                              reason: 'Abrechnung zur Korrektur abgelehnt.',
                               expectedRowVersion: settlementRowVersion(s),
                             })
                           }}
-                          disabled={approveSettlement.isPending}
+                          disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
                           Ablehnen
                         </Button>
                       ) : null}
                       {s.allowed_transitions.includes('ENTWURF') ? (
                         <Button
-                          size="sm"
                           variant="outline"
+                          className="min-h-touch touch-manipulation"
                           onClick={() => {
                             void approveSettlement.mutateAsync({
                               settlementId: s.id,
                               targetStatus: 'ENTWURF',
-                              reason: 'Settlement zur Ueberarbeitung in Entwurf zurueckgesetzt.',
+                              reason: 'Abrechnung zur Ueberarbeitung in Entwurf zurueckgesetzt.',
                               expectedRowVersion: settlementRowVersion(s),
                             })
                           }}
-                          disabled={approveSettlement.isPending}
+                          disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
-                          Zurueck in Entwurf
+                          Zurück in Entwurf
                         </Button>
                       ) : null}
                       <Button
-                        size="sm"
                         variant="outline"
+                        className="min-h-touch touch-manipulation"
                         onClick={() => {
                           void postSettlement.mutateAsync({ settlementId: s.id, expectedRowVersion: settlementRowVersion(s) })
                         }}
-                        disabled={postSettlement.isPending || !s.can_post_fibu}
+                        disabled={(postSettlement.isPending && postPendingId === s.id) || !s.can_post_fibu}
                       >
                         In Fibu buchen
                       </Button>
                       <Button
-                        size="sm"
                         variant="destructive"
+                        className="min-h-touch touch-manipulation"
                         onClick={() => {
                           if (!window.confirm('Abrechnung wirklich stornieren?')) return
                           void cancelSettlement.mutateAsync({
@@ -975,9 +1000,9 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                           })
                         }}
                         disabled={
-                          cancelSettlement.isPending
-                          || postSettlement.isPending
-                          || approveSettlement.isPending
+                          (cancelSettlement.isPending && cancelPendingId === s.id)
+                          || (postSettlement.isPending && postPendingId === s.id)
+                          || (approveSettlement.isPending && approvePendingId === s.id)
                         }
                       >
                         Stornieren
@@ -987,12 +1012,12 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                   {s.status === 'posted' && s.correction_options.length > 0 ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {s.correction_options.some((option) => option.memo_type === 'credit') ? (
-                        <Button size="sm" variant="outline" onClick={() => openCorrection(s, 'credit')}>
+                        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => openCorrection(s, 'credit')}>
                           Gutschrift
                         </Button>
                       ) : null}
                       {s.correction_options.some((option) => option.memo_type === 'debit') ? (
-                        <Button size="sm" variant="outline" onClick={() => openCorrection(s, 'debit')}>
+                        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => openCorrection(s, 'debit')}>
                           Belastung
                         </Button>
                       ) : null}
@@ -1003,11 +1028,11 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                   )}
                   {s.approval_history.length > 0 ? (
                     <div className="mt-3 rounded-md border bg-muted/20 p-3">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Freigabehistorie</div>
-                      <div className="mt-2 space-y-2 text-xs">
+                      <div className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">Freigabehistorie</div>
+                      <div className="mt-2 space-y-2 text-sm">
                         {s.approval_history.map((entry, idx) => (
                           <div key={`${entry.decided_at}-${idx}`} className="flex flex-wrap justify-between gap-2">
-                            <span>{entry.previous_status || 'START'} {'->'} {entry.new_status}</span>
+                            <span>{approvalStatusLabel(entry.previous_status || 'START')} {'→'} {approvalStatusLabel(entry.new_status)}</span>
                             <span>{entry.actor_type} / {entry.actor_id}</span>
                           </div>
                         ))}
@@ -1028,8 +1053,54 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           )}
         </CardContent>
       </Card>
+
+      {!isTouch ? (
+        <>
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <div className="space-y-4">
+              <OperationalCaseHeader
+                title="Abrechnungsfall"
+                description="Gewicht, Preis, Ausnahmen und naechste Aktion — nach der Arbeit, nicht davor."
+                status={operationalStatus}
+                owner="Annahme / Abrechnung"
+                blocker={operationalBlocker}
+                nextAction={previewData ? 'Abrechnung pruefen und speichern' : 'Vorschau erzeugen'}
+                caseLabel={form.settlementNumber || 'Neue Abrechnung'}
+                tags={['Annahme', 'Abrechnung']}
+              />
+              <OperationalTimeline title="Abrechnungsverlauf" items={timelineItems} />
+            </div>
+            <OperationalContextPanel title="Abrechnungskontext" sections={contextSections} />
+          </div>
+          {chain ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Partie bis Abrechnung</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3 md:grid-cols-4">
+                <div>
+                  <div className="text-xs text-muted-foreground">Wartende Annahmen</div>
+                  <div className="font-semibold">{chain.waitingInbound}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Offene Wiegungen</div>
+                  <div className="font-semibold">{chain.openWeighingTickets}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Gesperrte Chargen</div>
+                  <div className="font-semibold">{chain.blockedCharges}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Fracht in Transit</div>
+                  <div className="font-semibold">{chain.freightInTransit}</div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+        </>
+      ) : null}
     </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

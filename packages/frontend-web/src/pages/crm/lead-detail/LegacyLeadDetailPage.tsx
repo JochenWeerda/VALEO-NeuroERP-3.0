@@ -149,7 +149,7 @@ function LegacyLeadDetailPage(): JSX.Element {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate('/crm/leads')}>
+          <Button variant="outline" onClick={() => navigate('/crm/leads')} className="min-h-touch">
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('common.back')}
           </Button>

@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileDown, FileText, Plus, Search } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { NativeSelect } from '@/components/ui/native-select'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
@@ -72,6 +74,7 @@ export default function AngeboteListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<AngebotStatus | 'alle'>('alle')
   const [showImport, setShowImport] = useState(false)
@@ -263,8 +266,9 @@ export default function AngeboteListePage(): JSX.Element {
       label: t('crud.fields.number'),
       render: (angebot: Angebot) => (
         <button
+          type="button"
           onClick={() => navigate(`/sales/angebot/${angebot.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-touch touch-manipulation font-medium text-primary"
         >
           {angebot.nummer}
         </button>
@@ -300,17 +304,92 @@ export default function AngeboteListePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{getListTitle(t, entityTypeLabel)}</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">{getListTitle(t, entityTypeLabel)}</h1>
           <p className="text-muted-foreground">{t('crud.list.overview', { entityType: entityTypeLabel })}</p>
         </div>
-        <Button onClick={() => navigate('/sales/angebot/neu')} className="gap-2">
+        <Button onClick={() => navigate('/sales/angebot/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           {t('crud.actions.new')} {entityTypeLabel}
         </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('crud.actions.filter')} & {t('crud.actions.search')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label={t('crud.actions.search')}
+                placeholder={`${t('crud.actions.search')}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
+            </div>
+            <NativeSelect
+              aria-label={t('crud.fields.status')}
+              className="min-h-touch sm:w-48"
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as AngebotStatus | 'alle')}
+              options={[
+                { value: 'alle', label: t('crud.list.allStatus', { defaultValue: 'Alle Status' }) },
+                { value: 'offen', label: getStatusLabel(t, 'offen', 'Offen') },
+                { value: 'angenommen', label: getStatusLabel(t, 'angenommen', 'Angenommen') },
+                { value: 'abgelehnt', label: getStatusLabel(t, 'abgelehnt', 'Abgelehnt') },
+                { value: 'abgelaufen', label: getStatusLabel(t, 'abgelaufen', 'Abgelaufen') },
+              ]}
+            />
+            <AdvancedFilters
+              filters={filterConfig}
+              values={filterValues}
+              onChange={setFilterValues}
+              onReset={() => setFilterValues({})}
+            />
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
+              <FileDown className="h-4 w-4" />
+              {t('crud.print.export')}
+            </Button>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handlePrint}>
+              <FileText className="h-4 w-4" />
+              {t('crud.actions.print')}
+            </Button>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowImport(!showImport)}>
+              <FileText className="h-4 w-4" />
+              {t('crud.actions.import')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {showImport && (
+        <Card>
+          <CardContent className="pt-6">
+            <CSVImport
+              onImport={handleImport}
+              expectedColumns={['Angebotsnummer', 'Datum', 'Kunde', 'Betrag', 'Gültig bis', 'Status']}
+              entityName="Angebote"
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardContent className="overflow-x-auto pt-6">
+          <DataTable data={filteredAngebote} columns={columns} />
+          <div className="mt-4 text-sm text-muted-foreground">
+            {t('crud.list.showing', { count: filteredAngebote.length, total: angebote.length, entityType: entityTypeLabel })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {!isTouch ? (
+      <div className="space-y-4">
       <RoleFocusBar
         roles={offerRoleProfiles}
         value={roleFocus}
@@ -342,75 +421,8 @@ export default function AngeboteListePage(): JSX.Element {
         />
       </div>
       <CrudCapabilityChecklist capabilities={offerCrudCapabilities} />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('crud.actions.filter')} & {t('crud.actions.search')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={`${t('crud.actions.search')  }...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as Angebot['status'] | 'alle')}
-              className="rounded-md border border-input bg-background px-3 py-2"
-            >
-              <option value="alle">{t('crud.list.allStatus', { defaultValue: 'Alle Status' })}</option>
-              <option value="offen">{getStatusLabel(t, 'offen', 'Offen')}</option>
-              <option value="angenommen">{getStatusLabel(t, 'angenommen', 'Angenommen')}</option>
-              <option value="abgelehnt">{getStatusLabel(t, 'abgelehnt', 'Abgelehnt')}</option>
-              <option value="abgelaufen">{getStatusLabel(t, 'abgelaufen', 'Abgelaufen')}</option>
-            </select>
-            <AdvancedFilters
-              filters={filterConfig}
-              values={filterValues}
-              onChange={setFilterValues}
-              onReset={() => setFilterValues({})}
-            />
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
-              <FileDown className="h-4 w-4" />
-              {t('crud.print.export')}
-            </Button>
-            <Button variant="outline" className="gap-2" onClick={handlePrint}>
-              <FileText className="h-4 w-4" />
-              {t('crud.actions.print')}
-            </Button>
-            <Button variant="outline" className="gap-2" onClick={() => setShowImport(!showImport)}>
-              <FileText className="h-4 w-4" />
-              {t('crud.actions.import')}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {showImport && (
-        <Card>
-          <CardContent className="pt-6">
-            <CSVImport
-              onImport={handleImport}
-              expectedColumns={['Angebotsnummer', 'Datum', 'Kunde', 'Betrag', 'Gültig bis', 'Status']}
-              entityName="Angebote"
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={filteredAngebote} columns={columns} />
-          <div className="mt-4 text-sm text-muted-foreground">
-            {t('crud.list.showing', { count: filteredAngebote.length, total: angebote.length, entityType: entityTypeLabel })}
-          </div>
-        </CardContent>
-      </Card>
+      </div>
+      ) : null}
     </div>
   )
 }

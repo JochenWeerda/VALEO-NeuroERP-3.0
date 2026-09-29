@@ -288,7 +288,7 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
       <div className="rounded-lg border bg-muted/30 p-4 text-sm" role="alert">
         <p className="font-medium text-status-error">Die Ration konnte nicht geladen werden.</p>
         {loadError ? <p className="mt-1 text-muted-foreground">{loadError}</p> : null}
-        <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { void load() }}>
+        <Button type="button" variant="outline" className="min-h-touch mt-3" onClick={() => { void load() }}>
           Erneut laden
         </Button>
       </div>
@@ -310,10 +310,10 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
         <div className="flex items-center gap-3">
           {saveMessage ? <p className="text-sm text-status-success" role="status">{saveMessage}</p> : null}
           {saveError ? <p className="text-sm text-status-error" role="alert">{saveError}</p> : null}
-          <Button type="button" variant="outline" size="sm" disabled={!canUndo} onClick={undo}>
+          <Button type="button" variant="outline" disabled={!canUndo} onClick={undo} className="min-h-touch">
             Rückgängig
           </Button>
-          <Button type="button" variant="outline" size="sm" disabled={!canRedo} onClick={redo}>
+          <Button type="button" variant="outline" disabled={!canRedo} onClick={redo} className="min-h-touch">
             Wiederholen
           </Button>
           <Button type="button" disabled={saving || components.length === 0} onClick={() => { void save() }}>
@@ -326,8 +326,8 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
         <div className="space-y-3 rounded-lg border bg-card p-4">
           <div className="flex items-center justify-between gap-2">
             <h2 className="font-medium">Rationspositionen</h2>
-            <Button type="button" variant="outline" size="sm" aria-pressed={showExpert}
-                    onClick={() => setShowExpert((current) => !current)}>
+            <Button type="button" variant="outline" aria-pressed={showExpert}
+                    onClick={() => setShowExpert((current) => !current)} className="min-h-touch">
               Expertenspalten
             </Button>
           </div>
@@ -397,18 +397,18 @@ export function RationEditor({ rationId }: { rationId: string }): JSX.Element {
                     )) : null}
                     <td className="py-1.5 text-right">
                       <span className="inline-flex items-center gap-0.5">
-                        <Button type="button" variant="ghost" size="sm" disabled={index === 0}
+                        <Button type="button" variant="ghost" disabled={index === 0}
                                 aria-label={`${label} nach oben verschieben`}
-                                onClick={() => movePosition(component.feed_id, -1)}>
+                                onClick={() => movePosition(component.feed_id, -1)} className="min-h-touch">
                           ↑
                         </Button>
-                        <Button type="button" variant="ghost" size="sm" disabled={index === components.length - 1}
+                        <Button type="button" variant="ghost" disabled={index === components.length - 1}
                                 aria-label={`${label} nach unten verschieben`}
-                                onClick={() => movePosition(component.feed_id, 1)}>
+                                onClick={() => movePosition(component.feed_id, 1)} className="min-h-touch">
                           ↓
                         </Button>
-                        <Button type="button" variant="ghost" size="sm"
-                                onClick={() => removePosition(component.feed_id)}>
+                        <Button type="button" variant="ghost"
+                                onClick={() => removePosition(component.feed_id)} className="min-h-touch">
                           Entfernen
                         </Button>
                       </span>

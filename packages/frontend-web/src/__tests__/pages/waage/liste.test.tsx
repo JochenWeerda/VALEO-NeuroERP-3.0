@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from '@/app/routing/test-router'
 import WaageListePage from '@/pages/waage/liste'
 
@@ -56,7 +56,11 @@ vi.mock('@/lib/api/betrieb', () => ({
 }))
 
 describe('WaageListePage', () => {
-  it('rendert die Waagenliste im DS-Rahmen', () => {
+  beforeEach(() => {
+    navigateMock.mockClear()
+    toastMock.mockClear()
+  })
+  it('zeigt Suche und Hofliste vor den Leitstand-Panels', () => {
     render(
       <MemoryRouter>
         <WaageListePage />
@@ -65,7 +69,21 @@ describe('WaageListePage', () => {
 
     expect(screen.getByRole('heading', { name: 'Waagen', level: 1 })).toBeInTheDocument()
     expect(screen.getByLabelText('Suche Waagen')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Hofliste' })).toBeInTheDocument()
     expect(screen.getByText('Annahme 1')).toBeInTheDocument()
+    expect(screen.queryByText(/Ctrl\+F fokussiert/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/DS-Surface/)).not.toBeInTheDocument()
+  })
+
+  it('öffnet die Hofliste aus der Kopfzeile', () => {
+    render(
+      <MemoryRouter>
+        <WaageListePage />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hofliste' }))
+    expect(navigateMock).toHaveBeenCalledWith('/waage/hofliste')
   })
 
   it('filtert nach Standort und Typ', () => {

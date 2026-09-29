@@ -212,12 +212,13 @@ function EinheitenStammTab() {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        className="min-h-touch"
                         disabled={deletingKeys.has(e.einheit_kuerzel)}
                         onClick={() => handleDelete(e.einheit_kuerzel)}
                         aria-label={`Mengeneinheit ${e.einheit_kuerzel} deaktivieren`}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -400,12 +401,13 @@ function EinheitengruppenTab() {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        className="min-h-touch"
                         disabled={deletingKeys.has(g.gruppe_nr)}
                         onClick={() => handleDelete(g.gruppe_nr)}
                         aria-label={`Einheitengruppe ${g.gruppe_nr} deaktivieren`}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </TableCell>
                   </TableRow>

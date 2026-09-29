@@ -282,7 +282,7 @@ export function CustomerSelectionDialog({
               <Label htmlFor="search-delivery-address" className="text-sm font-normal cursor-pointer">
                 Suche nach Lief.-Adresse
               </Label>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" className="min-h-touch">
                 Neu
               </Button>
             </div>

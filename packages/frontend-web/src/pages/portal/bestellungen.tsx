@@ -229,14 +229,16 @@ export default function PortalBestellungen() {
                           <div className="flex gap-1">
                             <Button
                               variant="ghost"
-                              size="sm"
                               onClick={() => setSelectedBestellung(bestellung)}
+                              className="min-h-touch"
                             >
                               <Eye className="h-4 w-4" />
+                              Details
                             </Button>
                             {bestellung.rechnung && (
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" className="min-h-touch">
                                 <Download className="h-4 w-4" />
+                                Download
                               </Button>
                             )}
                           </div>

@@ -128,7 +128,7 @@ export default function SiloKapazitaetenPage(): JSX.Element {
 
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Auslastung</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-blue-600">{auslastung}%</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-primary">{auslastung}%</span></CardContent>
         </Card>
       </div>
 

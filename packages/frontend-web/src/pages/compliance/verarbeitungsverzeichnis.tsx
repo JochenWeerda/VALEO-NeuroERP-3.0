@@ -319,15 +319,14 @@ export default function Verarbeitungsverzeichnis(): JSX.Element {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => void handleExport()}
             disabled={downloadPending}
             data-testid="ropa-export-btn"
-          >
+           className="min-h-touch">
             <Download className="mr-2 h-4 w-4" />
             {downloadPending ? 'Exportiere…' : 'JSON-Export'}
           </Button>
-          <Button size="sm" onClick={openCreate} data-testid="ropa-add-btn">
+          <Button onClick={openCreate} data-testid="ropa-add-btn" className="min-h-touch">
             <Plus className="mr-2 h-4 w-4" />
             Neue Tätigkeit
           </Button>
@@ -351,7 +350,7 @@ export default function Verarbeitungsverzeichnis(): JSX.Element {
           <CardContent className="pt-6 text-center text-muted-foreground">
             <ShieldCheck className="mx-auto mb-3 h-10 w-10 opacity-30" />
             <p className="text-sm">Noch keine Verarbeitungstätigkeiten erfasst.</p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={openCreate}>
+            <Button variant="outline" className="min-h-touch mt-4" onClick={openCreate}>
               Erste Tätigkeit anlegen
             </Button>
           </CardContent>

@@ -30,7 +30,7 @@ export default function AnnahmeQRPage(): JSX.Element {
       <div className="mx-auto max-w-md space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Annahme — per Handy anmelden</h1>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/annahme/warteschlange')}>
+          <Button variant="ghost" className="min-h-touch" onClick={() => navigate('/annahme/warteschlange')}>
             Zur Warteschlange
           </Button>
         </div>
@@ -88,7 +88,7 @@ export default function AnnahmeQRPage(): JSX.Element {
 
         <Button
           variant="outline"
-          className="w-full"
+          className="min-h-touch w-full"
           onClick={() => navigate(PATH_LKW_REGISTRIERUNG)}
         >
           Direkt zur LKW-Registrierung

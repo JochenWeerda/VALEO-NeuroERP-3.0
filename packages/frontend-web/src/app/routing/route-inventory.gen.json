@@ -1306,6 +1306,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/crm/klaerfall-inbox",
+      "path": "crm/klaerfall-inbox",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/kontakt-detail",
       "path": "crm/kontakt-detail",
       "source": "auto"

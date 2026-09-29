@@ -24,10 +24,10 @@ export function MessagePanelRenderer({ messages, onLocateField, onRetry }: {
         <span className={message.severity === 'error' ? 'text-destructive' : message.severity === 'warning' ? 'text-status-warning' : 'text-muted-foreground'}>
           {message.severity === 'error' ? 'Fehler' : message.severity === 'warning' ? 'Warnung' : 'Hinweis'}: {message.message}
         </span>
-        {message.fieldKey && onLocateField && <Button type="button" variant="link" size="sm"
-          onClick={() => { const fieldKey = message.fieldKey; if (fieldKey) onLocateField(fieldKey) }}>Zum Feld</Button>}
+        {message.fieldKey && onLocateField && <Button type="button" variant="link"
+          onClick={() => { const fieldKey = message.fieldKey; if (fieldKey) onLocateField(fieldKey) }} className="min-h-touch">Zum Feld</Button>}
       </li>)}
     </ul>
-    {onRetry && <Button type="button" variant="outline" size="sm" className="mt-2" onClick={onRetry}>Erneut laden</Button>}
+    {onRetry && <Button type="button" variant="outline" className="min-h-touch mt-2" onClick={onRetry}>Erneut laden</Button>}
   </section>
 }

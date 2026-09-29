@@ -10,6 +10,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Plus, Search, Tractor, AlertCircle } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { queryKeys } from '@/lib/query'
 import { crmService, type FarmProfile } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle } from '@/features/crud/utils/i18n-helpers'
@@ -22,6 +23,7 @@ const EMPTY_FARM_PROFILES_RESPONSE: { data: FarmProfile[]; total: number } = {
 export default function BetriebsprofileListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const entityType = 'farmProfile'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Betriebsprofil')
@@ -44,8 +46,9 @@ export default function BetriebsprofileListePage(): JSX.Element {
       label: t('crud.fields.farmName'),
       render: (profile: FarmProfile) => (
         <button
+          type="button"
           onClick={() => navigate(`/crm/betriebsprofil/${profile.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {profile.farmName}
         </button>
@@ -142,9 +145,9 @@ export default function BetriebsprofileListePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold md:text-3xl flex items-center gap-2">
             <Tractor className="h-8 w-8 text-status-success" />
             {getListTitle(t, entityTypeLabel)}
           </h1>
@@ -156,13 +159,13 @@ export default function BetriebsprofileListePage(): JSX.Element {
             )}
           </div>
         </div>
-        <Button onClick={() => navigate('/crm/betriebsprofil/neu')} className="gap-2">
+        <Button onClick={() => navigate('/crm/betriebsprofil/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neues {entityTypeLabel}
         </Button>
       </div>
 
-      {/* KPI-Karten mit Skeleton-Loading */}
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         {isLoading ? (
           <>
@@ -211,6 +214,7 @@ export default function BetriebsprofileListePage(): JSX.Element {
           </>
         )}
       </div>
+      ) : null}
 
       {/* Info-Alert wenn keine Daten */}
       {!isLoading && profiles.length === 0 && (
@@ -228,17 +232,18 @@ export default function BetriebsprofileListePage(): JSX.Element {
           <CardTitle>{t('common.search')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                aria-label={t('common.search')}
                 placeholder={t('crud.tooltips.placeholders.searchFarmNameOrOwner')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="min-h-touch pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation">
               <FileDown className="h-4 w-4" />
               {t('crud.actions.export')}
             </Button>

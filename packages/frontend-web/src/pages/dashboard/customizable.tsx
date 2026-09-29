@@ -48,20 +48,19 @@ export default function CustomizableDashboardPage() {
         <div className="flex items-center gap-2">
           <Button
             variant={isEditing ? 'default' : 'outline'}
-            size="sm"
             onClick={() => setIsEditing(!isEditing)}
-          >
+           className="min-h-touch">
             <Edit2 className="mr-2 h-4 w-4" />
             {isEditing ? 'Bearbeitung beenden' : 'Anpassen'}
           </Button>
 
           {isEditing ? (
             <>
-              <Button variant="outline" size="sm" onClick={() => setShowAddPanel((prev) => !prev)}>
+              <Button variant="outline" onClick={() => setShowAddPanel((prev) => !prev)} className="min-h-touch">
                 <Plus className="mr-2 h-4 w-4" />
                 Widget hinzufuegen
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setShowWidgetPanel((prev) => !prev)}>
+              <Button variant="outline" onClick={() => setShowWidgetPanel((prev) => !prev)} className="min-h-touch">
                 <Settings className="mr-2 h-4 w-4" />
                 Widgets
               </Button>

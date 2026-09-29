@@ -404,20 +404,22 @@ export default function BetriebsstaettenPage() {
                       <div className="flex gap-1">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          className="min-h-touch"
                           onClick={() => setEditTarget(b)}
                           aria-label={`Betriebsstätte ${b.filial_nr} bearbeiten`}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" aria-hidden="true" />
+                          Bearbeiten
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          className="min-h-touch"
                           disabled={deletingNr === b.filial_nr}
                           onClick={() => handleDelete(b.filial_nr)}
                           aria-label={`Betriebsstätte ${b.filial_nr} deaktivieren`}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                          Löschen
                         </Button>
                       </div>
                     </TableCell>

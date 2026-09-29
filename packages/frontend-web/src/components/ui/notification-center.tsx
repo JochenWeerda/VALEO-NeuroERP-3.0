@@ -167,8 +167,7 @@ export function NotificationCenter() {
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-auto p-1 text-xs"
+                className="min-h-touch px-2"
                 onClick={markAllAsRead}
               >
                 <CheckCheck className="mr-1 h-3 w-3" />

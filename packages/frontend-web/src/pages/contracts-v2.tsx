@@ -34,6 +34,7 @@ import { useTenant } from '@/hooks/useTenant';
 import { summarizeContractHedge } from '@/lib/professional-control-centers';
 import { summarizeContractOperations } from '@/lib/domain-depth';
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader';
+import { useTouchDevice } from '@/hooks/useTouchDevice';
 import { normalizeOperationalStatus } from '@/lib/operational-status';
 
 interface Contract {
@@ -55,23 +56,28 @@ interface Contract {
   writeoffCandidate?: boolean;
   printReady?: boolean;
   alternateArticles?: string[];
-  qty: {
-    contracted: number;
-    unit: string;
+  qty?: {
+    contracted?: number;
+    unit?: string;
   };
-  deliveryWindow: {
-    from: string;
-    to: string;
+  deliveryWindow?: {
+    from?: string;
+    to?: string;
   };
   createdAt: string;
   updatedAt: string;
 }
 
-function daysUntil(dateValue: string): number | null {
+function daysUntil(dateValue?: string | null): number | null {
+  if (!dateValue) return null
   const target = new Date(dateValue);
   if (Number.isNaN(target.getTime())) return null;
   const now = new Date();
   return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function statusKey(value?: string | null): string {
+  return (value ?? '').toLowerCase()
 }
 
 function getSourceBadgeLabel(sourceType?: Contract['sourceType']): string {
@@ -102,6 +108,7 @@ interface AmendmentTemplate {
 }
 
 export default function ContractsPageV2(): JSX.Element {
+  const isTouch = useTouchDevice();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -260,15 +267,14 @@ export default function ContractsPageV2(): JSX.Element {
     const q = query.toLowerCase();
     return contracts.filter(
       c =>
-        c.contractNo.toLowerCase().includes(q) ||
-        c.commodity.toLowerCase().includes(q) ||
-        c.type.toLowerCase().includes(q)
+        (c.contractNo ?? '').toLowerCase().includes(q) ||
+        (c.commodity ?? '').toLowerCase().includes(q) ||
+        (c.type ?? '').toLowerCase().includes(q)
     );
   }, [contracts, query]);
 
-  const getStatusColor = (status: string) => {
-    const statusLower = status.toLowerCase();
-    switch (statusLower) {
+  const getStatusColor = (status?: string) => {
+    switch (statusKey(status)) {
       case 'active':
         return 'bg-green-100 text-green-800';
       case 'fulfilled':
@@ -319,14 +325,14 @@ export default function ContractsPageV2(): JSX.Element {
   const openContractOverview = () => navigate('/kontrakte');
 
   const openContracts = useMemo(
-    () => contracts.filter((contract) => !['cancelled', 'fulfilled'].includes(contract.status.toLowerCase())),
+    () => contracts.filter((contract) => !['cancelled', 'fulfilled'].includes(statusKey(contract.status))),
     [contracts],
   );
 
   const expiringContracts = useMemo(
     () =>
       openContracts.filter((contract) => {
-        const days = daysUntil(contract.deliveryWindow.to);
+        const days = daysUntil(contract.deliveryWindow?.to);
         return days !== null && days >= 0 && days <= 30;
       }),
     [openContracts],
@@ -353,6 +359,7 @@ export default function ContractsPageV2(): JSX.Element {
 
   return (
     <div className="space-y-4">
+      {!isTouch ? (
       <OperationalCaseHeader
         title="Kontraktübersicht"
         status={operationalStatus}
@@ -361,6 +368,7 @@ export default function ContractsPageV2(): JSX.Element {
         caseLabel="Kontrakte"
         tags={contractOps.dunningCount > 0 ? [`${contractOps.dunningCount} Mahnung(en)`] : []}
       />
+      ) : null}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{entityTypeLabel}</h2>
         <div className="flex gap-2">
@@ -500,7 +508,7 @@ export default function ContractsPageV2(): JSX.Element {
               </div>
               <p className="text-sm text-muted-foreground">
                 {(() => {
-                  const days = daysUntil(nextActionContract.deliveryWindow.to);
+                  const days = daysUntil(nextActionContract.deliveryWindow?.to);
                   if (days !== null && days >= 0 && days <= 30) {
                     return `Friststeuerung priorisieren: Kontrakt läuft in ${days} Tagen ab.`;
                   }
@@ -508,8 +516,8 @@ export default function ContractsPageV2(): JSX.Element {
                 })()}
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => openContractWorkspace(nextActionContract)}>Arbeitsplatz öffnen</Button>
-                <Button size="sm" variant="outline" onClick={() => setSelectedContract(nextActionContract)}>Kurzsicht</Button>
+                <Button className="min-h-touch" onClick={() => openContractWorkspace(nextActionContract)}>Arbeitsplatz öffnen</Button>
+                <Button className="min-h-touch" variant="outline" onClick={() => setSelectedContract(nextActionContract)}>Kurzsicht</Button>
               </div>
             </div>
           ) : (
@@ -556,42 +564,43 @@ export default function ContractsPageV2(): JSX.Element {
                   <TableCell>{contract.commodity}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(contract.status)}>
-                      {getStatusLabel(t, contract.status.toLowerCase(), contract.status)}
+                      {getStatusLabel(t, statusKey(contract.status), contract.status)}
                     </Badge>
                     {(() => {
-                      const days = daysUntil(contract.deliveryWindow.to);
+                      const days = daysUntil(contract.deliveryWindow?.to);
                       return days !== null && days >= 0 && days <= 30 ? (
                         <p className="mt-1 text-xs text-status-warning">Ablauf in {days} Tagen</p>
                       ) : null;
                     })()}
                   </TableCell>
                   <TableCell>
-                    {contract.qty.contracted} {contract.qty.unit}
+                    {contract.qty?.contracted ?? '—'} {contract.qty?.unit ?? ''}
                   </TableCell>
                   <TableCell>
-                    {new Date(contract.deliveryWindow.from).toLocaleDateString('de-DE')} -{' '}
-                    {new Date(contract.deliveryWindow.to).toLocaleDateString('de-DE')}
+                    {contract.deliveryWindow?.from && contract.deliveryWindow?.to
+                      ? `${new Date(contract.deliveryWindow.from).toLocaleDateString('de-DE')} - ${new Date(contract.deliveryWindow.to).toLocaleDateString('de-DE')}`
+                      : '—'}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-2 justify-end">
                       <Button
-                        size="sm"
+                        className="min-h-touch"
                         variant="outline"
                         onClick={() => setSelectedContract(contract)}
                       >
                         {t('crud.actions.details')}
                       </Button>
                       <Button
-                        size="sm"
+                        className="min-h-touch"
                         variant="outline"
                         onClick={() => openContractEditWorkspace(contract)}
                       >
                         {t('crud.actions.edit')}
                       </Button>
-                      {contract.status.toLowerCase() !== 'cancelled' && contract.status.toLowerCase() !== 'fulfilled' && (
+                      {statusKey(contract.status) !== 'cancelled' && statusKey(contract.status) !== 'fulfilled' && (
                         <>
                           <Button
-                            size="sm"
+                            className="min-h-touch"
                             variant="outline"
                             onClick={() => {
                               setSelectedContract(contract);
@@ -601,7 +610,7 @@ export default function ContractsPageV2(): JSX.Element {
                             {t('crud.actions.amend')}
                           </Button>
                           <Button
-                            size="sm"
+                            className="min-h-touch"
                             variant="outline"
                             onClick={() => handleCancelClick(contract.id, contract.contractNo)}
                           >
@@ -610,7 +619,7 @@ export default function ContractsPageV2(): JSX.Element {
                         </>
                       )}
                       <Button
-                        size="sm"
+                        className="min-h-touch"
                         variant="destructive"
                         onClick={() => handleDeleteClick(contract.id, contract.contractNo)}
                       >
@@ -764,9 +773,11 @@ export default function ContractsPageV2(): JSX.Element {
                 <p><strong>Ausweichung / Druck:</strong> {selectedContract.alternateArticles?.join(', ') || '-'} / {selectedContract.printReady ? 'druckbereit' : 'Druck offen'}</p>
                 <p><strong>{t('crud.fields.type')}:</strong> {selectedContract.type}</p>
                 <p><strong>{t('crud.fields.commodity')}:</strong> {selectedContract.commodity}</p>
-                <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, selectedContract.status.toLowerCase(), selectedContract.status)}</p>
-                <p><strong>{t('crud.fields.quantity')}:</strong> {selectedContract.qty.contracted} {selectedContract.qty.unit}</p>
-                <p><strong>{t('crud.fields.deliveryWindow')}:</strong> {new Date(selectedContract.deliveryWindow.from).toLocaleDateString('de-DE')} - {new Date(selectedContract.deliveryWindow.to).toLocaleDateString('de-DE')}</p>
+                <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, statusKey(selectedContract.status), selectedContract.status)}</p>
+                <p><strong>{t('crud.fields.quantity')}:</strong> {selectedContract.qty?.contracted ?? '—'} {selectedContract.qty?.unit ?? ''}</p>
+                <p><strong>{t('crud.fields.deliveryWindow')}:</strong> {selectedContract.deliveryWindow?.from && selectedContract.deliveryWindow?.to
+                  ? `${new Date(selectedContract.deliveryWindow.from).toLocaleDateString('de-DE')} - ${new Date(selectedContract.deliveryWindow.to).toLocaleDateString('de-DE')}`
+                  : '—'}</p>
                 <p><strong>Hedge / Marktwert / Mahnung:</strong> {selectedContract.hedgeQuotePct != null ? `${selectedContract.hedgeQuotePct.toFixed(1)}%` : '-'} / {selectedContract.marketValuationEur != null ? `${selectedContract.marketValuationEur.toFixed(2)} EUR` : '-'} / {selectedContract.dunningLevel != null ? `Stufe ${selectedContract.dunningLevel}` : '-'}</p>
                 <p><strong>Washout:</strong> {selectedContract.writeoffCandidate ? 'vorgemerkt' : 'nicht vorgemerkt'}</p>
               </div>
@@ -776,20 +787,20 @@ export default function ContractsPageV2(): JSX.Element {
               <h3 className="font-semibold mb-2">Naechste Aktion</h3>
               <div className="rounded-lg border p-3 text-sm text-muted-foreground">
                 {(() => {
-                  const days = daysUntil(selectedContract.deliveryWindow.to);
+                  const days = daysUntil(selectedContract.deliveryWindow?.to);
                   if (days !== null && days >= 0 && days <= 30) {
                     return `Friststeuerung priorisieren: dieser Kontrakt laeuft in ${days} Tagen ab.`;
                   }
-                  if (selectedContract.status.toLowerCase() === 'draft') {
+                  if (statusKey(selectedContract.status) === 'draft') {
                     return 'Kontrakt vervollstaendigen und in den fachlich passenden Arbeitsplatz ueberfuehren.';
                   }
                   return 'Detailarbeitsplatz, Positionsmonitor und Alarmdashboard fuer Mengen-, Preis- und Ablaufpruefung nutzen.';
                 })()}
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => openContractWorkspace(selectedContract)}>Arbeitsplatz</Button>
-                <Button size="sm" variant="outline" onClick={openContractPositions}>Positionsmonitor</Button>
-                <Button size="sm" variant="outline" onClick={openContractAlarms}>Alarme</Button>
+                <Button className="min-h-touch" variant="outline" onClick={() => openContractWorkspace(selectedContract)}>Arbeitsplatz</Button>
+                <Button className="min-h-touch" variant="outline" onClick={openContractPositions}>Positionsmonitor</Button>
+                <Button className="min-h-touch" variant="outline" onClick={openContractAlarms}>Alarme</Button>
               </div>
             </div>
 
@@ -802,7 +813,7 @@ export default function ContractsPageV2(): JSX.Element {
                       <div className="flex justify-between items-start">
                         <div>
                           <p><strong>{t('crud.fields.type')}:</strong> {amendment.type}</p>
-                          <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, amendment.status.toLowerCase(), amendment.status)}</p>
+                          <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, statusKey(amendment.status), amendment.status)}</p>
                           <p><strong>{t('crud.fields.reason')}:</strong> {amendment.reason}</p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(amendment.createdAt).toLocaleString('de-DE')}

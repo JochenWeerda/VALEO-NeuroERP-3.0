@@ -12,6 +12,7 @@ import {
 import { apiClient } from '@/lib/api-client'
 import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -119,6 +120,7 @@ const complianceRoles = [
 export default function ComplianceDashboardPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [roleFocus, setRoleFocus] = useState<ComplianceRole>('compliance')
   const { data: stats, isLoading: loadStats } = useQuery({
     queryKey: ['compliance', 'stats'],
@@ -268,21 +270,23 @@ export default function ComplianceDashboardPage(): JSX.Element {
       : 'Compliance-Report exportieren und als aktuellen Nachweis ablegen.'
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl font-bold md:text-3xl flex items-center gap-3">
             <Shield className="h-8 w-8 text-primary" />
             Compliance-Center
           </h1>
-          <p className="text-muted-foreground">Übersicht aller Compliance-Anforderungen</p>
+          <p className="text-muted-foreground">Offene Anforderungen und Nachweise</p>
         </div>
-        <Button className="gap-2" disabled={isLoading} onClick={handleReportPdf}>
+        <Button className="min-h-touch gap-2 touch-manipulation" disabled={isLoading} onClick={handleReportPdf}>
           <Download className="h-4 w-4" />
           Compliance-Report (PDF)
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={complianceRoles}
         value={roleFocus}
@@ -334,6 +338,8 @@ export default function ComplianceDashboardPage(): JSX.Element {
           />
         </div>
       </div>
+      </>
+      ) : null}
 
       {/* Overall Score */}
       <Card className="border-2 border-primary">
@@ -435,7 +441,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
                     {action.erfuellt
                       ? <Badge variant="success">Erfüllt</Badge>
                       : <Badge variant="destructive">Offen</Badge>}
-                    <Button variant="ghost" size="sm" onClick={() => openComplianceDetails(action)}>Details</Button>
+                    <Button variant="ghost" onClick={() => openComplianceDetails(action)} className="min-h-touch">Details</Button>
                   </div>
                 </div>
               ))}

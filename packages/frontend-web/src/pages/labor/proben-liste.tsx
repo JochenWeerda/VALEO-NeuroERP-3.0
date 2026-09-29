@@ -11,10 +11,12 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Beaker, FileDown, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function LaborProbenListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: proben = [], isError, error, refetch } = useLaborProben()
 
@@ -72,7 +74,7 @@ export default function LaborProbenListePage(): JSX.Element {
   ]
 
   const columns = [
-    { key: 'probennummer' as const, label: 'Probennummer', render: (p: Probe) => <button onClick={() => navigate(`/labor/probe/${p.id}`)} className="font-medium text-blue-600 hover:underline font-mono">{p.probennummer}</button> },
+    { key: 'probennummer' as const, label: 'Probennummer', render: (p: Probe) => <button type="button" onClick={() => navigate(`/labor/probe/${p.id}`)} className="min-h-11 font-medium font-mono text-primary touch-manipulation">{p.probennummer}</button> },
     { key: 'typ' as const, label: 'Typ', render: (p: Probe) => <Badge variant="outline">{p.typ}</Badge> },
     { key: 'artikel' as const, label: 'Artikel' },
     { key: 'datum' as const, label: 'Datum', render: (p: Probe) => new Date(p.datum).toLocaleDateString('de-DE') },
@@ -81,7 +83,9 @@ export default function LaborProbenListePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Laborproben"
         description="Der Probenraum zeigt Probenstau, Laborlast und Folgeaktion vor der eigentlichen Liste."
@@ -96,14 +100,18 @@ export default function LaborProbenListePage(): JSX.Element {
         <OperationalTimeline title="Probenverlauf" items={timelineItems} />
         <OperationalContextPanel title="Probenkontext" sections={contextSections} />
       </div>
-      <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Laborproben</h1><p className="text-muted-foreground">Proben-Verwaltung</p></div><Button onClick={() => navigate('/labor/probe/neu')} className="gap-2"><Plus className="h-4 w-4" />Neue Probe</Button></div>
+      </>
+      ) : null}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h1 className="text-2xl font-bold md:text-3xl">Laborproben</h1><p className="text-muted-foreground">Proben suchen und oeffnen</p></div><Button onClick={() => navigate('/labor/probe/neu')} className="min-h-touch gap-2 touch-manipulation"><Plus className="h-4 w-4" />Neue Probe</Button></div>
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Proben Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Beaker className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{gefilterteProben.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{processingCount}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{completedCount}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Ausstehend</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{pendingCount}</span></CardContent></Card>
       </div>
-      <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
+      ) : null}
+      <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label="Suche Laborproben" placeholder="Nummer, Typ, Artikel, Labor" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" /></div><Button variant="outline" className="min-h-touch gap-2 touch-manipulation"><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
       <Card><CardContent className="pt-6"><DataTable data={gefilterteProben} columns={columns} /></CardContent></Card>
     </div>
   )

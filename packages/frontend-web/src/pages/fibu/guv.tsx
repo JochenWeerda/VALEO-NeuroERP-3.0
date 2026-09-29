@@ -11,6 +11,7 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { TrendingUp, RefreshCw } from 'lucide-react'
 import { financeService } from '@/lib/services/finance-service'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
@@ -18,6 +19,7 @@ const fmt = (n: number) =>
 export default function GuvPage(): JSX.Element {
   const currentPeriod = new Date().toISOString().substring(0, 7)
   const [period, setPeriod] = useState(currentPeriod)
+  const isTouch = useTouchDevice()
 
   const { data: guv, isLoading, isError, refetch } = useQuery({
     queryKey: ['fibu', 'guv', period],
@@ -75,35 +77,23 @@ export default function GuvPage(): JSX.Element {
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
-    <div className="space-y-6 p-6">
-      <OperationalCaseHeader
-        title="Gewinn- und Verlustrechnung"
-        description="Ergebnisraum fuer Ertraege, Aufwendungen und Periodenergebnis."
-        status={operationalStatus}
-        owner="Controlling"
-        blocker={!guv ? `Fuer ${period} liegen keine GuV-Daten vor.` : jahresueberschuss < 0 ? 'Negatives Ergebnis in der gewaehlten Periode.' : null}
-        nextAction={jahresueberschuss < 0 ? 'Kosten- und Ertragsabweichungen pruefen' : 'Periode freigeben oder exportieren'}
-        caseLabel={guv?.period ?? period}
-        tags={['FIBU', 'Controlling']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <OperationalTimeline title="GuV-Verlauf" items={timelineItems} />
-        <OperationalContextPanel sections={contextSections} />
-      </div>
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Gewinn- und Verlustrechnung</h1>
+            <h1 className="text-2xl font-bold md:text-3xl">Gewinn- und Verlustrechnung</h1>
             <p className="text-muted-foreground">Periode: {guv?.period ?? period}</p>
           </div>
           <Input
             type="month"
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="w-40"
+            className="min-h-touch w-40 touch-manipulation"
+            aria-label="GuV-Periode"
           />
-          <Button variant="outline" size="sm" onClick={() => void refetch()} className="gap-2">
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void refetch()}>
             <RefreshCw className="h-4 w-4" />
+            Aktualisieren
           </Button>
         </div>
         <Badge variant="outline" className="text-lg px-4 py-2">
@@ -112,7 +102,7 @@ export default function GuvPage(): JSX.Element {
       </div>
 
       {(isError || !guv) && (
-        <Card className="border-amber-200 bg-amber-50">
+        <Card className="border-status-warning bg-status-warning/10">
           <CardContent className="p-4 text-status-warning text-sm">
             Keine GuV-Daten für Periode {period} vorhanden.
           </CardContent>
@@ -121,6 +111,7 @@ export default function GuvPage(): JSX.Element {
 
       {guv && (
         <>
+          {!isTouch ? (
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-2">
@@ -152,6 +143,7 @@ export default function GuvPage(): JSX.Element {
               </CardContent>
             </Card>
           </div>
+          ) : null}
 
           <div className="space-y-6">
             {/* ERTRÄGE */}
@@ -197,7 +189,7 @@ export default function GuvPage(): JSX.Element {
             </Card>
 
             {/* ERGEBNIS */}
-            <Card className={jahresueberschuss >= 0 ? 'border-green-500' : 'border-red-500'}>
+            <Card className={jahresueberschuss >= 0 ? 'border-status-success' : 'border-status-error'}>
               <CardContent className="pt-6">
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold">JAHRESÜBERSCHUSS/-FEHLBETRAG</span>
@@ -210,6 +202,24 @@ export default function GuvPage(): JSX.Element {
           </div>
         </>
       )}
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title="Gewinn- und Verlustrechnung"
+            description="Ergebnisraum fuer Ertraege, Aufwendungen und Periodenergebnis."
+            status={operationalStatus}
+            owner="Controlling"
+            blocker={!guv ? `Fuer ${period} liegen keine GuV-Daten vor.` : jahresueberschuss < 0 ? 'Negatives Ergebnis in der gewaehlten Periode.' : null}
+            nextAction={jahresueberschuss < 0 ? 'Kosten- und Ertragsabweichungen pruefen' : 'Periode freigeben oder exportieren'}
+            caseLabel={guv?.period ?? period}
+            tags={['FIBU', 'Controlling']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+            <OperationalTimeline title="GuV-Verlauf" items={timelineItems} />
+            <OperationalContextPanel sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

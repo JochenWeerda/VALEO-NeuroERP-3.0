@@ -111,7 +111,7 @@ export default function RezeptEditorPage(): JSX.Element {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Rezeptur-Komponenten</span>
-            <Button size="sm" onClick={addKomponente} className="gap-2">
+            <Button onClick={addKomponente} className="min-h-touch gap-2">
               <Plus className="h-4 w-4" />
               Komponente
             </Button>
@@ -143,7 +143,7 @@ export default function RezeptEditorPage(): JSX.Element {
                   }
                 />
                 <span className="text-sm text-muted-foreground">%</span>
-                <Button size="sm" variant="ghost" onClick={() => removeKomponente(k.id)}>
+                <Button variant="ghost" onClick={() => removeKomponente(k.id)} className="min-h-touch">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { AgentProcessPanel } from '@/components/agent'
 import { AlertTriangle, FileDown, Plus, Search, Truck } from 'lucide-react'
 
@@ -17,14 +18,9 @@ function LoadingSkeleton(): JSX.Element {
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div><Skeleton className="h-8 w-40" /><Skeleton className="h-4 w-28 mt-2" /></div>
-        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-11 w-40" />
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        {[1, 2, 3].map((i) => (
-          <Card key={i}><CardHeader className="pb-2"><Skeleton className="h-4 w-24" /></CardHeader><CardContent><Skeleton className="h-8 w-16" /></CardContent></Card>
-        ))}
-      </div>
-      <Card><CardHeader><Skeleton className="h-5 w-24" /></CardHeader><CardContent><div className="flex gap-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-24" /></div></CardContent></Card>
+      <Card><CardHeader><Skeleton className="h-5 w-24" /></CardHeader><CardContent><div className="flex gap-4"><Skeleton className="h-11 w-full" /><Skeleton className="h-11 w-24" /></div></CardContent></Card>
       <Card><CardContent className="pt-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
     </div>
   )
@@ -38,7 +34,7 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
       <p className="text-muted-foreground mb-4">
         {error?.message || 'Die Verladungs-Daten konnten nicht geladen werden.'}
       </p>
-      <Button onClick={onRetry} variant="outline" className="gap-2">
+      <Button onClick={onRetry} variant="outline" className="min-h-touch gap-2 touch-manipulation">
         <Truck className="h-4 w-4" />Erneut versuchen
       </Button>
     </div>
@@ -47,6 +43,7 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 
 export default function VerladungenListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchParams] = useSearchParams()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
@@ -65,14 +62,13 @@ export default function VerladungenListePage(): JSX.Element {
   const filteredVerladungen = useMemo(() => {
     if (!searchTerm) return verladungen
     const term = searchTerm.toLowerCase()
-    return verladungen.filter((v) => 
+    return verladungen.filter((v) =>
       v.kennzeichen.toLowerCase().includes(term) ||
       v.artikel.toLowerCase().includes(term) ||
       v.lieferscheinNr.toLowerCase().includes(term)
     )
   }, [verladungen, searchTerm])
 
-  // Error State: Keine Mock-Daten als Fallback!
   if (isError && !isLoading) {
     return <ErrorState error={error} onRetry={refetch} />
   }
@@ -90,22 +86,49 @@ export default function VerladungenListePage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-4 p-6">
-      {workflowInstanceId && (
-        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+    <div className="space-y-4 p-3 md:p-6">
+      {workflowInstanceId && !isTouch ? (
+        <div className="mb-4 rounded-md border border-border bg-muted px-4 py-2 text-sm text-foreground">
+          Vorgang: {workflowCase || workflowProcess}
         </div>
-      )}
-      <div className="flex items-center justify-between">
+      ) : null}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Verladungen</h1>
-          <p className="text-muted-foreground">LKW-Beladungen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Verladungen</h1>
+          <p className="text-muted-foreground">Welche LKW beladen werden und was schon raus ist</p>
         </div>
         <Button onClick={() => navigate('/verladung/lkw-beladung')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />Neue Beladung
         </Button>
       </div>
-      <AgentProcessPanel domain="lager" />
+      {!isTouch ? <AgentProcessPanel domain="lager" /> : null}
+      <Card>
+        <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                ref={searchInputRef}
+                aria-label="Suche Verladungen"
+                placeholder="Kennzeichen, Artikel oder Lieferschein suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
+            </div>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation">
+              <FileDown className="h-4 w-4" />Export
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="pt-6">
+          <DataTable data={filteredVerladungen} columns={columns} />
+        </CardContent>
+      </Card>
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -139,34 +162,9 @@ export default function VerladungenListePage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
-      <Card>
-        <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                ref={searchInputRef}
-                aria-label="Suche Verladungen"
-                placeholder="Kennzeichen, Artikel oder Lieferschein suchen"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="min-h-touch pl-10"
-              />
-            </div>
-            <Button variant="outline" className="gap-2">
-              <FileDown className="h-4 w-4" />Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={filteredVerladungen} columns={columns} />
-        </CardContent>
-      </Card>
+      ) : null}
     </div>
-    <KeyboardShortcutBar shortcuts={shortcuts} />
+    {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

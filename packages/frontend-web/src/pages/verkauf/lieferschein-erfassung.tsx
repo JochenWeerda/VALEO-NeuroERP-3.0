@@ -27,6 +27,7 @@ import { useSchlaege } from '@/lib/api/agrar'
 import { useKontraktLookup } from '@/hooks/useKontraktLookup'
 import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBanner'
@@ -355,6 +356,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const navigate = useNavigate()
   const { push } = useToast()
   const { user } = useAuth()
+  const isTouch = useTouchDevice()
   const { id: deliveryNoteId } = useParams<{ id?: string }>() // URL-Parameter für bestehenden Lieferschein
   const [searchParams] = useSearchParams()
   const salesHandover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
@@ -1887,10 +1889,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   })
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header: LIEFERSCHEIN-ERFASSUNG */}
-      <div className="bg-green-600 text-white px-4 py-2">
-        <h1 className="text-lg font-bold">LIEFERSCHEIN-ERFASSUNG</h1>
+    <div className="flex h-screen flex-col bg-background">
+      <div className="bg-primary px-4 py-2 text-primary-foreground">
+        <h1 className="text-lg font-bold">Lieferschein-Erfassung</h1>
       </div>
       <ModuleToolbar backTarget="/verkauf" closeTarget="/verkauf" title="Lieferschein-Erfassung" />
       {/* Belegfolge-Hinweis */}
@@ -1901,18 +1902,17 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <strong>{state.customer.name}</strong> vorhanden
           </span>
           <Button
-            size="sm"
             variant="outline"
-            className="h-6 text-xs border-amber-400 text-amber-800 hover:bg-amber-100"
+            className="min-h-touch text-xs touch-manipulation"
             onClick={() => setShowBelegfolgeDialog(true)}
           >
             Positionen übernehmen
           </Button>
           <Button
-            size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0 text-status-warning ml-auto"
+            className="ml-auto min-h-11 min-w-11 p-0 text-status-warning touch-manipulation"
             onClick={() => setVorgaengerCount(0)}
+            aria-label="Hinweis schließen"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -1932,19 +1932,19 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         ) : null}
         {/* Header-Bereich (3 Spalten) */}
         <Card className="mb-4 p-4">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Linke Spalte */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Liefersch.-Nr.:</Label>
-                <Input value={state.lieferscheinNr} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleLieferscheinSuchenOpen()} title="Lieferschein suchen">
+                <Input value={state.lieferscheinNr} readOnly className="min-h-touch flex-1" />
+                <Button variant="ghost" className="min-h-11 min-w-11 p-0 touch-manipulation" onClick={() => void handleLieferscheinSuchenOpen()} aria-label="Lieferschein suchen" title="Lieferschein suchen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleLieferscheinPrev()} title="Vorheriger Lieferschein">
+                <Button variant="ghost" className="min-h-11 min-w-11 p-0 touch-manipulation" onClick={() => void handleLieferscheinPrev()} aria-label="Vorheriger Lieferschein" title="Vorheriger Lieferschein">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleLieferscheinNext()} title="Nächster Lieferschein">
+                <Button variant="ghost" className="min-h-11 min-w-11 p-0 touch-manipulation" onClick={() => void handleLieferscheinNext()} aria-label="Nächster Lieferschein" title="Nächster Lieferschein">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -1959,13 +1959,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                       lieferDatum: e.target.value,
                     }))
                   }
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
                 <Input
                   type="time"
                   value={state.uhrzeit}
                   onChange={(e) => setState((prev) => ({ ...prev, uhrzeit: e.target.value }))}
-                  className="w-20 h-8"
+                  className="min-h-touch w-20"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -1976,11 +1976,12 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                   onChange={(e) =>
                     setState((prev) => ({ ...prev, kostenstelle: Number(e.target.value) }))
                   }
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={state.gutschriftKennz}
                   onCheckedChange={(checked) =>
                     setState((prev) => ({ ...prev, gutschriftKennz: checked === true }))
@@ -1993,11 +1994,12 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 <Input
                   value={state.reNrBezug}
                   onChange={(e) => setState((prev) => ({ ...prev, reNrBezug: e.target.value }))}
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={state.statusGedruckt}
                   onCheckedChange={(checked) =>
                     setState((prev) => ({ ...prev, statusGedruckt: checked === true }))
@@ -2007,6 +2009,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={state.statusAusgeliefert}
                   onCheckedChange={(checked) =>
                     setState((prev) => ({ ...prev, statusAusgeliefert: checked === true }))
@@ -2019,7 +2022,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 <Input
                   value={state.fakturiertRechnNr}
                   readOnly
-                  className="flex-1 h-8 bg-muted cursor-not-allowed"
+                  className="min-h-touch flex-1 cursor-not-allowed bg-muted"
                   placeholder={state.fakturiertRechnNr ? undefined : "Wird automatisch zugewiesen nach Fakturierung"}
                   title={state.fakturiertRechnNr ? `Rechnungsnummer: ${state.fakturiertRechnNr}` : "Wird automatisch vom System zugewiesen, wenn der Lieferschein in eine Rechnung umgewandelt wurde"}
                 />
@@ -2036,22 +2039,22 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                   onChange={(e) =>
                     setState((prev) => ({ ...prev, niederlassung: Number(e.target.value) }))
                   }
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleNiederlassungOpen()} title="Niederlassung auswählen">
+                <Button variant="ghost" className="min-h-11 min-w-11 p-0 touch-manipulation" onClick={() => void handleNiederlassungOpen()} aria-label="Niederlassung auswählen" title="Niederlassung auswählen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Vertreter:</Label>
-                <Input value={state.vertreter} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleVertreterOpen} title="Vertreter eingeben">
+                <Input value={state.vertreter} readOnly className="min-h-touch flex-1" />
+                <Button variant="ghost" className="min-h-11 min-w-11 p-0 touch-manipulation" onClick={handleVertreterOpen} aria-label="Vertreter eingeben" title="Vertreter eingeben">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Bediener:</Label>
-                <Input value={state.bediener} readOnly className="flex-1 h-8" />
+                <Input value={state.bediener} readOnly className="min-h-touch flex-1" />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Lkw-Nr.:</Label>
@@ -2059,24 +2062,25 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                   type="number"
                   value={state.lkwNr}
                   onChange={(e) => setState((prev) => ({ ...prev, lkwNr: Number(e.target.value) }))}
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <a
                   href="#"
-                  className="text-sm text-blue-600 underline hover:text-blue-800"
+                  className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
                   onClick={(e) => {
                     e.preventDefault()
                     // F11: Kopiert ALLE Daten (Kunde + Positionen)
                     void globalShortcutManager.execute('copy-previous-full')
                   }}
                 >
-                  &gt;&gt; wie vorheriger Beleg (F11)
+                    {isTouch ? 'wie vorheriger Beleg' : '>> wie vorheriger Beleg (F11)'}
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={state.selbstabholung}
                   onCheckedChange={(checked) =>
                     setState((prev) => ({ ...prev, selbstabholung: checked === true }))
@@ -2086,6 +2090,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={state.fruehbezugRechnung}
                   onCheckedChange={(checked) =>
                     setState((prev) => ({ ...prev, fruehbezugRechnung: checked === true }))
@@ -2101,14 +2106,14 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 {/* Eine Registerleiste statt zwei getrennter TabsLists — sonst
                     navigieren Pfeiltasten nur innerhalb je einer 4er-Reihe. */}
                 <TabsList variant="register" className="flex-wrap overflow-x-visible" aria-label="Kundenbereich-Register">
-                  <TabsTrigger value="kunde" className="text-xs py-1">KUNDE</TabsTrigger>
-                  <TabsTrigger value="lieferanschr" className="text-xs py-1">LIEFER-ANSCHR.</TabsTrigger>
-                  <TabsTrigger value="rechnanschrift" className="text-xs py-1">RECHN.-ANSCHRIFT</TabsTrigger>
-                  <TabsTrigger value="bestellung" className="text-xs py-1">BESTELLUNG</TabsTrigger>
-                  <TabsTrigger value="rechnung" className="text-xs py-1">RECHNUNG/ZAHLUNGSBED.</TabsTrigger>
-                  <TabsTrigger value="texte" className="text-xs py-1">TEXTE</TabsTrigger>
-                  <TabsTrigger value="spediteur" className="text-xs py-1">SPEDITEUR</TabsTrigger>
-                  <TabsTrigger value="lieferung" className="text-xs py-1">LIEFERUNG</TabsTrigger>
+                  <TabsTrigger value="kunde" className="min-h-11 text-xs">KUNDE</TabsTrigger>
+                  <TabsTrigger value="lieferanschr" className="min-h-11 text-xs">LIEFER-ANSCHR.</TabsTrigger>
+                  <TabsTrigger value="rechnanschrift" className="min-h-11 text-xs">RECHN.-ANSCHRIFT</TabsTrigger>
+                  <TabsTrigger value="bestellung" className="min-h-11 text-xs">BESTELLUNG</TabsTrigger>
+                  <TabsTrigger value="rechnung" className="min-h-11 text-xs">RECHNUNG/ZAHLUNGSBED.</TabsTrigger>
+                  <TabsTrigger value="texte" className="min-h-11 text-xs">TEXTE</TabsTrigger>
+                  <TabsTrigger value="spediteur" className="min-h-11 text-xs">SPEDITEUR</TabsTrigger>
+                  <TabsTrigger value="lieferung" className="min-h-11 text-xs">LIEFERUNG</TabsTrigger>
                 </TabsList>
 
                 {/* Tab-Inhalte */}
@@ -2205,8 +2210,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                             </ul>
                             <Button
                               variant="outline"
-                              size="sm"
-                              className="mt-2"
+                              className="mt-2 min-h-touch touch-manipulation"
                               onClick={() => setShowBelegfolgeDialog(true)}
                             >
                               Positionen aus Auftrag übernehmen
@@ -2308,18 +2312,29 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 <Input
                   value={state.customer?.debitorAccount || ''}
                   readOnly
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
+                {isTouch ? (
+                  <Button
+                    variant="ghost"
+                    className="min-h-11 min-w-11 p-0 touch-manipulation"
+                    onClick={() => setShowCustomerDialog(true)}
+                    aria-label="Kunde suchen"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                ) : (
                 <ShortcutHintButton shortcut="Strg+F1">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    className="min-h-11 min-w-11 p-0 touch-manipulation"
                     onClick={() => setShowCustomerDialog(true)}
+                    aria-label="Kunde suchen"
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </ShortcutHintButton>
+                )}
               </div>
               {state.customer && (
                 <div className="text-sm space-y-1 pl-32">
@@ -2332,13 +2347,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 <Input
                   value={state.customer?.creditLimit || ''}
                   readOnly
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
               </div>
               <div className="flex items-center gap-2 pl-32">
                 <a
                   href="#"
-                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
                   onClick={(e) => {
                     e.preventDefault()
                     if (state.customer) {
@@ -2391,7 +2406,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 {state.positionen.map((pos, idx) => (
                   <TableRow
                     key={idx}
-                    className={state.aktivePositionIndex === idx ? 'bg-green-100' : ''}
+                    className={state.aktivePositionIndex === idx ? 'bg-primary/10' : ''}
                     onClick={() => selectPositionForEdit(idx)}
                   >
                     <TableCell>{pos.posNr}</TableCell>
@@ -2423,8 +2438,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7"
-                          title="Hoch"
+                          className="min-h-11 min-w-11 touch-manipulation"
+                          aria-label="Hoch"
                           onClick={() => handleMovePositionUp(idx)}
                           disabled={state.status !== 'draft' || idx <= 0}
                         >
@@ -2434,8 +2449,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7"
-                          title="Runter"
+                          className="min-h-11 min-w-11 touch-manipulation"
+                          aria-label="Runter"
                           onClick={() => handleMovePositionDown(idx)}
                           disabled={state.status !== 'draft' || idx >= state.positionen.length - 1}
                         >
@@ -2445,8 +2460,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-status-error hover:text-status-error"
-                          title="Position löschen"
+                          className="min-h-11 min-w-11 touch-manipulation text-status-error hover:text-status-error"
+                          aria-label="Position löschen"
                           onClick={() => handleDeletePosition(idx)}
                           disabled={state.status !== 'draft'}
                         >
@@ -2489,7 +2504,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           <div className="grid grid-cols-6 gap-4">
             <div className="space-y-1">
               <Label className="text-xs">Pos.-Nr.:</Label>
-              <Input value={currentPosition.posNr} readOnly className="h-8" />
+              <Input value={currentPosition.posNr} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Artikel-Nr.:</Label>
@@ -2497,24 +2512,35 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 <Input
                   value={currentPosition.artikelNr}
                   readOnly
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
+                {isTouch ? (
+                  <Button
+                    variant="ghost"
+                    className="min-h-11 min-w-11 p-0 touch-manipulation"
+                    onClick={() => setShowArticleDialog(true)}
+                    aria-label="Artikel suchen"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                ) : (
                 <ShortcutHintButton shortcut="Strg+F2">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    className="min-h-11 min-w-11 p-0 touch-manipulation"
                     onClick={() => setShowArticleDialog(true)}
+                    aria-label="Artikel suchen"
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </ShortcutHintButton>
+                )}
               </div>
             </div>
             <div className="space-y-1 col-span-2">
               <Label className="text-xs">Artikel-Bezeichn:</Label>
-              <Input value={currentPosition.artikelBezeichnung} readOnly className="h-8" />
-              <Input value={currentPosition.artikelBezeichnung2} readOnly className="h-8" />
+              <Input value={currentPosition.artikelBezeichnung} readOnly className="min-h-touch" />
+              <Input value={currentPosition.artikelBezeichnung2} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Menge/Gebinde:</Label>
@@ -2527,12 +2553,12 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                     mengeGebinde: Number(e.target.value),
                   }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Einheit:</Label>
-              <Input value={currentPosition.einheit} readOnly className="h-8" />
+              <Input value={currentPosition.einheit} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Listenpreis:</Label>
@@ -2546,7 +2572,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                     listenpreis: Number(e.target.value),
                   }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
@@ -2560,16 +2586,16 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                     rabatt: Number(e.target.value),
                   }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Einh.-Preis:</Label>
-              <Input value={currentPosition.einhPreis.toFixed(2)} readOnly className="h-8" />
+              <Input value={currentPosition.einhPreis.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Betrag:</Label>
-              <Input value={currentPosition.betrag.toFixed(2)} readOnly className="h-8" />
+              <Input value={currentPosition.betrag.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">MWSt. %:</Label>
@@ -2582,7 +2608,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                     mwstProzent: Number(e.target.value),
                   }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
@@ -2609,13 +2635,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                       push('Kontrakt nicht gefunden oder nicht offen.')
                     }
                   }}
-                  className="h-8"
+                  className="min-h-touch"
                   placeholder={isResolvingKontrakt ? 'Pruefe...' : ''}
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-8 px-2"
+                  className="min-h-touch px-2"
                   onClick={() => setShowKontraktLookup(true)}
                   title="Kontrakt suchen"
                 >
@@ -2625,17 +2651,18 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             </div>
             <div className="space-y-1">
               <Label className="text-xs">verfügbar:</Label>
-              <Input value={`${currentPosition.verfuegbar} ${currentPosition.einheit}`} readOnly className="h-8" />
+              <Input value={`${currentPosition.verfuegbar} ${currentPosition.einheit}`} readOnly className="min-h-touch" />
             </div>
             <div className="flex items-end gap-2">
-              <Button variant="outline" size="sm" className="h-8" onClick={() => setShowPositionPopUpDialog(true)} title="Zusatzinfos zur Position">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowPositionPopUpDialog(true)} aria-label="Zusatzinfos zur Position">
                 PopUp
               </Button>
-              <Button variant="outline" size="sm" className="h-8" onClick={() => setShowPositionDetailsDialog(true)} title="Details zur Position">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowPositionDetailsDialog(true)} aria-label="Details zur Position">
                 Details
               </Button>
               <div className="flex items-center gap-1">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={currentPosition.fremdware}
                   onCheckedChange={(checked) =>
                     setCurrentPosition((prev) => ({ ...prev, fremdware: checked === true }))
@@ -2645,6 +2672,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-1">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={currentPosition.skontierf}
                   onCheckedChange={(checked) =>
                     setCurrentPosition((prev) => ({ ...prev, skontierf: checked === true }))
@@ -2653,7 +2681,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 <Label className="text-xs">skontierf.</Label>
               </div>
               <ShortcutHintButton shortcut="Strg+F3">
-                <Button onClick={handlePositionOK} className="h-8 gap-1">
+                <Button onClick={handlePositionOK} className="min-h-touch gap-1 touch-manipulation">
                   <Check className="h-4 w-4" />
                   Zeile OK
                 </Button>
@@ -2795,7 +2823,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               <div className="space-y-1 col-span-2">
                 <Label className="text-xs">Schlag (Feldbuch):</Label>
                 <Select value={psmSchlagId} onValueChange={setPsmSchlagId}>
-                  <SelectTrigger className="h-8">
+                  <SelectTrigger className="min-h-touch">
                     <SelectValue placeholder="Schlag wählen (optional)" />
                   </SelectTrigger>
                   <SelectContent>
@@ -2814,7 +2842,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                   value={psmFlaeche}
                   onChange={e => setPsmFlaeche(e.target.value)}
                   placeholder="z.B. 12.5"
-                  className="h-8"
+                  className="min-h-touch"
                 />
               </div>
               <div className="flex items-end">
@@ -2831,91 +2859,103 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           <div className="grid grid-cols-7 gap-4">
             <div className="space-y-1">
               <Label className="text-xs">Gewicht:</Label>
-              <Input value={`${summen.gewicht.toFixed(2)} kg`} readOnly className="h-8" />
+              <Input value={`${summen.gewicht.toFixed(2)} kg`} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Gef.-Pun.:</Label>
               <Input 
                 value={summen.gefahrgutPunkte.toFixed(0)} 
                 readOnly 
-                className={`h-8 ${summen.gefahrgutPunkte > 1000 ? 'bg-red-100 border-red-500' : summen.gefahrgutPunkte > 800 ? 'bg-yellow-100 border-yellow-500' : ''}`}
+                className={`min-h-touch ${summen.gefahrgutPunkte > 1000 ? 'border-status-error bg-status-error/10' : summen.gefahrgutPunkte > 800 ? 'border-status-warning bg-status-warning/10' : ''}`}
                 title={summen.gefahrgutPunkte > 1000 ? 'Warnung: Maximal 1000 Gefahrgut-Punkte erlaubt!' : ''}
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Netto:</Label>
-              <Input value={summen.netto.toFixed(2)} readOnly className="h-8" />
+              <Input value={summen.netto.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">MWSt.:</Label>
-              <Input value={summen.mwst.toFixed(2)} readOnly className="h-8" />
+              <Input value={summen.mwst.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Brutto:</Label>
-              <Input value={summen.brutto.toFixed(2)} readOnly className="h-8" />
+              <Input value={summen.brutto.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Gesamt:</Label>
-              <Input value={summen.gesamt.toFixed(2)} readOnly className="h-8" />
+              <Input value={summen.gesamt.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">EUR</Label>
-              <Input value="EUR" readOnly className="h-8" />
+              <Input value="EUR" readOnly className="min-h-touch" />
             </div>
           </div>
         </Card>
       </div>
 
       {/* Bottom-Toolbar */}
-      <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
-        <div className="flex gap-2">
-          <Button onClick={() => setShowPrintDialog(true)} variant="outline" size="sm" className="gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t bg-card px-3 py-2 md:px-4">
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => setShowPrintDialog(true)} variant="outline" className="min-h-touch gap-2 touch-manipulation">
             <Printer className="h-4 w-4" />
             LS drucken
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-4 w-4" />
             Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowAttachmentDialog(true)}>
             <Folder className="h-4 w-4" />
             Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geöffnet.'); }} title="Kontrakte anzeigen/verknüpfen">
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geöffnet.'); }} title="Kontrakte anzeigen/verknüpfen">
             <FileCheck className="h-4 w-4" />
             Kontrakte
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => { navigate('/waage'); push('Waagenmodul geöffnet. Connect-Einstellungen dort konfigurierbar.'); }} title="Schnittstellen (z. B. Waage)">
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => { navigate('/waage'); push('Waagenmodul geöffnet. Connect-Einstellungen dort konfigurierbar.'); }} title="Schnittstellen (z. B. Waage)">
             <LinkIcon className="h-4 w-4" />
-            Connect Anwendungen (Schnittstelle zB zum Waagenmodul)
+            {isTouch ? 'Waage' : 'Connect Anwendungen (Schnittstelle zB zum Waagenmodul)'}
           </Button>
           <Button
             variant="outline"
-            size="sm"
-            className="gap-2"
+            className="min-h-touch gap-2 touch-manipulation"
             onClick={() => void handleCreateInvoice()}
             data-action-id="sales.delivery.create-invoice"
           >
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-status-error" onClick={() => setShowDeleteDialog(true)}>
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation text-status-error" onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />
             LS löschen
           </Button>
         </div>
-        <div className="flex gap-2">
-          <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={handleSave} size="sm" className="gap-2" disabled={isSaving}>
+        <div className="flex flex-wrap gap-2">
+          {isTouch ? (
+            <Button onClick={handleSave} className="min-h-touch gap-2 touch-manipulation" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>
-          </ShortcutHintButton>
-          <ShortcutHintButton shortcut="Strg+F7">
-            <Button variant="outline" onClick={() => navigate('/verkauf')} size="sm">
+          ) : (
+            <ShortcutHintButton shortcut="Strg+F4">
+              <Button onClick={handleSave} className="min-h-touch gap-2" disabled={isSaving}>
+                <Save className="h-4 w-4" />
+                Speichern
+              </Button>
+            </ShortcutHintButton>
+          )}
+          {isTouch ? (
+            <Button variant="outline" onClick={() => navigate('/verkauf')} className="min-h-touch touch-manipulation">
               Schließen
             </Button>
-          </ShortcutHintButton>
+          ) : (
+            <ShortcutHintButton shortcut="Strg+F7">
+              <Button variant="outline" onClick={() => navigate('/verkauf')} className="min-h-touch">
+                Schließen
+              </Button>
+            </ShortcutHintButton>
+          )}
         </div>
       </div>
 

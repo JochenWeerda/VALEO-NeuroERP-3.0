@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Euro, FileDown, Loader2, Search } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
@@ -17,6 +18,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type OffenerPosten = {
   id: string
@@ -95,6 +97,7 @@ const statusVariantMap: Record<
 
 export default function OffenePostenPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { t } = useTranslation()
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
@@ -102,6 +105,10 @@ export default function OffenePostenPage(): JSX.Element {
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const handleExport = (): void => {
+    if (filteredPosten.length === 0) {
+      toast({ title: 'Keine Daten', description: 'Es gibt keine offenen Posten zum Exportieren.', variant: 'destructive' })
+      return
+    }
     try {
       exportToCSV(
         filteredPosten,
@@ -181,6 +188,7 @@ export default function OffenePostenPage(): JSX.Element {
       }
     },
     onSuccess: () => {
+      toast({ title: editingId ? 'OP aktualisiert' : 'OP angelegt' })
       setEditingId(null)
       setForm({
         rechnungsnr: '',
@@ -195,6 +203,9 @@ export default function OffenePostenPage(): JSX.Element {
       })
       void refetch()
     },
+    onError: (err) => {
+      toast({ title: 'Speichern fehlgeschlagen', description: String(err), variant: 'destructive' })
+    },
   })
 
   const deleteMutation = useMutation({
@@ -202,7 +213,11 @@ export default function OffenePostenPage(): JSX.Element {
       await apiClient.delete(`/api/v1/finance/open-items/${id}`)
     },
     onSuccess: () => {
+      toast({ title: 'OP geloescht' })
       void refetch()
+    },
+    onError: (err) => {
+      toast({ title: 'Loeschen fehlgeschlagen', description: String(err), variant: 'destructive' })
     },
   })
 
@@ -265,8 +280,9 @@ export default function OffenePostenPage(): JSX.Element {
       label: 'Rechnung',
       render: (posten: OffenerPosten) => (
         <button
-          onClick={() => navigate(`/sales/invoice-editor?id=${posten.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          type="button"
+          onClick={() => navigate(`/verkauf/rechnungen?q=${encodeURIComponent(posten.rechnungsNr)}`)}
+          className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline"
         >
           {posten.rechnungsNr}
         </button>
@@ -327,7 +343,131 @@ export default function OffenePostenPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">Offene Posten</h1>
+          <p className="text-muted-foreground">Forderungsmanagement & Mahnwesen</p>
+        </div>
+        <Button
+          variant="outline"
+          className="min-h-touch gap-2 touch-manipulation"
+          onClick={() => navigate('/finance/mahnwesen')}
+        >
+          <FileDown className="h-4 w-4" />
+          Mahnlauf starten
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filter & Suche</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-5">
+            <Input className="min-h-touch" placeholder="Rechnungs-Nr." value={form.rechnungsnr} onChange={(e) => setForm((p) => ({ ...p, rechnungsnr: e.target.value }))} />
+            <Input className="min-h-touch" placeholder="Konto-Nr." value={form.konto_nr} onChange={(e) => setForm((p) => ({ ...p, konto_nr: e.target.value }))} />
+            <Input className="min-h-touch" placeholder="Konto/Kunde Name" value={form.konto_name} onChange={(e) => setForm((p) => ({ ...p, konto_name: e.target.value, kunde_name: e.target.value }))} />
+            <Input className="min-h-touch" type="date" value={form.rechnungsdatum} onChange={(e) => setForm((p) => ({ ...p, rechnungsdatum: e.target.value }))} />
+            <Input className="min-h-touch" type="date" value={form.faelligkeit} onChange={(e) => setForm((p) => ({ ...p, faelligkeit: e.target.value }))} />
+            <Input className="min-h-touch" type="number" placeholder="OP-Betrag" value={form.op_betrag} onChange={(e) => setForm((p) => ({ ...p, op_betrag: Number(e.target.value || 0) }))} />
+            <Input className="min-h-touch" type="number" placeholder="Offen" value={form.offen} onChange={(e) => setForm((p) => ({ ...p, offen: Number(e.target.value || 0) }))} />
+            <Input className="min-h-touch" placeholder="OP-Text" value={form.op_text} onChange={(e) => setForm((p) => ({ ...p, op_text: e.target.value }))} />
+            <div className="flex gap-2">
+              <Button className="min-h-touch touch-manipulation" onClick={() => void saveMutation.mutateAsync()} disabled={saveMutation.isPending || !form.rechnungsnr}>
+                {editingId ? 'Aktualisieren' : 'Neu'}
+              </Button>
+              {editingId && <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => setEditingId(null)}>Abbrechen</Button>}
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Suche nach Rechnung oder Kunde..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+                aria-label="Offene Posten suchen"
+              />
+            </div>
+            <NativeSelect
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as OffenerPosten['status'] | 'alle')}
+              className="min-h-touch"
+              aria-label="Status filtern"
+            >
+              <option value="alle">Alle Status</option>
+              <option value="faellig">Fällig</option>
+              <option value="ueberfaellig">Überfällig</option>
+              <option value="mahnung1">Mahnung 1</option>
+              <option value="mahnung2">Mahnung 2</option>
+              <option value="mahnung3">Mahnung 3</option>
+              <option value="inkasso">Inkasso</option>
+            </NativeSelect>
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={handleExport}
+              data-global-button-handler="ignore"
+            >
+              <FileDown className="h-4 w-4" />
+              Export
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Lade offene Posten...</span>
+            </div>
+          ) : (
+            <>
+                      <DataTable data={filteredPosten} columns={columns} />
+              <div className="mt-2 space-y-2">
+                {filteredPosten.map((posten) => (
+                  <div key={`crud-${posten.id}`} className="flex items-center gap-2 text-xs">
+                    <span>{posten.rechnungsNr}</span>
+                    <Button
+                      className="min-h-touch touch-manipulation"
+                      variant="outline"
+                      onClick={() => {
+                        const src = allePosten.find((x) => x.id === posten.id)
+                        if (!src) return
+                        setEditingId(src.id)
+                        setForm({
+                          rechnungsnr: src.rechnungsNr,
+                          konto_nr: '',
+                          konto_name: src.kunde,
+                          kunde_name: src.kunde,
+                          rechnungsdatum: src.rechnungsDatum.slice(0, 10),
+                          faelligkeit: src.faelligAm.slice(0, 10),
+                          op_betrag: src.betrag,
+                          offen: src.offen,
+                          op_text: '',
+                        })
+                      }}
+                    >
+                      Bearbeiten
+                    </Button>
+                    <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => deleteMutation.mutate(posten.id)} disabled={deleteMutation.isPending}>Loeschen</Button>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                {filteredPosten.length} von {allePosten.length} offene(n) Posten angezeigt
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Offene Posten"
         description="Forderungsmanagement mit Fokus auf Faelligkeit, Mahnstufe und naechste Eskalation."
@@ -341,16 +481,6 @@ export default function OffenePostenPage(): JSX.Element {
       <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
         <OperationalTimeline title="Aktuelle Lage" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
-      </div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Offene Posten</h1>
-          <p className="text-muted-foreground">Forderungsmanagement & Mahnwesen</p>
-        </div>
-        <Button variant="outline" className="gap-2">
-          <FileDown className="h-4 w-4" />
-          Mahnlauf starten
-        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -398,106 +528,8 @@ export default function OffenePostenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Filter & Suche</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-5">
-            <Input placeholder="Rechnungs-Nr." value={form.rechnungsnr} onChange={(e) => setForm((p) => ({ ...p, rechnungsnr: e.target.value }))} />
-            <Input placeholder="Konto-Nr." value={form.konto_nr} onChange={(e) => setForm((p) => ({ ...p, konto_nr: e.target.value }))} />
-            <Input placeholder="Konto/Kunde Name" value={form.konto_name} onChange={(e) => setForm((p) => ({ ...p, konto_name: e.target.value, kunde_name: e.target.value }))} />
-            <Input type="date" value={form.rechnungsdatum} onChange={(e) => setForm((p) => ({ ...p, rechnungsdatum: e.target.value }))} />
-            <Input type="date" value={form.faelligkeit} onChange={(e) => setForm((p) => ({ ...p, faelligkeit: e.target.value }))} />
-            <Input type="number" placeholder="OP-Betrag" value={form.op_betrag} onChange={(e) => setForm((p) => ({ ...p, op_betrag: Number(e.target.value || 0) }))} />
-            <Input type="number" placeholder="Offen" value={form.offen} onChange={(e) => setForm((p) => ({ ...p, offen: Number(e.target.value || 0) }))} />
-            <Input placeholder="OP-Text" value={form.op_text} onChange={(e) => setForm((p) => ({ ...p, op_text: e.target.value }))} />
-            <div className="flex gap-2">
-              <Button onClick={() => void saveMutation.mutateAsync()} disabled={saveMutation.isPending || !form.rechnungsnr}>
-                {editingId ? 'Aktualisieren' : 'Neu'}
-              </Button>
-              {editingId && <Button variant="outline" onClick={() => setEditingId(null)}>Abbrechen</Button>}
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Suche nach Rechnung oder Kunde..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as OffenerPosten['status'] | 'alle')}
-              className="rounded-md border border-input bg-background px-3 py-2"
-            >
-              <option value="alle">Alle Status</option>
-              <option value="faellig">Fällig</option>
-              <option value="ueberfaellig">Überfällig</option>
-              <option value="mahnung1">Mahnung 1</option>
-              <option value="mahnung2">Mahnung 2</option>
-              <option value="mahnung3">Mahnung 3</option>
-              <option value="inkasso">Inkasso</option>
-            </select>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
-              <FileDown className="h-4 w-4" />
-              Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">Lade offene Posten...</span>
-            </div>
-          ) : (
-            <>
-                      <DataTable data={filteredPosten} columns={columns} />
-              <div className="mt-2 space-y-2">
-                {filteredPosten.map((posten) => (
-                  <div key={`crud-${posten.id}`} className="flex items-center gap-2 text-xs">
-                    <span>{posten.rechnungsNr}</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const src = allePosten.find((x) => x.id === posten.id)
-                        if (!src) return
-                        setEditingId(src.id)
-                        setForm({
-                          rechnungsnr: src.rechnungsNr,
-                          konto_nr: '',
-                          konto_name: src.kunde,
-                          kunde_name: src.kunde,
-                          rechnungsdatum: src.rechnungsDatum.slice(0, 10),
-                          faelligkeit: src.faelligAm.slice(0, 10),
-                          op_betrag: src.betrag,
-                          offen: src.offen,
-                          op_text: '',
-                        })
-                      }}
-                    >
-                      Bearbeiten
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => deleteMutation.mutate(posten.id)} disabled={deleteMutation.isPending}>Loeschen</Button>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 text-sm text-muted-foreground">
-                {filteredPosten.length} von {allePosten.length} offene(n) Posten angezeigt
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+        </>
+      ) : null}
     </div>
   )
 }

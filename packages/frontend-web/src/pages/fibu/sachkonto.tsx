@@ -87,8 +87,9 @@ export default function SachkontoPage(): JSX.Element {
             <p className="text-muted-foreground">{account.account_name}</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void refetch()} className="gap-2">
+        <Button variant="outline" className="min-h-touch gap-2" onClick={() => void refetch()}>
           <RefreshCw className="h-4 w-4" />
+          Aktualisieren
         </Button>
       </div>
 

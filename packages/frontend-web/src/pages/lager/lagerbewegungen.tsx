@@ -10,7 +10,8 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
-import { Edit, Plus, Search, Trash2 } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { Plus, Search } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import {
   stockMovementService,
@@ -57,9 +58,17 @@ const EMPTY_FORM: MovementFormState = {
   notes: '',
 }
 
+const MOVEMENT_TYPE_LABEL: Record<MovementFormState['movement_type'], string> = {
+  in: 'Zugang',
+  out: 'Abgang',
+  transfer: 'Umbuchung',
+  adjustment: 'Korrektur',
+}
+
 export default function LagerbewegungenPage(): JSX.Element {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
@@ -106,7 +115,7 @@ export default function LagerbewegungenPage(): JSX.Element {
     const hatBewegungen = total > 0
     return {
       status: hatBewegungen ? `${total} Bewegungen erfasst` : 'Keine Bewegungen',
-      statusColor: korrekturen > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : hatBewegungen ? 'text-green-700 bg-green-50 border-green-300' : 'text-slate-700 bg-slate-50 border-slate-300',
+      statusColor: korrekturen > 0 ? 'border-status-warning/40 bg-status-warning/10' : hatBewegungen ? 'border-status-success/40 bg-status-success/10' : 'border-border bg-muted/40',
       bewegungsdruck: `${zugaenge} Zugaenge, ${abgaenge} Abgaenge, ${korrekturen} Korrekturen`,
       auditLage: korrekturen > 0 ? `${korrekturen} Korrektur(en) — Audit-relevant` : 'Keine Korrekturen',
       folgepfad: korrekturen > 0 ? 'Korrekturbuchungen pruefen' : hatBewegungen ? 'Bewegungsjournal aktuell' : 'Neue Buchung erfassen',
@@ -237,13 +246,14 @@ export default function LagerbewegungenPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6" data-density="dense">
+    <div className="space-y-4 p-3 md:p-6" data-density="dense">
+      {!isTouch ? (
+      <>
       {workflowInstanceId && (
-        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        <div className="mb-4 rounded-md border border-border bg-muted/40 px-4 py-2 text-sm">
+          Belegkette: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
         </div>
       )}
-      {/* Operativer Fallkopf */}
       <Card className={`border ${fallkopf.statusColor}`}>
         <CardContent className="pt-4 pb-3 text-sm space-y-1">
           <div className="font-semibold">Bewegungslage: {fallkopf.status}</div>
@@ -252,13 +262,15 @@ export default function LagerbewegungenPage(): JSX.Element {
           <div>Folgepfad: {fallkopf.folgepfad}</div>
         </CardContent>
       </Card>
+      </>
+      ) : null}
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Lagerbewegungen</h1>
-          <p className="text-muted-foreground">Buchungen erfassen, aendern und loeschen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Lagerbewegungen</h1>
+          <p className="text-muted-foreground">Buchungen suchen, erfassen und loeschen</p>
         </div>
-        <Button onClick={openCreateDialog}>
+        <Button onClick={openCreateDialog} className="min-h-touch touch-manipulation">
           <Plus className="mr-2 h-4 w-4" />
           Neue Buchung
         </Button>
@@ -268,10 +280,17 @@ export default function LagerbewegungenPage(): JSX.Element {
         <CardContent className="pt-6">
           <div className="grid gap-3 md:grid-cols-3">
             <div className="relative md:col-span-2">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Suche (Beleg, Notiz, Charge, Benutzer)" className="pl-9" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label="Suche Lagerbewegungen"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Beleg, Notiz, Charge, Benutzer"
+                className="min-h-touch pl-9"
+              />
             </div>
             <NativeSelect
+              ariaLabel="Bewegungstyp"
               value={movementTypeFilter}
               onValueChange={setMovementTypeFilter}
               placeholder="Bewegungstyp"
@@ -320,24 +339,30 @@ export default function LagerbewegungenPage(): JSX.Element {
                   <TableCell>{articleMap.get(movement.article_id)?.name || movement.article_id}</TableCell>
                   <TableCell>{warehouseMap.get(movement.warehouse_id)?.name || movement.warehouse_id}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{movement.movement_type}</Badge>
+                    <Badge variant="outline">
+                      {MOVEMENT_TYPE_LABEL[movement.movement_type] ?? movement.movement_type}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right">{movement.quantity}</TableCell>
                   <TableCell>{movement.reference_number || '-'}</TableCell>
                   <TableCell>{movement.charge || '-'}</TableCell>
                   <TableCell>{movement.booking_user || '-'}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="icon" variant="outline" onClick={() => openEditDialog(movement)}>
-                        <Edit className="h-4 w-4" />
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
+                        onClick={() => openEditDialog(movement)}
+                      >
+                        Bearbeiten
                       </Button>
                       <Button
-                        size="icon"
                         variant="outline"
+                        className="min-h-touch touch-manipulation"
                         onClick={() => void handleDelete(movement.id)}
                         disabled={deletingId === movement.id}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {deletingId === movement.id ? 'Loeschen...' : 'Loeschen'}
                       </Button>
                     </div>
                   </TableCell>
@@ -358,6 +383,7 @@ export default function LagerbewegungenPage(): JSX.Element {
             <div className="space-y-2">
               <Label>Artikel</Label>
               <NativeSelect
+                ariaLabel="Artikel"
                 value={form.article_id}
                 onValueChange={(value) => setForm((prev) => ({ ...prev, article_id: value }))}
                 disabled={Boolean(editing)}
@@ -372,6 +398,7 @@ export default function LagerbewegungenPage(): JSX.Element {
             <div className="space-y-2">
               <Label>Lager</Label>
               <NativeSelect
+                ariaLabel="Lager"
                 value={form.warehouse_id}
                 onValueChange={(value) => setForm((prev) => ({ ...prev, warehouse_id: value }))}
                 disabled={Boolean(editing)}
@@ -386,6 +413,7 @@ export default function LagerbewegungenPage(): JSX.Element {
             <div className="space-y-2">
               <Label>Bewegungstyp</Label>
               <NativeSelect
+                ariaLabel="Bewegungstyp"
                 value={form.movement_type}
                 onValueChange={(value) =>
                   setForm((prev) => ({ ...prev, movement_type: value as MovementFormState['movement_type'] }))
@@ -465,8 +493,8 @@ export default function LagerbewegungenPage(): JSX.Element {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={resetDialog}>Abbrechen</Button>
-              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+              <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={resetDialog}>Abbrechen</Button>
+              <Button type="submit" className="min-h-touch touch-manipulation" disabled={createMutation.isPending || updateMutation.isPending}>
                 {editing ? 'Aktualisieren' : 'Buchen'}
               </Button>
             </div>

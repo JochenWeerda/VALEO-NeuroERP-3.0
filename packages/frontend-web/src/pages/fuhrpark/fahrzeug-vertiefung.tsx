@@ -433,10 +433,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                         <td className="py-2">
                           {s.status !== 'abgeschlossen' && (
                             <Button
-                              size="sm"
                               variant="outline"
                               disabled={abschliessendePending.has(s.id)}
                               onClick={() => void handleSchadenAbschliessen(s)}
+                              className="min-h-touch"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               {abschliessendePending.has(s.id) ? '…' : 'Abschließen'}
@@ -526,10 +526,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                         <td className="py-2">
                           {bg.status === 'offen' && (
                             <Button
-                              size="sm"
                               variant="outline"
                               disabled={bezahlenPending.has(bg.id)}
                               onClick={() => void handleBgBezahlen(bg)}
+                              className="min-h-touch"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               {bezahlenPending.has(bg.id) ? '…' : 'Bezahlt'}

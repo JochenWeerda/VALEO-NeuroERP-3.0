@@ -48,7 +48,7 @@ export default function GobdExportPage() {
       <div className="flex items-center gap-2">
         <PackageOpen size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">GoBD-Export</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => { void docs.refetch(); void probe.refetch() }} disabled={docs.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => { void docs.refetch(); void probe.refetch() }} disabled={docs.isFetching}>
           {docs.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -104,11 +104,11 @@ export default function GobdExportPage() {
             <>
               <div className="flex items-center gap-2">
                 <span className="font-medium">{selected}</span>
-                <Button size="sm" className="ml-auto" onClick={runExport} disabled={exp.isPending}>
+                <Button className="min-h-touch ml-auto" onClick={runExport} disabled={exp.isPending}>
                   {exp.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <FileArchive size={14} className="mr-1" />}
                   GoBD-Paket erzeugen
                 </Button>
-                {manifest && <Button size="sm" variant="outline" onClick={downloadManifest}>Manifest (JSON)</Button>}
+                {manifest && <Button variant="outline" onClick={downloadManifest} className="min-h-touch">Manifest (JSON)</Button>}
               </div>
 
               {manifest && (

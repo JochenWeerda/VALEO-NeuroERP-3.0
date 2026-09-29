@@ -23,8 +23,7 @@ import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import {
-  ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer,
-  Save, Trash2, FileText, Folder, Search, Send,
+  Check, Printer, Save, Trash2, FileText, Folder, Search, Send,
 } from 'lucide-react'
 
 // ==================== Types ====================
@@ -332,6 +331,8 @@ export default function AnfrageErfassungPage(): JSX.Element {
       setShowDeleteDialog(false)
       return
     }
+    if (loading) return
+    setLoading(true)
     try {
       await apiClient.delete(`/api/v1/einkauf/anfragen/${state.id}`)
       push('Anfrage gelöscht')
@@ -340,6 +341,8 @@ export default function AnfrageErfassungPage(): JSX.Element {
     } catch (_rawErr: unknown) {
         const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler: ${err.response?.data?.detail || err.message}`)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -354,9 +357,9 @@ export default function AnfrageErfassungPage(): JSX.Element {
   })
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <div className="bg-green-600 text-white px-4 py-2">
-        <h1 className="text-lg font-bold">ANFRAGE</h1>
+    <div className="flex h-screen flex-col bg-background">
+      <div className="border-b bg-card px-4 py-3">
+        <h1 className="text-lg font-bold">Anfrage</h1>
       </div>
       <ModuleToolbar backTarget="/einkauf" closeTarget="/einkauf" title="Anfrage" />
       <div className="flex-1 overflow-auto p-4">
@@ -367,11 +370,11 @@ export default function AnfrageErfassungPage(): JSX.Element {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="w-24 text-sm shrink-0">Kreditor-Kto.:</Label>
-                <Input value={state.lieferant?.kreditorAccount || ''} readOnly className="flex-1 h-8 bg-green-50" />
+                <Input value={state.lieferant?.kreditorAccount || ''} readOnly className="min-h-touch flex-1 bg-status-success/10" />
                 <ShortcutHintButton shortcut="Strg+F1">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                  <Button variant="outline" className="min-h-touch"
                     onClick={() => setShowLieferantDialog(true)}>
-                    <MoreHorizontal className="h-4 w-4" />
+                    Suchen
                   </Button>
                 </ShortcutHintButton>
               </div>
@@ -391,12 +394,13 @@ export default function AnfrageErfassungPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-24 text-sm shrink-0">Lieferant-Nr.:</Label>
-                <Input value={state.lieferant?.lieferantNr || ''} readOnly className="flex-1 h-8" />
+                <Input value={state.lieferant?.lieferantNr || ''} readOnly className="min-h-touch flex-1" />
               </div>
               <div className="flex items-center gap-2 pt-1">
-                <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={async (e) => {
-                    e.preventDefault()
+                <button
+                  type="button"
+                  className="min-h-touch text-left text-sm font-medium text-primary touch-manipulation"
+                  onClick={async () => {
                     try {
                       const items = await apiClient.get<{ id: string }[]>('/api/v1/einkauf/anfragen')
                       const idx = anfrageId ? items.findIndex(a => a.id === anfrageId) : -1
@@ -408,17 +412,18 @@ export default function AnfrageErfassungPage(): JSX.Element {
                     } catch { push('Anfragen konnten nicht geladen werden.') }
                   }}>
                   &gt;&gt; wie vorh. Best. (F11)
-                </a>
+                </button>
               </div>
               <div className="flex items-center gap-2">
-                <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={(e) => {
-                    e.preventDefault()
+                <button
+                  type="button"
+                  className="min-h-touch text-left text-sm font-medium text-primary touch-manipulation"
+                  onClick={() => {
                     if (state.lieferant?.id) navigate(`/crm/lieferanten/stamm/${state.lieferant.id}`)
                     else push('Bitte zuerst einen Lieferanten auswählen.')
                   }}>
                   Lieferanten-Stamm
-                </a>
+                </button>
               </div>
             </div>
 
@@ -428,49 +433,49 @@ export default function AnfrageErfassungPage(): JSX.Element {
                 <Label className="w-36 text-sm shrink-0">Niederlassung:</Label>
                 <Input value={state.niederlassung}
                   onChange={(e) => setState((p) => ({ ...p, niederlassung: e.target.value }))}
-                  className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                  className="min-h-touch flex-1" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
+              </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">Kostenstelle:</Label>
                 <Input value={state.kostenstelle}
                   onChange={(e) => setState((p) => ({ ...p, kostenstelle: e.target.value }))}
-                  className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                  className="min-h-touch flex-1" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
+              </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">Kommission:</Label>
                 <Input value={state.kommission}
                   onChange={(e) => setState((p) => ({ ...p, kommission: e.target.value }))}
-                  className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                  className="min-h-touch flex-1" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
+              </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">gepl. Liefer-Datum:</Label>
                 <Input type="date" value={state.geplLieferDatum}
                   onChange={(e) => setState((p) => ({ ...p, geplLieferDatum: e.target.value }))}
-                  className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                  className="min-h-touch flex-1" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
+              </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">Lade-Termin ab:</Label>
                 <Input type="date" value={state.ladeTerminAb}
                   onChange={(e) => setState((p) => ({ ...p, ladeTerminAb: e.target.value }))}
-                  className="flex-1 h-8" />
+                  className="min-h-touch flex-1" />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">Lade-Datum:</Label>
                 <Input type="date" value={state.ladeDatum}
                   onChange={(e) => setState((p) => ({ ...p, ladeDatum: e.target.value }))}
-                  className="flex-1 h-8" />
+                  className="min-h-touch flex-1" />
               </div>
             </div>
 
@@ -478,20 +483,20 @@ export default function AnfrageErfassungPage(): JSX.Element {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Anfrage-Nr.:</Label>
-                <Input value={state.anfrageNr} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><ChevronLeft className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><ChevronRight className="h-4 w-4" /></Button>
+                <Input value={state.anfrageNr} readOnly className="min-h-touch flex-1" />
+                <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>Suchen</Button>
+                <Button variant="outline" className="min-h-touch" onClick={() => push('Blättern ist in dieser Maske nicht angebunden.')}>Zurück</Button>
+                <Button variant="outline" className="min-h-touch" onClick={() => push('Blättern ist in dieser Maske nicht angebunden.')}>Weiter</Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Anfrage-Dat.:</Label>
                 <Input type="date" value={state.anfrageDat}
                   onChange={(e) => setState((p) => ({ ...p, anfrageDat: e.target.value }))}
-                  className="flex-1 h-8" />
+                  className="min-h-touch flex-1" />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Bediener:</Label>
-                <Input value={state.bediener} readOnly className="flex-1 h-8" />
+                <Input value={state.bediener} readOnly className="min-h-touch flex-1" />
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <Checkbox checked={state.erledigt}
@@ -506,10 +511,10 @@ export default function AnfrageErfassungPage(): JSX.Element {
         <Card className="mb-4 p-4">
           <Tabs value={posTab} onValueChange={(v) => setPosTab(v as typeof posTab)}>
             <TabsList className="mb-3">
-              <TabsTrigger value="positionen">POSITIONEN</TabsTrigger>
-              <TabsTrigger value="angebot">ANFRAGE / ANGEBOT</TabsTrigger>
-              <TabsTrigger value="zahlungsbed">ZAHLUNGSBEDINGUNGEN</TabsTrigger>
-              <TabsTrigger value="zusatz">ZUSÄTZLICHE ANGABEN</TabsTrigger>
+              <TabsTrigger value="positionen" className="min-h-touch">POSITIONEN</TabsTrigger>
+              <TabsTrigger value="angebot" className="min-h-touch">ANFRAGE / ANGEBOT</TabsTrigger>
+              <TabsTrigger value="zahlungsbed" className="min-h-touch">ZAHLUNGSBEDINGUNGEN</TabsTrigger>
+              <TabsTrigger value="zusatz" className="min-h-touch">ZUSÄTZLICHE ANGABEN</TabsTrigger>
             </TabsList>
 
             <TabsContent value="positionen">
@@ -539,7 +544,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                   <TableBody>
                     {state.positionen.map((pos, idx) => (
                       <TableRow key={idx}
-                        className={state.aktivePositionIndex === idx ? 'bg-green-100' : 'cursor-pointer hover:bg-muted/50'}
+                        className={state.aktivePositionIndex === idx ? 'bg-status-success/10' : 'cursor-pointer hover:bg-muted/50'}
                         onClick={() => setState((p) => ({ ...p, aktivePositionIndex: idx }))}>
                         <TableCell>{pos.posNr}</TableCell>
                         <TableCell>{pos.artikelNr}</TableCell>
@@ -574,7 +579,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                   <div className="flex items-center gap-2 mb-3">
                     <Button
                       variant="outline"
-                      size="sm"
+                      className="min-h-touch"
                       onClick={() => {
                         if (state.id) {
                           navigate(`/einkauf/rfq-bids/${state.id}`)
@@ -587,7 +592,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                     </Button>
                   </div>
                   <table className="w-full text-xs border-collapse">
-                    <thead><tr className="bg-gray-100">
+                    <thead><tr className="bg-muted">
                       <th className="border px-2 py-1 text-left">Pos.</th>
                       <th className="border px-2 py-1 text-left">Artikel</th>
                       <th className="border px-2 py-1 text-right">Menge</th>
@@ -613,19 +618,19 @@ export default function AnfrageErfassungPage(): JSX.Element {
               <div className="grid grid-cols-3 gap-4 text-sm pt-2">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Input placeholder="Tage" className="w-16 h-8" />
-                    <Input placeholder="% Skonto" className="w-20 h-8" />
+                    <Input placeholder="Tage" className="min-h-touch w-16" />
+                    <Input placeholder="% Skonto" className="min-h-touch w-20" />
                     <Label className="text-xs">Fällig ab</Label>
-                    <Input type="date" className="flex-1 h-8" />
+                    <Input type="date" className="min-h-touch flex-1" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input placeholder="Tage" className="w-16 h-8" />
-                    <Input placeholder="% Skonto" className="w-20 h-8" />
+                    <Input placeholder="Tage" className="min-h-touch w-16" />
+                    <Input placeholder="% Skonto" className="min-h-touch w-20" />
                     <Label className="text-xs">Festes Valuta:</Label>
-                    <Input type="date" className="flex-1 h-8" />
+                    <Input type="date" className="min-h-touch flex-1" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input placeholder="Tage" className="w-16 h-8" />
+                    <Input placeholder="Tage" className="min-h-touch w-16" />
                     <Label className="text-xs">netto Kasse</Label>
                   </div>
                 </div>
@@ -649,11 +654,11 @@ export default function AnfrageErfassungPage(): JSX.Element {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="w-36 text-xs shrink-0">Ihr Zeichen:</Label>
-                    <Input className="flex-1 h-8" />
+                    <Input className="min-h-touch flex-1" />
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="w-36 text-xs shrink-0">Unser Zeichen:</Label>
-                    <Input className="flex-1 h-8" />
+                    <Input className="min-h-touch flex-1" />
                   </div>
                 </div>
               </div>
@@ -667,16 +672,16 @@ export default function AnfrageErfassungPage(): JSX.Element {
           <div className="grid grid-cols-6 gap-3">
             <div className="space-y-1">
               <Label className="text-xs">Pos.-Nr.:</Label>
-              <Input value={currentPos.posNr} readOnly className="h-8" />
+              <Input value={currentPos.posNr} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Artikel-Nr.:</Label>
               <div className="flex gap-1">
-                <Input value={currentPos.artikelNr} readOnly className="flex-1 h-8" />
+                <Input value={currentPos.artikelNr} readOnly className="min-h-touch flex-1" />
                 <ShortcutHintButton shortcut="Strg+F2">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                  <Button variant="outline" className="min-h-touch"
                     onClick={() => setShowArticleDialog(true)}>
-                    <MoreHorizontal className="h-4 w-4" />
+                    Suchen
                   </Button>
                 </ShortcutHintButton>
               </div>
@@ -685,56 +690,56 @@ export default function AnfrageErfassungPage(): JSX.Element {
               <Label className="text-xs">Lief.-Artikel-Nr.:</Label>
               <Input value={currentPos.lieferantArtikelNr}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, lieferantArtikelNr: e.target.value }))}
-                className="h-8" />
+                className="min-h-touch" />
             </div>
             <div className="space-y-1 col-span-2">
               <Label className="text-xs">Bezeichnung:</Label>
-              <Input value={currentPos.artikelBezeichnung} readOnly className="h-8" />
-              <Input value={currentPos.artikelBezeichnung2} readOnly className="h-8" />
+              <Input value={currentPos.artikelBezeichnung} readOnly className="min-h-touch" />
+              <Input value={currentPos.artikelBezeichnung2} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Gebinde-Menge:</Label>
               <Input type="number" value={currentPos.gebindeMenge}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, gebindeMenge: Number(e.target.value) }))}
-                className="h-8" />
+                className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Best.-Menge:</Label>
               <Input type="number" value={currentPos.bestellMenge}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, bestellMenge: Number(e.target.value) }))}
-                className="h-8" />
+                className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Einheit:</Label>
-              <Input value={currentPos.einheit} readOnly className="h-8" />
+              <Input value={currentPos.einheit} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Einh.-Preis:</Label>
               <Input type="number" step="0.01" value={currentPos.einhPreis}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, einhPreis: Number(e.target.value) }))}
-                className="h-8" />
+                className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Preis je:</Label>
               <Input type="number" value={currentPos.preisEinheit}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, preisEinheit: Number(e.target.value) }))}
-                className="h-8" />
+                className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Kontrakt-Nr.:</Label>
               <Input value={currentPos.kontraktNr}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, kontraktNr: e.target.value }))}
-                className="h-8" />
+                className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Lager:</Label>
               <Input value={currentPos.lager}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, lager: e.target.value }))}
-                className="h-8" />
+                className="min-h-touch" />
             </div>
             <div className="col-span-6 flex justify-end">
               <ShortcutHintButton shortcut="Strg+F3">
-                <Button onClick={handlePositionOK} className="h-8 gap-1">
+                <Button onClick={handlePositionOK} className="min-h-touch gap-1">
                   <Check className="h-4 w-4" />Zeile OK
                 </Button>
               </ShortcutHintButton>
@@ -747,11 +752,11 @@ export default function AnfrageErfassungPage(): JSX.Element {
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
               <Label className="text-xs">Summe Gewicht:</Label>
-              <Input value={`${summen.gewicht.toFixed(2)} kg`} readOnly className="h-8 w-28" />
+              <Input value={`${summen.gewicht.toFixed(2)} kg`} readOnly className="min-h-touch w-28" />
             </div>
             <div className="flex items-center gap-2 ml-auto">
               <Label className="text-xs">Anfrage-Summe:</Label>
-              <Input value={summen.gesamt.toFixed(2)} readOnly className="h-8 w-32" />
+              <Input value={summen.gesamt.toFixed(2)} readOnly className="min-h-touch w-32" />
               <span className="text-sm font-medium">EUR</span>
             </div>
           </div>
@@ -759,12 +764,15 @@ export default function AnfrageErfassungPage(): JSX.Element {
       </div>
 
       {/* Bottom Toolbar */}
-      <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
+      <div className="flex items-center justify-between border-t bg-card px-4 py-2">
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="min-h-touch gap-2"
+            disabled={loading}
             onClick={async () => {
+              if (loading) return
               if (!state.lieferant) { push('Bitte zuerst einen Lieferanten auswählen.'); return }
               if (state.positionen.length === 0) { push('Bitte zuerst Positionen erfassen.'); return }
+              setLoading(true)
               try {
                 const payload = {
                   lieferant_id: state.lieferant.id,
@@ -779,34 +787,36 @@ export default function AnfrageErfassungPage(): JSX.Element {
               } catch (_rawErr: unknown) {
                 const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
                 push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+              } finally {
+                setLoading(false)
               }
             }}>
             <Send className="h-4 w-4" />Lieferanten-Angebot
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="min-h-touch gap-2"
             onClick={() => window.print()}>
             <Printer className="h-4 w-4" />Drucken
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="min-h-touch gap-2"
             onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-4 w-4" />Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="min-h-touch gap-2"
             onClick={() => setShowAttachmentDialog(true)}>
             <Folder className="h-4 w-4" />Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-status-error"
+          <Button variant="outline" className="min-h-touch gap-2 text-status-error"
             onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />Anfrage löschen
           </Button>
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={loading}>
+            <Button onClick={() => void handleSave()} className="min-h-touch gap-2" disabled={loading}>
               <Save className="h-4 w-4" />Speichern
             </Button>
           </ShortcutHintButton>
-          <Button variant="outline" onClick={() => navigate('/einkauf')} size="sm">
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate('/einkauf')}>
             Schließen
           </Button>
         </div>
@@ -829,8 +839,8 @@ export default function AnfrageErfassungPage(): JSX.Element {
               : 'Formular wird geleert.'}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Abbrechen</Button>
-            <Button variant="destructive" onClick={() => void handleDelete()}>Löschen</Button>
+            <Button variant="outline" className="min-h-touch" onClick={() => setShowDeleteDialog(false)}>Abbrechen</Button>
+            <Button variant="destructive" className="min-h-touch" onClick={() => void handleDelete()} disabled={loading}>Löschen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

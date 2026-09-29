@@ -23,6 +23,7 @@ import { de } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type PaymentEntry = {
   id: string
@@ -65,6 +66,7 @@ export default function PaymentMatchingPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [payments, setPayments] = useState<PaymentEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
@@ -163,7 +165,7 @@ export default function PaymentMatchingPage(): JSX.Element {
           op: matchedOp
         }),
         action: matchedOp ? (
-          <Button variant="outline" size="sm" onClick={() => navigate(`/finance/op-debitoren?opId=${encodeURIComponent(matchedOp)}`)}>
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate(`/finance/op-debitoren?opId=${encodeURIComponent(matchedOp)}`)}>
             OP öffnen
           </Button>
         ) : undefined,
@@ -287,7 +289,7 @@ export default function PaymentMatchingPage(): JSX.Element {
       cell: ({ row }: { row: { original: PaymentEntry } }) => (
         <Button
           variant="outline"
-          size="sm"
+          className="min-h-touch"
           onClick={() => {
             setSelectedPayment(row.original)
             fetchMatchSuggestions(row.original.id)
@@ -362,6 +364,8 @@ export default function PaymentMatchingPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title={t('finance.payments.title')}
         description={t('finance.payments.description')}
@@ -376,15 +380,17 @@ export default function PaymentMatchingPage(): JSX.Element {
         <OperationalTimeline title="Letzte Aktivitaeten" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
       </div>
+        </>
+      ) : null}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('finance.payments.title')}</h2>
+          <h1 className="text-3xl font-bold tracking-tight">{t('finance.payments.title')}</h1>
           <p className="text-muted-foreground">{t('finance.payments.description')}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="min-h-touch">
                 <Upload className="h-4 w-4 mr-2" />
                 {t('finance.payments.import')}
               </Button>
@@ -415,16 +421,16 @@ export default function PaymentMatchingPage(): JSX.Element {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+                <Button variant="outline" className="min-h-touch" onClick={() => setIsImportDialogOpen(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={() => void handleCsvImport()} disabled={isImporting || !csvFile || !bankAccount}>
+                <Button className="min-h-touch" onClick={() => void handleCsvImport()} disabled={isImporting || !csvFile || !bankAccount}>
                   {t('finance.payments.import')}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button onClick={() => void autoMatch()} disabled={isAutoMatching}>
+          <Button className="min-h-touch" onClick={() => void autoMatch()} disabled={isAutoMatching}>
             <CheckCircle2 className="h-4 w-4 mr-2" />
             {isAutoMatching ? t('finance.payments.autoMatching', { defaultValue: 'Matching läuft…' }) : t('finance.payments.autoMatch')}
           </Button>
@@ -483,10 +489,10 @@ export default function PaymentMatchingPage(): JSX.Element {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsMatchDialogOpen(false)}>
+            <Button variant="outline" className="min-h-touch" onClick={() => setIsMatchDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={() => void matchPayment()} disabled={isMatching || !selectedOpId}>
+            <Button className="min-h-touch" onClick={() => void matchPayment()} disabled={isMatching || !selectedOpId}>
               <Link2 className="h-4 w-4 mr-2" />
               {t('finance.payments.match')}
             </Button>

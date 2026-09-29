@@ -180,7 +180,7 @@ export default function RationsSchnittstellenImport() {
         <section className="rounded-2xl border bg-white p-4 shadow-sm">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="flex items-center gap-2 font-bold"><FileJson className="h-5 w-5 text-status-success" />Payload ({adapter.label})</h2>
-            <Button variant="outline" size="sm" onClick={loadSample}><Copy className="mr-1 h-4 w-4" />Beispiel laden</Button>
+            <Button variant="outline" onClick={loadSample} className="min-h-touch"><Copy className="mr-1 h-4 w-4" />Beispiel laden</Button>
           </div>
           <textarea
             className="h-80 w-full rounded-lg border border-slate-300 p-3 font-mono text-xs outline-hidden focus:ring-2 focus:ring-emerald-500"

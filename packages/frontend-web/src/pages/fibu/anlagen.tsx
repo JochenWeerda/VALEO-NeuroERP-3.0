@@ -33,7 +33,7 @@ export default function AnlagenPage(): JSX.Element {
       key: 'anlagennr' as const,
       label: 'Anlagen-Nr',
       render: (a: AnlageDetail) => (
-        <button onClick={() => navigate(`/fibu/anlage/${a.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
+        <button type="button" onClick={() => navigate(`/fibu/anlage/${a.id}`)} className="min-h-11 font-mono font-medium text-primary touch-manipulation">
           {a.anlagennr}
         </button>
       ),

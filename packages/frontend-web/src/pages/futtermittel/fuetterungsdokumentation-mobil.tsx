@@ -163,8 +163,8 @@ export default function MobileFuetterungsdokumentation() {
         <p className="font-semibold">{item.status === 'conflict' ? 'Konflikt bei der Übertragung' : 'Übertragung fehlgeschlagen'}</p>
         <p className="mt-1">{item.last_error ?? 'Details unbekannt.'}</p>
         <span className="mt-2 flex gap-2">
-          {item.status === 'failed' ? <Button size="sm" variant="outline" onClick={() => { queue.retry(item.id); setQueueItems(queue.items()); void replayQueue() }}>Erneut senden</Button> : null}
-          <Button size="sm" variant="ghost" onClick={() => { queue.remove(item.id); setQueueItems(queue.items()) }}>Verwerfen</Button>
+          {item.status === 'failed' ? <Button variant="outline" onClick={() => { queue.retry(item.id); setQueueItems(queue.items()); void replayQueue() }} className="min-h-touch">Erneut senden</Button> : null}
+          <Button variant="ghost" onClick={() => { queue.remove(item.id); setQueueItems(queue.items()) }} className="min-h-touch">Verwerfen</Button>
         </span>
       </Callout>)}
       {queuedOffline ? <p role="status" className="rounded-xl border border-[hsl(var(--color-semantic-success-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-success-50-hsl))] p-3 text-sm text-status-success">Offline gespeichert — die Ist-Fütterung wird bei Verbindung automatisch und ohne Doppelstand übertragen.</p> : null}

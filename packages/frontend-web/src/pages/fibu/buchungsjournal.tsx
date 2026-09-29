@@ -16,6 +16,7 @@ import { ErrorState } from '@/components/ErrorState'
 import { StornoDialog } from '@/components/finance/StornoDialog'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { toast } from 'sonner'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type Buchung = {
   id: string
@@ -56,6 +57,7 @@ function mapApiEntry(e: JournalEntryAPI): Buchung {
 export default function BuchungsjournalPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [referenceFilter, setReferenceFilter] = useState('')
@@ -150,7 +152,7 @@ export default function BuchungsjournalPage(): JSX.Element {
       key: 'actions' as const,
       label: t('crud.fields.actions'),
       render: (b: Buchung) => (
-        <Button variant="outline" size="sm" onClick={() => openStorno(b)} className="gap-1">
+        <Button variant="outline" onClick={() => openStorno(b)} className="min-h-touch gap-1 touch-manipulation">
           <Undo2 className="h-3 w-3" />
           {t('crud.actions.reverse')}
         </Button>
@@ -197,12 +199,66 @@ export default function BuchungsjournalPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold">Buchungsjournal</h1>
+        <h1 className="text-2xl font-bold md:text-3xl">Buchungsjournal</h1>
         <p className="text-muted-foreground">Alle Buchungssaetze</p>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Suche & Filter</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Suche Belegnummer, Konto, Text..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+                aria-label="Buchungen suchen"
+              />
+            </div>
+            <div className="flex items-center gap-2 sm:w-64">
+              <label htmlFor="ref-filter" className="shrink-0 text-sm text-muted-foreground">Referenz / Importlauf</label>
+              <Input
+                id="ref-filter"
+                placeholder="z. B. run_id"
+                value={referenceFilter}
+                onChange={(e) => setReferenceFilter(e.target.value)}
+                className="min-h-touch font-mono text-sm"
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => navigate('/fibu/schnittstelle-fibu?context=journal')}
+              data-global-button-handler="ignore"
+            >
+              <FileDown className="h-4 w-4" />
+              DATEV Export
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Lade Buchungen...</span>
+            </div>
+          ) : (
+            <DataTable data={filteredBuchungen} columns={columns} />
+          )}
+        </CardContent>
+      </Card>
+
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Buchungsjournal"
         description="Journalsaetze werden als Revisions- und Exportfall gefuehrt, damit Perioden- und Referenzdruck sichtbar bleiben."
@@ -251,47 +307,8 @@ export default function BuchungsjournalPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Suche & Filter</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche Belegnummer, Konto, Text..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-            </div>
-            <div className="flex items-center gap-2 sm:w-64">
-              <label htmlFor="ref-filter" className="shrink-0 text-sm text-muted-foreground">Referenz / Importlauf</label>
-              <Input
-                id="ref-filter"
-                placeholder="z. B. run_id"
-                value={referenceFilter}
-                onChange={(e) => setReferenceFilter(e.target.value)}
-                className="font-mono text-sm"
-              />
-            </div>
-            <Button variant="outline" className="gap-2" onClick={() => navigate('/fibu/schnittstelle-fibu?context=journal')}>
-              <FileDown className="h-4 w-4" />
-              DATEV Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-sm text-muted-foreground">Lade Buchungen...</span>
-            </div>
-          ) : (
-            <DataTable data={filteredBuchungen} columns={columns} />
-          )}
-        </CardContent>
-      </Card>
+        </>
+      ) : null}
 
       <StornoDialog
         open={stornoOpen}

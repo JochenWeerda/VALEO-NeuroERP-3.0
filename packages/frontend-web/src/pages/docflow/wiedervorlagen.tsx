@@ -56,7 +56,7 @@ function CreateForm({ doc }: { doc: string }) {
         <span>Fällig {art === 'wiedervorlage' ? '(Pflicht)' : '(opt.)'}</span>
         <Input type="date" value={faellig} onChange={(e) => setFaellig(e.target.value)} className="h-8" />
       </label>
-      <Button size="sm" onClick={submit} disabled={!valid || create.isPending}>
+      <Button onClick={submit} disabled={!valid || create.isPending} className="min-h-touch">
         {create.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Plus size={14} className="mr-1" />}Erfassen
       </Button>
     </div>
@@ -66,10 +66,10 @@ function CreateForm({ doc }: { doc: string }) {
 function CompleteButton({ id }: { id: string }) {
   const complete = useCompleteFollowup()
   return (
-    <Button size="sm" variant="ghost" onClick={() => complete.mutate(id, {
+    <Button variant="ghost" onClick={() => complete.mutate(id, {
       onSuccess: () => toast({ title: 'Erledigt' }),
       onError: (err) => toast({ title: 'Fehlgeschlagen', description: errDetail(err), variant: 'destructive' }),
-    })} disabled={complete.isPending}>
+    })} disabled={complete.isPending} className="min-h-touch">
       {complete.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Check size={13} className="mr-1 text-status-success" />}Erledigen
     </Button>
   )
@@ -101,7 +101,7 @@ export default function WiedervorlagenPage() {
       <div className="flex items-center gap-2">
         <CalendarClock size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Wiedervorlagen & Bescheide</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => { void worklist.refetch(); void docs.refetch() }} disabled={worklist.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => { void worklist.refetch(); void docs.refetch() }} disabled={worklist.isFetching}>
           {worklist.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>

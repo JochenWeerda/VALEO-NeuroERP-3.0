@@ -671,7 +671,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
                       <TableCell>
                         {item.exceptions.length > 0 && (
                           <Button
-                            size="sm"
+                            className="min-h-touch"
                             variant="outline"
                             onClick={() => handleException(item)}
                           >

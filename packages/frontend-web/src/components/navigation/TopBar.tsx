@@ -8,6 +8,7 @@ import { HELP_ROUTE, getEmbeddedHelpHref } from '@/lib/docs-help'
 import { useFeature } from '@/hooks/useFeature'
 import { useTheme } from '@/hooks/useTheme'
 import { availableLanguages, loadLanguage } from '@/i18n/config'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 interface TopBarProps {
   onCommandOpen?: () => void
@@ -134,7 +135,7 @@ function LanguageSelector(): JSX.Element {
               key={lang.code}
               type="button"
               onClick={() => void handleSwitch(lang.code)}
-              className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
+              className="flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-left text-sm hover:bg-accent"
             >
               <span>{lang.flag}</span>
               <span className="flex-1">{lang.name}</span>
@@ -157,6 +158,7 @@ export function TopBar({
   const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const voiceControlEnabled = useFeature('voiceControl')
+  const isTouchChrome = useTouchDevice()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const user = {
@@ -184,7 +186,7 @@ export function TopBar({
 
   return (
     <header
-      className="flex h-(--toolbar-height,56px) items-center gap-2 border-b border-border bg-card/90 px-3 shadow-sm backdrop-blur-sm md:gap-4 md:px-6"
+      className="flex h-(--toolbar-height,56px) items-center gap-1 border-b border-border bg-card/90 px-2 shadow-sm backdrop-blur-sm sm:gap-2 sm:px-3 md:gap-4 md:px-6"
       role="banner"
       data-mcp-component="top-bar"
     >
@@ -193,7 +195,7 @@ export function TopBar({
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="shrink-0 touch-manipulation md:hidden"
           onClick={onMobileMenuToggle}
           aria-label="Menü öffnen"
         >
@@ -201,34 +203,36 @@ export function TopBar({
         </Button>
       )}
 
-      <Link to="/" className="md:hidden flex items-center" aria-label="Zur Startseite">
+      <Link to="/" className="hidden shrink-0 items-center sm:flex md:hidden" aria-label="Zur Startseite">
         <img
           src="/branding/valeo-erp-logo.png"
           alt="VALEO ERP Logo"
           className="h-8 w-auto max-w-[132px] object-contain"
         />
       </Link>
-      <Button variant="ghost" size="icon" className="hidden md:inline-flex" title="Zur Startseite" aria-label="Zur Startseite" asChild>
+      <Button variant="ghost" size="icon" className="hidden shrink-0 md:inline-flex" title="Zur Startseite" aria-label="Zur Startseite" asChild>
         <Link to="/">
           <Home className="h-5 w-5" />
         </Link>
       </Button>
-      <Button variant="ghost" size="icon" className="inline-flex" title="Aufgaben" aria-label="Aufgaben" asChild>
+      <Button variant="ghost" size="icon" className="hidden shrink-0 touch-manipulation md:inline-flex" title="Aufgaben" aria-label="Aufgaben" asChild>
         <Link to="/crm/aktivitaeten">
           <ClipboardList className="h-5 w-5" />
         </Link>
       </Button>
 
-      <div className="flex-1 max-w-md">
+      <div className="min-w-0 flex-1 sm:max-w-md">
         <Button
           variant="outline"
-          className="w-full justify-start text-muted-foreground"
+          className="h-11 w-full min-w-11 justify-center touch-manipulation text-muted-foreground sm:justify-start"
           onClick={handleSearchClick}
           disabled={!commandPaletteEnabled}
+          aria-label="Suche öffnen"
+          data-mcp-action="open-search"
         >
-          <Search className="mr-2 h-4 w-4" />
-          <span>Suche... (Ctrl+K)</span>
-          <kbd className="ml-auto hidden rounded bg-muted px-2 py-0.5 text-xs lg:inline">
+          <Search className="h-4 w-4 sm:mr-2" />
+          <span aria-hidden="true" className="hidden truncate sm:inline">Suche</span>
+          <kbd aria-hidden="true" className="ml-auto hidden rounded bg-muted px-2 py-0.5 text-xs lg:inline">
             <CommandIcon className="h-3 w-3" />
             K
           </kbd>
@@ -239,9 +243,11 @@ export function TopBar({
         variant="ghost"
         size="icon"
         title="Ask VALEO - AI-Hilfe (Phase 3)"
-        className="hidden sm:inline-flex"
+        className="hidden shrink-0 sm:inline-flex"
         data-mcp-action="ask-valeo"
         data-mcp-intent="ai-assistance"
+        aria-label="Ask VALEO öffnen"
+        onClick={() => window.dispatchEvent(new Event('open-ask-valeo'))}
       >
         <Sparkles className="h-5 w-5 text-primary" />
         <span className="sr-only">AI-Hilfe</span>
@@ -253,7 +259,7 @@ export function TopBar({
           variant="ghost"
           size="icon"
           onClick={onSidebarToggle}
-          className="hidden md:inline-flex"
+          className="hidden shrink-0 md:inline-flex"
           title="Seitenleiste ein-/ausklappen (Strg+B)"
           aria-label="Seitenleiste ein-/ausklappen"
         >
@@ -270,7 +276,7 @@ export function TopBar({
       {/* Sprachsteuerung (KI Usability) – Feature-Flag: voiceControl */}
       {voiceControlEnabled && (
         <Suspense fallback={null}>
-          <VoiceButton variant="ghost" size="icon" className="hidden sm:inline-flex" />
+          <VoiceButton variant="ghost" size="icon" className="shrink-0" />
         </Suspense>
       )}
 
@@ -284,7 +290,7 @@ export function TopBar({
         variant="ghost"
         size="icon"
         onClick={toggleTheme}
-        className="hidden sm:inline-flex"
+        className="hidden shrink-0 sm:inline-flex"
         title={isDark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'}
         aria-label={isDark ? 'Zum hellen Modus wechseln' : 'Zum dunklen Modus wechseln'}
       >
@@ -307,11 +313,12 @@ export function TopBar({
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full"
+          className="shrink-0 rounded-full touch-manipulation"
           onClick={() => setUserMenuOpen((current) => !current)}
+          aria-label="Benutzermenü"
         >
           <User className="h-5 w-5" />
-          <span className="sr-only">User menu</span>
+          <span className="sr-only">Benutzermenü</span>
         </Button>
         {userMenuOpen && (
           <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border bg-popover p-1 shadow-lg">
@@ -320,17 +327,54 @@ export function TopBar({
               <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
             <div className="my-1 h-px bg-border" />
-            <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent">
+            {isTouchChrome && (
+              <>
+              <button
+                type="button"
+                className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-accent"
+                onClick={() => {
+                  setUserMenuOpen(false)
+                  navigate('/crm/aktivitaeten')
+                }}
+              >
+                <ClipboardList className="h-4 w-4" />
+                <span>Aufgaben</span>
+              </button>
+              <button
+                type="button"
+                className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-accent"
+                onClick={() => {
+                  setUserMenuOpen(false)
+                  window.dispatchEvent(new Event('open-copilot-dock'))
+                }}
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>Copilot</span>
+              </button>
+              </>
+            )}
+            <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-accent">
               <User className="h-4 w-4" />
               <span>Profil</span>
             </button>
-            <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent">
+            <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-accent">
               <Settings className="h-4 w-4" />
               <span>Einstellungen</span>
             </button>
             <button
               type="button"
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+              className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-accent md:hidden"
+              onClick={() => {
+                toggleTheme()
+                setUserMenuOpen(false)
+              }}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <span>{isDark ? 'Heller Modus' : 'Dunkler Modus'}</span>
+            </button>
+            <button
+              type="button"
+              className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-accent"
               onClick={() => {
                 setUserMenuOpen(false)
                 window.dispatchEvent(new Event('valeo:open-app-finder'))
@@ -342,7 +386,7 @@ export function TopBar({
             <div className="my-1 h-px bg-border" />
             <button
               type="button"
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+              className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm hover:bg-accent"
               onClick={() => {
                 setUserMenuOpen(false)
                 navigate(HELP_ROUTE)
@@ -352,7 +396,7 @@ export function TopBar({
               <span>Dokumentation</span>
             </button>
             <div className="my-1 h-px bg-border" />
-            <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-destructive hover:bg-accent">
+            <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm text-destructive hover:bg-accent">
               <LogOut className="h-4 w-4" />
               <span>Abmelden</span>
             </button>

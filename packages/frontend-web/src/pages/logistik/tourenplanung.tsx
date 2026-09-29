@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@/app/routing/typed-router'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -26,6 +27,7 @@ import {
   type DeliveryNoteHint,
 } from '@/lib/api/logistics-tours'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -98,6 +100,8 @@ const logisticsRoleProfiles: Array<{ id: LogisticsRoleFocus; label: string; desc
 ]
 
 export default function TourenplanungPage(): JSX.Element {
+  const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [roleFocus, setRoleFocus] = useState<LogisticsRoleFocus>('all')
@@ -343,6 +347,8 @@ export default function TourenplanungPage(): JSX.Element {
         </AlertDialogContent>
       </AlertDialog>
 
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Tourenplanung"
         description="Disposition, Fahrzeugbelegung und Status laufender Liefertouren."
@@ -390,17 +396,21 @@ export default function TourenplanungPage(): JSX.Element {
         <OperationalContextPanel sections={contextSections} />
       </div>
       <CrudCapabilityChecklist capabilities={tourCrudCapabilities} />
-      <div className="flex items-center justify-between">
+      </>
+      ) : null}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Tourenplanung</h1>
-          <p className="text-muted-foreground">Liefertouren & Disposition</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Tourenplanung</h1>
+          <p className="text-muted-foreground">Touren pruefen und disponieren</p>
         </div>
-        <Button className="gap-2">
+        <Button className="min-h-touch gap-2 touch-manipulation" onClick={() => navigate('/logistik/tour-fracht-arbeitsraum')}>
           <Truck className="h-4 w-4" />
-          Neue Tour
+          Dispo-Arbeitsraum
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Touren Heute</CardTitle></CardHeader>
@@ -463,6 +473,8 @@ export default function TourenplanungPage(): JSX.Element {
           <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -480,9 +492,9 @@ export default function TourenplanungPage(): JSX.Element {
               <label htmlFor="ls-ref" className="mb-1 block text-sm font-medium">
                 Lieferschein-Referenz
               </label>
-              <Input id="ls-ref" value={lsRef} onChange={(e) => setLsRef(e.target.value)} placeholder="z. B. DEMO-LS-001" />
+              <Input id="ls-ref" aria-label="Lieferschein-Referenz" value={lsRef} onChange={(e) => setLsRef(e.target.value)} placeholder="z. B. DEMO-LS-001" className="min-h-touch" />
             </div>
-            <Button type="button" disabled={lsBusy} onClick={() => void handleResolveLs()}>
+            <Button type="button" className="min-h-touch touch-manipulation" disabled={lsBusy} onClick={() => void handleResolveLs()}>
               {lsBusy ? 'Bitte warten…' : 'Aufloesen'}
             </Button>
           </div>
@@ -500,7 +512,7 @@ export default function TourenplanungPage(): JSX.Element {
             <div className="rounded-md border p-3 text-sm">
               <div className="mb-1 font-medium">Stopps Tour {hintTourId.slice(0, 8)}…</div>
               <pre className="whitespace-pre-wrap font-sans text-xs text-muted-foreground">{hintText}</pre>
-              <Button type="button" variant="ghost" size="sm" className="mt-2" disabled={hintBusy} onClick={() => setHintTourId(null)}>
+              <Button type="button" variant="ghost" className="mt-2 min-h-touch touch-manipulation" disabled={hintBusy} onClick={() => setHintTourId(null)}>
                 Hinweis schliessen
               </Button>
             </div>
@@ -531,7 +543,7 @@ export default function TourenplanungPage(): JSX.Element {
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
+                    className="min-h-touch touch-manipulation"
                     disabled={hintBusy && hintTourId === tour.id}
                     onClick={() => void handleTourHints(tour.id)}
                   >
@@ -541,8 +553,7 @@ export default function TourenplanungPage(): JSX.Element {
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                      className="min-h-touch border-destructive/40 text-destructive touch-manipulation hover:bg-destructive/10"
                       disabled={tourCancelSubmitting}
                       onClick={() => {
                         setTourCancelGrund('')

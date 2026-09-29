@@ -84,11 +84,11 @@ export default function ReportsDashboard(): JSX.Element {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Berichte und Analytics</h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleExport('json')}>
+          <Button variant="outline" onClick={() => handleExport('json')} className="min-h-touch">
             <Download className="mr-2 h-4 w-4" />
             JSON Export
           </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
+          <Button variant="outline" onClick={() => handleExport('csv')} className="min-h-touch">
             <Download className="mr-2 h-4 w-4" />
             CSV Export
           </Button>

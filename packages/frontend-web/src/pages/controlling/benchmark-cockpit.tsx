@@ -374,13 +374,13 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <Link to="/analytics">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" className="min-h-touch">
                         Analytics oeffnen
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                     <Link to="/admin/control-center/agent-ops">
-                      <Button variant="outline" size="sm">Agent Ops fuer Review</Button>
+                      <Button variant="outline" className="min-h-touch">Agent Ops fuer Review</Button>
                     </Link>
                   </div>
                 </CardContent>

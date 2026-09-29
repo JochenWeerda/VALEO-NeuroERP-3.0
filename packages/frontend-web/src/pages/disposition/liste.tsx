@@ -8,10 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AgentProcessPanel } from '@/components/agent'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { AlertTriangle, BarChart3, CheckCircle } from 'lucide-react'
 
 export default function DispositionPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { data: dispo = [], isLoading, refetch } = useDisposition()
 
   const shortcuts = buildCoreMaskShortcuts({
@@ -82,27 +84,36 @@ export default function DispositionPage(): JSX.Element {
 
   return (
     <div className="flex flex-col" data-density="dense">
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Disposition</h1>
-          <p className="text-muted-foreground">Bedarfsplanung</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Disposition</h1>
+          <p className="text-muted-foreground">Was fehlt, was nachbestellt werden muss</p>
         </div>
-        <Button onClick={() => navigate('/einkauf/bestellvorschlaege')}>Zu Bestellvorschlaegen</Button>
+        <Button className="min-h-touch touch-manipulation" onClick={() => navigate('/einkauf/bestellvorschlaege')}>
+          Zu Bestellvorschlägen
+        </Button>
       </div>
-      <AgentProcessPanel domain="einkauf" />
+      {!isTouch ? <AgentProcessPanel domain="einkauf" /> : null}
 
       {unterMindest > 0 && (
-        <Card className="border-red-500 bg-red-50">
+        <Card className="border-status-error/40 bg-status-error/10">
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{unterMindest} Artikel unter Mindestbestand!</span>
+              <span className="font-semibold">{unterMindest} Artikel unter Mindestbestand</span>
             </div>
           </CardContent>
         </Card>
       )}
 
+      <Card>
+        <CardContent className="pt-6">
+          <DataTable data={dispo} columns={columns} />
+        </CardContent>
+      </Card>
+
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -143,14 +154,9 @@ export default function DispositionPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={dispo} columns={columns} />
-        </CardContent>
-      </Card>
+      ) : null}
     </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

@@ -135,7 +135,6 @@ export function PageToolbar({
                   variant={action.variant ?? 'default'}
                   onClick={action.onClick}
                   disabled={action.disabled === true}
-                  size="sm"
                   className="min-h-touch min-w-touch touch-manipulation"
                   data-mcp-action={action.id}
                   data-mcp-intent={action.mcp?.intent}

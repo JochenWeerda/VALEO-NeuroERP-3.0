@@ -1,0 +1,49 @@
+---
+slice_id: MASK-FELDVERTRAG-GENERIC-STUBS
+id: MASK-FELDVERTRAG-GENERIC-STUBS
+title: Letzte 17 Generic-Stubs typisieren
+status: umgesetzt
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  sales_invoices.py, sales_orders.py, screen_definitions.py, crm_360.py und
+  der DSGVO-Loeschweg bleiben Claude. Keine FSX-Dateien. lager/leitstand
+  nicht anfassen. coverage_path_check.xml nicht committen. R5 nicht starten.
+  Commit 2f044dbb7 nicht force-pushen.
+goal: >
+  Die 17 Restquellen ohne Zeilenform (6 leere /masks/-Register, 11
+  /mask-rollouts/-Catch-alls) haben eine deklarierte Form. Abweichungen 0.
+  Ratsche 0. Aliase nur aus vorhandenen Spalten.
+file_ownership:
+  - app/api/v1/schemas/mask_entity_contracts.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - app/api/v1/endpoints/mask_rollout_summaries.py
+  - app/services/mask_rollout_summary_service.py
+  - tests/test_mask_entity_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_entity_backends.py
+  - docs/agent-ops/todo-datenmodell-katalog.md
+acceptance:
+  - python scripts/check_field_contracts.py Exit 0
+  - ZEILEN_NICHT_PRUEFBAR_MAX = 0
+  - die 17 Quellen nicht in zeilen_nicht_pruefbar
+  - screen_definitions.py, sales_orders.py, sales_invoices.py, crm_360.py
+    nicht in diesem Commit
+tests:
+  - tests/test_mask_entity_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_entity_backends.py
+risks:
+  - Der Catch-all darf die spezifischen Routen nicht schlucken
+  - URL-Plural (leads) ist nicht die kanonische Screen-ID (lead)
+  - Loader-Schluessel ohne Alias bleiben leer, obwohl das Schema spricht
+ai_harness:
+  fachlicher_vertrag: >
+    Spalten folgen den JSON-Schluesseln der Zeile. Fehlende physische Spalten
+    bleiben leer, sie werden nicht geraten.
+  architektur_vertrag: >
+    Dedizierte GET-Routen vor dem Catch-all. response_model ist die TabOut
+    mit typisierter Zeile. Kein Eingriff in Claudes Dateien.

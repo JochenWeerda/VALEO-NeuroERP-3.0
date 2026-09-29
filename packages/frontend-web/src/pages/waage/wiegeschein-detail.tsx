@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ComponentType } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { type WeighingTicket } from '@/lib/api/weighing-tickets'
@@ -38,7 +40,7 @@ type TabId = 'gewichte' | 'qualitaet' | 'kontrakt' | 'verlauf'
 const TABS: { id: TabId; label: string }[] = [
   { id: 'gewichte', label: 'Gewichte' },
   { id: 'qualitaet', label: 'Qualität' },
-  { id: 'kontrakt', label: 'Kontrakt-Zuordnung' },
+  { id: 'kontrakt', label: 'Kontrakt' },
   { id: 'verlauf', label: 'Verlauf' },
 ]
 
@@ -81,7 +83,7 @@ const weighingDetailRoleProfiles: Array<{ id: WeighingDetailRoleFocus; label: st
 function buildMockTicket(id: string): WeighingTicket {
   return {
     id,
-    ticket_number: `WS-${id.slice(0, 8).toUpperCase()}`,
+    ticket_number: id.toUpperCase().startsWith('WS-') ? id.toUpperCase() : `WS-${id.slice(0, 8).toUpperCase()}`,
     scale_id: 'WAAGE-01',
     vehicle_plate: 'AB-CD 1234',
     gross_weight: 28500,
@@ -132,6 +134,21 @@ function allocationStatusVariant(
   }
 }
 
+function ticketStatusLabel(status: string): string {
+  switch (status) {
+    case 'posted':
+      return 'Verbucht'
+    case 'allocated':
+      return 'Zugeordnet'
+    case 'closed':
+      return 'geschlossen'
+    case 'open':
+      return 'offen'
+    default:
+      return status
+  }
+}
+
 function ticketStatusVariant(
   status: string,
 ): 'default' | 'secondary' | 'outline' | 'destructive' {
@@ -156,7 +173,7 @@ function ReadField({
   return (
     <div>
       <Label className="text-xs text-muted-foreground uppercase tracking-wide">{label}</Label>
-      <div className="mt-1 rounded-md border bg-muted px-3 py-2 text-sm font-medium">
+      <div className="mt-1 min-h-11 rounded-md border bg-muted px-3 py-2 text-base font-medium">
         {value ?? '—'}
       </div>
     </div>
@@ -170,7 +187,7 @@ function TimelineStep({
   timestamp,
   done,
 }: {
-  icon: React.ComponentType<{ className?: string }>
+  icon: ComponentType<{ className?: string }>
   label: string
   timestamp?: string | null
   done: boolean
@@ -178,8 +195,8 @@ function TimelineStep({
   return (
     <div className="flex items-start gap-3">
       <div
-        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 ${
-          done ? 'border-green-500 bg-green-50 text-green-700' : 'border-muted-foreground/30 bg-muted text-muted-foreground'
+        className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 ${
+          done ? 'border-status-success text-status-success' : 'border-muted-foreground/30 bg-muted text-muted-foreground'
         }`}
       >
         <Icon className="h-4 w-4" />
@@ -205,6 +222,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<TabId>('gewichte')
   const [allocateOpen, setAllocateOpen] = useState(false)
@@ -433,7 +451,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
         </div>
         <Button
           variant="outline"
-          className="gap-2"
+          className="min-h-touch gap-2 touch-manipulation"
           onClick={() => setAllocateOpen(true)}
           disabled={ticket.status === 'posted'}
         >
@@ -482,7 +500,95 @@ export default function WiegescheinDetailPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-3 md:p-6">
+      <ModuleToolbar
+        backTarget="/waage/wiegungen"
+        closeTarget="/waage/wiegungen"
+        title="Wiegeschein"
+        actions={
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => navigate('/waage/wiegungen')}>
+            <ArrowRight className="h-4 w-4" />
+            Alle Wiegungen
+          </Button>
+        }
+      />
+
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <FileText className="h-6 w-6 shrink-0 text-muted-foreground" />
+                <h1 className="text-2xl font-bold">{ticket.ticket_number}</h1>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Badge variant={ticketStatusVariant(ticket.status)}>
+                  {ticketStatusLabel(ticket.status)}
+                </Badge>
+                <Badge variant={allocationStatusVariant(ticket.allocation_status)}>
+                  {allocationStatusLabel(ticket.allocation_status)}
+                </Badge>
+                {ticket.direction === 'inbound' && (
+                  <Badge variant="secondary">Eingang</Badge>
+                )}
+              </div>
+            </div>
+            <div className="space-y-1 text-sm text-muted-foreground sm:text-right">
+              {ticket.article_id && (
+                <div>
+                  Artikel: <span className="font-semibold text-foreground">{ticket.article_id}</span>
+                </div>
+              )}
+              {ticket.vehicle_plate && (
+                <div className="flex items-center gap-1 sm:justify-end">
+                  <Truck className="h-4 w-4" />
+                  <span className="font-semibold text-foreground">{ticket.vehicle_plate}</span>
+                </div>
+              )}
+              {ticket.first_weighing_at && (
+                <div className="flex items-center gap-1 sm:justify-end">
+                  <Clock className="h-4 w-4" />
+                  {new Date(ticket.first_weighing_at).toLocaleDateString('de-DE')}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabId)}>
+        <TabsList variant="register" className="flex-wrap" aria-label="Wiegeschein">
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id} className="min-h-11">
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {TABS.map((tab) => (
+          <TabsContent key={tab.id} value={tab.id}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">{tab.label}</CardTitle>
+              </CardHeader>
+              <CardContent>{tabContent[tab.id]}</CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
+
+      {ticket.notes && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Bemerkungen</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm">{ticket.notes}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isTouch ? (
+      <div className="space-y-6">
       {workflowContext ? <WorkflowProcessBand context={workflowContext} /> : null}
       <OperationalCaseHeader
         title={ticket.ticket_number}
@@ -494,121 +600,58 @@ export default function WiegescheinDetailPage(): JSX.Element {
         caseLabel={workflowContext?.caseNumber || 'Wiegevorgang'}
         tags={[ticket.direction, ticket.article_group || 'Artikelgruppe offen']}
       />
-      <div className="space-y-4">
-        <RoleFocusBar
-          roles={weighingDetailRoleProfiles}
-          value={roleFocus}
-          onChange={setRoleFocus}
-          visibleCount={roleFocus === 'all' ? 5 : 1}
-          totalCount={5}
-        />
-        <ManagementDecisionPanel
-          decision={{
-            allowed: isWeighingDetailReady,
-            allowedLabel: 'Abrechnungsbereit',
-            blockedLabel: 'Stopper offen',
-            summary: isWeighingDetailReady
-              ? `Der Wiegeschein ist fachlich bereit. Netto ${netWeight?.toLocaleString('de-DE')} kg, Zuordnung ${allocationStatusLabel(ticket.allocation_status)}.`
-              : `Vor der Abrechnung ist noch etwas offen: ${weighingDetailNextAction}`,
-            blockerCount: [!hasWeights, !hasQualityValues, !hasContract].filter(Boolean).length,
-            nextFocus: weighingDetailNextAction,
-            template: {
-              label: 'Wiegescheinliste oeffnen',
-              href: '/waage/liste',
-            },
-          }}
-        />
-        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-          <OperationalTaskPlan title="Wiegeschein-Aufgabenplan" items={weighingDetailTaskItems} />
-          <div className="space-y-3">
-            <NextActionPanel
-              action={weighingDetailNextAction}
-              tone={isWeighingDetailReady ? 'emerald' : !hasContract ? 'amber' : 'blue'}
-            />
-            <EvidenceTemplateLink link={{ label: 'Wiegungen oeffnen', href: '/waage/wiegungen' }} />
-          </div>
-        </div>
-        <CrudCapabilityChecklist capabilities={weighingDetailCrudCapabilities} />
-      </div>
-      <ModuleToolbar
-        backTarget="/waage/wiegungen"
-        closeTarget="/waage/wiegungen"
-        title="Wiegeschein-Detail"
-        actions={
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate('/waage/wiegungen')}>
-            <ArrowRight className="h-4 w-4" />
-            Alle Wiegungen
-          </Button>
-        }
+      <RoleFocusBar
+        roles={weighingDetailRoleProfiles}
+        value={roleFocus}
+        onChange={setRoleFocus}
+        visibleCount={roleFocus === 'all' ? 5 : 1}
+        totalCount={5}
       />
-
-      {/* Header-Bereich */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <FileText className="h-6 w-6 text-muted-foreground" />
-                <h1 className="text-2xl font-bold">{ticket.ticket_number}</h1>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                <Badge variant={ticketStatusVariant(ticket.status)}>
-                  {ticket.status === 'posted'
-                    ? 'Verbucht'
-                    : ticket.status === 'allocated'
-                      ? 'Zugeordnet'
-                      : ticket.status}
-                </Badge>
-                <Badge variant={allocationStatusVariant(ticket.allocation_status)}>
-                  {allocationStatusLabel(ticket.allocation_status)}
-                </Badge>
-                {ticket.direction === 'inbound' && (
-                  <Badge variant="secondary">Eingang</Badge>
-                )}
-              </div>
-            </div>
-            <div className="text-right space-y-1 text-sm text-muted-foreground">
-              {ticket.article_id && (
-                <div>
-                  Artikel: <span className="font-semibold text-foreground">{ticket.article_id}</span>
-                </div>
-              )}
-              {ticket.vehicle_plate && (
-                <div className="flex items-center gap-1 justify-end">
-                  <Truck className="h-4 w-4" />
-                  <span className="font-semibold text-foreground">{ticket.vehicle_plate}</span>
-                </div>
-              )}
-              {ticket.first_weighing_at && (
-                <div className="flex items-center gap-1 justify-end">
-                  <Clock className="h-3 w-3" />
-                  {new Date(ticket.first_weighing_at).toLocaleDateString('de-DE')}
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
+      <ManagementDecisionPanel
+        decision={{
+          allowed: isWeighingDetailReady,
+          allowedLabel: 'Abrechnungsbereit',
+          blockedLabel: 'Stopper offen',
+          summary: isWeighingDetailReady
+            ? `Gewichte, Qualitaet und Kontrakt sind vorhanden. ${weighingDetailNextAction}`
+            : `Vor der Abrechnung ist noch etwas offen: ${weighingDetailNextAction}`,
+          blockerCount: [!hasWeights, !hasQualityValues, !hasContract].filter(Boolean).length,
+          nextFocus: weighingDetailNextAction,
+          template: {
+            label: 'Wiegungen oeffnen',
+            href: '/waage/wiegungen',
+          },
+        }}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTaskPlan title="Wiegeschein-Aufgabenplan" items={weighingDetailTaskItems} />
+        <div className="space-y-3">
+          <NextActionPanel
+            action={weighingDetailNextAction}
+            tone={isWeighingDetailReady ? 'emerald' : !hasContract ? 'amber' : 'blue'}
+          />
+          <EvidenceTemplateLink link={{ label: 'Wiegungen oeffnen', href: '/waage/wiegungen' }} />
+        </div>
+      </div>
+      <CrudCapabilityChecklist capabilities={weighingDetailCrudCapabilities} />
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Objektkette zu diesem Wiegeschein</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-4">
-          <div><div className="text-xs text-muted-foreground">Wartende Annahmen</div><div className="text-2xl font-semibold">{chain.waitingInbound}</div></div>
-          <div><div className="text-xs text-muted-foreground">Offene Wiegungen</div><div className="text-2xl font-semibold">{chain.openWeighingTickets}</div></div>
-          <div><div className="text-xs text-muted-foreground">Gesperrte Chargen</div><div className="text-2xl font-semibold">{chain.blockedCharges}</div></div>
-          <div><div className="text-xs text-muted-foreground">Fracht in Transit</div><div className="text-2xl font-semibold">{chain.freightInTransit}</div></div>
+          <div><div className="text-xs text-muted-foreground">Wartende Annahmen</div><div className="text-2xl font-semibold">{chain?.waitingInbound ?? 0}</div></div>
+          <div><div className="text-xs text-muted-foreground">Offene Wiegungen</div><div className="text-2xl font-semibold">{chain?.openWeighingTickets ?? 0}</div></div>
+          <div><div className="text-xs text-muted-foreground">Gesperrte Chargen</div><div className="text-2xl font-semibold">{chain?.blockedCharges ?? 0}</div></div>
+          <div><div className="text-xs text-muted-foreground">Fracht in Transit</div><div className="text-2xl font-semibold">{chain?.freightInTransit ?? 0}</div></div>
         </CardContent>
       </Card>
-
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
         <OperationalTimeline
           title="Vorgangstimeline"
           items={[
             { label: 'Erstwiegung', timestamp: ticket.first_weighing_at, detail: ticket.vehicle_plate || undefined },
             { label: 'Zweitwiegung', timestamp: ticket.second_weighing_at, detail: ticket.ticket_number },
-            { label: 'Objektkettenabgleich', detail: `${chain.waitingInbound} wartend / ${chain.openWeighingTickets} offen / ${chain.freightInTransit} Transit` },
+            { label: 'Objektkettenabgleich', detail: `${chain?.waitingInbound ?? 0} wartend / ${chain?.openWeighingTickets ?? 0} offen / ${chain?.freightInTransit ?? 0} Transit` },
           ]}
         />
         <OperationalContextPanel
@@ -652,56 +695,15 @@ export default function WiegescheinDetailPage(): JSX.Element {
           <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
         </Card>
       </div>
-
-      {/* Tab-Navigation */}
-      <div className="border-b">
-        <nav className="flex gap-0" aria-label="Tabs">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
       </div>
+      ) : null}
 
-      {/* Tab-Inhalt */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            {TABS.find((t) => t.id === activeTab)?.label}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>{tabContent[activeTab]}</CardContent>
-      </Card>
-
-      {/* Bemerkungen */}
-      {ticket.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Bemerkungen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">{ticket.notes}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Dialog: Kontrakt zuordnen */}
       <Dialog open={allocateOpen} onOpenChange={(open) => !open && setAllocateOpen(false)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Kontrakt zuordnen</DialogTitle>
             <DialogDescription>
-              Wiegeschein {ticket.ticket_number} — Kontrakt-ID eingeben um den Wiegeschein gegen einen offenen Kontrakt zu allokieren.
+              Wiegeschein {ticket.ticket_number} — Kontrakt-ID eingeben, um den Wiegeschein einem offenen Kontrakt zuzuordnen.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -713,17 +715,19 @@ export default function WiegescheinDetailPage(): JSX.Element {
                 onChange={(e) => setContractInput(e.target.value)}
                 placeholder="z.B. KT-2026-0042"
                 autoFocus
+                className="min-h-touch"
               />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Wiegeschein {ticket.ticket_number} — Nettomenge: {netWeight?.toLocaleString('de-DE') ?? '—'} kg
             </p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAllocateOpen(false)}>
+          <DialogFooter className="flex flex-wrap gap-2">
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setAllocateOpen(false)}>
               Abbrechen
             </Button>
             <Button
+              className="min-h-touch touch-manipulation"
               onClick={() => allocate.mutate()}
               disabled={!contractInput.trim() || allocate.isPending}
             >
@@ -733,7 +737,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
         </DialogContent>
       </Dialog>
     </div>
-      <KeyboardShortcutBar shortcuts={shortcutsForBar} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcutsForBar} /> : null}
     </div>
   )
 }

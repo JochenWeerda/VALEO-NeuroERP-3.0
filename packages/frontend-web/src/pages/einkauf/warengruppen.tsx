@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Edit3, Layers, Plus, Save, Search, Trash2, X } from 'lucide-react'
+import { Layers, Plus, Save, Search, X } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   useCreateWarengruppe,
   useDeleteWarengruppe,
@@ -25,9 +26,11 @@ export default function WarengruppenPage(): JSX.Element {
   const createWarengruppe = useCreateWarengruppe()
   const updateWarengruppe = useUpdateWarengruppe()
   const deleteWarengruppe = useDeleteWarengruppe()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const [editingNr, setEditingNr] = useState<string | null>(null)
   const [form, setForm] = useState<WarengruppeCreate>(emptyForm)
+  const [deletePendingId, setDeletePendingId] = useState<string | null>(null)
 
   if (isLoading) return (
     <div className="p-3 md:p-6 space-y-4">
@@ -83,7 +86,7 @@ export default function WarengruppenPage(): JSX.Element {
         <button
           type="button"
           onClick={() => startEdit(w)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {w.gruppe_nr}
         </button>
@@ -96,17 +99,22 @@ export default function WarengruppenPage(): JSX.Element {
       label: '',
       render: (w: Warengruppe) => (
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => startEdit(w)} aria-label={`${w.gruppe_nr} bearbeiten`}>
-            <Edit3 className="h-4 w-4" />
+          <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={() => startEdit(w)}>
+            Bearbeiten
           </Button>
           <Button
             type="button"
             variant="outline"
-            size="sm"
-            onClick={() => deleteWarengruppe.mutate(w.gruppe_nr)}
-            aria-label={`${w.gruppe_nr} deaktivieren`}
+            className="min-h-touch touch-manipulation"
+            disabled={deletePendingId === w.gruppe_nr || deleteWarengruppe.isPending}
+            onClick={() => {
+              setDeletePendingId(w.gruppe_nr)
+              deleteWarengruppe.mutate(w.gruppe_nr, {
+                onSettled: () => setDeletePendingId(null),
+              })
+            }}
           >
-            <Trash2 className="h-4 w-4" />
+            {deletePendingId === w.gruppe_nr ? 'Loeschen...' : 'Deaktivieren'}
           </Button>
         </div>
       ),
@@ -115,17 +123,18 @@ export default function WarengruppenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Warengruppen</h1>
-          <p className="text-muted-foreground">Stammdaten - 3-stufige Warengruppenhierarchie</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Warengruppen</h1>
+          <p className="text-muted-foreground">Gruppen suchen und pflegen</p>
         </div>
-        <Button type="button" onClick={resetForm} className="gap-2">
+        <Button type="button" onClick={resetForm} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Warengruppe
         </Button>
       </div>
 
+      {!isTouch ? (
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">Warengruppen gesamt</CardTitle>
@@ -137,6 +146,7 @@ export default function WarengruppenPage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -145,28 +155,36 @@ export default function WarengruppenPage(): JSX.Element {
         <CardContent>
           <div className="grid gap-3 md:grid-cols-[180px_1fr_1fr_auto]">
             <Input
+              aria-label="Warengruppen-Nummer"
               placeholder="Nummer"
               value={form.gruppe_nr}
               onChange={(event) => setForm((prev) => ({ ...prev, gruppe_nr: event.target.value }))}
               disabled={isEditing}
+              className="min-h-touch"
             />
             <Input
+              aria-label="Bezeichnung"
               placeholder="Bezeichnung"
               value={form.bezeichnung}
               onChange={(event) => setForm((prev) => ({ ...prev, bezeichnung: event.target.value }))}
+              className="min-h-touch"
             />
             <Input
+              aria-label="Oberwarengruppe-ID"
               placeholder="Oberwarengruppe-ID"
               value={form.ober_id}
               onChange={(event) => setForm((prev) => ({ ...prev, ober_id: event.target.value }))}
+              className="min-h-touch"
             />
             <div className="flex gap-2">
-              <Button type="button" onClick={() => void submitForm()} disabled={!canSubmit || isSaving} aria-label="Warengruppe speichern">
+              <Button type="button" className="min-h-touch gap-2 touch-manipulation" onClick={() => void submitForm()} disabled={!canSubmit || isSaving}>
                 <Save className="h-4 w-4" />
+                Speichern
               </Button>
               {isEditing && (
-                <Button type="button" variant="outline" onClick={resetForm} aria-label="Bearbeitung abbrechen">
+                <Button type="button" variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={resetForm}>
                   <X className="h-4 w-4" />
+                  Abbrechen
                 </Button>
               )}
             </div>
@@ -182,10 +200,11 @@ export default function WarengruppenPage(): JSX.Element {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Nummer oder Bezeichnung..."
+              aria-label="Suche Warengruppen"
+              placeholder="Nummer oder Bezeichnung"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="pl-10"
+              className="min-h-touch pl-10"
             />
           </div>
         </CardContent>

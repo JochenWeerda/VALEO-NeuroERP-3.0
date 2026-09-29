@@ -105,7 +105,7 @@ export function PricingForm({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h4 className="font-semibold">Staffelpreise</h4>
-          <Button type="button" size="sm" onClick={addTier}>
+          <Button type="button" onClick={addTier} className="min-h-touch">
             Tier hinzufügen
           </Button>
         </div>

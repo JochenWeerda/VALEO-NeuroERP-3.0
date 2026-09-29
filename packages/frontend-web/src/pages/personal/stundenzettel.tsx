@@ -211,7 +211,7 @@ export default function StundenzettelPage(): JSX.Element {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Touren</CardTitle>
-            <Button size="sm" variant="outline" onClick={addTour} className="gap-2">
+            <Button className="min-h-touch" variant="outline" onClick={addTour}>
               <Plus className="h-4 w-4" />
               Tour hinzufügen
             </Button>
@@ -227,7 +227,8 @@ export default function StundenzettelPage(): JSX.Element {
                     type="time"
                     value={tour.start}
                     onChange={(e) => updateTour(tour.id, 'start', e.target.value)}
-                    className="font-mono"
+                    className="min-h-touch font-mono"
+                    aria-label={`Tourstart ${tour.id}`}
                   />
                 </div>
                 <div>
@@ -236,7 +237,8 @@ export default function StundenzettelPage(): JSX.Element {
                     type="time"
                     value={tour.ende}
                     onChange={(e) => updateTour(tour.id, 'ende', e.target.value)}
-                    className="font-mono"
+                    className="min-h-touch font-mono"
+                    aria-label={`Tourende ${tour.id}`}
                   />
                 </div>
                 <div>
@@ -245,7 +247,8 @@ export default function StundenzettelPage(): JSX.Element {
                     type="number"
                     value={tour.km}
                     onChange={(e) => updateTour(tour.id, 'km', Number(e.target.value))}
-                    className="font-mono"
+                    className="min-h-touch font-mono"
+                    aria-label={`Kilometer ${tour.id}`}
                   />
                 </div>
                 <div>
@@ -254,12 +257,13 @@ export default function StundenzettelPage(): JSX.Element {
                     type="number"
                     value={tour.pause}
                     onChange={(e) => updateTour(tour.id, 'pause', Number(e.target.value))}
-                    className="font-mono"
+                    className="min-h-touch font-mono"
+                    aria-label={`Pause ${tour.id}`}
                   />
                 </div>
                 <div className="flex items-end">
-                  <Button size="sm" variant="destructive" onClick={() => removeTour(tour.id)}>
-                    ✕
+                  <Button className="min-h-touch" variant="destructive" onClick={() => removeTour(tour.id)}>
+                    Löschen
                   </Button>
                 </div>
               </div>
@@ -291,10 +295,10 @@ export default function StundenzettelPage(): JSX.Element {
 
       {/* Actions */}
       <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={() => navigate('/personal/stundenzettel-liste')}>
+        <Button variant="outline" className="min-h-touch" onClick={() => navigate('/personal/stundenzettel-liste')}>
           Abbrechen
         </Button>
-        <Button className="gap-2" onClick={handleSave} disabled={saveMutation.isPending}>
+        <Button className="min-h-touch gap-2" onClick={handleSave} disabled={saveMutation.isPending}>
           <Save className="h-4 w-4" />
           {saveMutation.isPending ? 'Speichern...' : 'Speichern'}
         </Button>

@@ -44,11 +44,11 @@ import {
   User,
   FileText,
   Info,
-  Pencil,
   Trash2
 } from 'lucide-react'
 import { useMassnahmen, useAgrarKunden, useBulkDeleteMassnahmen, useDeleteMassnahme, type BulkDeleteResult } from '@/lib/api/agrar'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 // Types
 type MassnahmeTyp = 'Aussaat' | 'Düngung' | 'PSM' | 'Ernte' | 'Bodenbearbeitung' | 'Sonstiges'
@@ -94,7 +94,7 @@ function getMassnahmeIcon(typ: string) {
     case 'PSM-Behandlung': return <Bug className="h-4 w-4 text-status-error" />
     case 'Aussaat': return <Wheat className="h-4 w-4 text-status-warning" />
     case 'Ernte': return <Wheat className="h-4 w-4 text-status-success" />
-    case 'Bodenbearbeitung': return <Tractor className="h-4 w-4 text-brown-600" />
+    case 'Bodenbearbeitung': return <Tractor className="h-4 w-4 text-muted-foreground" />
     default: return <CalendarDays className="h-4 w-4" />
   }
 }
@@ -145,6 +145,8 @@ export default function MassnahmenPage(): JSX.Element {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [bulkDeleteResult, setBulkDeleteResult] = useState<BulkDeleteResult | null>(null)
   const [roleFocus, setRoleFocus] = useState<MassnahmenRole>('dokumentation')
+  const isTouch = useTouchDevice()
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   // Daten laden via TanStack Query hooks
   const { data: massnahmenData, isLoading: isLoadingMassnahmen } = useMassnahmen()
@@ -253,7 +255,7 @@ export default function MassnahmenPage(): JSX.Element {
   }
 
   const handleBulkDelete = (): void => {
-    if (selectedIds.length === 0) {
+    if (selectedIds.length === 0 || bulkDeleteMassnahmen.isPending) {
       return
     }
     if (!confirm(`${selectedIds.length} Maßnahmen wirklich löschen?`)) {
@@ -283,6 +285,29 @@ export default function MassnahmenPage(): JSX.Element {
     })
   }
 
+  async function persistDelete(id: string): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+      deleteMassnahme.mutate(id, {
+        onSuccess: () => resolve(),
+        onError: () => reject(new Error('Löschen fehlgeschlagen')),
+      })
+    })
+  }
+
+  async function handleDelete(id: string): Promise<void> {
+    if (deletingId) return
+    if (!confirm('Maßnahme wirklich löschen?')) return
+    setDeletingId(id)
+    try {
+      await persistDelete(id)
+      toast({ title: 'Maßnahme gelöscht' })
+    } catch {
+      toast({ variant: 'destructive', title: 'Löschen fehlgeschlagen' })
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   // Spalten-Definition
   const columns = [
     {
@@ -290,6 +315,7 @@ export default function MassnahmenPage(): JSX.Element {
       label: 'Auswahl',
       render: (m: Massnahme) => (
         <Checkbox
+          className="h-11 w-11"
           checked={selectedIds.includes(m.id)}
           onCheckedChange={(checked) => toggleSelection(m.id, checked === true)}
           aria-label={`Maßnahme ${m.schlagName} auswählen`}
@@ -311,8 +337,9 @@ export default function MassnahmenPage(): JSX.Element {
       label: 'Schlag',
       render: (m: Massnahme) => (
         <button
+          type="button"
           onClick={() => navigate(`/agrar/feldbuch/schlag/${m.schlagId}`)}
-          className="text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {m.schlagName}
         </button>
@@ -357,9 +384,15 @@ export default function MassnahmenPage(): JSX.Element {
       render: (m: Massnahme) => (
         <div className="flex items-center gap-2">
           {m.compliant ? (
-            <CheckCircle className="h-4 w-4 text-status-success" />
+            <span className="inline-flex items-center gap-1 text-status-success">
+              <CheckCircle className="h-4 w-4" />
+              Vollständig
+            </span>
           ) : (
-            <AlertTriangle className="h-4 w-4 text-status-warning" />
+            <span className="inline-flex items-center gap-1 text-status-warning">
+              <AlertTriangle className="h-4 w-4" />
+              Offen
+            </span>
           )}
           {m.exportiert && <FileText className="h-4 w-4 text-muted-foreground" aria-label="Exportiert" />}
         </div>
@@ -369,25 +402,21 @@ export default function MassnahmenPage(): JSX.Element {
       key: 'aktionen' as const,
       label: 'Aktionen',
       render: (m: Massnahme) => (
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/agrar/feldbuch/massnahme/${m.id}`)} title="Bearbeiten">
-            <Pencil className="h-4 w-4" />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            variant="outline"
+            className="min-h-touch touch-manipulation"
+            onClick={() => navigate(`/agrar/feldbuch/massnahme/${m.id}`)}
+          >
+            Öffnen
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (confirm('Maßnahme wirklich löschen?')) {
-                deleteMassnahme.mutate(m.id, {
-                  onSuccess: () => toast({ title: 'Maßnahme gelöscht' }),
-                  onError: () => toast({ variant: 'destructive', title: 'Löschen fehlgeschlagen' })
-                })
-              }
-            }}
-            disabled={deleteMassnahme.isPending}
-            title="Löschen"
+            variant="outline"
+            className="min-h-touch touch-manipulation"
+            onClick={() => { void handleDelete(m.id) }}
+            disabled={deletingId === m.id || deleteMassnahme.isPending}
           >
-            <Trash2 className="h-4 w-4 text-destructive" />
+            Löschen
           </Button>
         </div>
       )
@@ -459,22 +488,24 @@ export default function MassnahmenPage(): JSX.Element {
   return (
     <div className="space-y-4 p-3 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl font-bold md:text-3xl flex items-center gap-3">
             <CalendarDays className="h-8 w-8 text-muted-foreground" />
-            Maßnahmen-Dokumentation
+            Maßnahmen
           </h1>
           <p className="text-muted-foreground">
-            Spritztagebuch und Feldbuch-Dokumentation für Dienstleister
+            Einsätze suchen, öffnen und dokumentieren
           </p>
         </div>
-        <Button onClick={() => navigate('/agrar/feldbuch/massnahme/neu')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/feldbuch/massnahme/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Maßnahme
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={massnahmenRoles}
         value={roleFocus}
@@ -598,16 +629,18 @@ export default function MassnahmenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="liste">Alle Maßnahmen</TabsTrigger>
-          <TabsTrigger value="spritztagebuch">
+        <TabsList className="h-auto min-h-11 w-full flex-wrap justify-start">
+          <TabsTrigger value="liste" className="min-h-11">Alle Maßnahmen</TabsTrigger>
+          <TabsTrigger value="spritztagebuch" className="min-h-11">
             <Bug className="h-4 w-4 mr-1" />
             Spritztagebuch
           </TabsTrigger>
-          <TabsTrigger value="duengebilanz">
+          <TabsTrigger value="duengebilanz" className="min-h-11">
             <Droplets className="h-4 w-4 mr-1" />
             Düngung
           </TabsTrigger>
@@ -628,6 +661,7 @@ export default function MassnahmenPage(): JSX.Element {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Kunde</label>
                   <NativeSelect
+                    ariaLabel="Kunde"
                     value={selectedKundeId}
                     onValueChange={setSelectedKundeId}
                     options={kunden.map((kunde) => ({
@@ -641,11 +675,12 @@ export default function MassnahmenPage(): JSX.Element {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Maßnahmentyp</label>
                   <NativeSelect
+                    ariaLabel="Maßnahmentyp"
                     value={filterTyp}
                     onValueChange={setFilterTyp}
                     options={[
                       { value: 'alle', label: 'Alle Typen' },
-                      { value: 'D?ngung', label: 'D?ngung' },
+                      { value: 'Düngung', label: 'Düngung' },
                       { value: 'PSM', label: 'PSM' },
                       { value: 'Aussaat', label: 'Aussaat' },
                       { value: 'Ernte', label: 'Ernte' },
@@ -657,23 +692,24 @@ export default function MassnahmenPage(): JSX.Element {
                 {/* Suchfeld */}
                 <div className="md:col-span-2">
                   <label className="text-sm font-medium mb-2 block">Suche</label>
-                  <div className="flex gap-4">
-                    <div className="relative flex-1">
+                  <div className="flex flex-wrap gap-2">
+                    <div className="relative min-w-[12rem] flex-1">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Schlag, Mittel, Kunde..."
+                        aria-label="Suche Maßnahmen"
+                        placeholder="Schlag, Mittel, Kunde"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
+                        className="min-h-touch pl-10"
                       />
                     </div>
-                    <Button variant="outline" className="gap-2" onClick={handleExport}>
+                    <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
                       <FileDown className="h-4 w-4" />
                       Export
                     </Button>
                     <Button
                       variant="outline"
-                      className="gap-2"
+                      className="min-h-touch gap-2 touch-manipulation"
                       onClick={() => toggleSelectAllVisible(!allVisibleSelected)}
                       disabled={filteredMassnahmen.length === 0}
                     >
@@ -681,7 +717,7 @@ export default function MassnahmenPage(): JSX.Element {
                     </Button>
                     <Button
                       variant="destructive"
-                      className="gap-2"
+                      className="min-h-touch gap-2 touch-manipulation"
                       onClick={handleBulkDelete}
                       disabled={selectedCount === 0 || bulkDeleteMassnahmen.isPending}
                     >

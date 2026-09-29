@@ -13,6 +13,7 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type LiveRole = 'betrieb' | 'admin' | 'fachbereich' | 'leitung'
 
@@ -47,6 +48,7 @@ function formatDate(ts?: number): string {
 export default function LiveMonitorPage(): JSX.Element {
   const { sales, inventory, policy } = useLive()
   const [roleFocus, setRoleFocus] = useState<LiveRole>('betrieb')
+  const isTouch = useTouchDevice()
 
   const salesDocs = useMemo(() => Object.values(sales), [sales])
   const inventoryEvents = useMemo(() => Object.values(inventory), [inventory])
@@ -92,6 +94,8 @@ export default function LiveMonitorPage(): JSX.Element {
         <NavLiveStatus />
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={liveRoles}
         value={roleFocus}
@@ -174,6 +178,8 @@ export default function LiveMonitorPage(): JSX.Element {
           />
         </div>
       </div>
+      </>
+      ) : null}
 
       <AuditTimeline title="Letzte Live-Ereignisse" entries={timelineEntries} />
 

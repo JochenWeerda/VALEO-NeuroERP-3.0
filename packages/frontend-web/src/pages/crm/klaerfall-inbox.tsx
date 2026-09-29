@@ -119,7 +119,7 @@ export default function KlaerfallInboxPage() {
           <h1 className="text-lg font-semibold">Klärfall-Inbox</h1>
           {openCount > 0 && <Badge variant="destructive">{openCount} offen</Badge>}
         </div>
-        <Button variant="outline" size="sm" onClick={() => void refetch()} disabled={isFetching}>
+        <Button variant="outline" className="min-h-touch" onClick={() => void refetch()} disabled={isFetching}>
           {isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -136,7 +136,7 @@ export default function KlaerfallInboxPage() {
           <button
             key={t.key}
             onClick={() => setStatus(t.key)}
-            className={`px-3 py-1.5 text-sm border-b-2 -mb-px ${
+            className={`min-h-touch px-3 py-1.5 text-sm border-b-2 -mb-px ${
               status === t.key ? 'border-primary font-medium text-primary' : 'border-transparent text-muted-foreground'
             }`}
           >
@@ -198,15 +198,15 @@ export default function KlaerfallInboxPage() {
                           placeholder="Kundennr. …"
                           value={selected[item.id] || ''}
                           onChange={(e) => setSelected((s) => ({ ...s, [item.id]: e.target.value }))}
-                          className="h-9"
+                          className="min-h-touch"
                           disabled={busy}
                         />
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => handleAssign(item)} disabled={busy}>
+                          <Button className="min-h-touch" onClick={() => handleAssign(item)} disabled={busy}>
                             {assigning ? <Loader2 size={14} className="animate-spin" /> : <UserCheck size={14} />}
                             <span className="ml-1">Zuordnen</span>
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDismiss(item)} disabled={busy}>
+                          <Button className="min-h-touch" variant="outline" onClick={() => handleDismiss(item)} disabled={busy}>
                             {dismissing ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                             <span className="ml-1">Verwerfen</span>
                           </Button>

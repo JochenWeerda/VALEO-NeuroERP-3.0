@@ -154,18 +154,16 @@ export default function EsgReportPage(): JSX.Element {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => void handleDownload('csv')}
                   disabled={exporting !== null}
-                >
+                 className="min-h-touch">
                   {exporting === 'csv' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                   CSV
                 </Button>
                 <Button
-                  size="sm"
                   onClick={() => void handleDownload('pdf')}
                   disabled={exporting !== null}
-                >
+                 className="min-h-touch">
                   {exporting === 'pdf' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                   PDF
                 </Button>

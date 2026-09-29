@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 
@@ -73,6 +73,33 @@ describe('Wizard', () => {
 
     await waitFor(() => {
       expect(onFinish).toHaveBeenCalled()
+    })
+  })
+
+  it('wartet auf async onFinish und blockiert Doppelklick', async () => {
+    let resolveFinish: () => void = () => {}
+    const onFinish = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveFinish = resolve
+        }),
+    )
+    renderWizard(onFinish)
+
+    fireEvent.click(screen.getByRole('button', { name: /weiter/i }))
+    const abschliessenButton = await screen.findByRole('button', { name: /abschliessen/i })
+    fireEvent.click(abschliessenButton)
+    fireEvent.click(abschliessenButton)
+
+    await waitFor(() => {
+      expect(onFinish).toHaveBeenCalledTimes(1)
+    })
+    expect(abschliessenButton).toBeDisabled()
+    await act(async () => {
+      resolveFinish()
+    })
+    await waitFor(() => {
+      expect(abschliessenButton).not.toBeDisabled()
     })
   })
 

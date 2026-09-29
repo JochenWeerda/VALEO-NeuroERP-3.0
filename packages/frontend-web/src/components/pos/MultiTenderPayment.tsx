@@ -111,10 +111,9 @@ export function MultiTenderPayment({ total, onPaymentsChange }: MultiTenderPayme
                 <div className="flex items-center gap-3">
                   <span className="text-lg font-bold">{payment.amount.toFixed(2)} €</span>
                   <Button
-                    size="sm"
                     variant="ghost"
                     onClick={() => handleRemovePayment(payment.id)}
-                  >
+                   className="min-h-touch">
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

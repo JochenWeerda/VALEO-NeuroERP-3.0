@@ -202,9 +202,9 @@ export default function NaWaRoMitteilungDruckenPage(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={clearForm}>Neu</Button>
+            <Button variant="outline" onClick={clearForm} className="min-h-touch">Neu</Button>
             {(notificationsQuery.data ?? []).map((entry) => (
-              <Button key={entry.id} variant={entry.id === selectedId ? 'default' : 'outline'} size="sm" onClick={() => loadRecord(entry.id)}>
+              <Button key={entry.id} variant={entry.id === selectedId ? 'default' : 'outline'} onClick={() => loadRecord(entry.id)} className="min-h-touch">
                 {entry.harvest_year} {entry.form_code}
               </Button>
             ))}

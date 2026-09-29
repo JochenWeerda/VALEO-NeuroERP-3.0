@@ -212,12 +212,13 @@ function RabattgruppenTab() {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        className="min-h-touch"
                         disabled={deletingId === g.id}
                         onClick={() => handleDelete(g.id, g.gruppe_nr)}
                         aria-label={`Rabattgruppe ${g.gruppe_nr} deaktivieren`}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -371,12 +372,13 @@ function RabattklassenTab() {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        className="min-h-touch"
                         disabled={deletingId === k.id}
                         onClick={() => handleDelete(k.id, k.klasse_nr)}
                         aria-label={`Rabattklasse ${k.klasse_nr} deaktivieren`}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -583,12 +585,13 @@ function RabattsaetzeTab() {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        className="min-h-touch"
                         disabled={deletingId === s.id}
                         onClick={() => handleDelete(s.id)}
                         aria-label="Rabattsatz löschen"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </TableCell>
                   </TableRow>

@@ -8,10 +8,12 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useZertifikateListe, type Zertifikat } from '@/lib/api/betrieb'
 
 export default function ZertifikateListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: zertifikate = [], isLoading } = useZertifikateListe()
 
@@ -71,7 +73,7 @@ export default function ZertifikateListePage(): JSX.Element {
       key: 'art' as const,
       label: 'Zertifikat',
       render: (z: Zertifikat) => (
-        <button onClick={() => navigate(`/zertifikate/${z.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/zertifikate/${z.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {z.art}
         </button>
       ),
@@ -100,22 +102,22 @@ export default function ZertifikateListePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Zertifikate</h1>
-          <p className="text-muted-foreground">Zertifikat-Verwaltung</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Zertifikate</h1>
+          <p className="text-muted-foreground">Zertifikate suchen und pruefen</p>
         </div>
-        <Button onClick={() => navigate('/zertifikate/neu')} className="gap-2">
+        <Button onClick={() => navigate('/zertifikate/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neues Zertifikat
         </Button>
       </div>
 
       {expiringCertificates.length > 0 ? (
-        <Card className="border-orange-500 bg-orange-50">
+        <Card className="border-status-warning/40 bg-status-warning/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
+            <div className="flex items-center gap-2 text-status-warning">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{expiringCertificates.length} Zertifikat(e) laufen in den naechsten 90 Tagen ab.</span>
             </div>
@@ -123,21 +125,23 @@ export default function ZertifikateListePage(): JSX.Element {
         </Card>
       ) : null}
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Zertifikate Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Award className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{zertifikate.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gueltig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{zertifikate.filter((z) => z.status === 'gueltig').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Ablauf in 90 Tagen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{expiringCertificates.length}</span></CardContent></Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Zertifikate" placeholder="Art, Standard oder Nummer" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -148,11 +152,11 @@ export default function ZertifikateListePage(): JSX.Element {
       <Card>
         <CardHeader><CardTitle>Operator-Folgewege</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => expiringCertificates[0] && navigate(`/zertifikate/${expiringCertificates[0].id}`)} disabled={expiringCertificates.length === 0}>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => expiringCertificates[0] && navigate(`/zertifikate/${expiringCertificates[0].id}`)} disabled={expiringCertificates.length === 0}>
             Ablaufendes Zertifikat oeffnen
           </Button>
-          <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Nachweisraum</Button>
-          <Button variant="outline" onClick={() => navigate('/zertifikate/neu')}>Verlaengerung anlegen</Button>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/dokumente/ablage')}>Nachweisraum</Button>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/zertifikate/neu')}>Verlaengerung anlegen</Button>
         </CardContent>
       </Card>
 

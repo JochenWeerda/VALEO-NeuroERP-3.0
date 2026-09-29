@@ -223,21 +223,21 @@ export default function FarmersPage(): JSX.Element {
                   <TableCell className="text-right">
                     <div className="flex gap-2 justify-end">
                       <Button
-                        size="sm"
+                        className="min-h-touch"
                         variant="outline"
                         onClick={() => setSelectedFarmer(farmer)}
                       >
                         {t('crud.actions.details')}
                       </Button>
                       <Button
-                        size="sm"
+                        className="min-h-touch"
                         variant="outline"
                         onClick={() => navigate(`/crm/betriebsprofil/${encodeURIComponent(farmer.id)}`)}
                       >
                         {t('crud.actions.edit')}
                       </Button>
                       <Button
-                        size="sm"
+                        className="min-h-touch"
                         variant="destructive"
                         onClick={() => handleDeleteClick(farmer.id, farmer.fullName)}
                       >

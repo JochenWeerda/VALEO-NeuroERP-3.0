@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Mic, Check, X } from 'lucide-react'
 import { useVoiceDictation } from '@/lib/voice/useVoiceDictation'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import type { SttProvider, VoiceTelemetry } from '@/lib/voice/stt-provider'
 
 /**
@@ -37,6 +38,7 @@ export function VoiceBar({
   enableGlobalShortcut?: boolean
 }): JSX.Element | null {
   const reducedMotion = usePrefersReducedMotion()
+  const isTouch = useTouchDevice()
   const { available, listening, transcript, error, start, commit, cancel, setTranscript } = useVoiceDictation(provider, {
     target,
     onCommit,
@@ -62,18 +64,23 @@ export function VoiceBar({
 
   const showTranscript = listening || transcript.length > 0
 
+  const shortcutHint = isTouch ? '' : ' (Alt+V)'
+
   return (
     <div data-testid="voice-bar" className="flex items-center gap-2" data-listening={listening}>
       <button
         type="button"
         data-testid="voice-ptt"
         aria-pressed={listening}
-        aria-label={listening ? 'Diktat beenden (Alt+V)' : `${label} starten (Alt+V)`}
-        // Push-to-talk: gedrueckt halten; Klick/Alt+V toggelt.
-        onMouseDown={() => !listening && start()}
-        onMouseUp={() => listening && commit()}
+        aria-label={listening ? `Diktat beenden${shortcutHint}` : `${label} starten${shortcutHint}`}
+        onMouseDown={() => {
+          if (!isTouch && !listening) start()
+        }}
+        onMouseUp={() => {
+          if (!isTouch && listening) commit()
+        }}
         onClick={() => (listening ? commit() : start())}
-        className={`inline-flex h-9 w-9 items-center justify-center rounded-full border ${
+        className={`inline-flex h-11 w-11 items-center justify-center rounded-full border touch-manipulation ${
           listening
             ? `bg-destructive text-destructive-foreground ${reducedMotion ? '' : 'animate-pulse'}`
             : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
@@ -91,12 +98,12 @@ export function VoiceBar({
             onChange={(e) => setTranscript(e.target.value)}
             placeholder="Sprich jetzt…"
             aria-label="Transkript (editierbar)"
-            className="flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
+            className="min-h-11 flex-1 rounded border border-border bg-background px-2 py-1 text-sm"
           />
-          <button type="button" data-testid="voice-commit" aria-label="Uebernehmen" onClick={() => commit()} className="inline-flex h-7 w-7 items-center justify-center rounded text-status-success hover:bg-accent">
+          <button type="button" data-testid="voice-commit" aria-label="Uebernehmen" onClick={() => commit()} className="inline-flex h-11 w-11 items-center justify-center rounded text-status-success hover:bg-accent touch-manipulation">
             <Check className="h-4 w-4" />
           </button>
-          <button type="button" data-testid="voice-cancel" aria-label="Verwerfen" onClick={() => cancel()} className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-accent">
+          <button type="button" data-testid="voice-cancel" aria-label="Verwerfen" onClick={() => cancel()} className="inline-flex h-11 w-11 items-center justify-center rounded text-muted-foreground hover:bg-accent touch-manipulation">
             <X className="h-4 w-4" />
           </button>
         </div>

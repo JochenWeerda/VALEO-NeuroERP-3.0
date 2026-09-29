@@ -2,6 +2,7 @@ import { memo, useEffect, useState, type ReactNode } from 'react'
 import { Columns3, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { NativeSelect } from '@/components/ui/native-select'
 import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
 import type { RenderColumnKind, RenderTablePlan } from '../render-plan/types'
 import type { FilterPlan, TableQueryState } from '../runtime/types'
@@ -200,9 +201,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 <Button
                   key={action.key}
                   type="button"
-                  size="sm"
                   variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
-                  className="h-7 px-2 text-xs"
+                  className="min-h-touch px-2 text-xs"
                   data-testid={`row-action-${action.key}`}
                   onClick={(event) => {
                     event.stopPropagation()
@@ -262,7 +262,6 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 <Button
                   key={action.key}
                   type="button"
-                  size="sm"
                   variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
                   disabled={selectedIds.size === 0 || bulkActionPending !== null}
                   data-testid={`bulk-action-${action.key}`}
@@ -278,7 +277,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                       setBulkActionPending(null)
                     }
                   }}
-                >
+                 className="min-h-touch">
                   {action.label}
                 </Button>
               ))}
@@ -290,7 +289,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
               placeholder="Suchen…"
               value={q ?? ''}
               onChange={(e) => onQueryChange({ q: e.target.value || undefined, page: 1 })}
-              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-ring"
+              className="min-h-touch w-40 rounded border border-input bg-background px-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-ring"
               aria-label={`Suche in ${table.label}`}
               data-testid={`search-${table.key}`}
             />
@@ -301,8 +300,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
+                  className="min-h-touch px-2 text-xs"
                   onClick={() => setColumnPickerOpen((open) => !open)}
                   aria-expanded={columnPickerOpen}
                   aria-controls={`column-picker-${table.key}`}
@@ -316,8 +314,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
+                  className="min-h-touch px-2 text-xs"
                   onClick={() => { void onResetOverlay() }}
                   data-testid={`reset-overlay-${table.key}`}
                   aria-label={`Ansicht ${table.label} zuruecksetzen`}
@@ -337,7 +334,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             {availableColumns.map((column) => (
               <label
                 key={column.key}
-                className="inline-flex h-7 items-center gap-1.5 rounded border border-input bg-background px-2 text-xs"
+                className="inline-flex min-h-touch items-center gap-1.5 rounded border border-input bg-background px-2 text-xs"
               >
                 <input
                   type="checkbox"
@@ -354,19 +351,18 @@ export const FastTableRenderer = memo(function FastTableRenderer({
         ) : null}
         {onQueryChange && filterableColumns.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            <select
-              value={filterColumn}
-              onChange={(event) => setFilterColumn(event.target.value)}
-              className="h-7 rounded border border-input bg-background px-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-ring"
-              aria-label={`Filterspalte fuer ${table.label}`}
-              data-testid={`filter-column-${table.key}`}
-            >
-              {filterableColumns.map((column) => (
-                <option key={column.key} value={column.key}>
-                  {column.label}
-                </option>
-              ))}
-            </select>
+            <div className="min-w-32">
+              <NativeSelect
+                value={filterColumn}
+                onValueChange={setFilterColumn}
+                aria-label={`Filterspalte fuer ${table.label}`}
+                data-testid={`filter-column-${table.key}`}
+                options={filterableColumns.map((column) => ({
+                  value: column.key,
+                  label: column.label,
+                }))}
+              />
+            </div>
             <input
               type="text"
               value={filterValue}
@@ -375,15 +371,14 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 if (event.key === 'Enter') handleApplyFilter()
               }}
               placeholder="Filterwert"
-              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-hidden focus:ring-1 focus:ring-ring"
+              className="min-h-touch w-40 rounded border border-input bg-background px-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-ring"
               aria-label={`Filterwert fuer ${table.label}`}
               data-testid={`filter-value-${table.key}`}
             />
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              className="h-7 px-2 text-xs"
+              className="min-h-touch px-2 text-xs"
               onClick={handleApplyFilter}
               disabled={!filterColumn || filterValue.trim().length === 0}
               data-testid={`apply-filter-${table.key}`}
@@ -405,7 +400,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
           <div role="alert" className="space-y-2 pb-4 text-sm" data-testid={`table-load-error-${table.key}`}>
             <p className="text-destructive">{errorMessage}</p>
             {onRetry ? (
-              <Button type="button" variant="outline" size="sm" onClick={onRetry}>Erneut laden</Button>
+              <Button type="button" variant="outline" onClick={onRetry} className="min-h-touch">Erneut laden</Button>
             ) : null}
           </div>
         ) : null}
@@ -435,9 +430,9 @@ export const FastTableRenderer = memo(function FastTableRenderer({
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button
               variant="outline"
-              size="sm"
               disabled={!page || page <= 1}
               onClick={() => onQueryChange?.({ page: (page ?? 1) - 1 })}
+              className="min-h-touch"
             >
               Zurück
             </Button>
@@ -446,9 +441,9 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             </span>
             <Button
               variant="outline"
-              size="sm"
               disabled={(page ?? 1) >= totalPages}
               onClick={() => onQueryChange?.({ page: (page ?? 1) + 1 })}
+              className="min-h-touch"
             >
               Weiter
             </Button>

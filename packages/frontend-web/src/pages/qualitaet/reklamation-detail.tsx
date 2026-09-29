@@ -21,6 +21,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   ArrowLeft,
   CheckCircle,
@@ -143,6 +144,7 @@ export default function ReklamationDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const workflowContext = readWorkflowEntryContext(searchParams)
@@ -151,6 +153,7 @@ export default function ReklamationDetailPage(): JSX.Element {
   const [crmCaseId, setCrmCaseId] = useState('')
   const [dmsDocId, setDmsDocId] = useState('')
   const [dmsDocType, setDmsDocType] = useState('')
+  const [transitioning, setTransitioning] = useState(false)
 
   // ── Queries ──────────────────────────────────────────────────────────────
 
@@ -199,18 +202,27 @@ export default function ReklamationDetailPage(): JSX.Element {
     },
   })
 
-  const handleTransition = async (neuerStatus: string) => {
+  const persistTransition = async (neuerStatus: string): Promise<void> => {
     await transitionMutation.mutateAsync(neuerStatus)
-    // Also advance flow-spine if in workflow context (best-effort)
     if (workflowContext?.instanceId && workflowContext?.process) {
       try {
         await apiClient.post(
           `/api/v1/process/flow-spines/${workflowContext.process}/instances/${workflowContext.instanceId}/transitions`,
-          { node_id: 'reklamation', new_status: 'ok', action_label: `Status -> ${neuerStatus}` },
+          { node_id: 'reklamation', new_status: 'ok', action_label: `Status → ${neuerStatus}` },
         )
       } catch {
-        // best-effort
+        // Checkpoint ist optional; Statuswechsel in der Maske ist bereits persistiert.
       }
+    }
+  }
+
+  const handleTransition = async (neuerStatus: string): Promise<void> => {
+    if (transitioning) return
+    setTransitioning(true)
+    try {
+      await persistTransition(neuerStatus)
+    } finally {
+      setTransitioning(false)
     }
   }
 
@@ -267,11 +279,11 @@ export default function ReklamationDetailPage(): JSX.Element {
   if (isError || !reklamation) {
     return (
       <div className="p-6">
-        <Card className="border-red-500">
+        <Card className="border-status-error/40">
           <CardContent className="pt-6">
             <p className="text-status-error">Reklamation konnte nicht geladen werden.</p>
-            <Button variant="outline" className="mt-4" onClick={() => navigate('/qualitaet/reklamationen')}>
-              Zurueck zur Liste
+            <Button variant="outline" className="mt-4 min-h-touch touch-manipulation" onClick={() => navigate('/qualitaet/reklamationen')}>
+              Zurück zur Liste
             </Button>
           </CardContent>
         </Card>
@@ -284,74 +296,20 @@ export default function ReklamationDetailPage(): JSX.Element {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       {/* Workflow Banner */}
       {workflowContext && (
         <WorkflowProcessBand context={workflowContext} />
       )}
 
-      <OperationalCaseHeader
-        title={`Reklamation ${reklamation.reklamation_id.slice(0, 8)}`}
-        description="Reklamationsvorgang mit SLA-, CRM-, DMS- und Auditbezug."
-        status={reklamation.ist_ueberfaellig ? 'eskaliert' : normalizeOperationalStatus(reklamation.status)}
-        owner={reklamation.zustaendiger || 'Qualitaet / Service'}
-        blocker={reklamation.ist_ueberfaellig ? 'Die Reklamation ist ueberfaellig und braucht Eskalation.' : null}
-        nextAction={
-          reklamation.status === 'offen'
-            ? 'In Pruefung nehmen'
-            : reklamation.status === 'in_pruefung'
-              ? 'Entscheidung treffen'
-              : 'Vorgang abschliessen'
-        }
-        caseLabel={workflowContext?.caseNumber || 'Reklamationsfall'}
-        tags={[SLA_LABELS[reklamation.sla_status] ?? reklamation.sla_status, STATUS_LABELS[reklamation.status] ?? reklamation.status]}
-      />
-
-      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
-        <OperationalTimeline
-          title="Fallhistorie"
-          items={(auditData?.audit_trail || []).slice(0, 4).map((entry) => ({
-            label: entry.aktion,
-            detail: entry.beschreibung,
-            timestamp: entry.zeitstempel,
-          }))}
-        />
-        <OperationalContextPanel
-          title="Reklamationskontext"
-          sections={[
-            {
-              title: 'Objekt',
-              items: [
-                { label: 'Typ', value: reklamation.typ },
-                { label: 'Kontrakt', value: reklamation.kontrakt_id || '-' },
-              ],
-            },
-            {
-              title: 'Wirtschaftslage',
-              items: [
-                { label: 'Beanstandet', value: `${reklamation.gesamtwert_beanstandet_eur.toFixed(2)} EUR` },
-                { label: 'Anerkannt', value: `${reklamation.gesamtwert_anerkannt_eur.toFixed(2)} EUR` },
-              ],
-            },
-            {
-              title: 'Governance',
-              items: [
-                { label: 'CRM-Bezug', value: reklamation.hat_crm_bezug ? 'Vorhanden' : 'Offen' },
-                { label: 'DMS-Bezug', value: reklamation.hat_dms_bezug ? 'Vorhanden' : 'Offen' },
-              ],
-            },
-          ]}
-        />
-      </div>
-
-      {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/qualitaet/reklamationen')}>
+          <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation" onClick={() => navigate('/qualitaet/reklamationen')}>
             <ArrowLeft className="h-5 w-5" />
+            <span className="sr-only">Zurück zur Liste</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Reklamation {reklamation.reklamation_id.slice(0, 8)}</h1>
+            <h1 className="text-2xl font-bold md:text-3xl">Reklamation {reklamation.reklamation_id.slice(0, 8)}</h1>
             <p className="text-muted-foreground">
               Typ: {reklamation.typ} | Lieferant: {reklamation.lieferant_id}
             </p>
@@ -391,11 +349,11 @@ export default function ReklamationDetailPage(): JSX.Element {
             <Button
               key={t.value}
               variant={t.value === 'abgelehnt' ? 'destructive' : 'default'}
-              disabled={transitionMutation.isPending}
+              disabled={transitioning}
               onClick={() => void handleTransition(t.value)}
-              className="gap-2"
+              className="min-h-touch gap-2 touch-manipulation"
             >
-              {transitionMutation.isPending ? (
+              {transitioning ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <CheckCircle className="h-4 w-4" />
@@ -406,13 +364,69 @@ export default function ReklamationDetailPage(): JSX.Element {
         </div>
       )}
 
-      {/* Tabs */}
+      {!isTouch ? (
+      <>
+      <OperationalCaseHeader
+        title={`Reklamation ${reklamation.reklamation_id.slice(0, 8)}`}
+        description="Reklamationsvorgang mit SLA, CRM, DMS und Audit."
+        status={reklamation.ist_ueberfaellig ? 'eskaliert' : normalizeOperationalStatus(reklamation.status)}
+        owner={reklamation.zustaendiger || 'Qualität / Service'}
+        blocker={reklamation.ist_ueberfaellig ? 'Die Reklamation ist überfällig und braucht Eskalation.' : null}
+        nextAction={
+          reklamation.status === 'offen'
+            ? 'In Prüfung nehmen'
+            : reklamation.status === 'in_pruefung'
+              ? 'Entscheidung treffen'
+              : 'Vorgang abschließen'
+        }
+        caseLabel={workflowContext?.caseNumber || 'Reklamationsfall'}
+        tags={[SLA_LABELS[reklamation.sla_status] ?? reklamation.sla_status, STATUS_LABELS[reklamation.status] ?? reklamation.status]}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <OperationalTimeline
+          title="Fallhistorie"
+          items={(auditData?.audit_trail || []).slice(0, 4).map((entry) => ({
+            label: entry.aktion,
+            detail: entry.beschreibung,
+            timestamp: entry.zeitstempel,
+          }))}
+        />
+        <OperationalContextPanel
+          title="Reklamationskontext"
+          sections={[
+            {
+              title: 'Objekt',
+              items: [
+                { label: 'Typ', value: reklamation.typ },
+                { label: 'Kontrakt', value: reklamation.kontrakt_id || '-' },
+              ],
+            },
+            {
+              title: 'Wirtschaftslage',
+              items: [
+                { label: 'Beanstandet', value: `${reklamation.gesamtwert_beanstandet_eur.toFixed(2)} EUR` },
+                { label: 'Anerkannt', value: `${reklamation.gesamtwert_anerkannt_eur.toFixed(2)} EUR` },
+              ],
+            },
+            {
+              title: 'Governance',
+              items: [
+                { label: 'CRM-Bezug', value: reklamation.hat_crm_bezug ? 'Vorhanden' : 'Offen' },
+                { label: 'DMS-Bezug', value: reklamation.hat_dms_bezug ? 'Vorhanden' : 'Offen' },
+              ],
+            },
+          ]}
+        />
+      </div>
+      </>
+      ) : null}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="uebersicht">Uebersicht</TabsTrigger>
-          <TabsTrigger value="crm">CRM</TabsTrigger>
-          <TabsTrigger value="dokumente">Dokumente</TabsTrigger>
-          <TabsTrigger value="audit">Audit</TabsTrigger>
+        <TabsList variant="register" className="flex-wrap overflow-x-auto" aria-label="Reklamationsakte">
+          <TabsTrigger value="uebersicht" className="min-h-11">Übersicht</TabsTrigger>
+          <TabsTrigger value="crm" className="min-h-11">CRM</TabsTrigger>
+          <TabsTrigger value="dokumente" className="min-h-11">Dokumente</TabsTrigger>
+          <TabsTrigger value="audit" className="min-h-11">Audit</TabsTrigger>
         </TabsList>
 
         {/* Tab: Uebersicht */}
@@ -593,7 +607,7 @@ export default function ReklamationDetailPage(): JSX.Element {
                         href={reklamation.crm_referenz.crm_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-medium text-blue-600 hover:underline"
+                        className="min-h-11 font-medium text-primary touch-manipulation"
                       >
                         Zum CRM-Fall
                       </a>
@@ -614,10 +628,11 @@ export default function ReklamationDetailPage(): JSX.Element {
                       placeholder="z.B. CRM-2026-0042"
                       value={crmCaseId}
                       onChange={(e) => setCrmCaseId(e.target.value)}
+                      className="min-h-touch"
                     />
                   </div>
                   <Button
-                    className="mt-6 gap-2"
+                    className="mt-6 min-h-touch gap-2 touch-manipulation"
                     disabled={!crmCaseId.trim() || crmMutation.isPending}
                     onClick={() => crmMutation.mutate()}
                   >
@@ -669,6 +684,7 @@ export default function ReklamationDetailPage(): JSX.Element {
                       placeholder="z.B. DOC-00123"
                       value={dmsDocId}
                       onChange={(e) => setDmsDocId(e.target.value)}
+                      className="min-h-touch"
                     />
                   </div>
                   <div className="w-48">
@@ -681,7 +697,7 @@ export default function ReklamationDetailPage(): JSX.Element {
                     />
                   </div>
                   <Button
-                    className="mt-6 gap-2"
+                    className="mt-6 min-h-touch gap-2 touch-manipulation"
                     disabled={!dmsDocId.trim() || dmsMutation.isPending}
                     onClick={() => dmsMutation.mutate()}
                   >

@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CheckCircle, FileText, Filter, Search, Shield, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { usePSMAuflagen } from '@/lib/api/agrar'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type AuflagenStatistik = {
   gesamt: number
@@ -24,6 +25,7 @@ type AuflagenStatistik = {
 export default function PSMAuflagenManagerPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
 
   const { data: auflagenData, isLoading } = usePSMAuflagen()
 
@@ -97,8 +99,9 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
       label: 'PSM',
       render: (auflage: typeof auflagen[0]) => (
         <button
+          type="button"
           onClick={() => navigate(`/agrar/psm/stamm/${auflage.psm_id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {auflage.psm_name}
         </button>
@@ -117,7 +120,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
       key: 'beschreibung' as const,
       label: 'Auflage',
       render: (auflage: typeof auflagen[0]) => (
-        <div className="max-w-xs truncate" title={auflage.beschreibung}>
+        <div className="max-w-xs truncate" aria-label={auflage.beschreibung}>
           {auflage.beschreibung}
         </div>
       ),
@@ -153,7 +156,15 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
       render: (auflage: typeof auflagen[0]) => (
         <div className="flex items-center gap-2">
           {getComplianceIcon(auflage.compliance_status)}
-          <span className="text-sm capitalize">{auflage.compliance_status}</span>
+          <span className="text-sm">
+            {auflage.compliance_status === 'ok'
+              ? 'In Ordnung'
+              : auflage.compliance_status === 'warning'
+                ? 'Warnung'
+                : auflage.compliance_status === 'critical'
+                  ? 'Kritisch'
+                  : auflage.compliance_status}
+          </span>
         </div>
       ),
     },
@@ -166,10 +177,10 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
       key: 'actions' as const,
       label: 'Aktionen',
       render: (auflage: typeof auflagen[0]) => (
-        <div className="flex gap-1">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             variant="outline"
-            size="sm"
+            className="min-h-touch touch-manipulation"
             onClick={() => navigate(`/agrar/psm/auflagen/${auflage.id}/bearbeiten`)}
           >
             Bearbeiten
@@ -177,16 +188,15 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
           {auflage.status !== 'erfuellt' && (
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch touch-manipulation"
               onClick={() => {
                 toast({
-                  title: "Status aktualisiert",
+                  title: 'Status aktualisiert',
                   description: `Auflage für ${auflage.psm_name} als erledigt markiert.`,
                 })
               }}
-              className="text-status-success"
             >
-              <CheckCircle className="h-4 w-4" />
+              Erledigt
             </Button>
           )}
         </div>
@@ -209,17 +219,19 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">PSM-Auflagen-Manager</h1>
-          <p className="text-muted-foreground">Compliance-Management für PSM-Auflagen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">PSM-Auflagen</h1>
+          <p className="text-muted-foreground">Auflagen suchen und abarbeiten</p>
         </div>
-        <Button onClick={() => navigate('/agrar/psm/liste')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/psm/liste')} className="min-h-touch gap-2 touch-manipulation">
           <Shield className="h-4 w-4" />
           Zur PSM-Liste
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       {/* Statistiken */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
@@ -248,7 +260,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-blue-600">{statistik.in_bearbeitung}</span>
+            <span className="text-2xl font-bold">{statistik.in_bearbeitung}</span>
           </CardContent>
         </Card>
 
@@ -287,6 +299,8 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      </>
+      ) : null}
 
       {/* Filter und Suche */}
       <Card>
@@ -303,10 +317,11 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="PSM oder Auflage suchen..."
+                  aria-label="Suche Auflagen"
+                  placeholder="PSM oder Auflage suchen"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="min-h-touch pl-10"
                 />
               </div>
             </div>
@@ -314,6 +329,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
             <div>
               <Label>Auflagen-Typ</Label>
               <NativeSelect
+                ariaLabel="Auflagen-Typ"
                 value={filterTyp}
                 onValueChange={setFilterTyp}
                 options={[
@@ -329,6 +345,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
             <div>
               <Label>Status</Label>
               <NativeSelect
+                ariaLabel="Status"
                 value={filterStatus}
                 onValueChange={setFilterStatus}
                 options={[
@@ -343,6 +360,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
             <div>
               <Label>Priorität</Label>
               <NativeSelect
+                ariaLabel="Prioritaet"
                 value={filterPrioritaet}
                 onValueChange={setFilterPrioritaet}
                 options={[
@@ -369,7 +387,7 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
 
       {/* Warnungen */}
       {statistik.ueberfaellig > 0 && (
-        <Card className="border-red-500 bg-red-50">
+        <Card className="border-status-error/40 bg-status-error/10">
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />

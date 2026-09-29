@@ -40,6 +40,8 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   errors: 'core',
   etiketten: 'operations',
   export: 'finance',
+  auswertungen: 'finance',
+  abrechnung: 'finance',
   fibu: 'finance',
   finance: 'finance',
   finanzplanung: 'finance',

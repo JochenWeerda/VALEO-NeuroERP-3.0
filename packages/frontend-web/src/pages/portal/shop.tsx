@@ -497,9 +497,8 @@ export default function PortalShop() {
             <Button
               key={kat.value}
               variant={selectedKategorie === kat.value ? 'default' : 'outline'}
-              size="sm"
               onClick={() => setSelectedKategorie(kat.value)}
-              className="gap-2 whitespace-nowrap"
+              className="min-h-touch gap-2 whitespace-nowrap"
             >
               {kat.icon}
               {kat.label}
@@ -641,7 +640,7 @@ export default function PortalShop() {
                             </Button>
                           </div>
                           {item.lastOrderSilo && (
-                            <p className="text-xs text-blue-600">
+                            <p className="text-xs text-status-info">
                               Letzte Bestellung: {item.letzteBestellung?.menge} {item.einheit}
                             </p>
                           )}
@@ -672,7 +671,7 @@ export default function PortalShop() {
                               className="h-9"
                             />
                             {item.lastOrderSilo && (
-                              <p className="text-xs text-blue-600">
+                              <p className="text-xs text-status-info">
                                 Zuletzt: {item.lastOrderSilo}
                               </p>
                             )}
@@ -1038,7 +1037,7 @@ function ProductCard({
           <CardTitle className="mt-2 text-base">{product.name}</CardTitle>
           <CardDescription className="text-xs">{product.artikelnummer}</CardDescription>
           {recentlyOrdered && daysSinceOrder !== null && (
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-status-info">
               Zuletzt bestellt: vor {daysSinceOrder} Tag{daysSinceOrder !== 1 ? 'en' : ''} ({(product.letzteBestellung?.menge ?? 0)} {product.einheit})
             </p>
           )}
@@ -1164,11 +1163,10 @@ function ProductCard({
 
           {/* Hinzufügen Button */}
           <Button
-            size="sm"
             variant={inCart ? 'secondary' : 'default'}
             disabled={!product.verfuegbar}
             onClick={onAddToCart}
-            className="w-full gap-1"
+            className="min-h-touch w-full gap-1"
           >
             {!product.verfuegbar ? (
               'Ausverkauft'

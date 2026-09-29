@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, Euro, FileText, TrendingUp, Users, AlertCircle } from 'lucide-react'
 import { useSalesDashboard } from '@/lib/api/dashboard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -104,6 +105,7 @@ function DashboardSkeleton({ showMessage = false }: { showMessage?: boolean }) {
 export default function SalesDashboardPage(): JSX.Element {
   const { data: dashboard, isLoading } = useSalesDashboard()
   const [roleFocus, setRoleFocus] = useState<SalesDashboardRoleFocus>('all')
+  const isTouch = useTouchDevice()
   
   // Während des Ladens zeigen wir eine Skeleton-Vorschau
   if (isLoading) {
@@ -145,6 +147,7 @@ export default function SalesDashboardPage(): JSX.Element {
         <p className="text-muted-foreground">Aktuelle Kennzahlen</p>
       </div>
 
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar roles={salesDashboardRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 4 : 1} totalCount={4} />
         <ManagementDecisionPanel
@@ -167,6 +170,7 @@ export default function SalesDashboardPage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={dashboardCrudCapabilities} />
       </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-5">
         <Card>

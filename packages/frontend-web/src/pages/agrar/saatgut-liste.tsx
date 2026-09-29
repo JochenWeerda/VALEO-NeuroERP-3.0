@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ListReport } from '@/components/patterns/ListReport'
 import { useToast } from '@/hooks/use-toast'
-import { CheckCircle, Edit, Eye, FileDown, Sprout, XCircle } from 'lucide-react'
+import { CheckCircle, Sprout } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 interface SaatgutItem {
   id: string
@@ -43,7 +44,7 @@ const buildColumns = (
       const badges = []
       if (item.bsa_zulassung) badges.push(<Badge variant="success" key="bsa"><CheckCircle className="mr-1 w-3 h-3" />BSA</Badge>)
       if (item.eu_zulassung) badges.push(<Badge variant="info" key="eu"><CheckCircle className="mr-1 w-3 h-3" />EU</Badge>)
-      if (!item.bsa_zulassung && !item.eu_zulassung) badges.push(<Badge key="none" variant="secondary" className="bg-gray-100 text-gray-600"><XCircle className="mr-1 w-3 h-3" />Keine Zulassung</Badge>)
+      if (!item.bsa_zulassung && !item.eu_zulassung) badges.push(<Badge key="none" variant="secondary">Keine Zulassung</Badge>)
       return <div className="flex flex-wrap gap-1">{badges}</div>
     },
   },
@@ -62,9 +63,13 @@ const buildColumns = (
     accessorKey: 'actions',
     header: 'Aktionen',
     cell: ({ row }): JSX.Element => (
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => onView(row.original.id)} title="Anzeigen"><Eye className="w-4 h-4" /></Button>
-        <Button variant="outline" size="sm" onClick={() => onEdit(row.original.id)} title="Bearbeiten"><Edit className="w-4 h-4" /></Button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => onView(row.original.id)}>
+          Anzeigen
+        </Button>
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => onEdit(row.original.id)}>
+          Bearbeiten
+        </Button>
       </div>
     ),
   },
@@ -73,6 +78,7 @@ const buildColumns = (
 export default function SaatgutListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [search, setSearch] = useState('')
 
   const { data: saatgutList, isLoading } = useQuery<{ items: SaatgutItem[] }>({
@@ -140,30 +146,30 @@ export default function SaatgutListePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">Saatgut</h1>
+          <p className="text-muted-foreground">Sorten suchen und öffnen</p>
+        </div>
+      </div>
+
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Saatgut Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Sprout className="h-5 w-5 text-status-success" /><span className="text-2xl font-bold">{stats.total}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Verfuegbar</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{stats.available}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Verfügbar</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{stats.available}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Mit Zulassung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{stats.approved}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Niedriger Bestand</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{stats.lowStock}</span></CardContent></Card>
       </div>
-
-      <Card>
-        <CardHeader><CardTitle>Operative Folgewege</CardTitle></CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => filteredData[0] && navigate(`/agrar/saatgut-stamm/${filteredData[0].id}`)} disabled={filteredData.length === 0}>Stammsatz oeffnen</Button>
-          <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumente</Button>
-          <Button variant="outline" onClick={exportSaatgut}><FileDown className="mr-2 h-4 w-4" />Export</Button>
-        </CardContent>
-      </Card>
+      ) : null}
 
       <ListReport
         title="Saatgut-Verwaltung"
-        subtitle="Uebersicht aller Saatgut-Arten und -Sorten"
+        subtitle="Übersicht aller Saatgut-Arten und -Sorten"
         data={filteredData}
         columns={columns}
         primaryActions={[{ id: 'create-saatgut', label: 'Neues Saatgut', onClick: (): void => navigate('/agrar/saatgut-stamm') }]}
         overflowActions={[{ id: 'export-saatgut', label: 'Export CSV', onClick: exportSaatgut }]}
-        searchPlaceholder="Saatgut suchen (Name, Artikelnummer, Sorte, Art, Zuechter)"
+        searchPlaceholder="Saatgut suchen (Name, Artikelnummer, Sorte, Art, Züchter)"
         onSearch={setSearch}
         filterOptions={[
           { field: 'art', label: 'Art', type: 'select', options: [{ value: 'Weizen', label: 'Weizen' }, { value: 'Gerste', label: 'Gerste' }, { value: 'Roggen', label: 'Roggen' }, { value: 'Hafer', label: 'Hafer' }, { value: 'Mais', label: 'Mais' }, { value: 'Raps', label: 'Raps' }] },

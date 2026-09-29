@@ -9,6 +9,7 @@ import { clsx } from 'clsx'
 import { ChevronLeft, Keyboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export type ShortcutDefinition = {
   key: string
@@ -32,6 +33,8 @@ export function ShortcutHelpPanel({
   onDisplayModeChange,
   className,
 }: ShortcutHelpPanelProps): JSX.Element {
+  const isTouchChrome = useTouchDevice()
+  const [, setViewportTick] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false) // Standardmäßig eingeklappt
   
   // Expose toggle function globally for Strg+N
@@ -56,6 +59,12 @@ export function ShortcutHelpPanel({
   }, [])
   const [isHovering, setIsHovering] = useState(false)
 
+  useEffect(() => {
+    const onResize = (): void => setViewportTick((tick) => tick + 1)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
   // Lade gespeicherte Präferenz
   useEffect(() => {
     const saved = localStorage.getItem('shortcut-help-display-mode')
@@ -74,8 +83,8 @@ export function ShortcutHelpPanel({
     return acc
   }, {} as Record<string, ShortcutDefinition[]>)
 
-  // Rendere nichts wenn hidden
-  if (displayMode === 'hidden') {
+  // Rendere nichts wenn hidden oder auf Touch/Handy (Hover-Kürzel sind dort tot)
+  if (displayMode === 'hidden' || isTouchChrome) {
     return <></>
   }
 
@@ -135,8 +144,7 @@ export function ShortcutHelpPanel({
             {/* Expand/Collapse */}
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
+              className="min-h-touch h-6 w-6 p-0"
               onClick={() => setIsExpanded(!isExpanded)}
               aria-label={isExpanded ? 'Tastenkuerzel-Panel einklappen' : 'Tastenkuerzel-Panel ausklappen'}
             >

@@ -7,6 +7,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { buildDecisionView } from '@/policy/decision-view'
@@ -441,6 +442,7 @@ function mapVatReturnPayload(payload: Record<string, unknown> | null | undefined
 export default function UStVAPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const { data: fibuCockpit } = useFibuCockpit()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
@@ -681,6 +683,8 @@ export default function UStVAPage(): JSX.Element {
 
   return (
     <>
+      {!isTouch ? (
+      <>
       <div className="space-y-4 px-4 pb-4">
         <OperationalCaseHeader
           title="UStVA-Follow-up"
@@ -740,6 +744,8 @@ export default function UStVAPage(): JSX.Element {
           <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.latest_period ?? 'n/a'}</div></CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
       {workflowInstanceId && (
         <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)

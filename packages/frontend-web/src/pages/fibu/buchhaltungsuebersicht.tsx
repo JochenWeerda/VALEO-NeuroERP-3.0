@@ -35,6 +35,7 @@ import { financeService, type BalanceSheetItem } from '@/lib/services/finance-se
 import { useToast } from '@/hooks/use-toast'
 import { exportToCSV } from '@/lib/export-utils'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
@@ -105,6 +106,7 @@ function buildHierarchyRows(bilanzPerMonth: (null | BilanzSlice)[]): GridRow[] {
 
 export default function BuchhaltungsuebersichtPage(): JSX.Element {
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const navigate = useNavigate()
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth()
@@ -230,38 +232,38 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
       {/* Ribbon */}
       <div className="border-b bg-muted/30 shrink-0">
         <Tabs defaultValue="auswertungen" className="w-full">
-          <TabsList className="w-full justify-start rounded-none h-12 bg-transparent border-0 gap-0 p-0">
-            <TabsTrigger value="datei" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">DATEI</TabsTrigger>
-            <TabsTrigger value="allgemein" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">ALLGEMEIN</TabsTrigger>
-            <TabsTrigger value="postbearbeitung" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">POSTBEARBEITUNG</TabsTrigger>
-            <TabsTrigger value="schnittstellen" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">SCHNITTSTELLEN</TabsTrigger>
-            <TabsTrigger value="abschluss" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">ABSCHLUSS</TabsTrigger>
-            <TabsTrigger value="auswertungen" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">AUSWERTUNGEN</TabsTrigger>
-            <TabsTrigger value="fenster" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">FENSTER</TabsTrigger>
+          <TabsList className="h-12 w-full justify-start rounded-none border-0 gap-0 bg-transparent p-0">
+            <TabsTrigger value="datei" className="min-h-touch rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-background">DATEI</TabsTrigger>
+            <TabsTrigger value="allgemein" className="min-h-touch rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-background">ALLGEMEIN</TabsTrigger>
+            <TabsTrigger value="postbearbeitung" className="min-h-touch rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-background">POSTBEARBEITUNG</TabsTrigger>
+            <TabsTrigger value="schnittstellen" className="min-h-touch rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-background">SCHNITTSTELLEN</TabsTrigger>
+            <TabsTrigger value="abschluss" className="min-h-touch rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-background">ABSCHLUSS</TabsTrigger>
+            <TabsTrigger value="auswertungen" className="min-h-touch rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-background">AUSWERTUNGEN</TabsTrigger>
+            <TabsTrigger value="fenster" className="min-h-touch rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-primary data-[state=active]:bg-background">FENSTER</TabsTrigger>
           </TabsList>
           <TabsContent value="auswertungen" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleDrucken}>
+              <Button variant="ghost" className="min-h-touch gap-1.5" onClick={handleDrucken}>
                 <Printer className="h-4 w-4" /> Drucken
               </Button>
-              <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleExcel}>
+              <Button variant="ghost" className="min-h-touch gap-1.5" onClick={handleExcel}>
                 <FileDown className="h-4 w-4" /> Exportieren
               </Button>
               <Link to="/fibu/buchungsjournal">
-                <Button variant="ghost" size="sm" className="gap-1.5">
+                <Button variant="ghost" className="min-h-touch gap-1.5">
                   <Sigma className="h-4 w-4" /> Summen und Salden
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" className="gap-1.5">
+              <Button variant="ghost" className="min-h-touch gap-1.5" onClick={() => toast({ title: 'Hilfe', description: 'Der Hilfebildschirm ist in dieser Maske nicht angebunden.' })}>
                 <HelpCircle className="h-4 w-4" /> Hilfebildschirm
               </Button>
               <Link to="/fibu/bwa">
-                <Button variant="ghost" size="sm" className="gap-1.5">
+                <Button variant="ghost" className="min-h-touch gap-1.5">
                   <BarChart3 className="h-4 w-4" /> BWA
                 </Button>
               </Link>
               <Link to="/fibu/bilanz">
-                <Button variant="ghost" size="sm" className="gap-1.5">
+                <Button variant="ghost" className="min-h-touch gap-1.5">
                   <FileText className="h-4 w-4" /> Bilanz/GuV
                 </Button>
               </Link>
@@ -270,12 +272,12 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
           <TabsContent value="schnittstellen" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
               <Link to="/fibu/schnittstelle-fibu">
-                <Button variant="ghost" size="sm" className="gap-1.5">
+                <Button variant="ghost" className="min-h-touch gap-1.5">
                   <FileDown className="h-4 w-4" /> Buchungsübergabe (ASC)
                 </Button>
               </Link>
               <Link to="/fibu/schnittstelle-fibu">
-                <Button variant="ghost" size="sm" className="gap-1.5">
+                <Button variant="ghost" className="min-h-touch gap-1.5">
                   <LayoutGrid className="h-4 w-4" /> Schnittstelle FIBU
                 </Button>
               </Link>
@@ -284,44 +286,44 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
           <TabsContent value="datei" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
               <Link to="/fibu/schnittstellen-center">
-                <Button variant="ghost" size="sm" className="gap-1.5"><FolderOpen className="h-4 w-4" /> Laden</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><FolderOpen className="h-4 w-4" /> Laden</Button>
               </Link>
-              <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleExcel}><FileDown className="h-4 w-4" /> Export</Button>
+              <Button variant="ghost" className="min-h-touch gap-1.5" onClick={handleExcel}><FileDown className="h-4 w-4" /> Export</Button>
             </div>
           </TabsContent>
           <TabsContent value="allgemein" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
               <Link to="/fibu/schnittstellen-center">
-                <Button variant="ghost" size="sm" className="gap-1.5"><Settings className="h-4 w-4" /> Einstellungen</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><Settings className="h-4 w-4" /> Einstellungen</Button>
               </Link>
             </div>
           </TabsContent>
           <TabsContent value="postbearbeitung" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
               <Link to="/fibu/buchungsjournal">
-                <Button variant="ghost" size="sm" className="gap-1.5">
+                <Button variant="ghost" className="min-h-touch gap-1.5">
                   <Sigma className="h-4 w-4" /> Summen und Salden
                 </Button>
               </Link>
               <Link to="/finance/buchungserfassung">
-                <Button variant="ghost" size="sm" className="gap-1.5"><ArrowLeftRight className="h-4 w-4" /> Umbuchen</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><ArrowLeftRight className="h-4 w-4" /> Umbuchen</Button>
               </Link>
               <Link to="/fibu/bwa">
-                <Button variant="ghost" size="sm" className="gap-1.5"><Calculator className="h-4 w-4" /> Deckungsbeitrag Monat</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><Calculator className="h-4 w-4" /> Deckungsbeitrag Monat</Button>
               </Link>
             </div>
           </TabsContent>
           <TabsContent value="abschluss" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
               <Link to="/fibu/abschluss-cockpit">
-                <Button variant="ghost" size="sm" className="gap-1.5"><FileText className="h-4 w-4" /> Abschlussbuchung</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><FileText className="h-4 w-4" /> Abschlussbuchung</Button>
               </Link>
             </div>
           </TabsContent>
           <TabsContent value="fenster" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
               <Link to="/fibu/monatswerte">
-                <Button variant="ghost" size="sm" className="gap-1.5">Fenster anordnen</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5">Fenster anordnen</Button>
               </Link>
             </div>
           </TabsContent>
@@ -330,6 +332,8 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
 
       {/* Kopfbereich / Filter */}
       <div className="p-4 pb-0">
+        {!isTouch ? (
+          <>
         <OperationalCaseHeader
           title="Buchhaltungsuebersicht"
           description="Das L3/FIBU-Cockpit zeigt Periodenlage, Revisionskontext und naechste Folgeaktion direkt ueber der Auswertung."
@@ -344,6 +348,8 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
           <OperationalTimeline title="Auswertungsverlauf" items={timelineItems} />
           <OperationalContextPanel title="Buchhaltungskontext" sections={contextSections} />
         </div>
+          </>
+        ) : null}
       </div>
       <Card className="rounded-none border-x-0 border-t-0 shrink-0">
         <CardContent className="p-4">
@@ -402,7 +408,7 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-4">
                 <span className="text-xs text-muted-foreground">Auswertungs-Datum: {auswertungsDatum} Uhr</span>
-                <Button size="sm" onClick={handleJetztAuswerten} disabled={isLoading} className="gap-1.5">
+                <Button className="min-h-touch gap-1.5" onClick={handleJetztAuswerten} disabled={isLoading}>
                   <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                   Jetzt auswerten
                 </Button>
@@ -417,32 +423,32 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
         <nav className="w-52 shrink-0 border-r bg-muted/20 flex flex-col gap-1 p-2">
           <span className="text-xs font-semibold text-muted-foreground px-2 py-1">Auswertungen</span>
           <Link to="/fibu/buchhaltungsuebersicht">
-            <Button variant="default" size="sm" className="w-full justify-start gap-2">
+            <Button variant="default" className="min-h-touch w-full justify-start gap-2">
               <FileText className="h-4 w-4" /> Buchhaltungsübersicht
             </Button>
           </Link>
           <Link to="/fibu/monatswerte">
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+            <Button variant="ghost" className="min-h-touch w-full justify-start gap-2">
               <BarChart3 className="h-4 w-4" /> Monatswerte
             </Button>
           </Link>
           <Link to="/fibu/bwa">
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+            <Button variant="ghost" className="min-h-touch w-full justify-start gap-2">
               <BarChart3 className="h-4 w-4" /> BWA
             </Button>
           </Link>
           <Link to="/fibu/bilanz">
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+            <Button variant="ghost" className="min-h-touch w-full justify-start gap-2">
               <FileText className="h-4 w-4" /> Bilanz
             </Button>
           </Link>
           <Link to="/fibu/guv">
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+            <Button variant="ghost" className="min-h-touch w-full justify-start gap-2">
               <FileText className="h-4 w-4" /> GuV
             </Button>
           </Link>
           <Link to="/fibu/buchungsjournal">
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+            <Button variant="ghost" className="min-h-touch w-full justify-start gap-2">
               <Sigma className="h-4 w-4" /> Summen und Salden
             </Button>
           </Link>
@@ -558,18 +564,18 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
       <div className="border-t bg-muted/30 px-4 py-2 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <Link to="/fibu/schnittstellen-center">
-            <Button variant="outline" size="sm">Drucker einrichten</Button>
+            <Button variant="outline" className="min-h-touch">Drucker einrichten</Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={handleDrucken}>Drucken</Button>
+          <Button variant="outline" className="min-h-touch" onClick={handleDrucken}>Drucken</Button>
           <Link to="/fibu/buchungsjournal">
-            <Button variant="outline" size="sm">Journal</Button>
+            <Button variant="outline" className="min-h-touch">Journal</Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={handleExcel}>Excel</Button>
+          <Button variant="outline" className="min-h-touch" onClick={handleExcel}>Excel</Button>
           <Link to="/fibu/hauptbuch">
-            <Button variant="outline" size="sm">Kontenbewegung</Button>
+            <Button variant="outline" className="min-h-touch">Kontenbewegung</Button>
           </Link>
           <Link to="/fibu/monatswerte">
-            <Button variant="ghost" size="sm">Ende</Button>
+            <Button variant="ghost" className="min-h-touch">Ende</Button>
           </Link>
         </div>
         <div className="flex items-center gap-4 text-sm">

@@ -54,7 +54,7 @@ export default function PeriodenabschlussPage() {
       <div className="flex items-center gap-2">
         <CalendarCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Periodenabschluss</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void periods.refetch()} disabled={periods.isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void periods.refetch()} disabled={periods.isFetching}>
           {periods.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -89,7 +89,7 @@ export default function PeriodenabschlussPage() {
                         <td className="px-3 py-1.5 font-medium">{p.period}</td>
                         <td className="px-3 py-1.5 text-muted-foreground">{p.start} – {p.end}</td>
                         <td className="px-3 py-1.5">
-                          <Badge className={`text-[10px] ${p.status === 'closed' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                          <Badge className={`text-2xs ${p.status === 'closed' ? 'bg-status-error/10 text-status-error' : 'bg-status-success/10 text-status-success'}`}>
                             {p.status === 'closed' ? 'abgeschlossen' : 'offen'}
                           </Badge>
                         </td>
@@ -100,15 +100,15 @@ export default function PeriodenabschlussPage() {
                         </td>
                         <td className="px-3 py-1.5 text-right">
                           {p.status === 'closed' ? (
-                            <Button size="sm" variant="ghost" onClick={() => { setReopenTarget(p.period); setGrund('') }}>
+                            <Button className="min-h-touch" variant="ghost" onClick={() => { setReopenTarget(p.period); setGrund('') }}>
                               <LockOpen size={13} className="mr-1" />Öffnen
                             </Button>
                           ) : p.abschlussreif ? (
-                            <Button size="sm" variant="ghost" onClick={() => doClose(p, false)} disabled={pending}>
+                            <Button className="min-h-touch" variant="ghost" onClick={() => doClose(p, false)} disabled={pending}>
                               {pending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Lock size={13} className="mr-1" />}Abschließen
                             </Button>
                           ) : (
-                            <Button size="sm" variant="ghost" className="text-status-warning" onClick={() => doClose(p, true)} disabled={pending}>
+                            <Button className="min-h-touch text-status-warning" variant="ghost" onClick={() => doClose(p, true)} disabled={pending}>
                               {pending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Lock size={13} className="mr-1" />}Erzwingen
                             </Button>
                           )}

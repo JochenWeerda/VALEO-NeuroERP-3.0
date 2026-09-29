@@ -11,10 +11,12 @@ import { AlertTriangle, Award, FileDown, Plus, Search, CheckCircle, XCircle } fr
 import { usePSMSachkundeRegister, type PSMSachkundeNachweis } from '@/lib/api/agrar'
 import { ErrorState } from '@/components/ErrorState'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function PSMSachkundeRegisterPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = usePSMSachkundeRegister()
 
@@ -75,8 +77,9 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       label: 'Kunde',
       render: (s: PSMSachkundeNachweis) => (
         <button
+          type="button"
           onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {s.kunde}
         </button>
@@ -113,9 +116,9 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       render: (s: PSMSachkundeNachweis) => {
         const status = s.complianceStatus ?? 'warning'
         const statusConfig = {
-          compliant: { icon: CheckCircle, color: 'text-status-success', bg: 'bg-green-50', text: 'Compliant' },
-          warning: { icon: AlertTriangle, color: 'text-status-warning', bg: 'bg-orange-50', text: 'Warnung' },
-          'non-compliant': { icon: XCircle, color: 'text-status-error', bg: 'bg-red-50', text: 'Nicht compliant' },
+          compliant: { icon: CheckCircle, color: 'text-status-success', bg: 'bg-status-success/10', text: 'Vollständig' },
+          warning: { icon: AlertTriangle, color: 'text-status-warning', bg: 'bg-status-warning/10', text: 'Warnung' },
+          'non-compliant': { icon: XCircle, color: 'text-status-error', bg: 'bg-status-error/10', text: 'Nicht vollständig' },
         } as const
         const config = statusConfig[status as keyof typeof statusConfig] ?? statusConfig.warning
         const Icon = config.icon
@@ -131,7 +134,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       key: 'actions' as const,
       label: 'Aktionen',
       render: (s: PSMSachkundeNachweis) => (
-        <Button variant="outline" size="sm" onClick={() => navigate(`/agrar/psm/sachkunde/${s.id}/edit`)}>
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(`/agrar/psm/sachkunde/${s.id}/edit`)}>
           Bearbeiten
         </Button>
       ),
@@ -139,13 +142,13 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">PSM-Sachkunde-Register</h1>
-          <p className="text-muted-foreground">Sachkundenachweise fuer PSM-Vertrieb (Paragraf 9 PflSchG)</p>
+          <h1 className="text-2xl font-bold md:text-3xl">PSM-Sachkunde</h1>
+          <p className="text-muted-foreground">Nachweise suchen und prüfen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/psm/sachkunde/neu')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/psm/sachkunde/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Nachweis erfassen
         </Button>
@@ -154,21 +157,21 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       {(ablaufend > 0 || nonCompliant > 0) && (
         <div className="space-y-2">
           {ablaufend > 0 && (
-            <Card className="border-orange-500 bg-orange-50">
+            <Card className="border-status-warning/40 bg-status-warning/10">
               <CardContent className="pt-4">
-                <div className="flex items-center gap-2 text-orange-900">
+                <div className="flex items-center gap-2 text-status-warning">
                   <AlertTriangle className="h-5 w-5" />
-                  <span className="font-semibold">{ablaufend} Nachweis(e) laufen in den naechsten 3 Monaten ab.</span>
+                  <span className="font-semibold">{ablaufend} Nachweis(e) laufen in den nächsten 3 Monaten ab.</span>
                 </div>
               </CardContent>
             </Card>
           )}
           {nonCompliant > 0 && (
-            <Card className="border-red-500 bg-red-50">
+            <Card className="border-status-error/40 bg-status-error/10">
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 text-status-error">
                   <XCircle className="h-5 w-5" />
-                  <span className="font-semibold">{nonCompliant} Nachweis(e) nicht compliant.</span>
+                  <span className="font-semibold">{nonCompliant} Nachweis(e) nicht vollständig.</span>
                 </div>
               </CardContent>
             </Card>
@@ -181,9 +184,10 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
           <Award className="h-4 w-4" />
           <p className="font-semibold">Verkaufsvoraussetzung PSM</p>
         </div>
-        <p className="mt-1">Sachkundenachweis Pflicht fuer Anwender. Gueltigkeit: 3 Jahre. Vor Vertrieb pruefen.</p>
+        <p className="mt-1">Sachkundenachweis ist Pflicht für Anwender. Gültigkeit: 3 Jahre. Vor Vertrieb prüfen.</p>
       </Callout>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Nachweise Gesamt</CardTitle></CardHeader>
@@ -206,21 +210,23 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
           <CardContent><span className="text-2xl font-bold text-status-error">{nonCompliant}</span></CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
-        <CardHeader><CardTitle>Suche und Filter</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Suche Kunde, Nachweis-Nr oder Kd-Nr..."
+                aria-label="Suche Sachkundenachweise"
+                placeholder="Kunde, Nachweis-Nr oder Kd-Nr"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="min-h-touch pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

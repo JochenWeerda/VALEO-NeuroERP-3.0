@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Euro, Search, AlertCircle, CheckCircle2, Clock, Plus, Pencil, Trash2, Layers } from 'lucide-react'
+import { Euro, Search, AlertCircle, CheckCircle2, Clock, Plus, Layers } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { useFibuCockpit } from '@/lib/api/fibu'
@@ -16,6 +16,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { apiErrorDetail } from '@/lib/record-utils'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type OpStatus = 'offen' | 'teilweise' | 'geschlossen' | 'storniert'
 
@@ -93,6 +94,7 @@ function statusBadge(op: OpenItem) {
 
 export default function OpKreditorenPage(): JSX.Element {
   const queryClient = useQueryClient()
+  const isTouch = useTouchDevice()
   const { data: fibuCockpit } = useFibuCockpit()
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
@@ -352,6 +354,8 @@ export default function OpKreditorenPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Kreditoren-OP steuern"
         description="Der Sammelarbeitsplatz zeigt nur Rueckstand, Ueberfaelligkeit und die naechste Massnahme ueber der Liste."
@@ -377,6 +381,8 @@ export default function OpKreditorenPage(): JSX.Element {
           <div><div className="text-xs text-muted-foreground">Jahreswechsel</div><div className="text-sm font-semibold">{fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klärungen'}</div></div>
         </CardContent>
       </Card>
+        </>
+      ) : null}
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Offene Posten - Kreditoren</h1>
@@ -385,6 +391,7 @@ export default function OpKreditorenPage(): JSX.Element {
         <div className="flex gap-2">
           <Button
             variant="outline"
+            className="min-h-touch"
             disabled={selectedIds.size === 0}
             onClick={() => setBatchSettleOpen(true)}
           >
@@ -392,6 +399,7 @@ export default function OpKreditorenPage(): JSX.Element {
             Sammelausgleich {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
           </Button>
           <Button
+            className="min-h-touch"
             onClick={() => {
               setFormData(defaultForm)
               setCreateOpen(true)
@@ -403,6 +411,7 @@ export default function OpKreditorenPage(): JSX.Element {
         </div>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -441,11 +450,12 @@ export default function OpKreditorenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          className="pl-9"
+          className="min-h-touch pl-9"
           placeholder="Lieferant oder Rechnungsnummer suchen..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -514,27 +524,27 @@ export default function OpKreditorenPage(): JSX.Element {
                         <div className="inline-flex items-center gap-1">
                           <Button
                             variant="outline"
-                            size="sm"
+                            className="min-h-touch"
                             disabled={!isEditable(op.op_status)}
                             onClick={() => openSettle(op)}
                           >
                             Ausgleich
                           </Button>
                           <Button
-                            variant="ghost"
-                            size="icon"
+                            variant="outline"
+                            className="min-h-touch"
                             disabled={!isEditable(op.op_status)}
                             onClick={() => openEdit(op)}
                           >
-                            <Pencil className="h-4 w-4" />
+                            Bearbeiten
                           </Button>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={!isEditable(op.op_status)}
+                            variant="outline"
+                            className="min-h-touch"
+                            disabled={!isEditable(op.op_status) || (deleteMutation.isPending && deleteMutation.variables === op.id)}
                             onClick={() => deleteMutation.mutate(op.id)}
                           >
-                            <Trash2 className="h-4 w-4 text-status-error" />
+                            Löschen
                           </Button>
                         </div>
                       </td>
@@ -573,8 +583,8 @@ export default function OpKreditorenPage(): JSX.Element {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Abbrechen</Button>
-            <Button onClick={onSubmitCreate} disabled={createMutation.isPending}>Speichern</Button>
+            <Button variant="outline" className="min-h-touch" onClick={() => setCreateOpen(false)}>Abbrechen</Button>
+            <Button className="min-h-touch" onClick={onSubmitCreate} disabled={createMutation.isPending}>Speichern</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -600,8 +610,8 @@ export default function OpKreditorenPage(): JSX.Element {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>Abbrechen</Button>
-            <Button onClick={onSubmitEdit} disabled={updateMutation.isPending}>Aktualisieren</Button>
+            <Button variant="outline" className="min-h-touch" onClick={() => setEditOpen(false)}>Abbrechen</Button>
+            <Button className="min-h-touch" onClick={onSubmitEdit} disabled={updateMutation.isPending}>Aktualisieren</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -623,8 +633,8 @@ export default function OpKreditorenPage(): JSX.Element {
             <Input value={settleReference} onChange={(e) => setSettleReference(e.target.value)} />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSettleOpen(false)}>Abbrechen</Button>
-            <Button onClick={submitSettle} disabled={settleMutation.isPending}>Buchen</Button>
+            <Button variant="outline" className="min-h-touch" onClick={() => setSettleOpen(false)}>Abbrechen</Button>
+            <Button className="min-h-touch" onClick={submitSettle} disabled={settleMutation.isPending}>Buchen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -648,8 +658,8 @@ export default function OpKreditorenPage(): JSX.Element {
           <Label>Buchungsdatum (für alle)</Label>
           <Input type="date" value={batchSettleDate} onChange={(e) => setBatchSettleDate(e.target.value)} />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBatchSettleOpen(false)}>Abbrechen</Button>
-            <Button onClick={submitBatchSettle} disabled={batchSettleMutation.isPending}>
+            <Button variant="outline" className="min-h-touch" onClick={() => setBatchSettleOpen(false)}>Abbrechen</Button>
+            <Button className="min-h-touch" onClick={submitBatchSettle} disabled={batchSettleMutation.isPending}>
               Alle ausgleichen
             </Button>
           </DialogFooter>

@@ -8,18 +8,23 @@ import { Input } from '@/components/ui/input'
 import { AlertTriangle, Euro, FileDown, Search, Loader2 } from 'lucide-react'
 import { useDebitoren, useMahnen } from '@/lib/api/fibu'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function DebitorenAPIPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterUeberfaellig, setFilterUeberfaellig] = useState<boolean | undefined>(undefined)
+  const [mahnenPendingId, setMahnenPendingId] = useState<string | null>(null)
 
   // API Integration
   const { data: debitoren = [], isLoading, error } = useDebitoren({ ueberfaellig: filterUeberfaellig })
   const mahnenMutation = useMahnen()
 
   async function handleMahnen(id: string): Promise<void> {
+    if (mahnenPendingId) return
+    setMahnenPendingId(id)
     try {
       const result = await mahnenMutation.mutateAsync(id)
       toast({
@@ -32,6 +37,8 @@ export default function DebitorenAPIPage(): JSX.Element {
         description: 'Mahnung konnte nicht erstellt werden',
         variant: 'destructive',
       })
+    } finally {
+      setMahnenPendingId(null)
     }
   }
 
@@ -40,7 +47,7 @@ export default function DebitorenAPIPage(): JSX.Element {
       key: 'rechnungsnr' as const,
       label: 'Rechnung',
       render: (op: typeof debitoren[0]) => (
-        <button onClick={() => navigate(`/sales/invoice/${op.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
+        <button type="button" onClick={() => navigate(`/sales/invoice/${op.id}`)} className="min-h-11 font-mono font-medium text-primary touch-manipulation">
           {op.rechnungsnr}
         </button>
       ),
@@ -96,8 +103,8 @@ export default function DebitorenAPIPage(): JSX.Element {
         const ueberfaellig = new Date(op.faelligkeit) < new Date()
         if (ueberfaellig && (op.mahn_stufe ?? 0) < 3) {
           return (
-            <Button size="sm" variant="outline" onClick={() => handleMahnen(op.id)} disabled={mahnenMutation.isPending}>
-              Mahnen
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => void handleMahnen(op.id)} disabled={mahnenPendingId === op.id}>
+              {mahnenPendingId === op.id ? 'Mahnen...' : 'Mahnen'}
             </Button>
           )
         }
@@ -121,9 +128,20 @@ export default function DebitorenAPIPage(): JSX.Element {
     )
   }
 
-  const gesamtOffen = debitoren.reduce((sum, op) => sum + op.offen, 0)
-  const ueberfaellig = debitoren.filter((op) => new Date(op.faelligkeit) < new Date()).length
-  const mahnungen = debitoren.filter((op) => (op.mahn_stufe ?? 0) > 0).length
+  const sichtbare = searchTerm
+    ? debitoren.filter((op) => {
+        const term = searchTerm.toLowerCase()
+        return (
+          String(op.rechnungsnr ?? '').toLowerCase().includes(term) ||
+          String(op.kunde_name ?? '').toLowerCase().includes(term) ||
+          String(op.kunde_id ?? '').toLowerCase().includes(term)
+        )
+      })
+    : debitoren
+
+  const gesamtOffen = sichtbare.reduce((sum, op) => sum + op.offen, 0)
+  const ueberfaellig = sichtbare.filter((op) => new Date(op.faelligkeit) < new Date()).length
+  const mahnungen = sichtbare.filter((op) => (op.mahn_stufe ?? 0) > 0).length
 
   return (
     <div className="space-y-4 p-6">
@@ -136,9 +154,9 @@ export default function DebitorenAPIPage(): JSX.Element {
       </div>
 
       {ueberfaellig > 0 && (
-        <Card className="border-orange-500 bg-orange-50">
+        <Card className="border-status-warning/40 bg-status-warning/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
+            <div className="flex items-center gap-2 text-status-warning">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{ueberfaellig} überfällige Rechnung(en)!</span>
             </div>
@@ -146,13 +164,14 @@ export default function DebitorenAPIPage(): JSX.Element {
         </Card>
       )}
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Offene Posten</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{debitoren.length}</span>
+            <span className="text-2xl font-bold">{sichtbare.length}</span>
           </CardContent>
         </Card>
 
@@ -188,24 +207,26 @@ export default function DebitorenAPIPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche & Filter</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Debitoren" placeholder="Kunde, Rechnung" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
             <Button
               variant={filterUeberfaellig === true ? 'default' : 'outline'}
+              className="min-h-touch touch-manipulation"
               onClick={() => setFilterUeberfaellig(filterUeberfaellig === true ? undefined : true)}
             >
               Nur Überfällige
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation">
               <FileDown className="h-4 w-4" />
               DATEV Export
             </Button>
@@ -220,7 +241,7 @@ export default function DebitorenAPIPage(): JSX.Element {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <DataTable data={debitoren} columns={columns} />
+            <DataTable data={sichtbare} columns={columns} />
           )}
         </CardContent>
       </Card>

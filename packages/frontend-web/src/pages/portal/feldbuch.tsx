@@ -57,6 +57,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ErrorState } from '@/components/ErrorState'
 import { NextActionPanel } from '@/components/workflow'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   Bug,
   Calendar,
@@ -70,11 +71,9 @@ import {
   Info,
   Leaf,
   MapPin,
-  Pencil,
   Plus,
   Search,
   Sprout,
-  Trash2,
   Upload,
   AlertTriangle,
 } from 'lucide-react'
@@ -105,7 +104,7 @@ function TypBadge({ typ }: { typ: string }) {
 function QuelleBadge({ quelle }: { quelle: string }) {
   if (quelle === 'erp_service' || quelle === 'erp_lieferschein') {
     return (
-      <Badge className="bg-purple-100 text-purple-800 gap-1 font-normal">
+      <Badge className="bg-status-info/10 text-status-info gap-1 font-normal">
         <Globe className="h-3 w-3" />
         VALEO Dienst
       </Badge>
@@ -846,6 +845,7 @@ function FeldbuchSkeleton() {
 // ── Hauptkomponente ────────────────────────────────────────────────────────
 
 export default function PortalFeldbuch() {
+  const isTouch = useTouchDevice()
   const currentYear = new Date().getFullYear()
   const [activeTab, setActiveTab] = useState('schlaege')
   const [searchTerm, setSearchTerm] = useState('')
@@ -980,7 +980,7 @@ export default function PortalFeldbuch() {
               label: `WJ ${y}`,
             }))}
           />
-          <Button variant="outline" onClick={() => setShowSammelDialog(true)} className="gap-2">
+          <Button variant="outline" onClick={() => setShowSammelDialog(true)} className="min-h-touch gap-2">
             <Droplets className="h-4 w-4" />
             Sammeldüngung
           </Button>
@@ -988,15 +988,15 @@ export default function PortalFeldbuch() {
             variant="outline"
             onClick={() => void handleJahreswechsel()}
             disabled={jahreswechsel.isPending}
-            className="gap-2"
+            className="min-h-touch gap-2"
           >
             Jahreswechsel
           </Button>
-          <Button variant="outline" onClick={() => setShowImportDialog(true)} className="gap-2">
+          <Button variant="outline" onClick={() => setShowImportDialog(true)} className="min-h-touch gap-2">
             <Upload className="h-4 w-4" />
             Import
           </Button>
-          <Button variant="outline" onClick={() => setShowExportDialog(true)} className="gap-2">
+          <Button variant="outline" onClick={() => setShowExportDialog(true)} className="min-h-touch gap-2">
             <Download className="h-4 w-4" />
             Export
           </Button>
@@ -1014,6 +1014,8 @@ export default function PortalFeldbuch() {
         </Alert>
       )}
 
+      {!isTouch ? (
+      <>
       <NextActionPanel
         title="Was ist als Naechstes sinnvoll?"
         action={nextPortalAction}
@@ -1064,7 +1066,7 @@ export default function PortalFeldbuch() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-purple-100 p-2 text-purple-600">
+              <div className="rounded-lg bg-status-info/10 p-2 text-status-info">
                 <Globe className="h-5 w-5" />
               </div>
               <div>
@@ -1075,6 +1077,8 @@ export default function PortalFeldbuch() {
           </CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
 
       {/* Search & Filter */}
       <div className="flex flex-col gap-4 md:flex-row">
@@ -1084,7 +1088,7 @@ export default function PortalFeldbuch() {
             placeholder="Schlag, Kultur, Mittel suchen…"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="pl-9"
+            className="pl-9 min-h-touch"
           />
         </div>
         {activeTab === 'massnahmen' && (
@@ -1096,15 +1100,14 @@ export default function PortalFeldbuch() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex items-center justify-between">
           <TabsList>
-            <TabsTrigger value="schlaege">Schläge ({schlaege.length})</TabsTrigger>
-            <TabsTrigger value="massnahmen">Maßnahmen ({massnahmen.length})</TabsTrigger>
+            <TabsTrigger value="schlaege" className="min-h-touch">Schläge ({schlaege.length})</TabsTrigger>
+            <TabsTrigger value="massnahmen" className="min-h-touch">Maßnahmen ({massnahmen.length})</TabsTrigger>
           </TabsList>
           {activeTab === 'schlaege' && (
             <Button
-              size="sm"
               data-testid="schlag-create"
               onClick={() => { setEditSchlag(null); setShowSchlagDialog(true) }}
-              className="gap-1"
+              className="min-h-touch gap-1"
             >
               <Plus className="h-4 w-4" />
               Schlag anlegen
@@ -1112,10 +1115,9 @@ export default function PortalFeldbuch() {
           )}
           {activeTab === 'massnahmen' && (
             <Button
-              size="sm"
               data-testid="massnahme-create"
               onClick={() => { setEditMassnahme(null); setShowMassnahmeDialog(true) }}
-              className="gap-1"
+              className="min-h-touch gap-1"
             >
               <Plus className="h-4 w-4" />
               Maßnahme erfassen
@@ -1166,28 +1168,28 @@ export default function PortalFeldbuch() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => setSchlaginfoId(schlag.id)} aria-label={`Info ${schlag.name}`}>
+                          <Button variant="ghost" className="min-h-touch" onClick={() => setSchlaginfoId(schlag.id)} aria-label={`Info ${schlag.name}`}>
                             Info
                           </Button>
                           <Button
-                            size="sm"
                             variant="ghost"
+                            className="min-h-touch"
                             aria-label={`Bearbeiten ${schlag.name}`}
                             data-testid={`schlag-edit-${schlag.id}`}
                             onClick={() => { setEditSchlag(schlag); setShowSchlagDialog(true) }}
                             disabled={rowBusy}
                           >
-                            <Pencil className="h-4 w-4" />
+                            Bearbeiten
                           </Button>
                           <Button
-                            size="sm"
                             variant="ghost"
+                            className="min-h-touch"
                             aria-label={`Löschen ${schlag.name}`}
                             data-testid={`schlag-delete-${schlag.id}`}
                             onClick={() => handleDeleteSchlag(schlag)}
                             disabled={rowBusy}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            Löschen
                           </Button>
                         </div>
                       </TableCell>
@@ -1272,24 +1274,24 @@ export default function PortalFeldbuch() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button
-                            size="sm"
                             variant="ghost"
+                            className="min-h-touch"
                             aria-label={`Bearbeiten Maßnahme ${m.datum}`}
                             data-testid={`massnahme-edit-${m.id}`}
                             disabled={isErp || rowBusy}
                             onClick={() => { setEditMassnahme(m); setShowMassnahmeDialog(true) }}
                           >
-                            <Pencil className="h-4 w-4" />
+                            Bearbeiten
                           </Button>
                           <Button
-                            size="sm"
                             variant="ghost"
+                            className="min-h-touch"
                             aria-label={`Löschen Maßnahme ${m.datum}`}
                             data-testid={`massnahme-delete-${m.id}`}
                             disabled={isErp || rowBusy}
                             onClick={() => handleDeleteMassnahme(m)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            Löschen
                           </Button>
                         </div>
                       </TableCell>

@@ -59,6 +59,7 @@ const FastFieldItem = memo(function FastFieldItem({
           value={value}
           lookupEndpoint={lookupEndpoint}
           performance={performance}
+          onSelect={isEditable ? (next) => handleChange(next) : undefined}
         />
         {fieldErrors.map((err) => (
           <p

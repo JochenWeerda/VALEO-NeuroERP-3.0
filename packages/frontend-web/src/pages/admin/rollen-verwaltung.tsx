@@ -16,6 +16,7 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type RoleAdminFocus = 'it' | 'fachbereich' | 'datenschutz' | 'leitung'
 
@@ -28,6 +29,7 @@ const roleAdminProfiles = [
 
 export default function RollenVerwaltungPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { data: items, isLoading } = useRollen()
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFocus, setRoleFocus] = useState<RoleAdminFocus>('it')
@@ -60,7 +62,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
       key: 'name' as const,
       label: 'Rolle',
       render: (r: Rolle) => (
-        <button onClick={() => navigate(`/admin/rolle/${r.id}`)} className="font-medium text-primary hover:underline">
+        <button onClick={() => navigate(`/admin/rolle/${r.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {r.name}
         </button>
       ),
@@ -72,17 +74,19 @@ export default function RollenVerwaltungPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Rollen-Verwaltung</h1>
-          <p className="text-muted-foreground">Berechtigungen & Rollen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Rollen-Verwaltung</h1>
+          <p className="text-muted-foreground">Rollen suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/admin/rolle/neu')} className="gap-2">
+        <Button onClick={() => navigate('/admin/rolle/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Rolle
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar roles={roleAdminProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={filteredList.length} totalCount={list.length} title="Wer prueft die Rollen?" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -126,7 +130,10 @@ export default function RollenVerwaltungPage(): JSX.Element {
           ]}
         />
       </div>
+      </>
+      ) : null}
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
@@ -149,6 +156,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -157,7 +165,7 @@ export default function RollenVerwaltungPage(): JSX.Element {
         <CardContent>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            <Input aria-label="Suche Rollen" placeholder="Name oder Beschreibung" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
           </div>
         </CardContent>
       </Card>

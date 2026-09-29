@@ -59,7 +59,7 @@ export default function RabattePage(): JSX.Element {
       key: 'name' as const,
       label: 'Rabatt-Name',
       render: (r: Rabatt) => (
-        <button onClick={() => navigate(`/pos/rabatt/${r.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/pos/rabatt/${r.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {r.name}
         </button>
       ),

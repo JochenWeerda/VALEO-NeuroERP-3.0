@@ -131,7 +131,7 @@ function LieferantSuchDialog({ open, onClose, onSelect }: {
           <Input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Name oder Kreditor-Kto. ..." className="flex-1"
             onKeyDown={(e) => e.key === 'Enter' && void doSearch()} autoFocus />
-          <Button onClick={() => void doSearch()} disabled={loading} className="gap-1">
+          <Button onClick={() => void doSearch()} disabled={loading} className="min-h-touch gap-1">
             <Search className="h-4 w-4" />Suchen
           </Button>
         </div>
@@ -405,9 +405,11 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                         <Input value={state.lieferant?.kreditorAccount || ''} readOnly
                           className="flex-1 h-8 bg-green-50" />
                         <ShortcutHintButton shortcut="Strg+F1">
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
-                            onClick={() => setShowLieferantDialog(true)}>
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button variant="ghost" className="min-h-touch"
+                            onClick={() => setShowLieferantDialog(true)}
+                            aria-label="Lieferant suchen">
+                            <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                            Suchen
                           </Button>
                         </ShortcutHintButton>
                       </div>
@@ -454,17 +456,17 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                         <Input value={state.niederlassung}
                           onChange={(e) => setState((p) => ({ ...p, niederlassung: e.target.value }))}
                           className="flex-1 h-8" />
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" className="min-h-touch" aria-label="Niederlassung suchen"><MoreHorizontal className="h-4 w-4" aria-hidden="true" />Suchen</Button>
                       </div>
                       <div className="flex items-center gap-2">
                         <Label className="w-28 text-sm shrink-0">Kostenstelle:</Label>
                         <Input value={state.kostenstelle} readOnly className="flex-1 h-8 bg-muted" />
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" className="min-h-touch" aria-label="Kostenstelle suchen"><MoreHorizontal className="h-4 w-4" aria-hidden="true" />Suchen</Button>
                       </div>
                       <div className="flex items-center gap-2">
                         <Label className="w-28 text-sm shrink-0">Bediener:</Label>
                         <Input value={state.bediener} readOnly className="flex-1 h-8" />
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" className="min-h-touch" aria-label="Bediener suchen"><MoreHorizontal className="h-4 w-4" aria-hidden="true" />Suchen</Button>
                       </div>
                       <div className="flex items-center gap-2 pt-1">
                         <Checkbox checked={state.erledigt}
@@ -539,9 +541,9 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
               <div className="flex items-center gap-2">
                 <Label className="w-24 text-sm shrink-0">Beleg-Nr.:</Label>
                 <Input value={state.belegNr} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><ChevronLeft className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><ChevronRight className="h-4 w-4" /></Button>
+                <Button variant="ghost" className="min-h-touch" aria-label="Beleg suchen"><MoreHorizontal className="h-4 w-4" aria-hidden="true" />Suchen</Button>
+                <Button variant="ghost" className="min-h-touch" aria-label="Vorheriger Beleg"><ChevronLeft className="h-4 w-4" aria-hidden="true" />Zurück</Button>
+                <Button variant="ghost" className="min-h-touch" aria-label="Nächster Beleg"><ChevronRight className="h-4 w-4" aria-hidden="true" />Weiter</Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-24 text-sm shrink-0">Rechnung-Nr.:</Label>
@@ -762,9 +764,11 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
               <div className="flex gap-1">
                 <Input value={currentPos.artikelNr} readOnly className="flex-1 h-8" />
                 <ShortcutHintButton shortcut="Strg+F2">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
-                    onClick={() => setShowArticleDialog(true)}>
-                    <MoreHorizontal className="h-4 w-4" />
+                  <Button variant="ghost" className="min-h-touch"
+                    onClick={() => setShowArticleDialog(true)}
+                    aria-label="Artikel suchen">
+                    <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                    Suchen
                   </Button>
                 </ShortcutHintButton>
               </div>
@@ -832,8 +836,8 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
 
             {/* Buttons-Leiste */}
             <div className="col-span-8 flex items-center gap-2 pt-1 flex-wrap">
-              <Button variant="outline" size="sm" className="h-8">PopUp</Button>
-              <Button variant="outline" size="sm" className="h-8"
+              <Button variant="outline" className="min-h-touch">PopUp</Button>
+              <Button variant="outline" className="min-h-touch"
                 onClick={() => push('Aktualisieren')}>Aktualisieren</Button>
               <div className="flex items-center gap-1 border rounded px-2 h-8">
                 <span className="text-xs">Kontrakt-Nr. ---</span>
@@ -842,10 +846,10 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                 <Checkbox />
                 <Label className="text-xs">skontierfähig</Label>
               </div>
-              <Button variant="outline" size="sm" className="h-8">↔ Niederlassung usw.</Button>
-              <Button variant="outline" size="sm" className="h-8">⚡ Chargen-/Serien-Nr.</Button>
+              <Button variant="outline" className="min-h-touch">↔ Niederlassung usw.</Button>
+              <Button variant="outline" className="min-h-touch">⚡ Chargen-/Serien-Nr.</Button>
               <ShortcutHintButton shortcut="Strg+F3">
-                <Button onClick={handlePositionOK} className="h-8 gap-1">
+                <Button onClick={handlePositionOK} className="min-h-touch gap-1">
                   <Check className="h-4 w-4" />Zeile OK
                 </Button>
               </ShortcutHintButton>
@@ -857,34 +861,34 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
       {/* Bottom Toolbar */}
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="min-h-touch gap-2"
             disabled={isSaving}
             onClick={() => void handlePrintAndBook()}>
             <Printer className="h-4 w-4" />Beleg drucken und buchen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="min-h-touch gap-2"
             onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-4 w-4" />Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="min-h-touch gap-2"
             onClick={() => setShowAttachmentDialog(true)}>
             <Folder className="h-4 w-4" />Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-status-error"
+          <Button variant="outline" className="min-h-touch gap-2 text-status-error"
             onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />Rechnung löschen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => { setShowAttachmentDialog(true); push('Unterlagen geöffnet. Hier können Sie die Originalrechnung hochladen.'); }} title="Originalrechnung anzeigen/hochladen">
-            <BookOpen className="h-4 w-4" />Originalrechnung ▼
+          <Button variant="outline" className="min-h-touch gap-2" onClick={() => { setShowAttachmentDialog(true); push('Unterlagen geöffnet. Hier können Sie die Originalrechnung hochladen.'); }} title="Originalrechnung anzeigen/hochladen">
+            <BookOpen className="h-4 w-4" />Originalrechnung
           </Button>
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSaveClick()} disabled={isSaving} size="sm" className="gap-2">
+            <Button onClick={() => void handleSaveClick()} disabled={isSaving} className="min-h-touch gap-2">
               <Save className="h-4 w-4" />Speichern
             </Button>
           </ShortcutHintButton>
-          <Button variant="outline" onClick={() => navigate('/einkauf')} size="sm">Schließen</Button>
+          <Button variant="outline" onClick={() => navigate('/einkauf')} className="min-h-touch">Schließen</Button>
         </div>
       </div>
 

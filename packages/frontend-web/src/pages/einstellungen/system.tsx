@@ -152,7 +152,7 @@ function LanguagePackageCard({
         {status === 'available' && (
           <>
             <Badge variant="outline">{t('admin.languagePackage.available')}</Badge>
-            <Button size="sm" onClick={onActivate}>{t('admin.languagePackage.activate')}</Button>
+            <Button onClick={onActivate} className="min-h-touch">{t('admin.languagePackage.activate')}</Button>
           </>
         )}
         {status === 'generating' && (
@@ -162,7 +162,7 @@ function LanguagePackageCard({
           </Badge>
         )}
         {status === 'not_available' && (
-          <Button size="sm" variant="outline" onClick={onGenerate}>
+          <Button variant="outline" onClick={onGenerate} className="min-h-touch">
             <Sparkles className="mr-1 h-3 w-3" />
             {t('admin.languagePackage.generate')}
           </Button>

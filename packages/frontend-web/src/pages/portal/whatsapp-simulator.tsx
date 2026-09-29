@@ -178,7 +178,7 @@ export default function WhatsAppSimulator() {
                 {DEMO_PHONES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+49..." className="text-sm font-mono" />
-              <Button variant="outline" size="sm" className="w-full" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>Verlauf zurücksetzen</Button>
+              <Button variant="outline" className="min-h-touch w-full" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>Verlauf zurücksetzen</Button>
             </div>
             <div className="border rounded-lg p-3 space-y-2 bg-card">
               <h2 className="text-sm font-medium">Beispiel-Nachrichten</h2>
@@ -294,7 +294,7 @@ export default function WhatsAppSimulator() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium">Ausgehende Nachrichten (Outbox)</h2>
-            <Button variant="outline" size="sm" onClick={() => outboxRefetch()}>Aktualisieren</Button>
+            <Button variant="outline" onClick={() => outboxRefetch()} className="min-h-touch">Aktualisieren</Button>
           </div>
           {!outboxData || outboxData.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">Noch keine ausgehenden Nachrichten.</p>

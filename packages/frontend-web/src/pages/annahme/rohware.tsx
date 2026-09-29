@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { CheckCircle, Truck } from 'lucide-react'
@@ -78,6 +79,7 @@ const LAGER_OPTIONEN = [
 export default function RohwareAnnahmePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const { data: chain } = useSupplyChainOverview()
   const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
   const transferSummary = useMemo(() => summarizeSupplyTransfer(chain), [chain])
@@ -231,6 +233,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
   })
 
   const handleFinish = (): void => {
+    if (createAcceptance.isPending) return
     createAcceptance.mutate()
   }
 
@@ -302,11 +305,11 @@ export default function RohwareAnnahmePage(): JSX.Element {
                     },
                   })
                 }
-                className="flex-1"
+                className="min-h-touch flex-1 touch-manipulation"
               >
                 Zur Abrechnung
               </Button>
-              <Button onClick={() => navigate('/annahme/warteschlange')} className="flex-1">
+              <Button onClick={() => navigate('/annahme/warteschlange')} className="min-h-touch flex-1 touch-manipulation">
                 Zur Warteschlange
               </Button>
             </div>
@@ -435,7 +438,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
         <TouchSection title="Qualitätswerte (optional)">
           <Callout variant="info" className="rounded-md border p-3 text-sm">
             <p className="font-semibold">Rohware-Annahme ohne Vollanalyse</p>
-            <p className="mt-1 text-blue-700">
+            <p className="mt-1 text-foreground">
               Qualitätswerte sind optional. Vollständige Laboranalyse kann nachträglich ergänzt
               werden.
             </p>
@@ -475,7 +478,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
             <CheckCircle className="h-16 w-16 text-status-success" />
-            <h3 className="text-xl font-bold text-slate-800">Rohware-Annahme prüfen</h3>
+            <h3 className="text-xl font-bold text-foreground">Rohware-Annahme prüfen</h3>
           </div>
           <TouchConfirmCard
             title="Lieferant & Fahrzeug"
@@ -518,12 +521,24 @@ export default function RohwareAnnahmePage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-      <div className="p-6">
+      <div className="p-3 md:p-6">
         <ModuleToolbar
           backTarget="/annahme/warteschlange"
           closeTarget="/annahme/warteschlange"
           title="Rohware-Annahme"
         />
+        <Wizard
+          title="Rohware-Annahme"
+          subtitle="Lieferant, Ware, Qualität, Abschluss"
+          steps={steps}
+          getStepValidationError={validateRohwareStep}
+          onStepValidationError={handleRohwareStepValidationError}
+          onFinish={handleFinish}
+          onCancel={() => navigate('/annahme/warteschlange')}
+          loading={createAcceptance.isPending}
+        />
+        {!isTouch ? (
+        <>
         <div className="mt-4 space-y-4">
           <OperationalCaseHeader
             title="Rohware-Annahme steuern"
@@ -542,26 +557,26 @@ export default function RohwareAnnahmePage(): JSX.Element {
         </div>
         <Card className="mt-4">
           <CardContent className="grid gap-3 pt-6 md:grid-cols-4">
-            <div><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-xl font-semibold">{chain.waitingInbound}</div></div>
-            <div><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-xl font-semibold">{chain.openWeighingTickets}</div></div>
-            <div><div className="text-xs text-muted-foreground">Chargen gesperrt / Prüfung</div><div className="text-xl font-semibold">{chain.blockedCharges}</div></div>
-            <div><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-xl font-semibold">{chain.freightInTransit}</div></div>
+            <div><div className="text-2xs uppercase tracking-wide text-muted-foreground">Annahme offen</div><div className="text-xl font-semibold">{chain.waitingInbound}</div></div>
+            <div><div className="text-2xs uppercase tracking-wide text-muted-foreground">Wiegungen offen</div><div className="text-xl font-semibold">{chain.openWeighingTickets}</div></div>
+            <div><div className="text-2xs uppercase tracking-wide text-muted-foreground">Chargen gesperrt / Prüfung</div><div className="text-xl font-semibold">{chain.blockedCharges}</div></div>
+            <div><div className="text-2xs uppercase tracking-wide text-muted-foreground">Fracht unterwegs</div><div className="text-xl font-semibold">{chain.freightInTransit}</div></div>
           </CardContent>
         </Card>
         <Card className="mt-4">
           <CardContent className="grid gap-3 pt-6 md:grid-cols-3">
             <div>
-              <div className="text-xs text-muted-foreground">Bottleneck</div>
+              <div className="text-2xs uppercase tracking-wide text-muted-foreground">Engpass</div>
               <div className="text-lg font-semibold capitalize">{supplyOps.bottleneck}</div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Druck</div>
+              <div className="text-2xs uppercase tracking-wide text-muted-foreground">Druck</div>
               <Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : supplyOps.pressure === 'mittel' ? 'secondary' : 'outline'}>
                 {supplyOps.pressure}
               </Badge>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Naechste Aktion</div>
+              <div className="text-2xs uppercase tracking-wide text-muted-foreground">Nächste Aktion</div>
               <div className="text-sm font-semibold">{supplyOps.nextAction}</div>
             </div>
           </CardContent>
@@ -569,34 +584,26 @@ export default function RohwareAnnahmePage(): JSX.Element {
         <Card className="mt-4">
           <CardContent className="grid gap-3 pt-6 md:grid-cols-3">
             <div>
-              <div className="text-xs text-muted-foreground">Uebergabedruck</div>
+              <div className="text-2xs uppercase tracking-wide text-muted-foreground">Übergabedruck</div>
               <Badge variant={transferSummary.transferPressure === 'hoch' ? 'destructive' : 'outline'}>
                 {transferSummary.transferPressure}
               </Badge>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Offene Kettenpunkte</div>
+              <div className="text-2xs uppercase tracking-wide text-muted-foreground">Offene Kettenpunkte</div>
               <div className="text-lg font-semibold">{transferSummary.handoverRisk}</div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Naechste Kettenaktion</div>
+              <div className="text-2xs uppercase tracking-wide text-muted-foreground">Nächste Kettenaktion</div>
               <div className="text-sm font-semibold">{transferSummary.nextAction}</div>
             </div>
           </CardContent>
         </Card>
-        <AgentProcessPanel domain="annahme" className="mb-4" />
-        <Wizard
-          title="Rohware-Annahme"
-          subtitle="4-schrittiger Assistent für die Rohware-Eingangserfassung"
-          steps={steps}
-          getStepValidationError={validateRohwareStep}
-          onStepValidationError={handleRohwareStepValidationError}
-          onFinish={handleFinish}
-          onCancel={() => navigate('/annahme/warteschlange')}
-          loading={createAcceptance.isPending}
-        />
+        <AgentProcessPanel domain="annahme" className="mb-4 mt-4" />
+        </>
+        ) : null}
       </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

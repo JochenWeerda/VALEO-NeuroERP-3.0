@@ -37,7 +37,7 @@ export default function ENNIMeldungenPage(): JSX.Element {
       label: 'N-P-K (kg/ha)',
       render: (m: ENNIMeldung) => (
         <div className="flex gap-2 font-mono text-xs">
-          <span className="text-blue-600">{m.naehrstoffe.n}</span> -
+          <span className="text-status-info">{m.naehrstoffe.n}</span> -
           <span className="text-status-warning">{m.naehrstoffe.p}</span> -
           <span className="text-status-success">{m.naehrstoffe.k}</span>
         </div>

@@ -104,11 +104,10 @@ export const CalendarRenderer = memo(function CalendarRenderer({
             <Button
               key={key}
               type="button"
-              size="sm"
               variant={view === key ? 'default' : 'outline'}
               onClick={() => setView(key)}
               data-testid={`calendar-view-${key}`}
-            >
+             className="min-h-touch">
               {key === 'month' ? 'Monat' : key === 'week' ? 'Woche' : 'Agenda'}
             </Button>
           ))}

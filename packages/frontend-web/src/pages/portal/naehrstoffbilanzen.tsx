@@ -503,8 +503,7 @@ export default function PortalNaehrstoffbilanzen() {
                   </div>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="w-full mt-3 gap-2"
+                    className="min-h-touch w-full mt-3 gap-2"
                     disabled={exporting !== null}
                     onClick={() => {
                       setSelectedJahr(String(bilanz.jahr))

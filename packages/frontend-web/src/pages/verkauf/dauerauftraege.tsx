@@ -222,7 +222,6 @@ export default function DauerauftraegePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={() =>
                     append({
                       pos_nr: String(fields.length + 1),
@@ -232,7 +231,7 @@ export default function DauerauftraegePage() {
                       preis_eur: '',
                     })
                   }
-                >
+                 className="min-h-touch">
                   <Plus className="mr-1 h-3 w-3" aria-hidden="true" />
                   Position
                 </Button>

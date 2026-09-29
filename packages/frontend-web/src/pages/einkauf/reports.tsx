@@ -192,7 +192,7 @@ export default function ProcurementReportsPage(): JSX.Element {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('crud.fields.openOrdersReport')}</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => handleExport('open-orders', openOrders)} disabled={openOrders.length === 0}>
+                <Button variant="outline" className="min-h-touch" onClick={() => handleExport('open-orders', openOrders)} disabled={openOrders.length === 0}>
                   <Download className="h-4 w-4 mr-2" />
                   {t('crud.actions.export')}
                 </Button>
@@ -236,7 +236,7 @@ export default function ProcurementReportsPage(): JSX.Element {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('crud.fields.spendAnalysisReport')}</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => handleExport('spend', spendByCategory)} disabled={spendByCategory.length === 0}>
+                <Button variant="outline" className="min-h-touch" onClick={() => handleExport('spend', spendByCategory)} disabled={spendByCategory.length === 0}>
                   <Download className="h-4 w-4 mr-2" />
                   {t('crud.actions.export')}
                 </Button>
@@ -294,7 +294,7 @@ export default function ProcurementReportsPage(): JSX.Element {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('crud.fields.supplierPerformanceReport')}</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => handleExport('performance', supplierPerformance)} disabled={supplierPerformance.length === 0}>
+                <Button variant="outline" className="min-h-touch" onClick={() => handleExport('performance', supplierPerformance)} disabled={supplierPerformance.length === 0}>
                   <Download className="h-4 w-4 mr-2" />
                   {t('crud.actions.export')}
                 </Button>
@@ -338,7 +338,7 @@ export default function ProcurementReportsPage(): JSX.Element {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('crud.fields.toleranceReports')}</CardTitle>
-                <Button variant="outline" size="sm" onClick={() => handleExport('tolerance', toleranceReports)} disabled={toleranceReports.length === 0}>
+                <Button variant="outline" className="min-h-touch" onClick={() => handleExport('tolerance', toleranceReports)} disabled={toleranceReports.length === 0}>
                   <Download className="h-4 w-4 mr-2" />
                   {t('crud.actions.export')}
                 </Button>

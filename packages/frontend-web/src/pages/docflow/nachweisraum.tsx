@@ -38,7 +38,7 @@ export default function NachweisraumPage() {
         <ShieldCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Nachweisraum</h1>
         <span className="text-sm text-muted-foreground">GoBD: Artefakte · Vorgangskette · Buchungen</span>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void docsQuery.refetch()} disabled={docsQuery.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => void docsQuery.refetch()} disabled={docsQuery.isFetching}>
           {docsQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>

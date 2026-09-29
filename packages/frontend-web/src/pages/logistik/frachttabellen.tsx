@@ -62,10 +62,9 @@ function PositionenPanel({ tabelle }: { tabelle: FrachttabelleOut }) {
           onChange={(e) => setForm((f) => ({ ...f, mindestfracht_eur: e.target.value ? Number(e.target.value) : undefined }))}
         />
         <Button
-          size="sm"
           onClick={() => { void handleAddPosition() }}
           disabled={createMutation.isPending}
-          className="gap-1"
+          className="min-h-touch gap-1"
         >
           <PlusCircle className="h-3.5 w-3.5" />
           {createMutation.isPending ? '…' : 'Position'}

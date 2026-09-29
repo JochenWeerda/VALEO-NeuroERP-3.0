@@ -70,33 +70,33 @@ function EmpfehlungCard({ e, onGesehen }: { e: Empfehlung; onGesehen: (id: strin
       <CardContent className="pt-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1">
-            <div className="mt-0.5 text-gray-600">{cfg.icon}</div>
+            <div className="mt-0.5 text-muted-foreground">{cfg.icon}</div>
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="font-semibold text-gray-900">{e.titel}</span>
+                <span className="font-semibold">{e.titel}</span>
                 <Badge variant={PRIORITAET_FARBE[e.prioritaet]}>{e.prioritaet}</Badge>
                 <Badge variant="outline">{cfg.badge}</Badge>
                 {e.gesehen && <CheckCircle2 className="h-4 w-4 text-status-success" />}
               </div>
-              <p className="text-sm text-gray-600 mb-3">{e.beschreibung}</p>
+              <p className="mb-3 text-sm text-muted-foreground">{e.beschreibung}</p>
               <div className="flex items-center gap-2">
                 <Button
-                  size="sm"
+
                   onClick={() => {
                     onGesehen(e.empfehlung_id)
                     // Navigation zu relativer Portal-Route
                     // In Produktion: navigate(e.cta_ziel)
                   }}
-                >
+                 className="min-h-touch">
                   {e.cta_label}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
                 {!e.gesehen && (
                   <Button
-                    size="sm"
+
                     variant="ghost"
                     onClick={() => onGesehen(e.empfehlung_id)}
-                    className="text-gray-500"
+                    className="min-h-touch text-muted-foreground"
                   >
                     Als gesehen markieren
                   </Button>
@@ -145,11 +145,11 @@ export default function EmpfehlungenPage() {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-status-warning" />
             Empfehlungen für Sie
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Personalisierte Angebote basierend auf Ihrer Schlagkartei und Ihren Aktivitäten
           </p>
         </div>
@@ -165,9 +165,9 @@ export default function EmpfehlungenPage() {
         {['alle', 'ankauf_kontrakt', 'rohware_angebot', 'lohndienst', 'vertrag_erinnerung'].map((f) => (
           <Button
             key={f}
-            size="sm"
             variant={filter === f ? 'default' : 'outline'}
             onClick={() => setFilter(f)}
+            className="min-h-touch"
           >
             {f === 'alle' ? 'Alle' : TYP_CONFIG[f]?.badge ?? f}
           </Button>

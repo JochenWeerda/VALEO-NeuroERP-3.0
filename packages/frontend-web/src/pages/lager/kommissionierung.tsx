@@ -161,7 +161,7 @@ function PickListPanel({
           {plStatusBadge(pl.status)}
           {pl.status !== 'COMPLETED' && hasOpen && (
             <Button
-              size="sm"
+              className="min-h-touch"
               disabled={pending.has('all')}
               onClick={handleConfirmAll}
             >
@@ -200,7 +200,7 @@ function PickListPanel({
               <TableCell>
                 {(line.status === 'OPEN' || line.status === 'PARTIAL') && pl.status !== 'COMPLETED' && (
                   <Button
-                    size="sm"
+                    className="min-h-touch"
                     variant="outline"
                     disabled={pending.has(line.id)}
                     onClick={() => handleConfirmLine(line)}
@@ -283,7 +283,7 @@ export default function KommissionierungPage() {
                 {dnStatusBadge(dn.status)}
                 {!activePl[dn.id] ? (
                   <Button
-                    size="sm"
+                    className="min-h-touch"
                     disabled={creating.has(dn.id)}
                     onClick={() => handleCreatePickList(dn)}
                   >

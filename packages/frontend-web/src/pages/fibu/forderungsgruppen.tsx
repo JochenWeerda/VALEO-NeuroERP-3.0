@@ -154,21 +154,23 @@ export default function ForderungsgruppenPage(): JSX.Element {
           <Button
             type="button"
             variant="outline"
-            size="sm"
             onClick={() => startEdit(row)}
             aria-label={`${row.gruppe_nr} bearbeiten`}
+            className="min-h-touch"
           >
             <Edit3 className="h-4 w-4" aria-hidden="true" />
+            Bearbeiten
           </Button>
           <Button
             type="button"
             variant="outline"
-            size="sm"
             disabled={isDeleting && deletingNr === row.gruppe_nr}
             onClick={() => void handleDelete(row.gruppe_nr)}
             aria-label={`${row.gruppe_nr} deaktivieren`}
+            className="min-h-touch"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Löschen
           </Button>
         </div>
       ),

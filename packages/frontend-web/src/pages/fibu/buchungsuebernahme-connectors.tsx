@@ -87,7 +87,7 @@ export default function BuchungsuebernahmeConnectorsPage(): JSX.Element {
 
           <div className="flex gap-2 pt-2">
             <Link to="/fibu/schnittstellen-center">
-              <Button variant="outline" size="sm">Schnittstellen-Center</Button>
+              <Button variant="outline" className="min-h-touch">Schnittstellen-Center</Button>
             </Link>
           </div>
         </CardContent>

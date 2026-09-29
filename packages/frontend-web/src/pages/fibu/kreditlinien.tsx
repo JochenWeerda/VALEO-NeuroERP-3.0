@@ -44,7 +44,7 @@ export default function KreditlinienPage(): JSX.Element {
       label: 'Kunde',
       render: (k: Kreditlinie) => (
         <div>
-          <button onClick={() => navigate(`/verkauf/kunden-stamm/${k.id}`)} className="font-medium text-blue-600 hover:underline">
+          <button type="button" onClick={() => navigate(`/verkauf/kunden-stamm/${k.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
             {k.kunde}
           </button>
           <div className="text-xs text-muted-foreground font-mono">{k.kundennr}</div>
@@ -55,7 +55,7 @@ export default function KreditlinienPage(): JSX.Element {
       key: 'bonitaet' as const,
       label: 'Bonität',
       render: (k: Kreditlinie) => {
-        const colors = { A: 'text-status-success', B: 'text-blue-600', C: 'text-status-warning', D: 'text-status-error' }
+        const colors = { A: 'text-status-success', B: 'text-status-info', C: 'text-status-warning', D: 'text-status-error' }
         return <span className={`text-2xl font-bold ${colors[k.bonitaet]}`}>{k.bonitaet}</span>
       },
     },

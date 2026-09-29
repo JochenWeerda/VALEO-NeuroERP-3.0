@@ -5,6 +5,7 @@
 import { useState, useCallback } from 'react'
 import { Mic, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { summarizeVoice } from '../api/voice'
 import { useVoiceIntent } from '../hooks/useVoiceIntent'
 import { useVoicePlayback } from '../hooks/useVoicePlayback'
@@ -99,11 +100,13 @@ export function VoiceButton({
       <Button
         variant={variant}
         size={size}
-        className={className}
+        className={cn('shrink-0 touch-manipulation', className)}
         onClick={startListening}
         disabled={listening}
         aria-label={listening ? 'Höre zu…' : 'Sprachbefehl starten'}
         title="Sprachbefehl (Polish + optional Zusammenfassung via Ollama)"
+        data-mcp-action="voice-command"
+        data-mcp-intent="voice-input"
       >
         {listening ? (
           <Loader2 className="h-4 w-4 animate-spin" />

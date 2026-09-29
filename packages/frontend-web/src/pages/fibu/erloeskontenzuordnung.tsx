@@ -196,11 +196,12 @@ export default function ErloeskontenzuordnungPage(): JSX.Element {
           <Button
             type="button"
             variant="outline"
-            size="sm"
             onClick={() => startEdit(row)}
             aria-label={`Zuordnung ${row.id} bearbeiten`}
+            className="min-h-touch"
           >
             <Edit3 className="h-4 w-4" aria-hidden="true" />
+            Bearbeiten
           </Button>
         </div>
       ),

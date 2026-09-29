@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator'
 import { useFibuCockpit } from '@/lib/api/fibu'
 import { FileDown, Filter, CheckCircle2, AlertCircle, FolderOpen } from 'lucide-react'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 // Standard-Buchungsarten die gefiltert werden können
 const ALLE_BUCHUNGSARTEN = [
@@ -54,6 +55,7 @@ function twoWeeksAgo(): string {
 
 export default function SchnittstelleFibuPage(): JSX.Element {
   const { data: fibuCockpit } = useFibuCockpit()
+  const isTouch = useTouchDevice()
   const [von, setVon] = useState(twoWeeksAgo())
   const [bis, setBis] = useState(today())
   const [bediener, setBediener] = useState('')
@@ -143,22 +145,11 @@ export default function SchnittstelleFibuPage(): JSX.Element {
   ]
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-4">
-      <OperationalCaseHeader
-        title="Schnittstelle Finanzbuchhaltung"
-        description="Die Buchungsuebergabe wird als L3/FIBU-Cutover-Fall mit Revisions- und Governance-Kontext gefuehrt."
-        status={operationalStatus}
-        owner="FIBU / Migration"
-        blocker={error ? 'Der letzte Exportlauf ist fehlgeschlagen und muss geklaert werden.' : null}
-        nextAction={summary ? 'Export herunterladen und Folgeverbuchung pruefen' : 'Vorschau erzeugen oder Uebertragung starten'}
-        caseLabel="Vorgang: Buchungsuebergabe"
-        tags={['L3', 'FIBU', 'Cutover']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
-        <OperationalTimeline title="Uebergabeverlauf" items={timelineItems} />
-        <OperationalContextPanel title="Schnittstellenkontext" sections={contextSections} />
+    <div className="max-w-2xl mx-auto space-y-4 p-3 md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Schnittstelle Finanzbuchhaltung</h1>
+        <p className="text-muted-foreground">Buchungssaetze als ASC-Datei uebergeben</p>
       </div>
-      {/* Titelbereich im Dialog-Stil */}
       <Card className="border-2">
         <CardHeader className="pb-2 bg-muted/40 rounded-t-lg">
           <CardTitle className="text-base font-semibold tracking-wide uppercase">
@@ -166,6 +157,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4 space-y-5">
+          {!isTouch ? (
           <div className="grid gap-3 md:grid-cols-4">
             <div className="rounded-lg border p-3">
               <div className="text-xs text-muted-foreground">Exportläufe</div>
@@ -184,11 +176,12 @@ export default function SchnittstelleFibuPage(): JSX.Element {
               <div className="text-sm font-semibold">{fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'prüfen'} / {fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'offen'}</div>
             </div>
           </div>
+          ) : null}
 
           {/* Info-Bereich */}
           <Callout variant="info" className="border rounded p-3 text-sm">
-            <p className="font-semibold text-blue-800 uppercase text-xs mb-1">Buchungsübergabe (ASC) erzeugen</p>
-            <p className="text-blue-700">
+            <p className="mb-1 text-xs font-semibold uppercase">Buchungsübergabe (ASC) erzeugen</p>
+            <p>
               Die erzeugten Buchungssätze werden in eine <strong>ASC-Datei</strong> (Buchungsübergabe)
               zur Übergabe an die Finanzbuchhaltung exportiert.
             </p>
@@ -215,21 +208,21 @@ export default function SchnittstelleFibuPage(): JSX.Element {
                 type="date"
                 value={von}
                 onChange={(e) => setVon(e.target.value)}
-                className="h-8 text-sm"
+                className="min-h-touch"
               />
               <Label className="text-sm">bis:</Label>
               <Input
                 type="date"
                 value={bis}
                 onChange={(e) => setBis(e.target.value)}
-                className="h-8 text-sm"
+                className="min-h-touch"
               />
               <Label className="text-sm">Beediener:</Label>
               <Input
                 value={bediener}
                 onChange={(e) => setBediener(e.target.value)}
                 placeholder="alle"
-                className="h-8 text-sm"
+                className="min-h-touch"
               />
             </div>
           </div>
@@ -240,7 +233,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Sortierung</p>
             <div className="space-y-1.5">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex min-h-touch cursor-pointer items-center gap-2 touch-manipulation">
                 <input
                   type="radio"
                   name="sortierung"
@@ -251,7 +244,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
                 />
                 <span className="text-sm">Niederlassung, Beediener, Buch.-Datum, Rechnung-Nr.</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex min-h-touch cursor-pointer items-center gap-2 touch-manipulation">
                 <input
                   type="radio"
                   name="sortierung"
@@ -278,7 +271,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
                   {ALLE_BUCHUNGSARTEN.map((art) => (
-                    <label key={art.key} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <label key={art.key} className="flex min-h-touch cursor-pointer items-center gap-2 text-sm touch-manipulation">
                       <input
                         type="checkbox"
                         checked={selectedArten.includes(art.key)}
@@ -291,7 +284,8 @@ export default function SchnittstelleFibuPage(): JSX.Element {
                 </div>
                 {selectedArten.length > 0 && (
                   <button
-                    className="text-xs text-muted-foreground underline"
+                    type="button"
+                    className="min-h-touch text-sm text-muted-foreground underline touch-manipulation"
                     onClick={() => setSelectedArten([])}
                   >
                     Alle zurücksetzen
@@ -307,7 +301,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           <div className="flex items-center gap-2 flex-wrap">
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch touch-manipulation"
               onClick={() => setShowBuchungsartenFilter((v) => !v)}
             >
               <Filter className="h-4 w-4 mr-1.5" />
@@ -318,7 +312,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
 
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch touch-manipulation"
               onClick={() => exportMutation.mutate(false)}
               disabled={exportMutation.isPending}
             >
@@ -326,7 +320,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
             </Button>
 
             <Button
-              size="sm"
+              className="min-h-touch touch-manipulation"
               onClick={() => exportMutation.mutate(true)}
               disabled={exportMutation.isPending || !von || !bis}
             >
@@ -336,7 +330,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
 
             <Button
               variant="ghost"
-              size="sm"
+              className="min-h-touch touch-manipulation"
               onClick={() => {
                 setSummary(null)
                 setError(null)
@@ -372,7 +366,7 @@ export default function SchnittstelleFibuPage(): JSX.Element {
                 <span>{summary.summe_haben.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span>
               </div>
               <div className="flex gap-2 pt-1">
-                <Button size="sm" onClick={() => exportMutation.mutate(true)}>
+                <Button className="min-h-touch touch-manipulation" onClick={() => exportMutation.mutate(true)}>
                   <FileDown className="h-3 w-3 mr-1" />
                   Jetzt herunterladen
                 </Button>
@@ -381,6 +375,24 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           )}
         </CardContent>
       </Card>
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title="Schnittstelle Finanzbuchhaltung"
+            description="Die Buchungsuebergabe wird als L3/FIBU-Cutover-Fall mit Revisions- und Governance-Kontext gefuehrt."
+            status={operationalStatus}
+            owner="FIBU / Migration"
+            blocker={error ? 'Der letzte Exportlauf ist fehlgeschlagen und muss geklaert werden.' : null}
+            nextAction={summary ? 'Export herunterladen und Folgeverbuchung pruefen' : 'Vorschau erzeugen oder Uebertragung starten'}
+            caseLabel="Vorgang: Buchungsuebergabe"
+            tags={['L3', 'FIBU', 'Cutover']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+            <OperationalTimeline title="Uebergabeverlauf" items={timelineItems} />
+            <OperationalContextPanel title="Schnittstellenkontext" sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

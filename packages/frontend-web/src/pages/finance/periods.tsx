@@ -52,6 +52,7 @@ export default function PeriodsPage(): JSX.Element {
     status: 'OPEN' as const
   })
   const [closeBy, setCloseBy] = useState('')
+  const [pendingPeriodId, setPendingPeriodId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPeriods()
@@ -77,6 +78,8 @@ export default function PeriodsPage(): JSX.Element {
   }
 
   async function createPeriod(): Promise<void> {
+    if (pendingPeriodId) return
+    setPendingPeriodId('create')
     try {
       await apiClient.post('/api/v1/finance/periods', newPeriod)
 
@@ -93,11 +96,15 @@ export default function PeriodsPage(): JSX.Element {
         description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || t('crud.feedback.createError', { entityType: 'Periode' }),
         variant: 'destructive',
       })
+    } finally {
+      setPendingPeriodId(null)
     }
   }
 
   async function closePeriod(): Promise<void> {
     if (!selectedPeriod || !closeBy) return
+    if (pendingPeriodId) return
+    setPendingPeriodId(selectedPeriod.id)
 
     try {
       await apiClient.put(`/api/v1/finance/periods/${selectedPeriod.id}`, {
@@ -127,10 +134,14 @@ export default function PeriodsPage(): JSX.Element {
         description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || t('finance.periods.closeError'),
         variant: 'destructive',
       })
+    } finally {
+      setPendingPeriodId(null)
     }
   }
 
   async function reopenPeriod(period: AccountingPeriod): Promise<void> {
+    if (pendingPeriodId) return
+    setPendingPeriodId(period.id)
     try {
       await apiClient.put(`/api/v1/finance/periods/${period.id}`, {
         status: 'OPEN',
@@ -147,6 +158,8 @@ export default function PeriodsPage(): JSX.Element {
         description: (error as { response?: { data?: { detail?: string } }; message?: string })?.response?.data?.detail || (error as Error)?.message || 'Fehler beim Wiedereröffnen der Periode.',
         variant: 'destructive',
       })
+    } finally {
+      setPendingPeriodId(null)
     }
   }
 
@@ -233,7 +246,7 @@ export default function PeriodsPage(): JSX.Element {
           {row.original.status === 'OPEN' && (
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               onClick={() => {
                 setSelectedPeriod(row.original)
                 setIsCloseDialogOpen(true)
@@ -246,8 +259,9 @@ export default function PeriodsPage(): JSX.Element {
           {row.original.status === 'CLOSED' && (
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => reopenPeriod(row.original)}
+              className="min-h-touch"
+              disabled={pendingPeriodId === row.original.id}
+              onClick={() => void reopenPeriod(row.original)}
             >
               <Unlock className="h-4 w-4 mr-1" />
               Wiedereröffnen
@@ -267,13 +281,13 @@ export default function PeriodsPage(): JSX.Element {
       )}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('finance.periods.title')}</h2>
+          <h1 className="text-3xl font-bold tracking-tight">{t('finance.periods.title')}</h1>
           <p className="text-muted-foreground">{t('finance.periods.description')}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="min-h-touch">
                 <Plus className="h-4 w-4 mr-2" />
                 {t('finance.periods.createPeriod')}
               </Button>
@@ -309,10 +323,10 @@ export default function PeriodsPage(): JSX.Element {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                <Button variant="outline" className="min-h-touch" onClick={() => setIsCreateDialogOpen(false)}>
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={createPeriod}>{t('common.create')}</Button>
+                <Button className="min-h-touch" onClick={() => void createPeriod()} disabled={pendingPeriodId === 'create'}>{t('common.create')}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -364,10 +378,10 @@ export default function PeriodsPage(): JSX.Element {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCloseDialogOpen(false)}>
+            <Button variant="outline" className="min-h-touch" onClick={() => setIsCloseDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={closePeriod} disabled={!closeBy}>
+            <Button className="min-h-touch" onClick={() => void closePeriod()} disabled={!closeBy || pendingPeriodId === selectedPeriod?.id}>
               <Lock className="h-4 w-4 mr-2" />
               {t('finance.periods.close')}
             </Button>

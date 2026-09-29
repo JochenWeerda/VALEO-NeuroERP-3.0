@@ -68,7 +68,7 @@ const createKundenListConfig = (t: TFunction, entityTypeLabel: string): ListConf
       key: 'email',
       label: t('crud.fields.email'),
       labelKey: 'crud.fields.email',
-      render: (value) => value ? <a href={`mailto:${value}`} className="text-blue-600 hover:underline">{value}</a> : '-'
+      render: (value) => value ? <a href={`mailto:${value}`} className="min-h-11 inline-flex items-center text-primary touch-manipulation">{value}</a> : '-'
     },
     {
       key: 'umsatzGesamt',

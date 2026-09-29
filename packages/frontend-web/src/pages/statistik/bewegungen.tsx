@@ -47,7 +47,7 @@ export default function BewegungenStatistikPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <ArrowUpCircle className="h-5 w-5 text-muted-foreground" />
-              <span className="text-2xl font-bold text-blue-600">{bewegungen.heute.ausgaenge}</span>
+              <span className="text-2xl font-bold text-primary">{bewegungen.heute.ausgaenge}</span>
             </div>
           </CardContent>
         </Card>
@@ -75,7 +75,7 @@ export default function BewegungenStatistikPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Woche Ausgänge</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-blue-600">{bewegungen.woche.ausgaenge}</span>
+            <span className="text-2xl font-bold text-primary">{bewegungen.woche.ausgaenge}</span>
           </CardContent>
         </Card>
       </div>
@@ -111,7 +111,7 @@ export default function BewegungenStatistikPage(): JSX.Element {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Ausgänge:</span>
-                    <span className="font-semibold text-blue-600">{artikel.ausgaenge} t</span>
+                    <span className="font-semibold text-primary">{artikel.ausgaenge} t</span>
                   </div>
                 </div>
               </div>

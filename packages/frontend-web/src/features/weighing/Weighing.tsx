@@ -247,10 +247,10 @@ export default function Weighing(): ReactElement {
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
-                          size="sm"
                           variant="outline"
                           disabled={approveMutation.isPending}
                           onClick={() => handleApprove(ticket.id)}
+                          className="min-h-touch"
                         >
                           Freigeben
                         </Button>

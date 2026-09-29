@@ -10,6 +10,9 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { listFuhrparkFahrzeuge, type FuhrparkFahrzeug } from '@/lib/api/fuhrpark'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -54,6 +57,8 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 
 export default function FahrzeugePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFocus, setRoleFocus] = useState<FleetRole>('fuhrpark')
 
@@ -87,6 +92,32 @@ export default function FahrzeugePage(): JSX.Element {
         ? 'Suchfilter pruefen oder neues Fahrzeug anlegen.'
         : 'Fahrzeugbestand ist arbeitsfaehig; naechste Fristenpruefung planen.'
 
+  function handleExport(): void {
+    if (filteredFahrzeuge.length === 0) {
+      toast({ title: 'Kein Export', description: 'Keine Fahrzeuge in der aktuellen Sicht.', variant: 'destructive' })
+      return
+    }
+    exportToCSV(
+      filteredFahrzeuge.map((f) => ({
+        kennzeichen: f.kennzeichen,
+        ro_nummer: f.ro_nummer ?? '',
+        typ: f.typ,
+        kilometerstand: f.kilometerstand ?? 0,
+        naechste_inspektion: f.naechste_inspektion ?? '',
+        status: f.status,
+      })),
+      `fuhrpark-${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { key: 'kennzeichen', label: 'Kennzeichen' },
+        { key: 'ro_nummer', label: 'RO-Nr' },
+        { key: 'typ', label: 'Typ' },
+        { key: 'kilometerstand', label: 'km-Stand' },
+        { key: 'naechste_inspektion', label: 'Inspektion' },
+        { key: 'status', label: 'Status' },
+      ],
+    )
+  }
+
   if (isError && !isLoading) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   if (isLoading) return <LoadingSkeleton />
 
@@ -95,7 +126,7 @@ export default function FahrzeugePage(): JSX.Element {
       key: 'kennzeichen' as const,
       label: 'Kennzeichen',
       render: (f: FuhrparkFahrzeug) => (
-        <button onClick={() => navigate(`/fuhrpark/fahrzeug/${f.id}`)} className="font-mono font-medium text-blue-600 hover:underline">{f.kennzeichen}</button>
+        <button type="button" onClick={() => navigate(`/fuhrpark/fahrzeug/${f.id}`)} className="min-h-11 font-mono font-medium text-primary touch-manipulation">{f.kennzeichen}</button>
       ),
     },
     { key: 'ro_nummer' as const, label: 'RO-Nr.' },
@@ -123,17 +154,21 @@ export default function FahrzeugePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Fuhrpark</h1>
-          <p className="text-muted-foreground">Fahrzeug-Verwaltung</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Fuhrpark</h1>
+          <p className="text-muted-foreground">Fahrzeuge suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/fuhrpark/fahrzeug/neu')} className="gap-2"><Plus className="h-4 w-4" />Neues Fahrzeug</Button>
+        <Button onClick={() => navigate('/fuhrpark/fahrzeug/neu')} className="min-h-touch gap-2 touch-manipulation"><Plus className="h-4 w-4" />Neues Fahrzeug</Button>
       </div>
 
+      {!isTouch ? (
       <RoleFocusBar roles={fleetRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={filteredFahrzeuge.length} totalCount={fahrzeuge.length} title="Wer steuert den Fuhrpark?" />
+      ) : null}
 
+      {!isTouch ? (
+      <>
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <ManagementDecisionPanel
           decision={{
@@ -175,6 +210,8 @@ export default function FahrzeugePage(): JSX.Element {
           ]}
         />
       </div>
+      </>
+      ) : null}
 
       {inspektionFaellig > 0 && (
         <Callout variant="warning" className="pt-4"><div className="flex items-center gap-2 text-status-warning"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{inspektionFaellig} Inspektion(en) in den naechsten 14 Tagen faellig!</span></div></Callout>
@@ -183,9 +220,9 @@ export default function FahrzeugePage(): JSX.Element {
       <Card>
         <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div>
-            <Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label="Suche Fahrzeuge" placeholder="Kennzeichen, Typ, RO-Nr" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" /></div>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}><FileDown className="h-4 w-4" />Export</Button>
           </div>
         </CardContent>
       </Card>

@@ -342,7 +342,7 @@ function LegacyKundenStammModern(): JSX.Element {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {(l3Config.ai?.intentBar?.actions ?? []).map((action) => (
-              <Button key={action.id} variant={activePanel === 'intent' && action.id === 'gen_letter_salutation' ? 'default' : 'outline'} size="sm" onClick={() => void handleIntentAction(action.id)}>
+              <Button key={action.id} variant={activePanel === 'intent' && action.id === 'gen_letter_salutation' ? 'default' : 'outline'} onClick={() => void handleIntentAction(action.id)} className="min-h-touch">
                 {action.label}
               </Button>
             ))}

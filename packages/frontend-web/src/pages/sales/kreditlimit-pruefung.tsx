@@ -44,7 +44,7 @@ export default function KreditlimitPruefungPage() {
       <div className="flex items-center gap-2">
         <ShieldCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Kreditlimit-Prüfung</h1>
-        <Button variant="outline" size="sm" className="ml-auto"
+        <Button variant="outline" className="min-h-touch ml-auto"
           onClick={() => { void customers.refetch(); void orders.refetch() }}
           disabled={customers.isFetching || orders.isFetching}>
           {customers.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}

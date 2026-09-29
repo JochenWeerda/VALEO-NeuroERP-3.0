@@ -9,6 +9,7 @@ import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 import { apiClient } from '@/lib/api-client'
@@ -40,6 +41,7 @@ type SiloOption = { id: string; label: string; description: string }
 export default function LKWBeladungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
 
   const { data: articlesData } = useQuery({
     queryKey: ['articles', 'lkw-beladung'],
@@ -87,6 +89,7 @@ export default function LKWBeladungPage(): JSX.Element {
   }
 
   const handleFinish = async (): Promise<void> => {
+    if (saving) return
     setSaving(true)
     try {
       await api.post('/api/v1/lager/verladung', {
@@ -202,7 +205,7 @@ export default function LKWBeladungPage(): JSX.Element {
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
             <CheckCircle className="h-16 w-16 text-status-success" />
-            <h3 className="text-xl font-bold text-slate-800">Beladung prüfen</h3>
+            <h3 className="text-xl font-bold text-foreground">Beladung prüfen</h3>
           </div>
           <TouchConfirmCard
             title="Zusammenfassung"
@@ -228,7 +231,7 @@ export default function LKWBeladungPage(): JSX.Element {
     <div className="flex flex-col">
       <div className="p-3 md:p-6">
         <ModuleToolbar backTarget="/logistik/verladungen" closeTarget="/logistik/verladungen" title="LKW-Beladung" />
-        <AgentProcessPanel domain="lager" className="mb-4" />
+        {!isTouch ? <AgentProcessPanel domain="lager" className="mb-4" /> : null}
         <Wizard
           title="LKW-Beladung"
           steps={steps}
@@ -237,7 +240,7 @@ export default function LKWBeladungPage(): JSX.Element {
           loading={saving}
         />
       </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

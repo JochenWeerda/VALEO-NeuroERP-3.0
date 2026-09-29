@@ -167,15 +167,15 @@ export default function PreisspiedelPage() {
             <TrendingUp className="h-6 w-6 text-status-success" />
             Getreidekurse
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Aktuelle Ankaufspreise für Ihre Ernte — alle Liefervarianten im Überblick
           </p>
         </div>
         <Button
           variant="outline"
-          size="sm"
           onClick={() => refetch()}
           disabled={isFetching}
+          className="min-h-touch"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
           Aktualisieren

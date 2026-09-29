@@ -128,7 +128,7 @@ describe('AdminControlCenterPage', () => {
     expect(screen.getAllByText('Finance Approval Case').length).toBeGreaterThan(0)
     expect(screen.getByText('Superglue Document Search')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'superglue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Superglue' }))
     expect(screen.getByText('default.sg.document.search')).toBeInTheDocument()
 
     fireEvent.change(screen.getByPlaceholderText('Vorfaelle filtern...'), { target: { value: 'finance' } })

@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Download, RefreshCw, ClipboardList } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { getCoverageMonitor, requestOverride, type CoverageItem } from '@/lib/api/positions'
 
 function getDefaultPeriodFrom(): string {
@@ -23,12 +24,13 @@ function getDefaultPeriodTo(): string {
 }
 
 function cellBgClass(severity: string): string {
-  if (severity === 'RED') return 'bg-red-100 dark:bg-red-900/30'
-  if (severity === 'YELLOW') return 'bg-yellow-100 dark:bg-yellow-900/30'
+  if (severity === 'RED') return 'bg-status-error/10 text-status-error'
+  if (severity === 'YELLOW') return 'bg-status-warning/10 text-status-warning'
   return ''
 }
 
 export default function FrmCoverageMonitor(): JSX.Element {
+  const isTouch = useTouchDevice()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [branchId, setBranchId] = useState<string | undefined>(undefined)
@@ -141,8 +143,8 @@ export default function FrmCoverageMonitor(): JSX.Element {
     <div className="flex flex-col">
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Coverage Monitor (kritische Lücken)</h1>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
+        <h1 className="text-2xl font-semibold">Deckungsmonitor</h1>
+        <Button variant="outline" className="min-h-touch" onClick={() => refetch()}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Aktualisieren
         </Button>
@@ -155,20 +157,21 @@ export default function FrmCoverageMonitor(): JSX.Element {
         <CardContent className="grid grid-cols-2 gap-4 md:grid-cols-6">
           <div>
             <Label>Stichtag</Label>
-            <Input type="date" value={asOfDate} onChange={(e) => setAsOfDate(e.target.value)} />
+            <Input className="min-h-touch" type="date" value={asOfDate} onChange={(e) => setAsOfDate(e.target.value)} />
           </div>
           <div>
             <Label>Periode von</Label>
-            <Input value={periodFrom} onChange={(e) => setPeriodFrom(e.target.value)} />
+            <Input className="min-h-touch" value={periodFrom} onChange={(e) => setPeriodFrom(e.target.value)} />
           </div>
           <div>
             <Label>Periode bis</Label>
-            <Input value={periodTo} onChange={(e) => setPeriodTo(e.target.value)} />
+            <Input className="min-h-touch" value={periodTo} onChange={(e) => setPeriodTo(e.target.value)} />
           </div>
           <div>
             <Label>Schweregrad</Label>
             <select
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              className="flex min-h-touch w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              aria-label="Schweregrad"
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value)}
             >
@@ -192,12 +195,12 @@ export default function FrmCoverageMonitor(): JSX.Element {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardHeader className="flex flex-col gap-2 pb-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">Kritische Positionen</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               disabled={selected.size === 0 || massActionLoading}
               onClick={handleMassFreigabe}
             >
@@ -205,14 +208,14 @@ export default function FrmCoverageMonitor(): JSX.Element {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               disabled={selected.size === 0}
               onClick={handleMassAufgabe}
             >
               <ClipboardList className="mr-2 h-4 w-4" />
               Aufgabe erstellen
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExport} disabled={!data?.items?.length}>
+            <Button variant="outline" className="min-h-touch" onClick={handleExport} disabled={!data?.items?.length}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
@@ -284,7 +287,7 @@ export default function FrmCoverageMonitor(): JSX.Element {
               <div className="flex gap-2 mt-4">
                 <Button
                   variant="outline"
-                  size="sm"
+                  className="min-h-touch"
                   disabled={skip === 0}
                   onClick={() => setSkip((s) => Math.max(0, s - limit))}
                 >
@@ -292,7 +295,7 @@ export default function FrmCoverageMonitor(): JSX.Element {
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  className="min-h-touch"
                   disabled={skip + limit >= data.total}
                   onClick={() => setSkip((s) => s + limit)}
                 >
@@ -304,7 +307,7 @@ export default function FrmCoverageMonitor(): JSX.Element {
         </CardContent>
       </Card>
     </div>
-    <KeyboardShortcutBar shortcuts={shortcuts} />
+    {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

@@ -101,8 +101,7 @@ function DocRow({
       {onLink && (
         <Button
           variant="outline"
-          size="sm"
-          className="h-7 gap-1 text-xs"
+          className="min-h-touch h-7 gap-1 text-xs"
           onClick={onLink}
           disabled={linking}
           title="Diesem Beleg zuordnen"

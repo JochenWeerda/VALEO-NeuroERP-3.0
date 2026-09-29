@@ -16,6 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { useNavigate } from '@/app/routing/typed-router'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   TrendingUp,
   Users,
@@ -48,32 +50,37 @@ const GAP_ICONS: Record<string, React.ReactNode> = {
 }
 
 function GapKarte({ gap }: { gap: GapTyp }) {
+  const navigate = useNavigate()
   const gesamtPotential = gap.kunden.length * gap.potential_eur_je_kunde
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card>
       <CardContent className="pt-4">
         <div className="flex items-start gap-3">
           <div className="mt-1">{GAP_ICONS[gap.gap_typ] ?? <Target className="h-5 w-5" />}</div>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold text-gray-900">{gap.titel}</span>
+              <span className="font-semibold text-foreground">{gap.titel}</span>
               <Badge variant="error">
                 {gap.kunden.length} Kunden
               </Badge>
             </div>
-            <p className="text-sm text-gray-600 mb-3">{gap.beschreibung}</p>
+            <p className="text-sm text-muted-foreground mb-3">{gap.beschreibung}</p>
             <div className="flex items-center justify-between">
               <div className="text-sm">
-                <span className="text-gray-500">Potential: </span>
+                <span className="text-muted-foreground">Potential: </span>
                 <span className="font-bold text-status-success">
                   {gesamtPotential.toLocaleString('de-DE')} €
                 </span>
-                <span className="text-gray-400 text-xs ml-1">
+                <span className="text-muted-foreground text-xs ml-1">
                   ({gap.potential_eur_je_kunde.toLocaleString('de-DE')} €/Kunde)
                 </span>
               </div>
               {gap.kunden.length > 0 && (
-                <Button size="sm" variant="outline">
+                <Button
+                  className="min-h-touch"
+                  variant="outline"
+                  onClick={() => navigate(`/crm/kunden-liste?q=${encodeURIComponent(gap.kunden[0] ?? '')}`)}
+                >
                   Kunden ansehen
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
@@ -94,6 +101,7 @@ function GapKarte({ gap }: { gap: GapTyp }) {
 }
 
 export default function PotentialAnalysePage() {
+  const isTouch = useTouchDevice()
   const { data, isLoading, isError } = useQuery<PotentialResponse>({
     queryKey: ['potential-analyse'],
     queryFn: async () => {
@@ -111,22 +119,21 @@ export default function PotentialAnalysePage() {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Target className="h-6 w-6 text-muted-foreground" />
           Potential-Analyse
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-muted-foreground text-sm mt-1">
           Cross-Sell-Lücken im Kundenstamm — für Außendienst und Innendienst
         </p>
       </div>
 
-      {/* KPI-Leiste */}
-      {data && (
+      {!isTouch && data ? (
         <div className="grid grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-4 text-center">
-              <div className="text-3xl font-bold text-blue-700">{gesamtKunden}</div>
-              <div className="text-sm text-gray-500">Kunden mit Potential</div>
+              <div className="text-3xl font-bold text-primary">{gesamtKunden}</div>
+              <div className="text-sm text-muted-foreground">Kunden mit Potential</div>
             </CardContent>
           </Card>
           <Card>
@@ -134,17 +141,17 @@ export default function PotentialAnalysePage() {
               <div className="text-3xl font-bold text-status-success">
                 {(gesamtPotential / 1000).toFixed(0)} T€
               </div>
-              <div className="text-sm text-gray-500">Geschätztes Gesamtpotential</div>
+              <div className="text-sm text-muted-foreground">Geschätztes Gesamtpotential</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 text-center">
               <div className="text-3xl font-bold text-status-warning">{data.schlag_kunden_count}</div>
-              <div className="text-sm text-gray-500">Kunden mit Schlagkartei</div>
+              <div className="text-sm text-muted-foreground">Kunden mit Schlagkartei</div>
             </CardContent>
           </Card>
         </div>
-      )}
+      ) : null}
 
       {isLoading && (
         <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-32" />)}</div>
@@ -164,7 +171,7 @@ export default function PotentialAnalysePage() {
       </div>
 
       {data && (
-        <p className="text-xs text-gray-400">{data.hinweis}</p>
+        <p className="text-xs text-muted-foreground">{data.hinweis}</p>
       )}
     </div>
   )

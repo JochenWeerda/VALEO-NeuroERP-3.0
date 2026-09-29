@@ -268,10 +268,11 @@ export default function PortalAnfragen() {
                         <TableCell>
                           <Button
                             variant="ghost"
-                            size="sm"
                             onClick={() => setSelectedAnfrage(anfrage)}
+                            className="min-h-touch"
                           >
                             <Eye className="h-4 w-4" />
+                            Details
                           </Button>
                         </TableCell>
                       </TableRow>

@@ -144,19 +144,17 @@ function BreachCard({ breach, onEdit, onNotify }: BreachCardProps): JSX.Element 
         <div className="mt-3 flex gap-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => onEdit(breach)}
             data-testid={`breach-edit-${breach.id}`}
-          >
+           className="min-h-touch">
             <Pencil className="mr-1 h-3 w-3" /> Bearbeiten
           </Button>
           {breach.status !== 'GEMELDET' && breach.status !== 'ABGESCHLOSSEN' && (
             <Button
               variant="default"
-              size="sm"
               onClick={() => onNotify(breach)}
               data-testid={`breach-notify-${breach.id}`}
-            >
+             className="min-h-touch">
               <CheckCircle2 className="mr-1 h-3 w-3" /> Behörde gemeldet
             </Button>
           )}
@@ -476,7 +474,7 @@ export default function Datenpannen(): JSX.Element {
               {overdueCount} offen / überfällig
             </span>
           )}
-          <Button size="sm" onClick={openCreate} data-testid="breach-add-btn">
+          <Button onClick={openCreate} data-testid="breach-add-btn" className="min-h-touch">
             <Plus className="mr-2 h-4 w-4" /> Datenpanne erfassen
           </Button>
         </div>
@@ -497,7 +495,7 @@ export default function Datenpannen(): JSX.Element {
           <CardContent className="pt-6 text-center text-muted-foreground">
             <ShieldAlert className="mx-auto mb-3 h-10 w-10 opacity-30" />
             <p className="text-sm">Keine Datenpannen erfasst — das ist gut!</p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={openCreate}>
+            <Button variant="outline" className="min-h-touch mt-4" onClick={openCreate}>
               Datenpanne erfassen
             </Button>
           </CardContent>

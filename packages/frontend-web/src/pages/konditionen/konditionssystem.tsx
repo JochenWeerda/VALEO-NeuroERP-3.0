@@ -188,8 +188,9 @@ function PreislistenTab() {
                       <Badge variant={pl.is_active ? 'outline' : 'secondary'}>{pl.is_active ? 'Aktiv' : 'Inaktiv'}</Badge>
                     </td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === pl.id} onClick={() => void handleDelete(pl)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === pl.id} onClick={() => void handleDelete(pl)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -296,8 +297,9 @@ function RabattgruppenTab() {
                     <td className="py-2 pr-3">{g.bezeichnung}</td>
                     <td className="py-2 pr-3"><Badge variant="secondary">{g.richtung}</Badge></td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === g.id} onClick={() => void handleDelete(g)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === g.id} onClick={() => void handleDelete(g)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -402,8 +404,9 @@ function RabattklassenTab() {
                     <td className="py-2 pr-3">{k.bezeichnung}</td>
                     <td className="py-2 pr-3"><Badge variant="secondary">{k.richtung}</Badge></td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === k.id} onClick={() => void handleDelete(k)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === k.id} onClick={() => void handleDelete(k)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -540,8 +543,9 @@ function RabattsaetzeTab() {
                     <td className="py-2 pr-3 text-xs">{s.gueltig_ab ? new Date(s.gueltig_ab).toLocaleDateString('de-DE') : '—'}</td>
                     <td className="py-2 pr-3 text-xs">{s.gueltig_bis ? new Date(s.gueltig_bis).toLocaleDateString('de-DE') : 'unbegrenzt'}</td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === s.id} onClick={() => void handleDelete(s)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === s.id} onClick={() => void handleDelete(s)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -688,8 +692,9 @@ function IndividualpreiseTab() {
                     <td className="py-2 pr-3 text-xs">{new Date(ip.gueltig_von).toLocaleDateString('de-DE')}</td>
                     <td className="py-2 pr-3 text-xs">{ip.gueltig_bis ? new Date(ip.gueltig_bis).toLocaleDateString('de-DE') : 'unbegrenzt'}</td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === ip.id} onClick={() => void handleDelete(ip)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === ip.id} onClick={() => void handleDelete(ip)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>

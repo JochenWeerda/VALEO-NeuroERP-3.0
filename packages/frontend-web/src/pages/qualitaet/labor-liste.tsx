@@ -12,9 +12,11 @@ import { Input } from '@/components/ui/input'
 import { Beaker, FileDown, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function LaborListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: auftraege = [], isError, error, refetch } = useLaborAuftraege()
 
@@ -89,7 +91,9 @@ export default function LaborListePage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'id' as const, label: 'Auftrag', render: (l: LaborAuftrag) => <button onClick={() => navigate(`/qualitaet/labor/${l.id}`)} className="font-medium text-blue-600 hover:underline">{l.id}</button> },
+    { key: 'id' as const, label: 'Auftrag', render: (l: LaborAuftrag) => (
+      <button type="button" onClick={() => navigate(`/qualitaet/labor/${l.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">{l.id}</button>
+    ) },
     { key: 'chargenId' as const, label: 'Charge', render: (l: LaborAuftrag) => <span className="font-mono">{l.chargenId}</span> },
     { key: 'labor' as const, label: 'Labor' },
     { key: 'analysen' as const, label: 'Analysen', render: (l: LaborAuftrag) => `${l.analysen} Analysen` },
@@ -98,32 +102,76 @@ export default function LaborListePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">Labor-Aufträge</h1>
+          <p className="text-muted-foreground">Qualitätsanalysen sichten und öffnen</p>
+        </div>
+        <Button onClick={() => navigate('/qualitaet/labor-auftrag')} className="min-h-touch gap-2 touch-manipulation">
+          <Plus className="h-4 w-4" />Neuer Auftrag
+        </Button>
+      </div>
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
-        title="Labor-Auftraege"
-        description="Der Qualitaetsraum zeigt offene Analysen, Chargebezug und naechste Folgeaktion ueber der Arbeitsliste."
+        title="Labor-Aufträge"
+        description="Der Qualitätsraum zeigt offene Analysen, Chargebezug und nächste Folgeaktion über der Arbeitsliste."
         status={operationalStatus}
-        owner="Qualitaet / Labor"
+        owner="Qualität / Labor"
         blocker={offeneAuftraege.some((auftrag) => auftrag.status === 'offen') ? 'Mindestens ein Auftrag ist noch nicht gestartet.' : null}
-        nextAction={offeneAuftraege.length > 0 ? 'Naechsten offenen Auftrag bearbeiten' : 'Abgeschlossene Analysen nachbereiten'}
+        nextAction={offeneAuftraege.length > 0 ? 'Nächsten offenen Auftrag bearbeiten' : 'Abgeschlossene Analysen nachbereiten'}
         caseLabel="Vorgang: Laborauftrag"
-        tags={['Qualitaet', 'Charge']}
+        tags={['Qualität', 'Charge']}
       />
       <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
         <OperationalTimeline title="Analyseverlauf" items={timelineItems} />
         <OperationalContextPanel title="Labor-Kontext" sections={contextSections} />
       </div>
-      <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Labor-Auftraege</h1><p className="text-muted-foreground">Qualitaetsanalysen</p></div><Button onClick={() => navigate('/qualitaet/labor-auftrag')} className="gap-2"><Plus className="h-4 w-4" />Neuer Auftrag</Button></div>
+      </>
+      ) : null}
+      <Card>
+        <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label="Suche Laboraufträge"
+                placeholder="Auftrag, Charge oder Labor suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
+            </div>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
+              <FileDown className="h-4 w-4" />Export
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      <Card><CardContent className="pt-6"><DataTable data={gefilterteAuftraege} columns={columns} /></CardContent></Card>
+      {!isTouch ? (
+      <>
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Auftraege Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Beaker className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{gefilterteAuftraege.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aufträge Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Beaker className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{gefilterteAuftraege.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{gefilterteAuftraege.filter((a) => a.status === 'in-bearbeitung').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{gefilterteAuftraege.filter((a) => a.status === 'abgeschlossen').length}</span></CardContent></Card>
       </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2" onClick={handleExport}><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
-        <Card><CardHeader><CardTitle>Labor-Folgeaktionen</CardTitle></CardHeader><CardContent className="space-y-3 text-sm"><div className="rounded-lg border p-3"><div className="font-medium">Offene Analysen</div><div className="text-muted-foreground">{offeneAuftraege.length} Auftrag/Auftraege noch nicht abgeschlossen.</div></div><Button className="w-full justify-start" variant="outline" onClick={() => { const target = offeneAuftraege[0] ?? gefilterteAuftraege[0]; if (target) navigate(`/qualitaet/labor/${target.id}`) }}>Naechsten Auftrag oeffnen</Button><Button className="w-full justify-start" variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumentenablage oeffnen</Button><Button className="w-full justify-start" variant="outline" onClick={() => navigate('/qualitaet/labor-auftrag')}>Neuen Auftrag anlegen</Button></CardContent></Card>
-      </div>
-      <Card><CardContent className="pt-6"><DataTable data={gefilterteAuftraege} columns={columns} /></CardContent></Card>
+      <Card>
+        <CardHeader><CardTitle>Labor-Folgeaktionen</CardTitle></CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="rounded-lg border p-3">
+            <div className="font-medium">Offene Analysen</div>
+            <div className="text-muted-foreground">{offeneAuftraege.length} Auftrag/Aufträge noch nicht abgeschlossen.</div>
+          </div>
+          <Button className="min-h-touch w-full justify-start touch-manipulation" variant="outline" onClick={() => { const target = offeneAuftraege[0] ?? gefilterteAuftraege[0]; if (target) navigate(`/qualitaet/labor/${target.id}`) }}>Nächsten Auftrag öffnen</Button>
+          <Button className="min-h-touch w-full justify-start touch-manipulation" variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumentenablage öffnen</Button>
+          <Button className="min-h-touch w-full justify-start touch-manipulation" variant="outline" onClick={() => navigate('/qualitaet/labor-auftrag')}>Neuen Auftrag anlegen</Button>
+        </CardContent>
+      </Card>
+      </>
+      ) : null}
     </div>
   )
 }

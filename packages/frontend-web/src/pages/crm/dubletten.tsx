@@ -89,7 +89,7 @@ function GroupCard({ g }: { g: DuplicateGroup }) {
           <span className="text-xs text-muted-foreground">
             Master wählen — die übrigen werden in den Master überführt (Historie umgehängt, revisionssicher protokolliert).
           </span>
-          <Button size="sm" onClick={handleMerge} disabled={mergeMut.isPending || !master}>
+          <Button className="min-h-touch" onClick={handleMerge} disabled={mergeMut.isPending || !master}>
             {mergeMut.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Merge size={14} className="mr-1" />}
             Zusammenführen
           </Button>
@@ -113,7 +113,7 @@ export default function DublettenPage() {
             {data.total} Cluster · {data.geprueft} Kunden geprüft
           </span>
         )}
-        <Button variant="outline" size="sm" className="ml-auto"
+        <Button variant="outline" className="ml-auto min-h-touch"
           onClick={() => void refetch()} disabled={isFetching}>
           {isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Neu prüfen</span>

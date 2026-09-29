@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileDown, Search, Truck } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { useToast } from '@/hooks/use-toast'
+import { NativeSelect } from '@/components/ui/native-select'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { useLieferungen, type Lieferung, type LieferungStatus } from '@/lib/api/sales'
 import {
@@ -40,6 +43,8 @@ const deliveryListRoleProfiles: Array<{ id: DeliveryListRoleFocus; label: string
 export default function LieferungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const entityType = 'delivery'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lieferung')
   const pageTitle = getListTitle(t, entityTypeLabel)
@@ -92,8 +97,9 @@ export default function LieferungenListePage(): JSX.Element {
       label: t('crud.fields.number'),
       render: (lieferung: Lieferung) => (
         <button
+          type="button"
           onClick={() => navigate(`/sales/delivery-editor?id=${lieferung.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="inline-flex min-h-11 items-center text-left font-medium text-primary underline-offset-4 hover:underline"
         >
           {lieferung.nummer}
         </button>
@@ -113,8 +119,9 @@ export default function LieferungenListePage(): JSX.Element {
       label: t('crud.entities.salesOrder'),
       render: (lieferung: Lieferung) => (
         <button
+          type="button"
           onClick={() => navigate(`/sales/order-editor?id=${lieferung.auftragsNr}`)}
-          className="text-sm text-blue-600 hover:underline"
+          className="inline-flex min-h-11 items-center text-sm text-primary underline-offset-4 hover:underline"
         >
           {lieferung.auftragsNr}
         </button>
@@ -133,19 +140,82 @@ export default function LieferungenListePage(): JSX.Element {
     },
   ]
 
+  const handleExport = (): void => {
+    const header = 'Nummer;Datum;Kunde;Auftrag;Menge;Status\n'
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const rows = filteredLieferungen.map((lieferung) =>
+      [lieferung.nummer, lieferung.datum, lieferung.kunde, lieferung.auftragsNr, lieferung.menge, lieferung.status].map(esc).join(';'),
+    ).join('\n')
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Lieferungen_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: t('crud.actions.export'), description: t('crud.messages.exportedItems', { count: filteredLieferungen.length, entityType: entityTypeLabel }) })
+  }
+
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">{pageTitle}</h1>
           <p className="text-muted-foreground">{t('crud.list.overview', { entityType: entityTypeLabel })}</p>
         </div>
-        <Button onClick={() => navigate('/sales/delivery-editor')} className="gap-2">
+        <Button onClick={() => navigate('/sales/delivery-editor')} className="min-h-touch gap-2 touch-manipulation">
           <Truck className="h-4 w-4" />
           {t('crud.actions.new')} {entityTypeLabel}
         </Button>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('crud.actions.filter')} & {t('crud.actions.search')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label={t('crud.actions.search')}
+                placeholder={`${t('crud.actions.search')}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
+            </div>
+            <NativeSelect
+              aria-label={t('crud.fields.status')}
+              className="min-h-touch sm:w-48"
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as LieferungStatus | 'alle')}
+              options={[
+                { value: 'alle', label: t('crud.list.allStatus', { defaultValue: 'Alle Status' }) },
+                { value: 'geplant', label: t('status.planned') },
+                { value: 'unterwegs', label: t('status.inTransit') },
+                { value: 'zugestellt', label: t('status.delivered') },
+                { value: 'storniert', label: t('status.cancelled') },
+              ]}
+            />
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
+              <FileDown className="h-4 w-4" />
+              {t('crud.actions.export')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="overflow-x-auto pt-6">
+          <DataTable data={filteredLieferungen} columns={columns} />
+          <div className="mt-4 text-sm text-muted-foreground">
+            {t('crud.list.showing', { count: filteredLieferungen.length, total: lieferungen.length, entityType: entityTypeLabel })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar roles={deliveryListRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
         <ManagementDecisionPanel
@@ -168,49 +238,7 @@ export default function LieferungenListePage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={deliveryListCrudCapabilities} />
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('crud.actions.filter')} & {t('crud.actions.search')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={`${t('crud.actions.search')  }...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as Lieferung['status'] | 'alle')}
-              className="rounded-md border border-input bg-background px-3 py-2"
-            >
-              <option value="alle">{t('crud.list.allStatus', { defaultValue: 'Alle Status' })}</option>
-              <option value="geplant">{t('status.planned')}</option>
-              <option value="unterwegs">{t('status.inTransit')}</option>
-              <option value="zugestellt">{t('status.delivered')}</option>
-              <option value="storniert">{t('status.cancelled')}</option>
-            </select>
-            <Button variant="outline" className="gap-2">
-              <FileDown className="h-4 w-4" />
-              {t('crud.actions.export')}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={filteredLieferungen} columns={columns} />
-          <div className="mt-4 text-sm text-muted-foreground">
-            {t('crud.list.showing', { count: filteredLieferungen.length, total: lieferungen.length, entityType: entityTypeLabel })}
-          </div>
-        </CardContent>
-      </Card>
+      ) : null}
     </div>
   )
 }

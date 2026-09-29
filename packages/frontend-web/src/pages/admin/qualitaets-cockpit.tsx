@@ -115,10 +115,10 @@ export default function QualitaetsCockpitPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" asChild className="min-h-touch">
             <Link to="/admin/externe-gates">Externe Gates</Link>
           </Button>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" asChild className="min-h-touch">
             <a
               href={`${DOCS_BASE_URL}/entwickler/drift-dashboard/`}
               target="_blank"
@@ -128,7 +128,7 @@ export default function QualitaetsCockpitPage() {
               Drift-Dashboard
             </a>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching} className="min-h-touch">
             <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
             Aktualisieren
           </Button>

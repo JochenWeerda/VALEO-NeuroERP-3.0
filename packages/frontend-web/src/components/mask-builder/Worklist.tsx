@@ -139,9 +139,8 @@ const Worklist: React.FC<WorklistProps> = ({
                 <Button
                   key={action.key}
                   variant={action.type === 'primary' ? 'default' : 'outline'}
-                  size="sm"
                   onClick={() => handleAction(item, action.key)}
-                  className="gap-1"
+                  className="min-h-touch gap-1"
                 >
                   {action.icon && <span className="text-sm">{action.icon}</span>}
                   {action.label}

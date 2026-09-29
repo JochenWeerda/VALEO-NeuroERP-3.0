@@ -61,12 +61,12 @@ export default function AdminSuiteSetupPage(): JSX.Element {
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {step.target_path ? (
-                <Button asChild size="sm" variant="outline"><Link to={step.target_path}>Fachmaske <ExternalLink className="ml-2 h-4 w-4" /></Link></Button>
+                <Button asChild variant="outline" className="min-h-touch"><Link to={step.target_path}>Fachmaske <ExternalLink className="ml-2 h-4 w-4" /></Link></Button>
               ) : null}
-              <Button size="sm" variant="outline" disabled={updateStep.isPending} onClick={() => updateStep.mutate({ key: step.key, status: 'in_progress' })}>
+              <Button variant="outline" disabled={updateStep.isPending} onClick={() => updateStep.mutate({ key: step.key, status: 'in_progress' })} className="min-h-touch">
                 <CircleHelp className="mr-2 h-4 w-4" />In Arbeit
               </Button>
-              <Button size="sm" disabled={updateStep.isPending} onClick={() => updateStep.mutate({ key: step.key, status: 'completed' })}>
+              <Button disabled={updateStep.isPending} onClick={() => updateStep.mutate({ key: step.key, status: 'completed' })} className="min-h-touch">
                 <CheckCircle2 className="mr-2 h-4 w-4" />Abschliessen
               </Button>
             </CardContent>

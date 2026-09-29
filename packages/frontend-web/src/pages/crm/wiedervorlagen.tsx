@@ -33,7 +33,7 @@ function Row({ w, onDone }: { w: Wiedervorlage; onDone: () => void }) {
   }
 
   return (
-    <tr className={`border-b last:border-0 ${w.ueberfaellig ? 'bg-red-50/60' : ''}`}>
+    <tr className={`border-b last:border-0 ${w.ueberfaellig ? 'bg-status-error/10' : ''}`}>
       <td className="px-3 py-1.5 whitespace-nowrap">
         {w.wiedervorlage ? new Date(w.wiedervorlage).toLocaleDateString('de-DE') : '—'}
         {w.ueberfaellig && <Badge variant="destructive" className="ml-1">überfällig</Badge>}
@@ -44,10 +44,10 @@ function Row({ w, onDone }: { w: Wiedervorlage; onDone: () => void }) {
       </td>
       <td className="px-3 py-1.5">{w.kurzinfo || '—'}</td>
       <td className="px-3 py-1.5">
-        <Input value={ergebnis} onChange={(e) => setErgebnis(e.target.value)} placeholder="Ergebnis (opt.)" className="h-8 w-44" disabled={erledigen.isPending} />
+        <Input value={ergebnis} onChange={(e) => setErgebnis(e.target.value)} placeholder="Ergebnis (opt.)" aria-label="Ergebnis" className="min-h-touch w-44" disabled={erledigen.isPending} />
       </td>
       <td className="px-3 py-1.5">
-        <Button size="sm" onClick={done} disabled={erledigen.isPending}>
+        <Button className="min-h-touch" onClick={done} disabled={erledigen.isPending}>
           {erledigen.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
           <span className="ml-1">Erledigen</span>
         </Button>
@@ -68,7 +68,7 @@ export default function WiedervorlagenPage() {
         <h1 className="text-lg font-semibold">Wiedervorlagen</h1>
         <Badge variant="secondary">{items.length} offen</Badge>
         {overdue > 0 && <Badge variant="destructive">{overdue} überfällig</Badge>}
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void refetch()} disabled={isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void refetch()} disabled={isFetching}>
           {isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>

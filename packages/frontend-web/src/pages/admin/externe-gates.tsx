@@ -130,7 +130,7 @@ export default function ExterneGatesPage() {
             Integrationsstatus: DATEV · ELSTER · TSE · DMS · Bank/SEPA
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+        <Button variant="outline" onClick={() => refetch()} disabled={isFetching} className="min-h-touch">
           <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
           Aktualisieren
         </Button>

@@ -933,8 +933,8 @@ export default function BestellungAnlegenPage(): JSX.Element {
                             <td className="py-2">
                               <Button
                                 type="button"
-                                size="sm"
                                 variant="outline"
+                                className="min-h-touch touch-manipulation"
                                 onClick={() => vorschlagUebernehmen(zeile)}
                               >
                                 Uebernehmen

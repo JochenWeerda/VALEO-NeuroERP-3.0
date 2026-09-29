@@ -45,7 +45,7 @@ export default function GiftCardsPage(): JSX.Element {
       key: 'cardNumber' as const,
       label: 'Karten-Nummer',
       render: (gc: GiftCard) => (
-        <button onClick={() => navigate(`/pos/gift-card/${gc.id}`)} className="font-mono font-bold text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/pos/gift-card/${gc.id}`)} className="min-h-11 font-mono font-bold text-primary touch-manipulation">
           {gc.cardNumber}
         </button>
       ),

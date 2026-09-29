@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { Camera, Clock, Truck, Upload, X } from 'lucide-react'
 import {
   TouchSection,
@@ -58,6 +59,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const workflowContext = readWorkflowEntryContext(searchParams)
   const [lkw, setLKW] = useState<LKWData>({
     kennzeichen: '',
@@ -73,6 +75,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
   const [uploading, setUploading] = useState(false)
   const [scanDialogField, setScanDialogField] = useState<'kennzeichen' | 'lieferscheinNr' | null>(null)
   const [scanInputValue, setScanInputValue] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   function updateField<K extends keyof LKWData>(key: K, value: LKWData[K]): void {
     setLKW((prev) => ({ ...prev, [key]: value }))
@@ -235,6 +238,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
   }
 
   async function handleSubmit(): Promise<void> {
+    if (submitting) return
+    setSubmitting(true)
     try {
       await api.post('/api/v1/annahme/lkw-registrierung', {
         kennzeichen: lkw.kennzeichen,
@@ -258,6 +263,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
         description: e.response?.data?.detail ?? e.message,
         variant: 'destructive',
       })
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -302,26 +309,26 @@ export default function LKWRegistrierungPage(): JSX.Element {
             </Button>
           </div>
           <div>
-            <p className="mb-2 text-base font-medium text-slate-700">Foto Kennzeichen (optional)</p>
+            <p className="mb-2 text-base font-medium text-foreground">Foto Kennzeichen (optional)</p>
             <div
               {...dropzoneKennzeichen.getRootProps()}
-              className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
+              className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/40 p-4 text-center transition-colors hover:border-primary hover:bg-muted"
             >
               <input {...dropzoneKennzeichen.getInputProps()} accept="image/*" capture="environment" aria-label="Foto Kennzeichen hochladen" />
               <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {dropzoneKennzeichen.isDragActive ? 'Ablegen...' : 'Tippen oder Foto hierher ziehen'}
               </p>
             </div>
           </div>
           <div className="space-y-1">
-            <label htmlFor="ankunftszeit" className="block text-base font-medium text-slate-700">Ankunftszeit</label>
+            <label htmlFor="ankunftszeit" className="block text-base font-medium text-foreground">Ankunftszeit</label>
             <input
               id="ankunftszeit"
               type="datetime-local"
               value={lkw.ankunftszeit}
               onChange={(e) => updateField('ankunftszeit', e.target.value)}
-              className="flex w-full min-h-[54px] rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg text-slate-900 focus:border-blue-500 focus:outline-hidden"
+              className="flex w-full min-h-[54px] rounded-lg border-2 border-border bg-background px-4 py-3 text-lg text-foreground focus:border-primary focus:outline-hidden"
             />
           </div>
         </TouchSection>
@@ -357,14 +364,14 @@ export default function LKWRegistrierungPage(): JSX.Element {
             </Button>
           </div>
           <div>
-            <p className="mb-2 text-base font-medium text-slate-700">Foto Lieferschein (optional)</p>
+            <p className="mb-2 text-base font-medium text-foreground">Foto Lieferschein (optional)</p>
             <div
               {...dropzoneLieferschein.getRootProps()}
-              className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
+              className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/40 p-4 text-center transition-colors hover:border-primary hover:bg-muted"
             >
               <input {...dropzoneLieferschein.getInputProps()} accept="image/*" capture="environment" aria-label="Foto Lieferschein hochladen" />
               <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {dropzoneLieferschein.isDragActive ? 'Ablegen...' : 'Tippen oder Foto hierher ziehen'}
               </p>
             </div>
@@ -401,10 +408,10 @@ export default function LKWRegistrierungPage(): JSX.Element {
       content: (
         <div className="space-y-5">
           <div className="flex flex-col items-center gap-2 py-2">
-            <div className="rounded-full bg-slate-100 p-5">
+            <div className="rounded-full bg-muted p-5">
               <Truck className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900">{lkw.kennzeichen || 'KENNZEICHEN'}</h3>
+            <h3 className="text-xl font-bold text-foreground">{lkw.kennzeichen || 'KENNZEICHEN'}</h3>
           </div>
           <TouchConfirmCard
             title="Lieferungsdetails"
@@ -421,7 +428,12 @@ export default function LKWRegistrierungPage(): JSX.Element {
               {attachmentIds.map((id, i) => (
                 <Badge key={id} variant="secondary" className="gap-1">
                   Anhang #{i + 1}
-                  <button type="button" onClick={() => removeAttachment(i)} aria-label="Entfernen">
+                  <button
+                    type="button"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center touch-manipulation"
+                    onClick={() => removeAttachment(i)}
+                    aria-label="Anhang entfernen"
+                  >
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
@@ -430,7 +442,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
           )}
           <Callout variant="info" className="rounded-xl px-4 py-3 text-center text-sm">
             <p className="font-semibold">LKW wird in die Warteschlange eingereiht</p>
-            <p className="mt-0.5 flex items-center justify-center gap-1 text-blue-700">
+            <p className="mt-0.5 flex items-center justify-center gap-1 text-status-info">
               <Clock className="h-3.5 w-3.5" />
               Der Fahrer erhaelt eine Wartenummer
             </p>
@@ -442,9 +454,19 @@ export default function LKWRegistrierungPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-      <div className="p-6">
+      <div className="p-3 md:p-6">
         {workflowContext ? <div className="mb-6"><WorkflowProcessBand context={workflowContext} /></div> : null}
-        <div className="mb-6 space-y-6">
+        <ModuleToolbar backTarget="/annahme/warteschlange" closeTarget="/annahme/warteschlange" title="LKW-Registrierung" />
+        <Wizard
+          title="LKW-Registrierung"
+          steps={steps}
+          onFinish={handleSubmit}
+          onCancel={() => navigate('/annahme/warteschlange')}
+          getStepValidationError={validateStep}
+          onStepValidationError={handleStepValidationError}
+        />
+        {!isTouch ? (
+        <div className="mt-6 space-y-6">
           <OperationalCaseHeader
             title={lkw.kennzeichen || 'LKW-Registrierung'}
             description="Anlieferung als gefuehrter Annahmevorgang mit Scanquelle, Ressourcenlage und naechster Aktion."
@@ -507,15 +529,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
             />
           </div>
         </div>
-        <ModuleToolbar backTarget="/annahme/warteschlange" closeTarget="/annahme/warteschlange" title="LKW-Registrierung" />
-        <Wizard
-          title="LKW-Registrierung"
-          steps={steps}
-          onFinish={handleSubmit}
-          onCancel={() => navigate('/annahme/warteschlange')}
-          getStepValidationError={validateStep}
-          onStepValidationError={handleStepValidationError}
-        />
+        ) : null}
         <Dialog open={!!scanDialogField} onOpenChange={(open) => !open && setScanDialogField(null)}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -525,7 +539,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-2">
-              <label className="text-sm font-medium text-slate-700" htmlFor="scan-input">
+              <label className="text-sm font-medium text-foreground" htmlFor="scan-input">
                 {scanDialogField === 'kennzeichen' ? 'Kennzeichen aus Scanner oder OCR' : 'Lieferschein-Nr. aus Scanner oder OCR'}
               </label>
               <input
@@ -534,23 +548,23 @@ export default function LKWRegistrierungPage(): JSX.Element {
                 value={scanInputValue}
                 onChange={(event) => setScanInputValue(event.target.value)}
                 placeholder={scanDialogField === 'kennzeichen' ? 'z.B. AB-CD 1234' : 'z.B. LS-2026-0042'}
-                className="flex w-full min-h-[52px] rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg text-slate-900 focus:border-blue-500 focus:outline-hidden"
+                className="flex w-full min-h-[52px] rounded-lg border-2 border-border bg-background px-4 py-3 text-lg text-foreground focus:border-primary focus:outline-hidden"
                 autoFocus
               />
-              <div className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+              <div className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
                 {scanDialogField === 'kennzeichen'
                   ? 'Praxispfad: Scanner als Tastaturkeil oder OCR-App verwenden, Wert hier pruefen und direkt in den Vorgang uebernehmen. Das Foto-Upload-Feld darunter bleibt fuer Belegbilder nutzbar.'
                   : 'Praxispfad: Lieferschein per Scanner oder OCR erfassen, Nummer hier pruefen und in die Registrierung uebernehmen. Das Foto-Upload-Feld darunter bleibt fuer den eigentlichen Beleg nutzbar.'}
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setScanDialogField(null)}>Schliessen</Button>
-              <Button onClick={applyScannedValue}>Uebernehmen</Button>
+            <DialogFooter className="flex flex-wrap gap-2">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setScanDialogField(null)}>Schliessen</Button>
+              <Button className="min-h-touch touch-manipulation" onClick={applyScannedValue}>Uebernehmen</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

@@ -178,9 +178,9 @@ export default function NaWaRoVertraegePage(): JSX.Element {
           <CardTitle>Gespeicherte Datensaetze</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={clearForm}>Neu</Button>
+          <Button variant="outline" onClick={clearForm} className="min-h-touch">Neu</Button>
           {(sheetsQuery.data ?? []).map((sheet) => (
-            <Button key={sheet.id} variant={sheet.id === selectedId ? 'default' : 'outline'} size="sm" onClick={() => loadSheet(sheet.id)}>
+            <Button key={sheet.id} variant={sheet.id === selectedId ? 'default' : 'outline'} onClick={() => loadSheet(sheet.id)} className="min-h-touch">
               {sheet.harvest_year} {sheet.article_number ?? '-'}
             </Button>
           ))}
@@ -217,7 +217,7 @@ export default function NaWaRoVertraegePage(): JSX.Element {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Vertragspositionen</CardTitle>
-          <Button variant="outline" size="sm" className="gap-2" onClick={addRow}>
+          <Button variant="outline" className="min-h-touch gap-2" onClick={addRow}>
             <Plus className="h-4 w-4" />Zeile
           </Button>
         </CardHeader>

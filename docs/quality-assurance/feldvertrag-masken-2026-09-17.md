@@ -27,15 +27,20 @@ Zehn Masken hatten den zweiten Fall: `beleg_nr` statt `rechnungsnr`, `ls_nr`
 statt `delivery_note_number`, `wert` statt `amount`, `ist_aktiv` statt
 `is_active`. Alle behoben; das Gate haelt den Stand.
 
-## Stand 2026-09-17, Abend
+## Stand 2026-09-17, spaeter Abend
 
-    285 Felder gegen deklarierte Antworten geprueft (Start: 110)
+    Felder gegen deklarierte Antworten geprueft (Kopf plus typisierte Zeilen)
       0 Abweichungen
       0 Kopfquellen ohne deklarierte Antwort
-     49 Tabellenquellen ohne deklarierte Zeilenform (Start: 52)
+      0 Tabellenquellen ohne deklarierte Zeilenform (Start: 52)
 
 Aufruf: `python scripts/check_field_contracts.py [--list]`.
 Gate: `tests/test_mask_field_contracts.py`, `tests/test_mask_bridge_field_contracts.py`.
+
+Die letzten 17 Generic-Stubs (`/masks/` Duenger/Saatgut/Lead und elf
+`/mask-rollouts/`-Catch-alls) haben eigene Routen und Zeilenformen. Die
+Ratsche steht auf 0. SEPA, POS-Huelle, Budget und Personalstamm sind R5
+und nicht Teil dieses Gates.
 
 ## Kopf und Zeile
 
@@ -51,11 +56,11 @@ Spalte mit falschem Schluessel bleibt leer. Lesbar ist eine Zeilenform, wenn die
 Antwort eine Liste typisierter Zeilen ist (`list[ZeileOut]`) oder eine
 Seiten-Huelle mit typisiertem `items`.
 
-## Die blinden Flecken: 49 Tabellenquellen
+## Die blinden Flecken: 0 Tabellenquellen
 
 Kopfquellen sind vollstaendig typisiert — die zwoelf Bruecken-Koepfe hat Cursor
-in P4 erledigt, `sales/invoice` der Rechnungsweg selbst. Bei den Tabellen liegt
-der Rest: 49 von 63 Quellen sagen ihre Zeilenform nicht zu.
+in P4 erledigt, `sales/invoice` der Rechnungsweg selbst. Die Tabellen sind
+ebenfalls geschlossen: 52 → 49 (Rechnung) → 43 (P8) → 27 (P9) → 0 (P10).
 
 Drei davon sind heute geschlossen worden, als Muster fuer die uebrigen:
 
@@ -68,7 +73,12 @@ Register mit zwei Zeilenformen brauchen zwei Routen; die Sammelroute bleibt
 dahinter stehen, damit ein unbekanntes Register weiterhin eine leere Seite
 ergibt und keinen Fehler.
 
-`ZEILEN_NICHT_PRUEFBAR_MAX` steht auf **49** und darf nur sinken.
+`ZEILEN_NICHT_PRUEFBAR_MAX` steht auf **27** und darf nur sinken.
+
+Die dreizehn leeren P4-Brueckenregister (`/masks/.../tabs/...`) haben eigene
+Routen mit Zeilenform; die Tabelle bleibt leer, bis ein Fachendpunkt Daten
+liefert. Auftrag und Rechnung bleiben Claude. Duenger, Saatgut, Lead und der
+mask-rollout-Catch-all sind der Rest.
 
 ## Was das Gate nicht kann
 
@@ -78,4 +88,4 @@ ergibt und keinen Fehler.
 - Es sagt nichts ueber **Bedeutung**: `menge` kann gelieferte oder berechnete
   Menge meinen. Dagegen helfen Fachtests, kein Scanner.
 - Wo die Zeilenform fehlt (`extra="allow"` ohne Felder), zaehlt die Quelle als
-  unpruefbar statt als Abweichung — das sind die 49 Generic-Stubs.
+  unpruefbar statt als Abweichung — das sind die 27 restlichen Generic-Stubs.

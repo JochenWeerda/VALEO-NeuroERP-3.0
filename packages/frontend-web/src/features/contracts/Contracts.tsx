@@ -284,7 +284,7 @@ export default function Contracts(): ReactElement {
                         <p className="text-lg font-semibold tabular-nums text-foreground">
                           {monetaryFormatter.format(contract.quantity * contract.price)}
                         </p>
-                        <Button className="mt-2" size="sm" variant="outline">
+                        <Button className="min-h-touch mt-2" variant="outline">
                           Details
                         </Button>
                       </div>

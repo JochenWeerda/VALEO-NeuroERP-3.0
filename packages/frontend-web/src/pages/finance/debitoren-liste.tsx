@@ -64,7 +64,7 @@ const createDebitorenListConfig = (t: TFunction): ListConfig => ({
         let color = 'text-gray-600'
         if (daysUntil < 0) color = 'text-status-error'
         else if (daysUntil <= 7) color = 'text-status-warning'
-        else if (daysUntil <= 30) color = 'text-blue-600'
+        else if (daysUntil <= 30) color = 'text-status-info'
 
         return <span className={color}>{date.toLocaleDateString('de-DE')}</span>
       }

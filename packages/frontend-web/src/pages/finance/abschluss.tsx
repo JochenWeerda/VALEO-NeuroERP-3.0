@@ -5,6 +5,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient } from '@/lib/api-client'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
@@ -492,6 +493,7 @@ function RueckstellungenTable({ data: _data, onChange }: { data: Record<string, 
 
 export default function AbschlussPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const workflowContext = readWorkflowEntryContext(searchParams)
   const [isDirty, setIsDirty] = useState(false)
@@ -816,6 +818,8 @@ export default function AbschlussPage(): JSX.Element {
       {workflowContext ? (
         <WorkflowProcessBand context={workflowContext} />
       ) : null}
+      {!isTouch ? (
+      <>
       <div className="space-y-4 px-4 pb-4">
         <OperationalCaseHeader
           title="Abschlussfall steuern"
@@ -881,6 +885,8 @@ export default function AbschlussPage(): JSX.Element {
           <CardContent><div className="text-sm font-semibold">{fibuCockpit.annual_close.latest_vat_period ?? 'n/a'}</div></CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
       <ObjectPage
         config={abschlussConfig}
         data={effectiveData}

@@ -6,6 +6,7 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Callout } from '@/components/ui/callout'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -14,9 +15,11 @@ import { AlertCircle, Euro, FileDown, Search } from 'lucide-react'
 import { useKreditorenOP, type KreditOP } from '@/lib/api/fibu'
 import { ErrorState } from '@/components/ErrorState'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function KreditorenPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: items, isLoading, isError, error, refetch } = useKreditorenOP()
 
@@ -46,7 +49,15 @@ export default function KreditorenPage(): JSX.Element {
     {
       key: 'rechnungsnr' as const,
       label: 'Rechnung',
-      render: (op: KreditOP) => <span className="font-mono font-bold">{op.rechnungsnr}</span>,
+      render: (op: KreditOP) => (
+        <button
+          type="button"
+          onClick={() => navigate('/fibu/zahlungsvorschlaege')}
+          className="min-h-11 font-mono font-medium text-primary touch-manipulation"
+        >
+          {op.rechnungsnr}
+        </button>
+      ),
     },
     { key: 'lieferant' as const, label: 'Lieferant' },
     { key: 'lieferantennr' as const, label: 'Lief-Nr', render: (op: KreditOP) => <span className="font-mono text-sm">{op.lieferantennr}</span> },
@@ -134,14 +145,62 @@ export default function KreditorenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Kreditorenbuchhaltung</h1>
-          <p className="text-muted-foreground">Offene Posten Lieferanten</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Kreditorenbuchhaltung</h1>
+          <p className="text-muted-foreground">Offene Posten suchen und in den Zahlungslauf geben</p>
         </div>
-        <BackButton to="/fibu/op-verwaltung" label="Zurueck zur OP-Verwaltung" />
+        <BackButton to="/fibu/op-verwaltung" label="Zurueck zur OP-Verwaltung" className="min-h-touch touch-manipulation" />
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Suche</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label="Suche Kreditoren"
+                placeholder="Rechnung, Lieferant..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
+            </div>
+            <Button className="min-h-touch touch-manipulation" onClick={() => navigate('/fibu/zahlungslaeufe')}>
+              Zahlungslauf
+            </Button>
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => navigate('/fibu/schnittstelle-fibu?context=kreditoren')}
+            >
+              <FileDown className="h-4 w-4" />
+              DATEV Export
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <DataTable data={list} columns={columns} emptyMessage="Keine Kreditoren-Posten im aktuellen Suchraum." />
+        </CardContent>
+      </Card>
+
+      {skontoVerfuegbar > 0 ? (
+        <Callout variant="success" className="pt-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
+            <span className="font-semibold">{skontoVerfuegbar} Rechnung(en) mit Skonto-Option</span>
+          </div>
+        </Callout>
+      ) : null}
+
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Kreditorenbuchhaltung"
         description="Offene Kreditoren werden als operativer Follow-up-Fall mit Faelligkeits- und Exportdruck gefuehrt."
@@ -156,17 +215,6 @@ export default function KreditorenPage(): JSX.Element {
         <OperationalTimeline title="Kreditorenverlauf" items={timelineItems} />
         <OperationalContextPanel title="Kreditoren-Kontext" sections={contextSections} />
       </div>
-
-      {skontoVerfuegbar > 0 && (
-        <Card className="border-green-500 bg-green-50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-status-success">
-              <AlertCircle className="h-5 w-5" />
-              <span className="font-semibold">{skontoVerfuegbar} Rechnung(en) mit Skonto-Option!</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -185,7 +233,7 @@ export default function KreditorenPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Euro className="h-5 w-5 text-muted-foreground" />
-              <span className="text-2xl font-bold text-blue-600">
+              <span className="text-2xl font-bold text-primary">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtOffen)}
               </span>
             </div>
@@ -210,31 +258,8 @@ export default function KreditorenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Suche & Aktionen</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-            </div>
-            <Button onClick={() => navigate('/fibu/zahlungslaeufe')}>Zahlungslauf</Button>
-            <Button variant="outline" className="gap-2" onClick={() => navigate('/fibu/schnittstelle-fibu?context=kreditoren')}>
-              <FileDown className="h-4 w-4" />
-              DATEV Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={list} columns={columns} />
-        </CardContent>
-      </Card>
+        </>
+      ) : null}
     </div>
   )
 }

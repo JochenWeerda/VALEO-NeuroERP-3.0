@@ -51,8 +51,8 @@ export default function IntegrationenQuarantaenePage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="destructive">{item.status}</Badge>
-                <Button size="sm" variant="outline" onClick={() => onRetry(item.id)} disabled={retryMutation.isPending}>Retry</Button>
-                <Button size="sm" onClick={() => onResolve(item.id)} disabled={resolveMutation.isPending}>Resolve</Button>
+                <Button variant="outline" onClick={() => onRetry(item.id)} disabled={retryMutation.isPending} className="min-h-touch">Erneut versuchen</Button>
+                <Button onClick={() => onResolve(item.id)} disabled={resolveMutation.isPending} className="min-h-touch">Erledigen</Button>
               </div>
             </div>
           ))}

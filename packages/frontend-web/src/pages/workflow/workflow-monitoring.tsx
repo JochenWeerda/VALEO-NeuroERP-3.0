@@ -72,7 +72,7 @@ export default function WorkflowMonitoringPage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt-Ausfuehrungen</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{stats.total}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Erfolgsrate</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-status-success">{successRate.toFixed(1)}%</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laufende Workflows</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-blue-600">{stats.running}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Laufende Workflows</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-primary">{stats.running}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fehlgeschlagen</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-status-error">{stats.failed}</div></CardContent></Card>
       </div>
       {stats.failed > 0 && <Callout variant="error" className="pt-4"><div className="flex items-center gap-2 text-status-error"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{stats.failed} Workflow(s) sind fehlgeschlagen!</span></div></Callout>}

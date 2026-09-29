@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Loader2, Package, Plus, Search } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type Artikel = {
   id: string
@@ -35,6 +36,7 @@ function mapApiArticle(a: Record<string, unknown>): Artikel {
 
 export default function ArtikelListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
 
   const { data: artikel = [], isLoading, isError, error, refetch } = useQuery({
@@ -66,8 +68,9 @@ export default function ArtikelListePage(): JSX.Element {
       label: 'Bezeichnung',
       render: (a: Artikel) => (
         <button
+          type="button"
           onClick={() => navigate(`/artikel/${a.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {a.bezeichnung}
         </button>
@@ -102,19 +105,35 @@ export default function ArtikelListePage(): JSX.Element {
 
   const lagerwert = artikel.reduce((sum, a) => sum + a.vkPreis * a.bestand, 0)
 
+  const persistExport = () => {
+    const header = 'Artikelnr;Bezeichnung;Warengruppe;VK-Preis;Bestand;Status\n'
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const rows = artikel
+      .map((a) => [a.artikelnr, a.bezeichnung, a.warengruppe, a.vkPreis, a.bestand, a.status].map(esc).join(';'))
+      .join('\n')
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `artikel-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Artikel</h1>
-          <p className="text-muted-foreground">Artikelstamm</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Artikel</h1>
+          <p className="text-muted-foreground">Artikel suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/artikel/neu')} className="gap-2">
+        <Button onClick={() => navigate('/artikel/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neuer Artikel
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -166,23 +185,25 @@ export default function ArtikelListePage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Suche nach Artikelnr., Bezeichnung, Warengruppe..."
+                aria-label="Suche Artikel"
+                placeholder="Artikelnr., Bezeichnung, Warengruppe"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="min-h-touch pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={persistExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

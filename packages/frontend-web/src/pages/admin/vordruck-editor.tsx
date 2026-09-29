@@ -22,6 +22,14 @@ import { Copy, Eye, FilePlus2, Printer, Save, Sparkles, Trash2 } from 'lucide-re
 
 type ElementTyp = 'text' | 'feld' | 'linie' | 'rechteck' | 'qrcode'
 
+const ELEMENT_TYP_LABELS: Record<ElementTyp, string> = {
+  text: 'Text',
+  feld: 'Feld',
+  linie: 'Linie',
+  rechteck: 'Rechteck',
+  qrcode: 'QR-Code',
+}
+
 type VordruckElement = {
   typ: ElementTyp
   x: number
@@ -443,7 +451,7 @@ export default function VordruckEditorPage(): JSX.Element {
                     <Label className="text-xs">Element hinzufügen</Label>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {(['text', 'feld', 'linie', 'rechteck', 'qrcode'] as ElementTyp[]).map((typ) => (
-                        <Button key={typ} size="sm" variant="outline" onClick={() => addElement(typ)}>{typ}</Button>
+                        <Button key={typ} variant="outline" onClick={() => addElement(typ)} className="min-h-touch">{ELEMENT_TYP_LABELS[typ]}</Button>
                       ))}
                     </div>
                   </div>
@@ -452,8 +460,9 @@ export default function VordruckEditorPage(): JSX.Element {
                     <div className="space-y-2 rounded border bg-muted/40 p-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold">Element: {aktivesElement.typ}</span>
-                        <Button size="sm" variant="ghost" onClick={() => removeElement(selectedElement)}>
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        <Button variant="ghost" onClick={() => removeElement(selectedElement)} className="min-h-touch" aria-label="Element löschen">
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" aria-hidden="true" />
+                          Löschen
                         </Button>
                       </div>
                       <div className="grid grid-cols-4 gap-1">

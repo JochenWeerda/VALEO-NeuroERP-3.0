@@ -247,7 +247,7 @@ const SaatgutStammPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleCancel}>
+          <Button variant="outline" className="min-h-touch" onClick={handleCancel}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Zurück
           </Button>
@@ -262,16 +262,16 @@ const SaatgutStammPage: React.FC = () => {
         </div>
         <div className="flex gap-2">
           {readOnlyMode ? (
-            <Button onClick={() => navigate(`/agrar/saatgut-stamm/${id}`)}>
+            <Button className="min-h-touch" onClick={() => navigate(`/agrar/saatgut-stamm/${id}`)}>
               <Pencil className="w-4 h-4 mr-2" />
               Bearbeiten
             </Button>
           ) : (
             <>
-              <Button variant="outline" onClick={handleCancel}>
+              <Button variant="outline" className="min-h-touch" onClick={handleCancel}>
                 Abbrechen
               </Button>
-              <Button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
+              <Button className="min-h-touch" onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
                 <Save className="w-4 h-4 mr-2" />
                 {createMutation.isPending || updateMutation.isPending ? 'Speichern...' : 'Speichern'}
               </Button>

@@ -42,6 +42,13 @@ describe('Meridian column navigation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Zurück zu Aufträge' }))
     expect(screen.getByLabelText('Suche')).toHaveValue('Weizen')
   })
+  it('zeigt die Liste zuerst, solange nur eine Spalte Platz hat', () => {
+    render(<ColumnLayoutRenderer pattern="listDetail" columns={columns.slice(0, 2)} />)
+    expect(screen.getByLabelText('Suche')).toBeVisible()
+    expect(screen.getByRole('region', { name: 'Aufträge' })).toBeVisible()
+    expect(screen.queryByRole('region', { name: 'Auftrag 100' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Auftrag 100' })).toBeInTheDocument()
+  })
   it('opens a newly selected object without remounting the list', async () => {
     const { rerender } = render(<ColumnLayoutRenderer pattern="listDetail" columns={columns.slice(0, 1)} />)
     fireEvent.change(screen.getByLabelText('Suche'), { target: { value: 'Gerste' } })
@@ -161,5 +168,45 @@ describe('Derived worklist columns', () => {
     fireEvent.click(screen.getByRole('button', { name: 'In Vollansicht öffnen' }))
     expect(pushState).toHaveBeenCalledWith(null, '', '/analysen/a2')
     pushState.mockRestore()
+  })
+
+  it('laesst auf schmalem Schirm die Liste vor der Vorschau', async () => {
+    const originalMatch = window.matchMedia
+    const originalWidth = window.innerWidth
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('max-width'),
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+      onchange: null,
+    })) as typeof window.matchMedia
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
+    try {
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <MemoryRouter>
+            <UniversalMaskRenderer
+              plan={compileRenderPlanFromScreenDefinition(definition)}
+              tables={{
+                list: [
+                  { id: 'a1', probe_nr: 'P-1', bezeichnung: 'Grassilage' },
+                  { id: 'a2', probe_nr: 'P-2', bezeichnung: 'Maissilage' },
+                ],
+              }}
+            />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      )
+      expect(screen.queryByTestId('selected-record-panel')).not.toBeInTheDocument()
+      expect(screen.getByText('Grassilage')).toBeVisible()
+      fireEvent.click(screen.getByText('Grassilage'))
+      await waitFor(() => expect(screen.getByTestId('selected-record-panel')).toHaveTextContent('Grassilage'))
+    } finally {
+      window.matchMedia = originalMatch
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth })
+    }
   })
 })

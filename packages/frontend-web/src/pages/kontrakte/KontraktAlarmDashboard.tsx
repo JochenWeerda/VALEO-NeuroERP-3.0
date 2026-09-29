@@ -10,6 +10,7 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { listKontrakte, type KontraktListItem } from '@/lib/api/kontrakte'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { AlertTriangle, Clock, TrendingUp, Package } from 'lucide-react'
 
 function daysUntil(dateStr: string | null | undefined): number | null {
@@ -27,6 +28,7 @@ type AlarmItem = KontraktListItem & {
 
 export default function KontraktAlarmDashboard(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
 
   const query = useQuery({
     queryKey: ['kontrakte', 'alarm-dashboard'],
@@ -169,7 +171,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
       case 'expiring': return <Clock className="h-4 w-4 text-status-warning" />
       case 'low_rest': return <Package className="h-4 w-4 text-status-warning" />
       case 'matif_open': return <TrendingUp className="h-4 w-4 text-muted-foreground" />
-      case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-fuchsia-600" />
+      case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-status-warning" />
       case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-status-error" />
       case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-status-error" />
       case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-status-warning" />
@@ -193,14 +195,20 @@ export default function KontraktAlarmDashboard(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <h1 className="text-2xl font-semibold md:text-3xl">Kontrakt-Alarme</h1>
+        <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate('/kontrakte')}>Zur Kontraktliste</Button>
+      </div>
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Kontrakt-Alarme steuern"
-        description="Ablauf, Hedge-Luecken, Mahnfaelle und Washout-Druck werden als ein Operatorraum priorisiert."
+        description="Ablauf, Hedge-Lücken, Mahnfälle und Washout-Druck werden als ein Operatorraum priorisiert."
         status={operationalStatus}
         owner="Kontrakt / Handel"
-        blocker={alarms.length > 0 ? 'Offene Alarmfaelle muessen vor weiterem Vertragsdruck priorisiert werden.' : null}
-        nextAction={alarms.length > 0 ? 'Kritischste Alarmfaelle zuerst oeffnen und bearbeiten' : 'Kein unmittelbarer Eingriff erforderlich'}
+        blocker={alarms.length > 0 ? 'Offene Alarmfälle müssen vor weiterem Vertragsdruck priorisiert werden.' : null}
+        nextAction={alarms.length > 0 ? 'Kritischste Alarmfälle zuerst öffnen und bearbeiten' : 'Kein unmittelbarer Eingriff erforderlich'}
         caseLabel="Kontrakt-Alarmraum"
         tags={['Kontrakte', 'Risiko']}
       />
@@ -208,14 +216,10 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <OperationalTimeline title="Alarmverlauf" items={timelineItems} />
         <OperationalContextPanel title="Alarmkontext" sections={contextSections} />
       </div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-status-warning" />
-          Kontrakt-Alarme
-        </h1>
-        <Button variant="outline" onClick={() => navigate('/kontrakte')}>Zur Kontraktliste</Button>
-      </div>
+      </>
+      ) : null}
 
+      {!isTouch ? (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-7">
         <Card>
           <CardHeader className="pb-2">
@@ -259,12 +263,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-fuchsia-600" />
-              Hedge-Luecken
+              <TrendingUp className="h-4 w-4 text-status-warning" />
+              Hedge-Lücken
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-fuchsia-700">{hedgeGapCount}</div>
+            <div className="text-3xl font-bold text-status-warning">{hedgeGapCount}</div>
             <p className="text-xs text-muted-foreground">Unter Zielabsicherung</p>
           </CardContent>
         </Card>
@@ -308,6 +312,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       {alarms.length === 0 && !query.isLoading && (
         <Card>
@@ -340,15 +345,23 @@ export default function KontraktAlarmDashboard(): JSX.Element {
                     <TableRow key={`${alarm.contract_id}-${alarm.alarmType}-${idx}`}>
                       <TableCell>{alarmIcon(alarm.alarmType)}</TableCell>
                       <TableCell>{alarmBadge(alarm.alarmType)}</TableCell>
-                      <TableCell className="font-mono">{alarm.contract_no}</TableCell>
+                      <TableCell>
+                        <button
+                          type="button"
+                          className="min-h-11 font-mono text-primary touch-manipulation"
+                          onClick={() => navigate(`/kontrakte/${alarm.contract_id}`)}
+                        >
+                          {alarm.contract_no}
+                        </button>
+                      </TableCell>
                       <TableCell>{alarm.party_name || alarm.party_id}</TableCell>
                       <TableCell>{alarm.first_article_desc || alarm.first_article_id || '-'}</TableCell>
                       <TableCell>{alarm.valid_to ? new Date(alarm.valid_to).toLocaleDateString('de-DE') : '-'}</TableCell>
                       <TableCell className="text-right">{alarm.rest_quantity.toLocaleString('de-DE')} {alarm.unit}</TableCell>
                       <TableCell className="text-sm">{alarm.alarmText}</TableCell>
                       <TableCell>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/kontrakte/${alarm.contract_id}`)}>
-                          Oeffnen
+                        <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate(`/kontrakte/${alarm.contract_id}`)}>
+                          Öffnen
                         </Button>
                       </TableCell>
                     </TableRow>

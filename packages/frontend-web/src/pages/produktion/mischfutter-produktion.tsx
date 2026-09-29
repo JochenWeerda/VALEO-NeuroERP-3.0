@@ -33,6 +33,7 @@ import {
   RoleFocusBar,
 } from '@/components/workflow'
 import { Callout } from '@/components/ui/callout'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type KomponentenBedarf = { name: string; bedarf: number; verfuegbar: number }
 type ProductionRole = 'produktion' | 'lager' | 'qs' | 'leitung'
@@ -82,6 +83,7 @@ const nextTransitions: Record<ProduktionsauftragStatus, Array<{ to: Exclude<Prod
 export default function MischfutterProduktionPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
 
   const { data: verfuegbarkeit, isLoading: loadingV } = useMischfutterVerfuegbarkeit()
@@ -365,6 +367,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      {!isTouch ? (
+        <>
       <RoleFocusBar roles={productionRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={komponenten.length} totalCount={komponenten.length} title="Wer bereitet die Produktion vor?" />
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <ManagementDecisionPanel
@@ -406,6 +410,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
           ]}
         />
       </div>
+        </>
+      ) : null}
       <Wizard
         key={wizardKey}
         title="Mischfutter-Produktion"
@@ -454,8 +460,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
                     </div>
                     <Button
                       type="button"
-                      size="sm"
                       variant="outline"
+                      className="min-h-touch"
                       disabled={pendingActions.has(`link:${row.id}`)}
                       onClick={() => void handleEnsureLink(row)}
                     >
@@ -495,9 +501,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
                     <Button
                       key={t.to}
                       type="button"
-                      size="sm"
                       variant={t.destructive ? 'outline' : 'default'}
-                      className={t.destructive ? 'border-destructive/40 text-destructive hover:bg-destructive/10' : undefined}
+                      className={`min-h-touch ${t.destructive ? 'border-destructive/40 text-destructive hover:bg-destructive/10' : ''}`}
                       disabled={rowPending}
                       onClick={() => void handleStatusAction(a, t.to)}
                     >
@@ -507,8 +512,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
                   {a.status === 'fertig' ? (
                     <Button
                       type="button"
-                      size="sm"
                       variant="outline"
+                      className="min-h-touch"
                       disabled={rowPending}
                       onClick={() => void handleShowTrace(a)}
                     >
@@ -538,7 +543,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
                 {trace.kette_geschlossen ? 'Kette geschlossen' : 'Charge fehlt'}
               </Badge>
             </CardTitle>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setTrace(null)}>
+            <Button type="button" variant="ghost" className="min-h-touch" onClick={() => setTrace(null)}>
               Schließen
             </Button>
           </CardHeader>

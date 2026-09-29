@@ -7,11 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { toast } from '@/hooks/use-toast'
 import { useFahrerListe, type Fahrer } from '@/lib/api/betrieb'
 
 export default function FahrerListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: fahrer = [], isError, error, refetch } = useFahrerListe()
 
@@ -51,7 +53,7 @@ export default function FahrerListePage(): JSX.Element {
       key: 'name' as const,
       label: 'Name',
       render: (f: Fahrer) => (
-        <button onClick={() => navigate(`/transporte/fahrer/${f.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/transporte/fahrer/${f.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {f.name}
         </button>
       ),
@@ -73,34 +75,36 @@ export default function FahrerListePage(): JSX.Element {
   const availableDrivers = filteredFahrer.filter((f) => f.status === 'verfuegbar')
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Fahrer</h1>
-          <p className="text-muted-foreground">Fahrer-Verwaltung</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Fahrer</h1>
+          <p className="text-muted-foreground">Fahrer suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/transporte/fahrer/neu')} className="gap-2">
+        <Button onClick={() => navigate('/transporte/fahrer/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neuer Fahrer
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fahrer Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><Truck className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{filteredFahrer.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Verfuegbar</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{availableDrivers.length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Unterwegs</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{filteredFahrer.filter((f) => f.status === 'unterwegs').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Touren Heute</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{filteredFahrer.reduce((sum, f) => sum + f.tourenHeute, 0)}</span></CardContent></Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Fahrer" placeholder="Name, Fahrzeug, Status" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -111,11 +115,11 @@ export default function FahrerListePage(): JSX.Element {
       <Card>
         <CardHeader><CardTitle>Disposition</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => availableDrivers[0] && navigate(`/transporte/fahrer/${availableDrivers[0].id}`)} disabled={availableDrivers.length === 0}>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => availableDrivers[0] && navigate(`/transporte/fahrer/${availableDrivers[0].id}`)} disabled={availableDrivers.length === 0}>
             Verfuegbaren Fahrer oeffnen
           </Button>
-          <Button variant="outline" onClick={() => navigate('/logistik/tourenplanung')}>Tourenplanung</Button>
-          <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumente</Button>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/logistik/tourenplanung')}>Tourenplanung</Button>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/dokumente/ablage')}>Dokumente</Button>
         </CardContent>
       </Card>
 

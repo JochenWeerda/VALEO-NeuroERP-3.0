@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from '@/app/routing/typed-router'
 import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Camera, CheckCircle, QrCode } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
+import { toast } from '@/hooks/use-toast'
 
 type Artikel = { name: string; bestand: number; preis: number }
 
@@ -19,6 +21,7 @@ function mapArticle(row: Record<string, unknown>): Artikel {
 }
 
 export default function MobileScannerPage(): JSX.Element {
+  const navigate = useNavigate()
   const [scanResult, setScanResult] = useState<string>('')
   const [manualCode, setManualCode] = useState<string>('')
   const [artikel, setArtikel] = useState<Artikel | null>(null)
@@ -66,13 +69,23 @@ export default function MobileScannerPage(): JSX.Element {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="rounded-lg border-2 border-dashed p-12 flex flex-col items-center justify-center bg-gray-50 min-h-[300px]">
+          <div className="rounded-lg border-2 border-dashed p-12 flex flex-col items-center justify-center bg-muted min-h-[300px]">
             <Camera className="h-24 w-24 text-muted-foreground mb-4" />
             <p className="text-muted-foreground text-center">Kamera-Vorschau</p>
             <p className="text-sm text-muted-foreground mt-2">Barcode/QR-Code vor Kamera halten</p>
           </div>
 
-          <Button className="w-full gap-2" size="lg" onClick={() => { void lookup(manualCode) }} disabled={isLoading}>
+          <Button
+            className="min-h-touch w-full gap-2"
+            onClick={() => {
+              if (!manualCode.trim()) {
+                toast({ title: 'Code eingeben', description: 'Kamera ist in diesem Browser nicht angebunden. Bitte Barcode manuell eintragen.' })
+                return
+              }
+              void lookup(manualCode)
+            }}
+            disabled={isLoading}
+          >
             <Camera className="h-5 w-5" />
             {isLoading ? 'Suche...' : 'Scan starten'}
           </Button>
@@ -82,7 +95,7 @@ export default function MobileScannerPage(): JSX.Element {
             <Input
               id="manual"
               placeholder="Barcode oder Chargen-ID"
-              className="font-mono"
+              className="min-h-touch font-mono"
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
               onKeyDown={(e) => {
@@ -96,7 +109,7 @@ export default function MobileScannerPage(): JSX.Element {
       </Card>
 
       {artikel && (
-        <Card className="border-green-500">
+        <Card className="border-status-success">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle className="h-6 w-6 text-status-success" />
@@ -123,8 +136,19 @@ export default function MobileScannerPage(): JSX.Element {
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm">Details</Button>
-              <Button size="sm">Buchen</Button>
+              <Button
+                variant="outline"
+                className="min-h-touch"
+                onClick={() => navigate(`/artikel/liste?q=${encodeURIComponent(scanResult)}`)}
+              >
+                Details
+              </Button>
+              <Button
+                className="min-h-touch"
+                onClick={() => toast({ title: 'Buchen nicht in dieser Maske', description: 'Buchung läuft über Einlagerung, nicht über den Scanner.' })}
+              >
+                Buchen
+              </Button>
             </div>
           </CardContent>
         </Card>

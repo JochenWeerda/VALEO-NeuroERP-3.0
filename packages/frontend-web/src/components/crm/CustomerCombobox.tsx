@@ -189,13 +189,12 @@ export function CustomerCombobox({
                     )}
                     {onCreateNew ? (
                       <Button
-                        size="sm"
                         variant="default"
                         onClick={() => {
                           setOpen(false)
                           onCreateNew(debouncedQuery.trim())
                         }}
-                      >
+                       className="min-h-touch">
                         <UserRoundPlus className="mr-2 h-4 w-4" />
                         {isSearching ? `"${debouncedQuery}" als neuen Kunden anlegen` : 'Neuen Kunden anlegen'}
                       </Button>

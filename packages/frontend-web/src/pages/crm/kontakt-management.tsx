@@ -58,7 +58,7 @@ const createKontaktListConfig = (handlers: {
       key: 'email',
       label: 'E-Mail',
       filterable: true,
-      render: (value) => (value ? <a href={`mailto:${value}`} className="text-blue-600 hover:underline">{value}</a> : '-'),
+      render: (value) => (value ? <a href={`mailto:${value}`} className="min-h-11 inline-flex items-center text-primary touch-manipulation">{value}</a> : '-'),
     },
     {
       key: 'telefon',
@@ -109,7 +109,7 @@ const createKontaktListConfig = (handlers: {
         let color = 'text-gray-600'
         if (daysUntil < 0) color = 'text-status-error'
         else if (daysUntil <= 7) color = 'text-status-warning'
-        else if (daysUntil <= 30) color = 'text-blue-600'
+        else if (daysUntil <= 30) color = 'text-status-info'
         return <span className={color}>{date.toLocaleDateString('de-DE')}</span>
       },
     },

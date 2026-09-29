@@ -87,7 +87,7 @@ export default function UmsatzsteuerVoranmeldungPage(): JSX.Element {
           </div>
           <div className="rounded-lg bg-muted p-4">
             <div className="text-sm text-muted-foreground mb-1">Umsatzsteuer-Zahllast</div>
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-primary">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ustData.zahllast)}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
@@ -126,7 +126,7 @@ export default function UmsatzsteuerVoranmeldungPage(): JSX.Element {
               </div>
               <div className="flex justify-between pt-2">
                 <dt className="font-bold">Zahllast</dt>
-                <dd className="font-bold text-blue-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ustData.zahllast)}</dd>
+                <dd className="font-bold text-primary">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ustData.zahllast)}</dd>
               </div>
             </dl>
             <div className="mt-6 space-y-2">

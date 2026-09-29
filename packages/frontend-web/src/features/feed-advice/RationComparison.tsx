@@ -75,7 +75,7 @@ export function RationComparison({ baseVersionId, variantVersionId }: {
       <div className="rounded-lg border bg-muted/30 p-4 text-sm" role="alert">
         <p className="font-medium text-status-error">Der Vergleich konnte nicht geladen werden.</p>
         {error ? <p className="mt-1 text-muted-foreground">{error}</p> : null}
-        <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { void load() }}>
+        <Button type="button" variant="outline" className="min-h-touch mt-3" onClick={() => { void load() }}>
           Erneut laden
         </Button>
       </div>

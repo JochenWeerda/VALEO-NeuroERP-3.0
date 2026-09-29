@@ -122,7 +122,7 @@ function LotActionRow({
         <td className="px-3 py-2 tabular-nums">{lot.linked_cell_count ?? 0}</td>
         <td className="px-3 py-2">
           <div className="flex flex-wrap gap-1">
-            <Button size="sm" variant="outline" onClick={() => setExpanded((v) => !v)} disabled={pending}>
+            <Button className="min-h-touch" variant="outline" onClick={() => setExpanded((v) => !v)} disabled={pending}>
               Aktionen
             </Button>
           </div>
@@ -155,20 +155,20 @@ function LotActionRow({
                     {(suggest.data.blockers ?? []).join(' · ') || 'Manuelle Freigabe erforderlich'}
                   </p>
                 )}
-                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={applySuggest} disabled={pending}>
+                <Button className="min-h-touch" variant="ghost" onClick={applySuggest} disabled={pending}>
                   Vorschlag übernehmen
                 </Button>
               </div>
             ) : null}
             <div className="flex flex-wrap gap-2 mt-3">
-              <Button size="sm" onClick={() => void runTransition('frei')} disabled={pending}>
+              <Button className="min-h-touch" onClick={() => void runTransition('frei')} disabled={pending}>
                 {pending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
                 <span className="ml-1">Freigeben</span>
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => void runTransition('in_pruefung')} disabled={pending}>
+              <Button className="min-h-touch" variant="secondary" onClick={() => void runTransition('in_pruefung')} disabled={pending}>
                 In Prüfung
               </Button>
-              <Button size="sm" variant="destructive" onClick={() => void runTransition('gesperrt')} disabled={pending}>
+              <Button className="min-h-touch" variant="destructive" onClick={() => void runTransition('gesperrt')} disabled={pending}>
                 <XCircle size={14} className="mr-1" />
                 Sperren
               </Button>

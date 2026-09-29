@@ -120,9 +120,8 @@ export default function VoiceChannelPage(): JSX.Element {
             </span>
             <Button
               type="button"
-              size="sm"
               variant="ghost"
-              className="h-7 gap-1"
+              className="min-h-touch gap-1"
               disabled={statusLoading}
               aria-label="Status aktualisieren"
               onClick={refetch}

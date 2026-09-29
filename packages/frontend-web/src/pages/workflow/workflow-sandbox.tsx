@@ -254,7 +254,7 @@ export default function WorkflowSandboxPage(): JSX.Element {
                 <CardHeader>
                   <div className="flex items-center justify-between gap-3">
                     <CardTitle>Ablaufvorschau</CardTitle>
-                    <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handleExportPreview}>
+                    <Button type="button" variant="outline" className="min-h-touch gap-2" onClick={handleExportPreview}>
                       <Download className="h-4 w-4" />
                       JSON exportieren
                     </Button>

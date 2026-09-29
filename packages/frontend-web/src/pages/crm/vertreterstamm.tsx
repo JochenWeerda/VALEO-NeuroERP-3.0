@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { Plus, Trash2, Pencil } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -87,7 +87,7 @@ function VertretergruppenTab() {
               />
               {errors.bezeichnung && <span className="text-xs text-destructive">Pflichtfeld</span>}
             </div>
-            <Button type="submit" disabled={createGruppe.isPending} aria-label="Vertretergruppe anlegen">
+            <Button type="submit" className="min-h-touch" disabled={createGruppe.isPending} aria-label="Vertretergruppe anlegen">
               <Plus className="h-4 w-4 mr-1" />
               {createGruppe.isPending ? 'Wird angelegt…' : 'Anlegen'}
             </Button>
@@ -118,13 +118,12 @@ function VertretergruppenTab() {
                     <TableCell>{g.bezeichnung}</TableCell>
                     <TableCell>
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        className="min-h-touch"
                         onClick={() => handleDelete(g.gruppe_nr)}
-                        disabled={deleteGruppe.isPending}
-                        aria-label={`Vertretergruppe ${g.gruppe_nr} deaktivieren`}
+                        disabled={deleteGruppe.isPending && deleteGruppe.variables === g.gruppe_nr}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        Deaktivieren
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -386,7 +385,7 @@ function VertreterTab() {
                   ))}
                 </select>
               </div>
-              <Button type="submit" disabled={createVertreter.isPending} aria-label="Vertreter anlegen">
+              <Button type="submit" className="min-h-touch" disabled={createVertreter.isPending} aria-label="Vertreter anlegen">
                 <Plus className="h-4 w-4 mr-1" />
                 {createVertreter.isPending ? 'Wird angelegt…' : 'Anlegen'}
               </Button>
@@ -431,21 +430,19 @@ function VertreterTab() {
                     <TableCell>
                       <div className="flex gap-1">
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          className="min-h-touch"
                           onClick={() => setEditTarget(v)}
-                          aria-label={`Vertreter ${v.vertreter_nr} bearbeiten`}
                         >
-                          <Pencil className="h-4 w-4" />
+                          Bearbeiten
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          className="min-h-touch"
                           onClick={() => handleDelete(v.vertreter_nr)}
-                          disabled={deleteVertreter.isPending}
-                          aria-label={`Vertreter ${v.vertreter_nr} deaktivieren`}
+                          disabled={deleteVertreter.isPending && deleteVertreter.variables === v.vertreter_nr}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          Deaktivieren
                         </Button>
                       </div>
                     </TableCell>

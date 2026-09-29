@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { listKontrakte } from '@/lib/api/kontrakte'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const PAGE_SIZE = 50
 
@@ -34,6 +35,7 @@ function statusBadge(status: string): JSX.Element {
 
 export default function LstKontraktUebersicht(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const matchcodeRef = useRef<HTMLInputElement | null>(null)
   const [contractType, setContractType] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -150,16 +152,22 @@ export default function LstKontraktUebersicht(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">Kontrakt-Übersicht</h1>
+          <p className="text-muted-foreground">Offene Kontrakte finden, öffnen, steuern</p>
+        </div>
+        <Button className="min-h-touch touch-manipulation" onClick={() => navigate('/kontrakte/neu')}>Neu</Button>
+      </div>
       <Card>
-        <CardHeader>
-          <CardTitle>Kontrakt-Uebersicht</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
+          {!isTouch ? (
+          <>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <Card>
               <CardContent className="py-4">
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">Ausweichbereit</div>
+                <div className="text-2xs uppercase tracking-wide text-muted-foreground">Ausweichbereit</div>
                 <div className="mt-2 text-2xl font-semibold">{steeringSummary.fallbackReady}</div>
                 <p className="mt-1 text-xs text-muted-foreground">Kontrakte mit Ausweichroute oder Alternativartikel</p>
               </CardContent>
@@ -174,7 +182,7 @@ export default function LstKontraktUebersicht(): JSX.Element {
             <Card>
               <CardContent className="py-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">Druckbereit</div>
-                <div className="mt-2 text-2xl font-semibold text-blue-700">{steeringSummary.printReady}</div>
+                <div className="mt-2 text-2xl font-semibold text-status-info">{steeringSummary.printReady}</div>
                 <p className="mt-1 text-xs text-muted-foreground">Formular und Kanal bereits definiert</p>
               </CardContent>
             </Card>
@@ -212,11 +220,13 @@ export default function LstKontraktUebersicht(): JSX.Element {
             <Card>
               <CardContent className="py-4">
                 <div className="text-xs uppercase tracking-wide text-muted-foreground">Hedge-Lueckenmenge</div>
-                <div className="mt-2 text-2xl font-semibold text-fuchsia-700">{engagement.hedgeGapMenge.toLocaleString('de-DE')}</div>
-                <p className="mt-1 text-xs text-muted-foreground">Restmenge mit offener Absicherungsluecke</p>
+                <div className="mt-2 text-2xl font-semibold text-status-warning">{engagement.hedgeGapMenge.toLocaleString('de-DE')}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Restmenge mit offener Absicherungslücke</p>
               </CardContent>
             </Card>
           </div>
+          </>
+          ) : null}
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
             <div className="space-y-1">
@@ -247,11 +257,11 @@ export default function LstKontraktUebersicht(): JSX.Element {
             </div>
             <div className="space-y-1">
               <Label>Datum von</Label>
-              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+              <Input type="date" className="min-h-touch" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label>Datum bis</Label>
-              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+              <Input type="date" className="min-h-touch" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label>Sortierung</Label>
@@ -266,38 +276,37 @@ export default function LstKontraktUebersicht(): JSX.Element {
             </div>
             <div className="space-y-1">
               <Label>von Kontrakt-Nr.</Label>
-              <Input value={contractNoFrom} onChange={(e) => setContractNoFrom(e.target.value)} />
+              <Input className="min-h-touch" value={contractNoFrom} onChange={(e) => setContractNoFrom(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label>bis Kontrakt-Nr.</Label>
-              <Input value={contractNoTo} onChange={(e) => setContractNoTo(e.target.value)} />
+              <Input className="min-h-touch" value={contractNoTo} onChange={(e) => setContractNoTo(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label>Matchcode 1</Label>
-              <Input ref={matchcodeRef} value={matchcode1} onChange={(e) => setMatchcode1(e.target.value)} />
+              <Input ref={matchcodeRef} className="min-h-touch" aria-label="Matchcode 1" value={matchcode1} onChange={(e) => setMatchcode1(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label>Matchcode 2</Label>
-              <Input value={matchcode2} onChange={(e) => setMatchcode2(e.target.value)} />
+              <Input className="min-h-touch" aria-label="Matchcode 2" value={matchcode2} onChange={(e) => setMatchcode2(e.target.value)} />
             </div>
             <div className="flex flex-col justify-end gap-2">
-              <label className="flex items-center gap-2">
+              <label className="flex min-h-touch items-center gap-2">
                 <Checkbox checked={onlyNoInput} onCheckedChange={(v) => setOnlyNoInput(v === true)} />
                 <span className="text-sm">nur Nr.-Eingabe</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex min-h-touch items-center gap-2">
                 <Checkbox checked={alsoDone} onCheckedChange={(v) => setAlsoDone(v === true)} />
                 <span className="text-sm">auch erledigte</span>
               </label>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={() => navigate('/kontrakte/neu')}>Neu</Button>
-            <Button variant="outline" onClick={() => { const first = rows[0]; if (first) navigate(`/kontrakte/${first.contract_id}`) }}>Oeffnen</Button>
-            <Button variant="outline" onClick={() => navigate('/kontrakte/positionen')}>Long/Short-Monitor</Button>
-            <Button variant="outline" onClick={() => navigate('/kontrakte/alarme')}>Alarme</Button>
-            <Button variant="outline" onClick={() => window.print()}>Drucken</Button>
-            <Button variant="outline" onClick={() => {
+          <div className="flex flex-wrap gap-2">
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => { const first = rows[0]; if (first) navigate(`/kontrakte/${first.contract_id}`) }}>Öffnen</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate('/kontrakte/positionen')}>Long/Short-Monitor</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate('/kontrakte/alarme')}>Alarme</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => window.print()}>Drucken</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => {
               const lines = ['Kontrakt-Nr.;Kontr.-Datum;gueltig von;gueltig bis;Partner;Artikel;Bezeichnung;Kontrakt-Menge;Verk.-Menge;Rest-Menge;Einheit;Einh.-Preis;Status']
               rows.forEach((r) => lines.push(
                 `${r.contract_no};${r.contract_date ?? ''};${r.valid_from ?? ''};${r.valid_to ?? ''};${r.party_name || r.party_id};${r.first_article_id ?? ''};${r.first_article_desc ?? ''};${r.total_quantity};${Math.max(0, r.total_quantity - r.rest_quantity)};${r.rest_quantity};${r.unit};${r.first_unit_price ?? ''};${r.status}`
@@ -319,9 +328,9 @@ export default function LstKontraktUebersicht(): JSX.Element {
             <span>{query.data?.total ?? 0} Kontrakte gefunden</span>
             {totalPages > 1 && (
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Zurueck</Button>
+                <Button variant="outline" className="min-h-touch touch-manipulation" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Zurück</Button>
                 <span>Seite {page + 1} / {totalPages}</span>
-                <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Weiter</Button>
+                <Button variant="outline" className="min-h-touch touch-manipulation" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Weiter</Button>
               </div>
             )}
           </div>
@@ -347,8 +356,16 @@ export default function LstKontraktUebersicht(): JSX.Element {
               </TableHeader>
               <TableBody>
                 {rows.map((row) => (
-                  <TableRow key={row.contract_id} className="cursor-pointer" onDoubleClick={() => navigate(`/kontrakte/${row.contract_id}`)}>
-                    <TableCell className="font-mono">{row.contract_no}</TableCell>
+                  <TableRow key={row.contract_id}>
+                    <TableCell>
+                      <button
+                        type="button"
+                        className="min-h-11 font-mono text-primary touch-manipulation"
+                        onClick={() => navigate(`/kontrakte/${row.contract_id}`)}
+                      >
+                        {row.contract_no}
+                      </button>
+                    </TableCell>
                     <TableCell>{statusBadge(row.status)}</TableCell>
                     <TableCell>{row.contract_date ? new Date(row.contract_date).toLocaleDateString('de-DE') : '-'}</TableCell>
                     <TableCell>{row.valid_from ? new Date(row.valid_from).toLocaleDateString('de-DE') : '-'}</TableCell>
@@ -376,9 +393,9 @@ export default function LstKontraktUebersicht(): JSX.Element {
           </div>
           {totalPages > 1 && (
             <div className="mt-2 flex items-center justify-end gap-2 text-sm">
-              <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Zurueck</Button>
+              <Button variant="outline" className="min-h-touch touch-manipulation" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>Zurück</Button>
               <span>Seite {page + 1} / {totalPages}</span>
-              <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Weiter</Button>
+              <Button variant="outline" className="min-h-touch touch-manipulation" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Weiter</Button>
             </div>
           )}
         </CardContent>
@@ -403,8 +420,16 @@ export default function LstKontraktUebersicht(): JSX.Element {
               </TableHeader>
               <TableBody>
                 {engagement.topRisiken.map((row) => (
-                  <TableRow key={`risk-${row.contract_id}`} className="cursor-pointer" onDoubleClick={() => navigate(`/kontrakte/${row.contract_id}`)}>
-                    <TableCell className="font-mono">{row.contract_no}</TableCell>
+                  <TableRow key={`risk-${row.contract_id}`}>
+                    <TableCell>
+                      <button
+                        type="button"
+                        className="min-h-11 font-mono text-primary touch-manipulation"
+                        onClick={() => navigate(`/kontrakte/${row.contract_id}`)}
+                      >
+                        {row.contract_no}
+                      </button>
+                    </TableCell>
                     <TableCell>{row.party_name || row.party_id}</TableCell>
                     <TableCell className="text-right">{row.rest_quantity.toLocaleString('de-DE')}</TableCell>
                     <TableCell className="text-right font-mono">{(row.steering?.market_valuation_eur ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
@@ -431,7 +456,7 @@ export default function LstKontraktUebersicht(): JSX.Element {
         </CardContent>
       </Card>
     </div>
-    <KeyboardShortcutBar shortcuts={shortcuts} />
+    {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

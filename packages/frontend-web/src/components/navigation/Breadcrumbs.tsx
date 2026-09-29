@@ -119,7 +119,7 @@ export function Breadcrumbs() {
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-muted-foreground px-6 pt-3 pb-0">
+    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 px-3 pt-3 pb-0 text-sm text-muted-foreground md:px-6">
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1
         return (
@@ -128,14 +128,14 @@ export function Breadcrumbs() {
             {crumb.path && !isLast ? (
               <Link
                 to={crumb.path}
-                className="hover:text-foreground transition-colors"
-                aria-label={i === 0 ? 'Home' : undefined}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-1 hover:text-foreground touch-manipulation"
+                aria-label={i === 0 ? 'Zur Startseite' : undefined}
               >
-                {i === 0 ? <Home className="h-3.5 w-3.5" aria-hidden="true" /> : crumb.label}
+                {i === 0 ? <Home className="h-4 w-4" aria-hidden="true" /> : crumb.label}
               </Link>
             ) : (
-              <span className={isLast ? 'font-medium text-foreground' : ''}>
-                {i === 0 ? <Home className="h-3.5 w-3.5" aria-hidden="true" /> : crumb.label}
+              <span className={isLast ? 'inline-flex min-h-11 items-center font-medium text-foreground' : 'inline-flex min-h-11 items-center'}>
+                {i === 0 ? <Home className="h-4 w-4" aria-hidden="true" /> : crumb.label}
               </span>
             )}
           </span>

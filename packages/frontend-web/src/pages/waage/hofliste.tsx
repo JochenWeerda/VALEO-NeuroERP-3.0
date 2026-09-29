@@ -26,6 +26,7 @@ import {
   type WeighingTicket,
 } from '@/lib/api/weighing-tickets'
 import { Plus, RefreshCw, Scale } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -50,6 +51,7 @@ const yardRoleProfiles: Array<{ id: YardRoleFocus; label: string; description: s
 export default function HoflistePage(): JSX.Element {
   const { toast } = useToast()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
   const [showNewDialog, setShowNewDialog] = useState(false)
@@ -228,15 +230,15 @@ export default function HoflistePage(): JSX.Element {
   }
 
   return (
-    <div className="flex flex-col h-full p-4 gap-3">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-wide uppercase">Waage - Hofliste</h1>
-        <Badge variant="secondary" className="text-sm">
+    <div className="flex h-full flex-col gap-3 p-3 md:p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">Hofliste</h1>
+        <Badge variant="secondary" className="min-h-11 px-3 text-sm">
           {openTickets.length} offen
         </Badge>
       </div>
 
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar roles={yardRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
         <ManagementDecisionPanel
@@ -259,41 +261,41 @@ export default function HoflistePage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={yardCrudCapabilities} />
       </div>
+      ) : null}
 
-      {/* Toolbar */}
       <Card>
-        <CardContent className="flex flex-wrap items-center gap-3 py-3">
+        <CardContent className="flex flex-col gap-3 py-3 sm:flex-row sm:flex-wrap sm:items-center">
           <Button
-            className="gap-2"
+            className="min-h-touch gap-2 touch-manipulation"
             onClick={handleOpenNewDialog}
             disabled={createMutation.isPending}
           >
             <Plus className="h-4 w-4" />
-            Neue Wiegung (F1)
+            {isTouch ? 'Neue Wiegung' : 'Neue Wiegung (F1)'}
           </Button>
           <Button
             variant="outline"
-            className="gap-2"
+            className="min-h-touch gap-2 touch-manipulation"
             onClick={() => { void handleZweitWiegung() }}
             disabled={updateMutation.isPending || !selectedTicketId}
           >
             <Scale className="h-4 w-4" />
-            Zweit-Wiegung (F2)
+            {isTouch ? 'Zweit-Wiegung' : 'Zweit-Wiegung (F2)'}
           </Button>
           <Button
             variant="outline"
-            className="gap-2"
+            className="min-h-touch gap-2 touch-manipulation"
             onClick={handleRefresh}
             disabled={ticketsQuery.isFetching}
           >
             <RefreshCw className={`h-4 w-4 ${ticketsQuery.isFetching ? 'animate-spin' : ''}`} />
-            Aktualisieren (F12)
+            {isTouch ? 'Aktualisieren' : 'Aktualisieren (F12)'}
           </Button>
 
-          <div className="ml-auto flex items-center gap-2">
-            <span className="text-sm text-muted-foreground whitespace-nowrap">Suche:</span>
+          <div className="flex min-w-0 w-full flex-1 items-center gap-2 sm:ml-auto sm:w-auto">
             <Input
-              className="w-48"
+              aria-label="Hofliste suchen"
+              className="min-h-touch min-w-0 flex-1 sm:w-56"
               placeholder="Nr., Kennzeichen, Gruppe..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -361,10 +363,10 @@ export default function HoflistePage(): JSX.Element {
                 render: (t: WeighingTicket) => (
                   <Button
                     variant={selectedTicketId === t.id ? 'default' : 'ghost'}
-                    size="sm"
+                    className="min-h-11 touch-manipulation"
                     onClick={() => setSelectedTicketId(selectedTicketId === t.id ? null : t.id)}
                   >
-                    {selectedTicketId === t.id ? 'Markiert' : 'Ausw.'}
+                    {selectedTicketId === t.id ? 'Markiert' : 'Auswählen'}
                   </Button>
                 ),
               },
@@ -374,43 +376,42 @@ export default function HoflistePage(): JSX.Element {
       </Card>
 
       {/* Status bar + Close */}
-      <div className="flex items-center justify-between border-t pt-2 text-xs text-muted-foreground">
-        <div className="flex gap-6">
+      <div className="flex flex-col gap-2 border-t pt-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-x-6 gap-y-1">
           <span>Bediener: Aktueller Benutzer</span>
           <span>Firma: VALEO</span>
           <span>Niederlassung: Hauptsitz</span>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(-1)}>
           Schliessen
         </Button>
       </div>
 
-      {/* New Weighing Dialog */}
       <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Neue Wiegung anlegen</DialogTitle>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
-            {/* KFZ-Kennzeichen */}
             <div className="grid gap-1.5">
               <Label htmlFor="nw-vehicle">KFZ-Kennzeichen</Label>
               <Input
                 id="nw-vehicle"
+                className="min-h-touch"
                 placeholder="z.B. VEC-AB 123"
                 value={formVehiclePlate}
                 onChange={(e) => setFormVehiclePlate(e.target.value)}
               />
             </div>
 
-            {/* Warengruppe */}
             <div className="grid gap-1.5">
               <Label>Warengruppe</Label>
               <NativeSelect
                 value={formArticleGroup}
                 onValueChange={setFormArticleGroup}
                 placeholder="Warengruppe auswaehlen..."
+                className="min-h-touch"
                 options={(articleGroupsQuery.data ?? []).map((g) => ({
                   value: g.warengruppe,
                   label: `${g.warengruppe} (${g.count})`,
@@ -418,7 +419,6 @@ export default function HoflistePage(): JSX.Element {
               />
             </div>
 
-            {/* Artikel (abhängig von Gruppe) */}
             <div className="grid gap-1.5">
               <Label>Ware</Label>
               <NativeSelect
@@ -426,6 +426,7 @@ export default function HoflistePage(): JSX.Element {
                 onValueChange={setFormArticleId}
                 disabled={!formArticleGroup}
                 placeholder={formArticleGroup ? 'Ware auswaehlen...' : 'Zuerst Warengruppe auswaehlen'}
+                className="min-h-touch"
                 options={(articlesByGroupQuery.data ?? []).map((a) => ({
                   value: a.id,
                   label: `${a.article_number} - ${a.name}`,
@@ -433,7 +434,6 @@ export default function HoflistePage(): JSX.Element {
               />
             </div>
 
-            {/* Notizen */}
             <div className="grid gap-1.5">
               <Label htmlFor="nw-notes">Notizen</Label>
               <Textarea
@@ -446,11 +446,11 @@ export default function HoflistePage(): JSX.Element {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNewDialog(false)}>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowNewDialog(false)}>
               Abbrechen
             </Button>
-            <Button onClick={() => { void handleCreateTicket() }} disabled={createMutation.isPending}>
+            <Button className="min-h-touch touch-manipulation" onClick={() => { void handleCreateTicket() }} disabled={createMutation.isPending}>
               {createMutation.isPending ? 'Erstelle...' : 'Wiegung anlegen'}
             </Button>
           </DialogFooter>

@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, Plus, Search } from 'lucide-react'
 import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -30,6 +31,7 @@ const userAdminRoles = [
 
 export default function BenutzerListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { toast } = useToast()
   const { data: items, isLoading } = useBenutzer()
   const [searchTerm, setSearchTerm] = useState('')
@@ -78,7 +80,7 @@ export default function BenutzerListePage(): JSX.Element {
       key: 'name' as const,
       label: 'Name',
       render: (b: Benutzer) => (
-        <button onClick={() => navigate(`/admin/benutzer/${b.id}`)} className="font-medium text-primary hover:underline">
+        <button onClick={() => navigate(`/admin/benutzer/${b.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {b.name}
         </button>
       ),
@@ -99,17 +101,19 @@ export default function BenutzerListePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Benutzerverwaltung</h1>
-          <p className="text-muted-foreground">Benutzer & Berechtigungen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Benutzerverwaltung</h1>
+          <p className="text-muted-foreground">Benutzer suchen, oeffnen und exportieren</p>
         </div>
-        <Button onClick={() => navigate('/admin/benutzer/neu')} className="gap-2">
+        <Button onClick={() => navigate('/admin/benutzer/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neuer Benutzer
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar roles={userAdminRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={filteredList.length} totalCount={list.length} title="Wer verwaltet die Benutzer?" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -153,18 +157,20 @@ export default function BenutzerListePage(): JSX.Element {
           ]}
         />
       </div>
+      </>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Benutzer" placeholder="Name, E-Mail oder Rolle" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => { void handleExport() }}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

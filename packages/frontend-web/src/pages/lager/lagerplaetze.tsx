@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { AlertTriangle, MapPin, Package, Warehouse } from 'lucide-react'
 import { useWarehouses } from '@/lib/api/inventory'
 import { getAxiosErrorMessage } from '@/lib/api-client'
@@ -27,6 +28,7 @@ import {
   type WmsRow,
 } from '@/lib/api/warehouse-wms'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   CrudCapabilityChecklist,
@@ -73,7 +75,7 @@ function LagerstrukturWmsPanel(props: {
   }
 
   async function handleSaveBin(): Promise<void> {
-    if (!editBin) return
+    if (!editBin || patchBin.isPending) return
     const id = wmsStr(editBin, 'id')
     const patch: WmsBinPatch = { is_blocked: blocked }
     const trimmed = capInput.trim()
@@ -105,7 +107,7 @@ function LagerstrukturWmsPanel(props: {
       <li key={wmsStr(bin, 'id')} className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 py-1 last:border-0">
         <span className="font-mono text-sm">{wmsStr(bin, 'bin_code')}</span>
         <span className="text-xs text-muted-foreground">{cap ? `max. ${cap} kg` : 'keine Kap.-Angabe'}</span>
-        <Button type="button" variant="outline" size="sm" onClick={() => openBinEditor(bin)}>
+        <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={() => openBinEditor(bin)}>
           Bearbeiten
         </Button>
       </li>
@@ -115,10 +117,9 @@ function LagerstrukturWmsPanel(props: {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">WMS-Lagerstruktur (Zone → Gang → Fach)</CardTitle>
+        <CardTitle className="text-base">Lagerstruktur</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Daten aus <code className="rounded bg-muted px-1">/api/v1/lager/wms</code> — nach Migration WM-STRUCT-001
-          inkl. Gänge; Lagerplatz-Metadaten per PATCH (Kapazität, Sperre).
+          Zone, Gang und Fach je Lager. Kapazität und Sperre am Fach ändern.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -126,19 +127,17 @@ function LagerstrukturWmsPanel(props: {
           <label htmlFor="wms-warehouse-select" className="text-sm font-medium">
             Lager
           </label>
-          <select
+          <NativeSelect
             id="wms-warehouse-select"
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            ariaLabel="Lager wählen"
+            placeholder="Lager wählen"
             value={warehouseId}
-            onChange={(e) => setWarehouseId(e.target.value)}
-          >
-            <option value="">— Lager wählen —</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name || w.code || w.id}
-              </option>
-            ))}
-          </select>
+            onValueChange={setWarehouseId}
+            options={warehouses.map((w) => ({
+              value: w.id,
+              label: w.name || w.code || w.id,
+            }))}
+          />
         </div>
 
         {warehouseId && zonesQ.isError && (
@@ -165,7 +164,7 @@ function LagerstrukturWmsPanel(props: {
               const bins = (binsQ.data ?? []).filter((b) => wmsStr(b, 'zone_id') === zid)
               return (
                 <details key={zid} className="rounded-lg border p-3">
-                  <summary className="cursor-pointer font-medium">
+                  <summary className="min-h-11 cursor-pointer font-medium touch-manipulation">
                     {wmsStr(zone, 'zone_code')} — {wmsStr(zone, 'name')}
                     <span className="ml-2 text-sm font-normal text-muted-foreground">
                       {aislesLoading ? '…' : `${aisles.length} Gänge`}, {bins.length} Fächer
@@ -229,11 +228,13 @@ function LagerstrukturWmsPanel(props: {
                     value={capInput}
                     onChange={(e) => setCapInput(e.target.value)}
                     placeholder="z. B. 25000"
+                    className="min-h-touch"
                   />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="wms-bin-blocked"
+                    className="h-11 w-11"
                     checked={blocked}
                     onCheckedChange={(c) => setBlocked(c === true)}
                   />
@@ -249,15 +250,16 @@ function LagerstrukturWmsPanel(props: {
                     onChange={(e) => setBlockReason(e.target.value)}
                     disabled={!blocked}
                     placeholder="Kurztext bei Sperre"
+                    className="min-h-touch"
                   />
                 </div>
               </div>
             )}
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setEditBin(null)} disabled={patchBin.isPending}>
+              <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={() => setEditBin(null)} disabled={patchBin.isPending}>
                 Abbrechen
               </Button>
-              <Button type="button" onClick={() => void handleSaveBin()} disabled={patchBin.isPending || !editBin}>
+              <Button type="button" className="min-h-touch touch-manipulation" onClick={() => void handleSaveBin()} disabled={patchBin.isPending || !editBin}>
                 {patchBin.isPending ? 'Speichern…' : 'Speichern'}
               </Button>
             </DialogFooter>
@@ -270,6 +272,7 @@ function LagerstrukturWmsPanel(props: {
 
 export default function LagerplaetzePage(): JSX.Element {
   const [searchParams] = useSearchParams()
+  const isTouch = useTouchDevice()
   const [roleFocus, setRoleFocus] = useState<WarehouseRole>('lager')
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
@@ -310,23 +313,35 @@ export default function LagerplaetzePage(): JSX.Element {
       : 'Freie Kapazitaet beobachten und naechste Einlagerung planen.'
 
   return (
-    <div className="space-y-6 p-6">
-      {workflowInstanceId && (
-        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
-        </div>
-      )}
+    <div className="space-y-6 p-3 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold">Lagerplätze</h1>
-        <p className="text-muted-foreground">Lagerverwaltung & Auslastung</p>
+        <h1 className="text-2xl font-bold md:text-3xl">Lagerplätze</h1>
+        <p className="text-muted-foreground">Fach wählen, sperren oder Kapazität setzen</p>
       </div>
 
+      {workflowInstanceId && !isTouch ? (
+        <div className="mb-4 rounded-md border border-border bg-muted px-4 py-2 text-sm">
+          Vorgang: {workflowCase || workflowProcess}
+        </div>
+      ) : null}
+
+      {isLoading && (
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      )}
+
       {!isLoading && (
+        <LagerstrukturWmsPanel
+          warehouses={items.map((w) => ({ id: w.id, name: w.name, code: w.code }))}
+        />
+      )}
+
+      {!isLoading && !isTouch ? (
         <>
           <RoleFocusBar roles={warehouseRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={lager.bereiche.length} totalCount={lager.bereiche.length} title="Wer klaert die Lagerkapazitaet?" />
-          <LagerstrukturWmsPanel
-            warehouses={items.map((w) => ({ id: w.id, name: w.name, code: w.code }))}
-          />
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
             <ManagementDecisionPanel
               decision={{
@@ -367,15 +382,7 @@ export default function LagerplaetzePage(): JSX.Element {
             />
           </div>
         </>
-      )}
-
-      {isLoading && (
-        <div className="grid gap-4 md:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-24" />
-          ))}
-        </div>
-      )}
+      ) : null}
 
       {!isLoading && lager.bereiche.length === 0 && (
         <Card>
@@ -386,17 +393,17 @@ export default function LagerplaetzePage(): JSX.Element {
       )}
 
       {kritisch > 0 && (
-        <Card className="border-orange-500 bg-orange-50">
+        <Card className="border-status-warning/40 bg-status-warning/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
+            <div className="flex items-center gap-2 text-status-warning">
               <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{kritisch} Lagerbereich(e) über 95% ausgelastet!</span>
+              <span className="font-semibold">{kritisch} Lagerbereich(e) über 95% ausgelastet</span>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {!isLoading && (
+      {!isLoading && !isTouch ? (
       <>
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -472,7 +479,7 @@ export default function LagerplaetzePage(): JSX.Element {
                       <span className="text-sm w-24">Plätze:</span>
                       <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                         <div
-                          className={`h-full ${auslastung > 95 ? 'bg-red-600' : auslastung > 80 ? 'bg-orange-600' : 'bg-green-600'}`}
+                          className={`h-full ${auslastung > 95 ? 'bg-status-error' : auslastung > 80 ? 'bg-status-warning' : 'bg-status-success'}`}
                           style={{ width: `${auslastung}%` }}
                         />
                       </div>
@@ -483,7 +490,7 @@ export default function LagerplaetzePage(): JSX.Element {
                     <div className="flex items-center gap-2">
                       <span className="text-sm w-24">Füllstand:</span>
                       <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-600" style={{ width: `${fuellstand}%` }} />
+                        <div className="h-full bg-status-info" style={{ width: `${fuellstand}%` }} />
                       </div>
                       <Badge variant="outline">{`${fuellstand.toFixed(0)}%`}</Badge>
                     </div>
@@ -495,7 +502,7 @@ export default function LagerplaetzePage(): JSX.Element {
         </CardContent>
       </Card>
       </>
-      )}
+      ) : null}
     </div>
   )
 }

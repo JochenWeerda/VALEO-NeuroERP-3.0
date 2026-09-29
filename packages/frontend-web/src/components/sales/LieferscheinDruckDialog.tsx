@@ -193,16 +193,16 @@ export function LieferscheinDruckDialog({
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Button variant="outline" onClick={() => window.print()} className="min-h-touch">
               Drucken
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" className="min-h-touch">
               Vorschau
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" className="min-h-touch">
               E-Mail
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" className="min-h-touch">
               Dokumente
             </Button>
           </div>

@@ -8,9 +8,11 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, FileDown, Package, Search } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function ChargenListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: chargen = [], isLoading } = useCharges()
 
@@ -52,7 +54,11 @@ export default function ChargenListePage(): JSX.Element {
       key: 'chargenId' as const,
       label: 'Chargen-ID',
       render: (c: Charge) => (
-        <button onClick={() => navigate(`/charge/stamm/${c.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
+        <button
+          type="button"
+          onClick={() => navigate(`/charge/stamm/${c.id}`)}
+          className="min-h-11 font-medium font-mono text-primary touch-manipulation"
+        >
           {c.chargenId}
         </button>
       ),
@@ -77,19 +83,19 @@ export default function ChargenListePage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Chargen</h1>
-          <p className="text-muted-foreground">Chargenverwaltung</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Chargen</h1>
+          <p className="text-muted-foreground">Chargen suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/charge/wareneingang')}>Wareneingang</Button>
+        <Button onClick={() => navigate('/charge/wareneingang')} className="min-h-touch touch-manipulation">Wareneingang</Button>
       </div>
 
       {inPruefung > 0 && (
-        <Card className="border-orange-500 bg-orange-50">
+        <Card className="border-status-warning/40 bg-status-warning/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
+            <div className="flex items-center gap-2 text-status-warning">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{inPruefung} Charge(n) in Qualitaetspruefung</span>
             </div>
@@ -97,6 +103,7 @@ export default function ChargenListePage(): JSX.Element {
         </Card>
       )}
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -128,18 +135,42 @@ export default function ChargenListePage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Chargen-ID oder Artikel..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                aria-label="Suche Chargen"
+                placeholder="Chargen-ID oder Artikel"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => {
+                const header = 'Chargen-ID;Artikel;Menge;Lagerort;Eingang;Status\n'
+                const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+                const rows = filteredChargen
+                  .map((c) => [c.chargenId, c.artikel, c.menge, c.lagerort, c.eingang, c.status].map(esc).join(';'))
+                  .join('\n')
+                const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `chargen-${new Date().toISOString().slice(0, 10)}.csv`
+                a.click()
+                URL.revokeObjectURL(url)
+              }}
+            >
               <FileDown className="h-4 w-4" />
               Export
             </Button>

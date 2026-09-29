@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { PlusCircle, Trash2, Wheat } from 'lucide-react'
+import { PlusCircle, Wheat } from 'lucide-react'
 import {
   useRohwarengruppen,
   useCreateRohwarengruppe,
@@ -152,13 +152,12 @@ function RohwarengruppenTab() {
                     {g.mengeneinheit && <span className="text-xs text-muted-foreground">[{g.mengeneinheit}]</span>}
                   </div>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`${g.gruppe_nr} löschen`}
+                    variant="outline"
+                    className="min-h-touch shrink-0 touch-manipulation"
                     disabled={pendingDeletes.has(g.gruppe_nr)}
                     onClick={() => { void handleDelete(g.gruppe_nr) }}
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    {pendingDeletes.has(g.gruppe_nr) ? 'Löschen...' : 'Löschen'}
                   </Button>
                 </div>
               ))}

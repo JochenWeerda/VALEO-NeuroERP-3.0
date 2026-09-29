@@ -4,7 +4,7 @@ import type { RenderPlan } from '../render-plan/types'
 import type { ScreenOverlay } from '../render-plan/overlay'
 import type { TableQueryState } from '../runtime/types'
 import type { ScreenColumnNavigation } from '../schema'
-import { ColumnLayoutRenderer, type NavigationColumn } from './ColumnLayoutRenderer'
+import { ColumnLayoutRenderer, isNarrowColumnSplit, type NavigationColumn } from './ColumnLayoutRenderer'
 import { FastFormRenderer } from './FastFormRenderer'
 import { FastTabRenderer } from './FastTabRenderer'
 import { FastTableRenderer } from './FastTableRenderer'
@@ -79,6 +79,7 @@ export function DerivedColumnLayout({
   const childRows = childKey ? (tables[childKey] ?? []) : []
   const [selectedListKey, setSelectedListKey] = useState<string | undefined>()
   const [selectedChildKey, setSelectedChildKey] = useState<string | undefined>()
+  const postponePreview = isNarrowColumnSplit()
   const classes = layoutClasses(plan.shell.layoutMode, plan.shell.density)
   const listFloor = plan.shell.floorplan === 'worklist' || plan.shell.floorplan === 'analyticalList'
 
@@ -92,9 +93,10 @@ export function DerivedColumnLayout({
       setSelectedListKey(undefined)
       return
     }
+    if (postponePreview) return
     if (selectedListKey && listRows.some((row, index) => rowIdentity(row, index) === selectedListKey)) return
     setSelectedListKey(rowIdentity(listRows[0], 0))
-  }, [listRows, selectedListKey])
+  }, [listRows, selectedListKey, postponePreview])
 
   if (!listKey || !listTable) return null
 
@@ -161,10 +163,13 @@ export function DerivedColumnLayout({
         </div>
       ),
     },
-    {
+  ]
+
+  if (selectedRow) {
+    columns.push({
       key: 'object',
       title: objectTitle,
-      content: selectedRow ? (
+      content: (
         <div className="space-y-3">
           <SelectedRecordPanel table={listTable} row={selectedRow} />
           {objectFields.length > 0 ? (
@@ -218,21 +223,15 @@ export function DerivedColumnLayout({
             />
           ) : null}
         </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">Datensatz in der Liste wählen.</p>
       ),
-    },
-  ]
+    })
+  }
 
-  if (pattern === 'listDetailDetail') {
+  if (pattern === 'listDetailDetail' && selectedChild && childTable) {
     columns.push({
       key: 'subobject',
-      title: childTable?.label ?? 'Unterobjekt',
-      content: selectedChild && childTable ? (
-        <SelectedRecordPanel table={childTable} row={selectedChild} />
-      ) : (
-        <p className="text-sm text-muted-foreground">Unterobjekt in der Tabelle wählen.</p>
-      ),
+      title: childTable.label,
+      content: <SelectedRecordPanel table={childTable} row={selectedChild} />,
     })
   }
 

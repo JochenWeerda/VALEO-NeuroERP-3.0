@@ -18,8 +18,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Droplets,
-  Edit,
-  Eye,
   Filter,
   Info,
   Plus,
@@ -28,6 +26,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 interface DuengerListItem {
   id: string
@@ -83,6 +82,7 @@ const SAFETY_OPTIONS = [
 
 export default function DuengerListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const [typFilter, setTypFilter] = useState('all-types')
   const [herstellerFilter, setHerstellerFilter] = useState('')
@@ -192,7 +192,7 @@ export default function DuengerListePage(): JSX.Element {
       )
     }
 
-    return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Keine Zulassung</Badge>
+    return <Badge variant="secondary">Keine Zulassung</Badge>
   }
 
   const getNpkDisplay = (item: DuengerListItem): string => {
@@ -213,19 +213,20 @@ export default function DuengerListePage(): JSX.Element {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="mx-auto max-w-7xl space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Duenger-Verwaltung</h1>
-          <p className="text-muted-foreground">Uebersicht aller Duenger und deren Eigenschaften</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Dünger</h1>
+          <p className="text-muted-foreground">Dünger suchen und öffnen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/duenger-stamm')}>
+        <Button onClick={() => navigate('/agrar/duenger-stamm')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="mr-2 h-4 w-4" />
-          Neuer Duenger
+          Neuer Dünger
         </Button>
       </div>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+      {!isTouch ? (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         {isLoading ? (
           [...Array(4)].map((_, index) => (
             <Card key={index}>
@@ -241,7 +242,7 @@ export default function DuengerListePage(): JSX.Element {
           <>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Gesamt Duenger</CardTitle>
+                <CardTitle className="text-sm font-medium">Gesamt Dünger</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats?.total_duenger || 0}</div>
@@ -249,10 +250,10 @@ export default function DuengerListePage(): JSX.Element {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Wassergefaehrdend</CardTitle>
+                <CardTitle className="text-sm font-medium">Wassergefährdend</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">{stats?.by_safety?.WG || 0}</div>
+                <div className="text-2xl font-bold text-status-info">{stats?.by_safety?.WG || 0}</div>
               </CardContent>
             </Card>
             <Card>
@@ -276,13 +277,14 @@ export default function DuengerListePage(): JSX.Element {
           </>
         )}
       </div>
+      ) : null}
 
       {!isLoading && filteredData.length === 0 ? (
         <Alert className="mb-6">
           <Info className="h-4 w-4" />
           <AlertTitle>Vorschau-Modus</AlertTitle>
           <AlertDescription>
-            Es sind noch keine Duenger-Daten verfuegbar. Legen Sie Duenger-Artikel an, um die Uebersicht zu fuellen.
+            Es sind noch keine Dünger-Daten verfügbar. Legen Sie Dünger-Artikel an, um die Übersicht zu füllen.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -299,17 +301,18 @@ export default function DuengerListePage(): JSX.Element {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Suche..."
+                aria-label="Suche Dünger"
+                placeholder="Name, Artikelnummer oder Hersteller"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                className="pl-9"
+                className="min-h-touch pl-9"
               />
             </div>
-            <NativeSelect value={typFilter} onValueChange={setTypFilter} options={TYP_OPTIONS} />
-            <NativeSelect value={kulturTypFilter} onValueChange={setKulturTypFilter} options={KULTUR_OPTIONS} />
-            <NativeSelect value={safetyFilter} onValueChange={setSafetyFilter} options={SAFETY_OPTIONS} />
-            <Button variant="outline" onClick={clearFilters}>
-              Filter loeschen
+            <NativeSelect ariaLabel="Typ" value={typFilter} onValueChange={setTypFilter} options={TYP_OPTIONS} />
+            <NativeSelect ariaLabel="Kulturtyp" value={kulturTypFilter} onValueChange={setKulturTypFilter} options={KULTUR_OPTIONS} />
+            <NativeSelect ariaLabel="Sicherheitsstufe" value={safetyFilter} onValueChange={setSafetyFilter} options={SAFETY_OPTIONS} />
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={clearFilters}>
+              Filter löschen
             </Button>
           </div>
         </CardContent>
@@ -317,7 +320,7 @@ export default function DuengerListePage(): JSX.Element {
 
       <Card>
         <CardHeader>
-          <CardTitle>Duenger-Liste</CardTitle>
+          <CardTitle>Dünger-Liste</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -328,10 +331,10 @@ export default function DuengerListePage(): JSX.Element {
             </div>
           ) : filteredData.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
-              <p className="mb-4">Keine Duenger-Eintraege gefunden</p>
-              <Button onClick={() => navigate('/agrar/duenger-stamm')}>
+              <p className="mb-4">Keine Dünger-Einträge gefunden</p>
+              <Button className="min-h-touch touch-manipulation" onClick={() => navigate('/agrar/duenger-stamm')}>
                 <Plus className="mr-2 h-4 w-4" />
-                Ersten Duenger anlegen
+                Ersten Dünger anlegen
               </Button>
             </div>
           ) : (
@@ -355,7 +358,15 @@ export default function DuengerListePage(): JSX.Element {
                   {filteredData.map(item => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.artikelnummer}</TableCell>
-                      <TableCell>{item.name}</TableCell>
+                      <TableCell>
+                        <button
+                          type="button"
+                          className="min-h-11 font-medium text-primary touch-manipulation"
+                          onClick={() => navigate(`/agrar/duenger-stamm/${item.id}`)}
+                        >
+                          {item.name}
+                        </button>
+                      </TableCell>
                       <TableCell>{item.typ}</TableCell>
                       <TableCell>{item.hersteller}</TableCell>
                       <TableCell className="font-mono">{getNpkDisplay(item)}</TableCell>
@@ -368,12 +379,12 @@ export default function DuengerListePage(): JSX.Element {
                       </TableCell>
                       <TableCell>{item.vk_preis ? `EUR ${item.vk_preis.toFixed(2)}` : '-'}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => navigate(`/agrar/duenger-stamm/${item.id}`)}>
-                            <Eye className="h-4 w-4" />
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(`/agrar/duenger-stamm/${item.id}`)}>
+                            Anzeigen
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => navigate(`/agrar/duenger-stamm/${item.id}`)}>
-                            <Edit className="h-4 w-4" />
+                          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(`/agrar/duenger-stamm/${item.id}`)}>
+                            Bearbeiten
                           </Button>
                         </div>
                       </TableCell>

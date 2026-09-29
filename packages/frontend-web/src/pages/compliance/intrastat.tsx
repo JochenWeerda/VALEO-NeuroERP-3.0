@@ -64,7 +64,7 @@ export default function IntrastatPage(): JSX.Element {
       key: 'id' as const,
       label: 'Aktionen',
       render: (m: IntrastatMeldung) => (
-        <Button size="sm" variant="outline" className="gap-1" onClick={() => { void handleExport(m.meldezeitraum) }}>
+        <Button variant="outline" className="min-h-touch gap-1" onClick={() => { void handleExport(m.meldezeitraum) }}>
           <Download className="h-3 w-3" />CSV
         </Button>
       ),

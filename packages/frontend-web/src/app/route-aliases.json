@@ -1409,6 +1409,10 @@
       "path": "crm/dubletten"
     },
     {
+      "module": "@/pages/crm/klaerfall-inbox",
+      "path": "crm/klaerfall-inbox"
+    },
+    {
       "module": "@/pages/crm/kunden-zuordnung",
       "path": "crm/kunden-zuordnung"
     },

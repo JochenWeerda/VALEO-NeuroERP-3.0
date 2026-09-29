@@ -93,14 +93,14 @@ export function DuplicateWarning({
                 {onSelect && (
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={() => onSelect(candidate)}
+                    className="min-h-touch"
                   >
                     Auswählen
                   </Button>
                 )}
                 <Link to={`/crm/customers/${candidate.id}`}>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" className="min-h-touch min-w-touch" aria-label="Kandidatenstamm öffnen">
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -111,7 +111,7 @@ export function DuplicateWarning({
 
         {onIgnore && (
           <div className="mt-4 flex justify-end">
-            <Button variant="outline" size="sm" onClick={onIgnore}>
+            <Button variant="outline" onClick={onIgnore} className="min-h-touch">
               Warnung ignorieren und fortfahren
             </Button>
           </div>

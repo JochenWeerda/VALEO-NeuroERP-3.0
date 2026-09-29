@@ -63,7 +63,7 @@ export default function WetterPrognosePage(): JSX.Element {
           <h1 className="text-3xl font-bold">Wetter-Prognose</h1>
           <p className="text-muted-foreground">7-Tage-Vorhersage · DWD ICON-D2 via Open-Meteo · Stationsdaten via BrightSky</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
+        <Button variant="outline" onClick={handleRefresh} className="min-h-touch gap-2 touch-manipulation">
           <RefreshCw className="h-4 w-4" />
           Aktualisieren
         </Button>
@@ -97,7 +97,7 @@ export default function WetterPrognosePage(): JSX.Element {
                 placeholder="z.B. 9.73"
               />
             </div>
-            <Button onClick={handleApply} size="sm">Übernehmen</Button>
+            <Button onClick={handleApply} className="min-h-touch touch-manipulation">Übernehmen</Button>
             {aktuell?.station_name && (
               <span className="text-sm text-muted-foreground">
                 Nächste DWD-Station: <strong>{aktuell.station_name}</strong>
@@ -228,7 +228,7 @@ export default function WetterPrognosePage(): JSX.Element {
                         <div className="text-lg font-bold">{fmt(tag.temperatur_max, '°')}</div>
                         <div className="text-sm text-muted-foreground">{fmt(tag.temperatur_min, '°')}</div>
                         {regen && (
-                          <div className="text-xs text-blue-600 font-medium">
+                          <div className="text-xs font-medium text-primary">
                             {fmt(tag.niederschlag_summe, ' mm')}
                           </div>
                         )}

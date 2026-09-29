@@ -982,9 +982,8 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
           </div>
           <div className="flex items-center gap-3">
             <Button
-              size="sm"
               variant="outline"
-              className="border-indigo-400/30 bg-indigo-500/10 text-indigo-200 hover:bg-indigo-500/20"
+              className="min-h-touch border-indigo-400/30 bg-indigo-500/10 text-indigo-200 hover:bg-indigo-500/20"
               onClick={() => setShowNewInstanceDialog(true)}
             >
               <Plus className="mr-1.5 h-3.5 w-3.5" />
@@ -1211,60 +1210,54 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
 
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      size="sm"
                       onClick={() => void handleSaveLifecycle()}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="bg-white text-slate-950 hover:bg-white/90"
+                      className="min-h-touch bg-white text-slate-950 hover:bg-white/90"
                     >
                       <Save className="mr-1.5 h-4 w-4" />
                       Speichern
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => void handleResumeLifecycle()}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                      className="min-h-touch border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
                     >
                       <PlayCircle className="mr-1.5 h-4 w-4" />
                       Wieder aufnehmen
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('hold')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                      className="min-h-touch border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
                     >
                       <PauseCircle className="mr-1.5 h-4 w-4" />
                       Pause
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('complete')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-emerald-400/20 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
+                      className="min-h-touch border-emerald-400/20 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
                     >
                       <CheckCircle2 className="mr-1.5 h-4 w-4" />
                       Abschliessen
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('cancel')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-rose-400/20 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15"
+                      className="min-h-touch border-rose-400/20 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15"
                     >
                       <XCircle className="mr-1.5 h-4 w-4" />
                       Abbrechen
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('fail')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-red-400/20 bg-red-500/10 text-red-100 hover:bg-red-500/15"
+                      className="min-h-touch border-red-400/20 bg-red-500/10 text-red-100 hover:bg-red-500/15"
                     >
                       <CircleAlert className="mr-1.5 h-4 w-4" />
                       Scheitern
@@ -1375,7 +1368,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                             onClick={() => void handleAction(action)}
                             disabled={executeAction.isPending}
                             variant={action.variant === 'primary' ? 'default' : 'outline'}
-                            className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                            className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
                           >
                             {action.label}
                             <ChevronRight className="h-4 w-4" />
@@ -1555,11 +1548,13 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       {selectedNode.agent.actions.map((action) => (
                         <Button
                           key={action}
-                          size="sm"
                           disabled={executeAgentAction.isPending}
                           onClick={() => void handleAgentAction(action)}
                           variant={action === 'Uebernehmen' ? 'default' : 'outline'}
-                          className={cn(action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10')}
+                          className={cn(
+                            'min-h-touch',
+                            action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10',
+                          )}
                         >
                           {action}
                         </Button>
@@ -1575,7 +1570,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     key={action.label}
                     onClick={() => void handleAction(action)}
                     disabled={executeAction.isPending}
-                    className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                    className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
                     variant={action.variant === 'primary' ? 'default' : 'outline'}
                   >
                     {action.label}

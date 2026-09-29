@@ -232,8 +232,7 @@ export default function CustomerPortalLayout() {
             <div className="relative" ref={moreMenuRef}>
               <Button
                 variant="ghost"
-                size="sm"
-                className="gap-2"
+                className="min-h-touch gap-2"
                 onClick={() => setMoreMenuOpen((open) => !open)}
               >
                 <FileSpreadsheet className="h-4 w-4" />

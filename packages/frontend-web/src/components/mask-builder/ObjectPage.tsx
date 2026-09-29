@@ -480,8 +480,11 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 <span className="font-semibold">Entwurf vorhanden</span>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={restoreDraft}>Wiederherstellen</Button>
-                <Button size="sm" variant="ghost" onClick={discardDraft}><X className="h-4 w-4" /></Button>
+                <Button variant="outline" onClick={restoreDraft} className="min-h-touch">Wiederherstellen</Button>
+                <Button variant="ghost" onClick={discardDraft} className="min-h-touch" aria-label="Entwurf verwerfen">
+                  <X className="h-4 w-4" aria-hidden="true" />
+                  Verwerfen
+                </Button>
               </div>
             </div>
           </CardContent>

@@ -101,7 +101,7 @@ export function ImportMonitor(): JSX.Element {
       <div className="rounded-lg border bg-muted/30 p-4 text-sm" role="alert">
         <p className="font-medium text-status-error">Der Integrationsmonitor konnte nicht geladen werden.</p>
         <p className="mt-1 text-muted-foreground">{error}</p>
-        <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { void load() }}>
+        <Button type="button" variant="outline" className="min-h-touch mt-3" onClick={() => { void load() }}>
           Erneut laden
         </Button>
       </div>
@@ -145,13 +145,13 @@ export function ImportMonitor(): JSX.Element {
                   </div>
                   <div className="flex items-center gap-2">
                     {job.status === 'validated' ? (
-                      <Button type="button" size="sm" disabled={isPending} onClick={() => accept(job.id)}>
+                      <Button type="button" disabled={isPending} onClick={() => accept(job.id)} className="min-h-touch">
                         {isPending ? 'Übernimmt…' : 'Übernehmen'}
                       </Button>
                     ) : null}
                     {(job.status === 'validated' || job.status === 'quarantined') ? (
-                      <Button type="button" size="sm" variant="outline" disabled={isPending}
-                              onClick={() => { setRejectingId(job.id); setReason('') }}>
+                      <Button type="button" variant="outline" disabled={isPending}
+                              onClick={() => { setRejectingId(job.id); setReason('') }} className="min-h-touch">
                         Verwerfen
                       </Button>
                     ) : null}
@@ -183,13 +183,13 @@ export function ImportMonitor(): JSX.Element {
                         placeholder="Warum wird dieser Import verworfen?"
                       />
                     </div>
-                    <Button type="button" variant="destructive" size="sm"
+                    <Button type="button" variant="destructive"
                             disabled={isPending || reason.trim().length < 3}
-                            onClick={confirmReject}>
+                            onClick={confirmReject} className="min-h-touch">
                       Verwerfen bestätigen
                     </Button>
-                    <Button type="button" variant="ghost" size="sm"
-                            onClick={() => { setRejectingId(null); setReason('') }}>
+                    <Button type="button" variant="ghost"
+                            onClick={() => { setRejectingId(null); setReason('') }} className="min-h-touch">
                       Abbrechen
                     </Button>
                   </div>

@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, Trash2, Globe } from 'lucide-react'
+import { Plus, Globe } from 'lucide-react'
 
 type ExchangeRate = {
   id: string
@@ -247,11 +247,11 @@ export default function WechselkursePage(): JSX.Element {
                       <td className="py-2">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          className="min-h-touch"
                           onClick={() => deleteRate.mutate(r.id)}
                           disabled={deleteRate.isPending}
                         >
-                          <Trash2 className="h-4 w-4 text-status-error" />
+                          Löschen
                         </Button>
                       </td>
                     </tr>

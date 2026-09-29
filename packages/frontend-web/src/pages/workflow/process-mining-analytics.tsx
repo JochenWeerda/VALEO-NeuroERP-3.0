@@ -56,7 +56,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
       render: (p: ProcessSummary) => (
         <button
           onClick={() => setSelectedProcess(p.projection_key)}
-          className="font-medium text-blue-600 hover:underline text-left"
+          className="min-h-11 font-medium text-primary touch-manipulation text-left"
         >
           {p.process_name}
         </button>
@@ -199,7 +199,7 @@ export default function ProcessMiningAnalyticsPage(): JSX.Element {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>{drilldown.process_name} — Drilldown</CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedProcess(null)}>✕ Schließen</Button>
+              <Button variant="ghost" onClick={() => setSelectedProcess(null)} className="min-h-touch">✕ Schließen</Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">

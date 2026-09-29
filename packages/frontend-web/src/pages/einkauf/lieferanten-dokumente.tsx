@@ -194,8 +194,8 @@ export default function LieferantenDokumentePage(): JSX.Element {
                       <TableCell>{record?.followUp ?? '-'}</TableCell>
                       <TableCell className="text-right">
                         <Button
-                          size="sm"
                           variant="outline"
+                          className="min-h-touch"
                           onClick={() => { void handleDelete(document.id) }}
                           disabled={deleteDoc.isPending}
                         >

@@ -134,21 +134,23 @@ export default function ErloeskennziffernPage(): JSX.Element {
           <Button
             type="button"
             variant="outline"
-            size="sm"
             onClick={() => startEdit(row)}
             aria-label={`${row.ekz_nr} bearbeiten`}
+            className="min-h-touch"
           >
             <Edit3 className="h-4 w-4" aria-hidden="true" />
+            Bearbeiten
           </Button>
           <Button
             type="button"
             variant="outline"
-            size="sm"
             disabled={deletingNr === row.ekz_nr}
             onClick={() => void handleDelete(row.ekz_nr)}
             aria-label={`${row.ekz_nr} deaktivieren`}
+            className="min-h-touch"
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Löschen
           </Button>
         </div>
       ),

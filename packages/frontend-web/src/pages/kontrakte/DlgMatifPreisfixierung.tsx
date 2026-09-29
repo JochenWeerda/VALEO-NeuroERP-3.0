@@ -182,10 +182,9 @@ export default function DlgMatifPreisfixierung({
                   </TableCell>
                   <TableCell>
                     <Button
-                      size="sm"
                       disabled={calculatedPrice === null || !isWindowActive}
                       onClick={() => handleFixLine(idx)}
-                    >
+                     className="min-h-touch">
                       Fixieren
                     </Button>
                   </TableCell>

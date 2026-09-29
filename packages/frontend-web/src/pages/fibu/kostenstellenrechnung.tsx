@@ -35,7 +35,6 @@ import {
   GitMerge,
   Plus,
   Tag,
-  Trash2,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
@@ -375,8 +374,8 @@ function KostenstellenTab() {
                       </button>
                     </td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === kst.id} onClick={() => void handleDelete(kst)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === kst.id} onClick={() => void handleDelete(kst)}>
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -504,8 +503,8 @@ function KostenartenTab() {
                     </td>
                     <td className="py-2 pr-3 font-mono text-xs text-muted-foreground">{koa.konto_nr ?? '—'}</td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === koa.id} onClick={() => void handleDelete(koa)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === koa.id} onClick={() => void handleDelete(koa)}>
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -678,8 +677,8 @@ function BuchungenTab() {
                       {fmtEurFull(Number(b.betrag_eur))}
                     </td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === b.id} onClick={() => void handleDelete(b)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === b.id} onClick={() => void handleDelete(b)}>
+                        Löschen
                       </Button>
                     </td>
                   </tr>

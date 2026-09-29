@@ -398,7 +398,7 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
         <DialogFooter className="border-t pt-3 mt-0 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {totalPositionen > 0 && (
-              <Button variant="ghost" size="sm" onClick={selectAllBelege}>
+              <Button variant="ghost" onClick={selectAllBelege} className="min-h-touch">
                 Alle laden &amp; auswählen
               </Button>
             )}

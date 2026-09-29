@@ -55,7 +55,7 @@ export default function LieferungStornoPage() {
       <div className="flex items-center gap-2">
         <Undo2 size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Lieferung-Storno / Gutschrift</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
           {orders.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -126,7 +126,7 @@ export default function LieferungStornoPage() {
                             <td className="px-3 py-1.5 text-muted-foreground">{ls.storno_grund ?? '—'}</td>
                             <td className="px-3 py-1.5 text-right">
                               {ls.storno_moeglich ? (
-                                <Button size="sm" variant="ghost" onClick={() => { setStorno(ls.lieferschein); setGrund('') }}>
+                                <Button variant="ghost" onClick={() => { setStorno(ls.lieferschein); setGrund('') }} className="min-h-touch">
                                   <Ban size={13} className="text-status-error mr-1" />Storno
                                 </Button>
                               ) : (

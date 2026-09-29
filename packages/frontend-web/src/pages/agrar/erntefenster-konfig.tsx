@@ -262,8 +262,7 @@ export default function ErntefensterKonfigPage(): JSX.Element {
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    className="gap-2"
+                    className="min-h-touch gap-2"
                     onClick={() =>
                       openSandboxPreview({
                         processKey: selectedTemplate.process_key,
@@ -402,7 +401,7 @@ export default function ErntefensterKonfigPage(): JSX.Element {
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
+                      className="min-h-touch"
                       onClick={() => openSettlementReview(campaign)}
                     >
                       Settlement-Abschluss pruefen
@@ -410,8 +409,7 @@ export default function ErntefensterKonfigPage(): JSX.Element {
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      className="gap-2"
+                      className="min-h-touch gap-2"
                       onClick={() =>
                         openSandboxPreview({
                           processKey: campaign.process_key,
@@ -427,11 +425,11 @@ export default function ErntefensterKonfigPage(): JSX.Element {
                     <Button
                       type="button"
                       variant="outline"
-                      size="sm"
-                      disabled={legacySettlementCount === 0 || backfillMutation.isPending}
+                      className="min-h-touch"
+                      disabled={legacySettlementCount === 0 || (backfillMutation.isPending && backfillMutation.variables === campaign.id)}
                       onClick={() => backfillMutation.mutate(campaign.id)}
                     >
-                      {backfillMutation.isPending ? 'Ordnet zu...' : 'Alt-Daten zuordnen'}
+                      {backfillMutation.isPending && backfillMutation.variables === campaign.id ? 'Ordnet zu...' : 'Alt-Daten zuordnen'}
                     </Button>
                   </div>
                 </li>

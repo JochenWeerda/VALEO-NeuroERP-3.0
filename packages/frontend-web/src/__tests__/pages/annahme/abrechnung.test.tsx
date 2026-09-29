@@ -120,7 +120,7 @@ describe('AnnahmeAbrechnungPage', () => {
 
     expect(await screen.findByText('Kampagnenabschluss: Ernte 2026')).toBeInTheDocument()
     await waitFor(() => {
-      expect(screen.getByLabelText('Supplier ID')).toBeInTheDocument()
+      expect(screen.getByLabelText('Lieferant')).toBeInTheDocument()
     })
 
     apiPostMock.mockImplementation(async (url: string, payload?: Record<string, unknown>) => {
@@ -136,10 +136,10 @@ describe('AnnahmeAbrechnungPage', () => {
       return { data: {} }
     })
 
-    const supplierInput = screen.getByLabelText('Supplier ID')
+    const supplierInput = screen.getByLabelText('Lieferant')
     fireEvent.change(supplierInput, { target: { value: 'LW-NEW' } })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Settlement speichern' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
 
     await waitFor(() => {
       expect(apiPostMock).toHaveBeenCalledWith(

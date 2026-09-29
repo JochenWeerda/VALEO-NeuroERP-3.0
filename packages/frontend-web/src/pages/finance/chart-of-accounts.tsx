@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
-import { FileDown, Plus, Search, Edit, Trash2, Loader2, Building2, TrendingUp, TrendingDown, DollarSign, ListTree } from 'lucide-react'
+import { FileDown, Plus, Search, Loader2, Building2, TrendingUp, TrendingDown, DollarSign, ListTree } from 'lucide-react'
 import { queryKeys } from '@/lib/query'
 import { financeService, type Account, type AccountHierarchy } from '@/lib/services/finance-service'
 import { toast } from 'sonner'
@@ -293,7 +293,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
       render: (account: Account) => (
         <button
           onClick={() => navigate(`/finance/accounts/${account.id}`)}
-          className="font-mono font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-mono font-medium text-primary touch-manipulation"
         >
           {account.account_number}
         </button>
@@ -354,13 +354,13 @@ export default function ChartOfAccountsPage(): JSX.Element {
       label: 'Aktionen',
       render: (account: Account) => (
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleEdit(account)}>
-            <Edit className="h-4 w-4" />
+          <Button variant="outline" className="min-h-touch" onClick={() => handleEdit(account)}>
+            Bearbeiten
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Trash2 className="h-4 w-4" />
+              <Button variant="outline" className="min-h-touch">
+                Deaktivieren
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>

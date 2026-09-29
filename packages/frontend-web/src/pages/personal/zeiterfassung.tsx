@@ -45,6 +45,7 @@ import {
   type WorkPlanFinding,
   type ZeitEintrag,
 } from '@/lib/api/personal'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const getFindingBadgeVariant = (severity: DriverTimeFindingSeverity): 'destructive' | 'secondary' | 'outline' => {
   if (severity === 'blocker') return 'destructive'
@@ -72,6 +73,7 @@ type HrTimeQuickFilter = 'all' | 'blockers' | 'warnings' | 'printReady' | 'drive
 type HrTimeSortMode = 'priority' | 'date' | 'employee' | 'status'
 
 export default function ZeiterfassungPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const initialDate = new Date().toISOString().split('T')[0]
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const { data: zeiten, isLoading } = useZeiterfassung(selectedDate)
@@ -242,7 +244,7 @@ export default function ZeiterfassungPage(): JSX.Element {
       key: 'id' as const,
       label: 'Aktion',
       render: (z: ZeitEintrag) => (
-        <Button type="button" size="sm" variant="outline" className="gap-2" onClick={() => startCorrection(z)}>
+        <Button type="button" variant="outline" className="min-h-touch gap-2" onClick={() => startCorrection(z)}>
           <Pencil className="h-4 w-4" />
           Bearbeiten
         </Button>
@@ -508,26 +510,26 @@ export default function ZeiterfassungPage(): JSX.Element {
             <p className="text-muted-foreground">Time & Labor, Abwesenheiten, Fahrerzeit und Payroll-Freigabe</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => setSelectedDate(addDays(selectedDate, -1))}>
+            <Button variant="outline" className="min-h-touch" onClick={() => setSelectedDate(addDays(selectedDate, -1))}>
               <ChevronLeft className="mr-2 h-4 w-4" />
               Zurueck
             </Button>
-            <Input className="h-9 w-[150px]" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} />
-            <Button variant="outline" size="sm" onClick={() => setSelectedDate(initialDate)}>
+            <Input className="min-h-touch w-[150px]" value={selectedDate} onChange={(event) => setSelectedDate(event.target.value)} type="date" aria-label="Datum" />
+            <Button variant="outline" className="min-h-touch" onClick={() => setSelectedDate(initialDate)}>
               <Clock className="mr-2 h-4 w-4" />
               Heute
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setSelectedDate(addDays(selectedDate, 1))}>
+            <Button variant="outline" className="min-h-touch" onClick={() => setSelectedDate(addDays(selectedDate, 1))}>
               Weiter
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={handlePrintWorkPlan}>
+            <Button variant="outline" onClick={handlePrintWorkPlan} className="min-h-touch">
               <Printer className="mr-2 h-4 w-4" />
               Arbeitsplan drucken
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               onClick={handleCreatePayroll}
               disabled={createPayrollExport.isPending || cockpit.payrollReadiness.status !== 'ready' || cockpit.payrollReadiness.blockers.length > 0}
               title={cockpit.payrollReadiness.blockers.length > 0 ? `${cockpit.payrollReadiness.blockers.length} Blocker vor Export loesen` : undefined}
@@ -546,7 +548,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             aria-label="HR-Time Suche"
-            className="pl-9"
+            className="pl-9 min-h-touch"
             placeholder="Mitarbeiter, Tour, Schicht, Kampagne, Befund suchen"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
@@ -556,6 +558,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <Label htmlFor="hr-time-quick-filter" className="sr-only">HR-Time Schnellfilter</Label>
           <NativeSelect
             id="hr-time-quick-filter"
+            ariaLabel="HR-Time Schnellfilter"
             value={quickFilter}
             onValueChange={(value) => setQuickFilter(value as HrTimeQuickFilter)}
             options={[
@@ -572,6 +575,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           <Label htmlFor="hr-time-sort" className="sr-only">HR-Time Sortierung</Label>
           <NativeSelect
             id="hr-time-sort"
+            ariaLabel="HR-Time Sortierung"
             value={sortMode}
             onValueChange={(value) => setSortMode(value as HrTimeSortMode)}
             options={[
@@ -582,11 +586,13 @@ export default function ZeiterfassungPage(): JSX.Element {
             ]}
           />
         </div>
-        <Button type="button" variant="outline" onClick={() => { setSearchTerm(''); setQuickFilter('all'); setSortMode('priority') }}>
+        <Button type="button" variant="outline" className="min-h-touch" onClick={() => { setSearchTerm(''); setQuickFilter('all'); setSortMode('priority') }}>
           Filter resetten
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -726,18 +732,20 @@ export default function ZeiterfassungPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="agent">Agent</TabsTrigger>
-          <TabsTrigger value="steuerung">Steuerung</TabsTrigger>
-          <TabsTrigger value="crud">Erfassen</TabsTrigger>
-          <TabsTrigger value="arbeitsplan">Arbeitsplan</TabsTrigger>
-          <TabsTrigger value="saison">Saison-Leitstand</TabsTrigger>
-          <TabsTrigger value="planung">Planung</TabsTrigger>
-          <TabsTrigger value="driver">Fahrerzeit</TabsTrigger>
-          <TabsTrigger value="zeiten">Arbeitszeit</TabsTrigger>
-          <TabsTrigger value="payroll">Payroll</TabsTrigger>
+          <TabsTrigger value="agent" className="min-h-touch">Agent</TabsTrigger>
+          <TabsTrigger value="steuerung" className="min-h-touch">Steuerung</TabsTrigger>
+          <TabsTrigger value="crud" className="min-h-touch">Erfassen</TabsTrigger>
+          <TabsTrigger value="arbeitsplan" className="min-h-touch">Arbeitsplan</TabsTrigger>
+          <TabsTrigger value="saison" className="min-h-touch">Saison-Leitstand</TabsTrigger>
+          <TabsTrigger value="planung" className="min-h-touch">Planung</TabsTrigger>
+          <TabsTrigger value="driver" className="min-h-touch">Fahrerzeit</TabsTrigger>
+          <TabsTrigger value="zeiten" className="min-h-touch">Arbeitszeit</TabsTrigger>
+          <TabsTrigger value="payroll" className="min-h-touch">Payroll</TabsTrigger>
         </TabsList>
 
         <TabsContent value="agent" className="space-y-4">
@@ -767,7 +775,7 @@ export default function ZeiterfassungPage(): JSX.Element {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button
-                  className="w-full justify-start gap-2"
+                  className="min-h-touch w-full justify-start gap-2"
                   variant="outline"
                   onClick={handleCreatePayroll}
                   disabled={createPayrollExport.isPending || cockpit.payrollReadiness.status !== 'ready' || cockpit.payrollReadiness.blockers.length > 0}
@@ -775,11 +783,11 @@ export default function ZeiterfassungPage(): JSX.Element {
                   <FileDown className="h-4 w-4" />
                   {cockpit.payrollReadiness.blockers.length > 0 ? `${cockpit.payrollReadiness.blockers.length} Blocker loesen` : 'Payroll-Paket erzeugen'}
                 </Button>
-                <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreateShift} disabled={createShift.isPending}>
+                <Button className="min-h-touch w-full justify-start gap-2" variant="outline" onClick={handleCreateShift} disabled={createShift.isPending}>
                   <CalendarDays className="h-4 w-4" />
                   Schicht prüfen
                 </Button>
-                <Button className="w-full justify-start gap-2" variant="outline" onClick={handleCreateField} disabled={createFieldServicePlan.isPending}>
+                <Button className="min-h-touch w-full justify-start gap-2" variant="outline" onClick={handleCreateField} disabled={createFieldServicePlan.isPending}>
                   <Route className="h-4 w-4" />
                   Außendienst prüfen
                 </Button>
@@ -966,7 +974,7 @@ export default function ZeiterfassungPage(): JSX.Element {
               <CardHeader>
                 <div className="flex items-center justify-between gap-3">
                   <CardTitle>{workPlan?.printTitle || 'Arbeitsplan'}</CardTitle>
-                  <Button variant="outline" size="sm" onClick={handlePrintWorkPlan}>
+                  <Button variant="outline" onClick={handlePrintWorkPlan} className="min-h-touch">
                     <Printer className="mr-2 h-4 w-4" />
                     Drucken
                   </Button>
@@ -1021,7 +1029,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                     </div>
                   )}
                   <div className="border-t pt-3">
-                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={handlePrintWorkPlan}>
+                    <Button variant="outline" className="min-h-touch w-full gap-2" onClick={handlePrintWorkPlan}>
                       <Printer className="h-4 w-4" />
                       Arbeitsplan drucken
                     </Button>
@@ -1087,26 +1095,26 @@ export default function ZeiterfassungPage(): JSX.Element {
                       className={[
                         'rounded-md border p-2 text-xs',
                         severity === 'blocker' ? 'border-destructive/60 bg-destructive/5' :
-                        severity === 'warning' ? 'border-amber-300 bg-amber-50' :
-                        'border-emerald-200 bg-emerald-50',
+                        severity === 'warning' ? 'border-status-warning/40 bg-status-warning/10' :
+                        'border-status-success/40 bg-status-success/10',
                       ].join(' ')}
                     >
                       <p className="mb-1 font-semibold text-foreground">{dayLabel}</p>
-                      {isSchoolHoliday && <Badge variant="secondary" className="mb-1 w-full justify-center text-[10px]">Schulferien</Badge>}
-                      {isBridgeDay && <Badge variant="outline" className="mb-1 w-full justify-center text-[10px]">Brueckentag</Badge>}
+                      {isSchoolHoliday && <Badge variant="secondary" className="mb-1 w-full justify-center text-2xs tracking-wide uppercase">Schulferien</Badge>}
+                      {isBridgeDay && <Badge variant="outline" className="mb-1 w-full justify-center text-2xs tracking-wide uppercase">Brueckentag</Badge>}
                       {activeCampaigns.length > 0 && (
                         <div className="mb-1 space-y-0.5">
                           {activeCampaigns.map((c) => (
                             <div key={c.campaignCode} className="flex items-center gap-1">
                               <span className={c.status === 'blocked' ? 'text-destructive' : 'text-muted-foreground'}>{c.name}</span>
-                              {c.status === 'blocked' && <Badge variant="destructive" className="text-[9px]">!</Badge>}
+                              {c.status === 'blocked' && <Badge variant="destructive" className="text-2xs">!</Badge>}
                             </div>
                           ))}
                         </div>
                       )}
                       <div className="flex gap-1 flex-wrap mt-1">
-                        {blockers.length > 0 && <Badge variant="destructive" className="text-[10px]">{blockers.length} Blocker</Badge>}
-                        {warnings.length > 0 && <Badge variant="secondary" className="text-[10px]">{warnings.length} Warn.</Badge>}
+                        {blockers.length > 0 && <Badge variant="destructive" className="text-2xs tracking-wide uppercase">{blockers.length} Blocker</Badge>}
+                        {warnings.length > 0 && <Badge variant="secondary" className="text-2xs tracking-wide uppercase">{warnings.length} Warn.</Badge>}
                         {dayAssignments.length === 0 && activeCampaigns.length === 0 && (
                           <span className="text-muted-foreground">—</span>
                         )}
@@ -1137,7 +1145,7 @@ export default function ZeiterfassungPage(): JSX.Element {
           {/* Planungswizard UX-M3 */}
           {!wizardOpen ? (
             <div className="flex justify-end">
-              <Button size="sm" className="gap-2" onClick={() => { setWizardOpen(true); setWizardStep(1) }}>
+              <Button className="min-h-touch gap-2" onClick={() => { setWizardOpen(true); setWizardStep(1) }}>
                 <Plus className="h-4 w-4" />
                 Neuen Arbeitsplan erstellen
               </Button>
@@ -1182,7 +1190,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                         <Input placeholder="Bis" type="time" value={row.endTime} onChange={e => setWizardBedarf(b => b.map((r, i) => i === idx ? { ...r, endTime: e.target.value } : r))} />
                       </div>
                     ))}
-                    <Button variant="outline" size="sm" className="gap-1" onClick={() => setWizardBedarf(b => [...b, { roleCode: '', label: '', count: '1', startTime: '06:00', endTime: '14:00' }])}>
+                    <Button variant="outline" className="min-h-touch gap-1" onClick={() => setWizardBedarf(b => [...b, { roleCode: '', label: '', count: '1', startTime: '06:00', endTime: '14:00' }])}>
                       <Plus className="h-3 w-3" /> Zeile hinzufügen
                     </Button>
                   </div>
@@ -1231,13 +1239,13 @@ export default function ZeiterfassungPage(): JSX.Element {
                   </div>
                 )}
                 <div className="flex justify-between pt-2">
-                  <Button variant="ghost" size="sm" onClick={() => { setWizardOpen(false); setWizardStep(1) }}>Abbrechen</Button>
+                  <Button variant="ghost" className="min-h-touch" onClick={() => { setWizardOpen(false); setWizardStep(1) }}>Abbrechen</Button>
                   <div className="flex gap-2">
                     {wizardStep > 1 && (
-                      <Button variant="outline" size="sm" onClick={() => setWizardStep(s => (s - 1) as typeof s)}>Zurück</Button>
+                      <Button variant="outline" className="min-h-touch" onClick={() => setWizardStep(s => (s - 1) as typeof s)}>Zurück</Button>
                     )}
                     {wizardStep < 5 && (
-                      <Button size="sm" onClick={() => setWizardStep(s => (s + 1) as typeof s)}>Weiter</Button>
+                      <Button className="min-h-touch" onClick={() => setWizardStep(s => (s + 1) as typeof s)}>Weiter</Button>
                     )}
                   </div>
                 </div>
@@ -1411,8 +1419,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                       onChange={(e) => setDriverPatchForm((prev) => ({ ...prev, notes: e.target.value }))}
                     />
                     <Button
-                      size="sm"
-                      className="w-full gap-2"
+                      className="min-h-touch w-full gap-2"
                       disabled={updateDriverTimeEvent.isPending}
                       onClick={() => {
                         if (!selectedDriverEvent) return
@@ -1506,11 +1513,11 @@ export default function ZeiterfassungPage(): JSX.Element {
                     </div>
                   )}
                   <div className="space-y-2 border-t pt-3">
-                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => startCorrection(selectedTimeEntry)}>
+                    <Button variant="outline" className="min-h-touch w-full gap-2" onClick={() => startCorrection(selectedTimeEntry)}>
                       <Pencil className="h-4 w-4" />
                       Bearbeiten / Korrigieren
                     </Button>
-                    <Button size="sm" variant="outline" className="w-full gap-2" onClick={() => submitTimeEntry.mutate(selectedTimeEntry.id)} disabled={submitTimeEntry.isPending}>
+                    <Button variant="outline" className="min-h-touch w-full gap-2" onClick={() => submitTimeEntry.mutate(selectedTimeEntry.id)} disabled={submitTimeEntry.isPending}>
                       <Save className="h-4 w-4" />
                       Zur Freigabe einreichen
                     </Button>
@@ -1540,7 +1547,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                       <div key={`${blocker}-${index}`} className="flex items-center gap-2 rounded border border-destructive/30 bg-background px-3 py-2">
                         <Badge variant="destructive" className="shrink-0">Blocker</Badge>
                         <span className="text-sm">{blocker}</span>
-                        <Button size="sm" variant="outline" className="ml-auto gap-1 text-xs" onClick={() => setActiveTab('steuerung')}>
+                        <Button variant="outline" className="min-h-touch ml-auto gap-1 text-xs" onClick={() => setActiveTab('steuerung')}>
                           Pruefen
                         </Button>
                       </div>
@@ -1555,7 +1562,7 @@ export default function ZeiterfassungPage(): JSX.Element {
                   <p className="font-semibold text-status-success">Export freigegeben</p>
                   <p className="text-sm text-muted-foreground">{cockpit.payrollReadiness.exportHint}</p>
                 </div>
-                <Button size="sm" className="gap-2" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
+                <Button className="min-h-touch gap-2" onClick={handleCreatePayroll} disabled={createPayrollExport.isPending}>
                   <FileDown className="h-4 w-4" />
                   Export erstellen
                 </Button>

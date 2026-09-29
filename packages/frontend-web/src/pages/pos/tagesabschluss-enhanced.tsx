@@ -361,8 +361,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                   </div>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="shrink-0 border-blue-300 text-blue-800 hover:bg-blue-100"
+                    className="min-h-touch shrink-0 border-blue-300 text-blue-800 hover:bg-blue-100"
                     onClick={handleDsfinvkExport}
                   >
                     <Download className="mr-1.5 h-4 w-4" />

@@ -28,6 +28,7 @@ import {
   RoleFocusBar,
 } from "@/components/workflow"
 import { OperationalCaseHeader } from "@/components/workflow/OperationalCaseHeader"
+import { useTouchDevice } from "@/hooks/useTouchDevice"
 import { normalizeOperationalStatus } from "@/lib/operational-status"
 import {
   listConnectors,
@@ -310,6 +311,7 @@ function jobFromApi(j: JobApi): JobRun {
 }
 
 export default function MeldewesenKonsole() {
+  const isTouch = useTouchDevice()
   const qc = useQueryClient()
   const [activeConnectorId, setActiveConnectorId] = useState<string>("")
   const [activeScheduleId, setActiveScheduleId] = useState<string>("")
@@ -575,6 +577,7 @@ export default function MeldewesenKonsole() {
   return (
     <div className="flex flex-col">
     <div className="p-4 md:p-6 space-y-4">
+      {!isTouch ? (
       <OperationalCaseHeader
         title="Meldewesen-Konsole"
         status={operationalStatus}
@@ -582,6 +585,7 @@ export default function MeldewesenKonsole() {
         nextAction={feedbackSummary.nextAction}
         caseLabel="Compliance"
       />
+      ) : null}
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Meldewesen-Konsole</h1>
@@ -590,7 +594,7 @@ export default function MeldewesenKonsole() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={exportAllConfig}>
+          <Button variant="secondary" className="min-h-touch" onClick={exportAllConfig}>
             <Download className="h-4 w-4 mr-2" /> Export
           </Button>
           <label className="inline-flex items-center">
@@ -603,7 +607,7 @@ export default function MeldewesenKonsole() {
                 if (f) importAllConfig(f)
               }}
             />
-            <Button variant="secondary" asChild>
+            <Button variant="secondary" className="min-h-touch" asChild>
               <span>
                 <Upload className="h-4 w-4 mr-2" /> Import
               </span>
@@ -612,6 +616,7 @@ export default function MeldewesenKonsole() {
         </div>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -638,7 +643,10 @@ export default function MeldewesenKonsole() {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
+      {!isTouch ? (
+        <>
       <RoleFocusBar
         roles={meldewesenRoles}
         value={roleFocus}
@@ -713,6 +721,8 @@ export default function MeldewesenKonsole() {
       </div>
 
       <AgentProcessPanel domain="compliance" />
+        </>
+      ) : null}
 
       <Alert>
         <ShieldAlert className="h-4 w-4" />
@@ -829,7 +839,7 @@ export default function MeldewesenKonsole() {
                             return (
                               <Button
                                 key={t}
-                                size="sm"
+                                className="min-h-touch"
                                 variant={on ? "default" : "outline"}
                                 onClick={() => {
                                   const next = on
@@ -1137,7 +1147,7 @@ export default function MeldewesenKonsole() {
                             return (
                               <Button
                                 key={fmt}
-                                size="sm"
+                                className="min-h-touch"
                                 variant={on ? "default" : "outline"}
                                 onClick={() => {
                                   const next = on
@@ -1367,7 +1377,7 @@ export default function MeldewesenKonsole() {
         </CardContent>
       </Card>
     </div>
-    <KeyboardShortcutBar shortcuts={shortcuts} />
+    {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

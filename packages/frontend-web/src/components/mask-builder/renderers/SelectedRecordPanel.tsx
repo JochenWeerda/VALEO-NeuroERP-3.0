@@ -27,9 +27,8 @@ export function SelectedRecordPanel({
         <Button
           type="button"
           variant="outline"
-          size="sm"
           onClick={() => navigateRowRoute(table.rowRouteTemplate, row)}
-        >
+         className="min-h-touch">
           In Vollansicht öffnen
         </Button>
       ) : null}

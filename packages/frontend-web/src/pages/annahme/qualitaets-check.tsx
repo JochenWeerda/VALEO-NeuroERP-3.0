@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
@@ -87,6 +88,7 @@ export default function QualitaetsCheckPage(): JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const routeState = (location.state as { eintragId?: string; harvestAcceptanceId?: string; referenceContext?: QualityProtocolResponse['reference_context'] } | null) ?? null
   const eintragId = routeState?.eintragId
   const harvestAcceptanceId = routeState?.harvestAcceptanceId
@@ -483,17 +485,24 @@ export default function QualitaetsCheckPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="p-6">
+    <div className="p-3 md:p-6">
       <ModuleToolbar
         backTarget="/annahme/warteschlange"
         closeTarget="/annahme/warteschlange"
         title="Qualitätsprüfung"
         actions={
-          <Button variant="outline" size="sm" onClick={goToAbrechnung}>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={goToAbrechnung}>
             Zur Abrechnung
           </Button>
         }
       />
+      <Wizard
+        title="Schnell-Qualitätsprüfung"
+        steps={steps}
+        onFinish={handleSubmit}
+        onCancel={() => navigate('/annahme/warteschlange')}
+      />
+      {!isTouch ? (
       <div className="mb-6 mt-4 space-y-4">
         <OperationalCaseHeader
           title="Qualitaetspruefung steuern"
@@ -509,7 +518,6 @@ export default function QualitaetsCheckPage(): JSX.Element {
           <OperationalTimeline title="QS-Verlauf" items={timelineItems} />
           <OperationalContextPanel title="QS-Kontext" sections={contextSections} />
         </div>
-      </div>
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         {qualityDecisionView ? (
           <Card>
@@ -533,14 +541,10 @@ export default function QualitaetsCheckPage(): JSX.Element {
           </Card>
         ) : null}
       </div>
-      <Wizard
-        title="Schnell-Qualitätsprüfung"
-        steps={steps}
-        onFinish={handleSubmit}
-        onCancel={() => navigate('/annahme/warteschlange')}
-      />
+      </div>
+      ) : null}
     </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

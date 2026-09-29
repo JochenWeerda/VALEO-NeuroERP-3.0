@@ -141,9 +141,8 @@ export function HumanOversightBoard({
                 <Button
                   key={status}
                   variant={statusFilter === status ? 'default' : 'outline'}
-                  size="sm"
                   onClick={() => setStatusFilter(status)}
-                >
+                 className="min-h-touch">
                   {status === 'all' ? 'Alle' : status}
                 </Button>
               ))}

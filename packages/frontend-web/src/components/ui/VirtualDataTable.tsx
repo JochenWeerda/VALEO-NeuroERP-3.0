@@ -1,6 +1,8 @@
 import { useMemo, useRef, type ReactNode } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/lib/utils'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { TouchRecordCard } from '@/components/list/TouchRecordStack'
 
 export interface VirtualDataTableColumn<T extends Record<string, unknown>> {
   key: keyof T | string
@@ -44,11 +46,13 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
   sortDir,
   onSortChange,
 }: VirtualDataTableProps<T>): JSX.Element {
+  const isTouch = useTouchDevice()
+  const estimatedRowSize = isTouch ? 160 : rowHeight
   const parentRef = useRef<HTMLDivElement>(null)
   const virtualizer = useVirtualizer({
     count: data.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => rowHeight,
+    estimateSize: () => estimatedRowSize,
     overscan: 8,
   })
 
@@ -58,18 +62,21 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
   )
   const virtualItems = virtualizer.getVirtualItems()
   const fallbackItems = useMemo(() => {
-    const visibleCount = Math.max(1, Math.ceil(height / rowHeight) + 8)
+    const visibleCount = Math.max(1, Math.ceil(height / estimatedRowSize) + 8)
     return data.slice(0, visibleCount).map((_, index) => ({
       key: `fallback-${index}`,
       index,
-      start: index * rowHeight,
-      size: rowHeight,
+      start: index * estimatedRowSize,
+      size: estimatedRowSize,
     }))
-  }, [data, height, rowHeight])
-  const contentHeight = virtualItems.length > 0 ? virtualizer.getTotalSize() : data.length * rowHeight
-  const bodyHeight = fitToContent ? Math.min(height, contentHeight) : height
-  const emptyHeight = fitToContent ? Math.min(height, 96) : height
+  }, [data, height, estimatedRowSize])
   const renderedItems = virtualItems.length > 0 ? virtualItems : fallbackItems
+  // The touch list pads its scroll container with p-2 (8 px top and bottom).
+  const contentHeight = virtualItems.length > 0 ? virtualizer.getTotalSize() : data.length * estimatedRowSize
+  const bodyHeight = fitToContent
+    ? Math.min(height, contentHeight + (isTouch ? 16 : 0))
+    : height
+  const emptyHeight = fitToContent ? Math.min(height, 96) : height
 
   function renderCell(column: VirtualDataTableColumn<T>, row: T): ReactNode {
     const value = row[column.key as string]
@@ -95,6 +102,58 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
     return (
       <div className="flex items-center justify-center rounded-md border border-border p-8 text-sm text-muted-foreground" style={{ height: emptyHeight }}>
         {emptyMessage}
+      </div>
+    )
+  }
+
+  const dataColumns = columns.filter((column) => {
+    const key = String(column.key)
+    return key !== '__selected' && key !== '__actions'
+  })
+  const selectColumn = columns.find((column) => String(column.key) === '__selected')
+  const actionColumn = columns.find((column) => String(column.key) === '__actions')
+  const titleColumn = dataColumns[0]
+  const fieldColumns = dataColumns.slice(1, 6)
+
+  if (isTouch) {
+    return (
+      <div className="rounded-md border border-border" data-testid="virtual-data-table">
+        <div ref={parentRef} className="relative overflow-auto p-2" style={{ height: bodyHeight }}>
+          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+            {renderedItems.map((virtualRow) => {
+              const row = data[virtualRow.index]
+              const rowKey = getRowKey?.(row, virtualRow.index) ?? String(row.id ?? virtualRow.index)
+              const selected = Boolean(selectedRowKey) && rowKey === selectedRowKey
+              return (
+                // Cards grow with their field count, so each one is measured instead of assuming the estimate.
+                <div
+                  key={virtualRow.key}
+                  ref={virtualizer.measureElement}
+                  data-index={virtualRow.index}
+                  className="absolute left-0 w-full px-0 pb-2"
+                  style={{ transform: `translateY(${virtualRow.start}px)` }}
+                >
+                  <TouchRecordCard
+                    selected={selected}
+                    onOpen={onRowClick ? () => onRowClick(row) : undefined}
+                    title={
+                      <span className="flex items-center gap-2">
+                        {selectColumn ? renderCell(selectColumn, row) : null}
+                        {titleColumn ? renderCell(titleColumn, row) : rowKey}
+                      </span>
+                    }
+                    fields={fieldColumns.map((column) => ({
+                      key: String(column.key),
+                      label: column.label,
+                      value: renderCell(column, row),
+                    }))}
+                    actionSlot={actionColumn ? renderCell(actionColumn, row) : undefined}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
     )
   }

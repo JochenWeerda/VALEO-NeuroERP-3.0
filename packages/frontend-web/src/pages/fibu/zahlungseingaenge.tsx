@@ -19,6 +19,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type Zahlungseingang = {
   id: string
@@ -65,6 +66,7 @@ const statusIconMap: Record<Zahlungseingang['match_status'], JSX.Element> = {
 
 export default function ZahlungseingangsPage(): JSX.Element {
   const { t } = useTranslation()
+  const isTouch = useTouchDevice()
   const { tenantId } = useTenant()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Zahlungseingang['match_status'] | 'alle'>('alle')
@@ -299,7 +301,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
       label: t('crud.messages.paymentMatching.columns.reference'),
       render: (zahlung: Zahlungseingang) =>
         zahlung.reference ? (
-          <span className="text-sm text-blue-600">{zahlung.reference}</span>
+          <span className="text-sm text-primary">{zahlung.reference}</span>
         ) : (
           <span className="text-sm text-muted-foreground">-</span>
         ),
@@ -332,12 +334,12 @@ export default function ZahlungseingangsPage(): JSX.Element {
       render: (zahlung: Zahlungseingang) => (
         <div className="flex gap-2">
           {zahlung.match_status === 'UNMATCHED' && (
-            <Button size="sm" variant="outline" onClick={() => handleMatch(zahlung)}>
+            <Button className="min-h-touch" variant="outline" onClick={() => handleMatch(zahlung)}>
               {t('crud.messages.paymentMatching.match')}
             </Button>
           )}
           {zahlung.match_status === 'PARTIAL' && (
-            <Button size="sm" variant="outline" onClick={() => handleMatch(zahlung)}>
+            <Button className="min-h-touch" variant="outline" onClick={() => handleMatch(zahlung)}>
               {t('crud.messages.paymentMatching.clarify')}
             </Button>
           )}
@@ -348,6 +350,8 @@ export default function ZahlungseingangsPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Zahlungseingaenge"
         description="Bankimport, Matching und Klaerung offener Debitorenzahlungen."
@@ -362,12 +366,14 @@ export default function ZahlungseingangsPage(): JSX.Element {
         <OperationalTimeline title="Vorgangsverlauf" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
       </div>
+        </>
+      ) : null}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t('crud.messages.paymentMatching.title')}</h1>
           <p className="text-muted-foreground">{t('crud.messages.paymentMatching.subtitle')}</p>
         </div>
-        <Button className="gap-2" onClick={handleBankImportClick}>
+        <Button className="min-h-touch gap-2" onClick={handleBankImportClick}>
           <Upload className="h-4 w-4" />
           {t('crud.messages.paymentMatching.bankImport')}
         </Button>
@@ -393,6 +399,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
             <div>
               <Label>Format</Label>
               <NativeSelect
+                ariaLabel="Importformat"
                 value={bankImportFormat}
                 onValueChange={(v) => setBankImportFormat(v as 'CAMT' | 'MT940' | 'CSV')}
                 options={[
@@ -405,6 +412,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
             <div>
               <Label>Bankkonto</Label>
               <NativeSelect
+                ariaLabel="Bankkonto"
                 value={bankImportAccountId || (bankAccounts[0]?.id ?? '')}
                 onValueChange={setBankImportAccountId}
                 placeholder="Konto waehlen"
@@ -473,10 +481,11 @@ export default function ZahlungseingangsPage(): JSX.Element {
                 placeholder={t('crud.messages.paymentMatching.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="min-h-touch pl-10"
               />
             </div>
             <NativeSelect
+              ariaLabel="Match-Status"
               className="w-[180px]"
               value={statusFilter}
               onValueChange={(value) => setStatusFilter(value as Zahlungseingang['match_status'] | 'alle')}
@@ -564,7 +573,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
                         </td>
                         <td className="p-2 text-right">{new Date(op.due_date).toLocaleDateString('de-DE')}</td>
                         <td className="p-2 text-center">
-                          <Button size="sm" disabled={confirmingMatch} onClick={() => void handleConfirmMatch(op.op_id)}>
+                          <Button className="min-h-touch" disabled={confirmingMatch} onClick={() => void handleConfirmMatch(op.op_id)}>
                             {t('crud.messages.paymentMatching.match')}
                           </Button>
                         </td>

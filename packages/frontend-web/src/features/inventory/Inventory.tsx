@@ -287,7 +287,7 @@ export default function Inventory(): ReactElement {
                         </div>
                       </div>
                       <div className="text-right">
-                        <Button size="sm" variant="outline">
+                        <Button variant="outline" className="min-h-touch">
                           Details
                         </Button>
                       </div>

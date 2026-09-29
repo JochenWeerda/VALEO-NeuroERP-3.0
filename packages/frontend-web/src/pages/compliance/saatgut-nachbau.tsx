@@ -23,7 +23,7 @@ export default function SaatgutNachbauPage(): JSX.Element {
       key: 'betrieb' as const,
       label: 'Betrieb',
       render: (n: SaatgutNachbau) => (
-        <button onClick={() => navigate(`/crm/betrieb/${n.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/crm/betrieb/${n.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {n.betrieb}
         </button>
       ),

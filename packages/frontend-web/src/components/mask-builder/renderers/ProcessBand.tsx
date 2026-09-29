@@ -98,12 +98,11 @@ export function ProcessBand({
         {nextAction ? (
           onAction ? (
             <Button
-              size="sm"
               variant="outline"
               data-testid="process-band-next-action"
               data-next-action={nextAction.actionKey}
               onClick={() => onAction(nextAction.actionKey)}
-            >
+             className="min-h-touch">
               {nextAction.label}
             </Button>
           ) : (
@@ -117,7 +116,7 @@ export function ProcessBand({
           )
         ) : null}
         {onOpenProcess ? (
-          <Button size="sm" variant="ghost" onClick={onOpenProcess} data-testid="process-band-open">
+          <Button variant="ghost" onClick={onOpenProcess} data-testid="process-band-open" className="min-h-touch">
             Prozess
           </Button>
         ) : null}

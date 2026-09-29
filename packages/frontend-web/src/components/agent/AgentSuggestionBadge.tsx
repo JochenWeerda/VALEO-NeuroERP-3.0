@@ -85,8 +85,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
           {agent.status === 'idle' && (
             <Button
               variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-violet-700 hover:bg-violet-100"
+              className="min-h-touch h-7 text-xs text-violet-700 hover:bg-violet-100"
               onClick={agent.trigger}
             >
               Analysieren
@@ -95,8 +94,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
           {agent.status === 'error' && (
             <Button
               variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-slate-500 hover:bg-slate-100"
+              className="min-h-touch h-7 text-xs text-slate-500 hover:bg-slate-100"
               onClick={agent.reset}
             >
               Erneut versuchen
@@ -106,8 +104,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
             <>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-violet-700 hover:bg-violet-100 gap-1"
+                className="min-h-touch h-7 text-xs text-violet-700 hover:bg-violet-100 gap-1"
                 onClick={handleAccept}
               >
                 <Check className="h-3 w-3" />

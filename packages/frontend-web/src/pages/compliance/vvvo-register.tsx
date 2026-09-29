@@ -56,7 +56,7 @@ export default function VVVORegisterPage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'betriebsname' as const, label: 'Betrieb', render: (v: VVVOBetrieb) => <button onClick={() => navigate(`/crm/betrieb/${v.id}`)} className="font-medium text-blue-600 hover:underline">{v.betriebsname}</button> },
+    { key: 'betriebsname' as const, label: 'Betrieb', render: (v: VVVOBetrieb) => <button type="button" onClick={() => navigate(`/crm/betrieb/${v.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">{v.betriebsname}</button> },
     { key: 'vvvo' as const, label: 'VVVO-Betriebsnummer', render: (v: VVVOBetrieb) => <span className="font-mono font-bold text-lg">{v.vvvo}</span> },
     { key: 'bundesland' as const, label: 'Bundesland' },
     { key: 'tierart' as const, label: 'Tierart', render: (v: VVVOBetrieb) => <Badge variant="outline">{v.tierart}</Badge> },

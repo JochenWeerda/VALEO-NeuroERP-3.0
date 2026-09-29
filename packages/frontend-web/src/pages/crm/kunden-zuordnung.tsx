@@ -39,13 +39,13 @@ function Row({ c, onAssigned }: { c: UnassignedCustomer; onAssigned: () => void 
       <td className="px-3 py-1.5">{c.name1 || '—'}</td>
       <td className="px-3 py-1.5">{[c.plz, c.ort].filter(Boolean).join(' ') || '—'}</td>
       <td className="px-3 py-1.5">
-        <Input value={vb} onChange={(e) => setVb(e.target.value)} placeholder="AD-Kürzel" className="h-8 w-24" disabled={setOwner.isPending} />
+        <Input value={vb} onChange={(e) => setVb(e.target.value)} placeholder="AD-Kürzel" aria-label="Außendienst-Kürzel" className="min-h-touch w-24" disabled={setOwner.isPending} />
       </td>
       <td className="px-3 py-1.5">
-        <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="ID (opt.)" className="h-8 w-24" disabled={setOwner.isPending} />
+        <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="ID (opt.)" aria-label="Innendienst-Kürzel" className="min-h-touch w-24" disabled={setOwner.isPending} />
       </td>
       <td className="px-3 py-1.5">
-        <Button size="sm" onClick={assign} disabled={setOwner.isPending}>
+        <Button className="min-h-touch" onClick={assign} disabled={setOwner.isPending}>
           {setOwner.isPending ? <Loader2 size={14} className="animate-spin" /> : <UserCheck size={14} />}
           <span className="ml-1">Zuordnen</span>
         </Button>
@@ -63,7 +63,7 @@ export default function KundenZuordnungPage() {
         <UserCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Kunden-Zuordnung</h1>
         {data && <Badge variant={data.total ? 'destructive' : 'secondary'}>{data.total} ohne Außendienst</Badge>}
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void refetch()} disabled={isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void refetch()} disabled={isFetching}>
           {isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>

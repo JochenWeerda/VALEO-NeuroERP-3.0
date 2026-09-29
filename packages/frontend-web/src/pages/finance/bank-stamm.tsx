@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Building2, Plus, Pencil } from 'lucide-react'
+import { Building2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 type BankAccount = {
@@ -193,8 +193,8 @@ export default function BankStammPage(): JSX.Element {
                       <td className="py-2 pr-4 text-right">{acc.balance != null ? fmt(Number(acc.balance), acc.currency) : '–'}</td>
                       <td className="py-2 pr-4">{acc.is_active ? 'Ja' : 'Nein'}</td>
                       <td className="py-2 text-right">
-                        <Button variant="ghost" size="sm" onClick={() => openEdit(acc)}>
-                          <Pencil className="h-4 w-4" />
+                        <Button variant="ghost" className="min-h-touch" onClick={() => openEdit(acc)}>
+                          Bearbeiten
                         </Button>
                       </td>
                     </tr>

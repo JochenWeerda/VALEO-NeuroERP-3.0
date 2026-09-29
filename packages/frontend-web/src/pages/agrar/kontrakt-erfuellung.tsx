@@ -20,17 +20,17 @@ function Bar({ pct, over }: { pct: number; over: boolean }) {
   const w = Math.min(100, Math.max(0, pct))
   return (
     <div className="h-2 w-full rounded bg-muted overflow-hidden">
-      <div className={`h-full ${over ? 'bg-red-500' : pct >= 99.5 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${w}%` }} />
+      <div className={`h-full ${over ? 'bg-status-error' : pct >= 99.5 ? 'bg-status-success' : 'bg-status-warning'}`} style={{ width: `${w}%` }} />
     </div>
   )
 }
 
 function Row({ c, active, onClick }: { c: ContractRow; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`w-full text-left px-3 py-2 hover:bg-muted/50 ${active ? 'bg-muted' : ''}`}>
+    <button onClick={onClick} className={`min-h-touch w-full text-left px-3 py-2 ${active ? 'bg-muted' : ''}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium text-sm truncate">{c.contract_no}</span>
-        <Badge variant="outline" className="text-[10px]">{c.typ}</Badge>
+        <Badge variant="outline" className="text-2xs">{c.typ}</Badge>
       </div>
       <div className="mt-1"><Bar pct={c.erfuellung_pct} over={c.erfuellung_status === 'uebererfuellt'} /></div>
       <div className="text-xs text-muted-foreground flex justify-between mt-0.5">
@@ -55,12 +55,12 @@ export default function KontraktErfuellungPage() {
       <div className="flex items-center gap-2">
         <FileSignature size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Kontrakt-Erfüllung</h1>
-        <NativeSelect value={typ} onChange={(e) => setTyp(e.target.value)} className="h-8 w-32">
+        <NativeSelect ariaLabel="Kontrakttyp" value={typ} onChange={(e) => setTyp(e.target.value)} className="min-h-touch w-32">
           <option value="alle">Alle</option>
           <option value="EINKAUF">Einkauf</option>
           <option value="VERKAUF">Verkauf</option>
         </NativeSelect>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void listQuery.refetch()} disabled={listQuery.isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void listQuery.refetch()} disabled={listQuery.isFetching}>
           {listQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -72,7 +72,7 @@ export default function KontraktErfuellungPage() {
             <CardTitle className="text-sm">Kontrakte</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" aria-label="Kontraktnummer suchen" className="min-h-touch pl-7" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
@@ -135,7 +135,7 @@ export default function KontraktErfuellungPage() {
                         {(detail.data.positionen ?? []).map((p) => (
                           <tr key={p.position_no} className="border-b last:border-0">
                             <td className="px-3 py-1.5">{p.position_no}</td>
-                            <td className="px-3 py-1.5">{p.artikel}{p.is_matif && <Badge variant="outline" className="ml-1 text-[10px]">MATIF</Badge>}</td>
+                            <td className="px-3 py-1.5">{p.artikel}{p.is_matif && <Badge variant="outline" className="ml-1 text-2xs">MATIF</Badge>}</td>
                             <td className="px-3 py-1.5 text-right tabular-nums">{p.menge_kontrakt}</td>
                             <td className="px-3 py-1.5 text-right tabular-nums">{p.abgerufen}</td>
                             <td className="px-3 py-1.5 text-right tabular-nums">{p.offen}</td>

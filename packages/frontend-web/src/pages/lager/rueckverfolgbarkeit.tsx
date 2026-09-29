@@ -77,6 +77,7 @@ function LotActions({ node }: { node: TraceNode }) {
   const gesperrt = node.status === 'gesperrt'
 
   const run = async (kind: 'block' | 'release' | 'shrinkage') => {
+    if (action.isPending) return
     if (!grund.trim()) {
       toast({ title: 'Grund fehlt', description: 'Bitte einen Grund angeben.', variant: 'destructive' })
       return
@@ -99,22 +100,22 @@ function LotActions({ node }: { node: TraceNode }) {
   }
 
   return (
-    <div className="ml-9 mt-1 flex flex-col gap-2 rounded-md border bg-muted/20 p-2 sm:flex-row sm:items-center">
-      <Input value={grund} onChange={(e) => setGrund(e.target.value)} placeholder="Grund…" className="h-8 flex-1" disabled={action.isPending} />
+    <div className="ml-0 mt-1 flex flex-col gap-2 rounded-md border bg-muted/20 p-2 sm:ml-9 sm:flex-row sm:items-center">
+      <Input value={grund} onChange={(e) => setGrund(e.target.value)} placeholder="Grund…" className="min-h-touch flex-1" disabled={action.isPending} />
       {!gesperrt && (
-        <div className="flex items-center gap-1">
-          <Input value={menge} onChange={(e) => setMenge(e.target.value)} type="number" placeholder="Schwund kg" className="h-8 w-28" disabled={action.isPending} />
-          <Button size="sm" variant="outline" onClick={() => run('shrinkage')} disabled={action.isPending}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Input value={menge} onChange={(e) => setMenge(e.target.value)} type="number" placeholder="Schwund kg" className="min-h-touch w-full sm:w-28" disabled={action.isPending} />
+          <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => { void run('shrinkage') }} disabled={action.isPending}>
             <Droplets size={14} className="mr-1" />Schwund
           </Button>
         </div>
       )}
       {gesperrt ? (
-        <Button size="sm" variant="outline" onClick={() => run('release')} disabled={action.isPending}>
+        <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => { void run('release') }} disabled={action.isPending}>
           {action.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Unlock size={14} className="mr-1" />}QS-Freigabe
         </Button>
       ) : (
-        <Button size="sm" variant="outline" onClick={() => run('block')} disabled={action.isPending}>
+        <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => { void run('block') }} disabled={action.isPending}>
           {action.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Lock size={14} className="mr-1" />}Sperren
         </Button>
       )}
@@ -123,15 +124,27 @@ function LotActions({ node }: { node: TraceNode }) {
 }
 
 function CompletenessDots({ t }: { t: TraceTicket }) {
-  const dot = (ok: boolean, label: string) => (
-    <span
-      title={label}
-      className={`inline-block h-2 w-2 rounded-full ${ok ? 'bg-emerald-500' : 'bg-muted-foreground/30'}`}
-    />
-  )
+  const stages = [
+    { ok: true, short: 'W', label: 'Wiegung' },
+    { ok: t.hat_annahme, short: 'A', label: 'Annahme' },
+    { ok: t.hat_lager, short: 'L', label: 'Lager' },
+    { ok: t.hat_abrechnung, short: 'R', label: 'Abrechnung' },
+  ]
   return (
-    <span className="inline-flex items-center gap-1">
-      {dot(true, 'Wiegung')}{dot(t.hat_annahme, 'Annahme')}{dot(t.hat_lager, 'Lager')}{dot(t.hat_abrechnung, 'Abrechnung')}
+    <span
+      className="inline-flex items-center gap-1"
+      aria-label={stages.map((s) => `${s.label}: ${s.ok ? 'vorhanden' : 'fehlt'}`).join(', ')}
+    >
+      {stages.map((s) => (
+        <span
+          key={s.short}
+          className={`inline-flex min-h-6 min-w-6 items-center justify-center rounded-full text-2xs tracking-wide ${
+            s.ok ? 'bg-status-success/20 text-status-success' : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          {s.short}
+        </span>
+      ))}
     </span>
   )
 }
@@ -165,7 +178,7 @@ export default function RueckverfolgbarkeitPage() {
   )
 
   const submitEvent = async () => {
-    if (!selected) return
+    if (!selected || addEvent.isPending) return
     if (!evGrund.trim()) {
       toast({ title: 'Grund/Notiz fehlt', description: 'Bitte einen Text zum Ereignis angeben.', variant: 'destructive' })
       return
@@ -189,7 +202,7 @@ export default function RueckverfolgbarkeitPage() {
   }
 
   const submitStorno = async () => {
-    if (!selected) return
+    if (!selected || cancelChain.isPending) return
     if (!stornoGrund.trim()) {
       toast({ title: 'Grund fehlt', description: 'Bitte einen Storno-Grund angeben.', variant: 'destructive' })
       return
@@ -207,12 +220,13 @@ export default function RueckverfolgbarkeitPage() {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex items-center gap-2">
-        <GitBranch size={20} className="text-primary" />
-        <h1 className="text-lg font-semibold">Rückverfolgbarkeit</h1>
-        <span className="text-sm text-muted-foreground">Wiegung → Annahme → Lager → Abrechnung</span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div>
+          <h1 className="text-2xl font-semibold md:text-3xl">Rückverfolgbarkeit</h1>
+          <p className="text-sm text-muted-foreground">Wiegung → Annahme → Lager → Abrechnung</p>
+        </div>
         <Button
-          variant="outline" size="sm" className="ml-auto"
+          variant="outline" className="min-h-touch touch-manipulation sm:ml-auto"
           onClick={() => void ticketsQuery.refetch()} disabled={ticketsQuery.isFetching}
         >
           {ticketsQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
@@ -229,7 +243,8 @@ export default function RueckverfolgbarkeitPage() {
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={filter} onChange={(e) => setFilter(e.target.value)}
-                placeholder="Nr. suchen…" className="h-8 pl-7"
+                aria-label="Wiegeschein suchen"
+                placeholder="Nr. suchen…" className="min-h-touch pl-7"
               />
             </div>
           </CardHeader>
@@ -246,7 +261,7 @@ export default function RueckverfolgbarkeitPage() {
                   <button
                     key={t.ticket_id}
                     onClick={() => setSelected(t.ticket_nr)}
-                    className={`w-full text-left px-3 py-2 hover:bg-muted/50 ${
+                    className={`w-full min-h-touch text-left px-3 py-2 touch-manipulation ${
                       selected === t.ticket_nr ? 'bg-muted' : ''
                     }`}
                   >
@@ -269,7 +284,7 @@ export default function RueckverfolgbarkeitPage() {
         <div className="space-y-3">
           {!selected ? (
             <Card><CardContent className="py-16 text-center text-sm text-muted-foreground">
-              Wiegeschein links wählen, um die durchgängige Kette anzuzeigen.
+              Wiegeschein wählen, um die durchgängige Kette anzuzeigen.
             </CardContent></Card>
           ) : trace.isLoading ? (
             <Card><CardContent className="py-16 text-center text-muted-foreground">
@@ -297,7 +312,7 @@ export default function RueckverfolgbarkeitPage() {
                   <Badge variant="outline">{trace.data.summary.offene_luecken} Lücke(n)</Badge>
                 )}
                 {trace.data.kanon_status?.status !== 'storniert' && (
-                  <Button size="sm" variant="outline" className="ml-auto text-status-error hover:text-status-error"
+                  <Button className="min-h-touch touch-manipulation ml-auto text-status-error" variant="outline"
                     onClick={() => setStornoOpen((v) => !v)}>
                     <Ban size={14} className="mr-1" />Kette stornieren
                   </Button>
@@ -307,12 +322,12 @@ export default function RueckverfolgbarkeitPage() {
               {stornoOpen && trace.data.kanon_status?.status !== 'storniert' && (
                 <Callout variant="error" className="flex flex-col gap-2 rounded-md border p-2 sm:flex-row sm:items-center">
                   <Input value={stornoGrund} onChange={(e) => setStornoGrund(e.target.value)}
-                    placeholder="Storno-Grund (Pflicht)…" className="h-9 flex-1" disabled={cancelChain.isPending} />
-                  <Button size="sm" variant="destructive" onClick={submitStorno} disabled={cancelChain.isPending}>
+                    placeholder="Storno-Grund (Pflicht)…" className="min-h-touch flex-1" disabled={cancelChain.isPending} />
+                  <Button className="min-h-touch touch-manipulation" variant="destructive" onClick={() => { void submitStorno() }} disabled={cancelChain.isPending}>
                     {cancelChain.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Ban size={14} className="mr-1" />}
                     Storno bestätigen
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setStornoOpen(false)} disabled={cancelChain.isPending}>
+                  <Button className="min-h-touch touch-manipulation" variant="ghost" onClick={() => setStornoOpen(false)} disabled={cancelChain.isPending}>
                     Abbrechen
                   </Button>
                 </Callout>
@@ -338,7 +353,7 @@ export default function RueckverfolgbarkeitPage() {
                   <CardContent className="space-y-1.5">
                     {trace.data.mengen_konsistenz.map((c, i) => (
                       <div key={i} className={`flex items-center justify-between rounded border p-2 text-sm ${
-                        c.abweichung ? 'border-red-200 bg-red-50 text-red-900' : 'border-emerald-200 bg-emerald-50/50'
+                        c.abweichung ? 'border-status-error/40 bg-status-error/10 text-status-error' : 'border-status-success/40 bg-status-success/10'
                       }`}>
                         <span>{c.von} → {c.nach}</span>
                         <span className="tabular-nums">
@@ -388,9 +403,9 @@ export default function RueckverfolgbarkeitPage() {
                             <Badge variant="outline" className="capitalize">{e.event_type}</Badge>
                             <span className="opacity-60">[{e.stage}]</span>
                             {e.ref_label && <span className="font-medium">{e.ref_label}</span>}
-                            {e.source === 'manual' && <Badge variant="secondary" className="text-[10px]">manuell</Badge>}
+                            {e.source === 'manual' && <Badge variant="secondary" className="text-2xs tracking-wide uppercase">manuell</Badge>}
                             {e.source === 'backfill' && (
-                              <Badge variant="secondary" className="text-[10px]"><Bot size={10} className="mr-0.5" />abgeleitet</Badge>
+                              <Badge variant="secondary" className="text-2xs tracking-wide uppercase"><Bot size={10} className="mr-0.5" />abgeleitet</Badge>
                             )}
                             {e.menge_kg != null && <span className="tabular-nums text-xs">{fmtKg(e.menge_kg)}</span>}
                             <span className="ml-auto text-xs text-muted-foreground">
@@ -405,17 +420,17 @@ export default function RueckverfolgbarkeitPage() {
 
                   {/* Ereignis erfassen */}
                   <div className="mt-3 flex flex-col gap-2 rounded-md border bg-muted/30 p-2 sm:flex-row sm:items-center">
-                    <NativeSelect value={evType} onChange={(e) => setEvType(e.target.value)} className="h-9 sm:w-40">
+                    <NativeSelect value={evType} onChange={(e) => setEvType(e.target.value)} className="min-h-touch sm:w-40" aria-label="Ereignistyp">
                       <option value="korrektur">Korrektur</option>
                       <option value="abweichung">Abweichung</option>
                       <option value="storniert">Storno</option>
                       <option value="notiz">Notiz</option>
                     </NativeSelect>
                     <Input value={evGrund} onChange={(e) => setEvGrund(e.target.value)}
-                      placeholder="Grund / Notiz…" className="h-9 flex-1" />
+                      placeholder="Grund / Notiz…" className="min-h-touch flex-1" />
                     <Input value={evMenge} onChange={(e) => setEvMenge(e.target.value)}
-                      type="number" placeholder="Menge kg (optional)" className="h-9 sm:w-44" />
-                    <Button size="sm" onClick={submitEvent} disabled={addEvent.isPending}>
+                      type="number" placeholder="Menge kg (optional)" className="min-h-touch sm:w-44" />
+                    <Button className="min-h-touch touch-manipulation" onClick={() => { void submitEvent() }} disabled={addEvent.isPending}>
                       {addEvent.isPending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
                       <span className="ml-1">Erfassen</span>
                     </Button>

@@ -8,9 +8,11 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, FileText, Plus, Search } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function FoerderantraegeListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: antraege = [], isLoading } = useFoerderAntraege()
 
@@ -46,7 +48,7 @@ export default function FoerderantraegeListePage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'nummer' as const, label: 'Antragsnummer', render: (a: Antrag) => <button onClick={() => navigate(`/foerderung/antrag/${a.id}`)} className="font-medium text-blue-600 hover:underline">{a.nummer}</button> },
+    { key: 'nummer' as const, label: 'Antragsnummer', render: (a: Antrag) => <button type="button" onClick={() => navigate(`/foerderung/antrag/${a.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">{a.nummer}</button> },
     { key: 'programm' as const, label: 'Programm', render: (a: Antrag) => <Badge variant="outline">{a.programm}</Badge> },
     { key: 'antragsdatum' as const, label: 'Antragsdatum', render: (a: Antrag) => new Date(a.antragsdatum).toLocaleDateString('de-DE') },
     { key: 'flaeche' as const, label: 'Flaeche (ha)', render: (a: Antrag) => `${a.flaeche} ha` },
@@ -57,15 +59,28 @@ export default function FoerderantraegeListePage(): JSX.Element {
   const gesamtBetrag = antraege.filter((a) => a.status === 'bewilligt').reduce((sum, a) => sum + a.betrag, 0)
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Foerderantraege</h1><p className="text-muted-foreground">EU-Agrarfoerderung</p></div><Button onClick={() => navigate('/foerderung/antrag')} className="gap-2"><Plus className="h-4 w-4" />Neuer Antrag</Button></div>
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h1 className="text-2xl font-bold md:text-3xl">Foerderantraege</h1><p className="text-muted-foreground">Antraege suchen und oeffnen</p></div><Button onClick={() => navigate('/foerderung/antrag')} className="min-h-touch gap-2 touch-manipulation"><Plus className="h-4 w-4" />Neuer Antrag</Button></div>
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Antraege Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><FileText className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{antraege.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bewilligt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{antraege.filter((a) => a.status === 'bewilligt').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Eingereicht</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{antraege.filter((a) => a.status === 'eingereicht').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bewilligte Summe</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtBetrag)}</span></CardContent></Card>
       </div>
-      <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
+      ) : null}
+      <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label="Suche Foerderantraege" placeholder="Nummer oder Programm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" /></div><Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => {
+        const header = 'Nummer;Programm;Antragsdatum;Flaeche;Betrag;Status\n'
+        const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+        const rows = filteredAntraege.map((a) => [a.nummer, a.programm, a.antragsdatum, a.flaeche, a.betrag, a.status].map(esc).join(';')).join('\n')
+        const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `foerderantraege-${new Date().toISOString().slice(0, 10)}.csv`
+        link.click()
+        URL.revokeObjectURL(url)
+      }}><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
       <Card><CardContent className="pt-6"><DataTable data={filteredAntraege} columns={columns} /></CardContent></Card>
     </div>
   )

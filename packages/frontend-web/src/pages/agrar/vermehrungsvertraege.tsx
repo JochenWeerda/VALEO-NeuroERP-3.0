@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Trash2, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 const STATUS_VARIANT: Record<VermehrungsvertragStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   angelegt: 'outline',
@@ -244,13 +244,12 @@ export default function VermehrungsvertraegePage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
                         disabled={deletingKey === vv.id || vv.status === 'storniert'}
                         onClick={() => handleDelete(vv.id, vv.vertrag_nr)}
-                        aria-label={`Vermehrungsvertrag ${vv.vertrag_nr} stornieren`}
                       >
-                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        Stornieren
                       </Button>
                     </TableCell>
                   </TableRow>

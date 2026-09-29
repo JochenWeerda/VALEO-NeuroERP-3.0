@@ -220,13 +220,12 @@ export function AlertActions({ alert }: Props): JSX.Element {
           >
             <AlertDialogTrigger asChild>
               <Button
-                size="sm"
                 variant="secondary"
                 onClick={(): void => {
                   setPending(button.key)
                   setOpen(true)
                 }}
-              >
+               className="min-h-touch">
                 {button.label}
               </Button>
             </AlertDialogTrigger>

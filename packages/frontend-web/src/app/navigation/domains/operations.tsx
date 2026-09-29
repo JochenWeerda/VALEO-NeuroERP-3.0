@@ -739,7 +739,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         icon: Truck,
         module: '@/pages/annahme/warteschlange',
         path: '/annahme/warteschlange',
-        keywords: ['waage', 'hofliste', 'annahme'],
+        keywords: ['warteschlange', 'waage', 'hofliste', 'annahme', 'lkw', 'queue'],
         mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
       },
       {
@@ -748,7 +748,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         icon: Scale,
         module: '@/pages/waage/hofliste',
         path: '/waage/hofliste',
-        keywords: ['hofliste', 'hof', 'yard'],
+        keywords: ['hofliste', 'hof', 'yard', 'waage'],
         mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
       },
       {
@@ -757,6 +757,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         icon: Scale,
         module: '@/pages/waage/liste',
         path: '/waage/liste',
+        keywords: ['waage', 'waagen', 'standort', 'brücke'],
         mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
       },
       {
@@ -765,6 +766,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         icon: FileText,
         module: '@/pages/waage/wiegungen',
         path: '/waage/wiegungen',
+        keywords: ['wiegung', 'wiegungen', 'wiegen', 'waage', 'wiegeschein'],
         mcp: { businessDomain: 'logistics', scope: 'logistics:read' },
       },
       {

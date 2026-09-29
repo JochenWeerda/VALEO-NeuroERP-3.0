@@ -127,12 +127,11 @@ export default function PolicyManagerPage(): JSX.Element {
                 </div>
               </div>
               <Button
-                size="sm"
                 variant="destructive"
                 onClick={(): void => {
                   handleDelete(rule.id)
                 }}
-              >
+               className="min-h-touch">
                 Loeschen
               </Button>
             </li>

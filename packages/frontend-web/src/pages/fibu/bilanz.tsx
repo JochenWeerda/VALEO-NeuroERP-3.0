@@ -13,6 +13,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
@@ -41,6 +42,7 @@ export default function BilanzPage(): JSX.Element {
   const currentPeriod = new Date().toISOString().substring(0, 7) // YYYY-MM
   const [period, setPeriod] = useState(currentPeriod)
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
 
   const { data: bilanz, isLoading, isError, refetch } = useQuery({
     queryKey: ['fibu', 'bilanz', period],
@@ -75,15 +77,15 @@ export default function BilanzPage(): JSX.Element {
             type="month"
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="w-40"
+            className="min-h-touch w-40 touch-manipulation"
           />
-          <Button variant="outline" onClick={() => void refetch()} className="gap-2">
+          <Button variant="outline" onClick={() => void refetch()} className="min-h-touch gap-2 touch-manipulation">
             <RefreshCw className="h-4 w-4" />
             Laden
           </Button>
         </div>
         {isError && (
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-status-warning bg-status-warning/10">
             <CardContent className="p-4 text-status-warning text-sm">
               Keine Bilanzdaten für Periode {period} vorhanden. Bitte Buchungen erfassen oder andere Periode wählen.
             </CardContent>
@@ -152,35 +154,23 @@ export default function BilanzPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <OperationalCaseHeader
-        title="Bilanz"
-        description="Vermoegens- und Kapitalstruktur zum gewaehlten Stichtag."
-        status={operationalStatus}
-        owner="Finanzbuchhaltung"
-        blocker={!bilanz.is_balanced ? 'Bilanz ist nicht ausgeglichen.' : Number(ekQuote) < 20 ? 'Niedrige Eigenkapitalquote erfordert Pruefung.' : null}
-        nextAction={bilanz.is_balanced ? 'Bilanz exportieren oder freigeben' : 'Differenzen im Abschlusslauf klaeren'}
-        caseLabel={bilanz.as_of_date}
-        tags={['FIBU', 'Abschluss']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <OperationalTimeline title="Bilanzverlauf" items={timelineItems} />
-        <OperationalContextPanel sections={contextSections} />
-      </div>
+    <div className="space-y-4 p-3 md:p-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Bilanz</h1>
+            <h1 className="text-2xl font-bold md:text-3xl">Bilanz</h1>
             <p className="text-muted-foreground">Stichtag: {bilanz.as_of_date}</p>
           </div>
           <Input
             type="month"
             value={period}
             onChange={e => setPeriod(e.target.value)}
-            className="w-40"
+            className="min-h-touch w-40 touch-manipulation"
+            aria-label="Bilanz-Periode"
           />
-          <Button variant="outline" size="sm" onClick={() => void refetch()} className="gap-2">
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void refetch()}>
             <RefreshCw className="h-4 w-4" />
+            Aktualisieren
           </Button>
         </div>
         <div className="flex items-center gap-2">
@@ -190,13 +180,19 @@ export default function BilanzPage(): JSX.Element {
           <Badge variant="outline" className="text-lg px-4 py-2">
             EK-Quote: {ekQuote}%
           </Badge>
-          <Button variant="outline" size="sm" className="gap-2" onClick={handleExport}>
+          <Button
+            variant="outline"
+            className="min-h-touch gap-2 touch-manipulation"
+            onClick={handleExport}
+            data-global-button-handler="ignore"
+          >
             <Download className="h-4 w-4" />
             Export CSV
           </Button>
         </div>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -226,6 +222,7 @@ export default function BilanzPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* AKTIVA */}
@@ -257,7 +254,7 @@ export default function BilanzPage(): JSX.Element {
               <p className="text-sm text-muted-foreground">Keine Aktivposten vorhanden</p>
             )}
             <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-4">
-              <div className="flex justify-between text-xl font-bold text-blue-900">
+              <div className="flex justify-between text-xl font-bold">
                 <span>SUMME AKTIVA</span>
                 <span>{fmt(bilanzsumme)}</span>
               </div>
@@ -283,7 +280,7 @@ export default function BilanzPage(): JSX.Element {
               <p className="text-sm text-muted-foreground">Keine Passivposten vorhanden</p>
             )}
             <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-4">
-              <div className="flex justify-between text-xl font-bold text-blue-900">
+              <div className="flex justify-between text-xl font-bold">
                 <span>SUMME PASSIVA</span>
                 <span>{fmt(bilanzsumme)}</span>
               </div>
@@ -291,6 +288,24 @@ export default function BilanzPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title="Bilanz"
+            description="Vermoegens- und Kapitalstruktur zum gewaehlten Stichtag."
+            status={operationalStatus}
+            owner="Finanzbuchhaltung"
+            blocker={!bilanz.is_balanced ? 'Bilanz ist nicht ausgeglichen.' : Number(ekQuote) < 20 ? 'Niedrige Eigenkapitalquote erfordert Pruefung.' : null}
+            nextAction={bilanz.is_balanced ? 'Bilanz exportieren oder freigeben' : 'Differenzen im Abschlusslauf klaeren'}
+            caseLabel={bilanz.as_of_date}
+            tags={['FIBU', 'Abschluss']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+            <OperationalTimeline title="Bilanzverlauf" items={timelineItems} />
+            <OperationalContextPanel sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

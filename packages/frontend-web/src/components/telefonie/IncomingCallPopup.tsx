@@ -47,10 +47,10 @@ export function IncomingCallPopup(): JSX.Element | null {
           )}
         </div>
         <div className="flex gap-2 border-t px-3 py-2">
-          <Button size="sm" className="flex-1 gap-2" onClick={handleOpen} disabled={!call.kunden_nr}>
+          <Button className="min-h-touch flex-1 gap-2" onClick={handleOpen} disabled={!call.kunden_nr}>
             <User2 className="h-4 w-4" />Kunde öffnen
           </Button>
-          <Button size="sm" variant="outline" className="gap-2" onClick={() => ack.mutate(call.id)}>
+          <Button variant="outline" className="min-h-touch gap-2" onClick={() => ack.mutate(call.id)}>
             <PhoneOff className="h-4 w-4" />Erledigt
           </Button>
         </div>

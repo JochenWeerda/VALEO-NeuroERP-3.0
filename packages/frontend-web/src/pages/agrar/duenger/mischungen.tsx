@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertTriangle, Calculator, ChevronDown, ChevronUp, FlaskConical, Plus, Save, Trash2 } from 'lucide-react'
+import { AlertTriangle, Calculator, FlaskConical, Plus, Save } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useDuengerKomponenten } from '@/lib/api/agrar'
 
@@ -308,7 +308,7 @@ export default function DuengerMischungenPage(): JSX.Element {
               <Plus className="h-5 w-5" />
               Komponenten ({mischung.komponenten.length})
             </span>
-            <Button onClick={addKomponente} size="sm" className="gap-2">
+            <Button onClick={addKomponente} className="min-h-touch gap-2 touch-manipulation">
               <Plus className="h-4 w-4" />
               Komponente hinzufügen
             </Button>
@@ -323,19 +323,18 @@ export default function DuengerMischungenPage(): JSX.Element {
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="font-medium">Komponente {index + 1}</h4>
                     <div className="flex items-center gap-1">
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => moveKomponenteUp(index)} disabled={index === 0} title="Nach oben">
-                        <ChevronUp className="h-4 w-4" />
+                      <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => moveKomponenteUp(index)} disabled={index === 0}>
+                        Nach oben
                       </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => moveKomponenteDown(index)} disabled={index === mischung.komponenten.length - 1} title="Nach unten">
-                        <ChevronDown className="h-4 w-4" />
+                      <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => moveKomponenteDown(index)} disabled={index === mischung.komponenten.length - 1}>
+                        Nach unten
                       </Button>
                       <Button
                         variant="outline"
-                        size="sm"
+                        className="min-h-touch touch-manipulation"
                         onClick={() => removeKomponente(index)}
-                        className="text-status-error hover:text-status-error"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Entfernen
                       </Button>
                     </div>
                   </div>
@@ -411,9 +410,9 @@ export default function DuengerMischungenPage(): JSX.Element {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
-                <div className="text-sm text-blue-600">Gesamt N</div>
+                <div className="text-sm text-primary">Gesamt N</div>
                 <div className="text-2xl font-bold text-blue-900">{mischung.berechnete_werte.gesamt_n}%</div>
-                <div className="text-xs text-blue-600">Ziel: {mischung.ziel_npk.n}%</div>
+                <div className="text-xs text-muted-foreground">Ziel: {mischung.ziel_npk.n}%</div>
               </div>
               <div className="p-4 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded-lg">
                 <div className="text-sm text-status-success">Gesamt P</div>

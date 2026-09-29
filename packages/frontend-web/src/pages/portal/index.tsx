@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
 import { usePortalDashboard, type PortalDashboard as PortalDashboardApi } from '@/lib/api/portal'
 import { ErrorState } from '@/components/ErrorState'
 import { useQuery } from '@tanstack/react-query'
@@ -157,7 +158,7 @@ function PreisspiegalWidget() {
           </CardDescription>
         </div>
         <Link to="/portal/preisspiegel">
-          <Button variant="ghost" size="sm" className="gap-1 text-status-success">
+          <Button variant="ghost" className="min-h-touch gap-1 text-status-success">
             Alle Varianten <ChevronRight className="h-4 w-4" />
           </Button>
         </Link>
@@ -171,7 +172,7 @@ function PreisspiegalWidget() {
         {data && (
           <div className="space-y-1">
             {/* Tabellenkopf */}
-            <div className="grid grid-cols-5 gap-2 text-xs font-medium text-gray-500 px-2 pb-1 border-b">
+            <div className="grid grid-cols-5 gap-2 text-2xs font-medium tracking-wide uppercase text-muted-foreground px-2 pb-1 border-b">
               <span className="col-span-1">Frucht</span>
               {Object.values(VARIANTE_LABELS).map((l) => (
                 <span key={l} className="text-right leading-tight">{l}</span>
@@ -184,20 +185,20 @@ function PreisspiegalWidget() {
                 className="grid grid-cols-5 gap-2 items-center rounded-lg px-2 py-2 hover:bg-gray-50"
               >
                 <div className="col-span-1">
-                  <div className="font-medium text-sm text-gray-900">{a.artikel_name}</div>
-                  <div className="text-xs text-gray-400">{a.frucht_gruppe}</div>
+                  <div className="font-medium text-sm">{a.artikel_name}</div>
+                  <div className="text-2xs tracking-wide uppercase text-muted-foreground">{a.frucht_gruppe}</div>
                 </div>
                 {Object.keys(VARIANTE_LABELS).map((v) => {
                   const p = a.varianten[v]
                   return (
                     <div key={v} className="text-right">
                       {p ? (
-                        <span className="text-sm font-semibold text-gray-800">
+                        <span className="text-sm font-semibold">
                           {p.gesamtpreis_eur_dt.toFixed(2)}{' '}
-                          <span className="text-xs font-normal text-gray-400">€/dt</span>
+                          <span className="text-2xs font-normal text-muted-foreground">€/dt</span>
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-300">—</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </div>
                   )
@@ -205,7 +206,7 @@ function PreisspiegalWidget() {
               </div>
             ))}
             {(data.preisspiegel ?? []).length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">
+              <p className="text-sm text-muted-foreground text-center py-4">
                 Keine Preise für Ihre Früchte hinterlegt.
               </p>
             )}
@@ -267,6 +268,7 @@ function EmpfehlungsBanner() {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export default function PortalDashboard() {
+  const { toast } = useToast()
   const { data: portalData, isLoading, isError, error, refetch } = usePortalDashboard()
 
   if (isLoading) {
@@ -369,7 +371,7 @@ export default function PortalDashboard() {
               <CardDescription>Ihre aktuellen Bestellungen</CardDescription>
             </div>
             <Link to="/portal/bestellungen">
-              <Button variant="ghost" size="sm" className="gap-1">
+              <Button variant="ghost" className="min-h-touch gap-1">
                 Alle <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -412,7 +414,7 @@ export default function PortalDashboard() {
               <CardDescription>Kürzlich bereitgestellt</CardDescription>
             </div>
             <Link to="/portal/dokumente">
-              <Button variant="ghost" size="sm" className="gap-1">
+              <Button variant="ghost" className="min-h-touch gap-1">
                 Alle <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -433,8 +435,11 @@ export default function PortalDashboard() {
                       <p className="text-xs text-muted-foreground">{dokument.datum}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    <Download className="h-4 w-4" />
+                  <Button variant="ghost" className="min-h-touch" onClick={() => toast({
+                    title: 'Download nicht angebunden',
+                    description: 'Dokumente öffnen Sie unter Dokumente im Kundenportal.',
+                  })}>
+                    Herunterladen
                   </Button>
                 </div>
               ))}
@@ -452,7 +457,7 @@ export default function PortalDashboard() {
         <CardContent className="space-y-4">
           {/* Neue Agrar-Dienste */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Markt & Dienste</p>
+            <p className="text-2xs font-semibold tracking-wide uppercase text-muted-foreground mb-2">Markt & Dienste</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <QuickAccessCard
                 title="Getreidekurse"
@@ -486,7 +491,7 @@ export default function PortalDashboard() {
           </div>
           {/* Feldbuch & Dokumente */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Flächen & Dokumente</p>
+            <p className="text-2xs font-semibold tracking-wide uppercase text-muted-foreground mb-2">Flächen & Dokumente</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <QuickAccessCard
                 title="Ackerschlagkartei"
@@ -540,7 +545,7 @@ function KPICard({
   color?: 'blue' | 'emerald' | 'amber' | 'purple'
 }) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
+    blue: 'bg-status-info/10 text-status-info',
     emerald: 'bg-emerald-50 text-status-success',
     amber: 'bg-amber-50 text-status-warning',
     purple: 'bg-purple-50 text-purple-600',

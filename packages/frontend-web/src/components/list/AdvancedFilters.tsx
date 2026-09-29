@@ -46,7 +46,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" className="min-h-touch touch-manipulation">
           <Filter className="h-4 w-4 mr-2" />
           {t('crud.actions.filter')}
           {activeFiltersCount > 0 && (
@@ -62,7 +62,7 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">{t('crud.list.searchAndFilter')}</CardTitle>
               {activeFiltersCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={onReset}>
+                <Button variant="ghost" onClick={onReset} className="min-h-touch">
                   <X className="h-4 w-4 mr-1" />
                   {t('common.reset')}
                 </Button>
@@ -115,9 +115,8 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                   {Boolean(value) && (
                     <Button
                       variant="ghost"
-                      size="sm"
                       onClick={() => handleRemove(filter.key)}
-                      className="h-6 px-2"
+                      className="min-h-touch px-2"
                     >
                       <X className="h-3 w-3" />
                       <span className="sr-only">{renderValue(value)}</span>
@@ -128,10 +127,10 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
             })}
             
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" size="sm" onClick={() => setIsOpen(false)}>
+              <Button variant="outline" onClick={() => setIsOpen(false)} className="min-h-touch">
                 {t('common.close')}
               </Button>
-              <Button size="sm" onClick={() => setIsOpen(false)}>
+              <Button onClick={() => setIsOpen(false)} className="min-h-touch">
                 {t('common.apply')}
               </Button>
             </div>

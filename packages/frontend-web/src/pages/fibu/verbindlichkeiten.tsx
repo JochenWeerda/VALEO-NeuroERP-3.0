@@ -8,8 +8,12 @@ import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertCircle, FileDown, Search } from 'lucide-react'
+import { NativeSelect } from '@/components/ui/native-select'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { useVerbindlichkeiten, type Verbindlichkeit } from '@/lib/api/fibu'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 
 const statusVariantMap: Record<string, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   offen: 'default',
@@ -21,6 +25,8 @@ const statusVariantMap: Record<string, 'default' | 'outline' | 'secondary' | 'de
 export default function VerbindlichkeitenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('alle')
   const { data: items, isLoading } = useVerbindlichkeiten()
@@ -52,7 +58,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
       render: (verb: Verbindlichkeit) => (
         <button
           onClick={() => navigate(`/fibu/verbindlichkeit/${verb.id}`)}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {verb.rechnungsNr}
         </button>
@@ -98,14 +104,15 @@ export default function VerbindlichkeitenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Verbindlichkeiten</h1>
-          <p className="text-muted-foreground">Übersicht aller offenen Lieferantenrechnungen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Verbindlichkeiten</h1>
+          <p className="text-muted-foreground">Lieferantenrechnungen suchen und oeffnen</p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/fibu/zahlungslaeufe')}>Zahlungslauf planen</Button>
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/fibu/zahlungslaeufe')}>Zahlungslauf planen</Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -143,34 +150,67 @@ export default function VerbindlichkeitenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Filter & Suche</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Suche nach Rechnung oder Lieferant..."
+                aria-label="Suche Verbindlichkeiten"
+                placeholder="Rechnung oder Lieferant"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="min-h-touch pl-10"
               />
             </div>
-            <select
+            <NativeSelect
+              ariaLabel="Statusfilter"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-md border border-input bg-background px-3 py-2"
+              onValueChange={setStatusFilter}
+              options={[
+                { value: 'alle', label: 'Alle Status' },
+                { value: 'offen', label: 'Offen' },
+                { value: 'teilbezahlt', label: 'Teilbezahlt' },
+                { value: 'bezahlt', label: 'Bezahlt' },
+                { value: 'skontofaehig', label: 'Skontofähig' },
+              ]}
+            />
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => {
+                if (filteredVerbindlichkeiten.length === 0) {
+                  toast({ title: 'Kein Export', description: 'Keine Verbindlichkeiten in der aktuellen Sicht.', variant: 'destructive' })
+                  return
+                }
+                exportToCSV(
+                  filteredVerbindlichkeiten.map((v) => ({
+                    rechnungsNr: v.rechnungsNr,
+                    lieferant: v.lieferant,
+                    rechnungsDatum: v.rechnungsDatum,
+                    faelligAm: v.faelligAm,
+                    betrag: v.betrag,
+                    offen: v.offen,
+                    status: v.status,
+                  })),
+                  `verbindlichkeiten-${new Date().toISOString().slice(0, 10)}.csv`,
+                  [
+                    { key: 'rechnungsNr', label: 'Rechnung' },
+                    { key: 'lieferant', label: 'Lieferant' },
+                    { key: 'rechnungsDatum', label: 'Rechnungsdatum' },
+                    { key: 'faelligAm', label: 'Faellig am' },
+                    { key: 'betrag', label: 'Betrag' },
+                    { key: 'offen', label: 'Offen' },
+                    { key: 'status', label: 'Status' },
+                  ],
+                )
+              }}
             >
-              <option value="alle">Alle Status</option>
-              <option value="offen">Offen</option>
-              <option value="teilbezahlt">Teilbezahlt</option>
-              <option value="bezahlt">Bezahlt</option>
-              <option value="skontofaehig">Skontofähig</option>
-            </select>
-            <Button variant="outline" className="gap-2">
               <FileDown className="h-4 w-4" />
               Export
             </Button>

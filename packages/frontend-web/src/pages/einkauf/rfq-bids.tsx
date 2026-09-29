@@ -399,8 +399,8 @@ export default function RfqBidsPage(): JSX.Element {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button
-                              size="sm"
                               variant="ghost"
+                              className="min-h-touch"
                               onClick={() => {
                                 setSelectedBid(bid)
                                 setBidDialogOpen(true)
@@ -702,8 +702,8 @@ export default function RfqBidsPage(): JSX.Element {
                           </TableCell>
                           <TableCell>
                             <Button
-                              size="sm"
                               variant="outline"
+                              className="min-h-touch"
                               onClick={() => {
                                 setComparisonDialogOpen(false)
                                 handleAwardBid(bid)

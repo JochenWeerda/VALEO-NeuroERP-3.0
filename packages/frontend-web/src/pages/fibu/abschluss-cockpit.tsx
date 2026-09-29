@@ -249,7 +249,7 @@ export default function AbschlussCockpitPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant={item.status === 'blocked' ? 'destructive' : 'outline'}>{item.status}</Badge>
-                <Button variant="outline" size="sm" onClick={() => { void openChecklistDetail(item.id) }}>
+                <Button variant="outline" onClick={() => { void openChecklistDetail(item.id) }} className="min-h-touch">
                   Details
                 </Button>
               </div>

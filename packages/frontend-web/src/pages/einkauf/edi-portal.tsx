@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -40,6 +41,7 @@ const ediRoles = [
 ] satisfies Array<{ id: EdiRole; label: string; description: string }>
 
 export default function EdiPortalPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const { data = [], isLoading, isError, error, refetch } = useEdiMessages()
   const createMsg = useCreateEdiMessage()
   const ackMsg = useAckEdiMessage()
@@ -68,6 +70,12 @@ export default function EdiPortalPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">EDI-Portal</h1>
+        <p className="text-muted-foreground">Lieferantenmeldungen anlegen, pruefen und bestaetigen</p>
+      </div>
+      {!isTouch ? (
+      <>
       <RoleFocusBar roles={ediRoles} value={role} onChange={setRole} visibleCount={data.length} totalCount={data.length} title="Wer arbeitet gerade an den Lieferantenmeldungen?" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -112,6 +120,8 @@ export default function EdiPortalPage(): JSX.Element {
           ]}
         />
       </div>
+      </>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -119,11 +129,11 @@ export default function EdiPortalPage(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-            <Input placeholder="Partner" value={partner} onChange={(e) => setPartner(e.target.value)} />
-            <Input placeholder="Nachrichtentyp, z. B. ORDERS" value={messageType} onChange={(e) => setMessageType(e.target.value)} />
-            <Input placeholder="Richtung: outbound oder inbound" value={direction} onChange={(e) => setDirection((e.target.value as 'outbound' | 'inbound') || 'outbound')} />
+            <Input aria-label="Partner" className="min-h-touch" placeholder="Partner" value={partner} onChange={(e) => setPartner(e.target.value)} />
+            <Input aria-label="Nachrichtentyp" className="min-h-touch" placeholder="Nachrichtentyp, z. B. ORDERS" value={messageType} onChange={(e) => setMessageType(e.target.value)} />
+            <Input aria-label="Richtung" className="min-h-touch" placeholder="Richtung: outbound oder inbound" value={direction} onChange={(e) => setDirection((e.target.value as 'outbound' | 'inbound') || 'outbound')} />
           </div>
-          <Button onClick={() => { void handleCreate() }} disabled={createMsg.isPending || !partner}>
+          <Button className="min-h-touch touch-manipulation" onClick={() => { void handleCreate() }} disabled={createMsg.isPending || !partner}>
             Lieferantenmeldung anlegen
           </Button>
         </CardContent>
@@ -137,7 +147,7 @@ export default function EdiPortalPage(): JSX.Element {
           {isLoading ? (
             <div className="text-sm text-muted-foreground">Lade Lieferantenmeldungen ...</div>
           ) : data.length === 0 ? (
-            <div className="rounded border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+            <div className="rounded border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
               Noch keine Lieferantenmeldung vorhanden. Lege bei Bedarf eine Meldung an oder pruefe spaeter den naechsten Schnittstellenlauf.
             </div>
           ) : (
@@ -161,7 +171,7 @@ export default function EdiPortalPage(): JSX.Element {
                     <TableCell>{m.direction}</TableCell>
                     <TableCell>{m.status}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => { void ackMsg.mutateAsync(m.id) }} disabled={m.status === 'ACKNOWLEDGED'}>
+                      <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => { void ackMsg.mutateAsync(m.id) }} disabled={m.status === 'ACKNOWLEDGED' || ackMsg.isPending}>
                         Bestaetigen
                       </Button>
                     </TableCell>

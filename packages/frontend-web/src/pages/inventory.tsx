@@ -48,21 +48,21 @@ export default function InventoryPanel(): JSX.Element {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Inventory</h2>
+      <h1 className="text-2xl font-bold">Bestand</h1>
       <Toolbar
         onSearch={setSearch}
         onCopilot={() => push("Copilot Hinweis: Slot-Empfehlungen werden berechnet...")}
       />
       <Card className="p-4">
-        {isLoading ? "Loading..." : (
+        {isLoading ? "Wird geladen…" : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>SKU</TableHead>
-                <TableHead>Item</TableHead>
-                <TableHead className="text-right">Qty</TableHead>
-                <TableHead>UoM</TableHead>
-                <TableHead>Location</TableHead>
+                <TableHead>Artikel</TableHead>
+                <TableHead>Bezeichnung</TableHead>
+                <TableHead className="text-right">Menge</TableHead>
+                <TableHead>Einheit</TableHead>
+                <TableHead>Lagerort</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -75,8 +75,8 @@ export default function InventoryPanel(): JSX.Element {
                   <TableCell>{stock.uom}</TableCell>
                   <TableCell>{stock.location ?? "-"}</TableCell>
                   <TableCell className="space-x-2 text-right">
-                    <Button size="sm" variant="secondary" onClick={() => setAdjustSku(stock)}>Adjust</Button>
-                    <Button size="sm" onClick={() => setPutawaySku(stock)}>Putaway</Button>
+                    <Button className="min-h-touch" variant="secondary" onClick={() => setAdjustSku(stock)}>Korrigieren</Button>
+                    <Button className="min-h-touch" onClick={() => setPutawaySku(stock)}>Einlagern</Button>
                   </TableCell>
                 </TableRow>
               ))}

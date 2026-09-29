@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Plus, Search, Target, Loader2 } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { queryKeys } from '@/lib/query'
 import { apiClient } from '@/lib/api-client'
 import { toast } from '@/hooks/use-toast'
@@ -23,7 +24,9 @@ const EMPTY_LEADS_RESPONSE: { data: Lead[]; total: number } = {
 export default function LeadsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
+  const [convertingId, setConvertingId] = useState<string | null>(null)
   const entityType = 'lead'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lead')
 
@@ -49,12 +52,15 @@ export default function LeadsPage(): JSX.Element {
   const highPriorityLeads = leads.filter(lead => lead.priority === 'high').length
 
   const handleConvert = (lead: Lead) => {
+    if (convertingId) return
+    setConvertingId(lead.id)
     convertLead.mutate(lead.id, {
       onSuccess: (r) => {
         toast({ title: 'Lead konvertiert', description: `${lead.company} → Kunde ${r.kunden_nr}.` })
         void refetch()
       },
       onError: (e: unknown) => toast({ variant: 'destructive', title: 'Konversion fehlgeschlagen', description: e instanceof Error ? e.message : 'Fehler' }),
+      onSettled: () => setConvertingId(null),
     })
   }
 
@@ -65,8 +71,9 @@ export default function LeadsPage(): JSX.Element {
       render: (lead: Lead) => (
         <div>
           <button
+            type="button"
             onClick={() => navigate(`/crm/lead/${lead.id}`)}
-            className="font-medium text-blue-600 hover:underline"
+            className="min-h-11 font-medium text-primary touch-manipulation"
           >
             {lead.company}
           </button>
@@ -109,12 +116,12 @@ export default function LeadsPage(): JSX.Element {
       label: 'Aktion',
       render: (lead: Lead) => (
         <Button
-          size="sm"
+          className="min-h-touch touch-manipulation"
           variant="outline"
           onClick={() => handleConvert(lead)}
-          disabled={convertLead.isPending}
+          disabled={convertingId === lead.id}
         >
-          → Kunde
+          {convertingId === lead.id ? 'Konvertiere...' : 'Zu Kunde'}
         </Button>
       ),
     },
@@ -135,19 +142,20 @@ export default function LeadsPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{getListTitle(t, entityTypeLabel)}</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">{getListTitle(t, entityTypeLabel)}</h1>
           <p className="text-muted-foreground">
             {isLoading ? t('crud.list.loading', { entityType: entityTypeLabel }) : t('crud.list.total', { count: totalLeads, entityType: entityTypeLabel })}
           </p>
         </div>
-        <Button onClick={() => navigate('/crm/lead/neu')} className="gap-2">
+        <Button onClick={() => navigate('/crm/lead/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           {t('crud.actions.new')} {entityTypeLabel}
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -190,23 +198,25 @@ export default function LeadsPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>{t('common.search')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                aria-label={t('common.search')}
                 placeholder={t('crud.list.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="min-h-touch pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation">
               <FileDown className="h-4 w-4" />
               {t('crud.actions.export')}
             </Button>

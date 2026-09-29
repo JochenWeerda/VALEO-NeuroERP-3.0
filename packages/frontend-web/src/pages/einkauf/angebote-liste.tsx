@@ -16,6 +16,7 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -29,7 +30,7 @@ const createAngeboteConfig = (t: TFunction, entityTypeLabel: string): ListConfig
       label: t('crud.fields.offerNumber'),
       labelKey: 'crud.fields.offerNumber',
       sortable: true,
-      render: (value) => <code className="text-sm font-mono">{renderValue(value)}</code>
+      render: (value) => <span className="inline-flex min-h-11 items-center font-mono text-sm text-primary">{renderValue(value)}</span>
     },
     {
       key: 'anfrage',
@@ -182,6 +183,7 @@ export default function AngeboteListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const isTouch = useTouchDevice()
   const { data: apiData = [], isLoading } = useEinkaufAngebote()
   const data = useMemo(() => apiData.map((item: EinkaufAngebot) => ({
     ...item,
@@ -330,7 +332,23 @@ export default function AngeboteListePage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-3 md:p-6">
+      <ListReport
+        config={angeboteConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => {
+          navigate('/einkauf/bestellungen?importContext=angebote')
+        }}
+        isLoading={isLoading}
+      />
+
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Einkaufsvorgang Angebote"
         description="Angebote werden nicht mehr nur gesammelt quittiert, sondern als operativer Vorgangsraum mit Review-, Freigabe- und Folgebeleglage gefuehrt."
@@ -409,20 +427,8 @@ export default function AngeboteListePage(): JSX.Element {
           ]}
         />
       </div>
-
-      <ListReport
-        config={angeboteConfig}
-        data={data}
-        total={total}
-        onCreate={handleCreate}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onExport={handleExport}
-        onImport={() => {
-          navigate('/einkauf/bestellungen?importContext=angebote')
-        }}
-        isLoading={isLoading}
-      />
+      </>
+      ) : null}
     </div>
   )
 }

@@ -426,12 +426,11 @@ export default function RationsZugangPage() {
                   <div className="flex justify-end gap-1">
                     <Button
                       variant="ghost"
-                      size="sm"
                       title={e.ist_aktiv ? 'Sperren' : 'Entsperren'}
                       onClick={() =>
                         sperrMut.mutate({ id: e.id, sperren: e.ist_aktiv })
                       }
-                    >
+                     className="min-h-touch">
                       {e.ist_aktiv ? (
                         <Ban className="h-4 w-4 text-status-warning" />
                       ) : (
@@ -440,13 +439,12 @@ export default function RationsZugangPage() {
                     </Button>
                     <Button
                       variant="ghost"
-                      size="sm"
                       title="Löschen"
                       onClick={() => {
                         if (confirm(`Zugang für ${e.empfaenger_email} wirklich widerrufen?`))
                           delMut.mutate(e.id)
                       }}
-                    >
+                     className="min-h-touch">
                       <Trash2 className="h-4 w-4 text-status-error" />
                     </Button>
                   </div>

@@ -99,6 +99,34 @@ describe('FastTableRenderer row actions', () => {
     expect(pushState).toHaveBeenCalledWith(null, '', '/lager/stock-movement/mv-9')
     pushState.mockRestore()
   })
+
+  it('stellt Zeilenaktionen auf Touch in der Karte dar', () => {
+    const original = window.matchMedia
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('max-width: 767px'),
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+      onchange: null,
+    })) as typeof window.matchMedia
+    const onRowAction = vi.fn()
+    try {
+      render(
+        <FastTableRenderer
+          table={table}
+          rows={[{ id: 'evt-fail', device_id: 'MDE-2', sync_status: 'failed' }]}
+          onRowAction={onRowAction}
+        />,
+      )
+      fireEvent.click(screen.getByTestId('row-action-retry_event'))
+      expect(onRowAction).toHaveBeenCalledWith('retry_event', expect.objectContaining({ id: 'evt-fail' }))
+    } finally {
+      window.matchMedia = original
+    }
+  })
 })
 
 describe('FastTabRenderer row actions', () => {

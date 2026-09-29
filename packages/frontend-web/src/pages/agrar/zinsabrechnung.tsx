@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Plus, BookCheck, XCircle } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 const STATUS_VARIANT: Record<ZinsabrechnungStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   berechnet: 'outline',
@@ -225,25 +225,25 @@ export default function ZinsabrechnungPage() {
                         {za.status.charAt(0).toUpperCase() + za.status.slice(1)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right flex gap-1 justify-end">
+                    <TableCell className="text-right">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
                         disabled={buchingKey === za.id || za.status !== 'berechnet'}
                         onClick={() => handleBuchen(za.id)}
-                        aria-label={`Zinsabrechnung ${za.id} buchen`}
                       >
-                        <BookCheck className="h-4 w-4" aria-hidden="true" />
+                        Buchen
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
                         disabled={storningKey === za.id || za.status === 'storniert'}
                         onClick={() => handleStornieren(za.id)}
-                        aria-label={`Zinsabrechnung ${za.id} stornieren`}
                       >
-                        <XCircle className="h-4 w-4" aria-hidden="true" />
+                        Stornieren
                       </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

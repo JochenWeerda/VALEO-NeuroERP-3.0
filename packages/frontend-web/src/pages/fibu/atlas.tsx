@@ -202,7 +202,7 @@ export default function AtlasPage(): JSX.Element {
           </p>
         </div>
         <Link to="/fibu/schnittstellen-center">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" className="min-h-touch">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Zurueck zum Schnittstellen-Center
           </Button>

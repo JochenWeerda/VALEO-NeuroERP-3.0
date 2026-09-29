@@ -124,7 +124,7 @@ export default function UebernahmeKassePage(): JSX.Element {
           {/* Buttons */}
           <div className="flex items-center gap-2 justify-end">
             <Button
-              size="sm"
+              className="min-h-touch"
               onClick={handleOk}
               disabled={mutation.isPending || !anySelected}
             >
@@ -139,7 +139,7 @@ export default function UebernahmeKassePage(): JSX.Element {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               onClick={handleReset}
               disabled={mutation.isPending}
             >
@@ -195,7 +195,7 @@ export default function UebernahmeKassePage(): JSX.Element {
                 </div>
               )}
 
-              <Button size="sm" variant="outline" onClick={handleReset}>
+              <Button className="min-h-touch" variant="outline" onClick={handleReset}>
                 Weitere Übernahme
               </Button>
             </Callout>

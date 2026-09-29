@@ -200,7 +200,7 @@ export function ConsultingCases({ initialCaseId }: { initialCaseId?: string }): 
       <div className="rounded-lg border bg-muted/30 p-4 text-sm" role="alert">
         <p className="font-medium text-status-error">Die Beratungsfälle konnten nicht geladen werden.</p>
         <p className="mt-1 text-muted-foreground">{listError}</p>
-        <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { void loadList() }}>
+        <Button type="button" variant="outline" className="min-h-touch mt-3" onClick={() => { void loadList() }}>
           Erneut laden
         </Button>
       </div>

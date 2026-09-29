@@ -30,6 +30,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useTenant } from '@/hooks/useTenant'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { cancelFreightTariff, listFreightTariffs, simulateFreightCost, type FreightTariffRow } from '@/lib/api/logistics-freight'
@@ -85,6 +86,7 @@ function canCancelOwnTariff(row: FreightTariffRow, tenant: string): boolean {
 
 export default function TourFrachtArbeitsraumPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const { tenantId } = useTenant()
@@ -332,6 +334,8 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Tour & Fracht — Dispo-Arbeitsraum"
         description="Gemeinsame operative Sicht auf Liefertouren und Frachtbriefe; Details in den Unterseiten."
@@ -377,21 +381,31 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
         }}
       />
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => navigate('/logistik/frachtbriefe')}>
-          Zu Frachtbriefen
-        </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => navigate('/logistik/frachttabellen')}>
-          Frachttabellen
-        </Button>
-      </div>
-
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <OperationalTimeline title="Lage in einem Blick" items={filteredTimeline} />
         <OperationalContextPanel sections={filteredContext} />
       </div>
 
       <CrudCapabilityChecklist capabilities={capabilities} />
+      </>
+      ) : null}
+
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Tour & Fracht</h1>
+        <p className="text-muted-foreground">Disposition, Frachtbriefe und Tarife</p>
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/logistik/tourenplanung')}>
+          Zur Tourenplanung
+        </Button>
+        <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/logistik/frachtbriefe')}>
+          Zu Frachtbriefen
+        </Button>
+        <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/logistik/frachttabellen')}>
+          Frachttabellen
+        </Button>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-1">
@@ -426,8 +440,7 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
                           <Button
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-destructive hover:text-destructive"
+                            className="min-h-touch px-2 text-destructive hover:text-destructive"
                             onClick={() => setCancelTarget(row)}
                           >
                             Storno
@@ -445,7 +458,7 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
                 PLZ 10115→20095.
               </p>
             ) : null}
-            <Button type="button" size="sm" disabled={probeBusy || !firstCarrierId} onClick={() => void handleFreightProbe()}>
+            <Button type="button" className="min-h-touch" disabled={probeBusy || !firstCarrierId} onClick={() => void handleFreightProbe()}>
               {probeBusy ? 'Rechnet…' : 'Probe berechnen'}
             </Button>
             {probeResult ? (
@@ -469,7 +482,7 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
               <Truck className="h-5 w-5" />
               Touren
             </CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={() => navigate('/logistik/tourenplanung')}>
+            <Button type="button" variant="outline" className="min-h-touch" onClick={() => navigate('/logistik/tourenplanung')}>
               Zur Tourenplanung
             </Button>
           </CardHeader>
@@ -492,7 +505,7 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
               <MapPin className="h-5 w-5" />
               Frachtbriefe
             </CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={() => navigate('/logistik/frachtbriefe')}>
+            <Button type="button" variant="outline" className="min-h-touch" onClick={() => navigate('/logistik/frachtbriefe')}>
               Zu Frachtbriefen
             </Button>
           </CardHeader>

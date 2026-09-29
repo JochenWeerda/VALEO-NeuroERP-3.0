@@ -1,15 +1,18 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Callout } from '@/components/ui/callout'
 import { useNavigate } from '@/app/routing/typed-router'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
-import { AlertTriangle, Euro, FileText, TrendingUp } from 'lucide-react'
+import { AlertTriangle, FileText } from 'lucide-react'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function OPVerwaltungPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
 
   const opData = {
     debitoren: {
@@ -66,99 +69,28 @@ export default function OPVerwaltungPage(): JSX.Element {
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
-    <div className="space-y-6 p-6">
-      <OperationalCaseHeader
-        title="Offene Posten Verwaltung"
-        description="Sammelraum fuer Forderungen, Verbindlichkeiten und kurzfristige Liquiditaetssteuerung."
-        status={operationalStatus}
-        owner="Finanzbuchhaltung"
-        blocker={opData.debitoren.ueberfaellig > 0 ? 'Mindestens eine Debitorenrechnung ist ueberfaellig.' : null}
-        nextAction={opData.debitoren.ueberfaellig > 0 ? 'Debitoreneskalation anstossen' : 'Kreditoren und Skonto priorisieren'}
-        caseLabel="OP-Clearing"
-        tags={['FIBU', 'Liquiditaet']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <OperationalTimeline title="OP-Verlauf" items={timelineItems} />
-        <OperationalContextPanel sections={contextSections} />
-      </div>
+    <div className="space-y-4 p-3 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold">Offene Posten Verwaltung</h1>
-        <p className="text-muted-foreground">Überblick Debitoren & Kreditoren</p>
+        <h1 className="text-2xl font-bold md:text-3xl">Offene Posten Verwaltung</h1>
+        <p className="text-muted-foreground">Debitoren und Kreditoren oeffnen</p>
       </div>
 
-      {opData.debitoren.ueberfaellig > 0 && (
-        <Card className="border-orange-500 bg-orange-50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-orange-900">
-              <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{opData.debitoren.ueberfaellig} überfällige Debitorenrechnung(en)!</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Offene Forderungen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-status-warning" />
-              <span className="text-2xl font-bold text-status-warning">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.debitoren.summe)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Offene Verbindlichkeiten</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-muted-foreground" />
-              <span className="text-2xl font-bold text-blue-600">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.kreditoren.summe)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Liquidität (Bank)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-status-success">
-              {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.bank)}
-            </span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Prognose</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-status-success" />
-              <span className="text-2xl font-bold text-status-success">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.prognose)}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {opData.debitoren.ueberfaellig > 0 ? (
+        <Callout variant="warning" className="pt-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            <span className="font-semibold">{opData.debitoren.ueberfaellig} ueberfaellige Debitorenrechnung(en)</span>
+          </div>
+        </Callout>
+      ) : null}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* DEBITOREN */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl flex items-center justify-between">
+            <CardTitle className="flex flex-col gap-3 text-xl sm:flex-row sm:items-center sm:justify-between">
               <span>Debitoren (Forderungen)</span>
-              <Button onClick={() => navigate('/fibu/debitoren')}>Details</Button>
+              <Button className="min-h-touch touch-manipulation" onClick={() => navigate('/fibu/debitoren')}>Debitoren oeffnen</Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -188,7 +120,7 @@ export default function OPVerwaltungPage(): JSX.Element {
 
             <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-50-hsl))] p-4 text-center">
               <div className="text-sm text-muted-foreground mb-1">Erwartete Zahlungseingänge</div>
-              <div className="text-xl font-bold text-orange-900">
+              <div className="text-xl font-bold text-status-warning">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.erwarteteEingaenge)}
               </div>
             </div>
@@ -198,9 +130,9 @@ export default function OPVerwaltungPage(): JSX.Element {
         {/* KREDITOREN */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl flex items-center justify-between">
+            <CardTitle className="flex flex-col gap-3 text-xl sm:flex-row sm:items-center sm:justify-between">
               <span>Kreditoren (Verbindlichkeiten)</span>
-              <Button onClick={() => navigate('/fibu/kreditoren')}>Details</Button>
+              <Button className="min-h-touch touch-manipulation" onClick={() => navigate('/fibu/kreditoren')}>Kreditoren oeffnen</Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -212,7 +144,7 @@ export default function OPVerwaltungPage(): JSX.Element {
                 </div>
                 <Badge variant="outline">{opData.kreditoren.gesamt}</Badge>
               </div>
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-bold text-primary">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.kreditoren.summe)}
               </div>
             </div>
@@ -230,7 +162,7 @@ export default function OPVerwaltungPage(): JSX.Element {
 
             <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-4 text-center">
               <div className="text-sm text-muted-foreground mb-1">Fällige Zahlungen</div>
-              <div className="text-xl font-bold text-blue-900">
+              <div className="text-xl font-bold text-status-info">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.falligeAusgaben)}
               </div>
             </div>
@@ -238,7 +170,22 @@ export default function OPVerwaltungPage(): JSX.Element {
         </Card>
       </div>
 
-      {/* LIQUIDITÄTSPROGNOSE */}
+      {!isTouch ? (
+        <>
+      <OperationalCaseHeader
+        title="Offene Posten Verwaltung"
+        description="Sammelraum fuer Forderungen, Verbindlichkeiten und kurzfristige Liquiditaetssteuerung."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={opData.debitoren.ueberfaellig > 0 ? 'Mindestens eine Debitorenrechnung ist ueberfaellig.' : null}
+        nextAction={opData.debitoren.ueberfaellig > 0 ? 'Debitoreneskalation anstossen' : 'Kreditoren und Skonto priorisieren'}
+        caseLabel="OP-Clearing"
+        tags={['FIBU', 'Liquiditaet']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="OP-Verlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Liquiditätsprognose (30 Tage)</CardTitle>
@@ -272,6 +219,8 @@ export default function OPVerwaltungPage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+        </>
+      ) : null}
     </div>
   )
 }

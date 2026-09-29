@@ -23,13 +23,13 @@ function DunningRow({ c, onMahnen, pending }: { c: DunningCandidate; onMahnen: (
   return (
     <tr className="border-b last:border-0">
       <td className="px-3 py-1.5 font-medium">{c.contract_no}</td>
-      <td className="px-3 py-1.5"><Badge variant="outline" className="text-[10px]">{c.typ}</Badge></td>
+      <td className="px-3 py-1.5"><Badge variant="outline" className="text-2xs">{c.typ}</Badge></td>
       <td className="px-3 py-1.5">{c.party_id ?? '—'}</td>
       <td className="px-3 py-1.5 text-right"><Num v={c.offen} unit={c.einheit ?? ''} /></td>
       <td className="px-3 py-1.5 text-right text-status-error">{c.tage_ueberfaellig} Tage</td>
       <td className="px-3 py-1.5 text-center">{c.letzte_mahnstufe ?? '—'}</td>
       <td className="px-3 py-1.5 text-right">
-        <Button size="sm" variant="outline" onClick={onMahnen} disabled={pending}>
+        <Button className="min-h-touch" variant="outline" onClick={onMahnen} disabled={pending}>
           {pending ? <Loader2 size={13} className="animate-spin mr-1" /> : <BellRing size={13} className="mr-1" />}
           Mahnen (St. {c.naechste_mahnstufe})
         </Button>
@@ -64,7 +64,7 @@ export default function KontraktEngagementPage() {
       <div className="flex items-center gap-2">
         <Boxes size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Kontrakt-Engagement</h1>
-        <Button variant="outline" size="sm" className="ml-auto"
+        <Button variant="outline" className="ml-auto min-h-touch"
           onClick={() => { void engagement.refetch(); void candidates.refetch() }}
           disabled={engagement.isFetching || candidates.isFetching}>
           {engagement.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
@@ -75,7 +75,7 @@ export default function KontraktEngagementPage() {
       <Card>
         <CardContent className="p-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
           <div><div className="text-xs text-muted-foreground">Einkauf offen</div><div className="font-semibold tabular-nums text-status-success"><Num v={s?.einkauf_offen} /></div></div>
-          <div><div className="text-xs text-muted-foreground">Verkauf offen</div><div className="font-semibold tabular-nums text-sky-700"><Num v={s?.verkauf_offen} /></div></div>
+          <div><div className="text-xs text-muted-foreground">Verkauf offen</div><div className="font-semibold tabular-nums text-primary"><Num v={s?.verkauf_offen} /></div></div>
           <div><div className="text-xs text-muted-foreground">Netto-Engagement</div><div className={`font-semibold tabular-nums ${(s?.netto ?? 0) >= 0 ? 'text-status-success' : 'text-status-error'}`}><Num v={s?.netto} /></div></div>
           <div><div className="text-xs text-muted-foreground">Artikel / Parteien</div><div className="font-semibold tabular-nums">{s?.artikel_anzahl ?? 0} / {s?.parteien_anzahl ?? 0}</div></div>
         </CardContent>

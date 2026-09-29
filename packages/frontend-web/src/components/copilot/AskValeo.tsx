@@ -261,8 +261,7 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
             />
             <Button
               variant="ghost"
-              size="sm"
-              className="absolute bottom-3 right-3 gap-2"
+              className="min-h-touch absolute bottom-3 right-3 gap-2"
               onClick={() => {
                 setPrompt('Welche Aufgaben stehen als nächstes an?');
               }}
@@ -277,8 +276,7 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
               <Button
                 key={action}
                 variant="secondary"
-                size="sm"
-                className="justify-start gap-2"
+                className="min-h-touch justify-start gap-2"
                 onClick={() => handleQuickAction(action)}
               >
                 <Wand2 className="h-4 w-4" />
@@ -349,11 +347,10 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
                             <p className="text-sm text-muted-foreground">{response.nextAction.description}</p>
                           </div>
                           <Button
-                            size="sm"
                             onClick={() => {
                               void handleNextAction();
                             }}
-                          >
+                           className="min-h-touch">
                             {response.nextAction.label}
                           </Button>
                         </div>

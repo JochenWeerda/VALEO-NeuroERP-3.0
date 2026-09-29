@@ -67,8 +67,9 @@ export default function ErnteNeuPage(): JSX.Element {
   return (
     <div className="space-y-4 p-6 max-w-2xl">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/agrar/ernte')}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="ghost" className="min-h-touch" onClick={() => navigate('/agrar/ernte')}>
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Zur Ernteliste
         </Button>
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -170,11 +171,12 @@ export default function ErnteNeuPage(): JSX.Element {
       </Card>
 
       <div className="flex gap-3 justify-end">
-        <Button variant="outline" onClick={() => navigate('/agrar/ernte')}>
+        <Button variant="outline" className="min-h-touch" onClick={() => navigate('/agrar/ernte')}>
           Abbrechen
         </Button>
         <Button
           variant="outline"
+          className="min-h-touch"
           onClick={handleSave}
           disabled={!valid || createErnte.isPending}
         >
@@ -182,6 +184,7 @@ export default function ErnteNeuPage(): JSX.Element {
           Speichern
         </Button>
         <Button
+          className="min-h-touch"
           onClick={handleAnnahme}
           disabled={!valid || createErnte.isPending}
         >

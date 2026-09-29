@@ -15,6 +15,9 @@ import { useFrachtbriefe, type Frachtbrief } from '@/lib/api/misc-modules'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 import {
   CrudCapabilityChecklist,
   ManagementDecisionPanel,
@@ -61,11 +64,24 @@ const freightRoleProfiles: Array<{ id: FreightRoleFocus; label: string; descript
 
 export default function FrachtbriefePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
+  const { toast } = useToast()
   const { data: chain } = useSupplyChainOverview()
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFocus, setRoleFocus] = useState<FreightRoleFocus>('all')
   const { data: frachtbriefe, isLoading } = useFrachtbriefe()
   const list = useMemo(() => frachtbriefe ?? [], [frachtbriefe])
+  const filtered = useMemo(() => {
+    if (!searchTerm) return list
+    const term = searchTerm.toLowerCase()
+    return list.filter((f) =>
+      f.nummer.toLowerCase().includes(term) ||
+      f.kennzeichen.toLowerCase().includes(term) ||
+      f.artikel.toLowerCase().includes(term) ||
+      f.absender.toLowerCase().includes(term) ||
+      f.empfaenger.toLowerCase().includes(term),
+    )
+  }, [list, searchTerm])
   const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
   const transferSummary = useMemo(() => summarizeSupplyTransfer(chain), [chain])
 
@@ -87,7 +103,7 @@ export default function FrachtbriefePage(): JSX.Element {
       key: 'nummer' as const,
       label: 'Frachtbrief-Nr.',
       render: (f: Frachtbrief) => (
-        <button onClick={() => navigate(`/logistik/frachtbrief/${f.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
+        <button type="button" onClick={() => navigate(`/logistik/frachtbrief/${f.id}`)} className="min-h-11 font-medium font-mono text-primary touch-manipulation">
           {f.nummer}
         </button>
       ),
@@ -260,6 +276,8 @@ export default function FrachtbriefePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Frachtbriefe steuern"
         description="Versandstatus, Dokumentdruck und physische Kettenlage bleiben oben als ein kompakter Frachtfall sichtbar."
@@ -307,18 +325,22 @@ export default function FrachtbriefePage(): JSX.Element {
         <OperationalContextPanel title="Frachtkontext" sections={contextSections} />
       </div>
       <CrudCapabilityChecklist capabilities={freightCrudCapabilities} />
+      </>
+      ) : null}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Frachtbriefe</h1>
-          <p className="text-muted-foreground">Transport-Dokumentation</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Frachtbriefe</h1>
+          <p className="text-muted-foreground">Frachtbriefe suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/logistik/frachtbrief/neu')} className="gap-2">
+        <Button onClick={() => navigate('/logistik/frachtbrief/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neuer Frachtbrief
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Frachtbriefe Heute</CardTitle></CardHeader>
@@ -360,16 +382,50 @@ export default function FrachtbriefePage(): JSX.Element {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Kettenpunkte</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{transferSummary.handoverRisk}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Naechster Kettenpfad</CardTitle></CardHeader><CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent></Card>
       </div>
+      </>
+      ) : null}
 
       <Card>
         <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Frachtbriefe" placeholder="Nummer, LKW, Artikel, Strecke" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => {
+                if (filtered.length === 0) {
+                  toast({ title: 'Kein Export', description: 'Keine Frachtbriefe in der aktuellen Sicht.', variant: 'destructive' })
+                  return
+                }
+                exportToCSV(
+                  filtered.map((f) => ({
+                    nummer: f.nummer,
+                    kennzeichen: f.kennzeichen,
+                    artikel: f.artikel,
+                    menge: f.menge,
+                    absender: f.absender,
+                    empfaenger: f.empfaenger,
+                    datum: f.datum,
+                    status: f.status,
+                  })),
+                  `frachtbriefe-${new Date().toISOString().slice(0, 10)}.csv`,
+                  [
+                    { key: 'nummer', label: 'Frachtbrief-Nr' },
+                    { key: 'kennzeichen', label: 'LKW' },
+                    { key: 'artikel', label: 'Artikel' },
+                    { key: 'menge', label: 'Menge' },
+                    { key: 'absender', label: 'Absender' },
+                    { key: 'empfaenger', label: 'Empfaenger' },
+                    { key: 'datum', label: 'Datum' },
+                    { key: 'status', label: 'Status' },
+                  ],
+                )
+              }}
+            >
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -379,7 +435,7 @@ export default function FrachtbriefePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={list} columns={columns} />
+          <DataTable data={filtered} columns={columns} />
         </CardContent>
       </Card>
     </div>

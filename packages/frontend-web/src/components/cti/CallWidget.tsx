@@ -50,8 +50,7 @@ export function CallWidget(): JSX.Element | null {
           {activeCall.customerId && (
             <Button
               variant="outline"
-              size="sm"
-              className="w-full mb-3"
+              className="min-h-touch w-full mb-3"
               onClick={() => navigate(`/verkauf/kunden-stamm/${activeCall.customerId}`)}
             >
               🔗 Kunde öffnen
@@ -61,7 +60,7 @@ export function CallWidget(): JSX.Element | null {
           {/* Call-Actions */}
           <div className="grid grid-cols-4 gap-2">
             {activeCall.state === 'ringing' && activeCall.direction === 'inbound' && (
-              <Button size="sm" variant="default" className="col-span-4" onClick={() => answerCall(activeCall.callId)}>
+              <Button variant="default" className="min-h-touch col-span-4" onClick={() => answerCall(activeCall.callId)}>
                 <PhoneCall className="h-4 w-4 mr-2" />
                 Annehmen
               </Button>
@@ -69,13 +68,13 @@ export function CallWidget(): JSX.Element | null {
 
             {activeCall.state === 'connected' && (
               <>
-                <Button size="sm" variant="outline" onClick={() => holdCall(activeCall.callId)}>
+                <Button variant="outline" onClick={() => holdCall(activeCall.callId)} className="min-h-touch min-w-touch" aria-label="Anruf halten">
                   <Pause className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => transferCall(activeCall.callId, '100')}>
+                <Button variant="outline" onClick={() => transferCall(activeCall.callId, '100')} className="min-h-touch min-w-touch" aria-label="Anruf weiterleiten">
                   <PhoneForwarded className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="destructive" className="col-span-2" onClick={() => hangupCall(activeCall.callId)}>
+                <Button variant="destructive" className="min-h-touch col-span-2" onClick={() => hangupCall(activeCall.callId)}>
                   <PhoneOff className="h-4 w-4 mr-2" />
                   Auflegen
                 </Button>
@@ -83,7 +82,7 @@ export function CallWidget(): JSX.Element | null {
             )}
 
             {activeCall.state === 'held' && (
-              <Button size="sm" variant="default" className="col-span-4" onClick={() => answerCall(activeCall.callId)}>
+              <Button variant="default" className="min-h-touch col-span-4" onClick={() => answerCall(activeCall.callId)}>
                 <PhoneCall className="h-4 w-4 mr-2" />
                 Fortsetzen
               </Button>

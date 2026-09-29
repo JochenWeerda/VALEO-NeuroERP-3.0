@@ -160,7 +160,7 @@ export default function DuengungsplanungPage(): JSX.Element {
                   <div className="grid grid-cols-3 gap-4 mt-4">
                     <div className="rounded-lg bg-[hsl(var(--color-semantic-info-50-hsl))] p-3 text-center">
                       <div className="text-sm text-muted-foreground">N (Stickstoff)</div>
-                      <div className="text-lg font-bold text-blue-600 mt-1">—</div>
+                      <div className="text-lg font-bold text-status-info mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
                     <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-50-hsl))] p-3 text-center">

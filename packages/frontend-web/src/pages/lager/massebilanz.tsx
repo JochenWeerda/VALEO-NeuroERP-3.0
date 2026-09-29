@@ -36,7 +36,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Lock } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 // ── Bilanzen-Tab ─────────────────────────────────────────────────────────────
 
@@ -189,13 +189,12 @@ function BilanzenTab() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
-                        variant="ghost"
-                        size="icon"
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
                         disabled={festschreibingKey === b.id || b.status === 'festgeschrieben'}
                         onClick={() => handleFestschreiben(b.id, b.periode)}
-                        aria-label={`Massebilanz ${b.periode} festschreiben`}
                       >
-                        <Lock className="h-4 w-4" aria-hidden="true" />
+                        Festschreiben
                       </Button>
                     </TableCell>
                   </TableRow>

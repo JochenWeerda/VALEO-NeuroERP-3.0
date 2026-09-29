@@ -226,20 +226,18 @@ export const SignatureCanvas = forwardRef<SignatureCanvasRef, SignatureCanvasPro
           <Button
             type="button"
             variant="outline"
-            size="sm"
             onClick={clearCanvas}
             disabled={disabled || isEmpty}
-          >
+           className="min-h-touch">
             <RotateCcw className="h-4 w-4 mr-1" />
             Löschen
           </Button>
           <Button
             type="button"
             variant="ghost"
-            size="sm"
             onClick={clearCanvas}
             disabled={disabled || isEmpty}
-          >
+           className="min-h-touch">
             <Eraser className="h-4 w-4 mr-1" />
             Neu
           </Button>

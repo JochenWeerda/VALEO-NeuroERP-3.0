@@ -180,11 +180,11 @@ export default function EinkaufLieferscheinFrachtauftragPage(): JSX.Element {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" className="min-h-touch gap-2">
               <FileText className="h-4 w-4" />
               Frachtauftrag anlegen
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" className="min-h-touch gap-2">
               <RefreshCw className="h-4 w-4" />
               Aktualisieren
             </Button>

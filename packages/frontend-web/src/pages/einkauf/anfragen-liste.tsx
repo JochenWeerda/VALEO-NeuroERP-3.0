@@ -16,6 +16,8 @@ import { OperationalContextPanel } from '@/components/workflow/OperationalContex
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { renderValue, stringValue } from '@/lib/record-utils'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
 
 const createAnfragenConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -204,6 +206,7 @@ async function bulkRequestMutation(
 export default function AnfragenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const { data: apiData = [], isLoading } = useEinkaufAnfragen()
   const data = useMemo(
@@ -292,38 +295,50 @@ export default function AnfragenListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    try {
-      const csvHeader = `${t('crud.fields.requestNumber')};${t('crud.fields.requester')};${t('crud.fields.product')};${t('crud.fields.quantity')};${t('crud.fields.status')}\n`
-      const csvContent = data.map(anfrage =>
-        `"${anfrage.anfrageNummer}";"${anfrage.anforderer}";"${anfrage.artikel}";"${anfrage.menge}";"${anfrage.status}"`
-      ).join('\n')
-
-      const csv = csvHeader + csvContent
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-      const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute('download', `anfragen-liste-${new Date().toISOString().split('T')[0]}.csv`)
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      toast({
-        title: t('crud.messages.exportSuccess'),
-        description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
-      })
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.exportError'),
-        description: t('crud.messages.exportFailed'),
-      })
+    if (data.length === 0) {
+      toast({ title: 'Keine Daten', description: 'Es gibt keine Anfragen zum Exportieren.', variant: 'destructive' })
+      return
     }
+    exportToCSV(
+      data.map((item) => ({
+        anfrageNummer: item.anfrageNummer,
+        anforderer: item.anforderer,
+        artikel: item.artikel,
+        menge: item.menge,
+        status: item.status,
+      })),
+      `anfragen-${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { key: 'anfrageNummer', label: t('crud.fields.requestNumber') },
+        { key: 'anforderer', label: t('crud.fields.requester') },
+        { key: 'artikel', label: t('crud.fields.product') },
+        { key: 'menge', label: t('crud.fields.quantity') },
+        { key: 'status', label: t('crud.fields.status') },
+      ],
+    )
+    toast({
+      title: t('crud.messages.exportSuccess'),
+      description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
+    })
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <ListReport
+        config={anfragenConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => {
+          navigate('/einkauf/bestellungen?importContext=anfragen')
+        }}
+        isLoading={isLoading}
+      />
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Beschaffungsvorgang Anfragen"
         description="Anfragen steuern Bedarf, Angebotsphase und Folgebelege als zusammenhaengender Fall statt als lokale Listenquittung."
@@ -402,20 +417,8 @@ export default function AnfragenListePage(): JSX.Element {
           ]}
         />
       </div>
-
-      <ListReport
-        config={anfragenConfig}
-        data={data}
-        total={total}
-        onCreate={handleCreate}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onExport={handleExport}
-        onImport={() => {
-          navigate('/einkauf/bestellungen?importContext=anfragen')
-        }}
-        isLoading={isLoading}
-      />
+        </>
+      ) : null}
     </div>
   )
 }

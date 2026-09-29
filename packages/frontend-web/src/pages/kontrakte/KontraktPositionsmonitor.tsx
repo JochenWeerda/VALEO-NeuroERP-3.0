@@ -14,6 +14,7 @@ import { listKontrakte } from '@/lib/api/kontrakte'
 import { summarizeContractOperations } from '@/lib/domain-depth'
 import { summarizeContractHedge } from '@/lib/professional-control-centers'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -66,7 +67,7 @@ function signalBadge(signal: string, coveragePct: number | null): JSX.Element {
   if (signal === 'SHORT') {
     const critical = coveragePct !== null && coveragePct < 50
     return (
-      <Badge className={critical ? 'bg-red-600 text-white animate-pulse' : 'bg-red-100 text-red-800'}>
+      <Badge variant={critical ? 'destructive' : 'error'}>
         <ArrowDownRight className="mr-1 h-3 w-3" />
         SHORT
       </Badge>
@@ -81,7 +82,7 @@ function signalBadge(signal: string, coveragePct: number | null): JSX.Element {
     )
   }
   return (
-    <Badge className="bg-slate-100 text-slate-600">
+    <Badge variant="muted">
       <Minus className="mr-1 h-3 w-3" />
       BALANCED
     </Badge>
@@ -90,15 +91,15 @@ function signalBadge(signal: string, coveragePct: number | null): JSX.Element {
 
 function coverageBadge(pct: number | null): JSX.Element {
   if (pct == null) return <span className="text-muted-foreground">-</span>
-  let cls = 'bg-green-100 text-green-800'
-  if (pct < 50) cls = 'bg-red-600 text-white font-bold'
-  else if (pct < 80) cls = 'bg-red-100 text-red-800'
-  else if (pct < 100) cls = 'bg-amber-100 text-amber-800'
-  return <Badge className={cls}>{pct.toFixed(1)}%</Badge>
+  if (pct < 50) return <Badge variant="destructive">{pct.toFixed(1)}%</Badge>
+  if (pct < 80) return <Badge variant="error">{pct.toFixed(1)}%</Badge>
+  if (pct < 100) return <Badge variant="warning">{pct.toFixed(1)}%</Badge>
+  return <Badge variant="success">{pct.toFixed(1)}%</Badge>
 }
 
 export default function KontraktPositionsmonitor(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [includeDone, setIncludeDone] = useState(false)
   const [onlyShort, setOnlyShort] = useState(false)
 
@@ -206,7 +207,27 @@ export default function KontraktPositionsmonitor(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <h1 className="text-2xl font-semibold md:text-3xl">
+          Rohwaren-Positionsmonitor
+        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex min-h-touch items-center gap-2 text-sm touch-manipulation">
+            <Checkbox className="h-11 w-11" checked={includeDone} onCheckedChange={(v) => setIncludeDone(v === true)} />
+            Erledigte einbeziehen
+          </label>
+          <label className="flex min-h-touch items-center gap-2 text-sm touch-manipulation">
+            <Checkbox className="h-11 w-11" checked={onlyShort} onCheckedChange={(v) => setOnlyShort(v === true)} />
+            Nur Short-Positionen
+          </label>
+          <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate('/kontrakte')}>Kontraktliste</Button>
+          <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate('/kontrakte/alarme')}>Alarme</Button>
+        </div>
+      </div>
+
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Rohwaren-Positionen steuern"
         description="Exposure, Fixierung, Paritaet und Mahndruck werden als gemeinsamer Kontraktoperatorpfad gefuehrt."
@@ -221,28 +242,12 @@ export default function KontraktPositionsmonitor(): JSX.Element {
         <OperationalTimeline title="Operatorverlauf" items={timelineItems} />
         <OperationalContextPanel title="Exposure-Kontext" sections={contextSections} />
       </div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          <ShieldAlert className="h-5 w-5 text-status-error" />
-          Rohwaren-Positionsmonitor
-        </h1>
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox checked={includeDone} onCheckedChange={(v) => setIncludeDone(v === true)} />
-            Erledigte einbeziehen
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox checked={onlyShort} onCheckedChange={(v) => setOnlyShort(v === true)} />
-            Nur Short-Positionen
-          </label>
-          <Button variant="outline" onClick={() => navigate('/kontrakte')}>Kontraktliste</Button>
-          <Button variant="outline" onClick={() => navigate('/kontrakte/alarme')}>Alarme</Button>
-        </div>
-      </div>
+      </>
+      ) : null}
 
       {critical && (
-        <Card className="border-red-300 bg-red-50">
-          <CardContent className="flex items-center gap-4 py-4">
+        <Card className="border-status-error/40 bg-status-error/10">
+          <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center">
             <AlertTriangle className="h-8 w-8 text-status-error shrink-0" />
             <div>
               <p className="font-semibold text-status-error">
@@ -255,8 +260,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
             </div>
             <Button
               variant="outline"
-              size="sm"
-              className="ml-auto border-red-300 text-red-700 hover:bg-red-100"
+              className="min-h-touch touch-manipulation sm:ml-auto"
               onClick={() => navigate(`/kontrakte?article_id=${critical.article_id}`)}
             >
               Kontrakte anzeigen
@@ -265,6 +269,8 @@ export default function KontraktPositionsmonitor(): JSX.Element {
         </Card>
       )}
 
+      {!isTouch ? (
+      <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -300,7 +306,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-600">{balancedCount}</div>
+            <div className="text-3xl font-bold text-foreground">{balancedCount}</div>
             <p className="text-xs text-muted-foreground">Ausgeglichen</p>
           </CardContent>
         </Card>
@@ -379,7 +385,7 @@ export default function KontraktPositionsmonitor(): JSX.Element {
             <CardTitle className="text-base">Hedge-Luecken</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-semibold text-fuchsia-700">{hedgeGapCount}</div>
+            <div className="text-2xl font-semibold text-status-warning">{hedgeGapCount}</div>
             <p className="text-xs text-muted-foreground">Unter Zielquote abgesicherte Kontrakte</p>
           </CardContent>
         </Card>
@@ -393,10 +399,12 @@ export default function KontraktPositionsmonitor(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      </>
+      ) : null}
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Positionsuebersicht pro Artikel</CardTitle>
+          <CardTitle className="text-base">Positionsübersicht pro Artikel</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="max-h-[520px] overflow-auto rounded border">
@@ -421,11 +429,18 @@ export default function KontraktPositionsmonitor(): JSX.Element {
                 {positions.map((p) => (
                   <TableRow
                     key={p.article_id}
-                    className={`cursor-pointer ${p.signal === 'SHORT' ? 'bg-red-50/50 hover:bg-red-100/60' : ''}`}
-                    onDoubleClick={() => navigate(`/kontrakte?article_id=${p.article_id}`)}
+                    className={p.signal === 'SHORT' ? 'bg-status-error/10' : undefined}
                   >
                     <TableCell>{signalBadge(p.signal, p.coverage_pct)}</TableCell>
-                    <TableCell className="font-mono text-xs">{p.article_id}</TableCell>
+                    <TableCell>
+                      <button
+                        type="button"
+                        className="min-h-11 font-mono text-xs text-primary touch-manipulation"
+                        onClick={() => navigate(`/kontrakte?article_id=${p.article_id}`)}
+                      >
+                        {p.article_id}
+                      </button>
+                    </TableCell>
                     <TableCell className="font-medium">{p.article_desc}</TableCell>
                     <TableCell className="text-center">{coverageBadge(p.coverage_pct)}</TableCell>
                     <TableCell className="text-right">{p.sell_contract_count}</TableCell>

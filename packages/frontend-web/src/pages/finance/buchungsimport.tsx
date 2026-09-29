@@ -16,6 +16,8 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Upload, FileText, CheckCircle2, AlertCircle, ArrowRight, RotateCcw } from 'lucide-react'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { apiClient } from '@/lib/api-client'
+import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type ImportError = {
   row_number: number
@@ -64,7 +66,7 @@ function StepIndicator({ current }: { current: Step }) {
       {steps.map((s, i) => (
         <div key={s.key} className="flex items-center gap-2">
           <div
-            className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-semibold border-2 transition-colors ${
+            className={`flex min-h-touch min-w-11 items-center justify-center rounded-full text-sm font-semibold border-2 transition-colors ${
               i < idx
                 ? 'bg-primary border-primary text-primary-foreground'
                 : i === idx
@@ -85,6 +87,7 @@ function StepIndicator({ current }: { current: Step }) {
 }
 
 export default function BuchungsimportPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const [step, setStep] = useState<Step>('upload')
   const [file, setFile] = useState<File | null>(null)
   const [period, setPeriod] = useState(() => {
@@ -103,17 +106,49 @@ export default function BuchungsimportPage(): JSX.Element {
   }
 
   const handlePreview = async () => {
-    if (!file || !period) return
-    const res = await importMutation.mutateAsync({ file, period, dry_run: true })
-    setPreview(res)
-    setStep('preview')
+    if (importMutation.isPending) return
+    if (!file || !period) {
+      toast({ variant: 'destructive', title: 'Angaben fehlen', description: 'Bitte Datei und Periode waehlen.' })
+      return
+    }
+    try {
+      const res = await importMutation.mutateAsync({ file, period, dry_run: true })
+      setPreview(res)
+      setStep('preview')
+      toast({
+        title: 'Vorschau bereit',
+        description: `${res.successful} gueltig, ${res.failed} fehlerhaft.`,
+      })
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Vorschau fehlgeschlagen',
+        description: err instanceof Error ? err.message : 'Unbekannter Fehler',
+      })
+    }
   }
 
   const handleImport = async () => {
-    if (!file || !period) return
-    const res = await importMutation.mutateAsync({ file, period, dry_run: false })
-    setResult(res)
-    setStep('result')
+    if (importMutation.isPending) return
+    if (!file || !period) {
+      toast({ variant: 'destructive', title: 'Angaben fehlen', description: 'Bitte Datei und Periode waehlen.' })
+      return
+    }
+    try {
+      const res = await importMutation.mutateAsync({ file, period, dry_run: false })
+      setResult(res)
+      setStep('result')
+      toast({
+        title: 'Import abgeschlossen',
+        description: `${res.successful} Buchungen uebernommen, ${res.failed} Fehler.`,
+      })
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Import fehlgeschlagen',
+        description: err instanceof Error ? err.message : 'Unbekannter Fehler',
+      })
+    }
   }
 
   const handleReset = () => {
@@ -167,23 +202,9 @@ export default function BuchungsimportPage(): JSX.Element {
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
-    <div className="space-y-6 p-6">
-      <OperationalCaseHeader
-        title="Massen-Buchungsimport"
-        description="Import, Vorschau und Uebernahme grosser Buchungspakete in einem gefuehrten Vorgangsbild."
-        status={operationalStatus}
-        owner="Finanzbuchhaltung"
-        blocker={activeResult?.failed ? 'Der Import enthaelt Validierungsfehler.' : null}
-        nextAction={step === 'preview' ? 'Vorschau freigeben oder korrigieren' : step === 'result' ? 'Ergebnis pruefen oder neuen Lauf starten' : 'CSV-Datei waehlen'}
-        caseLabel={file?.name || 'Importlauf'}
-        tags={['FIBU', 'Import']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <OperationalTimeline title="Importverlauf" items={timelineItems} />
-        <OperationalContextPanel sections={contextSections} />
-      </div>
+    <div className="space-y-4 p-3 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold">Massen-Buchungsimport</h1>
+        <h1 className="text-2xl font-bold md:text-3xl">Massen-Buchungsimport</h1>
         <p className="text-muted-foreground">CSV-Datei mit Buchungen hochladen, prüfen und importieren</p>
       </div>
 
@@ -206,6 +227,7 @@ export default function BuchungsimportPage(): JSX.Element {
                 type="file"
                 accept=".csv,.txt"
                 onChange={handleFileChange}
+                className="min-h-touch"
               />
               <p className="text-xs text-muted-foreground">
                 Spalten: buchungsdatum, konto, buchungstext, soll, haben, belegnummer, steuerschluessel, kostenstelle
@@ -218,17 +240,22 @@ export default function BuchungsimportPage(): JSX.Element {
                 type="month"
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                className="max-w-xs"
+                className="max-w-xs min-h-touch"
               />
             </div>
 
-            <div className="flex gap-2">
-              <Button onClick={handlePreview} disabled={!file || !period || importMutation.isPending}>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                className="min-h-touch touch-manipulation"
+                onClick={handlePreview}
+                disabled={!file || !period || importMutation.isPending}
+              >
                 {importMutation.isPending ? 'Prüfe…' : 'Vorschau anzeigen'}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
               <Button
                 variant="outline"
+                className="min-h-touch touch-manipulation"
                 onClick={() => {
                   window.open('/api/v1/bulk-journal-import/template', '_blank')
                 }}
@@ -292,7 +319,7 @@ export default function BuchungsimportPage(): JSX.Element {
                     </thead>
                     <tbody>
                       {preview.errors.map((err, i) => (
-                        <tr key={i} className="border-b last:border-0 bg-red-50">
+                        <tr key={i} className="border-b last:border-0 bg-destructive/10">
                           <td className="py-1 px-2 font-mono">{err.row_number}</td>
                           <td className="py-1 px-2 font-mono text-muted-foreground">{err.field ?? '–'}</td>
                           <td className="py-1 px-2 text-status-error">{err.error_message}</td>
@@ -304,15 +331,16 @@ export default function BuchungsimportPage(): JSX.Element {
               </div>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
+                className="min-h-touch touch-manipulation"
                 onClick={handleImport}
                 disabled={preview.successful === 0 || importMutation.isPending}
               >
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 {importMutation.isPending ? 'Importiere…' : `${preview.successful} Buchungen importieren`}
               </Button>
-              <Button variant="outline" onClick={handleReset}>
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Zurück
               </Button>
@@ -367,13 +395,31 @@ export default function BuchungsimportPage(): JSX.Element {
               Importiert: {new Date(result.imported_at).toLocaleString('de-DE')}
             </p>
 
-            <Button onClick={handleReset}>
+            <Button className="min-h-touch touch-manipulation" onClick={handleReset}>
               <RotateCcw className="h-4 w-4 mr-2" />
               Neuer Import
             </Button>
           </CardContent>
         </Card>
       )}
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title="Massen-Buchungsimport"
+            description="Import, Vorschau und Uebernahme grosser Buchungspakete in einem gefuehrten Vorgangsbild."
+            status={operationalStatus}
+            owner="Finanzbuchhaltung"
+            blocker={activeResult?.failed ? 'Der Import enthaelt Validierungsfehler.' : null}
+            nextAction={step === 'preview' ? 'Vorschau freigeben oder korrigieren' : step === 'result' ? 'Ergebnis pruefen oder neuen Lauf starten' : 'CSV-Datei waehlen'}
+            caseLabel={file?.name || 'Importlauf'}
+            tags={['FIBU', 'Import']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+            <OperationalTimeline title="Importverlauf" items={timelineItems} />
+            <OperationalContextPanel sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

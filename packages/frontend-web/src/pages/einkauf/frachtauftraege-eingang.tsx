@@ -14,7 +14,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/components/ui/toast-provider'
 import { apiClient } from '@/lib/api-client'
 import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
-import { MoreHorizontal, RefreshCw, Truck, Eye, Calculator } from 'lucide-react'
+import { RefreshCw, Truck, Eye, Calculator } from 'lucide-react'
 
 type Frachtauftrag = {
   id: string
@@ -90,9 +90,9 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
   const selectedItem = items.find((i) => i.id === selected)
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <div className="bg-gray-700 text-white px-4 py-2">
-        <h1 className="text-lg font-bold">FRACHTAUFTRÄGE</h1>
+    <div className="flex h-screen flex-col bg-background">
+      <div className="border-b bg-card px-4 py-3">
+        <h1 className="text-lg font-bold">Frachtaufträge</h1>
       </div>
 
       <div className="flex-1 overflow-auto p-4">
@@ -103,6 +103,7 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
               <div className="flex items-center gap-2">
                 <Label className="w-44 text-sm shrink-0">Filter:</Label>
                 <NativeSelect
+                  ariaLabel="Filter"
                   value={filterStatus}
                   onValueChange={setFilterStatus}
                   options={[
@@ -116,6 +117,7 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
               <div className="flex items-center gap-2">
                 <Label className="w-44 text-sm shrink-0">Belegart:</Label>
                 <NativeSelect
+                  ariaLabel="Belegart"
                   value={filterBelegart}
                   onValueChange={setFilterBelegart}
                   options={[
@@ -129,10 +131,10 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
                 <Label className="w-44 text-sm shrink-0">Niederlassung:</Label>
                 <Input value={filterNiederlassung}
                   onChange={(e) => setFilterNiederlassung(e.target.value)}
-                  className="flex-1 h-8" placeholder="Alle" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                  className="min-h-touch flex-1" placeholder="Alle" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
+              </Button>
               </div>
             </div>
             <div className="space-y-2">
@@ -140,39 +142,39 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
                 <Label className="w-36 text-sm shrink-0">Liefer-Termin von:</Label>
                 <Input type="date" value={filterVon}
                   onChange={(e) => setFilterVon(e.target.value)}
-                  className="flex-1 h-8" />
+                  className="min-h-touch flex-1" />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">bis:</Label>
                 <Input type="date" value={filterBis}
                   onChange={(e) => setFilterBis(e.target.value)}
-                  className="flex-1 h-8" />
+                  className="min-h-touch flex-1" />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">Spediteur-Nr.:</Label>
                 <Input value={filterSpedNr}
                   onChange={(e) => setFilterSpedNr(e.target.value)}
-                  className="w-24 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                  className="min-h-touch w-24" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
+              </Button>
                 <Input value={filterSpedName}
                   onChange={(e) => setFilterSpedName(e.target.value)}
-                  className="flex-1 h-8" placeholder="Spediteur-Name" />
+                  className="min-h-touch flex-1" placeholder="Spediteur-Name" />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-36 text-sm shrink-0">Kunden-Nr.:</Label>
                 <Input value={filterKundenNr}
                   onChange={(e) => setFilterKundenNr(e.target.value)}
-                  className="w-24 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                  className="min-h-touch w-24" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
+              </Button>
               </div>
             </div>
           </div>
           <div className="mt-3 flex justify-end">
-            <Button onClick={() => void loadData()} disabled={loading} size="sm" className="gap-2">
+            <Button onClick={() => void loadData()} disabled={loading} className="min-h-touch gap-2">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Aufbereiten
             </Button>
@@ -210,7 +212,7 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
                 )}
                 {items.map((item) => (
                   <TableRow key={item.id}
-                    className={`cursor-pointer ${selected === item.id ? 'bg-blue-100' : 'hover:bg-muted/50'}`}
+                    className={`cursor-pointer ${selected === item.id ? 'bg-primary/10' : 'hover:bg-muted/50'}`}
                     onClick={() => setSelected(item.id)}>
                     <TableCell>{item.belegart}</TableCell>
                     <TableCell>
@@ -235,13 +237,13 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
       </div>
 
       {/* Bottom Toolbar */}
-      <div className="border-t bg-white px-4 py-2 flex items-center gap-3">
-        <Button variant="outline" size="sm" className="gap-2"
+      <div className="flex items-center gap-3 border-t bg-card px-4 py-2">
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => void loadData()} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Aufbereiten
         </Button>
-        <Button variant="outline" size="sm" className="gap-2"
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => {
             if (!selected) { push('Bitte einen Frachtauftrag auswählen'); return }
             navigate(`/einkauf/frachtauftrag/${selected}`)
@@ -249,7 +251,7 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
           <Truck className="h-4 w-4" />
           Frachtauftrag
         </Button>
-        <Button variant="outline" size="sm" className="gap-2"
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => {
             if (!selectedItem) { push('Bitte einen Frachtauftrag auswählen'); return }
             push(`Beleg anzeigen: ${selectedItem.belegNr}`)
@@ -257,7 +259,7 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
           <Eye className="h-4 w-4" />
           Beleg anzeigen
         </Button>
-        <Button variant="outline" size="sm" className="gap-2"
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => {
             if (!selectedItem) { push('Bitte einen Frachtauftrag auswählen'); return }
             const neu = parseFloat(prompt(`Pauschalfracht für ${selectedItem.belegNr} (aktuell: ${selectedItem.pauschalFracht.toFixed(2)} €):`) ?? '')
@@ -270,7 +272,7 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
           Calc
         </Button>
         <div className="ml-auto">
-          <Button variant="outline" onClick={() => navigate('/einkauf')} size="sm">
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate('/einkauf')}>
             Schließen
           </Button>
         </div>

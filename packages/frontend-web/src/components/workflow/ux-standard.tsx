@@ -70,7 +70,7 @@ export function RoleFocusBar<T extends string = string>({
             key={role.id}
             type="button"
             onClick={() => onChange(role.id)}
-            className={`rounded border px-3 py-1.5 text-xs font-bold transition ${
+            className={`min-h-11 min-w-11 touch-manipulation rounded border px-3 text-sm font-bold transition ${
               value === role.id ? 'border-[#005ca5] bg-blue-50 text-[#005ca5]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
             }`}
             title={role.description}
