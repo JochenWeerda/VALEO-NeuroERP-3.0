@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+
+## BUSINESS-TIME-AGRAR-VALIDITY-20260929 — reserviert, Codex
+
+**Ziel:** Zulassungsablauf und 90-Tage-Fristen in PSM-, Saatgut- und
+Duenger-Stammdaten am konfigurierten Geschaeftstag ausrichten.
+**Dateibesitz:** `app/domains/agrar/api/psm.py`, `saatgut.py`, `duenger.py`,
+eigener fokussierter Vertragstest, eigene Slice-/QA-Doku, BUSINESS-TIME-Restpunkt
+in Open-Gaps und dieser Abschnitt.
+**Abnahme:** Alle fachlichen Zulassungsvergleiche nutzen `business_today()`;
+Grenzfaelle mit abweichendem UTC-/Ortsdatum sind getestet; technische
+Zeitstempel bleiben unveraendert.
+**Risiken:** Der Zeitstempel fuer frei benannte Synchronisationslaeufe bleibt
+technischer Zeitstempel und ist nicht Teil dieses Slices.
+
 ## BUSINESS-TIME-HR-20260929 — abgeschlossen, Codex
 
 **Ziel:** HR-Retention, Fahrerzeit-/Cockpit-Defaults und datumslose HR-Fallbacks
