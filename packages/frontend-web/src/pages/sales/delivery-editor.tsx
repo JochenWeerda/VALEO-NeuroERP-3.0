@@ -438,12 +438,13 @@ export default function DeliveryEditorNewPage(): JSX.Element {
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
+                id="delivery-credit-note"
                 checked={deliveryNote.isCreditNote}
                 onCheckedChange={(checked) =>
                   setDeliveryNote((prev) => ({ ...prev, isCreditNote: checked === true }))
                 }
               />
-              <Label>Gutschrift kennzeichnen</Label>
+              <Label htmlFor="delivery-credit-note">Gutschrift kennzeichnen</Label>
             </div>
             <div className="flex items-center gap-2">
               <Label className="w-32">Re.-Nr. (Bezug):</Label>
@@ -457,21 +458,23 @@ export default function DeliveryEditorNewPage(): JSX.Element {
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
+                id="delivery-printed"
                 checked={deliveryNote.isPrinted}
                 onCheckedChange={(checked) =>
                   setDeliveryNote((prev) => ({ ...prev, isPrinted: checked === true }))
                 }
               />
-              <Label>gedruckt</Label>
+              <Label htmlFor="delivery-printed">gedruckt</Label>
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
+                id="delivery-delivered"
                 checked={deliveryNote.isDelivered}
                 onCheckedChange={(checked) =>
                   setDeliveryNote((prev) => ({ ...prev, isDelivered: checked === true }))
                 }
               />
-              <Label>ausgeliefert</Label>
+              <Label htmlFor="delivery-delivered">ausgeliefert</Label>
             </div>
             <div className="flex items-center gap-2">
               <Label className="w-32">fakturiert: Rechn.-Nr.:</Label>

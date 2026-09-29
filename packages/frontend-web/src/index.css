@@ -409,6 +409,28 @@
     color: hsl(var(--foreground));
   }
 
+  /*
+    WCAG 2.5.5: h-6/h-7/h-8 setzen height, nicht min-height.
+    Die Untergrenze bleibt 44 px, auch bei nativen Schaltflächen außerhalb
+    der Button-Komponente. sr-only und versteckte Felder bleiben ausgenommen.
+  */
+  button:not(.sr-only),
+  [role="checkbox"]:not(.sr-only),
+  [role="radio"]:not(.sr-only),
+  [role="switch"]:not(.sr-only),
+  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.sr-only),
+  select:not(.sr-only),
+  textarea:not(.sr-only) {
+    min-height: var(--touch-target, 44px);
+  }
+
+  button:not(.sr-only),
+  [role="checkbox"]:not(.sr-only),
+  [role="radio"]:not(.sr-only),
+  [role="switch"]:not(.sr-only) {
+    min-width: var(--touch-target, 44px);
+  }
+
   /* Forms — Label-Gap, Error-States */
   label {
     font-size: var(--text-sm);

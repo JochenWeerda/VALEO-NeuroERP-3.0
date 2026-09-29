@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, agent, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-09-21
+last_reviewed: 2026-09-29
 description: Nachweis und Grenzen der zentralen Touch-Mindestgroesse kleiner Buttons.
 ---
 
@@ -33,9 +33,11 @@ FSX-, Auftrag-, Rechnung- und KIM-Fachdateien wurden nicht veraendert.
 
 Die Messung belegt die Komponente, keine vollstaendige Seitenabnahme.
 Toolbars und feste Tabellenzeilen koennen durch die groesseren Ziele mehr
-Platz brauchen; insbesondere FSX/KIM sind noch in ihren Fachablaeufen zu
-pruefen. Explizite kleinere `min-height`-Overrides oder native Buttons
-sind nicht automatisch abgesichert.
+Platz brauchen. Seit 2026-09-29 gilt die 44-px-Untergrenze auch fuer
+`size="default"` und `size="icon"`, fuer `Input` (`min-h-touch` neben
+einem `h-8`), fuer Checkbox und Switch, und per Stylesheet fuer native
+`button`/`select`/`textarea`. `h-6` bis `h-8` setzen nur `height` und
+unterschreiten `min-height` nicht mehr.
 
 Die Kartenstapel existieren inzwischen im gemeinsamen Arbeitsbaum, liegen
 aber im Slice HOME-UIX von Cursor; dieser Commit nimmt dessen Aenderungen

@@ -15,7 +15,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
     return (
       <label
         className={cn(
-          'inline-flex cursor-pointer items-center',
+          'inline-flex min-h-touch min-w-touch cursor-pointer items-center',
           disabled && 'cursor-not-allowed opacity-50',
           className
         )}
