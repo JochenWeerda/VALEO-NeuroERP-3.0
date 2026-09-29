@@ -12,6 +12,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 # Active Workboard
 
 
+## DOC-OPENAPI-CI-FAIL-CLOSED-20260929 — reserviert, Codex
+
+**Ziel:** OpenAPI-Drift in CI nur pruefen und bei Abweichung fehlschlagen lassen,
+ohne Schreibrecht oder selbsttaetigen Push auf geschuetzte Branches.
+**Dateibesitz:** `.github/workflows/openapi-drift.yml`, eigener Workflow-
+Regressionstest, eigene Slice-/QA-Doku und dieser Abschnitt.
+**Abnahme:** Workflow besitzt nur `contents: read`; Drift fuehrt direkt zu einem
+roten Job; kein `git commit`, `git push` oder Regenerationsschritt in Actions.
+**Risiken:** Die aktualisierte Spec muss zusammen mit der verursachenden API-
+Aenderung im normalen Review-/Merge-Weg eingecheckt werden.
+
+
 ## BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929 — abgeschlossen, Codex
 
 **Ziel:** Fachliche Datumswerte in OCR-Fallback, ATLAS und Compliance-Trend am
