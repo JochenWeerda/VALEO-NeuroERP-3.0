@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BUSINESS-TIME-HR-20260929 — reserviert, Codex
+## BUSINESS-TIME-HR-20260929 — abgeschlossen, Codex
 
 **Ziel:** HR-Retention, Fahrerzeit-/Cockpit-Defaults und datumslose HR-Fallbacks
 am konfigurierten Geschaeftstag ausrichten.
@@ -21,6 +21,9 @@ BUSINESS-TIME-Restpunkt in Open-Gaps und dieser Abschnitt.
 **Abnahme:** Alle fachlichen Heute-Vergleiche nutzen `business_today()`; explizite
 Eingabedaten bleiben unveraendert; Retention- und Endpoint-Tests sind gruen.
 **Risiken:** Ereigniszeitpunkte und Audit-Timestamps bleiben UTC.
+**Ergebnis:** Retention, Fahrerzeit, Zeitcockpit, Datumsfallback und manuelle
+Arbeitszeitkorrektur nutzen `business_today()`. 16 fokussierte Tests bestanden.
+[QA](../quality-assurance/business-time-hr-20260929.md).
 
 ## BUSINESS-TIME-TOURS-20260929 — abgeschlossen, Codex
 

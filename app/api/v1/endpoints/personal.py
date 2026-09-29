@@ -14,6 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.personal_service import PersonalService
@@ -583,7 +584,7 @@ _LONG_DAY_WARNING_HOURS = 10.0
 
 def _to_iso(d: date | datetime | None) -> str:
     if d is None:
-        return datetime.utcnow().date().isoformat()
+        return business_today().isoformat()
     if isinstance(d, datetime):
         return d.date().isoformat()
     return d.isoformat()
@@ -2494,7 +2495,7 @@ async def get_driver_time_summary(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    target_date = datum or datetime.utcnow().date().isoformat()
+    target_date = datum or business_today().isoformat()
     try:
         data = PersonalService(db, tenant_id).get_driver_time_data(target_date)
         timesheet_rows = data["timesheet_rows"]
@@ -2522,7 +2523,7 @@ async def get_time_cockpit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    target_date = datum or datetime.utcnow().date().isoformat()
+    target_date = datum or business_today().isoformat()
     driver_time = await get_driver_time_summary(datum=target_date, tenant_id=tenant_id, db=db)
     try:
         rows = PersonalService(db, tenant_id).get_time_cockpit_entries(target_date)
@@ -3084,7 +3085,7 @@ async def adjust_time_account(
 ):
     """Manuelle Saldo-Korrektur (Urlaubsabgeltung, Übertrag etc.)."""
     adj_id = str(uuid4())
-    adj_date = payload.adjustment_date or date.today().isoformat()
+    adj_date = payload.adjustment_date or business_today().isoformat()
     try:
         db.execute(
             text("""

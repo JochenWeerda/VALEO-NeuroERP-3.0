@@ -13,6 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundError
+from app.core.business_time import business_today
 from app.core.uuid7 import uuid7
 from app.api.v1.schemas.personal_schemas import (
     HrmOperationsGateOut,
@@ -1835,9 +1836,9 @@ class PersonalService:
     @staticmethod
     def _add_years(date_text: str | None, years: int) -> str:
         try:
-            base = date.fromisoformat(str(date_text)) if date_text else datetime.utcnow().date()
+            base = date.fromisoformat(str(date_text)) if date_text else business_today()
         except ValueError:
-            base = datetime.utcnow().date()
+            base = business_today()
         try:
             return base.replace(year=base.year + years).isoformat()
         except ValueError:
@@ -1922,7 +1923,7 @@ class PersonalService:
             retention=EmployeeFileRetentionOut(
                 deletionConcept="Dokumentklasse bestimmt Mindestaufbewahrung; Zweckfortfall und Rechtsfristen blockieren automatische Loeschung.",
                 reviewCadence="jaehrlich und bei Austritt",
-                blockedDocumentCount=sum(1 for d in visible if d.retentionUntil >= datetime.utcnow().date().isoformat()),
+                blockedDocumentCount=sum(1 for d in visible if d.retentionUntil >= business_today().isoformat()),
                 nextReviewHint="HR prueft Retention, DMS-Referenz und Zweckbindung vor Loeschlauf.",
             ),
         )

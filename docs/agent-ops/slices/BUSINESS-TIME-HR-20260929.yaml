@@ -1,0 +1,18 @@
+id: BUSINESS-TIME-HR-20260929
+owner: Codex
+status: abgeschlossen
+goal: Fachliche HR-Tagesgrenzen auf den konfigurierten Geschaeftstag vereinheitlichen.
+scope: Retention, Fahrerzeit, Zeitcockpit, Datumsfallbacks und Arbeitszeitkorrekturen.
+file_ownership:
+  - app/services/personal_service.py
+  - app/api/v1/endpoints/personal.py
+  - tests/test_personal_business_time.py
+acceptance:
+  - Fachliche Heute-Vergleiche verwenden business_today.
+  - Explizite Eingabedaten bleiben unveraendert.
+  - Audit- und Ereigniszeitpunkte bleiben UTC.
+tests:
+  - 16 Business-Time-, Fahrerzeit- und Cockpit-Tests bestanden.
+risks:
+  - Provider- und Audit-Timestamps sind absichtlich nicht umgestellt.
+external_gates: []
