@@ -13,6 +13,9 @@ from typing import Any
 # bis sie hier stehen (only-up).
 SCHEMA_TO_DOMAIN: dict[str, str] = {
     "domain_agrar": "agrar",
+    # Attestierungen (Nachdruck eines gebuchten Belegs mit Begruendung).
+    # Infrastruktur wie domain_log und die audit_logs in domain_shared.
+    "domain_audit": "platform",
     "domain_compliance": "dms-compliance",
     "domain_controlling": "finance",
     "domain_crm": "crm",
@@ -31,6 +34,11 @@ SCHEMA_TO_DOMAIN: dict[str, str] = {
     "domain_log": "platform",
     "domain_logistics": "logistics",
     "domain_meldewesen": "finance",
+    # Fertigung (Stueckliste, Produktionsauftrag, Produktionsereignis) aus der
+    # L3-Uebernahme. Die Zuordnung zu inventory ist die naheliegende — die
+    # Mischfutterproduktion bucht ueber Roh- und Fertigwarenlager —, aber sie
+    # ist vorlaeufig: Wer die Fertigung fachlich fuehrt, moege sie bestaetigen.
+    "domain_mfg": "inventory",
     "domain_nachweisraum": "dms-compliance",
     "domain_ops": "inventory",
     "domain_portal": "crm",
