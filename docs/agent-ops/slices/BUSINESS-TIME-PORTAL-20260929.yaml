@@ -1,0 +1,26 @@
+id: BUSINESS-TIME-PORTAL-20260929
+owner: Codex
+status: abgeschlossen
+goal: Portal-Shop-Tagesstatistik am konfigurierten Geschaeftstag statt am UTC-Kalendertag abgrenzen.
+scope: Orders-Observability-Tagesfilter und fokussierter Regressionstest.
+file_ownership:
+  - app/api/v1/endpoints/portal_shop.py
+  - tests/test_portal_shop_business_time.py
+  - docs/quality-assurance/business-time-portal-20260929.md
+acceptance:
+  - Der Today-Filter verwendet business_today.
+  - Ein abweichendes UTC- und Ortsdatum wird im Query-Vertrag nachgewiesen.
+  - Wochenfenster und technische UTC-Zeitstempel bleiben unveraendert.
+tests:
+  - 10 Portal- und Business-Time-Tests bestanden.
+risks:
+  - Andere nicht buchungsrelevante UTC-Zeitstempel im Portal-Shop sind ausserhalb dieses Slices.
+ai_harness:
+  fachlicher_vertrag: Today bedeutet den konfigurierten lokalen Geschaeftstag.
+  architektur_vertrag: Wiederverwendung des zentralen Business-Time-Moduls.
+  daten_vertrag: Keine Schema- oder Persistenzaenderung.
+  test_vertrag: Der SQL-Filter enthaelt das lokale Datum auch bei UTC-Abweichung.
+  security_vertrag: Tenant-Filter bleibt unveraendert.
+  betriebs_vertrag: BUSINESS_TIMEZONE steuert die Tagesgrenze.
+  dokumentations_vertrag: Workboard, Open-Gaps, Slice und QA aktualisiert.
+external_gates: []

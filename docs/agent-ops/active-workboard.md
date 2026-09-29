@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BUSINESS-TIME-PORTAL-20260929 — reserviert, Codex
+## BUSINESS-TIME-PORTAL-20260929 — abgeschlossen, Codex
 
 **Ziel:** Die Tagesstatistik des Portal-Shops am konfigurierten Geschaeftstag
 statt am UTC-Kalendertag abgrenzen.
@@ -21,6 +21,9 @@ eigene Slice-/QA-Doku, BUSINESS-TIME-Restpunkt in Open-Gaps und dieser Abschnitt
 den lokalen Geschaeftstag; bestehende Wochen- und technische Zeitstempel bleiben
 unveraendert; gezielter Test und Doku-Gates sind gruen.
 **Risiken:** Keine pauschale Umstellung aller UTC-Zeitstempel im Portal-Shop.
+**Ergebnis:** `orders/observability` grenzt `today` mit `business_today()` ab.
+10 fokussierte Tests bestanden, einschliesslich abweichendem UTC-/Ortsdatum.
+[QA](../quality-assurance/business-time-portal-20260929.md).
 
 ## UIX-LEGACY-ROUTES-VERIFY-20260927 — abgeschlossen, Codex
 

@@ -20,6 +20,7 @@ from app.core.security import get_user_id_from_request
 from sqlalchemy import and_, or_, desc
 
 from app.core.database import get_db
+from app.core.business_time import business_today
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from app.core.config import settings
 from app.infrastructure.models import Article as ArticleModel, Customer as CustomerModel
@@ -847,7 +848,7 @@ async def get_orders_observability(
     by_status = {s.value: c for s, c in status_counts}
     total = sum(by_status.values())
 
-    today = datetime.utcnow().date()
+    today = business_today()
     today_count = db.query(CustomerOrder).filter(
         and_(
             CustomerOrder.tenant_id == tenant_id,
