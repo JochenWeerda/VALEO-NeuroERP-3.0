@@ -11,6 +11,36 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HANDSHAKE: 76 Tabellen und Spalten ohne Migration 2026-09-30, Claude Code an die Fachowner
+
+**Worum es geht:** `scripts/check_schema_drift.py` findet 102 Tabellen und
+Spalten, die es nur in der Entwicklungsdatenbank gibt. Bei **76** von ihnen
+erwaehnt der Code den Namen — auf einer frischen Installation laeuft er dort ins
+Leere. Das deckt sich mit dem, was die Tabellen-Ratsche
+(`scripts/check_table_references.py`) am 29.09. unabhaengig davon fand.
+
+**Warum nicht selbst gebaut:** Welche Form eine Tabelle haben soll, weiss der
+Owner. Ein Nachbau aus dem lokalen Stand wuerde einen gewachsenen Zufall zur
+Migration erheben und in jede Installation tragen.
+
+**Betroffen je Domaene:** CRM (`contacts`, `crm_customers`, `crm_activities`,
+`crm_contacts`, `crm_visit_reports`), Einkauf (`ers_invoices`, `ers_suppliers`),
+Finanzen (`ebilanz_exports`), Futtermittel (`feed_raw_materials`,
+`feed_recipes`, `raw_material_analyses`, `recipe_ingredients`), Lager
+(`article_alternative_eans`, `article_analyses`, `article_print_settings`,
+`article_units`, `nawaro_*`), POS (`payment_methods`, `promotions`), Shared
+(`process_projection_cursors`, `process_projection_registry`), Compliance
+(`whistleblower_reports`) — und 51 weitere.
+
+**Ausserdem 21 reine Typunterschiede**, die einzeln angesehen gehoeren: Wo eine
+Spalte lokal `text` und im Migrationsstand `varchar(50)` ist, schreibt der Code
+lokal Werte, die eine frische Installation abweist.
+
+**Vollstaendige Liste:** `python scripts/check_schema_drift.py --json`.
+Einordnung und Vorgehen in
+`docs/quality-assurance/schema-drift-2026-09-30.md`.
+
+
 ## DOC-HANDSHAKE-CLEANUP-20260930 — reserviert, Codex
 
 **Ziel:** Ueberholte Codex-Handshakes als historisch erledigt kennzeichnen,
@@ -25,7 +55,7 @@ Handlungsauftrag formuliert; Doku-Gates sind gruen.
 **Risiken:** Historische Entscheidungen bleiben nachvollziehbar; echte offene
 Fach- und Sicherheitsrisiken werden nicht als erledigt umgedeutet.
 
-## SCHEMA-DRIFT-GATE-20260930 — reserviert, Claude Code
+## SCHEMA-DRIFT-GATE-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** Abweichungen zwischen einer Ziel-Datenbank und einer frisch
 migrierten sichtbar machen statt sie zu erraten. Spalten, Nullbarkeit,
@@ -34,13 +64,19 @@ lesbare Liste: fehlt / zusaetzlich / anders.
 **Dateibesitz:** `scripts/check_schema_drift.py`,
 `tests/test_check_schema_drift.py`,
 `docs/quality-assurance/schema-drift-2026-09-30.md`.
-**Stand:** reserviert 2026-09-30. Grund: Der Pruefstand (DB-PRUEFSTAND) sagt
-nichts darueber, ob die gewachsene Datenbank noch zum Schema passt. Genau diese
-Luecke verdeckte am 29.09. neunundfuenfzig rote Tests.
-**Abnahme:** Fundliste im QA-Dokument, jeder Fund mit einer von drei
-Entscheidungen — (a) Migration fehlt, (b) Dev-Datenbank verbastelt, (c) Spalte
-ungenutzt. Vergleichslogik mit reinen Unit-Tests, der Vergleich selbst gegen
-echtes Postgres, kein MagicMock. Open-Gaps nachgezogen.
+**Stand:** abgeschlossen 2026-09-30. `scripts/check_schema_drift.py` stellt
+`valeo_neuro_erp` dem frisch migrierten Stand gegenueber: **881 Abweichungen**
+— 484 fehlen, 213 sind anders, 184 zusaetzlich. Damit steht fest: **Die
+Entwicklungsdatenbank ist nie das gewesen, was die Migrationen beschreiben.**
+Einordnung: 484 „fehlt" = Dev-Datenbank verbastelt (keine Migration, neu
+aufsetzen); 76 der 102 zusaetzlichen Tabellen/Spalten werden im Code benutzt =
+Migration fehlt wirklich (Handshake); 26 ohne Codebezug = dokumentieren, nicht
+loeschen; 213 „anders" vor allem gelockerte Bedingungen, darunter 31 gelockerte
+NOT-NULL-Regeln — genau das Muster vom 29.09.
+**Abnahme:** 15 reine Unit-Tests ohne Datenbank, ein Lauf gegen echtes Postgres
+(zwei Schemata, eines verbogen), vier Stichproben von Hand in beiden Datenbanken
+nachgezaehlt. Bewusst **keine Ratsche und nicht in CI**: Der Abstand haengt vom
+Rechner ab, eine Ratsche darauf wuerde den Rechner messen.
 **Risiken:** Funde in fremden Slices (Einkauf, Verkauf, Agrar) nicht selbst
 reparieren, sondern als Handshake weitergeben. Eine Reparatur der
 Dev-Datenbank darf nicht als Migration getarnt werden.

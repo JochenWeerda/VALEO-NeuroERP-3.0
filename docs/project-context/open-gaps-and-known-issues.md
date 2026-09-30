@@ -11,6 +11,29 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## SCHEMA-DRIFT-GATE — Datenbank gegen Migrationsstand (2026-09-30)
+
+**Erledigt.** `scripts/check_schema_drift.py` vergleicht eine Ziel-Datenbank mit
+einer frisch migrierten: Tabellen, Spalten (Typ, Laenge, Skala, Nullbarkeit),
+Fremdschluessel, CHECK, UNIQUE und Indizes. 15 Unit-Tests ohne Datenbank, ein
+Lauf gegen echtes Postgres. Bewusst keine Ratsche und nicht in CI — der Abstand
+haengt vom Rechner ab.
+
+**Der Befund:** **881 Abweichungen** zwischen `valeo_neuro_erp` und dem
+Migrationsstand. Die Entwicklungsdatenbank ist nie das gewesen, was die
+Migrationen beschreiben. Vier Stichproben von Hand bestaetigt.
+
+**Offen, Entscheidung des Hauses:** 484 Funde sind „fehlt" — die Migration gibt
+es, sie ist auf dieser Datenbank nur nie vollstaendig angekommen. Die Reparatur
+ist ein Neuaufsetzen, keine Migration. Ob die gewachsenen Daten erhalten bleiben
+muessen, entscheidet das Haus; solange sie bleiben, gilt „Schema frisch pruefen,
+Daten gewachsen".
+
+**Offen, gehoert den Fachownern:** 76 Tabellen und Spalten, die der Code benutzt
+und die keine Migration anlegt, plus 21 reine Typunterschiede. Handshake im
+Workboard. 26 weitere ohne Codebezug: dokumentieren, nicht still loeschen.
+
+
 ## TOTE-TRANSAKTION — except ohne Rollback (2026-09-30)
 
 **Erledigt.** `scripts/check_dead_transactions.py` (AST-Suche, Ratsche 78, im
