@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## GATE-BLOCKER-20260930 — reserviert, Claude Code
+
+**Ziel:** Die zwei kleinen Blockierer wegraeumen, die das Quality Gate fuer alle
+rot halten: zwei High-Funde in `brace-expansion` und der Kontrastfehler der
+Startseitenkacheln.
+**Dateibesitz:** `package.json` (nur die Zeile `brace-expansion` unter
+`pnpm.overrides`), `pnpm-lock.yaml`,
+`packages/frontend-web/src/components/navigation/LaunchpadBoard.tsx` (nur die
+Farbklasse der Mikro-Ueberschrift).
+**Stand:** reserviert 2026-09-30. Der Override steht auf `^2.1.4`, die Behebung
+verlangt `>= 2.1.6` — die Untergrenze ist veraltet, nicht der Override fehlt.
+Der Kontrast betraegt 3,84:1 statt 4,5:1, weil `text-muted-foreground` auf einer
+getoenten Kachelflaeche steht.
+**Abnahme:** `pnpm audit --audit-level high` Exit 0; der axe-Lauf auf `/` ohne
+Kontrastverstoss; keine andere Kachelwirkung.
+**Risiken:** `LaunchpadBoard.tsx` gehoert zur Startseitenarbeit von Cursor —
+nur anfassen, solange die Datei unangetastet ist, und nur die Farbklasse.
+
+
 ## HANDSHAKE: 76 Tabellen und Spalten ohne Migration 2026-09-30, Claude Code an die Fachowner
 
 **Worum es geht:** `scripts/check_schema_drift.py` findet 102 Tabellen und
