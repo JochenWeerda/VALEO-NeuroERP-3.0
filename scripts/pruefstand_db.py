@@ -85,9 +85,34 @@ def pruefstand_url() -> URL:
     return make_url(basis).set(database=VORGABE_NAME)
 
 
-def _ist_pruefstand(name: str) -> bool:
+def ist_pruefstand(url_oder_name: str | None) -> bool:
+    """Darf diese Datenbank weggeworfen werden?
+
+    Oeffentlich, weil nicht nur dieses Skript die Frage stellt: Tests, die das
+    Schema aendern (eine Spalte umbenennen, eine Bedingung anlegen), duerfen
+    nur gegen eine Wegwerf-Datenbank laufen. Bricht ein solcher Lauf zwischen
+    Hin- und Rueckaenderung ab — abgeschnittene Sitzung, Speichermangel,
+    gestoppter Dienst —, bleibt die Aenderung stehen. Auf einer geteilten
+    Entwicklungsdatenbank waere das eine Stoerung fuer jeden, der danach
+    arbeitet.
+
+    Nimmt eine Verbindungszeichenfolge oder einen blossen Datenbanknamen.
+    """
+    if not url_oder_name:
+        return False
+    name = url_oder_name
+    if "/" in name:
+        try:
+            name = make_url(url_oder_name).database or ""
+        except Exception:  # noqa: BLE001 — unlesbare URL ist kein Pruefstand
+            return False
     klein = name.lower()
     return any(marker in klein for marker in PRUEFSTAND_MARKER)
+
+
+def _ist_pruefstand(name: str) -> bool:
+    """Alter, modulinterner Name — bleibt, damit nichts bricht."""
+    return ist_pruefstand(name)
 
 
 def _verwaltungsverbindung(url: URL):

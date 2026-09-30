@@ -77,6 +77,25 @@ def mandant():
                 v.execute(text(sql), {"t": name})
 
 
+def _nur_pruefstand() -> None:
+    """Ueberspringt einen schemaaendernden Test ausserhalb einer Wegwerf-Datenbank.
+
+    Dieselbe Erkennung wie in ``scripts/pruefstand_db.py`` — eine Quelle, nicht
+    zwei.
+    """
+    import pathlib
+    import sys
+
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
+    from pruefstand_db import ist_pruefstand
+
+    if not ist_pruefstand(DB_URL):
+        pytest.skip(
+            "Schemaaendernder Test nur gegen eine Wegwerf-Datenbank. "
+            "Aufsetzen: python scripts/pruefstand_db.py"
+        )
+
+
 def _kopf(mandant: str) -> dict[str, str]:
     return {
         "Authorization": "Bearer dev-token",
@@ -153,8 +172,18 @@ def test_eine_datenbankstoerung_erfindet_keine_zahlart(client, mandant) -> None:
     Die Stoerung wird echt ausgeloest — die Spalte, nach der der Endpunkt
     filtert, wird kurzzeitig umbenannt. Zuvor lieferte der Endpunkt hier
     BAR/KARTE/SEPA, als waeren sie eingerichtet.
+
+    **Nur gegen eine Wegwerf-Datenbank.** Dieser Test aendert das Schema. Bricht
+    der Lauf zwischen Umbenennen und Zuruecknennen ab — abgeschnittene Sitzung,
+    Speichermangel, gestoppter Dienst —, bleibt die Spalte umbenannt zurueck.
+    Auf einer geteilten Entwicklungsdatenbank waere das eine Stoerung fuer
+    jeden, der danach arbeitet. Erkennungsmerkmal ist dasselbe wie in
+    ``scripts/pruefstand_db.py``: der Name traegt ``probe``, ``test`` oder
+    ``pruefstand``.
     """
     from sqlalchemy import create_engine, text
+
+    _nur_pruefstand()
 
     engine = create_engine(DB_URL)
     with engine.begin() as v:

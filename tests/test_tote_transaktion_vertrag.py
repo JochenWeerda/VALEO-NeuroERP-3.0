@@ -101,6 +101,28 @@ def kopf(mandant: str) -> dict[str, str]:
     }
 
 
+def _nur_pruefstand() -> None:
+    """Ueberspringt einen schemaaendernden Test ausserhalb einer Wegwerf-Datenbank.
+
+    Die beiden Tests unten legen eine CHECK-Bedingung auf
+    ``domain_crm.customers`` an und nehmen sie im ``finally`` zurueck. Bricht
+    der Lauf dazwischen ab — abgeschnittene Sitzung, Speichermangel, gestoppter
+    Dienst —, bleibt sie stehen, und danach kann niemand mehr einen Kunden
+    anonymisieren. Dieselbe Erkennung wie in ``scripts/pruefstand_db.py``.
+    """
+    import pathlib as _p
+    import sys as _s
+
+    _s.path.insert(0, str(_p.Path(__file__).resolve().parents[1] / "scripts"))
+    from pruefstand_db import ist_pruefstand
+
+    if not ist_pruefstand(DB_URL):
+        pytest.skip(
+            "Schemaaendernder Test nur gegen eine Wegwerf-Datenbank. "
+            "Aufsetzen: python scripts/pruefstand_db.py"
+        )
+
+
 def _kunde(mandant: str, name: str = "Hof Loeschkandidat") -> str:
     from sqlalchemy import create_engine, text
 
@@ -273,6 +295,7 @@ def test_eine_bedingungsverletzung_reisst_den_lauf_nicht_mit(
     """
     from sqlalchemy import create_engine, text
 
+    _nur_pruefstand()
     kunden_id = _kunde(mandant)
     antrag_id = _antrag(client, kopf, kunden_id)
 
@@ -323,6 +346,7 @@ def test_der_antrag_bleibt_offen_wenn_die_loeschung_scheitert(
     """Ein Antrag, bei dem nichts gelang, darf nicht als erledigt gelten."""
     from sqlalchemy import create_engine, text
 
+    _nur_pruefstand()
     kunden_id = _kunde(mandant)
     antrag_id = _antrag(client, kopf, kunden_id)
 

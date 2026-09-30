@@ -234,6 +234,19 @@ def test_der_abgleich_findet_eine_echte_abweichung() -> None:
         "DATABASE_URL",
         "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp",
     )
+    # Auch dieser Test legt Schemata an und wieder ab. Bricht er dazwischen
+    # ab, bleiben sie stehen. Auf einer Wegwerf-Datenbank ist das folgenlos,
+    # auf einer geteilten nicht — dieselbe Erkennung wie in
+    # scripts/pruefstand_db.py.
+    from check_schema_drift import vergleiche as _  # noqa: F401  (Pfad steht schon)
+    from pruefstand_db import ist_pruefstand
+
+    if not ist_pruefstand(url):
+        pytest.skip(
+            "Schemaanlegender Test nur gegen eine Wegwerf-Datenbank. "
+            "Aufsetzen: python scripts/pruefstand_db.py"
+        )
+
     kennung = uuid.uuid4().hex[:8]
     voll, arm = f"probe_voll_{kennung}", f"probe_arm_{kennung}"
 
