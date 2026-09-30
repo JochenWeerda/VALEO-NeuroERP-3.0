@@ -11,6 +11,43 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHISTLEBLOWER-EINE-TABELLE-20260930 — reserviert, Claude Code
+
+**Ziel:** `domain_compliance.whistleblower_reports` bekommt eine Migration, einen
+Mandantenbezug und **eine** Form. Heute schreiben zwei Endpunkte dieselbe
+Tabelle mit unvereinbaren Spalten, und keine Migration legt sie an.
+**Dateibesitz:** neue Migration,
+`app/api/v1/endpoints/compliance_whistleblower.py`,
+`app/api/v1/endpoints/compliance_whistleblower_lksg.py` (nur der
+Whistleblower-Teil), `tests/test_whistleblower_vertraulichkeit.py`,
+`docs/quality-assurance/whistleblower-eine-tabelle-2026-09-30.md`.
+**Stand:** reserviert 2026-09-30. Gefunden beim Abarbeiten der Schema-Drift-Liste.
+Vier Befunde in einer Datei, und die Daten sind das Sensibelste, was das System
+fuehrt:
+1. `compliance_whistleblower.py` legt die Tabelle zur **Laufzeit** an
+   (`CREATE TABLE IF NOT EXISTS`) — das Schema haengt davon ab, welcher
+   Endpunkt zuerst aufgerufen wurde.
+2. Die beiden Formen sind **unvereinbar**: `report_token`,
+   `description_encrypted`, `severity`, `submitted_at`, `notes`, **kein
+   tenant_id** gegen `tenant_id`, `description`, `contact_email`, `anonymous`,
+   `created_at`. Wer zuerst laeuft, bestimmt; der andere bekommt dauerhaft 503.
+3. `GET /reports` listet **alle** Meldungen **aller** Mandanten — kein
+   Mandantenfilter, weil die Spalte in dieser Form fehlt.
+4. Die Notiz wird per f-String in einen JSON-Text gesetzt; ein
+   Anfuehrungszeichen in der Notiz zerlegt die Struktur (JSON-Injektion aus
+   einem Hinweisgeberformular).
+Dazu: Die Spalte heisst `description_encrypted`, bekommt aber Klartext.
+**Abnahme:** Eine Migration mit `tenant_id NOT NULL`; beide Endpunkte auf
+dieselbe Form und mit Mandantenfilter; die Notiz ueber `json.dumps`; kein
+`CREATE TABLE` mehr im Endpunkt; Vertragstests gegen den frischen Pruefstand,
+die den mandantenuebergreifenden Zugriff und die Injektion ausdruecklich
+pruefen.
+**Risiken:** Vertraulichkeit nach der EU-Hinweisgeberrichtlinie (Art. 16) —
+ein mandantenuebergreifender Lesezugriff ist kein Schoenheitsfehler. Die
+Umstellung beruehrt zwei Endpunkte verschiedener Slices; bei Bestandsdaten ohne
+Mandant braucht die Migration eine Entscheidung.
+
+
 ## GATE-BLOCKER-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** Die zwei kleinen Blockierer wegraeumen, die das Quality Gate fuer alle
