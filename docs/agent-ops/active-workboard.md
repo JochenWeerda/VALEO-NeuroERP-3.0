@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## OPENAPI-DRIFT-REFRESH-20260930 — reserviert, Codex
+
+**Ziel:** Den vom Quality-Gate belegten OpenAPI-Drift aus einem sauberen HEAD
+regenerieren, ohne parallele CRM-/Meridian-Routen aus dem Arbeitsbaum zu
+veroeffentlichen.
+**Dateibesitz:** `docs/schnittstellen/openapi.json`, eigene Slice-/QA-Doku und
+dieser Abschnitt.
+**Abnahme:** Generator-Check bytegenau gruen; Pfadzahl dokumentiert; Doku-Gates
+gruen; keine fremden Arbeitsbaumdateien im Commit.
+**Risiken:** Jeder spaetere Router-Commit muss die Spezifikation erneut
+regenerieren; der Workflow bleibt bewusst read-only und fail-closed.
+
 ## DUE-DATE-CALENDAR-20260930 — abgeschlossen, Codex
 
 **Ziel:** Elf `replace(day=min(day + 30, 28))`-Berechnungen durch eine zentrale

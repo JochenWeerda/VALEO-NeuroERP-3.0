@@ -1,0 +1,36 @@
+slice_id: OPENAPI-DRIFT-REFRESH-20260930
+id: OPENAPI-DRIFT-REFRESH-20260930
+title: OpenAPI-Spezifikation aus sauberem HEAD regenerieren
+status: reserviert
+owner: Codex
+date: 2026-09-30
+created_at: 2026-09-30
+goal: >
+  Den erstmals erreichten OpenAPI-Drift-Blocker durch eine reproduzierbare
+  Regenerierung aus einem sauberen HEAD schliessen, ohne parallelen WIP in die
+  Spezifikation zu uebernehmen.
+file_ownership:
+  - docs/schnittstellen/openapi.json
+  - docs/quality-assurance/openapi-drift-refresh-20260930.md
+  - docs/agent-ops/active-workboard.md (nur eigener Abschnitt)
+  - docs/agent-ops/slices/OPENAPI-DRIFT-REFRESH-20260930.yaml
+acceptance:
+  - Die Spec wird aus dem gepushten, sauberen HEAD erzeugt
+  - python scripts/generate_openapi.py --check ist gruen
+  - Pfadzahl und Umfang der Drift sind dokumentiert
+  - Doku-Gates sind gruen
+tests:
+  - python scripts/generate_openapi.py --check
+  - pnpm docs:check
+risks:
+  - Parallele, noch nicht committete Router duerfen nicht in die Spec gelangen
+ai_harness:
+  fachlicher_vertrag: Die veroeffentlichte API-Spezifikation entspricht exakt der Produktions-App.
+  architektur_vertrag: Generatorquelle bleibt main:app; CI schreibt nicht auf main.
+  daten_vertrag: Keine Schema- oder Datenmigration.
+  test_vertrag: Der Generator-Check vergleicht bytegenau mit dem eingecheckten Artefakt.
+  security_vertrag: Keine Aenderung an Zugriff oder Mandantengrenzen.
+  betriebs_vertrag: Regenerierung erfolgt in einem sauberen isolierten Worktree.
+  dokumentations_vertrag: Workboard, Slice und QA halten Ursache und Nachweis fest.
+external_gates:
+  - not_applicable
