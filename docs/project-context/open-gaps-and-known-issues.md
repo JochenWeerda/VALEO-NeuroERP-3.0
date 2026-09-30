@@ -11,6 +11,31 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## DB-PRUEFSTAND — frische Datenbank als Prüfstand (2026-09-30)
+
+**Erledigt.** `scripts/pruefstand_db.py` setzt eine frisch migrierte Datenbank
+auf (drop, create, migrate), idempotent und ohne Zugangsdaten im Code.
+`TEST_DATABASE_URL` oder Ableitung aus `DATABASE_URL`. Regel in CLAUDE.md,
+Runbook unter `docs/quality-assurance/pruefstand-datenbank.md`. Nachweis: die
+elf in CI roten Testdateien laufen gegen einen von null aufgebauten Prüfstand
+mit 87 bestandenen Tests durch.
+
+**Offen, gehört anderen:** **24 Slice-YAMLs sind für `scripts/valeo_slice.py`
+unlesbar.** Sie tragen am Dateiende eine zweite Dokumentmarke (`---`), und
+`yaml.safe_load` bricht dann mit „expected a single document in the stream" ab.
+Die CLI meldet dann nicht den Formfehler, sondern „Slice-YAML nicht gefunden" —
+der Slice ist für `claim`, `verify`, `close` und `status` unsichtbar. Betroffen
+sind 26 von 274 Dateien; die zwei eigenen sind behoben. Der node-basierte
+`ai-slice-readiness-check.cjs` liest sie dagegen, weshalb es nie aufgefallen
+ist. Zwei Wege: die Schlussmarken entfernen, oder `valeo_slice.py` auf
+`yaml.safe_load_all` umstellen und das erste Dokument nehmen. Der zweite Weg
+ist der robustere, berührt aber das Governance-Skript.
+
+**Offen, Entscheidung:** Der Prüfstand sagt nichts darüber, ob die gewachsene
+Datenbank noch zum Schema passt. Diese Frage beantwortet der Slice
+`SCHEMA-DRIFT-GATE`.
+
+
 ## MERIDIAN-BELEG-SYSTEMWEIT — Beleg-Look als Voreinstellung (2026-09-29)
 
 Status: **abgeschlossen, Restpunkte offen.** Slice

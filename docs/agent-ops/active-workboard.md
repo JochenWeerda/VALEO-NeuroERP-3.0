@@ -21,19 +21,24 @@ Hunk), `features/mask-pilot/`, Pilot-Schalter in `order-editor.tsx`, `KontraktDe
 `kunden-stamm-modern.tsx`, `MaskBenchmarkRoute.tsx`, Pilotseiten und ihre Tests.
 **Abnahme:** siehe [Slice](slices/MERIDIAN-BELEG-RESTPUNKTE-20260930.yaml).
 
-## DB-PRUEFSTAND-20260930 — reserviert, Claude Code
+## DB-PRUEFSTAND-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** Eine frisch migrierte Datenbank ist der dokumentierte Pruefstand fuer
 Schema- und Vertragstests. Die gewachsene Dev-Datenbank bleibt Pruefstand fuer
 Daten (Maskenabnahme, Statuswoerterbuecher), nicht fuer das Schema.
 **Dateibesitz:** `scripts/pruefstand_db.py`, `docs/quality-assurance/pruefstand-datenbank.md`,
 Abschnitt „Testing" in `CLAUDE.md`, `.env.example` (nur `TEST_DATABASE_URL`).
-**Stand:** reserviert 2026-09-30. Grund: Die 59 roten Tests vom 29.09. waren ein
-Messfehler — geprueft wurde gegen eine Datenbank, die Fremdschluessel und
-Pruefbedingungen verloren und Spalten gewonnen hatte, die keine Migration
-anlegt.
-**Abnahme:** Die Suite, die in CI rot war, laeuft lokal gegen den Pruefstand
-genauso wie in CI. Das Skript ist idempotent und traegt keine Zugangsdaten.
+**Stand:** abgeschlossen 2026-09-30. `scripts/pruefstand_db.py` setzt die
+Datenbank idempotent neu auf (drop, create, migrate), liest die Verbindung aus
+`TEST_DATABASE_URL` oder leitet sie aus `DATABASE_URL` ab und bricht ab, wenn
+der Name nicht wie ein Pruefstand aussieht. Regel im Abschnitt Testing von
+CLAUDE.md, Runbook unter `docs/quality-assurance/pruefstand-datenbank.md`.
+**Abnahme:** Pruefstand von null aufgebaut, danach 87 Tests der elf zuvor roten
+Dateien gruen. Die Sicherung mit einem absichtlichen Zeigefehler auf
+`valeo_neuro_erp` geprueft — sie bricht ab.
+**Nebenbefund, gehoert anderen:** 24 weitere Slice-YAMLs sind fuer
+`scripts/valeo_slice.py` unlesbar (zweite Dokumentmarke am Dateiende); die CLI
+meldet dann „nicht gefunden" statt des Formfehlers. Details in Open-Gaps.
 **Risiken:** Ein zweiter Pruefstand darf nicht zur zweiten Wahrheit werden —
 die Zuordnung Schema/Daten muss in der Doku eindeutig sein.
 

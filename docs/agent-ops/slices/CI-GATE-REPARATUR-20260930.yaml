@@ -82,4 +82,3 @@ ai_harness:
 docs_sync_exception: true
 external_gates:
   - not_applicable
----

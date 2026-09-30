@@ -154,6 +154,29 @@ Key variables (see `.env.example`):
 - Frontend E2E: Playwright
 - Coverage reports: terminal + HTML + XML
 
+### Prüfstand-Datenbank (verbindlich)
+
+**Für das Schema ist eine frische Datenbank der Prüfstand, für die Daten die
+gewachsene.** Die Entwicklungsdatenbank `valeo_neuro_erp` weicht in **beide**
+Richtungen von einer frischen Installation ab: Sie hat Fremdschlüssel,
+Prüfbedingungen und NOT-NULL-Regeln **verloren** und Spalten und Tabellen
+**gewonnen**, die keine Migration anlegt. Am 29.09.2026 verdeckte das
+neunundfünfzig rote Tests und drei echte Fehler — darunter eine Löschung nach
+Art. 17 DSGVO, die nichts tat und 503 meldete.
+
+```bash
+export TEST_DATABASE_URL=postgresql://valeo_dev:…@127.0.0.1:5432/valeo_probe
+python scripts/pruefstand_db.py                                   # drop, create, migrate
+DATABASE_URL="$TEST_DATABASE_URL" python -m pytest tests/… -q     # so prüfen
+```
+
+Frisch prüfen: jede neue Alembic-Migration (auch eine, die lokal „schon läuft"),
+jedes Testfixture mit rohem SQL, Vertragstests, Ratschen, Inventare.
+Gewachsen prüfen: Maskenabnahme, Statuswörterbücher, Altbestände. Eine Migration
+braucht **beide** — Schema frisch, Daten gewachsen.
+
+Runbook: `docs/quality-assurance/pruefstand-datenbank.md`.
+
 ## Error Handling Invariant
 
 - No empty catch blocks.
