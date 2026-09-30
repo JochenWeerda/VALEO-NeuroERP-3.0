@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BUSINESS-TIME-RATCHET-20260930 — reserviert, Codex
+
+**Ziel:** Neue direkte Ableitungen fachlicher Tageswerte aus Host- oder UTC-Zeit
+systemweit verhindern. Ein AST-basiertes Ratchet-Gate misst den vorhandenen
+Altbestand unter `app/`, blockiert neue oder verschobene Verstoesse und zwingt
+bei Abbau zur abgesenkten Baseline.
+**Dateibesitz:** `scripts/check_business_time_usage.py`,
+`config/business_time_usage_baseline.json`,
+`tests/test_business_time_usage_gate.py`, `.github/workflows/quality-gate.yml`
+(nur neuer Gate-Schritt), eigene Slice-/QA-Doku, BUSINESS-TIME-Abschnitt in
+Open-Gaps und dieser Abschnitt.
+**Abnahme:** Direkte `date.today()`- sowie `datetime.now/utcnow().date()`-Muster
+werden aliasfest erkannt; der Bestand ist exakt inventarisiert; neue, verschobene
+oder wieder eingefuehrte Verstoesse lassen das Gate fehlschlagen; Abbau verlangt
+eine kleinere Baseline; Unit-Tests, Gate und Doku-Gates sind gruen.
+**Risiken:** Der Bestand enthaelt fachliche und technische Tageswerte. Das Gate
+klassifiziert ihn nicht automatisch, sondern verhindert zusaetzliche Schuld und
+macht die schrittweise fachliche Bereinigung verbindlich.
+
 ## WHISTLEBLOWER-EINE-TABELLE-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** `domain_compliance.whistleblower_reports` bekommt eine Migration, einen

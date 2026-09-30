@@ -1,0 +1,42 @@
+slice_id: BUSINESS-TIME-RATCHET-20260930
+id: BUSINESS-TIME-RATCHET-20260930
+title: Neue fachliche Tagesgrenzen mit einem Ratchet-Gate verhindern
+status: reserviert
+owner: Codex
+date: 2026-09-30
+created_at: 2026-09-30
+goal: >
+  Neue direkte Ableitungen fachlicher Tageswerte aus Host- oder UTC-Zeit
+  systemweit verhindern und den vorhandenen Bestand messbar abbauen.
+file_ownership:
+  - scripts/check_business_time_usage.py
+  - config/business_time_usage_baseline.json
+  - tests/test_business_time_usage_gate.py
+  - .github/workflows/quality-gate.yml (nur neuer Gate-Schritt)
+  - docs/quality-assurance/business-time-ratchet-20260930.md
+  - docs/project-context/open-gaps-and-known-issues.md (nur BUSINESS-TIME-001)
+  - docs/agent-ops/active-workboard.md (nur eigener Abschnitt)
+  - docs/agent-ops/slices/BUSINESS-TIME-RATCHET-20260930.yaml
+acceptance:
+  - Direkte date.today- und datetime-to-date-Muster werden aliasfest erkannt
+  - Der vorhandene Bestand ist exakt und pfadbezogen inventarisiert
+  - Neue, verschobene und wieder eingefuehrte Verstoesse blockieren CI
+  - Abbau verlangt eine kleinere Baseline
+  - Unit-Tests, Gate und Dokumentationspruefungen sind gruen
+tests:
+  - pytest tests/test_business_time_usage_gate.py -q --no-cov
+  - python scripts/check_business_time_usage.py
+  - pnpm docs:check
+  - pnpm ai:slice:check
+risks:
+  - Bestehende technische und fachliche Tageswerte muessen fachlich getrennt abgebaut werden
+ai_harness:
+  fachlicher_vertrag: Fachliche Tageswerte kommen aus dem zentralen Business-Time-Modul.
+  architektur_vertrag: Ein AST-Ratchet verhindert neue dezentrale Zeitquellen.
+  daten_vertrag: Keine Schema- oder Datenmigration.
+  test_vertrag: Erkennung, Aliasaufloesung und Ratchet-Verhalten sind isoliert getestet.
+  security_vertrag: Keine Aenderung an Zugriff oder Mandantengrenzen.
+  betriebs_vertrag: Das Gate laeuft deterministisch ohne Netzwerk oder Datenbank.
+  dokumentations_vertrag: Workboard, Slice, Open-Gaps und QA beschreiben Bestand und Abbauweg.
+external_gates:
+  - not_applicable
