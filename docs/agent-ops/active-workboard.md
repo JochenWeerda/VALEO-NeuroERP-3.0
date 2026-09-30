@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BUSINESS-TIME-RATCHET-20260930 — reserviert, Codex
+## BUSINESS-TIME-RATCHET-20260930 — abgeschlossen, Codex
 
 **Ziel:** Neue direkte Ableitungen fachlicher Tageswerte aus Host- oder UTC-Zeit
 systemweit verhindern. Ein AST-basiertes Ratchet-Gate misst den vorhandenen
@@ -29,6 +29,13 @@ eine kleinere Baseline; Unit-Tests, Gate und Doku-Gates sind gruen.
 **Risiken:** Der Bestand enthaelt fachliche und technische Tageswerte. Das Gate
 klassifiziert ihn nicht automatisch, sondern verhindert zusaetzliche Schuld und
 macht die schrittweise fachliche Bereinigung verbindlich.
+**Ergebnis:** Das AST-Gate inventarisiert 244 direkte Kalenderableitungen in 125
+produktiven Python-Dateien: 232 `date.today()`, elf
+`datetime.now(...).date()` und einmal `datetime.utcnow().date()`. Die Baseline
+ist nach Datei und Muster getrennt; Zuwachs, Verschiebung und Wiederkehr nach
+Abbau sind blockierend. Der Quality-Gate-Workflow fuehrt die Pruefung vor den
+Bestandsratschen aus. Fuenf Unit-Tests und der Reallauf sind gruen.
+[QA](../quality-assurance/business-time-ratchet-20260930.md).
 
 ## WHISTLEBLOWER-EINE-TABELLE-20260930 — abgeschlossen, Claude Code
 

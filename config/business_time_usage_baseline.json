@@ -1,0 +1,381 @@
+{
+  "_hinweis": "BUSINESS-TIME-RATCHET-20260930: Direkte Kalenderquellen unter app/. Die Zaehler duerfen nur sinken. Nach bewusster Bereinigung mit python scripts/check_business_time_usage.py --update-baseline absenken.",
+  "counts": {
+    "app/agents/workflows/bestellvorschlag.py": {
+      "date.today": 1
+    },
+    "app/agrar/rations/assist.py": {
+      "date.today": 1
+    },
+    "app/agrar/rations/integrations/adapters.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/admin_monitoring.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/agrar_wetter.py": {
+      "date.today": 4
+    },
+    "app/api/v1/endpoints/analytics.py": {
+      "datetime.now.date": 1
+    },
+    "app/api/v1/endpoints/artikel_stamm_ext.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/artikel_stoffstrom.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/bank_import.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/bank_reconciliation.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/bank_statement_import.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/benchmark_api.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/collective_documents.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/commodity_positions.py": {
+      "date.today": 5
+    },
+    "app/api/v1/endpoints/compat.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/crm_360.py": {
+      "datetime.now.date": 2
+    },
+    "app/api/v1/endpoints/crm_kim.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/customers.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/dauerauftraege.py": {
+      "date.today": 6
+    },
+    "app/api/v1/endpoints/direct_debits.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/dunning.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/ebilanz_elster.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/einkauf_lieferschein.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/erechnung_import.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/erloeskennziffern.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/ernte_planung.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/ers_settlement.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/exchange_rates.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/export_service.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/fibu_geschaeftsjahre.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/finance_actions.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/futtermittel_qs.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/gelangensbestaetigung.py": {
+      "date.today": 1,
+      "datetime.now.date": 1
+    },
+    "app/api/v1/endpoints/individualpreise.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/inventory_counts.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/inventory_operations.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/kasse_tagesabschluss.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/kontrakt_mengenzeitraum.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/l3_report_catalog.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/liquidity.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/liquidity_planning.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/logistik_frachttabellen.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/mask_frontend_bridges.py": {
+      "date.today": 7
+    },
+    "app/api/v1/endpoints/open_items.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/payment_matching.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/payment_runs.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/periodische_buchungen.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/portal_preisspiegel.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/pos_dsfinvk.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/pos_payments.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/pos_payments_promotions.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/preis_rabattgruppen.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/purchase_invoice_verification.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/reklamation_api.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/rohware_sammelabrechnung.py": {
+      "date.today": 5
+    },
+    "app/api/v1/endpoints/ruestliste.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/saatzucht.py": {
+      "date.today": 4
+    },
+    "app/api/v1/endpoints/sales_delivery_notes.py": {
+      "date.today": 4
+    },
+    "app/api/v1/endpoints/self_billing.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/strecke.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py": {
+      "date.today": 7
+    },
+    "app/api/v1/endpoints/waage.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/warehouse_transfers.py": {
+      "date.today": 1
+    },
+    "app/api/v1/endpoints/xrechnung.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/zertifikate_api.py": {
+      "date.today": 2
+    },
+    "app/api/v1/endpoints/zinsabrechnung.py": {
+      "date.today": 3
+    },
+    "app/api/v1/endpoints/zu_abschlaggruppen.py": {
+      "date.today": 1
+    },
+    "app/core/betriebskennzahlen.py": {
+      "date.today": 1
+    },
+    "app/core/dunning_model.py": {
+      "date.today": 1
+    },
+    "app/core/dunning_run.py": {
+      "date.today": 1
+    },
+    "app/core/policy_overrides.py": {
+      "date.today": 1
+    },
+    "app/core/process_mining_application.py": {
+      "date.today": 3
+    },
+    "app/core/reklamation.py": {
+      "date.today": 1
+    },
+    "app/core/screen_definitions.py": {
+      "date.today": 1
+    },
+    "app/core/settlement_journal_bridge.py": {
+      "date.today": 1
+    },
+    "app/core/workflow_simulation.py": {
+      "date.today": 1
+    },
+    "app/core/zertifikate.py": {
+      "date.today": 5
+    },
+    "app/documents/router.py": {
+      "datetime.now.date": 2
+    },
+    "app/einkauf/router.py": {
+      "datetime.utcnow.date": 1
+    },
+    "app/finance/export_sepa.py": {
+      "date.today": 1
+    },
+    "app/finance/fx_loader.py": {
+      "date.today": 1
+    },
+    "app/finance/gobd.py": {
+      "date.today": 5
+    },
+    "app/finance/repositories.py": {
+      "date.today": 1
+    },
+    "app/finance/router.py": {
+      "date.today": 5
+    },
+    "app/finance/tax_resolver.py": {
+      "date.today": 1
+    },
+    "app/reports/services.py": {
+      "datetime.now.date": 1
+    },
+    "app/routers/fibu_router.py": {
+      "date.today": 5
+    },
+    "app/services/admin_core_service.py": {
+      "date.today": 1
+    },
+    "app/services/agrar_partie_aggregate_service.py": {
+      "date.today": 1
+    },
+    "app/services/agrar_settlement_service.py": {
+      "date.today": 3
+    },
+    "app/services/agri_lot_link_booking_service.py": {
+      "date.today": 1
+    },
+    "app/services/agri_silo_material_flow_service.py": {
+      "date.today": 2
+    },
+    "app/services/ai_engineering_metrics_service.py": {
+      "datetime.now.date": 1
+    },
+    "app/services/command_handlers_procurement.py": {
+      "date.today": 1
+    },
+    "app/services/compliance_vvvo_sachkunde_service.py": {
+      "date.today": 5
+    },
+    "app/services/contract_engagement_service.py": {
+      "date.today": 1
+    },
+    "app/services/contract_fixing_service.py": {
+      "date.today": 1
+    },
+    "app/services/contract_fulfillment_service.py": {
+      "date.today": 2
+    },
+    "app/services/crm_kontakt_service.py": {
+      "date.today": 1
+    },
+    "app/services/docflow_followup_service.py": {
+      "date.today": 2
+    },
+    "app/services/docflow_service.py": {
+      "date.today": 2
+    },
+    "app/services/einkauf_compat_service.py": {
+      "date.today": 3
+    },
+    "app/services/einvoice_generator.py": {
+      "date.today": 2
+    },
+    "app/services/eric_submission_service.py": {
+      "date.today": 1
+    },
+    "app/services/external_mock_harness_service.py": {
+      "date.today": 3
+    },
+    "app/services/feed_inventory_link_service.py": {
+      "date.today": 1
+    },
+    "app/services/feeding_actual_measure_service.py": {
+      "date.today": 1
+    },
+    "app/services/feeding_feed_analysis_service.py": {
+      "date.today": 1
+    },
+    "app/services/feeding_feed_catalog_service.py": {
+      "date.today": 2
+    },
+    "app/services/finance_clearing_service.py": {
+      "date.today": 1
+    },
+    "app/services/finance_dunning_service.py": {
+      "date.today": 2
+    },
+    "app/services/finance_op_service.py": {
+      "date.today": 1
+    },
+    "app/services/finance_ratenzahlung_service.py": {
+      "date.today": 1
+    },
+    "app/services/finance_sepa_service.py": {
+      "datetime.now.date": 2
+    },
+    "app/services/fints_connector.py": {
+      "date.today": 3
+    },
+    "app/services/gap_pipeline.py": {
+      "date.today": 1
+    },
+    "app/services/inventory_lot_trace_service.py": {
+      "date.today": 1
+    },
+    "app/services/portal_intelligence_service.py": {
+      "date.today": 2
+    },
+    "app/services/portal_preisspiegel_service.py": {
+      "date.today": 4
+    },
+    "app/services/procurement_service.py": {
+      "datetime.now.date": 1
+    },
+    "app/services/rations_controlling_service.py": {
+      "date.today": 4
+    },
+    "app/services/rations_herd_data_sync_service.py": {
+      "date.today": 1
+    },
+    "app/services/rations_readiness_service.py": {
+      "date.today": 1
+    },
+    "app/services/rfq_service.py": {
+      "date.today": 2
+    },
+    "app/workers/price_monitoring_worker.py": {
+      "date.today": 2
+    }
+  }
+}

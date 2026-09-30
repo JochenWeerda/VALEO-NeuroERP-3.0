@@ -224,6 +224,9 @@ jobs:
       - name: SQL bind cast check (:name::typ bindet nicht)
         run: python scripts/check_sql_bind_casts.py
 
+      - name: Business-Time-Ratchet (keine neuen Host-/UTC-Tageswerte)
+        run: python scripts/check_business_time_usage.py
+
       # Bewusst **vor** der Pagination-Ratsche: Dieser Job bricht beim ersten
       # roten Schritt ab, und die Pagination-Schwelle ist seit dem 27.05.
       # nicht erfuellbar (53 gefordert, 55 schon damals vorhanden). Hinter ihr

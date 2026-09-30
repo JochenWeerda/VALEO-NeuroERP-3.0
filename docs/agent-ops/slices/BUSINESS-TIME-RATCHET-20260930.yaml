@@ -1,10 +1,15 @@
 slice_id: BUSINESS-TIME-RATCHET-20260930
 id: BUSINESS-TIME-RATCHET-20260930
 title: Neue fachliche Tagesgrenzen mit einem Ratchet-Gate verhindern
-status: reserviert
+status: abgeschlossen
 owner: Codex
 date: 2026-09-30
 created_at: 2026-09-30
+closed_at: 2026-09-30
+result: >
+  Das AST-Gate inventarisiert 244 direkte Kalenderableitungen in 125 Dateien
+  und blockiert neue, verschobene oder nach Abbau wiederkehrende Stellen. Die
+  Quality-Gate-CI fuehrt die Pruefung verbindlich aus.
 goal: >
   Neue direkte Ableitungen fachlicher Tageswerte aus Host- oder UTC-Zeit
   systemweit verhindern und den vorhandenen Bestand messbar abbauen.
@@ -24,10 +29,10 @@ acceptance:
   - Abbau verlangt eine kleinere Baseline
   - Unit-Tests, Gate und Dokumentationspruefungen sind gruen
 tests:
-  - pytest tests/test_business_time_usage_gate.py -q --no-cov
-  - python scripts/check_business_time_usage.py
-  - pnpm docs:check
-  - pnpm ai:slice:check
+  - "pytest tests/test_business_time_usage_gate.py -q --no-cov: 5 passed"
+  - "python scripts/check_business_time_usage.py: 244 Stellen in 125 Dateien, Exit 0"
+  - "pnpm docs:check: gruen"
+  - "pnpm ai:slice:check: gruen"
 risks:
   - Bestehende technische und fachliche Tageswerte muessen fachlich getrennt abgebaut werden
 ai_harness:
