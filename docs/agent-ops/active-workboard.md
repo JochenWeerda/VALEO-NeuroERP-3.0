@@ -11,6 +11,29 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## TOTE-TRANSAKTION-20260930 — reserviert, Claude Code
+
+**Ziel:** Das Muster „`except` faengt den Fehler, die Transaktion ist trotzdem
+tot, und was danach kommt sieht aus wie ein Ergebnis" systematisch finden, je
+echtem Fund einen Vertragstest schreiben und die Stelle beheben. Der
+Art.-17-Pfad zuerst.
+**Dateibesitz:** `scripts/check_dead_transactions.py`,
+`tests/test_tote_transaktion_vertrag.py`,
+`docs/quality-assurance/tote-transaktion-2026-09-30.md`, dazu die Endpunkte,
+die als echte Funde herauskommen — mit Handshake, falls sie in fremden Slices
+liegen (Einkauf, Verkauf, Agrar).
+**Stand:** reserviert 2026-09-30. Der Fund vom 29.09.: Der Loeschlauf nach
+Art. 17 DSGVO lief komplett ins Leere und meldete 503, weil eine fehlende
+Nebentabelle die Transaktion abbrach und das `except` den Fehler nur
+protokollierte.
+**Abnahme:** Fundliste abgearbeitet oder mit Begruendung offen; je echtem Fund
+ein Vertragstest gegen den frischen Pruefstand, der die Datenbank-Ausnahme echt
+ausloest und genau einen Statuscode prueft; bei Wiederkehr ein Gate mit Ratsche
+in CI.
+**Risiken:** Ein Savepoint je Anweisung kann Mengenoperationen verlangsamen;
+eine zu weite statische Suche erzeugt Rauschen statt Funden.
+
+
 ## MERIDIAN-BELEG-RESTPUNKTE-20260930 — reserviert, Cursor
 
 **Ziel:** Restpunkte aus MERIDIAN-BELEG-SYSTEMWEIT schließen: fachliche Reklamationsnummer,
