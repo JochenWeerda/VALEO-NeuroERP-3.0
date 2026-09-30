@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PROJEKTION-CURSOR-MIGRATION-20260930 — in Arbeit, Claude Code
+
+**Ziel:** Die drei `domain_shared.process_projection_*`-Tabellen
+(`registry`, `snapshots`, `cursors`) kommen aus einer Migration statt aus
+Laufzeit-DDL in zwei verschiedenen Modulen.
+**Dateibesitz:** `alembic/versions/projektion_cursor_20260930.py`,
+`app/core/projection_cursor_service.py`,
+`app/services/finance_read_model_service.py` (nur die `_ensure_*`- und
+Lese-Hunks), `app/api/v1/endpoints/finance_read_models.py` (nur die
+Re-Exporte), `tests/test_projektion_cursor_vertrag.py`, eigene Slice-/QA-Doku
+und dieser Abschnitt.
+**Abnahme:** Die drei Tabellen stehen nach `alembic upgrade head` auf einem
+frischen Stand; keine Laufzeit-DDL mehr im Anwendungspfad; Vertraege gruen
+gegen `valeo_probe`; Doku-Gates gruen.
+**Risiken:** Die Form ist woertlich aus der Laufzeit-DDL uebernommen. Kein
+`response_model` und keine Route aendern sich, damit der parallel laufende
+OPENAPI-DRIFT-REFRESH nicht erneut driftet.
+
 ## OPENAPI-DRIFT-REFRESH-20260930 — reserviert, Codex
 
 **Ziel:** Den vom Quality-Gate belegten OpenAPI-Drift aus einem sauberen HEAD
