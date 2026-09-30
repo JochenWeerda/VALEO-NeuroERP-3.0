@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SLICE-YAML-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+
+**Ziel:** Governance-CLI laedt historische Slice-YAMLs mit leerer Schlussmarke,
+weist mehrere befuellte Dokumente und doppelte Schluessel ab und meldet
+Formfehler als Formfehler statt als angeblich fehlenden Slice.
+**Dateibesitz:** `scripts/valeo_slice.py`, `tests/test_valeo_slice_cli.py`,
+eigene Slice-/QA-Doku, DB-PRUEFSTAND-Absatz in Open-Gaps und dieser Abschnitt.
+**Abnahme:** Alle syntaktisch gueltigen historischen YAMLs sichtbar; kein
+stilles Verwerfen eines zweiten Dokuments; positive und negative CLI-Vertraege gruen.
+**Risiken:** Fehlende Harness-Felder bleiben echte Schemafehler und werden
+nicht durch automatische Inhaltsveraenderung fremder Slices verdeckt.
+**Naechster Schritt:** Separaten Claim committen, Loader und Fehleranzeige reparieren.
+
+
 ## LASTSCHRIFT-MANDANT-20260930 — in Arbeit, Claude Code
 
 **Ziel:** `domain_shared.direct_debit_items` traegt keinen Mandanten. Die
