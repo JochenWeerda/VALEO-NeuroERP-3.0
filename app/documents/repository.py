@@ -20,8 +20,8 @@ class DocumentRepository:
     def __init__(self, db: Session):
         self.db = db
     
-    def save_document(self, doc_type: str, doc_number: str, data: dict) -> dict:
-        """Speichert oder aktualisiert ein Dokument"""
+    def save_document(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True) -> dict:
+        """Speichert ein Dokument; commit=False belässt die Transaktion beim Aufrufer."""
         try:
             # Prüfe ob Dokument existiert
             existing = self.db.execute(
@@ -66,11 +66,13 @@ class DocumentRepository:
                     }
                 )
             
-            self.db.commit()
+            if commit:
+                self.db.commit()
             logger.info(f"Saved document: {doc_type}/{doc_number}")
             return {"ok": True, "number": doc_number}
         except Exception as e:
-            self.db.rollback()
+            if commit:
+                self.db.rollback()
             logger.error(f"Failed to save document: {e}")
             raise
     

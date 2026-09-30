@@ -11,6 +11,15 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## PAYMENT-EXECUTION-ATOMICITY — Zahlungslauf (2026-09-30)
+
+**Repo-seitig geschlossen:** falscher BEZAHLT-Status bei Teilzahlung,
+interne Teilcommits und verschluckte Ausführungsfehler. Reale PostgreSQL-
+Rollback-, Mandanten-, Wiederholungs- und Paralleltests sind grün.
+**Separat offen:** Bankabnahme und Legacy-Belege ohne Tenantkennung;
+projektweite Godfile-Befunde in fremden aktiven Slices bleiben sichtbar.
+Nachweis: `docs/quality-assurance/payment-execution-atomicity-20260930.md`.
+
 ## CODE-IMPROVEMENT-INTEGRITY — verlässliche Pruefungen (2026-09-30)
 
 **Repo-seitig abgeschlossen; externer CI-Nachweis offen.** Pagination wird pro Abfrage

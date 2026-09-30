@@ -11,19 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## PAYMENT-EXECUTION-ATOMICITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+## PAYMENT-EXECUTION-ATOMICITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Ziel:** Teilzahlungen bleiben offen; Zahlungslauf, OP und vorhandene AP-Belege
-werden in einer gemeinsamen Transaktion gespeichert; Fehler verhindern Erfolg.
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-09-30.
-**Dateibesitz:** `app/api/v1/endpoints/payment_runs.py`, ausschließlich die
-optionale Commitsteuerung in `app/documents/repository.py`,
-`tests/test_finance_payment_runs_api.py`, neue Transaktionstests und eigene
-Slice-/QA-Doku; gemeinsame Dokumente nur im eigenen Abschnitt.
-**Abnahme:** Voll-/Teilzahlung, Wiederholung, fehlender OP, DB-/Belegfehler;
-kein interner Commit im Zahlungslauf; vorhandene API-Verträge bleiben grün.
-**Risiken:** Legacy-Belege ohne Tenantkennung und externe Bankabnahme bleiben
-explizit; keine Übernahme aktiver Lastschrift-/CRM-/Meridian-Slices.
+**Owner:** Codex-01a0f3fc. **Claim:** `52a4b317e`.
+**Ziel/Ergebnis:** Teilzahlungen bleiben offen; Lauf, Positionen, OP und
+vorhandene AP-Belegänderung nutzen eine Transaktion. Sperre vor Statuslesen,
+Kinddaten-/Summenvertrag und OP-Guards verhindern Doppelzahlung und falsche
+Zuordnung; echte DB-Fehler werden nicht verschluckt. Antwort vor Commit.
+**Dateibesitz:** `app/api/v1/endpoints/payment_runs.py`, optionale Commitsteuerung
+in `app/documents/repository.py`, Zahlungs- und neue Transaktionstests,
+eigene Slice-/QA-Doku; gemeinsame Dokumente nur im eigenen Abschnitt.
+**Abnahme:** Frisch migrierte eigene PostgreSQL-Datenbank: 26 Tests grün,
+zusätzlich 45 bestehende Finanz-/Wave-1-Verträge grün; zehn reproduzierte
+Fehler im Kontrolllauf des alten Codes. SQL-Casts, Pagination und Baselines grün.
+**Handshake/Risiken:** Externe Bankannahme, Legacy-Tenant-Datenmigration und
+weitere Fachprozesse bleiben eigene Gates. Godfile-Ratsche meldet fremde
+aktive Änderungen in CRM/Mask-Bridges; keine Grenzwert-Anhebung.
+**Nachweis:** `docs/quality-assurance/payment-execution-atomicity-20260930.md`.
 
 ## SLICE-YAML-INTEGRITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 

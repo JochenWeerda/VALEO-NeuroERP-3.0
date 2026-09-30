@@ -1,0 +1,37 @@
+slice_id: PAYMENT-EXECUTION-ATOMICITY-20260930
+title: Atomare und widerspruchsfreie Zahlungslauf-Ausführung
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-09-30
+completed_at: 2026-09-30
+coordination: Claim 52a4b317e; keine aktiven Lastschrift-, CRM- oder Meridian-Dateien.
+goal: Teilzahlungen offen halten und alle Ausführungsänderungen atomar speichern.
+file_ownership:
+  - app/api/v1/endpoints/payment_runs.py
+  - app/documents/repository.py
+  - tests/test_finance_payment_runs_api.py
+  - tests/test_payment_execution_atomicity.py
+  - docs/quality-assurance/payment-execution-atomicity-20260930.md
+acceptance:
+  - Teilzahlung setzt keinen vorhandenen AP-Beleg auf BEZAHLT.
+  - Vollausgleich und Belegänderung nutzen genau einen Commit.
+  - SQL- und Lesefehler führen zum vollständigen Rollback.
+  - Wiederholung und konkurrierende Ausführung reduzieren OP nur einmal.
+  - Bestehende Dokument-Aufrufer behalten den Standardcommit.
+tests:
+  - python -m pytest tests/test_payment_execution_atomicity.py tests/test_finance_payment_runs_api.py tests/test_fin_belegbruch_001.py --noconftest --no-cov -q -o addopts=
+  - python -m pytest tests/test_process_kernel_wave1_contracts.py --noconftest --no-cov -q -o addopts=
+risks:
+  - Reale Transaktionstests benötigen eine explizite migrierte PostgreSQL-Testdatenbank.
+  - Legacy-Belege ohne Tenantkennung bleiben Datenmigrationsbedarf.
+  - Externe Bankannahme ist nicht durch lokale SEPA-Erzeugung nachgewiesen.
+ai_harness:
+  fachlicher_vertrag: Nur Vollausgleich schließt den vorhandenen Beleg.
+  architektur_vertrag: Bestehende API und Repository; kein neuer Dienst.
+  daten_vertrag: Mandantengebundene Sperre und gemeinsame Ausführungstransaktion.
+  test_vertrag: Reale PostgreSQL-Fehler und unabhängige konkurrierende Sessions.
+  security_vertrag: Kein Memory-Fallback oder SQL-Detail im Ausführungsfehler.
+  betriebs_vertrag: Wiederholung ist debitfrei; Fehler verhindern Erfolg.
+  dokumentations_vertrag: QA-Bericht, Workboard und eigener Open-Gaps-Abschnitt.
+external_gates:
+  - Frische CI-Datenbank und reale Bankfreigabe im jeweiligen Betriebsprozess.
