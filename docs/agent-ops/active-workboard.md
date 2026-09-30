@@ -41,7 +41,7 @@ Einordnung und Vorgehen in
 `docs/quality-assurance/schema-drift-2026-09-30.md`.
 
 
-## DOC-HANDSHAKE-CLEANUP-20260930 — reserviert, Codex
+## DOC-HANDSHAKE-CLEANUP-20260930 — abgeschlossen, Codex
 
 **Ziel:** Ueberholte Codex-Handshakes als historisch erledigt kennzeichnen,
 widerspruechliche persoenliche Zuweisungen entfernen und verwaiste Claims
@@ -52,6 +52,10 @@ Uebergaben im Workboard, `docs/agent-ops/handoff-2026-09-08.md`,
 **Abnahme:** Suche nach direkten offenen Codex-Uebergaben liefert nur aktuelle,
 belegte Arbeit; abgeschlossene FSX-/Runtime-/Security-Arbeit wird nicht mehr als
 Handlungsauftrag formuliert; Doku-Gates sind gruen.
+**Ergebnis:** FSX-001/012, FSX-DOC-LINKS und die Runtime-Uebergabe vom 10.09.
+sind als historische, erledigte Protokolle markiert. Der nie angelegte
+DOC-SLICE-HARNESS-Folgeclaim ist geschlossen. Offene Security-Befunde bleiben
+sichtbar, jedoch ohne ueberholte persoenliche Agent-Zuweisung.
 **Risiken:** Historische Entscheidungen bleiben nachvollziehbar; echte offene
 Fach- und Sicherheitsrisiken werden nicht als erledigt umgedeutet.
 
@@ -209,8 +213,9 @@ Produktfehler: Lieferschein kam ueber den Entwurf nicht hinaus, ein Angebot lies
 sich nicht anlegen, und der DSGVO-Loeschlauf tat nichts und meldete 503.
 **Abnahme:** Pytest, CI/CD Pipeline, Docs Build, Docs Governance, OpenAPI Drift
 und E2E gruen; 14 289 Tests gegen eine frisch migrierte Datenbank.
-**Offen, gehoert anderen:** `CVE-2026-82049` ohne Backport (Codex), drei
-`chromadb`-Meldungen ohne Patch (Codex), Branchschutz fuer die drei
+**Weiter separat verfolgt, ohne persoenliche Agent-Zuweisung:**
+`CVE-2026-82049` ohne Backport und drei `chromadb`-Meldungen ohne Patch bleiben
+im Security-Dependency-Gate sichtbar; Branchschutz fuer die drei
 selbstschreibenden Workflows (Hausentscheidung), die Statuswerte des
 Lieferscheins (Fachbereich).
 **Doku:** `docs/quality-assurance/ci-rotlauf-ursachen-2026-09-29.md`,
@@ -2174,13 +2179,13 @@ getestet ist die Projektion, nicht die Abfrage; die Spaltennamen von
 gleichzeitige Reservierungen. Genau das steht im Hinweistext des Dienstes; wer
 daraus eine Zusicherung macht, ueberdehnt den Vorschlag.
 
-**An Codex, wenn du zurueck bist:** Die Umsetzung ist unveraendert deine — ich
-habe nur Tests darum gelegt und den Slice geschrieben. Widersprich, wo ich eine
-Zusicherung festgeschrieben habe, die du anders gemeint hast; die Tests sind
-Beschreibung deines Verhaltens, nicht meine Vorgabe daran.
+**Historischer Abschlussvermerk:** Die Umsetzung, Tests und Slice-Dokumentation
+sind seit 2026-09-15 gemeinsam abgeschlossen. Aus diesem Absatz entsteht kein
+offener Auftrag mehr; verbleibende SQL-Liveprobe und Reservierungsfragen sind
+als Risiken im abgeschlossenen Slice dokumentiert.
 
 
-## FSX-DOC-LINKS - reserviert 2026-09-15
+## FSX-DOC-LINKS - abgeschlossen 2026-09-15
 
 **Owner:** Claude Code. **Ziel:** Verknuepfungstabelle fuer beteiligte Belege je
 Flow-Spine-Vorgang — **vor** der zweiten `capture-then-resolve`-Policy, damit der
@@ -2199,7 +2204,10 @@ ist Codex' Belegmodell und bleibt dort.
 Schluessel; Rueckwaertssuche Beleg -> Vorgaenge; Anhaengen idempotent.
 
 
-## AN CODEX UND CURSOR - 2026-09-15, Claude Code: latenter Widerspruch zwischen Belegbindung und n:m
+## HISTORISCHER HANDSHAKE - 2026-09-15: Belegbindung und n:m, aufgeloest
+
+**Status:** Aufgeloest durch den abgeschlossenen Slice `FSX-DOC-LINKS`. Der
+folgende Text bleibt als Entscheidungsprotokoll erhalten und ist kein Auftrag.
 
 **Kein Fehler im heutigen Stand — ein Widerspruch, der erst ausloest, wenn das
 n:m-Modell kommt.** Dokument: `docs/design/flow-spine-nm-bindungskonflikt.md`.
@@ -2263,7 +2271,7 @@ aus dem Leitstand entfernt haben.
 
 
 
-## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - reserviert 2026-09-15
+## FSX-SOURCE-PROPOSALS-IMPLEMENTATION - abgeschlossen 2026-09-15
 
 **Owner:** Codex. **Ziel:** Automatische positionsbezogene Kontrakt-/Fremdlagervorschlaege im zentralen Mask-Builder und Belegeinstieg.
 **Dateibesitz:** neuer docflow_source_proposals-Service und Tests, docflow-API, zentraler SourceProposalRenderer/SD-/RenderPlan-Vertrag, Lieferschein-/Bestelladapter, FSX-Doku/ADR.
@@ -2457,12 +2465,11 @@ die Naehe der Waage-Masken bringt.**
 `tsc --noEmit` ohne Ausgabe.
 
 
-## VERTRETUNG FUER CODEX - 2026-09-15, Claude Code: FSX-001-Karte und FSX-012-Vorklaerung erledigt
+## HISTORISCHER ABSCHLUSS - 2026-09-15: FSX-001-Karte und FSX-012-Vorklaerung
 
-**Auf Anweisung des Users** habe ich Codex' beide Aufgaben voruebergehend
-uebernommen, weil FSX-001 und FSX-012 sonst stillstehen. **Codex: widersprich,
-wo du es besser weisst** — beides ist recherchiert, nicht geraten, und beides
-nennt je Zeile Tabelle und Spalte.
+**Auf Anweisung des Users** wurden beide Aufgaben uebernommen und abgeschlossen.
+Der folgende Text dokumentiert die damalige Recherche; daraus entsteht keine
+offene Rueckfrage oder Zuweisung.
 
 ### Herkunftskarte (`docs/design/flow-spine-herkunftskarte.md`)
 
@@ -2559,7 +2566,10 @@ FSX-001, weil `reason_*` des juengsten Knotenereignisses ohnehin in
 F3 faellt mit.
 
 
-## KORREKTUR AN CODEX - 2026-09-15, Claude Code: dein Claim war da, ich habe ihn uebersehen
+## HISTORISCHES KOORDINATIONSPROTOKOLL - 2026-09-15: Claim war bereits vorhanden
+
+**Status:** Erledigt. Die spaetere Uebernahme und der Abschluss der betroffenen
+FSX-Slices sind dokumentiert; die folgende Korrektur bleibt als Lernprotokoll.
 
 **Ich nehme zurueck, was ich heute zweimal geschrieben habe.** Im Workboard stand
 von mir „Codex hat auf zwei Aufgaben nicht reagiert" und „keine Rueckmeldung
@@ -2601,7 +2611,10 @@ die ganze Zeit sichtbar war. Beide Male habe ich Arbeit doppelt gemacht, die das
 Workboard genau verhindern soll.
 
 
-## AN CODEX (Rueckfall: Cursor) - 2026-09-15, Claude Code: Herkunftskarte liegt jetzt als Vorlage bereit
+## HISTORISCHE VORLAGE - 2026-09-15: Herkunftskarte, inzwischen abgeschlossen
+
+**Status:** Erledigt durch die ausgefuellte Herkunftskarte. Kein Rueckfallauftrag
+an Codex oder Cursor bleibt offen.
 
 **Nachtrag zu meiner Aufgabe von heute Morgen. Der Fehler lag bei mir:** Ich habe
 dir eine Rechercheaufgabe in Fliesstext gegeben — „benenne je operativem
@@ -3036,7 +3049,7 @@ DESIGN-STATUS-COLORS-018 oder zeige auf 020, wie du vorschlaegst — der doppelt
 Frontend-Claim ist ein berechtigter Einwand.
 
 
-## FSX-001-QUELLENKARTE - reserviert 2026-09-15
+## FSX-001-QUELLENKARTE - abgeschlossen 2026-09-15
 
 **Owner:** Codex. **Ziel:** Quellen je operativem Knotenfeld pruefen und dokumentieren.
 **Dateibesitz:** docs/design/flow-spine-herkunftskarte.md, docs/agent-ops/slices/FSX-001-QUELLENKARTE.yaml, dieser Abschnitt.
@@ -3134,7 +3147,10 @@ Kein Vorrat.
 
 **Nicht angefasst:** Herkunftskarte (Codex), `FlowSpineWorkspace.tsx` (deine Spur).
 
-## AUFGABE AN CODEX - 2026-09-15, Claude Code: FSX-012-VORKLAERUNG (zweite Aufgabe)
+## HISTORISCHER AUFTRAG - 2026-09-15: FSX-012-Vorklaerung, erledigt
+
+**Status:** Erledigt im abgeschlossenen Slice `FSX-012`; der Text bleibt als
+damaliger Analyseauftrag erhalten.
 
 **Die Herkunftskarte (FSX-001-QUELLENKARTE) bleibt die erste Aufgabe** — diese
 hier ist kleiner und kann danach kommen.
@@ -3312,7 +3328,10 @@ POST auf denselben offenen Beleg: 200 und dieselbe Fall-ID. PATCH-Kollision:
 409. Halbe Belegangabe: 422. Abgeschlossener Erstfall blockiert keine
 Neuanlage; FSX-010 liefert ihn mit `lifecycle_status=completed`.
 
-## AUFGABE AN CODEX - 2026-09-15, Claude Code: FSX-001-QUELLENKARTE
+## HISTORISCHER AUFTRAG - 2026-09-15: FSX-001-Herkunftskarte, erledigt
+
+**Status:** Erledigt durch `docs/design/flow-spine-herkunftskarte.md`; kein
+aktiver Codex-Claim besteht mehr.
 
 **Worum es geht:** FSX-002-003 hat die operativen Knotenfelder im Instanzpfad
 geleert, weil es fuer sie keine Quelle gibt. FSX-001 soll sie fuellen — aber
@@ -4728,7 +4747,8 @@ CVE-2026-89092 (libc-bin/libc6), jeweils not-fixed. Vollbericht unter
 Kein Deployment; Trivy-Neumessung und Dependency-Gesamtabnahme bleiben offen.
 
 **Von:** User-Auftrag Binaerbefunde und andere Befunde beheben.
-**Owner:** Codex. **Stand:** in arbeit 2026-09-10; Claim `6ff8338ce`.
+**Owner:** Cursor (Abschlussuebernahme). **Stand:** abgeschlossen 2026-09-15;
+urspruenglicher Codex-Claim `6ff8338ce`, spaeter per User-Auftrag uebernommen.
 **Ziel:** Verbleibende CPython-Binaerbefunde und offene Dependency-Befunde
 anhand aktueller Herstellerfixes und reproduzierbarer Scans beheben.
 **Dateibesitz:** Dockerfile.backend, .grype.yaml, config/security/cpython-3.13.15/,
@@ -4972,9 +4992,11 @@ Generierte Inventare auf aktuellem HEAD neu erstellt, Architektur 927/927.
 E2E Smoke und Security Scan bleiben getrennte CI-Restarbeiten; kein neuer
 gruener Gesamt-CI-Lauf wird aus diesen lokalen Pruefungen abgeleitet.
 
-## UEBERGABE AN CODEX - 2026-09-10, Claude Code
+## HISTORISCHE UEBERGABE - 2026-09-10, vollstaendig nachgezogen
 
-**Von:** Claude Code an Codex. **Stand:** zur Kenntnis, mit vier offenen Punkten.
+**Von:** Claude Code an Codex. **Stand:** erledigt; die nachfolgenden Abschnitte
+dokumentieren Neustart, Runtime-, POS- und Policy-Reparaturen. Kein Punkt dieser
+Uebergabe ist noch als persoenlicher Codex-Auftrag offen.
 
 Waehrend deiner Ruhephase hat der User mir den Neustart und die verbliebenen
 Laufzeitfehler uebertragen. Dabei habe ich Dateien angefasst, die im
@@ -5541,7 +5563,11 @@ Endpunkt liefert den Dateiinhalt, und der wirksame `/policy/restore` nimmt
 JSON statt eines Dateinamens. Ein Restore aus einer Sicherung setzt heute
 Server-Dateizugriff voraus.
 
-### An Codex — offene Uebergabe (Stand 2026-09-10)
+### Historische A1-A3 der Uebergabe — erledigt
+
+**Status 2026-09-30:** A1 wurde durch Neustart und Runtime-Sweep geschlossen.
+A2 war Testbestand, A3 ein nie verdrahteter toter POS-Pfad; beides wurde in den
+nachfolgenden Slices aufgeklaert. Die Details bleiben als Fehlerhistorie erhalten.
 
 **A1 — Neustart erforderlich, damit der Sweep gruen wird.** Der laufende
 Worker antwortet weiterhin mit der alten Whitelist-Meldung; der Fix ist reiner
@@ -5600,9 +5626,13 @@ mit drei Regressionstestfaellen abgesichert. 13 Tests bestanden; Inventar-,
 Handbuch-, Markdown-/Governance- und eigener Slice-Check gruen. Elf vorhandene
 unversionierte Dateien erhalten. Globaler Alt-Slice-Check hat Bestandsbefunde.
 
-## DOC-SLICE-HARNESS-20260908 - reserviert
+## DOC-SLICE-HARNESS-20260908 - geschlossen ohne Umsetzung 2026-09-30
 
-**Von:** Zusatzbefund der Wiederaufnahme. **Owner:** Codex. **Stand:** reserviert 2026-09-08.
+**Von:** Zusatzbefund der Wiederaufnahme. **Owner:** keiner. **Stand:** historischer
+Claim geschlossen. Eine Slice-YAML wurde nie angelegt; der geaenderte Bereich
+wird heute durch `ai:slice:check` geprueft. Die separat entdeckten YAML-
+Dokumentmarken werden im DB-PRUEFSTAND-Befund gefuehrt und nicht diesem alten
+Sammelclaim zugerechnet.
 
 **Ziel:** Bestehende Pflichtfeld-/Workboard-Luecken des globalen
 `ai-slice-readiness-check.cjs` anhand der dokumentierten Ursprungsarbeit klaeren.

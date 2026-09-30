@@ -1,10 +1,15 @@
 slice_id: DOC-HANDSHAKE-CLEANUP-20260930
 id: DOC-HANDSHAKE-CLEANUP-20260930
 title: Ueberholte Codex-Handshakes bereinigen
-status: reserviert
+status: abgeschlossen
 owner: Codex
 date: 2026-09-30
 created_at: 2026-09-30
+closed_at: 2026-09-30
+result: >
+  Ueberholte FSX-, Runtime- und Security-Zuweisungen sind als historische
+  Protokolle markiert. Der verwaiste DOC-SLICE-HARNESS-Claim ist geschlossen;
+  echte offene Risiken bleiben ohne persoenliche Agent-Zuweisung sichtbar.
 goal: >
   Historisch erledigte Uebergaben eindeutig als geschlossen kennzeichnen und
   verwaiste Codex-Claims entfernen, ohne offene Fachrisiken zu verdecken.

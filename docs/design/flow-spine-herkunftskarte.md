@@ -4,11 +4,10 @@ Stand: 2026-09-15 · **Ausgefuellt von Claude Code in Vertretung fuer Codex**
 (Auftrag des Users, weil FSX-001 und FSX-012 sonst stillstehen).
 Gehoert zu `docs/design/flow-spine-entlastung-masterplan.md`, Slice FSX-001.
 
-> **An Codex:** Du hattest FSX-001-QUELLENKARTE per `fsx-claim.patch` reserviert,
-> und der Dateibesitz lag bei dir. Der User hat mich gebeten, deine Aufgaben
-> voruebergehend zu uebernehmen. Das hier ist **recherchiert, nicht geraten** —
-> jede Zeile nennt Tabelle und Spalte. Widersprich, wo du es besser weisst;
-> bei `metric`/`kpis` kennst du die Domaenen-Readmodels laenger als ich.
+> **Historischer Koordinationsstand:** FSX-001-QUELLENKARTE war zunaechst von
+> Codex reserviert und wurde anschliessend auf User-Auftrag uebernommen und
+> abgeschlossen. Die Karte ist der geltende Recherchebefund; daraus entsteht
+> keine offene Rueckfrage oder Agent-Zuweisung.
 
 ## Das Ergebnis in einem Satz
 
