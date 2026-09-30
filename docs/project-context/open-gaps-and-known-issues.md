@@ -11,6 +11,27 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## WHISTLEBLOWER-EINE-TABELLE — fuenf Befunde in einer Tabelle (2026-09-30)
+
+**Erledigt.** Gefunden beim Abarbeiten der Schema-Drift-Liste. Die Tabelle
+legte sich zur Laufzeit selbst an; zwei Endpunkte schrieben sie mit
+unvereinbaren Formen; es gab keinen Mandantenbezug, weshalb `GET` alle
+Meldungen aller Haeuser listete; die Notiz entstand per f-String in einem
+JSON-Text; und die Routen lagen ohne Praefix unter `/api/v1/reports`, neben den
+Verkaufsauswertungen.
+
+Behoben mit Migration `whistleblower_eine_tabelle_20260930` und einem
+ueberarbeiteten `compliance_whistleblower.py`. Sechs Vertraege gruen gegen
+beide Datenbankstaende. Details:
+`docs/quality-assurance/whistleblower-eine-tabelle-2026-09-30.md`.
+
+**Offen, Produktentscheidung:** Sind der kurze und der LkSG-Weg Dubletten? Beide
+schreiben jetzt dieselbe Tabelle; der eine bietet Token und Notizen, der andere
+Kontaktmail und Statusuebergaenge. Und: Soll die Meldung verschluesselt werden?
+Heute steht sie im Klartext — das ist jetzt wenigstens ehrlich benannt (die
+Spalte hiess `description_encrypted`).
+
+
 ## GATE-BLOCKER — die zwei kleinen Blockierer des Quality Gate (2026-09-30)
 
 **Erledigt.** `brace-expansion` von `^2.1.4` auf `^2.1.6` (zwei High-Funde,

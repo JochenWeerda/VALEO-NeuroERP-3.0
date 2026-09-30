@@ -1,0 +1,66 @@
+---
+slice_id: WHISTLEBLOWER-EINE-TABELLE
+id: WHISTLEBLOWER-EINE-TABELLE
+title: Hinweisgebermeldungen bekommen eine Migration, eine Form und einen Mandanten
+status: abgeschlossen
+owner: Claude Code
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+coordination: >
+  compliance_whistleblower_lksg.py blieb unveraendert — es schrieb schon
+  tenant_id und description und filterte korrekt. Angefasst wurden nur die
+  neue Migration und compliance_whistleblower.py.
+goal: >
+  Die Tabelle kommt aus einer Migration statt aus Laufzeit-DDL, traegt eine
+  Form statt zweier unvereinbarer, und keine Meldung ist mehr aus einem
+  fremden Haus lesbar.
+file_ownership:
+  - alembic/versions/whistleblower_eine_tabelle_20260930.py
+  - app/api/v1/endpoints/compliance_whistleblower.py
+  - tests/test_whistleblower_vertraulichkeit.py
+  - docs/quality-assurance/whistleblower-eine-tabelle-2026-09-30.md
+acceptance:
+  - Sechs Vertraege gruen gegen den frischen UND den gewachsenen Stand
+  - Kein CREATE TABLE mehr im Endpunkt
+  - Beide Endpunkte schreiben dieselbe Tabelle
+  - Ein fremder Token gibt dieselbe Antwort wie ein unbekannter
+tests:
+  - tests/test_whistleblower_vertraulichkeit.py
+risks:
+  - Vertraulichkeit nach EU-Hinweisgeberrichtlinie Art. 16
+  - Bestandszeilen ohne Mandanten lassen sich nicht zuordnen
+  - Die Routen haben sich geaendert; im Repo gab es keinen Aufrufer
+ai_harness:
+  fachlicher_vertrag: >
+    Ein Hinweis bleibt im Haus, in dem er eingereicht wurde. Weder Liste noch
+    Statusabfrage noch Bearbeitung reichen darueber hinaus, und der
+    Unterschied zwischen "gibt es nicht" und "gehoert einem anderen" ist von
+    aussen nicht erkennbar.
+  architektur_vertrag: >
+    Die Tabelle kommt aus einer Migration, nicht aus einem CREATE TABLE im
+    Endpunkt. Ein eigenes Praefix trennt die Routen vom Auswertungs-Namensraum.
+    Die LkSG-Routen bleiben, wo sie sind.
+  daten_vertrag: >
+    tenant_id wird NOT NULL nur, wenn keine Zeile ohne ihn steht — einen
+    Mandanten zu erraten hiesse, eine Meldung dem falschen Haus zuzuordnen.
+    report_token wird nullbar, weil der LkSG-Weg keinen vergibt. Altspalten
+    (description_encrypted, submitted_at) werden nachgefuellt, nicht geloescht.
+  test_vertrag: >
+    Sechs HTTP-Vertraege mit zwei Mandanten, gruen gegen beide
+    Datenbankstaende. Die Injektion wird mit einem Wortlaut geprueft, der
+    Anfuehrungszeichen, eine eingebettete JSON-Struktur und einen
+    Backslash enthaelt.
+  security_vertrag: >
+    Mandantenfilter in jeder Abfrage; gleiche Antwort fuer unbekannt und
+    fremd; Notiz ueber json.dumps statt f-String. Die Meldung steht weiter im
+    Klartext — die Spalte heisst deshalb description und nicht mehr
+    description_encrypted.
+  betriebs_vertrag: >
+    Rollback = Commit reverten; das downgrade nimmt nur die Mandantenpflicht
+    und die Indizes zurueck und loescht keine Zeile.
+  dokumentations_vertrag: >
+    docs/quality-assurance/whistleblower-eine-tabelle-2026-09-30.md mit allen
+    fuenf Befunden, Workboard, Open-Gaps.
+external_gates:
+  - not_applicable

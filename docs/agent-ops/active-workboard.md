@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## WHISTLEBLOWER-EINE-TABELLE-20260930 — reserviert, Claude Code
+## WHISTLEBLOWER-EINE-TABELLE-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** `domain_compliance.whistleblower_reports` bekommt eine Migration, einen
 Mandantenbezug und **eine** Form. Heute schreiben zwei Endpunkte dieselbe
@@ -37,11 +37,19 @@ fuehrt:
    Anfuehrungszeichen in der Notiz zerlegt die Struktur (JSON-Injektion aus
    einem Hinweisgeberformular).
 Dazu: Die Spalte heisst `description_encrypted`, bekommt aber Klartext.
-**Abnahme:** Eine Migration mit `tenant_id NOT NULL`; beide Endpunkte auf
-dieselbe Form und mit Mandantenfilter; die Notiz ueber `json.dumps`; kein
-`CREATE TABLE` mehr im Endpunkt; Vertragstests gegen den frischen Pruefstand,
-die den mandantenuebergreifenden Zugriff und die Injektion ausdruecklich
-pruefen.
+**Fuenfter Befund, beim Arbeiten dazugekommen:** Der Router hatte **kein
+Praefix**. Die Routen lagen unter `/api/v1/reports` — im selben Namensraum wie
+`/api/v1/reports/sales-performance`. Ein `GET /api/v1/reports` lieferte
+Hinweisgebermeldungen, wo jemand eine Auswertung erwartete. Jetzt
+`/compliance/hinweisgeber`; im Repo gab es keinen Aufrufer der alten Pfade.
+**Abnahme:** erfuellt. Migration `whistleblower_eine_tabelle_20260930`, sechs
+Vertraege gruen gegen den frischen **und** den gewachsenen Stand.
+`compliance_whistleblower_lksg.py` blieb unveraendert — es war die richtige
+Seite.
+**Beim Probelauf gegen die gewachsene Datenbank gefunden:** Dort war
+`report_token` NOT NULL (aus der Laufzeitfassung), der LkSG-Weg vergibt aber
+keinen. Die Migration loest das; gegen die frische Datenbank allein waere es
+nicht aufgefallen.
 **Risiken:** Vertraulichkeit nach der EU-Hinweisgeberrichtlinie (Art. 16) —
 ein mandantenuebergreifender Lesezugriff ist kein Schoenheitsfehler. Die
 Umstellung beruehrt zwei Endpunkte verschiedener Slices; bei Bestandsdaten ohne
