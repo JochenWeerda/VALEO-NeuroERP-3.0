@@ -34,7 +34,7 @@ in CI.
 eine zu weite statische Suche erzeugt Rauschen statt Funden.
 
 
-## MERIDIAN-BELEG-RESTPUNKTE-20260930 — reserviert, Cursor
+## MERIDIAN-BELEG-RESTPUNKTE-20260930 — in Arbeit, Cursor
 
 **Ziel:** Restpunkte aus MERIDIAN-BELEG-SYSTEMWEIT schließen: fachliche Reklamationsnummer,
 Text-IDs in den Registern der Rollout-Masken, Pilotseiten auf den gemeinsamen Masken-Runtime.
@@ -43,6 +43,11 @@ Text-IDs in den Registern der Rollout-Masken, Pilotseiten auf den gemeinsamen Ma
 Hunk), `features/mask-pilot/`, Pilot-Schalter in `order-editor.tsx`, `KontraktDetailRoute.tsx`,
 `kunden-stamm-modern.tsx`, `MaskBenchmarkRoute.tsx`, Pilotseiten und ihre Tests.
 **Abnahme:** siehe [Slice](slices/MERIDIAN-BELEG-RESTPUNKTE-20260930.yaml).
+**Zwischenstand 2026-09-30:** Reklamationsnummer `REK-JJJJ-NNNNN` je Mandant
+und Geschaeftsjahr sowie Text-IDs fuer nicht UUID-basierte Rollout-Masken sind
+implementiert. 95 Reklamations-/Belegtests, 39 Maskenbackendtests und der
+Feldvertrag mit 604/0 bestanden. Offen bleiben der Umzug der drei Pilotseiten
+auf `useUniversalMaskRuntime` und deren Frontend-/Browser-Abnahme.
 
 ## DB-PRUEFSTAND-20260930 — abgeschlossen, Claude Code
 
@@ -156,7 +161,7 @@ Readiness); `VirtualDataTable` Scrollleisten-Rinne statt doppelter Leiste;
 `sales_orders.py` `customer_name` in der Einzelabfrage + `_fetch_customer_name` liest
 `domain_crm.customers` (vorher falsche Tabelle/Spalte, Fehler still geschluckt);
 `renderers/status-labels.ts` (neu) in `FastTableRenderer`/`FieldRenderer`; Tabellenprofil-
-Text entfernt (`meridian-visual-audit.spec.ts` angepasst); `debitoren.test.tsx` lokal nachgezogen (haengt an der fremden, noch nicht committeten `debitoren.tsx` und ist nicht Teil dieses Commits).
+Text entfernt (`meridian-visual-audit.spec.ts` angepasst); `debitoren.test.tsx` repariert.
 **Abnahme 3:** Vitest ui + Mask-Builder + Debitoren 192/192, RenderPlan 27/27; pytest
 34/34 (`test_sales_orders_api.py` inkl. Kundenname-Vertrag, Habit-Bridge 16/16); Feldvertrag
 591/0; Handbuch aktuell; `tsc` 0. Browser: SO-00064, DEMO-PO-001, RE-95AB198A45 (1440 + 390 px).
@@ -169,7 +174,8 @@ vervollständigt; Boolean Ja/Nein in `FieldRenderer`.
 Habit-Bridge); Vitest 216/216; Feldvertrag 594/0; Handbuch aktuell; `tsc` 0.
 Browser: DEMO-LS-001 (Kopf ohne UUID), SO-00064 (Name + KD-10001).
 **Risiken:** keine offenen Restpunkte (Open-Gaps § MERIDIAN-BELEG-ONEPAGE).
-Kein Claim-Commit, weil der Arbeitsbaum fremde Änderungen enthält; selektiv committet (nur eigene Hunks).
+Kein Claim-Commit, weil der Arbeitsbaum fremde Änderungen enthielt; die Lieferung
+ist inzwischen auf `main` integriert.
 
 ## DOC-SLICE-METADATA-PORTAL-20260929 — abgeschlossen, Codex
 
@@ -183,7 +189,6 @@ YAML-, Slice- und Doku-Gates sind gruen.
 des abgeschlossenen Portal-Slices blieben unveraendert.
 [QA](../quality-assurance/business-time-portal-slice-metadata-20260929.md).
 
-
 ## DOC-OPENAPI-CI-FAIL-CLOSED-20260929 — abgeschlossen, Codex
 
 **Ziel:** OpenAPI-Drift in CI nur pruefen und bei Abweichung fehlschlagen lassen,
@@ -195,7 +200,6 @@ roten Job; kein `git commit`, `git push` oder Regenerationsschritt in Actions.
 **Ergebnis:** Der Workflow ist read-only und fail-closed. Die Spec wird mit der
 verursachenden API-Aenderung ueber den normalen Review-/Merge-Weg geliefert.
 [QA](../quality-assurance/openapi-drift-fail-closed-20260929.md).
-
 
 ## BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929 — abgeschlossen, Codex
 
@@ -367,6 +371,21 @@ HTTP-404 bei unbekanntem Tool und funktionierendem angeschlossenem Handler.
 **Offen:** echte MCP-Schreibadapter mit Auth, Tenant, Approval und Audit.
 Das Gesamtziel UIX/MCP ist weiterhin in Arbeit.
 
+## MCP-WRITE-INVOICE-PROPOSE-20260929 — abgeschlossen 2026-09-30, Cursor
+
+**Ziel:** `sales.invoice.propose` speichert einen ausstehenden Rechnungsvorschlag
+aus einem gebuchten Lieferschein. Der Aufruf bucht keine Rechnung.
+**Dateibesitz:** `app/services/mcp_execution_service.py`,
+`tests/test_mcp_execution.py`, `config/mcp_erp_tools.yaml`,
+generierte MCP-Referenz, QA-Doku, dieser Abschnitt.
+**Abnahme:** `execute` und ein Freigabe-Boolean buchen nicht; `propose` schreibt
+`agent_proposals` mit `pending`; `dryRun` schreibt nicht. 20 Tests in
+`tests/test_mcp_execution.py` gruen.
+[QA](../quality-assurance/mcp-invoice-propose-20260929.md).
+**Ergebnis:** Der Rechnungsvorschlag ist mit Scope-, Tenant-, Idempotenz-, Audit-
+und Replay-Vertrag angebunden. Buchen bleibt der menschliche Lieferschein-Pfad;
+weitere Tools ohne Adapter sind eigenstaendige Folgeslices.
+
 ## UIX-SM-TOUCH-20260921 — abgeschlossen, Codex
 
 **Ziel:** Gemeinsame kleine Button-Variante mit mindestens 44 px Hoehe,
@@ -423,7 +442,8 @@ Ablage: Export umgeht den Global-Intercept, Folgezeile nur Desktop.
 KIM, Auftrag, Rechnung und Lieferschein: size=sm weg, Schaltflaechen 44 px, Struktur bleibt Claude.
 Register-Tabs zentral `min-h-touch`. ELSTER und Bankabgleich: Arbeit zuerst, Theater nur Desktop.
 Sprache findet elster-online und bankabgleich.
-Naechste: MCP-Write.
+`sales.invoice.propose` speichert einen ausstehenden Rechnungsvorschlag und bucht nicht.
+Naechste: weitere MCP-Schreibadapter.
 
 **Ziel:** Produktive Einstiege per Finger, Stimme und ehrlichem Agent-Vertrag
 bedienbar machen; Lücken dokumentieren statt Dynamics-MCP vortäuschen.
@@ -500,7 +520,8 @@ bedienbar machen; Lücken dokumentieren statt Dynamics-MCP vortäuschen.
 **Abnahme:** 390 px Start ohne gequetschte 16-px-Icons; Sprache sichtbar;
 Kunden- und Queue-CTAs ≥44 px; Doku nennt, was MCP nicht kann.
 Ablage-Export, KIM/Belege 44 px, ELSTER und Bankabgleich Arbeit-zuerst sind
-auf main (`e7aa92913`). Naechste Abnahme ist MCP-Write.
+auf main (`e7aa92913`). `sales.invoice.propose` bucht nicht.
+Naechste Abnahme: weitere MCP-Schreibadapter.
 
 ## HOME-BELEG-FIRST — Flow Spine von der Startseite 2026-09-17, Cursor
 
@@ -569,11 +590,12 @@ mit Zeilenform, `ZEILEN_NICHT_PRUEFBAR_MAX = 27`. Auftrag, Rechnung und
 
 ## MASK-FELDVERTRAG-GENERIC-STUBS — letzte 17 Zeilenformen 2026-09-17, Cursor
 
-**Stand:** umgesetzt, nicht committed. Claude hat 17 gemessen, die Schwelle
+**Stand:** abgeschlossen 2026-09-30. Claude hat 17 gemessen, die Schwelle
 stand bei 27 — jetzt 0. Sechs leere `/masks/`-Register und elf
 `/mask-rollouts/`-Catch-alls mit eigener Route und Zeilenform. R5 bleibt
 Produktentscheidung. `crm_360.py` und DSGVO-Loeschweg bleiben Claude.
-Commit `2f044dbb7` (Betreff `@`) wird nicht force-gepusht.
+Nachweis: 39 Maskenbackendtests gruen; Feldvertrag 604/0 und keine untypisierte
+Kopf- oder Tabellenquelle.
 
 **Dateibesitz:** `mask_entity_contracts.py`, `mask_screen_definition.py`,
 `mask_rollout_summaries.py`, `mask_rollout_summary_service.py`, Gate-Tests.

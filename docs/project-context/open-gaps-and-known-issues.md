@@ -43,12 +43,30 @@ Status: **abgeschlossen, Restpunkte offen.** Slice
 
 | Lücke | Prio | Stand |
 |---|---|---|
-| Reklamation ohne fachliche Nummer; `reklamation_nr` ist der Primärschlüssel mit Präfix | P2 Qualität | offen |
+| Reklamation ohne fachliche Nummer; `reklamation_nr` ist der Primärschlüssel mit Präfix | P2 Qualität | geschlossen 2026-09-30: `REK-JJJJ-NNNNN` je Mandant und Geschaeftsjahr, Bestand migriert |
 | Pilotseiten (`usePilotRenderPlan`: Auftrag, Kontrakt, Kunde-Altpfad) laden nur das aktive Register und erzwingen deshalb `tabs` | P2 UIX | offen, Umzug auf `useUniversalMaskRuntime` |
-| Register-Endpunkte `mask-rollouts/*/tabs/*` verlangen UUIDs, Ernteabrechnungen haben Text-IDs; die Register bleiben dann leer mit Fehlermeldung | P2 Agrar | offen (`mask_rollout_summary_service.py`, fremder Dateibesitz) |
+| Register-Endpunkte `mask-rollouts/*/tabs/*` verlangen UUIDs, Ernteabrechnungen haben Text-IDs; die Register bleiben dann leer mit Fehlermeldung | P2 Agrar | geschlossen 2026-09-30: Text-IDs fuer textbasierte Masken, UUID-Pruefung nur fuer Bestellung und Lieferant |
 | Verkaufschance: Kopfdaten kommen aus dem externen crm-sales-Dienst; Browser-Abnahme ohne Dev-Daten, nur HTTP-Vertrag | P3 | offen |
 | Futteranalyse-Tests hinterlassen Daten im Dev-Mandanten (wie die bestehenden Tests) | P3 | offen |
 | Fremd, nicht Teil des Slices: `test_sales_invoices_api.py` (Kunden ohne `company_name`), `test_feed_advice_screen_definition.py::test_feeding_businesses_are_a_native_grant_aware_worklist` (erwartet Layout ohne `columnNavigation`) | P2 | offen |
+
+## EK-BESTELLUNG-FUEHREND — Native Maske gegen L3 (2026-09-18)
+
+Status: **abgeschlossen 2026-09-29.** Slice
+[`docs/agent-ops/slices/EK-BESTELLUNG-FUEHREND-20260918.yaml`](../agent-ops/slices/EK-BESTELLUNG-FUEHREND-20260918.yaml).
+Die native Maske `einkauf/purchase-order` ist die fuehrende Bestellmaske
+(L3-Kopf, Positionsgrid, drei Bestellfaelle). Die Vereinheitlichung der beiden
+Bestandsspeicher Compat-`purchase-orders` und `domain_einkauf.bestellungen`
+ist ein eigener Folgeslice. Keine fuenfte Custom-Seite. HOME-UIX bleibt
+Besitzer von `bestellungen-liste.tsx`.
+
+| Luecke | Prio | Stand |
+|---|---|---|
+| Bestellkopf ohne Ladetermin, Kontrakt, Skontostaffel, Ansprechpartner | P1 Einkauf | geschlossen in der nativen SD + ORM |
+| Position ohne Lief-Artikel, Gebinde, Gewicht, Lagerfach | P1 Einkauf | geschlossen in der nativen SD + ORM |
+| Drei Bestellfaelle (Bestand/Abverkauf, Direktlieferung, Innovation) | P1 Einkauf | geschlossen als `bestellfall` |
+| Zwei Speicher Compat vs `domain_einkauf` | P1 Einkauf | ausserhalb dieses Slices; eigener Folgeslice |
+| `bestellung-stamm` neben native | P2 | bewusst Compat-Bruecke, nicht fuehrend |
 
 ## HOME-UIX-ANWENDER-BEDIENWEGE — Touch, Sprache, Agent (2026-09-17)
 
@@ -82,7 +100,8 @@ Listen-Kartenstapel gilt für DataTable, ListReport und FastTable; form-level MC
 Commit `e7aa92913`: Ablage-Export ohne Global-Intercept; KIM, Auftrag, Rechnung
 und Lieferschein 44 px bei unveränderter Claude-Struktur; Register-Tabs
 `min-h-touch`; ELSTER und Bankabgleich Arbeit zuerst, Theater nur Desktop;
-Sprache findet `elster-online` und `bankabgleich`. MCP-Write bleibt offen.
+Sprache findet `elster-online` und `bankabgleich`. `sales.invoice.propose` legt einen
+ausstehenden Vorschlag an und bucht keine Rechnung. Weitere MCP-Schreibadapter bleiben offen.
 
 | Lücke | Prio | Stand |
 |---|---|---|
@@ -146,7 +165,7 @@ Sprache findet `elster-online` und `bankabgleich`. MCP-Write bleibt offen.
 | Chargen/Futter/Zertifikate/Versicherungen/Projekte/Förderung/Schäden Hover-Blau | P1 Betrieb | geschlossen |
 | Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
 | Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
-| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | dokumentiert, nicht gebaut |
+| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Kontakt-Log und Rechnungsvorschlag angebunden; Rechnung buchen und übrige Schreibtools offen |
 | KIM Object Page | P1 | Claude Sprint 3 |
 | Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
 | Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |
@@ -154,7 +173,7 @@ Sprache findet `elster-online` und `bankabgleich`. MCP-Write bleibt offen.
 | KIM/Auftrag/Rechnung/Lieferschein `size=sm` unter 44 px | P1 Innendienst | geschlossen 2026-09-29; Struktur bleibt Claude |
 | ELSTER Theater vor den Schritten | P1 Buchhaltung | geschlossen 2026-09-29; Sprache `elster-online` |
 | Bankabgleich Theater vor der ObjectPage | P1 Buchhaltung | geschlossen 2026-09-29; Sprache `bankabgleich` |
-| Übrige Fachmasken Seite für Seite | P1 | Slice weiter; MCP-Write offen |
+| Übrige Fachmasken Seite für Seite | P1 | Slice weiter; weitere MCP-Schreibadapter offen |
 
 ## HOME-IA-HIERARCHIE — Startseite zu viele Ebenen gleichzeitig (2026-09-17)
 
@@ -572,7 +591,7 @@ Dritte Runde (2026-09-29):
   Nur-Lese-Felder mit Schlüssel `status`; Unbekanntes bleibt stehen.
 - ~~„Standard Table Profile“~~ unter jeder Tabelle entfernt (interne Klassifikation,
   englisch); maschinenlesbar bleibt `data-table-profile`.
-- ~~`debitoren.test.tsx`~~ → an die neue Unterzeile angepasst, Suchfilter-Test ergänzt; haengt an der fremden, noch nicht committeten `debitoren.tsx` und ist nicht Teil dieses Commits.
+- ~~`debitoren.test.tsx`~~ → an die neue Unterzeile angepasst, Suchfilter-Test ergänzt.
 
 Vierte Runde (2026-09-29) — Rest geschlossen:
 
@@ -940,7 +959,7 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - **WM-AGRI-QS-003 (2026-06-18):** Backend-Kontrakt `POST /supply-chain/lots/{lot_id}/qs-transition` fuer Labor-/Lager-/Produktions-QS mit Pflichtgrund, Bediener, Probe/Analyse/Dokument, GMP+/VLOG-Payload, Update `silo_lots.status`, Rueckkopplung `silo_cells.qs_status` und append-only `supply_chain_events`. **WM-AGRI-QS-004 (2026-06-23):** Leitstand-UI `lager/qs-leitstand`, Worklist `GET /supply-chain/qs-worklist`, Freigabe-Vorschlag `GET …/qs-release-suggest` inkl. deterministischer Produktionsfreigabe-Regeln.
 - **FEED-CHAIN-004 (2026-06-23):** Einzelfuttermittel ↔ `domain_inventory.articles` (`inventory_article_id`); bei Mischfutter-Produktionsfreigabe/Storno kanonische `inventory_stock_movements` (`feed_production`); API `GET/POST /produktion/mischfutter/inventory-links`. **FEED-CHAIN-004.5:** UI-Verknüpfung auf `mischfutter-produktion`. **FEED-CHAIN-004.6 (2026-09-11):** `GET …/inventory-links` zählte `total`/`mapped_count`/`unmapped_count` auf der per `LIMIT` abgeschnittenen Seite — bei 558 aktiven Einzelfuttermitteln meldete die Oberfläche „0/100 verknüpft" und entwarnte fälschlich mit „Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft". Zähler kommen jetzt aus einer Aggregatabfrage über den Mandantenbestand, die Seite aus `limit`/`offset` mit Filter `mapped`; Antwort nennt zusätzlich `limit`, `offset`, `returned`, `filter_mapped`. Die UI lädt offene Verknüpfungen serverseitig (`mapped=false`). Die frühere Diagnose „Test hängt an fehlenden Seed-Daten" (Workboard-Übergabe, POS-FIBU-CLEANUP-20260910) war falsch.
 - UX-Paritaet wird ueber [ux-excellence-operating-standard-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/ux-excellence-operating-standard-2026-05-13.md) gefuehrt. Stand 2026-05-16: systemweiter UX-Baukasten-Rollout abgeschlossen.
-- **BUSINESS-TIME-001 (2026-09-11):** Buchungsdaten kamen aus `datetime.utcnow().date()`. Da `period` als `YYYY-MM` aus `entry_date` gebildet wird, buchte das System zwischen 00:00 und 02:00 Ortszeit (MESZ) auf den Vortag — am Monatsersten in die Vorperiode. In CI unsichtbar, weil der Workflow `TZ: UTC` setzt. Behoben über `app/core/business_time.py` (`business_today()`, `business_now()`, pure `business_date_at()`; Zeitzone via `BUSINESS_TIMEZONE`, Standard `Europe/Berlin`) für alle buchungs- und periodenrelevanten Stellen: `sales_posting_service`, `harvest_acceptance_service`, `procurement_service`, `ap_invoice_kernel_posting`, `finance/router` (IC-Gegenbuchung), `inventory_service` (Bewegungsdatum/-zeit), `agrar_settlement_service`, `settlement_drying_service`. **Abgeschlossen:** Die fachlichen Demo-/Fallback-Daten in `ocr_invoice.py`, `atlas_customs_service.py` und `security/compliance_monitor.py` verwenden seit `BUSINESS-TIME-DEMO-PLACEHOLDERS-20260929` ebenfalls `business_today()`. Die Zulassungsablauf-Vergleiche in `domains/agrar/api/{psm,saatgut,duenger}.py` sind seit `BUSINESS-TIME-AGRAR-VALIDITY-20260929` auf `business_today()` umgestellt. Portal-Shop, `/tours/today` und HR-Retention/-Defaults sind seit `BUSINESS-TIME-PORTAL-20260929`, `BUSINESS-TIME-TOURS-20260929` beziehungsweise `BUSINESS-TIME-HR-20260929` auf `business_today()` umgestellt und mit UTC-/Ortsdatum-Grenzfaellen abgesichert. Technische Verarbeitungs-, Audit- und Ereigniszeitpunkte bleiben absichtlich UTC.
+- **BUSINESS-TIME-001 (2026-09-11):** Buchungsdaten kamen aus `datetime.utcnow().date()`. Da `period` als `YYYY-MM` aus `entry_date` gebildet wird, buchte das System zwischen 00:00 und 02:00 Ortszeit (MESZ) auf den Vortag — am Monatsersten in die Vorperiode. In CI unsichtbar, weil der Workflow `TZ: UTC` setzt. Behoben ueber `app/core/business_time.py` (`business_today()`, `business_now()`, pure `business_date_at()`; Zeitzone via `BUSINESS_TIMEZONE`, Standard `Europe/Berlin`) fuer alle buchungs- und periodenrelevanten Stellen. **Abgeschlossen:** Demo-/Fallbackdaten, agrarische Zulassungsablauf-Vergleiche, Portal-Shop, `/tours/today` sowie HR-Retention/-Defaults verwenden die fachliche Zeit und sind mit UTC-/Ortsdatum-Grenzfaellen abgesichert. Technische UTC-Zeitstempel bleiben bewusst UTC.
 
 ---
 

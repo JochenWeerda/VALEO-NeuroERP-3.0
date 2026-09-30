@@ -36,6 +36,7 @@ import {
 
 type ReklamationDetail = {
   reklamation_id: string
+  reklamation_nr: string
   tenant_id: string
   kontrakt_id: string | null
   lieferant_id: string
@@ -309,7 +310,7 @@ export default function ReklamationDetailPage(): JSX.Element {
             <span className="sr-only">Zurück zur Liste</span>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold md:text-3xl">Reklamation {reklamation.reklamation_id.slice(0, 8)}</h1>
+            <h1 className="text-2xl font-bold md:text-3xl">Reklamation {reklamation.reklamation_nr}</h1>
             <p className="text-muted-foreground">
               Typ: {reklamation.typ} | Lieferant: {reklamation.lieferant_id}
             </p>
@@ -367,7 +368,7 @@ export default function ReklamationDetailPage(): JSX.Element {
       {!isTouch ? (
       <>
       <OperationalCaseHeader
-        title={`Reklamation ${reklamation.reklamation_id.slice(0, 8)}`}
+        title={`Reklamation ${reklamation.reklamation_nr}`}
         description="Reklamationsvorgang mit SLA, CRM, DMS und Audit."
         status={reklamation.ist_ueberfaellig ? 'eskaliert' : normalizeOperationalStatus(reklamation.status)}
         owner={reklamation.zustaendiger || 'Qualität / Service'}
@@ -441,8 +442,8 @@ export default function ReklamationDetailPage(): JSX.Element {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span className="text-muted-foreground">Reklamations-ID</span>
-                  <span className="font-medium">{reklamation.reklamation_id.slice(0, 8)}</span>
+                  <span className="text-muted-foreground">Reklamationsnummer</span>
+                  <span className="font-medium">{reklamation.reklamation_nr}</span>
                   <span className="text-muted-foreground">Typ</span>
                   <span className="font-medium">{reklamation.typ}</span>
                   <span className="text-muted-foreground">Status</span>

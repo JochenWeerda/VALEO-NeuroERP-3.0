@@ -49,6 +49,10 @@ nachrangig). UIX-060 (Suche) und UIX-061 (Rollen) nähren
 [`launchpad-informationshierarchie.md`](launchpad-informationshierarchie.md),
 ersetzen Sprint 3 (KIM Object Page) nicht.
 
+Nachzug 2026-09-17: Touch/Sprache/MCP der produktiven Einstiege in
+[`uix-anwender-bedienwege.md`](uix-anwender-bedienwege.md). Omnibox bleibt
+⌘K am Desktop; auf dem Handy heißt die Suche nur noch „Suche“.
+
 ### Slices
 
 **UIX-060 Omnibox-Shell + Intent-Vorschau (Read-only)**

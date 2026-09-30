@@ -989,14 +989,14 @@ Gibt Status und Pruefprotokoll eines GoBD-Exports zurueck.
 
 ### `sales.invoice.propose` — Rechnungsvorschlag aus Lieferschein
 
-Erzeugt einen Rechnungs-Entwurf aus einem abgeschlossenen Lieferschein. Erfordert Human Approval.
+Legt einen ausstehenden Rechnungsvorschlag zu einem gebuchten Lieferschein an. HTTP-Aufruf an POST /api/v1/mcp/tools/call mit tool_name=sales.invoice.propose. Default dryRun liest nur Summen. propose speichert agent_proposals mit approval_status pending und bucht keine Rechnung. execute ist nicht angebunden. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit sales:write und tenant_id erforderlich.
 
 - **Scope:** `sales:write`
 - **Idempotent:** nein
 - **Risikoklasse:** hoch
 - **Audit:** write
 - **Human-Approval erforderlich:** ja
-- **Endpoint:** `POST /api/v1/sales-invoices/propose`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 

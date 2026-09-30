@@ -117,7 +117,7 @@ export default function ReklamationenPage(): JSX.Element {
     },
     {
       key: 'kunde' as const,
-      label: 'Kunde',
+      label: 'Lieferant',
       render: (r: Reklamation) => (
         <div>
           <div className="font-medium">{r.kunde}</div>
@@ -161,7 +161,7 @@ export default function ReklamationenPage(): JSX.Element {
   }
 
   const handleExport = (): void => {
-    const header = 'Nummer;Kunde;Artikel;Grund;Datum;Prioritaet;Status\n'
+    const header = 'Nummer;Lieferant;Artikel;Grund;Datum;Prioritaet;Status\n'
     const esc = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`
     const rows = list
       .map((entry) =>
@@ -227,7 +227,7 @@ export default function ReklamationenPage(): JSX.Element {
               <Input
                 ref={searchInputRef}
                 aria-label="Suche Reklamationen"
-                placeholder="Nummer, Kunde, Grund oder Artikel suchen"
+                placeholder="Nummer, Lieferant, Grund oder Artikel suchen"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="min-h-touch pl-10"

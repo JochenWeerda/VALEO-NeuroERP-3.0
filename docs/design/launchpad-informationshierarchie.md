@@ -185,3 +185,7 @@ UIX-061 (Rollen-Workspaces) nährt Sprint 1/2, ersetzt sie nicht. Die Omnibox
 - App-Finder: Kategorie und Beschreibung, auch ohne Anpassen-Modus.
 - Keine Statusfarbe ohne fachliche Ausnahme.
 - Keine erfundenen Heute-Zahlen.
+
+Touch, Sprache und Agent-Kanäle (was ein LLM per MCP wirklich darf) stehen in
+[`uix-anwender-bedienwege.md`](uix-anwender-bedienwege.md) — nicht in diesem
+Hierarchie-Schnitt.

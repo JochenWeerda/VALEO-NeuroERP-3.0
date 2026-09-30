@@ -3,9 +3,17 @@
 from __future__ import annotations
 
 from app.api.v1.schemas.mask_entity_contracts import (
+    ArticleStockBestandRowOut,
+    DuengerVerwendungRowOut,
+    EinkaufAnfragePositionRowOut,
+    FinanceOffenePostenRowOut,
+    OpportunityAktivitaetRowOut,
     ap_invoice_freigabe_zeilen,
     ap_invoice_mask_aliases,
     ap_invoice_position_aliases,
+    delivery_note_position_aliases,
+    opportunity_activity_aliases,
+    opportunity_quote_aliases,
     purchase_order_comm_aliases,
     purchase_order_position_aliases,
     supplier_contact_aliases,
@@ -145,3 +153,87 @@ def test_zeilenform_platzhalter_ist_nicht_pruefbar() -> None:
         },
     }
     assert _zeilenform(spec, spec["paths"]["/stub"]["get"]) is None
+
+
+def test_anfrage_zeile_nennt_die_maskenspalten() -> None:
+    assert set(EinkaufAnfragePositionRowOut.model_fields) >= {
+        "artikel_nr",
+        "bezeichnung",
+        "menge",
+        "einheit",
+    }
+
+
+def test_offene_posten_zeile_nennt_die_maskenspalten() -> None:
+    assert set(FinanceOffenePostenRowOut.model_fields) >= {
+        "beleg_nr",
+        "datum",
+        "faellig",
+        "betrag",
+        "status",
+    }
+
+
+def test_duenger_und_bestand_zeile_nennen_die_maskenspalten() -> None:
+    assert set(DuengerVerwendungRowOut.model_fields) >= {"datum", "flaeche", "menge", "einheit"}
+    assert set(ArticleStockBestandRowOut.model_fields) >= {
+        "lagerort_nr",
+        "lagerort_bezeichnung",
+        "bestand_menge",
+        "einheit",
+        "reserviert",
+        "mindestbestand",
+    }
+    assert set(OpportunityAktivitaetRowOut.model_fields) >= {
+        "datum",
+        "typ",
+        "betreff",
+        "verantwortlich",
+        "status",
+    }
+
+
+def test_opportunity_activity_spricht_die_maske() -> None:
+    aliased = opportunity_activity_aliases(
+        {"activity_type": "Anruf", "subject": "Rueckfrage", "due_date": "2026-09-17", "status": "offen"}
+    )
+    assert aliased["typ"] == "Anruf"
+    assert aliased["betreff"] == "Rueckfrage"
+    assert aliased["datum"] == "2026-09-17"
+    assert "verantwortlich" not in aliased or aliased.get("verantwortlich") is None
+
+
+def test_opportunity_quote_spricht_die_maske() -> None:
+    aliased = opportunity_quote_aliases(
+        {"quote_number": "ANG-1", "valid_until": "2026-10-01", "total_amount": 120.5, "status": "offen"}
+    )
+    assert aliased["angebot_nr"] == "ANG-1"
+    assert aliased["datum"] == "2026-10-01"
+    assert aliased["wert"] == 120.5
+
+
+def test_delivery_note_position_spricht_die_maske() -> None:
+    aliased = delivery_note_position_aliases(
+        {"pos_nr": 1, "artikel_id": "A-9", "bezeichnung": "Weizen", "menge": 4.0, "einheit": "t"}
+    )
+    assert aliased["pos_nr"] == 1
+    assert aliased["artikel_nr"] == "A-9"
+    assert aliased["menge"] == 4.0
+
+
+def test_operation_bevorzugt_dedizierten_mask_tab() -> None:
+    spec = {
+        "paths": {
+            "/api/v1/masks/{mask_id:path}/entity/{entity_id}/tabs/{tab_key}": {
+                "get": {"responses": {"200": {"id": "sammel"}}}
+            },
+            "/api/v1/masks/einkauf/anfragen/entity/{entity_id}/tabs/positionen": {
+                "get": {"responses": {"200": {"id": "anfrage"}}}
+            },
+        }
+    }
+    found = _operation(
+        spec, "/api/v1/masks/einkauf/anfragen/entity/{entity_id}/tabs/positionen"
+    )
+    assert found is not None
+    assert found["responses"]["200"]["id"] == "anfrage"

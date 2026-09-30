@@ -393,3 +393,8 @@ fünf Navigationsebenen gleichzeitig da waren. Sprint 1+2 der Hierarchie sind
 geliefert (`launchpad-informationshierarchie.md`): Prozessraum als Auswahl,
 Katalog ohne Anpassen, 44 px auf der Startfläche. Sprint 3 (KIM) bleibt Claude.
 Kein zweites Meridian, kein SAP-Lookalike.
+
+Nachzug 2026-09-17 (Anwender-Bedienwege): Die Start-Chrome war auf dem Handy
+nicht erstklassig (Mikrofon versteckt, Ctrl+K, gequetschte Icons). Schnitt
+und ehrlicher MCP-Stand stehen in
+[`uix-anwender-bedienwege.md`](uix-anwender-bedienwege.md).

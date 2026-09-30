@@ -15,8 +15,19 @@ from app.api.v1.schemas.base import TypedObjectOut
 from app.api.v1.schemas.mask_entity_contracts import (
     ApInvoiceFreigabeTabOut,
     ApInvoicePositionTabOut,
+    ArOpenItemAusgleichTabOut,
+    ArticleStockBestandTabOut,
+    ArticleStockBewegungTabOut,
+    DeliveryNoteDokumentTabOut,
+    DeliveryNotePositionTabOut,
+    HarvestSettlementAbzugTabOut,
+    HarvestSettlementPositionTabOut,
+    OpportunityAktivitaetTabOut,
+    OpportunityAngebotTabOut,
+    PaymentRunZahlungTabOut,
     PurchaseOrderCommTabOut,
     PurchaseOrderPositionTabOut,
+    StockMovementDetailTabOut,
     SupplierContactTabOut,
     SupplierOrderTabOut,
 )
@@ -232,6 +243,71 @@ async def get_ap_invoice_freigabe_tab(
         filter_plan=filter_plan, filter_plan_legacy=filter_plan_legacy,
         db=db, tenant_id=tenant_id,
     )
+
+
+_TYPED_ROLLOUT_TABS: tuple[tuple[str, str, type, str, str], ...] = (
+    ("crm/opportunity", "aktivitaeten", OpportunityAktivitaetTabOut, "Opportunity: Aktivitaeten", "get_opportunity_aktivitaeten_tab"),
+    ("crm/opportunity", "angebote", OpportunityAngebotTabOut, "Opportunity: Angebote", "get_opportunity_angebote_tab"),
+    ("lager/article-stock", "bestand", ArticleStockBestandTabOut, "Artikelbestand: Bestand", "get_article_stock_bestand_tab"),
+    ("lager/article-stock", "bewegungen", ArticleStockBewegungTabOut, "Artikelbestand: Bewegungen", "get_article_stock_bewegungen_tab"),
+    ("sales/delivery-note", "positionen", DeliveryNotePositionTabOut, "Lieferschein: Positionen", "get_delivery_note_positionen_tab"),
+    ("sales/delivery-note", "dokumente", DeliveryNoteDokumentTabOut, "Lieferschein: Dokumente", "get_delivery_note_dokumente_tab"),
+    ("finance/ar-open-item", "ausgleich", ArOpenItemAusgleichTabOut, "Offener Posten: Ausgleich", "get_ar_open_item_ausgleich_tab"),
+    ("lager/stock-movement", "details", StockMovementDetailTabOut, "Lagerbewegung: Details", "get_stock_movement_details_tab"),
+    ("agrar/harvest-settlement", "positionen", HarvestSettlementPositionTabOut, "Ernte-Abrechnung: Positionen", "get_harvest_settlement_positionen_tab"),
+    ("agrar/harvest-settlement", "abzuege", HarvestSettlementAbzugTabOut, "Ernte-Abrechnung: Abzuege", "get_harvest_settlement_abzuege_tab"),
+    ("finance/payment-run", "zahlungen", PaymentRunZahlungTabOut, "Zahlungslauf: Zahlungen", "get_payment_run_zahlungen_tab"),
+)
+
+
+def _register_typed_rollout_tabs() -> None:
+    """Eigene Route je Register, bevor der Catch-all die Zeilenform verschluckt."""
+    for screen_id, tab_key, model, summary, op_id in _TYPED_ROLLOUT_TABS:
+        def _make(bound_screen: str, bound_tab: str):
+            async def get_typed_tab(
+                entity_id: str,
+                page: int = Query(1, ge=1),
+                limit: int = Query(25, ge=1, le=50),
+                q: str | None = Query(None),
+                sort: str | None = Query(None),
+                sort_dir: str | None = Query(None, pattern="^(asc|desc)$"),
+                filter_plan: str | None = Query(None),
+                filter_plan_legacy: str | None = Query(None, alias="filterPlan", include_in_schema=False),
+                db: Session = Depends(get_db),
+                tenant_id: str = Depends(get_tenant_id),
+            ) -> dict[str, Any]:
+                return _tab_page(
+                    bound_screen,
+                    entity_id,
+                    bound_tab,
+                    page=page,
+                    limit=limit,
+                    q=q,
+                    sort=sort,
+                    sort_dir=sort_dir,
+                    filter_plan=filter_plan,
+                    filter_plan_legacy=filter_plan_legacy,
+                    db=db,
+                    tenant_id=tenant_id,
+                )
+
+            return get_typed_tab
+
+        handler = _make(screen_id, tab_key)
+        handler.__name__ = op_id
+        handler.__qualname__ = op_id
+        router.add_api_route(
+            f"/{screen_id}/{{entity_id}}/tabs/{tab_key}",
+            handler,
+            methods=["GET"],
+            response_model=model,
+            summary=summary,
+            name=op_id,
+            operation_id=op_id,
+        )
+
+
+_register_typed_rollout_tabs()
 
 
 @router.get(

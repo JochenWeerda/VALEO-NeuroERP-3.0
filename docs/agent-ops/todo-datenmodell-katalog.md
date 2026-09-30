@@ -178,10 +178,53 @@ und sprechen nicht die Maske.
 - [x] `einkauf/purchase-order` Positionen + Kommunikation
 - [x] `einkauf/supplier` Bestellungen + Kontakte
 - [x] `finance/ap-invoice` Positionen + Freigabe-Stand
-- [ ] Leere `/masks/.../tabs/`-Stubs — naechster Claim
+- [x] Leere `/masks/.../tabs/`-Stubs — P9
 
 **Abnahme:** `ZEILEN_NICHT_PRUEFBAR_MAX = 43`. Abweichungen 0. Keine
 Rechnungs- oder Auftragsdateien.
+
+### P9 — Leere Bruecken-Tab-Stubs — erledigt 2026-09-17
+
+Die restlichen P4-Bruecken haben Tabellenregister am Catch-all
+(`TypedObjectOut`). Eigene Route, eigene Zeilenform, leere `items` — das Gate
+sieht die Spalten, die Maske bekommt weiter eine leere Tabelle.
+
+- [x] Anfrage, Angebot, Anlieferavis, Auftragsbestaetigung: Positionen
+- [x] Bankkonto: Buchungen; Debitor: offene Posten + Umsaetze;
+      Kreditor: offene Posten + Bestellungen
+- [x] Mischfuttermittel: Rezeptur + Naehrstoffe; Reklamation: Massnahmen +
+      Dokumente
+- [x] `screen_definitions.py`, Auftrag und Rechnung unangetastet
+
+**Abnahme:** `ZEILEN_NICHT_PRUEFBAR_MAX = 27`. Abweichungen 0.
+
+### P10 — Generische `/masks/`- und `/mask-rollouts/`-Stubs — erledigt 2026-09-17
+
+Die gemessenen 17 Restquellen (Claude: Schwelle 27, gemessen 17, Datei in
+Cursors Baum) sind typisiert. Sechs leere `/masks/`-Register (Duenger,
+Saatgut, Lead) und elf `/mask-rollouts/`-Catch-alls mit bestehendem Loader.
+Aliase nur aus vorhandenen Spalten. Keine erfundene Waehrung, kein
+Mindestbestand, keine Fake-Ernteposition. R5 (SEPA, POS-Huelle, Budget,
+Personalstamm) nicht angefasst. `crm_360.py`, DSGVO, Auftrag, Rechnung,
+`screen_definitions.py` unangetastet.
+
+- [x] `agrar/duenger` Verwendung + Preise; `agrar/saatgut` Lager + Vertraege
+- [x] `crm/lead` Aktivitaeten + Aufgaben (URL-Plural `leads`)
+- [x] Opportunity, Artikelbestand, Lieferschein, OP-Ausgleich,
+      Lagerbewegung, Ernte-Abrechnung, Zahlungslauf
+- [x] `ZEILEN_NICHT_PRUEFBAR_MAX = 0`
+
+**Abnahme:** Abweichungen 0. Keine Luft in der Ratsche.
+
+### P11 — Fuehrende Einkaufsbestellung gegen L3 — in Arbeit 2026-09-18
+
+Feldvertrag gegen sich selbst war blind: Maske und Endpunkt liessen dieselben
+L3-Felder weg. Messung gegen `docs/data/l3/raw_tables.json` und die Captures.
+
+- [x] Native `einkauf/purchase-order` als fuehrende Maske (kein fuenftes Custom)
+- [x] Bestellfall Bestand/Abverkauf, Direktlieferung, Innovation
+- [x] Ladetermin, Skontostaffel, Kontrakt, Lief-Artikel, Gebinde, Gewicht
+- [ ] Compat-`purchase-orders` und `domain_einkauf.bestellungen` zusammenlegen
 
 ### P6 — Optional nach P1–P3 — nicht starten
 
@@ -211,6 +254,6 @@ Owner an Tabellen, die der Check nicht sieht.
 
 ## Einstieg fuer den naechsten Slice
 
-Datei: `docs/agent-ops/slices/MASK-FELDVERTRAG-ZEILE-20260917.yaml`.
-Naechster Claim nach P8: leere `/masks/.../tabs/`-Stubs, **ohne** Auftrag und
-Rechnung. P6 nicht starten. P5 bleibt dauerhaft.
+Datei: `docs/agent-ops/slices/MASK-FELDVERTRAG-BRUECKEN-STUBS-20260917.yaml`.
+Rest: Duenger/Saatgut/Lead-Tabs und mask-rollout-Catch-all. **Ohne** Auftrag
+und Rechnung. P6 nicht starten. P5 bleibt dauerhaft.

@@ -25,6 +25,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Customer
 from app.infrastructure.models.agrar_models import FeldbuchSchlag
+from app.services.customer_reference import resolve_reference
 from app.services.finance_datev_service import FinanceDatevService
 from app.services.finance_period_service import FinancePeriodService, PeriodError
 from app.services.vies_service import vies_service
@@ -1029,14 +1030,22 @@ def list_qualitaet_reklamationen(
         "SELECT * FROM domain_ops.reklamationen WHERE tenant_id = :t ORDER BY erstellt_am DESC LIMIT 200",
         {"t": tenant_id},
     )
+    # Die Liste kennt vier Stufen; die Zustandsmaschine (ReklamationsStatus) sechs.
     status_map = {
         "offen": "neu",
-        "in_bearbeitung": "in-bearbeitung",
+        "in_pruefung": "in-bearbeitung",
+        "teilweise_anerkannt": "in-bearbeitung",
+        "anerkannt": "in-bearbeitung",
         "geschlossen": "geloest",
         "abgelehnt": "abgelehnt",
     }
+    lieferanten: dict[str, str] = {}
     result = []
     for r in rows:
+        lieferant_ref = str(r.get("lieferant_id") or "")
+        if lieferant_ref not in lieferanten:
+            lieferant = resolve_reference(db, tenant_id, "supplier", lieferant_ref)
+            lieferanten[lieferant_ref] = lieferant.name or lieferant.number or ""
         positionen = r.get("positionen") or []
         if isinstance(positionen, str):
             try:
@@ -1047,8 +1056,8 @@ def list_qualitaet_reklamationen(
         result.append(
             {
                 "id": r.get("reklamation_id") or r.get("id"),
-                "nummer": r.get("reklamation_id") or r.get("id"),
-                "kunde": r.get("lieferant_id") or "",
+                "nummer": r.get("reklamation_nr") or "",
+                "kunde": lieferanten[lieferant_ref],
                 "artikel": first.get("artikel") or first.get("bezeichnung") or r.get("typ") or "",
                 "grund": r.get("typ") or "",
                 "datum": _iso(r.get("erstellt_am") or r.get("frist_datum")) or "",

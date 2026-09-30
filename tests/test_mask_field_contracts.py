@@ -36,9 +36,9 @@ pytestmark = pytest.mark.unit
 #: typisiert (21642ae85); die zwoelf Bruecken-Koepfe Cursor.
 NICHT_PRUEFBAR_MAX = 0
 
-#: 49 (8da5d757b) minus 6 Bruecken-Tabellen: Bestellung, Lieferant, Eingangsrechnung.
-#: Darf sinken, nicht steigen. Auftrag/Rechnung bleiben Claude.
-ZEILEN_NICHT_PRUEFBAR_MAX = 40
+#: 17 generische Stubs (6 leere /masks/, 11 /mask-rollouts/) sind typisiert.
+#: Darf sinken, nicht steigen. Auftrag/Rechnung bleiben Claude. R5 nicht hier.
+ZEILEN_NICHT_PRUEFBAR_MAX = 0
 
 
 @pytest.fixture(scope="module")

@@ -2,10 +2,14 @@
 slice_id: MASK-FELDVERTRAG-GENERIC-STUBS
 id: MASK-FELDVERTRAG-GENERIC-STUBS
 title: Letzte 17 Generic-Stubs typisieren
-status: umgesetzt
+status: abgeschlossen
 owner: Cursor
 date: 2026-09-17
 created_at: 2026-09-17
+closed_at: 2026-09-30
+result: >
+  39 Maskenbackendtests bestanden. Der Feldvertrag prueft 604 Felder ohne
+  Abweichung; keine Kopf- oder Tabellenquelle bleibt ohne deklarierte Form.
 coordination: >
   sales_invoices.py, sales_orders.py, screen_definitions.py, crm_360.py und
   der DSGVO-Loeschweg bleiben Claude. Keine FSX-Dateien. lager/leitstand
@@ -65,4 +69,3 @@ ai_harness:
     Workboard, todo-datenmodell-katalog P9, feldvertrag-masken.
 external_gates:
   - not_applicable
----

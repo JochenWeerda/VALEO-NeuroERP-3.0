@@ -287,7 +287,9 @@ _BP_FLAGS = (
 
 # Reihenfolge = Loeschreihenfolge: Belege vor den Stammdaten, auf die sie zeigen.
 _MANDANTEN_TABELLEN = (
+    ("domain_inventory.agrar_settlement_deductions", "tenant_id"),
     ("domain_inventory.agrar_settlements", "tenant_id"),
+    ("domain_inventory.weighing_tickets", "tenant_id"),
     ("domain_inventory.inventory_stock_movements", "tenant_id"),
     ("domain_ops.reklamationen", "tenant_id"),
     ("domain_einkauf.bestellungen", "tenant_id"),
@@ -525,7 +527,7 @@ def test_reklamation_nennt_lieferant_kontrakt_und_nummer(client, stamm: dict) ->
         "zustaendiger": "qs-team",
         "frist_datum": "2026-10-15",
     })
-    assert angelegt.status_code in (200, 201), angelegt.text
+    assert angelegt.status_code == 201, angelegt.text
 
     gelesen = client.get(_entity_url("qualitaet/reklamation", angelegt.json()["reklamation_id"]), headers=kopf)
     assert gelesen.status_code == 200, gelesen.text
@@ -533,7 +535,7 @@ def test_reklamation_nennt_lieferant_kontrakt_und_nummer(client, stamm: dict) ->
     assert body["lieferant_name"] == "Agrarhandel Nord GmbH"
     assert body["lieferant_nummer"] == "LF-4711"
     assert body["kontrakt_nummer"] == "EK-K-2026-07"
-    assert re.fullmatch(r"REK-[0-9A-F]{8}", body["reklamation_nr"])
+    assert re.fullmatch(r"REK-\d{4}-\d{5}", body["reklamation_nr"])
 
 
 @pytest.mark.integration
@@ -547,7 +549,7 @@ def test_reklamation_faellt_auf_agrarkontrakt_zurueck(client, stamm: dict) -> No
         "zustaendiger": "qs-team",
         "frist_datum": "2026-10-15",
     })
-    assert angelegt.status_code in (200, 201), angelegt.text
+    assert angelegt.status_code == 201, angelegt.text
 
     body = client.get(_entity_url("qualitaet/reklamation", angelegt.json()["reklamation_id"]), headers=kopf).json()
     assert body["kontrakt_nummer"] == "AK-2026-031"
@@ -593,7 +595,7 @@ def test_bestellung_nennt_niederlassung_und_belegkette(client, stamm: dict) -> N
         "kunden_id": "K-3300",
         "bestellfall": "direktlieferung",
     })
-    assert angelegt.status_code in (200, 201), angelegt.text
+    assert angelegt.status_code == 201, angelegt.text
 
     gelesen = client.get(_entity_url("einkauf/purchase-order", angelegt.json()["id"]), headers=kopf)
     assert gelesen.status_code == 200, gelesen.text
@@ -653,3 +655,153 @@ def test_verkaufschance_nennt_den_kunden(client, stamm: dict, monkeypatch) -> No
     assert body["customer_name"] == "Raiffeisen Markt Ost eG"
     assert body["customer_number"] == "K-3300"
     assert {"customer_name", "customer_number"} <= _kopf_keys("crm/opportunity")
+
+
+# ---------------------------------------------------------------------------
+# MERIDIAN-BELEG-RESTPUNKTE: Reklamationsnummer, Text-IDs in Registern
+# ---------------------------------------------------------------------------
+
+
+def _reklamation_anlegen(client, stamm: dict) -> dict:
+    angelegt = client.post("/api/v1/reklamationen", headers=_kopf(stamm["mandant"]), json={
+        "lieferant_id": stamm["lieferant"],
+        "typ": "qualitaet",
+        "positionen": [],
+        "zustaendiger": "qs-team",
+        "frist_datum": "2026-10-15",
+    })
+    assert angelegt.status_code == 201, angelegt.text
+    return angelegt.json()
+
+
+@pytest.mark.integration
+def test_reklamationsnummer_laeuft_je_mandant_und_geschaeftsjahr(client, stamm: dict) -> None:
+    from app.core.business_time import business_today
+
+    jahr = business_today().year
+    erste = _reklamation_anlegen(client, stamm)
+    zweite = _reklamation_anlegen(client, stamm)
+
+    # Ein frischer Mandant beginnt bei 1, egal wie viele Reklamationen andere fuehren.
+    assert erste["reklamation_nr"] == f"REK-{jahr}-00001"
+    assert zweite["reklamation_nr"] == f"REK-{jahr}-00002"
+
+    gelesen = client.get(_entity_url("qualitaet/reklamation", zweite["reklamation_id"]), headers=_kopf(stamm["mandant"]))
+    assert gelesen.status_code == 200, gelesen.text
+    assert gelesen.json()["reklamation_nr"] == f"REK-{jahr}-00002"
+    assert "reklamation_nr" in _kopf_keys("qualitaet/reklamation")
+
+
+@pytest.mark.integration
+def test_reklamationsnummer_wartet_auf_die_offene_anlage(stamm: dict) -> None:
+    """Die zweite Vergabe darf das Maximum erst lesen, wenn die erste Anlage steht."""
+    import threading
+    from datetime import date
+
+    from sqlalchemy.orm import Session
+
+    from app.api.v1.endpoints.reklamation_api import _naechste_reklamation_nr
+    from app.domains.operations.models import ReklamationDB
+
+    mandant = stamm["mandant"]
+    ergebnis: dict[str, str] = {}
+
+    def _zweite_vergabe() -> None:
+        with Session(stamm["engine"]) as zweite:
+            ergebnis["nr"] = _naechste_reklamation_nr(zweite, mandant)
+
+    with Session(stamm["engine"]) as erste:
+        nr = _naechste_reklamation_nr(erste, mandant)
+        erste.add(ReklamationDB(
+            reklamation_id=str(uuid.uuid4()), reklamation_nr=nr, tenant_id=mandant,
+            lieferant_id=stamm["lieferant"], typ="qualitaet", positionen=[], zustaendiger="qs-team",
+            frist_datum=date(2026, 10, 15), status="offen", dms_referenzen=[], audit_trail=[],
+        ))
+        erste.flush()
+        faden = threading.Thread(target=_zweite_vergabe)
+        faden.start()
+        faden.join(timeout=1.0)
+        assert faden.is_alive(), "zweite Vergabe las das Maximum, obwohl die erste Anlage offen war"
+        erste.commit()
+    faden.join(timeout=10)
+    assert ergebnis["nr"].endswith("-00002"), ergebnis
+
+
+@pytest.mark.integration
+def test_reklamationsliste_zeigt_nummer_lieferant_und_stand(client, stamm: dict) -> None:
+    from sqlalchemy import text
+
+    reklamation = _reklamation_anlegen(client, stamm)
+    with stamm["engine"].begin() as v:
+        v.execute(
+            text("UPDATE domain_ops.reklamationen SET status = 'in_pruefung' WHERE reklamation_id = :id"),
+            {"id": reklamation["reklamation_id"]},
+        )
+
+    liste = client.get("/api/v1/qualitaet/reklamationen", headers=_kopf(stamm["mandant"]))
+    assert liste.status_code == 200, liste.text
+    [zeile] = liste.json()
+    assert zeile["id"] == reklamation["reklamation_id"]
+    assert zeile["nummer"] == reklamation["reklamation_nr"]
+    assert zeile["kunde"] == "Agrarhandel Nord GmbH"
+    # Vor dem Fix fiel jeder Stand ausser offen/geschlossen/abgelehnt auf "neu" zurueck.
+    assert zeile["status"] == "in-bearbeitung"
+
+
+def _rollout_url(mask_id: str, entity_id: str, teil: str) -> str:
+    return f"/api/v1/mask-rollouts/{mask_id}/{entity_id}/{teil}"
+
+
+@pytest.mark.integration
+def test_ernteabrechnung_mit_text_id_fuellt_kopf_und_register(client, stamm: dict) -> None:
+    from sqlalchemy import text
+
+    mandant = stamm["mandant"]
+    abrechnung = f"set-{uuid.uuid4().hex[:8]}"
+    wiegeschein = f"wt-{uuid.uuid4().hex[:8]}"
+    with stamm["engine"].begin() as v:
+        v.execute(text(
+            "INSERT INTO domain_inventory.weighing_tickets (id, tenant_id, ticket_number, net_weight, billing_weight, "
+            "moisture_pct, weighing_date, article_id) "
+            "VALUES (:id, :t, 'WS-2026-0815', 25000, 24500, 15.2, '2026-08-04T00:30:00+02:00', :art)"
+        ), {"id": wiegeschein, "t": mandant, "art": stamm["artikel"]})
+        v.execute(text(
+            "INSERT INTO domain_inventory.agrar_settlements (id, tenant_id, settlement_number, supplier_id, ticket_id, "
+            "article_id, gross_quantity_kg, billing_quantity_kg, unit_price_eur_per_ton, gross_amount_eur, "
+            "total_deductions_eur, net_amount_eur, currency, status) "
+            "VALUES (:id, :t, 'EA-2026-0043', :bp, :ws, :art, 25000, 24500, 210, 5145, 61.25, 5083.75, 'EUR', 'draft')"
+        ), {"id": abrechnung, "t": mandant, "bp": stamm["erzeuger"], "ws": wiegeschein, "art": stamm["artikel"]})
+        v.execute(text(
+            "INSERT INTO domain_inventory.agrar_settlement_deductions (id, tenant_id, settlement_id, deduction_type, "
+            "mode, rate_per_ton_eur, basis_quantity_tons, amount_eur, note) "
+            "VALUES (:id, :t, :s, 'trocknung', 'per_ton', 2.5, 24.5, 61.25, 'Trocknung 15,2 % auf 14,5 %')"
+        ), {"id": f"ded-{uuid.uuid4().hex[:8]}", "t": mandant, "s": abrechnung})
+
+    kopf = _kopf(mandant)
+    summary = client.get(_rollout_url("agrar/harvest-settlement", abrechnung, "screen-summary"), headers=kopf)
+    assert summary.status_code == 200, summary.text
+    assert summary.json()["summary"]["net_amount"] == 5083.75
+
+    positionen = client.get(_rollout_url("agrar/harvest-settlement", abrechnung, "tabs/positionen"), headers=kopf)
+    assert positionen.status_code == 200, positionen.text
+    [position] = positionen.json()["items"]
+    assert position == {
+        "lieferschein_nr": "WS-2026-0815", "datum": "2026-08-04", "sorte": "Weizen A",
+        "feuchtigkeit": 15.2, "menge": 24500.0,
+    }
+
+    abzuege = client.get(_rollout_url("agrar/harvest-settlement", abrechnung, "tabs/abzuege"), headers=kopf)
+    assert abzuege.status_code == 200, abzuege.text
+    [abzug] = abzuege.json()["items"]
+    assert (abzug["abzug_art"], abzug["beschreibung"], abzug["menge"], abzug["betrag"]) == (
+        "trocknung", "Trocknung 15,2 % auf 14,5 %", 24.5, 61.25,
+    )
+
+
+@pytest.mark.integration
+def test_bestellung_ohne_uuid_bleibt_unbekannt(client, stamm: dict) -> None:
+    """Nur die Einkaufstabellen fuehren UUID-Schluessel; dort ist eine Text-ID kein Treffer, kein 500."""
+    kopf = _kopf(stamm["mandant"])
+    for teil in ("screen-summary", "tabs/positionen", "tabs/kette"):
+        antwort = client.get(_rollout_url("einkauf/purchase-order", "keine-uuid", teil), headers=kopf)
+        assert antwort.status_code == 404, (teil, antwort.text)

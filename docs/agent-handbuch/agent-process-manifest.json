@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29",
+  "generatedAt": "2026-09-30",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -3133,7 +3133,7 @@
       "idempotent": false,
       "risk_class": "high",
       "human_approval_required": true,
-      "endpoint": "POST /api/v1/sales-invoices/propose"
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "fibu.open_items.list",

@@ -108,7 +108,7 @@ tools:
   - tool_id: sales.invoice.propose
     domain: sales
     name: "Rechnungsvorschlag aus Lieferschein"
-    description: "Erzeugt einen Rechnungs-Entwurf aus einem abgeschlossenen Lieferschein. Erfordert Human Approval."
+    description: "Legt einen ausstehenden Rechnungsvorschlag zu einem gebuchten Lieferschein an. HTTP-Aufruf an POST /api/v1/mcp/tools/call mit tool_name=sales.invoice.propose. Default dryRun liest nur Summen. propose speichert agent_proposals mit approval_status pending und bucht keine Rechnung. execute ist nicht angebunden. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit sales:write und tenant_id erforderlich."
     scope: sales:write
     idempotent: false
     risk_class: high
@@ -127,7 +127,7 @@ tools:
         mwst: { type: number }
         positionen: { type: integer }
     audit: write
-    endpoint: "POST /api/v1/sales-invoices/propose"
+    endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: true
 
   # ── FIBU ───────────────────────────────────────────────────────────────────

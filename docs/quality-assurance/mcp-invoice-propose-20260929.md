@@ -3,8 +3,8 @@ title: MCP-Rechnungsvorschlag ohne Buchung
 type: reference
 audience: [agent, entwickler, qa]
 owner: Cursor
-status: aktiv
-last_reviewed: 2026-09-29
+status: abgeschlossen
+last_reviewed: 2026-09-30
 description: sales.invoice.propose speichert einen ausstehenden Vorschlag und bucht keine Rechnung.
 ---
 

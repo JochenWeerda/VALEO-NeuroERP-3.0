@@ -158,3 +158,70 @@ def test_mask_bridges_haengen_hinter_sales_beleg() -> None:
     assert 'down_revision = "screen_definition_drafts_20260916"' in consents
     assert 'down_revision = "crm_consents_20260917"' in sales
     assert 'down_revision = "sales_beleg_druck_buchung_20260917"' in bridges
+
+
+def test_leerer_anfrage_tab_liefert_leere_seite(monkeypatch):
+    _disable_dev_token(monkeypatch)
+    response = client.get(
+        "/api/v1/masks/einkauf/anfragen/entity/anf-1/tabs/positionen",
+        headers={**AUTH_HEADERS, **TENANT_HEADER},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["items"] == []
+    assert payload["total"] == 0
+    assert payload["tab_key"] == "positionen"
+    assert payload["table_key"] == "positionen"
+
+
+def test_leerer_debitor_tab_liefert_leere_seite(monkeypatch):
+    _disable_dev_token(monkeypatch)
+    response = client.get(
+        "/api/v1/masks/finance/debitoren/entity/deb-1/tabs/offene-posten",
+        headers={**AUTH_HEADERS, **TENANT_HEADER},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["items"] == []
+    assert payload["tab_key"] == "offene_posten"
+
+
+def test_leerer_duenger_tab_liefert_leere_seite(monkeypatch):
+    _disable_dev_token(monkeypatch)
+    response = client.get(
+        "/api/v1/masks/agrar/duenger/entity/due-1/tabs/verwendung",
+        headers={**AUTH_HEADERS, **TENANT_HEADER},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["items"] == []
+    assert payload["tab_key"] == "verwendung"
+
+
+def test_leerer_lead_tab_nutzt_den_plural_im_pfad(monkeypatch):
+    _disable_dev_token(monkeypatch)
+    response = client.get(
+        "/api/v1/masks/crm/leads/entity/lead-1/tabs/aufgaben",
+        headers={**AUTH_HEADERS, **TENANT_HEADER},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["items"] == []
+    assert payload["tab_key"] == "aufgaben"
+
+
+def test_rollout_tab_routen_sind_dediziert_registriert() -> None:
+    paths = {getattr(route, "path", "") for route in app.routes}
+    assert "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/aktivitaeten" in paths
+    assert "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bestand" in paths
+    assert "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/positionen" in paths
+    assert "/api/v1/mask-rollouts/{screen_id:path}/{entity_id}/tabs/{tab_key}" in paths
+
+
+def test_unbekannte_maske_tab_ist_404(monkeypatch):
+    _disable_dev_token(monkeypatch)
+    response = client.get(
+        "/api/v1/masks/gibt-es-nicht/entity/x/tabs/foo",
+        headers={**AUTH_HEADERS, **TENANT_HEADER},
+    )
+    assert response.status_code == 404

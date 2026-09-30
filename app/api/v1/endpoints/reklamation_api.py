@@ -7,8 +7,10 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.reklamation import Reklamation, ReklamationsStatus, ReklamationsTyp, ReklamationZustandsmaschine
@@ -202,8 +204,7 @@ def _to_dict(row: ReklamationDB) -> dict:
     folge = _folgeentscheidungen(row)
     return {
         "reklamation_id": row.reklamation_id,
-        # reklamation_id is a UUID; the prefixed primary key (REK-XXXXXXXX) is the readable number.
-        "reklamation_nr": row.id,
+        "reklamation_nr": row.reklamation_nr,
         "tenant_id": row.tenant_id,
         "lieferant_id": row.lieferant_id,
         "typ": row.typ,
@@ -229,6 +230,25 @@ def _to_dict(row: ReklamationDB) -> dict:
         "abschlussfaehig": folge["can_close"],
         "schema_version": 1,
     }
+
+
+def _naechste_reklamation_nr(db: Session, tenant_id: str) -> str:
+    jahr = business_today().year
+    praefix = f"REK-{jahr}-"
+    # Der Lock gilt bis zum Commit der Anlage: Zwei gleichzeitige Anlagen
+    # desselben Mandanten lesen sonst dasselbe Maximum.
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:schluessel, 0))"),
+        {"schluessel": f"reklamation_nr:{tenant_id}:{jahr}"},
+    )
+    letzte = db.execute(
+        text(
+            "SELECT max(substring(reklamation_nr FROM :ab)::int) FROM domain_ops.reklamationen "
+            "WHERE tenant_id = :tenant_id AND reklamation_nr ~ :muster"
+        ),
+        {"ab": len(praefix) + 1, "tenant_id": tenant_id, "muster": f"^REK-{jahr}-[0-9]+$"},
+    ).scalar()
+    return f"{praefix}{(letzte or 0) + 1:05d}"
 
 
 def _add_audit(
@@ -263,6 +283,7 @@ def create_reklamation(
     gobd = req.gobd_beleg_id or (dms[0]["dokument_id"] if dms else None)
     row = ReklamationDB(
         reklamation_id=str(uuid.uuid4()),
+        reklamation_nr=_naechste_reklamation_nr(db, tenant_id),
         tenant_id=tenant_id,
         lieferant_id=req.lieferant_id,
         typ=req.typ,

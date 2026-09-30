@@ -43,7 +43,8 @@ def test_bruecken_koepfe_sind_pruefbar(ergebnis: dict) -> None:
     )
 
 
-#: Tabellen der drei Bruecken mit echten Rollout-Daten — nicht die leeren Stubs.
+#: Tabellen der P4-Bruecken mit deklarierter Zeilenform — Rollout-Daten und
+#: leere Stubs. Auftrag und Rechnung bleiben Claude.
 BRUECKEN_ZEILEN = (
     "einkauf/purchase-order/positionen/positionen",
     "einkauf/purchase-order/kommunikation/kommunikation",
@@ -51,6 +52,36 @@ BRUECKEN_ZEILEN = (
     "einkauf/supplier/kontakte/kontakte",
     "finance/ap-invoice/positionen/positionen",
     "finance/ap-invoice/freigabe/freigabe",
+    "einkauf/anfrage/positionen/positionen",
+    "einkauf/angebot/positionen/positionen",
+    "einkauf/anlieferavis/positionen/positionen",
+    "einkauf/auftragsbestaetigung/positionen/positionen",
+    "finance/bankkonto/buchungen/buchungen",
+    "finance/debitor/offene_posten/offene_posten",
+    "finance/debitor/umsaetze/umsaetze",
+    "finance/kreditor/offene_posten/offene_posten",
+    "finance/kreditor/bestellungen/bestellungen",
+    "futtermittel/mischfuttermittel/rezeptur/rezeptur",
+    "futtermittel/mischfuttermittel/naehrstoffe/naehrstoffe",
+    "qualitaet/reklamation/massnahmen/massnahmen",
+    "qualitaet/reklamation/dokumente/dokumente",
+    "agrar/duenger/verwendung/verwendung",
+    "agrar/duenger/preise/preise",
+    "agrar/saatgut/lagerbestaende/lagerbestaende",
+    "agrar/saatgut/vertraege/vertraege",
+    "crm/lead/aktivitaeten/aktivitaeten",
+    "crm/lead/aufgaben/aufgaben",
+    "crm/opportunity/aktivitaeten/aktivitaeten",
+    "crm/opportunity/angebote/angebote",
+    "lager/article-stock/bestand/bestand",
+    "lager/article-stock/bewegungen/bewegungen",
+    "sales/delivery-note/positionen/positionen",
+    "sales/delivery-note/dokumente/dokumente",
+    "finance/ar-open-item/ausgleich/ausgleich",
+    "lager/stock-movement/details/details",
+    "agrar/harvest-settlement/positionen/positionen",
+    "agrar/harvest-settlement/abzuege/abzuege",
+    "finance/payment-run/zahlungen/zahlungen",
 )
 
 

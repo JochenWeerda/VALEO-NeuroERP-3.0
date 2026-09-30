@@ -1,0 +1,48 @@
+slice_id: MCP-WRITE-INVOICE-PROPOSE-20260929
+id: MCP-WRITE-INVOICE-PROPOSE-20260929
+title: Sicheren MCP-Rechnungsvorschlag anbinden
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-29
+created_at: 2026-09-29
+closed_at: 2026-09-30
+goal: >
+  sales.invoice.propose speichert einen pruefbaren, ausstehenden Vorschlag aus
+  einem gebuchten Lieferschein, ohne eine Rechnung zu buchen.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/schnittstellen/mcp-tools.md
+  - docs/quality-assurance/mcp-invoice-propose-20260929.md
+acceptance:
+  - dryRun liest und schreibt nicht
+  - propose verlangt einen Idempotenzschluessel und speichert pending
+  - execute bucht keine Rechnung und antwortet nicht implementiert
+  - Tenant, Scope, Audit und Replay sind Teil des Vertrags
+tests:
+  - tests/test_mcp_execution.py
+risks:
+  - Ein Vorschlag darf weder Rechnungsnummer noch Buchung vortaeuschen
+result: >
+  20 Tests bestanden. Der Adapter speichert nur agent_proposals und das
+  Ausfuehrungsjournal; die eigentliche Rechnung bleibt im menschlichen Pfad.
+ai_harness:
+  fachlicher_vertrag: >
+    Ein Agent darf eine Rechnung vorbereiten, aber nicht ohne menschlichen
+    Fachpfad buchen.
+  architektur_vertrag: >
+    Der MCP-Katalog ruft den zentralen Execution-Service mit Audit und Replay.
+  daten_vertrag: >
+    Vorschlaege sind tenantgebunden, pending und ueber Idempotenz wiederholbar.
+  test_vertrag: >
+    Tests belegen Schreibfreiheit von dryRun und execute sowie die begrenzte
+    Persistenz von propose.
+  security_vertrag: >
+    Verifizierter Token, sales:write-Scope und Tenant-Abgleich sind Pflicht.
+  betriebs_vertrag: >
+    Nicht angebundene Ausfuehrung bleibt fail-closed mit HTTP 501.
+  dokumentations_vertrag: >
+    Katalog, Agent-Handbuch, QA, Workboard und Open-Gaps werden gemeinsam gepflegt.
+external_gates:
+  - not_applicable

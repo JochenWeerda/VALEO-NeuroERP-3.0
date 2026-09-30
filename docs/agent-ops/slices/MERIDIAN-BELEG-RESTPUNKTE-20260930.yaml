@@ -1,7 +1,7 @@
 slice_id: MERIDIAN-BELEG-RESTPUNKTE
 id: MERIDIAN-BELEG-RESTPUNKTE
 title: Restpunkte aus MERIDIAN-BELEG-SYSTEMWEIT schliessen
-status: reserviert
+status: in arbeit
 owner: Cursor
 date: 2026-09-30
 created_at: 2026-09-30
@@ -9,6 +9,10 @@ coordination: >
   Folgt MERIDIAN-BELEG-SYSTEMWEIT. mask_rollout_summary_service.py traegt
   uncommittete fremde Aenderungen; committet wird dort nur der eigene Hunk
   auf Basis von HEAD. coverage_path_check.xml nicht committen.
+progress: >
+  Reklamationsnummer REK-JJJJ-NNNNN und Text-ID-faehige Rollout-Register sind
+  umgesetzt und geprueft. Offen bleibt der Umzug der drei Pilotseiten auf
+  useUniversalMaskRuntime samt Frontend- und Browser-Abnahme.
 goal: >
   Die Reklamation bekommt eine fachliche Nummer, die Register der Rollout-Masken
   nehmen Text-IDs an, wo die Tabelle Text-IDs fuehrt, und die drei Pilotseiten

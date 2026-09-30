@@ -85,7 +85,7 @@ wie Dynamics). Ein LLM-Agent kann also:
 | Kann | Kann nicht |
 |---|---|
 | Kunden suchen, 360-Kurzlage, Waagenscheine listen, Auftrag-Status, Bestand, OP, DMS-Suche | Eine Maske feldweise ausfüllen |
-| Rechnung *vorschlagen* (Freigabe Mensch) | Wiegen, Queue-Eintrag anlegen, SEPA auslösen |
+| Rechnung *vorschlagen* (ausstehender Vorschlag, keine Buchung) | Wiegen, Queue-Eintrag anlegen, SEPA auslösen, Rechnung buchen |
 | REST `/api/v1/...` mit Token + `X-Tenant-ID` | Die UI als Benutzer klicken (außer Browser-MCP des Entwicklers) |
 | Agent-Handbuch + Tool-Referenz lesen | 157 generische ERP-Tools à la Frihet |
 
@@ -276,6 +276,8 @@ ersetzt aber keine Fach-Tools.
   Sprache findet `elster-online`.
 - Bankabgleich (`/finance/bank-abgleich`): ObjectPage zuerst, Theater nur
   Desktop. Sprache findet `bankabgleich`.
+- `sales.invoice.propose`: ausstehender Vorschlag zu einem gebuchten Lieferschein.
+  Der Aufruf bucht keine Rechnung. `execute` bleibt geschlossen.
 
 ## Offen (ehrlich)
 

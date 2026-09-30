@@ -5,7 +5,7 @@ Models für Waagen, Wiegungen, Fahrzeuge und Fahrer
 
 from uuid import uuid4
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean, UniqueConstraint, text
+from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean, Index, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -1496,10 +1496,15 @@ class ErnteKampagneDB(Base):
 class ReklamationDB(Base):
     """Reklamation (Lieferantenbeschwerde) — ersetzt ReklamationStore"""
     __tablename__ = "reklamationen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        Index("uq_reklamationen_tenant_nr", "tenant_id", "reklamation_nr", unique=True),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("REK"))
     reklamation_id = Column(String(120), nullable=False, unique=True, index=True)
+    #: Fachliche Nummer REK-JJJJ-NNNNN, fortlaufend je Mandant und Geschaeftsjahr.
+    reklamation_nr = Column(String(40), nullable=False)
     tenant_id = Column(String(120), nullable=False, index=True)
     lieferant_id = Column(String(120), nullable=False, index=True)
     typ = Column(String(60), nullable=False)

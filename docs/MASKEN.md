@@ -154,6 +154,11 @@ Alle Belege in einer Belegfolge müssen folgende **gemeinsame Funktionalitäten*
    - `RenderPlan` und `UniversalMaskRenderer` setzen Floorplan, Dichte,
      Register, Summary-Position, Sticky-Regionen und Aktionszonen zentral um.
    - Spezialisierte Prozessmasken bleiben nur gemaess ADR-031 zulaessig.
+   - Metadatengetriebene Object Page (Fiori-Elements-Methode, ohne SAP-Chrome):
+     CDS-Fachmodell → `ScreenDefinition`; `@UI.facet` → `tabs[]`;
+     `@UI.identification` → `fields[]`; `@Consumption.valueHelpDefinition` →
+     LookupField `type: lookup`; List Report → `worklist`; Object Page →
+     `objectPage`. Generator ist der Schema-Compiler, nicht Fiori Tools.
 
 2. **Gleiche Komponenten verwenden:**
    - `CustomerSelectionDialog` für Kunden-Auswahl
