@@ -11,6 +11,28 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LASTSCHRIFT-MANDANT-20260930 — in Arbeit, Claude Code
+
+**Ziel:** `domain_shared.direct_debit_items` traegt keinen Mandanten. Die
+Lastschriftmaske liest, exportiert, gibt frei, fuehrt aus und storniert
+deshalb **ueber Haeuser hinweg** — mit Name, IBAN, BIC, Mandatsreferenz und
+Betrag. Die Tabelle bekommt `tenant_id`, und jede Abfrage filtert danach.
+**Dateibesitz:** `alembic/versions/lastschrift_mandant_20260930.py`,
+`app/api/v1/endpoints/direct_debits.py`,
+`app/api/v1/endpoints/mask_frontend_bridges.py` (nur die drei
+Lastschrift-Hunks), `app/api/v1/endpoints/finance_actions.py` (nur der
+Lastschriften-INSERT), `tests/test_lastschrift_mandant_vertrag.py`, eigene
+Slice-/QA-Doku und dieser Abschnitt.
+**Abnahme:** Kein Lastschriftweg ohne `tenant_id`-Filter; ein fremder Lauf ist
+404, nicht lesbar und nicht ausfuehrbar; `create` schreibt den Mandanten; die
+Tabelle ist in beiden Datenbanken leer, deshalb ist `NOT NULL` ohne Nachfuellen
+moeglich; Vertraege gruen gegen `valeo_probe`; Doku-Gates gruen.
+**Risiken:** Die beiden Haelften des Codes widersprachen sich: `finance_followup`
+filtert seit immer nach `tenant_id` und `debitor_id`, die es nicht gab (jede
+Abfrage scheiterte still), `direct_debits` kannte beide nicht. Der Slice bringt
+die Tabelle auf die Form, die der Lesepfad ohnehin annimmt. Keine Route und kein
+`response_model` aendern sich.
+
 ## CODE-IMPROVEMENT-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
 
 **Ziel:** Den Verbesserungszyklus korrekt und widerspruchsfrei schliessen:
