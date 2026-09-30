@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_date_after, business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import AuditLog
@@ -690,13 +691,13 @@ class EinkaufCompatService:
         if action == "verbuchen":
             try:
                 import uuid as _uuid
-                from datetime import date as _date
                 rech_row = self.db.execute(text(
                     "SELECT rechnungs_nummer, brutto_betrag, rechnungs_datum FROM einkauf_rechnungseingaenge WHERE id = :id"
                 ), {"id": rid}).fetchone()
                 if rech_row and rech_row[1]:
-                    today = _date.today().isoformat()
-                    due_in_30 = (_date.today().replace(day=min(_date.today().day + 30, 28))).isoformat()
+                    business_day = business_today()
+                    today = business_day.isoformat()
+                    due_in_30 = business_date_after(30, from_date=business_day).isoformat()
                     self.db.execute(text("""
                         INSERT INTO domain_erp.offene_posten
                             (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

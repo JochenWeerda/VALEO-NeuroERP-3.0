@@ -13,7 +13,7 @@ in anderen Zeitzonen nicht auf Europe/Berlin festgenagelt sind.
 from __future__ import annotations
 
 import os
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 DEFAULT_BUSINESS_TIMEZONE = "Europe/Berlin"
@@ -41,3 +41,8 @@ def business_now() -> datetime:
 
 def business_today() -> date:
     return business_now().date()
+
+
+def business_date_after(days: int, *, from_date: date | None = None) -> date:
+    """Kalendertage ab einem Geschaeftstag addieren, auch ueber Monatsgrenzen."""
+    return (from_date if from_date is not None else business_today()) + timedelta(days=days)

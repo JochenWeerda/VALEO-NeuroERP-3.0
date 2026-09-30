@@ -15,6 +15,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.business_time import business_date_after, business_today
 from app.services.document_allocation_service import (
     AllocationError,
     DocumentAllocationService,
@@ -894,10 +895,10 @@ async def create_invoice_from_delivery(
 
     # SALES-DN-INV-OP-001: Debitoren-OP + Document-Store Eintrag (Belegbruch schliessen)
     try:
-        from datetime import date as _date
         import uuid as _uuid
-        today = _date.today().isoformat()
-        due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+        business_day = business_today()
+        today = business_day.isoformat()
+        due = business_date_after(30, from_date=business_day).isoformat()
         db.execute(text("""
             INSERT INTO domain_erp.offene_posten
                 (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

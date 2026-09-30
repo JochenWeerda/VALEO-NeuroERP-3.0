@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from app.core.business_time import business_date_after, business_today
 from app.services.sales_posting_service import SalesPostingService
 from app.services.sales_invoice_service import InvoiceCreationError, SalesInvoiceService
 
@@ -200,9 +201,9 @@ async def create_collective_invoice(
     try:
         if _is_test_double_session(db):
             raise RuntimeError("skip optional posting for unit-test double")
-        from datetime import date as _date
-        today = _date.today().isoformat()
-        due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+        business_day = business_today()
+        today = business_day.isoformat()
+        due = business_date_after(30, from_date=business_day).isoformat()
         db.execute(text("""
             INSERT INTO domain_erp.offene_posten
                 (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

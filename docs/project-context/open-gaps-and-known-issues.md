@@ -11,6 +11,15 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## DUE-DATE-CALENDAR — vergangene Faelligkeiten behoben (2026-09-30)
+
+**Erledigt.** Elf Pfade interpretierten „in 30 Tagen“ als Austausch des
+Monatstags und konnten dadurch vergangene Faelligkeiten erzeugen. Alle Aufrufer
+verwenden nun `business_today()` und `business_date_after(30)`; Monats-,
+Jahres- und Schaltjahrgrenzen sind getestet. Die Business-Time-Ratsche sinkt
+von 244 auf 212 direkte Kalenderquellen. Details:
+`docs/quality-assurance/due-date-calendar-20260930.md`.
+
 ## GODFILE-RATCHET — Gate repariert, Zerlegung offen (2026-09-30)
 
 **Gate erledigt.** Der eingecheckte Stand enthaelt 15 Python-Endpunkte ueber

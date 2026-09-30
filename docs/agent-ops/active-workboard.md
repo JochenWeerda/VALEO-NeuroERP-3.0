@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DUE-DATE-CALENDAR-20260930 — reserviert, Codex
+## DUE-DATE-CALENDAR-20260930 — abgeschlossen, Codex
 
 **Ziel:** Elf `replace(day=min(day + 30, 28))`-Berechnungen durch eine zentrale
 Addition von 30 Kalendertagen ab Geschaeftstag ersetzen. Das alte Muster kann
@@ -22,6 +22,10 @@ fokussierte Verträge sowie eigene Slice-/QA-/Open-Gaps-Dokumentation.
 zentralisiert; altes Muster aus `app/` entfernt; Tests und Doku-Gates gruen.
 **Risiken:** Der Slice korrigiert die bestehende Annahme „30 Kalendertage“ und
 modelliert keine individuellen Zahlungsbedingungen.
+**Stand:** abgeschlossen 2026-09-30. Elf Aufrufer verwenden echte
+Kalendertage ab Geschaeftstag; 25 Tests sind gruen, das alte Muster ist weg und
+die Business-Time-Baseline sinkt von 244 auf 212. Nachweis:
+`docs/quality-assurance/due-date-calendar-20260930.md`.
 
 ## GODFILE-RATCHET-20260930 — abgeschlossen, Codex
 

@@ -19,6 +19,7 @@ from sqlalchemy import text
 
 from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
+from app.core.business_time import business_date_after, business_today
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -229,9 +230,9 @@ def buche_zinsabrechnung(
     if zins_brutto > 0 and r.get("lieferant_nr"):
         try:
             import uuid as _uuid
-            from datetime import date as _date
-            today = _date.today().isoformat()
-            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            business_day = business_today()
+            today = business_day.isoformat()
+            due = business_date_after(30, from_date=business_day).isoformat()
             db.execute(text("""
                 INSERT INTO domain_erp.offene_posten
                     (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

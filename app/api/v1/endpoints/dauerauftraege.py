@@ -25,6 +25,7 @@ from sqlalchemy import text
 
 from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
+from app.core.business_time import business_date_after
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -268,7 +269,7 @@ def dauerauftrag_starten(
             for p in positionen
         )
         if gesamt > 0:
-            faell = (date.today().replace(day=min(date.today().day + 30, 28)))
+            faell = business_date_after(30)
             db.execute(text("""
                 INSERT INTO domain_erp.offene_posten
                     (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

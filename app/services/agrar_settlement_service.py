@@ -10,7 +10,7 @@ from typing import Any, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from app.core.business_time import business_now, business_today
+from app.core.business_time import business_date_after, business_now, business_today
 from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_settlement_datensatz
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.trocknungs_abrechnung import (
@@ -704,10 +704,10 @@ class AgrarSettlementService:
         if net and float(net) > 0:
             try:
                 import uuid as _uuid
-                from datetime import date as _date
                 from sqlalchemy import text as _text
-                today = _date.today().isoformat()
-                due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+                business_day = business_today()
+                today = business_day.isoformat()
+                due = business_date_after(30, from_date=business_day).isoformat()
                 self.db.execute(_text("""
                     INSERT INTO domain_erp.offene_posten
                         (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

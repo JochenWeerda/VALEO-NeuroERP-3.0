@@ -13,12 +13,13 @@ description: Messung und blockierende Ratsche fuer direkte Host- und UTC-Kalende
 ## Befund
 
 Der zentrale Vertrag in `app/core/business_time.py` loest bereits bekannte
-Buchungs-, Frist- und Tagesgrenzen. Eine Repo-Inventur zeigt trotzdem 244
-direkte Kalenderableitungen in 125 produktiven Python-Dateien:
+Buchungs-, Frist- und Tagesgrenzen. Die Erstinventur zeigte 244 direkte
+Kalenderableitungen in 125 produktiven Python-Dateien. Nach der zentralen
+Korrektur von elf Faelligkeitspfaden verbleiben 212 Stellen in 117 Dateien:
 
 | Muster | Stellen |
 |---|---:|
-| `date.today()` einschliesslich Import-Aliasse | 232 |
+| `date.today()` einschliesslich Import-Aliasse | 200 |
 | `datetime.now(...).date()` | 11 |
 | `datetime.utcnow().date()` | 1 |
 
@@ -47,8 +48,8 @@ sondern die Obergrenze fuer den schrittweisen Abbau.
 ## Nachweis
 
 - `pytest tests/test_business_time_usage_gate.py -q --no-cov`: 5 bestanden.
-- `python scripts/check_business_time_usage.py`: Exit 0, 244 Stellen in 125
-  Dateien.
+- `python scripts/check_business_time_usage.py`: Exit 0, 212 Stellen in 117
+  Dateien; die Erstbaseline lag bei 244 Stellen in 125 Dateien.
 - Die Tests belegen Alias-Erkennung, erlaubte zentrale Helfer, pfad- und
   musterbezogene Zaehler, Verschiebungsschutz und Baseline-Absenkung.
 

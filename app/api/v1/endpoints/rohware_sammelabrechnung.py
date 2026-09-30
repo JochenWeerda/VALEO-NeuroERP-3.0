@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.schemas.base import BaseSchema
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.business_time import business_date_after, business_today
 
 
 class RohwareSammelabrechnungOut(BaseSchema):
@@ -426,8 +427,9 @@ def buchen(
         )
 
         if betrag > 0:
-            today = date.today().isoformat()
-            due = date.today().replace(day=min(date.today().day + 30, 28)).isoformat()
+            business_day = business_today()
+            today = business_day.isoformat()
+            due = business_date_after(30, from_date=business_day).isoformat()
             db.execute(
                 text(
                     """

@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.purchase_invoice_verification_schemas import PurchaseInvoiceVerificationOut
@@ -312,8 +313,9 @@ def approve_verification(
         except Exception:  # noqa: BLE001 — AP-Invoice-Update nicht kritisch
             pass
         try:
-            today = _date.today().isoformat()
-            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            business_day = business_today()
+            today = business_day.isoformat()
+            due = business_date_after(30, from_date=business_day).isoformat()
             db.execute(text("""
                 INSERT INTO domain_erp.offene_posten
                     (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

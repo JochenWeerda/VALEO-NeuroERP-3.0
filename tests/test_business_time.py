@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
 from app.core.business_time import (
     DEFAULT_BUSINESS_TIMEZONE,
+    business_date_after,
     business_date_at,
     business_now,
     business_timezone,
@@ -76,3 +77,16 @@ def test_business_now_is_aware_and_consistent_with_today(monkeypatch):
     assert now.tzinfo is not None
     assert now.utcoffset() in (timedelta(hours=1), timedelta(hours=2))
     assert business_today() == now.date()
+
+
+@pytest.mark.parametrize(
+    ("start", "expected"),
+    [
+        (date(2025, 1, 31), date(2025, 3, 2)),
+        (date(2026, 9, 30), date(2026, 10, 30)),
+        (date(2026, 12, 15), date(2027, 1, 14)),
+        (date(2024, 2, 1), date(2024, 3, 2)),
+    ],
+)
+def test_business_date_after_addiert_echte_kalendertage(start, expected):
+    assert business_date_after(30, from_date=start) == expected
