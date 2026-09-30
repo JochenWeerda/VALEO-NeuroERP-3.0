@@ -73,7 +73,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: frischen Installation da. Die Schwelle stand seither drei Plaetze zu hoch —
 #: drei neue Verweise ins Leere waeren durchgegangen. Gemessen mit
 #: ``DATABASE_URL=…/valeo_probe`` nach ``scripts/pruefstand_db.py``.
-BASELINE_LEBEND = 25
+#:
+#: 2026-09-30, lebend 25 -> 24: ``domain_shared.sepa_mandates`` legt
+#: ``lastschrift_mandant_20260930`` an.
+BASELINE_LEBEND = 24
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

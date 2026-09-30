@@ -25,7 +25,7 @@ nicht durch automatische Inhaltsveraenderung fremder Slices verdeckt.
 **Naechster Schritt:** Separaten Claim committen, Loader und Fehleranzeige reparieren.
 
 
-## LASTSCHRIFT-MANDANT-20260930 — in Arbeit, Claude Code
+## LASTSCHRIFT-MANDANT-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** `domain_shared.direct_debit_items` traegt keinen Mandanten. Die
 Lastschriftmaske liest, exportiert, gibt frei, fuehrt aus und storniert
@@ -33,19 +33,41 @@ deshalb **ueber Haeuser hinweg** — mit Name, IBAN, BIC, Mandatsreferenz und
 Betrag. Die Tabelle bekommt `tenant_id`, und jede Abfrage filtert danach.
 **Dateibesitz:** `alembic/versions/lastschrift_mandant_20260930.py`,
 `app/api/v1/endpoints/direct_debits.py`,
+`app/api/v1/endpoints/finance_followup.py` (nur der Vorschau-Hunk),
 `app/api/v1/endpoints/mask_frontend_bridges.py` (nur die drei
 Lastschrift-Hunks), `app/api/v1/endpoints/finance_actions.py` (nur der
-Lastschriften-INSERT), `tests/test_lastschrift_mandant_vertrag.py`, eigene
+Lastschriften-INSERT), `scripts/check_table_references.py` (nur die Schwelle),
+`tests/test_lastschrift_mandant_vertrag.py`,
+`tests/test_finance_followup_api.py` (nur der Mandats-Stub), eigene
 Slice-/QA-Doku und dieser Abschnitt.
-**Abnahme:** Kein Lastschriftweg ohne `tenant_id`-Filter; ein fremder Lauf ist
-404, nicht lesbar und nicht ausfuehrbar; `create` schreibt den Mandanten; die
-Tabelle ist in beiden Datenbanken leer, deshalb ist `NOT NULL` ohne Nachfuellen
-moeglich; Vertraege gruen gegen `valeo_probe`; Doku-Gates gruen.
-**Risiken:** Die beiden Haelften des Codes widersprachen sich: `finance_followup`
-filtert seit immer nach `tenant_id` und `debitor_id`, die es nicht gab (jede
-Abfrage scheiterte still), `direct_debits` kannte beide nicht. Der Slice bringt
-die Tabelle auf die Form, die der Lesepfad ohnehin annimmt. Keine Route und kein
-`response_model` aendern sich.
+**Stand:** abgeschlossen 2026-09-30. Vierter Eintrag der Welle 2, und der
+schwerste: Sechs Wege eines fremden Hauses auf fremde Bankdaten und fremde
+Lastschriftlaeufe sind zu. Dass nie Geld floss, lag nicht an einer Pruefung,
+sondern daran, dass der einzige sammelnde Weg ohnehin nicht lief.
+**Drei Nebenbefunde, behoben:**
+1. `sepa_ready` war **wahr, wenn kein Debitor ein Mandat hatte** — geprueft
+   wurde nur, dass keines abgelaufen ist, und die Abfrage lag in einem
+   verschluckenden `except`. Jetzt: Abfrage muss gelaufen sein, jeder Debitor
+   braucht ein gueltiges Mandat, gezaehlt werden Debitoren statt Mandatszeilen.
+2. `POST /finance/direct-debit/run` lief **nie**: `sepa_mandates` gab es
+   nirgends, der INSERT nannte `mandate_ref` statt `mandate_id`, und der Debitor
+   heisst in `open_items` `partner_id`. Gemeldet wurde "keine faelligen Posten".
+3. Eine nicht lesbare Lastschriftliste sah aus wie "keine Laeufe" (`return []`).
+   Jetzt 503.
+**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 25 -> 24.
+**Handshake an den Finanz-Owner:** `sepa_mandates` ist **minimal** — nur die
+fuenf Spalten, die der Code nennt. Glaeubiger-Identifikationsnummer, Sequenztyp
+(FRST/RCUR/OOFF/FNAL), Verfahren (CORE/B2B), Unterschriftsdatum und die IBAN des
+Zahlungspflichtigen fehlen; vier davon nimmt die Maske heute **pro Lauf**
+entgegen und verwirft sie. Ohne sie ist keine echte pain.008 moeglich.
+**Hinweis an den CRM-Slice:** Im gemeinsamen Arbeitsbaum meldet die
+Tabellen-Ratsche 26 statt 24, weil das noch nicht eingecheckte `crm_360.py`
+`domain_crm.contacts` und `domain_crm.crm_customers` anspricht — beide auf der
+Liste der 76 Tabellen ohne Migration. Die Schwelle ist gegen den Stand ohne
+diese Dateien gemessen.
+**Abnahme:** 16 Vertraege gruen gegen den frischen Stand, dazu 39 vorhandene
+Finanz-/Bruecken-Tests. Nachweis:
+`docs/quality-assurance/lastschrift-mandant-20260930.md`.
 
 ## CODE-IMPROVEMENT-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
 

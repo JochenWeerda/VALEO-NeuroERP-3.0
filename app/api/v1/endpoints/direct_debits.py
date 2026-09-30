@@ -2,8 +2,9 @@
 Direct debit endpoints used by finance UI masks.
 """
 
+import logging
 from datetime import date
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -13,6 +14,8 @@ from ....core.database import get_db
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.direct_debits_schemas import DirectDebitsOut
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/direct-debits", tags=["finance", "direct-debits"])
 
@@ -34,10 +37,11 @@ async def list_direct_debits(
                          WHEN status = 'pending' THEN 'pending'
                          ELSE 'draft' END) AS status
             FROM domain_shared.direct_debit_items
+            WHERE tenant_id = :tid
             GROUP BY run_id
             ORDER BY MIN(created_at) DESC
             LIMIT 50
-        """)).fetchall()
+        """), {"tid": tenant_id}).fetchall()
         return [
             {
                 "id": r.run_id,
@@ -49,8 +53,15 @@ async def list_direct_debits(
             }
             for r in rows
         ]
-    except Exception:
-        return []
+    except Exception as exc:
+        # Keine leere Liste: "keine Laeufe" und "die Datenbank antwortet nicht"
+        # sehen sonst gleich aus, und im zweiten Fall haelt ein Haus einen
+        # faelligen Lastschriftlauf fuer erledigt.
+        db.rollback()
+        logger.exception("Lastschriftlaeufe nicht lesbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=503, detail="Lastschriftlaeufe sind derzeit nicht abrufbar"
+        ) from exc
 
 
 @router.get("/new", response_model=DirectDebitsOut, summary="New direct debit template abrufen")
@@ -78,7 +89,6 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 from starlette.responses import Response
-from fastapi import HTTPException
 import uuid
 
 
@@ -117,12 +127,13 @@ async def create_direct_debit_run(
     for item in body.items:
         db.execute(text("""
             INSERT INTO domain_shared.direct_debit_items
-                (run_id, debitor_name, iban, bic, mandate_id, amount,
+                (tenant_id, run_id, debitor_name, iban, bic, mandate_id, amount,
                  verwendungszweck, status, created_at)
             VALUES
-                (:run_id, :debitor_name, :iban, :bic, :mandate_id, :amount,
+                (:tid, :run_id, :debitor_name, :iban, :bic, :mandate_id, :amount,
                  :verwendungszweck, 'pending', :created_at)
         """), {
+            "tid": tenant_id,
             "run_id": run_id,
             "debitor_name": item.debitor_name,
             "iban": item.iban,
@@ -156,11 +167,15 @@ async def get_direct_debit_run(
             SELECT run_id, debitor_name, iban, bic, mandate_id, amount,
                    verwendungszweck, status, created_at
             FROM domain_shared.direct_debit_items
-            WHERE run_id = :run_id
+            WHERE tenant_id = :tid AND run_id = :run_id
             ORDER BY created_at
-        """), {"run_id": run_id}).fetchall()
-    except Exception:
-        rows = []
+        """), {"tid": tenant_id, "run_id": run_id}).fetchall()
+    except Exception as exc:
+        db.rollback()
+        logger.exception("Lastschriftlauf %s nicht lesbar", run_id)
+        raise HTTPException(
+            status_code=503, detail="Lastschriftlauf ist derzeit nicht abrufbar"
+        ) from exc
     if not rows:
         raise HTTPException(status_code=404, detail="Lastschriftlauf nicht gefunden")
     items = [
@@ -197,8 +212,8 @@ async def export_direct_debit_run(
         result = db.execute(text("""
             UPDATE domain_shared.direct_debit_items
             SET status = 'exported'
-            WHERE run_id = :run_id AND status = 'pending'
-        """), {"run_id": run_id})
+            WHERE tenant_id = :tid AND run_id = :run_id AND status = 'pending'
+        """), {"tid": tenant_id, "run_id": run_id})
         db.commit()
     except Exception as exc:
         db.rollback()
@@ -218,8 +233,8 @@ async def cancel_direct_debit_run(
     result = db.execute(text("""
         UPDATE domain_shared.direct_debit_items
         SET status = 'cancelled'
-        WHERE run_id = :run_id AND status != 'exported'
-    """), {"run_id": run_id})
+        WHERE tenant_id = :tid AND run_id = :run_id AND status != 'exported'
+    """), {"tid": tenant_id, "run_id": run_id})
     db.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Lastschriftlauf nicht gefunden oder bereits exportiert")

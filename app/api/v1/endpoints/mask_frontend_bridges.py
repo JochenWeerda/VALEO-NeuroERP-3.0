@@ -590,9 +590,10 @@ def approve_direct_debit(
         """
         UPDATE domain_shared.direct_debit_items
         SET status = 'approved'
-        WHERE run_id = :run_id AND status IN ('draft', 'pending', 'zur_freigabe')
+        WHERE tenant_id = :tid AND run_id = :run_id
+          AND status IN ('draft', 'pending', 'zur_freigabe')
         """,
-        {"run_id": run_id},
+        {"tid": tenant_id, "run_id": run_id},
     )
     return {
         "id": run_id,
@@ -615,15 +616,17 @@ def execute_direct_debit(
         """
         UPDATE domain_shared.direct_debit_items
         SET status = 'executed'
-        WHERE run_id = :run_id AND status IN ('approved', 'pending', 'exported')
+        WHERE tenant_id = :tid AND run_id = :run_id
+          AND status IN ('approved', 'pending', 'exported')
         """,
-        {"run_id": run_id},
+        {"tid": tenant_id, "run_id": run_id},
     )
     if updated == 0:
         rows = _safe_rows(
             db,
-            "SELECT COUNT(*) AS n FROM domain_shared.direct_debit_items WHERE run_id = :run_id",
-            {"run_id": run_id},
+            "SELECT COUNT(*) AS n FROM domain_shared.direct_debit_items "
+            "WHERE tenant_id = :tid AND run_id = :run_id",
+            {"tid": tenant_id, "run_id": run_id},
         )
         if not rows or int(rows[0]["n"] or 0) == 0:
             raise HTTPException(status_code=404, detail="Lastschriftlauf nicht gefunden")

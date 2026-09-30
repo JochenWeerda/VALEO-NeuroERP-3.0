@@ -443,14 +443,26 @@ async def get_lastschrift_preview(
         if row:
             total_amount = float(row.total_amount or 0)
             debitor_count = row.debitor_count or 0
-    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
-        pass
+    except Exception as exc:
+        db.rollback()
+        logger.exception("Lastschriftlauf %s nicht lesbar", run_id)
+        raise HTTPException(
+            status_code=503, detail="Lastschrift-Vorschau ist derzeit nicht abrufbar"
+        ) from exc
 
+    # Gezaehlt werden **Debitoren**, nicht Mandatszeilen: Zwei Mandate fuer
+    # denselben Debitor sind ein Debitor mit Mandat, nicht zwei.
+    mandat_geprueft = False
     try:
         result = db.execute(text("""
             SELECT
-                COUNT(*) FILTER (WHERE mandate_valid = true) AS valid_count,
-                COUNT(*) FILTER (WHERE mandate_valid = false OR mandate_expired_at < NOW()) AS expired_count
+                COUNT(DISTINCT debitor_id) FILTER (
+                    WHERE mandate_valid = true
+                      AND (mandate_expired_at IS NULL OR mandate_expired_at > NOW())
+                ) AS valid_count,
+                COUNT(DISTINCT debitor_id) FILTER (
+                    WHERE mandate_valid = false OR mandate_expired_at <= NOW()
+                ) AS expired_count
             FROM domain_shared.sepa_mandates
             WHERE tenant_id = :tid AND debitor_id IN (
                 SELECT DISTINCT debitor_id FROM domain_shared.direct_debit_items
@@ -461,9 +473,19 @@ async def get_lastschrift_preview(
         if mrow:
             mandate_valid_count = mrow.valid_count or 0
             mandate_expired_count = mrow.expired_count or 0
-    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
-        pass
+            mandat_geprueft = True
+    except Exception as exc:
+        db.rollback()
+        logger.exception("SEPA-Mandate nicht lesbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=503, detail="SEPA-Mandate sind derzeit nicht pruefbar"
+        ) from exc
 
+    # ``sepa_ready`` heisst: **jeder** Debitor des Laufs hat ein gueltiges
+    # Mandat. Vorher stand hier nur ``mandate_expired_count == 0`` — und das war
+    # auch dann wahr, wenn es zu keinem Debitor ein Mandat gab oder die Abfrage
+    # gescheitert war. Ein Lauf ohne ein einziges Mandat galt als bereit zum
+    # Einzug.
     preview = LastschriftPreview(
         tenant_id=tenant_id,
         direct_debit_run_id=run_id,
@@ -471,7 +493,12 @@ async def get_lastschrift_preview(
         debitor_count=debitor_count,
         mandate_valid_count=mandate_valid_count,
         mandate_expired_count=mandate_expired_count,
-        sepa_ready=(mandate_expired_count == 0 and debitor_count > 0),
+        sepa_ready=(
+            mandat_geprueft
+            and debitor_count > 0
+            and mandate_expired_count == 0
+            and mandate_valid_count == debitor_count
+        ),
     )
     return preview.model_dump(mode="json")
 

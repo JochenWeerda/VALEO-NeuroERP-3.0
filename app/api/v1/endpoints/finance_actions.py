@@ -270,12 +270,12 @@ async def run_direct_debit(
         result = db.execute(
             text("""
                 INSERT INTO domain_shared.direct_debit_items
-                    (id, tenant_id, run_id, debitor_id, amount, currency, mandate_ref, status, created_at)
+                    (id, tenant_id, run_id, debitor_id, amount, currency, mandate_id, status, created_at)
                 SELECT
                     gen_random_uuid()::text,
                     oi.tenant_id,
                     :run_id,
-                    oi.debitor_id,
+                    oi.partner_id,
                     oi.amount,
                     COALESCE(oi.currency, 'EUR'),
                     sm.mandate_reference,
@@ -283,7 +283,7 @@ async def run_direct_debit(
                     NOW()
                 FROM domain_shared.open_items oi
                 JOIN domain_shared.sepa_mandates sm
-                    ON sm.debitor_id = oi.debitor_id AND sm.tenant_id = oi.tenant_id
+                    ON sm.debitor_id = oi.partner_id AND sm.tenant_id = oi.tenant_id
                     AND sm.mandate_valid = true
                     AND (sm.mandate_expired_at IS NULL OR sm.mandate_expired_at > NOW())
                 WHERE oi.tenant_id = :tid
