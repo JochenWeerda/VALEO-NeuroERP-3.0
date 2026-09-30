@@ -44,7 +44,9 @@ function parseArgs() {
 }
 
 function git(args) {
-  return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8" }).trim();
+  return execFileSync("git", args, {
+    cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
 }
 
 function changedSliceFiles(base, head) {
@@ -92,6 +94,39 @@ function sliceIdFromContent(filePath, content) {
   return match ? match[1].trim() : path.basename(filePath, path.extname(filePath));
 }
 
+function syntaxText(content) {
+  let coordinationSeen = false;
+  return content
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== "---")
+    .map((line) => {
+      if (/^coordination:/.test(line)) {
+        if (coordinationSeen) return line.replace(/^coordination:\s*/, "");
+        coordinationSeen = true;
+      }
+      return line.replace(/^(\s*)-\s+>-[ \t]*$/, "$1-");
+    })
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function closedLegacySyntaxRepair(filePath, content, args) {
+  if (!args.changedOnly) return false;
+  let before;
+  try {
+    before = git(["show", `${args.base || "HEAD"}:${filePath}`]);
+  } catch {
+    return false; // neue Datei ist niemals Legacy
+  }
+  const closedStatus = (source) => source.match(/^status:\s*(done|completed|abgeschlossen)\s*$/m)?.[1];
+  const status = closedStatus(before);
+  if (!status || closedStatus(content) !== status) return false;
+  // Vollstaendige alte Slices brauchen keine Ausnahme; substantielle Aenderungen auch nicht.
+  if (requiredTopLevel.every((key) => yamlHas(before, key)) && yamlHas(before, "ai_harness")) return false;
+  return syntaxText(before) === syntaxText(content);
+}
+
 function main() {
   const args = parseArgs();
   const files = sliceFiles(args).filter((filePath) => fs.existsSync(path.join(repoRoot, filePath)));
@@ -102,6 +137,11 @@ function main() {
   for (const filePath of files) {
     const content = fs.readFileSync(path.join(repoRoot, filePath), "utf8");
     const sliceId = sliceIdFromContent(filePath, content);
+
+    if (closedLegacySyntaxRepair(filePath, content, args)) {
+      console.log(`Legacy syntax repair (unchanged closed contract): ${filePath}`);
+      continue;
+    }
 
     for (const key of requiredTopLevel) {
       if (!yamlHas(content, key)) errors.push(`${filePath}: missing required field '${key}'`);

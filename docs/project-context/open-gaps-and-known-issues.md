@@ -11,6 +11,25 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## CODE-IMPROVEMENT-INTEGRITY — verlässliche Pruefungen (2026-09-30)
+
+**Repo-seitig abgeschlossen; externer CI-Nachweis offen.** Pagination wird pro Abfrage
+und Funktion gemessen, Baselines gegen den Ausgangscommit geschuetzt,
+Frontendtests sind verbindlich, Sonar verwendet SHA-/inhaltsgleiche Coverage
+aus demselben Run. Der vorhandene Nightly publiziert lesende Artefakte.
+Nachweis und Grenzen: `docs/quality-assurance/code-improvement-integrity-20260930.md`.
+90 fokussierte Vertraege und der volle Frontend-Lauf (914 Tests) sind lokal gruen.
+
+**Altbestand offen.** Die neue Messung erfasst 289 unbeschraenkte Abfragen in
+262 Funktionen statt der unzureichenden alten Dateizaehlung (53). Das ist
+keine Schuldentilgung. Fachliche Vollaggregate und echte Listen sind je
+Funktion zu klassifizieren und mit Fehlervertraegen abzusichern.
+Lokale Fremdaenderungen an CRM/Maskenbruecke verletzen aktuell die Godfile-
+Ratsche; deren Owner muessen den Strukturabbau liefern, die Baseline bleibt scharf.
+
+**Extern offen.** Erster realer GitHub-Lauf, Branchschutz mit erforderlichen
+Checks und Sonar-Projekt/Token. Keine externe Freigabe wird lokal fingiert.
+
 ## DUE-DATE-CALENDAR — vergangene Faelligkeiten behoben (2026-09-30)
 
 **Erledigt.** Elf Pfade interpretierten „in 30 Tagen“ als Austausch des
@@ -154,16 +173,13 @@ Runbook unter `docs/quality-assurance/pruefstand-datenbank.md`. Nachweis: die
 elf in CI roten Testdateien laufen gegen einen von null aufgebauten Prüfstand
 mit 87 bestandenen Tests durch.
 
-**Offen, gehört anderen:** **24 Slice-YAMLs sind für `scripts/valeo_slice.py`
-unlesbar.** Sie tragen am Dateiende eine zweite Dokumentmarke (`---`), und
-`yaml.safe_load` bricht dann mit „expected a single document in the stream" ab.
-Die CLI meldet dann nicht den Formfehler, sondern „Slice-YAML nicht gefunden" —
-der Slice ist für `claim`, `verify`, `close` und `status` unsichtbar. Betroffen
-sind 26 von 274 Dateien; die zwei eigenen sind behoben. Der node-basierte
-`ai-slice-readiness-check.cjs` liest sie dagegen, weshalb es nie aufgefallen
-ist. Zwei Wege: die Schlussmarken entfernen, oder `valeo_slice.py` auf
-`yaml.safe_load_all` umstellen und das erste Dokument nehmen. Der zweite Weg
-ist der robustere, berührt aber das Governance-Skript.
+**Erledigt (SLICE-YAML-INTEGRITY-20260930).** Leere Schlussdokumente werden
+gelesen; befuellte zweite Dokumente und doppelte Schluessel sind explizite
+Fehler. 19 echte Formfehler in abgeschlossenen historischen Slices wurden
+inhaltserhaltend normalisiert. Inventur: 290/290 YAMLs lesbar, null Formfehler.
+Ein Bestandstest verhindert Rueckfaelle; fehlende aktuelle Harness-Felder
+in Legacy-Slices bleiben als Vertragsluecken erkennbar. Details:
+`docs/quality-assurance/slice-yaml-integrity-20260930.md`.
 
 **Offen, Entscheidung:** Der Prüfstand sagt nichts darüber, ob die gewachsene
 Datenbank noch zum Schema passt. Diese Frage beantwortet der Slice

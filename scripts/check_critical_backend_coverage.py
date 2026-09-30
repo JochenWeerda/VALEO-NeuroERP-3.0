@@ -210,6 +210,8 @@ def main() -> None:
     # eines Schwellwerts die Baseline mit anheben.
     import json
     baseline_path = PROJECT_ROOT / "config" / "coverage_ratchet_baseline.json"
+    if not baseline_path.is_file():
+        raise SystemExit("Coverage-Ratchet-Baseline fehlt; Integritaet nicht nachweisbar.")
     if baseline_path.exists():
         baseline = json.loads(baseline_path.read_text(encoding="utf-8")).get("thresholds", {})
         for filename, base_value in baseline.items():
@@ -224,10 +226,12 @@ def main() -> None:
                 )
         for filename, current in CRITICAL_THRESHOLDS.items():
             base_value = baseline.get(filename)
-            if base_value is not None and current > base_value:
-                print(
-                    f"HINWEIS: {filename} Schwellwert {current:.0%} > Baseline {base_value:.0%} — "
-                    "bitte config/coverage_ratchet_baseline.json mit anheben."
+            if base_value is None:
+                failures.append(f"{filename}: fehlt in der Coverage-Ratchet-Baseline")
+            elif current > base_value:
+                failures.append(
+                    f"{filename}: Schwellwert {current:.0%} > Baseline {base_value:.0%} — "
+                    "config/coverage_ratchet_baseline.json im selben Commit anheben."
                 )
 
     for filename, threshold in CRITICAL_THRESHOLDS.items():

@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SLICE-YAML-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+## SLICE-YAML-INTEGRITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Ziel:** Governance-CLI laedt historische Slice-YAMLs mit leerer Schlussmarke,
 weist mehrere befuellte Dokumente und doppelte Schluessel ab und meldet
@@ -23,7 +23,19 @@ stilles Verwerfen eines zweiten Dokuments; positive und negative CLI-Vertraege g
 **Risiken:** Fehlende Harness-Felder bleiben echte Schemafehler und werden
 nicht durch automatische Inhaltsveraenderung fremder Slices verdeckt.
 **Naechster Schritt:** Separaten Claim committen, Loader und Fehleranzeige reparieren.
-
+**Stand:** Repo-seitig abgeschlossen. 290/290 YAMLs lesbar, 19 historische
+Formfehler normalisiert; negative Loader-/ID-Vertraege und Bestandstest gruen.
+Nachweis: `docs/quality-assurance/slice-yaml-integrity-20260930.md`.
+**Ergaenzter Scope:** Rein syntaktische Normalisierung der 19 abgeschlossenen
+historischen YAMLs aus der strikten Inventur. Owner, Status, Fachvertraege und
+historische Nachweise bleiben erhalten; keine Uebernahme ihrer Fachslices.
+Textlisten werden als Text serialisiert, beide alten Security-Koordinationssaetze
+bleiben in einem Feld; zwei disjunkte Masken-Dokumente werden jeweils ein Mapping.
+**Governance-Integration:** `scripts/ai-slice-readiness-check.cjs` und neue
+Vertragstests unterscheiden gegen den Ausgangscommit eine reine Syntaxreparatur
+eines bereits abgeschlossenen Legacy-Slice von einer fachlichen Aenderung.
+Nur erstere braucht keinen nachtraeglich erfundenen Harness; bei Inhalts- oder
+Statusaenderung bleibt der volle Vertrag verbindlich.
 
 ## LASTSCHRIFT-MANDANT-20260930 — abgeschlossen, Claude Code
 
@@ -69,7 +81,7 @@ diese Dateien gemessen.
 Finanz-/Bruecken-Tests. Nachweis:
 `docs/quality-assurance/lastschrift-mandant-20260930.md`.
 
-## CODE-IMPROVEMENT-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+## CODE-IMPROVEMENT-INTEGRITY-20260930 — abgeschlossen (repo-seitig), Codex (Chat 01a0f3fc)
 
 **Ziel:** Den Verbesserungszyklus korrekt und widerspruchsfrei schliessen:
 abfragebezogene Pagination, gegen den Ausgangscommit geschuetzte Baselines,
@@ -88,6 +100,15 @@ gezielte Tests und Doku-Gates gruen; verbleibende Fach-/externe Gaps ehrlich erf
 Bestehende Claims (Projektion, OpenAPI, Meridian und Domain-Handshakes) bleiben
 beim Owner. Die gemeinsame CI-Datei wird nur in den genannten Gates geaendert.
 **Naechster Schritt:** Claim committen, Harness anlegen, Gate-Vertraege implementieren.
+**Stand:** 90 fokussierte Vertraege und 914 Frontendtests gruen;
+Pagination/Integritaet gegen Ausgangscommit gruen. Nightly lesend,
+CI-Inventur eigenstaendig, Sonar ohne doppelte Tests und mit SHA-Pruefung.
+**Extern offen:** Erster GitHub-Lauf, Required Checks und Sonar-Konfiguration.
+**Handoff:** Domain-/Godfile-Fremdclaims bleiben aktiv; keine Baseline angehoben.
+Details: `docs/quality-assurance/code-improvement-integrity-20260930.md`.
+**Ergaenzter Dateibesitz:** `scripts/verify_quality_evidence.py`,
+`packages/frontend-web/package.json` (nur gepinnter Coverage-Provider),
+`pnpm-lock.yaml` (zugehoerige Aufloesung). Bestehende Paketversionen bleiben erhalten.
 
 ## PROJEKTION-CURSOR-MIGRATION-20260930 — abgeschlossen, Claude Code
 

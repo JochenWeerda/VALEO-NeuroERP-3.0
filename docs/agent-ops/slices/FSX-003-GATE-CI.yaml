@@ -27,24 +27,34 @@ entscheidung_frontend_regel: >-
   die Claude ausdruecklich nicht wollte. Deshalb kein ESLint, sondern ein
   gezielter Scanner mit vier Mustern.
 file_ownership:
-  - docs/agent-ops/slices/FSX-003-GATE-CI.yaml
+  - >-
+    docs/agent-ops/slices/FSX-003-GATE-CI.yaml
   - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
-  - .github/workflows/quality-gate.yml
-  - scripts/check_flow_spine_invented_frontend_values.py
-  - tests/test_flow_spine_invented_frontend_gate.py
-  - tests/test_fsx003_quality_gate_wiring.py
+  - >-
+    .github/workflows/quality-gate.yml
+  - >-
+    scripts/check_flow_spine_invented_frontend_values.py
+  - >-
+    tests/test_flow_spine_invented_frontend_gate.py
+  - >-
+    tests/test_fsx003_quality_gate_wiring.py
 acceptance:
-  - Eigenes quality-gate-Job, needs nur path-guard, nicht backend.
-  - Provenance-Tests laufen mit --noconftest und ohne Vollsuite.
-  - Scanner verbietet ?? '92%' und width: '92%' unter workflow/, erlaubt ?? [] und 0%/100%.
-  - Live-Bestand unter workflow/ ist 0 Treffer.
+  - >-
+    Eigenes quality-gate-Job, needs nur path-guard, nicht backend.
+  - >-
+    Provenance-Tests laufen mit --noconftest und ohne Vollsuite.
+  - >-
+    Scanner verbietet ?? '92%' und width: '92%' unter workflow/, erlaubt ?? [] und 0%/100%.
+  - >-
+    Live-Bestand unter workflow/ ist 0 Treffer.
 tests:
   - >-
     pytest tests/test_flow_spine_data_provenance.py
     tests/test_flow_spine_invented_frontend_gate.py
     tests/test_fsx003_quality_gate_wiring.py
     --noconftest -p no:cacheprovider --no-cov -q -o addopts=""
-  - python scripts/check_flow_spine_invented_frontend_values.py
+  - >-
+    python scripts/check_flow_spine_invented_frontend_values.py
 risks:
   - risiko: >-
       Die Backend-Kaskade bricht beim ersten roten Schritt ab. Saeße das Gate
@@ -69,4 +79,5 @@ ai_harness:
   betriebs_vertrag: Reiner CI-Schritt, kein Rollout.
   dokumentations_vertrag: Slice, Workboard, Masterplan-Hinweis.
 external_gates:
-  - GitHub Actions quality-gate Job fsx-gates nach Push.
+  - >-
+    GitHub Actions quality-gate Job fsx-gates nach Push.

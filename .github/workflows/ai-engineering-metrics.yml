@@ -6,7 +6,11 @@ on:
   workflow_dispatch:        # manueller Trigger
 
 permissions:
-  contents: write           # für Auto-Commit der generierten Seite
+  contents: read
+
+concurrency:
+  group: ai-engineering-metrics-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   metrics:
@@ -22,7 +26,7 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install PyYAML==6.0.3
 
       - name: Run AI Engineering Metrics
         run: |
@@ -40,14 +44,20 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ai-engineering-metrics-${{ github.run_id }}
-          path: /tmp/metrics.json
+          path: |
+            /tmp/metrics.json
+            docs/agent-ops/engineering-metrics.md
+          if-no-files-found: error
           retention-days: 90
 
-      - name: Commit updated metrics page
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/agent-ops/engineering-metrics.md
-          git diff --cached --quiet || \
-            git commit -m "chore(metrics): Nightly AI Engineering Metrics Update $(date +%Y-%m-%d)"
-          git push
+      - name: Read-only improvement inventory
+        run: python scripts/run_improvement_pipelines.py --jobs 2 --timeout 120
+
+      - name: Upload improvement evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-code-improvement
+          path: artifacts/code-improvement.json
+          if-no-files-found: error
+          retention-days: 30

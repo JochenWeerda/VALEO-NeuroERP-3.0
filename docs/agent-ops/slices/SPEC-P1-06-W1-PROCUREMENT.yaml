@@ -12,16 +12,25 @@ goal: >-
   auf echte Pydantic-Schemas heben, ohne Felder aus den Service-Rueckgaben zu
   verlieren.
 file_ownership:
-  - docs/agent-ops/slices/SPEC-P1-06-W1-PROCUREMENT.yaml
-  - app/api/v1/schemas/procurement_match_schemas.py
-  - app/api/v1/endpoints/procurement_match.py
-  - tests/test_procurement_match_response_models.py
+  - >-
+    docs/agent-ops/slices/SPEC-P1-06-W1-PROCUREMENT.yaml
+  - >-
+    app/api/v1/schemas/procurement_match_schemas.py
+  - >-
+    app/api/v1/endpoints/procurement_match.py
+  - >-
+    tests/test_procurement_match_response_models.py
 acceptance:
-  - 14 von 15 Endpunkten tragen ein echtes Pydantic-response_model
-  - Kein Feldverlust gegenueber den Service-Rueckgabe-Dicts (FastAPI filtert gegen response_model)
-  - Nichttrefferfall {"found": false, "detail": ...} bleibt uebertragbar
-  - Bestehende Tests test_dom_proc_004 und test_einkauf_3way_match_ers_rfq bleiben gruen
-  - check_response_models.py --threshold 20 bleibt gruen
+  - >-
+    14 von 15 Endpunkten tragen ein echtes Pydantic-response_model
+  - >-
+    Kein Feldverlust gegenueber den Service-Rueckgabe-Dicts (FastAPI filtert gegen response_model)
+  - >-
+    Nichttrefferfall {"found": false, "detail": ...} bleibt uebertragbar
+  - >-
+    Bestehende Tests test_dom_proc_004 und test_einkauf_3way_match_ers_rfq bleiben gruen
+  - >-
+    check_response_models.py --threshold 20 bleibt gruen
 result: >-
   Schwache response_model-Typen repo-weit 447 -> 433. Neues Schema-Modul mit 20
   Schemas, Feldlisten aus procurement_match_service, proc_wareneingang_service,

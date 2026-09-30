@@ -10,39 +10,57 @@ goal: >-
   Mask-Seiten dauerhafte Netzwerkaktivitaet (SSE-Reconnects/Polling) halten. Ziel:
   Smoke-Suite wieder gruen und deterministisch, ohne die Testaussage zu verwaessern.
 file_ownership:
-  - .github/workflows/e2e-smoke.yml
-  - playwright.config.ts
-  - playwright.global-setup.mjs
-  - playwright-tests/specs/**
-  - playwright-tests/fixtures/testSetup.ts
-  - playwright-tests/helpers/api.ts
-  - docs/agent-ops/slices/E2E-SMOKE-REPAIR-001.yaml
-  - docs/agent-ops/active-workboard.md
+  - >-
+    .github/workflows/e2e-smoke.yml
+  - >-
+    playwright.config.ts
+  - >-
+    playwright.global-setup.mjs
+  - >-
+    playwright-tests/specs/**
+  - >-
+    playwright-tests/fixtures/testSetup.ts
+  - >-
+    playwright-tests/helpers/api.ts
+  - >-
+    docs/agent-ops/slices/E2E-SMOKE-REPAIR-001.yaml
+  - >-
+    docs/agent-ops/active-workboard.md
 acceptance:
-  - Alle waitForLoadState('networkidle')-Aufrufe in Smoke-Specs durch deterministische
+  - >-
+    Alle waitForLoadState('networkidle')-Aufrufe in Smoke-Specs durch deterministische
     Waits ersetzt ('load' bzw. 'domcontentloaded' + sichtbarer Locator)
-  - baseURL-Verdrahtung vereinheitlicht — eine Quelle (echte Env-Variable VALEO_BASE_URL
+  - >-
+    baseURL-Verdrahtung vereinheitlicht — eine Quelle (echte Env-Variable VALEO_BASE_URL
     im Workflow-Step), totes PLAYWRIGHT_BASE_URL entfernt, Fixture-Defaults konsistent
     zur playwright.config.ts
-  - Doppelter Preview-Start beseitigt (Workflow-Step Port 3000 vs. global-setup Port
+  - >-
+    Doppelter Preview-Start beseitigt (Workflow-Step Port 3000 vs. global-setup Port
     4173 — nur noch ein Server, global-setup-Reuse greift)
-  - Entscheidung dokumentiert, wie /api/v1-Calls in CI bedient werden — Befund bei der
+  - >-
+    Entscheidung dokumentiert, wie /api/v1-Calls in CI bedient werden — Befund bei der
     Umsetzung: vite preview ERBT server.proxy per Default (Vite-Quelle
     resolvePreviewOptions, "preview?.proxy ?? server.proxy"); der /api-Proxy war also
     immer aktiv, der Triage-Verdacht "kein Proxy im Preview" war falsch. Gerade der
     durchgeproxte, dauerhaft offene SSE-Stream (/api/events) ist der Grund, warum
     networkidle nie eintritt. Kein Code-Change noetig, Kommentar im Workflow.
-  - Workflow "E2E Smoke Tests" auf main gruen (alle 5 Matrix-Domains)
+  - >-
+    Workflow "E2E Smoke Tests" auf main gruen (alle 5 Matrix-Domains)
 tests:
-  - pnpm exec playwright test --grep "@smoke" --project=smoke (lokal gegen Dev-Stack)
-  - GitHub Actions Run "E2E Smoke Tests" auf dem Slice-Branch
+  - >-
+    pnpm exec playwright test --grep "@smoke" --project=smoke (lokal gegen Dev-Stack)
+  - >-
+    GitHub Actions Run "E2E Smoke Tests" auf dem Slice-Branch
 risks:
-  - networkidle-Abloesung kann latente Rendering-Fehler sichtbar machen, die bisher
+  - >-
+    networkidle-Abloesung kann latente Rendering-Fehler sichtbar machen, die bisher
     hinter dem Timeout versteckt waren (dann echte Bugfixes noetig, Scope waechst)
-  - Fixture-/Helper-Aenderungen betreffen auch e2e-full und e2e-critical — deren
+  - >-
+    Fixture-/Helper-Aenderungen betreffen auch e2e-full und e2e-critical — deren
     Gruen-Stand darf nicht kippen
 external_gates:
-  - GitHub Actions "E2E Smoke Tests" + "E2E @critical" gruen auf main nach Merge
+  - >-
+    GitHub Actions "E2E Smoke Tests" + "E2E @critical" gruen auf main nach Merge
 ai_harness:
   fachlicher_vertrag: >-
     CI-Triage 2026-07-06 — Smoke-Suite ist das breiteste UI-Regressionsnetz und seit

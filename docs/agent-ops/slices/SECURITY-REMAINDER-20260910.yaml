@@ -8,32 +8,53 @@ goal: Verbleibende Sicherheitsursachen beheben und Scanner-Restmeldungen belegen
 coordination: >-
   Uebernommen von Codex per User-Auftrag 2026-09-15. Herstellerfixes sind
   geliefert; Restbefunde ohne Fix sind triagiert (ADR-071), nicht ignoriert.
-coordination: Folgeauftrag nach abgeschlossenem Claude-Security-Slice; Claim 6ff8338ce.
+  Folgeauftrag nach abgeschlossenem Claude-Security-Slice; Claim 6ff8338ce.
 file_ownership:
-  - Dockerfile.backend
-  - .grype.yaml
-  - config/security/cpython-3.13.15/
-  - scripts/verify_cpython_security.py
-  - scripts/verify_aiosmtplib_security.py
-  - services/crm-communication/requirements.txt
-  - requirements-docs.txt
-  - package.json
-  - pnpm-lock.yaml
-  - packages/*/package.json
-  - config/security/npm-patches/
-  - scripts/verify_node_dependency_security.cjs
-  - docs/agent-ops/slices/SECURITY-REMAINDER-20260910.yaml
-  - docs/quality-assurance/security-remainder-2026-09-10.md
+  - >-
+    Dockerfile.backend
+  - >-
+    .grype.yaml
+  - >-
+    config/security/cpython-3.13.15/
+  - >-
+    scripts/verify_cpython_security.py
+  - >-
+    scripts/verify_aiosmtplib_security.py
+  - >-
+    services/crm-communication/requirements.txt
+  - >-
+    requirements-docs.txt
+  - >-
+    package.json
+  - >-
+    pnpm-lock.yaml
+  - >-
+    packages/*/package.json
+  - >-
+    config/security/npm-patches/
+  - >-
+    scripts/verify_node_dependency_security.cjs
+  - >-
+    docs/agent-ops/slices/SECURITY-REMAINDER-20260910.yaml
+  - >-
+    docs/quality-assurance/security-remainder-2026-09-10.md
 acceptance:
-  - Vier CPython-Verhaltensregressionen vor Fix rot und danach gruen.
-  - Backend-Import und Build mit stabiler Python-Version gruen.
-  - Keine neuen Ignores und keine verfälschte Versionsnummer.
+  - >-
+    Vier CPython-Verhaltensregressionen vor Fix rot und danach gruen.
+  - >-
+    Backend-Import und Build mit stabiler Python-Version gruen.
+  - >-
+    Keine neuen Ignores und keine verfälschte Versionsnummer.
 tests:
-  - python scripts/verify_cpython_security.py im gebauten Image
-  - Trivy und Grype mit allen Befunden und bestehenden Gate-Schwellen
+  - >-
+    python scripts/verify_cpython_security.py im gebauten Image
+  - >-
+    Trivy und Grype mit allen Befunden und bestehenden Gate-Schwellen
 risks:
-  - ZIP-Backport fuer 3.13 ist upstream noch nicht gemerged.
-  - Versionsbasierte Scanner erkennen lokale Quellkorrekturen nicht automatisch.
+  - >-
+    ZIP-Backport fuer 3.13 ist upstream noch nicht gemerged.
+  - >-
+    Versionsbasierte Scanner erkennen lokale Quellkorrekturen nicht automatisch.
 ai_harness:
   fachlicher_vertrag: Laufzeitfunktionen erhalten und konkrete Sicherheitsursachen schliessen.
   architektur_vertrag: Bestehende Python-Linie und Container-Struktur erhalten.
@@ -43,7 +64,8 @@ ai_harness:
   betriebs_vertrag: Isolierte Image-Builds, kein Deployment.
   dokumentations_vertrag: Workboard, Herstellerquellen und Nachmessung dokumentieren.
 external_gates:
-  - Dependabot-Restbefunde in weiteren Wellen beheben.
+  - >-
+    Dependabot-Restbefunde in weiteren Wellen beheben.
 
 resume_20260913:
   source_commit: "8e1f84a01"

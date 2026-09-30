@@ -11,20 +11,33 @@ goal: >-
   meisten schwachen response_model-Typen auf echte Pydantic-Schemas heben —
   external_mock_harness (10), futtermittel_qs (10), pos_fiscalization (9).
 file_ownership:
-  - docs/agent-ops/slices/SPEC-P1-06-W2-MOCK-QS-POS.yaml
-  - app/api/v1/schemas/external_mock_harness_schemas.py
-  - app/api/v1/schemas/futtermittel_qs_schemas.py
-  - app/api/v1/schemas/pos_fiscalization_schemas.py
-  - app/api/v1/endpoints/external_mock_harness.py
-  - app/api/v1/endpoints/futtermittel_qs.py
-  - app/api/v1/endpoints/pos_fiscalization.py
-  - tests/test_welle2_response_models.py
+  - >-
+    docs/agent-ops/slices/SPEC-P1-06-W2-MOCK-QS-POS.yaml
+  - >-
+    app/api/v1/schemas/external_mock_harness_schemas.py
+  - >-
+    app/api/v1/schemas/futtermittel_qs_schemas.py
+  - >-
+    app/api/v1/schemas/pos_fiscalization_schemas.py
+  - >-
+    app/api/v1/endpoints/external_mock_harness.py
+  - >-
+    app/api/v1/endpoints/futtermittel_qs.py
+  - >-
+    app/api/v1/endpoints/pos_fiscalization.py
+  - >-
+    tests/test_welle2_response_models.py
 acceptance:
-  - Alle 29 Endpunkte der drei Dateien tragen ein echtes Pydantic-response_model
-  - Kein Feldverlust gegenueber Service-Rueckgaben bzw. Tabellen-DDL
-  - "simulated: true" bleibt in jeder Mock-Antwort erhalten
-  - OpenAPI erzeugt $ref statt freier Objekte
-  - Bestandstests der drei Bereiche bleiben gruen
+  - >-
+    Alle 29 Endpunkte der drei Dateien tragen ein echtes Pydantic-response_model
+  - >-
+    Kein Feldverlust gegenueber Service-Rueckgaben bzw. Tabellen-DDL
+  - >-
+    "simulated: true" bleibt in jeder Mock-Antwort erhalten
+  - >-
+    OpenAPI erzeugt $ref statt freier Objekte
+  - >-
+    Bestandstests der drei Bereiche bleiben gruen
 result: >-
   Schwache response_model-Typen repo-weit 433 -> 404, betroffene Dateien
   114 -> 111. Bei der Fiskalisierung genuegte es, die bereits existierenden
