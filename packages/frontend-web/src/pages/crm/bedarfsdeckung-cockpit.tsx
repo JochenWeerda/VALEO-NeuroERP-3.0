@@ -294,7 +294,7 @@ export default function BedarfsdeckungCockpitPage(): JSX.Element {
 
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={() => navigate(`/crm/durchdringungs-pipeline`)}>Durchdringungs-Pipeline</Button>
-            <Button variant="outline" onClick={() => navigate(`/crm/kunden-cockpit`)}>Zum Kunden-Cockpit</Button>
+            <Button variant="outline" onClick={() => navigate('/verkauf/kunden-liste')}>Zur Kundenliste</Button>
             <Button variant="outline" onClick={() => navigate(`/crm/kunden-karte`)}>Auf der Karte</Button>
           </div>
         </>

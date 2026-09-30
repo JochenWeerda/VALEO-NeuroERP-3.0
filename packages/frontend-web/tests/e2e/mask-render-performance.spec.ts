@@ -48,7 +48,7 @@ test.describe('Mask render performance smoke', () => {
     })
 
     await page.goto('/crm/kunden-stamm-modern?id=perf-customer', { waitUntil: 'domcontentloaded' })
-    await expect(page.getByTestId('universal-customer-mask-pilot')).toBeVisible()
+    await expect(page.getByTestId('crm-customer-360')).toBeVisible()
     expect(tabRequests).toHaveLength(0)
 
     await page.getByRole('tab', { name: /ansprechpartner/i }).click()

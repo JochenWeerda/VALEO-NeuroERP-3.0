@@ -382,20 +382,30 @@ Pagination-Schwelle ist seit dem 27.05. nicht erfuellbar).
 eine zu weite statische Suche erzeugt Rauschen statt Funden.
 
 
-## MERIDIAN-BELEG-RESTPUNKTE-20260930 — in Arbeit, Cursor
+## MERIDIAN-PARTY-OBJECTPAGE-20260930 — abgeschlossen, Cursor
+
+**Ziel:** Eine Object-Page-Akte fuer Interessent und Bestandskunde. KIM wird Redirect,
+Listen-IDs (`kunden_nr`/BP) oeffnen denselben Stamm, Chef/Praesente/Postfach/Geo
+sitzen in der ScreenDefinition.
+**Dateibesitz:** `screen_definitions.py` (crm/customer-360, crm/lead, Stammkoepfe),
+`crm_360.py`, `customer_service.py`, `party-native.tsx`, KIM-/Cockpit-Redirects,
+`kunden-stamm.tsx` (Detail → Akte), Launchpad Meine Kunden, Vertragstests.
+**Stand:** abgeschlossen 2026-09-30. Funf Wellen plus Restluecken: Identitaetsbruecke,
+`?tab=` auf Anker, Stamm-/Cockpit-Links auf `/crm/kunden/{id}`, Geo aus `kunden_geo`.
+**Abnahme:** siehe [Slice](slices/MERIDIAN-PARTY-OBJECTPAGE-20260930.yaml).
+
+## MERIDIAN-BELEG-RESTPUNKTE-20260930 — abgeschlossen, Cursor
 
 **Ziel:** Restpunkte aus MERIDIAN-BELEG-SYSTEMWEIT schließen: fachliche Reklamationsnummer,
 Text-IDs in den Registern der Rollout-Masken, Pilotseiten auf den gemeinsamen Masken-Runtime.
 **Dateibesitz:** `ReklamationDB.reklamation_nr`, `reklamation_api.py`, Migration
 `reklamation_nummer_20260930`, UUID-Prüfung in `mask_rollout_summary_service.py` (nur dieser
-Hunk), `features/mask-pilot/`, Pilot-Schalter in `order-editor.tsx`, `KontraktDetailRoute.tsx`,
-`kunden-stamm-modern.tsx`, `MaskBenchmarkRoute.tsx`, Pilotseiten und ihre Tests.
+Hunk), Pilot-Schalter in `order-editor.tsx`, `KontraktDetailRoute.tsx`,
+`kunden-stamm-modern.tsx`, `MaskBenchmarkRoute.tsx` und deren Tests.
+**Stand:** abgeschlossen 2026-09-30. Reklamationsnummer `REK-JJJJ-NNNNN` je Mandant,
+Text-IDs fuer nicht UUID-basierte Rollout-Masken, drei Pilotseiten auf
+`useUniversalMaskRuntime`; `usePilotRenderPlan` ist entfernt.
 **Abnahme:** siehe [Slice](slices/MERIDIAN-BELEG-RESTPUNKTE-20260930.yaml).
-**Zwischenstand 2026-09-30:** Reklamationsnummer `REK-JJJJ-NNNNN` je Mandant
-und Geschaeftsjahr sowie Text-IDs fuer nicht UUID-basierte Rollout-Masken sind
-implementiert. 95 Reklamations-/Belegtests, 39 Maskenbackendtests und der
-Feldvertrag mit 604/0 bestanden. Offen bleiben der Umzug der drei Pilotseiten
-auf `useUniversalMaskRuntime` und deren Frontend-/Browser-Abnahme.
 
 ## DB-PRUEFSTAND-20260930 — abgeschlossen, Claude Code
 

@@ -44,7 +44,7 @@ export default function KreditlinienPage(): JSX.Element {
       label: 'Kunde',
       render: (k: Kreditlinie) => (
         <div>
-          <button type="button" onClick={() => navigate(`/verkauf/kunden-stamm/${k.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
+          <button type="button" onClick={() => navigate(`/crm/kunden/${encodeURIComponent(k.kundennr || k.id)}`)} className="min-h-11 font-medium text-primary touch-manipulation">
             {k.kunde}
           </button>
           <div className="text-xs text-muted-foreground font-mono">{k.kundennr}</div>

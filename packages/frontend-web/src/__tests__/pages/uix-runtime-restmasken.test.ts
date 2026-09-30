@@ -47,13 +47,13 @@ describe('UIX zentrale Runtime und Restmasken', () => {
     expect(read('../../pages/portal/whatsapp-simulator.tsx')).not.toMatch(/size="sm"/)
   })
 
-  it('stellt KIM, Auftrag, Rechnung und Lieferschein ohne size=sm', () => {
+  it('stellt KIM als Redirect und Auftrag/Rechnung/Lieferschein ohne size=sm', () => {
+    const kim = read('../../pages/crm/kim/index.tsx')
+    expect(kim).toContain('/crm/kunden/')
+    expect(kim).toContain('readQueryParam')
+    expect(kim).not.toMatch(/size="sm"/)
+    expect(kim).not.toMatch(/h-6 px-2/)
     const files = [
-      '../../pages/crm/kim/index.tsx',
-      '../../pages/crm/kim/components/CustomerActionBar.tsx',
-      '../../pages/crm/kim/components/ContactPersonsTable.tsx',
-      '../../pages/crm/kim/components/DocumentPanel.tsx',
-      '../../pages/crm/kim/components/CustomerGiftsTab.tsx',
       '../../pages/sales/OrderEditorLegacyPage.tsx',
       '../../pages/sales/invoice-editor.tsx',
       '../../pages/sales/delivery-editor.tsx',
@@ -64,8 +64,6 @@ describe('UIX zentrale Runtime und Restmasken', () => {
     for (const file of files) {
       expect(read(file), file).not.toMatch(/size="sm"/)
     }
-    expect(read('../../pages/crm/kim/components/DocumentPanel.tsx')).toContain('Löschen')
-    expect(read('../../pages/crm/kim/index.tsx')).not.toMatch(/h-6 px-2/)
     expect(read('../../pages/sales/OrderEditorLegacyPage.tsx')).toContain('min-h-touch')
     expect(read('../../pages/sales/OrderEditorLegacyPage.tsx')).not.toMatch(/h-8 w-8/)
     expect(read('../../pages/sales/invoice-editor.tsx')).toContain('XRechnung')

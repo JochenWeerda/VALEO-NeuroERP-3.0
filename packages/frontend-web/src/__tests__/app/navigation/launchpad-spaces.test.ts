@@ -26,6 +26,7 @@ describe('launchpad-spaces', () => {
     expect(launchpadTileSurface('kunden').borderLeftColor).toMatch(/--chart-[1-6]-hsl/)
     expect(launchpadTileSurface('kunden')).toEqual(launchpadTileSurface('kunden'))
     expect(launchpadTileSurface('meine-aufgaben', 'task').backgroundColor).toContain('0.4')
+    expect(launchpadTileKind('kundenakte')).toBe('app')
     expect(launchpadTileKind('kim-cockpit')).toBe('task')
     expect(launchpadTileKind('kunden')).toBe('app')
     expect(launchpadTileKind('leitstand')).toBe('alert')
@@ -105,8 +106,8 @@ describe('launchpad-spaces', () => {
     expect(ids).toEqual(['handel', 'ernte', 'logistik', 'betriebsmittel', 'finanzen', 'steuerung'])
     expect(spaces.flatMap((space) => space.pages).every((page) => page.tiles.length > 0 && page.tiles.length <= 10)).toBe(true)
     const kunden = spaces.find((space) => space.id === 'handel')?.pages.find((page) => page.id === 'kunden')
-    expect(kunden?.tiles.map((tile) => tile.id)).toEqual(['kunden', 'kim-cockpit', 'meine-aufgaben'])
-    expect(kunden?.tiles.some((tile) => tile.id === 'kunden-cockpit' || tile.id === 'kontakte' || tile.id === 'kunden-schnellauswahl')).toBe(false)
+    expect(kunden?.tiles.map((tile) => tile.id)).toEqual(['kunden', 'kundenakte', 'kunden-karte'])
+    expect(kunden?.tiles.some((tile) => tile.id === 'kim-cockpit' || tile.id === 'kunden-cockpit' || tile.id === 'kontakte' || tile.id === 'kunden-schnellauswahl')).toBe(false)
     const warteschlange = spaces
       .flatMap((space) => space.pages)
       .flatMap((page) => page.tiles)

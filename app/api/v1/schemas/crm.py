@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Any, Optional
 from uuid import UUID
 
-from pydantic import EmailStr, Field, ValidationInfo, field_validator, model_validator
+from pydantic import ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
@@ -102,6 +102,8 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     Nur Antwortmodell: die Schreibwege laufen ueber ``CustomerCreate`` und
     ``CustomerUpdate``, die keine ``id`` entgegennehmen.
     """
+
+    model_config = ConfigDict(from_attributes=True, extra="allow")
 
     # Leseweg: die Spalte ``domain_crm.customers.id`` ist ``character varying``
     # und traegt neben UUIDs auch fachliche Schluessel aus Demo- und

@@ -118,9 +118,8 @@ _IDENTITAET = {
     "agrar/feeding-group": "name",
     "agrar/feeding-plan": "name",
     "agrar/harvest-settlement": "settlement_number",
-    # Kontrakte und Bankkonten fuehren im Kopf weder Nummer noch Namen; der
-    # Titel der Maske bleibt die Ueberschrift.
-    "agrar/kontrakte": None,
+    "agrar/kontrakte": "contract_no",
+    "crm/customer-360": "firma",
     "agrar/ration": "name",
     "agrar/saatgut": "artikelnummer",
     "crm/lead": "company_name",
@@ -301,6 +300,8 @@ _MANDANTEN_TABELLEN = (
     ("domain_inventory.articles", "tenant_id"),
     ("domain_agrar.ernte_kampagnen", "tenant_id"),
     ("domain_crm.sales_orders", "tenant_id"),
+    ("domain_crm.crm_opportunities", "tenant_id"),
+    ("domain_crm.crm_customers", "tenant_id"),
     ("domain_crm.business_partners", "tenant_id"),
     ("domain_crm.customers", "tenant_id"),
     ("domain_shared.branches", "tenant_id"),
@@ -611,26 +612,49 @@ def test_bestellung_nennt_niederlassung_und_belegkette(client, stamm: dict) -> N
 
 @pytest.mark.integration
 def test_futteranalyse_nennt_den_originalbeleg(client) -> None:
+    from sqlalchemy import text
+
     _engine()
     mandant = "00000000-0000-0000-0000-000000000001"
     kopf = {"Authorization": "Bearer dev-token", "X-Tenant-Id": mandant}
     suffix = uuid.uuid4().hex[:8]
-    futter = client.post("/api/v1/agrar/rations-optimization/feed-catalog/feeds", headers=kopf, json={
-        "artikel_nummer": f"MBS-{suffix}", "name": f"Maissilage {suffix}", "art": "Grundfutter",
-        "feed_kind": "forage", "approval_status": "approved", "trockensubstanz": "35",
-    })
-    assert futter.status_code == 201, futter.text
-    analyse = client.post("/api/v1/agrar/rations-optimization/feed-analyses", headers=kopf, json={
-        "feed_id": futter.json()["id"], "bezeichnung": f"Maissilage Probe {suffix}",
-        "probe_nr": f"P-{suffix}", "labor": "Testlabor", "status": "draft",
-        "quelle_datei": f"laborbefund-{suffix}.pdf", "values": [],
-    })
-    assert analyse.status_code == 201, analyse.text
+    futter_id = None
+    analyse_id = None
+    try:
+        futter = client.post("/api/v1/agrar/rations-optimization/feed-catalog/feeds", headers=kopf, json={
+            "artikel_nummer": f"MBS-{suffix}", "name": f"Maissilage {suffix}", "art": "Grundfutter",
+            "feed_kind": "forage", "approval_status": "approved", "trockensubstanz": "35",
+        })
+        assert futter.status_code == 201, futter.text
+        futter_id = futter.json()["id"]
+        analyse = client.post("/api/v1/agrar/rations-optimization/feed-analyses", headers=kopf, json={
+            "feed_id": futter_id, "bezeichnung": f"Maissilage Probe {suffix}",
+            "probe_nr": f"P-{suffix}", "labor": "Testlabor", "status": "draft",
+            "quelle_datei": f"laborbefund-{suffix}.pdf", "values": [],
+        })
+        assert analyse.status_code == 201, analyse.text
+        analyse_id = analyse.json()["id"]
 
-    gelesen = client.get(_entity_url("futtermittel/analyse", analyse.json()["id"]), headers=kopf)
-    assert gelesen.status_code == 200, gelesen.text
-    assert gelesen.json()["quelle_datei"] == f"laborbefund-{suffix}.pdf"
-    assert "quelle_datei" in _kopf_keys("futtermittel/analyse")
+        gelesen = client.get(_entity_url("futtermittel/analyse", analyse_id), headers=kopf)
+        assert gelesen.status_code == 200, gelesen.text
+        assert gelesen.json()["quelle_datei"] == f"laborbefund-{suffix}.pdf"
+        assert "quelle_datei" in _kopf_keys("futtermittel/analyse")
+    finally:
+        with _engine().begin() as v:
+            if analyse_id:
+                for tabelle in (
+                    "domain_shared.feeding_feed_analysis_values",
+                    "domain_shared.feeding_feed_analysis_findings",
+                ):
+                    v.execute(text(f"DELETE FROM {tabelle} WHERE analysis_id = :id"), {"id": analyse_id})  # nosec B608
+                # Revisionszeilen sind per Trigger unveraenderlich; die Analyse selbst
+                # bleibt deshalb als Historie stehen, der Dev-Mandant bekommt aber
+                # keine offenen Messwerte und Befunde mehr.
+                v.execute(
+                    text("UPDATE domain_shared.grundfutter_analysen SET is_active = false WHERE id = :id"),
+                    {"id": analyse_id},
+                )
+            # Futter bleibt, weil die unveraenderliche Revision darauf zeigen darf.
 
 
 @pytest.mark.integration
@@ -655,6 +679,46 @@ def test_verkaufschance_nennt_den_kunden(client, stamm: dict, monkeypatch) -> No
     assert body["customer_name"] == "Raiffeisen Markt Ost eG"
     assert body["customer_number"] == "K-3300"
     assert {"customer_name", "customer_number"} <= _kopf_keys("crm/opportunity")
+
+
+@pytest.mark.integration
+def test_verkaufschance_liest_die_lokale_pipeline_wenn_crm_sales_fehlt(client, stamm: dict, monkeypatch) -> None:
+    """Ohne crm-sales bleibt die Maske lesbar: Liste und Einzel-GET kommen aus domain_crm."""
+    import httpx
+    from sqlalchemy import text
+
+    from app.api.v1.endpoints import opportunities
+
+    async def _crm_weg(*_args, **_kwargs):
+        raise httpx.RequestError("crm-sales unreachable")
+
+    monkeypatch.setattr(opportunities, "crm_get_opportunity", _crm_weg)
+    monkeypatch.setattr(opportunities, "crm_list_opportunities", _crm_weg)
+
+    chance_id = str(uuid.uuid4())
+    with stamm["engine"].begin() as v:
+        v.execute(text(
+            "INSERT INTO domain_crm.crm_customers "
+            "(id, tenant_id, customer_number, company_name, last_name, street, postal_code, city) "
+            "VALUES (:id, :t, 'K-3300', 'Raiffeisen Markt Ost eG', 'Ost', 'Markt 1', '27356', 'Rotenburg')"
+        ), {"id": stamm["kunde"], "t": stamm["mandant"]})
+        v.execute(text(
+            "INSERT INTO domain_crm.crm_opportunities "
+            "(id, tenant_id, customer_id, title, stage, status, assigned_to, estimated_value) "
+            "VALUES (:id, :t, :kunde, 'Frühjahrsdüngung 2027', 'prospecting', 'aktiv', 'system', 12000)"
+        ), {"id": chance_id, "t": stamm["mandant"], "kunde": stamm["kunde"]})
+
+    kopf = _kopf(stamm["mandant"])
+    liste = client.get(f"/api/v1/crm/opportunities?tenant_id={stamm['mandant']}", headers=kopf)
+    assert liste.status_code == 200, liste.text
+    assert any(item["id"] == chance_id for item in liste.json()["items"])
+
+    gelesen = client.get(_entity_url("crm/opportunity", chance_id), headers=kopf)
+    assert gelesen.status_code == 200, gelesen.text
+    body = gelesen.json()
+    assert body["name"] == "Frühjahrsdüngung 2027"
+    assert body["customer_name"] == "Raiffeisen Markt Ost eG"
+    assert body["customer_number"] == "K-3300"
 
 
 # ---------------------------------------------------------------------------

@@ -33,4 +33,20 @@ describe('ScreenSummaryGrid', () => {
     expect(screen.getByText('Transport')).toBeInTheDocument()
     expect(screen.getByTestId('summary-source-ref-transport_tkm')).toHaveTextContent('transport:charge-1')
   })
+
+  it('renders typed header facets instead of cards', () => {
+    render(
+      <ScreenSummaryGrid
+        items={[
+          { key: 'kunden_nr', label: 'Kunden-Nr.', value: 'K-100', kind: 'identity' },
+          { key: 'party_status', label: 'Status', value: 'Kunde', kind: 'status', tone: 'success' },
+        ]}
+      />,
+    )
+
+    expect(screen.getByTestId('mask-header-facets')).toBeInTheDocument()
+    expect(screen.getByText('Kunden-Nr.')).toBeInTheDocument()
+    expect(screen.getByText('K-100')).toBeInTheDocument()
+    expect(screen.queryByText('CO2e Charge')).not.toBeInTheDocument()
+  })
 })

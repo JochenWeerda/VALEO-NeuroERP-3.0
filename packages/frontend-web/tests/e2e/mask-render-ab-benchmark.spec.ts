@@ -61,7 +61,7 @@ const scenarios: Array<{
         variant: 'pilot',
         path: `/dev/mask-benchmark/sales-order/pilot/${BENCH_ORDER_ID}`,
         waitForShellReady: async (page) => {
-          await page.getByTestId('universal-sales-order-pilot').waitFor({ state: 'visible', timeout: 45_000 })
+          await page.getByTestId('sales-sales-order').waitFor({ state: 'visible', timeout: 45_000 })
           await page.getByText('Auftragssumme').waitFor({ state: 'visible', timeout: 45_000 })
         },
         positionsRowSelector: '[data-testid="virtual-data-table"] button[type="button"]',
@@ -95,7 +95,7 @@ const scenarios: Array<{
         variant: 'pilot',
         path: `/dev/mask-benchmark/kontrakt/pilot/${BENCH_CONTRACT_ID}`,
         waitForShellReady: async (page) => {
-          await page.getByTestId('universal-kontrakt-pilot').waitFor({ state: 'visible', timeout: 45_000 })
+          await page.getByTestId('agrar-kontrakt').waitFor({ state: 'visible', timeout: 45_000 })
           await page.getByText('Restmenge').waitFor({ state: 'visible', timeout: 45_000 })
         },
         positionsRowSelector: '[data-testid="virtual-data-table"] button[type="button"]',

@@ -75,12 +75,12 @@ export function CustomerChefHintsBanner({
         Chef-Hinweise
         {data.partnerId ? (
           <Link
-            to={`/verkauf/kunden-stamm/${data.partnerId}`}
+            to={`/crm/kunden/${encodeURIComponent(data.partnerId)}`}
             className="text-xs font-normal text-status-warning underline-offset-2 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Kundenstamm öffnen
+            Kundenakte öffnen
           </Link>
         ) : null}
       </AlertTitle>

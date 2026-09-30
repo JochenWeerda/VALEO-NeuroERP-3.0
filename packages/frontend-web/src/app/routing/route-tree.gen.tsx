@@ -3,7 +3,9 @@ import { createRootRoute, createRoute, redirect } from '@tanstack/react-router'
 import { RootRouteLayout, AppRouteLayout, PortalRouteLayout, renderPage } from '@/app/routing/route-layouts'
 
 function buildLegacyRedirect(target: string, params: Record<string, string>): string {
-  return `/${target.replace(/:([A-Za-z0-9_]+)/g, (_match, name: string) => encodeURIComponent(params[name] ?? ''))}`
+  const path = `/${target.replace(/:([A-Za-z0-9_]+)/g, (_match, name: string) => encodeURIComponent(params[name] ?? ''))}`
+  const search = typeof window !== 'undefined' ? window.location.search : ''
+  return `${path}${search}`
 }
 
 export const rootRoute = createRootRoute({

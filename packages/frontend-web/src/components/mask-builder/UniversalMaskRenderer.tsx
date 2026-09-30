@@ -37,9 +37,18 @@ const PROCESS_FLOW_SECTION_KEY = 'belegfluss'
 
 function documentIdentity(identityField: string | undefined, payload: Record<string, unknown>): string | undefined {
   if (!identityField) return undefined
-  const value = getValue(payload, identityField)
-  if (value == null || typeof value === 'object') return undefined
-  return String(value).trim() || undefined
+  const aliases: Record<string, string[]> = {
+    firma: ['firma', 'company_name', 'name', 'display_name'],
+    company_name: ['company_name', 'firma', 'name', 'display_name'],
+  }
+  const keys = aliases[identityField] ?? [identityField]
+  for (const key of keys) {
+    const value = getValue(payload, key)
+    if (value == null || typeof value === 'object') continue
+    const text = String(value).trim()
+    if (text) return text
+  }
+  return undefined
 }
 
 interface UniversalMaskRendererProps {
@@ -69,6 +78,8 @@ interface UniversalMaskRendererProps {
   formState?: UniversalFormState
   /** Optional rich workflow state (from useWorkflowState) */
   workflowState?: WorkflowState
+  /** Deep-link into a section or register (`?tab=`). */
+  requestedSectionKey?: string
 }
 
 function matchesShortcut(event: ReactKeyboardEvent<HTMLElement>, shortcut: string): boolean {
@@ -168,6 +179,7 @@ function RenderFromPlan({
   formState,
   workflowState,
   entityId,
+  requestedSectionKey,
 }: {
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
@@ -185,11 +197,15 @@ function RenderFromPlan({
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
   formState?: UniversalFormState
   workflowState?: WorkflowState
+  requestedSectionKey?: string
 }): JSX.Element {
   const container = useRef<HTMLDivElement>(null)
-  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
+  const [activeTab, setActiveTab] = useState<string | undefined>(requestedSectionKey)
   const [locateField, setLocateField] = useState<string | undefined>(undefined)
-  useEffect(() => { setActiveTab(undefined); setLocateField(undefined) }, [plan.screenId])
+  useEffect(() => {
+    setActiveTab(requestedSectionKey)
+    setLocateField(undefined)
+  }, [plan.screenId, requestedSectionKey])
   useEffect(() => {
     if (!locateField) return
     let cancelled = false
@@ -610,6 +626,7 @@ export function UniversalMaskRenderer({
   workflowState,
   entityId,
   region,
+  requestedSectionKey,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
 
@@ -638,6 +655,7 @@ export function UniversalMaskRenderer({
           formState={formState}
           workflowState={workflowState}
           entityId={entityId}
+          requestedSectionKey={requestedSectionKey}
         />
       </LookupBindingContext.Provider>
     )

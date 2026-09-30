@@ -109,7 +109,7 @@ test.describe('Sales Universal Order Pilot', () => {
   test('renders summary-first shell for existing order', async ({ page }) => {
     await page.goto('/sales/order-editor/e2e-order', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByTestId('universal-sales-order-pilot')).toBeVisible()
+    await expect(page.getByTestId('sales-sales-order')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'E2E Auftrag' })).toBeVisible()
     await expect(page.getByText('Auftragssumme')).toBeVisible()
   })

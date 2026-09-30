@@ -128,15 +128,21 @@ function CustomerMaskEditPage(): JSX.Element {
         <Alert variant="warning">
           <AlertTitle>Verkaufs-Stammdaten</AlertTitle>
           <AlertDescription>
-            Dieser CRM-Kunde ist mit einem Business-Partner verknüpft. Für die kanonische Pflege (Chef-Anweisungen,
-            Tab 21–25) den{' '}
+            Die Totalsicht liegt in der{' '}
             <Link
-              to={`/verkauf/kunden-stamm/${customer.business_partner_id}`}
+              to={`/crm/kunden/${encodeURIComponent(String(customer.id ?? id))}`}
+              className="font-medium underline underline-offset-2"
+            >
+              Kundenakte
+            </Link>
+            . Tab 21–25 bleiben im{' '}
+            <Link
+              to={`/verkauf/kunden-stamm/${encodeURIComponent(customer.business_partner_id)}?pflege=1`}
               className="font-medium underline underline-offset-2"
             >
               Kundenstamm (Verkauf)
-            </Link>{' '}
-            öffnen.
+            </Link>
+            .
           </AlertDescription>
         </Alert>
       ) : null}

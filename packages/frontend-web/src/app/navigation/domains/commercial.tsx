@@ -520,23 +520,12 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
-        id: 'kim-cockpit',
-        label: 'KIM – Kunde im Mittelpunkt',
+        id: 'kundenakte',
+        label: 'Kundenakte',
         icon: Headset,
-        module: '@/pages/crm/kim/index',
-        preferredPath: 'crm',
-        keywords: ['kim', 'kunde', '360', 'cockpit', 'kundenstamm', 'crm', 'dossier', 'neuroai', 'kontakthistorie'],
-        mcp: { businessDomain: 'sales', scope: 'sales:read' },
-      },
-      {
-        // DEPRECATED (KIM-DEPRECATE-COCKPIT-001): durch KIM (/crm) abgelöst; Eintrag
-        // leitet via Redirect-Seite auf das KIM-360°-Cockpit.
-        id: 'kunden-cockpit',
-        label: 'Kunden-Cockpit (abgelöst → KIM)',
-        icon: Headset,
-        module: '@/pages/crm/kunden-cockpit',
-        preferredPath: 'crm/kunden-cockpit',
-        keywords: ['kunden', 'cockpit', 'kontakt', 'wiedervorlage', 'telefon', 'whatsapp', 'crm', 'kontakthistorie', 'kim', 'abgelöst'],
+        module: '@/pages/crm/customer-360-native',
+        preferredPath: 'verkauf/kunden-liste',
+        keywords: ['kim', 'kunde', '360', 'akte', 'kundenstamm', 'crm', 'dossier', 'lead', 'interessent', 'cockpit'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {

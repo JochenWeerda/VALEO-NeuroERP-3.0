@@ -134,7 +134,7 @@ const SECTION_PRESETS: Record<string, SectionPreset> = {
     },
   },
   crm: {
-    landingItemId: 'kim-cockpit',
+    landingItemId: 'kundenakte',
     description: {
       de: 'Kundenbeziehungen, Kampagnen und Marktpotenziale auf einen Blick.',
       en: 'Customer relations, campaigns, and market potential in one place.',

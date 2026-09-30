@@ -211,10 +211,14 @@ export interface ScreenTabDefinition {
   dataSourceKeys?: string[]
 }
 
+export type ScreenSummaryFacetKind = 'identity' | 'status' | 'kpi' | 'contact'
+
 export interface ScreenSummaryItem {
   key: string
   label: string
   value: string | number | boolean | null
+  /** Fiori-artige Header-Facet; ohne kind bleibt die Karten-Summary. */
+  kind?: ScreenSummaryFacetKind
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
   details?: {
     components?: Array<{
@@ -479,6 +483,11 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   }
   if (screen.layout?.summaryPlacement && !['header', 'footer'].includes(screen.layout.summaryPlacement)) {
     errors.push(`layout.summaryPlacement is invalid: ${screen.layout.summaryPlacement}`)
+  }
+  for (const item of screen.summary ?? []) {
+    if (item.kind && !['identity', 'status', 'kpi', 'contact'].includes(item.kind)) {
+      errors.push(`summary ${item.key} has invalid kind: ${item.kind}`)
+    }
   }
   const shortcuts = new Set<string>()
   for (const action of screen.actions ?? []) {

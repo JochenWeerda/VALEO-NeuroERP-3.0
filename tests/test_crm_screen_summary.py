@@ -17,6 +17,12 @@ def test_customer_screen_summary_is_compact_generator_contract() -> None:
     assert payload["summary"]["sales_ytd"] == 12_500.0
     assert payload["summary"]["credit_status"] == "ok"
     assert "dokumente" in payload["available_tabs"]
+    assert "aufgaben" in payload["available_tabs"]
+    assert "kontrakte" in payload["available_tabs"]
+    facets = {item["key"]: item for item in payload["summary_items"]}
+    assert facets["kunden_nr"]["kind"] == "identity"
+    assert facets["kunden_nr"]["value"] == "K-100"
+    assert facets["sales_ytd"]["value"] == 12_500.0
     assert payload["performance"]["tabs_lazy"] is True
     assert payload["performance"]["lookup_min_chars"] == 2
     assert "tab_endpoints" in payload

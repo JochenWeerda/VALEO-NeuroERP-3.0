@@ -34,6 +34,14 @@ Abbau sinken. Details:
 bearbeitete Arbeitsbaum hebt ausserdem `crm_360.py` von 976 auf 1.235 Zeilen;
 die neue Ratsche erkennt das bereits vor dem Commit.
 
+## MERIDIAN-PARTY-OBJECTPAGE — eine Kundenakte (2026-09-30)
+
+**Erledigt.** Lead und Bestandskunde teilen eine native Object Page. KIM und das
+Kunden-Cockpit sind Redirects inklusive `?tab=`. Listen-IDs (`kunden_nr`,
+Partnernummer) und `/verkauf/kunden-stamm/:id` oeffnen denselben Stamm. Chef,
+Praesente, Postfach und Geo sitzen in der ScreenDefinition; Mini-Apps bleiben weg.
+Tab 21–25 bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+
 ## POS-ZAHLARTEN + AGRAR-KONTRAKTE — Welle 2, zweiter und dritter Eintrag (2026-09-30)
 
 **Erledigt (POS).** `domain_pos.payment_methods` und `domain_pos.promotions`
@@ -292,7 +300,7 @@ ausstehenden Vorschlag an und bucht keine Rechnung. Weitere MCP-Schreibadapter b
 | Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
 | Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
 | MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Kontakt-Log und Rechnungsvorschlag angebunden; Rechnung buchen und übrige Schreibtools offen |
-| KIM Object Page | P1 | Claude Sprint 3 |
+| KIM Object Page | P1 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
 | Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
 | Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |
 | Ablage-Export vom Global-Handler geschluckt; Folgezeile abgeschnitten | P1 Dokumente | geschlossen 2026-09-29 (`e7aa92913`) |
@@ -307,8 +315,8 @@ Status: **Sprint 1+2 abgeschlossen.** Sidebar auf `/` eingeklappt,
 Meine Kunden drei Einstiege, Prozessraum als Auswahl statt Unterreiter,
 App-Finder mit Kategorie/Beschreibung ohne Anpassen, Schnellaktionen 4+Mehr,
 KPI mit Drilldown ohne Fake-Lagerzahl, Start-Steuerelemente 44 px. Sprint 3
-(KIM Object Page) und vollständige WCAG/Responsive/Heute der übrigen Masken
-bleiben offen.
+(KIM Object Page) ist geschlossen (`MERIDIAN-PARTY-OBJECTPAGE`); vollständige
+WCAG/Responsive/Heute der übrigen Masken bleiben offen.
 Entscheidung: [`docs/design/launchpad-informationshierarchie.md`](../design/launchpad-informationshierarchie.md).
 
 | Lücke | Prio | Slice |
@@ -316,7 +324,7 @@ Entscheidung: [`docs/design/launchpad-informationshierarchie.md`](../design/laun
 | Fünf Navigationsebenen gleichzeitig; „Meine Kunden“ fünf überlappende Kacheln | P1 | Sprint 1 — umgesetzt, verifiziert |
 | Gleiche Kachelgewichtung, KPI ohne Trend, zu viele Schnellaktionen | P2 | Sprint 2 — Code da |
 | App-Finder ohne Kategorie, nur im Anpassen-Modus, Suche nur Label | P4 / Sprint 2 | geschlossen |
-| KIM nicht durchgängiger Object-Page-Workspace | P1/P3 | Sprint 3, Claude-Claim |
+| KIM nicht durchgängiger Object-Page-Workspace | P1/P3 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
 | Realtime-Leiste dauerhaft für alle | P4 | Code: nur bei Störung; rollenbasiert danach |
 
 Nicht in diesem Gap: SAP visuell kopieren; erfundene „Heute“-Kennzahlen.

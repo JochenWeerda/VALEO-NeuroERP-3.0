@@ -78,7 +78,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
       render: (s: PSMSachkundeNachweis) => (
         <button
           type="button"
-          onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)}
+          onClick={() => navigate(`/crm/kunden/${encodeURIComponent(s.kundennr || s.id)}`)}
           className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {s.kunde}

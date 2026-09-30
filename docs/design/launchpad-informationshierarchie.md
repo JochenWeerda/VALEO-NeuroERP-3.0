@@ -152,26 +152,27 @@ einem SAP-Aktionsblatt.
 
 ## Sprints (Reihenfolge bindend)
 
-Stand 2026-09-17 **Sprint 1+2 umgesetzt** (nicht committed): Kunden-Seite drei
+Stand 2026-09-30 **Sprint 1–3 umgesetzt**: Kunden-Seite drei
 Einstiege, 6–10 Kacheln, Luft, Schnellaktionen 4+Mehr, App-Finder mit Kategorie,
 Beschreibung und Nav-Stichworten, Finder ohne Anpassen-Modus, KPI mit Zeitraum/
 Trend/Abweichung/Drilldown ohne Fake-Lagerzahl, globale Ebene Start · Aufgaben · Suche,
 Sidebar auf Start eingeklappt und ausgeblendet, Realtime-Leiste nur bei Störung.
 Startfläche (Katalog, Reiter, Schnellaktionen, Finder) auf **44 px** Touchziel.
 Prozessräume sind keine zweite Reiterleiste mehr, sondern eine Auswahl
-(eine Überschrift, wenn nur ein Raum). Sprint 3 (KIM-Workspace in der Maske)
-bleibt eigene Claim-Grenze. Operatives „Heute“ ohne echte Quellen nicht gebaut.
+(eine Überschrift, wenn nur ein Raum). Sprint 3 (Kundenakte als Object Page)
+ist umgesetzt: KIM ist Redirect, Meine Kunden hat Liste / Akte / Karte.
+Operatives „Heute“ ohne echte Quellen nicht gebaut.
 Vollständige WCAG-2.2-AA-Härtung der übrigen Masken bleibt **danach**.
 
 Nicht umdrehen. Keine FSX-Dateien in diesen Slices. Kein SAP-Lookalike.
-`screen_definitions.py` / Auftrag / Rechnung bleiben Claude, außer KIM als
-Object-Page-Workspace in Sprint 3 (eigene Claim-Grenze).
+`screen_definitions.py` / Auftrag / Rechnung bleiben Claude. Die Kundenakte
+ist die Object-Page-Referenz fuer Stammobjekte.
 
 | Sprint | Inhalt | Nicht |
 |---|---|---|
 | **1** | Navigation + Informationshierarchie: eine Ebene sichtbar; 6–10 Kacheln/Rolle; Kunden-Seite auf drei Einstiege; Luft | Neue Farben, neue Apps |
 | **2** | Tile-Typen, KPI mit Kontext, Schnellaktionen 4–6 + Mehr, Personalisierung sichtbarer, App-Finder-Lücken 1–3 | KIM umbauen |
-| **3** | KIM als durchgängiger Object-Page-Workspace; Kontakte/Cockpit/Schnellauswahl nicht mehr als parallele Startkacheln | Pixel-Fiori |
+| **3** | Kundenakte als durchgängiger Object-Page-Workspace; KIM-Route leitet um; Meine Kunden = Liste, Akte, Karte | Pixel-Fiori |
 | **danach** | Responsive, WCAG 2.2 AA, Icon- und Farbhärtung, Realtime-Leiste rollenbasiert, operatives „Heute“ mit echten Quellen | Erfundene Kennzahlen |
 
 UIX-061 (Rollen-Workspaces) nährt Sprint 1/2, ersetzt sie nicht. Die Omnibox

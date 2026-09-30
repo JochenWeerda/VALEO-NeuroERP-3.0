@@ -6,7 +6,7 @@ import { usePendingCalls, useAckCall, type TapiCall } from '@/lib/api/tapi'
 /**
  * Globales Popup für eingehende Anrufe (TAPI/Click-to-Customer).
  * Pollt /crm/tapi/pending; ein lokaler TAPI-Bridge-Dienst meldet Anrufe per
- * POST /crm/tapi/incoming. Zeigt den erkannten Kunden und führt ins Cockpit.
+ * POST /crm/tapi/incoming. Zeigt den erkannten Kunden und führt in die Akte.
  * Wird global in der AppShell gemountet.
  */
 export function IncomingCallPopup(): JSX.Element | null {
@@ -18,7 +18,7 @@ export function IncomingCallPopup(): JSX.Element | null {
   if (!call) return null
 
   const handleOpen = () => {
-    if (call.kunden_nr) navigate('/crm/kunden-cockpit')
+    if (call.kunden_nr) navigate(`/crm/kunden/${encodeURIComponent(call.kunden_nr)}`)
     ack.mutate(call.id)
   }
 

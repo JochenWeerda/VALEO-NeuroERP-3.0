@@ -43,7 +43,7 @@ export default function SachkundeRegisterPage(): JSX.Element {
       key: 'kunde' as const,
       label: 'Kunde',
       render: (s: Sachkundenachweis) => (
-        <button type="button" onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
+        <button type="button" onClick={() => navigate(`/crm/kunden/${encodeURIComponent(s.kundennr || s.id)}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {s.kunde}
         </button>
       ),

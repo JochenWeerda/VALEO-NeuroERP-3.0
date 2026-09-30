@@ -89,7 +89,7 @@ test.describe('CRM Universal Customer Mask Pilot', () => {
     const summaryResponse = page.waitForResponse(/\/api\/v1\/crm\/customers\/e2e-customer\/screen-summary$/)
     await page.goto('/crm/kunden-stamm-modern?id=e2e-customer', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByTestId('universal-customer-mask-pilot')).toBeVisible()
+    await expect(page.getByTestId('crm-customer-360')).toBeVisible()
     await expect(page.getByTestId('screen-crm/customer-360')).toHaveAttribute('data-layout-mode', 'desktopDense')
     await summaryResponse
     await expect(page.getByRole('heading', { name: 'E2E Universal Kunde' })).toBeVisible()
@@ -113,7 +113,7 @@ test.describe('CRM Universal Customer Mask Pilot', () => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/crm/kunden-stamm-modern?id=e2e-customer', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByTestId('universal-customer-mask-pilot')).toBeVisible()
+    await expect(page.getByTestId('crm-customer-360')).toBeVisible()
     await expect(page.getByTestId('screen-crm/customer-360')).toHaveAttribute('data-mobile-layout', 'mobileStack')
     await expect(page.getByRole('heading', { name: 'E2E Universal Kunde' })).toBeVisible()
   })

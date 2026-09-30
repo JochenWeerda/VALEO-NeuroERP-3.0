@@ -80,6 +80,7 @@ export interface RenderProcessRibbonPlan {
 export interface RenderSummarySlot {
   key: string
   label: string
+  kind?: ScreenSummaryItem['kind']
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
 }
 

@@ -1,5 +1,5 @@
 /**
- * Auftrags-Erfassung (Verkauf) — Route-Switch Legacy vs. Universal Mask Generator Pilot
+ * Auftrags-Erfassung (Verkauf) — Route-Switch Legacy vs. native Maske (UniversalMaskRuntime)
  */
 
 import { lazy, Suspense } from 'react'
@@ -7,7 +7,7 @@ import { useParams, useSearchParams } from '@/app/routing/typed-router'
 import { ENABLE_UNIVERSAL_MASK_SALES_ORDER } from '@/features/sales-masks/sales-order-mask-support'
 
 const OrderEditorLegacyPage = lazy(() => import('./OrderEditorLegacyPage'))
-const UniversalSalesOrderPilotPage = lazy(() => import('./UniversalSalesOrderPilotPage'))
+const SalesOrderNativePage = lazy(() => import('./sales-order-native'))
 
 export default function SalesOrderEditorPage(): JSX.Element {
   const { id: routeId } = useParams<{ id?: string }>()
@@ -17,7 +17,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
   const PageComponent =
     !isNew && ENABLE_UNIVERSAL_MASK_SALES_ORDER
-      ? UniversalSalesOrderPilotPage
+      ? SalesOrderNativePage
       : OrderEditorLegacyPage
 
   return (

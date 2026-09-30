@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
+import { nativeDetailLoadState } from '@/components/mask-builder/native-detail-load-state'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
@@ -44,6 +45,7 @@ interface UniversalNativeDetailPageProps {
   screenId: string
   entityId: string | undefined
   testId?: string
+  requestedSectionKey?: string
 }
 
 interface PendingAction {
@@ -89,6 +91,7 @@ export function UniversalNativeDetailPage({
   screenId,
   entityId,
   testId,
+  requestedSectionKey,
 }: UniversalNativeDetailPageProps): JSX.Element {
   const { onTabChange } = useMaskPilotState()
   const navigate = useNavigate()
@@ -242,8 +245,16 @@ export function UniversalNativeDetailPage({
     setValidationErrors([])
   }
 
-  // --- Empty entity guard ---
-  if (!entityId) {
+  const loadState = nativeDetailLoadState({
+    entityId,
+    schemaError: schemaQuery.error,
+    entityError: runtime.entityError,
+    hasPlan: Boolean(runtime.plan),
+    schemaFetching: schemaQuery.isFetching,
+    hasSchema: Boolean(schemaQuery.data),
+  })
+
+  if (loadState === 'empty') {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
         <AlertCircle className="h-10 w-10 text-muted-foreground" />
@@ -261,8 +272,7 @@ export function UniversalNativeDetailPage({
     )
   }
 
-  // --- Error state ---
-  if (schemaQuery.error || runtime.entityError) {
+  if (loadState === 'error') {
     const errMsg = getAxiosErrorMessage(schemaQuery.error ?? runtime.entityError)
     const isNotFound =
       errMsg?.includes('404') ||
@@ -277,18 +287,31 @@ export function UniversalNativeDetailPage({
             {isNotFound ? 'Datensatz nicht gefunden' : 'Fehler beim Laden'}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isNotFound ? 'Der angeforderte Datensatz existiert nicht oder wurde gelöscht.' : errMsg}
+            {isNotFound
+              ? 'Der angeforderte Datensatz existiert nicht oder wurde gelöscht.'
+              : (errMsg || 'Die Maske konnte nicht geladen werden. Prüfen Sie, ob das Backend läuft.')}
           </p>
         </div>
-        <Button variant="outline" onClick={() => void navigate({ to: -1 as never })}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Zurück
-        </Button>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              void schemaQuery.refetch()
+              void runtime.refetch()
+            }}
+          >
+            Erneut versuchen
+          </Button>
+          <Button variant="outline" onClick={() => void navigate({ to: -1 as never })}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Zurück
+          </Button>
+        </div>
       </div>
     )
   }
 
-  if (!runtime.plan) {
+  if (loadState === 'loading' || !runtime.plan) {
     return (
       <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
         Wird geladen…
@@ -329,6 +352,7 @@ export function UniversalNativeDetailPage({
           onOverlayChange={runtime.updateUserOverlay}
           onOverlayReset={runtime.resetUserOverlay}
           onAction={handleAction}
+          requestedSectionKey={requestedSectionKey}
         />
       </div>
 

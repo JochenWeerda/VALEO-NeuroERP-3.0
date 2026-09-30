@@ -12,6 +12,46 @@ import { appendQueryParams } from './data-source-resolver'
 import { apiClient } from '@/lib/api-client'
 import { deleteUserOverlay, overlayKeys, saveUserOverlay, useUserScreenOverlay } from '@/lib/api/ux-overlays'
 
+const SUMMARY_PLACEHOLDERS = [
+  'entity_id',
+  'customer_id',
+  'contract_id',
+  'order_id',
+  'invoice_id',
+]
+
+function interpolateSummaryEndpoint(template: string, entityId: string): string {
+  return SUMMARY_PLACEHOLDERS.reduce(
+    (url, token) => url.replaceAll(`{${token}}`, encodeURIComponent(entityId)),
+    template,
+  )
+}
+
+function asSummaryItems(value: unknown): ScreenSummaryItem[] | undefined {
+  if (!Array.isArray(value) || value.length === 0) return undefined
+  return value.filter((item): item is ScreenSummaryItem =>
+    Boolean(item && typeof item === 'object' && 'key' in item && 'label' in item),
+  )
+}
+
+function resolveSummaryItems(
+  schemaItems: ScreenSummaryItem[] | undefined,
+  payload: Record<string, unknown> | undefined,
+  explicit?: ScreenSummaryItem[],
+): ScreenSummaryItem[] | undefined {
+  const fromPayload = asSummaryItems(payload?.summary_items)
+  if (fromPayload) return fromPayload
+  if (explicit?.length) return explicit
+  if (!schemaItems?.length) return undefined
+  const values = payload?.summary && typeof payload.summary === 'object'
+    ? payload.summary as Record<string, unknown>
+    : {}
+  return schemaItems.map((item) => ({
+    ...item,
+    value: item.value ?? (values[item.key] as ScreenSummaryItem['value']) ?? null,
+  }))
+}
+
 export interface UseUniversalMaskRuntimeOptions {
   screenId: string
   entityId?: string
@@ -86,16 +126,33 @@ export function useUniversalMaskRuntime({
   const overlayQuery = useUserScreenOverlay(screenId, { enabled: enabled && Boolean(schema) })
   const activeOverlay = overlayQuery.data?.overlay ?? {}
 
+  const summaryQuery = useQuery({
+    queryKey: [screenId, entityId, 'screen-summary'],
+    queryFn: async () => {
+      const template = schema?.summaryEndpoint
+      if (!template || !entityId) return {}
+      const res = await apiClient.get<Record<string, unknown>>(interpolateSummaryEndpoint(template, entityId))
+      return res.data ?? {}
+    },
+    enabled: enabled && Boolean(entityId) && Boolean(schema?.summaryEndpoint),
+    staleTime: 30_000,
+  })
+
+  const resolvedSummaryItems = useMemo(
+    () => resolveSummaryItems(schema?.summary, summaryQuery.data, summaryItems),
+    [schema?.summary, summaryQuery.data, summaryItems],
+  )
+
   const plan = useMemo<RenderPlan | undefined>(() => {
     if (!schema || !enabled) return undefined
     const compiled = compileRenderPlan(schema, {
       screenId,
       schemaVersion: schema.schemaVersion ?? 1,
       summary: {
-        title: summaryTitle,
-        subtitle: summarySubtitle,
+        title: summaryTitle ?? (typeof summaryQuery.data?.title === 'string' ? summaryQuery.data.title : undefined),
+        subtitle: summarySubtitle ?? (typeof summaryQuery.data?.subtitle === 'string' ? summaryQuery.data.subtitle : undefined),
         availableTabs,
-        summaryItems,
+        summaryItems: resolvedSummaryItems,
         tabEndpoints,
       },
       auth: { permissions },
@@ -106,7 +163,7 @@ export function useUniversalMaskRuntime({
       cacheKey: `${compiled.cacheKey}:overlay:${overlayQuery.data?.schema_version ?? schema.schemaVersion ?? 1}:${hashOverlay(activeOverlay)}`,
       overlayInvalidPaths: applied.invalidPaths.length > 0 ? applied.invalidPaths : applied.plan.overlayInvalidPaths,
     }
-  }, [schema, screenId, enabled, summaryTitle, summarySubtitle, availableTabs, summaryItems, tabEndpoints, permissions, activeOverlay, overlayQuery.data?.schema_version])
+  }, [schema, screenId, enabled, summaryTitle, summarySubtitle, availableTabs, resolvedSummaryItems, tabEndpoints, permissions, activeOverlay, overlayQuery.data?.schema_version, summaryQuery.data])
 
   const saveOverlayMutation = useMutation({
     mutationFn: (overlay: ScreenOverlay) => saveUserOverlay(screenId, {
@@ -265,6 +322,7 @@ export function useUniversalMaskRuntime({
       await Promise.all([
         entityQuery.refetch(),
         overlayQuery.refetch(),
+        summaryQuery.refetch(),
         ...tableResults.map((result) => result.refetch()),
       ])
     },

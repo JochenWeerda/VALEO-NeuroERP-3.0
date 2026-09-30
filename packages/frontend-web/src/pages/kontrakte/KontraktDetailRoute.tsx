@@ -3,7 +3,7 @@ import { useParams } from '@/app/routing/typed-router'
 import { ENABLE_UNIVERSAL_MASK_AGRAR_KONTRAKT } from '@/features/agrar-masks/kontrakt-mask-support'
 
 const FrmKontraktDetail = lazy(() => import('./FrmKontraktDetail'))
-const UniversalKontraktPilotPage = lazy(() => import('./UniversalKontraktPilotPage'))
+const KontraktNativePage = lazy(() => import('@/pages/agrar/kontrakt-native'))
 
 export default function KontraktDetailRoute(): JSX.Element {
   const { id } = useParams<{ id?: string }>()
@@ -11,7 +11,7 @@ export default function KontraktDetailRoute(): JSX.Element {
 
   const PageComponent =
     isExistingContract && ENABLE_UNIVERSAL_MASK_AGRAR_KONTRAKT
-      ? UniversalKontraktPilotPage
+      ? KontraktNativePage
       : FrmKontraktDetail
 
   return (

@@ -107,19 +107,7 @@ export const LAUNCHPAD_SPACES: LaunchpadSpaceDef[] = [
       {
         id: 'kunden',
         label: { de: 'Meine Kunden', en: 'My customers' },
-        tileItemIds: ['kunden', 'kim-cockpit'],
-        extraTiles: [
-          {
-            id: 'meine-aufgaben',
-            label: { de: 'Meine Aufgaben', en: 'My tasks' },
-            path: '/crm/aktivitaeten',
-            description: {
-              de: 'Wiedervorlagen und offene Aktivitäten',
-              en: 'Follow-ups and open activities',
-            },
-            kind: 'task',
-          },
-        ],
+        tileItemIds: ['kunden', 'kundenakte', 'kunden-karte'],
       },
       {
         id: 'aussendienst',

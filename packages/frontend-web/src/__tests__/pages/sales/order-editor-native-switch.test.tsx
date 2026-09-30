@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import SalesOrderEditorPage from '@/pages/sales/order-editor'
 
 vi.mock('@/features/sales-masks/sales-order-mask-support', () => ({
-  ENABLE_UNIVERSAL_MASK_SALES_ORDER: false,
+  ENABLE_UNIVERSAL_MASK_SALES_ORDER: true,
 }))
 
 vi.mock('@/pages/sales/OrderEditorLegacyPage', () => ({
@@ -16,12 +15,14 @@ vi.mock('@/pages/sales/sales-order-native', () => ({
 
 vi.mock('@/app/routing/typed-router', () => ({
   useParams: () => ({ id: 'order-1' }),
-  useSearchParams: () => [new URLSearchParams('id=order-1')],
+  useSearchParams: () => [new URLSearchParams()],
 }))
 
-describe('SalesOrderEditorPage route switch', () => {
-  it('uses legacy editor when the native flag is disabled', async () => {
+describe('SalesOrderEditorPage native switch', () => {
+  it('renders the native mask for an existing order when the flag is on', async () => {
+    const { default: SalesOrderEditorPage } = await import('@/pages/sales/order-editor')
     render(<SalesOrderEditorPage />)
-    expect(await screen.findByTestId('legacy-order-editor')).toBeInTheDocument()
+    expect(await screen.findByTestId('sales-sales-order')).toBeInTheDocument()
+    expect(screen.queryByTestId('legacy-order-editor')).not.toBeInTheDocument()
   })
 })

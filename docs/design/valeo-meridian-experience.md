@@ -148,9 +148,8 @@ Sprungmarken, ohne dass die ScreenDefinition etwas deklariert (Compiler
 `resolveSectionNavigation`, Backend-Normalisierer `_with_meridian_layout`).
 Wer Register braucht, setzt `layout.sectionNavigation: "tabs"` als Opt-out und
 begründet es. Die Readiness meldet die aufgelöste Einstellung unter
-`resolvedLayout`. Pilotseiten mit `usePilotRenderPlan` (Auftrag, Kontrakt,
-Kunde-Altpfad) bleiben vorerst auf Registern, weil sie nur die Tabelle des
-aktiven Registers laden.
+`resolvedLayout`. Die früheren Pilotseiten (Auftrag, Kontrakt, Kunde-Altpfad)
+laufen über `useUniversalMaskRuntime` und damit über dieselbe Voreinstellung.
 
 ### Belegidentität und Anzeigewerte
 
@@ -222,7 +221,7 @@ Wizard-Masken duerfen keine leere Kontext-Rail haben.
 Referenzmasken sind Abnahmefaelle:
 
 - Finance: `financial` profile, AuditReason, Freigabe-/Storno-/Buchungslogik.
-- CRM 360: `objectPage` oder `cockpit`, aktive Kontext-Rail, Status und ActionRuntime.
+- CRM 360: `objectPage` mit Header-Facets (`summary.kind`), Ankern und Prozessband Interessent → Kunde; KIM und das Kunden-Cockpit sind Redirects auf dieselbe Akte, `?tab=` springt in die Sektion; Listen-IDs und `/verkauf/kunden-stamm/:id` werden auf den Stamm aufgelöst.
 - Lager: `inventory` profile, Mengen/Einheiten, Reservierungen, Bewegungen und Status.
 
 Abweichungen werden im Builder oder in der ScreenDefinition behoben.

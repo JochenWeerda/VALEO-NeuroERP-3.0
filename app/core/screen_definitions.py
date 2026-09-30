@@ -26,20 +26,31 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
         "id": "crm/customer-360",
         "domain": "crm",
         "mode": "detail",
-        "title": "Kundenstamm",
-        "subtitle": "CRM 360",
+        "title": "Kundenakte",
+        "subtitle": "CRM",
+        "identityField": "firma",
         "adapter": {
             "type": "native",
             "sourceId": "crm/customer-360",
             "temporary": False,
         },
         "summaryEndpoint": "/api/v1/crm/customers/{customer_id}/screen-summary",
+        "summary": [
+            {"key": "kunden_nr", "label": "Kunden-Nr.", "value": None, "kind": "identity"},
+            {"key": "party_status", "label": "Status", "value": "Kunde", "kind": "status", "tone": "success"},
+            {"key": "sales_ytd", "label": "Umsatz 12M", "value": None, "kind": "kpi"},
+            {"key": "open_items_total", "label": "Offene Posten", "value": None, "kind": "kpi"},
+            {"key": "recent_activity_count", "label": "Aktivitaeten 90T", "value": None, "kind": "contact"},
+        ],
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/crm/customers/{entity_id}"},
             {"key": "contacts",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/contacts",    "pageSize": 25},
             {"key": "auftraege",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/auftraege",   "pageSize": 25},
             {"key": "aktivitaeten","endpoint": "/api/v1/crm/customers/{entity_id}/tabs/aktivitaeten","pageSize": 25},
             {"key": "dokumente",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/dokumente",   "pageSize": 25},
+            {"key": "aufgaben",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/aufgaben",    "pageSize": 25},
+            {"key": "kontrakte",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/kontrakte",   "pageSize": 25},
+            {"key": "praesente",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/praesente",   "pageSize": 25},
         ],
         "tabs": [
             {
@@ -64,6 +75,8 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                     {"key": "telefon", "label": "Telefon", "type": "text"},
                     {"key": "fax", "label": "Fax", "type": "text"},
                     {"key": "email", "label": "E-Mail", "type": "email"},
+                    {"key": "breitengrad", "label": "Breitengrad", "type": "text"},
+                    {"key": "laengengrad", "label": "Laengengrad", "type": "text"},
                 ],
             },
             {
@@ -77,9 +90,20 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                                 {"key": "email", "label": "E-Mail", "width": 200},
                             ]}],
             },
-            {"key": "finance", "label": "Finanzen", "lazy": True, "keepAlive": True},
             {
-                "key": "auftraege", "label": "Auftraege", "lazy": True, "keepAlive": True,
+                "key": "finance", "label": "Finanzen", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "finance", "label": "Offene Posten", "dataSourceKey": "dokumente",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "rechnungsnr", "label": "Rechnung", "width": 130, "sortable": True},
+                                {"key": "faelligkeit", "label": "Faellig", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "amount", "label": "Offen", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "days_overdue", "label": "Tage ueberfaellig", "numeric": True, "sortable": True, "width": 130},
+                                {"key": "op_status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                            ]}],
+            },
+            {
+                "key": "auftraege", "label": "Belege", "lazy": True, "keepAlive": True,
                 "tables": [{"key": "auftraege", "label": "Auftraege", "dataSourceKey": "auftraege",
                             "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
                             "columns": [
@@ -113,6 +137,50 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                                 {"key": "op_status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
                             ]}],
             },
+            {
+                "key": "aufgaben", "label": "Aufgaben", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "aufgaben", "label": "Aufgaben", "dataSourceKey": "aufgaben",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "faellig", "label": "Faellig", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "titel", "label": "Titel", "width": 220},
+                                {"key": "prioritaet", "label": "Prioritaet", "width": 100, "filterable": True},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                            ]}],
+            },
+            {
+                "key": "kontrakte", "label": "Kontrakte", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "kontrakte", "label": "Kontrakte", "dataSourceKey": "kontrakte",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "contract_no", "label": "Kontrakt-Nr.", "width": 140, "sortable": True},
+                                {"key": "contract_type", "label": "Art", "width": 110, "filterable": True},
+                                {"key": "contract_date", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                                {"key": "total_quantity", "label": "Menge", "numeric": True, "sortable": True},
+                            ]}],
+            },
+            {
+                "key": "praesente", "label": "Praesente", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "praesente", "label": "Praesente", "dataSourceKey": "praesente",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "year", "label": "Jahr", "width": 80, "sortable": True},
+                                {"key": "gift_date", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "occasion", "label": "Anlass", "width": 140, "filterable": True},
+                                {"key": "gift_name", "label": "Praesent", "width": 200},
+                                {"key": "quantity", "label": "Menge", "numeric": True, "sortable": True, "width": 90},
+                            ]}],
+            },
+            {
+                "key": "postfach", "label": "Postfach", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "postfach", "label": "Postfach", "type": "text"},
+                    {"key": "postfach_plz", "label": "Postfach-PLZ", "type": "text", "width": 80},
+                    {"key": "postfach_ort", "label": "Postfach-Ort", "type": "text"},
+                    {"key": "email", "label": "E-Mail", "type": "email", "readOnly": True},
+                ],
+            },
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.customer.update", "zone": "commit"},
@@ -131,9 +199,16 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                 "zone": "footer",
             },
         ],
-        "noWorkflowReason": "Kundenstamm ist ein reines Verwaltungsobjekt ohne prozessgesteuerten Lebenszyklus — Statuswechsel erfolgen implizit ueber Auftraege und Aktivitaeten.",
+        "workflow": {
+            "processKey": "crm-party-lifecycle",
+            "phases": [
+                {"key": "lead", "label": "Interessent"},
+                {"key": "qualified", "label": "Qualifiziert"},
+                {"key": "customer", "label": "Kunde"},
+            ],
+        },
         "agentContract": {
-            "businessPurpose": "360-Grad-Kundenstamm-Cockpit fuer Vertrieb und CRM — Stammdaten, Aktivitaeten, offene Auftraege und Dokumente in einer Ansicht.",
+            "businessPurpose": "360-Grad-Kundenakte fuer Vertrieb und CRM — Stammdaten, Aktivitaeten, Belege und Dokumente in einer Ansicht.",
             "examplePrompts": [
                 "Analysiere Kunde {entity_id}: offene Posten, letzte Aktivitaeten, Umsatz 12M.",
                 "Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.",
@@ -150,6 +225,10 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
             "touchTargetPx": 44,
+            "floorplan": "objectPage",
+            "columnNavigation": "single",
+            "sectionNavigation": "anchors",
+            "density": "expertDense",
             "contextRail": "combined",
             "contextRailSections": ["workflow", "audit", "copilot", "collab"],
             "summaryPlacement": "header",
@@ -300,6 +379,7 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
         "mode": "detail",
         "title": "Kontrakt",
         "subtitle": "Agrar-Kontrakt",
+        "identityField": "contract_no",
         "adapter": {
             "type": "native",
             "sourceId": "agrar/kontrakte",
@@ -311,8 +391,21 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
             {"key": "positionen","endpoint": "/api/v1/kontrakte/{entity_id}/tabs/positionen", "pageSize": 50},
             {"key": "umsaetze",  "endpoint": "/api/v1/kontrakte/{entity_id}/tabs/umsaetze",  "pageSize": 25},
         ],
+        "summary": [
+            {"key": "contract_no", "label": "Kontrakt-Nr.", "value": None, "kind": "identity"},
+            {"key": "status", "label": "Status", "value": None, "kind": "status"},
+            {"key": "total_quantity", "label": "Menge", "value": None, "kind": "kpi"},
+        ],
         "tabs": [
-            {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True},
+            {"key": "kopf", "label": "Kopfdaten", "lazy": True, "keepAlive": True,
+             "fields": [
+                 {"key": "contract_no", "label": "Kontrakt-Nr.", "type": "text", "readOnly": True},
+                 {"key": "contract_type", "label": "Art", "type": "text", "readOnly": True},
+                 {"key": "status", "label": "Status", "type": "text", "readOnly": True},
+                 {"key": "contract_date", "label": "Datum", "type": "date"},
+                 {"key": "total_quantity", "label": "Menge", "type": "number"},
+                 {"key": "unit", "label": "Einheit", "type": "text"},
+             ]},
             {
                 "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True,
                 "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
@@ -356,6 +449,14 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
             "touchTargetPx": 44,
+            "floorplan": "objectPage",
+            "columnNavigation": "single",
+            "sectionNavigation": "anchors",
+            "density": "expertDense",
+            "contextRail": "combined",
+            "summaryPlacement": "header",
+            "stickyHeader": True,
+            "stickyFooter": True,
         },
         "performance": {
             "initialPayloadBudgetKb": 52,
@@ -376,12 +477,18 @@ def build_supplier_screen_definition() -> dict[str, Any]:
         "mode": "detail",
         "title": "Lieferant",
         "subtitle": "Lieferantenstamm",
+        "identityField": "lieferantennummer",
         "adapter": {
             "type": "native",
             "sourceId": "einkauf/supplier",
             "temporary": False,
         },
         "summaryEndpoint": "/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/screen-summary",
+        "summary": [
+            {"key": "lieferantennummer", "label": "Lieferanten-Nr.", "value": None, "kind": "identity"},
+            {"key": "aktiv", "label": "Status", "value": None, "kind": "status"},
+            {"key": "lieferzeit_tage", "label": "Lieferzeit", "value": None, "kind": "kpi"},
+        ],
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/einkauf/lieferanten/{entity_id}"},
             {"key": "bestellungen", "endpoint": "/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/bestellungen", "pageSize": 25},
@@ -475,6 +582,14 @@ def build_supplier_screen_definition() -> dict[str, Any]:
             "preferredMode": "desktopDense",
             "mobileMode": "mobileStack",
             "touchTargetPx": 44,
+            "floorplan": "objectPage",
+            "columnNavigation": "single",
+            "sectionNavigation": "anchors",
+            "density": "expertDense",
+            "contextRail": "combined",
+            "summaryPlacement": "header",
+            "stickyHeader": True,
+            "stickyFooter": True,
         },
         "performance": {
             "initialPayloadBudgetKb": 48,
@@ -638,12 +753,14 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
         "mode": "detail",
         "title": "Artikelbestand",
         "subtitle": "Lager / Bestandsfuehrung",
+        "identityField": "article_number",
         "adapter": {"type": "native", "sourceId": "lager/article-stock", "temporary": False},
         "summaryEndpoint": "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/screen-summary",
         "summary": [
-            {"key": "bestand", "label": "Bestand", "tone": "neutral"},
-            {"key": "mindestbestand", "label": "Meldebestand", "tone": "warning"},
-            {"key": "esg_co2e", "label": "CO2e Charge", "tone": "neutral"},
+            {"key": "article_number", "label": "Artikel-Nr.", "value": None, "kind": "identity"},
+            {"key": "bestand", "label": "Bestand", "value": None, "kind": "kpi", "tone": "neutral"},
+            {"key": "mindestbestand", "label": "Meldebestand", "value": None, "kind": "kpi", "tone": "warning"},
+            {"key": "esg_co2e", "label": "CO2e Charge", "value": None, "kind": "kpi", "tone": "neutral"},
         ],
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/articles/{entity_id}"},
@@ -714,7 +831,20 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
                 "summaryArea": "[data-testid='mask-summary']",
             },
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "summaryPlacement": "header", "stickyHeader": True, "stickyFooter": True},
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "floorplan": "objectPage",
+            "columnNavigation": "single",
+            "sectionNavigation": "anchors",
+            "density": "expertDense",
+            "contextRail": "combined",
+            "tableProfile": "inventory",
+            "summaryPlacement": "header",
+            "stickyHeader": True,
+            "stickyFooter": True,
+        },
         "interaction": {"enterMovesFocus": True},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "lager"},
     }
@@ -2354,8 +2484,15 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
     """Native SD fuer crm/lead."""
     return {
         "schemaVersion": 1, "id": "crm/lead", "domain": "crm", "mode": "detail",
-        "title": "Lead", "subtitle": "CRM / Lead-Verwaltung",
+        "title": "Kundenakte", "subtitle": "CRM / Interessent",
+        "identityField": "company_name",
         "adapter": {"type": "native", "sourceId": "crm/lead", "temporary": False},
+        "summary": [
+            {"key": "status", "label": "Status", "value": "Interessent", "kind": "status", "tone": "warning"},
+            {"key": "estimated_value", "label": "Geschaetzter Wert", "value": None, "kind": "kpi"},
+            {"key": "assigned_to", "label": "Zustaendig", "value": None, "kind": "contact"},
+            {"key": "source", "label": "Quelle", "value": None, "kind": "identity"},
+        ],
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/crm/leads/{entity_id}"},
             {"key": "aktivitaeten", "endpoint": "/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
@@ -2399,14 +2536,33 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.lead.update"},
             {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren", "method": "POST"},
         ],
-        "noWorkflowReason": "Lead-Status wird manuell gesetzt — Qualifizierung erzeugt Opportunity (separate Maske).",
+        "workflow": {
+            "processKey": "crm-party-lifecycle",
+            "phases": [
+                {"key": "lead", "label": "Interessent"},
+                {"key": "qualified", "label": "Qualifiziert"},
+                {"key": "customer", "label": "Kunde"},
+            ],
+        },
         "agentContract": {
-            "businessPurpose": "Lead-Cockpit: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.",
+            "businessPurpose": "Lead-Akte: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.",
             "examplePrompts": ["Was ist der Status von Lead {entity_id}?", "Zeige alle offenen Aufgaben fuer Lead {entity_id}.", "Welche Aktivitaeten wurden fuer Lead {entity_id} erfasst?"],
             "sensitiveFields": ["wert"],
             "testSelectors": {"screenRoot": "[data-testid='crm-lead']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "layout": {
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "floorplan": "objectPage",
+            "columnNavigation": "single",
+            "sectionNavigation": "anchors",
+            "density": "expertDense",
+            "contextRail": "combined",
+            "summaryPlacement": "header",
+            "stickyHeader": True,
+            "stickyFooter": True,
+        },
         "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "crm"},
     }
 
@@ -4763,7 +4919,7 @@ def _infer_meridian_floorplan(definition: dict[str, Any]) -> str:
     mode = definition.get("mode")
     if mode == "list":
         return "worklist"
-    if mode == "cockpit" or screen_id == "crm/customer-360":
+    if mode == "cockpit":
         return "cockpit"
     if mode == "wizard":
         return "wizard"
@@ -4864,7 +5020,7 @@ _IDENTITY_EXCLUDED_TOKENS = (
 )
 
 
-_IDENTITY_NAME_KEYS = ("name", "company_name", "firmenname", "bezeichnung")
+_IDENTITY_NAME_KEYS = ("name", "company_name", "firmenname", "firma", "bezeichnung")
 
 
 def infer_identity_field(definition: dict[str, Any]) -> str | None:
@@ -4960,7 +5116,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "agrar/harvest-settlement": ["ernteabrechnung", "sammelabrechnung", "gutschrift ernte"],
     "agrar/kontrakte": ["kontrakt", "vorkontrakt", "liefervertrag", "andienung"],
     "agrar/saatgut": ["saatgut", "sorte", "z-saatgut"],
-    "crm/customer-360": ["kunde", "kundenakte", "kunden-360", "kundenstamm"],
+    "crm/customer-360": ["kunde", "kundenakte", "kunden-360", "kundenstamm", "kim", "interessent"],
     "crm/mail-arbeitsplatz": ["mail", "email", "rollenpostfach", "posteingang", "anlage", "entwurf"],
     "crm/lead": ["lead", "interessent", "verkaufschance"],
     "crm/opportunity": ["opportunity", "chance", "verkaufschance"],

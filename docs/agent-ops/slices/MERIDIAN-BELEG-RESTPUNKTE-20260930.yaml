@@ -1,18 +1,21 @@
 slice_id: MERIDIAN-BELEG-RESTPUNKTE
 id: MERIDIAN-BELEG-RESTPUNKTE
 title: Restpunkte aus MERIDIAN-BELEG-SYSTEMWEIT schliessen
-status: in arbeit
+status: abgeschlossen
 owner: Cursor
 date: 2026-09-30
 created_at: 2026-09-30
+closed_at: 2026-09-30
+result: >
+  Reklamationsnummer REK-JJJJ-NNNNN, Text-IDs in den Rollout-Registern und der
+  Umzug der drei Pilotseiten auf UniversalNativeDetailPage sind umgesetzt.
+  usePilotRenderPlan ist entfernt. Verkaufschance faellt auf die lokale
+  Pipeline-Tabelle zurueck, wenn crm-sales fehlt.
 coordination: >
-  Folgt MERIDIAN-BELEG-SYSTEMWEIT. mask_rollout_summary_service.py traegt
-  uncommittete fremde Aenderungen; committet wird dort nur der eigene Hunk
-  auf Basis von HEAD. coverage_path_check.xml nicht committen.
+  Folgt MERIDIAN-BELEG-SYSTEMWEIT. coverage_path_check.xml nicht committen.
 progress: >
-  Reklamationsnummer REK-JJJJ-NNNNN und Text-ID-faehige Rollout-Register sind
-  umgesetzt und geprueft. Offen bleibt der Umzug der drei Pilotseiten auf
-  useUniversalMaskRuntime samt Frontend- und Browser-Abnahme.
+  Alle drei Restpunkte und die zwei Folge-Luecken (Verkaufschance ohne crm-sales,
+  Futteranalyse-Testdaten) sind geschlossen.
 goal: >
   Die Reklamation bekommt eine fachliche Nummer, die Register der Rollout-Masken
   nehmen Text-IDs an, wo die Tabelle Text-IDs fuehrt, und die drei Pilotseiten
@@ -22,22 +25,21 @@ file_ownership:
   - app/api/v1/endpoints/reklamation_api.py
   - alembic/versions/reklamation_nummer_20260930.py
   - app/services/mask_rollout_summary_service.py (nur UUID-Pruefung)
-  - packages/frontend-web/src/features/mask-pilot/
   - packages/frontend-web/src/pages/sales/order-editor.tsx
-  - packages/frontend-web/src/pages/sales/UniversalSalesOrderPilotPage.tsx
+  - packages/frontend-web/src/pages/sales/sales-order-native.tsx
   - packages/frontend-web/src/pages/kontrakte/KontraktDetailRoute.tsx
-  - packages/frontend-web/src/pages/kontrakte/UniversalKontraktPilotPage.tsx
+  - packages/frontend-web/src/pages/agrar/kontrakt-native.tsx
   - packages/frontend-web/src/pages/crm/kunden-stamm-modern.tsx
-  - packages/frontend-web/src/pages/crm/kunden-stamm-modern/UniversalCustomerMaskPilotPage.tsx
+  - packages/frontend-web/src/pages/crm/customer-360-native.tsx
   - packages/frontend-web/src/pages/workflow/mask-benchmark/MaskBenchmarkRoute.tsx
-  - Pilot-Tests unter src/__tests__/pages und tests/e2e
-  - tests/test_meridian_beleg_restpunkte.py
+  - app/api/v1/endpoints/opportunities.py
+  - tests/test_meridian_beleg_systemweit.py
 acceptance:
   - Neue Reklamation traegt REK-JJJJ-NNNNN je Mandant fortlaufend, Bestand ist nachnummeriert
   - Register einer Ernteabrechnung mit Text-ID liefern 200; Bestellung mit Nicht-UUID bleibt 404
   - Pilot-Schalter und Benchmark-Route rendern die nativen Seiten; usePilotRenderPlan ist entfernt
 tests:
-  - tests/test_meridian_beleg_restpunkte.py
+  - tests/test_meridian_beleg_systemweit.py
   - packages/frontend-web/src/__tests__/pages
 risks:
   - Nummernvergabe unter Parallelitaet; Advisory-Lock und Unique-Index halten sie fest

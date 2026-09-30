@@ -44,8 +44,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `auswertungen/lieferschein-kontrolle` | Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/lieferschein-kontrolle/agent-contract` |
 | `auswertungen/sanktionspruefung-kunden` | Terrorschutzpruefung Kunden | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract` |
 | `auswertungen/sanktionspruefung-personal` | Terrorschutzpruefung Personal | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract` |
-| `crm/customer-360` | Kundenstamm | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
-| `crm/lead` | Lead | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
+| `crm/customer-360` | Kundenakte | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
+| `crm/lead` | Kundenakte | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
 | `crm/mail-arbeitsplatz` | Mail-Arbeitsplatz | crm | niedrig | — | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
 | `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
@@ -853,9 +853,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: crm
 
-### `crm/customer-360` — Kundenstamm
+### `crm/customer-360` — Kundenakte
 
-**Zweck:** 360-Grad-Kundenstamm-Cockpit fuer Vertrieb und CRM — Stammdaten, Aktivitaeten, offene Auftraege und Dokumente in einer Ansicht.
+**Zweck:** 360-Grad-Kundenakte fuer Vertrieb und CRM — Stammdaten, Aktivitaeten, Belege und Dokumente in einer Ansicht.
 
 | | |
 |---|---|
@@ -874,6 +874,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `auftraege` → `/api/v1/crm/customers/{entity_id}/tabs/auftraege`
 - `aktivitaeten` → `/api/v1/crm/customers/{entity_id}/tabs/aktivitaeten`
 - `dokumente` → `/api/v1/crm/customers/{entity_id}/tabs/dokumente`
+- `aufgaben` → `/api/v1/crm/customers/{entity_id}/tabs/aufgaben`
+- `kontrakte` → `/api/v1/crm/customers/{entity_id}/tabs/kontrakte`
+- `praesente` → `/api/v1/crm/customers/{entity_id}/tabs/praesente`
 
 **MCP-Tools (Domäne):**
 
@@ -898,9 +901,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `crm/lead` — Lead
+### `crm/lead` — Kundenakte
 
-**Zweck:** Lead-Cockpit: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.
+**Zweck:** Lead-Akte: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.
 
 | | |
 |---|---|

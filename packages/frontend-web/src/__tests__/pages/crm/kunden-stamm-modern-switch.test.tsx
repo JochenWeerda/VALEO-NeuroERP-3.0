@@ -7,8 +7,8 @@ async function renderSwitch(flags: { universal: boolean; maskBuilder: boolean })
     ENABLE_UNIVERSAL_MASK_CUSTOMER: flags.universal,
     ENABLE_CUSTOMER_MASK_BUILDER_FORM: flags.maskBuilder,
   }))
-  vi.doMock('@/pages/crm/kunden-stamm-modern/UniversalCustomerMaskPilotPage', () => ({
-    default: () => <div>Universal Pilot</div>,
+  vi.doMock('@/pages/crm/customer-360-native', () => ({
+    default: () => <div>Native Customer</div>,
   }))
   vi.doMock('@/pages/crm/kunden-stamm-modern/CustomerMaskEditPage', () => ({
     default: () => <div>Mask Builder</div>,
@@ -22,16 +22,16 @@ async function renderSwitch(flags: { universal: boolean; maskBuilder: boolean })
 }
 
 describe('KundenStammModern route switch', () => {
-  it('uses the legacy fallback when the universal pilot flag is disabled', async () => {
+  it('uses the legacy fallback when the native flag is disabled', async () => {
     await renderSwitch({ universal: false, maskBuilder: false })
 
     expect(await screen.findByText('Legacy Customer')).toBeInTheDocument()
   })
 
-  it('uses the universal pilot before the mask-builder page when enabled', async () => {
+  it('uses the native mask before the mask-builder page when enabled', async () => {
     await renderSwitch({ universal: true, maskBuilder: true })
 
-    expect(await screen.findByText('Universal Pilot')).toBeInTheDocument()
+    expect(await screen.findByText('Native Customer')).toBeInTheDocument()
     expect(screen.queryByText('Mask Builder')).not.toBeInTheDocument()
   })
 })

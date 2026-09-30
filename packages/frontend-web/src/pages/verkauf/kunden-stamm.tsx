@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
+import { Navigate, useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -572,6 +572,16 @@ function generateCustomerNumber(): string {
 }
 
 export default function KundenStammPage(): JSX.Element {
+  const { id } = useParams<{ id?: string }>()
+  const [searchParams] = useSearchParams()
+  const isNew = !id || id === 'neu'
+  if (!isNew && searchParams.get('pflege') !== '1') {
+    return <Navigate to={`/crm/kunden/${encodeURIComponent(String(id))}`} replace />
+  }
+  return <KundenStammEditor />
+}
+
+function KundenStammEditor(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams<{ id?: string }>()
   const [searchParams, setSearchParams] = useSearchParams()

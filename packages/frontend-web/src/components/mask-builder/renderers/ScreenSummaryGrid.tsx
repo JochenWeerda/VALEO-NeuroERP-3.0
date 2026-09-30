@@ -5,8 +5,38 @@ import { Info } from 'lucide-react'
 import type { ScreenSummaryItem } from '../schema'
 import { renderValue } from './render-utils'
 
+const TONE_CLASS: Record<NonNullable<ScreenSummaryItem['tone']>, string> = {
+  neutral: 'text-foreground',
+  success: 'text-status-success',
+  warning: 'text-status-warning',
+  danger: 'text-status-error',
+}
+
 export function ScreenSummaryGrid({ items }: { items: ScreenSummaryItem[] }): JSX.Element | null {
   if (items.length === 0) return null
+
+  if (items.some((item) => item.kind)) {
+    return (
+      <div
+        className="flex flex-wrap gap-x-6 gap-y-3"
+        data-testid="mask-header-facets"
+        role="group"
+        aria-label="Kennzahlen"
+      >
+        {items.map((item) => (
+          <div key={item.key} data-kind={item.kind} className="min-w-[7.5rem]">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-2xs tracking-wide uppercase text-muted-foreground">{item.label}</p>
+              <SummaryDetails item={item} />
+            </div>
+            <p className={`mt-0.5 text-sm font-semibold tabular-nums ${TONE_CLASS[item.tone ?? 'neutral']}`}>
+              {renderValue(item.value) || '–'}
+            </p>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

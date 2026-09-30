@@ -85,7 +85,7 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
             <div className="flex items-center gap-2">
               <User2 className="h-4 w-4 text-muted-foreground" />
               {match ? (
-                <button type="button" onClick={() => navigate(`/crm/kunden-cockpit`)} className="min-h-11 font-medium text-primary touch-manipulation">
+                <button type="button" onClick={() => navigate(`/crm/kunden/${encodeURIComponent(match.kunden_nr)}`)} className="min-h-11 font-medium text-primary touch-manipulation">
                   {match.name} <span className="text-xs text-muted-foreground">({match.kunden_nr}{match.ort ? ` · ${match.ort}` : ''})</span>
                 </button>
               ) : (

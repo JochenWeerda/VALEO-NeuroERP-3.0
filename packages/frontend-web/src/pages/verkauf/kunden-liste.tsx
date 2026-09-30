@@ -120,7 +120,7 @@ export default function KundenListePage(): JSX.Element {
       render: (customer: CustomerRow) => (
         <button
           type="button"
-          onClick={() => navigate(customer.id.includes('-') ? `/verkauf/kunden-stamm/${customer.id}` : '/crm/kunden-schnellauswahl')}
+          onClick={() => navigate(`/crm/kunden/${encodeURIComponent(customer.id)}`)}
           className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline"
         >
           {customer.name}

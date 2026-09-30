@@ -64,29 +64,89 @@ def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict 
     operative zuerst: Er traegt die Kundennummer, mit der die Register weiter
     suchen.
     """
+    params = {"cid": customer_id, "tid": tenant_id}
     kunde = _query_one(
         db,
         """
         SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr
         FROM domain_crm.customers
-        WHERE id::text = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
+        WHERE (:tid IS NULL OR tenant_id::text = :tid)
+          AND (
+                id::text = :cid
+             OR customer_number = :cid
+             OR business_partner_id::text = :cid
+          )
         LIMIT 1
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        params,
     )
     if kunde is not None:
         return kunde
 
-    return _query_one(
+    partner = _query_one(
         db,
         """
         SELECT partner_id::text AS id, name_1 AS name, partner_number AS kunden_nr
         FROM domain_crm.business_partners
-        WHERE partner_id::text = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
+        WHERE (:tid IS NULL OR tenant_id::text = :tid)
+          AND (partner_id::text = :cid OR partner_number = :cid)
         LIMIT 1
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        params,
     )
+    if partner is not None:
+        linked = _query_one(
+            db,
+            """
+            SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr
+            FROM domain_crm.customers
+            WHERE (:tid IS NULL OR tenant_id::text = :tid)
+              AND business_partner_id::text = :pid
+            LIMIT 1
+            """,
+            {"pid": partner["id"], "tid": tenant_id},
+        )
+        return linked or partner
+
+    alt = _query_one(
+        db,
+        """
+        SELECT COALESCE(business_partner_id::text, kunden_nr) AS id,
+               COALESCE(name, kunden_nr) AS name,
+               kunden_nr
+        FROM public.kunden
+        WHERE kunden_nr = :cid
+        LIMIT 1
+        """,
+        {"cid": customer_id},
+    )
+    if alt is None:
+        alt = _query_one(
+            db,
+            """
+            SELECT COALESCE(business_partner_id::text, kunden_nr) AS id,
+                   COALESCE(name1, kunden_nr) AS name,
+                   kunden_nr
+            FROM public.kunden
+            WHERE kunden_nr = :cid
+            LIMIT 1
+            """,
+            {"cid": customer_id},
+        )
+    if alt is None:
+        return None
+    linked = _query_one(
+        db,
+        """
+        SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr
+        FROM domain_crm.customers
+        WHERE (:tid IS NULL OR tenant_id::text = :tid)
+          AND (customer_number = :nr OR business_partner_id::text = :bid)
+        LIMIT 1
+        """,
+        {"nr": alt.get("kunden_nr"), "bid": alt.get("id"), "tid": tenant_id},
+    )
+    return linked or alt
 
 
 def _safe_query(db: Session, sql: str, params: dict) -> dict | None:
@@ -127,24 +187,60 @@ def build_customer_screen_summary(
         ],
         "available_tabs": [
             "stammdaten",
+            "masterdata",
+            "address",
             "kontakte",
+            "contacts",
             "angebote",
             "auftraege",
+            "belege",
             "dokumente",
+            "finance",
             "aktivitaeten",
+            "aufgaben",
+            "kontrakte",
+            "praesente",
+            "postfach",
+            "geo",
             "historie",
         ],
         "tab_endpoints": {
             "stammdaten": _customer_tab_endpoint(customer_id, "stammdaten"),
+            "masterdata": _customer_tab_endpoint(customer_id, "stammdaten"),
             "kontakte": _customer_tab_endpoint(customer_id, "kontakte"),
             "contacts": _customer_tab_endpoint(customer_id, "contacts"),
             "finance": _customer_tab_endpoint(customer_id, "dokumente"),
             "angebote": _customer_tab_endpoint(customer_id, "angebote"),
             "auftraege": _customer_tab_endpoint(customer_id, "auftraege"),
+            "belege": _customer_tab_endpoint(customer_id, "auftraege"),
             "dokumente": _customer_tab_endpoint(customer_id, "dokumente"),
             "aktivitaeten": _customer_tab_endpoint(customer_id, "aktivitaeten"),
+            "aufgaben": _customer_tab_endpoint(customer_id, "aufgaben"),
+            "kontrakte": _customer_tab_endpoint(customer_id, "kontrakte"),
+            "praesente": _customer_tab_endpoint(customer_id, "praesente"),
+            "gifts": _customer_tab_endpoint(customer_id, "praesente"),
+            "postfach": _customer_tab_endpoint(customer_id, "postfach"),
+            "geo": _customer_tab_endpoint(customer_id, "geo"),
             "historie": _customer_tab_endpoint(customer_id, "historie"),
         },
+        "summary_items": [
+            {"key": "kunden_nr", "label": "Kunden-Nr.", "value": customer.get("kunden_nr"), "kind": "identity"},
+            {"key": "party_status", "label": "Status", "value": "Kunde", "kind": "status", "tone": "success"},
+            {"key": "sales_ytd", "label": "Umsatz 12M", "value": sales_ytd, "kind": "kpi"},
+            {
+                "key": "open_items_total",
+                "label": "Offene Posten",
+                "value": open_items_total,
+                "kind": "kpi",
+                "tone": "warning" if open_items_total > 0 else "neutral",
+            },
+            {
+                "key": "recent_activity_count",
+                "label": "Aktivitaeten 90T",
+                "value": recent_activity_count,
+                "kind": "contact",
+            },
+        ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "permission": "crm.customer.update"},
             {"key": "create_activity", "label": "Aktivitaet anlegen", "permission": "crm.activity.create"},
@@ -178,6 +274,7 @@ async def get_customer_screen_summary(
     customer = _kunde_finden(db, customer_id, tenant_id)
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
+    canonical_id = str(customer.get("id") or customer_id)
 
     sales_row = _query_one(
         db,
@@ -188,7 +285,7 @@ async def get_customer_screen_summary(
           AND (:tid IS NULL OR tenant_id::text = :tid)
           AND created_at >= NOW() - INTERVAL '12 months'
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": canonical_id, "tid": tenant_id},
     ) or {}
     open_items_row = _query_one(
         db,
@@ -199,7 +296,7 @@ async def get_customer_screen_summary(
           AND (:tid IS NULL OR tenant_id::text = :tid)
           AND op_status NOT IN ('bezahlt', 'storniert')
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": canonical_id, "tid": tenant_id},
     ) or {}
     activity_row = _query_one(
         db,
@@ -216,7 +313,7 @@ async def get_customer_screen_summary(
     ) or {}
 
     return build_customer_screen_summary(
-        customer_id=customer_id,
+        customer_id=canonical_id,
         tenant_id=tenant_id,
         customer=customer,
         sales_ytd=float(sales_row.get("sales_ytd") or 0.0),
@@ -232,6 +329,16 @@ def _normalize_tab_key(tab_key: str) -> str:
         "stammdaten": "stammdaten",
         "masterdata": "stammdaten",
         "finance": "dokumente",
+        "belege": "auftraege",
+        "aufgaben": "aufgaben",
+        "kontrakte": "kontrakte",
+        "praesente": "praesente",
+        "präsente": "praesente",
+        "gifts": "praesente",
+        "postfach": "postfach",
+        "mailbox": "postfach",
+        "geo": "geo",
+        "karte": "geo",
     }
     return aliases.get(tab_key, tab_key)
 
@@ -309,6 +416,74 @@ def _fetch_customer_tab_items(
             {"kunde": kunden_name, "tid": tenant_id},
         )
         return "recent_activities", rows
+
+    if normalized == "aufgaben":
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(title, subject, '') AS titel,
+                   COALESCE(priority, '') AS prioritaet,
+                   COALESCE(status, '') AS status,
+                   COALESCE(due_date, date, created_at)::text AS faellig
+            FROM domain_crm.activities
+            WHERE customer = :kunde
+              AND (:tid IS NULL OR tenant_id::text = :tid)
+              AND (
+                    COALESCE(type, '') ILIKE '%task%'
+                 OR COALESCE(type, '') ILIKE '%aufgabe%'
+                 OR COALESCE(status, '') ILIKE '%offen%'
+              )
+            ORDER BY COALESCE(due_date, date, created_at) DESC
+            LIMIT 25
+            """,
+            {"kunde": kunden_name, "tid": tenant_id},
+        )
+        return "aufgaben", rows
+
+    if normalized == "kontrakte":
+        rows = _query_many(
+            db,
+            """
+            SELECT contract_id AS id,
+                   contract_no,
+                   contract_type,
+                   status,
+                   contract_date::text AS contract_date,
+                   COALESCE(total_quantity, 0)::float AS total_quantity
+            FROM domain_ops.kon_contract
+            WHERE party_id = :cid
+            ORDER BY contract_date DESC
+            LIMIT 25
+            """,
+            {"cid": customer_id},
+        )
+        return "kontrakte", rows
+
+    if normalized == "praesente":
+        if not kunden_nr:
+            return "praesente", []
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   year,
+                   gift_date::text AS gift_date,
+                   COALESCE(occasion, '') AS occasion,
+                   COALESCE(gift_name, '') AS gift_name,
+                   COALESCE(quantity, 0)::float AS quantity
+            FROM public.crm_gifts
+            WHERE kunden_nr = :kunden_nr
+              AND (:tid IS NULL OR tenant_id::text = :tid)
+            ORDER BY gift_date DESC NULLS LAST, created_at DESC
+            LIMIT 25
+            """,
+            {"kunden_nr": kunden_nr, "tid": tenant_id},
+        )
+        return "praesente", rows
+
+    if normalized in {"postfach", "geo"}:
+        return normalized, []
 
     if normalized == "dokumente":
         rows = _query_many(
@@ -437,6 +612,39 @@ class CustomerDocumentsTabOut(CustomerTabOut):
     items: list[CustomerDocumentRowOut] = Field(default_factory=list)
 
 
+class CustomerTaskRowOut(BaseSchema):
+    """Eine Zeile im Register Aufgaben."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    titel: str = ""
+    prioritaet: str = ""
+    status: str = ""
+    faellig: Optional[str] = None
+
+
+class CustomerContractRowOut(BaseSchema):
+    """Eine Zeile im Register Kontrakte."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    contract_no: Optional[str] = None
+    contract_type: Optional[str] = None
+    status: Optional[str] = None
+    contract_date: Optional[str] = None
+    total_quantity: float = 0.0
+
+
+class CustomerTasksTabOut(CustomerTabOut):
+    items: list[CustomerTaskRowOut] = Field(default_factory=list)
+
+
+class CustomerContractsTabOut(CustomerTabOut):
+    items: list[CustomerContractRowOut] = Field(default_factory=list)
+
+
 # Vier benannte Register vor der generischen Route
 # -----------------------------------------------
 #
@@ -551,6 +759,56 @@ async def get_customer_tab_dokumente(
 
 
 @router.get(
+    "/{customer_id}/tabs/aufgaben",
+    response_model=CustomerTasksTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Aufgaben",
+)
+async def get_customer_tab_aufgaben(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Offene Aufgaben und Wiedervorlagen zum Kunden."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="aufgaben", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/kontrakte",
+    response_model=CustomerContractsTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Kontrakte",
+)
+async def get_customer_tab_kontrakte(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Kontrakte der Partei."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="kontrakte", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
     "/{customer_id}/tabs/{tab_key}",
     response_model=TypedObjectOut,
     tags=["crm", "customers", "screen-summary"],
@@ -591,7 +849,7 @@ async def get_customer_tab_data(
 
     table_key, items = _fetch_customer_tab_items(
         db,
-        customer_id=customer_id,
+        customer_id=str(customer.get("id") or customer_id),
         tenant_id=tenant_id,
         tab_key=tab_key,
         kunden_nr=customer.get("kunden_nr"),
@@ -627,6 +885,7 @@ async def get_customer_360(
     customer = _kunde_finden(db, customer_id, tenant_id)
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
+    customer_id = str(customer.get("id") or customer_id)
 
     # 1. Letzte 10 Aufträge (domain_crm.sales_orders)
     orders = _query_many(

@@ -12,10 +12,15 @@ export function useScreenDefinition(maskId: string, options?: { enabled?: boolea
     queryKey: maskKeys.screenDefinition(maskId),
     queryFn: async () => {
       const encoded = maskId.replace(/\//g, '__')
-      const response = await apiClient.get<ScreenDefinition>(`/api/v1/masks/${encoded}/screen-definition`)
+      const response = await apiClient.get<ScreenDefinition>(
+        `/api/v1/masks/${encoded}/screen-definition`,
+        { timeout: 8_000 },
+      )
       return response.data
     },
     enabled: Boolean(maskId) && (options?.enabled ?? true),
     staleTime: 10 * 60 * 1000,
+    retry: 1,
+    retryDelay: 800,
   })
 }

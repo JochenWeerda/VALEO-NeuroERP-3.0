@@ -53,6 +53,19 @@ describe('schema-compiler', () => {
     invalidateRenderPlanCache()
   })
 
+  it('compiles header facet kinds into summary slots', () => {
+    const plan = compileRenderPlanFromScreenDefinition({
+      ...crmSchema(),
+      summary: [
+        { key: 'kunden_nr', label: 'Kunden-Nr.', value: 'K-100', kind: 'identity' },
+        { key: 'open_items_total', label: 'Offene Posten', value: 250, kind: 'kpi', tone: 'warning' },
+      ],
+    })
+
+    expect(plan.summarySlots.map((slot) => slot.kind)).toEqual(['identity', 'kpi'])
+    expect(plan.summaryItems[0]?.kind).toBe('identity')
+  })
+
   it('compiles CRM schema into a flat RenderPlan with indexed fields and tabs', () => {
     const schema = crmSchema()
     const plan = compileRenderPlanFromScreenDefinition(schema, {

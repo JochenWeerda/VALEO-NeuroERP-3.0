@@ -335,6 +335,7 @@ export function compileRenderPlan(
     summarySlots: (context.summary?.summaryItems ?? schema.summary ?? []).map((item) => ({
       key: item.key,
       label: item.label,
+      kind: item.kind,
       tone: item.tone,
     })),
     summaryItems: context.summary?.summaryItems ?? schema.summary ?? [],

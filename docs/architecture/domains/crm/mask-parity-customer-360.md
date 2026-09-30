@@ -33,11 +33,16 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 | Schnittstellen (`interfaces`) | `interfaces` | Integrationen | `GET /api/v1/crm/customers/{id}` | partial |
 | Potenzial (`potential`) | `potential` | GAP/Potenzial (Feature-Flag) | `GET /api/v1/crm/customers/{id}` | partial |
 | Ansprechpartner (`contacts`) | `contacts` | Felder + Kontaktliste | `GET .../tabs/contacts` | partial |
-| CRM 360 Auftraege | `auftraege` (supplemental) | Auftragsliste | `GET .../tabs/auftraege` | partial |
-| CRM 360 Aktivitaeten | `aktivitaeten` (supplemental) | Aktivitaetenliste | `GET .../tabs/aktivitaeten` | partial |
-| CRM 360 Dokumente | `dokumente` (supplemental) | Offene Posten als Belege | `GET .../tabs/dokumente` | partial |
+| CRM 360 Auftraege | `auftraege` (Belege) | Auftragsliste | `GET .../tabs/auftraege` | ok |
+| CRM 360 Aktivitaeten | `aktivitaeten` | Aktivitaetenliste | `GET .../tabs/aktivitaeten` | ok |
+| CRM 360 Dokumente | `dokumente` / `finance` | Offene Posten | `GET .../tabs/dokumente` | ok |
+| KIM Belege | `auftraege` | Auftragsliste | `GET .../tabs/auftraege` | ok |
+| KIM Finanzen | `finance` | Offene Posten | `GET .../tabs/dokumente` | ok |
+| KIM Aufgaben | `aufgaben` | Wiedervorlagen | `GET .../tabs/aufgaben` | partial |
+| KIM Kontrakte | `kontrakte` | Kontraktliste | `GET .../tabs/kontrakte` | partial |
 | CRM 360 Angebote | `angebote` (Summary only) | — | `GET .../tabs/angebote` | gap |
 | CRM 360 Historie | `historie` (Summary only) | — | `GET .../tabs/historie` | gap |
+| KIM Chef/Präsente/Postfach/Geo | `masterdata` / `praesente` / `postfach` / `address` | Chefanweisung, Präsenteliste, Postfachfelder, Koordinaten | `GET .../customers/{id}` + `GET .../tabs/praesente` | compiled | ok |
 
 ## Summary vs. Mask-Tab-Keys
 
@@ -48,6 +53,8 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 | `auftraege` | `auftraege` | Supplemental Tab im Pilot |
 | `aktivitaeten` | `aktivitaeten` | Supplemental Tab im Pilot |
 | `dokumente` | `dokumente` | Supplemental Tab; `finance` nutzt gleiche API |
+| `aufgaben` | `aufgaben` | KIM-Aufgaben, leer wenn keine Quelle |
+| `kontrakte` | `kontrakte` | `domain_ops.kon_contract` nach `party_id` |
 
 ## Lazy-Load Vertrag (Wave 27)
 
@@ -63,6 +70,11 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 
 - Angebote und Historie: Endpunkt vorhanden, liefert leere Liste bis fachliche Quelle angebunden ist.
 - Vollstaendige Feld-Paritaet aller Legacy-Sections: bewusst ausserhalb Wave 27 (Adapter-Pilot).
+- Chef, Präsente, Postfach und Geo sitzen in der nativen Object Page
+  (`masterdata`/`praesente`/`postfach`/`address`); Mini-Apps bleiben weg.
+- Listen-IDs (`kunden_nr`, Partnernummer) oeffnen dieselbe Akte wie die UUID.
+- `/verkauf/kunden-stamm/:id` und `/crm/kunden-cockpit?id=` leiten auf dieselbe Akte;
+  Tab 21–25 bleiben unter `?pflege=1`.
 
 ## Desktop-Gewohnheitsbruecke 2026-08-19
 

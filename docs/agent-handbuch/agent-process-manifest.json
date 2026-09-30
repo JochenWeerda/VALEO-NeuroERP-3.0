@@ -1599,7 +1599,7 @@
     },
     {
       "mask_id": "crm/customer-360",
-      "title": "Kundenstamm",
+      "title": "Kundenakte",
       "domain": "crm",
       "process_keys": [
         "order-to-cash",
@@ -1647,7 +1647,7 @@
     },
     {
       "mask_id": "crm/lead",
-      "title": "Lead",
+      "title": "Kundenakte",
       "domain": "crm",
       "process_keys": [],
       "rollout_route": "/mask-rollout/crm__lead/:entityId",
