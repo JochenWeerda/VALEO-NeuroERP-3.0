@@ -1,0 +1,62 @@
+---
+slice_id: POS-ZAHLARTEN-MIGRATION
+id: POS-ZAHLARTEN-MIGRATION
+title: Zahlarten und Kassenaktionen kommen aus einer Migration, nicht aus der Laufzeit
+status: abgeschlossen
+owner: Claude Code
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+coordination: >
+  Nur pos_payments.py und eine neue Migration. Die Kassenmasken im Frontend
+  sind nicht beruehrt; die Antwortform bleibt gleich, nur der Fehlerfall
+  aendert sich von erfundenen Zahlarten auf 503.
+goal: >
+  domain_pos.payment_methods und domain_pos.promotions gibt es auf einer
+  frischen Installation, bevor jemand die Kasse oeffnet — und eine
+  Datenbankstoerung sieht nicht mehr aus wie eine Konfiguration.
+file_ownership:
+  - alembic/versions/pos_zahlarten_aktionen_20260930.py
+  - app/api/v1/endpoints/pos_payments.py
+  - tests/test_pos_zahlarten_vertrag.py
+acceptance:
+  - Fuenf Vertraege gruen gegen den frischen Stand; die Migration selbst
+    zusaetzlich gegen den gewachsenen angewandt
+  - Kein CREATE TABLE mehr im Endpunkt
+  - Eine echte Datenbankstoerung ergibt 503, nicht BAR/KARTE/SEPA
+  - Die Startkonfiguration erscheint nur bei wirklich leerer Pflege
+tests:
+  - tests/test_pos_zahlarten_vertrag.py
+risks:
+  - Die Startkonfiguration bleibt eine Verabredung, keine gespeicherte Pflege
+  - Ein Aufrufer, der sich auf den alten Fehlerrueckfall verliess, bekommt
+    jetzt 503 statt einer Liste — das ist die Absicht
+ai_harness:
+  fachlicher_vertrag: >
+    Ein Kassierer sieht die Zahlarten seines Hauses. Hat das Haus keine
+    gepflegt, sieht er eine Startkonfiguration. Antwortet die Datenbank nicht,
+    sieht er einen Fehler — keine Zahlart, von der niemand weiss, ob das Haus
+    sie annimmt.
+  architektur_vertrag: >
+    Die Tabellen kommen aus pos_zahlarten_aktionen_20260930, nicht aus einem
+    CREATE TABLE im Endpunkt. Die Form ist woertlich aus der Laufzeit-DDL
+    uebernommen, ergaenzt um Zeitstempel und zwei Indizes.
+  daten_vertrag: >
+    Beide Tabellen tragen tenant_id, und jede Abfrage filtert danach — anders
+    als bei den Hinweisgebermeldungen gab es hier kein Mandantenproblem. Ein
+    eindeutiger Index auf (tenant_id, method_code) verhindert zwei gleiche
+    Zahlarten im selben Haus. Kein DROP im downgrade.
+  test_vertrag: >
+    Die Stoerung wird echt ausgeloest — die Spalte, nach der gefiltert wird,
+    wird kurzzeitig umbenannt. Dazu die Mandantentrennung, der leere Fall und
+    der gepflegte Fall, und dass kein CREATE TABLE zurueckkommt.
+  security_vertrag: >
+    Keine neue Aussenschnittstelle. Der Mandantenfilter bleibt in jeder
+    Abfrage.
+  betriebs_vertrag: >
+    Rollback = Commit reverten; das downgrade nimmt nur die Indizes zurueck.
+  dokumentations_vertrag: >
+    Workboard, Open-Gaps; die Begruendung fuer den getrennten Fehlerfall steht
+    als Kommentar an der Stelle.
+external_gates:
+  - not_applicable

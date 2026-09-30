@@ -11,6 +11,23 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## POS-ZAHLARTEN + AGRAR-KONTRAKTE — Welle 2, zweiter und dritter Eintrag (2026-09-30)
+
+**Erledigt (POS).** `domain_pos.payment_methods` und `domain_pos.promotions`
+kommen aus `pos_zahlarten_aktionen_20260930`; die Laufzeit-DDL im Endpunkt ist
+weg. Nebenbefund behoben: Ein **Datenbankfehler** lieferte dieselben drei
+Zahlarten wie leere Pflege — eine Stoerung sah aus wie eine Konfiguration.
+Jetzt 503. Fuenf Vertraege gruen gegen den frischen Stand.
+
+**Offen, gehoert dem Agrar-Owner.** `domain_agrar.kontrakt_dispositionen` und
+ihre **Elterntabelle** `domain_agrar.kontrakte` fehlen beide im
+Migrationsstand. Dazu: Laufzeit-DDL in `kontrakte_service.py:410`; die drei
+Dispositions-Endpunkte nehmen `tenant_id` entgegen und benutzen ihn nicht
+(fremder Lese- **und** Schreibzugriff ueber die Kontraktkennung); und
+`kontrakte.py:1001` verschluckt die fehlende Tabelle in eine leere Liste.
+Handshake im Workboard.
+
+
 ## WHISTLEBLOWER-EINE-TABELLE — fuenf Befunde in einer Tabelle (2026-09-30)
 
 **Erledigt.** Gefunden beim Abarbeiten der Schema-Drift-Liste. Die Tabelle
@@ -1044,7 +1061,7 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - **WM-AGRI-QS-003 (2026-06-18):** Backend-Kontrakt `POST /supply-chain/lots/{lot_id}/qs-transition` fuer Labor-/Lager-/Produktions-QS mit Pflichtgrund, Bediener, Probe/Analyse/Dokument, GMP+/VLOG-Payload, Update `silo_lots.status`, Rueckkopplung `silo_cells.qs_status` und append-only `supply_chain_events`. **WM-AGRI-QS-004 (2026-06-23):** Leitstand-UI `lager/qs-leitstand`, Worklist `GET /supply-chain/qs-worklist`, Freigabe-Vorschlag `GET …/qs-release-suggest` inkl. deterministischer Produktionsfreigabe-Regeln.
 - **FEED-CHAIN-004 (2026-06-23):** Einzelfuttermittel ↔ `domain_inventory.articles` (`inventory_article_id`); bei Mischfutter-Produktionsfreigabe/Storno kanonische `inventory_stock_movements` (`feed_production`); API `GET/POST /produktion/mischfutter/inventory-links`. **FEED-CHAIN-004.5:** UI-Verknüpfung auf `mischfutter-produktion`. **FEED-CHAIN-004.6 (2026-09-11):** `GET …/inventory-links` zählte `total`/`mapped_count`/`unmapped_count` auf der per `LIMIT` abgeschnittenen Seite — bei 558 aktiven Einzelfuttermitteln meldete die Oberfläche „0/100 verknüpft" und entwarnte fälschlich mit „Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft". Zähler kommen jetzt aus einer Aggregatabfrage über den Mandantenbestand, die Seite aus `limit`/`offset` mit Filter `mapped`; Antwort nennt zusätzlich `limit`, `offset`, `returned`, `filter_mapped`. Die UI lädt offene Verknüpfungen serverseitig (`mapped=false`). Die frühere Diagnose „Test hängt an fehlenden Seed-Daten" (Workboard-Übergabe, POS-FIBU-CLEANUP-20260910) war falsch.
 - UX-Paritaet wird ueber [ux-excellence-operating-standard-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/ux-excellence-operating-standard-2026-05-13.md) gefuehrt. Stand 2026-05-16: systemweiter UX-Baukasten-Rollout abgeschlossen.
-- **BUSINESS-TIME-001 (2026-09-11):** Buchungsdaten kamen aus `datetime.utcnow().date()`. Da `period` als `YYYY-MM` aus `entry_date` gebildet wird, buchte das System zwischen 00:00 und 02:00 Ortszeit (MESZ) auf den Vortag — am Monatsersten in die Vorperiode. In CI unsichtbar, weil der Workflow `TZ: UTC` setzt. Behoben ueber `app/core/business_time.py` (`business_today()`, `business_now()`, pure `business_date_at()`; Zeitzone via `BUSINESS_TIMEZONE`, Standard `Europe/Berlin`) fuer alle buchungs- und periodenrelevanten Stellen. **Abgeschlossen:** Demo-/Fallbackdaten, agrarische Zulassungsablauf-Vergleiche, Portal-Shop, `/tours/today` sowie HR-Retention/-Defaults verwenden die fachliche Zeit und sind mit UTC-/Ortsdatum-Grenzfaellen abgesichert. Technische UTC-Zeitstempel bleiben bewusst UTC. **Ratchet 2026-09-30:** Die breitere Codeanalyse misst noch 244 direkte Kalenderableitungen in 125 produktiven Python-Dateien (232 `date.today()`, elf `datetime.now(...).date()`, einmal `datetime.utcnow().date()`). `scripts/check_business_time_usage.py` blockiert in der Quality-Gate-CI neuen oder verschobenen Bestand und verlangt nach jeder Bereinigung eine kleinere, pfadbezogene Baseline. Der Bestand bleibt fachlich zu klassifizieren und wellenweise abzubauen; er wird nicht mehr als stillschweigend abgeschlossen behandelt.
+- **BUSINESS-TIME-001 (2026-09-11):** Buchungsdaten kamen aus `datetime.utcnow().date()`. Da `period` als `YYYY-MM` aus `entry_date` gebildet wird, buchte das System zwischen 00:00 und 02:00 Ortszeit (MESZ) auf den Vortag — am Monatsersten in die Vorperiode. In CI unsichtbar, weil der Workflow `TZ: UTC` setzt. Behoben ueber `app/core/business_time.py` (`business_today()`, `business_now()`, pure `business_date_at()`; Zeitzone via `BUSINESS_TIMEZONE`, Standard `Europe/Berlin`) fuer alle buchungs- und periodenrelevanten Stellen. **Abgeschlossen:** Demo-/Fallbackdaten, agrarische Zulassungsablauf-Vergleiche, Portal-Shop, `/tours/today` sowie HR-Retention/-Defaults verwenden die fachliche Zeit und sind mit UTC-/Ortsdatum-Grenzfaellen abgesichert. Technische UTC-Zeitstempel bleiben bewusst UTC.
 
 ---
 

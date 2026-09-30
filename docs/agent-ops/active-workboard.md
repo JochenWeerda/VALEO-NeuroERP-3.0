@@ -11,7 +11,54 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BUSINESS-TIME-RATCHET-20260930 — abgeschlossen, Codex
+## POS-ZAHLARTEN-MIGRATION-20260930 — abgeschlossen, Claude Code
+
+**Ziel:** `domain_pos.payment_methods` und `domain_pos.promotions` kommen aus
+einer Migration statt aus Laufzeit-DDL im Endpunkt.
+**Dateibesitz:** `alembic/versions/pos_zahlarten_aktionen_20260930.py`,
+`app/api/v1/endpoints/pos_payments.py`,
+`tests/test_pos_zahlarten_vertrag.py`.
+**Stand:** abgeschlossen 2026-09-30. Zweiter Eintrag der Welle 2. Die Form ist
+woertlich aus der Laufzeit-DDL uebernommen; beide Tabellen tragen `tenant_id`,
+und jede Abfrage filtert danach — hier gab es **kein** Mandantenproblem.
+**Nebenbefund, behoben:** `GET /pos/payment-methods` lieferte bei einem
+**Datenbankfehler** dieselben drei Zahlarten wie bei leerer Pflege
+(BAR/KARTE/SEPA). Eine Stoerung sah damit aus wie eine Konfiguration, und ein
+Kassierer haette eine Zahlart waehlen koennen, die das Haus gar nicht annimmt.
+Jetzt: leere Pflege -> Startkonfiguration, Stoerung -> 503.
+**Abnahme:** Fuenf Vertraege gruen gegen den frischen Stand; die Migration
+selbst zusaetzlich gegen den gewachsenen angewandt und nachgesehen. Die Stoerung wird echt ausgeloest, indem die Spalte, nach der gefiltert
+wird, kurzzeitig umbenannt wird.
+
+## HANDSHAKE: Agrar-Kontrakte haben keine Migration 2026-09-30, Claude Code an den Agrar-Owner
+
+**Worum es geht:** Beim Abarbeiten der 28 lebenden Tabellen kam heraus, dass
+`domain_agrar.kontrakt_dispositionen` **und ihre Elterntabelle**
+`domain_agrar.kontrakte` im Migrationsstand fehlen. Eine Migration nur fuer die
+Dispositionen waere auf Sand gebaut — deshalb hier statt selbst gebaut.
+
+**Drei Befunde, alle in `kontrakte.py` und `kontrakte_service.py`:**
+
+1. **Laufzeit-DDL.** `kontrakte_service.py:410` legt
+   `kontrakt_dispositionen` selbst an. Das Schema haengt davon ab, ob jemand
+   die Maske geoeffnet hat.
+2. **Kein Mandantenbezug, und der Endpunkt prueft ihn nicht.** Die Tabelle hat
+   keine `tenant_id`; `list_dispositionen`, `create_disposition` und
+   `freigabe_disposition` nehmen `tenant_id` entgegen und **benutzen ihn
+   nicht**. Gefiltert wird allein nach `kontrakt_id`. Wer eine Kontraktkennung
+   kennt, liest und schreibt die Dispositionen eines fremden Hauses.
+3. **Die fehlende Tabelle wird in eine leere Liste verschluckt.**
+   `kontrakte.py:1001` faengt den Fehler ab und gibt `[]` zurueck, wenn
+   „relation" oder „does not exist" in der Meldung steht. Ein Anwender sieht
+   „keine Dispositionen", wo „die Tabelle gibt es nicht" gilt.
+
+**Was zu entscheiden ist:** Traegt eine Disposition ihren eigenen Mandanten
+oder erbt sie ihn vom Kontrakt? Beides ist vertretbar; die zweite Variante
+verlangt, dass der Endpunkt den Kontrakt mandantenrein prueft, bevor er die
+Dispositionen liest. Das ist eine Fachfrage, keine technische.
+
+
+## BUSINESS-TIME-RATCHET-20260930 — reserviert, Codex
 
 **Ziel:** Neue direkte Ableitungen fachlicher Tageswerte aus Host- oder UTC-Zeit
 systemweit verhindern. Ein AST-basiertes Ratchet-Gate misst den vorhandenen
@@ -29,13 +76,6 @@ eine kleinere Baseline; Unit-Tests, Gate und Doku-Gates sind gruen.
 **Risiken:** Der Bestand enthaelt fachliche und technische Tageswerte. Das Gate
 klassifiziert ihn nicht automatisch, sondern verhindert zusaetzliche Schuld und
 macht die schrittweise fachliche Bereinigung verbindlich.
-**Ergebnis:** Das AST-Gate inventarisiert 244 direkte Kalenderableitungen in 125
-produktiven Python-Dateien: 232 `date.today()`, elf
-`datetime.now(...).date()` und einmal `datetime.utcnow().date()`. Die Baseline
-ist nach Datei und Muster getrennt; Zuwachs, Verschiebung und Wiederkehr nach
-Abbau sind blockierend. Der Quality-Gate-Workflow fuehrt die Pruefung vor den
-Bestandsratschen aus. Fuenf Unit-Tests und der Reallauf sind gruen.
-[QA](../quality-assurance/business-time-ratchet-20260930.md).
 
 ## WHISTLEBLOWER-EINE-TABELLE-20260930 — abgeschlossen, Claude Code
 

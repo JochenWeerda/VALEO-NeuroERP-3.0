@@ -22,35 +22,24 @@ class PosPaymentOut(BaseSchema):
 router = APIRouter()
 
 
-def _ensure_tables(db: Session) -> None:
-    try:
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_pos.payment_methods (
-                id TEXT PRIMARY KEY,
-                method_code TEXT NOT NULL,
-                name TEXT NOT NULL,
-                is_active BOOLEAN DEFAULT TRUE,
-                tenant_id TEXT NOT NULL
-            )
-        """))
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_pos.promotions (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                promo_type TEXT NOT NULL,
-                article_id TEXT,
-                article_group TEXT,
-                discount_value NUMERIC,
-                min_quantity NUMERIC DEFAULT 1,
-                valid_from DATE,
-                valid_to DATE,
-                is_active BOOLEAN DEFAULT TRUE,
-                tenant_id TEXT NOT NULL
-            )
-        """))
-        db.commit()
-    except Exception:
-        db.rollback()
+#: Wortlaut, wenn die Migration nicht gelaufen ist. Frueher legte dieses Modul
+#: die Tabellen zur Laufzeit selbst an (`_ensure_tables`) — das Schema hing
+#: damit davon ab, ob jemand die Kasse geoeffnet hatte. Jetzt kommen sie aus
+#: `pos_zahlarten_aktionen_20260930`.
+_FEHLT = (
+    "Kassentabellen fehlen — Migration pos_zahlarten_aktionen_20260930 "
+    "ausfuehren."
+)
+
+#: Startkonfiguration, wenn ein Haus noch keine Zahlart eingerichtet hat.
+#: Bewusst **nur** fuer den leeren Fall, nicht fuer den Fehlerfall: Eine
+#: Datenbankstoerung sah zuvor aus wie eine Konfiguration, und ein Kassierer
+#: haette eine Zahlart waehlen koennen, die das Haus gar nicht annimmt.
+_START_ZAHLARTEN = [
+    {"method_code": "BAR", "name": "Bargeld"},
+    {"method_code": "KARTE", "name": "EC-/Kreditkarte"},
+    {"method_code": "SEPA", "name": "SEPA-Überweisung"},
+]
 
 
 # ── Schemas ────────────────────────────────────────────────────────────────
@@ -92,23 +81,19 @@ async def list_payment_methods(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     try:
         rows = db.execute(
             text("SELECT * FROM domain_pos.payment_methods WHERE tenant_id = :tid AND is_active = TRUE"),
             {"tid": tenant_id},
         ).fetchall()
-    except Exception:
-        # Return defaults if table not yet populated
-        return [
-            {"method_code": "BAR", "name": "Bargeld"},
-            {"method_code": "KARTE", "name": "EC-/Kreditkarte"},
-            {"method_code": "SEPA", "name": "SEPA-Überweisung"},
-        ]
-    return [dict(r._mapping) for r in rows] or [
-        {"method_code": "BAR", "name": "Bargeld"},
-        {"method_code": "KARTE", "name": "EC-/Kreditkarte"},
-    ]
+    except Exception as fehler:
+        # Kein Rueckfall auf erfundene Zahlarten: Eine Stoerung ist keine
+        # Konfiguration. Wer hier BAR/KARTE/SEPA sieht, glaubt, das Haus nehme
+        # sie an.
+        raise HTTPException(status_code=503, detail=_FEHLT) from fehler
+    # Nur wenn das Haus wirklich nichts gepflegt hat — nicht bei einer
+    # Stoerung, die oben als 503 herausgeht.
+    return [dict(r._mapping) for r in rows] or list(_START_ZAHLARTEN)
 
 
 @router.post("/checkout/split-payment", status_code=201, summary="Payment aufteilen",
@@ -142,7 +127,6 @@ async def list_promotions(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     try:
         rows = db.execute(
             text("""
@@ -166,7 +150,6 @@ async def create_promotion(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     promo_id = str(uuid4())
     try:
         db.execute(text("""
@@ -195,7 +178,6 @@ async def check_promotion(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     today = date.today().isoformat()
     try:
         rows = db.execute(text("""
