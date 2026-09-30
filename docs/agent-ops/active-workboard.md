@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## GODFILE-RATCHET-20260930 — reserviert, Codex
+## GODFILE-RATCHET-20260930 — abgeschlossen, Codex
 
 **Ziel:** Den roten Godfile-Check von einer historisch falschen globalen Zahl
 auf eine exakte pfadbezogene Abbau-Ratsche umstellen. Neue, verschobene oder
@@ -23,6 +23,10 @@ Reifeauswertung sowie eigene Slice-/QA-/Open-Gaps-Dokumentation.
 rot; Abbau erzwingt kleinere Baseline; Unit-, Gate- und Doku-Tests gruen.
 **Risiken:** Die Ratsche sichert den Abbau, ersetzt aber nicht die fachlich
 kontrollierte Zerlegung der vorhandenen grossen Endpunktmodule.
+**Stand:** abgeschlossen 2026-09-30. 15 Pfade und Zeilenzahlen sind exakt
+inventarisiert; neue, verschobene, gewachsene und nicht nachgezogene kleinere
+Godfiles blockieren. Nachweis:
+`docs/quality-assurance/godfile-ratchet-20260930.md`.
 
 ## PAGINATION-RATCHET-RESTORE-20260930 — abgeschlossen, Codex
 

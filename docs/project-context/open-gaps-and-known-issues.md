@@ -11,6 +11,20 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## GODFILE-RATCHET — Gate repariert, Zerlegung offen (2026-09-30)
+
+**Gate erledigt.** Der eingecheckte Stand enthaelt 15 Python-Endpunkte ueber
+1.000 Zeilen. Die alte globale Schwelle 12 war bereits unterschritten und
+blockierte alle spaeteren Backend-Pruefungen. Die neue pfad- und zeilengenaue
+Baseline blockiert neue, verschobene und gewachsene Godfiles und muss bei jedem
+Abbau sinken. Details:
+`docs/quality-assurance/godfile-ratchet-20260930.md`.
+
+**Abbau offen.** Zuerst eignen sich `logistics_tours.py` (1.033),
+`admin_suite.py` (1.038) und `einkauf_bestellvorschlag.py` (1.058). Der parallel
+bearbeitete Arbeitsbaum hebt ausserdem `crm_360.py` von 976 auf 1.235 Zeilen;
+die neue Ratsche erkennt das bereits vor dem Commit.
+
 ## POS-ZAHLARTEN + AGRAR-KONTRAKTE — Welle 2, zweiter und dritter Eintrag (2026-09-30)
 
 **Erledigt (POS).** `domain_pos.payment_methods` und `domain_pos.promotions`

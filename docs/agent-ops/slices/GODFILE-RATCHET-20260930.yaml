@@ -1,10 +1,15 @@
 slice_id: GODFILE-RATCHET-20260930
 id: GODFILE-RATCHET-20260930
 title: Godfile-Gate als pfadbezogene Abbau-Ratsche reparieren
-status: reserviert
+status: abgeschlossen
 owner: Codex
 date: 2026-09-30
 created_at: 2026-09-30
+closed_at: 2026-09-30
+result: >
+  Die 15 eingecheckten Godfiles sind pfad- und zeilengenau inventarisiert.
+  Neue, verschobene, gewachsene sowie nach Abbau nicht nachgezogene Eintraege
+  blockieren CI; der historisch falsche globale Schwellwert ist entfernt.
 goal: >
   Den blockierenden, historisch unterschrittenen Zaehlschwellwert durch eine
   exakte pfadbezogene Baseline ersetzen, die neue, verschobene und nach Abbau
@@ -26,9 +31,9 @@ acceptance:
   - Bestehende Aufrufer und Reifeauswertung bleiben kompatibel
   - Unit-Tests, Gate und Dokumentationspruefungen sind gruen
 tests:
-  - pytest tests/test_file_size_gate.py -q --no-cov
-  - python scripts/check_file_size.py
-  - pnpm docs:check
+  - "pytest tests/test_file_size_gate.py -q --no-cov: 5 passed"
+  - "python scripts/check_file_size.py gegen HEAD-Endpunkte: 15/15, Exit 0"
+  - "pnpm docs:check: gruen"
 risks:
   - Die Baseline akzeptiert Altbestand nur als sinkende Obergrenze und ersetzt nicht dessen Zerlegung
 ai_harness:

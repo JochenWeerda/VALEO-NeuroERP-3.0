@@ -227,10 +227,8 @@ jobs:
       - name: Business-Time-Ratchet (keine neuen Host-/UTC-Tageswerte)
         run: python scripts/check_business_time_usage.py
 
-      # Bewusst **vor** der Pagination-Ratsche: Dieser Job bricht beim ersten
-      # roten Schritt ab, und die Pagination-Schwelle ist seit dem 27.05.
-      # nicht erfuellbar (53 gefordert, 55 schon damals vorhanden). Hinter ihr
-      # wuerde dieser Waechter nie laufen.
+      # Bewusst vor den Bestandsratschen: Fehlerhafte Transaktionen betreffen
+      # Datenintegritaet und sollen unabhaengig von Strukturabbau sichtbar sein.
       - name: Tote Transaktionen (except ohne rollback, danach wird weitergearbeitet)
         run: python scripts/check_dead_transactions.py
 
@@ -244,7 +242,7 @@ jobs:
         run: python scripts/check_pagination.py --threshold 53
 
       - name: Godfile regression check (>1000 LOC)
-        run: python scripts/check_file_size.py --threshold 12
+        run: python scripts/check_file_size.py
 
       - name: Process chains registry (UIX-091)
         run: python scripts/check_process_chains.py
