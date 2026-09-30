@@ -11,6 +11,28 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## TOTE-TRANSAKTION — except ohne Rollback (2026-09-30)
+
+**Erledigt.** `scripts/check_dead_transactions.py` (AST-Suche, Ratsche 78, im
+Quality Gate vor der Pagination-Pruefung), 10 Unit-Tests ohne Datenbank, 5
+HTTP-Vertraege gegen den frischen Pruefstand. Der Art.-17-Pfad ist behoben und
+**auditiert**: hashverketteter Eintrag in `domain_shared.audit_logs` mit dem
+Handelnden, dem Betroffenen und dem Loeschprotokoll; ein gescheiterter
+Auditeintrag steht als `audit_fehler` in der Antwort.
+
+**Offen, gehoert den Fachownern:** 18 mutierende Fundstellen in Finanzen (8),
+Agrar (2), Verkauf (1), Lager (3), Logistik (1) und CRM (1) plus zwei im
+Bankimport. Der schwerste ist `payment_runs.py:799`: Die erkennbare Absicht
+„einen Posten ueberspringen, mit den uebrigen weitermachen" haelt nicht — nach
+einem Fehlschlag faellt der ganze Lauf mit 500, und niemand erfaehrt, welcher
+Posten der Ausloeser war. Handshake im Workboard, Einordnung je Stelle in
+`docs/quality-assurance/tote-transaktion-2026-09-30.md`.
+
+**Offen, Entscheidung:** Die 59 lesenden Fundstellen richten keinen unmittelbaren
+Schaden an (die Anfrage endet, die Sitzung wird geschlossen). Ob sie trotzdem
+aufgeraeumt werden, ist eine Frage von Aufwand gegen Gleichfoermigkeit.
+
+
 ## DB-PRUEFSTAND — frische Datenbank als Prüfstand (2026-09-30)
 
 **Erledigt.** `scripts/pruefstand_db.py` setzt eine frisch migrierte Datenbank

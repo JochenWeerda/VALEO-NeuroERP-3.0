@@ -11,7 +11,52 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## TOTE-TRANSAKTION-20260930 — reserviert, Claude Code
+## HANDSHAKE: 18 tote Transaktionen in Fachdomaenen 2026-09-30, Claude Code an die Fachowner
+
+**Worum es geht:** `scripts/check_dead_transactions.py` findet 78 Stellen, an
+denen ein `except` eine tote Transaktion verdeckt. 19 davon liegen in
+mutierenden Funktionen; eine (Art. 17 DSGVO) ist behoben, **18 bleiben** und
+gehoeren in Fachdomaenen mit eigenem Owner.
+
+**Warum nicht selbst behoben:** Ein Savepoint ist schnell gesetzt. Die Frage,
+*was* nach einem Fehlschlag gelten soll — Posten ueberspringen, Import
+abbrechen, Teilergebnis melden —, ist fachlich und gehoert dem Owner. Nach der
+Hausregel braucht jede Stelle ausserdem einen HTTP-Vertragstest, der die
+Datenbank-Ausnahme echt ausloest.
+
+**Buchung und Zahlung (8), Finanzen:** `payment_runs.py:799`
+(`execute_payment_run`), `ap_invoice_kernel_posting.py:222`,
+`erechnung_import.py:225`, `zinsabrechnung.py:249`,
+`op_skonto_auszifferung.py:198`, `credit_debit_memos.py:485`,
+`payment_matching.py:214`, `closing_checklists.py:857`.
+
+Der Zahlungslauf im Einzelnen, weil er Geld bewegt: In der Schleife ueber die
+Zahlungen steht `except Exception as e: logger.warning("Could not settle open
+item …")`. Die Absicht ist erkennbar — *diesen* Posten ueberspringen, mit den
+uebrigen weitermachen. Sie haelt nicht: Scheitert ein Ausziffern in der
+Datenbank, ist die Transaktion tot, jedes weitere Ausziffern scheitert ebenso,
+und das `db.commit()` danach auch. Der aeussere `except` rollt alles zurueck und
+liefert 500. Es gibt kein „einen ueberspringen" — nur ganz oder gar nicht, und
+niemand erfaehrt, welcher Posten der Ausloeser war. Zwei Savepoints stellen die
+Absicht wieder her.
+
+**Loeschung (1), Agrar:** `agrar_feldbuch.py:577` (`bulk_delete_massnahmen`) —
+eine Massnahme, die nicht geloescht werden kann, verhindert alle folgenden.
+
+**Freigabe (1), Verkauf:** `sales_blanket_orders.py:304` (`create_release`).
+
+**Anlage und Import (8):** `bank_statement_import.py:505` und `:522`,
+`customers.py:452`, `liquidity_planning.py:244`, `logistics_freight.py:434`,
+`psm_proplanta.py:357` (Agrar), `inventory_compat_service.py:443`, `:473`,
+`:503` (Lager). Bei Importen besonders tueckisch: Der Zaehler „X von Y
+importiert" zaehlt Schleifendurchlaeufe, nicht erfolgreiche Schreibvorgaenge.
+
+**Gesichert ist:** Die Ratsche verhindert neue Stellen. Details, Muster fuer den
+Fix und die vollstaendige Liste in
+`docs/quality-assurance/tote-transaktion-2026-09-30.md`.
+
+
+## TOTE-TRANSAKTION-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** Das Muster „`except` faengt den Fehler, die Transaktion ist trotzdem
 tot, und was danach kommt sieht aus wie ein Ergebnis" systematisch finden, je
@@ -22,14 +67,20 @@ Art.-17-Pfad zuerst.
 `docs/quality-assurance/tote-transaktion-2026-09-30.md`, dazu die Endpunkte,
 die als echte Funde herauskommen — mit Handshake, falls sie in fremden Slices
 liegen (Einkauf, Verkauf, Agrar).
-**Stand:** reserviert 2026-09-30. Der Fund vom 29.09.: Der Loeschlauf nach
-Art. 17 DSGVO lief komplett ins Leere und meldete 503, weil eine fehlende
-Nebentabelle die Transaktion abbrach und das `except` den Fehler nur
-protokollierte.
-**Abnahme:** Fundliste abgearbeitet oder mit Begruendung offen; je echtem Fund
-ein Vertragstest gegen den frischen Pruefstand, der die Datenbank-Ausnahme echt
-ausloest und genau einen Statuscode prueft; bei Wiederkehr ein Gate mit Ratsche
-in CI.
+**Stand:** abgeschlossen 2026-09-30. `scripts/check_dead_transactions.py`
+liest den AST: 351 Rohtreffer, davon **78** echte — gezaehlt wird nur, wenn nach
+dem `except` noch weitergearbeitet wird (Schleife oder weitere Anweisung).
+Davon 19 in mutierenden Funktionen. Der Art.-17-Pfad ist behoben **und
+auditiert**: Der Eintrag geht hashverkettet nach `domain_shared.audit_logs`,
+mit `user_id` des Handelnden, dem Betroffenen und dem Loeschprotokoll.
+Scheitert er, nennt die Antwort `audit_fehler` — eine vollzogene, aber
+unbezeugte Loeschung bleibt nicht im Protokoll haengen.
+**Abnahme:** 10 Unit-Tests ohne Datenbank, 5 HTTP-Vertraege gegen den frischen
+Pruefstand. Der Kernvertrag loest eine echte CHECK-Verletzung aus und prueft
+genau **422** — nicht 503, nicht 200 — und dass die Schritte nach dem
+gescheiterten gelaufen sind. Ratsche 78 im Quality Gate, bewusst **vor** der
+Pagination-Pruefung (der Job bricht beim ersten roten Schritt ab, und die
+Pagination-Schwelle ist seit dem 27.05. nicht erfuellbar).
 **Risiken:** Ein Savepoint je Anweisung kann Mengenoperationen verlangsamen;
 eine zu weite statische Suche erzeugt Rauschen statt Funden.
 

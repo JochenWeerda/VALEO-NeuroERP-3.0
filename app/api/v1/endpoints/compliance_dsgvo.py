@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 from psycopg2.errors import UndefinedTable
 from sqlalchemy import text
@@ -16,9 +16,33 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.services.audit_hardening import append_audit_entry
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.compliance_dsgvo_schemas import ComplianceDsgvoOut
+
+
+def _benutzer_aus_anfrage(request: Request | None) -> str | None:
+    """Wer handelt hier? Ohne Namen ist eine Attestierung nur eine Huerde.
+
+    Dieselbe Form wie im Druckpfad des Lieferscheins: erst der Kopf
+    ``X-User-ID``, dann das ``sub`` des Bearer-Tokens.
+    """
+    if request is None:
+        return None
+    kopf = request.headers.get("X-User-ID")
+    if kopf:
+        return kopf
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            import base64
+            nutzlast = auth[7:].split(".")[1]
+            nutzlast += "=" * (4 - len(nutzlast) % 4)
+            return json.loads(base64.urlsafe_b64decode(nutzlast)).get("sub")
+        except Exception:  # noqa: BLE001 — kein lesbares Token, dann kein Name
+            pass
+    return None
 
 
 router = APIRouter(prefix="/compliance/dsgvo", tags=["compliance", "dsgvo"])
@@ -61,6 +85,13 @@ class ErasureProcessOut(BaseModel):
     id: str
     status: str
     deletion_log: list[ErasureLogEntry] = Field(default_factory=list)
+    #: Hash des Auditeintrags in domain_shared.audit_logs. Ohne dieses Feld
+    #: schnitte FastAPI die Spur bei der Serialisierung weg — derselbe Fehler,
+    #: der zuvor das deletion_log verschwinden liess.
+    audit_hash: str | None = None
+    #: Gesetzt, wenn der Auditeintrag scheiterte. Dann ist die Loeschung
+    #: vollzogen und **nicht** bezeugt; das muss sichtbar sein.
+    audit_fehler: str | None = None
 
 
 class ErasureRejectIn(BaseModel):
@@ -316,6 +347,7 @@ async def get_erasure_request(
 async def process_erasure_request(
     request_id: str,
     payload: ErasureProcessIn,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -371,6 +403,32 @@ async def process_erasure_request(
         db.rollback()
         raise HTTPException(status_code=503, detail="Failed to update erasure request")
 
+    # Eine Loeschung nach Art. 17 ist unumkehrbar. Sie braucht eine Spur, die
+    # der Antragszeile nicht gehoert: wer sie ausgefuehrt hat, wann, welchen
+    # Betroffenen sie traf und was dabei angefasst wurde. Die Antragszeile
+    # allein sagt nicht, *wer* gehandelt hat — und eine spaetere Verarbeitung
+    # koennte sie ueberschreiben.
+    #
+    # domain_shared.audit_logs ist dafuer der Ort: hashverkettet
+    # (prev_hash/hash), mandantenbezogen und dauerhaft. Der Eintrag wird
+    # **nach** dem Commit geschrieben, damit er den vollzogenen Vorgang
+    # bezeugt und nicht einen geplanten.
+    audit = append_audit_entry(
+        db,
+        tenant_id=tenant_id,
+        action="ERASURE_PROCESSED" if vollstaendig else "ERASURE_INCOMPLETE",
+        entity_type="data_erasure_request",
+        entity_id=request_id,
+        user_id=_benutzer_aus_anfrage(request) or "system",
+        changes={
+            "subject_type": r["subject_type"],
+            "subject_id": r["subject_id"],
+            "status": neuer_status,
+            "deletion_log": deletion_log,
+        },
+        correlation_id=request.headers.get("X-Correlation-ID", ""),
+    )
+
     if not vollstaendig:
         raise HTTPException(
             status_code=422,
@@ -379,9 +437,20 @@ async def process_erasure_request(
                 "id": request_id,
                 "status": neuer_status,
                 "deletion_log": deletion_log,
+                "audit": audit.get("hash") or audit,
             },
         )
-    return {"id": request_id, "status": "ABGESCHLOSSEN", "deletion_log": deletion_log}
+    return {
+        "id": request_id,
+        "status": "ABGESCHLOSSEN",
+        "deletion_log": deletion_log,
+        # Scheitert der Auditeintrag, steht hier der Fehler statt eines
+        # Hashes. Die Loeschung ist dann vollzogen und **nicht** bezeugt —
+        # eine Lage, die der Betrieb erfahren muss, statt sie im Protokoll
+        # zu verlieren.
+        "audit_hash": audit.get("hash"),
+        "audit_fehler": audit.get("error"),
+    }
 
 
 @router.post("/erasure-requests/{request_id}/reject", summary="Erasure request ablehnen",

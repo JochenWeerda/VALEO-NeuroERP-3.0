@@ -1,0 +1,77 @@
+---
+slice_id: TOTE-TRANSAKTION
+id: TOTE-TRANSAKTION
+title: Ein except, das eine tote Transaktion verdeckt, erzeugt kein Ergebnis mehr
+status: abgeschlossen
+owner: Claude Code
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+coordination: >
+  Behoben wird nur der Art.-17-Pfad (compliance_dsgvo.py). Die uebrigen
+  achtzehn mutierenden Fundstellen liegen in Finanzen, Agrar, Verkauf, Lager
+  und Logistik und gehen als Handshake an die Owner — ein Savepoint ist
+  schnell gesetzt, die Frage was nach einem Fehlschlag gelten soll ist
+  fachlich. Cursors und Codex' Dateien im Arbeitsbaum bleiben unangetastet.
+goal: >
+  Das Muster "except faengt den Fehler, die Transaktion ist trotzdem tot, und
+  was danach kommt sieht aus wie ein Ergebnis" ist systematisch gefunden,
+  eingeordnet und gegen Zuwachs gesichert. Der Loeschweg nach Art. 17 DSGVO
+  greift wirklich und ist bezeugt.
+file_ownership:
+  - scripts/check_dead_transactions.py
+  - tests/test_check_dead_transactions.py
+  - tests/test_tote_transaktion_vertrag.py
+  - docs/quality-assurance/tote-transaktion-2026-09-30.md
+  - app/api/v1/endpoints/compliance_dsgvo.py
+  - .github/workflows/quality-gate.yml
+acceptance:
+  - python scripts/check_dead_transactions.py Exit 0 bei Schwelle 78
+  - Der Waechter laeuft im Quality Gate vor der Pagination-Pruefung
+  - Fuenf Vertraege fuer Art. 17 gegen den frischen Pruefstand gruen
+  - Die Loeschung anonymisiert wirklich und steht hashverkettet im Audit
+  - Eine echte CHECK-Verletzung ergibt genau 422, nicht 503 und nicht 200
+tests:
+  - tests/test_check_dead_transactions.py
+  - tests/test_tote_transaktion_vertrag.py
+  - tests/test_dsgvo_loeschung_loescht_wirklich.py
+risks:
+  - Ein Savepoint je Anweisung kann Mengenoperationen verlangsamen
+  - Eine zu weite Suche erzeugt Rauschen statt Funden (351 gegen 78)
+  - Ein gescheiterter Auditeintrag darf nicht stillschweigend durchgehen
+ai_harness:
+  fachlicher_vertrag: >
+    Eine Loeschung nach Art. 17 DSGVO anonymisiert den Kunden wirklich,
+    entfernt die Aktivitaeten unter seinem Klarnamen und hinterlaesst eine
+    Spur, die sagt wer wann was geloescht hat. Scheitert ein Schritt, bleibt
+    der Antrag offen und nennt die Tabelle — er gilt nie als erledigt, weil
+    nichts gelang.
+  architektur_vertrag: >
+    Eine fehlende Tabelle gilt als "enthaelt keine Daten des Betroffenen"
+    (protokolliert als table_missing), jede andere Stoerung als Fehler. Der
+    Auditeintrag geht nach dem Commit in domain_shared.audit_logs ueber
+    append_audit_entry; es entsteht keine zweite Auditsenke.
+  daten_vertrag: >
+    Savepoints statt eines globalen Rollbacks: Ein Fehlschlag verliert nur
+    seinen eigenen Schritt. Gebuchte Werte werden nicht angefasst. Der
+    Auditeintrag ist hashverkettet und wird nie ueberschrieben.
+  test_vertrag: >
+    Zehn Unit-Tests fuer die Erkennungslogik ohne Datenbank, fuenf
+    HTTP-Vertraege gegen den frischen Pruefstand. Der Kernvertrag loest eine
+    echte CHECK-Verletzung aus und prueft genau einen Statuscode sowie dass
+    die Schritte nach dem gescheiterten gelaufen sind.
+  security_vertrag: >
+    Der Handelnde wird aus X-User-ID oder dem sub des Bearer-Tokens
+    ermittelt und im Audit vermerkt. Ohne erkennbaren Benutzer steht dort
+    "system" — eine Auskunft, kein Name. Keine personenbezogenen Daten in
+    der Fundliste oder im Waechter.
+  betriebs_vertrag: >
+    Rollback = Commit reverten. Die Ratsche steht auf dem heutigen Stand und
+    darf nur sinken; sie heraufzusetzen ist keine Behebung. Scheitert der
+    Auditeintrag, nennt die Antwort das Feld audit_fehler.
+  dokumentations_vertrag: >
+    docs/quality-assurance/tote-transaktion-2026-09-30.md mit der ganzen
+    Fundliste und der Einordnung je Stelle, Workboard, Open-Gaps,
+    Handshake an die Fachowner.
+external_gates:
+  - not_applicable
