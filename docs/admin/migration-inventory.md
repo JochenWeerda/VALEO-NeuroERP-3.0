@@ -355,6 +355,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rations_feeding_control_20260711` | Persisted feeding-control logs (DLG 01/2025 F1). |
 | `rations_integrations_20260712` | Rations integration import journal. |
 | `rations_zugang_dsgvo_20260420` | rations_zugang DSGVO access control table |
+| `reklamation_nummer_20260930` | Die Reklamation bekommt eine Nummer, die man nennen kann. |
 | `repair_article_dangerous_goods_20260610` | Repair dangerous-goods columns required by the Article runtime model. |
 | `repair_business_partner_contract_20260610` | Complete the canonical business-partner runtime contract. |
 | `repair_core_schema_drift_20260609` | Repair schema objects missing from databases stamped past older migrations. |
