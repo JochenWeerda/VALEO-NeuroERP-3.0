@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MERIDIAN-BELEG-RESTPUNKTE-20260930 — reserviert, Cursor
+
+**Ziel:** Restpunkte aus MERIDIAN-BELEG-SYSTEMWEIT schließen: fachliche Reklamationsnummer,
+Text-IDs in den Registern der Rollout-Masken, Pilotseiten auf den gemeinsamen Masken-Runtime.
+**Dateibesitz:** `ReklamationDB.reklamation_nr`, `reklamation_api.py`, Migration
+`reklamation_nummer_20260930`, UUID-Prüfung in `mask_rollout_summary_service.py` (nur dieser
+Hunk), `features/mask-pilot/`, Pilot-Schalter in `order-editor.tsx`, `KontraktDetailRoute.tsx`,
+`kunden-stamm-modern.tsx`, `MaskBenchmarkRoute.tsx`, Pilotseiten und ihre Tests.
+**Abnahme:** siehe [Slice](slices/MERIDIAN-BELEG-RESTPUNKTE-20260930.yaml).
+
 ## DB-PRUEFSTAND-20260930 — reserviert, Claude Code
 
 **Ziel:** Eine frisch migrierte Datenbank ist der dokumentierte Pruefstand fuer
