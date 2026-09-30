@@ -31,7 +31,7 @@ Bestehende Claims (Projektion, OpenAPI, Meridian und Domain-Handshakes) bleiben
 beim Owner. Die gemeinsame CI-Datei wird nur in den genannten Gates geaendert.
 **Naechster Schritt:** Claim committen, Harness anlegen, Gate-Vertraege implementieren.
 
-## PROJEKTION-CURSOR-MIGRATION-20260930 — in Arbeit, Claude Code
+## PROJEKTION-CURSOR-MIGRATION-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** Die drei `domain_shared.process_projection_*`-Tabellen
 (`registry`, `snapshots`, `cursors`) kommen aus einer Migration statt aus
@@ -40,14 +40,28 @@ Laufzeit-DDL in zwei verschiedenen Modulen.
 `app/core/projection_cursor_service.py`,
 `app/services/finance_read_model_service.py` (nur die `_ensure_*`- und
 Lese-Hunks), `app/api/v1/endpoints/finance_read_models.py` (nur die
-Re-Exporte), `tests/test_projektion_cursor_vertrag.py`, eigene Slice-/QA-Doku
-und dieser Abschnitt.
-**Abnahme:** Die drei Tabellen stehen nach `alembic upgrade head` auf einem
-frischen Stand; keine Laufzeit-DDL mehr im Anwendungspfad; Vertraege gruen
-gegen `valeo_probe`; Doku-Gates gruen.
-**Risiken:** Die Form ist woertlich aus der Laufzeit-DDL uebernommen. Kein
-`response_model` und keine Route aendern sich, damit der parallel laufende
-OPENAPI-DRIFT-REFRESH nicht erneut driftet.
+Re-Exporte), `scripts/check_table_references.py` (nur die Schwelle),
+`tests/test_projektion_cursor_vertrag.py`, eigene Slice-/QA-Doku und dieser
+Abschnitt.
+**Stand:** abgeschlossen 2026-09-30. Dritter Eintrag der Welle 2. Die Form ist
+woertlich aus der Laufzeit-DDL uebernommen, Zeitstempel bleiben bewusst `TEXT`
+(der Lesepfad vergleicht sie als Zeichenketten). Alle drei Tabellen tragen
+`tenant_id` und fuehren ihn vorn im Primaerschluessel — hier gab es **kein**
+Mandantenproblem und braucht es keinen zusaetzlichen Index. Die Cursor-DDL
+stand zweimal wortgleich im Code; beide Stellen sind weg.
+**Nebenbefund, behoben:** Die vier Lesehilfen des Projektionsstands fingen jeden
+Fehler ab und gaben einen Leerstand zurueck — **ohne Rollback**. Da
+`get_projection_status` alle vier Quellen hintereinander liest, haette der
+Ausfall *einer* Tabelle die drei anderen mit `InFailedSqlTransaction`
+mitgenommen, und nichts davon stand im Protokoll. Jetzt: Rollback plus
+`logger.exception`.
+**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 28 -> 25. Die Schwelle stand
+seit dem 29.09. drei Plaetze zu hoch, weil die ersten zwei Eintraege der Welle
+ihre Tabellen nachgetragen, die Schwelle aber nicht gesenkt hatten.
+**Abnahme:** 10 Vertraege gruen gegen den frischen Stand, dazu 162 vorhandene
+Read-Model-Tests. Die Migration zusaetzlich gegen den gewachsenen Stand
+angewandt; die 24 Spalten sind in beiden Datenbanken Zeile fuer Zeile identisch.
+Nachweis: `docs/quality-assurance/projektion-cursor-20260930.md`.
 
 ## OPENAPI-DRIFT-REFRESH-20260930 — reserviert, Codex
 

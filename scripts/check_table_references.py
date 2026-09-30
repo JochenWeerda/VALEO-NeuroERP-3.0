@@ -64,7 +64,16 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: Das ist **keine** neue Schuld, sondern dieselbe Schuld richtig gemessen:
 #: Eine Ratsche gegen eine Datenbank, die nur auf einem Rechner existiert,
 #: misst diesen Rechner, nicht die Anwendung.
-BASELINE_LEBEND = 28
+#:
+#: 2026-09-30, lebend 28 -> 25 nachgezogen: Die drei Tabellen, die die
+#: Migrationen ``whistleblower_eine_tabelle_20260930`` und
+#: ``pos_zahlarten_aktionen_20260930`` nachgetragen haben
+#: (``domain_compliance.whistleblower_reports``,
+#: ``domain_pos.payment_methods``, ``domain_pos.promotions``), sind auf einer
+#: frischen Installation da. Die Schwelle stand seither drei Plaetze zu hoch —
+#: drei neue Verweise ins Leere waeren durchgegangen. Gemessen mit
+#: ``DATABASE_URL=…/valeo_probe`` nach ``scripts/pruefstand_db.py``.
+BASELINE_LEBEND = 25
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

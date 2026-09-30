@@ -15,34 +15,6 @@ from sqlalchemy import text
 REPLAY_PROJECTION_CONSUMER_ID = "finance-projections-01/replay"
 
 
-def ensure_projection_cursor_table(db: Any) -> None:
-    try:
-        db.execute(
-            text(
-                """
-                CREATE TABLE IF NOT EXISTS domain_shared.process_projection_cursors (
-                    tenant_id TEXT NOT NULL,
-                    consumer_id TEXT NOT NULL,
-                    projection_key TEXT NOT NULL,
-                    schema_version INTEGER NOT NULL DEFAULT 1,
-                    cursor_token TEXT NULL,
-                    last_event_id TEXT NULL,
-                    source_rebuilt_at TEXT NULL,
-                    replay_from_event_id TEXT NULL,
-                    replay_to_event_id TEXT NULL,
-                    status TEXT NOT NULL DEFAULT 'active',
-                    updated_at TEXT NOT NULL,
-                    PRIMARY KEY (tenant_id, consumer_id, projection_key)
-                )
-                """
-            )
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-
-
 def persist_projection_cursor(
     db: Any,
     tenant_id: str,
@@ -60,7 +32,6 @@ def persist_projection_cursor(
         return
     now = datetime.now(tz=timezone.utc).isoformat()
     try:
-        ensure_projection_cursor_table(db)
         db.execute(
             text(
                 """
