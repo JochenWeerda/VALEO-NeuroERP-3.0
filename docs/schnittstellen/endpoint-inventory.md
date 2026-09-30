@@ -100,7 +100,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `compat` | Compatibility endpoints for frontend path alignment and missing modules. |
 | `compliance` | Compliance API - DB-backed endpoints. |
 | `compliance_dsgvo` | DSGVO Löschkonzept — Erasure request management (Art. 17 DSGVO). |
-| `compliance_whistleblower` | — |
+| `compliance_whistleblower` | Hinweisgebersystem — Meldung, Statusabfrage, Bearbeitung. |
 | `compliance_whistleblower_lksg` | Whistleblower and LkSG operating contracts for compliance. |
 | `config_service` | Config Service API. |
 | `contacts` | CRM Contact management endpoints proxied via crm-core |

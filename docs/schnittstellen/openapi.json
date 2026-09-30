@@ -242045,6 +242045,266 @@
         ]
       }
     },
+    "/api/v1/compliance/hinweisgeber/reports": {
+      "get": {
+        "operationId": "list_reports_api_v1_compliance_hinweisgeber_reports_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
+                  },
+                  "title": "Response List Reports Api V1 Compliance Hinweisgeber Reports Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reports auflisten",
+        "tags": [
+          "compliance",
+          "whistleblower"
+        ]
+      },
+      "post": {
+        "operationId": "submit_report_api_v1_compliance_hinweisgeber_reports_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report einreichen",
+        "tags": [
+          "compliance",
+          "whistleblower"
+        ]
+      }
+    },
+    "/api/v1/compliance/hinweisgeber/reports/status/{token}": {
+      "get": {
+        "operationId": "report_status_api_v1_compliance_hinweisgeber_reports_status__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Status report",
+        "tags": [
+          "compliance",
+          "whistleblower"
+        ]
+      }
+    },
+    "/api/v1/compliance/hinweisgeber/reports/{report_id}/update": {
+      "patch": {
+        "operationId": "update_report_api_v1_compliance_hinweisgeber_reports__report_id__update_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Report aktualisieren",
+        "tags": [
+          "compliance",
+          "whistleblower"
+        ]
+      }
+    },
     "/api/v1/compliance/intrastat/meldungen": {
       "get": {
         "description": "Liste aller Intrastat-Meldungen (Gap 042).\n\nOptional filterbar nach Meldezeitraum (YYYY-MM) und Richtung (EINGANG/AUSGANG).",
@@ -403211,82 +403471,6 @@
         ]
       }
     },
-    "/api/v1/reports": {
-      "get": {
-        "operationId": "list_reports_api_v1_reports_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
-                  },
-                  "title": "Response List Reports Api V1 Reports Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Reports auflisten",
-        "tags": [
-          "compliance",
-          "whistleblower"
-        ]
-      },
-      "post": {
-        "operationId": "submit_report_api_v1_reports_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReportIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Report einreichen",
-        "tags": [
-          "compliance",
-          "whistleblower"
-        ]
-      }
-    },
     "/api/v1/reports/customer-analytics": {
       "get": {
         "description": "Customer Analytics Report\n- Top customers by revenue\n- Customer acquisition trends\n- Customer retention metrics",
@@ -403800,54 +403984,6 @@
         ]
       }
     },
-    "/api/v1/reports/status/{token}": {
-      "get": {
-        "operationId": "report_status_api_v1_reports_status__token__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "token",
-            "required": true,
-            "schema": {
-              "title": "Token",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Status report",
-        "tags": [
-          "compliance",
-          "whistleblower"
-        ]
-      }
-    },
     "/api/v1/reports/trend-analytics": {
       "get": {
         "description": "Trend Analytics Report\n- Revenue trends over time\n- Order volume trends\n- Customer acquisition trends",
@@ -403937,64 +404073,6 @@
           "analytics",
           "dashboard",
           "reports"
-        ]
-      }
-    },
-    "/api/v1/reports/{report_id}/update": {
-      "patch": {
-        "operationId": "update_report_api_v1_reports__report_id__update_patch",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "report_id",
-            "required": true,
-            "schema": {
-              "title": "Report Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NoteIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceWhistleblowerOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Report aktualisieren",
-        "tags": [
-          "compliance",
-          "whistleblower"
         ]
       }
     },

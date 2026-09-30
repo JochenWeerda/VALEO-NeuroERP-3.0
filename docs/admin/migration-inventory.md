@@ -389,5 +389,6 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |
 | `wf_cockpit_persist_20260625` | WF-COCKPIT-PERSIST-001: Persistente Workflow-Cockpit-Tabellen. |
 | `whatsapp_bestell_inbox_20260603` | WhatsApp Bestell-Inbox — eingehende Freitext-Bestellungen + AI-Extraktion. |
+| `whistleblower_eine_tabelle_20260930` | Hinweisgebermeldungen bekommen eine Migration, eine Form und einen Mandanten. |
 | `wms_material_flow_stock_link_20260619` | WMS-FLOW-001: silo_cells current_stock_kg + BAB-Umlagen-Tabelle |
 | `wms_warehouse_aisles_20260612` | WMS: Lager-Gang (warehouse_aisles) + optionale Zuordnung auf warehouse_bins. |
