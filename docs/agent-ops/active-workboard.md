@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PAYMENT-EXECUTION-ATOMICITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+
+**Ziel:** Teilzahlungen bleiben offen; Zahlungslauf, OP und vorhandene AP-Belege
+werden in einer gemeinsamen Transaktion gespeichert; Fehler verhindern Erfolg.
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-09-30.
+**Dateibesitz:** `app/api/v1/endpoints/payment_runs.py`, ausschließlich die
+optionale Commitsteuerung in `app/documents/repository.py`,
+`tests/test_finance_payment_runs_api.py`, neue Transaktionstests und eigene
+Slice-/QA-Doku; gemeinsame Dokumente nur im eigenen Abschnitt.
+**Abnahme:** Voll-/Teilzahlung, Wiederholung, fehlender OP, DB-/Belegfehler;
+kein interner Commit im Zahlungslauf; vorhandene API-Verträge bleiben grün.
+**Risiken:** Legacy-Belege ohne Tenantkennung und externe Bankabnahme bleiben
+explizit; keine Übernahme aktiver Lastschrift-/CRM-/Meridian-Slices.
+
 ## SLICE-YAML-INTEGRITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Ziel:** Governance-CLI laedt historische Slice-YAMLs mit leerer Schlussmarke,
