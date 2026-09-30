@@ -1,0 +1,43 @@
+slice_id: GODFILE-RATCHET-20260930
+id: GODFILE-RATCHET-20260930
+title: Godfile-Gate als pfadbezogene Abbau-Ratsche reparieren
+status: reserviert
+owner: Codex
+date: 2026-09-30
+created_at: 2026-09-30
+goal: >
+  Den blockierenden, historisch unterschrittenen Zaehlschwellwert durch eine
+  exakte pfadbezogene Baseline ersetzen, die neue, verschobene und nach Abbau
+  wiederkehrende Godfiles verhindert.
+file_ownership:
+  - scripts/check_file_size.py
+  - config/godfile_baseline.json
+  - tests/test_file_size_gate.py
+  - .github/workflows/quality-gate.yml (Godfile-Schritt und ueberholter Kommentar)
+  - scripts/measure_gesamtreife.py (Godfile-Auswertung)
+  - docs/quality-assurance/godfile-ratchet-20260930.md
+  - docs/project-context/open-gaps-and-known-issues.md (nur Godfile-Befund)
+  - docs/agent-ops/active-workboard.md (nur eigener Abschnitt)
+  - docs/agent-ops/slices/GODFILE-RATCHET-20260930.yaml
+acceptance:
+  - Der aktuelle Git-Bestand ist exakt nach Datei inventarisiert
+  - Neue oder verschobene Dateien ueber 1000 Zeilen blockieren CI
+  - Nach einer Zerlegung muss die Baseline im selben Commit sinken
+  - Bestehende Aufrufer und Reifeauswertung bleiben kompatibel
+  - Unit-Tests, Gate und Dokumentationspruefungen sind gruen
+tests:
+  - pytest tests/test_file_size_gate.py -q --no-cov
+  - python scripts/check_file_size.py
+  - pnpm docs:check
+risks:
+  - Die Baseline akzeptiert Altbestand nur als sinkende Obergrenze und ersetzt nicht dessen Zerlegung
+ai_harness:
+  fachlicher_vertrag: Keine Aenderung an ERP-Fachlogik oder API-Verhalten.
+  architektur_vertrag: Der Qualitaetsratchet misst Dateibesitz statt einer globalen Zahl.
+  daten_vertrag: Keine Schema- oder Datenmigration.
+  test_vertrag: Neue, verschobene, verkleinerte und wiederkehrende Godfiles sind isoliert getestet.
+  security_vertrag: Keine Aenderung an Zugriff oder Mandantengrenzen.
+  betriebs_vertrag: Das Gate laeuft deterministisch ohne Netzwerk oder Datenbank.
+  dokumentations_vertrag: Workboard, Slice, Open-Gaps und QA beschreiben Bestand und Abbauweg.
+external_gates:
+  - not_applicable

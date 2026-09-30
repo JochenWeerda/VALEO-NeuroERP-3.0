@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## GODFILE-RATCHET-20260930 — reserviert, Codex
+
+**Ziel:** Den roten Godfile-Check von einer historisch falschen globalen Zahl
+auf eine exakte pfadbezogene Abbau-Ratsche umstellen. Neue, verschobene oder
+nach Zerlegung wiederkehrende Dateien ueber 1.000 Zeilen muessen CI blockieren.
+**Dateibesitz:** `scripts/check_file_size.py`, `config/godfile_baseline.json`,
+`tests/test_file_size_gate.py`, Godfile-Schritt in `quality-gate.yml`, passende
+Reifeauswertung sowie eigene Slice-/QA-/Open-Gaps-Dokumentation.
+**Abnahme:** HEAD-Bestand exakt inventarisiert; neue und verschobene Godfiles
+rot; Abbau erzwingt kleinere Baseline; Unit-, Gate- und Doku-Tests gruen.
+**Risiken:** Die Ratsche sichert den Abbau, ersetzt aber nicht die fachlich
+kontrollierte Zerlegung der vorhandenen grossen Endpunktmodule.
+
 ## PAGINATION-RATCHET-RESTORE-20260930 — abgeschlossen, Codex
 
 **Ziel:** Den blockierenden Pagination-Rueckfall von 55 auf die unveraenderte
