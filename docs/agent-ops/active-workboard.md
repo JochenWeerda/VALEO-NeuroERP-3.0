@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-HANDSHAKE-CLEANUP-20260930 — reserviert, Codex
+
+**Ziel:** Ueberholte Codex-Handshakes als historisch erledigt kennzeichnen,
+widerspruechliche persoenliche Zuweisungen entfernen und verwaiste Claims
+schliessen, ohne weiterhin offene fachliche Risiken zu verdecken.
+**Dateibesitz:** dieser Abschnitt und die betroffenen historischen Codex-
+Uebergaben im Workboard, `docs/agent-ops/handoff-2026-09-08.md`,
+`docs/design/flow-spine-herkunftskarte.md`, eigene Slice-YAML.
+**Abnahme:** Suche nach direkten offenen Codex-Uebergaben liefert nur aktuelle,
+belegte Arbeit; abgeschlossene FSX-/Runtime-/Security-Arbeit wird nicht mehr als
+Handlungsauftrag formuliert; Doku-Gates sind gruen.
+**Risiken:** Historische Entscheidungen bleiben nachvollziehbar; echte offene
+Fach- und Sicherheitsrisiken werden nicht als erledigt umgedeutet.
+
 ## SCHEMA-DRIFT-GATE-20260930 — reserviert, Claude Code
 
 **Ziel:** Abweichungen zwischen einer Ziel-Datenbank und einer frisch

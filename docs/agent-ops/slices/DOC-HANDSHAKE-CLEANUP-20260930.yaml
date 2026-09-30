@@ -1,0 +1,35 @@
+slice_id: DOC-HANDSHAKE-CLEANUP-20260930
+id: DOC-HANDSHAKE-CLEANUP-20260930
+title: Ueberholte Codex-Handshakes bereinigen
+status: reserviert
+owner: Codex
+date: 2026-09-30
+created_at: 2026-09-30
+goal: >
+  Historisch erledigte Uebergaben eindeutig als geschlossen kennzeichnen und
+  verwaiste Codex-Claims entfernen, ohne offene Fachrisiken zu verdecken.
+file_ownership:
+  - docs/agent-ops/active-workboard.md (nur Codex-Handshakes und eigener Abschnitt)
+  - docs/agent-ops/handoff-2026-09-08.md
+  - docs/design/flow-spine-herkunftskarte.md
+  - docs/agent-ops/slices/DOC-HANDSHAKE-CLEANUP-20260930.yaml
+acceptance:
+  - Erledigte FSX- und Runtime-Uebergaben sind nicht mehr als offen formuliert
+  - Sicherheitsrisiken bleiben sichtbar, aber ohne ueberholte persoenliche Zuweisung
+  - Der verwaiste DOC-SLICE-HARNESS-Claim ist geschlossen
+  - Doku- und Slice-Gates sind gruen
+tests:
+  - pnpm docs:check
+  - pnpm ai:slice:check
+risks:
+  - Historische Entscheidungen duerfen nicht verloren gehen
+ai_harness:
+  fachlicher_vertrag: Offene Arbeit und historisches Protokoll sind klar getrennt.
+  architektur_vertrag: Keine Code- oder Architekturentscheidung wird geaendert.
+  daten_vertrag: Keine Daten- oder Schemaaenderung.
+  test_vertrag: Doku- und Slice-Gates pruefen die Bereinigung.
+  security_vertrag: Offene Sicherheitsrisiken bleiben sichtbar.
+  betriebs_vertrag: Keine Laufzeit- oder Deployment-Aenderung.
+  dokumentations_vertrag: Workboard, Handoff und Slice widersprechen sich nicht.
+external_gates:
+  - not_applicable
