@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PAYMENT-CSV-IMPORT-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-09-30.
+**Ziel:** CSV-Zahlungsimport speichert Kopf und sämtliche validierten Zeilen
+atomar, erhält Währungen und kollidiert nicht bei zeitgleichen Importen.
+**Dateibesitz:** ausschließlich `import_payments_csv` und UUID-Import in
+`app/api/v1/endpoints/payment_matching.py`, neue HTTP-/PostgreSQL-Tests,
+numerische Ratsche in `scripts/check_dead_transactions.py`, eigene Slice-/QA-
+Dokumente; Workboard und Open-Gaps nur im eigenen Abschnitt.
+**Abnahme:** echte Kopf-/Zeilen-/Commitfehler liefern Fehler und lassen keine
+Teilimporte; erfolgreiche Antwort entspricht der gespeicherten Währung.
+**Risiken:** Bankstatement-Automatching und Belegausgleich sind Folgeslices;
+kein Übernehmen bestehender CRM-/Meridian-/OpenAPI-Claims.
+
 ## PAYMENT-EXECUTION-ATOMICITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Claim:** `52a4b317e`.
