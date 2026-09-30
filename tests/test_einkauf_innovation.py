@@ -87,7 +87,13 @@ def proben(engine):
     mandant = f"test-{uuid.uuid4().hex[:8]}"
     lager_id = str(uuid.uuid4())
     lieferant_id = str(uuid.uuid4())
-    heute = date.today()
+    # Derselbe Kalender wie im Dienst: ProcurementService rechnet mit
+    # business_today() (Europe/Berlin), nicht mit der Ortszeit des Laeufers.
+    # In CI ist die UTC — kurz vor Mitternacht laufen die beiden Tage
+    # auseinander, und aus 60 Tagen im Regal wurden 61.
+    from app.core.business_time import business_today
+
+    heute = business_today()
     geliefert_am = heute - timedelta(days=60)
 
     daten: dict[str, str] = {}
@@ -223,7 +229,10 @@ def test_was_nicht_da_ist_wird_nicht_beurteilt(stand, proben) -> None:
 def test_gerechnet_wird_ab_der_lieferung_nicht_ab_der_bestellung(stand, proben) -> None:
     """Die Bestellung lag fuenf Tage vor der Lieferung — die zaehlen nicht mit."""
     zeile = stand[proben["laeuft_nr"]]
-    assert zeile["tage_im_regal"] == 60, zeile
+    # 60 Tage, oder 61, wenn zwischen Aufbau und Messung Mitternacht lag.
+    # Worauf es ankommt: Die fuenf Tage zwischen Bestellung und Lieferung
+    # zaehlen nicht mit — sonst stuenden hier 65.
+    assert zeile["tage_im_regal"] in (60, 61), zeile
     assert zeile["erste_lieferung"] > zeile["bestelldatum"]
 
 
