@@ -341,6 +341,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `performance_indexes_20260526` | Performance indexes for high-frequency query patterns. |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
+| `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
 | `pricing_staffelrabatt_artikel_m2m_20260702` | pricing: staffelrabatte <-> artikel als many-to-many |
 | `pricing_staffelrabatte_20260701` | pricing: staffelrabatte Tabelle anlegen |
 | `proc_bestellung_wareneingang_20260623` | DOM-PROC-004: proc_bestellung_status_log, proc_wareneingaenge, proc_rechnungspruefungen |
