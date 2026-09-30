@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PAGINATION-RATCHET-RESTORE-20260930 — reserviert, Codex
+
+**Ziel:** Den blockierenden Pagination-Rueckfall von 55 auf die unveraenderte
+Schwelle 53 zurueckfuehren. CRM-Einwilligungslisten werden echt paginiert; die
+beleggebundene Mengenzuordnung wird als absichtlich vollstaendiges Aggregat
+explizit klassifiziert.
+**Dateibesitz:** `app/api/v1/endpoints/crm_consents.py`,
+`scripts/check_pagination.py`, `tests/test_pagination_contract.py`, eigene
+Slice-/QA-Doku und dieser Abschnitt.
+**Abnahme:** Alle drei CRM-Consent-Listen besitzen `limit`/`skip` mit
+Obergrenzen und binden sie an die Abfrage; `document_allocations.py` ist mit
+fachlicher Begruendung ausgenommen; die Schwelle bleibt 53; fokussierte Tests,
+Pagination-Gate und Doku-Gates sind gruen.
+**Risiken:** Listen liefern standardmaessig hoechstens 100 Eintraege. Die
+Dokumentzuordnung darf nicht paginiert werden, weil Summen und offene Mengen den
+vollstaendigen Beleg abbilden muessen.
+
 ## POS-ZAHLARTEN-MIGRATION-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** `domain_pos.payment_methods` und `domain_pos.promotions` kommen aus
