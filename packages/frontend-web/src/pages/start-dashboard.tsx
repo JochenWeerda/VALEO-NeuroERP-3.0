@@ -449,7 +449,9 @@ function LaunchpadTile({
       style={surface}
     >
       {caption ? (
-        <span className="text-2xs tracking-wide uppercase text-muted-foreground">{caption}</span>
+        // Wie in LaunchpadBoard: Auf der getoenten Kachelflaeche erreicht
+        // muted-foreground nur 3,18–4,50:1, foreground dagegen 8,84–12,52:1.
+        <span className="text-2xs tracking-wide uppercase text-foreground">{caption}</span>
       ) : (
         <span aria-hidden="true" />
       )}

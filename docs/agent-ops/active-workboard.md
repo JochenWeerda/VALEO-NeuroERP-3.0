@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## GATE-BLOCKER-20260930 — reserviert, Claude Code
+## GATE-BLOCKER-20260930 — abgeschlossen, Claude Code
 
 **Ziel:** Die zwei kleinen Blockierer wegraeumen, die das Quality Gate fuer alle
 rot halten: zwei High-Funde in `brace-expansion` und der Kontrastfehler der
@@ -20,12 +20,20 @@ Startseitenkacheln.
 `pnpm.overrides`), `pnpm-lock.yaml`,
 `packages/frontend-web/src/components/navigation/LaunchpadBoard.tsx` (nur die
 Farbklasse der Mikro-Ueberschrift).
-**Stand:** reserviert 2026-09-30. Der Override steht auf `^2.1.4`, die Behebung
-verlangt `>= 2.1.6` — die Untergrenze ist veraltet, nicht der Override fehlt.
-Der Kontrast betraegt 3,84:1 statt 4,5:1, weil `text-muted-foreground` auf einer
-getoenten Kachelflaeche steht.
-**Abnahme:** `pnpm audit --audit-level high` Exit 0; der axe-Lauf auf `/` ohne
-Kontrastverstoss; keine andere Kachelwirkung.
+**Stand:** abgeschlossen 2026-09-30. `brace-expansion` von `^2.1.4` auf
+`^2.1.6` — die Untergrenze war veraltet, nicht der Override fehlte. Der Kontrast
+wurde **gerechnet, nicht geschaetzt**: Mit `text-muted-foreground` liegen
+**alle zwoelf** Kombinationen aus sechs Chart-Toenen und zwei Deckungsgraden
+zwischen 3,18 und 4,50:1, also unter AA. Mit `text-foreground` sind es 8,84 bis
+12,52:1. Die Stelle gab es **zweimal** — in `LaunchpadBoard.tsx` und in
+`start-dashboard.tsx`; beide behoben.
+**Abnahme:** `pnpm audit --audit-level high` Exit 0 (von 2 High auf 0); 14
+Kontrasttests gruen; axe 8/8; eslint und tsc ohne Befund.
+**Korrektur einer frueheren Annahme:** Ich hatte den WCAG-Job fuer sporadisch
+gehalten und die Ursache im Kachel-Hash vermutet. Falsch: **Jeder** Ton
+verfehlte AA. Gruen war der Lauf nur, wenn gar keine Kachel gerendert wurde —
+im WCAG-Job ist das Backend nicht erreichbar. Deshalb steht neben dem axe-Lauf
+jetzt ein rechnender Test, der die Tokens ausliest.
 **Risiken:** `LaunchpadBoard.tsx` gehoert zur Startseitenarbeit von Cursor —
 nur anfassen, solange die Datei unangetastet ist, und nur die Farbklasse.
 

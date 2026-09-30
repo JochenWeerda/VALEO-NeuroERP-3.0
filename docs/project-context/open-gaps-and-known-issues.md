@@ -11,6 +11,25 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## GATE-BLOCKER — die zwei kleinen Blockierer des Quality Gate (2026-09-30)
+
+**Erledigt.** `brace-expansion` von `^2.1.4` auf `^2.1.6` (zwei High-Funde,
+`pnpm audit --audit-level high` jetzt Exit 0) und der Kontrast der
+Kachelueberschrift in `LaunchpadBoard.tsx` **und** `start-dashboard.tsx`.
+
+**Gemessen statt geschaetzt:** Mit `text-muted-foreground` verfehlen alle zwoelf
+Kombinationen aus sechs Chart-Toenen und zwei Deckungsgraden die 4,5:1 (3,18 bis
+4,50). Mit `text-foreground` sind es 8,84 bis 12,52.
+`src/__tests__/kachel-kontrast.test.ts` liest die echten Tokens aus
+`palette.css` und rechnet es nach — deterministisch, im Gegensatz zum axe-Lauf,
+der ohne Backend nur prueft, was gerendert wurde.
+
+**Offen bleibt im Quality Gate:** die Pagination-Ratsche (53 gefordert, 57
+vorhanden; am Einfuehrungstag 27.05. schon 55 — nie erfuellbar). Vier Endpunkte
+brauchen echte Paginierung; die Schwelle heraufzusetzen waere die falsche
+Richtung.
+
+
 ## SCHEMA-DRIFT-GATE — Datenbank gegen Migrationsstand (2026-09-30)
 
 **Erledigt.** `scripts/check_schema_drift.py` vergleicht eine Ziel-Datenbank mit

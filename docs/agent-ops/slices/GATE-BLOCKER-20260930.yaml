@@ -1,0 +1,66 @@
+---
+slice_id: GATE-BLOCKER
+id: GATE-BLOCKER
+title: Die zwei kleinen Blockierer des Quality Gate wegraeumen
+status: abgeschlossen
+owner: Claude Code
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+coordination: >
+  LaunchpadBoard.tsx und start-dashboard.tsx gehoeren zur Startseitenarbeit von
+  Cursor. Angefasst wurde ausschliesslich die Farbklasse der
+  Mikro-Ueberschrift, und nur solange beide Dateien im Arbeitsbaum unangetastet
+  waren. Keine Aenderung an Aufbau, Groesse oder Verhalten der Kacheln.
+goal: >
+  Zwei Jobs des Quality Gate, die es fuer alle rot halten, laufen wieder:
+  Dependency Scan (zwei High-Funde) und Frontend WCAG (Kontrast).
+file_ownership:
+  - package.json
+  - pnpm-lock.yaml
+  - packages/frontend-web/src/components/navigation/LaunchpadBoard.tsx
+  - packages/frontend-web/src/pages/start-dashboard.tsx
+  - packages/frontend-web/src/__tests__/kachel-kontrast.test.ts
+acceptance:
+  - pnpm audit --audit-level high Exit 0
+  - 14 Kontrasttests gruen, alle sechs Chart-Toene und beide Deckungen
+  - npx playwright test accessibility.spec.ts 8/8 gruen
+  - eslint und tsc ohne Befund
+tests:
+  - packages/frontend-web/src/__tests__/kachel-kontrast.test.ts
+  - packages/frontend-web/tests/e2e/accessibility.spec.ts
+risks:
+  - Ein axe-Lauf ohne Backend prueft nur, was gerendert wurde — deshalb
+    zusaetzlich ein rechnender Test
+  - Die Abstufung zur Bezeichnung traegt jetzt die Schriftgroesse statt der
+    Farbe; ein Gestaltungsurteil, das der Startseiten-Owner umdrehen kann,
+    dann aber mit einem anderen AA-taugliche Ton
+ai_harness:
+  fachlicher_vertrag: >
+    Die Kachelueberschrift auf der Startseite und im Launchpad ist lesbar im
+    Sinne von WCAG 2.2 AA, auf jedem der sechs Kacheltoene und bei beiden
+    Deckungsgraden.
+  architektur_vertrag: >
+    Keine neue Farbe und kein neuer Token: Die Klasse wechselt von
+    text-muted-foreground auf text-foreground, beide zentral definiert. Die
+    Abhilfe steht an beiden Stellen, die launchpadTileSurface() benutzen —
+    LaunchpadBoard und start-dashboard.
+  daten_vertrag: >
+    Keine Datenwirkung. pnpm-lock.yaml wird nur durch das Anheben der
+    Override-Untergrenze beruehrt (--lockfile-only).
+  test_vertrag: >
+    Der Kontrast wird gerechnet, nicht beobachtet: Der Test liest die echten
+    Tokens aus palette.css und prueft alle zwoelf Kombinationen gegen 4,5:1.
+    Ein Gegentest haelt fest, dass muted-foreground alle zwoelf verfehlt — wer
+    die Klasse zurueckdreht, sieht, dass es gemessen war.
+  security_vertrag: >
+    brace-expansion von ^2.1.4 auf ^2.1.6 (GHSA-6j4f-fj2g-mc7p und
+    Folgemeldung). Die Untergrenze war veraltet, nicht der Override fehlte —
+    dasselbe Muster wie bei der Security-Welle im September.
+  betriebs_vertrag: >
+    Rollback = Commit reverten. Keine Migration, kein Datenstand.
+  dokumentations_vertrag: >
+    Workboard, Open-Gaps; die Messwerte stehen als Kommentar an beiden
+    Codestellen und im Test.
+external_gates:
+  - not_applicable

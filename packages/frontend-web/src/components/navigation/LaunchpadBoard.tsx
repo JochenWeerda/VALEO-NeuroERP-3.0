@@ -693,7 +693,14 @@ function LaunchpadTile({
 
   const body = (
     <>
-      <span className="text-2xs tracking-wide uppercase text-muted-foreground">
+      {/* text-foreground, nicht text-muted-foreground: Die Kachelflaeche ist
+          ein Chart-Ton mit 28–40 % Deckung. Gegen sie erreicht
+          muted-foreground (#57616b) bei **allen sechs** Toenen und beiden
+          Deckungen nur 3,18–4,50:1 — unter den 4,5:1 der WCAG AA. Mit
+          foreground sind es 8,84–12,52:1. Die Abstufung zur Bezeichnung
+          darunter traegt hier die Schriftgroesse (text-2xs, uppercase,
+          tracking-wide), nicht die Farbe. */}
+      <span className="text-2xs tracking-wide uppercase text-foreground">
         {caption ?? kindCaption}
       </span>
       <span className={emphasized ? 'text-base font-semibold leading-snug text-foreground' : 'text-sm font-semibold leading-snug text-foreground'}>
