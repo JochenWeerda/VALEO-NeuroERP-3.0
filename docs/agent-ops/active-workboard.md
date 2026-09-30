@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CODE-IMPROVEMENT-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+
+**Ziel:** Den Verbesserungszyklus korrekt und widerspruchsfrei schliessen:
+abfragebezogene Pagination, gegen den Ausgangscommit geschuetzte Baselines,
+verbindliche Frontendtests, wiederverwendete CI-Evidenz und lesender Dauerbetrieb.
+**Dateibesitz:** `scripts/check_pagination.py`, neue Pagination-Baseline,
+neue Gate-/Workflow-Vertragstests, neues Baseline-Integritaetsgate,
+`scripts/run_improvement_pipelines.py`, `scripts/check_critical_backend_coverage.py`,
+`.github/workflows/quality-gate.yml`, `.github/workflows/sonarcloud.yml`,
+`.github/workflows/ai-engineering-metrics.yml`, eigene Slice-/QA-Doku,
+eigener Open-Gaps-Abschnitt und dieser Workboard-Abschnitt.
+**Abnahme:** Abfragegrenzen werden nicht durch andere Funktionen verdeckt;
+Baseline-Anhebungen im selben PR schlagen fehl; Frontend-Testfehler blockieren;
+Sonar nutzt SHA-identische Coverage; Nightly schreibt nicht auf geschuetzte Branches;
+gezielte Tests und Doku-Gates gruen; verbleibende Fach-/externe Gaps ehrlich erfasst.
+**Risiken:** Neue Scanner-Messung ist keine fachliche Reparatur des Altbestands.
+Bestehende Claims (Projektion, OpenAPI, Meridian und Domain-Handshakes) bleiben
+beim Owner. Die gemeinsame CI-Datei wird nur in den genannten Gates geaendert.
+**Naechster Schritt:** Claim committen, Harness anlegen, Gate-Vertraege implementieren.
+
 ## PROJEKTION-CURSOR-MIGRATION-20260930 — in Arbeit, Claude Code
 
 **Ziel:** Die drei `domain_shared.process_projection_*`-Tabellen
