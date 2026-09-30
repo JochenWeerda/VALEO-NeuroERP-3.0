@@ -62,10 +62,11 @@ Kombinationen aus sechs Chart-Toenen und zwei Deckungsgraden die 4,5:1 (3,18 bis
 `palette.css` und rechnet es nach — deterministisch, im Gegensatz zum axe-Lauf,
 der ohne Backend nur prueft, was gerendert wurde.
 
-**Offen bleibt im Quality Gate:** die Pagination-Ratsche (53 gefordert, 57
-vorhanden; am Einfuehrungstag 27.05. schon 55 — nie erfuellbar). Vier Endpunkte
-brauchen echte Paginierung; die Schwelle heraufzusetzen waere die falsche
-Richtung.
+**Erledigt (2026-09-30):** Die Pagination-Ratsche steht wieder bei 53 und ihre
+Schwelle blieb unveraendert. Drei CRM-Consent-Listen sind echt paginiert;
+`document_allocations.py` ist als vollstaendiges Belegaggregat begruendet
+ausgenommen. Eine Teilseite wuerde dort Summen und offene Mengen verfaelschen.
+Nachweis: `docs/quality-assurance/pagination-ratchet-restore-20260930.md`.
 
 
 ## SCHEMA-DRIFT-GATE — Datenbank gegen Migrationsstand (2026-09-30)

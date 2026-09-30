@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## PAGINATION-RATCHET-RESTORE-20260930 — reserviert, Codex
+## PAGINATION-RATCHET-RESTORE-20260930 — abgeschlossen, Codex
 
 **Ziel:** Den blockierenden Pagination-Rueckfall von 55 auf die unveraenderte
 Schwelle 53 zurueckfuehren. CRM-Einwilligungslisten werden echt paginiert; die
@@ -27,6 +27,10 @@ Pagination-Gate und Doku-Gates sind gruen.
 **Risiken:** Listen liefern standardmaessig hoechstens 100 Eintraege. Die
 Dokumentzuordnung darf nicht paginiert werden, weil Summen und offene Mengen den
 vollstaendigen Beleg abbilden muessen.
+**Stand:** abgeschlossen 2026-09-30. Drei Consent-Listen sind echt paginiert;
+das beleggebundene Vollaggregat ist begruendet ausgenommen. Der Ratchet steht
+ohne Schwellenanhebung wieder bei 53. Nachweis:
+`docs/quality-assurance/pagination-ratchet-restore-20260930.md`.
 
 ## POS-ZAHLARTEN-MIGRATION-20260930 — abgeschlossen, Claude Code
 

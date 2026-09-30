@@ -7,10 +7,13 @@ Begrenzung nicht wieder still verschwindet und der Ratchet es nicht merkt.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from fastapi.routing import APIRoute
 
 from main import app
+from scripts.check_pagination import EXEMPT_FILES, _has_unbounded_all
 
 pytestmark = pytest.mark.unit
 
@@ -24,6 +27,9 @@ PAGINIERTE_LISTEN = {
     "/api/v1/admin/output-templates": 100,
     "/api/v1/admin/output-templates/{template_id}/versions": 100,
     "/api/v1/admin/output-profiles": 100,
+    "/api/v1/crm/consents": 100,
+    "/api/v1/crm/consents/contact/{contact_id}": 100,
+    "/api/v1/crm/consents/{consent_id}/history": 100,
 }
 
 
@@ -55,3 +61,10 @@ def test_skip_ist_nicht_negativ(pfad):
     assert skip.default == 0
     untergrenzen = [m.ge for m in skip.field_info.metadata if getattr(m, "ge", None) is not None]
     assert untergrenzen == [0], f"{pfad}: erwartet ge=0, gefunden {untergrenzen}"
+
+
+def test_document_allocations_ist_bewusstes_vollaggregat() -> None:
+    """Eine Teilseite duerfte keine vollstaendige Belegsumme behaupten."""
+    source = Path("app/api/v1/endpoints/document_allocations.py").read_text(encoding="utf-8")
+    assert _has_unbounded_all(source) > 0
+    assert "document_allocations.py" in EXEMPT_FILES

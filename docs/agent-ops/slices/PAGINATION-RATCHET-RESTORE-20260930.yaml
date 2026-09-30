@@ -1,10 +1,15 @@
 slice_id: PAGINATION-RATCHET-RESTORE-20260930
 id: PAGINATION-RATCHET-RESTORE-20260930
 title: Pagination-Ratchet ohne Schwellenanhebung wiederherstellen
-status: reserviert
+status: abgeschlossen
 owner: Codex
 date: 2026-09-30
 created_at: 2026-09-30
+closed_at: 2026-09-30
+result: >
+  Drei CRM-Consent-Listen sind auf hoechstens 1000 Eintraege begrenzt. Das
+  beleggebundene Zuordnungsaggregat ist fachlich begruendet ausgenommen; der
+  Pagination-Ratchet steht ohne Schwellenanhebung wieder bei 53.
 goal: >
   Den blockierenden Rueckfall von 55 auf die unveraenderte Pagination-Schwelle
   53 zurueckfuehren und beide hinzugekommenen Dateien fachlich korrekt behandeln.
@@ -22,9 +27,9 @@ acceptance:
   - check_pagination bleibt mit Schwelle 53 gruen
   - Fokussierte Tests und Dokumentationspruefungen sind gruen
 tests:
-  - pytest tests/test_pagination_contract.py -q --no-cov
-  - python scripts/check_pagination.py --threshold 53
-  - pnpm docs:check
+  - "pytest tests/test_pagination_contract.py -q --no-cov: 34 Vertragstests"
+  - "python scripts/check_pagination.py --threshold 53: 53 Dateien, Exit 0"
+  - "pnpm docs:check: gruen"
 risks:
   - Konsumenten grosser Consent-Listen muessen Seiten explizit nachladen
 ai_harness:

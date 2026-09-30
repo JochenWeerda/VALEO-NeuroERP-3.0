@@ -23,6 +23,9 @@ EXEMPT_FILES: set[str] = {
     "command_catalog.py",     # static command catalog
     "agent_tool_contracts.py",  # agent tool list — small bounded set
     "analytics.py",           # analytics aggregations, not entity lists
+    # Vollstaendiges Belegaggregat: Teilseiten wuerden Summen/offene Mengen
+    # fachlich falsch und die Zwei-Abfragen-je-Beleg-Garantie aufbrechen.
+    "document_allocations.py",
 }
 
 

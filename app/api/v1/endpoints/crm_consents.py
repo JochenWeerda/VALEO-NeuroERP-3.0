@@ -123,6 +123,8 @@ async def list_consents(
     contact_id: Optional[str] = Query(None),
     channel: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -133,12 +135,15 @@ async def list_consents(
         q = q.filter(CrmConsent.channel == channel)
     if status:
         q = q.filter(CrmConsent.status == status)
-    return [_to_dict(row) for row in q.order_by(CrmConsent.created_at.desc()).all()]
+    rows = q.order_by(CrmConsent.created_at.desc()).offset(skip).limit(limit).all()
+    return [_to_dict(row) for row in rows]
 
 
 @router.get("/contact/{contact_id}", response_model=list[TypedObjectOut], summary="Einwilligungen eines Kontakts")
 async def list_contact_consents(
     contact_id: str,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -146,6 +151,8 @@ async def list_contact_consents(
         db.query(CrmConsent)
         .filter(CrmConsent.tenant_id == tenant_id, CrmConsent.contact_id == contact_id)
         .order_by(CrmConsent.created_at.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
     return [_to_dict(row) for row in rows]
@@ -249,6 +256,8 @@ async def delete_consent(
 @router.get("/{consent_id}/history", response_model=list[TypedObjectOut], summary="Einwilligungshistorie")
 async def get_consent_history(
     consent_id: str,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
@@ -257,6 +266,8 @@ async def get_consent_history(
         db.query(CrmConsentHistory)
         .filter(CrmConsentHistory.consent_id == consent_id)
         .order_by(CrmConsentHistory.changed_at.desc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )
     return [_history_dict(row) for row in rows]
