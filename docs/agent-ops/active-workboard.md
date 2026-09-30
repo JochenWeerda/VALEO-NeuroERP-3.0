@@ -11,6 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SCHEMA-DRIFT-GATE-20260930 — reserviert, Claude Code
+
+**Ziel:** Abweichungen zwischen einer Ziel-Datenbank und einer frisch
+migrierten sichtbar machen statt sie zu erraten. Spalten, Nullbarkeit,
+Fremdschluessel, CHECK- und UNIQUE-Bedingungen und Indizes, je Schema, als
+lesbare Liste: fehlt / zusaetzlich / anders.
+**Dateibesitz:** `scripts/check_schema_drift.py`,
+`tests/test_check_schema_drift.py`,
+`docs/quality-assurance/schema-drift-2026-09-30.md`.
+**Stand:** reserviert 2026-09-30. Grund: Der Pruefstand (DB-PRUEFSTAND) sagt
+nichts darueber, ob die gewachsene Datenbank noch zum Schema passt. Genau diese
+Luecke verdeckte am 29.09. neunundfuenfzig rote Tests.
+**Abnahme:** Fundliste im QA-Dokument, jeder Fund mit einer von drei
+Entscheidungen — (a) Migration fehlt, (b) Dev-Datenbank verbastelt, (c) Spalte
+ungenutzt. Vergleichslogik mit reinen Unit-Tests, der Vergleich selbst gegen
+echtes Postgres, kein MagicMock. Open-Gaps nachgezogen.
+**Risiken:** Funde in fremden Slices (Einkauf, Verkauf, Agrar) nicht selbst
+reparieren, sondern als Handshake weitergeben. Eine Reparatur der
+Dev-Datenbank darf nicht als Migration getarnt werden.
+
+
 ## HANDSHAKE: 18 tote Transaktionen in Fachdomaenen 2026-09-30, Claude Code an die Fachowner
 
 **Worum es geht:** `scripts/check_dead_transactions.py` findet 78 Stellen, an
