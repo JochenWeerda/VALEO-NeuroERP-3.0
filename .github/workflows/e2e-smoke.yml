@@ -122,7 +122,7 @@ jobs:
       
       - name: Upload Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: smoke-artifacts-${{ matrix.domain }}-${{ github.run_id }}
           path: |
@@ -132,7 +132,7 @@ jobs:
       
       - name: Upload Coverage Matrix
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-matrix-${{ matrix.domain }}
           path: docs/uat/COVERAGE-MATRIX.csv

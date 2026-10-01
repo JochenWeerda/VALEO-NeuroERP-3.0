@@ -78,7 +78,7 @@ jobs:
       
       - name: Upload Full Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: full-uat-artifacts-${{ github.run_id }}
           path: |
@@ -88,7 +88,7 @@ jobs:
       
       - name: Upload Coverage Matrix
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-matrix-full
           path: docs/uat/COVERAGE-MATRIX.csv
@@ -96,7 +96,7 @@ jobs:
       
       - name: Upload Bug List
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bug-list
           path: docs/uat/BUGLIST.json
@@ -121,7 +121,7 @@ jobs:
       
       - name: Upload Summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: uat-summary
           path: docs/uat/UAT-SUMMARY.md
