@@ -11,6 +11,16 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## SECURITY-PATCH-MILESTONE — Paketbefunde (2026-10-01)
+
+**Repo-seitig repariert:** PyJWT 2.15.0, grpc-js 1.14.5, fastify 5.12.5,
+fast-uri 3.1.8 und moment 2.31.0. Frozen Install, JWT-Vertraege und Audits
+geprueft. Root/CRM-Marketing/JavaScript ohne Befunde; AI behaelt drei
+bestehende Embedded-only-Chroma-Bewertungen, ohne Review-Verlaengerung.
+**Extern offen:** GitHub-Alert-Schliessung nach Defaultbranch-Integration,
+CI und Deployment. Nachweis:
+`docs/quality-assurance/security-patch-milestone-20261001.md`.
+
 ## TEST-DATABASE-RESOURCE-POLICY — alle Agenten (2026-10-01)
 
 **Verbindlich integriert:** keine zusätzlichen Datenbank-/Dockerinstanzen

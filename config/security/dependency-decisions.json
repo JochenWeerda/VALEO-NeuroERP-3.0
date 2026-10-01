@@ -103,17 +103,17 @@
         "services/ai/app/api/v1/endpoints/autocomplete.py": "fc2d9af792f5f6aeb2364b3e5ee2996926037d6d19a0e185eb34feb8c40526bc",
         "services/ai/app/api/v1/endpoints/classification.py": "f74a9af1d6c8c735fb192557aa591b0c8a150f0edc16691f4fe341730bf73022",
         "services/ai/app/api/v1/endpoints/insights.py": "b3b16714b0073aac7109a5505c336296335252ce7ebf7b658a0385c47972ea4b",
-        "services/ai/app/api/v1/endpoints/mcp.py": "1a95fe0b1a3b0bd422fe9e01559e3a06a594cef58824d45e7ae991bbeb74ae0b",
+        "services/ai/app/api/v1/endpoints/mcp.py": "2f05e931a828971a97216e99b55928797a75a47ffc98e88288ca34c0773445d3",
         "services/ai/app/api/v1/endpoints/rag.py": "dca251d396f57a737a33569555bd92da77045c2a50b39cf2c7cea5a0e7e3a0ff",
         "services/ai/app/config.py": "d453f32abbc7743db5f877f0d21798d8b18939d335767ae1caad09fd965d5957",
         "services/ai/app/mcp/__init__.py": "b207a66bc516cc46522b7eda834656959e23f23d682d181f3d43c7d62b43c49a",
-        "services/ai/app/mcp/server.py": "4561dfe2e394a61f0f816ca5b098d6a1333b99252dcc8198cf02a8db8bade39a",
+        "services/ai/app/mcp/server.py": "dc272c73094843c9b23c04f672db814f029a0564fc8f0aaf895796cf7f70e0df",
         "services/ai/app/services/__init__.py": "135b1fd0b564d4e6cd443c547039e156dea30a4ea965e5e0cceb3c360fece995",
         "services/ai/app/services/openai_service.py": "f47a46a8395fe4e10d6f2ee31613b6c648a98e405f4090bfcc44cdaba1c7ed3f",
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "5ea11335cffd99831bcdcccc8ad0fa1c34432628c37dc2a2b6ab1f54eaa9112a"
+        "services/ai/requirements.txt": "e9fa6118fdd81fd0a022a70eadf00da7100f6e20d545394af0474a2242184409"
       }
     },
     {
@@ -218,17 +218,17 @@
         "services/ai/app/api/v1/endpoints/autocomplete.py": "fc2d9af792f5f6aeb2364b3e5ee2996926037d6d19a0e185eb34feb8c40526bc",
         "services/ai/app/api/v1/endpoints/classification.py": "f74a9af1d6c8c735fb192557aa591b0c8a150f0edc16691f4fe341730bf73022",
         "services/ai/app/api/v1/endpoints/insights.py": "b3b16714b0073aac7109a5505c336296335252ce7ebf7b658a0385c47972ea4b",
-        "services/ai/app/api/v1/endpoints/mcp.py": "1a95fe0b1a3b0bd422fe9e01559e3a06a594cef58824d45e7ae991bbeb74ae0b",
+        "services/ai/app/api/v1/endpoints/mcp.py": "2f05e931a828971a97216e99b55928797a75a47ffc98e88288ca34c0773445d3",
         "services/ai/app/api/v1/endpoints/rag.py": "dca251d396f57a737a33569555bd92da77045c2a50b39cf2c7cea5a0e7e3a0ff",
         "services/ai/app/config.py": "d453f32abbc7743db5f877f0d21798d8b18939d335767ae1caad09fd965d5957",
         "services/ai/app/mcp/__init__.py": "b207a66bc516cc46522b7eda834656959e23f23d682d181f3d43c7d62b43c49a",
-        "services/ai/app/mcp/server.py": "4561dfe2e394a61f0f816ca5b098d6a1333b99252dcc8198cf02a8db8bade39a",
+        "services/ai/app/mcp/server.py": "dc272c73094843c9b23c04f672db814f029a0564fc8f0aaf895796cf7f70e0df",
         "services/ai/app/services/__init__.py": "135b1fd0b564d4e6cd443c547039e156dea30a4ea965e5e0cceb3c360fece995",
         "services/ai/app/services/openai_service.py": "f47a46a8395fe4e10d6f2ee31613b6c648a98e405f4090bfcc44cdaba1c7ed3f",
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "5ea11335cffd99831bcdcccc8ad0fa1c34432628c37dc2a2b6ab1f54eaa9112a"
+        "services/ai/requirements.txt": "e9fa6118fdd81fd0a022a70eadf00da7100f6e20d545394af0474a2242184409"
       }
     },
     {
@@ -333,17 +333,17 @@
         "services/ai/app/api/v1/endpoints/autocomplete.py": "fc2d9af792f5f6aeb2364b3e5ee2996926037d6d19a0e185eb34feb8c40526bc",
         "services/ai/app/api/v1/endpoints/classification.py": "f74a9af1d6c8c735fb192557aa591b0c8a150f0edc16691f4fe341730bf73022",
         "services/ai/app/api/v1/endpoints/insights.py": "b3b16714b0073aac7109a5505c336296335252ce7ebf7b658a0385c47972ea4b",
-        "services/ai/app/api/v1/endpoints/mcp.py": "1a95fe0b1a3b0bd422fe9e01559e3a06a594cef58824d45e7ae991bbeb74ae0b",
+        "services/ai/app/api/v1/endpoints/mcp.py": "2f05e931a828971a97216e99b55928797a75a47ffc98e88288ca34c0773445d3",
         "services/ai/app/api/v1/endpoints/rag.py": "dca251d396f57a737a33569555bd92da77045c2a50b39cf2c7cea5a0e7e3a0ff",
         "services/ai/app/config.py": "d453f32abbc7743db5f877f0d21798d8b18939d335767ae1caad09fd965d5957",
         "services/ai/app/mcp/__init__.py": "b207a66bc516cc46522b7eda834656959e23f23d682d181f3d43c7d62b43c49a",
-        "services/ai/app/mcp/server.py": "4561dfe2e394a61f0f816ca5b098d6a1333b99252dcc8198cf02a8db8bade39a",
+        "services/ai/app/mcp/server.py": "dc272c73094843c9b23c04f672db814f029a0564fc8f0aaf895796cf7f70e0df",
         "services/ai/app/services/__init__.py": "135b1fd0b564d4e6cd443c547039e156dea30a4ea965e5e0cceb3c360fece995",
         "services/ai/app/services/openai_service.py": "f47a46a8395fe4e10d6f2ee31613b6c648a98e405f4090bfcc44cdaba1c7ed3f",
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "5ea11335cffd99831bcdcccc8ad0fa1c34432628c37dc2a2b6ab1f54eaa9112a"
+        "services/ai/requirements.txt": "e9fa6118fdd81fd0a022a70eadf00da7100f6e20d545394af0474a2242184409"
       }
     }
   ]

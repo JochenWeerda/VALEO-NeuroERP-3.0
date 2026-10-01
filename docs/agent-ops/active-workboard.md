@@ -27,9 +27,9 @@ Der eigene zusätzliche Prüfstand ist nach Nutzungsprüfung entfernt.
 frische Schema-Abnahmen am gemeinsamen Prüfstand benötigen Koordination.
 **Nachweis:** `docs/quality-assurance/test-database-resource-policy-20261001.md`.
 
-## SECURITY-PATCH-MILESTONE-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## SECURITY-PATCH-MILESTONE-20261001 — repo-seitig abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Owner:** Codex-01a0f3fc. **Stand:** repo-seitig abgeschlossen 2026-10-01; externe Integration offen.
 **Ziel:** Acht aktuelle GitHub-Alerts auf fünf Abhängigkeiten gezielt
 reparieren: PyJWT 2.15.0, grpc-js 1.14.5, fastify 5.12.5, fast-uri 3.1.8,
 moment 2.31.0. Keine Ausnahmen für neue erreichbare Schwachstellen.
@@ -51,6 +51,13 @@ nicht nachgezogen. Die beiden MCP-Diffs sind erneut gelesen; sie entfernen
 Scheinerfolge und verbinden keinen Chroma-HTTP-Server. Kontrolle weiterhin
 embedded-only. Nur diese drei Hashes werden nach Prüfung aktualisiert;
 Risikobewertung und Wiedervorlage bleiben unverändert.
+
+**Ergebnis:** Frozen Install und Produktionsaudit gruen; Root/CRM-Marketing
+Audit ohne Befunde. AI: drei bestehende Chroma-Befunde als not_affected,
+keine Review-Verlaengerung. 17 JWT-/OIDC-Vertraege, 18 Sicherheitsgate-Tests
+plus 14 Subtests, drei Kalendervertraege und zwei Laufzeit-Smokes gruen.
+**Nachweis:** `docs/quality-assurance/security-patch-milestone-20261001.md`.
+**Extern offen:** Defaultbranch-Integration, GitHub-Alert-Schliessung, CI und Deployment.
 
 ## HANDSHAKE: Die Kundenakte liest zwei Tabellen ohne Migration 2026-10-01, Claude Code an den CRM-Owner
 
