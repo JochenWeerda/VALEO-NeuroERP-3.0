@@ -11,6 +11,56 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WEBHOOK-MANDANT-20261001 — abgeschlossen, Claude Code
+
+**Ziel:** Unter `/api/v1/webhooks` haengen **zwei** Module, und beide bestimmten
+das Haus falsch. `webhook_system.py` kannte `get_tenant_id` nicht und schrieb in
+`domain_shared.webhooks` (keine Migration); `webhooks.py` nahm das Haus als
+**Abfrageparameter** `?tenant_id=` mit `DEFAULT_TENANT_ID` als Rueckfall.
+**Dateibesitz:** `app/api/v1/endpoints/webhook_system.py`,
+`app/api/v1/endpoints/webhooks.py`, `tests/test_webhook_mandant_vertrag.py`,
+`tests/test_gs1_webhook_ruestliste.py` (nur die zwei direkt aufrufenden Tests),
+eigene Slice-/QA-Doku und dieser Abschnitt.
+**Stand:** abgeschlossen 2026-10-01. Sechster Eintrag der Welle 2, und zum
+zweiten Mal war **keine Migration** die Antwort:
+`domain_shared.webhook_registrations` existiert, ist migriert, hat ein
+ORM-Modell und traegt `tenant_id` (Fremdschluessel auf `tenants`) und `secret`.
+`webhook_system.py` liest und schreibt jetzt dort. Die laufende Nummer ist keine
+Spalte mehr, sondern die Stellung der Zeile im eigenen Haus.
+**Was ein fremdes Haus konnte:** die Webhooks aller Haeuser mit ihren Ziel-URLs
+auflisten; mit `?tenant_id=` fremde Anbindungen lesen **und anlegen**; mit einer
+fremden Kennung eine Anbindung loeschen.
+**Vier Nebenbefunde, behoben:**
+1. `secret` wurde seit immer entgegengenommen und **verworfen**. Jetzt
+   hinterlegt, nie ausgegeben, und es signiert jeden Aufruf
+   (`X-Valeo-Signature: sha256=…`, HMAC-SHA256 ueber den gesendeten Rumpf).
+2. `DELETE /{nr}` war **unerreichbar** — `webhooks.py` ist unter demselben
+   Prefix zuerst eingebunden und hat `DELETE /{webhook_id}`. Jetzt
+   `DELETE /abmelden/{nr}`.
+3. Als Pruefung der Ziel-URL genuegte `https://`. Jetzt
+   `validate_outbound_http_target` wie in `webhooks.py` — sonst laesst sich die
+   Anwendung als Bote ins eigene Netz oder an den Cloud-Metadatendienst
+   schicken.
+4. Ein Lesefehler sah aus wie "kein Webhook eingerichtet" (`return []`). Jetzt
+   503 — sonst registriert ein Haus doppelt.
+**Ehrlich dazugesagt:** `_trigger_webhook` haette ein Ereignis aus Haus A an die
+URL von Haus B geschickt, hat aber **keinen Aufrufer**. Der Abfluss war angelegt,
+nicht in Betrieb.
+**Offene Fachfragen (nicht entschieden):** Die beiden Module kennen **disjunkte**
+Bereichs-Vokabulare (`KONTRAKT_NEU` … gegen `auftrag` …) und schreiben jetzt in
+dieselbe Spalte `event_area`; welches gilt, gehoert entschieden — zusammen mit
+der Frage, warum zwei Module unter einem Prefix haengen. Und:
+`webhook_registrations` hat keine Spalten fuer Fehlerzaehler und letzte
+Ausloesung, also stehen `fehler_count`/`letzte_auslosung_am` konstant auf 0/null.
+Ein Zustellversuch ohne Nachweis ist fuer einen Betrieb wenig wert; das braucht
+ein Zustellprotokoll oder zwei Spalten.
+**Hinweis:** Die Route hat sich geaendert, die OpenAPI-Spezifikation driftet
+also — wie im `OPENAPI-DRIFT-REFRESH` ausdruecklich vorgesehen.
+**Abnahme:** 18 Vertraege gruen, dazu 49 vorhandene Tests. Gegen die
+**vorhandene** gemeinsame Pruefstand-Datenbank, mit eigenen Mandantenkennungen
+und ohne Zuruecksetzen. Nachweis:
+`docs/quality-assurance/webhook-mandant-20261001.md`.
+
 ## BANK-STATEMENT-IMPORT-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.

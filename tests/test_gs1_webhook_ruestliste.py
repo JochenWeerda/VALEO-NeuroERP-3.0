@@ -130,20 +130,18 @@ def test_webhook_register_success():
     app.include_router(router, prefix="/webhooks")
 
     mock_db = MagicMock()
-    # Simulate MAX(nr) query returning 0
-    nr_result = MagicMock()
-    nr_result.__getitem__ = lambda self, k: 1
-    mock_mapping = MagicMock()
-    mock_mapping.one.return_value = nr_result
+    # Die laufende Nummer kommt jetzt je Haus aus einer ROW_NUMBER-Abfrage.
     mock_execute = MagicMock()
-    mock_execute.mappings.return_value = mock_mapping
+    mock_execute.scalar_one.return_value = 1
     mock_db.execute.return_value = mock_execute
 
     from app.api.v1.endpoints.webhook_system import register_webhook, WebhookCreate
     payload = WebhookCreate(url="https://example.com/hook", bereich="WIEGUNG_NEU")
-    result = register_webhook("WIEGUNG_NEU", payload, mock_db)
+    # Der Mandant ist Pflicht und steht vor der Sitzung.
+    result = register_webhook("WIEGUNG_NEU", payload, "haus-a", mock_db)
     assert result.id is not None
     assert result.bereich == "WIEGUNG_NEU"
+    assert result.nr == 1
 
 
 @pytest.mark.unit
@@ -155,13 +153,16 @@ def test_webhook_delete():
     app.include_router(router, prefix="/webhooks")
 
     mock_db = MagicMock()
-    delete_result = MagicMock()
-    delete_result.rowcount = 1
-    mock_db.execute.return_value = delete_result
+    # Erst wird die Kennung zur laufenden Nummer **im eigenen Haus** gesucht,
+    # dann geloescht.
+    treffer = MagicMock()
+    treffer.scalar.return_value = "wh-1"
+    treffer.rowcount = 1
+    mock_db.execute.return_value = treffer
 
     from app.api.v1.endpoints.webhook_system import unregister_webhook
     # Should not raise
-    unregister_webhook(42, mock_db)
+    unregister_webhook(42, "haus-a", mock_db)
     mock_db.commit.assert_called_once()
 
 

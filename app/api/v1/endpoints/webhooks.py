@@ -3,6 +3,7 @@ Webhook management endpoints (l3c-webhook)
 GET/POST/DEL for webhook registrations + event areas.
 """
 
+import logging
 from typing import Optional
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
@@ -12,11 +13,31 @@ from sqlalchemy.orm import Session
 from ....core.config import settings
 from ....core.database import get_db
 from ....core.outbound_security import validate_outbound_http_target
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import WebhookRegistration
 from ..schemas.base import BaseSchema, PaginatedResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _mandant(kopf_mandant: str, abfrage_mandant: Optional[str]) -> str:
+    """Das Haus kommt aus dem Kopf, nicht aus der Abfrage.
+
+    Der Parameter ``tenant_id`` bleibt in der Schnittstelle, weil Aufrufer ihn
+    senden — er wird aber **nicht mehr befolgt**: Wer ihn setzte, las und schrieb
+    bis zum 01.10.2026 die Webhooks eines fremden Hauses, und ohne ihn traf es
+    pauschal ``DEFAULT_TENANT_ID``. Ein abweichender Wert wird protokolliert.
+    """
+    if abfrage_mandant and abfrage_mandant != kopf_mandant:
+        logger.warning(
+            "webhooks: tenant_id=%s in der Abfrage weicht vom Kopf (%s) ab und wird ignoriert",
+            abfrage_mandant,
+            kopf_mandant,
+        )
+    return kopf_mandant
 
 EVENT_AREAS = [
     "auftrag",
@@ -63,10 +84,11 @@ async def list_webhooks(
     tenant_id: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
+    kopf_mandant: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """GET Webhooks"""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = _mandant(kopf_mandant, tenant_id)
     q = db.query(WebhookRegistration).filter(WebhookRegistration.tenant_id == tid)
     total = q.count()
     items = q.offset(skip).limit(limit).all()
@@ -93,12 +115,13 @@ async def list_event_areas():
 async def register_webhook(
     payload: WebhookCreate,
     tenant_id: Optional[str] = Query(None),
+    kopf_mandant: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """POST Registrieren"""
     from app.core.uuid7 import uuid7
 
-    tid = tenant_id or DEFAULT_TENANT
+    tid = _mandant(kopf_mandant, tenant_id)
     if payload.event_area not in EVENT_AREAS:
         raise HTTPException(400, f"Unknown event area: {payload.event_area}")
     obj = WebhookRegistration(
@@ -115,9 +138,24 @@ async def register_webhook(
 
 
 @router.delete("/{webhook_id}", status_code=204, response_class=Response, response_model=None, summary="Webhook entfernen")
-async def remove_webhook(webhook_id: str, db: Session = Depends(get_db)):
-    """DEL Entfernen"""
-    obj = db.query(WebhookRegistration).filter(WebhookRegistration.id == webhook_id).first()
+async def remove_webhook(
+    webhook_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """DEL Entfernen
+
+    Mit Mandantenfilter: Vorher genuegte die Kennung, und die Kennung eines
+    fremden Webhooks loeschte dessen Anbindung.
+    """
+    obj = (
+        db.query(WebhookRegistration)
+        .filter(
+            WebhookRegistration.id == webhook_id,
+            WebhookRegistration.tenant_id == tenant_id,
+        )
+        .first()
+    )
     if not obj:
         raise HTTPException(404, "Webhook not found")
     db.delete(obj)
