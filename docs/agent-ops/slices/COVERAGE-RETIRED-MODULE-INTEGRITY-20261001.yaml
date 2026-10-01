@@ -1,0 +1,38 @@
+slice_id: COVERAGE-RETIRED-MODULE-INTEGRITY-20261001
+title: Coverage-Ratsche fuer reale Modul-Loeschung und gueltige Messwerte
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claim c3b1b7fa3; Handshake KONTRAKT-EINE-ORDNUNG beantwortet.
+goal: Leichen bereinigen ohne Coverage-Schutz vorhandener oder verschobener Module abzusenken.
+file_ownership:
+  - scripts/check_baseline_integrity.py
+  - scripts/check_critical_backend_coverage.py
+  - config/coverage_ratchet_baseline.json
+  - tests/test_coverage_retired_module_integrity.py
+  - docs/quality-assurance/coverage-retired-module-integrity-20261001.md
+acceptance:
+  - Nur Git- und dateiseitig nachgewiesene Modul-Loeschung erlaubt Schwellenentfernung.
+  - Rename und umgeschriebene Nachfolger erhalten mindestens die bisherige Schwelle.
+  - 99 lebende Schwellen bleiben exakt gleich; vier reale Leichen entfernt.
+  - Messungen und Schwellen sind endliche Zahlen 0..1; aktive Quellen existieren.
+tests:
+  - python -m pytest --noconftest --no-cov -o addopts= -q tests/test_coverage_retired_module_integrity.py tests/test_baseline_integrity.py tests/test_improvement_workflow_contract.py tests/test_improvement_pipeline.py
+  - python -m ruff check scripts/check_baseline_integrity.py scripts/check_critical_backend_coverage.py tests/test_coverage_retired_module_integrity.py
+test_evidence:
+  - 57 Vertraege bestanden, davon 30 neue Retirement-/Coverage-Vertraege.
+  - Echte temporaere Git-Vertraege und positive sowie negative Coverage-Vertraege bestanden.
+risks:
+  - Gemischte Loeschung und neue Module werden konservativ behandelt.
+  - Lokale vorhandene Coverage bleibt wegen echter Unterschreitungen rot; frische CI-Evidence erforderlich.
+ai_harness:
+  fachlicher_vertrag: Code-Abbau und gesenkte Testabdeckung sind unterschiedliche Entscheidungen.
+  architektur_vertrag: Bestehendes Quality-Gate ohne neue Services oder Container.
+  daten_vertrag: Git-Identitaet, kanonische Pfade und endliche Coveragewerte gemeinsam pruefen.
+  test_vertrag: Echte Git-Snapshots und nachgewiesene Red-Green-Fehlerfaelle.
+  security_vertrag: Ersatzpfade, uncommittete Loeschung und NaN umgehen das Gate nicht.
+  betriebs_vertrag: Ohne Datenbank oder Docker; vorhandene CI-Pruefungen bleiben verbindlich.
+  dokumentations_vertrag: QA, Workboard, Gaps und Handshake-Nachzug synchronisiert.
+external_gates:
+  - GitHub-CI und frische Coverage-Evidence.

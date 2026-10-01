@@ -11,6 +11,31 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-LEGACY-IMPORT-INTEGRATION — zweiter Bankweg (2026-10-01, offen)
+
+**Bestaetigt:** bank_import.py / INT-BANK-001 schreibt domain_finance statt
+domain_erp und verwendet eigene MT940-/CAMT.08-Parser, float-Betraege,
+Substring-/Betragsfallback und interne Commit-/Rollbackpfade. Wiederholte
+Dateien erhalten neue IDs. Der sichere Bankstatement-Vertrag wird dort nicht
+konsumiert. **Offen:** Fuehrendes Auszugsmodell/Bestandsbezug, API-Kompatibilitaet,
+eindeutige reale Zahlung, atomare Zuordnung/Audit und Dateireplay; eigener
+Architecture-/Finance-Claim vor Umsetzung. Keine stille Datenuebernahme oder
+pauschale Bankabnahme. CAMT.02- und MT940-Nachzuege beziehen sich auf den
+beanspruchten Bankstatement-Import. Analyse im Coverage-Nachweis dokumentiert.
+
+## COVERAGE-RETIRED-MODULE-INTEGRITY — reale Loeschung und Messwerte (2026-10-01)
+
+**Geschlossen:** verwaiste Coverage-Schwellen nach echter Modul-Loeschung,
+fehlende Quelldatei trotz XML-Erfolg und NaN/Infinity-Vergleichsumgehung.
+Git-/Dateinachweis schuetzt Retirement; Rename-Nachfolger behaelt mindestens
+die alte Schwelle. Umgeschriebene/aus app verschobene Nachfolger werden nicht
+als unbedeutende Loeschung angenommen. Vier Kontrakt-Leichen entfernt,
+alle 99 lebenden Schwellen exakt unveraendert.
+**Offen:** Reale Coverage-Unterschreitungen und fehlende Messwerte im vorhandenen
+datierten Bericht; frische SHA-/Run-gleiche CI-Evidence erforderlich. Keine
+behauptete Gesamtabdeckungsverbesserung. Nachweis:
+`docs/quality-assurance/coverage-retired-module-integrity-20261001.md`.
+
 ## BANK-CAMT-PARSER-INTEGRITY — gebuchte Salden und Einzelzahlungen (2026-10-01)
 
 **Geschlossen:** falsche erste Saldoart/Vorzeichen, errechneter statt gepruefter

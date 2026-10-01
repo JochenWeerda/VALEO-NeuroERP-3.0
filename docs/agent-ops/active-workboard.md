@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## COVERAGE-RETIRED-MODULE-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## COVERAGE-RETIRED-MODULE-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe CI-Abnahme offen.
 **Ziel:** Coverage-Ratsche erlaubt nur nachgewiesene Modul-Loeschung;
 vorhandener, untracked ersetzter oder verschobener Code bleibt geschuetzt.
 **Dateibesitz:** `scripts/check_baseline_integrity.py`,
@@ -28,6 +28,25 @@ reparieren. Vier Schwellen entfallen erst mit Git-/Dateinachweis; keine neue
 Testdatenbank/Dockerinstanz. Temporäre Git-Testrepos nur im pytest-Tempverzeichnis.
 **Risiken:** Git-Rename-Erkennung ist heuristisch; Reorganisation ist keine
 Coverage-Freigabe. Zweiter Bankimportweg bleibt separater Integrations-Slice.
+
+**Scope-Nachzug vor Edit:** Der gleiche Coverage-Checker vergleicht float-
+Messwerte ohne Endlichkeitspruefung; NaN umgeht den kleiner-als-Vergleich.
+Messwerte und Schwellwerte muessen endliche Zahlen im Intervall 0..1 sein.
+Eigene Guard-Vertraege im bereits geclaimten Coverage-Testmodul.
+
+**Ergebnis:** Git- und Dateinachweis fuer Retirement, geschuetzter Rename-
+Transfer, konservativer Guard fuer umgeschriebene Nachfolger und endliche
+Messungen/Schwellen. Vier Kontrakt-Leichen entfernt; 99 lebende Werte exakt
+unveraendert. Duplicate-Key mit identischem Wert im Checker bereinigt.
+**Nachweis:** `docs/quality-assurance/coverage-retired-module-integrity-20261001.md`.
+**Abnahme:** 57 Vertraege bestanden, davon 30 neue. Baselineintegritaet,
+Ruff und Whitespace gruen; keine Datenbank und kein Docker verwendet.
+**Offen:** Lokaler datierter Coverage-Bericht bleibt wegen wirklicher
+Unterschreitungen und fehlender Messwerte rot; keine neue Coverage behauptet.
+SHA-/Run-gleiche CI-Evidence und Deployment extern.
+**Handshake-Nachzug:** KONTRAKT-EINE-ORDNUNG-Loeschungsproblem repo-seitig
+geschlossen. Zweiter Bankimport INT-BANK-001 bleibt priorisierter separater
+Integrations-Slice (offen; Architecture-/Finance-Claim vor Umsetzung).
 
 ## PERIODE-EIN-ZUSTAND-20261001 — abgeschlossen, Claude Code
 

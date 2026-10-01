@@ -1,5 +1,5 @@
 {
-  "_kommentar": "SPEC-P0-05: Ratchet-Baseline — Schwellwerte duerfen nur steigen. Absenkung oder Entfernung eines Pfads in CRITICAL_THRESHOLDS unterhalb dieser Baseline laesst check_critical_backend_coverage.py fehlschlagen. Beim Anheben eines Schwellwerts diese Datei mit anheben.",
+  "_kommentar": "SPEC-P0-05: Schwellwerte lebender Module duerfen nur steigen. Nachgewiesene Modul-Loeschungen und geschuetzte Rename-Nachfolger werden gegen den Ausgangscommit geprueft. Beim Anheben Baseline und CRITICAL_THRESHOLDS gemeinsam aktualisieren.",
   "thresholds": {
     "api/v1/endpoints/agrar_contracts.py": 0.51,
     "api/v1/endpoints/agrar_p0.py": 0.57,
@@ -38,7 +38,6 @@
     "api/v1/endpoints/inventory_operations.py": 0.52,
     "api/v1/endpoints/journal_entries.py": 0.25,
     "api/v1/endpoints/kaeufergruppe.py": 0.6,
-    "api/v1/endpoints/kontrakt_actions.py": 0.58,
     "api/v1/endpoints/kontrakt_hedging.py": 0.74,
     "api/v1/endpoints/kontrakt_klassen.py": 0.75,
     "api/v1/endpoints/kontrakte.py": 0.27,
@@ -88,9 +87,6 @@
     "services/hrm_abwesenheit_service.py": 0.78,
     "services/hrm_zeiterfassung_service.py": 0.74,
     "services/integration_bootstrap.py": 0.92,
-    "services/kontrakt_fixing_service.py": 0.58,
-    "services/kontrakt_lifecycle_service.py": 0.8,
-    "services/kontrakt_settlement_service.py": 0.6,
     "services/mcp_tool_registry_service.py": 0.85,
     "services/meldewesen_lifecycle_service.py": 0.87,
     "services/operator_agent_service.py": 0.85,

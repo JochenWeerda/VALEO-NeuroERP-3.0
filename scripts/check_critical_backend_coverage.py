@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -39,12 +40,6 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     # ── Feed production chain (FEED-CHAIN-004 / COV-RATCHET-FEED-001) ─────────
     "services/feed_inventory_link_service.py": 0.55,
     "api/v1/endpoints/produktion_mischfutter.py": 0.35,
-
-    # ── DOM-CON-004: Kontrakt Lifecycle / Fixing / Settlement ─────────────────
-    "services/kontrakt_lifecycle_service.py": 0.80,   #  83% measured
-    "services/kontrakt_fixing_service.py": 0.58,      #  61% measured
-    "services/kontrakt_settlement_service.py": 0.60,  #  63% measured
-    "api/v1/endpoints/kontrakt_actions.py": 0.58,     #  62% measured
 
     # ── DOM-FEED-PROD-004: Mischfutter-Produktion ─────────────────────────────
     "services/feed_produktion_lifecycle_service.py": 0.73, #  76% measured
@@ -145,7 +140,6 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
     # ── WM-SILO-RULE-ENGINE-001 (2026-06-25) ─────────────────────────────────
     "services/silo_rule_engine_service.py": 0.80,          #  ~82% estimated
-    "api/v1/endpoints/silo_target_cell.py": 0.50,          #  ~55% estimated
 
     # ── WM-SILO-RULE-UPGRADE-001 (2026-06-25) ────────────────────────────────
     "services/agri_lot_link_booking_service.py": 0.50,     #  ~52% estimated (Regelengine-Fallback)
@@ -191,6 +185,15 @@ def _normalise(filename: str) -> str:
 
 
 def main() -> None:
+    from scripts.check_baseline_integrity import coverage_source
+
+    def validate_rates(values: dict, label: str) -> None:
+        for filename, rate in values.items():
+            if type(rate) not in {int, float} or not math.isfinite(rate) or not 0 <= rate <= 1:
+                raise SystemExit(f'{label}: ungueltiger Wert fuer {filename}; endliche Zahl 0..1 erforderlich')
+
+    validate_rates(CRITICAL_THRESHOLDS, 'CRITICAL_THRESHOLDS')
+
     if not COVERAGE_XML.exists():
         raise SystemExit("coverage.xml not found. Run pytest with coverage reporting first.")
 
@@ -200,20 +203,25 @@ def main() -> None:
     measured: dict[str, float] = {}
     for cls in root.findall(".//class"):
         filename = _normalise(cls.attrib.get("filename", ""))
-        line_rate = float(cls.attrib.get("line-rate", "0"))
+        try:
+            line_rate = float(cls.attrib.get("line-rate", "0"))
+        except (ValueError, TypeError) as exc:
+            raise SystemExit(f'Ungueltiger Coverage-Messwert: {filename}') from exc
+        validate_rates({filename: line_rate}, 'Coverage-Messung')
         measured[filename] = line_rate
 
     failures: list[str] = []
 
     # SPEC-P0-05 "only up": Schwellwerte duerfen gegenueber der committeten
-    # Baseline nie sinken; Pfade duerfen nicht entfernt werden. Beim Anheben
-    # eines Schwellwerts die Baseline mit anheben.
+    # Baseline nie sinken. Echte Modul-Loeschung wird separat gegen Git in
+    # check_baseline_integrity geprueft; lebende Pfade bleiben verbindlich.
     import json
     baseline_path = PROJECT_ROOT / "config" / "coverage_ratchet_baseline.json"
     if not baseline_path.is_file():
         raise SystemExit("Coverage-Ratchet-Baseline fehlt; Integritaet nicht nachweisbar.")
     if baseline_path.exists():
         baseline = json.loads(baseline_path.read_text(encoding="utf-8")).get("thresholds", {})
+        validate_rates(baseline, 'Coverage-Baseline')
         for filename, base_value in baseline.items():
             current = CRITICAL_THRESHOLDS.get(filename)
             if current is None:
@@ -235,6 +243,11 @@ def main() -> None:
                 )
 
     for filename, threshold in CRITICAL_THRESHOLDS.items():
+        try:
+            if not coverage_source(PROJECT_ROOT, filename).is_file():
+                failures.append(f'{filename}: kritisches Quellmodul fehlt; verwaiste Schwelle bereinigen')
+        except ValueError as exc:
+            failures.append(str(exc))
         actual = measured.get(filename)
         if actual is None:
             failures.append(f"{filename}: not present in coverage.xml")
@@ -251,4 +264,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    sys.path.insert(0, str(PROJECT_ROOT))
     main()
