@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-STATEMENT-IMPORT-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** Gueltige Kontoauszuege passieren DQ; manueller Import speichert
+Kopf und alle Zeilen atomar, statt SQL-/Commitfehler als Erfolg zu melden.
+**Dateibesitz:** `bank_statement_import.py` (parse_csv und manueller Import),
+eigene PostgreSQL-/HTTP-Vertraege, Slice-/QA-Doku und eigene gemeinsame Abschnitte.
+**Abnahme:** Echte Schreib-/Commitfehler hinterlassen keine Importdaten;
+Waehrung und Zaehler entsprechen dem gespeicherten Bestand; IDs kollidieren nicht.
+**Risiken:** Historisches Auto-Matching ist ein separater offener Fachpfad;
+keine fremden aktiven CRM-/POS-/OpenAPI-/Inventar-Dateien uebernehmen.
+Tests verwenden ausschliesslich den vorhandenen valeo_probe ohne Reset/Migration.
+
 ## TEST-DATABASE-RESOURCE-POLICY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Claim:** `9dfc87e76`. **Stand:** abgeschlossen 2026-10-01.
