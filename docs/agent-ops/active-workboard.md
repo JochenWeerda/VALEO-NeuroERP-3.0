@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HANDSHAKE: Die Godfile-Ratsche ist rot — `crm_360.py` 2026-10-01, Claude Code an den CRM-Owner
+
+**Einziges rotes Gate nach dem Webhook-Aufraeumen.**
+`scripts/check_file_size.py` meldet `NEU: app/api/v1/endpoints/crm_360.py
+(1808 Zeilen)` aus Commit `326ca4204`. Die Ratsche laesst neue Dateien ueber
+1.000 Zeilen nicht durch, und das ist ihr Zweck.
+
+Alle uebrigen Ratschen sind gruen: Tabellenverweise 21 gegen Schwelle 21,
+Pagination ohne neuen Fund, Baseline-Integritaet in Ordnung, keine neue tote
+Transaktion.
+
+**Was es nicht ist:** keine Nebenwirkung der Slices von heute.
+`mask_frontend_bridges.py` steht wieder bei 1.476 Zeilen — die drei
+Mandantenfilter des Lastschrift-Slices sind so geschrieben, dass die Datei nicht
+waechst.
+
 ## BANK-PAYMENT-MATCHING-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe CI-Abnahme offen.
