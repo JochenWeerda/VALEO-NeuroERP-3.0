@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## TEST-DATABASE-RESOURCE-POLICY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** User-Vorgabe verbindlich für alle Agenten: keine Datenbank oder
+Dockerinstanz pro Test/Agent; bestehenden Prüfstand wiederverwenden und
+Testdaten über Transaktionen/eindeutige IDs isolieren.
+**Dateibesitz:** `AGENTS.md`, `docs/agent-ops/session-start-checklist.md`,
+eigener Ressourcen-Runbook-/Slice-Abschnitt, Prüfstand-Dokumentation im
+`scripts/pruefstand_db.py`, die drei eigenen Finanz-Testdateien (nur
+Prüfstand-Namensguard). Workboard/Open-Gaps nur im eigenen Abschnitt.
+**Abnahme:** Gemeinsame Regeln verlinkt; Finanzverträge gegen vorhandenes
+`valeo_probe` grün; eigene zusätzliche Datenbank nach Nutzungsprüfung entfernt.
+**Risiken:** Keine Löschung fremder Prüfstände oder Docker-Volumes; kein
+Reset des gemeinsamen Prüfstands während paralleler Arbeit.
+
 ## SECURITY-PATCH-MILESTONE-20261001 — reserviert, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
