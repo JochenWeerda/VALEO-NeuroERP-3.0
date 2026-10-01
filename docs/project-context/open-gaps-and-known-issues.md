@@ -11,6 +11,17 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## PAYMENT-CSV-IMPORT-INTEGRITY — Zahlungsimport (2026-10-01)
+
+**Geschlossen:** Selbstduplikat-Blockade gültiger CSV-Daten, verschwiegene
+Schreibfehler, Verlust der Währung, ID-Kollisionen innerhalb einer Sekunde
+und Abweichung zwischen gerundetem SQL-Betrag und ungerundeter Antwort.
+10 echte PostgreSQL-/HTTP- und sechs bestehende DQ-Verträge grün;
+Dead-Transaction-Inventur und Ratsche stehen auf 75.
+**Offen:** Andere Bankimport-/Matchingwege und die restlichen 75 Fundstellen
+werden hier nicht als geschlossen gewertet. Nachweis:
+`docs/quality-assurance/payment-csv-import-integrity-20260930.md`.
+
 ## PAYMENT-EXECUTION-ATOMICITY — Zahlungslauf (2026-09-30)
 
 **Repo-seitig geschlossen:** falscher BEZAHLT-Status bei Teilzahlung,

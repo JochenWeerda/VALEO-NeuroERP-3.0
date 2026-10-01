@@ -15,6 +15,7 @@ import csv
 import io
 
 from app.core.database import get_db
+from app.core.uuid7 import uuid7
 from app.core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_payment_import_datensatz,
@@ -125,12 +126,7 @@ async def import_payments_csv(
             amount_raw = str(row.get('amount', '0')).replace(',', '.')
             currency = row.get('currency', row.get('waehrung', 'EUR'))
             dq_result = evaluate_payment_import_datensatz(
-                _build_payment_import_datensatz(
-                    booking_date=booking_date_raw,
-                    amount=amount_raw,
-                    currency=currency,
-                    reference=row.get('reference', ''),
-                ),
+                dq_context[row_number - 2],
                 dq_context,
             )
             if not dq_result.bestanden:
@@ -139,17 +135,24 @@ async def import_payments_csv(
                     detail=build_dq_error_detail("Zahlungsimport", dq_result),
                 )
 
+            if any(violation.regel_id == "PI-004" for violation in dq_result.verletzungen):
+                raise HTTPException(status_code=422, detail=f"Unsupported payment currency in CSV row {row_number}")
+
             try:
                 booking_date = datetime.strptime(booking_date_raw, '%Y-%m-%d').date()
                 amount = Decimal(amount_raw)
             except Exception as e:
                 raise HTTPException(status_code=422, detail=f"Failed to parse CSV row {row_number}: {str(e)}") from e
 
+            if not amount.is_finite() or amount != amount.quantize(Decimal("0.01")):
+                raise HTTPException(status_code=422, detail=f"Payment amount in CSV row {row_number} must use at most two decimal places")
+
             reference = row.get('reference', '')
             remittance_info = row.get('remittance_info', '')
             entries.append({
                 "booking_date": booking_date,
                 "amount": amount,
+                "currency": currency or "EUR",
                 "reference": reference,
                 "remittance_info": remittance_info,
             })
@@ -157,62 +160,57 @@ async def import_payments_csv(
         if not entries:
             return []
 
-        statement_id = f"STMT-CSV-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{bank_account[:8]}"
-        try:
-            stmt_ins = text("""
-                INSERT INTO domain_erp.bank_statements
-                (id, tenant_id, bank_account_id, account_iban, statement_date, opening_balance,
-                 closing_balance, format, total_lines, imported_lines, status, created_at, updated_at)
-                VALUES (:id, :tenant_id, :bank_account_id, :iban, :stmt_date, 0, 0, 'CSV', :total, :imported, 'imported', NOW(), NOW())
-            """)
-            db.execute(stmt_ins, {
-                "id": statement_id,
-                "tenant_id": tenant_id,
-                "bank_account_id": bank_account,
-                "iban": "",
-                "stmt_date": entries[0]["booking_date"] if entries else date.today(),
-                "total": len(entries),
-                "imported": len(entries),
-            })
-        except Exception as e:
-            logger.warning(f"bank_statements insert skipped: {e}")
-
+        statement_id = f"STMT-CSV-{uuid7()}"
+        stmt_ins = text("""
+            INSERT INTO domain_erp.bank_statements
+            (id, tenant_id, bank_account_id, account_iban, statement_date, opening_balance,
+             closing_balance, format, total_lines, imported_lines, status, created_at, updated_at)
+            VALUES (:id, :tenant_id, :bank_account_id, :iban, :stmt_date, 0, 0, 'CSV', :total, :imported, 'imported', NOW(), NOW())
+        """)
+        db.execute(stmt_ins, {
+            "id": statement_id,
+            "tenant_id": tenant_id,
+            "bank_account_id": bank_account,
+            "iban": "",
+            "stmt_date": entries[0]["booking_date"] if entries else date.today(),
+            "total": len(entries),
+            "imported": len(entries),
+        })
         line_ins = text("""
             INSERT INTO domain_erp.bank_statement_lines
             (id, tenant_id, statement_id, line_number, booking_date, value_date,
              amount, currency, reference, remittance_info, creditor_name, creditor_iban,
              debtor_name, debtor_iban, status, created_at, updated_at)
             VALUES (:id, :tenant_id, :statement_id, :line_num, :book_date, :val_date,
-                    :amount, 'EUR', :reference, :remittance, NULL, NULL, NULL, NULL, 'UNMATCHED', NOW(), NOW())
+                    :amount, :currency, :reference, :remittance, NULL, NULL, NULL, NULL, 'UNMATCHED', NOW(), NOW())
         """)
         result_entries: list[PaymentEntry] = []
         for idx, e in enumerate(entries):
             line_id = f"{statement_id}-L{idx + 1}"
-            try:
-                db.execute(line_ins, {
-                    "id": line_id,
-                    "tenant_id": tenant_id,
-                    "statement_id": statement_id,
-                    "line_num": idx + 1,
-                    "book_date": e["booking_date"],
-                    "val_date": e["booking_date"],
-                    "amount": e["amount"],
-                    "reference": e["reference"],
-                    "remittance": e["remittance_info"],
-                })
-                result_entries.append(PaymentEntry(
-                    id=line_id,
-                    tenant_id=tenant_id,
-                    bank_account=bank_account,
-                    booking_date=e["booking_date"],
-                    value_date=e["booking_date"],
-                    amount=e["amount"],
-                    reference=e["reference"],
-                    remittance_info=e["remittance_info"],
-                    match_status="UNMATCHED",
-                ))
-            except Exception as ins_err:
-                logger.warning(f"Insert line {line_id}: {ins_err}")
+            db.execute(line_ins, {
+                "id": line_id,
+                "tenant_id": tenant_id,
+                "statement_id": statement_id,
+                "line_num": idx + 1,
+                "book_date": e["booking_date"],
+                "val_date": e["booking_date"],
+                "amount": e["amount"],
+                "currency": e["currency"],
+                "reference": e["reference"],
+                "remittance": e["remittance_info"],
+            })
+            result_entries.append(PaymentEntry(
+                id=line_id,
+                tenant_id=tenant_id,
+                bank_account=bank_account,
+                booking_date=e["booking_date"],
+                value_date=e["booking_date"],
+                amount=e["amount"],
+                currency=e["currency"],
+                reference=e["reference"],
+                remittance_info=e["remittance_info"],
+                match_status="UNMATCHED",
+            ))
         db.commit()
         logger.info(f"Imported {len(result_entries)} payments from CSV into bank_statement_lines")
         return result_entries
@@ -222,7 +220,7 @@ async def import_payments_csv(
     except Exception as e:
         logger.error(f"Error importing CSV: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to import CSV: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to import CSV")
 
 
 @router.get("/unmatched", response_model=List[PaymentEntry], summary="Unmatched payments abrufen")

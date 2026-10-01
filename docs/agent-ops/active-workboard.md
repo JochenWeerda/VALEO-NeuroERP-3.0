@@ -11,19 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## PAYMENT-CSV-IMPORT-INTEGRITY-20260930 — reserviert, Codex (Chat 01a0f3fc)
+## PAYMENT-CSV-IMPORT-INTEGRITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-09-30.
-**Ziel:** CSV-Zahlungsimport speichert Kopf und sämtliche validierten Zeilen
-atomar, erhält Währungen und kollidiert nicht bei zeitgleichen Importen.
-**Dateibesitz:** ausschließlich `import_payments_csv` und UUID-Import in
+**Owner:** Codex-01a0f3fc. **Claim:** `2b5f9704f`. **Stand:** abgeschlossen 2026-10-01.
+**Ziel/Ergebnis:** CSV-Zahlungsimport speichert Kopf und sämtliche validierten
+Zeilen atomar. Selbstduplikatfehler korrigiert; echte Duplikate bleiben blockiert.
+Währungen bleiben erhalten, stilles Runden wird vor Schreibzugriff blockiert,
+UUIDv7 verhindert Sekundencollisionen. Kein Überspringen von Speicherfehlern.
+**Dateibesitz:** ausschließlich CSV-Import und UUID-Import in
 `app/api/v1/endpoints/payment_matching.py`, neue HTTP-/PostgreSQL-Tests,
 numerische Ratsche in `scripts/check_dead_transactions.py`, eigene Slice-/QA-
 Dokumente; Workboard und Open-Gaps nur im eigenen Abschnitt.
-**Abnahme:** echte Kopf-/Zeilen-/Commitfehler liefern Fehler und lassen keine
-Teilimporte; erfolgreiche Antwort entspricht der gespeicherten Währung.
-**Risiken:** Bankstatement-Automatching und Belegausgleich sind Folgeslices;
-kein Übernehmen bestehender CRM-/Meridian-/OpenAPI-Claims.
+**Abnahme:** 10/10 echte PostgreSQL-/HTTP-Verträge sowie 6/6 bestehende
+DQ-/Duplikatverträge grün. Zwei Red-Stufen belegen den vorgeschalteten
+Selbstduplikatfehler und acht anschließend erreichbare Persistenzprobleme.
+Transaktionsbefunde sinken 76 -> 75; Ratsche ehrlich auf 75 nachgezogen.
+**Handshake/Risiken:** CAMT/MT940-Import, Bankstatement-Automatching und
+Belegausgleich bleiben separate Fachgaps. Aktive Fremdclaims unberührt.
+**Nachweis:** `docs/quality-assurance/payment-csv-import-integrity-20260930.md`.
 
 ## PAYMENT-EXECUTION-ATOMICITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 

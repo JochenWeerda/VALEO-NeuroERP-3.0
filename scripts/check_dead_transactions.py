@@ -91,7 +91,8 @@ FEHLERANTWORTEN = {
     "NotFoundError", "ConflictError",
 }
 
-#: Stand 2026-09-30, gemessen auf origin/main. Darf sinken, nicht steigen.
+#: Stand 2026-09-30: 78 Erstbefunde minus zwei Zahlungs- und ein CSV-Importbefund.
+#: Aktueller Codebestand: 75. Darf sinken, nicht steigen.
 #:
 #: Davon 19 in mutierenden Funktionen (Buchung, Zahlung, Loeschung, Freigabe,
 #: Anlage/Import) und 59 in lesenden. Die Fundliste mit Einordnung je Stelle
@@ -99,7 +100,7 @@ FEHLERANTWORTEN = {
 #:
 #: Der Loeschweg nach Art. 17 DSGVO ist nicht mehr darunter: Er hat seit
 #: 2026-09-29 Savepoints je Anweisung.
-SCHWELLE = 78
+SCHWELLE = 75
 
 
 class _Besuch(ast.NodeVisitor):
