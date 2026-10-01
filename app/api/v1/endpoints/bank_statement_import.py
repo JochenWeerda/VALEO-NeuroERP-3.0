@@ -260,98 +260,92 @@ def parse_camt053(content: bytes) -> dict:
 
 
 def parse_mt940(content: bytes) -> dict:
-    """
-    Parse MT940 (SWIFT) format.
-    Returns dict with statement data.
-    """
+    """Parse one IBAN statement; unsupported variants fail before persistence."""
+    def balance(value: str) -> tuple[date, str, Decimal]:
+        match = re.fullmatch(r'([CD])(\d{6})([A-Z]{3})(\d+,\d{0,2})', value)
+        if not match or len(match[4]) > 15:
+            raise ValueError('Invalid MT940 balance')
+        amount = Decimal(match[4].replace(',', '.'))
+        return datetime.strptime(match[2], '%y%m%d').date(), match[3], amount if match[1] == 'C' else -amount
+
     try:
-        text_content = content.decode('utf-8', errors='ignore')
-        lines = text_content.split('\n')
-        
         account_iban = None
-        opening_balance = Decimal("0.00")
-        closing_balance = Decimal("0.00")
-        currency = "EUR"
+        opening = closing = None
         entries = []
-        current_entry = {}
-        line_number = 0
-        
-        for line in lines:
-            line = line.strip()
+        last_tag = None
+        for raw in content.decode('utf-8-sig').splitlines():
+            line = raw.strip()
             if not line:
                 continue
-            
-            # Account identification (IBAN)
-            if line.startswith(':25:'):
-                account_iban = line[4:].strip()
-            
-            # Opening balance
-            elif line.startswith(':60F:') or line.startswith(':60M:'):
-                # Format: :60F:CYYMMDDEUR1234,56
-                balance_str = line[5:].strip()
-                if len(balance_str) >= 10:
-                    currency = balance_str[7:10].upper()
-                    amount_str = balance_str[10:].replace(',', '.')
-                    opening_balance = Decimal(amount_str)
-            
-            # Statement line
-            elif line.startswith(':61:'):
-                # Format: :61:YYMMDDMMDDD1234,56NTRFNONREF//1234567890
-                # Parse date, amount, reference
-                data = line[4:].strip()
-                if len(data) >= 6:
-                    try:
-                        value_date = datetime.strptime(data[0:6], '%y%m%d').date()
-                        booking_date = value_date
-                        if len(data) >= 12:
-                            booking_date = datetime.strptime(data[6:12], '%y%m%d').date()
-                        
-                        # Find amount (starts after dates, ends before transaction code)
-                        amount_match = re.search(r'([\d,]+\.?\d*)', data[12:])
-                        if amount_match:
-                            amount_str = amount_match.group(1).replace(',', '.')
-                            amount = Decimal(amount_str)
-                            
-                            # Check debit/credit indicator
-                            if 'D' in data[12:20]:
-                                amount = -amount
-                            
-                            # Extract reference (after //)
-                            ref_match = re.search(r'//(.+)', data)
-                            reference = ref_match.group(1) if ref_match else None
-                            
-                            line_number += 1
-                            current_entry = {
-                                'line_number': line_number,
-                                'booking_date': booking_date,
-                                'value_date': value_date,
-                                'amount': amount,
-                                'currency': currency,
-                                'reference': reference,
-                                'remittance_info': None
-                            }
-                    except Exception as e:
-                        raise ValueError(f"Failed to parse MT940 line '{line}': {str(e)}") from e
-            
-            # Transaction details
-            elif line.startswith(':86:') and current_entry:
-                # Remittance info
-                remittance_info = line[4:].strip()
-                current_entry['remittance_info'] = remittance_info
-                entries.append(current_entry)
-                current_entry = {}
-        
-        # Calculate closing balance
-        closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
-        
-        return {
-            'account_iban': account_iban,
-            'opening_balance': opening_balance,
-            'closing_balance': closing_balance,
-            'entries': entries
-        }
-    except Exception as e:
-        raise ValueError(f"Failed to parse MT940: {str(e)}")
+            tag_match = re.fullmatch(r':(\d{2}[A-Z]?):(.*)', line)
+            if not tag_match:
+                if last_tag == '86' and entries:
+                    entries[-1]['remittance_info'] += '\n' + line
+                    continue
+                raise ValueError('Unsupported MT940 continuation or envelope')
+            tag, value = tag_match.groups()
+            if tag == '25':
+                if account_iban is not None or opening is not None:
+                    raise ValueError('Exactly one MT940 account is required')
+                account_iban = value
+            elif tag in {'60F', '60M'}:
+                if opening is not None or account_iban is None or closing is not None:
+                    raise ValueError('Invalid or repeated MT940 opening balance')
+                opening = balance(value)
+            elif tag in {'62F', '62M'}:
+                if opening is None or closing is not None:
+                    raise ValueError('Invalid or repeated MT940 closing balance')
+                closing = balance(value)
+            elif tag == '61':
+                if opening is None or closing is not None:
+                    raise ValueError('MT940 entry outside opening/closing balances')
+                # MMDD is optional; :86: is optional and never controls entry creation.
+                match = re.fullmatch(r'(\d{6})(\d{4})?([CD])([A-Z])?(\d+,\d{0,2})([NSF][A-Z0-9]{3})([^/]{1,16})(?://(.{1,16}))?', value)
+                if not match or len(match[5]) > 15:
+                    raise ValueError('Invalid or unsupported MT940 entry (including reversal)')
+                value_date = datetime.strptime(match[1], '%y%m%d').date()
+                booking_date = value_date
+                if match[2]:
+                    candidates = []
+                    for year in (value_date.year - 1, value_date.year, value_date.year + 1):
+                        try:
+                            candidates.append(date(year, int(match[2][:2]), int(match[2][2:])))
+                        except ValueError:
+                            continue
+                    if not candidates:
+                        raise ValueError('Invalid MT940 booking date')
+                    candidates.sort(key=lambda candidate: abs((candidate - value_date).days))
+                    if len(candidates) > 1 and abs((candidates[0] - value_date).days) == abs((candidates[1] - value_date).days):
+                        raise ValueError('Ambiguous MT940 booking year')
+                    booking_date = candidates[0]
+                    if abs((booking_date - value_date).days) > 183:
+                        raise ValueError('Ambiguous MT940 booking year')
+                if match[4] and match[4] != opening[1][-1]:
+                    raise ValueError('MT940 funds code does not match statement currency')
+                amount = Decimal(match[5].replace(',', '.'))
+                entries.append({
+                    'line_number': len(entries) + 1, 'booking_date': booking_date,
+                    'value_date': value_date, 'amount': amount if match[3] == 'C' else -amount,
+                    'currency': opening[1], 'reference': match[8] or match[7],
+                    'remittance_info': None,
+                })
+            elif tag == '86':
+                if last_tag != '61' or not entries or closing is not None:
+                    raise ValueError('Orphan or repeated MT940 transaction description')
+                entries[-1]['remittance_info'] = value
+            elif tag not in {'20', '21', '28C', '64', '65'}:
+                raise ValueError(f'Unsupported MT940 field {tag}')
+            last_tag = tag
+        if account_iban is None or opening is None or closing is None:
+            raise ValueError('MT940 account, opening and closing balance are required')
+        if closing[0] < opening[0] or closing[1] != opening[1]:
+            raise ValueError('Inconsistent MT940 balance dates or currency')
+        if opening[2] + sum((entry['amount'] for entry in entries), Decimal('0')) != closing[2]:
+            raise ValueError('MT940 closing balance does not reconcile with entries')
+        return {'account_iban': account_iban, 'opening_balance': opening[2],
+                'closing_balance': closing[2], 'entries': entries}
+    except (ValueError, InvalidOperation, UnicodeError) as exc:
+        raise ValueError(f'Failed to parse MT940: {exc}') from exc
 
 
 def parse_csv(content: bytes) -> dict:

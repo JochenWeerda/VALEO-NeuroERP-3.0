@@ -47,3 +47,10 @@ nicht bei geaendertem auto_match; expliziten Batchabgleich verwenden.
 Historische UUID-Importe und gleiche Buchungen in anderen Datei-Bytes bleiben
 separate Fachgaps. CSV-Salden sind synthetische Summen, keine Banknachweise.
 [Kontobindung und Replay-Abnahme](../../../quality-assurance/bank-import-account-replay-20261001.md).
+
+MT940 verarbeitet jede :61:-Zeile auch ohne :86:-Beschreibung und vergleicht
+Anfangssaldo plus Zeilen exakt mit dem angegebenen Schlusssaldo. Ein Auszug
+mit IBAN, passenden Waehrungen und gueltigen Daten; Widersprueche verhindern
+alle Writes. RC/RD bis zum Rueckbuchungsvertrag explizit abgelehnt.
+Weitere Bankprofile und CAMT-Details bleiben separate Abnahmen.
+[MT940-Profil und Parser-Abnahme](../../../quality-assurance/bank-mt940-parser-integrity-20261001.md).

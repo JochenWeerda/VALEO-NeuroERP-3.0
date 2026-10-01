@@ -36,9 +36,9 @@ vorhandenen Kontrakttabellen (`domain_einkauf.kontrakte`,
 Kopftabelle, und dieses Register) die fuehrende ist. Das ist die groesste
 Fachfrage des Systems und gehoert dem Domaenen-Owner.
 
-## BANK-MT940-PARSER-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## BANK-MT940-PARSER-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe Abnahme offen.
 **Ziel:** Keine verlorenen MT940-Zeilen ohne optionales :86:, korrekte
 MMDD-Buchungsdaten, vorzeichenrichtige Salden und Schlusssaldo-Abgleich.
 **Dateibesitz:** `bank_statement_import.py` nur MT940-Parser und interne
@@ -53,6 +53,17 @@ UniCredit-Formatbeschreibung als Feldreferenz; C/D werden verarbeitet,
 RC/RD bleiben bis zum fachlichen Rueckbuchungsvertrag explizit abgelehnt.
 **Risiken:** SWIFT-Umschlaege, nationale Kontokennungen und bankspezifische
 Varianten brauchen gesonderte Abnahme. CAMT bleibt separater Parser-Slice.
+
+**Ergebnis:** Zahlungszeilen ohne :86: erhalten, MMDD separat gelesen,
+Jahreswechsel aufgeloest und mehrdeutige Jahre abgelehnt. C/D-Salden mit
+Original-Endsaldo exakt abgeglichen. Fehler/Mehrfachauszuege vor Writes.
+**Abnahme:** 102 Parser-/Finanz-/DQ-Vertraege und Slice-CLI, Ruff, Handbuch,
+Whitespace bestanden. Tests ausschliesslich auf bestehendem valeo_probe.
+**Nachweis:** `docs/quality-assurance/bank-mt940-parser-integrity-20261001.md`.
+**Integration:** Keine fremde CRM-Pagination-Baseline uebernommen;
+deren Integritaetsfehler bleibt beim Owner. GitHub-CI/Deployment offen.
+**Naechster freier Slice:** CAMT-Saldoarten und Entrydetails (offen;
+vor Arbeitsbeginn eigenen Claim setzen).
 
 ## BANK-IMPORT-ACCOUNT-REPLAY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
