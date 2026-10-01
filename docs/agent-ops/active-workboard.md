@@ -11,6 +11,29 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-LEGACY-RETIREMENT-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** Ein fuehrendes Bankauszugsmodell in domain_erp; unsichere INT-BANK-001-
+API und konkurrierende DTO-/Parser-Vertraege entfernen. Keine neue Fachfunktion.
+**Dateibesitz:** bank_import.py (Entfernung), api.py nur Bankrouter-Montage,
+finance_controlling_bundle_schemas.py nur alte Bank-DTOs, Wave3/Welle12-Tests
+nur Bankabschnitte, neue Retirement-Migration/-Vertraege, eigene QA/Slice/ADR,
+Finance-Domain-Pack nur Bankabschnitte, betroffene generierte Inventare und
+eigene Workboard/Open-Gaps-Abschnitte. Fremde CRM-/Perioden-Dateien ausgenommen.
+**Abnahme:** Alte Routes nicht mehr montiert, kanonische Import-/Matching-
+Vertraege bestehen; Archivmigration erhaelt IDs, Betragswerte und OP-Bezuege
+und sperrt INSERT/UPDATE/DELETE/TRUNCATE. Keine automatisch erfundene Waehrung,
+Saldo-, Konto- oder Auditzuordnung; kein erneutes Matching historischer Zeilen.
+**Bestand:** Read-only 2026-10-01: Entwicklungsdatenbank 8 Auszuege/8 Zeilen,
+valeo_probe 0/0. Keine Migration/Reset des gemeinsam genutzten Pruefstands.
+**Entscheidung:** Significant; Proposed ADR fuer Retirement. Historische
+Tabellen explizit Archiv, kein aktives Schattenmodell oder API-Adapter.
+**Risiken:** Externe Alt-API-Konsumenten muessen auf kanonische Routen wechseln;
+CAMT.08 nicht automatisch fuer CAMT.02 freigegeben. Bestandsabstimmung und
+Deployment/Migration separat. Tests nutzen vorhandenen valeo_probe und nur
+ein eigenes kleines Schema mit gezieltem Cleanup, keine neue DB/Docker.
+
 ## STEUERNACHWEIS-MANDANT-20261001 — in Arbeit, Claude Code
 
 **Ziel:** Drei Compliance-Tabellen legt keine Migration an, und zwei von ihnen
