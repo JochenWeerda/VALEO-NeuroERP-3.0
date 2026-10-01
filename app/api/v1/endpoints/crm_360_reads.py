@@ -6,7 +6,6 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.crm_360_sql import _query_many
 from app.core.mask_screen_summary_common import (
     get_sortable_columns,
     paginate_tab_items as _paginate_tab_items,
@@ -61,6 +60,10 @@ def _fetch_customer_tab_items(
     kunden_name: str | None = None,
     partner_id: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
+    # Import erst beim Aufruf, damit die Register-Datei die Aggregation nicht
+    # schon beim Laden zieht.
+    from app.api.v1.endpoints.crm_360 import _query_many
+
     normalized = _normalize_tab_key(tab_key)
 
     if normalized == "stammdaten":
@@ -186,7 +189,6 @@ def _fetch_customer_tab_items(
               AND (
                     COALESCE(type, '') ILIKE '%task%'
                  OR COALESCE(type, '') ILIKE '%aufgabe%'
-                 OR COALESCE(status, '') ILIKE '%offen%'
               )
             ORDER BY COALESCE(date, created_at) DESC
             LIMIT 25

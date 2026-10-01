@@ -24,13 +24,28 @@ from ....core.tenant import get_tenant_id
 # Aufruf sah die Kunden, Auftraege und Kontrakte *aller* Mandanten. Der Mandant
 # kommt aus dem Header `X-Tenant-ID`, wie ueberall sonst im Haus.
 
-from app.api.v1.endpoints.crm_360_sql import _kunde_finden, _query_many, _query_one
+from app.api.v1.endpoints.crm_360_sql import _kunde_finden, _query_one
 from app.api.v1.endpoints.crm_360_tabs import router as _customer_tabs_router
 from app.api.v1.schemas.base import TypedObjectOut
 from app.api.v1.schemas.crm_360_schemas import Crm360Out
 
 router = APIRouter()
 router.include_router(_customer_tabs_router)
+
+
+def _query_many(db: Session, sql: str, params: dict) -> list[dict]:
+    """Schema-qualifizierte Query, hoechstens 25 Zeilen.
+
+    Jede Abfrage der Akte begrenzt sich im SQL auf hoechstens 25 Zeilen.
+    Dieselbe Grenze gilt hier noch einmal, damit ein vergessenes LIMIT
+    keine unbegrenzte Liste aus der Datenbank zieht.
+    """
+    try:
+        rows = db.execute(text(sql), params).mappings().fetchmany(25)
+        return [dict(r) for r in rows]
+    except Exception:
+        db.rollback()
+        return []
 
 
 def _customer_tab_endpoint(customer_id: str, tab_key: str) -> str:
@@ -591,18 +606,7 @@ async def create_activity_action(
     audit_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc)
 
-    kunde = db.execute(
-        text(
-            """
-            SELECT COALESCE(company_name, customer_number, '') AS name
-            FROM domain_crm.customers
-            WHERE id::text = :cid
-              AND (:tid IS NULL OR tenant_id::text = :tid)
-            LIMIT 1
-            """
-        ),
-        {"cid": customer_id, "tid": tenant_id},
-    ).mappings().first()
+    kunde = _kunde_finden(db, customer_id, tenant_id)
     if kunde is None:
         return ActionResult(
             actionKey="create_activity",
@@ -610,6 +614,7 @@ async def create_activity_action(
             success=False,
             error="Kunde nicht gefunden.",
         )
+    customer_id = str(kunde.get("id") or customer_id)
 
     verantwortlich = (body.get("verantwortlich") or "Akte")[:100]
     try:
@@ -626,7 +631,7 @@ async def create_activity_action(
                 "aid": activity_id,
                 "typ": (body.get("typ") or "Sonstiges")[:20],
                 "titel": body.get("betreff", "")[:200],
-                "kunde": str(kunde["name"])[:100] or customer_id[:100],
+                "kunde": str(kunde.get("name") or "")[:100] or customer_id[:100],
                 "person": verantwortlich,
                 "datum": body.get("datum") or now.date().isoformat(),
                 "verantwortlich": verantwortlich,

@@ -5,16 +5,6 @@ from __future__ import annotations
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-def _query_many(db: Session, sql: str, params: dict) -> list[dict]:
-    """Schema-qualifizierte Query; gibt leere Liste bei Fehler zurück."""
-    try:
-        rows = db.execute(text(sql), params).mappings().all()
-        return [dict(r) for r in rows]
-    except Exception:
-        db.rollback()
-        return []
-
-
 def _query_one(db: Session, sql: str, params: dict) -> dict | None:
     try:
         row = db.execute(text(sql), params).mappings().first()

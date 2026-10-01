@@ -136,8 +136,7 @@ unberührt — und `test_verkauf_kontrakte_central.py`) grün.
 
 ## Offen und nicht meins
 
-`scripts/check_baseline_integrity.py` meldet
-`config/pagination_baseline.json: app/api/v1/endpoints/crm_360_sql.py::_query_many: 0 -> 1 (Anhebung verboten)`.
-Das ist eine angehobene Pagination-Baseline aus der parallelen CRM-Arbeit, keine
-Folge dieses Slices. Ebenso bleibt die Godfile-Ratsche durch `crm_360.py` rot
-(1808 Zeilen).
+Die beiden CRM-Gates aus diesem Lauf sind geschlossen. Die Listenabfrage der
+Kundenakte ist auf 25 Zeilen begrenzt und hebt `pagination_baseline.json` nicht
+an. `crm_360.py` liegt unter 1.000 Zeilen; die Meldung mit 1.808 Zeilen galt vor
+der Zerlegung.

@@ -296,7 +296,7 @@ def test_angelegte_aktivitaet_erscheint_in_der_historie(client, kunde) -> None:
     from sqlalchemy import create_engine, text
 
     antwort = client.post(
-        f"/api/v1/crm/customers/{kunde['id']}/actions/create_activity",
+        f"/api/v1/crm/customers/{kunde['kunden_nr']}/actions/create_activity",
         headers=kopf(kunde["mandant"]),
         json={"betreff": "Hofbesuch", "typ": "Besuch", "_mode": "execute", "_auditReason": "Termin"},
     )
@@ -311,6 +311,11 @@ def test_angelegte_aktivitaet_erscheint_in_der_historie(client, kunde) -> None:
         )
         assert historie.status_code == 200, historie.text
         assert any(zeile.get("subject") == "Hofbesuch" for zeile in historie.json()["items"])
+        aufgaben = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/aufgaben", headers=kopf(kunde["mandant"])
+        )
+        assert aufgaben.status_code == 200, aufgaben.text
+        assert all(zeile.get("titel") != "Hofbesuch" for zeile in aufgaben.json()["items"])
     finally:
         with engine.begin() as verbindung:
             verbindung.execute(text("DELETE FROM domain_crm.activities WHERE id = :id"), {"id": aktivitaet})

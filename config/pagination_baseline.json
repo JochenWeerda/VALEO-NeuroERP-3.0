@@ -77,7 +77,6 @@
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::list_lksg_supplier_risk_assessments": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::list_whistleblower_reports": 1,
     "app/api/v1/endpoints/compliance_whistleblower_lksg.py::lksg_annual_report_preview": 1,
-    "app/api/v1/endpoints/crm_360_sql.py::_query_many": 1,
     "app/api/v1/endpoints/crm_kim.py::_safe": 1,
     "app/api/v1/endpoints/crm_partner_suche.py::_safe": 1,
     "app/api/v1/endpoints/customer_extensions.py::customer_geo_search": 1,

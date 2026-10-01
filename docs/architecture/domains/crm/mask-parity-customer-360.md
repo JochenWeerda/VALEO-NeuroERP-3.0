@@ -92,6 +92,8 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 - Adresse und Branche kommen aus `domain_crm.customers`, das Fax vom Partner.
 - Das Stammdaten-Segment ist das `marketing_segment` des Partners.
 - Präsente kommen aus `public.crm_gifts` ueber die Kundennummer.
+- Aufgaben sind Aktivitaeten vom Typ Aufgabe oder Task. Ein offener Besuch bleibt in der Historie.
+- Aktivitaet anlegen findet den Kunden auch ueber Kundennummer und Partnernummer.
 - Die Screen-Summary listet dieselben Register wie die ScreenDefinition, inklusive Pflege-Reiter, Potenzial, Rabatte und Preise.
 - Das Kreditlimit der Akte ist die Ausnahme aus `credit_limits`, sonst der Stamm.
 - `/verkauf/kunden-stamm/:id` und `/crm/kunden-cockpit?id=` leiten auf dieselbe Akte;

@@ -25,6 +25,10 @@ eigene Workboard/Open-Gaps-Abschnitte. Fremde CRM-/Perioden-Dateien ausgenommen.
 Vertraege bestehen; Archivmigration erhaelt IDs, Betragswerte und OP-Bezuege
 und sperrt INSERT/UPDATE/DELETE/TRUNCATE. Keine automatisch erfundene Waehrung,
 Saldo-, Konto- oder Auditzuordnung; kein erneutes Matching historischer Zeilen.
+**Scope-Nachzug vor Edit:** Generatoren finden den bereits vorhandenen
+webhook_service ohne Domaenenmapping; config/architecture-domain-prefixes.yaml
+nur exakter Platform-Service-Eintrag zur Wiederherstellung der Architekturabnahme.
+Business-Time-Baseline nur geloeschten bank_import-Eintrag absenken.
 **Bestand:** Read-only 2026-10-01: Entwicklungsdatenbank 8 Auszuege/8 Zeilen,
 valeo_probe 0/0. Keine Migration/Reset des gemeinsam genutzten Pruefstands.
 **Entscheidung:** Significant; Proposed ADR fuer Retirement. Historische
@@ -329,10 +333,9 @@ eigener Befund.
 **Abnahme:** 20 Vertraege gruen, dazu 14 vorhandene Tests (die Compat-Route des
 Warenkontrakts bleibt unberuehrt). Nachweis:
 `docs/quality-assurance/kontraktregister-20261001.md`.
-**Fremde rote Gates, unveraendert:** `check_baseline_integrity.py` meldet eine
-verbotene Anhebung in `config/pagination_baseline.json`
-(`crm_360_sql.py::_query_many: 0 -> 1`), die Godfile-Ratsche `crm_360.py` mit
-1808 Zeilen. Beides aus der parallelen CRM-Arbeit.
+**CRM-Gates, geschlossen:** Die Listenabfrage der Kundenakte ist auf 25 Zeilen
+begrenzt und hebt `pagination_baseline.json` nicht an. `crm_360.py` liegt unter
+1.000 Zeilen; die 1.808-Zeilen-Meldung galt vor der Zerlegung.
 ## BANK-MT940-PARSER-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe Abnahme offen.
@@ -394,7 +397,7 @@ insgesamt 106 verschiedene Tests bestanden. Letzten Rollback-Guard mit
 47 betroffenen Vertraegen erneut geprueft. Ruff, Pagination, Baselineintegritaet,
 Handbuch, Slice-Schema/Readiness/Doku-Governance gruen. Ergebnisbeschreibungen
 in beiden eigenen Slices unter test_evidence getrennt von ausfuehrbaren tests;
-fremde CRM-Godfile-Ratsche beim aktiven Owner weiterhin rot.
+die CRM-Godfile-Ratsche ist beim Owner geschlossen (`crm_360.py` unter 1.000 Zeilen).
 **Nachweis:** `docs/quality-assurance/bank-import-account-replay-20261001.md`.
 **Offen:** Historische UUID-Importe, semantische Dateiduplikate, Parserdetails,
 Rueckbuchung/GL und externe CI-/Deployment-Abnahme. Kein neuer Pruefstand.
@@ -409,9 +412,9 @@ Rueckbuchung/GL und externe CI-/Deployment-Abnahme. Kein neuer Pruefstand.
 **Antwort des CRM-Owners, 2026-10-01.** Die Datei ist zerlegt. Suche und
 sichere Abfragen liegen in `crm_360_sql.py`, die Register in `crm_360_reads.py`
 und die Tab-Routen in `crm_360_tabs.py`. `crm_360.py` bleibt die Aggregation
-und liegt unter 1.000 Zeilen. Die eine unbegrenzte `.all()`-Abfrage steht
-weiter in der Pagination-Baseline, jetzt unter `crm_360_sql.py::_query_many`.
-Godfile- und Pagination-Ratsche sind gruen.
+und liegt unter 1.000 Zeilen. Die Listenabfrage zieht hoechstens 25 Zeilen
+und steht nicht mehr in der Pagination-Baseline; der Schluessel wurde nicht
+angehoben. Godfile- und Pagination-Ratsche sind gruen.
 
 Alle uebrigen Ratschen sind gruen: Tabellenverweise 21 gegen Schwelle 21,
 Pagination ohne neuen Fund, Baseline-Integritaet in Ordnung, keine neue tote

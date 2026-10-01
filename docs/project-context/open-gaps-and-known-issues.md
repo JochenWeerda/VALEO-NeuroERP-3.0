@@ -183,6 +183,7 @@ Kunden-Cockpit sind Redirects inklusive `?tab=`. Listen-IDs (`kunden_nr`,
 Partnernummer) und `/verkauf/kunden-stamm/:id` oeffnen denselben Stamm. Chef,
 Praesente, Postfach und Geo sitzen in der ScreenDefinition; Mini-Apps bleiben weg.
 Angebote kommen aus `crm_opportunities`, Historie aus den CRM-Aktivitaeten.
+Aufgaben sind nur Typ Aufgabe oder Task; ein offener Besuch bleibt in der Historie.
 Potenzial ist der juengste Satz aus `public.customer_potential_snapshot`.
 Chef-Anweisungen, Anschriften, Kontoauszug und CPD-Konten sind in der Akte lesbar.
 Rabatte, Preise und das SEPA-Mandat kommen vom Partner.

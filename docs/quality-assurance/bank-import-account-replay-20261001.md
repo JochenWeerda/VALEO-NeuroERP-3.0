@@ -63,7 +63,7 @@ Ergebnisbeschreibungen unter tests und versuchte sie auszufuehren (WinError 2).
 Im neuen und vorherigen Matching-Slice stehen jetzt ausfuehrbare Checks unter
 tests, die bisherigen Abnahmeergebnisse getrennt unter test_evidence.
 Beide vollstaendigen Slice-CLI-Pruefläufe bestanden anschliessend.
-Projektweite Godfile-Ratsche bleibt beim aktiven CRM-Owner rot (1808 Zeilen).
+Projektweite Godfile-Ratsche war beim Lauf rot (1808 Zeilen). Der CRM-Owner hat `crm_360.py` danach unter 1.000 Zeilen zerlegt und die Listenabfrage auf 25 Zeilen begrenzt.
 Keine Baseline angehoben. Der vorherige
 Matching-Meilenstein ist als PR #18 integriert; GitHub-CI und Deployment
 werden dadurch nicht pauschal als erfolgreich bewertet.
