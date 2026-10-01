@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-RECONCILIATION-PROOF-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Gespeicherte mandantengebundene GL-Konto-ID
+statt verlorenem gl_account_number; Saldenvergleich mit Konto-/Tenantbindung,
+expliziter Datenvollstaendigkeit und ohne verschluckte Lesefehler.
+**Dateibesitz:** bank_accounts.py, bank_reconciliation.py, zugehoerige Schemas,
+eigene Bank-GL-Migration und Tests/QA/ADR/Slice; bank-abgleich.tsx nur
+Vertragsintegration, bank-stamm/bankkonten-stamm nur GL-Vertrag; eigene
+Workboard/Gaps/Finance-API-Abschnitte und abgegrenzte OpenAPI-Vertragshunks.
+**Abnahme:** Fremdkonto/-tenant 404; SQL-Fehler sichtbar; CSV ohne Banksaldo
+kein erfolgreicher Saldenbeleg; fehlender GL-Link/Journalnachweis ungeklärt;
+PARTIAL/Unknown-Zaehler und Dezimalwerte typisiert; reale PostgreSQL-Vertraege.
+**Risiken:** Fremde EUDR-Migrationen aktiv: keine gemeinsame DB-Migration
+waehrend fremder Nutzung. Migrationskette vor Integration erneut pruefen;
+eigene Schemafixtures im vorhandenen valeo_probe, keine neue Datenbank/Docker.
+Journalbetragsdubletten und zeilenweiser Bank/GL-Beleglink bleiben separate
+kanonische Umbauten; hier Konflikte sichtbar machen statt still vereinheitlichen.
+**Architektur:** Significant, Proposed ADR; bestehende Finance-Grenze,
+keine neue Maske oder Servicefunktionalitaet.
+
 ## EUDR-CHARGENKENNZEICHNUNG-20261001 — in Arbeit, Claude Code
 
 **Ziel:** Die zweite EUDR-Luecke schliessen — die **chargenbezogene
