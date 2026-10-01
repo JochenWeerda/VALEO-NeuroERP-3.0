@@ -148,7 +148,9 @@ def test_eudr_status_returns_200():
     assert resp.status_code == 200
     body = resp.json()
     assert "status" in body
-    assert "batches_total" in body
+    # Der Stand kommt seit dem 01.10.2026 aus dem Sorgfaltserklaerungsregister,
+    # nicht aus Chargenzahlen einer Tabelle, die kein Migrationsstand anlegt.
+    assert "due_diligence_statements" in body
     assert "last_check" in body
 
 
@@ -158,7 +160,16 @@ def test_eudr_status_fields_not_hardcoded():
     skip_if_db_unavailable(resp)
     if resp.status_code == 200:
         body = resp.json()
-        assert body["status"] in ("KONFORM", "WARNUNG", "KRITISCH")
+        # "OHNE_ERKLAERUNG" ist der ehrliche Stand eines leeren Registers:
+        # Nach Art. 3/4 der Verordnung (EU) 2023/1115 ist das Inverkehrbringen
+        # ohne Sorgfaltserklaerung verboten, und "nichts erfasst" ist kein
+        # Nachweis. Vorher stand hier in genau diesem Fall "KONFORM".
+        assert body["status"] in (
+            "KONFORM",
+            "UNVOLLSTAENDIG",
+            "KRITISCH",
+            "OHNE_ERKLAERUNG",
+        )
 
 
 def test_ustva_status_returns_200():

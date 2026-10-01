@@ -600,54 +600,54 @@ async def list_pcn_meldungen(
 
 @router.get("/eudr", response_model=ComplianceOut, summary="Eudr status abrufen")
 async def get_eudr_status(
-    tenant_id: Optional[str] = Query(None, description="Tenant context"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    """
-    EU Deforestation Regulation (EUDR) compliance status — aggregated from charge/lot data.
-    Falls back to a zero-state response when no EUDR data exists yet.
-    """
-    from sqlalchemy import text as _text
-    tid = tenant_id or "default"
-    try:
-        row = db.execute(
-            _text("""
-                SELECT
-                    COUNT(*) AS total,
-                    COUNT(*) FILTER (WHERE eudr_compliant = TRUE) AS compliant,
-                    COUNT(*) FILTER (WHERE eudr_compliant = FALSE) AS flagged,
-                    ARRAY_AGG(DISTINCT origin_country) FILTER (WHERE origin_country IS NOT NULL) AS countries
-                FROM domain_inventory.lots
-                WHERE tenant_id = :tid
-            """),
-            {"tid": tid},
-        ).fetchone()
-        total = int(row[0]) if row and row[0] else 0
-        compliant = int(row[1]) if row and row[1] else 0
-        flagged = int(row[2]) if row and row[2] else 0
-        countries = list(row[3]) if row and row[3] else []
-    except Exception:
-        total = compliant = flagged = 0
-        countries = []
+    """EUDR-Stand aus dem Sorgfaltserklaerungsregister.
 
-    try:
-        stmt_count = db.execute(
-            _text("SELECT COUNT(*) FROM domain_compliance.eudr_due_diligence WHERE tenant_id = :tid"),
-            {"tid": tid},
-        ).scalar() or 0
-    except Exception:
-        stmt_count = 0
+    Bis zum 01.10.2026 las dieser Weg ``domain_inventory.lots`` — eine Tabelle,
+    die **kein Migrationsstand anlegt** und deren Spalten ``eudr_compliant`` und
+    ``origin_country`` es nirgends gibt. Jeder Lesefehler lief in
+    ``except: total = compliant = flagged = 0``, und daraus wurde
+    ``status: "KONFORM"`` mit ``deforestation_risk: "NIEDRIG"``. Die Maske
+    behauptete damit Konformitaet, die nie geprueft wurde — bei einem
+    Inverkehrbringungsverbot nach Art. 3/4 der Verordnung (EU) 2023/1115 ist das
+    die gefaehrlichste aller Antworten.
 
-    status_label = "KONFORM" if flagged == 0 else ("KRITISCH" if flagged > 5 else "WARNUNG")
+    Jetzt kommt der Stand aus dem Register
+    (``domain_compliance.eudr_due_diligence``), der Mandant aus dem Kopf der
+    Anfrage, und ein Lesefehler ist ein 503. Ein leeres Register ist
+    ``OHNE_ERKLAERUNG`` — nicht ``KONFORM``: "nichts erfasst" ist kein Nachweis.
+
+    Chargenbezogene Kennzeichnung: benannte Luecke, siehe
+    ``docs/quality-assurance/eudr-sorgfaltserklaerung-20261001.md``."""
+    from app.api.v1.endpoints.eudr_register import registerstand
+
+    stand = registerstand(tenant_id=tenant_id, db=db)
+    riskant = int(stand["risiko_nicht_vernachlaessigbar"])
+    unbewertet = int(stand["ohne_risikobewertung"])
     return {
-        "status": status_label,
-        "last_check": datetime.utcnow().isoformat(),
-        "batches_total": total,
-        "batches_compliant": compliant,
-        "batches_flagged": flagged,
-        "due_diligence_statements": int(stmt_count),
-        "origin_countries": countries,
-        "deforestation_risk": "NIEDRIG" if flagged == 0 else "MITTEL",
+        "status": stand["status"],
+        "last_check": stand["stand_am"],
+        "due_diligence_statements": stand["erklaerungen_gesamt"],
+        "statements_submitted": stand["erklaerungen_eingereicht"],
+        "statements_draft": stand["erklaerungen_entwurf"],
+        "statements_unassessed": unbewertet,
+        "origin_countries": stand["produktionslaender"],
+        "commodities": stand["rohstoffe"],
+        # Abgeleitet aus dem, was bewertet wurde — nicht aus dem Fehlen von
+        # Daten. Ein leeres Register und unbewertete Erklaerungen sind ein
+        # offenes Risiko, kein niedriges: "nichts geprueft" ist keine Entlastung.
+        "deforestation_risk": (
+            "HOCH"
+            if riskant > 0
+            else (
+                "UNBEKANNT"
+                if (unbewertet > 0 or int(stand["erklaerungen_gesamt"]) == 0)
+                else "NIEDRIG"
+            )
+        ),
+        "batch_level_marking": "NICHT_UMGESETZT",
         "next_report_due": None,
     }
 

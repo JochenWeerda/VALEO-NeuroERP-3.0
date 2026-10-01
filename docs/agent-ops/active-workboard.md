@@ -54,48 +54,70 @@ Saldointervall, leerer Bank-CSV 422 ohne Header. 169 Tests bestanden (15 neu).
 **Offen:** Historische Kopf-Datenbereinigung, Bankreconciliation, weitere
 Profile und GitHub-CI/Deployment. Fremder Inventory-WIP bleibt beim Owner.
 
-## EUDR-SORGFALTSERKLAERUNG-20261001 — in Arbeit, Claude Code
+## EUDR-SORGFALTSERKLAERUNG-20261001 — abgeschlossen, Claude Code
 
-**Ziel:** Die im Vorgaenger-Slice benannte Luecke schliessen:
-`domain_compliance.eudr_due_diligence` bekommt eine Form, die der Verordnung
-(EU) 2023/1115 folgt — Inhalt der Sorgfaltserklaerung nach **Anhang II**,
-Informationspflichten nach **Art. 9**, Risikobewertung und -minderung nach
-**Art. 10/11**, Referenz- und Verifizierungsnummer des EU-Informationssystems
-nach **Art. 33**.
-
-**Zusaetzlicher Befund, der die Luecke dringlich macht:**
-`GET /api/v1/compliance/eudr` meldet bei **jedem** Lesefehler
-`status: "KONFORM"` und `deforestation_risk: "NIEDRIG"`. Die Abfrage liest
-`domain_inventory.lots` — eine Tabelle, die **kein Migrationsstand anlegt**, und
-deren Spalten `eudr_compliant`/`origin_country` es nirgends gibt. Die Maske
-`/nachhaltigkeit/eudr-compliance` behauptet damit Konformitaet, die nie geprueft
-wurde. Nach Art. 3/4 ist das Inverkehrbringen ohne Sorgfaltserklaerung
-verboten — eine gruene Anzeige ist hier die gefaehrlichste Antwort.
-Der Mandant kommt dort ausserdem aus einem **Abfrageparameter** mit Rueckfall
-`"default"`.
-
+**Ziel:** Die im Vorgaenger-Slice bewusst offen gelassene Luecke schliessen —
+`domain_compliance.eudr_due_diligence` bekommt die Form, die die Verordnung
+(EU) 2023/1115 vorgibt, statt einer aus einem `COUNT(*)` geratenen.
 **Dateibesitz:** `alembic/versions/eudr_sorgfaltserklaerung_20261001.py`,
 `app/api/v1/endpoints/eudr_register.py` (neu),
-`app/api/v1/schemas/eudr_register_schemas.py` (neu),
-`app/api/v1/api.py` (nur die Montage), `app/api/v1/endpoints/compliance.py`
-(nur der EUDR-Hunk), `tests/test_eudr_sorgfaltserklaerung_vertrag.py`,
-`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
-dieser Abschnitt.
+`app/api/v1/schemas/eudr_register_schemas.py` (neu), `app/api/v1/api.py` (nur
+die Montage), `app/api/v1/endpoints/compliance.py` (nur der EUDR-Hunk),
+`packages/frontend-web/src/pages/nachhaltigkeit/eudr-compliance.tsx`,
+`tests/test_eudr_sorgfaltserklaerung_vertrag.py`, `tests/test_gap_fixes_batch1.py`
+(nur die zwei EUDR-Erwartungen), `scripts/check_table_references.py` (nur die
+Schwelle), eigene QA-Doku und dieser Abschnitt.
+**Stand:** abgeschlossen 2026-10-01. Elfter Eintrag der Welle.
 
-**Abnahme:** Drei Tabellen (Erklaerung, Geolokationen, vorgelagerte
-Erklaerungen) mit `tenant_id NOT NULL`; die Datenbank haelt die sieben Rohstoffe
-und die zwei Risikostufen; **eingereicht nur mit vernachlaessigbarem Risiko,
-Referenznummer und abgegebener Erklaerung** (Art. 3/4); **Flurstuecke ueber
-vier Hektar nur als Polygon** (Art. 9); der Status kommt aus dem Register und
-meldet "nicht feststellbar" statt "KONFORM"; Mandant aus dem Kopf; Vertraege und
-Doku-Gates gruen.
+**Der Befund, der die Luecke dringlich machte:**
+`GET /api/v1/compliance/eudr` las `domain_inventory.lots` — eine Tabelle, die
+**kein Migrationsstand anlegt** und deren Spalten `eudr_compliant`/
+`origin_country` es nirgends gibt. Jeder Lesefehler lief in
+`except: total = compliant = flagged = 0`, und daraus wurde
+`status: "KONFORM"` mit `deforestation_risk: "NIEDRIG"`. Null markierte
+Chargen, **weil es keine Chargen gab**. Die Maske zeigte eine Compliance-Rate
+von 0,0 % **und** "KONFORM". Nach Art. 3/4 ist das Inverkehrbringen ohne
+Sorgfaltserklaerung verboten — eine gruene Anzeige ist hier die gefaehrlichste
+Antwort. Der Mandant kam dort aus `?tenant_id=` mit Rueckfall `"default"`.
 
-**Risiken und Grenzen:** Der Feldsatz folgt Anhang II und Art. 9; die
-**fachjuristische Abnahme** gehoert dem Compliance-Owner — das ist eine
-Modellierung nach dem Verordnungstext, kein Rechtsrat. Die chargenbezogene
-EUDR-Kennzeichnung (`domain_inventory.lots`) bleibt eine benannte Luecke: Sie
-waere eine eigene Fachentscheidung (welche Charge traegt welchen Nachweis), und
-`inventory_lots` traegt die Spalten nicht.
+**Der Feldsatz folgt dem Verordnungstext:** Anhang II Nr. 1-6 (Marktteilnehmer
+mit EORI, HS-Code und Menge, Produktionsland mit Geolokation und Zeitraum,
+vorgelagerte Erklaerungen, Erklaerung und Unterzeichnung), Art. 9
+(Lieferantenangaben, Nachweise fuer Abholzungsfreiheit und Rechtskonformitaet),
+Art. 10/11 (Risikobewertung und Minderung), Art. 33 (Referenz- und
+Verifizierungsnummer). Drei Tabellen: Erklaerung, Geolokationen (1:n),
+vorgelagerte Erklaerungen (1:n).
+
+**Drei Regeln haelt die Datenbank:** eingereicht nur mit vernachlaessigbarem
+Risiko, beiden Nachweisen, Unterzeichnung und Referenznummer (Art. 3/4);
+Flurstuecke ueber vier Hektar nur als Polygon (Art. 9); nicht
+vernachlaessigbares Risiko nur mit Minderungsmassnahmen (Art. 11). Dazu: die
+Referenznummer global eindeutig, der Produktionszeitraum nicht rueckwaerts.
+
+**Ausdruecklich keine Bedingung wurde der Stichtag 31.12.2020** (Art. 2): Nicht
+die Herstellung muss vor ihm liegen, sondern die Flaeche darf nach ihm nicht
+abgeholzt worden sein. Das traegt ein Nachweisfeld. Eine falsche Bedingung waere
+schlimmer als keine.
+
+**Der Status behauptet nichts mehr:** `OHNE_ERKLAERUNG` fuer ein leeres Register
+(nicht `KONFORM`), `UNVOLLSTAENDIG`, `KRITISCH`, `KONFORM`. Und
+`deforestation_risk` ist `UNBEKANNT`, solange etwas unbewertet ist **oder** das
+Register leer ist — "nichts geprueft" ist keine Entlastung. Lesefehler: 503. Die
+Maske zeigt das Register statt Chargenzahlen, die es nie gab, und schreibt
+"Chargenbezogene Kennzeichnung: nicht umgesetzt" im Klartext.
+
+**Grenzen, ausdruecklich:** Das ist eine Modellierung nach dem Verordnungstext,
+**kein Rechtsrat** — die fachjuristische Abnahme gehoert dem Compliance-Owner.
+Zwei Punkte gehoeren dabei geprueft: die **chargenbezogene Kennzeichnung** ist
+nicht umgesetzt (welche Charge welchen Nachweis traegt, ist eine
+Fachentscheidung, und `inventory_lots` hat die Spalten nicht), und eine
+ausdrueckliche **Aufbewahrungsregel** (fuenf Jahre) ist nicht implementiert —
+`downgrade` loescht die Erklaerungstabelle aber nicht.
+
+**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 14 -> 12.
+**Abnahme:** 35 Vertraege gruen, dazu `test_gap_fixes_batch1.py`; `tsc` und
+`eslint` ohne Befund zur Maske; alle Ratschen gruen. Nachweis:
+`docs/quality-assurance/eudr-sorgfaltserklaerung-20261001.md`.
 
 ## BANK-LEGACY-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

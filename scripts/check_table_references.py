@@ -102,7 +102,11 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: 2026-10-01, lebend 17 -> 14: `steuernachweis_mandant_20261001` legt
 #: `domain_compliance.gelangensbestaetigung`, `.intrastat_meldungen` und
 #: `.lksg_supplier_risk_assessments` an.
-BASELINE_LEBEND = 14
+#:
+#: 2026-10-01, lebend 14 -> 12: `eudr_sorgfaltserklaerung_20261001` legt das
+#: EUDR-Register an, und der Statusweg liest nicht mehr `domain_inventory.lots`
+#: — eine Tabelle, die kein Migrationsstand anlegt.
+BASELINE_LEBEND = 12
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

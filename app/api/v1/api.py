@@ -2073,6 +2073,10 @@ api_router.include_router(genossenschaft.router)
 from app.api.v1.endpoints import gelangensbestaetigung  # noqa: E402
 api_router.include_router(gelangensbestaetigung.router)
 
+# EUDR — Sorgfaltserklaerungen nach Verordnung (EU) 2023/1115
+from app.api.v1.endpoints import eudr_register  # noqa: E402
+api_router.include_router(eudr_register.router)
+
 # Intrastat — EU-Handelsstatistik
 from app.api.v1.endpoints import intrastat  # noqa: E402
 api_router.include_router(intrastat.router)
