@@ -46,50 +46,66 @@ ein Auditfehler darf keine Auszifferung hinterlassen.
 das Haus falsch. `webhook_system.py` kannte `get_tenant_id` nicht und schrieb in
 `domain_shared.webhooks` (keine Migration); `webhooks.py` nahm das Haus als
 **Abfrageparameter** `?tenant_id=` mit `DEFAULT_TENANT_ID` als Rueckfall.
-**Dateibesitz:** `app/api/v1/endpoints/webhook_system.py`,
-`app/api/v1/endpoints/webhooks.py`, `tests/test_webhook_mandant_vertrag.py`,
+**Dateibesitz:** `app/services/webhook_service.py`,
+`app/api/v1/endpoints/webhook_system.py`, `app/api/v1/endpoints/webhooks.py`,
+`alembic/versions/webhook_zustellprotokoll_20261001.py`,
+`packages/frontend-web/src/pages/admin/webhooks.tsx`,
+`tests/test_webhook_mandant_vertrag.py`,
+`packages/frontend-web/src/__tests__/pages/admin/webhooks.test.tsx`,
 `tests/test_gs1_webhook_ruestliste.py` (nur die zwei direkt aufrufenden Tests),
-eigene Slice-/QA-Doku und dieser Abschnitt.
-**Stand:** abgeschlossen 2026-10-01. Sechster Eintrag der Welle 2, und zum
-zweiten Mal war **keine Migration** die Antwort:
-`domain_shared.webhook_registrations` existiert, ist migriert, hat ein
-ORM-Modell und traegt `tenant_id` (Fremdschluessel auf `tenants`) und `secret`.
-`webhook_system.py` liest und schreibt jetzt dort. Die laufende Nummer ist keine
-Spalte mehr, sondern die Stellung der Zeile im eigenen Haus.
+`scripts/check_table_references.py` (nur die Schwelle), eigene Slice-/QA-Doku und
+dieser Abschnitt.
+**Stand:** abgeschlossen 2026-10-01, einschliesslich der beiden zunaechst offenen
+Fachfragen. Sechster Eintrag der Welle 2; zum zweiten Mal war **keine Migration**
+die Antwort: `domain_shared.webhook_registrations` existiert, ist migriert, hat
+ein ORM-Modell und traegt `tenant_id` (Fremdschluessel auf `tenants`) und
+`secret`.
 **Was ein fremdes Haus konnte:** die Webhooks aller Haeuser mit ihren Ziel-URLs
 auflisten; mit `?tenant_id=` fremde Anbindungen lesen **und anlegen**; mit einer
 fremden Kennung eine Anbindung loeschen.
-**Vier Nebenbefunde, behoben:**
-1. `secret` wurde seit immer entgegengenommen und **verworfen**. Jetzt
-   hinterlegt, nie ausgegeben, und es signiert jeden Aufruf
-   (`X-Valeo-Signature: sha256=…`, HMAC-SHA256 ueber den gesendeten Rumpf).
-2. `DELETE /{nr}` war **unerreichbar** — `webhooks.py` ist unter demselben
-   Prefix zuerst eingebunden und hat `DELETE /{webhook_id}`. Jetzt
-   `DELETE /abmelden/{nr}`.
-3. Als Pruefung der Ziel-URL genuegte `https://`. Jetzt
-   `validate_outbound_http_target` wie in `webhooks.py` — sonst laesst sich die
-   Anwendung als Bote ins eigene Netz oder an den Cloud-Metadatendienst
-   schicken.
-4. Ein Lesefehler sah aus wie "kein Webhook eingerichtet" (`return []`). Jetzt
-   503 — sonst registriert ein Haus doppelt.
-**Ehrlich dazugesagt:** `_trigger_webhook` haette ein Ereignis aus Haus A an die
-URL von Haus B geschickt, hat aber **keinen Aufrufer**. Der Abfluss war angelegt,
-nicht in Betrieb.
-**Offene Fachfragen (nicht entschieden):** Die beiden Module kennen **disjunkte**
-Bereichs-Vokabulare (`KONTRAKT_NEU` … gegen `auftrag` …) und schreiben jetzt in
-dieselbe Spalte `event_area`; welches gilt, gehoert entschieden — zusammen mit
-der Frage, warum zwei Module unter einem Prefix haengen. Und:
-`webhook_registrations` hat keine Spalten fuer Fehlerzaehler und letzte
-Ausloesung, also stehen `fehler_count`/`letzte_auslosung_am` konstant auf 0/null.
-Ein Zustellversuch ohne Nachweis ist fuer einen Betrieb wenig wert; das braucht
-ein Zustellprotokoll oder zwei Spalten.
-**Hinweis:** Die Route hat sich geaendert, die OpenAPI-Spezifikation driftet
-also — wie im `OPENAPI-DRIFT-REFRESH` ausdruecklich vorgesehen.
-**Abnahme:** 18 Vertraege gruen, dazu 49 vorhandene Tests. Gegen die
-**vorhandene** gemeinsame Pruefstand-Datenbank, mit eigenen Mandantenkennungen
-und ohne Zuruecksetzen. Nachweis:
+**Entscheidung 1 — ein Vokabular, eine Implementierung.** Gezeichnet wird ein
+**Ereignis**, nicht ein Objekt. Das kanonische Vokabular (`BEREICHE` in
+`webhook_service.py`) ist die Vereinigung beider alten Listen in einer
+Schreibweise; die alten Objektnamen von `webhooks.py` bleiben als Alias gueltig
+und werden kanonisch gespeichert. `app/services/webhook_service.py` ist die
+**einzige** Stelle, die die Anbindungen anfasst — beide Router sind duenn. Die
+zwei URL-Formen bleiben (ein Routenentzug wuerde keinem Anwender helfen), sind
+aber zwei Sichten auf **einen** Bestand; ein Vertrag prueft das.
+**Entscheidung 2 — ein Zustellversuch bekommt einen Nachweis.** Protokoll statt
+Zaehler: `webhook_zustellprotokoll_20261001` legt
+`domain_shared.webhook_deliveries` an (Zeitpunkt, Erfolg, Statuscode, Dauer,
+Fehlertext, signiert ja/nein). `fehler_count` und `letzte_auslosung_am` werden
+daraus **abgeleitet** und sind damit belegt statt behauptet;
+`GET /webhooks/{id}/zustellversuche` zeigt die Versuche. `ON DELETE CASCADE`: Das
+Protokoll ist Betriebsnachweis einer Anbindung, keine aufbewahrungspflichtige
+Buchung.
+**Vier Nebenbefunde, behoben:** `secret` wurde seit immer entgegengenommen und
+**verworfen** (jetzt hinterlegt, nie ausgegeben, HMAC-SHA256 ueber den gesendeten
+Rumpf); `DELETE /{nr}` war **unerreichbar**, weil `webhooks.py` zuerst
+eingebunden ist (jetzt `/abmelden/{nr}`); als Pruefung der Ziel-URL genuegte
+`https://` (jetzt `validate_outbound_http_target`); ein Lesefehler sah aus wie
+"kein Webhook eingerichtet" (jetzt 503).
+**Fuenfter Nebenbefund, behoben:** Die Maske `admin/webhooks.tsx` erwartete
+`name`, `events[]`, `aktiv` und `last_triggered` — **vier Felder, die der
+Endpunkt nie geliefert hat**. Unsichtbar, weil die Liste immer leer war; beim
+ersten echten Webhook waere `w.name.toLowerCase()` in der Suche gelaufen. Die
+Maske liest jetzt die echte Antwort und kann registrieren, abmelden und das
+Zustellprotokoll ansehen; der Knopf "Neuer Webhook" hatte vorher keinen Handler.
+Beide Mutationen mit Sperre, gesperrtem Knopf und sichtbarer Rueckmeldung.
+**Ehrlich dazugesagt:** `trigger` hat ausserhalb der Tests **keinen Aufrufer**,
+weil kein Fachdienst Webhook-Ereignisse meldet. Der Abfluss war angelegt, nicht
+in Betrieb. Das Verdrahten gehoert an die Stelle, an der die Ereignisse entstehen
+(Outbox) — eigener Vorgang.
+**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 24 -> 21. Dokumentiert ist
+dabei ein blinder Fleck der Ratsche: Sie scannt nur `app/api/v1/endpoints`, nicht
+`app/services`. Die Ausweitung ist richtig und ein eigener Vorgang; der Bestand
+dort ist nicht gemessen.
+**Hinweis:** Zwei Routen sind neu bzw. umbenannt, die OpenAPI-Spezifikation
+driftet also — wie im `OPENAPI-DRIFT-REFRESH` ausdruecklich vorgesehen.
+**Abnahme:** 28 Backend-Vertraege und 7 Frontend-Vertraege gruen, dazu 49
+vorhandene Tests; `tsc` und `eslint` ohne Befund zur Maske. Gegen die
+**vorhandene** gemeinsame Pruefstand-Datenbank, ohne Zuruecksetzen. Nachweis:
 `docs/quality-assurance/webhook-mandant-20261001.md`.
-
 ## BANK-STATEMENT-IMPORT-INTEGRITY-20261001 — abgeschlossen (manueller Import), Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** manueller Import abgeschlossen 2026-10-01; Auto-Abgleich offen.
@@ -162,7 +178,9 @@ plus 14 Subtests, drei Kalendervertraege und zwei Laufzeit-Smokes gruen.
 **Nachweis:** `docs/quality-assurance/security-patch-milestone-20261001.md`.
 **Extern offen:** Defaultbranch-Integration, GitHub-Alert-Schliessung, CI und Deployment.
 
-## HANDSHAKE: Die Kundenakte liest zwei Tabellen ohne Migration 2026-10-01, Claude Code an den CRM-Owner
+## HANDSHAKE: Die Kundenakte liest zwei Tabellen ohne Migration 2026-10-01 — **erledigt**, Claude Code an den CRM-Owner
+
+**Erledigt 2026-10-01:** `domain_crm.contacts`, `.crm_customers` und `.crm_activities` stehen nicht mehr an einem lebenden Weg; die Ratsche ist bei 21 gegen Schwelle 21 wieder gruen. Der Befund bleibt als Historie stehen.
 
 **Die Tabellen-Ratsche ist rot — 26 lebend gegen Schwelle 24 — und zwar seit
 Commit `aede5e1cc`** ("fix(crm): Kundenakte liest Partnerstamm, Posten und

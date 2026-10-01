@@ -300,7 +300,7 @@ class _Antwort:
     status_code = 200
 
 
-def _mit_falschem_klienten(engine, mandant, gesendet):
+def _mit_falschem_klienten(engine, mandant, gesendet, status_code: int = 200):
     """Ruft `_trigger_webhook` mit einem httpx-Doppel auf."""
     import asyncio
 
@@ -321,7 +321,9 @@ def _mit_falschem_klienten(engine, mandant, gesendet):
 
         async def post(self, url, content=None, headers=None, **__):
             gesendet.append((url, content, headers or {}))
-            return _Antwort()
+            antwort = _Antwort()
+            antwort.status_code = status_code
+            return antwort
 
     echt = httpx.AsyncClient
     httpx.AsyncClient = _Klient  # type: ignore[misc, assignment]
@@ -416,3 +418,153 @@ def test_ziel_im_eigenen_netz_wird_abgewiesen(client, url):
         headers=kopf(HAUS_A),
     )
     assert antwort.status_code in (400, 422), antwort.text
+
+
+# 8 -- Ein Vokabular, mit den alten Namen als Alias ---------------------------
+
+def test_bereiche_sind_eine_liste_in_einer_schreibweise(client):
+    antwort = client.get("/api/v1/webhooks/bereiche", headers=kopf(HAUS_A))
+    assert antwort.status_code == 200, antwort.text
+    bereiche = antwort.json()
+    # Beide alten Listen sind aufgegangen: das Ereignis aus `webhook_system`
+    # und die Objekte, die `webhooks.py` anbot.
+    assert "KONTRAKT_NEU" in bereiche
+    assert "AUFTRAG_NEU" in bereiche
+    assert "STAMMDATEN_GEAENDERT" in bereiche
+    # Und nur eine Schreibweise.
+    assert all(b == b.upper() for b in bereiche), bereiche
+    assert "auftrag" not in bereiche
+
+
+@pytest.mark.parametrize(
+    "alias,kanonisch",
+    [
+        ("wiegeschein", "WIEGUNG_NEU"),
+        ("rechnung", "RECHNUNG_NEU"),
+        ("auftrag", "AUFTRAG_NEU"),
+        ("lager", "LAGERBEWEGUNG_GEBUCHT"),
+    ],
+)
+def test_alter_objektname_wird_angenommen_und_kanonisch_gespeichert(
+    client, engine, alias, kanonisch
+):
+    """`webhooks.py` nahm Objektnamen an. Sie bleiben gueltig — als Alias."""
+    from sqlalchemy import text
+
+    _aufraeumen(engine)
+    antwort = client.post(
+        "/api/v1/webhooks/",
+        json={"url": "https://haus-a.example/alias", "event_area": alias},
+        headers=kopf(HAUS_A),
+    )
+    assert antwort.status_code == 201, antwort.text
+    assert antwort.json()["event_area"] == kanonisch
+    try:
+        with engine.connect() as conn:
+            gespeichert = conn.execute(
+                text(f"SELECT event_area FROM {TABELLE} WHERE tenant_id = :t"),
+                {"t": HAUS_A},
+            ).scalar()
+        assert gespeichert == kanonisch
+    finally:
+        _aufraeumen(engine)
+
+
+def test_unbekannter_bereich_wird_abgewiesen(client, engine):
+    _aufraeumen(engine)
+    antwort = client.post(
+        "/api/v1/webhooks/",
+        json={"url": "https://haus-a.example/x", "event_area": "GIBT_ES_NICHT"},
+        headers=kopf(HAUS_A),
+    )
+    assert antwort.status_code in (400, 422), antwort.text
+
+
+def test_beide_wege_sehen_dieselbe_anbindung(client, engine, beide_haeuser):
+    """Zwei Router, ein Dienst, eine Tabelle — kein getrennter Bestand mehr."""
+    ueber_system = client.get("/api/v1/webhooks", headers=kopf(HAUS_A))
+    ueber_l3c = client.get("/api/v1/webhooks/", headers=kopf(HAUS_A))
+    assert ueber_system.status_code == 200, ueber_system.text
+    assert ueber_l3c.status_code == 200, ueber_l3c.text
+
+    kennungen_system = [e["id"] for e in ueber_system.json()]
+    kennungen_l3c = [e["id"] for e in ueber_l3c.json()["items"]]
+    assert kennungen_system == kennungen_l3c
+    assert len(kennungen_system) == 1
+
+
+# 9 -- Ein Zustellversuch hat einen Nachweis ---------------------------------
+
+def test_zustellversuch_wird_protokolliert_und_zaehlt(client, engine, beide_haeuser):
+    """`fehler_count` und `letzte_auslosung_am` waren Behauptungen ohne Beleg.
+
+    Jetzt stehen sie im Zustellprotokoll: ein erfolgreicher und ein
+    fehlgeschlagener Versuch.
+    """
+    a, _b = beide_haeuser
+
+    gesendet: list[tuple] = []
+    _mit_falschem_klienten(engine, HAUS_A, gesendet, status_code=200)
+    _mit_falschem_klienten(engine, HAUS_A, gesendet, status_code=500)
+    assert len(gesendet) == 2
+
+    antwort = client.get("/api/v1/webhooks", headers=kopf(HAUS_A))
+    assert antwort.status_code == 200, antwort.text
+    eintrag = antwort.json()[0]
+    # Ein Fehlschlag (HTTP 500), ein Erfolg.
+    assert eintrag["fehler_count"] == 1
+    assert eintrag["letzte_auslosung_am"] is not None
+
+    versuche = client.get(
+        f"/api/v1/webhooks/{a['id']}/zustellversuche", headers=kopf(HAUS_A)
+    )
+    assert versuche.status_code == 200, versuche.text
+    zeilen = versuche.json()
+    assert len(zeilen) == 2
+    assert {z["erfolgreich"] for z in zeilen} == {True, False}
+    misslungen = next(z for z in zeilen if not z["erfolgreich"])
+    assert misslungen["status_code"] == 500
+    assert "500" in (misslungen["fehler"] or "")
+
+
+def test_fremde_zustellversuche_sind_nicht_lesbar(client, engine, beide_haeuser):
+    _a, b = beide_haeuser
+    gesendet: list[tuple] = []
+    _mit_falschem_klienten(engine, HAUS_B, gesendet, status_code=200)
+    assert len(gesendet) == 1
+
+    # Haus A fragt nach der Anbindung von Haus B.
+    antwort = client.get(
+        f"/api/v1/webhooks/{b['id']}/zustellversuche", headers=kopf(HAUS_A)
+    )
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json() == []
+
+
+def test_abmelden_nimmt_das_protokoll_mit(client, engine, beide_haeuser):
+    """Das Protokoll ist Betriebsnachweis einer Anbindung, keine Buchung."""
+    from sqlalchemy import text
+
+    a, _b = beide_haeuser
+    gesendet: list[tuple] = []
+    _mit_falschem_klienten(engine, HAUS_A, gesendet, status_code=200)
+
+    with engine.connect() as conn:
+        vorher = conn.execute(
+            text(
+                "SELECT count(*) FROM domain_shared.webhook_deliveries WHERE webhook_id = :w"
+            ),
+            {"w": a["id"]},
+        ).scalar()
+    assert vorher == 1
+
+    assert client.delete("/api/v1/webhooks/abmelden/1", headers=kopf(HAUS_A)).status_code == 204
+
+    with engine.connect() as conn:
+        nachher = conn.execute(
+            text(
+                "SELECT count(*) FROM domain_shared.webhook_deliveries WHERE webhook_id = :w"
+            ),
+            {"w": a["id"]},
+        ).scalar()
+    assert nachher == 0

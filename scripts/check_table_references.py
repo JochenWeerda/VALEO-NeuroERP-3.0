@@ -76,7 +76,20 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #:
 #: 2026-09-30, lebend 25 -> 24: ``domain_shared.sepa_mandates`` legt
 #: ``lastschrift_mandant_20260930`` an.
-BASELINE_LEBEND = 24
+#:
+#: 2026-10-01, lebend 24 -> 21: ``domain_pos.pos_transactions`` war ein falscher
+#: Verweis (der Kassenumsatz liegt in
+#: ``domain_docflow.pos_fiscal_transactions``), ``domain_shared.webhooks``
+#: ebenso (die Anbindungen liegen in ``domain_shared.webhook_registrations``),
+#: und die Kundenakte liest ``domain_crm.contacts``/``.crm_customers`` nicht
+#: mehr an einem lebenden Weg.
+#:
+#: Blinder Fleck, bewusst nicht in diesem Slice behoben: Gescannt wird nur
+#: ``app/api/v1/endpoints``. Wandert rohes SQL in einen Dienst unter
+#: ``app/services``, sinkt die Zahl, ohne dass Schuld verschwindet. Die Pruefung
+#: auf ``app/services`` auszuweiten ist richtig und ein eigener Vorgang — der
+#: Bestand dort ist nicht gemessen.
+BASELINE_LEBEND = 21
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")
