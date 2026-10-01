@@ -38,46 +38,59 @@ CAMT.08 nicht automatisch fuer CAMT.02 freigegeben. Bestandsabstimmung und
 Deployment/Migration separat. Tests nutzen vorhandenen valeo_probe und nur
 ein eigenes kleines Schema mit gezieltem Cleanup, keine neue DB/Docker.
 
-## STEUERNACHWEIS-MANDANT-20261001 — in Arbeit, Claude Code
+## STEUERNACHWEIS-MANDANT-20261001 — abgeschlossen, Claude Code
 
-**Ziel:** Drei Compliance-Tabellen legt keine Migration an, und zwei von ihnen
-kennen keinen Mandanten, obwohl ihre Module `get_tenant_id` entgegennehmen:
-`domain_compliance.gelangensbestaetigung`, `.intrastat_meldungen`,
+**Ziel:** Drei Compliance-Tabellen ohne Migration, und zwei Module, die
+`get_tenant_id` entgegennehmen und **nicht benutzen** — kein einziger Filter in
+keinem Weg: `domain_compliance.gelangensbestaetigung`, `.intrastat_meldungen`,
 `.lksg_supplier_risk_assessments`.
-
-**Was ein fremdes Haus heute kann** (beide Module nehmen den Mandanten
-entgegen und **benutzen ihn nicht**, kein einziger Filter):
-| Weg | Wirkung |
-|---|---|
-| `GET /gelangensbestaetigungen` | alle Haeuser: Kundennummer, Empfaengername, **USt-IdNr.**, Warenwert, Bestimmungsland |
-| `GET /gelangensbestaetigungen/faellig` | dito — und bei einem Lesefehler `[]`, also "nichts nachzufassen" |
-| `DELETE /intrastat/meldungen/{id}` | loescht die **Intrastat-Meldung eines fremden Hauses** |
-| `GET /intrastat/meldungen/{zeitraum}/...` + Export | der Export eines Hauses enthaelt die Zeilen **aller** Haeuser |
-| Meldenummernkreis | `COUNT(*) WHERE meldezeitraum AND meldungsart` ueber alle Haeuser |
-
-**Rechtsfolge, nicht Schoenheitsfehler:** Ohne Gelangensbestaetigung entfaellt
-die Steuerfreiheit der innergemeinschaftlichen Lieferung (§ 6a UStG, § 17a
-UStDV) — eine leere Faellig-Liste ist die Aussage "nichts nachzufassen" mit
-Steuerwirkung. Und ein Intrastat-Export, der die Zeilen eines fremden Hauses
-enthaelt, ist eine falsche Meldung an das Statistische Bundesamt.
-
 **Dateibesitz:** `alembic/versions/steuernachweis_mandant_20261001.py`,
 `app/api/v1/endpoints/gelangensbestaetigung.py`,
 `app/api/v1/endpoints/intrastat.py`,
 `tests/test_steuernachweis_mandant_vertrag.py`,
 `scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
 dieser Abschnitt.
+**Stand:** abgeschlossen 2026-10-01. Zehnter Eintrag der Welle.
 
-**Abnahme:** Die drei Tabellen stehen nach `alembic upgrade head` mit
-`tenant_id NOT NULL`; jeder Weg beider Module filtert; der Meldenummernkreis
-laeuft je Haus; der Export enthaelt nur eigene Zeilen; ein Lesefehler ist kein
-leeres Ergebnis; Vertraege und Doku-Gates gruen.
+**Was ein fremdes Haus konnte:** die Gelangensbestaetigungen aller Haeuser lesen
+(Kundennummer, Empfaengername, **USt-IdNr.**, Warenwert); einen fremden Nachweis
+als erhalten setzen; das **Token** eines fremden Nachweises abrufen — den Link,
+mit dem der Empfaenger bestaetigt; die **Intrastat-Meldung eines fremden Hauses
+loeschen und aendern**; einen Export ziehen, der die Zeilen **aller** Haeuser
+enthaelt.
 
-**Risiken:** Die Form ist aus den INSERTs und Pydantic-Modellen uebernommen.
-`domain_compliance.eudr_due_diligence` bleibt **offen**: Der Code kennt davon
-nur ein `COUNT(*) WHERE tenant_id` — das genuegt nicht, um eine
-EUDR-Sorgfaltserklaerung zu definieren, und erfinden waere hier besonders
-falsch. Benannte Luecke fuer den Compliance-Owner.
+**Rechtsfolge, nicht Formfrage:** Ohne Gelangensbestaetigung entfaellt die
+Steuerfreiheit der innergemeinschaftlichen Lieferung (§ 6a UStG, § 17a UStDV) —
+eine Faelligkeitsliste, die bei einem Lesefehler `[]` liefert, sagt "nichts
+nachzufassen" mit genau dieser Folge. Und ein Intrastat-Export mit fremden
+Zeilen ist eine falsche Meldung an das Statistische Bundesamt.
+
+**Vier Wege konnten nie eine Antwort liefern** — das kam erst heraus, als die
+Tabelle existierte; vorher verdeckte der 503 es:
+`POST /gelangensbestaetigung` (Modell verlangte 13 Felder, der Weg lieferte 4),
+`GET .../faellig` (13 gegen 10), `POST .../{id}/mahnung` (13 gegen 2) — je ein
+500er. Und `POST /intrastat/meldungen` antwortete mit `IDResponse`, wodurch die
+**Meldenummer** aus der Antwort fiel: kein Fehler, nur ein stilles Weglassen der
+Kennung, unter der die Meldung abgegeben wird. Jeder Weg hat jetzt ein Modell,
+das zu seiner Antwort passt; `rechnung_nr` und `empfaenger_ust_id_nr` sind
+optional, weil sie in der Datenbank fehlen duerfen.
+
+**Die Datenbank haelt jetzt:** `tenant_id NOT NULL`; ein Token global eindeutig;
+eine Gelangensbestaetigung je Haus und Lieferschein; eine Meldenummer je Haus und
+Meldezeitraum; `ERHALTEN` nur mit `erhalten_am` (das Beweisstueck, nicht der
+Status); `meldezeitraum` als JJJJ-MM; dazu die vier Wertemengen, die die Module
+selbst pruefen. Der Nummernkreis hat sein `except: seq = 1` verloren — eine
+Meldenummer zu raten, die es schon gibt, ist schlechter als keine Meldung.
+
+**Offen, bewusst:** `domain_compliance.eudr_due_diligence` bleibt ohne Migration.
+Der Code kennt davon nur ein `COUNT(*) WHERE tenant_id`; das genuegt nicht, um
+eine EUDR-Sorgfaltserklaerung zu definieren, und erfinden waere hier besonders
+falsch — die Verordnung schreibt den Inhalt vor. Benannte Luecke fuer den
+Compliance-Owner.
+
+**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 17 -> 14.
+**Abnahme:** 18 Vertraege gruen, dazu 80 vorhandene Tests. Alle Ratschen gruen.
+Nachweis: `docs/quality-assurance/steuernachweis-mandant-20261001.md`.
 
 ## COVERAGE-RETIRED-MODULE-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
