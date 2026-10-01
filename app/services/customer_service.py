@@ -258,23 +258,9 @@ class CustomerService:
                 customer_dict["postfach"] = getattr(row, "postfach", None)
                 customer_dict["postfach_plz"] = getattr(row, "postfach_plz", None)
                 customer_dict["postfach_ort"] = getattr(row, "postfach_ort", None)
-        cid = customer_dict.get("id")
-        if cid:
-            try:
-                geo = self.db.execute(
-                    text(
-                        "SELECT breitengrad, laengengrad FROM domain_crm.customers "
-                        "WHERE id::text = :cid AND tenant_id = :tid LIMIT 1"
-                    ),
-                    {"cid": str(cid), "tid": self.tenant_id},
-                ).fetchone()
-            except Exception:
-                self.db.rollback()
-                geo = None
-            if geo:
-                customer_dict["breitengrad"] = getattr(geo, "breitengrad", None)
-                customer_dict["laengengrad"] = getattr(geo, "laengengrad", None)
-        if (not customer_dict.get("breitengrad") or not customer_dict.get("laengengrad")) and kn:
+        # Koordinaten liegen in public.kunden_geo (kunden_geo_20260604).
+        # domain_crm.customers hat dafuer keine Migration.
+        if kn:
             try:
                 sat = self.db.execute(
                     text(
@@ -286,10 +272,8 @@ class CustomerService:
                 self.db.rollback()
                 sat = None
             if sat:
-                if customer_dict.get("breitengrad") is None:
-                    customer_dict["breitengrad"] = getattr(sat, "lat", None)
-                if customer_dict.get("laengengrad") is None:
-                    customer_dict["laengengrad"] = getattr(sat, "lon", None)
+                customer_dict["breitengrad"] = getattr(sat, "lat", None)
+                customer_dict["laengengrad"] = getattr(sat, "lon", None)
         self._attach_partner_mask_fields(customer_dict)
         self._attach_billing_config(customer_dict)
         self._attach_potential_snapshot(customer_dict)

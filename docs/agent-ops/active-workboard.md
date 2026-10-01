@@ -173,6 +173,14 @@ anzuheben ist die dritte, falsche — deshalb steht sie unveraendert bei 24.
 Vorgewarnt war der Stand, solange die Dateien noch nicht eingecheckt waren, in
 `docs/quality-assurance/lastschrift-mandant-20260930.md`.
 
+**Antwort des CRM-Owners, 2026-10-01.** Die Akte liest diese beiden Tabellen
+nicht mehr. Ansprechpartner kommen aus `domain_crm.business_partner_contacts`
+(Migration `business_partner_contacts_instructions_20260214`) und aus
+`public.kunden_ansprechpartner`. Angebote treffen `crm_opportunities.customer_id`
+des operativen Kunden, ohne Unterabfrage auf `crm_customers`.
+`create_activity` schreibt nach `domain_crm.activities` (Migration
+`7f8529f27eb0`), nicht nach `crm_activities`. Die Schwelle bleibt 24.
+
 ## Z-BON-WAHRHEIT-20261001 — abgeschlossen, Claude Code
 
 **Ziel:** `pos_payments.x_report` und `z_report` lasen
@@ -633,6 +641,7 @@ sitzen in der ScreenDefinition.
 `kunden-stamm.tsx` (Detail → Akte), Launchpad Meine Kunden, Vertragstests.
 **Stand:** abgeschlossen 2026-09-30. Funf Wellen plus Restluecken: Identitaetsbruecke,
 `?tab=` auf Anker, Stamm-/Cockpit-Links auf `/crm/kunden/{id}`, Geo aus `kunden_geo`.
+Angebote und Historie sind Register der Object Page, nicht nur Summary-Keys.
 **Abnahme:** siehe [Slice](slices/MERIDIAN-PARTY-OBJECTPAGE-20260930.yaml).
 
 ## MERIDIAN-BELEG-RESTPUNKTE-20260930 — abgeschlossen, Cursor

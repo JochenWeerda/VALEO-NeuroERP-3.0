@@ -232,7 +232,6 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
     from sqlalchemy import create_engine, text
 
     chance = str(uuid.uuid4())
-    pipeline_kunde = str(uuid.uuid4())
     aktivitaet = str(uuid.uuid4())
     engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
     with engine.begin() as verbindung:
@@ -242,7 +241,7 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
                 "(id, tenant_id, customer_number, company_name, last_name, street, postal_code, city) "
                 "VALUES (:id, :tid, :nr, 'Testhof Sonnenacker', 'Meyer', 'Hofweg 1', '29525', 'Uelzen')"
             ),
-            {"id": pipeline_kunde, "tid": kunde["mandant"], "nr": kunde["kunden_nr"]},
+            {"id": kunde["id"], "tid": kunde["mandant"], "nr": kunde["kunden_nr"]},
         )
         verbindung.execute(
             text(
@@ -250,7 +249,7 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
                 "(id, customer_id, title, assigned_to, tenant_id, stage, estimated_value, probability) "
                 "VALUES (:id, :cid, 'Weizen 2026', 'vertrieb', :tid, 'proposal', 12000, 40)"
             ),
-            {"id": chance, "cid": pipeline_kunde, "tid": kunde["mandant"]},
+            {"id": chance, "cid": kunde["id"], "tid": kunde["mandant"]},
         )
         verbindung.execute(
             text(
@@ -285,10 +284,42 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
                 text("DELETE FROM domain_crm.crm_opportunities WHERE id = :id"), {"id": chance}
             )
             verbindung.execute(
-                text("DELETE FROM domain_crm.crm_customers WHERE id = :id"), {"id": pipeline_kunde}
+                text("DELETE FROM domain_crm.crm_customers WHERE id = :id"), {"id": kunde["id"]}
             )
             verbindung.execute(
                 text("DELETE FROM domain_crm.activities WHERE id = :id"), {"id": aktivitaet}
+            )
+
+
+def test_angelegte_aktivitaet_erscheint_in_der_historie(client, kunde) -> None:
+    """create_activity schreibt in domain_crm.activities, nicht in eine Tabelle ohne Migration."""
+    from sqlalchemy import create_engine, text
+
+    antwort = client.post(
+        f"/api/v1/crm/customers/{kunde['id']}/actions/create_activity",
+        headers=kopf(kunde["mandant"]),
+        json={"betreff": "Hofbesuch", "typ": "Besuch", "_mode": "execute", "_auditReason": "Termin"},
+    )
+    assert antwort.status_code == 200, antwort.text
+    koerper = antwort.json()
+    assert koerper["success"] is True
+    aktivitaet = koerper["affectedIds"][0]
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    try:
+        historie = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/historie", headers=kopf(kunde["mandant"])
+        )
+        assert historie.status_code == 200, historie.text
+        assert any(zeile.get("subject") == "Hofbesuch" for zeile in historie.json()["items"])
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(text("DELETE FROM domain_crm.activities WHERE id = :id"), {"id": aktivitaet})
+            verbindung.execute(
+                text(
+                    "DELETE FROM domain_crm.crm_action_audit_log "
+                    "WHERE entity_id = :cid AND action_key = 'create_activity'"
+                ),
+                {"cid": kunde["id"]},
             )
 
 
@@ -329,7 +360,7 @@ def test_offene_posten_erscheinen_in_dokumenten_und_im_kopf(client, kunde) -> No
 
 
 def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) -> None:
-    """Steuern und Bank kommen vom Partner, Kontakte aus domain_crm.contacts, Kontrakte ueber party_id."""
+    """Steuern und Bank kommen vom Partner, Kontakte aus business_partner_contacts, Kontrakte ueber party_id."""
     from sqlalchemy import create_engine, text
 
     kontakt = str(uuid.uuid4())
@@ -346,11 +377,13 @@ def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) 
         )
         verbindung.execute(
             text(
-                "INSERT INTO domain_crm.contacts "
-                "(id, first_name, last_name, email, customer_id, position) "
-                "VALUES (:id, 'Ada', 'Meyer', 'ada@sonnenacker.test', :cid, 'Geschaeftsfuehrung')"
+                "INSERT INTO domain_crm.business_partner_contacts "
+                "(id, partner_id, priority, first_name, last_name, email, position, contact_type, "
+                "invoice_email_recipient, reminder_email_recipient, is_data_protection_officer) "
+                "VALUES (:id, :pid, 0, 'Ada', 'Meyer', 'ada@sonnenacker.test', 'Geschaeftsfuehrung', "
+                "'other', false, false, false)"
             ),
-            {"id": kontakt, "cid": kunde["id"]},
+            {"id": kontakt, "pid": kunde["partner_id"]},
         )
         verbindung.execute(
             text(
@@ -383,7 +416,7 @@ def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) 
     finally:
         with engine.begin() as verbindung:
             verbindung.execute(text("DELETE FROM domain_ops.kon_contract WHERE contract_id = :id"), {"id": kontrakt})
-            verbindung.execute(text("DELETE FROM domain_crm.contacts WHERE id = :id"), {"id": kontakt})
+            verbindung.execute(text("DELETE FROM domain_crm.business_partner_contacts WHERE id = :id"), {"id": kontakt})
 
 
 def test_potenzial_kommt_aus_dem_juengsten_gap_snapshot(client, kunde) -> None:
@@ -599,6 +632,255 @@ def test_rabatte_preise_und_sepa_liegen_in_der_akte(client, kunde) -> None:
             )
             verbindung.execute(
                 text("DELETE FROM domain_crm.business_partner_discount_items WHERE id = :id"), {"id": rabatt}
+            )
+
+
+def test_annahme_und_kreditlimit_in_der_360_sicht(client, kunde) -> None:
+    """Annahmeschein und Kreditausnahme treffen die Spalten der Migration."""
+    from sqlalchemy import create_engine, text
+
+    annahme = str(uuid.uuid4())
+    annahme_nr = f"AN-{uuid.uuid4().hex[:6].upper()}"
+    limit_id = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.harvest_acceptances "
+                "(id, acceptance_number, tenant_id, delivery_date, operator_id, customer_id, "
+                "is_sustainable_biomass, release_status, pricing_mode, "
+                "print_remarks_on_acceptance_note, print_remarks_on_settlement) "
+                "VALUES (:id, :nr, :tid, CURRENT_DATE, 'bedienung', :cid, "
+                "false, 'draft', 'spot_daily', false, false)"
+            ),
+            {"id": annahme, "nr": annahme_nr, "tid": kunde["mandant"], "cid": kunde["id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.credit_limits "
+                "(id, tenant_id, customer_id, credit_limit_eur) "
+                "VALUES (:id, :tid, :cid, 5000)"
+            ),
+            {"id": limit_id, "tid": kunde["mandant"], "cid": kunde["id"]},
+        )
+    try:
+        sicht = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/360", headers=kopf(kunde["mandant"])
+        )
+        assert sicht.status_code == 200, sicht.text
+        koerper = sicht.json()
+        eingang = koerper["last_goods_receipt"]
+        assert eingang["reference_number"] == annahme_nr
+        assert eingang["source"] == "harvest_acceptances"
+        assert koerper["credit_limit_status"]["credit_limit"] == 5000
+        assert koerper["credit_limit_status"]["source"] == "ausnahme"
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_crm.credit_limits WHERE id = :id"), {"id": limit_id}
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_inventory.harvest_acceptances WHERE id = :id"),
+                {"id": annahme},
+            )
+
+
+def test_warenzugang_ohne_annahmeschein_haengt_am_partner(client, kunde) -> None:
+    """Lagerbewegung zaehlt ueber owner_partner_id, nicht ueber einen Notiztext."""
+    from sqlalchemy import create_engine, text
+
+    bewegung = str(uuid.uuid4())
+    artikel = str(uuid.uuid4())
+    lager = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.warehouses "
+                "(id, tenant_id, warehouse_code, name, address, city, postal_code) "
+                "VALUES (:id, :tid, :code, 'Prueflager Akte', 'Kai 1', 'Bremen', '28195')"
+            ),
+            {"id": lager, "tid": kunde["mandant"], "code": f"L-{uuid.uuid4().hex[:4]}"},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.articles "
+                "(id, tenant_id, article_number, name, mhd_erforderlich, lagerartikel, "
+                "lagerorte, chargenpflicht, qs_pruefung_erforderlich, bio_kennzeichnung, "
+                "gmp_plus_relevanz, unit, category, sales_price) "
+                "VALUES (:id, :tid, :nr, 'Weizen Akte', false, true, '[]'::jsonb, false, "
+                "false, false, false, 't', 'Getreide', 0)"
+            ),
+            {"id": artikel, "tid": kunde["mandant"], "nr": f"A-{uuid.uuid4().hex[:6]}"},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.inventory_stock_movements "
+                "(id, article_id, warehouse_id, movement_type, quantity, reference_number, "
+                "owner_partner_id, ownership_type, auto_created, storage_fee_relevant, "
+                "previous_stock, new_stock, tenant_id) "
+                "VALUES (:id, :artikel, :lager, 'in', 12, 'WE-1', :pid, 'owned', false, false, "
+                "0, 12, :tid)"
+            ),
+            {
+                "id": bewegung,
+                "artikel": artikel,
+                "lager": lager,
+                "pid": kunde["partner_id"],
+                "tid": kunde["mandant"],
+            },
+        )
+    try:
+        sicht = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/360", headers=kopf(kunde["mandant"])
+        )
+        assert sicht.status_code == 200, sicht.text
+        eingang = sicht.json()["last_goods_receipt"]
+        assert eingang["reference_number"] == "WE-1"
+        assert eingang["quantity_kg"] == 12
+        assert eingang["source"] == "inventory_stock_movements"
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_inventory.inventory_stock_movements WHERE id = :id"),
+                {"id": bewegung},
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_inventory.articles WHERE id = :id"),
+                {"id": artikel},
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_inventory.warehouses WHERE id = :id"),
+                {"id": lager},
+            )
+
+
+def test_agrarkontrakt_haengt_am_partner_nicht_nur_an_der_kunden_id(client, kunde) -> None:
+    """Die 360-Liste trifft Kontrakte, deren partner_id der Geschaeftspartner ist."""
+    from sqlalchemy import create_engine, text
+
+    kontrakt = str(uuid.uuid4())
+    nummer = f"AK-{uuid.uuid4().hex[:6].upper()}"
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.agrar_contracts "
+                "(id, tenant_id, contract_number, contract_type, harvest_year, partner_id, "
+                "article_id, pricing_model, total_quantity_kg, remaining_quantity_kg, status, "
+                "fixed_price) "
+                "VALUES (:id, :tid, :nr, 'purchase', 2026, :pid, :artikel, 'fixed', "
+                "1000, 1000, 'open', 200)"
+            ),
+            {
+                "id": kontrakt,
+                "tid": kunde["mandant"],
+                "nr": nummer,
+                "pid": kunde["partner_id"],
+                "artikel": str(uuid.uuid4()),
+            },
+        )
+    try:
+        sicht = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/360", headers=kopf(kunde["mandant"])
+        )
+        assert sicht.status_code == 200, sicht.text
+        nummern = [zeile.get("contract_number") for zeile in sicht.json()["active_contracts"]]
+        assert nummer in nummern
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_inventory.agrar_contracts WHERE id = :id"),
+                {"id": kontrakt},
+            )
+
+
+def test_jahresumsatz_zaehlt_die_geschriebenen_auftragsstatus(client, kunde) -> None:
+    """Offene Auftraege zaehlen nicht. completed und geliefert zaehlen."""
+    from sqlalchemy import create_engine, text
+
+    abgeschlossen = str(uuid.uuid4())
+    geliefert = str(uuid.uuid4())
+    offen = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        for auftrag, nummer, status, betrag in (
+            (abgeschlossen, f"VA-{uuid.uuid4().hex[:6]}", "completed", 1500),
+            (geliefert, f"VA-{uuid.uuid4().hex[:6]}", "geliefert", 250),
+            (offen, f"VA-{uuid.uuid4().hex[:6]}", "open", 999),
+        ):
+            verbindung.execute(
+                text(
+                    "INSERT INTO domain_crm.sales_orders "
+                    "(id, tenant_id, customer_id, order_number, subject, total_amount, status) "
+                    "VALUES (:id, :tid, :cid, :nr, 'Akte', :betrag, :status)"
+                ),
+                {
+                    "id": auftrag,
+                    "tid": kunde["mandant"],
+                    "cid": kunde["id"],
+                    "nr": nummer,
+                    "betrag": betrag,
+                    "status": status,
+                },
+            )
+    try:
+        sicht = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/360", headers=kopf(kunde["mandant"])
+        )
+        assert sicht.status_code == 200, sicht.text
+        koerper = sicht.json()
+        assert koerper["jahresumsatz_eur"] == 1750
+        nummern = {zeile.get("order_number") for zeile in koerper["recent_orders"]}
+        assert len(nummern) == 3
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_crm.sales_orders WHERE id IN (:a, :b, :c)"),
+                {"a": abgeschlossen, "b": geliefert, "c": offen},
+            )
+
+
+def test_postfach_und_geo_kommen_aus_dem_migrierten_stamm(client, kunde) -> None:
+    """Postfach aus public.kunden, Koordinaten aus public.kunden_geo."""
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO public.kunden (kunden_nr, name1, postfach, postfach_plz, postfach_ort) "
+                "VALUES (:nr, 'Testhof Sonnenacker', '12', '28195', 'Bremen')"
+            ),
+            {"nr": kunde["kunden_nr"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO public.kunden_geo (kunden_nr, lat, lon, \"precision\", source) "
+                "VALUES (:nr, 53.0793, 8.8017, 'address', 'manuell')"
+            ),
+            {"nr": kunde["kunden_nr"]},
+        )
+    try:
+        stamm = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}", headers=kopf(kunde["mandant"])
+        )
+        assert stamm.status_code == 200, stamm.text
+        daten = stamm.json()
+        assert daten["postfach"] == "12"
+        assert daten["postfach_plz"] == "28195"
+        assert daten["postfach_ort"] == "Bremen"
+        assert float(daten["breitengrad"]) == 53.0793
+        assert float(daten["laengengrad"]) == 8.8017
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM public.kunden_geo WHERE kunden_nr = :nr"),
+                {"nr": kunde["kunden_nr"]},
+            )
+            verbindung.execute(
+                text("DELETE FROM public.kunden WHERE kunden_nr = :nr"),
+                {"nr": kunde["kunden_nr"]},
             )
 
 

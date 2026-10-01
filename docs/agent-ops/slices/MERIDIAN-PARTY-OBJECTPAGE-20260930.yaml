@@ -16,6 +16,11 @@ progress: >
   Potenzial aus dem juengsten `public.customer_potential_snapshot`.
   Pflege-Register Chef, Anschriften, Kontoauszug und CPD sind lesbar.
   Rabatte, Preise und das SEPA-Mandat kommen vom Partner.
+  Ansprechpartner aus `business_partner_contacts`, nicht aus `domain_crm.contacts`.
+  Angebote ohne Unterabfrage auf `crm_customers`.
+  Jahresumsatz zaehlt `completed`, `geliefert` und `invoiced`.
+  Wareneingang ohne Annahmeschein haengt an `owner_partner_id`.
+  Agrarkontrakte haengen an der Partner-ID oder der Partnernummer.
 closed_at: 2026-09-30
 result: >
   Eine Object-Page-Akte fuer Interessent und Kunde. KIM-Route leitet um,

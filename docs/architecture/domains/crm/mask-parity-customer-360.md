@@ -32,7 +32,7 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 | Ausgabe (`output`) | `output` | Rechnungs- und Mahnversand | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Schnittstellen (`interfaces`) | `interfaces` | EDIFACT INVOIC, ORDERS, DESADV | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Potenzial (`potential`) | `potential` | Juengster Satz aus `public.customer_potential_snapshot` | `GET /api/v1/crm/customers/{id}` | compiled | ok |
-| Ansprechpartner (`contacts`) | `contacts` | `domain_crm.contacts` und `public.kunden_ansprechpartner` | `GET .../tabs/contacts` | lazy table | ok |
+| Ansprechpartner (`contacts`) | `contacts` | `domain_crm.business_partner_contacts` und `public.kunden_ansprechpartner` | `GET .../tabs/contacts` | lazy table | ok |
 | CRM 360 Auftraege | `auftraege` (Belege) | Auftragsliste | `GET .../tabs/auftraege` | ok |
 | CRM 360 Aktivitaeten | `aktivitaeten` | Aktivitaetenliste | `GET .../tabs/aktivitaeten` | ok |
 | CRM 360 Dokumente | `dokumente` / `finance` | Offene Posten ueber `kunde_id` | `GET .../tabs/dokumente` | ok |
@@ -82,6 +82,11 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 - Chef, Präsente, Postfach und Geo sitzen in der nativen Object Page
   (`masterdata`/`praesente`/`postfach`/`address`); Mini-Apps bleiben weg.
 - Listen-IDs (`kunden_nr`, Partnernummer) oeffnen dieselbe Akte wie die UUID.
+- Jahresumsatz zaehlt Auftraege mit Status `completed`, `geliefert` oder `invoiced`.
+- Der letzte Wareneingang kommt vom Annahmeschein; fehlt der, von der
+  Lagerbewegung ueber `owner_partner_id`.
+- Laufende Agrarkontrakte haengen an der Partner-ID oder der Partnernummer.
+- Postfach kommt aus `public.kunden`, Koordinaten aus `public.kunden_geo`.
 - `/verkauf/kunden-stamm/:id` und `/crm/kunden-cockpit?id=` leiten auf dieselbe Akte;
   Mutationen der Tabs 21–25 bleiben unter `?pflege=1`.
 
