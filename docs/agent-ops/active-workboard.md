@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BANK-PAYMENT-MATCHING-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## BANK-PAYMENT-MATCHING-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe CI-Abnahme offen.
 **Ziel:** Import-Abgleich, manuelle Zuordnung und Zahlungs-Automatik verwenden
 denselben transaktionalen Vertrag fuer reale Bankzeile und OP. Keine
 angenommenen Zahlungen, kein Fremdmandant, keine volle Rechnung bei Teilzahlung.
@@ -39,6 +39,13 @@ bleiben beim Owner. Fresh-Schema zeigte ausserdem fehlendes op_betrag:
 bestehende Lesewege verwenden die migrierte Betragsspalte. Jeder echte
 Abgleich bekommt einen atomaren hashverketteten Nachweis mit Dezimalwerten;
 ein Auditfehler darf keine Auszifferung hinterlassen.
+
+**Ergebnis:** 69 echte Finanzvertraege und 13 weitere bestehende Vertraege
+bestanden. Drei Wege verwenden reale Bankzeile/OP, Teilzahlung, Header-Tenant,
+Guard-Updates, Sperren und atomaren Auditnachweis. Keine neue Testressource.
+**Nachweis:** `docs/quality-assurance/bank-payment-matching-integrity-20261001.md`.
+**Offen:** Dateireimport, Bankkonto-/IBAN-Bindung, Rueckbuchung/GL und externe
+CI-/OpenAPI-Gates; fremde POS-/Webhook-/CRM-Gates nicht uebernommen.
 
 ## WEBHOOK-MANDANT-20261001 — abgeschlossen, Claude Code
 
@@ -108,7 +115,7 @@ vorhandene Tests; `tsc` und `eslint` ohne Befund zur Maske. Gegen die
 `docs/quality-assurance/webhook-mandant-20261001.md`.
 ## BANK-STATEMENT-IMPORT-INTEGRITY-20261001 — abgeschlossen (manueller Import), Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** manueller Import abgeschlossen 2026-10-01; Auto-Abgleich offen.
+**Owner:** Codex-01a0f3fc. **Stand:** manueller Import abgeschlossen; Auto-Abgleich im Nachzug BANK-PAYMENT-MATCHING-INTEGRITY-20261001 geschlossen.
 **Ziel:** Gueltige Kontoauszuege passieren DQ; manueller Import speichert
 Kopf und alle Zeilen atomar, statt SQL-/Commitfehler als Erfolg zu melden.
 **Dateibesitz:** `bank_statement_import.py` (parse_csv und manueller Import),
@@ -121,14 +128,18 @@ Tests verwenden ausschliesslich den vorhandenen valeo_probe ohne Reset/Migration
 
 **Scope-Ergaenzung vor Edit:** Reparierte DQ macht den bisher blockierten
 Auto-Matchingpfad erreichbar: fehlender Tenantfilter, Teilzahlung setzt
-Restbetrag auf null, Bankzeilenstatus wird nicht gespeichert. Bis zum eigenen
-fachlichen Abgleichvertrag wird auto_match vor jedem DB-Zugriff mit 501
-abgewiesen. Manueller Import bleibt atomar nutzbar; Matching-Gap bleibt offen.
+Restbetrag auf null, Bankzeilenstatus wird nicht gespeichert. Historischer Zwischenstand:
+auto_match wurde vor DB-Zugriff mit 501 gesperrt. Der unten dokumentierte
+Nachzug schliesst diesen Matching-Gap; manueller Import bleibt atomar.
 
 **Ergebnis:** 12 echte PostgreSQL-/HTTP- und sechs bestehende DQ-Vertraege
 bestanden. Kopf und Zeilen atomar, keine Selbstduplikate, Waehrung erhalten,
 UUIDv7-IDs; auto_match vor DB-Zugriff mit 501 gesperrt.
 **Nachweis:** `docs/quality-assurance/bank-statement-import-integrity-20261001.md`.
+
+**Nachzug 2026-10-01:** Die historische 501-Sperre ist durch denselben
+sicheren Vertrag wie manuelle/batchweise Zahlungszuordnung ersetzt.
+Aktueller Stand: BANK-PAYMENT-MATCHING-INTEGRITY-20261001.
 
 ## TEST-DATABASE-RESOURCE-POLICY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

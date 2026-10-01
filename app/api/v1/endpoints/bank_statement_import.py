@@ -4,7 +4,7 @@ FIBU-BNK-02: Kontoauszugsimport CAMT/MT940/CSV
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal, InvalidOperation
@@ -16,6 +16,7 @@ import io
 import re
 import logging
 
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from ....core.database import get_db
 from ....core.data_quality_enforcement import (
@@ -368,15 +369,14 @@ async def import_bank_statement(
     file: UploadFile = File(...),
     format: str = Query(..., description="File format: CAMT, MT940, or CSV"),
     bank_account_id: str = Query(..., description="Bank account ID"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     auto_match: bool = Query(False, description="Auto-match transactions"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None,
 ):
     """
     Import bank statement from CAMT.053, MT940, or CSV file.
     """
-    if auto_match:
-        raise HTTPException(status_code=501, detail="Automatic matching is unavailable; import without auto_match and reconcile separately")
     db_started = False
     try:
         content = await file.read()
@@ -465,6 +465,14 @@ async def import_bank_statement(
                 "status": "UNMATCHED",
             })
             imported_lines.append(BankStatementLine(**entry, status="UNMATCHED"))
+        if auto_match:
+            from app.api.v1.endpoints.payment_matching import match_statement_lines
+
+            matches = match_statement_lines(db, tenant_id, statement_id=statement_id, request=request)
+            matched_ids = {match.payment_id for match in matches}
+            for entry, line in zip(parsed['entries'], imported_lines):
+                if f"{statement_id}-L{entry['line_number']}" in matched_ids:
+                    line.status = "MATCHED"
         # Validate the response before committing so serialization errors cannot
         # turn a committed import into a failed request.
         result = BankStatementImportResult(
@@ -496,7 +504,7 @@ async def import_bank_statement(
 @router.get("/{statement_id}/lines", response_model=List[BankStatementLine], summary="Statement lines abrufen")
 async def get_statement_lines(
     statement_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Get all lines for a bank statement."""

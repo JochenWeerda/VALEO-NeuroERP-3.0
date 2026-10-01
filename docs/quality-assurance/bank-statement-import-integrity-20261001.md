@@ -45,19 +45,21 @@ Fundstellen, nach Reparatur keine. Die projektweite Zahl ist wegen paralleler
 Fremdarbeit eine Momentaufnahme, keine vollstaendige Gap-Schliessung.
 Die bestehende Schwelle wird nicht angehoben.
 
-## Automatischer Abgleich bleibt offen
+## Historischer Schutz und Nachzug
 
 Die bisher durch den DQ-Fehler praktisch blockierte Option auto_match las
 alle zahlbaren offenen Posten ohne Mandantenfilter, setzte beim blossen
 Referenztreffer auch Teilzahlungen auf null und speicherte keinen
 Bankzeilenstatus. Nach Behebung der DQ waere dieser Pfad erreichbar geworden.
-Deshalb wird auto_match jetzt vor jedem Datenbankzugriff mit HTTP 501
-abgewiesen. Ein Vertrag sichert ab, dass dabei keine Importdaten entstehen.
+Der manuelle Meilenstein sperrte auto_match vor jedem Datenbankzugriff mit
+HTTP 501. Der Nachzug BANK-PAYMENT-MATCHING-INTEGRITY-20261001 ersetzt diese
+Sperre durch den gemeinsamen sicheren Matching-Vertrag; aktuelle Abnahme:
+[Bank- und Zahlungsabgleich](bank-payment-matching-integrity-20261001.md).
 
-Die atomare manuelle Importfunktion ist abgeschlossen. Fachlicher
-Auto-Abgleich bleibt ein eigener Gap: tenantgebundene Kandidaten,
+Die atomare manuelle Importfunktion ist abgeschlossen. Der damalige
+Auto-Abgleich-Gap umfasste: tenantgebundene Kandidaten,
 Betrag/Vorzeichen/Waehrung, Teilzahlungen, Mehrdeutigkeiten, persistente
 Zuordnung, Sperren und Wiederholungsschutz sind gemeinsam abzusichern.
-Authentisierung/Tenant-Query-Vertraege, CAMT-/MT940-Parserdetails und die
-separate Zahlungs-Matching-API sind durch diesen Slice nicht vollstaendig
-abgenommen. GitHub-CI und Integration bleiben externe Nachweise.
+Dieser urspruengliche Slice allein nahm Tenant-/Matchingvertraege nicht
+vollstaendig ab; ihr aktueller Stand und verbleibende Parser-/Fachgaps
+stehen im verlinkten Nachzug. GitHub-CI und Integration bleiben externe Nachweise.

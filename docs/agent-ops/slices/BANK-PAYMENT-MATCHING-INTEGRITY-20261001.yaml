@@ -1,0 +1,40 @@
+slice_id: BANK-PAYMENT-MATCHING-INTEGRITY-20261001
+title: Einheitlicher Bank- und Zahlungsabgleich
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claims cbd92693a und c6e48664b; fremde aktive Slices unveraendert.
+goal: Reale Bankzeile und OP sicher und atomar zuordnen.
+file_ownership:
+  - app/api/v1/endpoints/payment_matching.py
+  - app/api/v1/endpoints/bank_statement_import.py
+  - config/pagination_baseline.json
+  - tests/test_bank_payment_matching_integrity.py
+  - tests/test_bank_statement_import_integrity.py
+  - tests/test_payment_csv_import_integrity.py
+  - docs/architecture/domains/finance/workflows.md
+  - docs/quality-assurance/bank-payment-matching-integrity-20261001.md
+acceptance:
+  - Alle drei Zuordnungswege verwenden denselben transaktionalen Vertrag.
+  - Teilzahlung bezahlt keine Rechnung; Fremdmandant und Mehrdeutigkeit werden nicht gebucht.
+  - Wiederholung und Parallelaufruf reduzieren den OP nur einmal.
+  - OP, Bankzeile, Beleg und Audit haben genau einen Commit und atomaren Rollback.
+tests:
+  - 69 echte Finanzvertraege mit 30 neuen Matching-Vertraegen bestanden.
+  - 13 weitere bestehende DQ- und Ausfallvertraege im regulaeren Lauf bestanden.
+  - Ruff, Diff-Whitespace, Agent-Handbuch und Baseline-Integritaet bestanden.
+risks:
+  - Projektweite aktive fremde CI-Gaps bleiben sichtbar.
+  - Importdatei-Idempotenz und Bankkonto-/IBAN-Bindung bleiben eigene Fachvertraege.
+ai_harness:
+  fachlicher_vertrag: Echte Zahlung exakt verrechnen; Beleg nur bei OP-Rest null bezahlt.
+  architektur_vertrag: Minor-Bugfix vorhandener Finance-Routes und Tabellen ohne neue Services.
+  daten_vertrag: Tenant, Waehrung, Vorzeichen und Dezimalbetraege gemeinsam geprueft.
+  test_vertrag: Reale SQL-Fehler sowie Wiederholungs- und Parallelvertraege.
+  security_vertrag: Header-Tenant und verifizierte Akteurclaims statt Query-/Userheader-Identitaet.
+  betriebs_vertrag: Bestehender Pruefstand; begrenzte Batches und tenantbezogene Sperre.
+  dokumentations_vertrag: Finance-Workflow, QA, Workboard und Open-Gaps aktualisiert.
+external_gates:
+  - OpenAPI-Nachzug durch aktiven Owner nach Integration.
+  - GitHub-CI und Deployment.

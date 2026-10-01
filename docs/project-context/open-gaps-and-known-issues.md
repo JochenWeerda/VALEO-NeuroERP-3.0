@@ -11,16 +11,24 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-PAYMENT-MATCHING-INTEGRITY — sicherer Abgleich (2026-10-01)
+
+**Geschlossen:** angenommene statt gelesene Zahlung, falscher Belegstatus bei
+Teilzahlung, Fremdmandanten ueber Query, ungesicherte Wiederholung und
+fehlender atomarer Nachweis. Import-, Einzel- und Batchabgleich verwenden
+denselben Vertrag; 82 verschiedene echte und bestehende Vertraege bestanden.
+**Offen:** Dateireimport-Idempotenz, Bankkonto-/IBAN-Bindung, Rueckbuchung,
+GL-Journalintegration und weitergehende CAMT-/MT940-Abnahme. Fremde aktive
+CI-Gaps und externe Integration bleiben offen. Nachweis:
+`docs/quality-assurance/bank-payment-matching-integrity-20261001.md`.
+
 ## BANK-STATEMENT-IMPORT-INTEGRITY — manueller Import (2026-10-01)
 
 **Geschlossen:** Selbstduplikate gueltiger Zeilen, Erfolg trotz SQL-/Commitfehler,
-Waehrungsverlust und kollidierende Import-IDs. 18 echte und bestehende
-Vertraege auf vorhandenem valeo_probe bestanden, ohne neue Testressourcen.
-**Offen:** auto_match hatte keinen Tenantfilter und konnte Teilzahlungen
-vollstaendig ausgleichen. Die Option wird vor Datenzugriff mit 501 abgewiesen;
-ein eigener Fachvertrag muss Teilzahlungen, Sperren, Wiederholungsschutz,
-Waehrung, Vorzeichen und eindeutige persistente Zuordnung absichern.
-Tenant-Query-/Auth-Vertrag und weitere Parserabnahmen bleiben eigene Gaps.
+Waehrungsverlust und kollidierende Import-IDs. 18 Vertraege im manuellen
+Meilenstein bestanden. Die damalige 501-Sperre fuer auto_match ist im Nachzug
+BANK-PAYMENT-MATCHING-INTEGRITY durch den sicheren gemeinsamen Vertrag ersetzt.
+Aktuelle Abnahme und verbleibende Fach-/Parsergaps stehen im Nachzug.
 Nachweis: `docs/quality-assurance/bank-statement-import-integrity-20261001.md`.
 
 ## SECURITY-PATCH-MILESTONE — Paketbefunde (2026-10-01)

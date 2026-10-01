@@ -14,14 +14,14 @@ acceptance:
   - Manueller Kopf-/Zeilenimport hat genau einen Commit und atomaren Rollback.
   - DQ unterscheidet aktuelle Zeile von echten Duplikaten.
   - Antwort und gespeicherte Waehrung und Zaehler stimmen ueberein.
-  - Unsicherer Auto-Abgleich wird vor Datenzugriff mit 501 abgewiesen.
+  - Historische 501-Sperre ist im Nachzug BANK-PAYMENT-MATCHING-INTEGRITY-20261001 sicher ersetzt.
 tests:
   - 12 echte PostgreSQL-/HTTP-Vertraege und sechs bestehende DQ-Vertraege bestanden.
   - Ruff fuer neue Tests und Diff-Whitespacepruefung bestanden.
   - Dead-Transaction-Scanner findet keine Importfundstelle mehr.
 risks:
-  - Auto-Abgleich erfordert einen eigenen vollstaendigen Fachvertrag.
-  - Tenant-Query-/Auth-Vertraege und andere Parser bleiben eigene Gaps.
+  - Historischer Auto-Abgleich-Gap ist im Nachzug BANK-PAYMENT-MATCHING-INTEGRITY-20261001 geschlossen.
+  - Aktueller Tenant-/Matchingstand und verbleibende Parsergaps stehen im Nachzug.
 ai_harness:
   fachlicher_vertrag: Erfolg bedeutet vollstaendig gespeicherten manuellen Import.
   architektur_vertrag: Bestehende Tabellen und gemeinsamer Pruefstand.
@@ -32,4 +32,4 @@ ai_harness:
   dokumentations_vertrag: Workboard, Open-Gaps, Slice und Abnahmebericht.
 external_gates:
   - GitHub-CI und Integration.
-  - Eigener Fachslice fuer sicheren automatischen Abgleich.
+  - Weiterfuehrende Fachvertraege gemaess BANK-PAYMENT-MATCHING-INTEGRITY-20261001.

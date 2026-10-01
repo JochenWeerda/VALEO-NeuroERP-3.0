@@ -42,7 +42,6 @@
     "app/api/v1/endpoints/asset_accounting.py::list_assets": 1,
     "app/api/v1/endpoints/asset_accounting.py::run_depreciation": 1,
     "app/api/v1/endpoints/audit.py::get_audit_stats": 2,
-    "app/api/v1/endpoints/bank_statement_import.py::import_bank_statement": 1,
     "app/api/v1/endpoints/beleg_vordrucke.py::list_vordrucke": 1,
     "app/api/v1/endpoints/beleg_vordrucke.py::seed_standard_vorlagen": 1,
     "app/api/v1/endpoints/benchmark_api.py::get_benchmark_report": 1,

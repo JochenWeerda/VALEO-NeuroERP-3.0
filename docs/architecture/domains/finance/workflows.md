@@ -23,3 +23,17 @@ mit Quellbeleg und Nachweis klaeren -> begruendet wiederholen.
 Bonus: freigegebenen festen Bericht und Periode waehlen -> Basiszeilen
 berechnen -> unveraenderlichen Lauf speichern -> optional Korrekturlauf mit
 Bezug/Grund -> auditierter CSV-Export. Ursprungslauf bleibt unveraendert.
+
+## Bank- und Zahlungsabgleich
+
+Tenant aus X-Tenant-ID -> echten Auszug und Bankzeile lesen -> eindeutige
+Belegreferenz, Waehrung und Zahlungsrichtung pruefen -> OP-Rest exakt reduzieren
+-> Bankzeile persistent zuordnen -> bei OP-Rest null eigenen Beleg als bezahlt
+markieren -> hashverketteten Nachweis schreiben -> gemeinsam committen.
+
+Import-Automatik, manuelle Zuordnung und Batch-Automatik nutzen denselben
+Vertrag. Mehrdeutigkeit und Ueberzahlung bleiben unzugeordnet; Teilzahlungen
+lassen den OP und die Rechnung offen. Batch maximal 100 Zeilen; wiederholte
+Zuordnung derselben Bankzeile ist idempotent. Keine neue GL-Buchung durch
+blossen Abgleich. Nachweis:
+[Matching-Abnahme](../../../quality-assurance/bank-payment-matching-integrity-20261001.md).

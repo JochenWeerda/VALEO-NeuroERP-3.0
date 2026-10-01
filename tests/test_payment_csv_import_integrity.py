@@ -59,7 +59,7 @@ def import_case():
     app = FastAPI()
     app.include_router(payment_matching.router, prefix="/payments")
     app.dependency_overrides[get_db] = lambda: db
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Tenant-ID": tenant}) as client:
         yield db, client, tenant
     db.rollback()
     db.close()

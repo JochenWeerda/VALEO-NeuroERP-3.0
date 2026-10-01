@@ -58,7 +58,7 @@ def import_case():
     app = FastAPI()
     app.include_router(bank_statement_import.router)
     app.dependency_overrides[get_db] = lambda: db
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Tenant-ID": tenant}) as client:
         yield db, client, tenant
     db.rollback()
     db.close()
@@ -133,13 +133,14 @@ def test_two_imports_have_distinct_persistent_ids(import_case):
     assert counts(import_case) == (2, 4)
 
 
-def test_auto_match_is_rejected_before_import_or_open_item_mutation(import_case):
+def test_auto_match_without_candidate_keeps_import_unmatched(import_case):
     db, client, tenant = import_case
     response = client.post("/bank-statements/import", params={"tenant_id": tenant,
         "bank_account_id": "bank-test", "format": "CSV", "auto_match": True},
         files={"file": ("statement.csv", CSV.encode(), "text/csv")})
-    assert response.status_code == 501
-    assert db.commits == 0 and counts(import_case) == (0, 0)
+    assert response.status_code == 200, response.text
+    assert all(row["status"] == "UNMATCHED" for row in response.json()["lines"])
+    assert db.commits == 1 and counts(import_case) == (1, 2)
 
 
 def test_signed_bank_debit_is_preserved(import_case):
