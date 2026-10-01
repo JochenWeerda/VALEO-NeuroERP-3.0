@@ -11,57 +11,87 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## KONTRAKT-EINE-ORDNUNG-20261001 — in Arbeit, Claude Code
+## KONTRAKT-EINE-ORDNUNG-20261001 — abgeschlossen, Claude Code
 
-**Ziel:** Fuer "Kontrakt" gibt es sechs Tabellen in fuenf Schemata und **zwei
+**Ziel:** Fuer "Kontrakt" standen sechs Tabellen in fuenf Schemata und **zwei
 vollstaendig ausgebaute, geroutete Implementierungen von Fixierung und
 Abrechnung**. Der Slice benennt je Fachbegriff ein fuehrendes Modell, legt die
-Doppelung still und raeumt die Verweise ins Leere auf.
-
-**Befund (gemessen 01.10.2026, dev und frisch):**
-| Tabelle | Zeilen dev | Code | Masken |
-|---|---|---|---|
-| `domain_ops.kon_contract` (+ `_line`/`_fixing`/`_movement`/`_reminder`) | 8/8/2/6/0 | 4 Dienste, 4 Endpunktmodule, ORM | 4 Frontend-Module |
-| `domain_inventory.agrar_contracts` | 94 | CRM, Portal, Bruecken, ORM | Portal/CRM |
-| `domain_einkauf.kontrakte` (+ Positionen) | 0 | Preisermittlung, ORM | — |
-| `domain_contracts.contracts` (+ Versionen/Pflichten) | 0 | Vertragsregister (gerade migriert) | — |
-| `domain_kontrakte.*` (4 Tabellen, **keine Kopftabelle**) | 0 | 3 Dienste, 1 Endpunktmodul, 7 Routen | **keine** |
-| `domain_portal.customer_contracts` | 0 | **keine** | **keine** |
-| `domain_agrar.kontrakte` / `kontrakt_dispositionen` | existiert nicht | 2 Verweise ins Leere | — |
-
+zweite Fassung still und raeumt die Verweise ins Leere auf.
 **Dateibesitz:** `alembic/versions/kontrakt_ordnung_20261001.py`,
-`app/api/v1/endpoints/kontrakt_actions.py` (Entfall),
-`app/api/v1/schemas/kontrakt_actions_schemas.py` (Entfall),
-`app/services/kontrakt_fixing_service.py`,
-`app/services/kontrakt_lifecycle_service.py`,
-`app/services/kontrakt_settlement_service.py` (Entfall),
-`app/api/v1/api.py` (nur die Montage dieses Routers),
+`app/api/v1/api.py` (nur die entfernte Montage),
 `app/services/calendar_projection_service.py` (nur der Kontraktfristen-Hunk),
-`tests/test_dom_con_004.py` (Entfall), `tests/test_welle4_response_models.py`
-(nur die Modulliste), `tests/test_uix063_planning_calendar.py` (nur der
-Kontrakt-Stub), `tests/test_kontrakt_ordnung_vertrag.py`,
-`docs/architecture/domains/kontrakte/fuehrendes-modell.md`,
-`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
+entfallen: `kontrakt_actions.py`, `kontrakt_actions_schemas.py`,
+`kontrakt_fixing_service.py`, `kontrakt_lifecycle_service.py`,
+`kontrakt_settlement_service.py`, `tests/test_dom_con_004.py`;
+`tests/test_welle4_response_models.py` und
+`tests/test_uix063_planning_calendar.py` (je ein Block),
+`tests/test_kontrakt_ordnung_vertrag.py`,
+`docs/architecture/domains/kontrakte/fuehrendes-modell.md`, eigene QA-Doku und
 dieser Abschnitt.
 
-**Abnahme:** Es gibt genau **eine** Implementierung von Fixierung und
-Abrechnung; die stillgelegten Tabellen sind weg und ihre Ruecknahme legt sie
-wieder an; die fuehrenden Wege laufen unveraendert; kein Verweis mehr auf
-`domain_agrar.kontrakte`; Vertragstests und Doku-Gates gruen.
+**Die Entscheidung — drei Fachbegriffe, drei Modelle, drei Pfade:**
+| Fachbegriff | fuehrend | Pfad |
+|---|---|---|
+| Warenkontrakt (Menge, Preisbildung, Fixierung, Andienung, Abrechnung) | `domain_ops.kon_contract` + 4 Satelliten | `/api/v1/contracts/...` |
+| Agrar-Erzeugerkontrakt (Erntejahr, Pool) | `domain_inventory.agrar_contracts` | `/api/v1/agrar/contracts/...` |
+| Vertrag (Miete, Pacht, Dienstleistung, mit Versionen/Pflichten) | `domain_contracts.contracts` | `/api/v1/vertraege/...` |
 
-**GoBD:** Stillgelegt wird nur, was am 01.10.2026 in **beiden** Datenbanken
-**null Zeilen** hatte und von keinem Weg benutzt wird — es gab also nie einen
-aufbewahrungspflichtigen Datensatz. Keine Tabelle mit Bestand wird angefasst,
-keine Buchung umgedeutet, und die Ruecknahme der Migration legt die Tabellen
-wieder an. Umgekehrt ist der stillgelegte Overlay selbst ein GoBD-Problem: Seine
-Fixierungen und Abrechnungen trugen eine freie `kontrakt_id` **ohne
-Vertragsbezug** — nicht nachvollziehbar, nicht nachpruefbar.
+**Warum `kon_contract` fuehrt:** 31 Spalten mit Praemien-/Basis-Preisbildung und
+Fixierungsfenster (`pricing_model`, `min_price`, `premium_type`,
+`premium_value`, `basis_reference`, `pricing_window_from/to`), Mengenart und
+Ueberlieferungsregel; vier echte Satelliten; ORM-Modelle; vier Dienste; vier
+Endpunktmodule; vier Frontend-Module; Bestand. Keine andere Tabelle hat mehr als
+die Haelfte davon.
 
-**Risiken:** Der Overlay stammt aus DOM-CON-004 (Juni 2026, Cursor). Er ist
-leer, ohne Aufrufer und ohne Vertragsbezug; die Begruendung steht im
-Entscheidungsdokument. Was **nicht** entschieden wird: ob
-`domain_einkauf.kontrakte` (Rahmenkontrakt mit Positionspreisen) langfristig im
-Warenkontrakt aufgeht. Dafuer fehlt Bestand zum Messen.
+**Was stillgelegt wurde, und der GoBD-Grund:** `domain_kontrakte.*` war die
+zweite Fassung — **ohne Kopftabelle**. `kontrakt_lifecycle` diente sich selbst
+als Kopf, und `kontrakt_id` war eine freie Zeichenkette, geprueft gegen nichts.
+Eine Preisfixierung und eine Abrechnung ohne nachweisbaren Vertragsbezug sind
+nach GoBD nicht nachvollziehbar und nicht nachpruefbar (Rz. 30 ff.). Das ist der
+Grund, nicht die Doppelung.
+**Ohne Datenverlust:** null Zeilen in **beiden** Datenbanken, kein Aufrufer
+(auch nicht im Frontend) — es gab nie einen aufbewahrungspflichtigen Datensatz.
+Die Migration **zaehlt vor dem Loeschen und bricht ab**, wenn irgendwo Bestand
+liegt; `downgrade` legt die Tabellen in der abgelesenen Form wieder an.
+
+**Nebenbefund, behoben:** `KontraktFristenProjector` las `domain_agrar.kontrakte`
+— eine Tabelle, die kein Migrationsstand anlegt. `_safe_mappings` fing den
+Fehler, der Kalender zeigte **keine** Kontraktfrist und sah aus, als gaebe es
+keine; sein Test stubte die Abfrage und bewies die Form, nicht die Quelle. Jetzt
+projiziert er zwei echte Fristen des fuehrenden Modells: Ende Lieferzeitraum und
+Ende Fixierungsfenster.
+
+**Benannte Luecken (nicht erfunden, nicht verschwiegen):** Andienungsfrist und
+Fruehbezugsrabatt haben im fuehrenden Modell kein Feld; `domain_einkauf.kontrakte`
+(Rahmenkontrakt mit Positionspreisen) ist leer, deshalb nicht entscheidbar;
+`domain_portal.customer_contracts` ist leer, hat aber ein ORM-Modell und wird vom
+Kundenportal abgefragt — unfertige Funktion, keine Altlast, nicht angefasst;
+`domain_agrar.kontrakt_dispositionen` bleibt beim Agrar-Owner (eigener
+Handshake).
+
+**Abnahme:** 63 Tests gruen (10 neue Vertraege + fuenf bestehende Dateien). Alle
+Ratschen gruen: Tabellenverweise 18/18, Pagination 285 ohne neuen Fund,
+Baseline-Integritaet in Ordnung, keine neue tote Transaktion, Godfile exakt.
+Nachweis: `docs/quality-assurance/kontrakt-ordnung-20261001.md`,
+Entscheidung: `docs/architecture/domains/kontrakte/fuehrendes-modell.md`.
+
+## HANDSHAKE: Ein Modul loeschen trippt die Coverage-Ratsche 2026-10-01, Claude Code an den Gate-Owner
+
+`config/coverage_ratchet_baseline.json` trug Schwellen fuer die fuenf in
+KONTRAKT-EINE-ORDNUNG entfernten Module. Nimmt man sie heraus, meldet
+`check_baseline_integrity.py` **"Absenkung verboten"**: Die Richtung dieser
+Baseline ist `up`, und ein **entfernter** Eintrag ist fuer den Vergleich dasselbe
+wie ein gesenkter. Die vier Eintraege stehen deshalb weiter da und zeigen auf
+Dateien, die es nicht mehr gibt.
+
+**Vorschlag:** Ein Eintrag darf entfernt werden, wenn die Datei im Zielcommit
+fehlt. Sonst waechst die Baseline mit jeder Aufraeumarbeit um Leichen, und jedes
+Loeschen eines Moduls wird zur Gate-Verletzung.
+
+Unabhaengig davon ist `check_critical_backend_coverage.py` rot
+(`portal_innendienst.py` 31,5 % gegen 60 %, `external_gates.py` 48,3 % gegen
+70 %, `quality_evidence.py` 49,1 % gegen 70 %) — Altbestand, nicht Folge dieses
+Slices.
 
 ## BANK-CAMT-PARSER-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

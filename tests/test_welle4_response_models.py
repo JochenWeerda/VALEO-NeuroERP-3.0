@@ -11,11 +11,9 @@ import pytest
 
 from app.api.v1.endpoints import ai_engineering_metrics as metrics_module
 from app.api.v1.endpoints import billing_batch as billing_module
-from app.api.v1.endpoints import kontrakt_actions as kontrakt_module
 from app.api.v1.endpoints import wf_cockpit_persist as cockpit_module
 from app.api.v1.schemas import ai_engineering_metrics_schemas as am
 from app.api.v1.schemas import billing_batch_schemas as bb
-from app.api.v1.schemas import kontrakt_actions_schemas as ka
 from app.api.v1.schemas import wf_cockpit_persist_schemas as wf
 from app.services.ai_engineering_metrics_service import ai_engineering_metrics_service
 
@@ -33,8 +31,8 @@ def _response_models(module):
 
 @pytest.mark.parametrize(
     "module",
-    [billing_module, metrics_module, cockpit_module, kontrakt_module],
-    ids=["billing_batch", "ai_engineering_metrics", "wf_cockpit_persist", "kontrakt_actions"],
+    [billing_module, metrics_module, cockpit_module],
+    ids=["billing_batch", "ai_engineering_metrics", "wf_cockpit_persist"],
 )
 def test_kein_endpunkt_mehr_schwach_typisiert(module):
     schwach = []
@@ -304,69 +302,3 @@ def test_stapel_summary_und_anlage():
     )
 
 
-# ── Kontraktaktionen ────────────────────────────────────────────────────────
-
-
-def test_kontrakt_lifecycle_fixing_settlement():
-    _assert_kein_feldverlust(
-        ka.KontraktLifecycleOut,
-        {
-            "id": "k1",
-            "kontrakt_id": "K-1",
-            "tenant_id": "t",
-            "kontrakt_nr": "KT-2026-001",
-            "artikel_id": "A1",
-            "menge_t": 500.0,
-            "preis_eur_t": 210.5,
-            "lieferant_id": "L1",
-            "periode": "2026-Q3",
-            "status": "ENTWURF",
-            "created_at": datetime(2026, 8, 1),
-            "updated_at": None,
-        },
-    )
-    _assert_kein_feldverlust(
-        ka.KontraktFixingOut,
-        {
-            "id": "f1",
-            "kontrakt_id": "K-1",
-            "tenant_id": "t",
-            "fixing_datum": "2026-08-01",
-            "fixing_preis_eur_t": 215.0,
-            "menge_t": 100.0,
-            "markt": "KASSA",
-            "referenz": "MATIF",
-            "operator": "u1",
-            "created_at": datetime(2026, 8, 1),
-        },
-    )
-    dumped = _assert_kein_feldverlust(
-        ka.KontraktFixingSummaryOut,
-        {
-            "kontrakt_id": "K-1",
-            "gefixte_menge_t": 100.0,
-            "offene_menge_t": 400.0,
-            "avg_fixing_preis_eur_t": 215.0,
-            "anzahl_fixings": 1,
-            "vollstaendig_gefixt": False,
-        },
-    )
-    assert dumped["offene_menge_t"] == 400.0
-    _assert_kein_feldverlust(
-        ka.KontraktSettlementOut,
-        {
-            "id": "s1",
-            "kontrakt_id": "K-1",
-            "tenant_id": "t",
-            "lieferung_datum": "2026-08-15",
-            "gelieferte_menge_t": 50.0,
-            "abrechnungspreis_eur_t": 212.0,
-            "netto_eur": 10600.0,
-            "referenz": "LS-1",
-            "status": "OFFEN",
-            "storno_grund": "",
-            "operator": "u1",
-            "created_at": datetime(2026, 8, 15),
-            "updated_at": None,
-        },
-    )

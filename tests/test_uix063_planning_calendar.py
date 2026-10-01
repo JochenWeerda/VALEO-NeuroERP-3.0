@@ -60,11 +60,14 @@ class _CalendarDb:
                 "id": "op-1", "beleg_nr": "RE-1", "partner_name": "Folkerts",
                 "faellig_am": (NOW + timedelta(days=5)).date(), "offen": 250,
             }])
-        if "FROM domain_agrar.kontrakte" in sql:
+        if "FROM domain_ops.kon_contract" in sql:
+            # Das fuehrende Modell des Warenkontrakts. Vorher stand hier
+            # domain_agrar.kontrakte — eine Tabelle, die kein Migrationsstand
+            # anlegt; der Stub verdeckte, dass die Abfrage ins Leere lief.
             return _Result([{
                 "id": "kon-1", "kontrakt_nr": "K-1", "partner_name": "DueKa",
-                "andienung_bis": (NOW + timedelta(days=20)).date(),
-                "fruehbezugsrabatt_bis": (NOW + timedelta(days=8)).date(),
+                "valid_to": (NOW + timedelta(days=20)).date(),
+                "pricing_window_to": (NOW + timedelta(days=8)).date(),
             }])
         if "FROM domain_crm.activities" in sql:
             return _Result([{

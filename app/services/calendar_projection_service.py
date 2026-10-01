@@ -229,12 +229,28 @@ class KontraktFristenProjector:
         now: datetime | None = None,
     ) -> list[CalendarItemDraft]:
         base = now or datetime.now(UTC)
+        # Gelesen wurde ``domain_agrar.kontrakte`` — diese Tabelle gibt es in
+        # keinem Migrationsstand. Die Abfrage lief seit immer ins Leere, und
+        # ``_safe_mappings`` gab eine leere Liste zurueck: Der Kalender zeigte
+        # **keine** Kontraktfrist und sah dabei aus, als gaebe es keine.
+        #
+        # Gefuehrt wird der Warenkontrakt in ``domain_ops.kon_contract``
+        # (Entscheidung: docs/architecture/domains/kontrakte/fuehrendes-modell.md).
+        # Dort stehen zwei echte Fristen: das Ende des Lieferzeitraums und das
+        # Ende des Fixierungsfensters — bis dahin muss der Preis fixiert sein.
+        # "Andienungsfrist" und "Fruehbezugsrabatt" als eigene Felder hat das
+        # fuehrende Modell nicht; das ist eine benannte Luecke, keine Erfindung.
         rows = _safe_mappings(
             db,
             """
-            SELECT id, kontrakt_nr, partner_name, andienung_bis, fruehbezugsrabatt_bis
-            FROM domain_agrar.kontrakte
+            SELECT contract_id AS id,
+                   contract_no AS kontrakt_nr,
+                   party_id    AS partner_name,
+                   valid_to,
+                   pricing_window_to
+            FROM domain_ops.kon_contract
             WHERE tenant_id = :tenant_id
+              AND status NOT IN ('STORNIERT', 'ABGESCHLOSSEN')
         """,
             {"tenant_id": tenant_id},
         )
@@ -243,8 +259,8 @@ class KontraktFristenProjector:
         for row in rows:
             object_id = str(row.get("id") or "")
             for field_name, label in (
-                ("andienung_bis", "Andienungsfrist"),
-                ("fruehbezugsrabatt_bis", "Ende Fruehbezugsrabatt"),
+                ("valid_to", "Ende Lieferzeitraum"),
+                ("pricing_window_to", "Ende Fixierungsfenster"),
             ):
                 raw = row.get(field_name)
                 if not raw:
