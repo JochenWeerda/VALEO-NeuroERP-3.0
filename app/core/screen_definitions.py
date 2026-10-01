@@ -3265,7 +3265,7 @@ def build_agrar_feeding_business_screen_definition() -> dict[str, Any]:
         "noWorkflowReason": "Die Betriebsakte priorisiert vorhandene Aggregate; Freigaben bleiben im Rations-Lifecycle.",
         "layout": {
             "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
-            "floorplan": "objectPage", "density": "compact", "contextRail": "findings", "tableProfile": "audit",
+            "floorplan": "objectPage", "density": "compact", "contextRail": "audit", "tableProfile": "audit",
         },
         "performance": {
             "initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True,
@@ -3502,7 +3502,7 @@ def build_agrar_feeding_reference_data_screen_definition() -> dict[str, Any]:
         "noWorkflowReason": "Referenzdaten werden hier revisionssicher gelesen; Aenderungen folgen einem separaten Governance-Prozess.",
         "layout": {
             "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
-            "floorplan": "listReport", "density": "compact", "contextRail": "audit", "tableProfile": "standard",
+            "floorplan": "worklist", "density": "compact", "contextRail": "audit", "tableProfile": "standard",
         },
         "performance": {
             "initialPayloadBudgetKb": 28, "requiresLazyTabs": True,
@@ -3547,7 +3547,7 @@ def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
             {"key": "open_inventory", "label": "Bestaende pflegen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
         ],
         "noWorkflowReason": "Die Maske erzeugt ausschliesslich einen auditierbaren Bedarfsvorschlag; Bestellung und Freigabe bleiben im Einkaufsprozess.",
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "listReport", "density": "compact", "contextRail": "copilot", "tableProfile": "inventory"},
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "worklist", "density": "compact", "contextRail": "copilot", "tableProfile": "inventory"},
         "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice"},
         "agentContract": {"businessPurpose": "Planbedarf, Sicherheitsreserve und Bestandsreichweite erklaerbar vergleichen und Unterdeckungen kontrolliert an den Einkauf geben.", "examplePrompts": ["Welche Futtermittel reichen weniger als 14 Tage?", "Welche Unterdeckungen sind wegen unbekannter Handelseinheiten noch nicht uebergabefaehig?"], "sensitiveFields": ["stock_kg"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feed-readiness']"}},
     }
@@ -3646,7 +3646,7 @@ def build_agrar_feeding_actuals_screen_definition() -> dict[str, Any]:
             {"key": "open_mobile", "label": "Ist-Fuetterung erfassen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
         ],
         "noWorkflowReason": "Ist-Fuetterungen sind append-only Nachweise; Korrekturen erzeugen einen neuen Stand mit Vorgaengerreferenz.",
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "listReport", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
+        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "worklist", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice"},
         "agentContract": {"businessPurpose": "Komponentenabweichungen und ihre Kosten-/Naehrstofffolgen planversionsgebunden erklaeren.", "examplePrompts": ["Welche Komponenten wurden heute ueberdosiert?", "Bei welchen Ist-Fuetterungen fehlen Preise oder Naehrstoffwerte?"], "sensitiveFields": ["comment", "value_consequences"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feeding-actuals']"}},
     }
@@ -4316,7 +4316,7 @@ def build_mail_workspace_screen_definition() -> dict[str, Any]:
         ],
         "actions": [{"key": "draft", "label": "Neue Mail", "kind": "primary", "permission": "crm.mail.write", "dangerLevel": "low"}],
         "workflow": {"processKey": "mail-workspace", "status": "role-inbox", "nextActionKey": "assign", "auditRequired": True},
-        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "crm"},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "standard"},
         "performance": {"initialPayloadBudgetKb": 64, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "crm"},
         "agentContract": {"businessPurpose": "Rollenpostfaecher revisionssicher mit Kontakten und Belegen verbinden.", "examplePrompts": ["Zeige unzugeordnete CRM-Mails.", "Welche Anlagen warten auf DMS-Uebernahme?"], "sensitiveFields": ["from_address", "to_addresses", "subject", "body_text", "contact_id"], "forbiddenAgentTasks": ["Mail ohne menschlichen Audit-Grund senden oder Anlagen ungeprueft uebernehmen"], "testSelectors": {"screenRoot": "[data-testid='mail-arbeitsplatz']"}},
     }
@@ -4480,7 +4480,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
             "columns": [{"key": "document_name", "label": "Dokument", "sortable": True, "filterable": True, "width": 250}, {"key": "document_number", "label": "Nummer", "filterable": True, "width": 130}, {"key": "document_type", "label": "Typ", "filterable": True, "width": 130}, {"key": "document_category", "label": "Kategorie", "filterable": True, "width": 130}, {"key": "article_number", "label": "Artikel-Nr.", "filterable": True, "width": 120}, {"key": "article_name", "label": "Artikel", "filterable": True, "width": 220}, {"key": "valid_from", "label": "Gueltig ab", "renderKind": "date", "width": 110}, {"key": "valid_to", "label": "Gueltig bis", "renderKind": "date", "width": 110}, {"key": "created_at", "label": "Angelegt", "renderKind": "datetime", "sortable": True, "width": 160}],
             "rowActions": [{"key": "preview", "label": "Vorschau", "visibleWhen": {"field": "external_gate", "values": ["configured"]}}, {"key": "open_source", "label": "Artikel oeffnen"}]}],
         "workflow": {"processKey": "dms-fulltext-search", "status": "read-only", "nextActionKey": "open_source", "auditRequired": False},
-        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "preview", "tableProfile": "document"},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "standard"},
         "performance": {"initialPayloadBudgetKb": 45, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "documents"},
         "agentContract": {"businessPurpose": "Tenant-sicher Dokumente wiederfinden und zum Quellobjekt springen.", "examplePrompts": ["Suche Dokumente mit dieser Belegnummer.", "Zeige Zertifikate zu diesem Artikel."], "sensitiveFields": ["description", "document_name", "article_name"], "forbiddenAgentTasks": ["Dokumentinhalte oder Metadaten anderer Mandanten anzeigen"], "testSelectors": {"screenRoot": "[data-testid='dms-volltext']"}},
     },
@@ -4544,7 +4544,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
             "rowActions": [{"key": "open_source", "label": "Quellbeleg", "visibleWhen": {"field": "quelle", "values": ["erp_service", "erp_lieferschein"]}}],
         }],
         "workflow": {"processKey": "fertilizer-amount-report", "status": "read-only", "nextActionKey": "open_source", "auditRequired": False},
-        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "summary", "tableProfile": "inventory"},
+        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "combined", "tableProfile": "inventory"},
         "performance": {"initialPayloadBudgetKb": 45, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar"},
         "agentContract": {"businessPurpose": "Duengemittelmengen aus kanonischen Feldbuchdaten L3-vertraut auswerten.", "examplePrompts": ["Zeige Duengemittelmengen dieses Jahres.", "Summiere N, P2O5 und K2O je Schlag."], "sensitiveFields": ["customer_id", "schlag_name", "lieferschein_id"], "forbiddenAgentTasks": ["Reinnährstoffe ohne Quelldaten schaetzen"], "testSelectors": {"screenRoot": "[data-testid='duengemittelmengen']"}},
     },
@@ -5156,44 +5156,23 @@ def _default_column_navigation(floorplan: str, has_tables: bool) -> str:
     return "single"
 
 
-_MERIDIAN_TABLE_PROFILE_ALIASES = {
-    "crm": "standard",
-    "document": "standard",
-}
-
-_MERIDIAN_FLOORPLAN_ALIASES = {
-    "listReport": "worklist",
-}
-
-_MERIDIAN_CONTEXT_RAIL_ALIASES = {
-    # Specialized content stays in the mask body; the rail declares only the
-    # centrally renderable collaboration/audit contract.
-    "preview": "audit",
-    "summary": "combined",
-    "findings": "audit",
-}
-
-
 def _with_meridian_layout(definition: dict[str, Any]) -> dict[str, Any]:
-    """Adds the Meridian layout contract without changing existing builders."""
+    """Ergaenzt den Meridian-Layoutvertrag.
+
+    Floorplan, Context-Rail und Tabellenprofil stehen in der Definition
+    bereits im kanonischen Vokabular. Alte Namen werden nicht mehr uebersetzt.
+    """
 
     layout = dict(definition.get("layout") or {})
     floorplan = layout.get("floorplan") or _infer_meridian_floorplan(definition)
     layout.setdefault("preferredMode", "desktopDense")
     layout.setdefault("mobileMode", "mobileStack")
     layout.setdefault("touchTargetPx", 44)
-    layout["floorplan"] = _MERIDIAN_FLOORPLAN_ALIASES.get(floorplan, floorplan)
+    layout["floorplan"] = floorplan
     layout.setdefault("density", "expertDense" if _infer_meridian_table_profile(definition) in {"financial", "inventory"} else "compact")
     layout.setdefault("contextRail", "none" if floorplan == "worklist" else ("audit" if definition.get("domain") == "finance" else "combined"))
     if _has_tables(definition):
         layout.setdefault("tableProfile", _infer_meridian_table_profile(definition))
-    layout["contextRail"] = _MERIDIAN_CONTEXT_RAIL_ALIASES.get(
-        layout["contextRail"], layout["contextRail"]
-    )
-    if layout.get("tableProfile"):
-        layout["tableProfile"] = _MERIDIAN_TABLE_PROFILE_ALIASES.get(
-            layout["tableProfile"], layout["tableProfile"]
-        )
     resolved_floorplan = layout["floorplan"]
     if resolved_floorplan in _MERIDIAN_COLUMNS_FORBIDDEN:
         layout["columnNavigation"] = "single"

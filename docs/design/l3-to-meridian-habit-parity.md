@@ -56,8 +56,9 @@ zentral ueber:
   verwenden nach zentraler Normalisierung nur renderbare Floorplans,
   Context-Rails und Tabellenprofile.
 - Historische Aliaswerte (`listReport`, `crm`, `document`, `preview`,
-  `summary`, `findings`) werden an einer Stelle in den kanonischen
-  Meridian-Vertrag uebersetzt.
+  `summary`, `findings`) stehen in den ScreenDefinitions selbst im
+  kanonischen Vokabular (`worklist`, `standard`, `audit`, `combined`).
+  Eine zentrale Uebersetzung dieser Namen gibt es nicht mehr.
 - `expertDense` wirkt nun auch tatsaechlich auf Root- und Registertabellen:
   die zentrale RenderPlan-Kompilierung begrenzt deren Zeilenhoehe auf 36 px;
   `compact` bleibt bei 44 px und `comfortable` bei mindestens 52 px.
