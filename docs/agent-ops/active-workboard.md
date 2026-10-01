@@ -11,6 +11,58 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTRAKT-EINE-ORDNUNG-20261001 — in Arbeit, Claude Code
+
+**Ziel:** Fuer "Kontrakt" gibt es sechs Tabellen in fuenf Schemata und **zwei
+vollstaendig ausgebaute, geroutete Implementierungen von Fixierung und
+Abrechnung**. Der Slice benennt je Fachbegriff ein fuehrendes Modell, legt die
+Doppelung still und raeumt die Verweise ins Leere auf.
+
+**Befund (gemessen 01.10.2026, dev und frisch):**
+| Tabelle | Zeilen dev | Code | Masken |
+|---|---|---|---|
+| `domain_ops.kon_contract` (+ `_line`/`_fixing`/`_movement`/`_reminder`) | 8/8/2/6/0 | 4 Dienste, 4 Endpunktmodule, ORM | 4 Frontend-Module |
+| `domain_inventory.agrar_contracts` | 94 | CRM, Portal, Bruecken, ORM | Portal/CRM |
+| `domain_einkauf.kontrakte` (+ Positionen) | 0 | Preisermittlung, ORM | — |
+| `domain_contracts.contracts` (+ Versionen/Pflichten) | 0 | Vertragsregister (gerade migriert) | — |
+| `domain_kontrakte.*` (4 Tabellen, **keine Kopftabelle**) | 0 | 3 Dienste, 1 Endpunktmodul, 7 Routen | **keine** |
+| `domain_portal.customer_contracts` | 0 | **keine** | **keine** |
+| `domain_agrar.kontrakte` / `kontrakt_dispositionen` | existiert nicht | 2 Verweise ins Leere | — |
+
+**Dateibesitz:** `alembic/versions/kontrakt_ordnung_20261001.py`,
+`app/api/v1/endpoints/kontrakt_actions.py` (Entfall),
+`app/api/v1/schemas/kontrakt_actions_schemas.py` (Entfall),
+`app/services/kontrakt_fixing_service.py`,
+`app/services/kontrakt_lifecycle_service.py`,
+`app/services/kontrakt_settlement_service.py` (Entfall),
+`app/api/v1/api.py` (nur die Montage dieses Routers),
+`app/services/calendar_projection_service.py` (nur der Kontraktfristen-Hunk),
+`tests/test_dom_con_004.py` (Entfall), `tests/test_welle4_response_models.py`
+(nur die Modulliste), `tests/test_uix063_planning_calendar.py` (nur der
+Kontrakt-Stub), `tests/test_kontrakt_ordnung_vertrag.py`,
+`docs/architecture/domains/kontrakte/fuehrendes-modell.md`,
+`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
+dieser Abschnitt.
+
+**Abnahme:** Es gibt genau **eine** Implementierung von Fixierung und
+Abrechnung; die stillgelegten Tabellen sind weg und ihre Ruecknahme legt sie
+wieder an; die fuehrenden Wege laufen unveraendert; kein Verweis mehr auf
+`domain_agrar.kontrakte`; Vertragstests und Doku-Gates gruen.
+
+**GoBD:** Stillgelegt wird nur, was am 01.10.2026 in **beiden** Datenbanken
+**null Zeilen** hatte und von keinem Weg benutzt wird — es gab also nie einen
+aufbewahrungspflichtigen Datensatz. Keine Tabelle mit Bestand wird angefasst,
+keine Buchung umgedeutet, und die Ruecknahme der Migration legt die Tabellen
+wieder an. Umgekehrt ist der stillgelegte Overlay selbst ein GoBD-Problem: Seine
+Fixierungen und Abrechnungen trugen eine freie `kontrakt_id` **ohne
+Vertragsbezug** — nicht nachvollziehbar, nicht nachpruefbar.
+
+**Risiken:** Der Overlay stammt aus DOM-CON-004 (Juni 2026, Cursor). Er ist
+leer, ohne Aufrufer und ohne Vertragsbezug; die Begruendung steht im
+Entscheidungsdokument. Was **nicht** entschieden wird: ob
+`domain_einkauf.kontrakte` (Rahmenkontrakt mit Positionspreisen) langfristig im
+Warenkontrakt aufgeht. Dafuer fehlt Bestand zum Messen.
+
 ## BANK-CAMT-PARSER-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
