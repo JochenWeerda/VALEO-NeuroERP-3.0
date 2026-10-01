@@ -91,3 +91,50 @@ def belegbezug(zeile: Mapping[str, Any]) -> Belegbezug:
         # lesbar, ohne dass die Zeile umgeschrieben wird.
         return Belegbezug(typ=historisch[0], id=historisch[1], herkunft="historisch")
     return Belegbezug(typ=None, id=None, herkunft="keiner")
+
+
+class Belegkonflikt(ValueError):
+    """Kanonischer Name und Altname desselben Belegs widersprechen sich."""
+
+
+@dataclass(frozen=True)
+class Buchungsbeleg:
+    """Beleg einer neuen Lagerbuchung, in Spaltennamen.
+
+    ``source_document_type`` ist die Belegart. ``reference_number`` ist die
+    Belegnummer. Eine Beleg-Id wird hier nicht erfunden.
+    """
+
+    source_document_type: str | None
+    reference_number: str | None
+
+
+def _eines(begriff: str, kanonisch: str | None, altname: str | None) -> str | None:
+    kanonisch_wert = kanonisch if kanonisch not in (None, "") else None
+    alt_wert = altname if altname not in (None, "") else None
+    if kanonisch_wert is not None and alt_wert is not None and kanonisch_wert != alt_wert:
+        raise Belegkonflikt(
+            f"{begriff}: kanonischer Wert und Altname widersprechen sich."
+        )
+    return kanonisch_wert if kanonisch_wert is not None else alt_wert
+
+
+def buchungsbeleg(
+    *,
+    source_document_type: str | None = None,
+    reference_number: str | None = None,
+    reference_type: str | None = None,
+    reference_id: str | None = None,
+) -> Buchungsbeleg:
+    """Loest den Beleg einer neuen Lagerbuchung auf.
+
+    Kanonisch sind ``source_document_type`` und ``reference_number``.
+    ``reference_type`` und ``reference_id`` sind der vorlaeufige Adapter von
+    ``POST /lager/bewegungen``: sie fuellen nur, wenn das kanonische Feld
+    leer ist. ``reference_id`` ist eine Belegnummer, keine Beleg-Id, und
+    wird nicht nach ``source_document_id`` geschrieben.
+    """
+    return Buchungsbeleg(
+        source_document_type=_eines("Belegart", source_document_type, reference_type),
+        reference_number=_eines("Belegnummer", reference_number, reference_id),
+    )

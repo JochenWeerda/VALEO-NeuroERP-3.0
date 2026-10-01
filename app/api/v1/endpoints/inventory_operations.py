@@ -883,6 +883,14 @@ async def create_lagerbewegung(
 
     buch_datum = payload.buchungsdatum or date_type.today()
     movement_id = str(uuid4())
+    # Altname der Route: reference_type/reference_id. Spalten: source_document_type
+    # und reference_number. Der Adapter schreibt keine Beleg-Id.
+    from app.services.inventory_document_reference import buchungsbeleg
+
+    beleg = buchungsbeleg(
+        reference_type=payload.reference_type,
+        reference_id=payload.reference_id,
+    )
 
     article = db.execute(
         text("SELECT id FROM domain_inventory.articles WHERE id = :id AND tenant_id = :tid"),
@@ -921,8 +929,8 @@ async def create_lagerbewegung(
             "quantity": payload.quantity,
             "movement_type": payload.movement_type,
             "charge": payload.charge,
-            "reference_number": payload.reference_id,
-            "source_document_type": payload.reference_type,
+            "reference_number": beleg.reference_number,
+            "source_document_type": beleg.source_document_type,
             "unit_cost": payload.unit_cost,
             "notes": payload.bemerkung,
             "movement_date": buch_datum,
