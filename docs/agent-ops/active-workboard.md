@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SECURITY-PATCH-MILESTONE-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** Acht aktuelle GitHub-Alerts auf fünf Abhängigkeiten gezielt
+reparieren: PyJWT 2.15.0, grpc-js 1.14.5, fastify 5.12.5, fast-uri 3.1.8,
+moment 2.31.0. Keine Ausnahmen für neue erreichbare Schwachstellen.
+**Dateibesitz:** `requirements.txt`, `services/ai/requirements.txt`,
+`services/crm-marketing/requirements.txt` (je nur PyJWT), `package.json`
+(nur betroffene Overrides), `pnpm-lock.yaml`, bestehende Chroma-Evidenz
+in `config/security/dependency-decisions.json` (nur eigenen Manifest-Hash),
+ein JWT-Fehlervertrag und eigene Slice-/QA-Dokumente; gemeinsame Dokumente
+nur im eigenen Abschnitt.
+**Abnahme:** Installerauflösung, frozen Lockfile, Audit, echte JWT-Verifikation
+und Rekursion-Abweisung; GitHub-Rückmeldung nach Meilenstein-Push.
+**Risiken:** Andere ungefixte Advisories bleiben sichtbar; Chroma-Bewertung
+wird nicht erweitert oder verlängert. Aktive POS-/CRM-/OpenAPI-Slices bleiben
+beim Owner.
+
 ## Z-BON-WAHRHEIT-20261001 — in Arbeit, Claude Code
 
 **Ziel:** `pos_payments.x_report` und `z_report` lesen
