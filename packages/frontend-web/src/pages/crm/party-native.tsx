@@ -50,6 +50,10 @@ const PARTY_SECTION_ALIASES: Record<string, string> = {
   kontoauszug: 'kontoauszug',
   tab25: 'cpd',
   cpd: 'cpd',
+  rabatte: 'rabatte',
+  discounts: 'rabatte',
+  preise: 'preise',
+  prices: 'preise',
 }
 
 export function resolvePartyKind(kind: string | null | undefined, pathname?: string): PartyKind {

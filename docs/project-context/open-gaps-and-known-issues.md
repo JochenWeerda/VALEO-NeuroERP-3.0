@@ -91,6 +91,7 @@ Praesente, Postfach und Geo sitzen in der ScreenDefinition; Mini-Apps bleiben we
 Angebote kommen aus `crm_opportunities`, Historie aus den CRM-Aktivitaeten.
 Potenzial ist der juengste Satz aus `public.customer_potential_snapshot`.
 Chef-Anweisungen, Anschriften, Kontoauszug und CPD-Konten sind in der Akte lesbar.
+Rabatte, Preise und das SEPA-Mandat kommen vom Partner.
 Mutationen der Tabs 21–25 bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
 
 ## POS-ZAHLARTEN + AGRAR-KONTRAKTE — Welle 2, zweiter und dritter Eintrag (2026-09-30)

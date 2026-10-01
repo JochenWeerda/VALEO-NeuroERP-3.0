@@ -47,6 +47,8 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 | Pflege Tab 23 Anschriften | `anschriften` | `domain_crm.business_partner_addresses` | `GET .../tabs/anschriften` | lazy table | ok |
 | Pflege Tab 24 Kontoauszug | `kontoauszug` | `domain_crm.business_partner_billing_configs` | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Pflege Tab 25 CPD-Konto | `cpd` | `domain_crm.business_partner_cpd_accounts` | `GET .../tabs/cpd` | lazy table | ok |
+| Rabatte | `rabatte` | `domain_crm.business_partner_discount_items` | `GET .../tabs/rabatte` | lazy table | ok |
+| Preise | `preise` | `domain_crm.business_partner_price_agreements` | `GET .../tabs/preise` | lazy table | ok |
 
 ## Summary vs. Mask-Tab-Keys
 

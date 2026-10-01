@@ -56,6 +56,8 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             {"key": "chefanweisungen", "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/chefanweisungen", "pageSize": 25},
             {"key": "anschriften", "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/anschriften", "pageSize": 25},
             {"key": "cpd",         "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/cpd",         "pageSize": 25},
+            {"key": "rabatte",     "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/rabatte",     "pageSize": 25},
+            {"key": "preise",      "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/preise",      "pageSize": 25},
         ],
         "tabs": [
             {
@@ -225,6 +227,8 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                     {"key": "bankname", "label": "Bank", "type": "text"},
                     {"key": "iban", "label": "IBAN", "type": "text"},
                     {"key": "bic", "label": "BIC", "type": "text"},
+                    {"key": "sepa_mandat_ref", "label": "SEPA-Mandat", "type": "text", "readOnly": True},
+                    {"key": "sepa_mandat_datum", "label": "Mandat unterschrieben", "type": "date", "readOnly": True},
                 ],
             },
             {
@@ -341,6 +345,29 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                                 {"key": "name_1", "label": "Name", "width": 180},
                                 {"key": "city", "label": "Ort", "width": 140},
                                 {"key": "email", "label": "E-Mail", "width": 180},
+                            ]}],
+            },
+            {
+                "key": "rabatte", "label": "Rabatte", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "rabatte", "label": "Rabatte", "dataSourceKey": "rabatte",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "article_number", "label": "Artikel", "width": 120, "sortable": True},
+                                {"key": "description", "label": "Bezeichnung", "width": 200},
+                                {"key": "discount_percent", "label": "Rabatt %", "numeric": True, "width": 100},
+                                {"key": "valid_to", "label": "Gueltig bis", "renderKind": "date", "width": 110},
+                            ]}],
+            },
+            {
+                "key": "preise", "label": "Preise", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "preise", "label": "Preisvereinbarungen", "dataSourceKey": "preise",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "article_number", "label": "Artikel", "width": 120, "sortable": True},
+                                {"key": "description", "label": "Bezeichnung", "width": 200},
+                                {"key": "price_net", "label": "Nettopreis", "numeric": True, "renderKind": "currency", "width": 120},
+                                {"key": "price_unit", "label": "Einheit", "width": 80},
+                                {"key": "valid_to", "label": "Gueltig bis", "renderKind": "date", "width": 110},
                             ]}],
             },
         ],

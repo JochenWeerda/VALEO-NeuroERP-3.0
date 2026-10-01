@@ -519,6 +519,89 @@ def test_pflege_register_liegen_in_der_akte(client, kunde) -> None:
             )
 
 
+def test_rabatte_preise_und_sepa_liegen_in_der_akte(client, kunde) -> None:
+    """Rabatt- und Preislisten des Partners plus SEPA-Mandat an der Bank."""
+    from sqlalchemy import create_engine, text
+
+    rabatt = str(uuid.uuid4())
+    preis = str(uuid.uuid4())
+    kontakt = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "UPDATE domain_crm.business_partners "
+                "SET sepa_mandate_reference = 'MANDAT-1', "
+                "sepa_mandate_signed_at = '2026-03-01' "
+                "WHERE partner_id = :id"
+            ),
+            {"id": kunde["partner_id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.business_partner_discount_items "
+                "(id, partner_id, article_number, description, discount_percent) "
+                "VALUES (:id, :pid, 'SAAT-1', 'Winterweizen', 12.5)"
+            ),
+            {"id": rabatt, "pid": kunde["partner_id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.business_partner_price_agreements "
+                "(id, partner_id, article_number, description, price_net, price_unit, discount_allowed) "
+                "VALUES (:id, :pid, 'SAAT-1', 'Winterweizen', 18.40, 'kg', true)"
+            ),
+            {"id": preis, "pid": kunde["partner_id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.business_partner_contacts "
+                "(id, partner_id, priority, last_name, email, contact_type, "
+                "invoice_email_recipient, reminder_email_recipient, is_data_protection_officer) "
+                "VALUES (:id, :pid, 0, 'Berger', 'berger@sonnenacker.test', 'other', false, false, false)"
+            ),
+            {"id": kontakt, "pid": kunde["partner_id"]},
+        )
+    try:
+        rabatte = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/rabatte", headers=kopf(kunde["mandant"])
+        )
+        assert rabatte.status_code == 200, rabatte.text
+        zeile = next(item for item in rabatte.json()["items"] if item.get("article_number") == "SAAT-1")
+        assert zeile["discount_percent"] == 12.5
+
+        preise = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/preise", headers=kopf(kunde["mandant"])
+        )
+        assert preise.status_code == 200, preise.text
+        vereinbarung = next(item for item in preise.json()["items"] if item.get("article_number") == "SAAT-1")
+        assert vereinbarung["price_net"] == 18.4
+
+        kontakte = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/contacts", headers=kopf(kunde["mandant"])
+        )
+        assert kontakte.status_code == 200, kontakte.text
+        assert any(zeile.get("name") == "Berger" for zeile in kontakte.json()["items"])
+
+        stamm = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}", headers=kopf(kunde["mandant"])
+        )
+        assert stamm.status_code == 200, stamm.text
+        assert stamm.json()["sepa_mandat_ref"] == "MANDAT-1"
+        assert stamm.json()["sepa_mandat_datum"] == "2026-03-01"
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_crm.business_partner_contacts WHERE id = :id"), {"id": kontakt}
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_crm.business_partner_price_agreements WHERE id = :id"), {"id": preis}
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_crm.business_partner_discount_items WHERE id = :id"), {"id": rabatt}
+            )
+
+
 def test_ein_kunde_den_es_nicht_gibt_bleibt_ein_404(client, kunde) -> None:
     """Der 404 soll weiterhin etwas bedeuten."""
     antwort = client.get(

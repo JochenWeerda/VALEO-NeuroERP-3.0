@@ -365,6 +365,10 @@ def _normalize_tab_key(tab_key: str) -> str:
         "tab23": "anschriften",
         "cpd": "cpd",
         "tab25": "cpd",
+        "rabatte": "rabatte",
+        "discounts": "rabatte",
+        "preise": "preise",
+        "prices": "preise",
     }
     return aliases.get(tab_key, tab_key)
 
@@ -419,7 +423,25 @@ def _fetch_customer_tab_items(
             """,
             {"cid": customer_id},
         )
-        return "contacts_list", rows + core
+        partner = []
+        if partner_id:
+            partner = _query_many(
+                db,
+                """
+                SELECT id::text AS id,
+                       COALESCE(last_name, '') AS name,
+                       COALESCE(first_name, '') AS "firstName",
+                       COALESCE(position, '') AS position,
+                       COALESCE(email, '') AS email,
+                       COALESCE(phone_1, '') AS phone1
+                FROM domain_crm.business_partner_contacts
+                WHERE partner_id::text = :pid
+                ORDER BY priority, last_name
+                LIMIT 25
+                """,
+                {"pid": partner_id},
+            )
+        return "contacts_list", rows + core + partner
 
     if normalized == "auftraege":
         rows = _query_many(
@@ -624,6 +646,49 @@ def _fetch_customer_tab_items(
             {"pid": partner_id},
         )
         return "cpd", rows
+
+    if normalized == "rabatte":
+        if not partner_id:
+            return "rabatte", []
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(article_number, '') AS article_number,
+                   COALESCE(description, '') AS description,
+                   COALESCE(discount_percent, 0)::float AS discount_percent,
+                   valid_from::text AS valid_from,
+                   valid_to::text AS valid_to
+            FROM domain_crm.business_partner_discount_items
+            WHERE partner_id::text = :pid
+            ORDER BY article_number
+            LIMIT 25
+            """,
+            {"pid": partner_id},
+        )
+        return "rabatte", rows
+
+    if normalized == "preise":
+        if not partner_id:
+            return "preise", []
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(article_number, '') AS article_number,
+                   COALESCE(description, '') AS description,
+                   price_net::float AS price_net,
+                   COALESCE(price_unit, '') AS price_unit,
+                   valid_from::text AS valid_from,
+                   valid_to::text AS valid_to
+            FROM domain_crm.business_partner_price_agreements
+            WHERE partner_id::text = :pid
+            ORDER BY article_number
+            LIMIT 25
+            """,
+            {"pid": partner_id},
+        )
+        return "preise", rows
 
     if normalized == "dokumente":
         rows = _query_many(
@@ -863,6 +928,41 @@ class CustomerCpdRowOut(BaseSchema):
 
 class CustomerCpdTabOut(CustomerTabOut):
     items: list[CustomerCpdRowOut] = Field(default_factory=list)
+
+
+class CustomerDiscountRowOut(BaseSchema):
+    """Eine Rabattzeile am Geschaeftspartner."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    article_number: str = ""
+    description: str = ""
+    discount_percent: float = 0.0
+    valid_from: Optional[str] = None
+    valid_to: Optional[str] = None
+
+
+class CustomerDiscountsTabOut(CustomerTabOut):
+    items: list[CustomerDiscountRowOut] = Field(default_factory=list)
+
+
+class CustomerPriceRowOut(BaseSchema):
+    """Eine Preisvereinbarung am Geschaeftspartner."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    article_number: str = ""
+    description: str = ""
+    price_net: Optional[float] = None
+    price_unit: str = ""
+    valid_from: Optional[str] = None
+    valid_to: Optional[str] = None
+
+
+class CustomerPricesTabOut(CustomerTabOut):
+    items: list[CustomerPriceRowOut] = Field(default_factory=list)
 
 
 # Vier benannte Register vor der generischen Route
@@ -1148,6 +1248,56 @@ async def get_customer_tab_cpd(
     """CPD-Konten des Partners."""
     return await get_customer_tab_data(
         customer_id=customer_id, tab_key="cpd", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/rabatte",
+    response_model=CustomerDiscountsTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Rabatte",
+)
+async def get_customer_tab_rabatte(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Artikelrabatte des Partners."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="rabatte", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/preise",
+    response_model=CustomerPricesTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Preise",
+)
+async def get_customer_tab_preise(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Preisvereinbarungen des Partners."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="preise", tenant_id=tenant_id,
         page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
         filter_plan=filter_plan, filter_plan_legacy=None, db=db,
     )

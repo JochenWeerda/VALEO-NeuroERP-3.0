@@ -24,6 +24,8 @@ describe('Party native entry', () => {
     expect(resolvePartySectionKey('tab23')).toBe('anschriften')
     expect(resolvePartySectionKey('tab24')).toBe('kontoauszug')
     expect(resolvePartySectionKey('tab25')).toBe('cpd')
+    expect(resolvePartySectionKey('rabatte')).toBe('rabatte')
+    expect(resolvePartySectionKey('preise')).toBe('preise')
     expect(resolvePartySectionKey(null)).toBeUndefined()
   })
 

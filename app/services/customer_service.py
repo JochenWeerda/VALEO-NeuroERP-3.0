@@ -305,6 +305,7 @@ class CustomerService:
                 text(
                     """
                     SELECT vat_id, tax_number, tax_type, iban, bic, bank_name, account_holder,
+                           sepa_mandate_reference, sepa_mandate_signed_at,
                            blocked_for_delivery, blocked_for_invoice, status,
                            farm_number, eu_farm_id, qs_certificate_number, bio_certified,
                            marketing_segment, newsletter_opt_in, email_opt_in,
@@ -334,6 +335,12 @@ class CustomerService:
                 "bic": row["bic"],
                 "bankname": row["bank_name"],
                 "kontoinhaber": row["account_holder"],
+                "sepa_mandat_ref": row["sepa_mandate_reference"],
+                "sepa_mandat_datum": (
+                    row["sepa_mandate_signed_at"].date().isoformat()
+                    if row["sepa_mandate_signed_at"] is not None
+                    else None
+                ),
                 "gesperrt_lieferung": row["blocked_for_delivery"],
                 "gesperrt_rechnung": row["blocked_for_invoice"],
                 "partner_status": row["status"],

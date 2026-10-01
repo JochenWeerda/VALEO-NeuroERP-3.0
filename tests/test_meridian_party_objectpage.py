@@ -42,6 +42,8 @@ def test_customer_360_is_object_page_with_identity_and_anchors() -> None:
     assert "anschriften" in tab_keys
     assert "kontoauszug" in tab_keys
     assert "cpd" in tab_keys
+    assert "rabatte" in tab_keys
+    assert "preise" in tab_keys
     assert "angebote" in tab_keys
     assert "historie" in tab_keys
     finance = next(tab for tab in screen["tabs"] if tab["key"] == "finance")

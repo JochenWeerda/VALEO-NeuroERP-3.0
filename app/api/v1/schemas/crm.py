@@ -180,6 +180,8 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     bonus_eligible: Optional[bool] = None
     self_billing_sales: Optional[bool] = None
     vat_optimizer: Optional[bool] = None
+    sepa_mandat_ref: Optional[str] = None
+    sepa_mandat_datum: Optional[str] = None
 
 
 # Lead Schemas
