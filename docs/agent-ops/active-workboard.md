@@ -11,6 +11,49 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## EUDR-SORGFALTSERKLAERUNG-20261001 — in Arbeit, Claude Code
+
+**Ziel:** Die im Vorgaenger-Slice benannte Luecke schliessen:
+`domain_compliance.eudr_due_diligence` bekommt eine Form, die der Verordnung
+(EU) 2023/1115 folgt — Inhalt der Sorgfaltserklaerung nach **Anhang II**,
+Informationspflichten nach **Art. 9**, Risikobewertung und -minderung nach
+**Art. 10/11**, Referenz- und Verifizierungsnummer des EU-Informationssystems
+nach **Art. 33**.
+
+**Zusaetzlicher Befund, der die Luecke dringlich macht:**
+`GET /api/v1/compliance/eudr` meldet bei **jedem** Lesefehler
+`status: "KONFORM"` und `deforestation_risk: "NIEDRIG"`. Die Abfrage liest
+`domain_inventory.lots` — eine Tabelle, die **kein Migrationsstand anlegt**, und
+deren Spalten `eudr_compliant`/`origin_country` es nirgends gibt. Die Maske
+`/nachhaltigkeit/eudr-compliance` behauptet damit Konformitaet, die nie geprueft
+wurde. Nach Art. 3/4 ist das Inverkehrbringen ohne Sorgfaltserklaerung
+verboten — eine gruene Anzeige ist hier die gefaehrlichste Antwort.
+Der Mandant kommt dort ausserdem aus einem **Abfrageparameter** mit Rueckfall
+`"default"`.
+
+**Dateibesitz:** `alembic/versions/eudr_sorgfaltserklaerung_20261001.py`,
+`app/api/v1/endpoints/eudr_register.py` (neu),
+`app/api/v1/schemas/eudr_register_schemas.py` (neu),
+`app/api/v1/api.py` (nur die Montage), `app/api/v1/endpoints/compliance.py`
+(nur der EUDR-Hunk), `tests/test_eudr_sorgfaltserklaerung_vertrag.py`,
+`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
+dieser Abschnitt.
+
+**Abnahme:** Drei Tabellen (Erklaerung, Geolokationen, vorgelagerte
+Erklaerungen) mit `tenant_id NOT NULL`; die Datenbank haelt die sieben Rohstoffe
+und die zwei Risikostufen; **eingereicht nur mit vernachlaessigbarem Risiko,
+Referenznummer und abgegebener Erklaerung** (Art. 3/4); **Flurstuecke ueber
+vier Hektar nur als Polygon** (Art. 9); der Status kommt aus dem Register und
+meldet "nicht feststellbar" statt "KONFORM"; Mandant aus dem Kopf; Vertraege und
+Doku-Gates gruen.
+
+**Risiken und Grenzen:** Der Feldsatz folgt Anhang II und Art. 9; die
+**fachjuristische Abnahme** gehoert dem Compliance-Owner — das ist eine
+Modellierung nach dem Verordnungstext, kein Rechtsrat. Die chargenbezogene
+EUDR-Kennzeichnung (`domain_inventory.lots`) bleibt eine benannte Luecke: Sie
+waere eine eigene Fachentscheidung (welche Charge traegt welchen Nachweis), und
+`inventory_lots` traegt die Spalten nicht.
+
 ## BANK-LEGACY-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc; Claim 1ede88778. **Ziel:** Ein aktives Bankauszugsmodell.
