@@ -71,7 +71,7 @@ Z_BON_ERSTELLT → TSE_SIGNIERT → DSFINVK_EXPORTIERT → ABGESCHLOSSEN).
 
 **Eine Störung ist ein 503.** Nicht 0,00 €.
 
-## Zwei Tagesabschlüsse — eine offene Frage an den POS-Owner
+## Zwei Tagesabschlüsse — entschieden
 
 Im System stehen zwei Dinge, die „Tagesabschluss" heißen:
 
@@ -79,11 +79,16 @@ Im System stehen zwei Dinge, die „Tagesabschluss" heißen:
    TSE-Signatur, Z-Bon-Nummer und DSFinV-K-Export.
 2. **Dieser Bericht:** eine Aggregation, die nichts abschließt.
 
-Dieser Slice macht den zweiten ehrlich — er zeigt jetzt an, was der erste
-entschieden hat, statt es zu behaupten. Ob ein zweiter Weg mit dem Namen
-„Z-Report" überhaupt bleiben soll, oder ob die Maske direkt am
-Tagesabschluss hängen müsste, ist eine fachliche Entscheidung des POS-Owners und
-in diesem Slice **nicht** getroffen.
+**Entschieden: beide bleiben, aber mit klarer Rollenteilung.** Der Bericht ist
+die *Sicht*, die Zustandsmaschine ist die *Entscheidung*. Ein zweiter Weg, der
+einen Tag abschließen könnte, wird **nicht** geschaffen — `closed` liest, was die
+Zustandsmaschine entschieden hat, und `closing_status` zeigt den Stand im
+Klartext. Wer den Tag abschließen will, geht über den Tagesabschluss; wer wissen
+will, was heute in der Kasse war, zieht den X-Bericht.
+
+Das ist der Grund, aus dem der Bericht bleiben darf: Ein X-Bericht während des
+Tages ist etwas, das eine Kasse braucht, und ein Tagesabschluss ist es nicht. Was
+nicht bleiben durfte, war ein Bericht, der behauptet, abgeschlossen zu haben.
 
 ## Abnahme
 
@@ -100,9 +105,10 @@ in diesem Slice **nicht** getroffen.
 | Verweis | `domain_pos.pos_transactions` kommt in `app/` und `modules/` in keiner Abfrage mehr vor |
 
 ```bash
-export TEST_DATABASE_URL=postgresql://valeo_dev:…@127.0.0.1:5432/valeo_probe
-python scripts/pruefstand_db.py
-DATABASE_URL="$TEST_DATABASE_URL" python -m pytest tests/test_z_bon_wahrheit_vertrag.py -q
+# Gegen die vorhandene gemeinsame Pruefstand-Datenbank, ohne Zuruecksetzen
+# (test-database-resource-policy-20261001.md). Die Testzeilen tragen eigene
+# Mandantenkennungen und werden hinterher entfernt.
+DATABASE_URL=postgresql://valeo_dev:…@127.0.0.1:5432/valeo_probe   python -m pytest tests/test_z_bon_wahrheit_vertrag.py -q
 ```
 
 **Ergebnis 2026-10-01:** 13 Verträge grün gegen den frischen Stand, dazu 36
@@ -130,21 +136,15 @@ Eine dateiweite Pagination-Ausnahme waere der bequemere Weg gewesen; das
 Baseline-Integritaetsgate verbietet sie, und das ist richtig: Sie haette auch die
 Zahlarten- und Aktionslisten derselben Datei mitbefreit.
 
-## Tabellen-Ratsche: der Stand ist rot, und zwar nicht hierdurch
+## Tabellen-Ratsche: 26 → 21 lebend, Stand 01.10.2026 abends
 
-Dieser Slice entfernt einen Verweis ins Leere an einem lebenden Weg; gemessen
-gegen `valeo_probe` sinkt die Zahl von 26 auf 25. **Die Schwelle steht bei 24 und
-bleibt dort** — sie wurde in diesem Slice bewusst *nicht* angehoben.
+Dieser Slice entfernt einen Verweis ins Leere an einem lebenden Weg
+(`domain_pos.pos_transactions`). Zum Zeitpunkt seiner Abnahme stand die Ratsche
+noch rot, und zwar nicht hierdurch: Commit `aede5e1cc` hatte
+`domain_crm.contacts` und `.crm_customers` von einem ruhenden an einen lebenden
+Weg geholt. Die Schwelle wurde deshalb **nicht** angehoben.
 
-Der Überhang kommt aus Commit `aede5e1cc` („fix(crm): Kundenakte liest
-Partnerstamm, Posten und Register"): `crm_360.py` liest dort
-`domain_crm.contacts` und `domain_crm.crm_customers`. Beide stehen auf der Liste
-der 76 Tabellen ohne Migration, und beide lagen vorher an einem *ruhenden* Weg.
-Die Kundenakte liest sie jetzt an einem lebenden — auf einer frischen
-Installation also ins Leere.
-
-**Handshake an den CRM-Owner:** Entweder die beiden Tabellen bekommen eine
-Migration, oder die Akte liest den Bestand, der sie trägt. Eine angehobene
-Schwelle wäre die dritte, falsche Möglichkeit. Vorgewarnt war der Stand im
-Vorgänger-Slice (`lastschrift-mandant-20260930.md`), solange die Dateien noch
-nicht eingecheckt waren.
+Erledigt am selben Tag: Der CRM-Owner hat die Akte auf den Bestand gezogen, der
+sie trägt, und der Webhook-Slice hat `domain_shared.webhooks` als weiteren
+falschen Verweis entfernt. Gemessen gegen `valeo_probe` sind es jetzt **21
+lebend**, und die Schwelle steht bündig bei 21.
