@@ -11,31 +11,54 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## KONTRAKTREGISTER-MIGRATION-20261001 — in Arbeit, Claude Code
+## KONTRAKTREGISTER-MIGRATION-20261001 — abgeschlossen, Claude Code
 
-**Ziel:** Die drei Tabellen des zentralen Kontraktregisters
+**Ziel:** Die drei Tabellen des zentralen Vertragsregisters
 (`domain_contracts.contracts`, `.contract_versions`, `.contract_obligations`)
 legt keine Migration an. Auf einer frischen Installation meldet jeder Weg der
-Kontrakte-Engine 503 — anlegen, auflisten, verlaengern, Pflichten fuehren,
+Vertrags-Engine 503 — anlegen, auflisten, verlaengern, Pflichten fuehren,
 Auswertung.
 **Dateibesitz:** `alembic/versions/kontraktregister_20261001.py`,
-`tests/test_kontraktregister_vertrag.py`, eigene Slice-/QA-Doku und dieser
-Abschnitt. `app/api/v1/endpoints/central_contracts.py` wird **nur** angefasst,
-wenn die Abnahme einen Fehler zeigt.
-**Abnahme:** Die drei Tabellen stehen nach `alembic upgrade head`; die Form ist
-woertlich aus den INSERTs und Pydantic-Modellen des Moduls uebernommen; der
-ganze Lebenszyklus laeuft gegen den frischen Stand durch (anlegen, aendern mit
-Versionszaehler, Pflicht anlegen und abschliessen, verlaengern, Auswertung);
-Mandantentrennung je Weg geprueft; Doku-Gates gruen.
-**Risiken:** `central_contracts.py` ist ungewoehnlich sauber — Mandantenfilter
-auf jedem Weg, 503 statt leerer Liste, Abfragegrenzen. Hier fehlt wirklich nur
-die Migration. Was der Slice **nicht** entscheidet: welche der sechs
-vorhandenen Kontrakttabellen (`domain_einkauf.kontrakte`,
-`domain_inventory.agrar_contracts`, `domain_ops.kon_contract`,
-`domain_portal.customer_contracts`, die Satelliten in `domain_kontrakte` ohne
-Kopftabelle, und dieses Register) die fuehrende ist. Das ist die groesste
-Fachfrage des Systems und gehoert dem Domaenen-Owner.
-
+`app/api/v1/endpoints/central_contracts.py`, `app/api/v1/api.py` (nur die
+Montage dieses Routers), `tests/test_kontraktregister_vertrag.py`,
+`scripts/check_table_references.py` (nur die Schwelle), eigene Slice-/QA-Doku
+und dieser Abschnitt.
+**Stand:** abgeschlossen 2026-10-01. Siebter Eintrag der Welle 2. Das Modul ist
+ungewoehnlich sauber — Mandantenfilter auf jedem Weg, 503 statt leerer Liste,
+Abfragegrenzen; hier fehlte wirklich nur die Migration. Die Form ist aus den
+INSERTs und Pydantic-Modellen uebernommen; ergaenzt sind Fremdschluessel
+(ON DELETE CASCADE), Pruefbedingungen auf die fuenf Wertemengen, die das Modul
+selbst prueft, und zwei Eindeutigkeiten (Vertragsnummer je Haus, Versionszaehler
+je Vertrag — `_next_version_number` zieht aus MAX+1).
+**Nebenbefund, behoben — ein Pfad fuer zwei Dinge:** Die Abnahme zeigte, dass die
+Migration allein nicht genuegt haette. `GET /contracts/{id}` und
+`GET /contracts/expiring` waren **unerreichbar**: Die Compat-Route des
+Warenkontrakts (`compat.py` -> `contracts_router`) ist zuerst eingebunden und las
+"expiring" als Vertragskennung. Das zweite ist das schlimmere — es ist die Liste,
+die einen auslaufenden Vertrag anzeigt, **bevor** er sich stillschweigend
+verlaengert.
+**Entscheidung:** "Kontrakt" (Warenkontrakt des Landhandels) und "Vertrag"
+(Miete, Pacht, Dienstleistung, mit Versionen und Pflichten) sind zwei Dinge und
+bekommen zwei Pfade. Das Register haengt jetzt unter `/api/v1/vertraege`, die
+Auswertung unter `/api/v1/vertraege/analytics` statt unter dem merkwuerdig
+globalen `/api/v1/analytics`. **Es bricht kein Aufrufer:** Das Register hatte
+keinen; alle Frontend-Zugriffe auf `/api/v1/contracts/...` gehen an den
+Warenkontrakt. Innerhalb des neuen Prefixes steht `/analytics` bewusst **vor**
+der Detailroute — sonst dieselbe Falle eine Ebene tiefer.
+**Nicht entschieden:** welche der sechs vorhandenen Kontrakttabellen die
+fuehrende ist (`domain_einkauf.kontrakte`, `domain_inventory.agrar_contracts`,
+`domain_ops.kon_contract`, `domain_portal.customer_contracts`, die Satelliten in
+`domain_kontrakte` **ohne Kopftabelle**, und dieses Register). Groesste Fachfrage
+des Systems, gehoert dem Domaenen-Owner. Die Satelliten ohne Kopftabelle sind ein
+eigener Befund.
+**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 21 -> 18.
+**Abnahme:** 20 Vertraege gruen, dazu 14 vorhandene Tests (die Compat-Route des
+Warenkontrakts bleibt unberuehrt). Nachweis:
+`docs/quality-assurance/kontraktregister-20261001.md`.
+**Fremde rote Gates, unveraendert:** `check_baseline_integrity.py` meldet eine
+verbotene Anhebung in `config/pagination_baseline.json`
+(`crm_360_sql.py::_query_many: 0 -> 1`), die Godfile-Ratsche `crm_360.py` mit
+1808 Zeilen. Beides aus der parallelen CRM-Arbeit.
 ## BANK-MT940-PARSER-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe Abnahme offen.

@@ -89,7 +89,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: ``app/services``, sinkt die Zahl, ohne dass Schuld verschwindet. Die Pruefung
 #: auf ``app/services`` auszuweiten ist richtig und ein eigener Vorgang — der
 #: Bestand dort ist nicht gemessen.
-BASELINE_LEBEND = 21
+#:
+#: 2026-10-01, lebend 21 -> 18: Das zentrale Vertragsregister
+#: (``domain_contracts.contracts``, ``.contract_versions``,
+#: ``.contract_obligations``) hat mit ``kontraktregister_20261001`` eine
+#: Migration.
+BASELINE_LEBEND = 18
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

@@ -1755,6 +1755,7 @@ api_router.include_router(
 
 api_router.include_router(
     central_contracts.router,
+    prefix="/vertraege",
     tags=["contracts", "obligations", "renewal"]
 )
 
