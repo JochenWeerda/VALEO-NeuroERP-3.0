@@ -255,11 +255,22 @@ _ABSCHLUSS_STAND = """
 """
 
 
+#: Obergrenze fuer die Aufschluesselung: eine Zeile je Zahlart, die an diesem Tag
+#: benutzt wurde. Ein Haus pflegt eine einstellige Zahl davon; die Grenze ist
+#: Schutz, nicht Seitenteilung. Wird sie erreicht, ist die Summe nicht
+#: vollstaendig — dann meldet der Bericht das, statt zu wenig auszuweisen.
+_MAX_ZAHLARTEN = 200
+
+
 def _tagesbericht(db: Session, tenant_id: str, tag: str) -> dict:
     """Liest einen Kassentag. Eine Stoerung wird gemeldet, nicht zu Null."""
     try:
         kennzahlen = db.execute(text(_TAGESKENNZAHLEN), {"tid": tenant_id, "tag": tag}).mappings().one()
-        zahlarten = db.execute(text(_UMSATZ_JE_ZAHLART), {"tid": tenant_id, "tag": tag}).mappings().all()
+        zahlarten = (
+            db.execute(text(_UMSATZ_JE_ZAHLART), {"tid": tenant_id, "tag": tag})
+            .mappings()
+            .fetchmany(_MAX_ZAHLARTEN)
+        )
     except Exception as fehler:
         # Kein Nullbericht: Bei einer Kasse ist "0,00 Euro" eine Aussage ueber
         # den Tag, keine ueber die Datenbank. Wer sie glaubt, verbucht einen
@@ -269,6 +280,17 @@ def _tagesbericht(db: Session, tenant_id: str, tag: str) -> dict:
             status_code=503,
             detail="Kassenumsatz ist derzeit nicht lesbar — Bericht nicht aussagefaehig.",
         ) from fehler
+
+    if len(zahlarten) >= _MAX_ZAHLARTEN:
+        # Ein Tagesabschluss ueber einen Teil der Zahlarten ist kein
+        # Tagesabschluss. Lieber keine Zahl als eine zu kleine.
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                f"Mehr als {_MAX_ZAHLARTEN} Zahlarten an einem Tag — der Bericht "
+                "waere unvollstaendig."
+            ),
+        )
 
     return {
         "brutto": float(kennzahlen["brutto"] or 0),

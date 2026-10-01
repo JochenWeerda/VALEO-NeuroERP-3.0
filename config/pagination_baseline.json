@@ -254,8 +254,7 @@
     "app/api/v1/endpoints/warehouse_transfers.py::list_bin_locations": 1,
     "app/api/v1/endpoints/warehouse_transfers.py::post_transfer": 1,
     "app/api/v1/endpoints/wartung.py::list_protokolle": 1,
-    "app/api/v1/endpoints/webhook_system.py::_trigger_webhook": 1,
-    "app/api/v1/endpoints/webhook_system.py::list_webhooks": 1,
+    
     "app/api/v1/endpoints/weighing_tickets.py::list_article_groups": 1,
     "app/api/v1/endpoints/zertifikate.py::get_zertifikate_stats": 1,
     "app/api/v1/endpoints/zertifikate.py::list_zertifikate": 1,

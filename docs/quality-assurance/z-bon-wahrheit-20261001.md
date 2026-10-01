@@ -114,6 +114,22 @@ Nebenbefund der Abnahme: Die Testzeilen scheiterten zunächst an `terminal_id`,
 `NOT NULL` auf einer **frischen** Datenbank. Genau der Grund, aus dem der
 Prüfstand frisch ist.
 
+## Nachtrag 01.10.2026: die Aufschluesselung ist begrenzt, und sagt es
+
+Das Pagination-Gate verlangt fuer jede Abfrage eine Grenze, und zu Recht: Eine
+Zeile je Zahlart ist zwar in der Praxis einstellig, aber die Abfrage selbst sagt
+das nicht. Die Aufschluesselung holt deshalb hoechstens `_MAX_ZAHLARTEN = 200`
+Zeilen.
+
+Entscheidend ist, was bei Erreichen der Grenze passiert: Der Bericht **meldet
+503**, statt eine zu kleine Summe auszuweisen. Eine Teilseite waere ein
+Tagesabschluss ueber einen Teil des Tages, und das ist dasselbe Muster, das
+dieser Slice behebt — lieber keine Zahl als eine falsche.
+
+Eine dateiweite Pagination-Ausnahme waere der bequemere Weg gewesen; das
+Baseline-Integritaetsgate verbietet sie, und das ist richtig: Sie haette auch die
+Zahlarten- und Aktionslisten derselben Datei mitbefreit.
+
 ## Tabellen-Ratsche: der Stand ist rot, und zwar nicht hierdurch
 
 Dieser Slice entfernt einen Verweis ins Leere an einem lebenden Weg; gemessen
