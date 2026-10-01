@@ -169,6 +169,17 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     share_of_wallet_total_pct: Optional[float] = None
     potential_segment: Optional[str] = None
     potential_notes: Optional[str] = None
+    billing_customer_group: Optional[str] = None
+    billing_customer_type: Optional[str] = None
+    account_statement_print: Optional[bool] = None
+    account_statement_separate: Optional[bool] = None
+    last_account_statement_number: Optional[int] = None
+    account_balance: Optional[float] = None
+    settlement_mode: Optional[str] = None
+    invoice_number_range: Optional[str] = None
+    bonus_eligible: Optional[bool] = None
+    self_billing_sales: Optional[bool] = None
+    vat_optimizer: Optional[bool] = None
 
 
 # Lead Schemas

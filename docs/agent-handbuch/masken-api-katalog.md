@@ -879,6 +879,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `angebote` → `/api/v1/crm/customers/{entity_id}/tabs/angebote`
 - `historie` → `/api/v1/crm/customers/{entity_id}/tabs/historie`
 - `praesente` → `/api/v1/crm/customers/{entity_id}/tabs/praesente`
+- `chefanweisungen` → `/api/v1/crm/customers/{entity_id}/tabs/chefanweisungen`
+- `anschriften` → `/api/v1/crm/customers/{entity_id}/tabs/anschriften`
+- `cpd` → `/api/v1/crm/customers/{entity_id}/tabs/cpd`
 
 **MCP-Tools (Domäne):**
 

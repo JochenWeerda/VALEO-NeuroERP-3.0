@@ -14,6 +14,7 @@ progress: >
   Stamm-/Cockpit-Links auf `/crm/kunden/{id}`, Geo aus `public.kunden_geo`.
   Angebote aus `crm_opportunities`, Historie aus CRM-Aktivitaeten.
   Potenzial aus dem juengsten `public.customer_potential_snapshot`.
+  Pflege-Register Chef, Anschriften, Kontoauszug und CPD sind lesbar.
 closed_at: 2026-09-30
 result: >
   Eine Object-Page-Akte fuer Interessent und Kunde. KIM-Route leitet um,

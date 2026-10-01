@@ -45,136 +45,60 @@ und Rekursion-Abweisung; GitHub-Rückmeldung nach Meilenstein-Push.
 wird nicht erweitert oder verlängert. Aktive POS-/CRM-/OpenAPI-Slices bleiben
 beim Owner.
 
-## Z-BON-WAHRHEIT-20261001 — in Arbeit, Claude Code
+## HANDSHAKE: Die Kundenakte liest zwei Tabellen ohne Migration 2026-10-01, Claude Code an den CRM-Owner
 
-**Ziel:** `pos_payments.x_report` und `z_report` lesen
-`domain_pos.pos_transactions` — ein Schema, in dem diese Tabelle **nicht**
-liegt. Bei jedem Fehler melden sie `total_eur: 0.0`, der Z-Bon zusaetzlich
-`closed: true`. Ein Tagesabschluss ueber 0,00 Euro ist bei einer Kasse keine
-Stoerungsmeldung, sondern eine Falschaussage (GoBD/KassenSichV). Beide Berichte
-lesen kuenftig den Bestand, der den Kassenumsatz wirklich traegt
-(`domain_docflow.pos_fiscal_transactions`), und eine Stoerung ist ein 503.
-**Hier ist keine Migration die Antwort**, sondern die Korrektur des Verweises —
-die dritte der drei Antworten aus `schema-drift-2026-09-30.md`.
-**Dateibesitz:** `app/api/v1/endpoints/pos_payments.py` (nur die beiden
-Report-Hunks), `tests/test_z_bon_wahrheit_vertrag.py`,
-`scripts/check_table_references.py` (nur die Schwelle), eigene Slice-/QA-Doku
-und dieser Abschnitt.
-**Abnahme:** X- und Z-Bericht summieren echte Kassenvorgaenge je Mandant und
-Geschaeftstag; alle Zahlarten werden aufgeschluesselt, nicht nur BAR und KARTE;
-`closed` kommt aus dem Tagesabschluss, nicht aus einer Zuweisung; Stoerung =
-503; Vertraege gruen gegen `valeo_probe`.
-**Risiken:** Es gibt zwei Tagesabschluesse im System — den echten
-(`pos_tagesabschluss_service`, Zustandsmaschine mit TSE und DSFinV-K) und diesen
-dekorativen. Der Slice macht den dekorativen ehrlich; die Frage, ob er ueberhaupt
-bleiben soll, gehoert dem POS-Owner.
+**Die Tabellen-Ratsche ist rot — 26 lebend gegen Schwelle 24 — und zwar seit
+Commit `aede5e1cc`** ("fix(crm): Kundenakte liest Partnerstamm, Posten und
+Register"), nicht durch den Slice danach.
 
-## PAYMENT-CSV-IMPORT-INTEGRITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
+`crm_360.py` liest dort `domain_crm.contacts` und `domain_crm.crm_customers`.
+Beide stehen auf der Liste der 76 Tabellen ohne Migration, und beide lagen vorher
+an einem **ruhenden** Weg. Die Kundenakte liest sie jetzt an einem **lebenden**:
+Auf einer frischen Installation laeuft sie dort ins Leere, und was der Anwender
+sieht, haengt davon ab, wie das `except` darueber antwortet.
 
-**Owner:** Codex-01a0f3fc. **Claim:** `2b5f9704f`. **Stand:** abgeschlossen 2026-10-01.
-**Ziel/Ergebnis:** CSV-Zahlungsimport speichert Kopf und sämtliche validierten
-Zeilen atomar. Selbstduplikatfehler korrigiert; echte Duplikate bleiben blockiert.
-Währungen bleiben erhalten, stilles Runden wird vor Schreibzugriff blockiert,
-UUIDv7 verhindert Sekundencollisionen. Kein Überspringen von Speicherfehlern.
-**Dateibesitz:** ausschließlich CSV-Import und UUID-Import in
-`app/api/v1/endpoints/payment_matching.py`, neue HTTP-/PostgreSQL-Tests,
-numerische Ratsche in `scripts/check_dead_transactions.py`, eigene Slice-/QA-
-Dokumente; Workboard und Open-Gaps nur im eigenen Abschnitt.
-**Abnahme:** 10/10 echte PostgreSQL-/HTTP-Verträge sowie 6/6 bestehende
-DQ-/Duplikatverträge grün. Zwei Red-Stufen belegen den vorgeschalteten
-Selbstduplikatfehler und acht anschließend erreichbare Persistenzprobleme.
-Transaktionsbefunde sinken 76 -> 75; Ratsche ehrlich auf 75 nachgezogen.
-**Handshake/Risiken:** CAMT/MT940-Import, Bankstatement-Automatching und
-Belegausgleich bleiben separate Fachgaps. Aktive Fremdclaims unberührt.
-**Nachweis:** `docs/quality-assurance/payment-csv-import-integrity-20260930.md`.
+**Zwei Moeglichkeiten, beide dem CRM-Owner:** Die Tabellen bekommen eine
+Migration, oder die Akte liest den Bestand, der sie traegt. Die Schwelle
+anzuheben ist die dritte, falsche — deshalb steht sie unveraendert bei 24.
 
-## PAYMENT-EXECUTION-ATOMICITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
-
-**Owner:** Codex-01a0f3fc. **Claim:** `52a4b317e`.
-**Ziel/Ergebnis:** Teilzahlungen bleiben offen; Lauf, Positionen, OP und
-vorhandene AP-Belegänderung nutzen eine Transaktion. Sperre vor Statuslesen,
-Kinddaten-/Summenvertrag und OP-Guards verhindern Doppelzahlung und falsche
-Zuordnung; echte DB-Fehler werden nicht verschluckt. Antwort vor Commit.
-**Dateibesitz:** `app/api/v1/endpoints/payment_runs.py`, optionale Commitsteuerung
-in `app/documents/repository.py`, Zahlungs- und neue Transaktionstests,
-eigene Slice-/QA-Doku; gemeinsame Dokumente nur im eigenen Abschnitt.
-**Abnahme:** Frisch migrierte eigene PostgreSQL-Datenbank: 26 Tests grün,
-zusätzlich 45 bestehende Finanz-/Wave-1-Verträge grün; zehn reproduzierte
-Fehler im Kontrolllauf des alten Codes. SQL-Casts, Pagination und Baselines grün.
-**Handshake/Risiken:** Externe Bankannahme, Legacy-Tenant-Datenmigration und
-weitere Fachprozesse bleiben eigene Gates. Godfile-Ratsche meldet fremde
-aktive Änderungen in CRM/Mask-Bridges; keine Grenzwert-Anhebung.
-**Nachweis:** `docs/quality-assurance/payment-execution-atomicity-20260930.md`.
-
-## SLICE-YAML-INTEGRITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
-
-**Ziel:** Governance-CLI laedt historische Slice-YAMLs mit leerer Schlussmarke,
-weist mehrere befuellte Dokumente und doppelte Schluessel ab und meldet
-Formfehler als Formfehler statt als angeblich fehlenden Slice.
-**Dateibesitz:** `scripts/valeo_slice.py`, `tests/test_valeo_slice_cli.py`,
-eigene Slice-/QA-Doku, DB-PRUEFSTAND-Absatz in Open-Gaps und dieser Abschnitt.
-**Abnahme:** Alle syntaktisch gueltigen historischen YAMLs sichtbar; kein
-stilles Verwerfen eines zweiten Dokuments; positive und negative CLI-Vertraege gruen.
-**Risiken:** Fehlende Harness-Felder bleiben echte Schemafehler und werden
-nicht durch automatische Inhaltsveraenderung fremder Slices verdeckt.
-**Naechster Schritt:** Separaten Claim committen, Loader und Fehleranzeige reparieren.
-**Stand:** Repo-seitig abgeschlossen. 290/290 YAMLs lesbar, 19 historische
-Formfehler normalisiert; negative Loader-/ID-Vertraege und Bestandstest gruen.
-Nachweis: `docs/quality-assurance/slice-yaml-integrity-20260930.md`.
-**Ergaenzter Scope:** Rein syntaktische Normalisierung der 19 abgeschlossenen
-historischen YAMLs aus der strikten Inventur. Owner, Status, Fachvertraege und
-historische Nachweise bleiben erhalten; keine Uebernahme ihrer Fachslices.
-Textlisten werden als Text serialisiert, beide alten Security-Koordinationssaetze
-bleiben in einem Feld; zwei disjunkte Masken-Dokumente werden jeweils ein Mapping.
-**Governance-Integration:** `scripts/ai-slice-readiness-check.cjs` und neue
-Vertragstests unterscheiden gegen den Ausgangscommit eine reine Syntaxreparatur
-eines bereits abgeschlossenen Legacy-Slice von einer fachlichen Aenderung.
-Nur erstere braucht keinen nachtraeglich erfundenen Harness; bei Inhalts- oder
-Statusaenderung bleibt der volle Vertrag verbindlich.
-
-## LASTSCHRIFT-MANDANT-20260930 — abgeschlossen, Claude Code
-
-**Ziel:** `domain_shared.direct_debit_items` traegt keinen Mandanten. Die
-Lastschriftmaske liest, exportiert, gibt frei, fuehrt aus und storniert
-deshalb **ueber Haeuser hinweg** — mit Name, IBAN, BIC, Mandatsreferenz und
-Betrag. Die Tabelle bekommt `tenant_id`, und jede Abfrage filtert danach.
-**Dateibesitz:** `alembic/versions/lastschrift_mandant_20260930.py`,
-`app/api/v1/endpoints/direct_debits.py`,
-`app/api/v1/endpoints/finance_followup.py` (nur der Vorschau-Hunk),
-`app/api/v1/endpoints/mask_frontend_bridges.py` (nur die drei
-Lastschrift-Hunks), `app/api/v1/endpoints/finance_actions.py` (nur der
-Lastschriften-INSERT), `scripts/check_table_references.py` (nur die Schwelle),
-`tests/test_lastschrift_mandant_vertrag.py`,
-`tests/test_finance_followup_api.py` (nur der Mandats-Stub), eigene
-Slice-/QA-Doku und dieser Abschnitt.
-**Stand:** abgeschlossen 2026-09-30. Vierter Eintrag der Welle 2, und der
-schwerste: Sechs Wege eines fremden Hauses auf fremde Bankdaten und fremde
-Lastschriftlaeufe sind zu. Dass nie Geld floss, lag nicht an einer Pruefung,
-sondern daran, dass der einzige sammelnde Weg ohnehin nicht lief.
-**Drei Nebenbefunde, behoben:**
-1. `sepa_ready` war **wahr, wenn kein Debitor ein Mandat hatte** — geprueft
-   wurde nur, dass keines abgelaufen ist, und die Abfrage lag in einem
-   verschluckenden `except`. Jetzt: Abfrage muss gelaufen sein, jeder Debitor
-   braucht ein gueltiges Mandat, gezaehlt werden Debitoren statt Mandatszeilen.
-2. `POST /finance/direct-debit/run` lief **nie**: `sepa_mandates` gab es
-   nirgends, der INSERT nannte `mandate_ref` statt `mandate_id`, und der Debitor
-   heisst in `open_items` `partner_id`. Gemeldet wurde "keine faelligen Posten".
-3. Eine nicht lesbare Lastschriftliste sah aus wie "keine Laeufe" (`return []`).
-   Jetzt 503.
-**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 25 -> 24.
-**Handshake an den Finanz-Owner:** `sepa_mandates` ist **minimal** — nur die
-fuenf Spalten, die der Code nennt. Glaeubiger-Identifikationsnummer, Sequenztyp
-(FRST/RCUR/OOFF/FNAL), Verfahren (CORE/B2B), Unterschriftsdatum und die IBAN des
-Zahlungspflichtigen fehlen; vier davon nimmt die Maske heute **pro Lauf**
-entgegen und verwirft sie. Ohne sie ist keine echte pain.008 moeglich.
-**Hinweis an den CRM-Slice:** Im gemeinsamen Arbeitsbaum meldet die
-Tabellen-Ratsche 26 statt 24, weil das noch nicht eingecheckte `crm_360.py`
-`domain_crm.contacts` und `domain_crm.crm_customers` anspricht — beide auf der
-Liste der 76 Tabellen ohne Migration. Die Schwelle ist gegen den Stand ohne
-diese Dateien gemessen.
-**Abnahme:** 16 Vertraege gruen gegen den frischen Stand, dazu 39 vorhandene
-Finanz-/Bruecken-Tests. Nachweis:
+Vorgewarnt war der Stand, solange die Dateien noch nicht eingecheckt waren, in
 `docs/quality-assurance/lastschrift-mandant-20260930.md`.
+
+## Z-BON-WAHRHEIT-20261001 — abgeschlossen, Claude Code
+
+**Ziel:** `pos_payments.x_report` und `z_report` lasen
+`domain_pos.pos_transactions` — eine Tabelle, die in diesem Schema nicht liegt.
+Bei jedem Fehler meldeten sie `total_eur: 0.0`, der Z-Bon zusaetzlich
+`closed: true`. Ein Tagesabschluss ueber einen umsatzlosen, abgeschlossenen Tag
+ist bei einer Kasse keine leere Lage, sondern eine Falschaussage
+(GoBD/KassenSichV).
+**Dateibesitz:** `app/api/v1/endpoints/pos_payments.py` (nur die beiden
+Report-Hunks), `tests/test_z_bon_wahrheit_vertrag.py`, eigene Slice-/QA-Doku und
+dieser Abschnitt.
+**Stand:** abgeschlossen 2026-10-01. Fuenfter Eintrag der Welle 2 — und der
+erste, in dem **keine Migration** die Antwort war, sondern die Korrektur des
+Verweises (die dritte der drei Antworten aus `schema-drift-2026-09-30.md`). Auch
+das richtige Schema haette nicht genuegt: `domain_erp.pos_transactions` ist ein
+Rumpf ohne Betrag und ohne Zahlart. Der Kassenumsatz liegt in
+`domain_docflow.pos_fiscal_transactions`. Eine neu angelegte
+`domain_pos.pos_transactions` haette eine zweite, leere Wahrheit ueber den
+Kassenumsatz geschaffen.
+**Vier Nebenbefunde, behoben:**
+1. Nur `BAR` und `KARTE` wurden aufgeschluesselt (so auch in der vorhandenen
+   `fiscalization.daily_summary`). Eine SEPA- oder Gutscheinzahlung steckte im
+   Brutto, aber in keinem Topf. Jetzt alle Zahlarten aus `payment_breakdown`.
+2. `closed` war eine **Zuweisung** (`"closed": True`). Jetzt kommt es aus
+   `pos_tagesabschluesse` und ist nur bei `ABGESCHLOSSEN` wahr; `closing_status`
+   gibt den Stand im Klartext.
+3. Unfertige Vorgaenge waren unsichtbar. Jetzt `unfinished_count`.
+4. Eine Stoerung ist ein 503, kein Nullbericht.
+**Offene Fachfrage an den POS-Owner:** Es gibt zwei Tagesabschluesse — den echten
+(`pos_tagesabschluss_service`: Zustandsmaschine, TSE, DSFinV-K) und diesen
+Bericht, der nichts abschliesst. Der Slice macht den zweiten ehrlich. Ob er
+bleiben soll oder die Maske direkt am Tagesabschluss haengen muesste, ist nicht
+entschieden.
+**Abnahme:** 13 Vertraege gruen gegen den frischen Stand, dazu 36 vorhandene
+POS-Tests. Nachweis: `docs/quality-assurance/z-bon-wahrheit-20261001.md`.
 
 ## CODE-IMPROVEMENT-INTEGRITY-20260930 — abgeschlossen (repo-seitig), Codex (Chat 01a0f3fc)
 

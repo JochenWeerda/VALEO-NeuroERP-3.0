@@ -53,6 +53,9 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             {"key": "angebote",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/angebote",    "pageSize": 25},
             {"key": "historie",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/historie",    "pageSize": 25},
             {"key": "praesente",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/praesente",   "pageSize": 25},
+            {"key": "chefanweisungen", "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/chefanweisungen", "pageSize": 25},
+            {"key": "anschriften", "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/anschriften", "pageSize": 25},
+            {"key": "cpd",         "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/cpd",         "pageSize": 25},
         ],
         "tabs": [
             {
@@ -287,6 +290,58 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                     {"key": "potential_segment", "label": "GAP-Segment", "type": "text", "readOnly": True},
                     {"key": "potential_notes", "label": "Notiz", "type": "textarea", "readOnly": True},
                 ],
+            },
+            {
+                "key": "chefanweisungen", "label": "Chef-Anweisung", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "chefanweisungen", "label": "Chef-Anweisungen", "dataSourceKey": "chefanweisungen",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "instruction_priority", "label": "Prioritaet", "width": 110, "filterable": True},
+                                {"key": "instruction_text", "label": "Text", "width": 320},
+                                {"key": "valid_from", "label": "Gueltig ab", "renderKind": "date", "width": 110},
+                                {"key": "valid_to", "label": "Gueltig bis", "renderKind": "date", "width": 110},
+                            ]}],
+            },
+            {
+                "key": "anschriften", "label": "Anschriften", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "anschriften", "label": "Anschriften", "dataSourceKey": "anschriften",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "address_type", "label": "Typ", "width": 120, "filterable": True},
+                                {"key": "name_1", "label": "Name", "width": 180, "sortable": True},
+                                {"key": "street", "label": "Strasse", "width": 160},
+                                {"key": "postal_code", "label": "PLZ", "width": 80},
+                                {"key": "city", "label": "Ort", "width": 140},
+                                {"key": "email", "label": "E-Mail", "width": 180},
+                            ]}],
+            },
+            {
+                "key": "kontoauszug", "label": "Kontoauszug", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "billing_customer_group", "label": "Kundengruppe", "type": "text", "readOnly": True},
+                    {"key": "billing_customer_type", "label": "Kundentyp", "type": "text", "readOnly": True},
+                    {"key": "last_account_statement_number", "label": "Letzte Auszugs-Nr.", "type": "number", "readOnly": True},
+                    {"key": "account_balance", "label": "Saldo", "type": "currency", "readOnly": True},
+                    {"key": "settlement_mode", "label": "Settlement", "type": "text", "readOnly": True},
+                    {"key": "invoice_number_range", "label": "Rechnungsnummernkreis", "type": "text", "readOnly": True},
+                    {"key": "account_statement_print", "label": "Kontoauszug drucken", "type": "boolean", "readOnly": True},
+                    {"key": "account_statement_separate", "label": "Getrennt", "type": "boolean", "readOnly": True},
+                    {"key": "bonus_eligible", "label": "Bonusberechtigt", "type": "boolean", "readOnly": True},
+                    {"key": "self_billing_sales", "label": "Selbstabrechner Verkauf", "type": "boolean", "readOnly": True},
+                    {"key": "vat_optimizer", "label": "USt-Optierer", "type": "boolean", "readOnly": True},
+                ],
+            },
+            {
+                "key": "cpd", "label": "CPD-Konto", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "cpd", "label": "CPD-Konten", "dataSourceKey": "cpd",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "cpd_customer_number", "label": "CPD-Nr.", "width": 130, "sortable": True},
+                                {"key": "debtor_account", "label": "Debitor", "width": 120},
+                                {"key": "name_1", "label": "Name", "width": 180},
+                                {"key": "city", "label": "Ort", "width": 140},
+                                {"key": "email", "label": "E-Mail", "width": 180},
+                            ]}],
             },
         ],
         "actions": [

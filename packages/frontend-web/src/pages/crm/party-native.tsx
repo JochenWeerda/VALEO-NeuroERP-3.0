@@ -40,6 +40,16 @@ const PARTY_SECTION_ALIASES: Record<string, string> = {
   historie: 'historie',
   history: 'historie',
   timeline: 'historie',
+  tab21: 'chefanweisungen',
+  chefanweisungen: 'chefanweisungen',
+  tab22: 'contacts',
+  tab23: 'anschriften',
+  anschriften: 'anschriften',
+  addresses: 'anschriften',
+  tab24: 'kontoauszug',
+  kontoauszug: 'kontoauszug',
+  tab25: 'cpd',
+  cpd: 'cpd',
 }
 
 export function resolvePartyKind(kind: string | null | undefined, pathname?: string): PartyKind {

@@ -420,6 +420,105 @@ def test_potenzial_kommt_aus_dem_juengsten_gap_snapshot(client, kunde) -> None:
             )
 
 
+def test_pflege_register_liegen_in_der_akte(client, kunde) -> None:
+    """Tab 21, 23, 24 und 25: Anweisungen, Anschriften, Kontoauszug, CPD."""
+    from sqlalchemy import create_engine, text
+
+    anweisung = str(uuid.uuid4())
+    anschrift = str(uuid.uuid4())
+    abrechnung = str(uuid.uuid4())
+    cpd = str(uuid.uuid4())
+    cpd_nr = f"CPD-{uuid.uuid4().hex[:6].upper()}"
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.business_partner_instructions "
+                "(id, partner_id, instruction_text, instruction_priority) "
+                "VALUES (:id, :pid, 'Nur nach Absprache liefern', 'high')"
+            ),
+            {"id": anweisung, "pid": kunde["partner_id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.business_partner_addresses "
+                "(id, partner_id, address_type, name_1, city, is_default) "
+                "VALUES (:id, :pid, 'shipping', 'Lagerhof', 'Kiel', false)"
+            ),
+            {"id": anschrift, "pid": kunde["partner_id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.business_partner_billing_configs "
+                "(id, partner_id, customer_group, account_balance, "
+                "account_statement_print, account_statement_separate, account_statement_reprint, "
+                "print_ad_text, shipping_expenses_enabled, bonus_eligible, "
+                "self_billing_sales, self_billing_purchase, remarkable_claim, vat_optimizer) "
+                "VALUES (:id, :pid, 'LAND', 1250.50, true, false, false, false, false, true, "
+                "false, false, false, false)"
+            ),
+            {"id": abrechnung, "pid": kunde["partner_id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.business_partner_cpd_accounts "
+                "(id, partner_id, cpd_customer_number, name_1, debtor_account, collective_invoice) "
+                "VALUES (:id, :pid, :nr, 'CPD Hof', '1400', false)"
+            ),
+            {"id": cpd, "pid": kunde["partner_id"], "nr": cpd_nr},
+        )
+    try:
+        anweisungen = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/chefanweisungen",
+            headers=kopf(kunde["mandant"]),
+        )
+        assert anweisungen.status_code == 200, anweisungen.text
+        assert any(
+            zeile.get("instruction_text") == "Nur nach Absprache liefern"
+            for zeile in anweisungen.json()["items"]
+        )
+
+        anschriften = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/anschriften",
+            headers=kopf(kunde["mandant"]),
+        )
+        assert anschriften.status_code == 200, anschriften.text
+        assert any(zeile.get("name_1") == "Lagerhof" for zeile in anschriften.json()["items"])
+
+        konten = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/cpd",
+            headers=kopf(kunde["mandant"]),
+        )
+        assert konten.status_code == 200, konten.text
+        assert any(zeile.get("cpd_customer_number") == cpd_nr for zeile in konten.json()["items"])
+
+        stamm = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}", headers=kopf(kunde["mandant"])
+        )
+        assert stamm.status_code == 200, stamm.text
+        assert stamm.json()["billing_customer_group"] == "LAND"
+        assert stamm.json()["account_balance"] == 1250.5
+        assert stamm.json()["bonus_eligible"] is True
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_crm.business_partner_cpd_accounts WHERE id = :id"),
+                {"id": cpd},
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_crm.business_partner_billing_configs WHERE id = :id"),
+                {"id": abrechnung},
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_crm.business_partner_addresses WHERE id = :id"),
+                {"id": anschrift},
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_crm.business_partner_instructions WHERE id = :id"),
+                {"id": anweisung},
+            )
+
+
 def test_ein_kunde_den_es_nicht_gibt_bleibt_ein_404(client, kunde) -> None:
     """Der 404 soll weiterhin etwas bedeuten."""
     antwort = client.get(

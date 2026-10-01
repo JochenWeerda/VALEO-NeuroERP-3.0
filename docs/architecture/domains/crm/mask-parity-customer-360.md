@@ -43,6 +43,10 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 | CRM 360 Angebote | `angebote` | Verkaufschancen | `GET .../tabs/angebote` | lazy table | ok |
 | CRM 360 Historie | `historie` | Aktivitaetenhistorie | `GET .../tabs/historie` | lazy table | ok |
 | KIM Chef/Präsente/Postfach/Geo | `masterdata` / `praesente` / `postfach` / `address` | Chefanweisung, Präsenteliste, Postfachfelder, Koordinaten | `GET .../customers/{id}` + `GET .../tabs/praesente` | compiled | ok |
+| Pflege Tab 21 Chef-Anweisung | `chefanweisungen` | `domain_crm.business_partner_instructions` | `GET .../tabs/chefanweisungen` | lazy table | ok |
+| Pflege Tab 23 Anschriften | `anschriften` | `domain_crm.business_partner_addresses` | `GET .../tabs/anschriften` | lazy table | ok |
+| Pflege Tab 24 Kontoauszug | `kontoauszug` | `domain_crm.business_partner_billing_configs` | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Pflege Tab 25 CPD-Konto | `cpd` | `domain_crm.business_partner_cpd_accounts` | `GET .../tabs/cpd` | lazy table | ok |
 
 ## Summary vs. Mask-Tab-Keys
 
@@ -68,14 +72,16 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 
 ## Offene Luecken
 
-- Mutationen bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+- Mutationen (Anlegen, Aendern, Loeschen) bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+- Die Pflege-Register Chef-Anweisung, Anschriften, Kontoauszug und CPD-Konto
+  sind in der Akte lesbar. Ohne Partnersatz bleiben sie leer.
 - Potenzial ist der juengste GAP-Snapshot (`customer_potential_snapshot`);
   ohne Pipeline-Lauf bleibt das Register leer.
 - Chef, Präsente, Postfach und Geo sitzen in der nativen Object Page
   (`masterdata`/`praesente`/`postfach`/`address`); Mini-Apps bleiben weg.
 - Listen-IDs (`kunden_nr`, Partnernummer) oeffnen dieselbe Akte wie die UUID.
 - `/verkauf/kunden-stamm/:id` und `/crm/kunden-cockpit?id=` leiten auf dieselbe Akte;
-  Tab 21–25 bleiben unter `?pflege=1`.
+  Mutationen der Tabs 21–25 bleiben unter `?pflege=1`.
 
 ## Desktop-Gewohnheitsbruecke 2026-08-19
 

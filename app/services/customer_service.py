@@ -291,6 +291,7 @@ class CustomerService:
                 if customer_dict.get("laengengrad") is None:
                     customer_dict["laengengrad"] = getattr(sat, "lon", None)
         self._attach_partner_mask_fields(customer_dict)
+        self._attach_billing_config(customer_dict)
         self._attach_potential_snapshot(customer_dict)
         return customer_dict
 
@@ -351,6 +352,49 @@ class CustomerService:
                 "edifact_invoic": row["edifact_invoic"],
                 "edifact_orders": row["edifact_orders"],
                 "edifact_desadv": row["edifact_desadv"],
+            }
+        )
+
+    def _attach_billing_config(self, customer_dict: dict[str, Any]) -> None:
+        """Kontoauszug. Quelle: domain_crm.business_partner_billing_configs."""
+        partner_id = customer_dict.get("business_partner_id")
+        if not partner_id:
+            return
+        try:
+            row = self.db.execute(
+                text(
+                    """
+                    SELECT customer_group, customer_type,
+                           account_statement_print, account_statement_separate,
+                           last_account_statement_number, account_balance,
+                           settlement_mode, invoice_number_range,
+                           bonus_eligible, self_billing_sales, vat_optimizer
+                    FROM domain_crm.business_partner_billing_configs
+                    WHERE partner_id::text = :id
+                    LIMIT 1
+                    """
+                ),
+                {"id": str(partner_id)},
+            ).mappings().first()
+        except Exception:
+            self.db.rollback()
+            return
+        if not row:
+            return
+        saldo = row["account_balance"]
+        customer_dict.update(
+            {
+                "billing_customer_group": row["customer_group"],
+                "billing_customer_type": row["customer_type"],
+                "account_statement_print": row["account_statement_print"],
+                "account_statement_separate": row["account_statement_separate"],
+                "last_account_statement_number": row["last_account_statement_number"],
+                "account_balance": float(saldo) if saldo is not None else None,
+                "settlement_mode": row["settlement_mode"],
+                "invoice_number_range": row["invoice_number_range"],
+                "bonus_eligible": row["bonus_eligible"],
+                "self_billing_sales": row["self_billing_sales"],
+                "vat_optimizer": row["vat_optimizer"],
             }
         )
 

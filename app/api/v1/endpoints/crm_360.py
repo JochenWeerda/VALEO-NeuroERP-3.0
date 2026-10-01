@@ -358,6 +358,13 @@ def _normalize_tab_key(tab_key: str) -> str:
         "mailbox": "postfach",
         "geo": "geo",
         "karte": "geo",
+        "chefanweisungen": "chefanweisungen",
+        "tab21": "chefanweisungen",
+        "anschriften": "anschriften",
+        "addresses": "anschriften",
+        "tab23": "anschriften",
+        "cpd": "cpd",
+        "tab25": "cpd",
     }
     return aliases.get(tab_key, tab_key)
 
@@ -554,6 +561,70 @@ def _fetch_customer_tab_items(
     if normalized in {"postfach", "geo"}:
         return normalized, []
 
+    if normalized == "chefanweisungen":
+        if not partner_id:
+            return "chefanweisungen", []
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(instruction_priority, '') AS instruction_priority,
+                   COALESCE(instruction_text, '') AS instruction_text,
+                   valid_from::text AS valid_from,
+                   valid_to::text AS valid_to
+            FROM domain_crm.business_partner_instructions
+            WHERE partner_id::text = :pid
+            ORDER BY created_at DESC
+            LIMIT 25
+            """,
+            {"pid": partner_id},
+        )
+        return "chefanweisungen", rows
+
+    if normalized == "anschriften":
+        if not partner_id:
+            return "anschriften", []
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(address_type, '') AS address_type,
+                   COALESCE(name_1, '') AS name_1,
+                   COALESCE(street, '') AS street,
+                   COALESCE(postal_code, '') AS postal_code,
+                   COALESCE(city, '') AS city,
+                   COALESCE(email, '') AS email,
+                   is_default
+            FROM domain_crm.business_partner_addresses
+            WHERE partner_id::text = :pid
+            ORDER BY is_default DESC, address_type
+            LIMIT 25
+            """,
+            {"pid": partner_id},
+        )
+        return "anschriften", rows
+
+    if normalized == "cpd":
+        if not partner_id:
+            return "cpd", []
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(cpd_customer_number, '') AS cpd_customer_number,
+                   COALESCE(debtor_account, '') AS debtor_account,
+                   COALESCE(name_1, '') AS name_1,
+                   COALESCE(city, '') AS city,
+                   COALESCE(email, '') AS email
+            FROM domain_crm.business_partner_cpd_accounts
+            WHERE partner_id::text = :pid
+            ORDER BY cpd_customer_number
+            LIMIT 25
+            """,
+            {"pid": partner_id},
+        )
+        return "cpd", rows
+
     if normalized == "dokumente":
         rows = _query_many(
             db,
@@ -740,6 +811,58 @@ class CustomerOffersTabOut(CustomerTabOut):
 
 class CustomerHistoryTabOut(CustomerTabOut):
     items: list[CustomerActivityRowOut] = Field(default_factory=list)
+
+
+class CustomerInstructionRowOut(BaseSchema):
+    """Eine Chef-Anweisung am Geschaeftspartner."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    instruction_priority: str = ""
+    instruction_text: str = ""
+    valid_from: Optional[str] = None
+    valid_to: Optional[str] = None
+
+
+class CustomerInstructionsTabOut(CustomerTabOut):
+    items: list[CustomerInstructionRowOut] = Field(default_factory=list)
+
+
+class CustomerAddressRowOut(BaseSchema):
+    """Eine normalisierte Anschrift am Geschaeftspartner."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    address_type: str = ""
+    name_1: str = ""
+    street: str = ""
+    postal_code: str = ""
+    city: str = ""
+    email: str = ""
+    is_default: Optional[bool] = None
+
+
+class CustomerAddressesTabOut(CustomerTabOut):
+    items: list[CustomerAddressRowOut] = Field(default_factory=list)
+
+
+class CustomerCpdRowOut(BaseSchema):
+    """Ein CPD-Konto am Geschaeftspartner."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    cpd_customer_number: str = ""
+    debtor_account: str = ""
+    name_1: str = ""
+    city: str = ""
+    email: str = ""
+
+
+class CustomerCpdTabOut(CustomerTabOut):
+    items: list[CustomerCpdRowOut] = Field(default_factory=list)
 
 
 # Vier benannte Register vor der generischen Route
@@ -950,6 +1073,81 @@ async def get_customer_tab_historie(
     """Aktivitaeten des Kunden in zeitlicher Reihenfolge."""
     return await get_customer_tab_data(
         customer_id=customer_id, tab_key="historie", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/chefanweisungen",
+    response_model=CustomerInstructionsTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Chef-Anweisungen",
+)
+async def get_customer_tab_chefanweisungen(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Normalisierte Chef-Anweisungen des Partners."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="chefanweisungen", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/anschriften",
+    response_model=CustomerAddressesTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Anschriften",
+)
+async def get_customer_tab_anschriften(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Normalisierte Anschriften des Partners."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="anschriften", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/cpd",
+    response_model=CustomerCpdTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: CPD-Konten",
+)
+async def get_customer_tab_cpd(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """CPD-Konten des Partners."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="cpd", tenant_id=tenant_id,
         page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
         filter_plan=filter_plan, filter_plan_legacy=None, db=db,
     )
