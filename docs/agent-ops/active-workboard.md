@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-DIRECTBOOK-RETIREMENT-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
+Scheinzuordnung entfernen; Entwicklungsfreigabe fuer Altlasten repositoryweit
+festhalten. Keine geratenen Konten oder falschen Buchungserfolgsmeldungen.
+**Dateibesitz:** bank_reconciliation.py nur Direktbuchung/Suggestions,
+bank-abgleich.tsx nur Rueckbau unsicherer Aktionen, eigene Vertragstests,
+AGENTS.md nur Entwicklungsregel; eigene Workboard/Gaps-/Finance-API-Abschnitte,
+eigene QA/Slice/ADR. Fremde UI-, EUDR- und Coverage-Aenderungen unberuehrt.
+**Abnahme:** auto_book=true explizit abgewiesen ohne Datenbankzugriff;
+interner Default echtes False; kein SQL-Schreibweg im Abgleich; kein lokales
+MATCHED durch Textmuster; Save validiert statt zu buchen.
+**Risiken:** Kontobindung, Hauptbuchnachweis und wahrheitsgetreuer Saldenstatus
+bleiben eigener Folgeslice, nicht durch Retirement als geschlossen markieren.
+**Betrieb:** Bestehenden valeo_probe ohne Reset/Migration verwenden,
+nur eigene Daten; keine neue Datenbank oder Dockerinstanz.
+
 ## BANK-STATEMENT-DATE-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Auszugsdatum aus Bankdatei statt Importtag;
