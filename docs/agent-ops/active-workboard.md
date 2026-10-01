@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## COVERAGE-RETIRED-MODULE-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** Coverage-Ratsche erlaubt nur nachgewiesene Modul-Loeschung;
+vorhandener, untracked ersetzter oder verschobener Code bleibt geschuetzt.
+**Dateibesitz:** `scripts/check_baseline_integrity.py`,
+`scripts/check_critical_backend_coverage.py`, eigene Baseline-/Coverage-
+Vertragstests, `config/coverage_ratchet_baseline.json` nur vier nachgewiesen
+entfernte Kontraktmodule, eigene QA-/Slice-/Workboard-/Open-Gaps-Doku.
+**Abnahme:** Echte Git-Vertraege fuer Loeschung, verwaiste Pfade, Rename,
+uncommittete Loeschung und vorhandene Ersatzdatei. Kein Absenken bestehender
+Schwellen, keine pauschale Freistellung. Coverage-Checks bleiben verbindlich.
+**Entscheidung:** Bestehendes Quality-Gate nach Handshake KONTRAKT-EINE-ORDNUNG
+reparieren. Vier Schwellen entfallen erst mit Git-/Dateinachweis; keine neue
+Testdatenbank/Dockerinstanz. Temporäre Git-Testrepos nur im pytest-Tempverzeichnis.
+**Risiken:** Git-Rename-Erkennung ist heuristisch; Reorganisation ist keine
+Coverage-Freigabe. Zweiter Bankimportweg bleibt separater Integrations-Slice.
+
 ## PERIODE-EIN-ZUSTAND-20261001 — in Arbeit, Claude Code
 
 **Ziel:** Eine Buchungsperiode hat **einen** Zustand. Heute stehen drei
