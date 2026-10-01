@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-DIRECTBOOK — unsicheren Altweg entfernt, Hauptbuchnachweis offen
+
+Entwicklungsfreigabe fuer Altlasten repositoryweit in AGENTS.md. Direkte
+Abgleichsbuchung mit geratenen Konten geloescht; true-Flag explizit 409 vor
+DB-Zugriff, False-Default fuer interne Calls. Keine Vorschlaege, stets keine
+Buchungsfreigabe. Maske entfernt lokale Scheinzuordnung und Book-Aktion;
+Save prueft. 62 Backend- und zwei Maskentests bestanden.
+Offen: Mandant/Konto-/GL-Bindung, Journalbetragsdubletten, stille Lesefehler,
+PARTIAL/Vollstaendigkeitsnachweis und CSV-Saldonachweis. Der bestehende
+Saldenvergleich ist hiermit nicht als korrekt abgenommen. Typecheck weiter
+rot durch bestehendes CallWidget.tsx:54. QA: bank-directbook-retirement-20261001.md.
+
 ## BANK-STATEMENT-DATE — ein fachlicher Stichtag (2026-10-01)
 
 **Geschlossen:** Importdatum statt Saldo-Datum, verschiedene CSV-Stichtage,

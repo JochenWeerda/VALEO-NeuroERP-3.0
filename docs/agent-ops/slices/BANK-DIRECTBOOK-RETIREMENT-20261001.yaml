@@ -1,0 +1,36 @@
+slice_id: BANK-DIRECTBOOK-RETIREMENT-20261001
+title: Unsicheren Bank-Direktbuchungsweg entfernen
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claim 8d3a9ae38; fremde UI/EUDR/Coverage und globalen OpenAPI-Claim respektieren.
+goal: Kein Buchungserfolg durch geratenes Konto oder lokale Scheinzuordnung.
+file_ownership:
+  - app/api/v1/endpoints/bank_reconciliation.py
+  - packages/frontend-web/src/pages/finance/bank-abgleich.tsx
+  - tests/test_bank_directbook_retirement.py
+  - tests/test_bank_reconciliation_api.py
+  - packages/frontend-web/src/__tests__/bank-abgleich-retirement.test.tsx
+  - AGENTS.md nur Entwicklungsregel
+  - docs/schnittstellen/openapi.json nur ReconciliationResult und auto_book Beschreibung
+acceptance:
+  - auto_book=true gibt 409 vor Datenbankzugriff; interner Default echtes False.
+  - Kein Journal-INSERT oder Bankzeilen-UPDATE im Abgleich.
+  - Keine geratenen Gegenkonten oder Buchungsvorschlaege.
+  - Keine lokale Zuordnung durch Textmuster oder Checkbox; Save prueft.
+test_evidence:
+  - 62 Backend-Vertraege und zwei neue Maskentests bestanden.
+  - Drei reale read-only Abnahmefaelle auf gemeinsamem valeo_probe.
+risks:
+  - Saldenvergleich braucht noch GL-Bindung, Mandantenbindung und ehrlichen Datenstatus.
+  - Fokussierter Typecheck rot wegen bestehender CallWidget.tsx Typabweichung.
+  - Globaler OpenAPI-Refresh und GitHub-CI bleiben eigene Abnahmen.
+ai_harness:
+  fachlicher_vertrag: Vergleich kann keine Buchungsfreigabe geben.
+  architektur_vertrag: Vorhandenen unsicheren Weg entfernen, kein neuer Service/Renderer.
+  daten_vertrag: Kein Abgleich-DML, eigene Testdatensaetze gezielt aufraeumen.
+  test_vertrag: HTTP, direkte Aufrufe und reale Datenbankzustandsvergleiche.
+  security_vertrag: Keine Direktbuchung mit geratenen Konten.
+  betriebs_vertrag: Vorhandener valeo_probe ohne Reset/Migration oder neue Dockerinstanz.
+  dokumentations_vertrag: ADR, QA, Slice, Workboard, Open-Gaps, Domain-API und Agentenregel.

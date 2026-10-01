@@ -3,22 +3,20 @@ Bank Reconciliation API
 FIBU-BNK-04: Bankabstimmung Saldoabgleich
 """
 
-from typing import List, Optional
+from typing import Annotated, List, Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
-from datetime import date, datetime
+from datetime import date
 from pydantic import BaseModel
 import logging
 
 from ....core.database import get_db
-from ....core.fibu_audit import log_fibu_audit
+
+from app.api.v1.schemas.bank_reconciliation_schemas import BankReconciliationOut
 
 logger = logging.getLogger(__name__)
-
-from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.bank_reconciliation_schemas import BankReconciliationOut
 
 
 router = APIRouter(prefix="/bank-reconciliation", tags=["finance", "bank-reconciliation"])
@@ -57,8 +55,7 @@ class ReconciliationResult(BaseModel):
     differences: List[DifferenceItem]
     total_differences: int
     line_counts: dict
-    can_be_booked: bool
-    booking_suggestions: Optional[List[dict]] = None
+    can_be_booked: Literal[False] = False
 
 
 @router.get("/{statement_id}/balance-comparison", response_model=BalanceComparison, summary="Balance comparison abrufen")
@@ -189,8 +186,7 @@ async def get_reconciliation_differences(
                 bank_amount=Decimal(str(row[2])),
                 reference=row[3],
                 description=row[4] or row[3] or "Unmatched bank transaction",
-                suggested_account="1200",  # Default: Accounts Receivable
-                suggested_action="CREATE_ENTRY"
+                suggested_action="INVESTIGATE"
             ))
         
         # Get accounting entries that might not be in bank statement
@@ -209,12 +205,17 @@ async def reconcile_bank_statement(
     statement_id: str,
     bank_account_id: str = Query(..., description="Bank account ID"),
     tenant_id: str = Query("system", description="Tenant ID"),
-    auto_book: bool = Query(False, description="Automatically book differences"),
+    auto_book: Annotated[bool, Query(description="Retired: direct booking is not supported")] = False,
     db: Session = Depends(get_db)
 ):
     """
-    Perform bank reconciliation and generate booking suggestions.
+    Perform a read-only comparison. Journal posting belongs to the journal workflow.
     """
+    if auto_book is not False:
+        raise HTTPException(
+            status_code=409,
+            detail="Direct bank reconciliation booking has been retired; use the journal posting workflow",
+        )
     try:
         # Get balance comparison
         balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
@@ -241,153 +242,6 @@ async def reconcile_bank_statement(
             "unmatched": int(line_counts_row[2] or 0) if line_counts_row else 0,
         }
 
-        # Generate booking suggestions for unmatched items
-        booking_suggestions = []
-        
-        for diff in differences:
-            if diff.item_type == "UNMATCHED_STATEMENT" and diff.suggested_action == "CREATE_ENTRY":
-                # Suggest journal entry for unmatched bank transaction
-                suggestion = {
-                    "type": "journal_entry",
-                    "description": diff.description,
-                    "date": diff.date.isoformat(),
-                    "account_debit": "1000",  # Bank account
-                    "account_credit": diff.suggested_account or "1200",  # Default AR
-                    "amount": float(diff.amount),
-                    "reference": diff.reference,
-                    "statement_line_id": diff.statement_line_id
-                }
-                booking_suggestions.append(suggestion)
-        
-        can_be_booked = len(booking_suggestions) > 0
-        
-        # Auto-book if requested and balanced
-        if auto_book and booking_suggestions:
-            for suggestion in booking_suggestions:
-                try:
-                    # Create journal entry
-                    journal_entry_id = f"JE-RECON-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{suggestion['statement_line_id'][:8]}"
-                    
-                    journal_insert = text("""
-                        INSERT INTO domain_erp.journal_entries
-                        (id, tenant_id, entry_number, entry_date, posting_date, description,
-                         source, status, total_debit, total_credit, created_at, updated_at)
-                        VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :description,
-                                :source, :status, :total_debit, :total_credit, NOW(), NOW())
-                        RETURNING id
-                    """)
-                    
-                    entry_date = datetime.strptime(suggestion["date"], '%Y-%m-%d').date()
-                    entry_number = f"BANK-RECON-{entry_date.strftime('%Y%m%d')}"
-                    
-                    db.execute(journal_insert, {
-                        "id": journal_entry_id,
-                        "tenant_id": tenant_id,
-                        "entry_number": entry_number,
-                        "entry_date": entry_date,
-                        "posting_date": entry_date,
-                        "description": suggestion["description"],
-                        "source": "bank_reconciliation",
-                        "status": "posted",
-                        "total_debit": Decimal(str(suggestion["amount"])),
-                        "total_credit": Decimal(str(suggestion["amount"]))
-                    })
-                    
-                    # Create journal entry lines
-                    # Debit: Bank account
-                    bank_account_query = text("""
-                        SELECT id FROM domain_erp.chart_of_accounts
-                        WHERE account_number = :account_number AND tenant_id = :tenant_id
-                        LIMIT 1
-                    """)
-                    bank_account_row = db.execute(bank_account_query, {
-                        "account_number": suggestion["account_debit"],
-                        "tenant_id": tenant_id
-                    }).fetchone()
-                    
-                    if bank_account_row:
-                        journal_line1 = text("""
-                            INSERT INTO domain_erp.journal_entry_lines
-                            (id, tenant_id, journal_entry_id, account_id, debit, credit,
-                             line_number, description, created_at)
-                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
-                                    :line_number, :description, NOW())
-                        """)
-                        
-                        db.execute(journal_line1, {
-                            "id": f"{journal_entry_id}-L1",
-                            "tenant_id": tenant_id,
-                            "journal_entry_id": journal_entry_id,
-                            "account_id": str(bank_account_row[0]),
-                            "debit": Decimal(str(suggestion["amount"])),
-                            "credit": Decimal("0.00"),
-                            "line_number": 1,
-                            "description": suggestion["description"]
-                        })
-                    
-                    # Credit: Suggested account
-                    credit_account_row = db.execute(bank_account_query, {
-                        "account_number": suggestion["account_credit"],
-                        "tenant_id": tenant_id
-                    }).fetchone()
-                    
-                    if credit_account_row:
-                        journal_line2 = text("""
-                            INSERT INTO domain_erp.journal_entry_lines
-                            (id, tenant_id, journal_entry_id, account_id, debit, credit,
-                             line_number, description, created_at)
-                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
-                                    :line_number, :description, NOW())
-                        """)
-                        
-                        db.execute(journal_line2, {
-                            "id": f"{journal_entry_id}-L2",
-                            "tenant_id": tenant_id,
-                            "journal_entry_id": journal_entry_id,
-                            "account_id": str(credit_account_row[0]),
-                            "debit": Decimal("0.00"),
-                            "credit": Decimal(str(suggestion["amount"])),
-                            "line_number": 2,
-                            "description": suggestion["description"]
-                        })
-                    
-                    # Mark statement line as matched
-                    if suggestion.get("statement_line_id"):
-                        update_line = text("""
-                            UPDATE domain_erp.bank_statement_lines
-                            SET status = 'MATCHED', updated_at = NOW()
-                            WHERE id = :line_id AND tenant_id = :tenant_id
-                        """)
-                        
-                        db.execute(update_line, {
-                            "line_id": suggestion["statement_line_id"],
-                            "tenant_id": tenant_id
-                        })
-                    log_fibu_audit(
-                        db, tenant_id, "create", "journal_entry", journal_entry_id,
-                        {"source": "bank_reconciliation", "entry_number": entry_number},
-                        request=None,
-                    )
-                except Exception as e:
-                    logger.error(f"Error creating journal entry for suggestion: {e}")
-                    continue
-            
-            db.commit()
-
-            # Refresh stats and comparison after auto-book
-            balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
-            line_counts_row = db.execute(
-                line_counts_query,
-                {"statement_id": statement_id, "tenant_id": tenant_id},
-            ).fetchone()
-            line_counts = {
-                "total": int(line_counts_row[0] or 0) if line_counts_row else 0,
-                "matched": int(line_counts_row[1] or 0) if line_counts_row else 0,
-                "unmatched": int(line_counts_row[2] or 0) if line_counts_row else 0,
-            }
-            differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
-            can_be_booked = len(differences) > 0
-        
         return ReconciliationResult(
             statement_id=statement_id,
             bank_account_id=bank_account_id,
@@ -395,8 +249,7 @@ async def reconcile_bank_statement(
             differences=differences,
             total_differences=len(differences),
             line_counts=line_counts,
-            can_be_booked=can_be_booked,
-            booking_suggestions=booking_suggestions if not auto_book else None
+            can_be_booked=False
         )
         
     except HTTPException:
@@ -458,7 +311,7 @@ async def get_reconciliation_summary(
                 "unmatched": unmatched_lines
             },
             "differences_count": len(differences),
-            "can_be_booked": balance_comp.is_balanced and unmatched_lines == 0
+            "can_be_booked": False
         }
         
     except Exception as e:

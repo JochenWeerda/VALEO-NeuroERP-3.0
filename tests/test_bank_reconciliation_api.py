@@ -95,11 +95,11 @@ def test_reconciliation_result_structure():
         differences=[],
         total_differences=0,
         line_counts={"matched": 10, "unmatched": 0},
-        can_be_booked=True,
+        can_be_booked=False,
     )
-    assert result.can_be_booked is True
+    assert result.can_be_booked is False
     assert result.total_differences == 0
-    assert result.booking_suggestions is None
+    assert "booking_suggestions" not in result.model_dump()
 
 
 # ---------------------------------------------------------------------------
