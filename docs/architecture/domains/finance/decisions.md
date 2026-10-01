@@ -24,3 +24,5 @@ version: 1.0.0
 - [ADR-073](../../../adr/adr-073-bank-model-retirement.md): ein aktives
   Bankauszugsmodell; unsicheren zweiten API-Weg loeschen, Entwicklungs-Altbestand
   nach expliziter User-Freigabe entfernen, kein Archiv/Adapter.
+
+- [ADR-074](../../../adr/adr-074-bank-directbook-retirement.md): konkurrierende Direktbuchung entfernen; Abgleich ohne Buchungsfreigabe.

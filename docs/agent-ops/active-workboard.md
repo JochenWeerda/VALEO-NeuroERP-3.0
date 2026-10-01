@@ -58,7 +58,7 @@ dieses Slices und bleibt eine benannte Luecke; gesetzt wird das Kennzeichen
 vorerst beim Wareneingang bzw. durch die Maske. Die fachjuristische Abnahme
 gehoert weiterhin dem Compliance-Owner.
 
-## BANK-DIRECTBOOK-RETIREMENT-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
 Scheinzuordnung entfernen; Entwicklungsfreigabe fuer Altlasten repositoryweit
@@ -74,6 +74,17 @@ MATCHED durch Textmuster; Save validiert statt zu buchen.
 bleiben eigener Folgeslice, nicht durch Retirement als geschlossen markieren.
 **Betrieb:** Bestehenden valeo_probe ohne Reset/Migration verwenden,
 nur eigene Daten; keine neue Datenbank oder Dockerinstanz.
+**Ergebnis:** Claim 8d3a9ae38. Direktbuchung, geratenes Gegenkonto,
+Buchungsvorschlaege und lokale Scheinzuordnung entfernt. 62 Backend- und zwei
+Maskentests bestanden; drei neue reale DB-Faelle ohne Writes. Save prueft.
+**Ergaenzter Besitz:** OpenAPI nur eigenes ReconciliationResult und auto_book-
+Beschreibung; globaler OPENAPI-DRIFT-REFRESH bleibt beim Owner.
+**Handoff:** QA bank-directbook-retirement-20261001.md und ADR-074.
+Fokussierter Typecheck rot wegen bestehendem CallWidget.tsx:54.
+**Naechster Slice:** BANK-RECONCILIATION-PROOF-20261001 offen: Mandant/Konto,
+GL-Bindung, eindeutige Journalbetraege, kein stiller Lesefehler/Nullsaldo,
+PARTIAL/Vollstaendigkeit und CSV-Saldonachweis. Noch kein erfolgreicher
+Hauptbuch-Abnahmebeleg; Gesamtziel bleibt offen.
 
 ## BANK-STATEMENT-DATE-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

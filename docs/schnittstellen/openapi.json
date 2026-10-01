@@ -168543,22 +168543,9 @@
             "title": "Bank Account Id",
             "type": "string"
           },
-          "booking_suggestions": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Booking Suggestions"
-          },
           "can_be_booked": {
+            "const": false,
+            "default": false,
             "title": "Can Be Booked",
             "type": "boolean"
           },
@@ -168589,8 +168576,7 @@
           "balance_comparison",
           "differences",
           "total_differences",
-          "line_counts",
-          "can_be_booked"
+          "line_counts"
         ],
         "title": "ReconciliationResult",
         "type": "object"
@@ -298133,7 +298119,7 @@
     },
     "/api/v1/finance/bank-reconciliation/{statement_id}/reconcile": {
       "post": {
-        "description": "Perform bank reconciliation and generate booking suggestions.",
+        "description": "Perform a read-only comparison. Journal posting belongs to the journal workflow.",
         "operationId": "reconcile_bank_statement_api_v1_finance_bank_reconciliation__statement_id__reconcile_post",
         "parameters": [
           {
@@ -298169,13 +298155,13 @@
             }
           },
           {
-            "description": "Automatically book differences",
+            "description": "Retired: direct booking is not supported",
             "in": "query",
             "name": "auto_book",
             "required": false,
             "schema": {
               "default": false,
-              "description": "Automatically book differences",
+              "description": "Retired: direct booking is not supported",
               "title": "Auto Book",
               "type": "boolean"
             }

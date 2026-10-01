@@ -35,6 +35,17 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
 - Bei paralleler Arbeit immer einen klaren Dateibesitz oder Themenbesitz definieren.
 - Nach jeder relevanten Aenderung Tests, Doku und Workboard aktualisieren.
 
+## Entwicklungsphase und Altlasten (User-Vorgabe, alle Agenten)
+
+- Das Projekt befindet sich in der Entwicklungsphase, nicht im Produktivbetrieb.
+  Saemtliche fachlich/technisch ueberholten Altlasten duerfen entfernt werden.
+- Keine Archive, Adapter oder konkurrierenden Modelle allein zur Erhaltung
+  historischer Entwicklungsdaten einfuehren. Die kanonische Form ist das Ziel.
+- Abhaengigkeiten und vorhandene Verbraucher vor dem Rueckbau pruefen;
+  Tests, Vertraege und Dokumentation gemeinsam aktualisieren.
+- Die Freigabe betrifft Projektaltlasten; fremde laufende Aenderungen und
+  Ressourcen bleiben geschuetzt. Die gemeinsame Testdatenbankregel gilt weiter.
+
 ## Testdatenbanken und Docker-Ressourcen (alle Agenten, verbindlich)
 
 - **Keine neue PostgreSQL-Testdatenbank und keinen neuen Docker-Container pro

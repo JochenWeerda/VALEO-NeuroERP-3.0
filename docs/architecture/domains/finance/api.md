@@ -10,6 +10,15 @@ version: 1.0.0
 
 # Finance — API
 
+## Bankvergleich ohne Direktbuchung
+
+POST /api/v1/finance/bank-reconciliation/{statement_id}/reconcile ist
+lesend. auto_book=true gibt 409; Default False. can_be_booked stets false,
+booking_suggestions entfernt. Differenzen schlagen INVESTIGATE statt geratene
+Konten vor. OP-Zuordnung erfolgt durch payments/match, Journalbuchung durch
+den bestehenden Journalworkflow. Fehlender GL-/Mandantennachweis bleibt offen.
+[ADR-074](../../../adr/adr-074-bank-directbook-retirement.md).
+
 ## Rechnungstapel
 
 - `POST|GET /api/v1/billing-batches`
