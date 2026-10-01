@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-CAMT-PARSER-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** OPBD/CLBD mit Vorzeichen und Waehrung lesen, Original-Endsaldo
+abgleichen; nur gebuchte eindeutige Einzeltransaktionen zum Abgleich zulassen.
+**Dateibesitz:** `bank_statement_import.py` CAMT-Parser und Importwaehrungs-
+pruefung auch bei leerem Auszug; neue CAMT-Vertraege; CAMT-Fixture in eigener
+Replay-Testdatei; eigene QA-/Slice-Doku, Finance-Workflow und eigene
+Workboard-/Open-Gaps-Abschnitte.
+**Abnahme:** Kein Datumsersatz durch heute, keine unbekannte Zahlungsrichtung,
+keine falsche erste Transaktion aus Sammlern. BOOK, Betrag, Waehrung, Datum
+und Salden gemeinsam pruefen; SQL-/Replay-Vertraege auf vorhandenem valeo_probe.
+**Entscheidung:** Bestehendes CAMT.053.001.02-Einzelauszugsprofil; weitere
+Versionen, Sammler/FX und Rueckbuchungen explizit ablehnen statt interpretieren.
+Direkte XML-Pfade verhindern Uebernahme fremder verschachtelter Werte.
+Keine neue Route/Tabelle/Migration oder weitere Datenbank/Dockerinstanz.
+**Risiken:** Profil enger als ISO-Schema; keine volle XSD-/Bankzertifizierung.
+Historische UUID- und semantische Datei-Duplikate bleiben separate Gaps.
+
 ## KONTRAKTREGISTER-MIGRATION-20261001 — abgeschlossen, Claude Code
 
 **Ziel:** Die drei Tabellen des zentralen Vertragsregisters
