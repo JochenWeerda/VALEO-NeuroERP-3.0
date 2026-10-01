@@ -11,6 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-PAYMENT-MATCHING-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** Import-Abgleich, manuelle Zuordnung und Zahlungs-Automatik verwenden
+denselben transaktionalen Vertrag fuer reale Bankzeile und OP. Keine
+angenommenen Zahlungen, kein Fremdmandant, keine volle Rechnung bei Teilzahlung.
+**Dateibesitz:** `payment_matching.py` (Zuordnung und Tenantdependency),
+`bank_statement_import.py` (Abgleichintegration und Tenantdependency), eigene
+Finanz-Importfixtures fuer Header-Tenant, neue Matching-Vertraege, Finance-
+Workflow-Ergaenzung und eigene Slice-/QA-/Workboard-/Open-Gaps-Abschnitte.
+**Abnahme:** Persistente eindeutige Zuordnung, echte Teilzahlung, Belegstatus
+nur bei OP-Rest null, Waehrung/Vorzeichen, Ueberzahlung/Mehrdeutigkeit,
+Wiederholung/Parallelaufruf und echte SQL-/Commitfehler. Genau ein Commit.
+**Entscheidung:** Minor Bugfix bestehender Routes/Tabellen, interne gemeinsame
+Hilfsfunktionen statt neuem Service/Schema. Automatik nur eindeutige volle
+Belegreferenz; reine Namens-/Betragsschaetzung bleibt Vorschlag, keine Buchung.
+**Risiken:** Tenant kommt aus bestehender Headerdependency; Queryparameter
+bestimmt keinen Fremdmandanten. Legacy-Belege ohne Tenantkennung werden bei
+Vollzahlung nicht als sichere eigene Belege angenommen. Kein Schema-Reset,
+keine Migration oder weitere Docker-/Datenbankressource im Testbetrieb.
+
 ## WEBHOOK-MANDANT-20261001 — abgeschlossen, Claude Code
 
 **Ziel:** Unter `/api/v1/webhooks` haengen **zwei** Module, und beide bestimmten
