@@ -370,7 +370,8 @@ def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) 
         verbindung.execute(
             text(
                 "UPDATE domain_crm.business_partners "
-                "SET vat_id = 'DE123456789', iban = 'DE89370400440532013000' "
+                "SET vat_id = 'DE123456789', iban = 'DE89370400440532013000', "
+                "marketing_segment = 'A-Kunde' "
                 "WHERE partner_id = :id"
             ),
             {"id": kunde["partner_id"]},
@@ -401,6 +402,8 @@ def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) 
         assert stamm.status_code == 200, stamm.text
         assert stamm.json()["ust_id"] == "DE123456789"
         assert stamm.json()["iban"] == "DE89370400440532013000"
+        assert stamm.json()["segment"] == "A-Kunde"
+        assert stamm.json()["marketing_segment"] == "A-Kunde"
 
         kontakte = client.get(
             f"/api/v1/crm/customers/{kunde['id']}/tabs/contacts", headers=kopf(kunde["mandant"])
@@ -657,6 +660,12 @@ def test_annahme_und_kreditlimit_in_der_360_sicht(client, kunde) -> None:
         )
         verbindung.execute(
             text(
+                "UPDATE domain_crm.customers SET credit_limit = 1000 WHERE id = :id"
+            ),
+            {"id": kunde["id"]},
+        )
+        verbindung.execute(
+            text(
                 "INSERT INTO domain_crm.credit_limits "
                 "(id, tenant_id, customer_id, credit_limit_eur) "
                 "VALUES (:id, :tid, :cid, 5000)"
@@ -674,6 +683,11 @@ def test_annahme_und_kreditlimit_in_der_360_sicht(client, kunde) -> None:
         assert eingang["source"] == "harvest_acceptances"
         assert koerper["credit_limit_status"]["credit_limit"] == 5000
         assert koerper["credit_limit_status"]["source"] == "ausnahme"
+        stamm = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}", headers=kopf(kunde["mandant"])
+        )
+        assert stamm.status_code == 200, stamm.text
+        assert stamm.json()["kreditlimit"] == 5000
     finally:
         with engine.begin() as verbindung:
             verbindung.execute(
@@ -881,6 +895,105 @@ def test_postfach_und_geo_kommen_aus_dem_migrierten_stamm(client, kunde) -> None
             verbindung.execute(
                 text("DELETE FROM public.kunden WHERE kunden_nr = :nr"),
                 {"nr": kunde["kunden_nr"]},
+            )
+
+
+def test_ein_reiner_bestandskunde_oeffnet_die_akte(client, kunde) -> None:
+    """public.kunden fuehrt name1 und tel. Daraus wird die Akte, auch ohne CRM-Satz."""
+    from sqlalchemy import create_engine, text
+
+    nummer = f"KD-{uuid.uuid4().hex[:6].upper()}"
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO public.kunden (kunden_nr, name1, strasse, plz, ort, land, tel) "
+                "VALUES (:nr, 'Hof Altbestand', 'Dorfstr. 4', '29439', 'Luechow', 'DE', '05841-100')"
+            ),
+            {"nr": nummer},
+        )
+    try:
+        stamm = client.get(
+            f"/api/v1/crm/customers/{nummer}", headers=kopf(kunde["mandant"])
+        )
+        assert stamm.status_code == 200, stamm.text
+        daten = stamm.json()
+        assert daten["firma"] == "Hof Altbestand"
+        assert daten["kunden_nr"] == nummer
+        assert daten["strasse"] == "Dorfstr. 4"
+        assert daten["telefon"] == "05841-100"
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM public.kunden WHERE kunden_nr = :nr"),
+                {"nr": nummer},
+            )
+
+
+def test_adresse_und_branche_kommen_aus_dem_kundenstamm(client, kunde) -> None:
+    """Ort, PLZ, Land und Branche liegen auf domain_crm.customers, das Fax am Partner."""
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "UPDATE domain_crm.customers "
+                "SET address = 'Dorfstr. 4', postal_code = '29439', city = 'Luechow', "
+                "country = 'DE', industry = 'Ackerbau', phone = '05841-100' "
+                "WHERE id = :id"
+            ),
+            {"id": kunde["id"]},
+        )
+        verbindung.execute(
+            text(
+                "UPDATE domain_crm.business_partners SET fax = '05841-200' "
+                "WHERE partner_id = :id"
+            ),
+            {"id": kunde["partner_id"]},
+        )
+    stamm = client.get(
+        f"/api/v1/crm/customers/{kunde['id']}", headers=kopf(kunde["mandant"])
+    )
+    assert stamm.status_code == 200, stamm.text
+    daten = stamm.json()
+    assert daten["strasse"] == "Dorfstr. 4"
+    assert daten["plz"] == "29439"
+    assert daten["ort"] == "Luechow"
+    assert daten["land"] == "DE"
+    assert daten["branche"] == "Ackerbau"
+    assert daten["telefon"] == "05841-100"
+    assert daten["fax"] == "05841-200"
+
+
+def test_praesent_erscheint_im_register(client, kunde) -> None:
+    """Präsente liegen in public.crm_gifts und werden ueber die Kundennummer gelesen."""
+    from sqlalchemy import create_engine, text
+
+    geschenk = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO public.crm_gifts "
+                "(id, tenant_id, kunden_nr, year, gift_name, occasion, quantity) "
+                "VALUES (:id, :tid, :nr, 2026, 'Weihnachtspaket', 'Weihnachten', 1)"
+            ),
+            {"id": geschenk, "tid": kunde["mandant"], "nr": kunde["kunden_nr"]},
+        )
+    try:
+        register = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/praesente",
+            headers=kopf(kunde["mandant"]),
+        )
+        assert register.status_code == 200, register.text
+        zeilen = register.json()["items"]
+        assert any(zeile.get("gift_name") == "Weihnachtspaket" for zeile in zeilen)
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM public.crm_gifts WHERE id = :id"),
+                {"id": geschenk},
             )
 
 

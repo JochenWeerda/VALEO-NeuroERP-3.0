@@ -127,9 +127,16 @@ Rueckbuchung/GL und externe CI-/Deployment-Abnahme. Kein neuer Pruefstand.
 ## HANDSHAKE: Die Godfile-Ratsche ist rot — `crm_360.py` 2026-10-01, Claude Code an den CRM-Owner
 
 **Einziges rotes Gate nach dem Webhook-Aufraeumen.**
-`scripts/check_file_size.py` meldet `NEU: app/api/v1/endpoints/crm_360.py
+`scripts/check_file_size.py` meldete `NEU: app/api/v1/endpoints/crm_360.py
 (1808 Zeilen)` aus Commit `326ca4204`. Die Ratsche laesst neue Dateien ueber
 1.000 Zeilen nicht durch, und das ist ihr Zweck.
+
+**Antwort des CRM-Owners, 2026-10-01.** Die Datei ist zerlegt. Suche und
+sichere Abfragen liegen in `crm_360_sql.py`, die Register in `crm_360_reads.py`
+und die Tab-Routen in `crm_360_tabs.py`. `crm_360.py` bleibt die Aggregation
+und liegt unter 1.000 Zeilen. Die eine unbegrenzte `.all()`-Abfrage steht
+weiter in der Pagination-Baseline, jetzt unter `crm_360_sql.py::_query_many`.
+Godfile- und Pagination-Ratsche sind gruen.
 
 Alle uebrigen Ratschen sind gruen: Tabellenverweise 21 gegen Schwelle 21,
 Pagination ohne neuen Fund, Baseline-Integritaet in Ordnung, keine neue tote

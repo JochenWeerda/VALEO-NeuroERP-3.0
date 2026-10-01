@@ -143,6 +143,8 @@ export interface ScreenActionDefinition {
   disabled?: boolean
   // Action Runtime (Phase 026)
   commandEndpoint?: string
+  /** Navigates instead of mutating. Placeholders: {entity_id}, {business_partner_id}. */
+  navigationRoute?: string
   /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
   inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string

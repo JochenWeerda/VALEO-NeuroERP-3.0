@@ -86,7 +86,7 @@ def test_stage_change_sets_default_probability():
 @pytest.mark.unit
 def test_360_returns_nulls_for_missing_tables():
     """Wenn Tabellen fehlen (_safe_query gibt None zurück), müssen Felder null sein."""
-    from app.api.v1.endpoints.crm_360 import _safe_query
+    from app.api.v1.endpoints.crm_360_sql import _safe_query
 
     db_mock = MagicMock()
     db_mock.execute.side_effect = Exception("table does not exist")

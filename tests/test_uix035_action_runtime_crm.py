@@ -195,3 +195,5 @@ def test_command_endpoint_wired_in_screen_definition():
     assert "create_activity" in actions
     assert actions["create_activity"].get("commandEndpoint"), "commandEndpoint muss gesetzt sein"
     assert "{entity_id}" in actions["create_activity"]["commandEndpoint"]
+    assert actions["edit"]["navigationRoute"] == "/verkauf/kunden-stamm/{business_partner_id}?pflege=1"
+    assert "commandEndpoint" not in actions["edit"]

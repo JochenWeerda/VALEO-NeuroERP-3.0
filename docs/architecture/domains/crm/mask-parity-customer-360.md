@@ -75,6 +75,7 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 ## Offene Luecken
 
 - Mutationen (Anlegen, Aendern, Loeschen) bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+  `Bearbeiten` auf der Akte oeffnet genau diese Pflege ueber die Partnerkennung.
 - Die Pflege-Register Chef-Anweisung, Anschriften, Kontoauszug und CPD-Konto
   sind in der Akte lesbar. Ohne Partnersatz bleiben sie leer.
 - Potenzial ist der juengste GAP-Snapshot (`customer_potential_snapshot`);
@@ -87,6 +88,12 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
   Lagerbewegung ueber `owner_partner_id`.
 - Laufende Agrarkontrakte haengen an der Partner-ID oder der Partnernummer.
 - Postfach kommt aus `public.kunden`, Koordinaten aus `public.kunden_geo`.
+- Ein reiner Bestandskunde ohne CRM-Satz oeffnet die Akte ueber `name1` und `tel`.
+- Adresse und Branche kommen aus `domain_crm.customers`, das Fax vom Partner.
+- Das Stammdaten-Segment ist das `marketing_segment` des Partners.
+- Präsente kommen aus `public.crm_gifts` ueber die Kundennummer.
+- Die Screen-Summary listet dieselben Register wie die ScreenDefinition, inklusive Pflege-Reiter, Potenzial, Rabatte und Preise.
+- Das Kreditlimit der Akte ist die Ausnahme aus `credit_limits`, sonst der Stamm.
 - `/verkauf/kunden-stamm/:id` und `/crm/kunden-cockpit?id=` leiten auf dieselbe Akte;
   Mutationen der Tabs 21–25 bleiben unter `?pflege=1`.
 

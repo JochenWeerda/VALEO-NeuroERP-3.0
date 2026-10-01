@@ -135,9 +135,9 @@ Abbau sinken. Details:
 `docs/quality-assurance/godfile-ratchet-20260930.md`.
 
 **Abbau offen.** Zuerst eignen sich `logistics_tours.py` (1.033),
-`admin_suite.py` (1.038) und `einkauf_bestellvorschlag.py` (1.058). Der parallel
-bearbeitete Arbeitsbaum hebt ausserdem `crm_360.py` von 976 auf 1.235 Zeilen;
-die neue Ratsche erkennt das bereits vor dem Commit.
+`admin_suite.py` (1.038) und `einkauf_bestellvorschlag.py` (1.058).
+`crm_360.py` lag im Arbeitsbaum ueber 1.000 Zeilen. Die Register sind nach
+`crm_360_reads.py` und `crm_360_tabs.py` gezogen; die Datei liegt wieder darunter.
 
 ## MERIDIAN-PARTY-OBJECTPAGE — eine Kundenakte (2026-09-30)
 
@@ -149,7 +149,11 @@ Angebote kommen aus `crm_opportunities`, Historie aus den CRM-Aktivitaeten.
 Potenzial ist der juengste Satz aus `public.customer_potential_snapshot`.
 Chef-Anweisungen, Anschriften, Kontoauszug und CPD-Konten sind in der Akte lesbar.
 Rabatte, Preise und das SEPA-Mandat kommen vom Partner.
+Adresse, Branche und das operative Kreditlimit (Ausnahme aus `credit_limits`,
+sonst der Stamm) stehen in der Akte. Koordinaten kommen aus `public.kunden_geo`,
+ein reiner Bestandskunde aus `public.kunden` (`name1`, `tel`).
 Mutationen der Tabs 21–25 bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+`Bearbeiten` oeffnet diese Pflege ueber die Partnerkennung und schreibt auf der Akte nichts.
 
 ## POS-ZAHLARTEN + AGRAR-KONTRAKTE — Welle 2, zweiter und dritter Eintrag (2026-09-30)
 

@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/dialog'
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { nativeDetailLoadState } from '@/components/mask-builder/native-detail-load-state'
+import { resolveNavigationRoute } from '@/components/mask-builder/runtime/navigation-route'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
@@ -174,7 +175,26 @@ export function UniversalNativeDetailPage({
   async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
     setActionError(null)
     setValidationErrors([])
-    const actionDef = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)
+    const actionDef = schemaQuery.data?.actions?.find((a) => a.key === actionKey)
+    const routeTemplate = actionDef?.navigationRoute
+    if (routeTemplate) {
+      const entity = (runtime.entityData ?? {}) as Record<string, unknown>
+      const partnerText = (value: unknown) => {
+        if (value == null) return undefined
+        const text = String(value).trim()
+        return text || undefined
+      }
+      const route = resolveNavigationRoute(routeTemplate, {
+        entityId,
+        businessPartnerId: partnerText(payload.business_partner_id) ?? partnerText(entity.business_partner_id),
+      })
+      if (!route) {
+        setActionError('Zur Pflege fehlt die Partnerkennung.')
+        return
+      }
+      void navigate({ to: route as never })
+      return
+    }
     const hasDryRun = Boolean(
       actionDef?.commandEndpoint &&
       !actionDef?.stubReason &&

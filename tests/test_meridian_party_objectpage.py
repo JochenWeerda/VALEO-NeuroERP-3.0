@@ -16,6 +16,9 @@ def test_customer_360_is_object_page_with_identity_and_anchors() -> None:
     assert screen["layout"]["floorplan"] == "objectPage"
     assert screen["layout"]["sectionNavigation"] == "anchors"
     assert screen["layout"]["columnNavigation"] == "single"
+    edit = next(action for action in screen["actions"] if action["key"] == "edit")
+    assert edit["navigationRoute"] == "/verkauf/kunden-stamm/{business_partner_id}?pflege=1"
+    assert "commandEndpoint" not in edit
     assert screen["workflow"]["processKey"] == "crm-party-lifecycle"
     assert [phase["label"] for phase in screen["workflow"]["phases"]] == [
         "Interessent",

@@ -21,6 +21,7 @@ progress: >
   Jahresumsatz zaehlt `completed`, `geliefert` und `invoiced`.
   Wareneingang ohne Annahmeschein haengt an `owner_partner_id`.
   Agrarkontrakte haengen an der Partner-ID oder der Partnernummer.
+  Bearbeiten navigiert nach `/verkauf/kunden-stamm/{business_partner_id}?pflege=1`.
 closed_at: 2026-09-30
 result: >
   Eine Object-Page-Akte fuer Interessent und Kunde. KIM-Route leitet um,

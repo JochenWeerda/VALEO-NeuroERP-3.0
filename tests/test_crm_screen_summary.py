@@ -26,7 +26,10 @@ def test_customer_screen_summary_is_compact_generator_contract() -> None:
     assert payload["performance"]["tabs_lazy"] is True
     assert payload["performance"]["lookup_min_chars"] == 2
     assert "tab_endpoints" in payload
-    assert "contacts" in payload["tab_endpoints"]
+    assert "preise" in payload["available_tabs"]
+    assert "potential" in payload["available_tabs"]
+    assert "chefanweisungen" in payload["available_tabs"]
+    assert payload["tab_endpoints"]["preise"].endswith("/tabs/preise")
 
 
 def test_customer_screen_summary_warns_on_open_items() -> None:

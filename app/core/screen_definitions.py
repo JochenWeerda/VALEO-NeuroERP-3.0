@@ -372,7 +372,15 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.customer.update", "zone": "commit"},
+            {
+                "key": "edit",
+                "label": "Bearbeiten",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "permission": "crm.customer.update",
+                "zone": "commit",
+                "navigationRoute": "/verkauf/kunden-stamm/{business_partner_id}?pflege=1",
+            },
             {
                 "key": "create_activity",
                 "label": "Aktivitaet anlegen",

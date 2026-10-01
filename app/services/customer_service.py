@@ -277,6 +277,7 @@ class CustomerService:
         self._attach_partner_mask_fields(customer_dict)
         self._attach_billing_config(customer_dict)
         self._attach_potential_snapshot(customer_dict)
+        self._attach_credit_exception(customer_dict)
         return customer_dict
 
     def _attach_partner_mask_fields(self, customer_dict: dict[str, Any]) -> None:
@@ -295,7 +296,7 @@ class CustomerService:
                            marketing_segment, newsletter_opt_in, email_opt_in,
                            membership_number, mandatory_shares, membership_terminated,
                            invoice_dispatch_channel, reminder_dispatch_channel,
-                           edifact_invoic, edifact_orders, edifact_desadv
+                           edifact_invoic, edifact_orders, edifact_desadv, fax
                     FROM domain_crm.business_partners
                     WHERE partner_id::text = :id
                       AND (:tid IS NULL OR tenant_id::text = :tid)
@@ -333,6 +334,7 @@ class CustomerService:
                 "qs_nummer": row["qs_certificate_number"],
                 "bio": row["bio_certified"],
                 "marketing_segment": row["marketing_segment"],
+                "segment": row["marketing_segment"],
                 "newsletter": row["newsletter_opt_in"],
                 "email_opt_in": row["email_opt_in"],
                 "mitgliedsnummer": row["membership_number"],
@@ -343,6 +345,7 @@ class CustomerService:
                 "edifact_invoic": row["edifact_invoic"],
                 "edifact_orders": row["edifact_orders"],
                 "edifact_desadv": row["edifact_desadv"],
+                "fax": row["fax"] or customer_dict.get("fax"),
             }
         )
 
@@ -434,6 +437,34 @@ class CustomerService:
                 "potential_notes": row["potential_notes"],
             }
         )
+
+    def _attach_credit_exception(self, customer_dict: dict[str, Any]) -> None:
+        """Operatives Limit. Ausnahme in credit_limits schlaegt den Stamm."""
+        customer_id = customer_dict.get("id")
+        if not customer_id:
+            return
+        try:
+            row = self.db.execute(
+                text(
+                    """
+                    SELECT credit_limit_eur
+                    FROM domain_crm.credit_limits
+                    WHERE customer_id::text = :cid
+                      AND (:tid IS NULL OR tenant_id::text = :tid)
+                    LIMIT 1
+                    """
+                ),
+                {"cid": str(customer_id), "tid": self.tenant_id},
+            ).fetchone()
+        except Exception:
+            # Die Ausnahme ist optional. Fehlt die Tabelle, bleibt das Stammlimit.
+            self.db.rollback()
+            return
+        if row is None or row.credit_limit_eur is None:
+            return
+        limit = float(row.credit_limit_eur)
+        customer_dict["credit_limit"] = limit
+        customer_dict["kreditlimit"] = limit
 
     def merge_extensions(self, customer_dict: dict[str, Any]) -> dict[str, Any]:
         ext = self.fetch_monolith_extensions(str(customer_dict["id"]))
@@ -693,7 +724,8 @@ class CustomerService:
                 text(
                     """
                     SELECT id, tenant_id, customer_number, company_name, contact_person,
-                           email, phone, address, credit_limit, payment_terms,
+                           email, phone, address, city, postal_code, country, industry,
+                           website, tax_id, credit_limit, payment_terms,
                            is_active, chefanweisung, business_partner_id, created_at, updated_at
                     FROM domain_crm.customers
                     WHERE tenant_id = :tid
@@ -715,7 +747,8 @@ class CustomerService:
                 partner = self.db.execute(
                     text(
                         """
-                        SELECT partner_id, name_1, partner_number
+                        SELECT partner_id, name_1, partner_number,
+                               street, postal_code, city, country, phone, email, fax
                         FROM domain_crm.business_partners
                         WHERE tenant_id = :tid
                           AND (partner_id::text = :cid OR partner_number = :cid)
@@ -733,7 +766,8 @@ class CustomerService:
                         text(
                             """
                             SELECT id, tenant_id, customer_number, company_name, contact_person,
-                                   email, phone, address, credit_limit, payment_terms,
+                                   email, phone, address, city, postal_code, country, industry,
+                                   website, tax_id, credit_limit, payment_terms,
                                    is_active, chefanweisung, business_partner_id, created_at, updated_at
                             FROM domain_crm.customers
                             WHERE tenant_id = :tid AND business_partner_id::text = :pid
@@ -753,12 +787,13 @@ class CustomerService:
                         "company_name": (partner.name_1 or customer_id)[:100],
                         "name": partner.name_1 or customer_id,
                         "contact_person": None,
-                        "email": None,
-                        "phone": None,
-                        "address": None,
-                        "city": None,
-                        "postal_code": None,
-                        "country": None,
+                        "email": partner.email,
+                        "phone": partner.phone,
+                        "address": partner.street,
+                        "city": partner.city,
+                        "postal_code": partner.postal_code,
+                        "country": partner.country,
+                        "fax": partner.fax,
                         "industry": None,
                         "website": None,
                         "price_group": None,
@@ -778,7 +813,7 @@ class CustomerService:
                 alt = self.db.execute(
                     text(
                         """
-                        SELECT kunden_nr, name, strasse, plz, ort, land, telefon, fax, email,
+                        SELECT kunden_nr, name1, strasse, plz, ort, land, tel, fax, email,
                                postfach, postfach_plz, postfach_ort, business_partner_id
                         FROM public.kunden WHERE kunden_nr = :cid LIMIT 1
                         """
@@ -790,7 +825,7 @@ class CustomerService:
                 alt = None
             if alt is None:
                 return None
-            name = str(alt.get("name") or alt.get("kunden_nr") or customer_id)[:100]
+            name = str(alt.get("name1") or alt.get("kunden_nr") or customer_id)[:100]
             number = str(alt.get("kunden_nr") or customer_id)[:50]
             return {
                 "id": str(alt.get("business_partner_id") or number),
@@ -800,7 +835,7 @@ class CustomerService:
                 "name": name,
                 "contact_person": None,
                 "email": alt.get("email"),
-                "phone": alt.get("telefon"),
+                "phone": alt.get("tel"),
                 "address": alt.get("strasse"),
                 "city": alt.get("ort"),
                 "postal_code": alt.get("plz"),
@@ -823,12 +858,15 @@ class CustomerService:
                 "postfach_ort": alt.get("postfach_ort"),
                 "fax": alt.get("fax"),
             }
-        city = postal_code = country = address_str = None
+        city = getattr(row, "city", None)
+        postal_code = getattr(row, "postal_code", None)
+        country = getattr(row, "country", None)
+        address_str = None
         if row.address:
             parsed = parse_address(row.address)
-            city = parsed.city
-            postal_code = parsed.postal_code
-            country = parsed.country
+            city = city or parsed.city
+            postal_code = postal_code or parsed.postal_code
+            country = country or parsed.country
             address_str = parsed.street or (row.address if isinstance(row.address, str) else str(row.address))
         payment_terms_val = 30
         if row.payment_terms:
@@ -849,13 +887,13 @@ class CustomerService:
             "city": city,
             "postal_code": postal_code,
             "country": country,
-            "industry": None,
-            "website": None,
+            "industry": getattr(row, "industry", None),
+            "website": getattr(row, "website", None),
             "price_group": None,
             "tax_category": None,
             "credit_limit": float(row.credit_limit) if row.credit_limit is not None else None,
             "payment_terms": payment_terms_val,
-            "tax_id": None,
+            "tax_id": getattr(row, "tax_id", None),
             "chefanweisung": getattr(row, "chefanweisung", None),
             "business_partner_id": getattr(row, "business_partner_id", None),
             "is_active": row.is_active if row.is_active is not None else True,

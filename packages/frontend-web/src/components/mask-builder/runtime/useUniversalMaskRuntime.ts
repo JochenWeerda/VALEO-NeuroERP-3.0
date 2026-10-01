@@ -143,6 +143,10 @@ export function useUniversalMaskRuntime({
     [schema?.summary, summaryQuery.data, summaryItems],
   )
 
+  const summaryAvailableTabs = Array.isArray(summaryQuery.data?.available_tabs)
+    ? summaryQuery.data.available_tabs.filter((tab): tab is string => typeof tab === 'string')
+    : undefined
+
   const plan = useMemo<RenderPlan | undefined>(() => {
     if (!schema || !enabled) return undefined
     const compiled = compileRenderPlan(schema, {
@@ -151,7 +155,7 @@ export function useUniversalMaskRuntime({
       summary: {
         title: summaryTitle ?? (typeof summaryQuery.data?.title === 'string' ? summaryQuery.data.title : undefined),
         subtitle: summarySubtitle ?? (typeof summaryQuery.data?.subtitle === 'string' ? summaryQuery.data.subtitle : undefined),
-        availableTabs,
+        availableTabs: availableTabs ?? (summaryAvailableTabs && summaryAvailableTabs.length > 0 ? summaryAvailableTabs : undefined),
         summaryItems: resolvedSummaryItems,
         tabEndpoints,
       },
