@@ -7,7 +7,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from datetime import datetime, date
 from pydantic import BaseModel
 import xml.etree.ElementTree as ET
@@ -16,6 +16,7 @@ import io
 import re
 import logging
 
+from app.core.uuid7 import uuid7
 from ....core.database import get_db
 from ....core.data_quality_enforcement import (
     build_dq_error_detail,
@@ -343,18 +344,9 @@ def parse_csv(content: bytes) -> dict:
             )
             for entry in entries
         ]
-        for entry in entries:
-            _validate_bank_statement_import_datensatz(
-                _build_bank_statement_import_datensatz(
-                    booking_date=entry['booking_date'].isoformat(),
-                    value_date=entry['value_date'].isoformat(),
-                    amount=entry['amount'],
-                    currency=entry.get('currency', 'EUR'),
-                    reference=entry.get('reference'),
-                ),
-                dq_context,
-            )
-        
+        for current_datensatz in dq_context:
+            _validate_bank_statement_import_datensatz(current_datensatz, dq_context)
+
         # Calculate closing balance (if opening balance provided)
         if entries:
             closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
@@ -383,6 +375,9 @@ async def import_bank_statement(
     """
     Import bank statement from CAMT.053, MT940, or CSV file.
     """
+    if auto_match:
+        raise HTTPException(status_code=501, detail="Automatic matching is unavailable; import without auto_match and reconcile separately")
+    db_started = False
     try:
         content = await file.read()
         
@@ -407,19 +402,19 @@ async def import_bank_statement(
             for entry in parsed['entries']
         ]
 
-        for entry in parsed['entries']:
-            current_datensatz = _build_bank_statement_import_datensatz(
-                booking_date=entry.get('booking_date').isoformat() if hasattr(entry.get('booking_date'), 'isoformat') else entry.get('booking_date'),
-                value_date=entry.get('value_date').isoformat() if hasattr(entry.get('value_date'), 'isoformat') else entry.get('value_date'),
-                amount=entry.get('amount'),
-                currency=entry.get('currency', 'EUR'),
-                reference=entry.get('reference'),
-            )
-            _validate_bank_statement_import_datensatz(
-                current_datensatz,
-                dq_context,
-            )
-        
+        for entry, current_datensatz in zip(parsed['entries'], dq_context):
+            _validate_bank_statement_import_datensatz(current_datensatz, dq_context)
+            amount = Decimal(str(entry['amount']))
+            try:
+                exact_cents = amount.is_finite() and amount == amount.quantize(Decimal("0.01"))
+            except InvalidOperation:
+                exact_cents = False
+            if not exact_cents:
+                raise HTTPException(status_code=422, detail="Amount must be finite and use at most two decimal places")
+            if entry.get('currency', 'EUR') not in {"EUR", "USD", "CHF", "GBP"}:
+                raise HTTPException(status_code=422, detail="Unsupported currency")
+
+        db_started = True
         # Get bank account IBAN if not provided
         if not parsed['account_iban']:
             account_query = text("""
@@ -433,160 +428,69 @@ async def import_bank_statement(
             if account_row:
                 parsed['account_iban'] = account_row[0]
         
-        # Create statement record
-        # Note: If bank_statements table doesn't exist, we'll store in a JSONB column or skip
-        statement_id = f"STMT-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{bank_account_id[:8]}"
-        
-        # Try to create statement record (table may not exist yet)
-        try:
-            statement_insert = text("""
-                INSERT INTO domain_erp.bank_statements
-                (id, tenant_id, bank_account_id, account_iban, statement_date, opening_balance,
-                 closing_balance, format, total_lines, imported_lines, status, created_at, updated_at)
-                VALUES (:id, :tenant_id, :account_id, :iban, :date, :opening, :closing,
-                        :format, :total, :imported, :status, NOW(), NOW())
-                RETURNING id
-            """)
-            
-            db.execute(statement_insert, {
-                "id": statement_id,
-                "tenant_id": tenant_id,
-                "account_id": bank_account_id,
-                "iban": parsed['account_iban'],
-                "date": date.today(),
-                "opening": parsed['opening_balance'],
-                "closing": parsed['closing_balance'],
-                "format": format.upper(),
-                "total": len(parsed['entries']),
-                "imported": len(parsed['entries']),
-                "status": "imported"
-            })
-        except Exception as e:
-            logger.warning(f"bank_statements table may not exist: {e}")
-            # Continue without database storage - data will be returned in response
-        
-        # Import statement lines
-        import_errors = []
+        # Persist the complete statement in one transaction. A failed write
+        # must never be represented as a successfully imported line.
+        statement_id = f"STMT-{uuid7()}"
+        db.execute(text("""
+            INSERT INTO domain_erp.bank_statements
+            (id, tenant_id, bank_account_id, account_iban, statement_date, opening_balance,
+             closing_balance, format, total_lines, imported_lines, status, created_at, updated_at)
+            VALUES (:id, :tenant_id, :account_id, :iban, :date, :opening, :closing,
+                    :format, :total, :imported, :status, NOW(), NOW())
+        """), {
+            "id": statement_id, "tenant_id": tenant_id, "account_id": bank_account_id,
+            "iban": parsed['account_iban'], "date": date.today(),
+            "opening": parsed['opening_balance'], "closing": parsed['closing_balance'],
+            "format": format.upper(), "total": len(parsed['entries']),
+            "imported": len(parsed['entries']), "status": "imported",
+        })
         imported_lines = []
-        
         for entry in parsed['entries']:
-            try:
-                line_id = f"{statement_id}-L{entry['line_number']}"
-                
-                # Try to insert into bank_statement_lines table
-                try:
-                    line_insert = text("""
-                        INSERT INTO domain_erp.bank_statement_lines
-                        (id, tenant_id, statement_id, line_number, booking_date, value_date,
-                         amount, currency, reference, remittance_info, creditor_name, creditor_iban,
-                         debtor_name, debtor_iban, status, created_at, updated_at)
-                        VALUES (:id, :tenant_id, :statement_id, :line_num, :book_date, :val_date,
-                                :amount, :currency, :reference, :remittance, :creditor_name, :creditor_iban,
-                                :debtor_name, :debtor_iban, :status, NOW(), NOW())
-                    """)
-                    
-                    db.execute(line_insert, {
-                        "id": line_id,
-                        "tenant_id": tenant_id,
-                        "statement_id": statement_id,
-                        "line_num": entry['line_number'],
-                        "book_date": entry['booking_date'],
-                        "val_date": entry['value_date'],
-                        "amount": entry['amount'],
-                        "currency": "EUR",
-                        "reference": entry.get('reference'),
-                        "remittance": entry.get('remittance_info'),
-                        "creditor_name": entry.get('creditor_name'),
-                        "creditor_iban": entry.get('creditor_iban'),
-                        "debtor_name": entry.get('debtor_name'),
-                        "debtor_iban": entry.get('debtor_iban'),
-                        "status": "UNMATCHED"
-                    })
-                except Exception as table_error:
-                    logger.warning(f"bank_statement_lines table may not exist: {table_error}")
-                    # Continue without database storage
-                
-                imported_lines.append(BankStatementLine(
-                    line_number=entry['line_number'],
-                    booking_date=entry['booking_date'],
-                    value_date=entry['value_date'],
-                    amount=entry['amount'],
-                    reference=entry.get('reference'),
-                    remittance_info=entry.get('remittance_info'),
-                    creditor_name=entry.get('creditor_name'),
-                    creditor_iban=entry.get('creditor_iban'),
-                    debtor_name=entry.get('debtor_name'),
-                    debtor_iban=entry.get('debtor_iban'),
-                    status="UNMATCHED"
-                ))
-            except Exception as e:
-                error_msg = f"Line {entry['line_number']}: {str(e)}"
-                import_errors.append(error_msg)
-                logger.error(error_msg)
-        
-        try:
-            db.commit()
-        except Exception:
-            db.rollback()
-        
-        # Auto-match: offene Posten per Betrag oder Rechnungsnummer zuordnen
-        if auto_match and imported_lines:
-            try:
-                from app.finance.models import OffenerPosten
-                from sqlalchemy import select
-
-                offene_posten = db.execute(
-                    select(OffenerPosten).where(OffenerPosten.zahlbar == True)
-                ).scalars().all()
-
-                for line in imported_lines:
-                    if line.status == "MATCHED":
-                        continue
-                    amt = abs(line.amount)
-                    ref = (line.remittance_info or "") + " " + (line.reference or "")
-
-                    # 1. Rechnungsnummer im Verwendungszweck
-                    match = next(
-                        (op for op in offene_posten if op.rechnungsnr and op.rechnungsnr in ref),
-                        None
-                    )
-                    # 2. Betrag-Match (Toleranz ±0.01 EUR)
-                    if not match:
-                        match = next(
-                            (op for op in offene_posten if abs(float(op.offen) - float(amt)) < 0.01),
-                            None
-                        )
-
-                    if match:
-                        line.status = "MATCHED"
-                        # Offenen Posten als ausgeglichen markieren
-                        match.offen = Decimal("0.00")
-                        match.zahlbar = False
-
-                db.commit()
-            except Exception as match_err:
-                logger.warning(f"Auto-matching fehlgeschlagen: {match_err}")
-        
-        return BankStatementImportResult(
-            statement_id=statement_id,
-            account_iban=parsed['account_iban'] or '',
-            opening_balance=parsed['opening_balance'],
-            closing_balance=parsed['closing_balance'],
-            total_lines=len(parsed['entries']),
-            imported_lines=len(imported_lines),
-            error_lines=len(import_errors),
-            lines=imported_lines,
-            import_errors=import_errors if import_errors else None
+            db.execute(text("""
+                INSERT INTO domain_erp.bank_statement_lines
+                (id, tenant_id, statement_id, line_number, booking_date, value_date,
+                 amount, currency, reference, remittance_info, creditor_name, creditor_iban,
+                 debtor_name, debtor_iban, status, created_at, updated_at)
+                VALUES (:id, :tenant_id, :statement_id, :line_num, :book_date, :val_date,
+                        :amount, :currency, :reference, :remittance, :creditor_name, :creditor_iban,
+                        :debtor_name, :debtor_iban, :status, NOW(), NOW())
+            """), {
+                "id": f"{statement_id}-L{entry['line_number']}", "tenant_id": tenant_id,
+                "statement_id": statement_id, "line_num": entry['line_number'],
+                "book_date": entry['booking_date'], "val_date": entry['value_date'],
+                "amount": entry['amount'], "currency": entry.get('currency', 'EUR'),
+                "reference": entry.get('reference'), "remittance": entry.get('remittance_info'),
+                "creditor_name": entry.get('creditor_name'), "creditor_iban": entry.get('creditor_iban'),
+                "debtor_name": entry.get('debtor_name'), "debtor_iban": entry.get('debtor_iban'),
+                "status": "UNMATCHED",
+            })
+            imported_lines.append(BankStatementLine(**entry, status="UNMATCHED"))
+        # Validate the response before committing so serialization errors cannot
+        # turn a committed import into a failed request.
+        result = BankStatementImportResult(
+            statement_id=statement_id, account_iban=parsed['account_iban'] or '',
+            opening_balance=parsed['opening_balance'], closing_balance=parsed['closing_balance'],
+            total_lines=len(parsed['entries']), imported_lines=len(imported_lines),
+            error_lines=0, lines=imported_lines, import_errors=None,
         )
-        
+        db.commit()
+
+        return result
+
     except HTTPException:
+        if db_started:
+            db.rollback()
         raise
     except ValueError as e:
+        if db_started:
+            db.rollback()
+            logger.exception("Failed to construct bank statement import")
+            raise HTTPException(status_code=500, detail="Failed to import bank statement") from e
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         db.rollback()
         logger.error(f"Error importing bank statement: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to import bank statement: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to import bank statement")
 
 
 @router.get("/{statement_id}/lines", response_model=List[BankStatementLine], summary="Statement lines abrufen")

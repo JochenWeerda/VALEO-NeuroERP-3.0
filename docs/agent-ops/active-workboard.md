@@ -61,9 +61,9 @@ also — wie im `OPENAPI-DRIFT-REFRESH` ausdruecklich vorgesehen.
 und ohne Zuruecksetzen. Nachweis:
 `docs/quality-assurance/webhook-mandant-20261001.md`.
 
-## BANK-STATEMENT-IMPORT-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## BANK-STATEMENT-IMPORT-INTEGRITY-20261001 — abgeschlossen (manueller Import), Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Owner:** Codex-01a0f3fc. **Stand:** manueller Import abgeschlossen 2026-10-01; Auto-Abgleich offen.
 **Ziel:** Gueltige Kontoauszuege passieren DQ; manueller Import speichert
 Kopf und alle Zeilen atomar, statt SQL-/Commitfehler als Erfolg zu melden.
 **Dateibesitz:** `bank_statement_import.py` (parse_csv und manueller Import),
@@ -79,6 +79,11 @@ Auto-Matchingpfad erreichbar: fehlender Tenantfilter, Teilzahlung setzt
 Restbetrag auf null, Bankzeilenstatus wird nicht gespeichert. Bis zum eigenen
 fachlichen Abgleichvertrag wird auto_match vor jedem DB-Zugriff mit 501
 abgewiesen. Manueller Import bleibt atomar nutzbar; Matching-Gap bleibt offen.
+
+**Ergebnis:** 12 echte PostgreSQL-/HTTP- und sechs bestehende DQ-Vertraege
+bestanden. Kopf und Zeilen atomar, keine Selbstduplikate, Waehrung erhalten,
+UUIDv7-IDs; auto_match vor DB-Zugriff mit 501 gesperrt.
+**Nachweis:** `docs/quality-assurance/bank-statement-import-integrity-20261001.md`.
 
 ## TEST-DATABASE-RESOURCE-POLICY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

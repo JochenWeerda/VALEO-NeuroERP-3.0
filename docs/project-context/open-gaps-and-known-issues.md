@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-STATEMENT-IMPORT-INTEGRITY — manueller Import (2026-10-01)
+
+**Geschlossen:** Selbstduplikate gueltiger Zeilen, Erfolg trotz SQL-/Commitfehler,
+Waehrungsverlust und kollidierende Import-IDs. 18 echte und bestehende
+Vertraege auf vorhandenem valeo_probe bestanden, ohne neue Testressourcen.
+**Offen:** auto_match hatte keinen Tenantfilter und konnte Teilzahlungen
+vollstaendig ausgleichen. Die Option wird vor Datenzugriff mit 501 abgewiesen;
+ein eigener Fachvertrag muss Teilzahlungen, Sperren, Wiederholungsschutz,
+Waehrung, Vorzeichen und eindeutige persistente Zuordnung absichern.
+Tenant-Query-/Auth-Vertrag und weitere Parserabnahmen bleiben eigene Gaps.
+Nachweis: `docs/quality-assurance/bank-statement-import-integrity-20261001.md`.
+
 ## SECURITY-PATCH-MILESTONE — Paketbefunde (2026-10-01)
 
 **Repo-seitig repariert:** PyJWT 2.15.0, grpc-js 1.14.5, fastify 5.12.5,
