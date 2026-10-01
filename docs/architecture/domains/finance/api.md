@@ -29,3 +29,14 @@ Entscheidung: [ADR-061](../../../adr/adr-061-billing-batch-orchestration.md).
   `POST .../{run_id}/corrections`, `GET .../{run_id}/export.csv`.
 - Belegkontrolle: gespeicherte Frontend-Sichten nutzen die vorhandenen
   `/api/v1/document-control`-Listen-, Status- und Auditvertraege.
+
+## Bankauszug: kanonischer aktiver Vertrag
+
+`POST /api/v1/finance/bank-statements/import` mit bank_account_id und format,
+`GET /api/v1/finance/bank-statements/{statement_id}/lines`,
+`POST /api/v1/finance/payments/match/{payment_id}` und
+`POST /api/v1/finance/payments/auto-match`. X-Tenant-ID bestimmt den Mandanten.
+Die vier konkurrierenden INT-BANK-001-Routen unter /api/v1/bank entfallen;
+kein Redirect und keine implizite Uebernahme alter IBAN-/DTO-Vertraege.
+Externe Alt-Konsumenten benoetigen eine bewusste Vertragsumstellung.
+[ADR-073](../../../adr/adr-073-bank-model-retirement.md).

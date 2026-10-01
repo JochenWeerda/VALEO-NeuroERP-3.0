@@ -20,3 +20,7 @@ version: 1.0.0
 | [ADR-036](../../../adr/adr-036-architecture-documentation-stack.md) | Doku-Stack |
 | [ADR-067](../../../adr/adr-067-governed-l3-report-catalog.md) | Fester L3-Berichtskatalog und Bonuslaeufe |
 | [ADR-070](../../../adr/adr-070-l3-deep-mask-parity.md) | Zentrale L3-Leaf-Masken |
+
+- [ADR-073](../../../adr/adr-073-bank-model-retirement.md): ein aktives
+  Bankauszugsmodell; unsicheren zweiten API-Weg loeschen, Entwicklungs-Altbestand
+  nach expliziter User-Freigabe entfernen, kein Archiv/Adapter.

@@ -11,17 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
-## BANK-LEGACY-IMPORT-INTEGRATION — zweiter Bankweg (2026-10-01, offen)
+## BANK-LEGACY-IMPORT-INTEGRATION — zweiter Bankweg entfernt (2026-10-01)
 
-**Bestaetigt:** bank_import.py / INT-BANK-001 schreibt domain_finance statt
-domain_erp und verwendet eigene MT940-/CAMT.08-Parser, float-Betraege,
-Substring-/Betragsfallback und interne Commit-/Rollbackpfade. Wiederholte
-Dateien erhalten neue IDs. Der sichere Bankstatement-Vertrag wird dort nicht
-konsumiert. **Offen:** Fuehrendes Auszugsmodell/Bestandsbezug, API-Kompatibilitaet,
-eindeutige reale Zahlung, atomare Zuordnung/Audit und Dateireplay; eigener
-Architecture-/Finance-Claim vor Umsetzung. Keine stille Datenuebernahme oder
-pauschale Bankabnahme. CAMT.02- und MT940-Nachzuege beziehen sich auf den
-beanspruchten Bankstatement-Import. Analyse im Coverage-Nachweis dokumentiert.
+**Geschlossen:** bank_import.py / INT-BANK-001, vier alte DTOs, konkurrierende
+API-/Parser-/Testvertraege und zwei alte domain_finance-Banktabellen entfernt.
+Ein aktives Modell domain_erp unter /api/v1/finance. Nach expliziter User-
+Freigabe Entwicklungs-Altbestand entfernt, kein Archiv/Adapter. Migration auf
+beiden vorhandenen Datenbanken verifiziert; keine neue DB/Dockerinstanz,
+kein Reset, kein zweites Matching oder OP-Umschreiben. 187 Vertraege bestanden,
+davon 9 neue. Inventare, Architekturindex, OpenAPI und Tabellenkatalog nachgezogen.
+**Offen:** GitHub-CI/Deployment und kanonische Fachgaps (weitere CAMT-Profile,
+semantische Duplikate, Reversal/GL); keine pauschale Bank-/Gesamtfreigabe.
+Nachweis: docs/quality-assurance/bank-legacy-retirement-20261001.md.
 
 ## COVERAGE-RETIRED-MODULE-INTEGRITY — reale Loeschung und Messwerte (2026-10-01)
 

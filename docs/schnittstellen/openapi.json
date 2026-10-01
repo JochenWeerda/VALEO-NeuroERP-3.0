@@ -18187,56 +18187,6 @@
         "title": "BankKontoUpdate",
         "type": "object"
       },
-      "BankMatchOut": {
-        "properties": {
-          "info": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Info"
-          },
-          "matched": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Matched"
-          },
-          "statement_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Statement Id"
-          },
-          "unmatched": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Unmatched"
-          }
-        },
-        "title": "BankMatchOut",
-        "type": "object"
-      },
       "BankReconciliationOut": {
         "additionalProperties": true,
         "description": "Response schema for bank reconciliation endpoints.",
@@ -18269,56 +18219,6 @@
           "bank_account_id"
         ],
         "title": "BankReconciliationRunRequest",
-        "type": "object"
-      },
-      "BankStatementImportOut": {
-        "properties": {
-          "format": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Format"
-          },
-          "iban": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Iban"
-          },
-          "lines": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lines"
-          },
-          "statement_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Statement Id"
-          }
-        },
-        "title": "BankStatementImportOut",
         "type": "object"
       },
       "BankStatementImportResult": {
@@ -18385,78 +18285,6 @@
           "lines"
         ],
         "title": "BankStatementImportResult",
-        "type": "object"
-      },
-      "BankStatementItemOut": {
-        "properties": {
-          "filename": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Filename"
-          },
-          "format": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Format"
-          },
-          "iban": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Iban"
-          },
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id"
-          },
-          "imported_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Imported At"
-          },
-          "line_count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Line Count"
-          }
-        },
-        "title": "BankStatementItemOut",
         "type": "object"
       },
       "BankStatementLine": {
@@ -18578,30 +18406,6 @@
           "amount"
         ],
         "title": "BankStatementLine",
-        "type": "object"
-      },
-      "BankStatementListOut": {
-        "properties": {
-          "count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Count"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/BankStatementItemOut"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "title": "BankStatementListOut",
         "type": "object"
       },
       "BankenOut": {
@@ -23297,21 +23101,6 @@
         "title": "Body_import_bestellungen_api_v1_einkauf_bestellungen_import_post",
         "type": "object"
       },
-      "Body_import_camt053_api_v1_bank_import_camt053_post": {
-        "properties": {
-          "file": {
-            "contentMediaType": "application/octet-stream",
-            "description": "CAMT.053 XML-Datei",
-            "title": "File",
-            "type": "string"
-          }
-        },
-        "required": [
-          "file"
-        ],
-        "title": "Body_import_camt053_api_v1_bank_import_camt053_post",
-        "type": "object"
-      },
       "Body_import_chargen_csv_api_v1_futter_import_chargen_post": {
         "properties": {
           "file": {
@@ -23408,21 +23197,6 @@
           "file"
         ],
         "title": "Body_import_mischfuttermittel_csv_api_v1_futter_import_mischfuttermittel_post",
-        "type": "object"
-      },
-      "Body_import_mt940_api_v1_bank_import_mt940_post": {
-        "properties": {
-          "file": {
-            "contentMediaType": "application/octet-stream",
-            "description": "MT940-Datei (.sta / .txt)",
-            "title": "File",
-            "type": "string"
-          }
-        },
-        "required": [
-          "file"
-        ],
-        "title": "Body_import_mt940_api_v1_bank_import_mt940_post",
         "type": "object"
       },
       "Body_import_payments_csv_api_v1_finance_payments_import_csv_post": {
@@ -40364,6 +40138,103 @@
         "title": "CustomerActivityRowOut",
         "type": "object"
       },
+      "CustomerAddressRowOut": {
+        "additionalProperties": true,
+        "description": "Eine normalisierte Anschrift am Geschaeftspartner.",
+        "properties": {
+          "address_type": {
+            "default": "",
+            "title": "Address Type",
+            "type": "string"
+          },
+          "city": {
+            "default": "",
+            "title": "City",
+            "type": "string"
+          },
+          "email": {
+            "default": "",
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_default": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Default"
+          },
+          "name_1": {
+            "default": "",
+            "title": "Name 1",
+            "type": "string"
+          },
+          "postal_code": {
+            "default": "",
+            "title": "Postal Code",
+            "type": "string"
+          },
+          "street": {
+            "default": "",
+            "title": "Street",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerAddressRowOut",
+        "type": "object"
+      },
+      "CustomerAddressesTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerAddressRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerAddressesTabOut",
+        "type": "object"
+      },
       "CustomerBrief": {
         "properties": {
           "city": {
@@ -40477,6 +40348,192 @@
           "table_key"
         ],
         "title": "CustomerContactsTabOut",
+        "type": "object"
+      },
+      "CustomerContractRowOut": {
+        "additionalProperties": true,
+        "description": "Eine Zeile im Register Kontrakte.",
+        "properties": {
+          "contract_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Date"
+          },
+          "contract_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract No"
+          },
+          "contract_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Type"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "total_quantity": {
+            "default": 0.0,
+            "title": "Total Quantity",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerContractRowOut",
+        "type": "object"
+      },
+      "CustomerContractsTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerContractRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerContractsTabOut",
+        "type": "object"
+      },
+      "CustomerCpdRowOut": {
+        "additionalProperties": true,
+        "description": "Ein CPD-Konto am Geschaeftspartner.",
+        "properties": {
+          "city": {
+            "default": "",
+            "title": "City",
+            "type": "string"
+          },
+          "cpd_customer_number": {
+            "default": "",
+            "title": "Cpd Customer Number",
+            "type": "string"
+          },
+          "debtor_account": {
+            "default": "",
+            "title": "Debtor Account",
+            "type": "string"
+          },
+          "email": {
+            "default": "",
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name_1": {
+            "default": "",
+            "title": "Name 1",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerCpdRowOut",
+        "type": "object"
+      },
+      "CustomerCpdTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerCpdRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerCpdTabOut",
         "type": "object"
       },
       "CustomerCreate": {
@@ -40782,6 +40839,99 @@
         "title": "CustomerDashboard",
         "type": "object"
       },
+      "CustomerDiscountRowOut": {
+        "additionalProperties": true,
+        "description": "Eine Rabattzeile am Geschaeftspartner.",
+        "properties": {
+          "article_number": {
+            "default": "",
+            "title": "Article Number",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "discount_percent": {
+            "default": 0.0,
+            "title": "Discount Percent",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerDiscountRowOut",
+        "type": "object"
+      },
+      "CustomerDiscountsTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerDiscountRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerDiscountsTabOut",
+        "type": "object"
+      },
       "CustomerDocumentRowOut": {
         "additionalProperties": true,
         "description": "Eine Zeile im Register Dokumente — offene Posten des Kunden.",
@@ -40886,6 +41036,47 @@
         "description": "Response schema for customer extensions endpoints.",
         "properties": {},
         "title": "CustomerExtensionsOut",
+        "type": "object"
+      },
+      "CustomerHistoryTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerActivityRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerHistoryTabOut",
         "type": "object"
       },
       "CustomerInfo": {
@@ -41020,6 +41211,187 @@
         "title": "CustomerInquiry",
         "type": "object"
       },
+      "CustomerInstructionRowOut": {
+        "additionalProperties": true,
+        "description": "Eine Chef-Anweisung am Geschaeftspartner.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "instruction_priority": {
+            "default": "",
+            "title": "Instruction Priority",
+            "type": "string"
+          },
+          "instruction_text": {
+            "default": "",
+            "title": "Instruction Text",
+            "type": "string"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerInstructionRowOut",
+        "type": "object"
+      },
+      "CustomerInstructionsTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerInstructionRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerInstructionsTabOut",
+        "type": "object"
+      },
+      "CustomerOfferRowOut": {
+        "additionalProperties": true,
+        "description": "Eine Zeile im Register Angebote — Verkaufschance aus der Pipeline.",
+        "properties": {
+          "estimated_value": {
+            "default": 0.0,
+            "title": "Estimated Value",
+            "type": "number"
+          },
+          "expected_close_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Close Date"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "probability": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Probability"
+          },
+          "stage": {
+            "default": "",
+            "title": "Stage",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerOfferRowOut",
+        "type": "object"
+      },
+      "CustomerOffersTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerOfferRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerOffersTabOut",
+        "type": "object"
+      },
       "CustomerOrderRowOut": {
         "additionalProperties": true,
         "description": "Eine Zeile im Register Auftraege.",
@@ -41112,6 +41484,197 @@
           "table_key"
         ],
         "title": "CustomerOrdersTabOut",
+        "type": "object"
+      },
+      "CustomerPriceRowOut": {
+        "additionalProperties": true,
+        "description": "Eine Preisvereinbarung am Geschaeftspartner.",
+        "properties": {
+          "article_number": {
+            "default": "",
+            "title": "Article Number",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "price_net": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Net"
+          },
+          "price_unit": {
+            "default": "",
+            "title": "Price Unit",
+            "type": "string"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerPriceRowOut",
+        "type": "object"
+      },
+      "CustomerPricesTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerPriceRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerPricesTabOut",
+        "type": "object"
+      },
+      "CustomerTaskRowOut": {
+        "additionalProperties": true,
+        "description": "Eine Zeile im Register Aufgaben.",
+        "properties": {
+          "art": {
+            "default": "",
+            "title": "Art",
+            "type": "string"
+          },
+          "faellig": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faellig"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "prioritaet": {
+            "default": "",
+            "title": "Prioritaet",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "titel": {
+            "default": "",
+            "title": "Titel",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerTaskRowOut",
+        "type": "object"
+      },
+      "CustomerTasksTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerTaskRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerTasksTabOut",
         "type": "object"
       },
       "CustomerUpdate": {
@@ -65643,49 +66206,6 @@
         "title": "FiscalTransactionResult",
         "type": "object"
       },
-      "FixingCreateRequest": {
-        "properties": {
-          "fixing_datum": {
-            "title": "Fixing Datum",
-            "type": "string"
-          },
-          "fixing_preis_eur_t": {
-            "title": "Fixing Preis Eur T",
-            "type": "number"
-          },
-          "kontrakt_id": {
-            "title": "Kontrakt Id",
-            "type": "string"
-          },
-          "markt": {
-            "default": "KASSA",
-            "title": "Markt",
-            "type": "string"
-          },
-          "menge_t": {
-            "title": "Menge T",
-            "type": "number"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
-          "referenz": {
-            "title": "Referenz",
-            "type": "string"
-          }
-        },
-        "required": [
-          "kontrakt_id",
-          "fixing_datum",
-          "fixing_preis_eur_t",
-          "menge_t",
-          "referenz"
-        ],
-        "title": "FixingCreateRequest",
-        "type": "object"
-      },
       "FixingCreatedOut": {
         "description": "``POST /contracts/fixing`` — angelegte Teilfixierung.",
         "properties": {
@@ -70984,7 +71504,37 @@
         "title": "GelangensbestaetigungCreate",
         "type": "object"
       },
-      "GelangensbestaetigungOut": {
+      "GelangensbestaetigungCreateOut": {
+        "description": "Was das Anlegen zurueckgibt.\n\nVorher stand hier ``GelangensbestaetigungOut`` — ein Modell mit zehn\nPflichtfeldern, von denen das Anlegen vier liefert. Der Weg konnte deshalb\n**nie** 201 antworten; sichtbar wurde es nicht, weil die fehlende Tabelle\nvorher 503 ergab.",
+        "properties": {
+          "erinnerung_am": {
+            "title": "Erinnerung Am",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "token",
+          "erinnerung_am",
+          "status"
+        ],
+        "title": "GelangensbestaetigungCreateOut",
+        "type": "object"
+      },
+      "GelangensbestaetigungFaelligOut": {
+        "description": "Was die Faelligkeitsliste zurueckgibt — ohne Status und USt-IdNr.\n\nDieselbe Falle wie beim Anlegen: Die Abfrage waehlt zehn Felder, das alte\nModell verlangte dreizehn.",
         "properties": {
           "bestimmungsland_code": {
             "title": "Bestimmungsland Code",
@@ -70994,11 +71544,7 @@
             "title": "Empfaenger Name",
             "type": "string"
           },
-          "empfaenger_ust_id_nr": {
-            "title": "Empfaenger Ust Id Nr",
-            "type": "string"
-          },
-          "erhalten_am": {
+          "erinnerung_am": {
             "anyOf": [
               {
                 "type": "string"
@@ -71007,11 +71553,7 @@
                 "type": "null"
               }
             ],
-            "title": "Erhalten Am"
-          },
-          "erinnerung_am": {
-            "title": "Erinnerung Am",
-            "type": "string"
+            "title": "Erinnerung Am"
           },
           "id": {
             "title": "Id",
@@ -71026,8 +71568,108 @@
             "type": "string"
           },
           "rechnung_nr": {
-            "title": "Rechnung Nr",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnung Nr"
+          },
+          "token": {
+            "title": "Token",
             "type": "string"
+          },
+          "versanddatum": {
+            "title": "Versanddatum",
+            "type": "string"
+          },
+          "warenwert_eur": {
+            "title": "Warenwert Eur",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "lieferschein_nr",
+          "kunde_nr",
+          "empfaenger_name",
+          "bestimmungsland_code",
+          "warenwert_eur",
+          "versanddatum",
+          "token"
+        ],
+        "title": "GelangensbestaetigungFaelligOut",
+        "type": "object"
+      },
+      "GelangensbestaetigungOut": {
+        "description": "Ein Nachweis, wie ihn die Liste zurueckgibt.\n\n``rechnung_nr`` und ``empfaenger_ust_id_nr`` sind **optional**: Beide duerfen\nin der Datenbank fehlen, und ein Pflichtfeld hier haette jede Liste mit einer\nsolchen Zeile in einen 500er verwandelt. Aufgefallen ist das erst, als es die\nTabelle gab — vorher antwortete jeder Weg 503.",
+        "properties": {
+          "bestimmungsland_code": {
+            "title": "Bestimmungsland Code",
+            "type": "string"
+          },
+          "empfaenger_name": {
+            "title": "Empfaenger Name",
+            "type": "string"
+          },
+          "empfaenger_ust_id_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empfaenger Ust Id Nr"
+          },
+          "erhalten_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erhalten Am"
+          },
+          "erinnerung_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erinnerung Am"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kunde_nr": {
+            "title": "Kunde Nr",
+            "type": "string"
+          },
+          "lieferschein_nr": {
+            "title": "Lieferschein Nr",
+            "type": "string"
+          },
+          "rechnung_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnung Nr"
           },
           "status": {
             "title": "Status",
@@ -71049,16 +71691,13 @@
         "required": [
           "id",
           "lieferschein_nr",
-          "rechnung_nr",
           "kunde_nr",
           "bestimmungsland_code",
           "warenwert_eur",
           "versanddatum",
           "empfaenger_name",
-          "empfaenger_ust_id_nr",
           "status",
-          "token",
-          "erinnerung_am"
+          "token"
         ],
         "title": "GelangensbestaetigungOut",
         "type": "object"
@@ -80685,6 +81324,30 @@
         "title": "IntrastatMeldungCreate",
         "type": "object"
       },
+      "IntrastatMeldungCreateOut": {
+        "description": "Was das Anlegen zurueckgibt.\n\nVorher stand hier ``IDResponse`` (``id`` und ``message``) — die\n**Meldenummer** fiel aus der Antwort heraus, also genau die Kennung, unter\nder die Meldung abgegeben wird. Sichtbar wurde das nicht, weil die fehlende\nTabelle vorher 503 ergab.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "meldenummer": {
+            "title": "Meldenummer",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "meldenummer",
+          "status"
+        ],
+        "title": "IntrastatMeldungCreateOut",
+        "type": "object"
+      },
       "IntrastatMeldungUpdate": {
         "properties": {
           "bestimmungsland": {
@@ -84449,247 +85112,6 @@
         "title": "KontraktCreate",
         "type": "object"
       },
-      "KontraktCreateRequest": {
-        "properties": {
-          "artikel_id": {
-            "title": "Artikel Id",
-            "type": "string"
-          },
-          "kontrakt_id": {
-            "title": "Kontrakt Id",
-            "type": "string"
-          },
-          "kontrakt_nr": {
-            "title": "Kontrakt Nr",
-            "type": "string"
-          },
-          "lieferant_id": {
-            "title": "Lieferant Id",
-            "type": "string"
-          },
-          "menge_t": {
-            "title": "Menge T",
-            "type": "number"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
-          "periode": {
-            "title": "Periode",
-            "type": "string"
-          },
-          "preis_eur_t": {
-            "title": "Preis Eur T",
-            "type": "number"
-          }
-        },
-        "required": [
-          "kontrakt_id",
-          "kontrakt_nr",
-          "artikel_id",
-          "menge_t",
-          "preis_eur_t",
-          "lieferant_id",
-          "periode"
-        ],
-        "title": "KontraktCreateRequest",
-        "type": "object"
-      },
-      "KontraktFixingOut": {
-        "description": "Zeile aus ``domain_kontrakte.kontrakt_fixings``.",
-        "properties": {
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "fixing_datum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fixing Datum"
-          },
-          "fixing_preis_eur_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fixing Preis Eur T"
-          },
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id"
-          },
-          "kontrakt_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kontrakt Id"
-          },
-          "markt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "KASSA und weitere Maerkte",
-            "title": "Markt"
-          },
-          "menge_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Menge T"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Operator"
-          },
-          "referenz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Referenz"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
-          }
-        },
-        "title": "KontraktFixingOut",
-        "type": "object"
-      },
-      "KontraktFixingSummaryOut": {
-        "description": "``GET /fixing/{kontrakt_id}/summary`` — Fixierungsstand des Kontrakts.",
-        "properties": {
-          "anzahl_fixings": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Anzahl Fixings"
-          },
-          "avg_fixing_preis_eur_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Mengengewichteter Durchschnittspreis",
-            "title": "Avg Fixing Preis Eur T"
-          },
-          "gefixte_menge_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gefixte Menge T"
-          },
-          "kontrakt_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kontrakt Id"
-          },
-          "offene_menge_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Offene Menge T"
-          },
-          "vollstaendig_gefixt": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Vollstaendig Gefixt"
-          }
-        },
-        "title": "KontraktFixingSummaryOut",
-        "type": "object"
-      },
       "KontraktKlasseCreate": {
         "properties": {
           "beschreibung": {
@@ -84815,148 +85237,6 @@
           "id"
         ],
         "title": "KontraktKlasseOut",
-        "type": "object"
-      },
-      "KontraktLifecycleOut": {
-        "description": "Zeile aus ``domain_kontrakte.kontrakt_lifecycle``.",
-        "properties": {
-          "artikel_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Artikel Id"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id"
-          },
-          "kontrakt_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kontrakt Id"
-          },
-          "kontrakt_nr": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kontrakt Nr"
-          },
-          "lieferant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferant Id"
-          },
-          "menge_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Menge T"
-          },
-          "periode": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Periode"
-          },
-          "preis_eur_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Preis Eur T"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "ENTWURF und Folgestatus",
-            "title": "Status"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          }
-        },
-        "title": "KontraktLifecycleOut",
         "type": "object"
       },
       "KontraktMengenzeitraumOut": {
@@ -85259,182 +85539,6 @@
           "table_key"
         ],
         "title": "KontraktPositionenTabOut",
-        "type": "object"
-      },
-      "KontraktSettlementOut": {
-        "description": "Zeile aus ``domain_kontrakte.kontrakt_settlements``.",
-        "properties": {
-          "abrechnungspreis_eur_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Abrechnungspreis Eur T"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "gelieferte_menge_t": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gelieferte Menge T"
-          },
-          "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Id"
-          },
-          "kontrakt_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kontrakt Id"
-          },
-          "lieferung_datum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferung Datum"
-          },
-          "netto_eur": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Netto Eur"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Operator"
-          },
-          "referenz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Referenz"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "OFFEN und Folgestatus",
-            "title": "Status"
-          },
-          "storno_grund": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Storno Grund"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          }
-        },
-        "title": "KontraktSettlementOut",
-        "type": "object"
-      },
-      "KontraktTransitionRequest": {
-        "properties": {
-          "grund": {
-            "default": "",
-            "title": "Grund",
-            "type": "string"
-          },
-          "new_status": {
-            "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          }
-        },
-        "required": [
-          "new_status"
-        ],
-        "title": "KontraktTransitionRequest",
         "type": "object"
       },
       "KontraktUmsaetzeTabOut": {
@@ -95193,6 +95297,25 @@
           }
         },
         "title": "MahnstufenTrailOut",
+        "type": "object"
+      },
+      "MahnungOut": {
+        "description": "Was das Erinnern zurueckgibt.",
+        "properties": {
+          "erinnerung_gesendet": {
+            "title": "Erinnerung Gesendet",
+            "type": "boolean"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "erinnerung_gesendet",
+          "token"
+        ],
+        "title": "MahnungOut",
         "type": "object"
       },
       "MailAssignOut": {
@@ -142159,44 +142282,6 @@
         "title": "SettlementCreate",
         "type": "object"
       },
-      "SettlementCreateRequest": {
-        "properties": {
-          "abrechnungspreis_eur_t": {
-            "title": "Abrechnungspreis Eur T",
-            "type": "number"
-          },
-          "gelieferte_menge_t": {
-            "title": "Gelieferte Menge T",
-            "type": "number"
-          },
-          "kontrakt_id": {
-            "title": "Kontrakt Id",
-            "type": "string"
-          },
-          "lieferung_datum": {
-            "title": "Lieferung Datum",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
-          "referenz": {
-            "title": "Referenz",
-            "type": "string"
-          }
-        },
-        "required": [
-          "kontrakt_id",
-          "lieferung_datum",
-          "gelieferte_menge_t",
-          "abrechnungspreis_eur_t",
-          "referenz"
-        ],
-        "title": "SettlementCreateRequest",
-        "type": "object"
-      },
       "SettlementFreigabeRequest": {
         "description": "Freigabe-Anfrage: Status-Übergang mit Aktor-Kontext.",
         "properties": {
@@ -142753,29 +142838,6 @@
           }
         },
         "title": "SettlementSummaryOut",
-        "type": "object"
-      },
-      "SettlementTransitionRequest": {
-        "properties": {
-          "new_status": {
-            "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
-          "storno_grund": {
-            "default": "",
-            "title": "Storno Grund",
-            "type": "string"
-          }
-        },
-        "required": [
-          "new_status"
-        ],
-        "title": "SettlementTransitionRequest",
         "type": "object"
       },
       "SetupFirmaOut": {
@@ -166952,6 +167014,63 @@
         "title": "ZurueckziehenBody",
         "type": "object"
       },
+      "ZustellversuchOut": {
+        "properties": {
+          "dauer_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dauer Ms"
+          },
+          "erfolgreich": {
+            "title": "Erfolgreich",
+            "type": "boolean"
+          },
+          "fehler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fehler"
+          },
+          "status_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Code"
+          },
+          "versucht_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Versucht Am"
+          }
+        },
+        "required": [
+          "erfolgreich"
+        ],
+        "title": "ZustellversuchOut",
+        "type": "object"
+      },
       "_AndiImportBody": {
         "properties": {
           "xml": {
@@ -173443,6 +173562,11 @@
             "title": "Nr",
             "type": "integer"
           },
+          "signiert": {
+            "default": false,
+            "title": "Signiert",
+            "type": "boolean"
+          },
           "url": {
             "title": "Url",
             "type": "string"
@@ -174242,8 +174366,42 @@
         "type": "object"
       },
       "app__api__v1__schemas__crm__Customer": {
+        "additionalProperties": true,
         "description": "Full customer schema.\n\nNur Antwortmodell: die Schreibwege laufen ueber ``CustomerCreate`` und\n``CustomerUpdate``, die keine ``id`` entgegennehmen.",
         "properties": {
+          "account_balance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Balance"
+          },
+          "account_statement_print": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Statement Print"
+          },
+          "account_statement_separate": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account Statement Separate"
+          },
           "address": {
             "anyOf": [
               {
@@ -174256,6 +174414,83 @@
             ],
             "description": "Company address",
             "title": "Address"
+          },
+          "bankname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bankname"
+          },
+          "betriebsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betriebsnummer"
+          },
+          "bic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
+          "billing_customer_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Billing Customer Group"
+          },
+          "billing_customer_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Billing Customer Type"
+          },
+          "bio": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bio"
+          },
+          "bonus_eligible": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bonus Eligible"
           },
           "business_partner_id": {
             "anyOf": [
@@ -174373,6 +174608,39 @@
             "description": "Deletion timestamp",
             "title": "Deleted At"
           },
+          "edifact_desadv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edifact Desadv"
+          },
+          "edifact_invoic": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edifact Invoic"
+          },
+          "edifact_orders": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edifact Orders"
+          },
           "email": {
             "anyOf": [
               {
@@ -174384,6 +174652,94 @@
             ],
             "description": "Contact email (gespeichert, unveraendert)",
             "title": "Email"
+          },
+          "email_opt_in": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email Opt In"
+          },
+          "eu_betriebsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eu Betriebsnummer"
+          },
+          "gap_direct_total_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Direct Total Eur"
+          },
+          "gap_estimated_area_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Estimated Area Ha"
+          },
+          "gap_ref_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Ref Year"
+          },
+          "gesperrt_lieferung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesperrt Lieferung"
+          },
+          "gesperrt_rechnung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesperrt Rechnung"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
           },
           "id": {
             "description": "Customer ID (gespeicherter Schluessel, unveraendert)",
@@ -174403,11 +174759,88 @@
             "description": "Industry sector",
             "title": "Industry"
           },
+          "invoice_number_range": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice Number Range"
+          },
           "is_active": {
             "default": true,
             "description": "Whether the record is active",
             "title": "Is Active",
             "type": "boolean"
+          },
+          "kontoinhaber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontoinhaber"
+          },
+          "last_account_statement_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Account Statement Number"
+          },
+          "mahnversand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mahnversand"
+          },
+          "marketing_segment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marketing Segment"
+          },
+          "mitgliedschaft_beendet": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mitgliedschaft Beendet"
+          },
+          "mitgliedsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mitgliedsnummer"
           },
           "name": {
             "anyOf": [
@@ -174421,6 +174854,28 @@
             "description": "Display name alias (mirrors company_name)",
             "title": "Name"
           },
+          "newsletter": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Newsletter"
+          },
+          "partner_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Status"
+          },
           "payment_terms": {
             "anyOf": [
               {
@@ -174433,6 +174888,17 @@
             ],
             "description": "Payment terms in days",
             "title": "Payment Terms"
+          },
+          "pflichtanteile": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pflichtanteile"
           },
           "phone": {
             "anyOf": [
@@ -174460,6 +174926,72 @@
             "description": "Postal code",
             "title": "Postal Code"
           },
+          "potential_fertilizer_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potential Fertilizer Eur"
+          },
+          "potential_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potential Notes"
+          },
+          "potential_psm_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potential Psm Eur"
+          },
+          "potential_seed_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potential Seed Eur"
+          },
+          "potential_segment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potential Segment"
+          },
+          "potential_total_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Potential Total Eur"
+          },
           "price_group": {
             "anyOf": [
               {
@@ -174472,6 +175004,105 @@
             ],
             "description": "Price group",
             "title": "Price Group"
+          },
+          "qs_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qs Nummer"
+          },
+          "rechnungsversand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungsversand"
+          },
+          "self_billing_sales": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Self Billing Sales"
+          },
+          "sepa_mandat_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sepa Mandat Datum"
+          },
+          "sepa_mandat_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sepa Mandat Ref"
+          },
+          "settlement_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Settlement Mode"
+          },
+          "share_of_wallet_total_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Of Wallet Total Pct"
+          },
+          "steuerart": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuerart"
+          },
+          "steuernummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuernummer"
           },
           "tax_category": {
             "anyOf": [
@@ -174505,6 +175136,17 @@
             "title": "Tenant Id",
             "type": "string"
           },
+          "turnover_total_last_year_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Turnover Total Last Year Eur"
+          },
           "updated_at": {
             "anyOf": [
               {
@@ -174517,6 +175159,28 @@
             ],
             "description": "Last update timestamp",
             "title": "Updated At"
+          },
+          "ust_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ust Id"
+          },
+          "vat_optimizer": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Optimizer"
           },
           "website": {
             "anyOf": [
@@ -228263,62 +228927,6 @@
         ]
       }
     },
-    "/api/v1/analytics": {
-      "get": {
-        "operationId": "contract_analytics_api_v1_analytics_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CentralContractsOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Analytics contract",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      }
-    },
     "/api/v1/analytics/benchmark": {
       "get": {
         "description": "Branchenbenchmark je Genossenschaft (Gap 047).\nLiefert eigene KPIs, Branchen-Referenzwerte und Abweichung.",
@@ -235977,320 +236585,6 @@
         "tags": [
           "neuro-core",
           "audit"
-        ]
-      }
-    },
-    "/api/v1/bank/import/camt053": {
-      "post": {
-        "description": "Importiert CAMT.053 XML und persistiert als Bank-Statement.",
-        "operationId": "import_camt053_api_v1_bank_import_camt053_post",
-        "parameters": [
-          {
-            "description": "IBAN des Kontos",
-            "in": "query",
-            "name": "iban",
-            "required": true,
-            "schema": {
-              "description": "IBAN des Kontos",
-              "title": "Iban",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_import_camt053_api_v1_bank_import_camt053_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankStatementImportOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "CAMT.053 XML importieren (INT-BANK-001)",
-        "tags": [
-          "schnittstellen",
-          "bank",
-          "schnittstellen",
-          "bank",
-          "zahlungsverkehr"
-        ]
-      }
-    },
-    "/api/v1/bank/import/mt940": {
-      "post": {
-        "description": "Importiert MT940 und persistiert als Bank-Statement mit Einzelbuchungen.",
-        "operationId": "import_mt940_api_v1_bank_import_mt940_post",
-        "parameters": [
-          {
-            "description": "IBAN des Kontos",
-            "in": "query",
-            "name": "iban",
-            "required": true,
-            "schema": {
-              "description": "IBAN des Kontos",
-              "title": "Iban",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_import_mt940_api_v1_bank_import_mt940_post"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankStatementImportOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "MT940-Kontoauszug importieren (INT-BANK-001)",
-        "tags": [
-          "schnittstellen",
-          "bank",
-          "schnittstellen",
-          "bank",
-          "zahlungsverkehr"
-        ]
-      }
-    },
-    "/api/v1/bank/match/{statement_id}": {
-      "post": {
-        "description": "Matcht alle offenen Buchungen des Auszugs gegen Debitoren-OPs.",
-        "operationId": "run_matching_api_v1_bank_match__statement_id__post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "statement_id",
-            "required": true,
-            "schema": {
-              "title": "Statement Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankMatchOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "OP-Matching für importierten Auszug ausführen",
-        "tags": [
-          "schnittstellen",
-          "bank",
-          "schnittstellen",
-          "bank",
-          "zahlungsverkehr"
-        ]
-      }
-    },
-    "/api/v1/bank/statements": {
-      "get": {
-        "operationId": "list_statements_api_v1_bank_statements_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "iban",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Iban"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 200,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankStatementListOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Importierte Kontoauszüge auflisten",
-        "tags": [
-          "schnittstellen",
-          "bank",
-          "schnittstellen",
-          "bank",
-          "zahlungsverkehr"
         ]
       }
     },
@@ -244948,201 +245242,6 @@
         ]
       }
     },
-    "/api/v1/contracts": {
-      "get": {
-        "operationId": "list_contracts_api_v1_contracts_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "contract_type",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Contract Type"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "counterparty_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Counterparty Id"
-            }
-          },
-          {
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 25,
-              "maximum": 200,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ContractOut"
-                  },
-                  "title": "Response List Contracts Api V1 Contracts Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Contracts auflisten",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      },
-      "post": {
-        "operationId": "create_contract_api_v1_contracts_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContractCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Contract anlegen",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      }
-    },
     "/api/v1/contracts/dunning": {
       "post": {
         "operationId": "create_reminder_api_v1_contracts_dunning_post",
@@ -245397,78 +245496,6 @@
           "contracts",
           "kontrakte",
           "agrar"
-        ]
-      }
-    },
-    "/api/v1/contracts/expiring": {
-      "get": {
-        "operationId": "expiring_contracts_api_v1_contracts_expiring_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "days_ahead",
-            "required": false,
-            "schema": {
-              "default": 90,
-              "maximum": 365,
-              "minimum": 1,
-              "title": "Days Ahead",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ContractOut"
-                  },
-                  "title": "Response Expiring Contracts Api V1 Contracts Expiring Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Contracts expiring",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
         ]
       }
     },
@@ -246200,7 +246227,7 @@
     },
     "/api/v1/contracts/{contract_id}": {
       "get": {
-        "operationId": "get_contract_api_v1_contracts__contract_id__get",
+        "operationId": "compat_contract_get_api_v1_contracts__contract_id__get",
         "parameters": [
           {
             "in": "path",
@@ -246233,7 +246260,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CentralContractsOut"
+                  "$ref": "#/components/schemas/CompatBridgeOut"
                 }
               }
             },
@@ -246255,401 +246282,9 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Contract abrufen",
+        "summary": "Contract get compat",
         "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      },
-      "patch": {
-        "operationId": "update_contract_api_v1_contracts__contract_id__patch",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "contract_id",
-            "required": true,
-            "schema": {
-              "title": "Contract Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ContractUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Contract aktualisieren",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      }
-    },
-    "/api/v1/contracts/{contract_id}/obligations": {
-      "get": {
-        "operationId": "list_obligations_api_v1_contracts__contract_id__obligations_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "contract_id",
-            "required": true,
-            "schema": {
-              "title": "Contract Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/ObligationOut"
-                  },
-                  "title": "Response List Obligations Api V1 Contracts  Contract Id  Obligations Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Obligations auflisten",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      },
-      "post": {
-        "operationId": "add_obligation_api_v1_contracts__contract_id__obligations_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "contract_id",
-            "required": true,
-            "schema": {
-              "title": "Contract Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ObligationCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ObligationOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Obligation hinzufügen",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      }
-    },
-    "/api/v1/contracts/{contract_id}/obligations/{obligation_id}": {
-      "patch": {
-        "operationId": "update_obligation_status_api_v1_contracts__contract_id__obligations__obligation_id__patch",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "contract_id",
-            "required": true,
-            "schema": {
-              "title": "Contract Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "obligation_id",
-            "required": true,
-            "schema": {
-              "title": "Obligation Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ObligationUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ObligationOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Obligation status aktualisieren",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
-        ]
-      }
-    },
-    "/api/v1/contracts/{contract_id}/renew": {
-      "post": {
-        "operationId": "renew_contract_api_v1_contracts__contract_id__renew_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "contract_id",
-            "required": true,
-            "schema": {
-              "title": "Contract Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RenewBody"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ContractOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Contract renew",
-        "tags": [
-          "contracts",
-          "obligations",
-          "renewal"
+          "compat"
         ]
       }
     },
@@ -258598,6 +258233,29 @@
             }
           },
           {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
             "in": "header",
             "name": "X-Tenant-ID",
             "required": false,
@@ -258726,6 +258384,29 @@
             "schema": {
               "title": "Contact Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           },
           {
@@ -259059,6 +258740,29 @@
             "schema": {
               "title": "Consent Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           },
           {
@@ -261496,6 +261200,483 @@
         ]
       }
     },
+    "/api/v1/crm/customers/{customer_id}/tabs/angebote": {
+      "get": {
+        "description": "Verkaufschancen der Partei aus der lokalen Pipeline.",
+        "operationId": "get_customer_tab_angebote_api_v1_crm_customers__customer_id__tabs_angebote_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerOffersTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Angebote",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/anschriften": {
+      "get": {
+        "description": "Normalisierte Anschriften des Partners.",
+        "operationId": "get_customer_tab_anschriften_api_v1_crm_customers__customer_id__tabs_anschriften_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerAddressesTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Anschriften",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/aufgaben": {
+      "get": {
+        "description": "Offene Aufgaben und Wiedervorlagen zum Kunden.",
+        "operationId": "get_customer_tab_aufgaben_api_v1_crm_customers__customer_id__tabs_aufgaben_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerTasksTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Aufgaben",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
     "/api/v1/crm/customers/{customer_id}/tabs/auftraege": {
       "get": {
         "description": "Die letzten Auftraege des Kunden.",
@@ -261645,6 +261826,165 @@
           }
         ],
         "summary": "Kunde: Auftraege",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/chefanweisungen": {
+      "get": {
+        "description": "Normalisierte Chef-Anweisungen des Partners.",
+        "operationId": "get_customer_tab_chefanweisungen_api_v1_crm_customers__customer_id__tabs_chefanweisungen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerInstructionsTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Chef-Anweisungen",
         "tags": [
           "crm",
           "customers",
@@ -261814,6 +262154,165 @@
         ]
       }
     },
+    "/api/v1/crm/customers/{customer_id}/tabs/cpd": {
+      "get": {
+        "description": "CPD-Konten des Partners.",
+        "operationId": "get_customer_tab_cpd_api_v1_crm_customers__customer_id__tabs_cpd_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerCpdTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: CPD-Konten",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
     "/api/v1/crm/customers/{customer_id}/tabs/dokumente": {
       "get": {
         "description": "Die offenen Posten des Kunden.",
@@ -261963,6 +262462,642 @@
           }
         ],
         "summary": "Kunde: Dokumente",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/historie": {
+      "get": {
+        "description": "Aktivitaeten des Kunden in zeitlicher Reihenfolge.",
+        "operationId": "get_customer_tab_historie_api_v1_crm_customers__customer_id__tabs_historie_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerHistoryTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Historie",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/kontrakte": {
+      "get": {
+        "description": "Kontrakte der Partei.",
+        "operationId": "get_customer_tab_kontrakte_api_v1_crm_customers__customer_id__tabs_kontrakte_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerContractsTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Kontrakte",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/preise": {
+      "get": {
+        "description": "Preisvereinbarungen des Partners.",
+        "operationId": "get_customer_tab_preise_api_v1_crm_customers__customer_id__tabs_preise_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPricesTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Preise",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{customer_id}/tabs/rabatte": {
+      "get": {
+        "description": "Artikelrabatte des Partners.",
+        "operationId": "get_customer_tab_rabatte_api_v1_crm_customers__customer_id__tabs_rabatte_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON FilterPlan",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON FilterPlan",
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerDiscountsTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Rabatte",
         "tags": [
           "crm",
           "customers",
@@ -297184,18 +298319,6 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
             "description": "Auto-match transactions",
             "in": "query",
             "name": "auto_match",
@@ -297205,6 +298328,22 @@
               "description": "Auto-match transactions",
               "title": "Auto Match",
               "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -297269,15 +298408,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311554,19 +312697,9 @@
     },
     "/api/v1/finance/payments/auto-match": {
       "post": {
-        "description": "Automatically match unmatched payments to open items.",
+        "description": "Match only unambiguous real bank payments in the tenant transaction.",
         "operationId": "auto_match_payments_api_v1_finance_payments_auto_match_post",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "bank_account",
@@ -311581,6 +312714,22 @@
                 }
               ],
               "title": "Bank Account"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311631,21 +312780,27 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "bank_account",
             "required": true,
             "schema": {
               "title": "Bank Account",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311714,13 +312869,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311766,7 +312927,7 @@
     },
     "/api/v1/finance/payments/match/{payment_id}": {
       "post": {
-        "description": "Match a payment to an open item.",
+        "description": "Assign a real tenant-owned bank payment exactly once.",
         "operationId": "match_payment_api_v1_finance_payments_match__payment_id__post",
         "parameters": [
           {
@@ -311805,13 +312966,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311866,13 +313033,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311923,16 +313096,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "default",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "bank_account",
             "required": false,
             "schema": {
@@ -311967,6 +313130,22 @@
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -325439,7 +326618,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GelangensbestaetigungOut"
+                  "$ref": "#/components/schemas/GelangensbestaetigungCreateOut"
                 }
               }
             },
@@ -325495,7 +326674,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/GelangensbestaetigungOut"
+                    "$ref": "#/components/schemas/GelangensbestaetigungFaelligOut"
                   },
                   "title": "Response List Faellig Api V1 Gelangensbestaetigung Faellig Get",
                   "type": "array"
@@ -325626,7 +326805,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GelangensbestaetigungOut"
+                  "$ref": "#/components/schemas/MahnungOut"
                 }
               }
             },
@@ -328657,7 +329836,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IDResponse"
+                  "$ref": "#/components/schemas/IntrastatMeldungCreateOut"
                 }
               }
             },
@@ -336656,303 +337835,6 @@
         ]
       }
     },
-    "/api/v1/kontrakte/fixing": {
-      "post": {
-        "operationId": "create_fixing_api_v1_kontrakte_fixing_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FixingCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KontraktFixingOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kontrakt-Fixing anlegen",
-        "tags": [
-          "kontrakte-lifecycle",
-          "kontrakte-lifecycle"
-        ]
-      }
-    },
-    "/api/v1/kontrakte/fixing/{kontrakt_id}/summary": {
-      "get": {
-        "operationId": "get_fixing_summary_api_v1_kontrakte_fixing__kontrakt_id__summary_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kontrakt_id",
-            "required": true,
-            "schema": {
-              "title": "Kontrakt Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KontraktFixingSummaryOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kontrakt-Fixing-Zusammenfassung abrufen",
-        "tags": [
-          "kontrakte-lifecycle",
-          "kontrakte-lifecycle"
-        ]
-      }
-    },
-    "/api/v1/kontrakte/lifecycle": {
-      "post": {
-        "operationId": "create_kontrakt_lifecycle_api_v1_kontrakte_lifecycle_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/KontraktCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KontraktLifecycleOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kontrakt-Lifecycle anlegen",
-        "tags": [
-          "kontrakte-lifecycle",
-          "kontrakte-lifecycle"
-        ]
-      }
-    },
-    "/api/v1/kontrakte/lifecycle/{kontrakt_id}": {
-      "get": {
-        "operationId": "get_kontrakt_lifecycle_api_v1_kontrakte_lifecycle__kontrakt_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kontrakt_id",
-            "required": true,
-            "schema": {
-              "title": "Kontrakt Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KontraktLifecycleOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kontrakt-Lifecycle abrufen",
-        "tags": [
-          "kontrakte-lifecycle",
-          "kontrakte-lifecycle"
-        ]
-      }
-    },
-    "/api/v1/kontrakte/lifecycle/{kontrakt_id}/transition": {
-      "post": {
-        "operationId": "transition_kontrakt_api_v1_kontrakte_lifecycle__kontrakt_id__transition_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kontrakt_id",
-            "required": true,
-            "schema": {
-              "title": "Kontrakt Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/KontraktTransitionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KontraktLifecycleOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kontraktstatus wechseln",
-        "tags": [
-          "kontrakte-lifecycle",
-          "kontrakte-lifecycle"
-        ]
-      }
-    },
     "/api/v1/kontrakte/lookup/verkauf": {
       "post": {
         "operationId": "lookup_verkauf_kontrakte_api_v1_kontrakte_lookup_verkauf_post",
@@ -337096,131 +337978,6 @@
         "summary": "Positionen abrufen",
         "tags": [
           "kontrakte"
-        ]
-      }
-    },
-    "/api/v1/kontrakte/settlement": {
-      "post": {
-        "operationId": "create_settlement_api_v1_kontrakte_settlement_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SettlementCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KontraktSettlementOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kontrakt-Settlement anlegen",
-        "tags": [
-          "kontrakte-lifecycle",
-          "kontrakte-lifecycle"
-        ]
-      }
-    },
-    "/api/v1/kontrakte/settlement/{settlement_id}/transition": {
-      "post": {
-        "operationId": "transition_settlement_api_v1_kontrakte_settlement__settlement_id__transition_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "settlement_id",
-            "required": true,
-            "schema": {
-              "title": "Settlement Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SettlementTransitionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KontraktSettlementOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Kontrakt-Settlement-Status wechseln",
-        "tags": [
-          "kontrakte-lifecycle",
-          "kontrakte-lifecycle"
         ]
       }
     },
@@ -378272,6 +379029,7 @@
     },
     "/api/v1/pos/x-report": {
       "get": {
+        "description": "Zwischenbericht des laufenden Tages. Schliesst nichts ab.",
         "operationId": "x_report_api_v1_pos_x_report_get",
         "parameters": [
           {
@@ -378328,6 +379086,7 @@
     },
     "/api/v1/pos/z-report/{report_date}": {
       "get": {
+        "description": "Tagesbericht. ``closed`` kommt aus dem Tagesabschluss, nicht von hier.",
         "operationId": "z_report_api_v1_pos_z_report__report_date__get",
         "parameters": [
           {
@@ -428098,6 +428857,784 @@
         ]
       }
     },
+    "/api/v1/vertraege": {
+      "get": {
+        "operationId": "list_contracts_api_v1_vertraege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "contract_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contract Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "counterparty_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Counterparty Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContractOut"
+                  },
+                  "title": "Response List Contracts Api V1 Vertraege Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertraege auflisten",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      },
+      "post": {
+        "operationId": "create_contract_api_v1_vertraege_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertrag anlegen",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      }
+    },
+    "/api/v1/vertraege/analytics": {
+      "get": {
+        "operationId": "contract_analytics_api_v1_vertraege_analytics_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CentralContractsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertragsauswertung",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      }
+    },
+    "/api/v1/vertraege/expiring": {
+      "get": {
+        "operationId": "expiring_contracts_api_v1_vertraege_expiring_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "days_ahead",
+            "required": false,
+            "schema": {
+              "default": 90,
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Days Ahead",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContractOut"
+                  },
+                  "title": "Response Expiring Contracts Api V1 Vertraege Expiring Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auslaufende Vertraege",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      }
+    },
+    "/api/v1/vertraege/{contract_id}": {
+      "get": {
+        "operationId": "get_contract_api_v1_vertraege__contract_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "title": "Contract Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CentralContractsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertrag abrufen",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      },
+      "patch": {
+        "operationId": "update_contract_api_v1_vertraege__contract_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "title": "Contract Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertrag aktualisieren",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      }
+    },
+    "/api/v1/vertraege/{contract_id}/obligations": {
+      "get": {
+        "operationId": "list_obligations_api_v1_vertraege__contract_id__obligations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "title": "Contract Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ObligationOut"
+                  },
+                  "title": "Response List Obligations Api V1 Vertraege  Contract Id  Obligations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pflichten auflisten",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      },
+      "post": {
+        "operationId": "add_obligation_api_v1_vertraege__contract_id__obligations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "title": "Contract Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObligationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObligationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pflicht hinzufügen",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      }
+    },
+    "/api/v1/vertraege/{contract_id}/obligations/{obligation_id}": {
+      "patch": {
+        "operationId": "update_obligation_status_api_v1_vertraege__contract_id__obligations__obligation_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "title": "Contract Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "obligation_id",
+            "required": true,
+            "schema": {
+              "title": "Obligation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObligationUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObligationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pflicht-Status aktualisieren",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      }
+    },
+    "/api/v1/vertraege/{contract_id}/renew": {
+      "post": {
+        "operationId": "renew_contract_api_v1_vertraege__contract_id__renew_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "title": "Contract Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertrag verlaengern",
+        "tags": [
+          "contracts",
+          "obligations",
+          "renewal"
+        ]
+      }
+    },
     "/api/v1/vertrag/rahmenvertraege": {
       "get": {
         "operationId": "list_rahmenvertraege_api_v1_vertrag_rahmenvertraege_get",
@@ -432375,8 +433912,26 @@
     },
     "/api/v1/webhooks": {
       "get": {
-        "description": "List all registered webhooks.",
+        "description": "Die Webhooks des eigenen Hauses.",
         "operationId": "list_webhooks_api_v1_webhooks_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -432391,6 +433946,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -432448,6 +434013,22 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -432502,6 +434083,22 @@
               ],
               "title": "Tenant Id"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "requestBody": {
@@ -432548,9 +434145,67 @@
         ]
       }
     },
+    "/api/v1/webhooks/abmelden/{nr}": {
+      "delete": {
+        "description": "Meldet den Webhook mit dieser laufenden Nummer im eigenen Haus ab.\n\nDer Weg hiess vorher ``DELETE /webhooks/{nr}`` und war **unerreichbar**:\nUnter demselben Prefix haengt ``webhooks.py`` mit ``DELETE /{webhook_id}``\nund ist zuerst eingebunden, also traf jede Abmeldung dort eine Kennung, die\nkeine laufende Nummer ist.",
+        "operationId": "unregister_webhook_api_v1_webhooks_abmelden__nr__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "nr",
+            "required": true,
+            "schema": {
+              "title": "Nr",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Webhook abmelden",
+        "tags": [
+          "webhooks",
+          "webhooks"
+        ]
+      }
+    },
     "/api/v1/webhooks/areas": {
       "get": {
-        "description": "GET Bereiche",
+        "description": "GET Bereiche — kanonisches Vokabular, mit den alten Objektnamen als Alias.",
         "operationId": "list_event_areas_api_v1_webhooks_areas_get",
         "responses": {
           "200": {
@@ -432582,7 +434237,7 @@
     },
     "/api/v1/webhooks/bereiche": {
       "get": {
-        "description": "List available webhook event areas.",
+        "description": "Das kanonische Bereichsvokabular.",
         "operationId": "list_bereiche_api_v1_webhooks_bereiche_get",
         "responses": {
           "200": {
@@ -432624,6 +434279,22 @@
             "schema": {
               "title": "Bereich",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -432671,51 +434342,9 @@
         ]
       }
     },
-    "/api/v1/webhooks/{nr}": {
-      "delete": {
-        "description": "Unregister (delete) a webhook by its sequential number.",
-        "operationId": "unregister_webhook_api_v1_webhooks__nr__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "nr",
-            "required": true,
-            "schema": {
-              "title": "Nr",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Webhook abmelden",
-        "tags": [
-          "webhooks",
-          "webhooks"
-        ]
-      }
-    },
     "/api/v1/webhooks/{webhook_id}": {
       "delete": {
-        "description": "DEL Entfernen",
+        "description": "DEL Entfernen\n\nMit Mandantenfilter: Vorher genuegte die Kennung, und die Kennung eines\nfremden Webhooks loeschte dessen Anbindung.",
         "operationId": "remove_webhook_api_v1_webhooks__webhook_id__delete",
         "parameters": [
           {
@@ -432725,6 +434354,22 @@
             "schema": {
               "title": "Webhook Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -432752,6 +434397,75 @@
         "tags": [
           "system",
           "integrations"
+        ]
+      }
+    },
+    "/api/v1/webhooks/{webhook_id}/zustellversuche": {
+      "get": {
+        "description": "Die letzten Zustellversuche einer Anbindung des eigenen Hauses.\n\nDer Nachweis zu ``fehler_count`` und ``letzte_auslosung_am``: Beide Felder\nwaren vorher Behauptungen ohne Beleg.",
+        "operationId": "list_zustellversuche_api_v1_webhooks__webhook_id__zustellversuche_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "webhook_id",
+            "required": true,
+            "schema": {
+              "title": "Webhook Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ZustellversuchOut"
+                  },
+                  "title": "Response List Zustellversuche Api V1 Webhooks  Webhook Id  Zustellversuche Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zustellversuche abrufen",
+        "tags": [
+          "webhooks",
+          "webhooks"
         ]
       }
     },

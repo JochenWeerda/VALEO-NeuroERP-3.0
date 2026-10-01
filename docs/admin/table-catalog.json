@@ -2,20 +2,6 @@
   "same_name_across_schemas": [
     {
       "schemas": [
-        "domain_erp",
-        "domain_finance"
-      ],
-      "table": "bank_statement_lines"
-    },
-    {
-      "schemas": [
-        "domain_erp",
-        "domain_finance"
-      ],
-      "table": "bank_statements"
-    },
-    {
-      "schemas": [
         "domain_crm",
         "domain_erp"
       ],
@@ -1733,7 +1719,8 @@
             "id"
           ],
           "read_by": [
-            "app/domains/operations/models.py"
+            "app/domains/operations/models.py",
+            "app/services/customer_reference.py"
           ]
         },
         "ernte_planung": {
@@ -7250,6 +7237,67 @@
         }
       }
     },
+    "domain_audit": {
+      "tables": {
+        "attestations": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "entity_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "entity_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "action",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "reason",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "created_by",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_audit / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "screens": [
+            "sales/delivery-note"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/sales_delivery_notes.py"
+          ]
+        }
+      }
+    },
     "domain_compliance": {
       "tables": {
         "compliance_artikel_sperre_audit": {
@@ -7531,6 +7579,349 @@
             "app/services/compliance_vvvo_sachkunde_service.py"
           ]
         },
+        "data_erasure_requests": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "requester_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "requester_email",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "request_date",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "completion_date",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "deletion_log",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/compliance_dsgvo.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/compliance_dsgvo.py"
+          ]
+        },
+        "gelangensbestaetigung": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "lieferschein_nr",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "rechnung_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "kunde_nr",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bestimmungsland_code",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "warenwert_eur",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "versanddatum",
+              "nullable": false,
+              "type": "date"
+            },
+            {
+              "name": "empfaenger_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "empfaenger_ust_id_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "token",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "erinnerung_am",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "erhalten_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/gelangensbestaetigung.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/gelangensbestaetigung.py"
+          ]
+        },
+        "intrastat_meldungen": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "meldenummer",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "meldezeitraum",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "meldungsart",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "cn8_warennummer",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "ursprungsland",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "bestimmungsland",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "statistischer_wert_eur",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "nettomasse_kg",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "menge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "mengeneinheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "geschaeftsvorgang_code",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/intrastat.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/intrastat.py"
+          ]
+        },
+        "lksg_supplier_risk_assessments": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "supplier_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "country_code",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "spend_eur",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "sector_risk",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "human_rights_flags",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "environmental_flags",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "mitigation_note",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "risk_score",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "risk_level",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_compliance / Domain dms-compliance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/compliance_whistleblower_lksg.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/compliance_whistleblower_lksg.py"
+          ]
+        },
         "sanctions_checks": {
           "columns": [
             {
@@ -7659,7 +8050,7 @@
             },
             {
               "name": "report_token",
-              "nullable": false,
+              "nullable": true,
               "type": "text"
             },
             {
@@ -7691,6 +8082,36 @@
               "name": "notes",
               "nullable": true,
               "type": "jsonb"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "description",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "contact_email",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "anonymous",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
             }
           ],
           "foreign_keys": [],
@@ -7705,8 +8126,223 @@
             "app/api/v1/endpoints/compliance_whistleblower_lksg.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/compliance_whistleblower.py",
             "app/api/v1/endpoints/compliance_whistleblower_lksg.py"
+          ]
+        }
+      }
+    },
+    "domain_contracts": {
+      "tables": {
+        "contract_obligations": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "contract_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "obligation_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "due_date",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "description",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "contract_id",
+              "references": "domain_contracts.contracts.id"
+            }
+          ],
+          "owner_domain": null,
+          "ownership_reason": "Schema domain_contracts fehlt in SCHEMA_TO_DOMAIN.",
+          "placement": "unknown_schema",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/central_contracts.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/central_contracts.py"
+          ]
+        },
+        "contract_versions": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "contract_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "version_number",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "changed_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "changed_by",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "change_summary",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "content_snapshot",
+              "nullable": false,
+              "type": "jsonb"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "contract_id",
+              "references": "domain_contracts.contracts.id"
+            }
+          ],
+          "owner_domain": null,
+          "ownership_reason": "Schema domain_contracts fehlt in SCHEMA_TO_DOMAIN.",
+          "placement": "unknown_schema",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/central_contracts.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/central_contracts.py"
+          ]
+        },
+        "contracts": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "contract_number",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "contract_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "title",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "counterparty_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "counterparty_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "start_date",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "end_date",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "auto_renewal_days",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "notice_period_days",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "total_value_eur",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": null,
+          "ownership_reason": "Schema domain_contracts fehlt in SCHEMA_TO_DOMAIN.",
+          "placement": "unknown_schema",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/central_contracts.py",
+            "app/api/v1/endpoints/pricing.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/central_contracts.py"
           ]
         }
       }
@@ -8437,11 +9073,13 @@
           "read_by": [
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py",
             "app/services/calendar_projection_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/compliance_dsgvo.py"
+            "app/api/v1/endpoints/compliance_dsgvo.py",
+            "app/api/v1/endpoints/crm_360.py"
           ]
         },
         "business_partner_addresses": {
@@ -8605,6 +9243,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py"
           ]
         },
@@ -8744,7 +9383,8 @@
             "id"
           ],
           "read_by": [
-            "app/infrastructure/models/__init__.py"
+            "app/infrastructure/models/__init__.py",
+            "app/services/customer_service.py"
           ]
         },
         "business_partner_communities": {
@@ -9010,6 +9650,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py"
           ]
         },
@@ -9293,6 +9934,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py"
           ]
         },
@@ -9377,6 +10019,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py"
           ]
         },
@@ -9579,6 +10222,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py"
           ]
         },
@@ -9846,6 +10490,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py"
           ]
         },
@@ -10798,11 +11443,17 @@
             "partner_id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/crm_360_sql.py",
+            "app/api/v1/endpoints/finance_invoices.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/business_partner_service.py",
-            "app/services/kunden_merge.py"
+            "app/services/customer_reference.py",
+            "app/services/customer_service.py",
+            "app/services/kunden_merge.py",
+            "app/services/mcp_execution_service.py"
           ]
         },
         "contacts": {
@@ -10940,7 +11591,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/credit_management.py",
-            "app/api/v1/endpoints/crm_360.py"
+            "app/api/v1/endpoints/crm_360.py",
+            "app/services/customer_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/credit_management.py"
@@ -10993,6 +11645,66 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/credit_management.py"
+          ]
+        },
+        "crm_action_audit_log": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "action_key",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "entity_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "entity_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "idempotency_key",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "audit_reason",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "performed_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "result_summary",
+              "nullable": false,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/crm_360.py",
+            "app/services/mask_action_runtime_service.py"
           ]
         },
         "crm_activities": {
@@ -11117,9 +11829,6 @@
             "app/crm/router.py",
             "app/domains/crm/models.py",
             "app/services/mask_rollout_summary_service.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/crm_360.py"
           ]
         },
         "crm_campaign_recipients": {
@@ -12125,7 +12834,9 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/api/v1/endpoints/crm_reports.py",
+            "app/api/v1/endpoints/opportunities.py",
             "app/domains/crm/models.py",
             "app/services/mask_rollout_summary_service.py"
           ]
@@ -12520,6 +13231,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/compat.py",
+            "app/api/v1/endpoints/compliance_dsgvo.py",
+            "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/customers.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
@@ -12528,6 +13242,7 @@
             "app/infrastructure/models/agrar_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/business_partner_service.py",
+            "app/services/customer_reference.py",
             "app/services/customer_sales_eligibility.py",
             "app/services/customer_service.py",
             "app/services/kunden_merge.py",
@@ -12540,6 +13255,7 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
+            "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/services/business_partner_service.py",
             "app/services/customer_service.py"
           ]
@@ -13300,10 +14016,12 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
+            "app/services/procurement_service.py",
             "app/services/sales_match_service.py"
           ],
           "written_by": [
@@ -13451,12 +14169,15 @@
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/credit_management.py",
             "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/api/v1/endpoints/crm_kim.py",
             "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
+            "app/services/customer_reference.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
             "app/services/o2c_chain_service.py",
+            "app/services/procurement_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_match_service.py",
             "app/services/sales_storno_service.py",
@@ -15135,6 +15856,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/pos_payments.py",
             "app/services/fiscalization/service.py"
           ],
           "written_by": [
@@ -15804,6 +16526,60 @@
             "app/infrastructure/models/einkauf_models.py"
           ]
         },
+        "bestellung_kommunikation": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bestellung_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kanal",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "empfaenger",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "versendet_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "status",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "betreff",
+              "nullable": true,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "procurement",
+          "ownership_reason": "Custodian domain_einkauf / Domain procurement.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/mask_rollout_summary_service.py"
+          ]
+        },
         "bestellung_positionen": {
           "columns": [
             {
@@ -15920,6 +16696,51 @@
               "name": "status",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "gebinde_menge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "gebinde_einheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "gebinde_schluessel",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "gewicht_kg",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "kontrakt_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "lagerhalle",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "lagerfach",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "mindestmenge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "maximalmenge",
+              "nullable": true,
+              "type": "numeric"
             }
           ],
           "foreign_keys": [
@@ -15945,7 +16766,8 @@
             "app/infrastructure/models/einkauf_models.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
-            "app/services/procurement_match_service.py"
+            "app/services/procurement_match_service.py",
+            "app/services/procurement_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
@@ -16109,6 +16931,196 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "bestellfall",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "ansprechpartner",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "kreditor_konto",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "lieferant_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "kostenstelle",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "kommission",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "ladetermin",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "ladetermin_ab",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "lade_datum",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "incoterms",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "lieferadresse",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "zahlungsbedingung",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "skonto1_tage",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "skonto1_prozent",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "skonto2_tage",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "skonto2_prozent",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "netto_tage",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "fremdwaehrung",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "umrechnungsfaktor",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "anfrage_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "angebot_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "auftrag_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "abverkauf_horizont",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "bedarfsmenge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "mindestbestellmenge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "maximalbestellmenge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "artikelgruppe",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "lagerplatz_opt",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "fracht_opt",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "opportunitaetskostensatz",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "palettenstellplatz_kosten",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "lagerkosten_satz",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "verkaufsbeleg_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "kunden_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "direktlieferung",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "ueberschlag_lager",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "neuer_artikel",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "innovationshinweis",
+              "nullable": true,
+              "type": "text"
             }
           ],
           "foreign_keys": [
@@ -16133,13 +17145,15 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/articles.py",
+            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
-            "app/services/procurement_match_service.py"
+            "app/services/procurement_match_service.py",
+            "app/services/procurement_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
@@ -16884,6 +17898,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/price_calculation.py",
             "app/infrastructure/models/einkauf_models.py"
           ]
         },
@@ -16998,7 +18013,9 @@
             "id"
           ],
           "read_by": [
-            "app/infrastructure/models/einkauf_models.py"
+            "app/api/v1/endpoints/price_calculation.py",
+            "app/infrastructure/models/einkauf_models.py",
+            "app/services/customer_reference.py"
           ]
         },
         "lager_kontenzuordnung": {
@@ -17267,8 +18284,10 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/crm_partner_suche.py",
             "app/infrastructure/models/einkauf_models.py",
+            "app/services/customer_reference.py",
             "app/services/mask_rollout_summary_service.py"
           ]
         },
@@ -18071,6 +19090,7 @@
             "app/api/v1/endpoints/bank_accounts.py",
             "app/api/v1/endpoints/bank_reconciliation.py",
             "app/api/v1/endpoints/bank_statement_import.py",
+            "app/api/v1/endpoints/liquidity_planning.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py"
           ],
           "written_by": [
@@ -18329,6 +19349,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/bank_reconciliation.py",
+            "app/api/v1/endpoints/bank_statement_import.py",
             "app/api/v1/endpoints/payment_matching.py"
           ],
           "written_by": [
@@ -18470,8 +19491,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/finance_actions.py",
-            "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/stmd_duplikat.py",
             "app/api/v1/endpoints/xrechnung.py"
           ]
@@ -20102,6 +21123,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/bank_reconciliation.py",
+            "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/chart_of_accounts.py",
             "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/finance_actions.py",
@@ -20251,6 +21273,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/bank_reconciliation.py",
+            "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/chart_of_accounts.py",
             "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/finance_actions.py",
@@ -20571,14 +21594,17 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/auto_matching.py",
-            "app/api/v1/endpoints/bank_import.py",
+            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/creditors.py",
             "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/api/v1/endpoints/debtors.py",
             "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/export_service.py",
             "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
+            "app/api/v1/endpoints/liquidity.py",
+            "app/api/v1/endpoints/liquidity_planning.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/payment_matching.py",
             "app/api/v1/endpoints/payment_runs.py",
@@ -20599,7 +21625,6 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/ap_invoices.py",
-            "app/api/v1/endpoints/bank_import.py",
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/credit_debit_memos.py",
             "app/api/v1/endpoints/dauerauftraege.py",
@@ -21354,135 +22379,6 @@
           ],
           "written_by": [
             "app/finance/gobd.py"
-          ]
-        },
-        "bank_statement_lines": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "uuid"
-            },
-            {
-              "name": "statement_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "booking_date",
-              "nullable": false,
-              "type": "date"
-            },
-            {
-              "name": "amount",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "side",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "reference",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "purpose",
-              "nullable": true,
-              "type": "text"
-            },
-            {
-              "name": "match_status",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "matched_op_id",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "source",
-              "nullable": false,
-              "type": "character varying"
-            }
-          ],
-          "foreign_keys": [
-            {
-              "column": "statement_id",
-              "references": "domain_finance.bank_statements.id"
-            }
-          ],
-          "owner_domain": "finance",
-          "ownership_reason": "Custodian domain_finance / Domain finance.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/bank_import.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/bank_import.py"
-          ]
-        },
-        "bank_statements": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "iban",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "format",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "filename",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "line_count",
-              "nullable": false,
-              "type": "integer"
-            },
-            {
-              "name": "imported_at",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "finance",
-          "ownership_reason": "Custodian domain_finance / Domain finance.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/bank_import.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/bank_import.py"
           ]
         },
         "billing_batch_audit": {
@@ -24224,11 +25120,11 @@
           "foreign_keys": [
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
+              "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
+              "references": "domain_hr.hrm_operations_gates.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -24303,19 +25199,19 @@
           "foreign_keys": [
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
+              "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
-            },
-            {
-              "column": "tenant_id",
               "references": "domain_hr.hrm_operations_gates.tenant_id"
             },
             {
               "column": "tenant_id",
               "references": "domain_hr.hrm_operations_gates.gate_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_hr.hrm_operations_gates.tenant_id"
             }
           ],
           "owner_domain": "hr",
@@ -25849,10 +26745,12 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/supplier_portal.py",
             "app/core/database.py",
-            "app/infrastructure/models/l3c_models.py"
+            "app/infrastructure/models/l3c_models.py",
+            "app/services/customer_reference.py"
           ]
         },
         "agrar_settlement_deductions": {
@@ -27419,10 +28317,12 @@
             "app/infrastructure/models/futtermittel_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/seeds/inventory_seed.py",
+            "app/services/customer_reference.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/ist_aggregation_service.py",
             "app/services/mask_rollout_summary_service.py",
+            "app/services/procurement_service.py",
             "app/services/whatsapp_intake_service.py"
           ],
           "written_by": [
@@ -28782,6 +29682,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/supplier_portal.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/agrar_partie_aggregate_service.py",
@@ -29551,7 +30452,8 @@
             "app/services/inventory_count_close_service.py",
             "app/services/inventory_document_reference.py",
             "app/services/inventory_movement_direction.py",
-            "app/services/inventory_stock_balance.py"
+            "app/services/inventory_stock_balance.py",
+            "app/services/procurement_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
@@ -32386,6 +33288,7 @@
             "app/infrastructure/models/l3c_models.py",
             "app/infrastructure/models/wms_models.py",
             "app/seeds/inventory_seed.py",
+            "app/services/customer_reference.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/mask_rollout_summary_service.py"
           ],
@@ -32675,297 +33578,8 @@
             "app/infrastructure/models/l3c_models.py",
             "app/services/agrar_partie_aggregate_service.py",
             "app/services/agri_lot_link_booking_service.py",
+            "app/services/mask_rollout_summary_service.py",
             "app/services/supply_chain_trace_service.py"
-          ]
-        }
-      }
-    },
-    "domain_kontrakte": {
-      "tables": {
-        "kontrakt_fixings": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "uuid"
-            },
-            {
-              "name": "kontrakt_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "fixing_datum",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "fixing_preis_eur_t",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "menge_t",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "markt",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "referenz",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "operator",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "created_at",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "agrar",
-          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/api/v1/schemas/kontrakt_actions_schemas.py",
-            "app/services/kontrakt_fixing_service.py"
-          ],
-          "written_by": [
-            "app/services/kontrakt_fixing_service.py"
-          ]
-        },
-        "kontrakt_lifecycle": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "uuid"
-            },
-            {
-              "name": "kontrakt_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "kontrakt_nr",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "artikel_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "menge_t",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "preis_eur_t",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "lieferant_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "periode",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "status",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "created_at",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "agrar",
-          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/api/v1/schemas/kontrakt_actions_schemas.py",
-            "app/services/kontrakt_fixing_service.py",
-            "app/services/kontrakt_lifecycle_service.py",
-            "app/services/kontrakt_settlement_service.py"
-          ],
-          "written_by": [
-            "app/services/kontrakt_lifecycle_service.py",
-            "app/services/kontrakt_settlement_service.py"
-          ]
-        },
-        "kontrakt_settlements": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "uuid"
-            },
-            {
-              "name": "kontrakt_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "lieferung_datum",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "gelieferte_menge_t",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "abrechnungspreis_eur_t",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "netto_eur",
-              "nullable": false,
-              "type": "numeric"
-            },
-            {
-              "name": "referenz",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "status",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "storno_grund",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "operator",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "created_at",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            },
-            {
-              "name": "updated_at",
-              "nullable": true,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "agrar",
-          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/api/v1/schemas/kontrakt_actions_schemas.py",
-            "app/services/kontrakt_settlement_service.py"
-          ],
-          "written_by": [
-            "app/services/kontrakt_settlement_service.py"
-          ]
-        },
-        "kontrakt_status_log": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "uuid"
-            },
-            {
-              "name": "kontrakt_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "old_status",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "new_status",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "operator",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "grund",
-              "nullable": false,
-              "type": "text"
-            },
-            {
-              "name": "created_at",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "agrar",
-          "ownership_reason": "Custodian domain_kontrakte / Domain agrar.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "written_by": [
-            "app/services/kontrakt_lifecycle_service.py"
           ]
         }
       }
@@ -34938,7 +35552,9 @@
             "contract_id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/crm_360_reads.py",
             "app/domains/operations/models.py",
+            "app/services/calendar_projection_service.py",
             "app/services/contract_engagement_service.py",
             "app/services/contract_fixing_service.py",
             "app/services/contract_fulfillment_service.py",
@@ -40471,6 +41087,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "reklamation_nr",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -40482,7 +41103,11 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/mask_frontend_bridges.py",
+            "app/api/v1/endpoints/reklamation_api.py",
             "app/domains/operations/models.py"
+          ],
+          "screens": [
+            "qualitaet/reklamation"
           ]
         },
         "strecke_speditionen_frachttarife": {
@@ -41341,6 +41966,16 @@
               "name": "tenant_id",
               "nullable": false,
               "type": "text"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
             }
           ],
           "foreign_keys": [],
@@ -41435,6 +42070,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/pos_payments.py",
             "app/services/pos_tagesabschluss_service.py"
           ],
           "written_by": [
@@ -41546,6 +42182,16 @@
               "name": "tenant_id",
               "nullable": false,
               "type": "text"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
             }
           ],
           "foreign_keys": [],
@@ -42862,6 +43508,7 @@
             "app/api/v1/endpoints/sustainability.py",
             "app/services/docflow_service.py",
             "app/services/mask_rollout_summary_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/sales_match_service.py",
             "app/services/warehouse_service.py"
           ],
@@ -43027,6 +43674,7 @@
             "app/services/document_control_projection.py",
             "app/services/logistics_disposition_service.py",
             "app/services/mask_rollout_summary_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/o2c_chain_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_match_service.py",
@@ -43371,6 +44019,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/xrechnung.py",
             "app/domains/documents/sales_invoice_models.py"
           ]
         },
@@ -43462,6 +44111,7 @@
           "read_by": [
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/credit_management.py",
+            "app/api/v1/endpoints/xrechnung.py",
             "app/domains/documents/sales_invoice_models.py"
           ]
         },
@@ -45760,6 +46410,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/neuro_verification.py",
@@ -45770,6 +46421,7 @@
             "app/services/audit_hardening.py"
           ],
           "written_by": [
+            "app/api/v1/endpoints/payment_matching.py",
             "app/finance/gobd.py",
             "app/services/audit_hardening.py",
             "app/services/consent_engine.py",
@@ -46098,7 +46750,8 @@
             "app/api/v1/endpoints/branches.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
-            "app/infrastructure/models/l3c_models.py"
+            "app/infrastructure/models/l3c_models.py",
+            "app/services/customer_reference.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/branches.py"
@@ -47037,6 +47690,21 @@
               "name": "created_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "debitor_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "currency",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -51611,7 +52279,6 @@
           ],
           "read_by": [
             "app/agents/workflows/skonto_optimizer.py",
-            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/crm_kim.py",
             "app/api/v1/endpoints/finance_actions.py",
             "app/api/v1/endpoints/finance_followup.py",
@@ -52167,7 +52834,6 @@
             "projection_key"
           ],
           "read_by": [
-            "app/core/projection_cursor_service.py",
             "app/services/finance_read_model_service.py"
           ],
           "written_by": [
@@ -53383,6 +54049,61 @@
             "app/services/studio_draft_store.py"
           ]
         },
+        "sepa_mandates": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "debitor_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "mandate_reference",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "mandate_valid",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "mandate_expired_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/finance_actions.py",
+            "app/api/v1/endpoints/finance_followup.py"
+          ]
+        },
         "stuecklisten": {
           "columns": [
             {
@@ -54321,6 +55042,76 @@
             "app/api/v1/endpoints/warengruppen.py"
           ]
         },
+        "webhook_deliveries": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "webhook_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "event_area",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "versucht_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erfolgreich",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "status_code",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "dauer_ms",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "fehler",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "signiert",
+              "nullable": false,
+              "type": "boolean"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "webhook_id",
+              "references": "domain_shared.webhook_registrations.id"
+            }
+          ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/webhook_system.py",
+            "app/services/webhook_service.py"
+          ]
+        },
         "webhook_registrations": {
           "columns": [
             {
@@ -54377,7 +55168,9 @@
             "id"
           ],
           "read_by": [
-            "app/infrastructure/models/l3c_models.py"
+            "app/api/v1/endpoints/webhook_system.py",
+            "app/infrastructure/models/l3c_models.py",
+            "app/services/webhook_service.py"
           ]
         },
         "zahlungsbedingungen": {

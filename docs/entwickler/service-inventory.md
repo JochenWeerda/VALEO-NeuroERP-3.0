@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-30
+last_reviewed: 2026-10-01
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -164,11 +164,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `kaeufer_signal_service` | Aggregiert echte Verhaltenssignale je Betrieb (und je Produktgruppe) aus den |
 | `kaeufergruppe` | Käufergruppen-Modell + realistisch gewinnbare Bedarfslücke (Durchdringungs-CRM). |
 | `knowledge_store` | Knowledge Store — NC-06 |
-| `kontrakt_fixing_service` | DOM-CON-004.3 — Kontrakt Preis-Fixing Service (MATIF/Kassamarkt). |
-| `kontrakt_lifecycle_service` | DOM-CON-004.2 — Kontrakt-Lifecycle Service (Statusmaschine + Fixing + Settlement). |
 | `kontrakt_movement_sync` | Automatic Kontrakt-Movement synchronization. |
 | `kontrakt_position_service` | Rohwaren-Positionsmonitor: Long/Short-Berechnung pro Artikel. |
-| `kontrakt_settlement_service` | DOM-CON-004.4 — Kontrakt Settlement Service (Abrechnung + Storno). |
 | `kontrakte_adapters` | — |
 | `kontrakte_service` | — |
 | `kunden_backfill` | Phase 2D Schritt 3: Backfill public.kunden -> Domänensatelliten. |
@@ -270,6 +267,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
 | `warehouse_service` | — |
+| `webhook_service` | Ausgehende Webhooks — die einzige Stelle, die die Anbindungen anfasst. |
 | `webshop_integration_service` | Service layer for B2B webshop order imports. |
 | `wf_cockpit_nats_projector` | WF-COCKPIT-PERSIST-001 — NATS-JetStream-Projector fuer Workflow-Cockpit. |
 | `wf_cockpit_persist_service` | WF-COCKPIT-PERSIST-001 — DB-backed Workflow-Cockpit-Service. |

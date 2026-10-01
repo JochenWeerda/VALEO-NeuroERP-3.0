@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-30
+last_reviewed: 2026-10-01
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -107,6 +107,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
 | `audit_attestations_20260917` | Die Attestierung bekommt ihre Tabelle. |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
+| `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
 | `billing_batch_20260821` | Billing batch orchestration and audit. |
 | `bp_merge_tab23_json_20260330` | Merge heads + domain_crm.business_partners.tab_23 JSONB (Tab-23 Stammdaten) |
@@ -273,6 +274,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `journal_entries_document_type_20260408` | domain_erp.journal_entries: document_type ergaenzen (GoBD Belegart) |
 | `journal_entries_unify_20260301` | Journal: Eine Tabelle für List + Connector (domain_erp.journal_entries) |
 | `kontrakt_lifecycle_fixing_20260623` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement Tabellen |
+| `kontrakt_ordnung_20261001` | Der Kontrakt-Overlay ohne Vertragsbezug wird stillgelegt. |
+| `kontraktregister_20261001` | Das zentrale Kontraktregister bekommt eine Migration. |
 | `kostenrechnung_stammdaten_20260618` | Kostenrechnung: Kostenstellen-Stammdaten + Kostenarten |
 | `kunden_ackerbau_profil_20260604` | Ackerbau-Bedarfsprofil je Betrieb (Fläche → Dünger/PSM/Saatgut). |
 | `kunden_bp_bridge_20260601` | Kunden→BusinessPartner Identitäts-Brücke (Phase 1 Stammdaten-Konsolidierung). |
@@ -291,6 +294,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `l3_recent_documents_20260821` | Personal authorized recent-document projection. |
 | `l3_report_catalog_20260821` | Governed L3 report catalog fact projection. |
 | `l3_runtime_hardening_20260822` | L3 runtime tenant and uniqueness hardening. |
+| `lastschrift_mandant_20260930` | Eine Lastschrift gehoert einem Haus. |
 | `lieferschein_status_bedingung_20260929` | Die Statusbedingung des Lieferscheins kennt die Zustaende, die es gibt. |
 | `lkw_annahme_queue_article_reference_20260328` | LKW-Annahme-Queue article reference |
 | `lkw_annahme_queue_klaerung_20260328` | LKW-Annahme-Queue Klaerungsdaten |
@@ -339,6 +343,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `perf_indexes_apply_20260602` | Catch-up: Performance-Indizes auf bereits migrierten DBs anlegen. |
 | `perf_indexes_multitenant_20260408` | perf: add missing database indexes for multi-tenant queries |
 | `performance_indexes_20260526` | Performance indexes for high-frequency query patterns. |
+| `periode_statuswoerterbuch_20261001` | Eine Buchungsperiode hat einen Zustand, nicht drei Vokabulare. |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
 | `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
@@ -352,6 +357,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `prod_fibu_journal_ref_20260618` | PROD-FIBU-001: fibu_journal_ref auf ProduktionsAuftrag |
 | `production_control_20260821` | Production control worklist and audit. |
 | `produktgruppen_kaeufer_20260604` | Käuferlogik je Produktgruppe + echte Signal-Herkunft. |
+| `projektion_cursor_20260930` | Die Projektionsbuchhaltung bekommt eine Migration. |
 | `query_center_20260821` | Safe query-center definitions and audit. |
 | `rations_feeding_control_20260711` | Persisted feeding-control logs (DLG 01/2025 F1). |
 | `rations_integrations_20260712` | Rations integration import journal. |
@@ -377,6 +383,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
+| `steuernachweis_mandant_20261001` | Steuerliche Nachweise bekommen eine Migration — und einen Mandanten. |
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tank_adapter_20260821` | Tank adapter inbox and delivery-note handover. |
@@ -388,6 +395,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |
+| `webhook_zustellprotokoll_20261001` | Ein Zustellversuch braucht einen Nachweis. |
 | `wf_cockpit_persist_20260625` | WF-COCKPIT-PERSIST-001: Persistente Workflow-Cockpit-Tabellen. |
 | `whatsapp_bestell_inbox_20260603` | WhatsApp Bestell-Inbox — eingehende Freitext-Bestellungen + AI-Extraktion. |
 | `whistleblower_eine_tabelle_20260930` | Hinweisgebermeldungen bekommen eine Migration, eine Form und einen Mandanten. |

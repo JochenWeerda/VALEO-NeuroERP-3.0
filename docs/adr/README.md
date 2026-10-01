@@ -66,3 +66,5 @@ ADR-030 ist **nicht vergeben** (Lücke in der Nummerierung).
 - [Architecture Index](../architecture/index.md)
 - [Process Kernel Status](../architecture/process-kernel/STATUS.md)
 - [ADR-072 Explizite MCP-Ausfuehrungsadapter](adr-072-mcp-execution-adapters.md)
+
+- [ADR-073 Ein aktives Bankauszugsmodell](adr-073-bank-model-retirement.md)

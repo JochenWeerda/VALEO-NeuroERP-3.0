@@ -2255,8 +2255,6 @@ from app.api.v1.endpoints import xrechnung  # noqa: E402
 api_router.include_router(xrechnung.router, tags=["schnittstellen", "e-rechnung"])
 
 # INT-BANK-001: Bank-API / SEPA-Import (MT940 + CAMT.053)
-from app.api.v1.endpoints import bank_import  # noqa: E402
-api_router.include_router(bank_import.router, tags=["schnittstellen", "bank"])
 
 # WGE-MOB-001: Mobile-Sync für Waagenbelege
 from app.api.v1.endpoints import waage_mobile  # noqa: E402

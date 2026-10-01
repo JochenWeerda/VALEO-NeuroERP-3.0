@@ -1,0 +1,44 @@
+slice_id: BANK-LEGACY-RETIREMENT-20261001
+title: Ein aktives Bankauszugsmodell ohne konkurrierende Altstruktur
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+coordination: Claim 1ede88778; fremde CRM-/Perioden-/Steuernachweis-Arbeit nicht uebernehmen.
+goal: Unsicheren zweiten Bankweg entfernen und Entwicklungs-Altbestand nach User-Freigabe entfernen.
+file_ownership:
+  - app/api/v1/endpoints/bank_import.py
+  - app/api/v1/api.py
+  - app/api/v1/schemas/finance_controlling_bundle_schemas.py
+  - alembic/versions/bank_legacy_retirement_20261001.py
+  - tests/test_bank_legacy_retirement.py
+  - tests/test_wave3_slices.py
+  - tests/test_wave3_db.py
+  - tests/test_welle12_response_models.py
+  - docs/adr/adr-073-bank-model-retirement.md
+  - docs/quality-assurance/bank-legacy-retirement-20261001.md
+acceptance:
+  - Kein aktiver Code fuer domain_finance Bankauszuege und keine Alt-API-Montage.
+  - Aktuelle kanonische Bank- und Zahlungs-Vertraege bleiben gruen.
+  - Nur beide Alttabellen loeschen; kanonische Auszuege und OP-Reste unveraendert.
+  - Keine automatische Rekonstruktion fehlender Zahlungsdaten oder neue Zahlungen aus Archiv.
+tests:
+  - python -m ruff check alembic/versions/bank_legacy_retirement_20261001.py tests/test_bank_legacy_retirement.py
+  - python scripts/generate_agent_handbuch.py --check
+risks:
+  - Retirement ist bewusst irreversibel nach expliziter Entwicklungsfreigabe.
+  - Externe Alt-API-Konsumenten und Migrationsdeployment separat pruefen.
+ai_harness:
+  fachlicher_vertrag: Ein aktiver Bankauszug und keine erneute Zahlung aus unvollstaendiger Historie.
+  architektur_vertrag: Significant Retirement nach ADR-003 und Proposed ADR-073, keine neue Fachfunktion.
+  daten_vertrag: Entwicklungs-Altlast loeschen, keine Archive/Adapter oder erfundene Zahlungen.
+  test_vertrag: Reale PostgreSQL-Loeschungs-/Rollbackvertraege und bestehende Import-/Replay-/Matching-Vertraege.
+  security_vertrag: Keine unsicheren Routen, keine CASCADE-Loeschung und echte Tenant-Vertraege.
+  betriebs_vertrag: Ein eigener Schema-Pruefraum auf vorhandenem valeo_probe, keine neue DB oder Dockerinstanz.
+  dokumentations_vertrag: Workboard, Gaps, Domain Pack, ADR, QA und generierte Inventare synchronisieren.
+external_gates:
+  - GitHub-CI, Deployment und kanonische Bankprofil-Abnahme.
+completed_at: 2026-10-01
+test_evidence:
+  - 187 Tests bestanden, darunter 9 neue Retirement-Vertraege.
+  - Beide bestehende Datenbanken auf neuer Revision; Alttabellen absent, kanonische Tabellen vorhanden.
+  - Ruff, Slice, Baselineintegritaet, Business-Time und Architektur strict bestanden.

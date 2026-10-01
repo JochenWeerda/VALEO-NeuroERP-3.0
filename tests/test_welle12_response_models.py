@@ -1,15 +1,14 @@
-"""SPEC-P1-06 Welle 12: Controlling, Periodenabschluss, Bank-Import."""
+"""SPEC-P1-06 Welle 12: Controlling und Periodenabschluss; Bank-Altmodell entfernt."""
 
 import pytest
 
-from app.api.v1.endpoints import bank_import as bank_module
 from app.api.v1.endpoints import controlling_actions as ctrl_module
 from app.api.v1.endpoints import finance_period as period_module
 from app.api.v1.schemas import finance_controlling_bundle_schemas as fin
 
 pytestmark = pytest.mark.unit
 
-WELLE12_MODULE = [ctrl_module, period_module, bank_module]
+WELLE12_MODULE = [ctrl_module, period_module]
 
 
 def _response_models(module):
@@ -136,41 +135,4 @@ def test_controlling_and_period_shapes():
     _assert_kein_feldverlust(
         fin.FinancePeriodActionOut,
         {"ok": True, "period": "2026-09", "status": "closed", "erzwungen": False},
-    )
-
-
-def test_bank_import_shapes():
-    _assert_kein_feldverlust(
-        fin.BankStatementImportOut,
-        {
-            "statement_id": "s1",
-            "lines": 3,
-            "iban": "DE00",
-            "format": "MT940",
-        },
-    )
-    _assert_kein_feldverlust(
-        fin.BankMatchOut,
-        {
-            "statement_id": "s1",
-            "matched": 1,
-            "unmatched": 2,
-            "info": "Keine offenen Buchungen",
-        },
-    )
-    _assert_kein_feldverlust(
-        fin.BankStatementListOut,
-        {
-            "items": [
-                {
-                    "id": "s1",
-                    "iban": "DE00",
-                    "format": "MT940",
-                    "filename": "a.sta",
-                    "line_count": 3,
-                    "imported_at": "2026-09-01T10:00:00",
-                }
-            ],
-            "count": 1,
-        },
     )

@@ -61,3 +61,12 @@ alle Referenztexte und Gegenkonten. Nur BOOK-Einzelzahlungen ohne Reversal;
 Sammelbuchungen, FX und Retouren ohne Fachvertrag werden abgelehnt. Auch
 leere Auszuege pruefen die Kontowaehrung. Weitere Profile bleiben separat.
 [CAMT-Profil und Parser-Abnahme](../../../quality-assurance/bank-camt-parser-integrity-20261001.md).
+
+## Zweiter Bankweg entfernt
+
+INT-BANK-001 entfaellt; aktiver Speicher bleibt allein domain_erp. Nach
+expliziter Entwicklungsfreigabe entfernt bank_legacy_retirement_20261001
+beide alten domain_finance-Tabellen mitsamt Entwicklungsdaten. Kein Archiv,
+keine zweite Zahlung, kein OP-Umschreiben. Die Migration verwendet kein
+CASCADE und bricht bei unerwarteten Abhaengigkeiten ab.
+[Retirement-Nachweis](../../../quality-assurance/bank-legacy-retirement-20261001.md).

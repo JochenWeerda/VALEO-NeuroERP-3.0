@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-17
+last_reviewed: 2026-10-01
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,40 +17,41 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**29 Schemas, 635 Tabellen, 8368 Spalten.**
+**30 Schemas, 641 Tabellen, 8496 Spalten.**
 
 ## Schemas
 
 | Schema | Domain | Tabellen | Spalten |
 |---|---|---|---|
 | `domain_agrar` | `agrar` | 82 | 1041 |
-| `domain_compliance` | `dms-compliance` | 8 | 65 |
+| `domain_audit` | `platform` | 1 | 8 |
+| `domain_compliance` | `dms-compliance` | 12 | 126 |
+| `domain_contracts` | `—` | 3 | 30 |
 | `domain_controlling` | `finance` | 9 | 89 |
-| `domain_crm` | `crm` | 45 | 846 |
+| `domain_crm` | `crm` | 46 | 855 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
 | `domain_docflow` | `dms-compliance` | 22 | 285 |
 | `domain_docs` | `platform` | 2 | 25 |
-| `domain_einkauf` | `procurement` | 20 | 332 |
+| `domain_einkauf` | `procurement` | 21 | 387 |
 | `domain_erp` | `finance` | 44 | 522 |
-| `domain_finance` | `finance` | 20 | 232 |
+| `domain_finance` | `finance` | 18 | 214 |
 | `domain_futtermittel` | `agrar` | 8 | 83 |
 | `domain_hr` | `hr` | 21 | 281 |
 | `domain_hrm` | `hr` | 3 | 32 |
 | `domain_integration` | `platform` | 4 | 46 |
 | `domain_inventory` | `inventory` | 71 | 1046 |
-| `domain_kontrakte` | `agrar` | 4 | 43 |
 | `domain_log` | `platform` | 4 | 59 |
 | `domain_logistics` | `logistics` | 8 | 92 |
 | `domain_meldewesen` | `finance` | 2 | 21 |
 | `domain_nachweisraum` | `dms-compliance` | 3 | 31 |
-| `domain_ops` | `inventory` | 76 | 1056 |
+| `domain_ops` | `inventory` | 76 | 1057 |
 | `domain_portal` | `crm` | 5 | 80 |
-| `domain_pos` | `finance` | 4 | 37 |
+| `domain_pos` | `finance` | 4 | 41 |
 | `domain_pricing` | `finance` | 4 | 38 |
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
 | `domain_sales` | `crm` | 11 | 152 |
-| `domain_shared` | `platform` | 140 | 1666 |
+| `domain_shared` | `platform` | 142 | 1687 |
 | `domain_workflow` | `platform` | 3 | 31 |
 
 ## Geschwister-Modelle
@@ -59,8 +60,6 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 
 ## Gleicher Tabellenname in mehreren Schemas
 
-- `bank_statement_lines` in `domain_erp`, `domain_finance`
-- `bank_statements` in `domain_erp`, `domain_finance`
 - `business_partners` in `domain_crm`, `domain_erp`
 - `delivery_notes` in `domain_erp`, `domain_sales`
 - `harvest_acceptances` in `domain_agrar`, `domain_inventory`
@@ -91,7 +90,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_agrar.consulting_cases` | `app/services/feeding_consulting_report_service.py`, `app/services/feeding_consulting_service.py` | `app/services/feeding_consulting_service.py` | — |
 | `domain_agrar.consulting_observations` | `app/services/feeding_consulting_report_service.py`, `app/services/feeding_consulting_service.py` | `app/services/feeding_consulting_service.py` | — |
 | `domain_agrar.consulting_report_drafts` | `app/services/feeding_consulting_report_service.py`, `app/services/feeding_reports_service.py` | `app/services/feeding_consulting_report_service.py` | — |
-| `domain_agrar.ernte_kampagnen` | `app/domains/operations/models.py` | — | — |
+| `domain_agrar.ernte_kampagnen` | `app/domains/operations/models.py`, `app/services/customer_reference.py` | — | — |
 | `domain_agrar.ernte_planung` | `app/domains/operations/models.py` | — | — |
 | `domain_agrar.esg_charge_footprint` | `app/api/v1/endpoints/esg_footprint.py` | `app/api/v1/endpoints/esg_footprint.py` | — |
 | `domain_agrar.evaluation_system_versions` | `app/services/feeding_requirements_service.py` | `app/services/feeding_requirements_service.py` | — |
@@ -154,14 +153,22 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_agrar.waagen_quittungen` | `app/api/v1/endpoints/waage_mobile.py` | `app/api/v1/endpoints/waage_mobile.py` | — |
 | `domain_agrar.waagen_vorlagen` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/waagen_vorlagen.py` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/waagen_vorlagen.py` | — |
 | `domain_agrar.weighing_tickets` | `app/api/v1/endpoints/waage_mobile.py` | `app/api/v1/endpoints/waage_mobile.py` | — |
+| `domain_audit.attestations` | — | `app/api/v1/endpoints/sales_delivery_notes.py` | `sales/delivery-note` |
 | `domain_compliance.compliance_artikel_sperre_audit` | `app/services/compliance_sperre_audit_service.py` | `app/services/compliance_sperre_audit_service.py` | — |
 | `domain_compliance.compliance_pcn_meldungen` | `app/services/compliance_pcn_lifecycle_service.py` | `app/services/compliance_pcn_lifecycle_service.py` | — |
 | `domain_compliance.compliance_pcn_status_log` | — | `app/services/compliance_pcn_lifecycle_service.py` | — |
 | `domain_compliance.compliance_sachkunde_register` | `app/services/compliance_vvvo_sachkunde_service.py` | — | — |
 | `domain_compliance.compliance_vvvo_register` | `app/services/compliance_vvvo_sachkunde_service.py` | `app/services/compliance_vvvo_sachkunde_service.py` | — |
+| `domain_compliance.data_erasure_requests` | `app/api/v1/endpoints/compliance_dsgvo.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
+| `domain_compliance.gelangensbestaetigung` | `app/api/v1/endpoints/gelangensbestaetigung.py` | `app/api/v1/endpoints/gelangensbestaetigung.py` | — |
+| `domain_compliance.intrastat_meldungen` | `app/api/v1/endpoints/intrastat.py` | `app/api/v1/endpoints/intrastat.py` | — |
+| `domain_compliance.lksg_supplier_risk_assessments` | `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | — |
 | `domain_compliance.sanctions_checks` | `app/api/v1/endpoints/sanctions_compliance.py` | `app/api/v1/endpoints/sanctions_compliance.py` | — |
 | `domain_compliance.sanctions_list` | `app/api/v1/endpoints/sanctions_compliance.py` | `app/api/v1/endpoints/sanctions_compliance.py` | — |
-| `domain_compliance.whistleblower_reports` | `app/api/v1/endpoints/compliance_whistleblower.py`, `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | `app/api/v1/endpoints/compliance_whistleblower.py`, `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | — |
+| `domain_compliance.whistleblower_reports` | `app/api/v1/endpoints/compliance_whistleblower.py`, `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | — |
+| `domain_contracts.contract_obligations` | `app/api/v1/endpoints/central_contracts.py` | `app/api/v1/endpoints/central_contracts.py` | — |
+| `domain_contracts.contract_versions` | `app/api/v1/endpoints/central_contracts.py` | `app/api/v1/endpoints/central_contracts.py` | — |
+| `domain_contracts.contracts` | `app/api/v1/endpoints/central_contracts.py`, `app/api/v1/endpoints/pricing.py` | `app/api/v1/endpoints/central_contracts.py` | — |
 | `domain_controlling.controlling_actions` | `app/services/controlling_service.py` | `app/services/controlling_service.py` | — |
 | `domain_controlling.controlling_budget_status_log` | — | `app/services/controlling_budget_lifecycle_service.py` | — |
 | `domain_controlling.controlling_budgets` | `app/services/controlling_abweichung_service.py`, `app/services/controlling_budget_lifecycle_service.py` | `app/services/controlling_budget_lifecycle_service.py` | — |
@@ -171,28 +178,29 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_controlling.dashboard_widgets` | `app/services/controlling_service.py` | `app/services/controlling_service.py` | — |
 | `domain_controlling.kpi_definitions` | `app/services/controlling_service.py` | `app/services/controlling_service.py` | — |
 | `domain_controlling.kpi_timeseries` | `app/services/controlling_service.py` | `app/services/controlling_service.py` | — |
-| `domain_crm.activities` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/infrastructure/models/__init__.py`, `app/services/calendar_projection_service.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
-| `domain_crm.business_partner_addresses` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partner_billing_configs` | `app/infrastructure/models/__init__.py` | — | — |
+| `domain_crm.activities` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py`, `app/services/calendar_projection_service.py` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py` | — |
+| `domain_crm.business_partner_addresses` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
+| `domain_crm.business_partner_billing_configs` | `app/infrastructure/models/__init__.py`, `app/services/customer_service.py` | — | — |
 | `domain_crm.business_partner_communities` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_community_members` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partner_contacts` | `app/infrastructure/models/__init__.py` | — | — |
+| `domain_crm.business_partner_contacts` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_cooperative_memberships` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partner_cpd_accounts` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partner_discount_items` | `app/infrastructure/models/__init__.py` | — | — |
+| `domain_crm.business_partner_cpd_accounts` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
+| `domain_crm.business_partner_discount_items` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_dispatch_media` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_email_distributions` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partner_instructions` | `app/infrastructure/models/__init__.py` | — | — |
+| `domain_crm.business_partner_instructions` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_interest_settings` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_interface_profiles` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partner_price_agreements` | `app/infrastructure/models/__init__.py` | — | — |
+| `domain_crm.business_partner_price_agreements` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_pricing_rules` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_profiles` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partners` | `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/kunden_merge.py` | — | — |
+| `domain_crm.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/customer_reference.py`, `app/services/customer_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py` | — | — |
 | `domain_crm.contacts` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
-| `domain_crm.credit_limits` | `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py` | `app/api/v1/endpoints/credit_management.py` | — |
+| `domain_crm.credit_limits` | `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py`, `app/services/customer_service.py` | `app/api/v1/endpoints/credit_management.py` | — |
 | `domain_crm.credit_overrides` | — | `app/api/v1/endpoints/credit_management.py` | — |
-| `domain_crm.crm_activities` | `app/crm/router.py`, `app/domains/crm/models.py`, `app/services/mask_rollout_summary_service.py` | `app/api/v1/endpoints/crm_360.py` | — |
+| `domain_crm.crm_action_audit_log` | — | `app/api/v1/endpoints/crm_360.py`, `app/services/mask_action_runtime_service.py` | — |
+| `domain_crm.crm_activities` | `app/crm/router.py`, `app/domains/crm/models.py`, `app/services/mask_rollout_summary_service.py` | — | — |
 | `domain_crm.crm_campaign_recipients` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
 | `domain_crm.crm_campaign_templates` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
 | `domain_crm.crm_campaigns` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
@@ -201,11 +209,11 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.crm_contact_consents` | `app/api/v1/endpoints/crm_consents.py`, `app/infrastructure/models/crm_consent.py` | — | — |
 | `domain_crm.crm_contacts` | `app/domains/crm/models.py` | — | — |
 | `domain_crm.crm_customers` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/domains/crm/models.py`, `app/services/kunden_merge.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
-| `domain_crm.crm_opportunities` | `app/api/v1/endpoints/crm_reports.py`, `app/domains/crm/models.py`, `app/services/mask_rollout_summary_service.py` | — | — |
+| `domain_crm.crm_opportunities` | `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/crm_reports.py`, `app/api/v1/endpoints/opportunities.py`, `app/domains/crm/models.py`, `app/services/mask_rollout_summary_service.py` | — | — |
 | `domain_crm.crm_segment_members` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
 | `domain_crm.crm_segments` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
 | `domain_crm.crm_visit_reports` | `app/domains/crm/models.py` | — | — |
-| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/schemas/crm.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/kunden_merge.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | `sales/delivery-note` |
+| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/schemas/crm.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/customer_reference.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/kunden_merge.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | `sales/delivery-note` |
 | `domain_crm.farm_profiles` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.leads` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
 | `domain_crm.mail_workspace_attachments` | `app/services/mail_workspace_service.py` | `app/services/mail_workspace_service.py` | — |
@@ -213,8 +221,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.mail_workspace_messages` | `app/services/mail_workspace_service.py` | `app/services/mail_workspace_service.py` | — |
 | `domain_crm.sales_offer_items` | `app/api/v1/endpoints/sales_offers.py` | `app/api/v1/endpoints/sales_offers.py` | — |
 | `domain_crm.sales_offers` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/sales_offers.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/o2c_chain_service.py` | `app/api/v1/endpoints/sales_offers.py` | — |
-| `domain_crm.sales_order_items` | `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/docflow_service.py`, `app/services/ist_aggregation_service.py`, `app/services/sales_match_service.py` | `app/api/v1/endpoints/sales_offers.py`, `app/api/v1/endpoints/sales_orders.py` | — |
-| `domain_crm.sales_orders` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_kim.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/docflow_service.py`, `app/services/ist_aggregation_service.py`, `app/services/o2c_chain_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_match_service.py`, `app/services/sales_storno_service.py`, `app/services/webshop_integration_service.py` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/pick_lists.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_offers.py`, `app/api/v1/endpoints/sales_orders.py`, `app/services/webshop_integration_service.py` | `sales/delivery-note` |
+| `domain_crm.sales_order_items` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/docflow_service.py`, `app/services/ist_aggregation_service.py`, `app/services/procurement_service.py`, `app/services/sales_match_service.py` | `app/api/v1/endpoints/sales_offers.py`, `app/api/v1/endpoints/sales_orders.py` | — |
+| `domain_crm.sales_orders` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/crm_kim.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/customer_reference.py`, `app/services/docflow_service.py`, `app/services/ist_aggregation_service.py`, `app/services/o2c_chain_service.py`, `app/services/procurement_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_match_service.py`, `app/services/sales_storno_service.py`, `app/services/webshop_integration_service.py` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/pick_lists.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_offers.py`, `app/api/v1/endpoints/sales_orders.py`, `app/services/webshop_integration_service.py` | `sales/delivery-note` |
 | `domain_crm.supplier_tax_profiles` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_docflow.command_idempotency_keys` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.create_request_idempotency` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
@@ -233,7 +241,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_docflow.pos_fiscal_closings` | `app/services/fiscalization/service.py` | `app/services/fiscalization/service.py` | — |
 | `domain_docflow.pos_fiscal_exports` | `app/api/v1/endpoints/pos_dsfinvk.py` | `app/services/fiscalization/service.py` | — |
 | `domain_docflow.pos_fiscal_provider_configs` | `app/services/fiscalization/service.py` | `app/services/fiscalization/service.py` | — |
-| `domain_docflow.pos_fiscal_transactions` | `app/services/fiscalization/service.py` | `app/services/fiscalization/service.py` | — |
+| `domain_docflow.pos_fiscal_transactions` | `app/api/v1/endpoints/pos_payments.py`, `app/services/fiscalization/service.py` | `app/services/fiscalization/service.py` | — |
 | `domain_docflow.pos_receipt_compliance` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/finance_followup.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.pos_regulatory_notices` | `app/api/v1/endpoints/admin_pos.py` | `app/api/v1/endpoints/admin_pos.py` | — |
 | `domain_docflow.pos_terminals` | `app/api/v1/endpoints/admin_pos.py` | `app/api/v1/endpoints/admin_pos.py` | — |
@@ -241,8 +249,9 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_docs.doc_allocation_sources` | `app/api/v1/endpoints/collective_documents.py`, `app/domains/documents/allocation_models.py`, `app/services/sales_invoice_mask.py` | — | — |
 | `domain_docs.doc_allocations` | `app/api/v1/endpoints/collective_documents.py`, `app/domains/documents/allocation_models.py`, `app/services/sales_invoice_mask.py` | — | — |
 | `domain_einkauf.artikel_lager_parameter` | `app/infrastructure/models/einkauf_models.py` | — | — |
-| `domain_einkauf.bestellung_positionen` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/einkauf_kpis.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/procurement_match_service.py` | `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/services/einkauf_compat_service.py`, `app/services/rfq_service.py` | — |
-| `domain_einkauf.bestellungen` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/einkauf_kpis.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/purchase_invoice_verification.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/procurement_match_service.py` | `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/services/einkauf_compat_service.py`, `app/services/rfq_service.py` | — |
+| `domain_einkauf.bestellung_kommunikation` | `app/services/mask_rollout_summary_service.py` | — | — |
+| `domain_einkauf.bestellung_positionen` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/einkauf_kpis.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/procurement_match_service.py`, `app/services/procurement_service.py` | `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/services/einkauf_compat_service.py`, `app/services/rfq_service.py` | — |
+| `domain_einkauf.bestellungen` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/einkauf_kpis.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/purchase_invoice_verification.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/procurement_match_service.py`, `app/services/procurement_service.py` | `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/services/einkauf_compat_service.py`, `app/services/rfq_service.py` | — |
 | `domain_einkauf.bestellvorschlaege` | `app/infrastructure/models/einkauf_models.py`, `app/workers/low_stock_agent.py` | `app/workers/low_stock_agent.py` | — |
 | `domain_einkauf.bestellvorschlag_positionen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.ers_invoices` | `app/api/v1/endpoints/ers_settlement.py` | `app/api/v1/endpoints/ers_settlement.py` | — |
@@ -250,10 +259,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_einkauf.foreign_goods_audit` | — | `app/services/foreign_goods_worklist_service.py` | — |
 | `domain_einkauf.fremdwaren_einlagerung` | `app/api/v1/schemas/ops_worklist_bundle_schemas.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/docflow_source_proposals.py`, `app/services/foreign_goods_worklist_service.py` | `app/services/foreign_goods_worklist_service.py` | — |
 | `domain_einkauf.invoice_verification` | `app/api/v1/endpoints/einkauf_kpis.py`, `app/api/v1/endpoints/purchase_invoice_verification.py` | `app/api/v1/endpoints/purchase_invoice_verification.py` | — |
-| `domain_einkauf.kontrakt_positionen` | `app/infrastructure/models/einkauf_models.py` | — | — |
-| `domain_einkauf.kontrakte` | `app/infrastructure/models/einkauf_models.py` | — | — |
+| `domain_einkauf.kontrakt_positionen` | `app/api/v1/endpoints/price_calculation.py`, `app/infrastructure/models/einkauf_models.py` | — | — |
+| `domain_einkauf.kontrakte` | `app/api/v1/endpoints/price_calculation.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/customer_reference.py` | — | — |
 | `domain_einkauf.lager_kontenzuordnung` | `app/api/v1/endpoints/inventory_operations.py`, `app/infrastructure/models/einkauf_models.py` | — | — |
-| `domain_einkauf.lieferanten` | `app/api/v1/endpoints/crm_partner_suche.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/mask_rollout_summary_service.py` | — | — |
+| `domain_einkauf.lieferanten` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/crm_partner_suche.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/customer_reference.py`, `app/services/mask_rollout_summary_service.py` | — | — |
 | `domain_einkauf.paletten_konto_buchungen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.pfand_konto_buchungen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.procurement_ers_credits` | `app/services/procurement_match_service.py` | `app/services/procurement_match_service.py` | — |
@@ -264,12 +273,12 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.ap_approval_requests` | `app/api/v1/endpoints/ap_approval_workflow.py`, `app/api/v1/endpoints/system_metrics.py` | `app/api/v1/endpoints/ap_approval_workflow.py` | — |
 | `domain_erp.ap_approval_rules` | `app/api/v1/endpoints/ap_approval_workflow.py` | `app/api/v1/endpoints/ap_approval_workflow.py` | — |
 | `domain_erp.ap_approvals` | `app/api/v1/endpoints/ap_approval_workflow.py`, `app/api/v1/endpoints/system_metrics.py` | `app/api/v1/endpoints/ap_approval_workflow.py` | — |
-| `domain_erp.bank_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/bank_statement_import.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py` | `app/api/v1/endpoints/bank_accounts.py` | — |
+| `domain_erp.bank_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/bank_statement_import.py`, `app/api/v1/endpoints/liquidity_planning.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py` | `app/api/v1/endpoints/bank_accounts.py` | — |
 | `domain_erp.bank_matches` | `app/api/v1/endpoints/auto_matching.py` | `app/api/v1/endpoints/auto_matching.py` | — |
 | `domain_erp.bank_statement_lines` | `app/api/v1/endpoints/auto_matching.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/bank_statement_import.py`, `app/api/v1/endpoints/payment_matching.py` | `app/api/v1/endpoints/auto_matching.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/bank_statement_import.py`, `app/api/v1/endpoints/payment_matching.py` | — |
-| `domain_erp.bank_statements` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/payment_matching.py` | `app/api/v1/endpoints/bank_statement_import.py`, `app/api/v1/endpoints/payment_matching.py` | — |
+| `domain_erp.bank_statements` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/bank_statement_import.py`, `app/api/v1/endpoints/payment_matching.py` | `app/api/v1/endpoints/bank_statement_import.py`, `app/api/v1/endpoints/payment_matching.py` | — |
 | `domain_erp.booking_templates` | `app/api/v1/endpoints/booking_templates.py` | `app/api/v1/endpoints/booking_templates.py` | — |
-| `domain_erp.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/api/v1/endpoints/xrechnung.py` | — | — |
+| `domain_erp.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/api/v1/endpoints/xrechnung.py` | — | — |
 | `domain_erp.cash_movements` | `app/api/v1/endpoints/admin_pos.py`, `app/services/finance_read_model_service.py` | — | — |
 | `domain_erp.chart_of_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_transaction_service.py`, `app/services/sales_posting_service.py` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py`, `app/services/sales_posting_service.py` | — |
 | `domain_erp.closing_checklist_templates` | `app/api/v1/endpoints/closing_checklists.py` | `app/api/v1/endpoints/closing_checklists.py` | — |
@@ -287,11 +296,11 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.fibu_connector_run_items` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/core/connectors/workflow.py` | — |
 | `domain_erp.fibu_connector_runs` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/core/connectors/workflow.py` | — |
 | `domain_erp.gift_cards` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/mask_frontend_bridges.py` | — | — |
-| `domain_erp.journal_entries` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/open_items.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/api/v1/schemas/finance.py`, `app/core/connectors/workflow.py`, `app/finance/gobd.py`, `app/finance/router.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_datev_service.py`, `app/services/finance_read_model_service.py`, `app/services/finance_transaction_service.py`, `app/services/sales_posting_service.py`, `app/workers/monthly_report_worker.py`, `app/workers/weekly_report_worker.py` | `app/api/v1/endpoints/accruals_provisions.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/open_items.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/services/finance_closing_service.py` | `sales/delivery-note` |
-| `domain_erp.journal_entry_lines` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/core/connectors/workflow.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_datev_service.py` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/open_items.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py` | — |
+| `domain_erp.journal_entries` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/budget_planning.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/open_items.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/api/v1/schemas/finance.py`, `app/core/connectors/workflow.py`, `app/finance/gobd.py`, `app/finance/router.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_datev_service.py`, `app/services/finance_read_model_service.py`, `app/services/finance_transaction_service.py`, `app/services/sales_posting_service.py`, `app/workers/monthly_report_worker.py`, `app/workers/weekly_report_worker.py` | `app/api/v1/endpoints/accruals_provisions.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/open_items.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/services/finance_closing_service.py` | `sales/delivery-note` |
+| `domain_erp.journal_entry_lines` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/budget_planning.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/core/connectors/workflow.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_datev_service.py` | `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/open_items.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py` | — |
 | `domain_erp.lohn_import_runs` | `app/api/v1/endpoints/lohn_connector.py` | `app/api/v1/endpoints/lohn_connector.py` | — |
 | `domain_erp.matching_rules` | `app/api/v1/endpoints/auto_matching.py` | `app/api/v1/endpoints/auto_matching.py` | — |
-| `domain_erp.offene_posten` | `app/api/v1/endpoints/auto_matching.py`, `app/api/v1/endpoints/bank_import.py`, `app/api/v1/endpoints/creditors.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/debtors.py`, `app/api/v1/endpoints/dunning.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/finance_stammdaten.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/payment_matching.py`, `app/api/v1/endpoints/payment_runs.py`, `app/api/v1/endpoints/rohware_sammelabrechnung.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/crm/router.py`, `app/services/finance_clearing_service.py`, `app/services/finance_datev_service.py`, `app/services/finance_dunning_service.py`, `app/services/finance_op_service.py`, `app/services/finance_period_service.py`, `app/services/sales_posting_service.py`, `app/services/scheduler_service.py`, `app/services/wf_trigger_service.py` | `app/api/v1/endpoints/ap_invoices.py`, `app/api/v1/endpoints/bank_import.py`, `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/credit_debit_memos.py`, `app/api/v1/endpoints/dauerauftraege.py`, `app/api/v1/endpoints/dunning.py`, `app/api/v1/endpoints/erechnung_import.py`, `app/api/v1/endpoints/ers_settlement.py`, `app/api/v1/endpoints/fibu_zahlungsmeldungen.py`, `app/api/v1/endpoints/op_skonto_auszifferung.py`, `app/api/v1/endpoints/payment_matching.py`, `app/api/v1/endpoints/payment_runs.py`, `app/api/v1/endpoints/purchase_invoice_verification.py`, `app/api/v1/endpoints/rohware_sammelabrechnung.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/strecke.py`, `app/api/v1/endpoints/zinsabrechnung.py`, `app/services/agrar_settlement_service.py`, `app/services/ap_invoice_kernel_posting.py`, `app/services/einkauf_compat_service.py`, `app/services/finance_clearing_service.py`, `app/services/finance_dunning_service.py`, `app/services/sales_posting_service.py`, `app/services/wf_trigger_service.py` | `sales/delivery-note` |
+| `domain_erp.offene_posten` | `app/api/v1/endpoints/auto_matching.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/creditors.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/debtors.py`, `app/api/v1/endpoints/dunning.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/finance_stammdaten.py`, `app/api/v1/endpoints/liquidity.py`, `app/api/v1/endpoints/liquidity_planning.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/payment_matching.py`, `app/api/v1/endpoints/payment_runs.py`, `app/api/v1/endpoints/rohware_sammelabrechnung.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/crm/router.py`, `app/services/finance_clearing_service.py`, `app/services/finance_datev_service.py`, `app/services/finance_dunning_service.py`, `app/services/finance_op_service.py`, `app/services/finance_period_service.py`, `app/services/sales_posting_service.py`, `app/services/scheduler_service.py`, `app/services/wf_trigger_service.py` | `app/api/v1/endpoints/ap_invoices.py`, `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/credit_debit_memos.py`, `app/api/v1/endpoints/dauerauftraege.py`, `app/api/v1/endpoints/dunning.py`, `app/api/v1/endpoints/erechnung_import.py`, `app/api/v1/endpoints/ers_settlement.py`, `app/api/v1/endpoints/fibu_zahlungsmeldungen.py`, `app/api/v1/endpoints/op_skonto_auszifferung.py`, `app/api/v1/endpoints/payment_matching.py`, `app/api/v1/endpoints/payment_runs.py`, `app/api/v1/endpoints/purchase_invoice_verification.py`, `app/api/v1/endpoints/rohware_sammelabrechnung.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/strecke.py`, `app/api/v1/endpoints/zinsabrechnung.py`, `app/services/agrar_settlement_service.py`, `app/services/ap_invoice_kernel_posting.py`, `app/services/einkauf_compat_service.py`, `app/services/finance_clearing_service.py`, `app/services/finance_dunning_service.py`, `app/services/sales_posting_service.py`, `app/services/wf_trigger_service.py` | `sales/delivery-note` |
 | `domain_erp.open_items` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/finance_actions.py`, `app/services/calendar_projection_service.py` | — | — |
 | `domain_erp.payment_returns` | — | `app/api/v1/endpoints/payment_runs.py` | — |
 | `domain_erp.payment_run_items` | `app/api/v1/endpoints/payment_runs.py`, `app/services/mask_rollout_summary_service.py` | `app/api/v1/endpoints/payment_runs.py` | — |
@@ -302,8 +311,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.tax_keys` | `app/api/v1/endpoints/tax_keys.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/finance/tax_resolver.py` | `app/api/v1/endpoints/tax_keys.py` | — |
 | `domain_erp.vat_returns` | `app/api/v1/endpoints/vat_return_export.py` | `app/api/v1/endpoints/vat_return_export.py` | — |
 | `domain_finance.aufbewahrungsfristen` | `app/finance/gobd.py`, `app/finance/models.py` | `app/finance/gobd.py` | — |
-| `domain_finance.bank_statement_lines` | `app/api/v1/endpoints/bank_import.py` | `app/api/v1/endpoints/bank_import.py` | — |
-| `domain_finance.bank_statements` | `app/api/v1/endpoints/bank_import.py` | `app/api/v1/endpoints/bank_import.py` | — |
 | `domain_finance.billing_batch_audit` | — | `app/services/billing_batch_service.py` | — |
 | `domain_finance.billing_batch_lines` | `app/services/billing_batch_service.py` | `app/services/billing_batch_service.py` | — |
 | `domain_finance.billing_batches` | `app/services/billing_batch_service.py` | `app/services/billing_batch_service.py` | — |
@@ -358,7 +365,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_integration.legacy_adapter_profiles` | `app/services/legacy_interface_adapter_service.py` | `app/services/legacy_interface_adapter_service.py` | — |
 | `domain_integration.legacy_adapter_staging` | `app/services/legacy_interface_adapter_service.py` | `app/services/legacy_interface_adapter_service.py` | — |
 | `domain_inventory.agrar_contract_allocations` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py` | — | — |
-| `domain_inventory.agrar_contracts` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/supplier_portal.py`, `app/core/database.py`, `app/infrastructure/models/l3c_models.py` | — | — |
+| `domain_inventory.agrar_contracts` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/supplier_portal.py`, `app/core/database.py`, `app/infrastructure/models/l3c_models.py`, `app/services/customer_reference.py` | — | — |
 | `domain_inventory.agrar_settlement_deductions` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py`, `app/services/mask_rollout_summary_service.py` | — | — |
 | `domain_inventory.agrar_settlements` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py`, `app/services/mask_rollout_summary_service.py`, `app/services/supply_chain_trace_service.py` | — | — |
 | `domain_inventory.article_alternative_eans` | `app/infrastructure/models/__init__.py` | — | — |
@@ -370,7 +377,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_inventory.article_selections` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.article_suppliers` | `app/infrastructure/models/__init__.py`, `app/services/rations_readiness_service.py` | — | — |
 | `domain_inventory.article_units` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_inventory.articles` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/dms_images.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/api/v1/endpoints/pricing.py`, `app/api/v1/endpoints/scan.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/futtermittel_models.py`, `app/infrastructure/models/l3c_models.py`, `app/seeds/inventory_seed.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/ist_aggregation_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/whatsapp_intake_service.py` | `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/seeds/inventory_seed.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_compat_service.py` | — |
+| `domain_inventory.articles` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/dms_images.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/api/v1/endpoints/pricing.py`, `app/api/v1/endpoints/scan.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/futtermittel_models.py`, `app/infrastructure/models/l3c_models.py`, `app/seeds/inventory_seed.py`, `app/services/customer_reference.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/ist_aggregation_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/procurement_service.py`, `app/services/whatsapp_intake_service.py` | `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/seeds/inventory_seed.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_compat_service.py` | — |
 | `domain_inventory.bin_locations` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.bin_stock` | `app/infrastructure/models/wms_models.py`, `app/services/mask_rollout_summary_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/pos_retoure.py`, `app/services/warehouse_service.py` | — |
 | `domain_inventory.charge_lineage_links` | `app/domains/inventory/api/charge_lineage.py` | `app/domains/inventory/api/charge_lineage.py`, `app/domains/inventory/api/stock_movements.py` | — |
@@ -383,7 +390,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_inventory.epcis_events` | `app/api/v1/endpoints/mask_frontend_bridges.py` | `app/api/v1/endpoints/mask_frontend_bridges.py` | — |
 | `domain_inventory.harvest_acceptance_lines` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.harvest_acceptance_positions` | `app/api/v1/endpoints/self_billing.py`, `app/infrastructure/models/l3c_models.py` | — | — |
-| `domain_inventory.harvest_acceptances` | `app/api/v1/endpoints/supplier_portal.py`, `app/infrastructure/models/l3c_models.py`, `app/services/agrar_partie_aggregate_service.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/supply_chain_trace_service.py` | — | — |
+| `domain_inventory.harvest_acceptances` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/supplier_portal.py`, `app/infrastructure/models/l3c_models.py`, `app/services/agrar_partie_aggregate_service.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/supply_chain_trace_service.py` | — | — |
 | `domain_inventory.inventory_auxiliary_audit` | — | `app/services/inventory_auxiliary_service.py` | — |
 | `domain_inventory.inventory_auxiliary_batches` | `app/api/v1/schemas/inventory_bundle_schemas.py`, `app/services/inventory_auxiliary_service.py` | `app/services/inventory_auxiliary_service.py` | — |
 | `domain_inventory.inventory_count_lines` | `app/infrastructure/models/l3c_models.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_count_close_service.py` | `app/services/inventory_auxiliary_service.py` | — |
@@ -391,7 +398,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_inventory.inventory_lot_movements` | — | `app/services/inventory_lot_trace_service.py` | — |
 | `domain_inventory.inventory_lots` | `app/api/v1/schemas/inventory_lot_bundle_schemas.py`, `app/services/inventory_lot_trace_service.py` | `app/services/inventory_lot_trace_service.py`, `app/services/wf_trigger_service.py` | — |
 | `domain_inventory.inventory_movement_types` | `app/services/inventory_balance_reconciliation.py` | — | — |
-| `domain_inventory.inventory_stock_movements` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/l3c_models.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_balance_reconciliation.py`, `app/services/inventory_correction_service.py`, `app/services/inventory_count_close_service.py`, `app/services/inventory_document_reference.py`, `app/services/inventory_movement_direction.py`, `app/services/inventory_stock_balance.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/api/v1/endpoints/warehouse_transfers.py`, `app/domains/inventory/api/storage_fees.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/agri_silo_material_flow_service.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_correction_service.py`, `app/services/inventory_count_close_service.py`, `app/services/mobile_sync_service.py`, `app/services/warehouse_service.py` | — |
+| `domain_inventory.inventory_stock_movements` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/l3c_models.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_balance_reconciliation.py`, `app/services/inventory_correction_service.py`, `app/services/inventory_count_close_service.py`, `app/services/inventory_document_reference.py`, `app/services/inventory_movement_direction.py`, `app/services/inventory_stock_balance.py`, `app/services/procurement_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/api/v1/endpoints/warehouse_transfers.py`, `app/domains/inventory/api/storage_fees.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/agri_silo_material_flow_service.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_correction_service.py`, `app/services/inventory_count_close_service.py`, `app/services/mobile_sync_service.py`, `app/services/warehouse_service.py` | — |
 | `domain_inventory.lkw_annahme_queue` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.material_flow_edges` | `app/api/v1/schemas/silo_material_flow_schemas.py`, `app/infrastructure/models/wms_models.py`, `app/services/agri_silo_material_flow_service.py` | `app/services/agri_silo_material_flow_service.py` | — |
 | `domain_inventory.material_flow_nodes` | `app/api/v1/schemas/silo_material_flow_schemas.py`, `app/infrastructure/models/wms_models.py`, `app/services/agri_silo_material_flow_service.py` | `app/services/agri_silo_material_flow_service.py` | — |
@@ -424,14 +431,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_inventory.warehouse_transfer_lines` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.warehouse_transfers` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.warehouse_zones` | `app/api/v1/endpoints/pos_retoure.py`, `app/infrastructure/models/wms_models.py`, `app/services/mask_rollout_summary_service.py`, `app/services/warehouse_service.py` | `app/services/warehouse_service.py` | — |
-| `domain_inventory.warehouses` | `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py`, `app/infrastructure/models/wms_models.py`, `app/seeds/inventory_seed.py`, `app/services/feed_inventory_link_service.py`, `app/services/mask_rollout_summary_service.py` | `app/seeds/inventory_seed.py` | — |
+| `domain_inventory.warehouses` | `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py`, `app/infrastructure/models/wms_models.py`, `app/seeds/inventory_seed.py`, `app/services/customer_reference.py`, `app/services/feed_inventory_link_service.py`, `app/services/mask_rollout_summary_service.py` | `app/seeds/inventory_seed.py` | — |
 | `domain_inventory.weighing_measurements` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.weighing_ticket_lines` | `app/infrastructure/models/l3c_models.py` | — | — |
-| `domain_inventory.weighing_tickets` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py`, `app/services/agrar_partie_aggregate_service.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/supply_chain_trace_service.py` | — | — |
-| `domain_kontrakte.kontrakt_fixings` | `app/api/v1/schemas/kontrakt_actions_schemas.py`, `app/services/kontrakt_fixing_service.py` | `app/services/kontrakt_fixing_service.py` | — |
-| `domain_kontrakte.kontrakt_lifecycle` | `app/api/v1/schemas/kontrakt_actions_schemas.py`, `app/services/kontrakt_fixing_service.py`, `app/services/kontrakt_lifecycle_service.py`, `app/services/kontrakt_settlement_service.py` | `app/services/kontrakt_lifecycle_service.py`, `app/services/kontrakt_settlement_service.py` | — |
-| `domain_kontrakte.kontrakt_settlements` | `app/api/v1/schemas/kontrakt_actions_schemas.py`, `app/services/kontrakt_settlement_service.py` | `app/services/kontrakt_settlement_service.py` | — |
-| `domain_kontrakte.kontrakt_status_log` | — | `app/services/kontrakt_lifecycle_service.py` | — |
+| `domain_inventory.weighing_tickets` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py`, `app/services/agrar_partie_aggregate_service.py`, `app/services/agri_lot_link_booking_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/supply_chain_trace_service.py` | — | — |
 | `domain_log.log_tour_delivery_notes` | `app/domains/verladung/models.py` | — | — |
 | `domain_log.log_tour_events` | `app/domains/verladung/models.py` | — | — |
 | `domain_log.log_tour_stops` | `app/domains/verladung/models.py` | — | — |
@@ -456,7 +459,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_ops.edi_nachrichten` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.edi_partner` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.kon_audit_log` | `app/domains/operations/models.py` | — | — |
-| `domain_ops.kon_contract` | `app/domains/operations/models.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fixing_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/contract_settlement_service.py`, `app/services/docflow_source_proposals.py` | — | — |
+| `domain_ops.kon_contract` | `app/api/v1/endpoints/crm_360_reads.py`, `app/domains/operations/models.py`, `app/services/calendar_projection_service.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fixing_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/contract_settlement_service.py`, `app/services/docflow_source_proposals.py` | — | — |
 | `domain_ops.kon_contract_fixing` | `app/services/contract_fixing_service.py`, `app/services/contract_settlement_service.py` | `app/services/contract_fixing_service.py`, `app/services/contract_settlement_service.py` | — |
 | `domain_ops.kon_contract_line` | `app/domains/operations/models.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fixing_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/docflow_source_proposals.py` | — | — |
 | `domain_ops.kon_contract_movement` | `app/domains/operations/models.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/contract_settlement_service.py`, `app/services/docflow_source_proposals.py` | `app/services/contract_settlement_service.py` | — |
@@ -519,7 +522,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_ops.quality_lot_profiles` | `app/api/v1/endpoints/quality_lot_binding.py` | `app/api/v1/endpoints/quality_lot_binding.py` | — |
 | `domain_ops.quality_release_decisions` | — | `app/api/v1/endpoints/quality_lot_binding.py` | — |
 | `domain_ops.recent_documents` | `app/services/recent_documents_service.py` | `app/services/recent_documents_service.py` | — |
-| `domain_ops.reklamationen` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/domains/operations/models.py` | — | — |
+| `domain_ops.reklamationen` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/reklamation_api.py`, `app/domains/operations/models.py` | — | `qualitaet/reklamation` |
 | `domain_ops.strecke_speditionen_frachttarife` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.tank_adapter_audit` | — | `app/services/tank_adapter_service.py` | — |
 | `domain_ops.tank_adapter_intake` | `app/api/v1/schemas/ops_worklist_bundle_schemas.py`, `app/services/tank_adapter_service.py` | `app/services/tank_adapter_service.py` | — |
@@ -531,7 +534,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_portal.customer_orders` | `app/core/sql_identifiers.py`, `app/infrastructure/models/portal_models.py`, `app/services/geo_pipeline.py`, `app/services/ist_aggregation_service.py` | — | — |
 | `domain_portal.customer_pre_purchases` | `app/infrastructure/models/portal_models.py` | — | — |
 | `domain_pos.payment_methods` | `app/api/v1/endpoints/pos_payments.py` | — | — |
-| `domain_pos.pos_tagesabschluesse` | `app/services/pos_tagesabschluss_service.py` | `app/services/pos_tagesabschluss_service.py` | — |
+| `domain_pos.pos_tagesabschluesse` | `app/api/v1/endpoints/pos_payments.py`, `app/services/pos_tagesabschluss_service.py` | `app/services/pos_tagesabschluss_service.py` | — |
 | `domain_pos.pos_tagesabschluss_log` | — | `app/services/pos_tagesabschluss_service.py` | — |
 | `domain_pos.promotions` | `app/api/v1/endpoints/pos_payments.py` | `app/api/v1/endpoints/pos_payments.py` | — |
 | `domain_pricing.price_list_items` | `app/api/v1/endpoints/price_lists.py`, `app/api/v1/endpoints/pricing.py` | `app/api/v1/endpoints/price_lists.py` | — |
@@ -549,14 +552,14 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_reporting.l3_report_facts` | `app/services/l3_report_catalog_service.py` | `app/services/l3_report_catalog_service.py` | — |
 | `domain_reporting.query_center_audit` | — | `app/services/query_center_service.py` | — |
 | `domain_reporting.query_definitions` | `app/services/query_center_service.py` | `app/services/query_center_service.py` | — |
-| `domain_sales.delivery_note_positions` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/sales_match_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py` | `sales/delivery-note` |
-| `domain_sales.delivery_notes` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/branches.py`, `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/document_control_projection.py`, `app/services/logistics_disposition_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/o2c_chain_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_match_service.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `sales/delivery-note` |
+| `domain_sales.delivery_note_positions` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/sales_match_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py` | `sales/delivery-note` |
+| `domain_sales.delivery_notes` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/branches.py`, `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/document_control_projection.py`, `app/services/logistics_disposition_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/o2c_chain_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_match_service.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `sales/delivery-note` |
 | `domain_sales.sales_ab_status_log` | — | `app/services/sales_ab_lifecycle_service.py` | — |
 | `domain_sales.sales_credit_note_lines` | — | `app/api/v1/endpoints/sales_credit_notes.py` | — |
 | `domain_sales.sales_credit_notes` | `app/api/v1/endpoints/sales_credit_notes.py`, `app/services/sales_storno_service.py` | `app/api/v1/endpoints/sales_credit_notes.py` | — |
 | `domain_sales.sales_delivery_notes` | `app/services/sales_lieferschein_close_service.py` | `app/services/sales_lieferschein_close_service.py` | — |
-| `domain_sales.sales_invoice_lines` | `app/domains/documents/sales_invoice_models.py` | — | — |
-| `domain_sales.sales_invoices` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/credit_management.py`, `app/domains/documents/sales_invoice_models.py` | — | — |
+| `domain_sales.sales_invoice_lines` | `app/api/v1/endpoints/xrechnung.py`, `app/domains/documents/sales_invoice_models.py` | — | — |
+| `domain_sales.sales_invoices` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/xrechnung.py`, `app/domains/documents/sales_invoice_models.py` | — | — |
 | `domain_sales.sales_lieferschein_close_log` | — | `app/services/sales_lieferschein_close_service.py` | — |
 | `domain_sales.sales_preisabweichungen` | `app/services/sales_preisabweichung_service.py` | `app/services/sales_preisabweichung_service.py` | — |
 | `domain_sales.sales_returns` | `app/api/v1/endpoints/sales_credit_notes.py` | `app/api/v1/endpoints/sales_credit_notes.py` | — |
@@ -585,11 +588,11 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.artikel_sperren` | `app/api/v1/endpoints/compliance.py` | `app/api/v1/endpoints/compliance.py` | — |
 | `domain_shared.artikel_stoffstrom` | `app/api/v1/endpoints/artikel_stoffstrom.py` | `app/api/v1/endpoints/artikel_stoffstrom.py` | — |
 | `domain_shared.artikel_verpackungen` | `app/api/v1/endpoints/artikel_verpackung.py` | `app/api/v1/endpoints/artikel_verpackung.py` | — |
-| `domain_shared.audit_logs` | `app/api/v1/endpoints/gobd_archiv.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/neuro_verification.py`, `app/core/fibu_audit.py`, `app/finance/gobd.py`, `app/infrastructure/models/__init__.py`, `app/security/dashboard.py`, `app/services/audit_hardening.py` | `app/finance/gobd.py`, `app/services/audit_hardening.py`, `app/services/consent_engine.py`, `app/services/neuro_verification_engine.py` | — |
+| `domain_shared.audit_logs` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/neuro_verification.py`, `app/core/fibu_audit.py`, `app/finance/gobd.py`, `app/infrastructure/models/__init__.py`, `app/security/dashboard.py`, `app/services/audit_hardening.py` | `app/api/v1/endpoints/payment_matching.py`, `app/finance/gobd.py`, `app/services/audit_hardening.py`, `app/services/consent_engine.py`, `app/services/neuro_verification_engine.py` | — |
 | `domain_shared.beleg_vordrucke` | `app/api/v1/endpoints/beleg_vordrucke.py` | `app/api/v1/endpoints/beleg_vordrucke.py` | — |
 | `domain_shared.betriebsstaetten` | `app/api/v1/endpoints/betriebsstaetten.py` | `app/api/v1/endpoints/betriebsstaetten.py` | — |
 | `domain_shared.blockchain_anchors` | `app/models/blockchain_anchors.py` | — | — |
-| `domain_shared.branches` | `app/api/v1/endpoints/branches.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/branches.py` | — |
+| `domain_shared.branches` | `app/api/v1/endpoints/branches.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/customer_reference.py` | `app/api/v1/endpoints/branches.py` | — |
 | `domain_shared.calendar_ics_tokens` | `app/services/calendar_projection_service.py` | `app/services/calendar_projection_service.py` | — |
 | `domain_shared.calendar_items` | `app/services/calendar_projection_service.py` | `app/services/calendar_projection_service.py` | — |
 | `domain_shared.calendar_team_memberships` | `app/services/calendar_projection_service.py` | — | — |
@@ -655,7 +658,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.number_ranges` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_shared.oberwarengruppen` | `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/warengruppen.py` | — |
 | `domain_shared.op_auszifferungen` | `app/api/v1/endpoints/op_skonto_auszifferung.py`, `app/services/finance_clearing_service.py` | `app/api/v1/endpoints/op_skonto_auszifferung.py`, `app/services/finance_clearing_service.py` | — |
-| `domain_shared.open_items` | `app/agents/workflows/skonto_optimizer.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/crm_kim.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_followup.py`, `app/api/v1/endpoints/liquidity.py` | — | — |
+| `domain_shared.open_items` | `app/agents/workflows/skonto_optimizer.py`, `app/api/v1/endpoints/crm_kim.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_followup.py`, `app/api/v1/endpoints/liquidity.py` | — | — |
 | `domain_shared.partiegruppen` | `app/api/v1/endpoints/partiestamm.py` | `app/api/v1/endpoints/partiestamm.py` | — |
 | `domain_shared.partiestamm` | `app/api/v1/endpoints/partiestamm.py` | `app/api/v1/endpoints/partiestamm.py` | — |
 | `domain_shared.periodische_buchungen` | `app/api/v1/endpoints/periodische_buchungen.py` | `app/api/v1/endpoints/periodische_buchungen.py` | — |
@@ -663,7 +666,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.preis_rabattgruppen` | `app/api/v1/endpoints/preis_rabattgruppen.py` | `app/api/v1/endpoints/preis_rabattgruppen.py` | — |
 | `domain_shared.preis_rabattklassen` | `app/api/v1/endpoints/preis_rabattgruppen.py` | `app/api/v1/endpoints/preis_rabattgruppen.py` | — |
 | `domain_shared.preis_rabattsaetze` | `app/api/v1/endpoints/preis_rabattgruppen.py` | `app/api/v1/endpoints/preis_rabattgruppen.py` | — |
-| `domain_shared.process_projection_cursors` | `app/core/projection_cursor_service.py`, `app/services/finance_read_model_service.py` | `app/core/projection_cursor_service.py`, `app/services/finance_read_model_service.py` | — |
+| `domain_shared.process_projection_cursors` | `app/services/finance_read_model_service.py` | `app/core/projection_cursor_service.py`, `app/services/finance_read_model_service.py` | — |
 | `domain_shared.process_projection_registry` | `app/services/finance_read_model_service.py` | `app/services/finance_read_model_service.py` | — |
 | `domain_shared.process_projection_snapshots` | `app/services/finance_read_model_service.py` | `app/services/finance_read_model_service.py` | — |
 | `domain_shared.rations_zugang` | `app/infrastructure/models/futtermittel_models.py` | — | — |
@@ -678,6 +681,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.saatzucht_vermehrungsvertraege` | `app/api/v1/endpoints/vermehrungsvertrag.py` | `app/api/v1/endpoints/vermehrungsvertrag.py` | — |
 | `domain_shared.schedules` | `app/api/v1/endpoints/config_service.py` | `app/api/v1/endpoints/config_service.py` | — |
 | `domain_shared.screen_definition_drafts` | `app/infrastructure/models/studio_models.py`, `app/services/studio_draft_store.py` | `app/services/studio_draft_store.py` | — |
+| `domain_shared.sepa_mandates` | `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_followup.py` | — | — |
 | `domain_shared.stuecklisten` | `app/api/v1/endpoints/stuecklisten.py` | `app/api/v1/endpoints/stuecklisten.py` | — |
 | `domain_shared.stuecklisten_positionen` | `app/api/v1/endpoints/stuecklisten.py` | `app/api/v1/endpoints/stuecklisten.py` | — |
 | `domain_shared.system_properties` | `app/api/v1/endpoints/compat.py`, `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/compat.py` | — |
@@ -691,7 +695,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.waage_hofliste` | `app/api/v1/endpoints/hofliste.py` | `app/api/v1/endpoints/hofliste.py` | — |
 | `domain_shared.waage_wiegungsgruppen` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
 | `domain_shared.warengruppen` | `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/warengruppen.py` | — |
-| `domain_shared.webhook_registrations` | `app/infrastructure/models/l3c_models.py` | — | — |
+| `domain_shared.webhook_deliveries` | `app/api/v1/endpoints/webhook_system.py`, `app/services/webhook_service.py` | — | — |
+| `domain_shared.webhook_registrations` | `app/api/v1/endpoints/webhook_system.py`, `app/infrastructure/models/l3c_models.py`, `app/services/webhook_service.py` | — | — |
 | `domain_shared.zahlungsbedingungen` | `app/api/v1/endpoints/zahlungsbedingungen.py` | `app/api/v1/endpoints/zahlungsbedingungen.py` | — |
 | `domain_shared.zahlungsformulare` | `app/api/v1/endpoints/fibu_stammdaten.py` | `app/api/v1/endpoints/fibu_stammdaten.py` | — |
 | `domain_shared.zinsgruppen` | `app/api/v1/endpoints/fibu_stammdaten.py` | `app/api/v1/endpoints/fibu_stammdaten.py` | — |
@@ -789,6 +794,12 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `waagen_vorlagen` | `agrar` | native | `id` | id, tenant_id, name, waage_id, kontrakt_nr, lieferant_nr, fahrer_name, kfz_kennzeichen, lager_id, silo_id, sorte_nr, artikel_nr, charge_nr, ist_aktiv, verwendungen_count |
 | `weighing_tickets` | `agrar` | native | `id` | id, tenant_id, ticket_number, netto_gewicht_kg, brutto_gewicht_kg, tara_gewicht_kg, status, quittiert, quittiert_am, created_at |
 
+## `domain_audit`
+
+| Tabelle | Domain | Lage | PK | Spalten |
+|---|---|---|---|---|
+| `attestations` | `platform` | native | `id` | id, tenant_id, entity_type, entity_id, action, reason, created_by, created_at |
+
 ## `domain_compliance`
 
 | Tabelle | Domain | Lage | PK | Spalten |
@@ -798,9 +809,21 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `compliance_pcn_status_log` | `dms-compliance` | native | `id` | id, meldung_id, old_status, new_status, operator, reason, tenant_id, created_at |
 | `compliance_sachkunde_register` | `dms-compliance` | native | `id` | id, tenant_id, mitarbeiter_name, zertifikat_art, zertifikat_nummer, ablauf_datum, created_at |
 | `compliance_vvvo_register` | `dms-compliance` | native | `id` | id, tenant_id, betrieb_name, vvvo_nummer, letzte_pruefung_am, naechste_pruefung_am, created_at |
+| `data_erasure_requests` | `dms-compliance` | native | `id` | id, requester_name, requester_email, subject_id, subject_type, request_date, completion_date, status, deletion_log, tenant_id, created_at, updated_at |
+| `gelangensbestaetigung` | `dms-compliance` | native | `id` | id, tenant_id, lieferschein_nr, rechnung_nr, kunde_nr, bestimmungsland_code, warenwert_eur, versanddatum, empfaenger_name, empfaenger_ust_id_nr, status, token, erinnerung_am, erhalten_am, created_at |
+| `intrastat_meldungen` | `dms-compliance` | native | `id` | id, tenant_id, meldenummer, meldezeitraum, meldungsart, cn8_warennummer, ursprungsland, bestimmungsland, statistischer_wert_eur, nettomasse_kg, menge, mengeneinheit, geschaeftsvorgang_code, status, created_at, updated_at |
+| `lksg_supplier_risk_assessments` | `dms-compliance` | native | `id` | id, tenant_id, supplier_id, country_code, spend_eur, sector_risk, human_rights_flags, environmental_flags, mitigation_note, risk_score, risk_level, created_at |
 | `sanctions_checks` | `dms-compliance` | native | `id` | id, tenant_id, geprueft_name, status, scope, entity_ref, checked_by, geprueft_am |
 | `sanctions_list` | `dms-compliance` | native | `id` | id, name, alias_namen, land_code, liste, eintragstyp, eintrags_nr, is_active, created_at |
-| `whistleblower_reports` | `dms-compliance` | native | `id` | id, report_token, category, description_encrypted, severity, status, submitted_at, notes |
+| `whistleblower_reports` | `dms-compliance` | native | `id` | id, report_token, category, description_encrypted, severity, status, submitted_at, notes, tenant_id, description, contact_email, anonymous, created_at, updated_at |
+
+## `domain_contracts`
+
+| Tabelle | Domain | Lage | PK | Spalten |
+|---|---|---|---|---|
+| `contract_obligations` | `—` | unknown_schema | `id` | id, contract_id, tenant_id, obligation_type, due_date, description, status, created_at |
+| `contract_versions` | `—` | unknown_schema | `id` | id, contract_id, tenant_id, version_number, changed_at, changed_by, change_summary, content_snapshot |
+| `contracts` | `—` | unknown_schema | `id` | id, tenant_id, contract_number, contract_type, title, counterparty_id, counterparty_type, status, start_date, end_date, auto_renewal_days, notice_period_days, total_value_eur, created_at |
 
 ## `domain_controlling`
 
@@ -841,6 +864,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `contacts` | `crm` | native | `id` | id, first_name, last_name, email, phone, position, department, customer_id, is_active, created_at, updated_at, deleted_at |
 | `credit_limits` | `crm` | native | `id` | id, tenant_id, customer_id, credit_limit_eur, warning_threshold_percent, block_threshold_percent, created_at, updated_at |
 | `credit_overrides` | `crm` | native | `id` | id, tenant_id, customer_id, approved_by, reason, valid_until, created_at |
+| `crm_action_audit_log` | `crm` | native | `id` | id, tenant_id, action_key, entity_type, entity_id, idempotency_key, audit_reason, performed_at, result_summary |
 | `crm_activities` | `crm` | native | `id` | id, customer_id, contact_id, activity_type, subject, description, activity_date, duration_minutes, assigned_to, status, next_action_date, next_action_description, location, latitude, longitude, metadata, tenant_id, created_at, updated_at |
 | `crm_campaign_recipients` | `crm` | native | `id` | id, tenant_id, campaign_id, recipient_id, recipient_type, status, sent_at, opened_at, clicked_at, converted_at, bounce_reason, meta, created_at |
 | `crm_campaign_templates` | `crm` | native | `id` | id, tenant_id, name, description, campaign_type, subject_line, message_body, is_active, created_by, meta, created_at, updated_at |
@@ -911,8 +935,9 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | Tabelle | Domain | Lage | PK | Spalten |
 |---|---|---|---|---|
 | `artikel_lager_parameter` | `procurement` | native | `id` | id, tenant_id, article_id, warehouse_id, niederlassung_id, mindestbestand, maximalbestand, meldebestand, soll_bestand, std_lieferant_id, std_bestellmenge, std_einheit, wiederbeschaffungs_tage, durchschnitt_verbrauch_tag, reichweite_tage, aktiv, notiz, created_at, updated_at, updated_by |
-| `bestellung_positionen` | `procurement` | native | `id` | id, bestellung_id, pos_nr, article_id, artikel_nr, artikel_bezeichnung, lieferanten_artnr, menge, menge_geliefert, menge_offen, einheit, einzelpreis, preis_einheit, rabatt_prozent, netto_betrag, mwst_satz, mwst_betrag, brutto_betrag, kontrakt_pos_id, lieferdatum, lagerort, notiz, status |
-| `bestellungen` | `procurement` | native | `id` | id, tenant_id, bestellnummer, lieferant_id, vorschlag_id, niederlassung_id, bestelldatum, lieferdatum_wunsch, lieferdatum_zugesagt, lieferdatum_ist, status, versand_art, versandt_am, versandt_von, netto_summe, mwst_betrag, brutto_summe, waehrung, zahlungsziel_tage, skonto_prozent, skonto_frist_tage, unsere_referenz, ihre_referenz, kontrakt_id, freitext_kopf, freitext_fuss, notiz, anhang_ids, erstellt_von, created_at, updated_at |
+| `bestellung_kommunikation` | `procurement` | native | `id` | id, tenant_id, bestellung_id, kanal, empfaenger, versendet_am, status, betreff |
+| `bestellung_positionen` | `procurement` | native | `id` | id, bestellung_id, pos_nr, article_id, artikel_nr, artikel_bezeichnung, lieferanten_artnr, menge, menge_geliefert, menge_offen, einheit, einzelpreis, preis_einheit, rabatt_prozent, netto_betrag, mwst_satz, mwst_betrag, brutto_betrag, kontrakt_pos_id, lieferdatum, lagerort, notiz, status, gebinde_menge, gebinde_einheit, gebinde_schluessel, gewicht_kg, kontrakt_nr, lagerhalle, lagerfach, mindestmenge, maximalmenge |
+| `bestellungen` | `procurement` | native | `id` | id, tenant_id, bestellnummer, lieferant_id, vorschlag_id, niederlassung_id, bestelldatum, lieferdatum_wunsch, lieferdatum_zugesagt, lieferdatum_ist, status, versand_art, versandt_am, versandt_von, netto_summe, mwst_betrag, brutto_summe, waehrung, zahlungsziel_tage, skonto_prozent, skonto_frist_tage, unsere_referenz, ihre_referenz, kontrakt_id, freitext_kopf, freitext_fuss, notiz, anhang_ids, erstellt_von, created_at, updated_at, bestellfall, ansprechpartner, kreditor_konto, lieferant_nr, kostenstelle, kommission, ladetermin, ladetermin_ab, lade_datum, incoterms, lieferadresse, zahlungsbedingung, skonto1_tage, skonto1_prozent, skonto2_tage, skonto2_prozent, netto_tage, fremdwaehrung, umrechnungsfaktor, anfrage_nr, angebot_nr, auftrag_nr, abverkauf_horizont, bedarfsmenge, mindestbestellmenge, maximalbestellmenge, artikelgruppe, lagerplatz_opt, fracht_opt, opportunitaetskostensatz, palettenstellplatz_kosten, lagerkosten_satz, verkaufsbeleg_id, kunden_id, direktlieferung, ueberschlag_lager, neuer_artikel, innovationshinweis |
 | `bestellvorschlaege` | `procurement` | native | `id` | id, tenant_id, vorschlag_typ, bezeichnung, datum, niederlassung_id, parameter, status, erstellt_von, freigegeben_von, freigegeben_am, notiz, created_at, updated_at |
 | `bestellvorschlag_positionen` | `procurement` | native | `id` | id, vorschlag_id, pos_nr, article_id, artikel_nr, artikel_bezeichnung, artikel_gruppe, einheit, ist_bestand, offene_auftraege, bedarf, vorschlag_menge, bestell_menge, lieferant_id, lieferant_name, kontrakt_id, letzter_preis, preis_einheit, letzter_kauf_datum, status |
 | `ers_invoices` | `procurement` | native | `id` | id, gr_id, supplier_id, amount, status, auto_created_at, tenant_id |
@@ -985,8 +1010,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | Tabelle | Domain | Lage | PK | Spalten |
 |---|---|---|---|---|
 | `aufbewahrungsfristen` | `finance` | native | `id` | id, tenant_id, dokument_typ, gesetzliche_grundlage, aufbewahrungs_jahre, aeltestes_dokument_datum, anzahl_dokumente, ablauf_datum, status, created_at, updated_at |
-| `bank_statement_lines` | `finance` | native | `id` | id, statement_id, tenant_id, booking_date, amount, side, reference, purpose, match_status, matched_op_id, source |
-| `bank_statements` | `finance` | native | `id` | id, tenant_id, iban, format, filename, line_count, imported_at |
 | `billing_batch_audit` | `finance` | native | `id` | id, tenant_id, batch_id, line_id, action, old_value, new_value, actor, reason, created_at |
 | `billing_batch_lines` | `finance` | native | `id` | id, tenant_id, batch_id, source_type, source_ref, source_number, source_route, evidence_route, amount, status, validation_error, retry_count, idempotency_key, processed_at, created_at |
 | `billing_batches` | `finance` | native | `id` | id, tenant_id, batch_number, batch_type, status, description, maker, checker, currency, total_lines, processed_lines, failed_lines, total_amount, created_at, updated_at |
@@ -1137,15 +1160,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `weighing_ticket_lines` | `inventory` | native | `id` | id, ticket_id, article_id, quantity, unit, tenant_id, created_at |
 | `weighing_tickets` | `inventory` | native | `id` | id, ticket_number, scale_id, vehicle_plate, gross_weight, tare_weight, net_weight, first_weighing_at, second_weighing_at, moisture_pct, protein_pct, impurities_pct, hl_weight, billing_weight, quality_data, contract_id, allocated_quantity_kg, allocation_status, weighing_date, status, direction, reference_doc, tenant_id, created_at, updated_at, article_group, article_id, notes |
 
-## `domain_kontrakte`
-
-| Tabelle | Domain | Lage | PK | Spalten |
-|---|---|---|---|---|
-| `kontrakt_fixings` | `agrar` | native | `id` | id, kontrakt_id, tenant_id, fixing_datum, fixing_preis_eur_t, menge_t, markt, referenz, operator, created_at |
-| `kontrakt_lifecycle` | `agrar` | native | `id` | id, kontrakt_id, tenant_id, kontrakt_nr, artikel_id, menge_t, preis_eur_t, lieferant_id, periode, status, created_at, updated_at |
-| `kontrakt_settlements` | `agrar` | native | `id` | id, kontrakt_id, tenant_id, lieferung_datum, gelieferte_menge_t, abrechnungspreis_eur_t, netto_eur, referenz, status, storno_grund, operator, created_at, updated_at |
-| `kontrakt_status_log` | `agrar` | native | `id` | id, kontrakt_id, tenant_id, old_status, new_status, operator, grund, created_at |
-
 ## `domain_log`
 
 | Tabelle | Domain | Lage | PK | Spalten |
@@ -1257,7 +1271,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `quality_lot_profiles` | `inventory` | native | `id` | id, lot_id, tenant_id, acceptance_id, contract_id, protocol_id, moisture_pct, impurities_pct, protein_pct, hl_weight, overall_grade, price_deduction_pct, approval_status, schema_version, created_at, updated_at |
 | `quality_release_decisions` | `inventory` | native | `id` | id, lot_id, tenant_id, protocol_id, decision, decided_by, decided_at, reason, price_deduction_applied_pct, schema_version, created_at |
 | `recent_documents` | `inventory` | native | `id` | id, tenant_id, user_id, screen_id, document_id, document_type, document_number, partner_id, partner_name, title, route, required_role, opened_at, expires_at |
-| `reklamationen` | `inventory` | native | `id` | id, reklamation_id, tenant_id, lieferant_id, typ, positionen, zustaendiger, frist_datum, kontrakt_id, status, crm_referenz, dms_referenzen, gobd_beleg_id, audit_trail, erstellt_am, updated_at |
+| `reklamationen` | `inventory` | native | `id` | id, reklamation_id, tenant_id, lieferant_id, typ, positionen, zustaendiger, frist_datum, kontrakt_id, status, crm_referenz, dms_referenzen, gobd_beleg_id, audit_trail, erstellt_am, updated_at, reklamation_nr |
 | `strecke_speditionen_frachttarife` | `inventory` | native | `id` | id, plz_von, plz_bis, spediteur, preis_eur_t, aktiv, notiz, created_at, updated_at, created_by, updated_by |
 | `tank_adapter_audit` | `inventory` | native | `id` | id, tenant_id, intake_id, action, actor, reason, payload_hash, created_at |
 | `tank_adapter_intake` | `inventory` | native | `id` | id, tenant_id, adapter_key, external_id, payload, payload_hash, status, validation_errors, rule_result, zapfung_id, delivery_handover_id, retry_count, received_at, processed_at, updated_at |
@@ -1278,10 +1292,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 
 | Tabelle | Domain | Lage | PK | Spalten |
 |---|---|---|---|---|
-| `payment_methods` | `finance` | native | `id` | id, method_code, name, is_active, tenant_id |
+| `payment_methods` | `finance` | native | `id` | id, method_code, name, is_active, tenant_id, created_at, updated_at |
 | `pos_tagesabschluesse` | `finance` | native | `id` | id, tenant_id, kasse_id, datum, status, z_bon_nr, tse_signatur, tse_serial, dsfinvk_export_pfad, umsatz_brutto_eur, fehler_grund, operator, created_at, updated_at |
 | `pos_tagesabschluss_log` | `finance` | native | `id` | id, abschluss_id, tenant_id, old_status, new_status, operator, created_at |
-| `promotions` | `finance` | native | `id` | id, name, promo_type, article_id, article_group, discount_value, min_quantity, valid_from, valid_to, is_active, tenant_id |
+| `promotions` | `finance` | native | `id` | id, name, promo_type, article_id, article_group, discount_value, min_quantity, valid_from, valid_to, is_active, tenant_id, created_at, updated_at |
 
 ## `domain_pricing`
 
@@ -1375,7 +1389,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `dauerauftraege` | `platform` | native | `id` | id, tenant_id, da_nr, kunden_nr, bezeichnung, da_anfang, da_naechster, da_ende, perioden_typ, perioden_wert, aktiv, letzter_lauf, erstellt_von, created_at |
 | `dauerauftrag_ausfuehrungen` | `platform` | native | `id` | id, tenant_id, dauerauftrag_id, ausfuehrungs_datum, belegnummer, status, created_at |
 | `dauerauftrag_positionen` | `platform` | native | `id` | id, tenant_id, dauerauftrag_id, pos_nr, artikel_nr, menge, mengeneinheit, preis_eur, created_at |
-| `direct_debit_items` | `platform` | native | `id` | id, run_id, debitor_name, iban, bic, mandate_id, amount, verwendungszweck, status, created_at |
+| `direct_debit_items` | `platform` | native | `id` | id, run_id, debitor_name, iban, bic, mandate_id, amount, verwendungszweck, status, created_at, tenant_id, debitor_id, currency |
 | `dispatchers` | `platform` | native | `id` | id, name, code, email, phone, is_active, tenant_id, created_at, updated_at |
 | `dms_inbox` | `platform` | native | `id` | id, dms_document_id, dms_url, ocr_text, parsed_fields, confidence, status, created_at |
 | `entity_notes` | `platform` | native | `id` | id, tenant_id, entity_type, entity_id, body, mentions, created_by, created_at, updated_at, deleted_at |
@@ -1453,6 +1467,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `saatzucht_vermehrungsvertraege` | `platform` | native | `id` | id, tenant_id, vertrag_nr, erntejahr, vermehrer_kunden_nr, sorte_nr, sorte_bezeichnung, kategorie, vertragsart, vertrags_menge_t, anbauflaeche_ha, lwk_anerkennungsstelle, vmkz, registriernummer, status, bemerkung, created_at, updated_at |
 | `schedules` | `platform` | native | `id` | id, tenant_id, schedule_key, display_name, reporting_unit_id, cron_expr, lead_days, use_workday_rule, output_format, config_json, is_active, created_at, updated_at |
 | `screen_definition_drafts` | `platform` | native | `id` | id, tenant_id, screen_id, base_screen_id, definition, status, readiness, created_by, updated_by, updated_at |
+| `sepa_mandates` | `platform` | native | `id` | id, tenant_id, debitor_id, mandate_reference, mandate_valid, mandate_expired_at, created_at, updated_at |
 | `stuecklisten` | `platform` | native | `id` | id, tenant_id, stueckliste_nr, artikel_nr, bezeichnung, menge_basis, einheit, variable_komp, aktiv, created_at |
 | `stuecklisten_positionen` | `platform` | native | `id` | id, tenant_id, stueckliste_id, pos_nr, komponente_nr, komponente_bez, menge, einheit, anteil_prozent, optional, created_at |
 | `system_properties` | `platform` | native | `id` | id, tenant_id, property_key, property_value, property_type, category, description |
@@ -1466,6 +1481,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `waage_hofliste` | `platform` | native | `id` | id, tenant_id, standort_id, kfz_kennzeichen, fahrer_name, lieferant_nr, lieferant_name, kontrakt_nr, artikel_nr, artikel_name, geplante_menge_t, status, ankunft_zeit, wiegung_start, abfahrt_zeit, wiegeschein_id, bemerkung, partievorerfassung, created_at, updated_at |
 | `waage_wiegungsgruppen` | `platform` | native | `id` | id, tenant_id, gruppe_nr, typ, wiegeschein_ids, gesamt_netto_kg, kontrakt_nr, beleg_nr, status, bemerkung, created_at |
 | `warengruppen` | `platform` | native | `id` | id, tenant_id, gruppe_nr, bezeichnung, ober_id, aktiv, created_at |
+| `webhook_deliveries` | `platform` | native | `id` | id, tenant_id, webhook_id, event_area, versucht_am, erfolgreich, status_code, dauer_ms, fehler, signiert |
 | `webhook_registrations` | `platform` | native | `id` | id, url, event_area, secret, is_active, tenant_id, created_at, updated_at |
 | `zahlungsbedingungen` | `platform` | native | `id` | id, tenant_id, zabd_nr, bezeichnung, zahlungsziel_tage, skonto1_tage, skonto1_prozent, skonto2_tage, skonto2_prozent, netto_tage, manuelles_datum, zahlungsart, aktiv, created_at |
 | `zahlungsformulare` | `platform` | native | `id` | id, tenant_id, formular_nr, bezeichnung, formularklasse, bank_blz, bank_iban, formulareinrichtung, aktiv, created_at |

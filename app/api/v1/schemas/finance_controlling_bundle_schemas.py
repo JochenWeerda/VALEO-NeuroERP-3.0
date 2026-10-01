@@ -3,7 +3,6 @@
 Ersetzt schwache ``response_model`` in:
 - ``controlling_actions.py``
 - ``finance_period.py``
-- ``bank_import.py``
 """
 
 from __future__ import annotations
@@ -109,34 +108,3 @@ class FinancePeriodActionOut(BaseSchema):
     period: Optional[str] = None
     status: Optional[str] = None
     erzwungen: Optional[bool] = None
-
-
-# ── Bank-Import ─────────────────────────────────────────────────────────────
-
-
-class BankStatementImportOut(BaseSchema):
-    statement_id: Optional[str] = None
-    lines: Optional[int] = None
-    iban: Optional[str] = None
-    format: Optional[str] = None
-
-
-class BankMatchOut(BaseSchema):
-    statement_id: Optional[str] = None
-    matched: Optional[int] = None
-    unmatched: Optional[int] = None
-    info: Optional[str] = None
-
-
-class BankStatementItemOut(BaseSchema):
-    id: Optional[str] = None
-    iban: Optional[str] = None
-    format: Optional[str] = None
-    filename: Optional[str] = None
-    line_count: Optional[int] = None
-    imported_at: Optional[str] = None
-
-
-class BankStatementListOut(BaseSchema):
-    items: list[BankStatementItemOut] = Field(default_factory=list)
-    count: Optional[int] = None

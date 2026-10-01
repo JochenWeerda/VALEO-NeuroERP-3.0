@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-09-21
+# Architecture Index — generiert 2026-10-01
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-09-21T10:39:04Z'
+generated_at: '2026-10-01T19:08:52Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -327,11 +327,8 @@ domains:
     - feeding_supply_service
     - geo_pipeline
     - harvest_acceptance_service
-    - kontrakt_fixing_service
-    - kontrakt_lifecycle_service
     - kontrakt_movement_sync
     - kontrakt_position_service
-    - kontrakt_settlement_service
     - kontrakte_adapters
     - kontrakte_service
     - production_control_service
@@ -406,7 +403,6 @@ domains:
     - grundfutter_analysen
     - harvest_acceptance
     - hofliste
-    - kontrakt_actions
     - kontrakt_hedging
     - kontrakt_klassen
     - kontrakt_mengenzeitraum
@@ -716,6 +712,7 @@ domains:
     - crm_merge_service
     - crm_notification_service
     - crm_ownership_service
+    - customer_reference
     - customer_sales_eligibility
     - customer_service
     - gap_analytics
@@ -761,6 +758,9 @@ domains:
     - credit_management
     - creditors
     - crm_360
+    - crm_360_reads
+    - crm_360_sql
+    - crm_360_tabs
     - crm_account_hierarchy
     - crm_auto_capture
     - crm_call_transcript
@@ -1216,7 +1216,6 @@ domains:
     - asset_ledger_connector
     - auto_matching
     - bank_accounts
-    - bank_import
     - bank_reconciliation
     - bank_statement_import
     - banken
@@ -1305,6 +1304,7 @@ domains:
     - docs/adr/adr-059-production-control-projection.md
     - docs/adr/adr-061-billing-batch-orchestration.md
     - docs/adr/adr-063-safe-user-query-center.md
+    - docs/adr/adr-073-bank-model-retirement.md
     status: active
   hr:
     owner: domain/hr
@@ -1763,6 +1763,7 @@ domains:
     - mail_ingest_service
     - mask_action_runtime_service
     - mask_rollout_summary_service
+    - mcp_execution_service
     - mcp_tool_registry_service
     - mobile_sync_service
     - nats_event_handlers
@@ -1788,6 +1789,7 @@ domains:
     - studio_validation
     - sync_scheduler
     - voice_adapter
+    - webhook_service
     - wf_cockpit_nats_projector
     - wf_cockpit_persist_service
     - wf_trigger_service
@@ -2029,8 +2031,8 @@ mapping_stats:
   frontend_routes_mapped: 932
   backend_services_total: 259
   backend_services_mapped: 259
-  backend_endpoints_total: 447
-  backend_endpoints_mapped: 447
+  backend_endpoints_total: 448
+  backend_endpoints_mapped: 448
 unmapped:
   frontend_routes: []
   backend_services: []

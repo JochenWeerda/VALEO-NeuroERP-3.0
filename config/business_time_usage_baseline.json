@@ -25,14 +25,11 @@
     "app/api/v1/endpoints/artikel_stoffstrom.py": {
       "date.today": 1
     },
-    "app/api/v1/endpoints/bank_import.py": {
-      "date.today": 2
-    },
     "app/api/v1/endpoints/bank_reconciliation.py": {
       "date.today": 2
     },
     "app/api/v1/endpoints/bank_statement_import.py": {
-      "date.today": 2
+      "date.today": 1
     },
     "app/api/v1/endpoints/benchmark_api.py": {
       "date.today": 1
@@ -44,7 +41,7 @@
       "date.today": 3
     },
     "app/api/v1/endpoints/crm_360.py": {
-      "datetime.now.date": 2
+      "datetime.now.date": 1
     },
     "app/api/v1/endpoints/crm_kim.py": {
       "date.today": 1
@@ -141,7 +138,7 @@
       "date.today": 1
     },
     "app/api/v1/endpoints/pos_payments.py": {
-      "date.today": 3
+      "date.today": 2
     },
     "app/api/v1/endpoints/pos_payments_promotions.py": {
       "date.today": 1

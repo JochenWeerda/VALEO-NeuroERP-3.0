@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-30
+last_reviewed: 2026-10-01
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -68,7 +68,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `auto_matching` | Automatic Matching API |
 | `background_jobs` | Queue-backed background job API for heavy process operations. |
 | `bank_accounts` | Bankkontenstamm API |
-| `bank_import` | INT-BANK-001: Bank-API / SEPA-Import (MT940 + CAMT.053). |
 | `bank_reconciliation` | Bank Reconciliation API |
 | `bank_statement_import` | Bank Statement Import API |
 | `banken` | Bank Accounts API - Bankkonto Management (SQLAlchemy) |
@@ -87,7 +86,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `business_partners` | Business partner master data endpoints. |
 | `case_management_api` | Case Management REST API — NC-08. |
 | `cases` | CRM Service Cases API endpoints proxied through crm-service. |
-| `central_contracts` | Zentrale Kontrakte-Engine — thin-router, sqlalchemy.text(). |
+| `central_contracts` | Zentrales Vertragsregister — thin-router, sqlalchemy.text(). |
 | `channel_work_surfaces` | — |
 | `channels` | Channel Endpoints — NC-H1/H2/H4: WhatsApp Webhook, Email Ingress, Channel Router. |
 | `charges` | Charges API - Lot/Batch Management (SQLAlchemy) |
@@ -116,6 +115,9 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `credit_management` | Kreditlimit-Verwaltung und Kreditstatus-Prüfung — thin-router, sqlalchemy.text(). |
 | `creditors` | Creditor (Kreditoren) master data management endpoints. |
 | `crm_360` | CRM 360°-Kundensicht — aggregiert echte ERP-Daten aus mehreren Domänen. |
+| `crm_360_reads` | CRM-360: Register lesen und seitenweise ausliefern. |
+| `crm_360_sql` | CRM-360: sichere Leseabfragen und die Kundensuche. |
+| `crm_360_tabs` | Benannte Register der Kundenakte, vor der generischen Tab-Route. |
 | `crm_account_hierarchy` | CRM Account-Hierarchien — Parent/Child-Beziehungen zwischen Business-Partnern. |
 | `crm_auto_capture` | KIM-AUTOCAPTURE — automatische Kontakt-Erfassung (Telefon/E-Mail/WhatsApp). |
 | `crm_call_transcript` | KIM Telefon-Transkript-Connector — Anrufe automatisch als Kontakt erfassen. |
@@ -252,7 +254,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kasse_tagesabschluss` | Kasse – Tagesabschluss: Aktueller Tag + Buchung |
 | `ki_usability` | KI-Usability API. |
 | `knowledge_api` | Knowledge Core API — Wave 69 |
-| `kontrakt_actions` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement. |
 | `kontrakt_hedging` | Kontrakt-Hedging und MATIF-Preisbindung. |
 | `kontrakt_klassen` | Kontrakt-Klassen und Kontraktvarianten (Agrar-Spezialsoftware Feature). |
 | `kontrakt_mengenzeitraum` | Kontraktmengenzeitraum — Ratierliche Lieferpläne für Rohwarenkontrakte. |
