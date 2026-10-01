@@ -24,6 +24,12 @@ Waehrung und Zaehler entsprechen dem gespeicherten Bestand; IDs kollidieren nich
 keine fremden aktiven CRM-/POS-/OpenAPI-/Inventar-Dateien uebernehmen.
 Tests verwenden ausschliesslich den vorhandenen valeo_probe ohne Reset/Migration.
 
+**Scope-Ergaenzung vor Edit:** Reparierte DQ macht den bisher blockierten
+Auto-Matchingpfad erreichbar: fehlender Tenantfilter, Teilzahlung setzt
+Restbetrag auf null, Bankzeilenstatus wird nicht gespeichert. Bis zum eigenen
+fachlichen Abgleichvertrag wird auto_match vor jedem DB-Zugriff mit 501
+abgewiesen. Manueller Import bleibt atomar nutzbar; Matching-Gap bleibt offen.
+
 ## TEST-DATABASE-RESOURCE-POLICY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Claim:** `9dfc87e76`. **Stand:** abgeschlossen 2026-10-01.
