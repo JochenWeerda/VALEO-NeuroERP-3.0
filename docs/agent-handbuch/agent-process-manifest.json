@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30",
+  "generatedAt": "2026-10-01",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1635,6 +1635,8 @@
         }
       ],
       "sensitive_fields": [
+        "iban",
+        "bic",
         "kreditlimit",
         "zahlungsbedingungen",
         "notizen"

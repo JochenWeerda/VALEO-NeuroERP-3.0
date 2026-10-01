@@ -68,7 +68,8 @@ def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict 
     kunde = _query_one(
         db,
         """
-        SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr
+        SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr,
+               business_partner_id::text AS business_partner_id
         FROM domain_crm.customers
         WHERE (:tid IS NULL OR tenant_id::text = :tid)
           AND (
@@ -86,7 +87,8 @@ def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict 
     partner = _query_one(
         db,
         """
-        SELECT partner_id::text AS id, name_1 AS name, partner_number AS kunden_nr
+        SELECT partner_id::text AS id, name_1 AS name, partner_number AS kunden_nr,
+               partner_id::text AS business_partner_id
         FROM domain_crm.business_partners
         WHERE (:tid IS NULL OR tenant_id::text = :tid)
           AND (partner_id::text = :cid OR partner_number = :cid)
@@ -98,7 +100,8 @@ def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict 
         linked = _query_one(
             db,
             """
-            SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr
+            SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr,
+                   business_partner_id::text AS business_partner_id
             FROM domain_crm.customers
             WHERE (:tid IS NULL OR tenant_id::text = :tid)
               AND business_partner_id::text = :pid
@@ -113,7 +116,8 @@ def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict 
         """
         SELECT COALESCE(business_partner_id::text, kunden_nr) AS id,
                COALESCE(name, kunden_nr) AS name,
-               kunden_nr
+               kunden_nr,
+               business_partner_id::text AS business_partner_id
         FROM public.kunden
         WHERE kunden_nr = :cid
         LIMIT 1
@@ -124,11 +128,12 @@ def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict 
         alt = _query_one(
             db,
             """
-            SELECT COALESCE(business_partner_id::text, kunden_nr) AS id,
-                   COALESCE(name1, kunden_nr) AS name,
-                   kunden_nr
-            FROM public.kunden
-            WHERE kunden_nr = :cid
+        SELECT COALESCE(business_partner_id::text, kunden_nr) AS id,
+               COALESCE(name1, kunden_nr) AS name,
+               kunden_nr,
+               business_partner_id::text AS business_partner_id
+        FROM public.kunden
+        WHERE kunden_nr = :cid
             LIMIT 1
             """,
             {"cid": customer_id},
@@ -138,7 +143,8 @@ def _kunde_finden(db: Session, customer_id: str, tenant_id: str | None) -> dict 
     linked = _query_one(
         db,
         """
-        SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr
+        SELECT id::text AS id, company_name AS name, customer_number AS kunden_nr,
+               business_partner_id::text AS business_partner_id
         FROM domain_crm.customers
         WHERE (:tid IS NULL OR tenant_id::text = :tid)
           AND (customer_number = :nr OR business_partner_id::text = :bid)
@@ -292,11 +298,17 @@ async def get_customer_screen_summary(
         """
         SELECT COALESCE(SUM(offen), 0)::float AS open_items_total
         FROM domain_erp.offene_posten
-        WHERE (kunden_id = :cid OR debitor_id::text = :cid)
+        WHERE (
+                kunde_id::text = :cid
+             OR debtor_id::text = :cid
+             OR (:kunden_nr IS NOT NULL AND (
+                    kunde_id::text = :kunden_nr OR debtor_id::text = :kunden_nr
+                ))
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
-          AND op_status NOT IN ('bezahlt', 'storniert')
+          AND COALESCE(op_status, '') NOT IN ('bezahlt', 'storniert')
         """,
-        {"cid": canonical_id, "tid": tenant_id},
+        {"cid": canonical_id, "tid": tenant_id, "kunden_nr": customer.get("kunden_nr")},
     ) or {}
     activity_row = _query_one(
         db,
@@ -332,6 +344,13 @@ def _normalize_tab_key(tab_key: str) -> str:
         "belege": "auftraege",
         "aufgaben": "aufgaben",
         "kontrakte": "kontrakte",
+        "angebote": "angebote",
+        "quotes": "angebote",
+        "offers": "angebote",
+        "opportunities": "angebote",
+        "historie": "historie",
+        "history": "historie",
+        "timeline": "historie",
         "praesente": "praesente",
         "präsente": "praesente",
         "gifts": "praesente",
@@ -351,32 +370,49 @@ def _fetch_customer_tab_items(
     tab_key: str,
     kunden_nr: str | None,
     kunden_name: str | None = None,
+    partner_id: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     normalized = _normalize_tab_key(tab_key)
 
-    if normalized in {"stammdaten", "angebote", "historie"}:
+    if normalized == "stammdaten":
         return normalized, []
 
     if normalized == "kontakte":
-        if not kunden_nr:
-            return "contacts_list", []
-        rows = _query_many(
+        rows: list[dict[str, Any]] = []
+        if kunden_nr:
+            rows = _query_many(
+                db,
+                """
+                SELECT id::text AS id,
+                       COALESCE(nachname, '') AS name,
+                       COALESCE(vorname, '') AS "firstName",
+                       COALESCE(position, '') AS position,
+                       COALESCE(email, '') AS email,
+                       COALESCE(telefon1, '') AS phone1
+                FROM public.kunden_ansprechpartner
+                WHERE kunden_nr = :kunden_nr
+                ORDER BY prioritaet NULLS LAST, nachname
+                LIMIT 25
+                """,
+                {"kunden_nr": kunden_nr},
+            )
+        core = _query_many(
             db,
             """
             SELECT id::text AS id,
-                   COALESCE(nachname, '') AS name,
-                   COALESCE(vorname, '') AS "firstName",
+                   COALESCE(last_name, '') AS name,
+                   COALESCE(first_name, '') AS "firstName",
                    COALESCE(position, '') AS position,
                    COALESCE(email, '') AS email,
-                   COALESCE(telefon1, '') AS phone1
-            FROM public.kunden_ansprechpartner
-            WHERE kunden_nr = :kunden_nr
-            ORDER BY prioritaet NULLS LAST, nachname
+                   COALESCE(phone, '') AS phone1
+            FROM domain_crm.contacts
+            WHERE customer_id::text = :cid
+            ORDER BY last_name
             LIMIT 25
             """,
-            {"kunden_nr": kunden_nr},
+            {"cid": customer_id},
         )
-        return "contacts_list", rows
+        return "contacts_list", rows + core
 
     if normalized == "auftraege":
         rows = _query_many(
@@ -397,7 +433,7 @@ def _fetch_customer_tab_items(
         )
         return "recent_orders", rows
 
-    if normalized == "aktivitaeten":
+    if normalized in {"aktivitaeten", "historie"}:
         rows = _query_many(
             db,
             """
@@ -415,17 +451,45 @@ def _fetch_customer_tab_items(
             """,
             {"kunde": kunden_name, "tid": tenant_id},
         )
-        return "recent_activities", rows
+        return ("historie" if normalized == "historie" else "recent_activities"), rows
+
+    if normalized == "angebote":
+        rows = _query_many(
+            db,
+            """
+            SELECT id::text AS id,
+                   COALESCE(title, '') AS title,
+                   COALESCE(stage, status, '') AS stage,
+                   COALESCE(estimated_value, 0)::float AS estimated_value,
+                   probability,
+                   expected_close_date::text AS expected_close_date
+            FROM domain_crm.crm_opportunities
+            WHERE (:tid IS NULL OR tenant_id::text = :tid)
+              AND (
+                    customer_id::text = :cid
+                 OR customer_id::text = :kunden_nr
+                 OR customer_id IN (
+                        SELECT id FROM domain_crm.crm_customers
+                        WHERE customer_number = :kunden_nr
+                          AND (:tid IS NULL OR tenant_id::text = :tid)
+                    )
+              )
+            ORDER BY expected_close_date DESC NULLS LAST, created_at DESC
+            LIMIT 25
+            """,
+            {"cid": customer_id, "tid": tenant_id, "kunden_nr": kunden_nr},
+        )
+        return "angebote", rows
 
     if normalized == "aufgaben":
         rows = _query_many(
             db,
             """
             SELECT id::text AS id,
-                   COALESCE(title, subject, '') AS titel,
-                   COALESCE(priority, '') AS prioritaet,
+                   COALESCE(title, '') AS titel,
+                   COALESCE(type, '') AS art,
                    COALESCE(status, '') AS status,
-                   COALESCE(due_date, date, created_at)::text AS faellig
+                   COALESCE(date, created_at)::text AS faellig
             FROM domain_crm.activities
             WHERE customer = :kunde
               AND (:tid IS NULL OR tenant_id::text = :tid)
@@ -434,7 +498,7 @@ def _fetch_customer_tab_items(
                  OR COALESCE(type, '') ILIKE '%aufgabe%'
                  OR COALESCE(status, '') ILIKE '%offen%'
               )
-            ORDER BY COALESCE(due_date, date, created_at) DESC
+            ORDER BY COALESCE(date, created_at) DESC
             LIMIT 25
             """,
             {"kunde": kunden_name, "tid": tenant_id},
@@ -452,11 +516,16 @@ def _fetch_customer_tab_items(
                    contract_date::text AS contract_date,
                    COALESCE(total_quantity, 0)::float AS total_quantity
             FROM domain_ops.kon_contract
-            WHERE party_id = :cid
+            WHERE (
+                    party_id::text = :cid
+                 OR party_id::text = :kunden_nr
+                 OR (:pid IS NOT NULL AND party_id::text = :pid)
+                  )
+              AND (:tid IS NULL OR tenant_id::text = :tid)
             ORDER BY contract_date DESC
             LIMIT 25
             """,
-            {"cid": customer_id},
+            {"cid": customer_id, "kunden_nr": kunden_nr, "pid": partner_id, "tid": tenant_id},
         )
         return "kontrakte", rows
 
@@ -496,13 +565,19 @@ def _fetch_customer_tab_items(
                    GREATEST(0, (CURRENT_DATE - faelligkeit::date))::int AS days_overdue,
                    op_status
             FROM domain_erp.offene_posten
-            WHERE (kunden_id = :cid OR debitor_id::text = :cid)
+            WHERE (
+                    kunde_id::text = :cid
+                 OR debtor_id::text = :cid
+                 OR (:kunden_nr IS NOT NULL AND (
+                        kunde_id::text = :kunden_nr OR debtor_id::text = :kunden_nr
+                    ))
+                  )
               AND (:tid IS NULL OR tenant_id::text = :tid)
-              AND op_status NOT IN ('bezahlt', 'storniert')
+              AND COALESCE(op_status, '') NOT IN ('bezahlt', 'storniert')
             ORDER BY faelligkeit ASC
             LIMIT 25
             """,
-            {"cid": customer_id, "tid": tenant_id},
+            {"cid": customer_id, "tid": tenant_id, "kunden_nr": kunden_nr},
         )
         table_key = "open_documents" if tab_key == "dokumente" else "open_items"
         return table_key, rows
@@ -619,6 +694,7 @@ class CustomerTaskRowOut(BaseSchema):
 
     id: str
     titel: str = ""
+    art: str = ""
     prioritaet: str = ""
     status: str = ""
     faellig: Optional[str] = None
@@ -643,6 +719,27 @@ class CustomerTasksTabOut(CustomerTabOut):
 
 class CustomerContractsTabOut(CustomerTabOut):
     items: list[CustomerContractRowOut] = Field(default_factory=list)
+
+
+class CustomerOfferRowOut(BaseSchema):
+    """Eine Zeile im Register Angebote — Verkaufschance aus der Pipeline."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    title: str = ""
+    stage: str = ""
+    estimated_value: float = 0.0
+    expected_close_date: Optional[str] = None
+    probability: Optional[float] = None
+
+
+class CustomerOffersTabOut(CustomerTabOut):
+    items: list[CustomerOfferRowOut] = Field(default_factory=list)
+
+
+class CustomerHistoryTabOut(CustomerTabOut):
+    items: list[CustomerActivityRowOut] = Field(default_factory=list)
 
 
 # Vier benannte Register vor der generischen Route
@@ -809,6 +906,56 @@ async def get_customer_tab_kontrakte(
 
 
 @router.get(
+    "/{customer_id}/tabs/angebote",
+    response_model=CustomerOffersTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Angebote",
+)
+async def get_customer_tab_angebote(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Verkaufschancen der Partei aus der lokalen Pipeline."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="angebote", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/historie",
+    response_model=CustomerHistoryTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Historie",
+)
+async def get_customer_tab_historie(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
+    db: Session = Depends(get_db),
+):
+    """Aktivitaeten des Kunden in zeitlicher Reihenfolge."""
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="historie", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
     "/{customer_id}/tabs/{tab_key}",
     response_model=TypedObjectOut,
     tags=["crm", "customers", "screen-summary"],
@@ -854,6 +1001,7 @@ async def get_customer_tab_data(
         tab_key=tab_key,
         kunden_nr=customer.get("kunden_nr"),
         kunden_name=customer.get("name"),
+        partner_id=customer.get("business_partner_id"),
     )
     paged_items, total = _paginate_items(
         items, page=page, limit=limit, q=q,
@@ -886,6 +1034,7 @@ async def get_customer_360(
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
     customer_id = str(customer.get("id") or customer_id)
+    kunden_nr = customer.get("kunden_nr")
 
     # 1. Letzte 10 Aufträge (domain_crm.sales_orders)
     orders = _query_many(
@@ -927,13 +1076,19 @@ async def get_customer_360(
                GREATEST(0, (CURRENT_DATE - faelligkeit::date))::int AS days_overdue,
                op_status
         FROM domain_erp.offene_posten
-        WHERE (kunden_id = :cid OR debitor_id::text = :cid)
+        WHERE (
+                kunde_id::text = :cid
+             OR debtor_id::text = :cid
+             OR (:kunden_nr IS NOT NULL AND (
+                    kunde_id::text = :kunden_nr OR debtor_id::text = :kunden_nr
+                ))
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
-          AND op_status NOT IN ('bezahlt', 'storniert')
+          AND COALESCE(op_status, '') NOT IN ('bezahlt', 'storniert')
         ORDER BY faelligkeit ASC
         LIMIT 20
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": customer_id, "tid": tenant_id, "kunden_nr": kunden_nr},
     )
     # Summe offener OP
     op_summe = sum(r.get("amount") or 0.0 for r in open_payments)

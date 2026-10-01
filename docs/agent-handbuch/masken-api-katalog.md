@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-09-30
+last_reviewed: 2026-10-01
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -876,6 +876,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `dokumente` → `/api/v1/crm/customers/{entity_id}/tabs/dokumente`
 - `aufgaben` → `/api/v1/crm/customers/{entity_id}/tabs/aufgaben`
 - `kontrakte` → `/api/v1/crm/customers/{entity_id}/tabs/kontrakte`
+- `angebote` → `/api/v1/crm/customers/{entity_id}/tabs/angebote`
+- `historie` → `/api/v1/crm/customers/{entity_id}/tabs/historie`
 - `praesente` → `/api/v1/crm/customers/{entity_id}/tabs/praesente`
 
 **MCP-Tools (Domäne):**
@@ -890,7 +892,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.
 - Zeige alle offenen Auftraege von Kunde {entity_id} mit Status 'offen'.
 
-**Sensible Felder:** `kreditlimit, zahlungsbedingungen, notizen`
+**Sensible Felder:** `iban, bic, kreditlimit, zahlungsbedingungen, notizen`
 
 **Actions:**
 

@@ -50,6 +50,8 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             {"key": "dokumente",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/dokumente",   "pageSize": 25},
             {"key": "aufgaben",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/aufgaben",    "pageSize": 25},
             {"key": "kontrakte",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/kontrakte",   "pageSize": 25},
+            {"key": "angebote",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/angebote",    "pageSize": 25},
+            {"key": "historie",    "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/historie",    "pageSize": 25},
             {"key": "praesente",   "endpoint": "/api/v1/crm/customers/{entity_id}/tabs/praesente",   "pageSize": 25},
         ],
         "tabs": [
@@ -144,7 +146,7 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                             "columns": [
                                 {"key": "faellig", "label": "Faellig", "sortable": True, "renderKind": "date", "width": 110},
                                 {"key": "titel", "label": "Titel", "width": 220},
-                                {"key": "prioritaet", "label": "Prioritaet", "width": 100, "filterable": True},
+                                {"key": "art", "label": "Art", "width": 100, "filterable": True},
                                 {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
                             ]}],
             },
@@ -158,6 +160,30 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                                 {"key": "contract_date", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
                                 {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
                                 {"key": "total_quantity", "label": "Menge", "numeric": True, "sortable": True},
+                            ]}],
+            },
+            {
+                "key": "angebote", "label": "Angebote", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "angebote", "label": "Verkaufschancen", "dataSourceKey": "angebote",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "title", "label": "Titel", "width": 220},
+                                {"key": "stage", "label": "Phase", "width": 120, "filterable": True},
+                                {"key": "estimated_value", "label": "Wert", "numeric": True, "sortable": True, "renderKind": "currency"},
+                                {"key": "expected_close_date", "label": "Abschluss", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "probability", "label": "Wahrsch.", "numeric": True, "sortable": True, "width": 90},
+                            ]}],
+            },
+            {
+                "key": "historie", "label": "Historie", "lazy": True, "keepAlive": True,
+                "tables": [{"key": "historie", "label": "Aktivitaetenhistorie", "dataSourceKey": "historie",
+                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
+                            "columns": [
+                                {"key": "created_at", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                                {"key": "activity_type", "label": "Typ", "width": 100, "filterable": True},
+                                {"key": "subject", "label": "Betreff", "width": 220},
+                                {"key": "assigned_to", "label": "Verantwortlich", "width": 140},
+                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
                             ]}],
             },
             {
@@ -179,6 +205,71 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                     {"key": "postfach_plz", "label": "Postfach-PLZ", "type": "text", "width": 80},
                     {"key": "postfach_ort", "label": "Postfach-Ort", "type": "text"},
                     {"key": "email", "label": "E-Mail", "type": "email", "readOnly": True},
+                ],
+            },
+            {
+                "key": "tax", "label": "Steuern", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "ust_id", "label": "USt-IdNr.", "type": "text"},
+                    {"key": "steuernummer", "label": "Steuernummer", "type": "text"},
+                    {"key": "steuerart", "label": "Steuerart", "type": "text"},
+                ],
+            },
+            {
+                "key": "bank", "label": "Bank", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "kontoinhaber", "label": "Kontoinhaber", "type": "text"},
+                    {"key": "bankname", "label": "Bank", "type": "text"},
+                    {"key": "iban", "label": "IBAN", "type": "text"},
+                    {"key": "bic", "label": "BIC", "type": "text"},
+                ],
+            },
+            {
+                "key": "system", "label": "System", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "partner_status", "label": "Partnerstatus", "type": "text", "readOnly": True},
+                    {"key": "gesperrt_lieferung", "label": "Liefersperre", "type": "boolean", "readOnly": True},
+                    {"key": "gesperrt_rechnung", "label": "Rechnungssperre", "type": "boolean", "readOnly": True},
+                ],
+            },
+            {
+                "key": "quality_compliance", "label": "Qualitaet", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "betriebsnummer", "label": "Betriebsnummer", "type": "text"},
+                    {"key": "eu_betriebsnummer", "label": "EU-Betriebsnummer", "type": "text"},
+                    {"key": "qs_nummer", "label": "QS-Nummer", "type": "text"},
+                    {"key": "bio", "label": "Bio", "type": "boolean"},
+                ],
+            },
+            {
+                "key": "marketing", "label": "Marketing", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "marketing_segment", "label": "Segment", "type": "text"},
+                    {"key": "newsletter", "label": "Newsletter", "type": "boolean"},
+                    {"key": "email_opt_in", "label": "E-Mail-Einwilligung", "type": "boolean"},
+                ],
+            },
+            {
+                "key": "cooperative", "label": "Genossenschaft", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "mitgliedsnummer", "label": "Mitgliedsnummer", "type": "text"},
+                    {"key": "pflichtanteile", "label": "Pflichtanteile", "type": "number"},
+                    {"key": "mitgliedschaft_beendet", "label": "Beendet", "type": "boolean"},
+                ],
+            },
+            {
+                "key": "output", "label": "Ausgabe", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "rechnungsversand", "label": "Rechnungsversand", "type": "text"},
+                    {"key": "mahnversand", "label": "Mahnversand", "type": "text"},
+                ],
+            },
+            {
+                "key": "interfaces", "label": "Schnittstellen", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "edifact_invoic", "label": "EDIFACT INVOIC", "type": "boolean"},
+                    {"key": "edifact_orders", "label": "EDIFACT ORDERS", "type": "boolean"},
+                    {"key": "edifact_desadv", "label": "EDIFACT DESADV", "type": "boolean"},
                 ],
             },
         ],

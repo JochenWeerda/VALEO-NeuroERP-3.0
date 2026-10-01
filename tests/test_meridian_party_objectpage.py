@@ -29,10 +29,24 @@ def test_customer_360_is_object_page_with_identity_and_anchors() -> None:
     assert "kontrakte" in tab_keys
     assert "praesente" in tab_keys
     assert "postfach" in tab_keys
+    assert "tax" in tab_keys
+    assert "bank" in tab_keys
+    assert "system" in tab_keys
+    assert "quality_compliance" in tab_keys
+    assert "marketing" in tab_keys
+    assert "cooperative" in tab_keys
+    assert "output" in tab_keys
+    assert "interfaces" in tab_keys
+    assert "angebote" in tab_keys
+    assert "historie" in tab_keys
     finance = next(tab for tab in screen["tabs"] if tab["key"] == "finance")
     assert finance["tables"][0]["dataSourceKey"] == "dokumente"
     praesente = next(tab for tab in screen["tabs"] if tab["key"] == "praesente")
     assert praesente["tables"][0]["dataSourceKey"] == "praesente"
+    angebote = next(tab for tab in screen["tabs"] if tab["key"] == "angebote")
+    assert angebote["tables"][0]["dataSourceKey"] == "angebote"
+    historie = next(tab for tab in screen["tabs"] if tab["key"] == "historie")
+    assert historie["tables"][0]["dataSourceKey"] == "historie"
     postfach = next(tab for tab in screen["tabs"] if tab["key"] == "postfach")
     assert {field["key"] for field in postfach["fields"]} >= {"postfach", "postfach_plz", "postfach_ort"}
 

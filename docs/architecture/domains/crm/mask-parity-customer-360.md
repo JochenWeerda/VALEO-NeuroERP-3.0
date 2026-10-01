@@ -22,26 +22,26 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 |---|---|---|---|---|---|
 | Stammdaten (`masterdata`) | `masterdata` | Stammdaten-Felder | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Adresse & Kommunikation (`address`) | `address` | Adress-/Kommunikationsfelder | `GET /api/v1/crm/customers/{id}` | compiled | ok |
-| System (`system`) | `system` | Metadaten, Sperren, Notizen | `GET /api/v1/crm/customers/{id}` | compiled | partial |
-| Steuern (`tax`) | `tax` | Steuerkennzeichen | `GET /api/v1/crm/customers/{id}` | compiled | partial |
-| Qualitaet / Compliance (`quality_compliance`) | `quality_compliance` | Farm-IDs, DSGVO | `GET /api/v1/crm/customers/{id}` | compiled | partial |
-| Finanzen (`finance`) | `finance` | Felder + Offene Posten (Liste) | Summary + `GET .../tabs/dokumente` | lazy table | partial |
-| Bank (`bank`) | `bank` | Bankverbindungen | `GET /api/v1/crm/customers/{id}` | partial |
-| Marketing (`marketing`) | `marketing` | Profile, Verteiler | `GET /api/v1/crm/customers/{id}` | partial |
-| Genossenschaft (`cooperative`) | `cooperative` | Anteile, Betriebsgruppen | `GET /api/v1/crm/customers/{id}` | partial |
-| Ausgabe (`output`) | `output` | Belegversand | `GET /api/v1/crm/customers/{id}` | partial |
-| Schnittstellen (`interfaces`) | `interfaces` | Integrationen | `GET /api/v1/crm/customers/{id}` | partial |
-| Potenzial (`potential`) | `potential` | GAP/Potenzial (Feature-Flag) | `GET /api/v1/crm/customers/{id}` | partial |
-| Ansprechpartner (`contacts`) | `contacts` | Felder + Kontaktliste | `GET .../tabs/contacts` | partial |
+| System (`system`) | `system` | Partnerstatus, Liefer- und Rechnungssperre | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Steuern (`tax`) | `tax` | USt-IdNr., Steuernummer, Steuerart | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Qualitaet / Compliance (`quality_compliance`) | `quality_compliance` | Betriebsnummer, QS, Bio | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Finanzen (`finance`) | `finance` | Offene Posten; Kreditlimit auf Stammdaten | Summary + `GET .../tabs/dokumente` | lazy table | ok |
+| Bank (`bank`) | `bank` | Kontoinhaber, Bank, IBAN, BIC | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Marketing (`marketing`) | `marketing` | Segment, Newsletter, E-Mail-Einwilligung | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Genossenschaft (`cooperative`) | `cooperative` | Mitgliedsnummer, Pflichtanteile, Beendet | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Ausgabe (`output`) | `output` | Rechnungs- und Mahnversand | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Schnittstellen (`interfaces`) | `interfaces` | EDIFACT INVOIC, ORDERS, DESADV | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Potenzial (`potential`) | — | keine fachliche Quelle im Partnerstamm | — | — | gap |
+| Ansprechpartner (`contacts`) | `contacts` | `domain_crm.contacts` und `public.kunden_ansprechpartner` | `GET .../tabs/contacts` | lazy table | ok |
 | CRM 360 Auftraege | `auftraege` (Belege) | Auftragsliste | `GET .../tabs/auftraege` | ok |
 | CRM 360 Aktivitaeten | `aktivitaeten` | Aktivitaetenliste | `GET .../tabs/aktivitaeten` | ok |
-| CRM 360 Dokumente | `dokumente` / `finance` | Offene Posten | `GET .../tabs/dokumente` | ok |
+| CRM 360 Dokumente | `dokumente` / `finance` | Offene Posten ueber `kunde_id` | `GET .../tabs/dokumente` | ok |
 | KIM Belege | `auftraege` | Auftragsliste | `GET .../tabs/auftraege` | ok |
 | KIM Finanzen | `finance` | Offene Posten | `GET .../tabs/dokumente` | ok |
-| KIM Aufgaben | `aufgaben` | Wiedervorlagen | `GET .../tabs/aufgaben` | partial |
-| KIM Kontrakte | `kontrakte` | Kontraktliste | `GET .../tabs/kontrakte` | partial |
-| CRM 360 Angebote | `angebote` (Summary only) | — | `GET .../tabs/angebote` | gap |
-| CRM 360 Historie | `historie` (Summary only) | — | `GET .../tabs/historie` | gap |
+| KIM Aufgaben | `aufgaben` | Titel, Art, Faelligkeit, Status | `GET .../tabs/aufgaben` | ok |
+| KIM Kontrakte | `kontrakte` | Kontraktliste ueber `party_id` | `GET .../tabs/kontrakte` | ok |
+| CRM 360 Angebote | `angebote` | Verkaufschancen | `GET .../tabs/angebote` | lazy table | ok |
+| CRM 360 Historie | `historie` | Aktivitaetenhistorie | `GET .../tabs/historie` | lazy table | ok |
 | KIM Chef/Präsente/Postfach/Geo | `masterdata` / `praesente` / `postfach` / `address` | Chefanweisung, Präsenteliste, Postfachfelder, Koordinaten | `GET .../customers/{id}` + `GET .../tabs/praesente` | compiled | ok |
 
 ## Summary vs. Mask-Tab-Keys
@@ -68,8 +68,8 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 
 ## Offene Luecken
 
-- Angebote und Historie: Endpunkt vorhanden, liefert leere Liste bis fachliche Quelle angebunden ist.
-- Vollstaendige Feld-Paritaet aller Legacy-Sections: bewusst ausserhalb Wave 27 (Adapter-Pilot).
+- Potenzial hat im Partnerstamm keine Spalte. Ein leeres Register wuerde eine
+  Quelle vortaeuschen. Mutationen bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
 - Chef, Präsente, Postfach und Geo sitzen in der nativen Object Page
   (`masterdata`/`praesente`/`postfach`/`address`); Mini-Apps bleiben weg.
 - Listen-IDs (`kunden_nr`, Partnernummer) oeffnen dieselbe Akte wie die UUID.

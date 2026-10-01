@@ -166,7 +166,7 @@ def kopf(mandant: str) -> dict[str, str]:
     }
 
 
-@pytest.mark.parametrize("register", ["contacts", "auftraege", "aktivitaeten", "dokumente", "praesente"])
+@pytest.mark.parametrize("register", ["contacts", "auftraege", "aktivitaeten", "dokumente", "praesente", "angebote", "historie"])
 @pytest.mark.parametrize("schluessel", ["id", "kunden_nr", "partner_number"])
 def test_jedes_register_findet_den_kunden(client, kunde, register: str, schluessel: str) -> None:
     antwort = client.get(
@@ -225,6 +225,165 @@ def test_die_360_sicht_findet_den_kunden_per_partnernummer(client, kunde) -> Non
     )
     assert antwort.status_code == 200, antwort.text
     assert antwort.json()["customer_id"] == kunde["id"]
+
+
+def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> None:
+    """Die Register duerfen nicht leer bleiben, nur weil die Abfrage scheitert."""
+    from sqlalchemy import create_engine, text
+
+    chance = str(uuid.uuid4())
+    pipeline_kunde = str(uuid.uuid4())
+    aktivitaet = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.crm_customers "
+                "(id, tenant_id, customer_number, company_name, last_name, street, postal_code, city) "
+                "VALUES (:id, :tid, :nr, 'Testhof Sonnenacker', 'Meyer', 'Hofweg 1', '29525', 'Uelzen')"
+            ),
+            {"id": pipeline_kunde, "tid": kunde["mandant"], "nr": kunde["kunden_nr"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.crm_opportunities "
+                "(id, customer_id, title, assigned_to, tenant_id, stage, estimated_value, probability) "
+                "VALUES (:id, :cid, 'Weizen 2026', 'vertrieb', :tid, 'proposal', 12000, 40)"
+            ),
+            {"id": chance, "cid": pipeline_kunde, "tid": kunde["mandant"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.activities "
+                "(id, type, title, customer, contact_person, date, status, assigned_to, tenant_id) "
+                "VALUES (:id, 'task', 'Rueckruf', 'Testhof Sonnenacker', 'Meyer', NOW(), 'offen', 'vertrieb', :tid)"
+            ),
+            {"id": aktivitaet, "tid": kunde["mandant"]},
+        )
+    try:
+        angebote = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/angebote", headers=kopf(kunde["mandant"])
+        )
+        assert angebote.status_code == 200, angebote.text
+        assert any(zeile.get("title") == "Weizen 2026" for zeile in angebote.json()["items"])
+
+        historie = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/historie", headers=kopf(kunde["mandant"])
+        )
+        assert historie.status_code == 200, historie.text
+        assert any(zeile.get("subject") == "Rueckruf" for zeile in historie.json()["items"])
+
+        aufgaben = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/aufgaben", headers=kopf(kunde["mandant"])
+        )
+        assert aufgaben.status_code == 200, aufgaben.text
+        zeile = next(item for item in aufgaben.json()["items"] if item.get("titel") == "Rueckruf")
+        assert zeile["art"] == "task"
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_crm.crm_opportunities WHERE id = :id"), {"id": chance}
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_crm.crm_customers WHERE id = :id"), {"id": pipeline_kunde}
+            )
+            verbindung.execute(
+                text("DELETE FROM domain_crm.activities WHERE id = :id"), {"id": aktivitaet}
+            )
+
+
+def test_offene_posten_erscheinen_in_dokumenten_und_im_kopf(client, kunde) -> None:
+    """domain_erp.offene_posten fuehrt den Kunden als kunde_id, nicht als kunden_id."""
+    from sqlalchemy import create_engine, text
+
+    posten = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_erp.offene_posten "
+                "(id, tenant_id, rechnungsnr, faelligkeit, betrag, offen, kunde_id, op_status) "
+                "VALUES (:id, :tid, 'RE-100', CURRENT_DATE - 3, 250, 250, :cid, 'offen')"
+            ),
+            {"id": posten, "tid": kunde["mandant"], "cid": kunde["id"]},
+        )
+    try:
+        dokumente = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/dokumente", headers=kopf(kunde["mandant"])
+        )
+        assert dokumente.status_code == 200, dokumente.text
+        zeile = next(item for item in dokumente.json()["items"] if item.get("rechnungsnr") == "RE-100")
+        assert zeile["amount"] == 250
+        assert zeile["op_status"] == "offen"
+
+        kopfzeile = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/screen-summary", headers=kopf(kunde["mandant"])
+        )
+        assert kopfzeile.status_code == 200, kopfzeile.text
+        assert kopfzeile.json()["summary"]["open_items_total"] == 250
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM domain_erp.offene_posten WHERE id = :id"), {"id": posten}
+            )
+
+
+def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) -> None:
+    """Steuern und Bank kommen vom Partner, Kontakte aus domain_crm.contacts, Kontrakte ueber party_id."""
+    from sqlalchemy import create_engine, text
+
+    kontakt = str(uuid.uuid4())
+    kontrakt = str(uuid.uuid4())
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "UPDATE domain_crm.business_partners "
+                "SET vat_id = 'DE123456789', iban = 'DE89370400440532013000' "
+                "WHERE partner_id = :id"
+            ),
+            {"id": kunde["partner_id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.contacts "
+                "(id, first_name, last_name, email, customer_id, position) "
+                "VALUES (:id, 'Ada', 'Meyer', 'ada@sonnenacker.test', :cid, 'Geschaeftsfuehrung')"
+            ),
+            {"id": kontakt, "cid": kunde["id"]},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_ops.kon_contract "
+                "(contract_id, contract_no, contract_type, party_id, quantity_type, total_quantity, "
+                "unit, allow_overdelivery, status, tenant_id) "
+                "VALUES (:id, 'AK-1', 'purchase', :pid, 'weight', 1000, 'kg', false, 'active', :tid)"
+            ),
+            {"id": kontrakt, "pid": kunde["partner_id"], "tid": kunde["mandant"]},
+        )
+    try:
+        stamm = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}", headers=kopf(kunde["mandant"])
+        )
+        assert stamm.status_code == 200, stamm.text
+        assert stamm.json()["ust_id"] == "DE123456789"
+        assert stamm.json()["iban"] == "DE89370400440532013000"
+
+        kontakte = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/contacts", headers=kopf(kunde["mandant"])
+        )
+        assert kontakte.status_code == 200, kontakte.text
+        assert any(zeile.get("name") == "Meyer" for zeile in kontakte.json()["items"])
+
+        kontrakte = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}/tabs/kontrakte", headers=kopf(kunde["mandant"])
+        )
+        assert kontrakte.status_code == 200, kontrakte.text
+        assert any(zeile.get("contract_no") == "AK-1" for zeile in kontrakte.json()["items"])
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(text("DELETE FROM domain_ops.kon_contract WHERE contract_id = :id"), {"id": kontrakt})
+            verbindung.execute(text("DELETE FROM domain_crm.contacts WHERE id = :id"), {"id": kontakt})
 
 
 def test_ein_kunde_den_es_nicht_gibt_bleibt_ein_404(client, kunde) -> None:

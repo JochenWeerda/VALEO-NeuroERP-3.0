@@ -133,6 +133,31 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     # Sales-spezifische Felder (nur neue)
     price_group: Optional[str] = Field(None, max_length=50, description="Price group")
     tax_category: Optional[str] = Field(None, max_length=50, description="Tax category")
+    ust_id: Optional[str] = None
+    steuernummer: Optional[str] = None
+    steuerart: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    bankname: Optional[str] = None
+    kontoinhaber: Optional[str] = None
+    gesperrt_lieferung: Optional[bool] = None
+    gesperrt_rechnung: Optional[bool] = None
+    partner_status: Optional[str] = None
+    betriebsnummer: Optional[str] = None
+    eu_betriebsnummer: Optional[str] = None
+    qs_nummer: Optional[str] = None
+    bio: Optional[bool] = None
+    marketing_segment: Optional[str] = None
+    newsletter: Optional[bool] = None
+    email_opt_in: Optional[bool] = None
+    mitgliedsnummer: Optional[str] = None
+    pflichtanteile: Optional[float] = None
+    mitgliedschaft_beendet: Optional[bool] = None
+    rechnungsversand: Optional[str] = None
+    mahnversand: Optional[str] = None
+    edifact_invoic: Optional[bool] = None
+    edifact_orders: Optional[bool] = None
+    edifact_desadv: Optional[bool] = None
 
 
 # Lead Schemas

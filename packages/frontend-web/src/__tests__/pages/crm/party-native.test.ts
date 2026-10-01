@@ -17,6 +17,9 @@ describe('Party native entry', () => {
     expect(resolvePartySectionKey('postfach')).toBe('postfach')
     expect(resolvePartySectionKey('geo')).toBe('address')
     expect(resolvePartySectionKey('belege')).toBe('auftraege')
+    expect(resolvePartySectionKey('angebote')).toBe('angebote')
+    expect(resolvePartySectionKey('quotes')).toBe('angebote')
+    expect(resolvePartySectionKey('historie')).toBe('historie')
     expect(resolvePartySectionKey(null)).toBeUndefined()
   })
 

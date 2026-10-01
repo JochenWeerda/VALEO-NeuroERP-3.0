@@ -34,6 +34,12 @@ const PARTY_SECTION_ALIASES: Record<string, string> = {
   kontrakte: 'kontrakte',
   contacts: 'contacts',
   kontakte: 'contacts',
+  angebote: 'angebote',
+  quotes: 'angebote',
+  offers: 'angebote',
+  historie: 'historie',
+  history: 'historie',
+  timeline: 'historie',
 }
 
 export function resolvePartyKind(kind: string | null | undefined, pathname?: string): PartyKind {

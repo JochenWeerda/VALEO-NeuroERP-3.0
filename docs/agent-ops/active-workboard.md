@@ -11,6 +11,30 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## Z-BON-WAHRHEIT-20261001 — in Arbeit, Claude Code
+
+**Ziel:** `pos_payments.x_report` und `z_report` lesen
+`domain_pos.pos_transactions` — ein Schema, in dem diese Tabelle **nicht**
+liegt. Bei jedem Fehler melden sie `total_eur: 0.0`, der Z-Bon zusaetzlich
+`closed: true`. Ein Tagesabschluss ueber 0,00 Euro ist bei einer Kasse keine
+Stoerungsmeldung, sondern eine Falschaussage (GoBD/KassenSichV). Beide Berichte
+lesen kuenftig den Bestand, der den Kassenumsatz wirklich traegt
+(`domain_docflow.pos_fiscal_transactions`), und eine Stoerung ist ein 503.
+**Hier ist keine Migration die Antwort**, sondern die Korrektur des Verweises —
+die dritte der drei Antworten aus `schema-drift-2026-09-30.md`.
+**Dateibesitz:** `app/api/v1/endpoints/pos_payments.py` (nur die beiden
+Report-Hunks), `tests/test_z_bon_wahrheit_vertrag.py`,
+`scripts/check_table_references.py` (nur die Schwelle), eigene Slice-/QA-Doku
+und dieser Abschnitt.
+**Abnahme:** X- und Z-Bericht summieren echte Kassenvorgaenge je Mandant und
+Geschaeftstag; alle Zahlarten werden aufgeschluesselt, nicht nur BAR und KARTE;
+`closed` kommt aus dem Tagesabschluss, nicht aus einer Zuweisung; Stoerung =
+503; Vertraege gruen gegen `valeo_probe`.
+**Risiken:** Es gibt zwei Tagesabschluesse im System — den echten
+(`pos_tagesabschluss_service`, Zustandsmaschine mit TSE und DSFinV-K) und diesen
+dekorativen. Der Slice macht den dekorativen ehrlich; die Frage, ob er ueberhaupt
+bleiben soll, gehoert dem POS-Owner.
+
 ## PAYMENT-CSV-IMPORT-INTEGRITY-20260930 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Claim:** `2b5f9704f`. **Stand:** abgeschlossen 2026-10-01.

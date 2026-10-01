@@ -79,6 +79,7 @@ die neue Ratsche erkennt das bereits vor dem Commit.
 Kunden-Cockpit sind Redirects inklusive `?tab=`. Listen-IDs (`kunden_nr`,
 Partnernummer) und `/verkauf/kunden-stamm/:id` oeffnen denselben Stamm. Chef,
 Praesente, Postfach und Geo sitzen in der ScreenDefinition; Mini-Apps bleiben weg.
+Angebote kommen aus `crm_opportunities`, Historie aus den CRM-Aktivitaeten.
 Tab 21–25 bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
 
 ## POS-ZAHLARTEN + AGRAR-KONTRAKTE — Welle 2, zweiter und dritter Eintrag (2026-09-30)
@@ -214,7 +215,7 @@ Status: **abgeschlossen, Restpunkte offen.** Slice
 | Lücke | Prio | Stand |
 |---|---|---|
 | Reklamation ohne fachliche Nummer; `reklamation_nr` ist der Primärschlüssel mit Präfix | P2 Qualität | geschlossen 2026-09-30: `REK-JJJJ-NNNNN` je Mandant und Geschaeftsjahr, Bestand migriert |
-| Pilotseiten (`usePilotRenderPlan`: Auftrag, Kontrakt, Kunde-Altpfad) laden nur das aktive Register und erzwingen deshalb `tabs` | P2 UIX | offen, Umzug auf `useUniversalMaskRuntime` |
+| Pilotseiten (`usePilotRenderPlan`: Auftrag, Kontrakt, Kunde-Altpfad) laden nur das aktive Register und erzwingen deshalb `tabs` | P2 UIX | geschlossen 2026-09-30: drei Pilotseiten auf `useUniversalMaskRuntime`, `usePilotRenderPlan` entfernt |
 | Register-Endpunkte `mask-rollouts/*/tabs/*` verlangen UUIDs, Ernteabrechnungen haben Text-IDs; die Register bleiben dann leer mit Fehlermeldung | P2 Agrar | geschlossen 2026-09-30: Text-IDs fuer textbasierte Masken, UUID-Pruefung nur fuer Bestellung und Lieferant |
 | Verkaufschance: Kopfdaten kommen aus dem externen crm-sales-Dienst; Browser-Abnahme ohne Dev-Daten, nur HTTP-Vertrag | P3 | offen |
 | Futteranalyse-Tests hinterlassen Daten im Dev-Mandanten (wie die bestehenden Tests) | P3 | offen |

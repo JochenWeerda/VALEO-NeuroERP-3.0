@@ -290,7 +290,68 @@ class CustomerService:
                     customer_dict["breitengrad"] = getattr(sat, "lat", None)
                 if customer_dict.get("laengengrad") is None:
                     customer_dict["laengengrad"] = getattr(sat, "lon", None)
+        self._attach_partner_mask_fields(customer_dict)
         return customer_dict
+
+    def _attach_partner_mask_fields(self, customer_dict: dict[str, Any]) -> None:
+        """Legacy-Register Steuern, Bank, System, Qualitaet, Marketing, Genossenschaft, Ausgabe, Schnittstellen."""
+        partner_id = customer_dict.get("business_partner_id")
+        if not partner_id:
+            return
+        try:
+            row = self.db.execute(
+                text(
+                    """
+                    SELECT vat_id, tax_number, tax_type, iban, bic, bank_name, account_holder,
+                           blocked_for_delivery, blocked_for_invoice, status,
+                           farm_number, eu_farm_id, qs_certificate_number, bio_certified,
+                           marketing_segment, newsletter_opt_in, email_opt_in,
+                           membership_number, mandatory_shares, membership_terminated,
+                           invoice_dispatch_channel, reminder_dispatch_channel,
+                           edifact_invoic, edifact_orders, edifact_desadv
+                    FROM domain_crm.business_partners
+                    WHERE partner_id::text = :id
+                      AND (:tid IS NULL OR tenant_id::text = :tid)
+                    LIMIT 1
+                    """
+                ),
+                {"id": str(partner_id), "tid": self.tenant_id},
+            ).mappings().first()
+        except Exception:
+            self.db.rollback()
+            return
+        if not row:
+            return
+        shares = row["mandatory_shares"]
+        customer_dict.update(
+            {
+                "ust_id": row["vat_id"] or customer_dict.get("tax_id"),
+                "steuernummer": row["tax_number"],
+                "steuerart": row["tax_type"],
+                "iban": row["iban"],
+                "bic": row["bic"],
+                "bankname": row["bank_name"],
+                "kontoinhaber": row["account_holder"],
+                "gesperrt_lieferung": row["blocked_for_delivery"],
+                "gesperrt_rechnung": row["blocked_for_invoice"],
+                "partner_status": row["status"],
+                "betriebsnummer": row["farm_number"],
+                "eu_betriebsnummer": row["eu_farm_id"],
+                "qs_nummer": row["qs_certificate_number"],
+                "bio": row["bio_certified"],
+                "marketing_segment": row["marketing_segment"],
+                "newsletter": row["newsletter_opt_in"],
+                "email_opt_in": row["email_opt_in"],
+                "mitgliedsnummer": row["membership_number"],
+                "pflichtanteile": float(shares) if shares is not None else None,
+                "mitgliedschaft_beendet": row["membership_terminated"],
+                "rechnungsversand": row["invoice_dispatch_channel"],
+                "mahnversand": row["reminder_dispatch_channel"],
+                "edifact_invoic": row["edifact_invoic"],
+                "edifact_orders": row["edifact_orders"],
+                "edifact_desadv": row["edifact_desadv"],
+            }
+        )
 
     def merge_extensions(self, customer_dict: dict[str, Any]) -> dict[str, Any]:
         ext = self.fetch_monolith_extensions(str(customer_dict["id"]))
