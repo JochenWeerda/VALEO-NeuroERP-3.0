@@ -32,6 +32,14 @@ bestimmt keinen Fremdmandanten. Legacy-Belege ohne Tenantkennung werden bei
 Vollzahlung nicht als sichere eigene Belege angenommen. Kein Schema-Reset,
 keine Migration oder weitere Docker-/Datenbankressource im Testbetrieb.
 
+**Scope-Ergaenzung vor Edit:** Die reparierte Importfunktion hat keine
+unbeschraenkte .all()-Abfrage mehr; nur ihr eigener Eintrag in
+`config/pagination_baseline.json` wird entfernt. Fremde POS-/Webhook-Funde
+bleiben beim Owner. Fresh-Schema zeigte ausserdem fehlendes op_betrag:
+bestehende Lesewege verwenden die migrierte Betragsspalte. Jeder echte
+Abgleich bekommt einen atomaren hashverketteten Nachweis mit Dezimalwerten;
+ein Auditfehler darf keine Auszifferung hinterlassen.
+
 ## WEBHOOK-MANDANT-20261001 — abgeschlossen, Claude Code
 
 **Ziel:** Unter `/api/v1/webhooks` haengen **zwei** Module, und beide bestimmten
