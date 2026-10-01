@@ -11,6 +11,28 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-IMPORT-ACCOUNT-REPLAY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** Beide Dateiimporte binden an eigenes aktives Konto mit gueltiger
+IBAN und Kontowaehrung. Identische Bytes in Tenant/Konto/Format werden nur
+einmal gespeichert/verrechnet, auch parallel oder ueber beide CSV-Routen.
+**Dateibesitz:** `bank_statement_import.py` (gemeinsame interne Konto-/Replay-
+Hilfen und Import), `payment_matching.py` (CSV-Importintegration), drei eigene
+Finanz-Import-/Matching-Testdateien, neue Replay-Vertraege, Finance-Workflow,
+eigene QA-/Slice-Doku und eigene Workboard-/Open-Gaps-Abschnitte.
+**Abnahme:** Fremdes/inaktives/unbekanntes Konto, IBAN-/Waehrungsfehler vor
+Writes; Replay liest echte aktuelle Zeilen ohne erneutes Matching/Audit;
+SQL-/Commitfehler hinterlassen keinen Fingerprint und sind wiederholbar.
+**Entscheidung:** Minor-Bugfix vorhandener Routes/Tabellen. Deterministische
+SHA-256-Identitaet im bestehenden Auszugsschluessel plus Transaktionssperre;
+kein neuer Service, Schema, Container oder weiterer Pruefstand. Kontowaehrung
+ist fest; keine implizite Summierung unterschiedlicher Waehrungen.
+**Risiken:** Historische UUID-Auszugsschluessel enthalten keine Dateiidentitaet
+und werden nicht ohne Nachweis umgeschrieben. Unterschiedliche Dateien mit
+gleichen Geschaeftsvorgaengen verlangen weitere Bank-Referenzvertraege.
+Tests benutzen ausschliesslich valeo_probe mit eigenen Konten/Testdatensaetzen.
+
 ## HANDSHAKE: Die Godfile-Ratsche ist rot — `crm_360.py` 2026-10-01, Claude Code an den CRM-Owner
 
 **Einziges rotes Gate nach dem Webhook-Aufraeumen.**
