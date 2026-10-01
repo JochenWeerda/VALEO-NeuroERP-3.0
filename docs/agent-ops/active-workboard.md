@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-STATEMENT-DATE-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Auszugsdatum aus Bankdatei statt Importtag;
+derselbe Vertrag in beiden CSV-Eingaengen und Replay, MT940-Leerwaehrung pruefen.
+**Dateibesitz:** bank_statement_import.py, payment_matching.py nur Importdatum,
+eigene Tests/QA/Slice und eigene Workboard/Gaps-/Finance-Workflow-Abschnitte;
+Business-Time-Baseline nur weggefallene eigene Kalenderquellen.
+**Abnahme:** CAMT/MT940 Schluss-Saldodatum persistent; CSV letzter Buchungstag
+als ausdruecklich synthetischer Stichtag, kein stiller Heute-Ersatz. Leerer CSV-
+Bankimport ohne Stichtag abgewiesen. MT940-Buchungstage im Saldointervall.
+**Risiken:** Alte gespeicherte Kopf-Daten haben keinen Originaldatumsnachweis;
+kein stilles Replay-Umschreiben. Saldenvergleich bleibt eigener separater Slice.
+**Betrieb:** Bestehenden valeo_probe verwenden, nur eigene Daten aufraeumen;
+keine neue Datenbank/Dockerinstanz. Keine Schema-/API-Feld-Erweiterung.
+**Naechster Slice offen:** Inventory-Belegreferenzpaare in DTO, Service und
+beiden Bewegungstabellen angleichen; source_document_type/source_document_id
+als kanonische Sprache, User-Freigabe fuer Entfernung der Entwicklungsaltlasten.
+
 ## EUDR-SORGFALTSERKLAERUNG-20261001 — in Arbeit, Claude Code
 
 **Ziel:** Die im Vorgaenger-Slice benannte Luecke schliessen:
