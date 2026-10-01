@@ -45,6 +45,13 @@ und Rekursion-Abweisung; GitHub-Rückmeldung nach Meilenstein-Push.
 wird nicht erweitert oder verlängert. Aktive POS-/CRM-/OpenAPI-Slices bleiben
 beim Owner.
 
+**Scope-Ergänzung vor Edit:** Bestehende Chroma-Evidenz ist bereits veraltet:
+MCP-Fehlervertrag (bb552b998) und vorige PyJWT-Servicepins (adb38dda4) wurden
+nicht nachgezogen. Die beiden MCP-Diffs sind erneut gelesen; sie entfernen
+Scheinerfolge und verbinden keinen Chroma-HTTP-Server. Kontrolle weiterhin
+embedded-only. Nur diese drei Hashes werden nach Prüfung aktualisiert;
+Risikobewertung und Wiedervorlage bleiben unverändert.
+
 ## HANDSHAKE: Die Kundenakte liest zwei Tabellen ohne Migration 2026-10-01, Claude Code an den CRM-Owner
 
 **Die Tabellen-Ratsche ist rot — 26 lebend gegen Schwelle 24 — und zwar seit
