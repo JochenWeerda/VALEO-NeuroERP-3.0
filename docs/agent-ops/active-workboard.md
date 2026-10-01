@@ -11,6 +11,31 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTRAKTREGISTER-MIGRATION-20261001 — in Arbeit, Claude Code
+
+**Ziel:** Die drei Tabellen des zentralen Kontraktregisters
+(`domain_contracts.contracts`, `.contract_versions`, `.contract_obligations`)
+legt keine Migration an. Auf einer frischen Installation meldet jeder Weg der
+Kontrakte-Engine 503 — anlegen, auflisten, verlaengern, Pflichten fuehren,
+Auswertung.
+**Dateibesitz:** `alembic/versions/kontraktregister_20261001.py`,
+`tests/test_kontraktregister_vertrag.py`, eigene Slice-/QA-Doku und dieser
+Abschnitt. `app/api/v1/endpoints/central_contracts.py` wird **nur** angefasst,
+wenn die Abnahme einen Fehler zeigt.
+**Abnahme:** Die drei Tabellen stehen nach `alembic upgrade head`; die Form ist
+woertlich aus den INSERTs und Pydantic-Modellen des Moduls uebernommen; der
+ganze Lebenszyklus laeuft gegen den frischen Stand durch (anlegen, aendern mit
+Versionszaehler, Pflicht anlegen und abschliessen, verlaengern, Auswertung);
+Mandantentrennung je Weg geprueft; Doku-Gates gruen.
+**Risiken:** `central_contracts.py` ist ungewoehnlich sauber — Mandantenfilter
+auf jedem Weg, 503 statt leerer Liste, Abfragegrenzen. Hier fehlt wirklich nur
+die Migration. Was der Slice **nicht** entscheidet: welche der sechs
+vorhandenen Kontrakttabellen (`domain_einkauf.kontrakte`,
+`domain_inventory.agrar_contracts`, `domain_ops.kon_contract`,
+`domain_portal.customer_contracts`, die Satelliten in `domain_kontrakte` ohne
+Kopftabelle, und dieses Register) die fuehrende ist. Das ist die groesste
+Fachfrage des Systems und gehoert dem Domaenen-Owner.
+
 ## BANK-MT940-PARSER-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
