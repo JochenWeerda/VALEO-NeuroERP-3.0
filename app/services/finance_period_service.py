@@ -15,6 +15,7 @@ from typing import Any, Optional
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.core import finance_periods
 
 _DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
@@ -111,7 +112,7 @@ class FinancePeriodService:
 
     def close_period(self, period: str, bediener: str = "KIM", force: bool = False) -> dict[str, Any]:
         stored = self._stored().get(period)
-        if stored and stored["status"] == "closed":
+        if stored and finance_periods.sperrt(stored["status"]):
             raise PeriodError(f"Periode {period} ist bereits abgeschlossen.")
         metrics = self._period_metrics(period)
         r = close_readiness(metrics["offen_count"], metrics["storno_inkonsistent"])
@@ -120,31 +121,40 @@ class FinancePeriodService:
         start, end = period_bounds(period)
         if stored:
             self.db.execute(
-                text("UPDATE public.finance_accounting_periods SET status='closed', closed_at=now(), "
+                text("UPDATE public.finance_accounting_periods SET status=:zustand, closed_at=now(), "
                      "closed_by=:by WHERE period=:p AND tenant_id=:t"),
-                {"by": bediener, "p": period, "t": self.tenant_id},
+                {"zustand": finance_periods.GESCHLOSSEN, "by": bediener, "p": period, "t": self.tenant_id},
             )
         else:
             self.db.execute(
                 text("INSERT INTO public.finance_accounting_periods "
                      "(id, tenant_id, period, status, start_date, end_date, closed_at, closed_by) "
-                     "VALUES (:id, :t, :p, 'closed', :s, :e, now(), :by)"),
-                {"id": str(uuid.uuid4()), "t": self.tenant_id, "p": period, "s": start, "e": end, "by": bediener},
+                     "VALUES (:id, :t, :p, :zustand, :s, :e, now(), :by)"),
+                {"id": str(uuid.uuid4()), "t": self.tenant_id, "p": period, "s": start,
+                 "e": end, "by": bediener, "zustand": finance_periods.GESCHLOSSEN},
             )
         self.db.commit()
-        return {"ok": True, "period": period, "status": "closed", "erzwungen": force and not r["ready"]}
+        return {
+            "ok": True,
+            "period": period,
+            "status": finance_periods.GESCHLOSSEN,
+            "erzwungen": force and not r["ready"],
+        }
 
     def reopen_period(self, period: str, grund: str, bediener: str = "KIM") -> dict[str, Any]:
         if not (grund or "").strip():
             raise PeriodError("Grund für die Wiedereröffnung ist erforderlich.")
         stored = self._stored().get(period)
-        if not stored or stored["status"] != "closed":
+        if not stored or not finance_periods.sperrt(stored["status"]):
             raise PeriodError(f"Periode {period} ist nicht abgeschlossen.")
         self.db.execute(
-            text("UPDATE public.finance_accounting_periods SET status='offen', closed_at=NULL, closed_by=NULL, "
+            # ``offen`` war der Grund, aus dem die Wiedereroeffnung nicht wirkte:
+            # Die sieben Waechter lasen ``offen != OPEN`` und sperrten weiter.
+            text("UPDATE public.finance_accounting_periods SET status=:zustand, closed_at=NULL, closed_by=NULL, "
                  "metadata = COALESCE(metadata,'{}'::jsonb) || jsonb_build_object('reopen_grund', :g, 'reopen_by', :by) "
                  "WHERE period=:p AND tenant_id=:t"),
-            {"g": grund, "by": bediener, "p": period, "t": self.tenant_id},
+            {"zustand": finance_periods.OFFEN, "g": grund, "by": bediener,
+             "p": period, "t": self.tenant_id},
         )
         self.db.commit()
-        return {"ok": True, "period": period, "status": "offen"}
+        return {"ok": True, "period": period, "status": finance_periods.OFFEN}

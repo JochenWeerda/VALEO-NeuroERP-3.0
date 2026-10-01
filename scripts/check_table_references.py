@@ -94,7 +94,11 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: (``domain_contracts.contracts``, ``.contract_versions``,
 #: ``.contract_obligations``) hat mit ``kontraktregister_20261001`` eine
 #: Migration.
-BASELINE_LEBEND = 18
+#:
+#: 2026-10-01, lebend 18 -> 17: Der Rueckfall auf ``domain_erp.accounting_periods``
+#: ist entfallen — er meldete eine Periodensperre, ohne zu sperren
+#: (``periode-ein-zustand-20261001.md``).
+BASELINE_LEBEND = 17
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

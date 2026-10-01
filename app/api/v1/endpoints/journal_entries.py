@@ -27,6 +27,7 @@ from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.journal_entries_schemas import JournalEntriesOut
+from app.core import finance_periods
 
 
 router = APIRouter()
@@ -101,19 +102,11 @@ async def create_journal_entry(
         # FIBU-GL-05: Check if period is open for bookings
         period = getattr(entry_data, "period", None)
         if period:
-            from sqlalchemy import text
-            period_check = db.execute(
-                text("""
-                    SELECT status FROM finance_accounting_periods
-                    WHERE tenant_id = :tenant_id AND period = :period
-                """),
-                {"tenant_id": tenant_id, "period": period}
-            ).fetchone()
-
-            if period_check and period_check[0] != "OPEN":
+            gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period)
+            if gesperrt:
                 raise HTTPException(
                     status_code=403,
-                    detail=f"Period {period} is {period_check[0]}. Bookings are blocked for closed periods."
+                    detail=finance_periods.meldung(period, gesperrt),
                 )
 
         entry_repo = container.resolve(JournalEntryRepository)

@@ -28,6 +28,7 @@ from ....core.gobd_artifact import register_artifact, sha256_hex
 from ....infrastructure.repositories import JournalEntryRepository
 
 from app.api.v1.schemas.base import BaseSchema
+from app.core import finance_periods
 from app.api.v1.schemas.finance_schemas import (
     ClosingCalculateOut,
     ClosingApproveOut,
@@ -151,21 +152,10 @@ async def post_journal_entry_action(
             return ActionResponse(success=False, message="Buchung nicht gefunden.")
 
         period = str(entry_row[0])
-        period_status = db.execute(
-            text(
-                """
-                SELECT status
-                FROM finance_accounting_periods
-                WHERE tenant_id = :tenant_id AND period = :period
-                LIMIT 1
-                """
-            ),
-            {"tenant_id": tenant_id, "period": period},
-        ).fetchone()
-        if period_status and str(period_status[0]) != "OPEN":
+        gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period)
+        if gesperrt:
             return ActionResponse(
-                success=False,
-                message=f"Periode {period} ist {period_status[0]}. Buchung gesperrt.",
+                success=False, message=finance_periods.meldung(period, gesperrt)
             )
 
         entry_repo = container.resolve(JournalEntryRepository)
@@ -317,21 +307,6 @@ class ClosingRunRequest(BaseModel):
     closing_type: str = Field("month", description="month | quarter | year")
 
 
-def _legacy_close_accounting_period(db: Session, tenant_id: str, period: str) -> None:
-    """Compatibility path for installations that still expose the legacy period table."""
-    db.execute(
-        text(
-            """
-            UPDATE domain_erp.accounting_periods
-            SET status = 'closed', closed_at = NOW()
-            WHERE tenant_id = :tenant_id AND period = :period
-            """
-        ),
-        {"tenant_id": tenant_id, "period": period},
-    )
-    db.commit()
-
-
 @router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen")
 async def calculate_closing(
     body: ClosingRunRequest,
@@ -374,12 +349,14 @@ async def lock_closing(
     except ClosingError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
-        try:
-            _legacy_close_accounting_period(db, tenant_id, body.period)
-            return ActionResponse(success=True, message=f"Periode {body.period} gesperrt.")
-        except Exception:
-            pass
-        raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}")
+        # Kein Rueckfall, der Erfolg meldet. Hier stand ein UPDATE auf
+        # ``domain_erp.accounting_periods`` — ein Schema, das es in keinem
+        # Migrationsstand gibt. Traf es null Zeilen, antwortete der Endpunkt
+        # "Periode gesperrt." **ohne Sperre**. Eine Periode, die als gesperrt
+        # gemeldet und weiter bebucht werden kann, ist der GoBD-Verstoss, den
+        # die Sperre verhindern soll.
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}") from exc
 
 
 @router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen")
@@ -400,15 +377,12 @@ async def run_closing(
     except ClosingError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
-        try:
-            _legacy_close_accounting_period(db, tenant_id, period)
-            return ActionResponse(
-                success=True,
-                message=f"Abschluss {closing_type} fuer Periode {period} abgeschlossen.",
-            )
-        except Exception:
-            pass
-        raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}")
+        # Kein Rueckfall. Der entfernte Weg behauptete einen vollstaendigen
+        # Abschluss, nachdem er nur einen Status zu setzen versucht hatte: ohne
+        # Salden und ohne Abschlussbuchung. Ein gemeldeter Abschluss ohne
+        # Abschlussbuchung verfehlt die Vollstaendigkeit (GoBD Rz. 36 ff.).
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}") from exc
 
 
 @router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen")

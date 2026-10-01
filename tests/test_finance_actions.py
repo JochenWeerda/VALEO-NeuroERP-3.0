@@ -12,11 +12,15 @@ from app.core.tenant import get_tenant_id
 
 
 class _FakeResult:
-    def __init__(self, *, fetchone=None, fetchall=None, first=None, rowcount: int = 0):
+    def __init__(self, *, fetchone=None, fetchall=None, first=None, rowcount: int = 0, scalar=None):
         self._fetchone = fetchone
         self._fetchall = list(fetchall or [])
         self._first = first
+        self._scalar = scalar
         self.rowcount = rowcount
+
+    def scalar(self):
+        return self._scalar
 
     def fetchone(self):
         return self._fetchone
@@ -97,6 +101,7 @@ class FakeDb:
             ),
         ]
         self.closed_period_updates: list[str] = []
+        self.gespeicherte_perioden: list[dict] = []
         self.inserted_cash_close = None
 
     def execute(self, statement, params=None):
@@ -111,7 +116,9 @@ class FakeDb:
             period = self.entry_periods.get(params["id"])
             return _FakeResult(fetchone=(period,) if period else None)
 
-        if "FROM finance_accounting_periods WHERE tenant_id = :tenant_id AND period = :period" in sql:
+        # Die Pruefung laeuft seit dem 01.10.2026 ueber app/core/finance_periods.py
+        # und nennt das Schema: public.finance_accounting_periods.
+        if "finance_accounting_periods WHERE tenant_id = :tenant_id AND period = :period" in sql:
             status = self.period_status.get(params["period"])
             return _FakeResult(fetchone=(status,) if status else None)
 
@@ -130,9 +137,29 @@ class FakeDb:
                 return _FakeResult(first=(2, 150.0, 150.0))
             raise RuntimeError("period calc failed")
 
-        if "UPDATE domain_erp.accounting_periods SET status = 'closed', closed_at = NOW()" in sql:
-            self.closed_period_updates.append(params["period"])
+        # Der echte Periodendienst (app/services/finance_period_service.py):
+        # lesen, dann anlegen oder fortschreiben. Hier stand bis zum 01.10.2026
+        # ein Zweig fuer `UPDATE domain_erp.accounting_periods` — den
+        # Legacy-Rueckfall, der Erfolg meldete, ohne zu sperren. Der Test
+        # bewies damit den Fehler.
+        if "FROM public.finance_accounting_periods WHERE tenant_id = :t" in sql:
+            return _FakeResult(fetchall=list(self.gespeicherte_perioden))
+
+        if "INSERT INTO public.finance_accounting_periods" in sql:
+            self.closed_period_updates.append(params["p"])
+            self.gespeicherte_perioden.append(
+                {"period": params["p"], "status": params["zustand"],
+                 "closed_at": None, "closed_by": params["by"]}
+            )
             return _FakeResult()
+
+        if "UPDATE public.finance_accounting_periods SET status=:zustand" in sql:
+            self.closed_period_updates.append(params["p"])
+            return _FakeResult()
+
+        # Abschlussreife: keine offenen und keine Storno-inkonsistenten Posten.
+        if "FROM domain_erp.offene_posten WHERE tenant_id = :t" in sql:
+            return _FakeResult(scalar=0, fetchall=[])
 
         if "FROM domain_erp.business_partners WHERE tenant_id=:tid AND credit_limit IS NOT NULL" in sql:
             return _FakeResult(fetchall=self.credit_limits)
@@ -150,6 +177,9 @@ class FakeDb:
 
     def commit(self):
         self.commit_count += 1
+
+    def rollback(self):
+        pass
 
 
 class FakeEntryRepo:
@@ -280,14 +310,24 @@ def test_closing_calculate_lock_run_and_approve_paths(monkeypatch):
     assert fallback.status_code == 200
     assert fallback.json()["entry_count"] == 0
 
+    # Sperren wirkt jetzt wirklich: Die Periode wird in
+    # public.finance_accounting_periods festgeschrieben. Vorher meldete der
+    # Endpunkt Erfolg ueber einen Rueckfall auf domain_erp.accounting_periods —
+    # ein Schema, das es in keinem Migrationsstand gibt — und sperrte nichts.
     locked = client.post("/finance/closing/lock", json={"period": "2026-04", "closing_type": "month"})
     assert locked.status_code == 200
     assert locked.json()["success"] is True
+    assert "2026-04" in db.closed_period_updates
 
-    run = client.post("/finance/closing/run", json={"period": "2026-04", "closing_type": "month"})
+    # Dieselbe Periode ein zweites Mal abzuschliessen wird abgewiesen — das war
+    # vorher nicht pruefbar, weil die erste Sperre nichts hinterliess.
+    nochmal = client.post("/finance/closing/lock", json={"period": "2026-04", "closing_type": "month"})
+    assert nochmal.status_code == 422
+
+    run = client.post("/finance/closing/run", json={"period": "2026-05", "closing_type": "month"})
     assert run.status_code == 200
     assert run.json()["success"] is True
-    assert "2026-04" in db.closed_period_updates
+    assert "2026-05" in db.closed_period_updates
 
     monkeypatch.setattr(finance_actions.endpoint_gateways, "get_closing_workspace_gateway", lambda: None)
     pending = client.post(

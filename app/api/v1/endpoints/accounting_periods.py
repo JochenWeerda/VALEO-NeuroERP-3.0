@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.accounting_periods_schemas import AccountingPeriodsOut
+from app.core import finance_periods
 
 
 router = APIRouter()
@@ -275,7 +276,7 @@ async def update_period(
         updates = []
 
         if period_update.status:
-            if period_update.status not in ["OPEN", "CLOSED", "ADJUSTING"]:
+            if period_update.status not in finance_periods.ZUSTAENDE:
                 raise HTTPException(
                     status_code=400,
                     detail="Status must be OPEN, CLOSED, or ADJUSTING"

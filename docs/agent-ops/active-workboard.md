@@ -29,60 +29,66 @@ Testdatenbank/Dockerinstanz. Temporäre Git-Testrepos nur im pytest-Tempverzeich
 **Risiken:** Git-Rename-Erkennung ist heuristisch; Reorganisation ist keine
 Coverage-Freigabe. Zweiter Bankimportweg bleibt separater Integrations-Slice.
 
-## PERIODE-EIN-ZUSTAND-20261001 — in Arbeit, Claude Code
+## PERIODE-EIN-ZUSTAND-20261001 — abgeschlossen, Claude Code
 
-**Ziel:** Eine Buchungsperiode hat **einen** Zustand. Heute stehen drei
-Vokabulare in derselben Spalte `public.finance_accounting_periods.status`:
-die Maske prueft `OPEN|CLOSED|ADJUSTING`, `close_period` schreibt `closed`,
-`reopen_period` schreibt `offen`. Sieben Buchungswege vergleichen
+**Ziel:** Eine Buchungsperiode hat **einen** Zustand. In
+`public.finance_accounting_periods.status` standen drei Vokabulare (`OPEN|CLOSED|
+ADJUSTING` in der Maske, `closed` beim Abschluss, `offen` bei der
+Wiedereroeffnung), und sieben Buchungswege verglichen jeder fuer sich
 `status != "OPEN"`.
-
-**Drei Folgen, alle nachgewiesen:**
-1. **Die Wiedereroeffnung wirkt nicht.** Sie verlangt einen Grund, schreibt ihn
-   ins Protokoll — und setzt `offen`. Die sieben Waechter lesen `offen != OPEN`
-   und **sperren weiter**. Die dokumentierte Wiedereroeffnung existiert nur auf
-   dem Papier.
-2. **`ADJUSTING` sperrt wie `CLOSED`.** Die Maske laesst den Zustand setzen; er
-   bedeutet dann nichts — eine Periode fuer Abschlussbuchungen, in die niemand
-   buchen kann.
-3. **Ein gescheiterter Abschluss meldet Erfolg.** `/finance/closing/lock` und
-   `/closing/run` fangen jeden unerwarteten Fehler und rufen
-   `_legacy_close_accounting_period` auf: ein `UPDATE domain_erp.accounting_periods`
-   — ein Schema, das es in keinem Migrationsstand gibt. Trifft das UPDATE
-   (auf einer Installation mit dieser Tabelle) null Zeilen, antwortet der
-   Endpunkt `success: true, "Periode gesperrt."` **ohne Sperre**, und `/run`
-   behauptet zusaetzlich einen Abschluss **ohne Salden und ohne
-   Abschlussbuchung**.
-
-**GoBD:** Unveraenderbarkeit (Rz. 107 ff.) verlangt, dass eine abgeschlossene
-Periode nicht mehr bebucht werden kann, und Nachvollziehbarkeit (Rz. 30 ff.),
-dass der Zustand einer Periode eindeutig feststellbar ist. Drei Vokabulare auf
-einer Spalte und ein Abschluss, der Erfolg meldet, ohne zu sperren, verfehlen
-beides.
-
-**Dateibesitz:** `app/core/finance_periods.py` (neu, das Woerterbuch und die
-eine Pruefung), `alembic/versions/periode_statuswoerterbuch_20261001.py`,
-`app/services/finance_period_service.py` (nur die beiden Schreibstellen),
-`app/api/v1/endpoints/finance_actions.py` (nur der Legacy-Rueckfall und der
-Waechter), die sechs weiteren Waechter (`ap_invoices.py`,
-`bulk_journal_import.py`, `finance_invoices.py`, `journal_entries.py`,
+**Dateibesitz:** `app/core/finance_periods.py` (neu),
+`alembic/versions/periode_statuswoerterbuch_20261001.py`,
+`app/services/finance_period_service.py`,
+`app/services/finance_transaction_service.py`,
 `app/services/ap_invoice_kernel_posting.py`,
-`app/services/finance_transaction_service.py`),
-`app/api/v1/endpoints/accounting_periods.py` (nur die Wertemenge),
-`tests/test_periode_ein_zustand_vertrag.py`, eigene Slice-/QA-Doku und dieser
-Abschnitt.
+`app/api/v1/endpoints/finance_actions.py`, `ap_invoices.py`,
+`bulk_journal_import.py`, `finance_invoices.py`, `journal_entries.py`,
+`accounting_periods.py` (je nur der Periodenhunk),
+`tests/test_periode_ein_zustand_vertrag.py`, `tests/test_finance_actions.py`
+(Testdoppel), `scripts/check_table_references.py` (nur die Schwelle), eigene
+QA-Doku und dieser Abschnitt.
+**Stand:** abgeschlossen 2026-10-01. Neunter Eintrag der Welle.
 
-**Abnahme:** Ein Woerterbuch, an einer Stelle; `CLOSED` sperrt, `OPEN` und
-`ADJUSTING` buchen; die Wiedereroeffnung wirkt; ein gescheiterter Abschluss
-meldet keinen Erfolg; die Datenbank haelt die Wertemenge per Pruefbedingung;
-Vertraege und Doku-Gates gruen.
+**Vier Befunde, alle behoben:**
+1. **Die Wiedereroeffnung wirkte nicht.** Sie verlangt einen Grund, weist eine
+   Wiedereroeffnung ohne Grund ab, protokolliert ihn in `metadata` — und setzte
+   `offen`. Die Waechter lasen `offen != "OPEN"` und **sperrten weiter**. Der
+   GoBD-Prozess existierte auf dem Papier und hatte keine Wirkung.
+2. **`ADJUSTING` sperrte wie `CLOSED`** und war damit bedeutungslos. Entschieden:
+   `ADJUSTING` erlaubt buchen; wer gegen jede Buchung sperren will, schliesst.
+   Dass fachlich nur *Abschluss*buchungen gemeint sind, gehoert an die Belegart,
+   nicht an die Periodensperre — benannte Luecke, keine stille Umdeutung.
+3. **Ein Lesefehler schaltete die Sperre ab.** `check_period_open` endete mit
+   `except Exception: pass  # allow through`. Jetzt: nicht feststellbar =
+   abgewiesen.
+4. **Ein gescheiterter Abschluss meldete Erfolg.** `/closing/lock` und
+   `/closing/run` fielen auf `UPDATE domain_erp.accounting_periods` zurueck — ein
+   Schema, das es in keinem Migrationsstand gibt. Traf das UPDATE null Zeilen,
+   antwortete der Endpunkt "Periode gesperrt." **ohne Sperre**, und `/run`
+   behauptete einen Abschluss **ohne Salden und ohne Abschlussbuchung**.
+   Rueckfall entfernt.
 
-**Risiken:** Die Entscheidung "ADJUSTING erlaubt buchen" ist fachlich: Sonst ist
-der Zustand gleichbedeutend mit `CLOSED` und wertlos. Die Normalisierung
-(`closed`->`CLOSED`, `offen`->`OPEN`) laeuft auf null Zeilen in beiden
-Datenbanken, ist also heute ein Nullvorgang — die Pruefbedingung wirkt ab
-morgen. Zusaetzlich stillgelegt: `domain_finance.period_closure`, null Zeilen,
-null Codeverweise.
+**Jetzt:** ein Woerterbuch in `app/core/finance_periods.py`; unbekannte Zustaende
+**sperren**; keine Zeile heisst offen; die Datenbank haelt die Wertemenge per
+Pruefbedingung und die Migration **bricht ab**, wenn ein Zustand nicht zuzuordnen
+ist; sieben Waechter, eine Pruefung, und ein Vertrag sucht den achten
+Eigenvergleich.
+
+**Ein bestehender Test bewies den Fehler:**
+`test_closing_calculate_lock_run_and_approve_paths` pruefte
+`"2026-04" in db.closed_period_updates`, und dieses Feld wurde im Testdoppel aus
+dem Legacy-`UPDATE` gefuellt. Der Test konnte nur gruen sein, weil die Sperre
+nichts hinterliess. Jetzt sperrt er echt, laesst den **zweiten** Abschluss
+derselben Periode mit 422 abweisen und schliesst eine andere Periode ab.
+
+**Nicht angefasst:** `domain_finance.period_closure` (leer, kein Codeverweis,
+Form deutet auf Controlling-Dimensionen — gehoert dem Controlling-Owner) und
+`domain_shared.fibu_perioden` (Geschaeftsjahresverwaltung, nicht Buchungssperre).
+
+**Nachgezogen:** Tabellen-Ratsche `BASELINE_LEBEND` 18 -> 17.
+**Abnahme:** 96 Tests gruen (26 neue Vertraege + fuenf bestehende Dateien), alle
+Ratschen gruen. Nachweis:
+`docs/quality-assurance/periode-ein-zustand-20261001.md`.
 
 ## KONTRAKT-EINE-ORDNUNG-20261001 — abgeschlossen, Claude Code
 

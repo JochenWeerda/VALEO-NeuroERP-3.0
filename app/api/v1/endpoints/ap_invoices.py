@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema, StatusResponse, TypedObjectOut
 from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
 from app.api.v1.schemas.mask_entity_contracts import FinanceApInvoiceOut, ap_invoice_mask_aliases
+from app.core import finance_periods
 
 
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
@@ -321,21 +322,13 @@ async def post_ap_invoice(
     # FIBU-GL-05: block posting in closed periods
     invoice_date = invoice.get("date", datetime.now().isoformat()[:10])
     period = str(invoice_date)[:7]
-    period_status = db.execute(
-        text(
-            """
-            SELECT status
-            FROM finance_accounting_periods
-            WHERE tenant_id = :tenant_id AND period = :period
-            LIMIT 1
-            """
-        ),
-        {"tenant_id": invoice.get("tenantId", "system"), "period": period},
-    ).fetchone()
-    if period_status and str(period_status[0]) != "OPEN":
+    gesperrt = finance_periods.gesperrter_zustand(
+        db, invoice.get("tenantId", "system"), period
+    )
+    if gesperrt:
         raise HTTPException(
             status_code=403,
-            detail=f"Period {period} is {period_status[0]}. Posting is blocked."
+            detail=finance_periods.meldung(period, gesperrt),
         )
 
     # Update status to posted

@@ -15,6 +15,7 @@ from app.core.exceptions import EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import JournalEntry
 from app.infrastructure.models.journal import JournalEntryLine
+from app.core import finance_periods
 
 logger = logging.getLogger(__name__)
 
@@ -51,24 +52,28 @@ class FinanceTransactionService:
             )
 
     def check_period_open(self, period: Optional[str]) -> None:
+        """Weist eine Buchung in eine gesperrte Periode ab.
+
+        Vorher endete diese Pruefung mit ``except Exception: pass  # allow
+        through``: War die Periodentabelle nicht lesbar, **entfiel die Sperre
+        ganz** — stillschweigend. Das ist die Unveraenderbarkeit nach GoBD
+        (Rz. 107 ff.) genau verkehrt herum: Wer nicht feststellen kann, ob eine
+        Periode offen ist, darf nicht buchen lassen.
+        """
         if not period:
             return
         try:
-            row = self.db.execute(
-                text(
-                    "SELECT status FROM finance_accounting_periods "
-                    "WHERE tenant_id = :tid AND period = :period"
-                ),
-                {"tid": self.tenant_id, "period": period},
-            ).fetchone()
-            if row and row[0] != "OPEN":
-                raise ValidationFailedError(
-                    f"Periode {period} ist {row[0]}. Buchungen in geschlossenen Perioden sind gesperrt."
-                )
-        except ValidationFailedError:
-            raise
-        except Exception:
-            pass  # table may not exist in test/dev — allow through
+            gesperrt = finance_periods.gesperrter_zustand(self.db, self.tenant_id, period)
+        except Exception as fehler:  # noqa: BLE001
+            raise ValidationFailedError(
+                f"Zustand der Periode {period} ist nicht feststellbar "
+                f"({type(fehler).__name__}). Buchung abgewiesen."
+            ) from fehler
+        if gesperrt:
+            raise ValidationFailedError(
+                f"Periode {period} ist {gesperrt}. "
+                "Buchungen in geschlossenen Perioden sind gesperrt."
+            )
 
     # ── GoBD helpers ─────────────────────────────────────────────────────────
 

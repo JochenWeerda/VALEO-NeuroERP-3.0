@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.finance_invoices_schemas import FinanceInvoicesOut
+from app.core import finance_periods
 
 
 router = APIRouter(prefix="/finance/invoices", tags=["finance", "invoices"])
@@ -130,21 +131,11 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
     """FIBU-AR-02: Erzeugt GL-Buchung + offenen Posten für Debitoren."""
     period = invoice.date[:7]
 
-    period_status = db.execute(
-        text(
-            """
-            SELECT status
-            FROM finance_accounting_periods
-            WHERE tenant_id = :tenant_id AND period = :period
-            LIMIT 1
-            """
-        ),
-        {"tenant_id": tenant_id, "period": period},
-    ).fetchone()
-    if period_status and str(period_status[0]) != "OPEN":
+    gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period)
+    if gesperrt:
         raise HTTPException(
             status_code=403,
-            detail=f"Period {period} is {period_status[0]}. Posting is blocked.",
+            detail=finance_periods.meldung(period, gesperrt),
         )
 
     customer_name = _resolve_customer_name(db, invoice.customerId, tenant_id)
