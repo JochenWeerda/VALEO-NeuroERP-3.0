@@ -95,7 +95,8 @@ def _normalized_iban(value: str | None) -> str:
 
 def prepare_statement_import(db: Session, tenant_id: str, account_id: str,
                              format: str, content: bytes, entries: list[dict],
-                             file_iban: str | None = None) -> tuple[str, str, dict | None]:
+                             file_iban: str | None = None,
+                             statement_currency: str | None = None) -> tuple[str, str, dict | None]:
     """Validate the real account and serialize byte-identical imports across routes."""
     account = db.execute(text("""
         SELECT iban,currency FROM domain_erp.bank_accounts
@@ -113,7 +114,7 @@ def prepare_statement_import(db: Session, tenant_id: str, account_id: str,
     currency = account['currency']
     if currency not in {'EUR', 'USD', 'CHF', 'GBP'}:
         raise HTTPException(status_code=409, detail="Bank account has no supported currency")
-    if any(entry.get('currency', 'EUR') != currency for entry in entries):
+    if (statement_currency is not None and statement_currency != currency) or any(entry.get('currency', 'EUR') != currency for entry in entries):
         raise HTTPException(status_code=422, detail="Statement currency does not match bank account")
     context = json.dumps([tenant_id, account_id, format.upper()], separators=(',', ':')).encode()
     fingerprint = hashlib.sha256(context + b"\0" + content).hexdigest()
@@ -150,113 +151,139 @@ def stored_statement_lines(db: Session, tenant_id: str, statement: dict) -> list
 
 
 def parse_camt053(content: bytes) -> dict:
-    """
-    Parse CAMT.053 (Bank Statement) XML format.
-    Returns dict with statement data.
-    """
+    """Booked single-transaction CAMT.053.001.02 profile, without guessed data."""
+    ns = '{urn:iso:std:iso:20022:tech:xsd:camt.053.001.02}'
+
+    def nodes(parent, path):
+        return parent.findall('/'.join(ns + part for part in path.split('/')))
+
+    def one(parent, path, required=False):
+        current = parent
+        for part in path.split('/'):
+            found = nodes(current, part)
+            if len(found) > 1 or (required and not found):
+                raise ValueError(f'CAMT requires a unique {path}')
+            if not found:
+                return None
+            current = found[0]
+        return current
+
+    def value(parent, path, required=False):
+        element = one(parent, path, required)
+        result = element.text.strip() if element is not None and element.text else None
+        if required and not result:
+            raise ValueError(f'CAMT requires {path}')
+        return result
+
+    def dated(parent, path):
+        choice = one(parent, path, True)
+        dates = nodes(choice, 'Dt') + nodes(choice, 'DtTm')
+        if len(dates) != 1 or not dates[0].text:
+            raise ValueError(f'CAMT requires an explicit {path} date')
+        raw = dates[0].text.strip()
+        if dates[0].tag == ns + 'Dt':
+            if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', raw):
+                raise ValueError('Invalid CAMT date')
+            return datetime.strptime(raw, '%Y-%m-%d').date()
+        if 'T' not in raw:
+            raise ValueError('Invalid CAMT datetime')
+        return datetime.fromisoformat(raw.replace('Z', '+00:00')).date()
+
+    def money(parent, path='Amt'):
+        element = one(parent, path, True)
+        raw = (element.text or '').strip()
+        currency = element.get('Ccy')
+        if not re.fullmatch(r'\d+(?:\.\d{1,2})?', raw) or len(raw.replace('.', '')) > 18:
+            raise ValueError('CAMT amount must be unsigned finite exact cents')
+        if not currency or not re.fullmatch(r'[A-Z]{3}', currency):
+            raise ValueError('CAMT amount requires currency')
+        amount = Decimal(raw).quantize(Decimal('0.01'))
+        if amount >= Decimal('10000000000000'):
+            raise ValueError('CAMT amount exceeds bank statement storage precision')
+        return amount, currency
+
+    def signed(parent):
+        amount, currency = money(parent)
+        direction = value(parent, 'CdtDbtInd', True)
+        if direction not in {'CRDT', 'DBIT'}:
+            raise ValueError('Invalid CAMT credit/debit indicator')
+        return amount if direction == 'CRDT' else -amount, currency
+
     try:
-        root = ET.fromstring(content)
-        
-        # Register namespaces
-        namespaces = {
-            'camt': 'urn:iso:std:iso:20022:tech:xsd:camt.053.001.02'
-        }
-        
-        if len(root.findall('.//camt:Stmt', namespaces)) != 1:
-            raise ValueError('Exactly one CAMT statement is required per import')
-        # Extract account info
-        acct_elem = root.find('.//camt:Acct', namespaces)
-        iban = acct_elem.find('.//camt:Id//camt:IBAN', namespaces)
-        account_iban = iban.text if iban is not None else None
-        
-        # Extract balances
-        bal_elem = root.find('.//camt:Bal', namespaces)
-        opening_balance = Decimal("0.00")
-        closing_balance = Decimal("0.00")
-        
-        if bal_elem is not None:
-            amt_elem = bal_elem.find('.//camt:Amt', namespaces)
-            if amt_elem is not None:
-                opening_balance = Decimal(amt_elem.text)
-        
-        # Extract all entries
+        xml = content.decode('utf-8-sig')
+        if '<!DOCTYPE' in xml or '<!ENTITY' in xml:
+            raise ValueError('CAMT DTD/entities are not supported')
+        root = ET.fromstring(xml)
+        if root.tag != ns + 'Document':
+            raise ValueError('Unsupported CAMT namespace or root')
+        report = one(root, 'BkToCstmrStmt', True)
+        stmt = one(report, 'Stmt', True)
+        if len(root.findall('.//' + ns + 'Stmt')) != 1:
+            raise ValueError('Exactly one CAMT statement is required')
+        account = one(stmt, 'Acct', True)
+        iban = value(account, 'Id/IBAN')
+        balances = {}
+        for bal in nodes(stmt, 'Bal'):
+            code = value(bal, 'Tp/CdOrPrtry/Cd')
+            if code in {'OPBD', 'CLBD'}:
+                if code in balances:
+                    raise ValueError(f'Duplicate CAMT {code} balance')
+                amount, currency = signed(bal)
+                balances[code] = (amount, currency, dated(bal, 'Dt'))
+        if set(balances) != {'OPBD', 'CLBD'}:
+            raise ValueError('CAMT requires OPBD and CLBD balances')
+        opening, closing = balances['OPBD'], balances['CLBD']
+        currency = opening[1]
+        if closing[1] != currency or closing[2] < opening[2]:
+            raise ValueError('Inconsistent CAMT balance currency or dates')
+        account_currency = value(account, 'Ccy')
+        if account_currency is not None and account_currency != currency:
+            raise ValueError('CAMT account and balance currencies differ')
         entries = []
-        ntry_elements = root.findall('.//camt:Ntry', namespaces)
-        
-        for idx, ntry in enumerate(ntry_elements):
-            try:
-                # Booking date
-                bookg_date_elem = ntry.find('.//camt:BookgDt//camt:Dt', namespaces)
-                booking_date = datetime.strptime(bookg_date_elem.text, '%Y-%m-%d').date() if bookg_date_elem is not None else date.today()
-                
-                # Value date
-                val_date_elem = ntry.find('.//camt:ValDt//camt:Dt', namespaces)
-                value_date = datetime.strptime(val_date_elem.text, '%Y-%m-%d').date() if val_date_elem is not None else booking_date
-                
-                # Amount
-                amt_elem = ntry.find('.//camt:Amt', namespaces)
-                amount = Decimal(amt_elem.text) if amt_elem is not None else Decimal("0.00")
-                
-                # Credit/Debit indicator
-                cdt_dbt_ind = ntry.find('.//camt:CdtDbtInd', namespaces)
-                if cdt_dbt_ind is not None and cdt_dbt_ind.text == 'DBIT':
-                    amount = -amount
-                
-                # Reference
-                ref_elem = ntry.find('.//camt:Refs//camt:AcctSvcrRef', namespaces)
-                reference = ref_elem.text if ref_elem is not None else None
-                
-                # Remittance info
-                rmt_inf_elem = ntry.find('.//camt:RmtInf//camt:Ustrd', namespaces)
-                remittance_info = rmt_inf_elem.text if rmt_inf_elem is not None else None
-                
-                # Creditor/Debtor info
-                creditor_name = None
-                creditor_iban = None
-                debtor_name = None
-                debtor_iban = None
-                
-                cdtr_elem = ntry.find('.//camt:Cdtr', namespaces)
-                if cdtr_elem is not None:
-                    nm_elem = cdtr_elem.find('.//camt:Nm', namespaces)
-                    creditor_name = nm_elem.text if nm_elem is not None else None
-                    acct_elem = cdtr_elem.find('.//camt:Acct//camt:Id//camt:IBAN', namespaces)
-                    creditor_iban = acct_elem.text if acct_elem is not None else None
-                
-                dbtr_elem = ntry.find('.//camt:Dbtr', namespaces)
-                if dbtr_elem is not None:
-                    nm_elem = dbtr_elem.find('.//camt:Nm', namespaces)
-                    debtor_name = nm_elem.text if nm_elem is not None else None
-                    acct_elem = dbtr_elem.find('.//camt:Acct//camt:Id//camt:IBAN', namespaces)
-                    debtor_iban = acct_elem.text if acct_elem is not None else None
-                
-                entries.append({
-                    'line_number': idx + 1,
-                    'booking_date': booking_date,
-                    'value_date': value_date,
-                    'amount': amount,
-                    'currency': amt_elem.get('Ccy', 'EUR') if amt_elem is not None else 'EUR',
-                    'reference': reference,
-                    'remittance_info': remittance_info,
-                    'creditor_name': creditor_name,
-                    'creditor_iban': creditor_iban,
-                    'debtor_name': debtor_name,
-                    'debtor_iban': debtor_iban
-                })
-            except Exception as e:
-                raise ValueError(f"Failed to parse CAMT entry {idx + 1}: {str(e)}") from e
-        
-        # Calculate closing balance
-        closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
-        
-        return {
-            'account_iban': account_iban,
-            'opening_balance': opening_balance,
-            'closing_balance': closing_balance,
-            'entries': entries
-        }
-    except Exception as e:
-        raise ValueError(f"Failed to parse CAMT.053: {str(e)}")
+        entry_nodes = nodes(stmt, 'Ntry')
+        if len(root.findall('.//' + ns + 'Ntry')) != len(entry_nodes):
+            raise ValueError('CAMT entries must belong directly to the statement')
+        for ntry in entry_nodes:
+            if value(ntry, 'Sts', True) != 'BOOK':
+                raise ValueError('Only booked CAMT entries are supported')
+            if value(ntry, 'RvslInd') not in {None, 'false', '0'}:
+                raise ValueError('CAMT reversal requires a reversal contract')
+            amount, entry_currency = signed(ntry)
+            if amount == 0 or entry_currency != currency:
+                raise ValueError('CAMT entry amount/currency is inconsistent')
+            txs = nodes(ntry, 'NtryDtls/TxDtls')
+            if len(txs) > 1 or nodes(ntry, 'NtryDtls/Btch') or len(ntry.findall('.//' + ns + 'TxDtls')) != len(txs):
+                raise ValueError('CAMT batch allocation is not supported')
+            tx = txs[0] if txs else ET.Element(ns + 'TxDtls')
+            if tx.findall('.//' + ns + 'CcyXchg') or nodes(tx, 'RtrInf'):
+                raise ValueError('CAMT FX/return requires a separate contract')
+            tx_amount = one(tx, 'AmtDtls/TxAmt')
+            if tx_amount is not None:
+                detail_amount, detail_currency = money(tx_amount)
+                if detail_amount != abs(amount) or detail_currency != currency:
+                    raise ValueError('CAMT transaction amount differs from entry')
+            reference = (value(ntry, 'AcctSvcrRef') or value(tx, 'Refs/AcctSvcrRef')
+                         or value(tx, 'Refs/EndToEndId') or value(ntry, 'NtryRef'))
+            texts = nodes(tx, 'RmtInf/Ustrd') + nodes(tx, 'RmtInf/Strd/CdtrRefInf/Ref')
+            remittance = '\n'.join(element.text.strip() for element in texts if element.text and element.text.strip())
+            booking_date = dated(ntry, 'BookgDt')
+            if not opening[2] <= booking_date <= closing[2]:
+                raise ValueError('CAMT booking date is outside statement balances')
+            entries.append({
+                'line_number': len(entries) + 1, 'booking_date': booking_date,
+                'value_date': dated(ntry, 'ValDt'), 'amount': amount, 'currency': currency,
+                'reference': reference, 'remittance_info': remittance or None,
+                'creditor_name': value(tx, 'RltdPties/Cdtr/Nm'),
+                'creditor_iban': value(tx, 'RltdPties/CdtrAcct/Id/IBAN'),
+                'debtor_name': value(tx, 'RltdPties/Dbtr/Nm'),
+                'debtor_iban': value(tx, 'RltdPties/DbtrAcct/Id/IBAN'),
+            })
+        if opening[0] + sum((entry['amount'] for entry in entries), Decimal('0')) != closing[0]:
+            raise ValueError('CAMT closing balance does not reconcile with entries')
+        return {'account_iban': iban, 'currency': currency, 'opening_balance': opening[0],
+                'closing_balance': closing[0], 'entries': entries}
+    except (ValueError, InvalidOperation, ET.ParseError) as exc:
+        raise ValueError(f'Failed to parse CAMT.053: {exc}') from exc
 
 
 def parse_mt940(content: bytes) -> dict:
@@ -475,7 +502,8 @@ async def import_bank_statement(
         db_started = True
         statement_id, account_iban, existing = prepare_statement_import(
             db, tenant_id, bank_account_id, format, content, parsed['entries'],
-            None if format.upper() == 'CSV' else parsed['account_iban'] or '')
+            None if format.upper() == 'CSV' else parsed['account_iban'] or '',
+            statement_currency=parsed.get('currency'))
         parsed['account_iban'] = account_iban
         if existing is not None:
             stored = stored_statement_lines(db, tenant_id, existing)

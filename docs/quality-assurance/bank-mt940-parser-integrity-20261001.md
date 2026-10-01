@@ -60,7 +60,9 @@ Supplementary-Details/Fortsetzungen ausserhalb :86: und unbekannte Felder
 verlangen eigene Profile und Abnahme. Optionale Metadaten 20/21/28C/64/65
 werden erkannt, aber nicht als bankfachlicher Identitaetsnachweis verwendet.
 Semantische Duplikate und historische UUID-Dateiimporte bleiben offen.
-CAMT-Saldoarten und Entrydetails bleiben ein eigener Parser-Slice.
+CAMT-Saldoarten und Einzeltransaktionsdetails sind im Nachzug
+[BANK-CAMT-PARSER-INTEGRITY](bank-camt-parser-integrity-20261001.md) fuer
+das begrenzte Profil abgesichert; weitere Bankprofile bleiben offen.
 
 Parallelstand: CRM-Owner baut die Godfile ab; Groessenratsche aktuell gruen.
 Seine neue Pagination-Baselinezuordnung crm_360_sql::_query_many verletzt

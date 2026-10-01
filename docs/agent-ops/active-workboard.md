@@ -63,9 +63,9 @@ Entscheidungsdokument. Was **nicht** entschieden wird: ob
 `domain_einkauf.kontrakte` (Rahmenkontrakt mit Positionspreisen) langfristig im
 Warenkontrakt aufgeht. Dafuer fehlt Bestand zum Messen.
 
-## BANK-CAMT-PARSER-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## BANK-CAMT-PARSER-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe Abnahme offen.
 **Ziel:** OPBD/CLBD mit Vorzeichen und Waehrung lesen, Original-Endsaldo
 abgleichen; nur gebuchte eindeutige Einzeltransaktionen zum Abgleich zulassen.
 **Dateibesitz:** `bank_statement_import.py` CAMT-Parser und Importwaehrungs-
@@ -81,6 +81,17 @@ Direkte XML-Pfade verhindern Uebernahme fremder verschachtelter Werte.
 Keine neue Route/Tabelle/Migration oder weitere Datenbank/Dockerinstanz.
 **Risiken:** Profil enger als ISO-Schema; keine volle XSD-/Bankzertifizierung.
 Historische UUID- und semantische Datei-Duplikate bleiben separate Gaps.
+
+**Ergebnis:** OPBD/CLBD und BOOK-Einzelzahlungen abgestimmt, direkte eindeutige
+Felder ohne Datumsersatz, Gegenkonten/Referenzen erhalten, auch bei leerem
+Auszug Kontowaehrung geprueft. Sammler, Reversal, FX und Return ohne Vertrag
+abgelehnt. Centdarstellung und NUMERIC(15,2)-Grenze vor Writes abgesichert.
+**Abnahme:** 134 Vertraege, davon 32 neue CAMT-Vertraege bestanden. Slice-CLI,
+Ruff, Whitespace, Handbuch, Pagination und Baselineintegritaet gruen.
+**Nachweis:** `docs/quality-assurance/bank-camt-parser-integrity-20261001.md`.
+**Offen:** Weitere Bankprofile/Versionen, andere Bankimportrouten, Sammler-
+aufloesung, Rueckbuchung/GL und semantische/historische Datei-Duplikate.
+GitHub-CI/Bank-/Deployment-Abnahme bleibt extern; keine neue Testressource.
 
 ## KONTRAKTREGISTER-MIGRATION-20261001 — abgeschlossen, Claude Code
 
@@ -156,8 +167,9 @@ Whitespace bestanden. Tests ausschliesslich auf bestehendem valeo_probe.
 **Nachweis:** `docs/quality-assurance/bank-mt940-parser-integrity-20261001.md`.
 **Integration:** Keine fremde CRM-Pagination-Baseline uebernommen;
 deren Integritaetsfehler bleibt beim Owner. GitHub-CI/Deployment offen.
-**Naechster freier Slice:** CAMT-Saldoarten und Entrydetails (offen;
-vor Arbeitsbeginn eigenen Claim setzen).
+**Nachzug:** CAMT-Saldoarten und Einzeltransaktionsdetails im begrenzten
+BANK-CAMT-PARSER-INTEGRITY-Profil abgesichert. Weitere Bankprofile und andere
+Importwege bleiben eigene offene Vertraege.
 
 ## BANK-IMPORT-ACCOUNT-REPLAY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

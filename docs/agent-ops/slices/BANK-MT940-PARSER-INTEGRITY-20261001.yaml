@@ -23,7 +23,7 @@ test_evidence:
   - Finaler Guard gegen mehrdeutiges Jahr mit 102 Vertraegen bestanden, davon 20 neue MT940-Vertraege.
 risks:
   - Reversals, nationale Kontoformate und weitere Bankprofile erfordern eigene Fachabnahme.
-  - Semantische Duplikate, historische Importe und CAMT-Parserdetails bleiben offen.
+  - Semantische Duplikate, historische Importe und weitere CAMT-Profile bleiben offen; begrenztes CAMT-Profil im Nachzug abgesichert.
 ai_harness:
   fachlicher_vertrag: Zahlungszeilen und Bank-Saldo stimmen exakt ueberein.
   architektur_vertrag: Minor-Bugfix bestehenden Parsers ohne neue Route oder Schema.

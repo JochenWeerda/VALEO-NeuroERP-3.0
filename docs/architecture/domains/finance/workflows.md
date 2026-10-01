@@ -54,3 +54,10 @@ mit IBAN, passenden Waehrungen und gueltigen Daten; Widersprueche verhindern
 alle Writes. RC/RD bis zum Rueckbuchungsvertrag explizit abgelehnt.
 Weitere Bankprofile und CAMT-Details bleiben separate Abnahmen.
 [MT940-Profil und Parser-Abnahme](../../../quality-assurance/bank-mt940-parser-integrity-20261001.md).
+
+CAMT.053.001.02 liest gezielt OPBD und CLBD, gleicht gebuchte Zahlungen exakt
+gegen den Bank-Endsaldo ab und behaelt explizite Buchungs-/Valutadaten sowie
+alle Referenztexte und Gegenkonten. Nur BOOK-Einzelzahlungen ohne Reversal;
+Sammelbuchungen, FX und Retouren ohne Fachvertrag werden abgelehnt. Auch
+leere Auszuege pruefen die Kontowaehrung. Weitere Profile bleiben separat.
+[CAMT-Profil und Parser-Abnahme](../../../quality-assurance/bank-camt-parser-integrity-20261001.md).

@@ -224,8 +224,10 @@ def test_parallel_cross_route_uploads_store_one_statement(import_case):
 
 
 CAMT_STMT = '''<Stmt><Acct><Id><IBAN>{iban}</IBAN></Id></Acct>
+<Bal><Tp><CdOrPrtry><Cd>OPBD</Cd></CdOrPrtry></Tp><Amt Ccy="{currency}">0</Amt><CdtDbtInd>CRDT</CdtDbtInd><Dt><Dt>2026-09-28</Dt></Dt></Bal>
+<Bal><Tp><CdOrPrtry><Cd>CLBD</Cd></CdOrPrtry></Tp><Amt Ccy="{currency}">25</Amt><CdtDbtInd>CRDT</CdtDbtInd><Dt><Dt>2026-09-28</Dt></Dt></Bal>
 <Ntry><Amt Ccy="{currency}">25.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
-<BookgDt><Dt>2026-09-28</Dt></BookgDt><Refs><AcctSvcrRef>REF-1</AcctSvcrRef></Refs>
+<Sts>BOOK</Sts><BookgDt><Dt>2026-09-28</Dt></BookgDt><ValDt><Dt>2026-09-28</Dt></ValDt><AcctSvcrRef>REF-1</AcctSvcrRef>
 </Ntry></Stmt>'''
 
 

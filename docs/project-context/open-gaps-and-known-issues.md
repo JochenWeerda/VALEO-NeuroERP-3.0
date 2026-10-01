@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-CAMT-PARSER-INTEGRITY — gebuchte Salden und Einzelzahlungen (2026-10-01)
+
+**Geschlossen:** falsche erste Saldoart/Vorzeichen, errechneter statt gepruefter
+Endsaldo, Datumsersatz durch heute, ungebuchte/mehrdeutige Einzelzuordnung,
+verschachtelte Ersatzwerte sowie verlorene Gegenkonten/Referenztexte.
+OPBD/CLBD und BOOK im CAMT.053.001.02-Einzelauszugsprofil abgestimmt;
+134 Vertraege, davon 32 neue CAMT-Vertraege bestanden auf vorhandenem valeo_probe.
+**Offen:** Weitere Versionen/Bankprofile und andere Importwege, Sammler-
+aufloesung, FX, Retouren, Rueckbuchung/GL und semantische/historische
+Datei-Duplikate. GitHub-CI/Bankprofil-/Deployment-Abnahme extern. Nachweis:
+`docs/quality-assurance/bank-camt-parser-integrity-20261001.md`.
+
 ## BANK-MT940-PARSER-INTEGRITY — vollstaendige Zeilen und Salden (2026-10-01)
 
 **Geschlossen:** verlorene :61:-Zeilen ohne optionales :86:, falsche
@@ -18,7 +30,7 @@ Datumslaenge, positive Sollsalden und ignorierter Endsaldo. Begrenztes
 IBAN-Einzelauszugsprofil; Bank-Saldo muss alle Zahlungszeilen exakt abdecken.
 102 Parser-, Finanz- und DQ-Vertraege bestanden auf bestehendem valeo_probe.
 **Offen:** RC/RD-Rueckbuchungsintegration, weitere Bankprofile/SWIFT-Umschlaege,
-nationale Kontokennungen, CAMT-Saldoarten/Entrydetails und semantische bzw.
+nationale Kontokennungen, weitere CAMT-Bankprofile und semantische bzw.
 historische Datei-Duplikate. Fremde CRM-Baselineintegritaet bleibt beim Owner;
 GitHub-CI/Bankprofil-/Deployment-Abnahme extern. Nachweis:
 `docs/quality-assurance/bank-mt940-parser-integrity-20261001.md`.
