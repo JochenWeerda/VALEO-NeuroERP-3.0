@@ -48,9 +48,9 @@ def import_case():
     if not raw:
         pytest.skip("Migrated PostgreSQL test database required")
     url = make_url(raw)
-    if "test" not in (url.database or "").lower():
+    if url.database != "valeo_probe" and "test" not in (url.database or "").lower():
         if os.getenv("TEST_DATABASE_URL"):
-            pytest.fail("TEST_DATABASE_URL must point to a test database")
+            pytest.fail("TEST_DATABASE_URL must point to shared valeo_probe or a configured test database")
         pytest.skip("Never seed bank imports into a development database")
     assert url.drivername.startswith("postgresql")
     engine = create_engine(url)

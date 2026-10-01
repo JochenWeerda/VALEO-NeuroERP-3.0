@@ -32,6 +32,14 @@ gewachsene.** Beide braucht es, und sie sind nicht austauschbar:
 Aufruf
 ------
 
+Ressourcenregel fuer alle Agenten (User-Vorgabe 2026-10-01): Vorhandenen
+Pruefstand wiederverwenden. Keine Datenbank oder Dockerinstanz je Test/Suite/
+Slice/Agent. Der Aufruf ohne Option setzt den gemeinsamen Pruefstand zurueck
+und ist keine normale Testvorbereitung! Fuer Sitzungsstart --status verwenden;
+--keep nur im abgestimmten Migrationsclaim. Frische-Schema-Abnahmen am selben
+Pruefstand koordinieren, niemals waehrend fremder Nutzung zuruecksetzen.
+Siehe AGENTS.md und docs/quality-assurance/test-database-resource-policy-20261001.md.
+
     python scripts/pruefstand_db.py             # aufsetzen (idempotent)
     python scripts/pruefstand_db.py --status    # nur nachsehen, nichts aendern
     python scripts/pruefstand_db.py --keep      # nicht loeschen, nur migrieren

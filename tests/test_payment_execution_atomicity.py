@@ -58,9 +58,9 @@ def execution_case():
     if not raw_url:
         pytest.skip("Explicit migrated PostgreSQL test database required")
     url = make_url(raw_url)
-    if "test" not in (url.database or "").lower():
+    if url.database != "valeo_probe" and "test" not in (url.database or "").lower():
         if os.getenv("TEST_DATABASE_URL"):
-            pytest.fail("TEST_DATABASE_URL must name a test database")
+            pytest.fail("TEST_DATABASE_URL must name the shared valeo_probe or a configured test database")
         pytest.skip("Never seed payment tests into a development database")
     if not url.drivername.startswith("postgresql"):
         pytest.fail("PostgreSQL required to verify failed-transaction semantics")

@@ -11,20 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## TEST-DATABASE-RESOURCE-POLICY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## TEST-DATABASE-RESOURCE-POLICY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
-**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
-**Ziel:** User-Vorgabe verbindlich für alle Agenten: keine Datenbank oder
-Dockerinstanz pro Test/Agent; bestehenden Prüfstand wiederverwenden und
-Testdaten über Transaktionen/eindeutige IDs isolieren.
-**Dateibesitz:** `AGENTS.md`, `docs/agent-ops/session-start-checklist.md`,
-eigener Ressourcen-Runbook-/Slice-Abschnitt, Prüfstand-Dokumentation im
-`scripts/pruefstand_db.py`, die drei eigenen Finanz-Testdateien (nur
-Prüfstand-Namensguard). Workboard/Open-Gaps nur im eigenen Abschnitt.
-**Abnahme:** Gemeinsame Regeln verlinkt; Finanzverträge gegen vorhandenes
-`valeo_probe` grün; eigene zusätzliche Datenbank nach Nutzungsprüfung entfernt.
-**Risiken:** Keine Löschung fremder Prüfstände oder Docker-Volumes; kein
-Reset des gemeinsamen Prüfstands während paralleler Arbeit.
+**Owner:** Codex-01a0f3fc. **Claim:** `9dfc87e76`. **Stand:** abgeschlossen 2026-10-01.
+**Ziel/Ergebnis:** User-Vorgabe gilt für alle Agenten: keine Datenbank oder
+Dockerinstanz pro Test/Suite/Slice/Agent. `AGENTS.md` und Pflichtcheckliste
+fordern Wiederverwendung, eigene Testdatenisolation und keinen Reset während
+fremder Nutzung. Die Prüfstand-Hilfe warnt vor ihrem resetzenden Standardaufruf.
+**Dateibesitz:** AGENTS, Startcheckliste, Prüfstand-Dokumentation,
+Namensguard der beiden eigenen Finanz-Testdateien und eigenes Runbook/Slice.
+**Abnahme:** 36 Finanz-/Import-/Transaktionsverträge grün auf vorhandenem
+`valeo_probe`; keine neue DB/Containeranlage oder Schema-Rücksetzung.
+Der eigene zusätzliche Prüfstand ist nach Nutzungsprüfung entfernt.
+**Risiken:** Fremde Datenbanken und Dockerressourcen bleiben unberührt;
+frische Schema-Abnahmen am gemeinsamen Prüfstand benötigen Koordination.
+**Nachweis:** `docs/quality-assurance/test-database-resource-policy-20261001.md`.
 
 ## SECURITY-PATCH-MILESTONE-20261001 — reserviert, Codex (Chat 01a0f3fc)
 

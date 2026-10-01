@@ -11,6 +11,15 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## TEST-DATABASE-RESOURCE-POLICY — alle Agenten (2026-10-01)
+
+**Verbindlich integriert:** keine zusätzlichen Datenbank-/Dockerinstanzen
+pro Test/Suite/Slice/Agent. Bestehenden Prüfstand mit eigenen isolierten
+Testdaten verwenden. 36 Finanzverträge auf vorhandenem `valeo_probe` grün;
+eigene zusätzliche Datenbank nach Nutzungsprüfung entfernt. Fremde
+Ressourcen bleiben unberührt. Runbook und gemeinsame Agentenregel:
+`docs/quality-assurance/test-database-resource-policy-20261001.md`, `AGENTS.md`.
+
 ## PAYMENT-CSV-IMPORT-INTEGRITY — Zahlungsimport (2026-10-01)
 
 **Geschlossen:** Selbstduplikat-Blockade gültiger CSV-Daten, verschwiegene

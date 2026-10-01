@@ -33,6 +33,11 @@ Diese Checkliste minimiert Kontextverlust bei Neustarts oder Agentenwechseln.
 - Welche Risiken oder Blocker bestehen?
 - Welche Annahmen wurden bereits getroffen?
 - Welche Tests oder Checks sind Pflicht?
+- Welcher vorhandene Testpruefstand wird wiederverwendet? Keine neue Datenbank
+  oder Dockerinstanz pro Test/Suite/Slice/Agent anlegen. `--status` pruefen;
+  keine Ruecksetzung oder Migration waehrend fremder Nutzung. Verbindliche
+  Ressourcenregel in [AGENTS.md](../../AGENTS.md) und
+  [Pruefstand-Runbook](../quality-assurance/test-database-resource-policy-20261001.md).
 - Welche Doku muss nachgezogen werden?
 
 ## Vor dem ersten Edit
