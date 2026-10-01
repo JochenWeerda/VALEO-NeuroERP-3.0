@@ -54,7 +54,15 @@ def import_case():
     assert url.drivername.startswith("postgresql")
     engine = create_engine(url)
     db = ImportSession(engine)
-    tenant = f"import-test-{uuid4().hex}"
+    tenant = str(uuid4())
+    db.execute(text("INSERT INTO domain_shared.tenants (id,name,domain,is_active) VALUES (:t,'Import test',:domain,TRUE)"),
+               {"t": tenant, "domain": f"{tenant}.test.local"})
+    db.execute(text("""
+        INSERT INTO domain_erp.bank_accounts (id,tenant_id,account_number,bank_name,iban,currency,is_active)
+        VALUES (:id,:t,:id,'Test Bank','DE89370400440532013000',:currency,TRUE)
+    """), {"id": f"bank-{tenant}", "t": tenant, "currency": "USD"})
+    db.commit()
+    db.commits = db.rollbacks = 0
     app = FastAPI()
     app.include_router(bank_statement_import.router)
     app.dependency_overrides[get_db] = lambda: db
@@ -65,16 +73,18 @@ def import_case():
     with engine.begin() as cleanup:
         cleanup.execute(text("DELETE FROM domain_erp.bank_statement_lines WHERE tenant_id=:t"), {"t": tenant})
         cleanup.execute(text("DELETE FROM domain_erp.bank_statements WHERE tenant_id=:t"), {"t": tenant})
+        cleanup.execute(text("DELETE FROM domain_erp.bank_accounts WHERE tenant_id=:t"), {"t": tenant})
+        cleanup.execute(text("DELETE FROM domain_shared.tenants WHERE id=:t"), {"t": tenant})
     engine.dispose()
 
 
-CSV = "date,amount,currency,reference\n2026-09-28,10.00,USD,REF-1\n2026-09-29,20.00,CHF,REF-2\n"
+CSV = "date,amount,currency,reference\n2026-09-28,10.00,USD,REF-1\n2026-09-29,20.00,USD,REF-2\n"
 
 
 def upload(case, csv=CSV):
     _, client, tenant = case
     return client.post("/bank-statements/import", params={"tenant_id": tenant,
-        "bank_account_id": "bank-test", "format": "CSV", "auto_match": False},
+        "bank_account_id": f"bank-{tenant}", "format": "CSV", "auto_match": False},
         files={"file": ("statement.csv", csv.encode(), "text/csv")})
 
 
@@ -93,9 +103,9 @@ def test_valid_csv_preserves_currency_counts_and_balance(import_case):
     assert data["total_lines"] == data["imported_lines"] == 2
     assert data["error_lines"] == 0 and data["import_errors"] is None
     assert Decimal(data["closing_balance"]) == Decimal("30")
-    assert [row["currency"] for row in data["lines"]] == ["USD", "CHF"]
+    assert [row["currency"] for row in data["lines"]] == ["USD", "USD"]
     rows = db.execute(text("SELECT currency,amount FROM domain_erp.bank_statement_lines WHERE tenant_id=:t ORDER BY line_number"), {"t": tenant}).all()
-    assert rows == [("USD", Decimal("10")), ("CHF", Decimal("20"))]
+    assert rows == [("USD", Decimal("10")), ("USD", Decimal("20"))]
     assert counts(import_case) == (1, 2) and db.commits == 1
 
 
@@ -127,7 +137,7 @@ def test_invalid_input_is_rejected_before_writes(import_case, csv):
 
 
 def test_two_imports_have_distinct_persistent_ids(import_case):
-    first, second = upload(import_case), upload(import_case)
+    first, second = upload(import_case), upload(import_case, CSV.replace("REF-2", "REF-3"))
     assert first.status_code == second.status_code == 200
     assert first.json()["statement_id"] != second.json()["statement_id"]
     assert counts(import_case) == (2, 4)
@@ -136,7 +146,7 @@ def test_two_imports_have_distinct_persistent_ids(import_case):
 def test_auto_match_without_candidate_keeps_import_unmatched(import_case):
     db, client, tenant = import_case
     response = client.post("/bank-statements/import", params={"tenant_id": tenant,
-        "bank_account_id": "bank-test", "format": "CSV", "auto_match": True},
+        "bank_account_id": f"bank-{tenant}", "format": "CSV", "auto_match": True},
         files={"file": ("statement.csv", CSV.encode(), "text/csv")})
     assert response.status_code == 200, response.text
     assert all(row["status"] == "UNMATCHED" for row in response.json()["lines"])

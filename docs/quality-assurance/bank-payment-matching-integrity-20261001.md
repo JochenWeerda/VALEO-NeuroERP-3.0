@@ -88,9 +88,10 @@ OpenAPI-Tenantparameter aendern sich; der aktive OPENAPI-DRIFT-REFRESH-Owner
 muss die Spezifikation aus dem integrierten Stand generieren.
 
 Bestehende Identitaets-/Rollenmiddleware wird konsumiert, nicht neu bewiesen.
-Bankkonto-/IBAN-Bindung, Importdatei-Idempotenz ueber mehrere neue Auszuege,
-CAMT-/MT940-Parserdetails, Rueckbuchung und GL-Journalintegration sind separate
-Fachvertraege. Derselbe bereits gespeicherte Zahlungssatz ist wiederholbar;
-der erneute Upload derselben Datei erzeugt weiterhin einen neuen Auszug.
+Bankkonto-/IBAN-Bindung und identische Datei-Bytes sind im Nachzug
+[BANK-IMPORT-ACCOUNT-REPLAY](bank-import-account-replay-20261001.md) abgesichert.
+Historische UUID-Importe und abweichende Dateien mit denselben Buchungen,
+CAMT-/MT940-Parserdetails, Rueckbuchung und GL-Journalintegration bleiben
+separate Fachvertraege.
 Legacy-PARTIAL-Zuordnungen ohne gespeicherten Verteilbetrag werden nicht
 blind weiterverrechnet. GitHub-CI/Deployment bleiben externe Abnahmen.

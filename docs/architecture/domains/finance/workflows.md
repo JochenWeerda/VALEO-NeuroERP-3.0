@@ -37,3 +37,13 @@ lassen den OP und die Rechnung offen. Batch maximal 100 Zeilen; wiederholte
 Zuordnung derselben Bankzeile ist idempotent. Keine neue GL-Buchung durch
 blossen Abgleich. Nachweis:
 [Matching-Abnahme](../../../quality-assurance/bank-payment-matching-integrity-20261001.md).
+
+Dateiimport -> aktives eigenes Konto mit gueltiger IBAN und gleicher Waehrung
+pruefen -> fuer CAMT/MT940 Datei-IBAN vergleichen -> Dateiidentitaet aus
+Tenant/Konto/Format/Originalbytes sperren -> einmal atomar speichern oder
+vorhandenen Auszug mit aktuellem Zuordnungsstatus liefern. Beide CSV-Routen
+teilen die Identitaet. Replay fuehrt keinen erneuten Abgleich durch, auch
+nicht bei geaendertem auto_match; expliziten Batchabgleich verwenden.
+Historische UUID-Importe und gleiche Buchungen in anderen Datei-Bytes bleiben
+separate Fachgaps. CSV-Salden sind synthetische Summen, keine Banknachweise.
+[Kontobindung und Replay-Abnahme](../../../quality-assurance/bank-import-account-replay-20261001.md).

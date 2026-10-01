@@ -27,9 +27,6 @@ from app.core.data_quality_enforcement import (
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
-
-
 router = APIRouter()
 
 
@@ -99,6 +96,7 @@ async def import_payments_csv(
     db: Session = Depends(get_db)
 ):
     """Import payments from CSV and persist to bank_statement_lines for matching."""
+    db_started = False
     try:
         content = await file.read()
         text_content = content.decode('utf-8-sig')
@@ -143,6 +141,7 @@ async def import_payments_csv(
 
             try:
                 booking_date = datetime.strptime(booking_date_raw, '%Y-%m-%d').date()
+                value_date = datetime.strptime(row.get('value_date', booking_date_raw), '%Y-%m-%d').date()
                 amount = Decimal(amount_raw)
             except Exception as e:
                 raise HTTPException(status_code=422, detail=f"Failed to parse CSV row {row_number}: {str(e)}") from e
@@ -154,6 +153,7 @@ async def import_payments_csv(
             remittance_info = row.get('remittance_info', '')
             entries.append({
                 "booking_date": booking_date,
+                "value_date": value_date,
                 "amount": amount,
                 "currency": currency or "EUR",
                 "reference": reference,
@@ -163,19 +163,37 @@ async def import_payments_csv(
         if not entries:
             return []
 
-        statement_id = f"STMT-CSV-{uuid7()}"
+        from app.api.v1.endpoints.bank_statement_import import prepare_statement_import, stored_statement_lines
+
+        db_started = True
+        statement_id, account_iban, existing = prepare_statement_import(
+            db, tenant_id, bank_account, 'CSV', content, entries)
+        if existing is not None:
+            stored = stored_statement_lines(db, tenant_id, existing)
+            result_entries = [PaymentEntry(
+                id=row['id'], tenant_id=tenant_id, bank_account=bank_account,
+                booking_date=row['booking_date'], value_date=row['value_date'],
+                amount=row['amount'], currency=row['currency'], reference=row['reference'],
+                remittance_info=row['remittance_info'], creditor_name=row['creditor_name'],
+                creditor_iban=row['creditor_iban'], debtor_name=row['debtor_name'],
+                debtor_iban=row['debtor_iban'], matched_op_id=row['matched_op_id'],
+                match_status=row['status'] or 'UNMATCHED',
+            ) for row in stored]
+            db.commit()
+            return result_entries
         stmt_ins = text("""
             INSERT INTO domain_erp.bank_statements
             (id, tenant_id, bank_account_id, account_iban, statement_date, opening_balance,
              closing_balance, format, total_lines, imported_lines, status, created_at, updated_at)
-            VALUES (:id, :tenant_id, :bank_account_id, :iban, :stmt_date, 0, 0, 'CSV', :total, :imported, 'imported', NOW(), NOW())
+            VALUES (:id, :tenant_id, :bank_account_id, :iban, :stmt_date, 0, :closing, 'CSV', :total, :imported, 'imported', NOW(), NOW())
         """)
         db.execute(stmt_ins, {
             "id": statement_id,
             "tenant_id": tenant_id,
             "bank_account_id": bank_account,
-            "iban": "",
+            "iban": account_iban,
             "stmt_date": entries[0]["booking_date"] if entries else date.today(),
+            "closing": sum((entry['amount'] for entry in entries), Decimal('0')),
             "total": len(entries),
             "imported": len(entries),
         })
@@ -196,7 +214,7 @@ async def import_payments_csv(
                 "statement_id": statement_id,
                 "line_num": idx + 1,
                 "book_date": e["booking_date"],
-                "val_date": e["booking_date"],
+                "val_date": e["value_date"],
                 "amount": e["amount"],
                 "currency": e["currency"],
                 "reference": e["reference"],
@@ -207,7 +225,7 @@ async def import_payments_csv(
                 tenant_id=tenant_id,
                 bank_account=bank_account,
                 booking_date=e["booking_date"],
-                value_date=e["booking_date"],
+                value_date=e["value_date"],
                 amount=e["amount"],
                 currency=e["currency"],
                 reference=e["reference"],
@@ -219,6 +237,8 @@ async def import_payments_csv(
         return result_entries
 
     except HTTPException:
+        if db_started:
+            db.rollback()
         raise
     except Exception as e:
         logger.error(f"Error importing CSV: {e}")

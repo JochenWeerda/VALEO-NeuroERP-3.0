@@ -11,13 +11,28 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-IMPORT-ACCOUNT-REPLAY — Konto und Dateiwiederholung (2026-10-01)
+
+**Geschlossen:** Import auf unbekanntes/fremdes/inaktives Konto,
+ungepruefte IBAN und Kontowaehrung; erneute Zahlung durch identische
+Datei-Bytes in Tenant/Konto/Format. Beide CSV-Routen teilen Sperre und
+Identitaet; Replay zeigt gespeicherten Status ohne zweites Matching/Audit.
+106 verschiedene Vertraege bestanden auf vorhandenem valeo_probe.
+**Offen:** Historische UUID-Importe ohne Dateiidentitaet, gleiche Buchungen
+in unterschiedlichen Bytes/Konto-IDs/Formaten, weitergehende Parserdetails,
+Rueckbuchung/GL und externe CI-/Deployment-Abnahme. Slice-CLI-Fehlaufruf durch
+Ergebnisbeschreibungen als Befehle in beiden eigenen Slices korrigiert. CRM-Godfile
+bleibt beim aktiven Owner. Nachweis:
+`docs/quality-assurance/bank-import-account-replay-20261001.md`.
+
 ## BANK-PAYMENT-MATCHING-INTEGRITY — sicherer Abgleich (2026-10-01)
 
 **Geschlossen:** angenommene statt gelesene Zahlung, falscher Belegstatus bei
 Teilzahlung, Fremdmandanten ueber Query, ungesicherte Wiederholung und
 fehlender atomarer Nachweis. Import-, Einzel- und Batchabgleich verwenden
 denselben Vertrag; 82 verschiedene echte und bestehende Vertraege bestanden.
-**Offen:** Dateireimport-Idempotenz, Bankkonto-/IBAN-Bindung, Rueckbuchung,
+**Nachzug:** Kontobindung und identische Datei-Bytes in BANK-IMPORT-ACCOUNT-REPLAY
+abgesichert. **Offen:** Historische/semantische Duplikate, Rueckbuchung,
 GL-Journalintegration und weitergehende CAMT-/MT940-Abnahme. Fremde aktive
 CI-Gaps und externe Integration bleiben offen. Nachweis:
 `docs/quality-assurance/bank-payment-matching-integrity-20261001.md`.

@@ -15,9 +15,11 @@ import csv
 import io
 import re
 import logging
+import hashlib
+import json
 
 from app.core.tenant import get_tenant_id
-from app.core.uuid7 import uuid7
+from app.core.validation_contracts import validate_iban
 from ....core.database import get_db
 from ....core.data_quality_enforcement import (
     build_dq_error_detail,
@@ -25,9 +27,6 @@ from ....core.data_quality_enforcement import (
 )
 
 logger = logging.getLogger(__name__)
-
-from app.api.v1.schemas.base import BaseSchema
-
 
 router = APIRouter(prefix="/bank-statements", tags=["finance", "bank-statements"])
 
@@ -90,6 +89,66 @@ def _validate_bank_statement_import_datensatz(
         )
 
 
+def _normalized_iban(value: str | None) -> str:
+    return "".join((value or "").split()).upper()
+
+
+def prepare_statement_import(db: Session, tenant_id: str, account_id: str,
+                             format: str, content: bytes, entries: list[dict],
+                             file_iban: str | None = None) -> tuple[str, str, dict | None]:
+    """Validate the real account and serialize byte-identical imports across routes."""
+    account = db.execute(text("""
+        SELECT iban,currency FROM domain_erp.bank_accounts
+        WHERE id=:id AND tenant_id=:tenant AND is_active IS TRUE FOR SHARE
+    """), {"id": account_id, "tenant": tenant_id}).mappings().first()
+    if account is None:
+        raise HTTPException(status_code=404, detail="Active bank account not found")
+    iban = _normalized_iban(account['iban'])
+    if not iban or not validate_iban(iban).is_valid:
+        raise HTTPException(status_code=409, detail="Bank account has no valid IBAN")
+    if file_iban is not None:
+        claimed_iban = _normalized_iban(file_iban)
+        if not validate_iban(claimed_iban).is_valid or claimed_iban != iban:
+            raise HTTPException(status_code=422, detail="Statement IBAN does not match selected bank account")
+    currency = account['currency']
+    if currency not in {'EUR', 'USD', 'CHF', 'GBP'}:
+        raise HTTPException(status_code=409, detail="Bank account has no supported currency")
+    if any(entry.get('currency', 'EUR') != currency for entry in entries):
+        raise HTTPException(status_code=422, detail="Statement currency does not match bank account")
+    context = json.dumps([tenant_id, account_id, format.upper()], separators=(',', ':')).encode()
+    fingerprint = hashlib.sha256(context + b"\0" + content).hexdigest()
+    statement_id = f"STMT-IMP-{fingerprint}"
+    # Lock before the lookup: a SELECT FOR UPDATE cannot lock an absent row.
+    db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))"),
+               {"key": f"bank-import:{statement_id}"})
+    existing = db.execute(text("""
+        SELECT id,tenant_id,bank_account_id,account_iban,opening_balance,closing_balance,
+               total_lines,imported_lines,format,status
+        FROM domain_erp.bank_statements WHERE id=:id FOR UPDATE
+    """), {"id": statement_id}).mappings().first()
+    if existing is not None:
+        if (existing['tenant_id'] != tenant_id or existing['bank_account_id'] != account_id
+                or existing['format'] != format.upper() or existing['account_iban'] != iban
+                or existing['status'] != 'imported'):
+            raise HTTPException(status_code=409, detail="Stored statement identity is inconsistent")
+    return statement_id, iban, existing
+
+
+def stored_statement_lines(db: Session, tenant_id: str, statement: dict) -> list[dict]:
+    expected = statement['total_lines']
+    if expected < 0 or statement['imported_lines'] != expected:
+        raise HTTPException(status_code=409, detail="Stored import counts are inconsistent")
+    rows = db.execute(text("""
+        SELECT id,line_number,booking_date,value_date,amount,currency,reference,
+               remittance_info,creditor_name,creditor_iban,debtor_name,debtor_iban,status,matched_op_id
+        FROM domain_erp.bank_statement_lines
+        WHERE statement_id=:id AND tenant_id=:tenant ORDER BY line_number,id
+    """), {"id": statement['id'], "tenant": tenant_id}).mappings().fetchmany(expected + 1)
+    if len(rows) != expected:
+        raise HTTPException(status_code=409, detail="Stored import is incomplete")
+    return rows
+
+
 def parse_camt053(content: bytes) -> dict:
     """
     Parse CAMT.053 (Bank Statement) XML format.
@@ -103,6 +162,8 @@ def parse_camt053(content: bytes) -> dict:
             'camt': 'urn:iso:std:iso:20022:tech:xsd:camt.053.001.02'
         }
         
+        if len(root.findall('.//camt:Stmt', namespaces)) != 1:
+            raise ValueError('Exactly one CAMT statement is required per import')
         # Extract account info
         acct_elem = root.find('.//camt:Acct', namespaces)
         iban = acct_elem.find('.//camt:Id//camt:IBAN', namespaces)
@@ -174,6 +235,7 @@ def parse_camt053(content: bytes) -> dict:
                     'booking_date': booking_date,
                     'value_date': value_date,
                     'amount': amount,
+                    'currency': amt_elem.get('Ccy', 'EUR') if amt_elem is not None else 'EUR',
                     'reference': reference,
                     'remittance_info': remittance_info,
                     'creditor_name': creditor_name,
@@ -209,6 +271,7 @@ def parse_mt940(content: bytes) -> dict:
         account_iban = None
         opening_balance = Decimal("0.00")
         closing_balance = Decimal("0.00")
+        currency = "EUR"
         entries = []
         current_entry = {}
         line_number = 0
@@ -227,7 +290,7 @@ def parse_mt940(content: bytes) -> dict:
                 # Format: :60F:CYYMMDDEUR1234,56
                 balance_str = line[5:].strip()
                 if len(balance_str) >= 10:
-                    _currency = balance_str[7:10]  # noqa: F841
+                    currency = balance_str[7:10].upper()
                     amount_str = balance_str[10:].replace(',', '.')
                     opening_balance = Decimal(amount_str)
             
@@ -263,6 +326,7 @@ def parse_mt940(content: bytes) -> dict:
                                 'booking_date': booking_date,
                                 'value_date': value_date,
                                 'amount': amount,
+                                'currency': currency,
                                 'reference': reference,
                                 'remittance_info': None
                             }
@@ -415,22 +479,21 @@ async def import_bank_statement(
                 raise HTTPException(status_code=422, detail="Unsupported currency")
 
         db_started = True
-        # Get bank account IBAN if not provided
-        if not parsed['account_iban']:
-            account_query = text("""
-                SELECT iban FROM domain_erp.bank_accounts
-                WHERE id = :account_id AND tenant_id = :tenant_id
-            """)
-            account_row = db.execute(account_query, {
-                "account_id": bank_account_id,
-                "tenant_id": tenant_id
-            }).fetchone()
-            if account_row:
-                parsed['account_iban'] = account_row[0]
-        
-        # Persist the complete statement in one transaction. A failed write
-        # must never be represented as a successfully imported line.
-        statement_id = f"STMT-{uuid7()}"
+        statement_id, account_iban, existing = prepare_statement_import(
+            db, tenant_id, bank_account_id, format, content, parsed['entries'],
+            None if format.upper() == 'CSV' else parsed['account_iban'] or '')
+        parsed['account_iban'] = account_iban
+        if existing is not None:
+            stored = stored_statement_lines(db, tenant_id, existing)
+            result = BankStatementImportResult(
+                statement_id=statement_id, account_iban=account_iban,
+                opening_balance=existing['opening_balance'], closing_balance=existing['closing_balance'],
+                total_lines=existing['total_lines'], imported_lines=existing['imported_lines'],
+                error_lines=0, lines=[BankStatementLine(**row) for row in stored], import_errors=None,
+            )
+            db.commit()  # Release the import lock; replay does not match or write again.
+            return result
+        # Persist the complete statement in the same transaction as its identity.
         db.execute(text("""
             INSERT INTO domain_erp.bank_statements
             (id, tenant_id, bank_account_id, account_iban, statement_date, opening_balance,

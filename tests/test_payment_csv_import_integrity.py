@@ -55,7 +55,15 @@ def import_case():
     assert url.drivername.startswith("postgresql")
     engine = create_engine(url)
     db = ImportSession(engine)
-    tenant = f"import-test-{uuid4().hex}"
+    tenant = str(uuid4())
+    db.execute(text("INSERT INTO domain_shared.tenants (id,name,domain,is_active) VALUES (:t,'Import test',:domain,TRUE)"),
+               {"t": tenant, "domain": f"{tenant}.test.local"})
+    db.execute(text("""
+        INSERT INTO domain_erp.bank_accounts (id,tenant_id,account_number,bank_name,iban,currency,is_active)
+        VALUES (:id,:t,:id,'Test Bank','DE89370400440532013000',:currency,TRUE)
+    """), {"id": f"bank-{tenant}", "t": tenant, "currency": "USD"})
+    db.commit()
+    db.commits = db.rollbacks = 0
     app = FastAPI()
     app.include_router(payment_matching.router, prefix="/payments")
     app.dependency_overrides[get_db] = lambda: db
@@ -66,15 +74,17 @@ def import_case():
     with engine.begin() as cleanup:
         cleanup.execute(text("DELETE FROM domain_erp.bank_statement_lines WHERE tenant_id=:t"), {"t": tenant})
         cleanup.execute(text("DELETE FROM domain_erp.bank_statements WHERE tenant_id=:t"), {"t": tenant})
+        cleanup.execute(text("DELETE FROM domain_erp.bank_accounts WHERE tenant_id=:t"), {"t": tenant})
+        cleanup.execute(text("DELETE FROM domain_shared.tenants WHERE id=:t"), {"t": tenant})
     engine.dispose()
 
 
-CSV = "date,amount,currency,reference\n2026-09-28,10.00,USD,REF-1\n2026-09-29,20.00,CHF,REF-2\n"
+CSV = "date,amount,currency,reference\n2026-09-28,10.00,USD,REF-1\n2026-09-29,20.00,USD,REF-2\n"
 
 
 def upload(case, csv=CSV):
     _, client, tenant = case
-    return client.post("/payments/import/csv", params={"tenant_id": tenant, "bank_account": "bank-test"},
+    return client.post("/payments/import/csv", params={"tenant_id": tenant, "bank_account": f"bank-{tenant}"},
                        files={"file": ("payments.csv", csv.encode(), "text/csv")})
 
 
@@ -89,12 +99,12 @@ def test_currency_and_success_counts_match_persisted_rows(import_case):
     db, _, tenant = import_case
     response = upload(import_case)
     assert response.status_code == 200, response.text
-    assert [row["currency"] for row in response.json()] == ["USD", "CHF"]
+    assert [row["currency"] for row in response.json()] == ["USD", "USD"]
     rows = db.execute(text("""
         SELECT currency,amount FROM domain_erp.bank_statement_lines
         WHERE tenant_id=:t ORDER BY line_number
     """), {"t": tenant}).all()
-    assert rows == [("USD", Decimal("10")), ("CHF", Decimal("20"))]
+    assert rows == [("USD", Decimal("10")), ("USD", Decimal("20"))]
     assert counts(import_case) == (1, 2)
     assert db.commits == 1
 
@@ -124,7 +134,7 @@ def test_imports_in_same_second_have_distinct_ids(import_case, monkeypatch):
             return cls(2026, 9, 30, 12, 0, 0)
 
     monkeypatch.setattr(payment_matching, "datetime", FrozenDatetime)
-    first, second = upload(import_case), upload(import_case)
+    first, second = upload(import_case), upload(import_case, CSV.replace("REF-2", "REF-3"))
     assert first.status_code == second.status_code == 200
     assert len(first.json()) == len(second.json()) == 2
     assert set(row["id"] for row in first.json()).isdisjoint(row["id"] for row in second.json())

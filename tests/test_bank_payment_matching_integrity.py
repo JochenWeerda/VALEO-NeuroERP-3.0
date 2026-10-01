@@ -61,6 +61,14 @@ def import_case():
     engine = create_engine(url)
     db = ImportSession(engine)
     tenant = str(uuid4())
+    db.execute(text("INSERT INTO domain_shared.tenants (id,name,domain,is_active) VALUES (:t,'Import test',:domain,TRUE)"),
+               {"t": tenant, "domain": f"{tenant}.test.local"})
+    db.execute(text("""
+        INSERT INTO domain_erp.bank_accounts (id,tenant_id,account_number,bank_name,iban,currency,is_active)
+        VALUES (:id,:t,:id,'Test Bank','DE89370400440532013000',:currency,TRUE)
+    """), {"id": f"bank-{tenant}", "t": tenant, "currency": "EUR"})
+    db.commit()
+    db.commits = db.rollbacks = 0
     app = FastAPI()
     app.include_router(bank_statement_import.router)
     app.include_router(payment_matching.router, prefix="/payments")
@@ -77,6 +85,8 @@ def import_case():
             {"ids": db.info.get("owned_ops", [])})
         cleanup.execute(text("DELETE FROM documents WHERE doc_number=ANY(:numbers)"),
             {"numbers": db.info.get("owned_documents", [])})
+        cleanup.execute(text("DELETE FROM domain_erp.bank_accounts WHERE tenant_id=:t"), {"t": tenant})
+        cleanup.execute(text("DELETE FROM domain_shared.tenants WHERE id=:t"), {"t": tenant})
     engine.dispose()
 
 
@@ -109,7 +119,7 @@ def upload(case, amount="100", currency="EUR", reference=None, auto=True):
     reference = reference or f"RE-{tenant}"
     csv = CSV.format(amount=amount, currency=currency, reference=reference)
     return client.post("/bank-statements/import", params={"tenant_id": tenant,
-        "bank_account_id": "bank-test", "format": "CSV", "auto_match": auto},
+        "bank_account_id": f"bank-{tenant}", "format": "CSV", "auto_match": auto},
         files={"file": ("statement.csv", csv.encode(), "text/csv")})
 
 
@@ -171,6 +181,10 @@ def test_missing_payment_cannot_settle_anything(import_case):
 @pytest.mark.parametrize("amount,currency", [("-100", "EUR"), ("100", "USD"), ("101", "EUR")])
 def test_wrong_direction_currency_or_overpayment_is_not_auto_matched(import_case, amount, currency):
     op = seed_op(import_case)
+    if currency != "EUR":
+        import_case[0].execute(text("UPDATE domain_erp.bank_accounts SET currency=:c WHERE tenant_id=:t"),
+                               {"c": currency, "t": import_case[2]})
+        import_case[0].commit()
     assert upload(import_case, amount=amount, currency=currency).status_code == 200
     assert op_state(import_case, op)[0] == 100
     assert line_state(import_case) == ("UNMATCHED", None)

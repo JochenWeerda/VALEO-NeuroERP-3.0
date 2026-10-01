@@ -21,12 +21,15 @@ acceptance:
   - Wiederholung und Parallelaufruf reduzieren den OP nur einmal.
   - OP, Bankzeile, Beleg und Audit haben genau einen Commit und atomaren Rollback.
 tests:
+  - python -m ruff check app/api/v1/endpoints/payment_matching.py app/api/v1/endpoints/bank_statement_import.py tests/test_bank_payment_matching_integrity.py
+  - python scripts/generate_agent_handbuch.py --check
+test_evidence:
   - 69 echte Finanzvertraege mit 30 neuen Matching-Vertraegen bestanden.
   - 13 weitere bestehende DQ- und Ausfallvertraege im regulaeren Lauf bestanden.
   - Ruff, Diff-Whitespace, Agent-Handbuch und Baseline-Integritaet bestanden.
 risks:
   - Projektweite aktive fremde CI-Gaps bleiben sichtbar.
-  - Importdatei-Idempotenz und Bankkonto-/IBAN-Bindung bleiben eigene Fachvertraege.
+  - Kontobindung und identische Datei-Bytes im Nachzug BANK-IMPORT-ACCOUNT-REPLAY abgesichert; Legacy und semantische Duplikate offen.
 ai_harness:
   fachlicher_vertrag: Echte Zahlung exakt verrechnen; Beleg nur bei OP-Rest null bezahlt.
   architektur_vertrag: Minor-Bugfix vorhandener Finance-Routes und Tabellen ohne neue Services.
