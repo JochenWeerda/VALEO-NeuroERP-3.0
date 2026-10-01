@@ -11,6 +11,47 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERNACHWEIS-MANDANT-20261001 — in Arbeit, Claude Code
+
+**Ziel:** Drei Compliance-Tabellen legt keine Migration an, und zwei von ihnen
+kennen keinen Mandanten, obwohl ihre Module `get_tenant_id` entgegennehmen:
+`domain_compliance.gelangensbestaetigung`, `.intrastat_meldungen`,
+`.lksg_supplier_risk_assessments`.
+
+**Was ein fremdes Haus heute kann** (beide Module nehmen den Mandanten
+entgegen und **benutzen ihn nicht**, kein einziger Filter):
+| Weg | Wirkung |
+|---|---|
+| `GET /gelangensbestaetigungen` | alle Haeuser: Kundennummer, Empfaengername, **USt-IdNr.**, Warenwert, Bestimmungsland |
+| `GET /gelangensbestaetigungen/faellig` | dito — und bei einem Lesefehler `[]`, also "nichts nachzufassen" |
+| `DELETE /intrastat/meldungen/{id}` | loescht die **Intrastat-Meldung eines fremden Hauses** |
+| `GET /intrastat/meldungen/{zeitraum}/...` + Export | der Export eines Hauses enthaelt die Zeilen **aller** Haeuser |
+| Meldenummernkreis | `COUNT(*) WHERE meldezeitraum AND meldungsart` ueber alle Haeuser |
+
+**Rechtsfolge, nicht Schoenheitsfehler:** Ohne Gelangensbestaetigung entfaellt
+die Steuerfreiheit der innergemeinschaftlichen Lieferung (§ 6a UStG, § 17a
+UStDV) — eine leere Faellig-Liste ist die Aussage "nichts nachzufassen" mit
+Steuerwirkung. Und ein Intrastat-Export, der die Zeilen eines fremden Hauses
+enthaelt, ist eine falsche Meldung an das Statistische Bundesamt.
+
+**Dateibesitz:** `alembic/versions/steuernachweis_mandant_20261001.py`,
+`app/api/v1/endpoints/gelangensbestaetigung.py`,
+`app/api/v1/endpoints/intrastat.py`,
+`tests/test_steuernachweis_mandant_vertrag.py`,
+`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
+dieser Abschnitt.
+
+**Abnahme:** Die drei Tabellen stehen nach `alembic upgrade head` mit
+`tenant_id NOT NULL`; jeder Weg beider Module filtert; der Meldenummernkreis
+laeuft je Haus; der Export enthaelt nur eigene Zeilen; ein Lesefehler ist kein
+leeres Ergebnis; Vertraege und Doku-Gates gruen.
+
+**Risiken:** Die Form ist aus den INSERTs und Pydantic-Modellen uebernommen.
+`domain_compliance.eudr_due_diligence` bleibt **offen**: Der Code kennt davon
+nur ein `COUNT(*) WHERE tenant_id` — das genuegt nicht, um eine
+EUDR-Sorgfaltserklaerung zu definieren, und erfinden waere hier besonders
+falsch. Benannte Luecke fuer den Compliance-Owner.
+
 ## COVERAGE-RETIRED-MODULE-INTEGRITY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe CI-Abnahme offen.
