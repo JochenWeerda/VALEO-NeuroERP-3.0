@@ -31,7 +31,7 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 | Genossenschaft (`cooperative`) | `cooperative` | Mitgliedsnummer, Pflichtanteile, Beendet | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Ausgabe (`output`) | `output` | Rechnungs- und Mahnversand | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Schnittstellen (`interfaces`) | `interfaces` | EDIFACT INVOIC, ORDERS, DESADV | `GET /api/v1/crm/customers/{id}` | compiled | ok |
-| Potenzial (`potential`) | — | keine fachliche Quelle im Partnerstamm | — | — | gap |
+| Potenzial (`potential`) | `potential` | Juengster Satz aus `public.customer_potential_snapshot` | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Ansprechpartner (`contacts`) | `contacts` | `domain_crm.contacts` und `public.kunden_ansprechpartner` | `GET .../tabs/contacts` | lazy table | ok |
 | CRM 360 Auftraege | `auftraege` (Belege) | Auftragsliste | `GET .../tabs/auftraege` | ok |
 | CRM 360 Aktivitaeten | `aktivitaeten` | Aktivitaetenliste | `GET .../tabs/aktivitaeten` | ok |
@@ -68,8 +68,9 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 
 ## Offene Luecken
 
-- Potenzial hat im Partnerstamm keine Spalte. Ein leeres Register wuerde eine
-  Quelle vortaeuschen. Mutationen bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+- Mutationen bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+- Potenzial ist der juengste GAP-Snapshot (`customer_potential_snapshot`);
+  ohne Pipeline-Lauf bleibt das Register leer.
 - Chef, Präsente, Postfach und Geo sitzen in der nativen Object Page
   (`masterdata`/`praesente`/`postfach`/`address`); Mini-Apps bleiben weg.
 - Listen-IDs (`kunden_nr`, Partnernummer) oeffnen dieselbe Akte wie die UUID.

@@ -272,6 +272,22 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                     {"key": "edifact_desadv", "label": "EDIFACT DESADV", "type": "boolean"},
                 ],
             },
+            {
+                "key": "potential", "label": "Potenzial", "lazy": True, "keepAlive": True,
+                "fields": [
+                    {"key": "gap_ref_year", "label": "GAP-Jahr", "type": "number", "readOnly": True},
+                    {"key": "gap_direct_total_eur", "label": "GAP-Direktzahlungen", "type": "currency", "readOnly": True},
+                    {"key": "gap_estimated_area_ha", "label": "Flaeche (ha)", "type": "number", "readOnly": True},
+                    {"key": "potential_total_eur", "label": "Potenzial gesamt", "type": "currency", "readOnly": True},
+                    {"key": "potential_seed_eur", "label": "Saatgut", "type": "currency", "readOnly": True},
+                    {"key": "potential_fertilizer_eur", "label": "Duenger", "type": "currency", "readOnly": True},
+                    {"key": "potential_psm_eur", "label": "PSM", "type": "currency", "readOnly": True},
+                    {"key": "turnover_total_last_year_eur", "label": "Umsatz Vorjahr", "type": "currency", "readOnly": True},
+                    {"key": "share_of_wallet_total_pct", "label": "Ausschöpfung %", "type": "number", "readOnly": True},
+                    {"key": "potential_segment", "label": "GAP-Segment", "type": "text", "readOnly": True},
+                    {"key": "potential_notes", "label": "Notiz", "type": "textarea", "readOnly": True},
+                ],
+            },
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.customer.update", "zone": "commit"},

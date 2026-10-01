@@ -158,6 +158,17 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     edifact_invoic: Optional[bool] = None
     edifact_orders: Optional[bool] = None
     edifact_desadv: Optional[bool] = None
+    gap_ref_year: Optional[int] = None
+    gap_direct_total_eur: Optional[float] = None
+    gap_estimated_area_ha: Optional[float] = None
+    potential_seed_eur: Optional[float] = None
+    potential_fertilizer_eur: Optional[float] = None
+    potential_psm_eur: Optional[float] = None
+    potential_total_eur: Optional[float] = None
+    turnover_total_last_year_eur: Optional[float] = None
+    share_of_wallet_total_pct: Optional[float] = None
+    potential_segment: Optional[str] = None
+    potential_notes: Optional[str] = None
 
 
 # Lead Schemas

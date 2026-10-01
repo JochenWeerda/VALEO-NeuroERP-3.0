@@ -291,6 +291,7 @@ class CustomerService:
                 if customer_dict.get("laengengrad") is None:
                     customer_dict["laengengrad"] = getattr(sat, "lon", None)
         self._attach_partner_mask_fields(customer_dict)
+        self._attach_potential_snapshot(customer_dict)
         return customer_dict
 
     def _attach_partner_mask_fields(self, customer_dict: dict[str, Any]) -> None:
@@ -350,6 +351,52 @@ class CustomerService:
                 "edifact_invoic": row["edifact_invoic"],
                 "edifact_orders": row["edifact_orders"],
                 "edifact_desadv": row["edifact_desadv"],
+            }
+        )
+
+    def _attach_potential_snapshot(self, customer_dict: dict[str, Any]) -> None:
+        """Juengster GAP-Snapshot. Quelle: public.customer_potential_snapshot."""
+        customer_id = customer_dict.get("id")
+        if not customer_id:
+            return
+        try:
+            row = self.db.execute(
+                text(
+                    """
+                    SELECT ref_year, gap_direct_total_eur, gap_estimated_area_ha,
+                           potential_seed_eur, potential_fertilizer_eur, potential_psm_eur,
+                           potential_total_eur, turnover_total_last_year_eur,
+                           share_of_wallet_total_pct, segment, potential_notes
+                    FROM public.customer_potential_snapshot
+                    WHERE customer_id::text = :cid
+                    ORDER BY ref_year DESC, computed_at DESC
+                    LIMIT 1
+                    """
+                ),
+                {"cid": str(customer_id)},
+            ).mappings().first()
+        except Exception:
+            self.db.rollback()
+            return
+        if not row:
+            return
+
+        def _zahl(value: Any) -> float | None:
+            return float(value) if value is not None else None
+
+        customer_dict.update(
+            {
+                "gap_ref_year": row["ref_year"],
+                "gap_direct_total_eur": _zahl(row["gap_direct_total_eur"]),
+                "gap_estimated_area_ha": _zahl(row["gap_estimated_area_ha"]),
+                "potential_seed_eur": _zahl(row["potential_seed_eur"]),
+                "potential_fertilizer_eur": _zahl(row["potential_fertilizer_eur"]),
+                "potential_psm_eur": _zahl(row["potential_psm_eur"]),
+                "potential_total_eur": _zahl(row["potential_total_eur"]),
+                "turnover_total_last_year_eur": _zahl(row["turnover_total_last_year_eur"]),
+                "share_of_wallet_total_pct": _zahl(row["share_of_wallet_total_pct"]),
+                "potential_segment": row["segment"],
+                "potential_notes": row["potential_notes"],
             }
         )
 

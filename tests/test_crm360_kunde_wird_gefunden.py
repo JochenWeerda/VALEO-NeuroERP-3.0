@@ -386,6 +386,40 @@ def test_partnerfelder_kontakte_und_kontrakte_liegen_in_der_akte(client, kunde) 
             verbindung.execute(text("DELETE FROM domain_crm.contacts WHERE id = :id"), {"id": kontakt})
 
 
+def test_potenzial_kommt_aus_dem_juengsten_gap_snapshot(client, kunde) -> None:
+    """Fachquelle: public.customer_potential_snapshot, juengstes GAP-Jahr."""
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO public.customer_potential_snapshot "
+                "(ref_year, customer_id, potential_total_eur, potential_seed_eur, gap_estimated_area_ha, segment) "
+                "VALUES (2024, CAST(:cid AS uuid), 1000, 200, 10, 'C'), "
+                "(2026, CAST(:cid AS uuid), 48000, 12000, 42.5, 'A')"
+            ),
+            {"cid": kunde["id"]},
+        )
+    try:
+        stamm = client.get(
+            f"/api/v1/crm/customers/{kunde['id']}", headers=kopf(kunde["mandant"])
+        )
+        assert stamm.status_code == 200, stamm.text
+        koerper = stamm.json()
+        assert koerper["gap_ref_year"] == 2026
+        assert koerper["potential_total_eur"] == 48000
+        assert koerper["potential_seed_eur"] == 12000
+        assert koerper["gap_estimated_area_ha"] == 42.5
+        assert koerper["potential_segment"] == "A"
+    finally:
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text("DELETE FROM public.customer_potential_snapshot WHERE customer_id = CAST(:cid AS uuid)"),
+                {"cid": kunde["id"]},
+            )
+
+
 def test_ein_kunde_den_es_nicht_gibt_bleibt_ein_404(client, kunde) -> None:
     """Der 404 soll weiterhin etwas bedeuten."""
     antwort = client.get(
