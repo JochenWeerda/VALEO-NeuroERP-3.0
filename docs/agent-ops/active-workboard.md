@@ -11,6 +11,53 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## EUDR-CHARGENKENNZEICHNUNG-20261001 — in Arbeit, Claude Code
+
+**Ziel:** Die zweite EUDR-Luecke schliessen — die **chargenbezogene
+Kennzeichnung**. Bisher meldet der Stand `batch_level_marking:
+"NICHT_UMGESETZT"`, und das ist ehrlich, aber unbrauchbar: Art. 4 der Verordnung
+(EU) 2023/1115 verbietet das Inverkehrbringen ohne Sorgfaltserklaerung, also
+muss eine Charge sagen koennen, **welche** Erklaerung sie deckt.
+
+**Die Modellierung, und warum so:**
+`domain_inventory.inventory_lots` bekommt **eine** neue Spalte —
+`eudr_relevant` —, weil die EUDR-Relevanz eine Eigenschaft der Ware ist und aus
+nichts anderem ableitbar. Die Verbindung zur Erklaerung kommt dagegen **nicht**
+als Spalte: Im Landhandel wird verschnitten, eine Silocharge kann aus mehreren
+Partien stammen und damit von **mehreren** Erklaerungen gedeckt sein. Deshalb
+eine Verbindungstabelle `domain_inventory.lot_eudr_erklaerungen` mit
+`menge_kg` — so steht je Charge und Erklaerung, welcher Anteil womit
+nachgewiesen ist.
+
+**Die Kennzeichnung selbst wird abgeleitet, nicht gespeichert:** nicht relevant
+-> `NICHT_RELEVANT`; relevant und nachgewiesene Menge deckt die Charge ->
+`NACHGEWIESEN`; sonst `OFFEN`. Eine zweite, gespeicherte Wahrheit ueber den
+Nachweisstand waere genau das Muster, das diese Welle abbaut.
+Die **Referenznummer wird nicht kopiert**: Sie steht an der Erklaerung, und eine
+Kopie an der Charge koennte von ihr abweichen.
+
+**Dateibesitz:** `alembic/versions/eudr_chargenkennzeichnung_20261001.py`,
+`app/api/v1/endpoints/eudr_register.py` (neue Chargenwege und der Stand),
+`app/api/v1/schemas/eudr_register_schemas.py`,
+`app/api/v1/endpoints/compliance.py` (nur der `batch_level_marking`-Hunk),
+`packages/frontend-web/src/pages/nachhaltigkeit/eudr-compliance.tsx`,
+`tests/test_eudr_chargenkennzeichnung_vertrag.py`, eigene QA-Doku und dieser
+Abschnitt.
+
+**Abnahme:** Eine Charge kann mit Menge an eine Erklaerung gebunden werden; nur
+an eine **eingereichte** (Art. 4: vorher darf nichts in Verkehr); die gebundene
+Menge ueberschreitet die Chargenmenge nicht; eine Erklaerung mit gebundener
+Charge ist nicht loeschbar; der Stand zeigt relevante, nachgewiesene und offene
+Chargen, und `batch_level_marking` ist nicht mehr `NICHT_UMGESETZT`; eine Liste
+nennt die Chargen, die **nicht** in Verkehr gebracht werden duerfen; Vertraege
+und Doku-Gates gruen.
+
+**Risiken:** Ob eine Charge EUDR-relevant ist, haengt am Artikel (Rohstoff und
+HS-Code) — die automatische Ableitung aus dem Artikelstamm ist **nicht** Teil
+dieses Slices und bleibt eine benannte Luecke; gesetzt wird das Kennzeichen
+vorerst beim Wareneingang bzw. durch die Maske. Die fachjuristische Abnahme
+gehoert weiterhin dem Compliance-Owner.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — reserviert, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
