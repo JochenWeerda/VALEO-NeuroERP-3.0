@@ -11,6 +11,61 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PERIODE-EIN-ZUSTAND-20261001 — in Arbeit, Claude Code
+
+**Ziel:** Eine Buchungsperiode hat **einen** Zustand. Heute stehen drei
+Vokabulare in derselben Spalte `public.finance_accounting_periods.status`:
+die Maske prueft `OPEN|CLOSED|ADJUSTING`, `close_period` schreibt `closed`,
+`reopen_period` schreibt `offen`. Sieben Buchungswege vergleichen
+`status != "OPEN"`.
+
+**Drei Folgen, alle nachgewiesen:**
+1. **Die Wiedereroeffnung wirkt nicht.** Sie verlangt einen Grund, schreibt ihn
+   ins Protokoll — und setzt `offen`. Die sieben Waechter lesen `offen != OPEN`
+   und **sperren weiter**. Die dokumentierte Wiedereroeffnung existiert nur auf
+   dem Papier.
+2. **`ADJUSTING` sperrt wie `CLOSED`.** Die Maske laesst den Zustand setzen; er
+   bedeutet dann nichts — eine Periode fuer Abschlussbuchungen, in die niemand
+   buchen kann.
+3. **Ein gescheiterter Abschluss meldet Erfolg.** `/finance/closing/lock` und
+   `/closing/run` fangen jeden unerwarteten Fehler und rufen
+   `_legacy_close_accounting_period` auf: ein `UPDATE domain_erp.accounting_periods`
+   — ein Schema, das es in keinem Migrationsstand gibt. Trifft das UPDATE
+   (auf einer Installation mit dieser Tabelle) null Zeilen, antwortet der
+   Endpunkt `success: true, "Periode gesperrt."` **ohne Sperre**, und `/run`
+   behauptet zusaetzlich einen Abschluss **ohne Salden und ohne
+   Abschlussbuchung**.
+
+**GoBD:** Unveraenderbarkeit (Rz. 107 ff.) verlangt, dass eine abgeschlossene
+Periode nicht mehr bebucht werden kann, und Nachvollziehbarkeit (Rz. 30 ff.),
+dass der Zustand einer Periode eindeutig feststellbar ist. Drei Vokabulare auf
+einer Spalte und ein Abschluss, der Erfolg meldet, ohne zu sperren, verfehlen
+beides.
+
+**Dateibesitz:** `app/core/finance_periods.py` (neu, das Woerterbuch und die
+eine Pruefung), `alembic/versions/periode_statuswoerterbuch_20261001.py`,
+`app/services/finance_period_service.py` (nur die beiden Schreibstellen),
+`app/api/v1/endpoints/finance_actions.py` (nur der Legacy-Rueckfall und der
+Waechter), die sechs weiteren Waechter (`ap_invoices.py`,
+`bulk_journal_import.py`, `finance_invoices.py`, `journal_entries.py`,
+`app/services/ap_invoice_kernel_posting.py`,
+`app/services/finance_transaction_service.py`),
+`app/api/v1/endpoints/accounting_periods.py` (nur die Wertemenge),
+`tests/test_periode_ein_zustand_vertrag.py`, eigene Slice-/QA-Doku und dieser
+Abschnitt.
+
+**Abnahme:** Ein Woerterbuch, an einer Stelle; `CLOSED` sperrt, `OPEN` und
+`ADJUSTING` buchen; die Wiedereroeffnung wirkt; ein gescheiterter Abschluss
+meldet keinen Erfolg; die Datenbank haelt die Wertemenge per Pruefbedingung;
+Vertraege und Doku-Gates gruen.
+
+**Risiken:** Die Entscheidung "ADJUSTING erlaubt buchen" ist fachlich: Sonst ist
+der Zustand gleichbedeutend mit `CLOSED` und wertlos. Die Normalisierung
+(`closed`->`CLOSED`, `offen`->`OPEN`) laeuft auf null Zeilen in beiden
+Datenbanken, ist also heute ein Nullvorgang — die Pruefbedingung wirkt ab
+morgen. Zusaetzlich stillgelegt: `domain_finance.period_closure`, null Zeilen,
+null Codeverweise.
+
 ## KONTRAKT-EINE-ORDNUNG-20261001 — abgeschlossen, Claude Code
 
 **Ziel:** Fuer "Kontrakt" standen sechs Tabellen in fuenf Schemata und **zwei
