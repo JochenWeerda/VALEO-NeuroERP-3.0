@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-STATEMENT-DATE — ein fachlicher Stichtag (2026-10-01)
+
+**Geschlossen:** Importdatum statt Saldo-Datum, verschiedene CSV-Stichtage,
+Datumskonflikt bei Replay, MT940-Buchungen ausserhalb Saldointervall und
+leere Fremdwaehrung. 169 Vertraege bestanden (15 neu), bestehender valeo_probe,
+keine neue Datenbank/Dockerinstanz oder Reset. Kein neues API-/Schemafeld.
+**Offen:** Historische kanonische Kopf-Daten, Bankreconciliation (Query-Tenant,
+Kontobindung/Hauptbuch/Stichtag und angenommene Abstimmbarkeit), weitere
+Bankprofile und GitHub-CI/Deployment. Lager-Referenzdubletten gefunden;
+Inventory-WIP wird separat bearbeitet. Nachweis:
+docs/quality-assurance/bank-statement-date-20261001.md.
+
 ## BANK-LEGACY-IMPORT-INTEGRATION — zweiter Bankweg entfernt (2026-10-01)
 
 **Geschlossen:** bank_import.py / INT-BANK-001, vier alte DTOs, konkurrierende

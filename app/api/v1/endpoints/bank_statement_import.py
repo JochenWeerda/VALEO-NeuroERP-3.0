@@ -96,7 +96,8 @@ def _normalized_iban(value: str | None) -> str:
 def prepare_statement_import(db: Session, tenant_id: str, account_id: str,
                              format: str, content: bytes, entries: list[dict],
                              file_iban: str | None = None,
-                             statement_currency: str | None = None) -> tuple[str, str, dict | None]:
+                             statement_currency: str | None = None,
+                             *, statement_date: date) -> tuple[str, str, dict | None]:
     """Validate the real account and serialize byte-identical imports across routes."""
     account = db.execute(text("""
         SELECT iban,currency FROM domain_erp.bank_accounts
@@ -124,7 +125,7 @@ def prepare_statement_import(db: Session, tenant_id: str, account_id: str,
                {"key": f"bank-import:{statement_id}"})
     existing = db.execute(text("""
         SELECT id,tenant_id,bank_account_id,account_iban,opening_balance,closing_balance,
-               total_lines,imported_lines,format,status
+               total_lines,imported_lines,format,status,statement_date
         FROM domain_erp.bank_statements WHERE id=:id FOR UPDATE
     """), {"id": statement_id}).mappings().first()
     if existing is not None:
@@ -132,6 +133,8 @@ def prepare_statement_import(db: Session, tenant_id: str, account_id: str,
                 or existing['format'] != format.upper() or existing['account_iban'] != iban
                 or existing['status'] != 'imported'):
             raise HTTPException(status_code=409, detail="Stored statement identity is inconsistent")
+        if existing['statement_date'] != statement_date:
+            raise HTTPException(status_code=409, detail="Stored statement cutoff is inconsistent")
     return statement_id, iban, existing
 
 
@@ -280,7 +283,7 @@ def parse_camt053(content: bytes) -> dict:
             })
         if opening[0] + sum((entry['amount'] for entry in entries), Decimal('0')) != closing[0]:
             raise ValueError('CAMT closing balance does not reconcile with entries')
-        return {'account_iban': iban, 'currency': currency, 'opening_balance': opening[0],
+        return {'account_iban': iban, 'currency': currency, 'statement_date': closing[2], 'opening_balance': opening[0],
                 'closing_balance': closing[0], 'entries': entries}
     except (ValueError, InvalidOperation, ET.ParseError) as exc:
         raise ValueError(f'Failed to parse CAMT.053: {exc}') from exc
@@ -367,9 +370,11 @@ def parse_mt940(content: bytes) -> dict:
             raise ValueError('MT940 account, opening and closing balance are required')
         if closing[0] < opening[0] or closing[1] != opening[1]:
             raise ValueError('Inconsistent MT940 balance dates or currency')
+        if any(not opening[0] <= entry['booking_date'] <= closing[0] for entry in entries):
+            raise ValueError('MT940 booking date is outside statement balances')
         if opening[2] + sum((entry['amount'] for entry in entries), Decimal('0')) != closing[2]:
             raise ValueError('MT940 closing balance does not reconcile with entries')
-        return {'account_iban': account_iban, 'opening_balance': opening[2],
+        return {'account_iban': account_iban, 'currency': opening[1], 'statement_date': closing[0], 'opening_balance': opening[2],
                 'closing_balance': closing[2], 'entries': entries}
     except (ValueError, InvalidOperation, UnicodeError) as exc:
         raise ValueError(f'Failed to parse MT940: {exc}') from exc
@@ -433,14 +438,16 @@ def parse_csv(content: bytes) -> dict:
         for current_datensatz in dq_context:
             _validate_bank_statement_import_datensatz(current_datensatz, dq_context)
 
-        # Calculate closing balance (if opening balance provided)
-        if entries:
-            closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
+        if not entries:
+            raise HTTPException(status_code=422, detail='CSV has no booking dates for a statement cutoff')
+        # CSV has no bank-supplied closing date: use an explicit synthetic cutoff.
+        closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
         
         return {
             'account_iban': None,  # CSV doesn't always have IBAN
             'opening_balance': opening_balance,
             'closing_balance': closing_balance,
+            'statement_date': max(entry['booking_date'] for entry in entries),
             'entries': entries
         }
     except HTTPException:
@@ -503,7 +510,7 @@ async def import_bank_statement(
         statement_id, account_iban, existing = prepare_statement_import(
             db, tenant_id, bank_account_id, format, content, parsed['entries'],
             None if format.upper() == 'CSV' else parsed['account_iban'] or '',
-            statement_currency=parsed.get('currency'))
+            statement_currency=parsed.get('currency'), statement_date=parsed['statement_date'])
         parsed['account_iban'] = account_iban
         if existing is not None:
             stored = stored_statement_lines(db, tenant_id, existing)
@@ -524,7 +531,7 @@ async def import_bank_statement(
                     :format, :total, :imported, :status, NOW(), NOW())
         """), {
             "id": statement_id, "tenant_id": tenant_id, "account_id": bank_account_id,
-            "iban": parsed['account_iban'], "date": date.today(),
+            "iban": parsed['account_iban'], "date": parsed['statement_date'],
             "opening": parsed['opening_balance'], "closing": parsed['closing_balance'],
             "format": format.upper(), "total": len(parsed['entries']),
             "imported": len(parsed['entries']), "status": "imported",

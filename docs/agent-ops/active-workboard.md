@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BANK-STATEMENT-DATE-20261001 — reserviert, Codex (Chat 01a0f3fc)
+## BANK-STATEMENT-DATE-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Auszugsdatum aus Bankdatei statt Importtag;
 derselbe Vertrag in beiden CSV-Eingaengen und Replay, MT940-Leerwaehrung pruefen.
@@ -25,9 +25,17 @@ Bankimport ohne Stichtag abgewiesen. MT940-Buchungstage im Saldointervall.
 kein stilles Replay-Umschreiben. Saldenvergleich bleibt eigener separater Slice.
 **Betrieb:** Bestehenden valeo_probe verwenden, nur eigene Daten aufraeumen;
 keine neue Datenbank/Dockerinstanz. Keine Schema-/API-Feld-Erweiterung.
-**Naechster Slice offen:** Inventory-Belegreferenzpaare in DTO, Service und
-beiden Bewegungstabellen angleichen; source_document_type/source_document_id
-als kanonische Sprache, User-Freigabe fuer Entfernung der Entwicklungsaltlasten.
+**Inventory-Integration:** Parallel b15407c82 committed. Vor weiterem
+Belegreferenz-Abgleich aktuellen DTO-/Schema-/Service-Stand pruefen; keine
+Doppelarbeit. Entwicklungsfreigabe fuer Altlasten bleibt massgeblich.
+
+**Ergebnis:** Bank-Schlussdatum persistent; beide CSV-Routen letzter
+Buchungstag unabhaengig von Reihenfolge/Valuta. Replay-Datumskonflikt 409,
+kein stilles Umschreiben; leerer MT940 prueft Kontowaehrung, Buchungstage im
+Saldointervall, leerer Bank-CSV 422 ohne Header. 169 Tests bestanden (15 neu).
+**Nachweis:** docs/quality-assurance/bank-statement-date-20261001.md.
+**Offen:** Historische Kopf-Datenbereinigung, Bankreconciliation, weitere
+Profile und GitHub-CI/Deployment. Fremder Inventory-WIP bleibt beim Owner.
 
 ## EUDR-SORGFALTSERKLAERUNG-20261001 — in Arbeit, Claude Code
 

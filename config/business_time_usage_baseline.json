@@ -28,9 +28,6 @@
     "app/api/v1/endpoints/bank_reconciliation.py": {
       "date.today": 2
     },
-    "app/api/v1/endpoints/bank_statement_import.py": {
-      "date.today": 1
-    },
     "app/api/v1/endpoints/benchmark_api.py": {
       "date.today": 1
     },
@@ -121,9 +118,6 @@
     },
     "app/api/v1/endpoints/open_items.py": {
       "date.today": 2
-    },
-    "app/api/v1/endpoints/payment_matching.py": {
-      "date.today": 1
     },
     "app/api/v1/endpoints/payment_runs.py": {
       "date.today": 1

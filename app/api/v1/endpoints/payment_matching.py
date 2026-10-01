@@ -167,7 +167,8 @@ async def import_payments_csv(
 
         db_started = True
         statement_id, account_iban, existing = prepare_statement_import(
-            db, tenant_id, bank_account, 'CSV', content, entries)
+            db, tenant_id, bank_account, 'CSV', content, entries,
+            statement_date=max(entry['booking_date'] for entry in entries))
         if existing is not None:
             stored = stored_statement_lines(db, tenant_id, existing)
             result_entries = [PaymentEntry(
@@ -192,7 +193,7 @@ async def import_payments_csv(
             "tenant_id": tenant_id,
             "bank_account_id": bank_account,
             "iban": account_iban,
-            "stmt_date": entries[0]["booking_date"] if entries else date.today(),
+            "stmt_date": max(entry['booking_date'] for entry in entries),
             "closing": sum((entry['amount'] for entry in entries), Decimal('0')),
             "total": len(entries),
             "imported": len(entries),

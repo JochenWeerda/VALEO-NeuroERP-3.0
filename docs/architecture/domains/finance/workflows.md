@@ -70,3 +70,13 @@ beide alten domain_finance-Tabellen mitsamt Entwicklungsdaten. Kein Archiv,
 keine zweite Zahlung, kein OP-Umschreiben. Die Migration verwendet kein
 CASCADE und bricht bei unerwarteten Abhaengigkeiten ab.
 [Retirement-Nachweis](../../../quality-assurance/bank-legacy-retirement-20261001.md).
+
+## Auszugsstichtag
+
+CAMT/MT940 speichern das gepruefte Schlusssaldodatum, nie den Importtag.
+CSV speichert max(booking_date) als synthetischen Stichtag in beiden
+Importeingaengen; Dateireihenfolge und Valuta aendern ihn nicht. Replay
+vergleicht das gespeicherte Datum mit dem neuen Parsergebnis und liefert bei
+Widerspruch 409 ohne stillen Datenumbau. Leere Bank-CSV ohne Datumsnachweis
+422; leere MT940 mit Datum/Saldo werden gegen Kontowaehrung geprueft.
+[Datums-Abnahme](../../../quality-assurance/bank-statement-date-20261001.md).
