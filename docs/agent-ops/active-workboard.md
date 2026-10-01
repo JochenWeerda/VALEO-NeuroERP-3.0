@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BANK-MT940-PARSER-INTEGRITY-20261001 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Stand:** reserviert 2026-10-01.
+**Ziel:** Keine verlorenen MT940-Zeilen ohne optionales :86:, korrekte
+MMDD-Buchungsdaten, vorzeichenrichtige Salden und Schlusssaldo-Abgleich.
+**Dateibesitz:** `bank_statement_import.py` nur MT940-Parser und interne
+Parserhilfen, neue `tests/test_bank_mt940_parser_integrity.py`, eigene
+QA-/Slice-Doku, Finance-Workflow und eigene Workboard-/Open-Gaps-Abschnitte.
+**Abnahme:** Jede :61:-Zeile erhalten oder gesamter Upload abgelehnt;
+fehlende/inkonsistente Salden, Datums-/Betragsfehler und Mehrfachauszuege
+vor Writes abweisen. Reale Import-/Rollbackvertraege auf valeo_probe.
+**Entscheidung:** Begrenztes MT940-Profil mit IBAN-Konto, einem Auszug,
+60F/60M und 62F/62M; keine neue Route/Tabelle/Migration oder Testdatenbank.
+UniCredit-Formatbeschreibung als Feldreferenz; C/D werden verarbeitet,
+RC/RD bleiben bis zum fachlichen Rueckbuchungsvertrag explizit abgelehnt.
+**Risiken:** SWIFT-Umschlaege, nationale Kontokennungen und bankspezifische
+Varianten brauchen gesonderte Abnahme. CAMT bleibt separater Parser-Slice.
+
 ## BANK-IMPORT-ACCOUNT-REPLAY-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Stand:** abgeschlossen 2026-10-01; externe CI-Abnahme offen.
