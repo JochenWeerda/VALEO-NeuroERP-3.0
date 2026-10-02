@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## JOURNAL-AMOUNT-INTEGRITY — Service-Guard geschlossen, Bewertung/Schema offen
+
+2026-10-02: Exakte endliche positive ausgeglichene Centbuchungen im Service;
+Create ohne Datenbankzugriff bei ungueltigem Betrag, erneute echte Zeilen-/
+Kopf-/Tenant-/Kontopruefung vor Post/Reverse. Produktions-Nullbetragshelper
+entfernt, fehlende Bewertung gemeldet und keine FiBu-Referenz behauptet.
+231 Tests bestanden (46 neue, 18 PostgreSQL). QA:
+[Betrags-/Lifecycle-Vertrag](../quality-assurance/journal-amount-integrity-20261002.md).
+Offen bleiben reale Bewertung, andere Schreiber, physische Betragsdubletten,
+Lifecycle-Concurrency/Consumer-Atomizitaet, Hash/Draft-Delete, Bankintegration
+und Handbuch-Drift. Guard ist keine Produktionskosten- oder GoBD-Abnahme.
+
 ## JOURNAL-ACCOUNT-ID — Service/Verbraucher kanonisch, Schema/andere Schreiber offen
 
 2026-10-02: Globale OR-Kontenaufloesung und accountId-Fallback im
@@ -22,8 +34,8 @@ QA: [Kontoreferenz-Vertrag](../quality-assurance/journal-account-identity-202610
 Weiter offen: globale account_number-UQ, Komposit-Tenant-FKs/andere Schreiber,
 Consumer-Atomizitaet, vollstaendiger Hash-Payload/Lifecycle/Betragskanonisierung,
 Bankintegration und Handbuch-Drift im parallelen Worktree. Neu belegt:
-Leere/Nullbetragsjournale passieren validate_balanced; Produktionsabschluss
-erzeugt Nullbetragsplatzhalter ohne echtes Bewertungsmodell.
+Leere/Nullbetragsjournale im Service sind jetzt abgewiesen und Produktions-
+Scheinbuchungen entfernt (JOURNAL-AMOUNT-INTEGRITY). Reale Bewertung offen.
 
 ## JOURNAL-STAMP-INTEGRITY — Service-Guard geschlossen, Journalkanonisierung offen
 

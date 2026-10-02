@@ -13,6 +13,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
 
 import pytest
 
@@ -452,7 +453,13 @@ def test_storno_reverse_sets_original_to_reversed():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = original
-    db.query.return_value.filter.return_value.all.return_value = [line]
+    original.total_debit = original.total_credit = line.debit
+    line.tenant_id = TENANT
+    line.debit_amount, line.credit_amount = line.debit, line.credit
+    counter = SimpleNamespace(tenant_id=TENANT, account_id="contra", debit=Decimal("0"),
+        debit_amount=Decimal("0"), credit=line.debit, credit_amount=line.debit, description="Counter")
+    db.query.return_value.filter.return_value.all.return_value = [line,counter]
+    db.execute.return_value.all.return_value = [("1200",),("contra",)]
     db.execute.return_value.fetchone.side_effect = [("read committed",),(5,5,5,0,"a"*64)]
 
     added = []
@@ -502,7 +509,13 @@ def test_storno_reversal_lines_are_swapped():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = original
-    db.query.return_value.filter.return_value.all.return_value = [line]
+    original.total_debit = original.total_credit = line.debit
+    line.tenant_id = TENANT
+    line.debit_amount, line.credit_amount = line.debit, line.credit
+    counter = SimpleNamespace(tenant_id=TENANT, account_id="contra", debit=Decimal("0"),
+        debit_amount=Decimal("0"), credit=line.debit, credit_amount=line.debit, description="Counter")
+    db.query.return_value.filter.return_value.all.return_value = [line,counter]
+    db.execute.return_value.all.return_value = [("1200",),("contra",)]
     db.execute.return_value.fetchone.side_effect = [("read committed",),(6,6,6,0,"a"*64)]
 
     line_kwargs_captured = []
@@ -527,7 +540,7 @@ def test_storno_reversal_lines_are_swapped():
 
         svc.reverse("e-swap", reason="test")
 
-    assert len(line_kwargs_captured) == 1
+    assert len(line_kwargs_captured) == 2
     rev_line = line_kwargs_captured[0]
     # Debit and credit are swapped
     assert rev_line["debit"] == line.credit    # 0

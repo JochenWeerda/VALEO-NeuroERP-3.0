@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## JOURNAL-AMOUNT-INTEGRITY-20261002 — reserviert, Codex (Chat 01a0f3fc)
+## JOURNAL-AMOUNT-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Ein exakter positiver Decimal-Centvertrag
 fuer Service-Journalzeilen; leere/Null-/NaN-/negative/mehrseitige Buchungen
@@ -27,6 +27,14 @@ Rundungen/Default-Nullen; widerspruechliche gespeicherte Betragsdubletten
 sperren Post/Reverse. Produktion erzeugt ohne Bewertung keine Scheinbuchung.
 **Risiken:** Andere Journal-Schreiber, Bewertungsmodell, Atomizitaet/Hash/
 Schema-Dubletten und Bankmigration bleiben offen. Keine neue Test-DB/Docker.
+
+**Ergebnis 2026-10-02:** Ein exakter positiver Centvertrag ohne Null-Defaults/
+Aliasbetraege; gespeicherte Zeilen/Kopfsummen/Tenant/Konten vor Post/Reverse.
+Produktions-Scheinbuchungshelper geloescht; fehlende Bewertung sichtbar.
+**Abnahme:** 231 Tests (46 neue, davon 18 PostgreSQL), Ruff bestanden.
+**Nachweis:** docs/quality-assurance/journal-amount-integrity-20261002.md.
+**Offen:** Reale Bewertung, andere Journal-Schreiber, Schema-Dubletten und
+Lifecycle-Concurrency/Atomizitaet, Hash/Draft-Delete, Bankmigration/Handbuch.
 
 ## JOURNAL-ACCOUNT-ID-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
