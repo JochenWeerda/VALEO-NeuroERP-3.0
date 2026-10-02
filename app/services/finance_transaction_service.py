@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import bindparam, text
@@ -20,6 +20,8 @@ from app.core import finance_periods
 logger = logging.getLogger(__name__)
 
 VALID_STATUSES = {"draft", "posted", "cancelled", "reversed"}
+MONEY_MAX = Decimal("9999999999999.99")
+MONEY_CENT = Decimal("0.01")
 
 
 class FinanceTransactionService:
@@ -31,13 +33,60 @@ class FinanceTransactionService:
 
     # ── validation ────────────────────────────────────────────────────────────
 
-    def validate_balanced(self, lines: List[Dict[str, Any]]) -> None:
-        total_debit = sum(Decimal(str(ln.get("debit_amount", 0))) for ln in lines)
-        total_credit = sum(Decimal(str(ln.get("credit_amount", 0))) for ln in lines)
+    @staticmethod
+    def _money(value: Any) -> Decimal:
+        """The stored NUMERIC(15,2) contract: exact finite currency cents."""
+        try:
+            amount = Decimal(str(value))
+            if (not amount.is_finite() or amount < 0
+                    or amount > MONEY_MAX
+                    or amount != amount.quantize(MONEY_CENT)):
+                raise ValidationFailedError("Journal amounts require finite nonnegative exact cents within NUMERIC(15,2)")
+            return Decimal("0.00") if amount == 0 else amount.quantize(MONEY_CENT)
+        except (InvalidOperation, ValueError, TypeError) as exc:
+            raise ValidationFailedError("Journal amount is not a valid exact decimal") from exc
+
+    def validate_balanced(self, lines: List[Dict[str, Any]]) -> Decimal:
+        if not isinstance(lines, list) or len(lines) < 2:
+            raise ValidationFailedError("A journal requires at least two nonzero lines")
+        total_debit = total_credit = Decimal("0.00")
+        for line in lines:
+            if not isinstance(line, dict):
+                raise ValidationFailedError("Journal lines require typed amount fields")
+            if {"debit", "credit", "debitAmount", "creditAmount"}.intersection(line):
+                raise ValidationFailedError("Journal lines require canonical debit_amount and credit_amount")
+            if "debit_amount" not in line or "credit_amount" not in line:
+                raise ValidationFailedError("Both canonical journal amount fields are required")
+            debit = self._money(line["debit_amount"])
+            credit = self._money(line["credit_amount"])
+            if (debit > 0) == (credit > 0):
+                raise ValidationFailedError("Each journal line requires exactly one positive side")
+            total_debit += debit
+            total_credit += credit
+            if total_debit > MONEY_MAX or total_credit > MONEY_MAX:
+                raise ValidationFailedError("Journal totals exceed NUMERIC(15,2)")
         if total_debit != total_credit:
-            raise ValidationFailedError(
-                f"Journal entry is not balanced: debit={total_debit}, credit={total_credit}"
-            )
+            raise ValidationFailedError("Journal entry is not balanced")
+        return total_debit
+
+    def _validated_existing_lines(self, obj: JournalEntry) -> List[JournalEntryLine]:
+        lines = self.db.query(JournalEntryLine).filter(
+            JournalEntryLine.journal_entry_id == obj.id
+        ).all()
+        payload = []
+        for line in lines:
+            if line.tenant_id != self.tenant_id:
+                raise ValidationFailedError("Journal line belongs to another tenant")
+            debit = self._money(line.debit_amount)
+            credit = self._money(line.credit_amount)
+            if debit != self._money(line.debit) or credit != self._money(line.credit):
+                raise ValidationFailedError("Conflicting stored journal amounts")
+            payload.append({"account_id": line.account_id, "debit_amount": debit, "credit_amount": credit})
+        total = self.validate_balanced(payload)
+        if self._money(obj.total_debit) != total or self._money(obj.total_credit) != total:
+            raise ValidationFailedError("Journal header amounts contradict its lines")
+        self._validate_line_accounts(payload)
+        return lines
 
     def validate_status_transition(self, current: str, target: str) -> None:
         allowed: Dict[str, set] = {
@@ -255,11 +304,10 @@ class FinanceTransactionService:
             raise ValidationFailedError(
                 "Belegprinzip: Jede Buchung muss eine Belegreferenz haben (reference-Feld)"
             )
-        self.validate_balanced(lines)
+        total_debit = self.validate_balanced(lines)
         self.check_period_open(period)
         account_ids = self._validate_line_accounts(lines)
 
-        total_debit = sum(Decimal(str(ln.get("debit_amount", 0))) for ln in lines)
         obj = JournalEntry(
             id=uuid7(),
             tenant_id=self.tenant_id,
@@ -279,8 +327,8 @@ class FinanceTransactionService:
         self.db.flush()  # get obj.id before inserting lines
 
         for line_number, ln in enumerate(lines, start=1):
-            debit = Decimal(str(ln.get("debit_amount", 0)))
-            credit = Decimal(str(ln.get("credit_amount", 0)))
+            debit = self._money(ln["debit_amount"])
+            credit = self._money(ln["credit_amount"])
             line = JournalEntryLine(
                 id=uuid7(),
                 journal_entry_id=obj.id,
@@ -324,6 +372,7 @@ class FinanceTransactionService:
     def post(self, entry_id: str, posted_by: Optional[str] = None) -> JournalEntry:
         obj = self.get_by_id(entry_id)
         self.validate_status_transition(obj.status, "posted")
+        self._validated_existing_lines(obj)
         obj.status = "posted"
         obj.posted_at = datetime.utcnow()
         resolved_posted_by = self._resolve_user_id(posted_by)
@@ -349,12 +398,7 @@ class FinanceTransactionService:
         original = self.get_by_id(entry_id)
         self.validate_status_transition(original.status, "reversed")
 
-        # Load original lines
-        orig_lines = (
-            self.db.query(JournalEntryLine)
-            .filter(JournalEntryLine.journal_entry_id == entry_id)
-            .all()
-        )
+        orig_lines = self._validated_existing_lines(original)
 
         # Build reversal entry
         now = datetime.utcnow()

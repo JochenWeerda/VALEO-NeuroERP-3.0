@@ -310,7 +310,7 @@ async def update_auftrag_status(
         )
         auftrag.bestands_abzug_erfolgt = False
 
-    # 'fertig' schließt die Belegkette: Fertigwaren-Charge entsteht + FiBu-Buchung (PROD-FIBU-001)
+    # 'fertig' erzeugt die Fertigwaren-Charge; die verifizierte FiBu-Bewertung fehlt noch.
     if payload.status == "fertig":
         try:
             chain.complete_to_charge(auftrag)
@@ -319,9 +319,9 @@ async def update_auftrag_status(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         auftrag.fertig_am = datetime.now()
 
-        # Verbrauchsbuchung → JournalEntry (idempotent: nur wenn noch kein Ref vorhanden)
+        # Fehlende Bewertung sichtbar melden; ohne Beleg keine FiBu-Referenz setzen.
         if not auftrag.fibu_journal_ref:
-            _post_produktion_to_fibu(db, tenant_id, auftrag)
+            _report_missing_production_valuation(auftrag)
 
     auftrag.status = payload.status
     db.commit()
@@ -329,90 +329,21 @@ async def update_auftrag_status(
     return _to_out(auftrag)
 
 
-def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAuftrag) -> None:
-    """Verbrauchsbuchung bei Produktionsabschluss → JournalEntry (PROD-FIBU-001).
+def _report_missing_production_valuation(auftrag: ProduktionsAuftrag) -> None:
+    """Report the missing valuation; never produce a zero-value journal.
 
-    Buchungslogik:
-      Pro Komponente: Dr. Herstellungskosten / Cr. Rohwarenlager (Standard-Konten via Env/Fallback)
-      Fertigware:     Dr. Fertigwarenlager   / Cr. Herstellungskosten (Summe)
+    Operational completion remains possible with fibu_journal_ref unset.
+    A real booking requires a separately verified inventory valuation model.
     """
-    try:
-        from app.services.finance_transaction_service import FinanceTransactionService
-        fin = FinanceTransactionService(db, tenant_id)
+    from app.core.metrics import critical_data_path_errors_total
 
-        verbrauch: list[dict] = auftrag.verbrauch or []
-        if not verbrauch:
-            return  # Kein Snapshot → keine Buchung möglich
-
-        now = datetime.utcnow()
-        # UUIDv7 prefixes encode time and collide for orders created close
-        # together. Use the stable random tail for the unique journal number.
-        journal_suffix = auftrag.id.replace("-", "")[-12:].upper()
-        journal_ref = f"JE-PROD-{now.strftime('%Y%m%d')}-{journal_suffix}"
-        menge_t = float(auftrag.menge_t or 0)
-
-        # Standardkonten (Fallback-Nummern nach SKR03-Landhandel)
-        KONTO_ROHWARENLAGER = "3100"      # Cr: Rohwarenlager-Abgang
-        KONTO_HERSTELLKOSTEN = "6800"     # Dr: Herstellungskosten, Cr: Verrechnungskonto
-        KONTO_FERTIGWARENLAGER = "3200"   # Dr: Fertigwarenlager-Zugang
-
-        lines: list[dict] = []
-        for komp in verbrauch:
-            # Schätzwert: 0 EUR — echte Kosten kommen aus Einkaufspreis des Einzelfutters
-            # Wird hier als Mengenbuchung ohne Betrag erfasst (Anpassung via KST möglich)
-            menge_komp = float(komp.get("menge_t", 0))
-            # Placeholder-Betrag 0 — echtes Preismodell via Einkaufspreisfortschreibung
-            lines.append({
-                "account_id": fin.account_id_for_number(KONTO_HERSTELLKOSTEN),
-                "debit_amount": 0.0,
-                "credit_amount": 0.0,
-                "description": f"Verbrauch {komp.get('name', komp.get('einzelfutter_id', '?'))} {menge_komp:.3f}t",
-                "quantity": menge_komp,
-                "unit": "t",
-            })
-            lines.append({
-                "account_id": fin.account_id_for_number(KONTO_ROHWARENLAGER),
-                "debit_amount": 0.0,
-                "credit_amount": 0.0,
-                "description": f"Lagerabgang {komp.get('name', '?')} {menge_komp:.3f}t",
-                "quantity": menge_komp,
-                "unit": "t",
-            })
-
-        # Fertigwarenzugang
-        lines.append({
-            "account_id": fin.account_id_for_number(KONTO_FERTIGWARENLAGER),
-            "debit_amount": 0.0,
-            "credit_amount": 0.0,
-            "description": f"Fertigwarenzugang {auftrag.chargen_id} {menge_t:.3f}t",
-            "quantity": menge_t,
-            "unit": "t",
-        })
-
-        je = fin.create(
-            entry_number=journal_ref,
-            description=f"Produktionsabschluss {auftrag.chargen_id} {menge_t:.3f}t",
-            entry_date=now.date(),
-            lines=lines,
-            reference=auftrag.id,
-            source="produktion_mischfutter",
-            document_type="produktionsauftrag",
-            period=now.strftime("%Y-%m"),
-        )
-        auftrag.fibu_journal_ref = str(je.entry_number)
-    except Exception as exc:
-        # Nicht blockierend: Produktion wird trotzdem abgeschlossen, die Buchung
-        # wird ueber /fibu/nachbuchung nachgeholt. Der Fehlschlag darf aber nicht
-        # unsichtbar bleiben, sonst faellt eine fehlende Buchung niemandem auf.
-        from app.core.metrics import critical_data_path_errors_total
-
-        critical_data_path_errors_total.labels(
-            endpoint="produktion_mischfutter_fibu", error_type="posting_failed"
-        ).inc()
-        logger.error(
-            "FiBu-Buchung fuer Produktionsabschluss %s fehlgeschlagen: %s",
-            auftrag.chargen_id, exc, exc_info=True,
-        )
+    critical_data_path_errors_total.labels(
+        endpoint="produktion_mischfutter_fibu", error_type="valuation_missing"
+    ).inc()
+    logger.error(
+        "Keine FiBu-Buchung fuer Produktionsabschluss %s: verifizierte Bestandsbewertung fehlt",
+        auftrag.chargen_id,
+    )
 
 
 @router.get("/auftraege", response_model=list[ProduktionsauftragOut], summary="Auftraege auflisten")

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
 
 import pytest
 
@@ -53,6 +54,13 @@ def _make_entry(status="draft", entry_id="e-001"):
     entry.document_type = None
     entry.reversed_entry_id = None
     return entry
+
+
+def _stored_lines(amount="100"):
+    value = Decimal(amount)
+    return [SimpleNamespace(tenant_id=TENANT, account_id=account, debit=debit,
+        debit_amount=debit, credit=credit, credit_amount=credit, description="Proof")
+        for account,debit,credit in [("1000",value,Decimal("0")),("4000",Decimal("0"),value)]]
 
 
 # ── validate_balanced ─────────────────────────────────────────────────────────
@@ -252,6 +260,8 @@ def test_post_draft_entry():
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
     db.execute.return_value.first.return_value = ("user-1",)
+    db.query.return_value.filter.return_value.all.return_value = _stored_lines()
+    db.execute.return_value.all.return_value = [("1000",),("4000",)]
     svc = FinanceTransactionService(db, TENANT)
     svc.post("e-001", posted_by="user-1")
     assert entry.status == "posted"
@@ -265,6 +275,8 @@ def test_post_ignores_unknown_user_fk():
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
     db.execute.return_value.first.return_value = None
+    db.query.return_value.filter.return_value.all.return_value = _stored_lines()
+    db.execute.return_value.all.return_value = [("1000",),("4000",)]
     svc = FinanceTransactionService(db, TENANT)
 
     svc.post("e-001", posted_by="technical-actor")
@@ -316,6 +328,8 @@ def test_reverse_posted_creates_reversal():
     added = []
     db.add.side_effect = lambda obj: added.append(obj)
 
+    db.query.return_value.filter.return_value.all.return_value = _stored_lines()
+    db.execute.return_value.all.return_value = [("1000",),("4000",)]
     svc = FinanceTransactionService(db, TENANT)
     with patch("app.services.finance_transaction_service.JournalEntry") as MockEntry, \
          patch("app.services.finance_transaction_service.JournalEntryLine"):

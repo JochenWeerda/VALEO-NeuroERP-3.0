@@ -175,10 +175,12 @@ def test_concurrent_writers_wait_and_use_committed_predecessor(case):
 
 
 @pytest.mark.parametrize("operation", ["create", "reverse"])
-def test_stamp_read_failure_prevents_create_and_reverse_writes(operation):
+def test_stamp_read_failure_prevents_create_and_reverse_writes(operation, monkeypatch):
     db = MagicMock()
     db.execute.side_effect = RuntimeError("secret SQL connection detail")
     service = FinanceTransactionService(db,"tenant")
+    monkeypatch.setattr(service,"_validate_line_accounts",lambda lines: [])
+    monkeypatch.setattr(service,"_validated_existing_lines",lambda obj: [])
     if operation == "reverse":
         original = entry("tenant")
         original.status = "posted"
@@ -186,7 +188,7 @@ def test_stamp_read_failure_prevents_create_and_reverse_writes(operation):
         db.query.return_value.filter.return_value.all.return_value = []
     with pytest.raises(ValidationFailedError, match="write rejected") as error:
         if operation == "create":
-            service.create("TEST","Proof",datetime(2026,10,2),[],reference="REF")
+            service.create("TEST","Proof",datetime(2026,10,2),[{"debit_amount":10,"credit_amount":0},{"debit_amount":0,"credit_amount":10}],reference="REF")
         else:
             service.reverse("id")
     assert "secret" not in str(error.value)

@@ -1,0 +1,32 @@
+slice_id: JOURNAL-AMOUNT-INTEGRITY-20261002
+title: Exakte positive Journalbetraege vor Create/Post/Reverse
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-02
+updated_at: 2026-10-02
+coordination: Claim 14b315a07; keine fremden EUDR/UI/Handbuch-Edits.
+goal: Keine Scheinbuchung oder widerspruechliche Betraege im Service-Lifecycle.
+file_ownership:
+  - finance_transaction_service.py Betragsvalidierung/Create/Post/Reverse
+  - produktion_mischfutter.py Nullbetragshelper/Verbraucherkommentar
+  - test_journal_amount_integrity.py und betroffene Journal-Testdoppel
+acceptance:
+  - Endliche exakte Centbetraege innerhalb NUMERIC(15,2), ohne Null-Default/Rundung.
+  - Mindestens zwei positive einseitige Zeilen und ausgeglichene positive Summen.
+  - Gespeicherte Betraege/Tenant/Konten vor Freigabe/Storno pruefen.
+  - Keine Produktions-Nullbetragsjournale ohne echte Bewertung.
+test_evidence:
+  - 231 Tests bestanden; 46 neue, davon 18 echte PostgreSQL-Vertraege.
+  - Ruff bestanden; keine neue DB/Dockerinstanz oder gemeinsame Migration.
+risks:
+  - Reales Bewertungsmodell und andere Journal-Schreiber bleiben offen.
+  - Schema-Dubletten, Lifecycle-Concurrency/Atomizitaet, Hash/Draft-Delete offen.
+  - Bank-Migrationsintegration und fremder Handbuch-Drift weiter offen.
+ai_harness:
+  fachlicher_vertrag: Positive ausgeglichene exakte Betraege, keine Scheinbuchung.
+  architektur_vertrag: Bestehender Finance-Service, keine neue API oder Maske.
+  daten_vertrag: Canonical debit_amount/credit_amount, physische Dubletten auf Konflikt pruefen.
+  test_vertrag: Echte ORM-/SQL-Uebergaenge und Zustandsnachweis bei Abweisung.
+  security_vertrag: Fremdtenant und unbuchbares Konto sperren Lifecycle.
+  betriebs_vertrag: Vorhandener valeo_probe, gezielt eigene Schemas, kein Reset.
+  dokumentations_vertrag: QA/Slice/Workboard/Gaps unterscheiden Guard von Bewertungsmodell.

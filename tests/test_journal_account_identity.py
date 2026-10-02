@@ -206,7 +206,6 @@ def test_many_lines_use_one_validation_query_before_any_journal_write(
         "app/api/v1/endpoints/asset_accounting.py",
         "app/api/v1/endpoints/genossenschaft.py",
         "app/api/v1/endpoints/logistics_freight.py",
-        "app/api/v1/endpoints/produktion_mischfutter.py",
     ],
 )
 def test_number_configured_service_callers_resolve_before_constructing_lines(file):
