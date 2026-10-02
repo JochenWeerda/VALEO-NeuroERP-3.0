@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-STAMP-INTEGRITY-20261002 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Journal-Schreiben ohne erfolgreichen
+Verkettungsnachweis abweisen; Sequenz und Vorgaenger unter einer
+mandantenbezogenen Transaktionssperre bestimmen.
+**Dateibesitz:** finance_transaction_service.py nur GoBD-Stempelhelfer;
+Tests test_finance_transaction_service.py nur betroffene Testdoppel,
+neuer test_journal_stamp_integrity.py, eigene QA/Slice/Workboard/Gaps.
+**Abnahme:** Lesefehler/fehlende oder widerspruechliche Stempel sperren;
+Create und Reverse speichern bei Stempelfehler nichts; konkurrierende
+Stempel im vorhandenen valeo_probe sind serialisiert. Keine neue DB/Docker.
+**Risiken:** Andere Journal-Schreiber verwenden den Helfer noch nicht;
+Hash-Nutzdaten decken noch nicht alle Zeilen/Attribute ab. Kontenreferenz-
+Kanonisierung und gemeinsame Bankmigration bleiben separate offene Arbeit.
+**Architektur:** Bugfix im vorhandenen Service, keine neuen API-Vertraege.
+
 ## BANK-RECONCILIATION-PROOF-20261001 — in Arbeit, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Gespeicherte mandantengebundene GL-Konto-ID
