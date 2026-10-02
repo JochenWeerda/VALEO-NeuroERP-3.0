@@ -453,12 +453,14 @@ def test_storno_reverse_sets_original_to_reversed():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = original
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = original
     original.total_debit = original.total_credit = line.debit
     line.tenant_id = TENANT
     line.debit_amount, line.credit_amount = line.debit, line.credit
     counter = SimpleNamespace(tenant_id=TENANT, account_id="contra", debit=Decimal("0"),
         debit_amount=Decimal("0"), credit=line.debit, credit_amount=line.debit, description="Counter")
     db.query.return_value.filter.return_value.all.return_value = [line,counter]
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = [line,counter]
     db.execute.return_value.all.return_value = [("1200",),("contra",)]
     db.execute.return_value.fetchone.side_effect = [("read committed",),(5,5,5,0,"a"*64)]
 
@@ -490,6 +492,7 @@ def test_storno_reverse_raises_on_draft():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     db.execute.return_value.fetchone.return_value = (1,)
 
     svc = FinanceTransactionService(db, TENANT)
@@ -509,12 +512,14 @@ def test_storno_reversal_lines_are_swapped():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = original
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = original
     original.total_debit = original.total_credit = line.debit
     line.tenant_id = TENANT
     line.debit_amount, line.credit_amount = line.debit, line.credit
     counter = SimpleNamespace(tenant_id=TENANT, account_id="contra", debit=Decimal("0"),
         debit_amount=Decimal("0"), credit=line.debit, credit_amount=line.debit, description="Counter")
     db.query.return_value.filter.return_value.all.return_value = [line,counter]
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = [line,counter]
     db.execute.return_value.all.return_value = [("1200",),("contra",)]
     db.execute.return_value.fetchone.side_effect = [("read committed",),(6,6,6,0,"a"*64)]
 

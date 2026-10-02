@@ -72,7 +72,7 @@ class FinanceTransactionService:
     def _validated_existing_lines(self, obj: JournalEntry) -> List[JournalEntryLine]:
         lines = self.db.query(JournalEntryLine).filter(
             JournalEntryLine.journal_entry_id == obj.id
-        ).all()
+        ).populate_existing().with_for_update(read=True).all()
         payload = []
         for line in lines:
             if line.tenant_id != self.tenant_id:
@@ -265,6 +265,16 @@ class FinanceTransactionService:
             raise EntityNotFoundError("JournalEntry", entry_id)
         return obj
 
+    def _locked_entry(self, entry_id: str) -> JournalEntry:
+        """Read current tenant-owned state under the mutation transaction lock."""
+        with self.db.no_autoflush:
+            obj = (self.db.query(JournalEntry)
+                .filter(JournalEntry.id == entry_id, JournalEntry.tenant_id == self.tenant_id)
+                .populate_existing().with_for_update().first())
+        if obj is None:
+            raise EntityNotFoundError("JournalEntry", entry_id)
+        return obj
+
     def list_paginated(
         self,
         skip: int = 0,
@@ -349,9 +359,11 @@ class FinanceTransactionService:
         return obj
 
     def update(self, entry_id: str, data: Dict[str, Any]) -> JournalEntry:
-        obj = self.get_by_id(entry_id)
+        obj = self._locked_entry(entry_id)
         if obj.status != "draft":
             raise ValidationFailedError("Nur Entwürfe können geändert werden")
+        if "reference" in data and (not isinstance(data["reference"], str) or not data["reference"].strip()):
+            raise ValidationFailedError("Belegprinzip: A nonempty reference is required")
         for field in ("description", "reference", "document_type"):
             if field in data:
                 setattr(obj, field, data[field])
@@ -360,22 +372,30 @@ class FinanceTransactionService:
         return obj
 
     def delete(self, entry_id: str) -> None:
-        obj = self.get_by_id(entry_id)
+        obj = self._locked_entry(entry_id)
         if obj.status != "draft":
             raise ValidationFailedError("Nur Entwürfe können gelöscht werden")
-        self.db.query(JournalEntryLine).filter(
+        if any(value is not None for value in (obj.sequence_number, obj.hash_current, obj.hash_prev)):
+            raise ValidationFailedError("Stamped drafts must be cancelled, not physically deleted")
+        lines = self.db.query(JournalEntryLine).filter(
             JournalEntryLine.journal_entry_id == entry_id
+        ).populate_existing().with_for_update(read=True).all()
+        if any(line.tenant_id != self.tenant_id for line in lines):
+            raise ValidationFailedError("Journal line belongs to another tenant")
+        self.db.query(JournalEntryLine).filter(
+            JournalEntryLine.journal_entry_id == entry_id,
+            JournalEntryLine.tenant_id == self.tenant_id,
         ).delete(synchronize_session=False)
         self.db.delete(obj)
         self.db.commit()
 
     def post(self, entry_id: str, posted_by: Optional[str] = None) -> JournalEntry:
-        obj = self.get_by_id(entry_id)
+        obj = self._locked_entry(entry_id)
         self.validate_status_transition(obj.status, "posted")
         self._validated_existing_lines(obj)
+        resolved_posted_by = self._resolve_user_id(posted_by)
         obj.status = "posted"
         obj.posted_at = datetime.utcnow()
-        resolved_posted_by = self._resolve_user_id(posted_by)
         if resolved_posted_by:
             obj.posted_by = resolved_posted_by
         self.db.commit()
@@ -384,7 +404,7 @@ class FinanceTransactionService:
         return obj
 
     def cancel(self, entry_id: str, reason: str) -> JournalEntry:
-        obj = self.get_by_id(entry_id)
+        obj = self._locked_entry(entry_id)
         self.validate_status_transition(obj.status, "cancelled")
         obj.status = "cancelled"
         if hasattr(obj, "cancel_reason"):
@@ -395,7 +415,7 @@ class FinanceTransactionService:
 
     def reverse(self, entry_id: str, reason: str = "") -> Tuple[JournalEntry, JournalEntry]:
         """Mark original as reversed and create a mirror entry with inverted debit/credit."""
-        original = self.get_by_id(entry_id)
+        original = self._locked_entry(entry_id)
         self.validate_status_transition(original.status, "reversed")
 
         orig_lines = self._validated_existing_lines(original)

@@ -11,6 +11,17 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## JOURNAL-LIFECYCLE-INTEGRITY — Service serialisiert, API/Repository noch offen
+
+2026-10-02: Kopf-FOR-UPDATE mit frischem ORM-Zustand fuer alle Service-
+Mutationen; Zeilen-Lesesperre, Stempelerhalt bei Delete-Abweisung/Cancel,
+eigene ungestempelte Altentwuerfe loeschbar. 247 Tests, 16 neue PostgreSQL-
+Faelle, fuenf echte wartende Paralleltransaktionen inkl. gecachtem Zustand.
+QA: [Lifecycle-Vertrag](../quality-assurance/journal-lifecycle-integrity-20261002.md).
+Offen: Journal-API/JournalEntryRepository eigener Mutation-/Delete-Weg;
+Cancel-Grund ohne Journal-ORM-Mapping/Audit, Consumer-Atomizitaet, Schema/Hash,
+Bewertung und Bankintegration. Kein globaler Stempel-/Delete-/Concurrency-Beleg.
+
 ## JOURNAL-AMOUNT-INTEGRITY — Service-Guard geschlossen, Bewertung/Schema offen
 
 2026-10-02: Exakte endliche positive ausgeglichene Centbuchungen im Service;
@@ -20,7 +31,7 @@ entfernt, fehlende Bewertung gemeldet und keine FiBu-Referenz behauptet.
 231 Tests bestanden (46 neue, 18 PostgreSQL). QA:
 [Betrags-/Lifecycle-Vertrag](../quality-assurance/journal-amount-integrity-20261002.md).
 Offen bleiben reale Bewertung, andere Schreiber, physische Betragsdubletten,
-Lifecycle-Concurrency/Consumer-Atomizitaet, Hash/Draft-Delete, Bankintegration
+Concurrency weiterer Journalwege/Consumer-Atomizitaet, Hash, Bankintegration
 und Handbuch-Drift. Guard ist keine Produktionskosten- oder GoBD-Abnahme.
 
 ## JOURNAL-ACCOUNT-ID — Service/Verbraucher kanonisch, Schema/andere Schreiber offen
@@ -45,7 +56,7 @@ READ-COMMITTED-Transaktionssperre, konsistente Sequenz/Vorgaenger-Metadaten,
 keine Teilstempel oder Create/Reverse-Commits bei Fehler. QA-Nachweis:
 quality-assurance/journal-stamp-integrity-20261002.md.
 Offen bleiben kanonischer Hash-Payload inkl. Zeilen, alle weiteren Schreiber,
-Draft-Delete ohne Kettenluecke, Konto-ID/Nummern-Verwechslung anderer Journalwege und
+Delete-Integration weiterer Journalwege, Konto-ID/Nummern-Verwechslung anderer Journalwege und
 skalierbarer Kettenzustand. Bankmigration/Betriebsprobe weiter offen.
 
 ## BANK-RECONCILIATION-PROOF — Code geprueft, Integration noch offen

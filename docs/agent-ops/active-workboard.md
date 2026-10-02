@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## JOURNAL-LIFECYCLE-INTEGRITY-20261002 — reserviert, Codex (Chat 01a0f3fc)
+## JOURNAL-LIFECYCLE-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Mutationen pro Journalkopf serialisieren,
 nach dem Warten frischen Status pruefen; gestempelte Entwuerfe nicht physisch
@@ -26,6 +26,14 @@ vorher gecachtem ORM-Objekt. Stempel/Zeilen bleiben bei Delete-Abweisung.
 Unstempelte eigene Legacy-Entwuerfe gezielt loeschen; fremde Zeilen sperren.
 **Risiken:** Andere Journalwege, Audit/Grundpersistenz, Hash/Payload/Schema
 und Consumer-Atomizitaet weiter offen. Vorhandener valeo_probe, keine neue DB.
+
+**Ergebnis 2026-10-02:** Frischer Journalkopf unter FOR UPDATE, Zeilen-
+Lesesperre, kein physisches Stempel-Delete und keine leere Pflichtreferenz.
+**Abnahme:** 247 Tests (16 neue PostgreSQL), fuenf echte wartende
+Paralleltransaktionen inkl. alter ORM-Cachewerte; Ruff/Whitespace bestanden.
+**Nachweis:** docs/quality-assurance/journal-lifecycle-integrity-20261002.md.
+**Naechste belegte Luecke:** Journal-API/Repository eigener Delete-/Mutationsweg,
+Cancel-Grund ohne ORM-Mapping. Keine globale Journal-/GoBD-Abnahme.
 
 ## JOURNAL-AMOUNT-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
