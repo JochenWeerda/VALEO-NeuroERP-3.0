@@ -135,6 +135,7 @@ def test_get_by_id_found():
     entry = _make_entry()
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     svc = FinanceTransactionService(db, TENANT)
     result = svc.get_by_id("e-001")
     assert result is entry
@@ -143,6 +144,7 @@ def test_get_by_id_found():
 def test_get_by_id_not_found():
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = None
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = None
     svc = FinanceTransactionService(db, TENANT)
     with pytest.raises(EntityNotFoundError):
         svc.get_by_id("missing")
@@ -216,6 +218,7 @@ def test_update_draft_ok():
     entry = _make_entry(status="draft")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     svc = FinanceTransactionService(db, TENANT)
     svc.update("e-001", {"description": "new desc"})
     assert entry.description == "new desc"
@@ -226,6 +229,7 @@ def test_update_posted_raises():
     entry = _make_entry(status="posted")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     svc = FinanceTransactionService(db, TENANT)
     with pytest.raises(ValidationFailedError, match="Entwürf"):
         svc.update("e-001", {"description": "x"})
@@ -233,10 +237,12 @@ def test_update_posted_raises():
 
 # ── delete ────────────────────────────────────────────────────────────────────
 
-def test_delete_draft_ok():
+def test_delete_unstamped_draft_ok():
     entry = _make_entry(status="draft")
+    entry.sequence_number = entry.hash_current = entry.hash_prev = None
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     db.query.return_value.filter.return_value.delete.return_value = None
     svc = FinanceTransactionService(db, TENANT)
     svc.delete("e-001")
@@ -248,6 +254,7 @@ def test_delete_posted_raises():
     entry = _make_entry(status="posted")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     svc = FinanceTransactionService(db, TENANT)
     with pytest.raises(ValidationFailedError, match="Entwürf"):
         svc.delete("e-001")
@@ -259,8 +266,10 @@ def test_post_draft_entry():
     entry = _make_entry(status="draft")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     db.execute.return_value.first.return_value = ("user-1",)
     db.query.return_value.filter.return_value.all.return_value = _stored_lines()
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = _stored_lines()
     db.execute.return_value.all.return_value = [("1000",),("4000",)]
     svc = FinanceTransactionService(db, TENANT)
     svc.post("e-001", posted_by="user-1")
@@ -274,8 +283,10 @@ def test_post_ignores_unknown_user_fk():
     entry.posted_by = None
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     db.execute.return_value.first.return_value = None
     db.query.return_value.filter.return_value.all.return_value = _stored_lines()
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = _stored_lines()
     db.execute.return_value.all.return_value = [("1000",),("4000",)]
     svc = FinanceTransactionService(db, TENANT)
 
@@ -289,6 +300,7 @@ def test_post_already_posted_raises():
     entry = _make_entry(status="posted")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     svc = FinanceTransactionService(db, TENANT)
     with pytest.raises(ValidationFailedError):
         svc.post("e-001")
@@ -300,6 +312,7 @@ def test_cancel_draft_ok():
     entry = _make_entry(status="draft")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     svc = FinanceTransactionService(db, TENANT)
     svc.cancel("e-001", reason="Fehleingabe")
     assert entry.status == "cancelled"
@@ -321,14 +334,17 @@ def test_reverse_posted_creates_reversal():
     db = MagicMock()
     # get_by_id
     db.query.return_value.filter.return_value.first.return_value = original
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = original
     # lines query
     db.query.return_value.filter.return_value.all.return_value = [line]
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = [line]
     db.execute.return_value.fetchone.side_effect = [("read committed",), (1, 1, 1, 0, "a" * 64)]
 
     added = []
     db.add.side_effect = lambda obj: added.append(obj)
 
     db.query.return_value.filter.return_value.all.return_value = _stored_lines()
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = _stored_lines()
     db.execute.return_value.all.return_value = [("1000",),("4000",)]
     svc = FinanceTransactionService(db, TENANT)
     with patch("app.services.finance_transaction_service.JournalEntry") as MockEntry, \
@@ -351,6 +367,7 @@ def test_reverse_draft_raises():
     entry = _make_entry(status="draft")
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     svc = FinanceTransactionService(db, TENANT)
     with pytest.raises(ValidationFailedError):
         svc.reverse("e-001")

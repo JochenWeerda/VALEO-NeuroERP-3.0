@@ -185,7 +185,9 @@ def test_stamp_read_failure_prevents_create_and_reverse_writes(operation, monkey
         original = entry("tenant")
         original.status = "posted"
         db.query.return_value.filter.return_value.first.return_value = original
+        db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = original
         db.query.return_value.filter.return_value.all.return_value = []
+        db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = []
     with pytest.raises(ValidationFailedError, match="write rejected") as error:
         if operation == "create":
             service.create("TEST","Proof",datetime(2026,10,2),[{"debit_amount":10,"credit_amount":0},{"debit_amount":0,"credit_amount":10}],reference="REF")
