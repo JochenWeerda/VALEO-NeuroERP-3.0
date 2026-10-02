@@ -11,6 +11,17 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## JOURNAL-STAMP-INTEGRITY — Service-Guard geschlossen, Journalkanonisierung offen
+
+2026-10-02: Verschluckter Stempelfehler und konkurrierende Sequenzvergabe im
+FinanceTransactionService behoben (115 Tests, 19 neue, 14 echte PostgreSQL).
+READ-COMMITTED-Transaktionssperre, konsistente Sequenz/Vorgaenger-Metadaten,
+keine Teilstempel oder Create/Reverse-Commits bei Fehler. QA-Nachweis:
+quality-assurance/journal-stamp-integrity-20261002.md.
+Offen bleiben kanonischer Hash-Payload inkl. Zeilen, alle weiteren Schreiber,
+Draft-Delete ohne Kettenluecke, globale Konto-ID/Nummern-Verwechslung und
+skalierbarer Kettenzustand. Bankmigration/Betriebsprobe weiter offen.
+
 ## BANK-RECONCILIATION-PROOF — Code geprueft, Integration noch offen
 
 Explizite GL-Konto-ID mit Tenant-FK statt verlorenem gl_account_number;
@@ -19,8 +30,8 @@ Header-Tenant/Konto, ein SQL-Snapshot, Decimal/null und typisierte Statuswerte.
 angewandt: parallele EUDR-Kette braucht koordinierten Merge-Head und danach
 Betriebsprobe. Kein abgeschlossener Lieferstatus. QA:
 [Saldennachweis](../quality-assurance/bank-reconciliation-proof-20261002.md).
-Neu belegte Journal-Gaps: globale LIMIT-1-Kontenaufloesung, verschluckter
-GoBD-Stempel, globale account_number-UQ und Betragsdubletten. Auch Bank/GL-
+Neu belegte Journal-Gaps: globale LIMIT-1-Kontenaufloesung, unvollstaendiger
+GoBD-Hash-Payload, globale account_number-UQ und Betragsdubletten. Auch Bank/GL-
 Zeilenlink, Bankstamm-Audit/RBAC und native Maskenkonvergenz offen.
 
 ## BANK-DIRECTBOOK — unsicheren Altweg entfernt, Hauptbuchnachweis offen

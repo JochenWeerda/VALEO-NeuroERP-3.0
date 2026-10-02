@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## JOURNAL-STAMP-INTEGRITY-20261002 — reserviert, Codex (Chat 01a0f3fc)
+## JOURNAL-STAMP-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Journal-Schreiben ohne erfolgreichen
 Verkettungsnachweis abweisen; Sequenz und Vorgaenger unter einer
@@ -26,6 +26,14 @@ Stempel im vorhandenen valeo_probe sind serialisiert. Keine neue DB/Docker.
 Hash-Nutzdaten decken noch nicht alle Zeilen/Attribute ab. Kontenreferenz-
 Kanonisierung und gemeinsame Bankmigration bleiben separate offene Arbeit.
 **Architektur:** Bugfix im vorhandenen Service, keine neuen API-Vertraege.
+
+**Ergebnis:** Fail-closed Stempel, keine Teilzuweisung, Transaktionssperre,
+READ COMMITTED, eine konsistente Kettenabfrage statt separatem MAX-Fallback.
+**Abnahme 2026-10-02:** 115 Tests bestanden (19 neue, davon 14 PostgreSQL),
+Ruff bestanden. Paralleltest belegt echte wartende Sperre via pg_locks.
+**Nachweis:** docs/quality-assurance/journal-stamp-integrity-20261002.md.
+**Folge-Gaps:** Hash-Payload/andere Schreiber/Draft-Delete und skalierbarer
+Kettenzustand bleiben offen; keine GoBD-Gesamtabnahme. Probe 0 Journalzeilen.
 
 ## BANK-RECONCILIATION-PROOF-20261001 — in Arbeit, Codex (Chat 01a0f3fc)
 
@@ -59,7 +67,7 @@ Decimal/null, sichtbare Fehler und alle Statuswerte; kein Abgleich-DML.
 Entwicklungsintegration/Betriebsprobe. Code als Draft-PR sichern.
 **Nachweis:** bank-reconciliation-proof-20261002.md, Proposed ADR-075.
 **Neue Folge-Gaps:** Journalservice globale LIMIT-1-Kontenaufloesung und
-verschluckter GoBD-Stempel; globale Kontennummer-UQ, doppelte Journalbetraege,
+unvollstaendiger GoBD-Hash-Payload; globale Kontennummer-UQ, doppelte Journalbetraege,
 Bank/GL-Zeilenlink und Bankstamm-Audit/RBAC. Gesamtziel bleibt offen.
 
 ## EUDR-CHARGENKENNZEICHNUNG-20261001 — in Arbeit, Claude Code

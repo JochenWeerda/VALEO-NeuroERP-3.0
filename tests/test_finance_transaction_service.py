@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -32,7 +32,7 @@ def _make_service(db=None):
     if db is None:
         db = MagicMock()
         # sequence + prev-hash queries return safe defaults
-        db.execute.return_value.fetchone.return_value = (1,)
+        db.execute.return_value.fetchone.side_effect = [("read committed",), (0, None, 0, 0, None)]
     return FinanceTransactionService(db, TENANT)
 
 
@@ -172,7 +172,7 @@ def test_create_unbalanced_raises():
 
 def test_create_persists_entry_and_lines():
     db = MagicMock()
-    db.execute.return_value.fetchone.return_value = (1,)
+    db.execute.return_value.fetchone.side_effect = [("read committed",), (0, None, 0, 0, None)]
     added = []
     db.add.side_effect = lambda obj: added.append(obj)
 
@@ -181,6 +181,8 @@ def test_create_persists_entry_and_lines():
          patch("app.services.finance_transaction_service.JournalEntryLine") as MockLine:
         mock_entry = MagicMock()
         mock_entry.id = "new-id"
+        mock_entry.tenant_id = TENANT
+        mock_entry.hash_prev = None
         mock_entry.sequence_number = None
         mock_entry.hash_current = None
         MockEntry.return_value = mock_entry
@@ -308,16 +310,18 @@ def test_reverse_posted_creates_reversal():
     db.query.return_value.filter.return_value.first.return_value = original
     # lines query
     db.query.return_value.filter.return_value.all.return_value = [line]
-    db.execute.return_value.fetchone.return_value = (2,)
+    db.execute.return_value.fetchone.side_effect = [("read committed",), (1, 1, 1, 0, "a" * 64)]
 
     added = []
     db.add.side_effect = lambda obj: added.append(obj)
 
     svc = FinanceTransactionService(db, TENANT)
     with patch("app.services.finance_transaction_service.JournalEntry") as MockEntry, \
-         patch("app.services.finance_transaction_service.JournalEntryLine") as MockLine:
+         patch("app.services.finance_transaction_service.JournalEntryLine"):
         mock_reversal = MagicMock()
         mock_reversal.id = "e-rev"
+        mock_reversal.tenant_id = TENANT
+        mock_reversal.hash_prev = None
         mock_reversal.sequence_number = None
         mock_reversal.hash_current = None
         MockEntry.return_value = mock_reversal

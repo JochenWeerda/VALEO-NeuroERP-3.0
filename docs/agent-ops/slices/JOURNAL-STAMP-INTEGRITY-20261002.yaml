@@ -1,0 +1,31 @@
+slice_id: JOURNAL-STAMP-INTEGRITY-20261002
+title: Fail-closed Journalstempel und serialisierte Sequenz
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-02
+updated_at: 2026-10-02
+coordination: Claim a6267f6a4; nur Stempelhelfer, keine fremden EUDR/UI-Edits.
+goal: Kein Service-Journalschreiben ohne vollstaendigen Verkettungsnachweis.
+file_ownership:
+  - app/services/finance_transaction_service.py nur Stempelhelfer
+  - tests/test_finance_transaction_service.py betroffene Testdoppel
+  - tests/test_journal_stamp_integrity.py
+acceptance:
+  - Stempelfehler verhindert Create/Reverse-Schreibzugriffe.
+  - Echte Transaktionssperre und READ-COMMITTED-Nachweis.
+  - Inkonsistente Kettenmetadaten und fremder Tenant abgewiesen.
+test_evidence:
+  - 115 Tests bestanden, davon 19 neue Vertraege und 14 neue echte PostgreSQL-Faelle.
+  - Ruff bestanden; gemeinsame Probe 0 Journalzeilen, keine Migration.
+risks:
+  - Kanonischer Hash-Payload, andere Schreiber und Draft-Delete bleiben offen.
+  - Globale Kontenaufloesung und Bank-Migrationsintegration bleiben offen.
+  - Metadatenpruefung skaliert mit Tenant-Kettenlaenge, Performance-Gesamtabnahme fehlt.
+ai_harness:
+  fachlicher_vertrag: Kein Schreiben ohne Verkettungsnachweis.
+  architektur_vertrag: Bestehender Finance-Service, keine neue API oder Domain.
+  daten_vertrag: Positive eindeutige lueckenlose Sequenz und konsistente Vorgaengerlinks.
+  test_vertrag: Echte PostgreSQL-Sperre und Zustand vor/nach abgewiesenem Schreiben.
+  security_vertrag: Mandantengebundene Sperre, keine SQL-Details in Fehlermeldungen.
+  betriebs_vertrag: Vorhandener valeo_probe, eigene kleine Schemakopie, kein Reset.
+  dokumentations_vertrag: QA, Slice, Workboard und Gaps mit klaren Folgegaps.
