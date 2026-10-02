@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
@@ -7,6 +8,8 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import type { BankReconciliationResult } from '@/features/finance/bank-contracts'
+import { useBankOptions } from '@/features/finance/useBankOptions'
 import { useTenant } from '@/hooks/useTenant'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -16,7 +19,7 @@ import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-
 import { Callout } from '@/components/ui/callout'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 
-const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
+const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string, bankOptions: { value: string; label: string }[]): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.bankReconciliation'),
   type: 'object-page',
@@ -30,20 +33,8 @@ const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskCo
           label: t('crud.fields.bankAccount'),
           type: 'select',
           required: true,
-          options: [
-            { value: '1200', label: `1200 - ${  t('crud.fields.bankAccount')  } Deutsche Bank` },
-            { value: '1300', label: `1300 - ${  t('crud.fields.bankAccount')  } Commerzbank` },
-            { value: '1400', label: `1400 - ${  t('crud.fields.bankAccount')  } Sparkasse` }
-          ]
+          options: bankOptions
         },
-        {
-          name: 'periode',
-          label: t('crud.fields.period'),
-          type: 'text',
-          required: true,
-          placeholder: t('crud.tooltips.placeholders.period'),
-          pattern: '^\\d{4}-\\d{2}$'
-         },
         {
           name: 'camtFile',
           label: t('crud.fields.camtFile'),
@@ -51,12 +42,7 @@ const createBankAbgleichConfig = (t: TFunction, entityTypeLabel: string): MaskCo
           accept: '.xml,.camt,.940,.sta,.csv',
           helpText: t('crud.tooltips.fields.camtFile')
         },
-        {
-          name: 'abgleichsDatum',
-          label: t('crud.fields.reconciliationDate'),
-          type: 'date',
-          required: true
-        }
+
       ],
       layout: 'grid',
       columns: 2
@@ -183,7 +169,7 @@ function BankZuordnungTable({ data: _data }: { data: Record<string, unknown>[] }
       </div>
 
       <div className="overflow-x-auto max-h-96">
-        <table className="min-w-full border border-gray-300">
+        <table className="min-w-full border border-border">
           <thead className="bg-gray-50 sticky top-0">
             <tr>
               <th className="px-4 py-2 border">{t('crud.fields.date')}</th>
@@ -260,17 +246,19 @@ export default function BankAbgleichPage(): JSX.Element {
   const { t } = useTranslation()
   const isTouch = useTouchDevice()
   const navigate = useNavigate()
+  const { data: accounts = [], isError: accountLoadFailed } = useBankOptions()
   const { tenantId } = useTenant()
   const entityType = 'bankReconciliation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bank-Abgleich')
-  const bankAbgleichConfig = createBankAbgleichConfig(t, entityTypeLabel)
+  const bankAbgleichConfig = createBankAbgleichConfig(t, entityTypeLabel, accounts.map(account => ({ value: account.id, label: `${account.account_number} - ${account.bank_name}` })))
 
-  const { data, loading } = useMaskData({
+  const { data, loading, setData } = useMaskData({
     apiUrl: bankAbgleichConfig.api.baseUrl,
-    id: 'new'
+    autoLoad: false
   })
+  useEffect(() => setData(null), [tenantId, setData])
   const operationalStatus = normalizeOperationalStatus(
-    !data ? 'offen' : Math.abs(Number(data.abgleichsDifferenz || 0)) >= 0.01 ? 'blockiert' : Number(data.nichtZugeordnet || 0) > 0 ? 'wartet_auf_mensch' : 'abgeschlossen'
+    data?.comparisonState === 'BALANCES_EQUAL' ? 'abgeschlossen' : data?.comparisonState === 'DIFFERENCES' ? 'blockiert' : 'offen'
   )
   const contextSections = [
     {
@@ -286,7 +274,7 @@ export default function BankAbgleichPage(): JSX.Element {
       items: [
         { label: 'Startsaldo', value: `${numberValue(data?.startSaldo).toFixed(2)} EUR` },
         { label: 'Endsaldo', value: `${numberValue(data?.endSaldo).toFixed(2)} EUR` },
-        { label: 'Differenz', value: `${Math.abs(numberValue(data?.abgleichsDifferenz)).toFixed(2)} EUR` },
+        { label: 'Differenz', value: data?.abgleichsDifferenz == null ? 'Nicht ermittelt' : `${Math.abs(numberValue(data.abgleichsDifferenz)).toFixed(2)} ${stringValue(data.currency, 'EUR')}` },
       ],
     },
     {
@@ -303,13 +291,6 @@ export default function BankAbgleichPage(): JSX.Element {
     data?.statementId ? { label: 'Statement importiert', detail: stringValue(data.statementId) } : null,
     numberValue(data?.nichtZugeordnet) > 0 ? { label: 'Manuelle Klaerung offen', detail: `${numberValue(data?.nichtZugeordnet)} Umsatzzeile(n) ohne Zuordnung` } : null,
   ].filter((item): item is { label: string; detail: string } => item !== null)
-
-  type ReconcileResult = {
-    balance_comparison: { difference: number; is_balanced: boolean }
-    line_counts?: { matched?: number; unmatched?: number }
-    total_differences?: number
-    differences?: unknown[]
-  }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'import') {
@@ -366,7 +347,7 @@ export default function BankAbgleichPage(): JSX.Element {
           }>
         }
         const res = await apiClient.post<ImportResult>(
-          `/api/v1/finance/bank-statements/import?format=${String(format ?? '')}&bank_account_id=${String(formData.kontoId ?? '')}&tenant_id=${String(encodeURIComponent(tenantId) ?? '')}`,
+          `/api/v1/finance/bank-statements/import?format=${String(format ?? '')}&bank_account_id=${String(formData.kontoId ?? '')}`,
           uploadFormData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         )
@@ -392,6 +373,9 @@ export default function BankAbgleichPage(): JSX.Element {
         formData.zugeordnet = umsaetze.filter(u => u.zugeordnet).length
         formData.abgleichsDifferenz = Math.abs(Number(formData.startSaldo) + Number(formData.gebuchteUmsaetze) - Number(formData.endSaldo))
         formData.statementId = result.statement_id
+        formData.comparisonState = 'INCOMPLETE'
+        formData.abgleichsDifferenz = null
+        setData({ ...formData })
         formData.importErrors = result.import_errors || []
 
         toast({
@@ -426,16 +410,30 @@ export default function BankAbgleichPage(): JSX.Element {
       }
 
       try {
-        const res = await apiClient.post<ReconcileResult>(
-          `/api/v1/finance/bank-reconciliation/${String(formData.statementId ?? '')}/reconcile?bank_account_id=${String(formData.kontoId ?? '')}&tenant_id=${String(encodeURIComponent(tenantId) ?? '')}&auto_book=false`
+        const res = await apiClient.post<BankReconciliationResult>(
+          `/api/v1/finance/bank-reconciliation/${String(formData.statementId ?? '')}/reconcile?bank_account_id=${String(formData.kontoId ?? '')}&auto_book=false`
         )
         const result = res.data
 
-        formData.abgleichsDifferenz = Math.abs(result.balance_comparison.difference)
+        formData.abgleichsDifferenz = result.balance_comparison.difference == null ? null : Math.abs(Number(result.balance_comparison.difference))
+        formData.comparisonState = result.comparison_state
+        formData.currency = result.balance_comparison.currency
+        formData.periode = result.balance_comparison.statement_date?.slice(0, 7)
         formData.zugeordnet = result.line_counts?.matched || 0
-        formData.nichtZugeordnet = result.line_counts?.unmatched || 0
+        formData.nichtZugeordnet = result.line_counts.unmatched + result.line_counts.partial + result.line_counts.unknown
 
-        if (result.balance_comparison.is_balanced && result.total_differences === 0) {
+        setData({ ...formData })
+        if (result.comparison_state === 'INCOMPLETE') {
+          const balance = result.balance_comparison
+          const reason = balance.bank_balance_state === 'CSV_SYNTHETIC'
+            ? 'CSV-Dateien enthalten keinen Bank-Saldonachweis.'
+            : balance.accounting_state === 'MAPPING_REQUIRED'
+              ? 'Bankkonto ist noch nicht mit einem Hauptbuchkonto verbunden.'
+              : balance.accounting_state === 'NO_POSTED_ENTRIES'
+                ? 'Fuer den Stichtag liegen keine belegten Hauptbuchbuchungen vor.'
+                : 'Es gibt Teilzuordnungen oder unbekannte Statuswerte.'
+          toast({ variant: 'destructive', title: 'Saldennachweis unvollstaendig', description: reason })
+        } else if (result.comparison_state === 'BALANCES_EQUAL') {
           toast({
             title: t('crud.messages.validationSuccess'),
             description: t('crud.messages.reconciliationBalanced'),
@@ -445,21 +443,21 @@ export default function BankAbgleichPage(): JSX.Element {
             variant: 'destructive',
             title: t('crud.messages.reconciliationNotBalanced'),
             description: t('crud.messages.reconciliationNotBalancedDesc', { 
-              difference: result.balance_comparison.difference.toFixed(2) 
+              difference: result.balance_comparison.difference == null ? 'Nicht ermittelt' : Number(result.balance_comparison.difference).toFixed(2)
             }),
           })
         }
 
-        // Show differences if any
-        if (result.differences && result.differences.length > 0) {
-          formData.differences = result.differences
-        }
+        formData.differences = result.differences
       } catch (_rawErr: unknown) {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+        formData.comparisonState = 'INCOMPLETE'
+        formData.abgleichsDifferenz = null
+        setData({ ...formData })
         toast({
           variant: 'destructive',
           title: t('crud.messages.reconciliationError'),
-          description: error.message || t('crud.messages.networkError'),
+          description: error.response?.data?.detail || error.message || t('crud.messages.networkError'),
         })
       }
     } else if (action === 'export') {
@@ -489,9 +487,15 @@ export default function BankAbgleichPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-4">
+      {accountLoadFailed ? <Callout variant="error">Bankkonten konnten nicht geladen werden.</Callout> : null}
       <ObjectPage
         config={bankAbgleichConfig}
         data={data}
+        onChange={(next) => {
+          if (next.kontoId !== data?.kontoId || next.camtFile !== data?.camtFile) {
+            setData({ ...next, comparisonState: 'INCOMPLETE', abgleichsDifferenz: null })
+          }
+        }}
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
@@ -505,7 +509,7 @@ export default function BankAbgleichPage(): JSX.Element {
             description="Import und Pruefung von Bankkontoauszuegen. Buchungen erfolgen im Journal."
             status={operationalStatus}
             owner="Finanzbuchhaltung"
-            blocker={Math.abs(Number(data?.abgleichsDifferenz || 0)) >= 0.01 ? 'Abgleichsdifferenz ist noch nicht null.' : Number(data?.nichtZugeordnet || 0) > 0 ? 'Es gibt noch nicht zugeordnete Umsatzzeilen.' : null}
+            blocker={data?.abgleichsDifferenz == null ? 'Saldennachweis noch nicht ermittelt.' : Math.abs(Number(data.abgleichsDifferenz)) >= 0.01 ? 'Abgleichsdifferenz ist noch nicht null.' : Number(data?.nichtZugeordnet || 0) > 0 ? 'Es gibt noch nicht zugeordnete Umsatzzeilen.' : null}
             nextAction={Number(data?.nichtZugeordnet || 0) > 0 ? 'Zuordnung abschliessen' : data?.statementId ? 'Saldenvergleich pruefen' : 'Kontoauszug importieren'}
             caseLabel={stringValue(data?.statementId, 'Neuer Abgleich')}
             tags={['FIBU', 'Bank']}

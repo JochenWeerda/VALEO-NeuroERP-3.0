@@ -93,15 +93,14 @@ async def run_bank_reconciliation(
             tenant_id=tenant_id,
             db=db,
         )
-        matched = getattr(result, "matched_count", 0) if hasattr(result, "matched_count") else len(getattr(result, "matched", []))
         return ActionResponse(
-            success=True,
-            message=f"Bankabgleich abgeschlossen: {matched} Zuordnung(en) fuer Konto {body.bank_account_id}.",
+            success=result.comparison_state == "BALANCES_EQUAL",
+            message=f"Bank-Saldenvergleich {result.comparison_state}: {result.line_counts.matched} Zuordnung(en) fuer Konto {body.bank_account_id}.",
         )
-    except Exception as e:
+    except Exception:
         return ActionResponse(
             success=False,
-            message=f"Bankabgleich fehlgeschlagen: {str(e)}",
+            message="Bankvergleich konnte nicht verlaesslich ermittelt werden",
         )
 
 

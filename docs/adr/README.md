@@ -70,3 +70,5 @@ ADR-030 ist **nicht vergeben** (Lücke in der Nummerierung).
 - [ADR-073 Ein aktives Bankauszugsmodell](adr-073-bank-model-retirement.md)
 
 - [ADR-074 Bankvergleich ohne Direktbuchung](adr-074-bank-directbook-retirement.md)
+
+- [ADR-075 Explizite Bank-Hauptbuchverbindung und Saldennachweis](adr-075-bank-ledger-evidence.md)

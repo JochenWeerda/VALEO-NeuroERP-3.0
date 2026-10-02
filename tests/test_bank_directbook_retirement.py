@@ -10,9 +10,10 @@ from sqlalchemy import text
 
 from app.api.v1.endpoints import bank_reconciliation as reconciliation
 from app.core.database import get_db
-from test_bank_import_account_replay import import_case as bank_import_fixture, upload
+from test_bank_reconciliation_proof import schema as bank_schema_fixture, case as bank_case_fixture
 
-import_case = bank_import_fixture
+schema = bank_schema_fixture
+import_case = bank_case_fixture
 
 
 class NoAccess:
@@ -54,11 +55,7 @@ def test_response_cannot_claim_booking_permission():
 
 @pytest.mark.parametrize("mode", ["http", "internal", "summary"])
 def test_comparison_is_read_only_and_does_not_guess_accounts(import_case, mode):
-    db, _, tenant = import_case
-    imported = upload(import_case)
-    assert imported.status_code == 200, imported.text
-    statement = imported.json()["statement_id"]
-    bank = f"bank-{tenant}"
+    db, _, tenant, _, bank, _, _, statement, _ = import_case
     before = db.execute(text("""
         SELECT id,status,amount,matched_op_id FROM domain_erp.bank_statement_lines
         WHERE tenant_id=:t ORDER BY id
@@ -72,7 +69,7 @@ def test_comparison_is_read_only_and_does_not_guess_accounts(import_case, mode):
         app = FastAPI()
         app.include_router(reconciliation.router)
         app.dependency_overrides[get_db] = lambda: db
-        with TestClient(app) as client:
+        with TestClient(app, headers={"X-Tenant-ID": tenant}) as client:
             params = {"bank_account_id": bank, "tenant_id": tenant}
             if mode == "summary":
                 response = client.get(f"/bank-reconciliation/{statement}/summary", params=params)

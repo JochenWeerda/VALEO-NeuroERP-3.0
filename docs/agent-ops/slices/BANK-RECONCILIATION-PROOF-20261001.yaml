@@ -1,0 +1,42 @@
+slice_id: BANK-RECONCILIATION-PROOF-20261001
+title: Gespeicherte GL-Verbindung und ehrlicher Bank-Saldennachweis
+owner: Codex-01a0f3fc
+status: in_progress
+created_at: 2026-10-01
+updated_at: 2026-10-02
+coordination: Claim 62fc46d84; fremde EUDR-/UI-/Coverage-Arbeit und OpenAPI-Refresh respektieren.
+goal: Keine positiven Saldenaussagen ohne Bank-, Hauptbuch- und Mandantennachweis.
+file_ownership:
+  - app/api/v1/endpoints/bank_accounts.py
+  - app/api/v1/endpoints/bank_reconciliation.py
+  - app/api/v1/endpoints/finance_actions.py nur Bank-Run
+  - app/api/v1/schemas/bank_accounts_schemas.py
+  - app/api/v1/schemas/bank_reconciliation_schemas.py
+  - alembic/versions/bank_gl_binding_20261001.py
+  - packages/frontend-web/src/features/finance/bank-contracts.ts
+  - packages/frontend-web/src/features/finance/useBankOptions.ts
+  - packages/frontend-web/src/pages/finance/bank-abgleich.tsx
+  - packages/frontend-web/src/pages/finance/bank-stamm.tsx
+  - packages/frontend-web/src/pages/finance/bankkonten-stamm.tsx
+  - tests/test_bank_reconciliation_proof.py
+  - config/business_time_usage_baseline.json nur eigene Kalenderquellen
+acceptance:
+  - Explizites eigenes GL-Konto dauerhaft speichern; alte Nummernvariante abweisen.
+  - 404 fremdes Konto/Tenant, sichtbare Fehler, keine synthetischen Nullsalden.
+  - Ein typisierter Dezimalvertrag; ein MVCC-Snapshot, begrenzte Differenzseite.
+  - Gemeinsame Migrationsintegration nach Abschluss paralleler EUDR-Arbeit.
+test_evidence:
+  - 55 Backend-Vertraege und fuenf Maskentests bestanden.
+  - Echte Migration und 31 neue PostgreSQL-Faelle in eigenen Schemas auf vorhandenem valeo_probe.
+risks:
+  - Gemeinsame Migration und Betriebsprobe fehlen noch; keine Integration als abgeschlossen markieren.
+  - Journal-Dubletten, globale Kontenaufloesung und Bank/GL-Zeilenlink bleiben Folgearbeit.
+  - Typecheck CallWidget.tsx und globale OpenAPI-/CI-Abnahme weiter offen.
+ai_harness:
+  fachlicher_vertrag: Fehlender Bank- oder Hauptbuchbeleg ist unbekannt, nicht Nullsaldo.
+  architektur_vertrag: Bestehende Finance-Grenze; gespeicherter Link und zentrale DTOs, keine neue Maske.
+  daten_vertrag: Composite-Tenant-FK, keine geratene Rueckfuellung oder stiller Alias-Fallback.
+  test_vertrag: Reale PostgreSQL-Migration, Zustandsvergleiche, Widersprueche und Maskenfehlerfaelle.
+  security_vertrag: Header-Tenant, kontogebundener Auszug, kein SQL-Leak und kein Abgleich-DML.
+  betriebs_vertrag: Gemeinsamer valeo_probe, eigene Schemas, keine neue DB/Dockerinstanz oder gemeinsame Migration.
+  dokumentations_vertrag: ADR, Domain-API, QA, Slice, Workboard und Open-Gaps mit Integrationsvorbehalt.
