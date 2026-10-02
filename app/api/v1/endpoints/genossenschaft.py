@@ -308,16 +308,16 @@ def create_anteilsbewegung(
                 fin = FinanceTransactionService(db, tenant_id)
                 if payload.bewegungstyp == "ZEICHNUNG":
                     lines = [
-                        {"account_id": "1200", "debit_amount": wert, "credit_amount": 0.0,
+                        {"account_id": fin.account_id_for_number("1200"), "debit_amount": wert, "credit_amount": 0.0,
                          "description": f"Anteilszeichnung Mitglied {mitglied_id[:8]}"},
-                        {"account_id": "0900", "debit_amount": 0.0, "credit_amount": wert,
+                        {"account_id": fin.account_id_for_number("0900"), "debit_amount": 0.0, "credit_amount": wert,
                          "description": "Genossenschaftskapital"},
                     ]
                 else:  # TEILRUECKZAHLUNG / VOLLRUECKZAHLUNG
                     lines = [
-                        {"account_id": "0900", "debit_amount": abs(wert), "credit_amount": 0.0,
+                        {"account_id": fin.account_id_for_number("0900"), "debit_amount": abs(wert), "credit_amount": 0.0,
                          "description": f"Anteilsrückzahlung Mitglied {mitglied_id[:8]}"},
-                        {"account_id": "1600", "debit_amount": 0.0, "credit_amount": abs(wert),
+                        {"account_id": fin.account_id_for_number("1600"), "debit_amount": 0.0, "credit_amount": abs(wert),
                          "description": "Verbindlichkeiten Mitglieder"},
                     ]
                 fin.create(

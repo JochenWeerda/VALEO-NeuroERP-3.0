@@ -338,6 +338,7 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
     """
     try:
         from app.services.finance_transaction_service import FinanceTransactionService
+        fin = FinanceTransactionService(db, tenant_id)
 
         verbrauch: list[dict] = auftrag.verbrauch or []
         if not verbrauch:
@@ -362,7 +363,7 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
             menge_komp = float(komp.get("menge_t", 0))
             # Placeholder-Betrag 0 — echtes Preismodell via Einkaufspreisfortschreibung
             lines.append({
-                "account_id": KONTO_HERSTELLKOSTEN,
+                "account_id": fin.account_id_for_number(KONTO_HERSTELLKOSTEN),
                 "debit_amount": 0.0,
                 "credit_amount": 0.0,
                 "description": f"Verbrauch {komp.get('name', komp.get('einzelfutter_id', '?'))} {menge_komp:.3f}t",
@@ -370,7 +371,7 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
                 "unit": "t",
             })
             lines.append({
-                "account_id": KONTO_ROHWARENLAGER,
+                "account_id": fin.account_id_for_number(KONTO_ROHWARENLAGER),
                 "debit_amount": 0.0,
                 "credit_amount": 0.0,
                 "description": f"Lagerabgang {komp.get('name', '?')} {menge_komp:.3f}t",
@@ -380,7 +381,7 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
 
         # Fertigwarenzugang
         lines.append({
-            "account_id": KONTO_FERTIGWARENLAGER,
+            "account_id": fin.account_id_for_number(KONTO_FERTIGWARENLAGER),
             "debit_amount": 0.0,
             "credit_amount": 0.0,
             "description": f"Fertigwarenzugang {auftrag.chargen_id} {menge_t:.3f}t",
@@ -388,7 +389,6 @@ def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAu
             "unit": "t",
         })
 
-        fin = FinanceTransactionService(db, tenant_id)
         je = fin.create(
             entry_number=journal_ref,
             description=f"Produktionsabschluss {auftrag.chargen_id} {menge_t:.3f}t",

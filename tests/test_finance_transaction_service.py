@@ -175,6 +175,7 @@ def test_create_persists_entry_and_lines():
     db.execute.return_value.fetchone.side_effect = [("read committed",), (0, None, 0, 0, None)]
     added = []
     db.add.side_effect = lambda obj: added.append(obj)
+    db.execute.return_value.all.return_value = [("1000",), ("4000",)]
 
     svc = FinanceTransactionService(db, TENANT)
     with patch("app.services.finance_transaction_service.JournalEntry") as MockEntry, \

@@ -393,26 +393,26 @@ def create_carrier_invoice(
     # 2) FiBu: Dr. Frachtkosten / Cr. AP Spediteur (+ Vorsteuer wenn > 0)
     try:
         from app.services.finance_transaction_service import FinanceTransactionService
+        fin = FinanceTransactionService(db, x_tenant_id)
         from datetime import date as _date
 
         inv_date = _date.fromisoformat(body.invoice_date)
         lines = [
-            {"account_id": body.debit_account, "debit_amount": body.net_amount_eur,
+            {"account_id": fin.account_id_for_number(body.debit_account), "debit_amount": body.net_amount_eur,
              "credit_amount": 0.0,
              "description": f"Frachtkosten Tour {body.tour_id} ({body.carrier_id})"},
-            {"account_id": body.credit_account, "debit_amount": 0.0,
+            {"account_id": fin.account_id_for_number(body.credit_account), "debit_amount": 0.0,
              "credit_amount": gross,
              "description": f"AP Spediteur {body.carrier_id} {body.invoice_number}"},
         ]
         if body.tax_amount_eur > 0:
             lines.append({
-                "account_id": body.tax_account,
+                "account_id": fin.account_id_for_number(body.tax_account),
                 "debit_amount": body.tax_amount_eur,
                 "credit_amount": 0.0,
                 "description": f"Vorsteuer 19% Fracht {body.invoice_number}",
             })
 
-        fin = FinanceTransactionService(db, x_tenant_id)
         je = fin.create(
             entry_number=f"JE-FRACHT-{body.invoice_number}",
             description=f"Spediteur-Rechnung {body.invoice_number} Tour {body.tour_id}",

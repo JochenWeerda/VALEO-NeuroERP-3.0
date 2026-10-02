@@ -11,6 +11,37 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-ACCOUNT-ID-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Service-Journalzeilen enthalten nur
+explizite eigene buchbare Konto-IDs; Kontonummern vor der Zeilenerzeugung
+mandantengebunden aufloesen, keine camelCase-/ID-Nummern-Fallbacks.
+**Dateibesitz:** finance_transaction_service.py Kontohelfer/Create;
+sales_posting_service.py Kontenauflösung, keine automatische CoA-Anlage;
+agrar_settlement_service.py, einkauf_compat_service.py,
+harvest_acceptance_service.py, procurement_service.py sowie Endpunkte
+asset_accounting/genossenschaft/logistics_freight/produktion_mischfutter
+nur Service-Kontoreferenzen. finance_invoices.py toten konkurrierenden
+_create_gl_booking_and_op und alleinige Helfer entfernen.
+Tests: neuer test_journal_account_identity.py, betroffene Journal-/Posting-
+Testdoppel; eigene QA/Slice/Workboard/Gaps.
+**Abnahme:** Fremde/inaktive/geloeschte/Summenkonten abweisen; Nummern nur
+ueber ausdrueckliche Aufloesung; keine Kopf-/Zeilenschreibzugriffe bei
+ungueltigem Konto. Alle bekannten Service-Verbraucher umgestellt.
+**Risiken:** Globale Kontennummer-UQ verhindert mandantengleiche Nummern;
+kein gemeinsamer Migrationslauf waehrend fremdem Claim. Andere Journal-
+Schreiber, Consumer-fail-soft und Betrags-/Auditkanonisierung weiter offen.
+**Architektur:** Bestehende Finance-Vertraege, keine neue Fachfunktionalitaet.
+
+**Ergebnis 2026-10-02:** Ein account_id-Vertrag, ausdruecklicher eigener
+Nummernlookup in neun Verbrauchern, gebuendelte ID-Pruefung vor Persistenz.
+Toter GL-/Ensure-Account-Weg in finance_invoices und Sales entfernt.
+**Abnahme:** 186 Tests (26 neue, davon 16 PostgreSQL), Kern-Ruff/Whitespace
+bestanden. 200 Zeilen eine Konto-ID-Validierungsabfrage.
+**Nachweis:** docs/quality-assurance/journal-account-identity-20261002.md.
+**Offen:** Globale UQ/andere Schreiber/Consumer-Atomizitaet und Bankintegration;
+Handbuch-Drift bei parallel ergaenzten ScreenDefinitions noch rot.
+
 ## JOURNAL-STAMP-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Journal-Schreiben ohne erfolgreichen
@@ -66,7 +97,7 @@ Decimal/null, sichtbare Fehler und alle Statuswerte; kein Abgleich-DML.
 **Noch nicht abgeschlossen:** Gemeinsamer Migrations-Merge, Pruefstand- und
 Entwicklungsintegration/Betriebsprobe. Code als Draft-PR sichern.
 **Nachweis:** bank-reconciliation-proof-20261002.md, Proposed ADR-075.
-**Neue Folge-Gaps:** Journalservice globale LIMIT-1-Kontenaufloesung und
+**Neue Folge-Gaps:** Kontoreferenzen anderer Journalschreiber und
 unvollstaendiger GoBD-Hash-Payload; globale Kontennummer-UQ, doppelte Journalbetraege,
 Bank/GL-Zeilenlink und Bankstamm-Audit/RBAC. Gesamtziel bleibt offen.
 

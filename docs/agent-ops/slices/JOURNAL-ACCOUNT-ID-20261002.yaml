@@ -1,0 +1,34 @@
+slice_id: JOURNAL-ACCOUNT-ID-20261002
+title: Explizite mandantengebundene Konto-IDs im Journalservice
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-02
+updated_at: 2026-10-02
+coordination: Claim 55182c332; keine fremden EUDR/UI/Snapshot-Edits.
+goal: Ein kanonischer Konto-ID-Vertrag fuer Service-Journalzeilen.
+file_ownership:
+  - finance_transaction_service.py Kontohelfer/Create
+  - sales_posting_service.py Kontoreferenzen/automatische Anlage entfernen
+  - finance_invoices.py toter konkurrierender GL-Helfer
+  - Neun nummernkonfigurierte Verbraucher nur Service-Kontoreferenzen
+  - test_journal_account_identity.py und betroffene Posting-Testdoppel
+acceptance:
+  - Kein globaler ID/Nummern-OR- oder accountId-Fallback.
+  - Nummern explizit vor dem Journalvertrag im eigenen Mandanten aufloesen.
+  - Eine Konto-ID-Validierungsabfrage vor jedem Journalschreiben.
+  - Toten GL-Weg und implizite Kontenanlage entfernen.
+test_evidence:
+  - 186 Tests bestanden; 26 neue, davon 16 echte PostgreSQL-Vertraege.
+  - Kern-Ruff und Whitespace bestanden; 200 Zeilen eine Validierungsabfrage.
+risks:
+  - Globale Kontennummer-UQ und andere Journal-Schreiber weiter offen.
+  - Consumer-Atomizitaet, Hash/Betrag/Lifecycle und Bankintegration weiter offen.
+  - Handbuch-Drift im parallelen Worktree, keine globale Gate-Freigabe.
+ai_harness:
+  fachlicher_vertrag: Konto-ID gehoert zum buchenden Mandanten und ist buchbar.
+  architektur_vertrag: Bestehender Finance-Service und bestehende Consumer.
+  daten_vertrag: account_id exakt, Nummern nur in ausdruecklicher Aufloesung.
+  test_vertrag: Reale PostgreSQL-IDs/Scope, AST-Verbraucherwaechter, keine Schreibzugriffe bei Fehler.
+  security_vertrag: Keine Fremd-/Templatekonten und kein globaler OR-Fallback.
+  betriebs_vertrag: Gemeinsamer valeo_probe, Transaktionen/eigenes Schema, keine Migration.
+  dokumentations_vertrag: QA, Slice, Workboard und Gaps mit weiteren Journalgaps.

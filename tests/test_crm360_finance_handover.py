@@ -27,14 +27,13 @@ def test_sales_invoice_posting_creates_posted_journal_and_open_item() -> None:
     db = MagicMock()
     db.execute.side_effect = [
         Result(mapping=None),
-        Result(row=("account-1200",)),
-        Result(row=("account-8400",)),
         Result(row=("CRM360 Testkunde",)),
         Result(row=None),
         Result(),
     ]
     service = SalesPostingService(db, "tenant-1")
     service._fin = MagicMock()
+    service._fin.account_id_for_number.side_effect = lambda number: "id-" + number
     service._fin.create.return_value = SimpleNamespace(id="journal-1")
 
     result = service.post_ausgangsrechnung_with_op(

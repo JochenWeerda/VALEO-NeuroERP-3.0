@@ -8,7 +8,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundError, ValidationFailedError
@@ -136,24 +136,54 @@ class FinanceTransactionService:
                 "Journal chain evidence unavailable; write rejected"
             ) from exc
 
-    def _resolve_account_id(self, account_ref: str) -> str:
-        row = self.db.execute(
-            text(
-                """
-                SELECT id
-                FROM domain_erp.chart_of_accounts
-                WHERE is_active = TRUE
-                  AND (id = :account_ref OR account_number = :account_ref)
-                LIMIT 1
-                """
-            ),
-            {"account_ref": account_ref},
-        ).first()
-        if not row:
-            raise ValidationFailedError(
-                f"Active chart-of-accounts entry not found: {account_ref}"
-            )
+    def _resolve_account_id(self, account_id: str) -> str:
+        """Validate the canonical ID; account numbers are never aliases."""
+        return self._bookable_account("id", account_id)
+
+    def account_id_for_number(self, account_number: str) -> str:
+        """Explicit tenant-owned number lookup before constructing journal lines."""
+        return self._bookable_account("account_number", account_number)
+
+    def _bookable_account(self, field: str, value: str) -> str:
+        if not isinstance(value, str) or not value.strip():
+            raise ValidationFailedError("A nonempty account reference is required")
+        # field is selected exclusively by the two fixed methods above.
+        if field not in {"id", "account_number"}:
+            raise ValidationFailedError("Unsupported account reference")
+        row = self.db.execute(text(f"""
+            SELECT id FROM domain_erp.chart_of_accounts
+            WHERE tenant_id = :tenant_id AND {field} = :value
+              AND is_active = TRUE AND deleted_at IS NULL
+              AND COALESCE(is_summary, FALSE) = FALSE
+        """), {"tenant_id": self.tenant_id, "value": value}).first()
+        if row is None:
+            raise ValidationFailedError("Own active bookable account not found")
         return str(row[0])
+
+    def _validate_line_accounts(self, lines: List[Dict[str, Any]]) -> List[str]:
+        ids = []
+        for line in lines:
+            if "accountId" in line or "account_number" in line:
+                raise ValidationFailedError("Journal lines require canonical account_id")
+            value = line.get("account_id")
+            if not isinstance(value, str) or not value.strip():
+                raise ValidationFailedError("A nonempty account reference is required")
+            ids.append(value)
+        if not ids:
+            return ids
+        requested = set(ids)
+        statement = text("""
+            SELECT id FROM domain_erp.chart_of_accounts
+            WHERE tenant_id = :tenant_id AND id IN :account_ids
+              AND is_active = TRUE AND deleted_at IS NULL
+              AND COALESCE(is_summary, FALSE) = FALSE
+            FOR SHARE
+        """).bindparams(bindparam("account_ids", expanding=True))
+        found = {str(row[0]) for row in self.db.execute(statement,
+            {"tenant_id": self.tenant_id, "account_ids": sorted(requested)}).all()}
+        if found != requested:
+            raise ValidationFailedError("Own active bookable account not found")
+        return ids
 
     def _resolve_user_id(self, user_id: Optional[str]) -> Optional[str]:
         if not user_id:
@@ -227,6 +257,7 @@ class FinanceTransactionService:
             )
         self.validate_balanced(lines)
         self.check_period_open(period)
+        account_ids = self._validate_line_accounts(lines)
 
         total_debit = sum(Decimal(str(ln.get("debit_amount", 0))) for ln in lines)
         obj = JournalEntry(
@@ -254,9 +285,7 @@ class FinanceTransactionService:
                 id=uuid7(),
                 journal_entry_id=obj.id,
                 tenant_id=self.tenant_id,
-                account_id=self._resolve_account_id(
-                    str(ln.get("account_id") or ln.get("accountId") or "")
-                ),
+                account_id=account_ids[line_number - 1],
                 debit=debit,
                 credit=credit,
                 debit_amount=debit,

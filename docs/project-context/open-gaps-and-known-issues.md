@@ -11,6 +11,20 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## JOURNAL-ACCOUNT-ID — Service/Verbraucher kanonisch, Schema/andere Schreiber offen
+
+2026-10-02: Globale OR-Kontenaufloesung und accountId-Fallback im
+FinanceTransactionService entfernt. Neun nummernkonfigurierte Verbraucher
+loesen eigene Nummern ausdruecklich zu IDs auf; eine gebuendelte Pruefung
+vor Kopf/Zeilen-Schreiben. Automatische Sales-Kontenanlage und toter zweiter
+Invoice-GL-Weg entfernt. 186 Tests bestanden (26 neue, 16 PostgreSQL).
+QA: [Kontoreferenz-Vertrag](../quality-assurance/journal-account-identity-20261002.md).
+Weiter offen: globale account_number-UQ, Komposit-Tenant-FKs/andere Schreiber,
+Consumer-Atomizitaet, vollstaendiger Hash-Payload/Lifecycle/Betragskanonisierung,
+Bankintegration und Handbuch-Drift im parallelen Worktree. Neu belegt:
+Leere/Nullbetragsjournale passieren validate_balanced; Produktionsabschluss
+erzeugt Nullbetragsplatzhalter ohne echtes Bewertungsmodell.
+
 ## JOURNAL-STAMP-INTEGRITY — Service-Guard geschlossen, Journalkanonisierung offen
 
 2026-10-02: Verschluckter Stempelfehler und konkurrierende Sequenzvergabe im
@@ -19,7 +33,7 @@ READ-COMMITTED-Transaktionssperre, konsistente Sequenz/Vorgaenger-Metadaten,
 keine Teilstempel oder Create/Reverse-Commits bei Fehler. QA-Nachweis:
 quality-assurance/journal-stamp-integrity-20261002.md.
 Offen bleiben kanonischer Hash-Payload inkl. Zeilen, alle weiteren Schreiber,
-Draft-Delete ohne Kettenluecke, globale Konto-ID/Nummern-Verwechslung und
+Draft-Delete ohne Kettenluecke, Konto-ID/Nummern-Verwechslung anderer Journalwege und
 skalierbarer Kettenzustand. Bankmigration/Betriebsprobe weiter offen.
 
 ## BANK-RECONCILIATION-PROOF — Code geprueft, Integration noch offen
@@ -30,7 +44,7 @@ Header-Tenant/Konto, ein SQL-Snapshot, Decimal/null und typisierte Statuswerte.
 angewandt: parallele EUDR-Kette braucht koordinierten Merge-Head und danach
 Betriebsprobe. Kein abgeschlossener Lieferstatus. QA:
 [Saldennachweis](../quality-assurance/bank-reconciliation-proof-20261002.md).
-Neu belegte Journal-Gaps: globale LIMIT-1-Kontenaufloesung, unvollstaendiger
+Neu belegte Journal-Gaps: Kontoreferenzen anderer Journalwege, unvollstaendiger
 GoBD-Hash-Payload, globale account_number-UQ und Betragsdubletten. Auch Bank/GL-
 Zeilenlink, Bankstamm-Audit/RBAC und native Maskenkonvergenz offen.
 
