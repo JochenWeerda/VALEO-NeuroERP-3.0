@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-LIFECYCLE-INTEGRITY-20261002 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Mutationen pro Journalkopf serialisieren,
+nach dem Warten frischen Status pruefen; gestempelte Entwuerfe nicht physisch
+loeschen und dadurch die Kette zerreissen.
+**Dateibesitz:** finance_transaction_service.py Kopf-Lock/Mutationen/Delete;
+Testdoppel in test_finance_transaction_service/test_posting_services/
+test_journal_stamp_integrity, neuer test_journal_lifecycle_integrity.py;
+eigene QA/Slice/Workboard/Gaps. Keine fremden EUDR/UI-Dateien.
+**Abnahme:** Echte PostgreSQL-Sperre bei Post/Post, Post/Cancel/Update/Delete
+und Reverse/Reverse; zweiter Schreiber sieht aktuellen Status auch bei
+vorher gecachtem ORM-Objekt. Stempel/Zeilen bleiben bei Delete-Abweisung.
+Unstempelte eigene Legacy-Entwuerfe gezielt loeschen; fremde Zeilen sperren.
+**Risiken:** Andere Journalwege, Audit/Grundpersistenz, Hash/Payload/Schema
+und Consumer-Atomizitaet weiter offen. Vorhandener valeo_probe, keine neue DB.
+
 ## JOURNAL-AMOUNT-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Ein exakter positiver Decimal-Centvertrag
