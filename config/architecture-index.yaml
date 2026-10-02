@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-01
+# Architecture Index — generiert 2026-10-02
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-01T19:08:52Z'
+generated_at: '2026-10-02T04:26:27Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1305,6 +1305,8 @@ domains:
     - docs/adr/adr-061-billing-batch-orchestration.md
     - docs/adr/adr-063-safe-user-query-center.md
     - docs/adr/adr-073-bank-model-retirement.md
+    - docs/adr/adr-074-bank-directbook-retirement.md
+    - docs/adr/adr-075-bank-ledger-evidence.md
     status: active
   hr:
     owner: domain/hr

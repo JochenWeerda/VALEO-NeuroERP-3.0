@@ -223,7 +223,7 @@ def test_bank_reconciliation_success_and_failure(monkeypatch):
     client = _build_client(db)
 
     async def _ok(**kwargs):
-        return SimpleNamespace(matched_count=4)
+        return SimpleNamespace(comparison_state="BALANCES_EQUAL", line_counts=SimpleNamespace(matched=4))
 
     async def _fail(**kwargs):
         raise RuntimeError("boom")
@@ -244,6 +244,17 @@ def test_bank_reconciliation_success_and_failure(monkeypatch):
     )
     assert failed.status_code == 200
     assert failed.json()["success"] is False
+
+
+def test_bank_run_cannot_report_completion_without_evidence(monkeypatch):
+    async def incomplete(**kwargs):
+        return SimpleNamespace(comparison_state="INCOMPLETE", line_counts=SimpleNamespace(matched=0))
+    monkeypatch.setattr("app.api.v1.endpoints.bank_reconciliation.reconcile_bank_statement", incomplete)
+    response = _build_client(FakeDb()).post("/finance/bank-reconciliation/run",
+        json={"bank_account_id": "bank-1", "statement_id": "stmt-1"})
+    assert response.status_code == 200
+    assert response.json()["success"] is False
+    assert "INCOMPLETE" in response.json()["message"]
 
 
 def test_post_journal_entry_handles_lookup_period_lock_success_and_repo_failure(monkeypatch):

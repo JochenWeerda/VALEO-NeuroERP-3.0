@@ -26,3 +26,5 @@ version: 1.0.0
   nach expliziter User-Freigabe entfernen, kein Archiv/Adapter.
 
 - [ADR-074](../../../adr/adr-074-bank-directbook-retirement.md): konkurrierende Direktbuchung entfernen; Abgleich ohne Buchungsfreigabe.
+
+- [ADR-075](../../../adr/adr-075-bank-ledger-evidence.md): explizite GL-ID und typisierter Saldennachweis; gemeinsame Integration noch offen.

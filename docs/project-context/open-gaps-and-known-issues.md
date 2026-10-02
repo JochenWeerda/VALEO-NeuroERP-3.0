@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## BANK-RECONCILIATION-PROOF — Code geprueft, Integration noch offen
+
+Explizite GL-Konto-ID mit Tenant-FK statt verlorenem gl_account_number;
+Header-Tenant/Konto, ein SQL-Snapshot, Decimal/null und typisierte Statuswerte.
+55 Backend- und fuenf Maskentests bestanden. Gemeinsame Migration nicht
+angewandt: parallele EUDR-Kette braucht koordinierten Merge-Head und danach
+Betriebsprobe. Kein abgeschlossener Lieferstatus. QA:
+[Saldennachweis](../quality-assurance/bank-reconciliation-proof-20261002.md).
+Neu belegte Journal-Gaps: globale LIMIT-1-Kontenaufloesung, verschluckter
+GoBD-Stempel, globale account_number-UQ und Betragsdubletten. Auch Bank/GL-
+Zeilenlink, Bankstamm-Audit/RBAC und native Maskenkonvergenz offen.
+
 ## BANK-DIRECTBOOK — unsicheren Altweg entfernt, Hauptbuchnachweis offen
 
 Entwicklungsfreigabe fuer Altlasten repositoryweit in AGENTS.md. Direkte

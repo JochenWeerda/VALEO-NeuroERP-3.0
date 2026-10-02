@@ -9,27 +9,10 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Building2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
-
-type BankAccount = {
-  id: string
-  account_number: string
-  bank_name: string
-  iban?: string | null
-  bic?: string | null
-  currency: string
-  balance?: number | null
-  is_active: boolean
-  gl_account_number?: string
-}
-
-type BankAccountPayload = {
-  account_number: string
-  bank_name: string
-  iban: string
-  bic: string
-  currency: string
-  is_active: boolean
-}
+import { NativeSelect } from '@/components/ui/native-select'
+import { useTenant } from '@/hooks/useTenant'
+import { useBankLedgerOptions } from '@/features/finance/useBankOptions'
+import type { BankAccount, BankAccountPayload } from '@/features/finance/bank-contracts'
 
 const defaultForm: BankAccountPayload = {
   account_number: '',
@@ -38,20 +21,23 @@ const defaultForm: BankAccountPayload = {
   bic: '',
   currency: 'EUR',
   is_active: true,
+  gl_account_id: null,
 }
 
-const fmt = (n: number, currency = 'EUR') =>
-  new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(n || 0)
+const fmt = (n: string | null | undefined, currency = 'EUR') =>
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(Number(n || 0))
 
 export default function BankStammPage(): JSX.Element {
   const queryClient = useQueryClient()
+  const { tenantId } = useTenant()
+  const { data: ledgerOptions = [] } = useBankLedgerOptions()
   const [createOpen, setCreateOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [formData, setFormData] = useState<BankAccountPayload>(defaultForm)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const { data: accounts = [], isLoading, isError } = useQuery({
-    queryKey: ['finance', 'bank-accounts'],
+    queryKey: ['finance', 'bank-accounts', tenantId],
     queryFn: async () => (await apiClient.get<BankAccount[]>('/api/v1/finance/bank-accounts')).data,
     staleTime: 2 * 60 * 1000,
   })
@@ -96,6 +82,7 @@ export default function BankStammPage(): JSX.Element {
       bic: acc.bic ?? '',
       currency: acc.currency ?? 'EUR',
       is_active: acc.is_active,
+      gl_account_id: acc.gl_account_id,
     })
     setEditOpen(true)
   }
@@ -133,6 +120,7 @@ export default function BankStammPage(): JSX.Element {
         bic: formData.bic || undefined,
         currency: formData.currency,
         is_active: formData.is_active,
+        gl_account_id: formData.gl_account_id,
       },
     })
   }
@@ -141,7 +129,7 @@ export default function BankStammPage(): JSX.Element {
     <div className="space-y-6 p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Bankkonten (Bankstamm)</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Bankkonten (Bankstamm)</h1>
           <p className="text-muted-foreground">
             Bankkonten verwalten und dem Kontenplan zuordnen (Gegenkonto für Buchungen).
           </p>
@@ -212,7 +200,7 @@ export default function BankStammPage(): JSX.Element {
             <DialogTitle>Neues Bankkonto anlegen</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3">
-            <Label>Kontonummer (Konto im Kontenplan)</Label>
+            <Label>Bankkonto-Kennung</Label>
             <Input
               value={formData.account_number}
               onChange={(e) => setFormData((p) => ({ ...p, account_number: e.target.value }))}
@@ -223,6 +211,13 @@ export default function BankStammPage(): JSX.Element {
               value={formData.bank_name}
               onChange={(e) => setFormData((p) => ({ ...p, bank_name: e.target.value }))}
               placeholder="z. B. Hauptkonto Deutsche Bank"
+            />
+            <Label>Hauptbuchkonto</Label>
+            <NativeSelect
+              value={formData.gl_account_id ?? ''}
+              onValueChange={(value) => setFormData((current) => ({ ...current, gl_account_id: value || null }))}
+              placeholder="Noch nicht verbunden"
+              options={ledgerOptions.map(account => ({ value: account.id, label: `${account.account_number} - ${account.account_name}` }))}
             />
             <Label>IBAN</Label>
             <Input
@@ -259,6 +254,13 @@ export default function BankStammPage(): JSX.Element {
             <Input
               value={formData.bank_name}
               onChange={(e) => setFormData((p) => ({ ...p, bank_name: e.target.value }))}
+            />
+            <Label>Hauptbuchkonto</Label>
+            <NativeSelect
+              value={formData.gl_account_id ?? ''}
+              onValueChange={(value) => setFormData((current) => ({ ...current, gl_account_id: value || null }))}
+              placeholder="Noch nicht verbunden"
+              options={ledgerOptions.map(account => ({ value: account.id, label: `${account.account_number} - ${account.account_name}` }))}
             />
             <Label>IBAN</Label>
             <Input

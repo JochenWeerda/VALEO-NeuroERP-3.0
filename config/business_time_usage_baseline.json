@@ -25,9 +25,6 @@
     "app/api/v1/endpoints/artikel_stoffstrom.py": {
       "date.today": 1
     },
-    "app/api/v1/endpoints/bank_reconciliation.py": {
-      "date.today": 2
-    },
     "app/api/v1/endpoints/benchmark_api.py": {
       "date.today": 1
     },

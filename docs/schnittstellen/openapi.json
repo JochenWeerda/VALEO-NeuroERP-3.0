@@ -17606,28 +17606,84 @@
         "type": "object"
       },
       "BalanceComparison": {
-        "description": "Balance comparison between bank statement and accounting",
+        "additionalProperties": false,
         "properties": {
           "accounting_balance": {
-            "title": "Accounting Balance",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accounting Balance"
+          },
+          "accounting_state": {
+            "enum": [
+              "AVAILABLE",
+              "MAPPING_REQUIRED",
+              "NO_POSTED_ENTRIES"
+            ],
+            "title": "Accounting State",
+            "type": "string"
+          },
+          "bank_balance_state": {
+            "enum": [
+              "BANK_PROVIDED",
+              "CSV_SYNTHETIC"
+            ],
+            "title": "Bank Balance State",
             "type": "string"
           },
           "bank_statement_balance": {
-            "title": "Bank Statement Balance",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bank Statement Balance"
           },
           "comparison_date": {
             "format": "date",
             "title": "Comparison Date",
             "type": "string"
           },
-          "difference": {
-            "title": "Difference",
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
             "type": "string"
           },
+          "difference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "readOnly": true,
+            "title": "Difference"
+          },
           "is_balanced": {
+            "readOnly": true,
             "title": "Is Balanced",
             "type": "boolean"
+          },
+          "ledger_account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ledger Account Id"
           },
           "statement_date": {
             "format": "date",
@@ -17638,10 +17694,14 @@
         "required": [
           "bank_statement_balance",
           "accounting_balance",
-          "difference",
-          "is_balanced",
           "statement_date",
-          "comparison_date"
+          "comparison_date",
+          "currency",
+          "ledger_account_id",
+          "bank_balance_state",
+          "accounting_state",
+          "difference",
+          "is_balanced"
         ],
         "title": "BalanceComparison",
         "type": "object"
@@ -17756,12 +17816,17 @@
         "type": "object"
       },
       "BankAccountCreate": {
+        "additionalProperties": false,
         "properties": {
           "account_number": {
+            "maxLength": 50,
+            "minLength": 1,
             "title": "Account Number",
             "type": "string"
           },
           "bank_name": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Bank Name",
             "type": "string"
           },
@@ -17778,10 +17843,11 @@
           },
           "currency": {
             "default": "EUR",
+            "pattern": "^[A-Z]{3}$",
             "title": "Currency",
             "type": "string"
           },
-          "gl_account_number": {
+          "gl_account_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -17790,7 +17856,7 @@
                 "type": "null"
               }
             ],
-            "title": "Gl Account Number"
+            "title": "Gl Account Id"
           },
           "iban": {
             "anyOf": [
@@ -17817,8 +17883,11 @@
         "type": "object"
       },
       "BankAccountResponse": {
+        "additionalProperties": false,
         "properties": {
           "account_number": {
+            "maxLength": 50,
+            "minLength": 1,
             "title": "Account Number",
             "type": "string"
           },
@@ -17834,6 +17903,8 @@
             "title": "Balance"
           },
           "bank_name": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Bank Name",
             "type": "string"
           },
@@ -17850,10 +17921,11 @@
           },
           "currency": {
             "default": "EUR",
+            "pattern": "^[A-Z]{3}$",
             "title": "Currency",
             "type": "string"
           },
-          "gl_account_number": {
+          "gl_account_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -17862,7 +17934,7 @@
                 "type": "null"
               }
             ],
-            "title": "Gl Account Number"
+            "title": "Gl Account Id"
           },
           "iban": {
             "anyOf": [
@@ -17885,26 +17957,21 @@
             "type": "boolean"
           },
           "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
+            "title": "Tenant Id",
+            "type": "string"
           }
         },
         "required": [
           "account_number",
           "bank_name",
-          "id"
+          "id",
+          "tenant_id"
         ],
         "title": "BankAccountResponse",
         "type": "object"
       },
       "BankAccountUpdate": {
+        "additionalProperties": false,
         "properties": {
           "bank_name": {
             "anyOf": [
@@ -17931,6 +17998,7 @@
           "currency": {
             "anyOf": [
               {
+                "pattern": "^[A-Z]{3}$",
                 "type": "string"
               },
               {
@@ -17939,7 +18007,7 @@
             ],
             "title": "Currency"
           },
-          "gl_account_number": {
+          "gl_account_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -17948,7 +18016,7 @@
                 "type": "null"
               }
             ],
-            "title": "Gl Account Number"
+            "title": "Gl Account Id"
           },
           "iban": {
             "anyOf": [
@@ -17977,9 +18045,93 @@
         "type": "object"
       },
       "BankAccountsOut": {
-        "additionalProperties": true,
-        "description": "Response schema for bank accounts endpoints.",
-        "properties": {},
+        "additionalProperties": false,
+        "description": "Create template uses the same field vocabulary as bank accounts.",
+        "properties": {
+          "account_number": {
+            "default": "",
+            "title": "Account Number",
+            "type": "string"
+          },
+          "balance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Balance"
+          },
+          "bank_name": {
+            "default": "",
+            "title": "Bank Name",
+            "type": "string"
+          },
+          "bic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bic"
+          },
+          "currency": {
+            "default": "EUR",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "type": "string"
+          },
+          "gl_account_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gl Account Id"
+          },
+          "iban": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iban"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id"
+        ],
         "title": "BankAccountsOut",
         "type": "object"
       },
@@ -18187,11 +18339,28 @@
         "title": "BankKontoUpdate",
         "type": "object"
       },
-      "BankReconciliationOut": {
-        "additionalProperties": true,
-        "description": "Response schema for bank reconciliation endpoints.",
-        "properties": {},
-        "title": "BankReconciliationOut",
+      "BankLedgerOption": {
+        "additionalProperties": false,
+        "properties": {
+          "account_name": {
+            "title": "Account Name",
+            "type": "string"
+          },
+          "account_number": {
+            "title": "Account Number",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "account_number",
+          "account_name"
+        ],
+        "title": "BankLedgerOption",
         "type": "object"
       },
       "BankReconciliationRunRequest": {
@@ -47286,7 +47455,7 @@
         "type": "object"
       },
       "DifferenceItem": {
-        "description": "Single difference between bank and accounting",
+        "additionalProperties": false,
         "properties": {
           "accounting_amount": {
             "anyOf": [
@@ -47324,6 +47493,12 @@
             "type": "string"
           },
           "item_type": {
+            "enum": [
+              "UNMATCHED_STATEMENT",
+              "PARTIAL_STATEMENT",
+              "UNKNOWN_STATEMENT_STATUS",
+              "BALANCE_MISMATCH"
+            ],
             "title": "Item Type",
             "type": "string"
           },
@@ -47361,26 +47536,14 @@
             "title": "Statement Line Id"
           },
           "suggested_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Suggested Account"
+            "title": "Suggested Account",
+            "type": "null"
           },
           "suggested_action": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Suggested Action"
+            "const": "INVESTIGATE",
+            "default": "INVESTIGATE",
+            "title": "Suggested Action",
+            "type": "string"
           }
         },
         "required": [
@@ -93639,6 +93802,40 @@
           }
         },
         "title": "LifecycleActionRequest",
+        "type": "object"
+      },
+      "LineCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "matched": {
+            "title": "Matched",
+            "type": "integer"
+          },
+          "partial": {
+            "title": "Partial",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "unknown": {
+            "title": "Unknown",
+            "type": "integer"
+          },
+          "unmatched": {
+            "title": "Unmatched",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "matched",
+          "unmatched",
+          "partial",
+          "unknown"
+        ],
+        "title": "LineCounts",
         "type": "object"
       },
       "LineIn": {
@@ -168533,54 +168730,6 @@
         "title": "MatchResult",
         "type": "object"
       },
-      "app__api__v1__endpoints__bank_reconciliation__ReconciliationResult": {
-        "description": "Result of bank reconciliation",
-        "properties": {
-          "balance_comparison": {
-            "$ref": "#/components/schemas/BalanceComparison"
-          },
-          "bank_account_id": {
-            "title": "Bank Account Id",
-            "type": "string"
-          },
-          "can_be_booked": {
-            "const": false,
-            "default": false,
-            "title": "Can Be Booked",
-            "type": "boolean"
-          },
-          "differences": {
-            "items": {
-              "$ref": "#/components/schemas/DifferenceItem"
-            },
-            "title": "Differences",
-            "type": "array"
-          },
-          "line_counts": {
-            "additionalProperties": true,
-            "title": "Line Counts",
-            "type": "object"
-          },
-          "statement_id": {
-            "title": "Statement Id",
-            "type": "string"
-          },
-          "total_differences": {
-            "title": "Total Differences",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "statement_id",
-          "bank_account_id",
-          "balance_comparison",
-          "differences",
-          "total_differences",
-          "line_counts"
-        ],
-        "title": "ReconciliationResult",
-        "type": "object"
-      },
       "app__api__v1__endpoints__billing_batch__BatchIn": {
         "properties": {
           "batch_number": {
@@ -173699,6 +173848,73 @@
         "additionalProperties": true,
         "properties": {},
         "title": "QualityProtocolOut",
+        "type": "object"
+      },
+      "app__api__v1__schemas__bank_reconciliation_schemas__ReconciliationResult": {
+        "additionalProperties": false,
+        "properties": {
+          "balance_comparison": {
+            "$ref": "#/components/schemas/BalanceComparison"
+          },
+          "bank_account_id": {
+            "title": "Bank Account Id",
+            "type": "string"
+          },
+          "can_be_booked": {
+            "const": false,
+            "default": false,
+            "title": "Can Be Booked",
+            "type": "boolean"
+          },
+          "comparison_state": {
+            "enum": [
+              "INCOMPLETE",
+              "DIFFERENCES",
+              "BALANCES_EQUAL"
+            ],
+            "readOnly": true,
+            "title": "Comparison State",
+            "type": "string"
+          },
+          "differences": {
+            "items": {
+              "$ref": "#/components/schemas/DifferenceItem"
+            },
+            "title": "Differences",
+            "type": "array"
+          },
+          "differences_limit": {
+            "default": 100,
+            "title": "Differences Limit",
+            "type": "integer"
+          },
+          "differences_offset": {
+            "default": 0,
+            "title": "Differences Offset",
+            "type": "integer"
+          },
+          "line_counts": {
+            "$ref": "#/components/schemas/LineCounts"
+          },
+          "statement_id": {
+            "title": "Statement Id",
+            "type": "string"
+          },
+          "total_differences": {
+            "title": "Total Differences",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "statement_id",
+          "bank_account_id",
+          "balance_comparison",
+          "differences",
+          "total_differences",
+          "line_counts",
+          "comparison_state"
+        ],
+        "title": "ReconciliationResult",
         "type": "object"
       },
       "app__api__v1__schemas__base__StatusResponse": {
@@ -297573,7 +297789,7 @@
         ]
       },
       "post": {
-        "description": "Neues Bankkonto anlegen. Legt bei Bedarf einen Kontenplan-Eintrag (Gegenkonto) an.",
+        "description": "Neues Bankkonto anlegen. Verknuepft nur ein explizit ausgewaehltes Hauptbuchkonto.",
         "operationId": "create_bank_account_api_v1_finance_bank_accounts_post",
         "parameters": [
           {
@@ -297631,6 +297847,90 @@
           }
         ],
         "summary": "Bank account anlegen",
+        "tags": [
+          "finance",
+          "bank-accounts",
+          "finance",
+          "bank-accounts"
+        ]
+      }
+    },
+    "/api/v1/finance/bank-accounts/ledger-options": {
+      "get": {
+        "operationId": "list_ledger_options_api_v1_finance_bank_accounts_ledger_options_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BankLedgerOption"
+                  },
+                  "title": "Response List Ledger Options Api V1 Finance Bank Accounts Ledger Options Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Own bookable bank ledger accounts",
         "tags": [
           "finance",
           "bank-accounts",
@@ -297967,7 +298267,6 @@
     },
     "/api/v1/finance/bank-reconciliation/{statement_id}/balance-comparison": {
       "get": {
-        "description": "Compare bank statement balance with accounting balance.",
         "operationId": "get_balance_comparison_api_v1_finance_bank_reconciliation__statement_id__balance_comparison_get",
         "parameters": [
           {
@@ -297980,26 +298279,28 @@
             }
           },
           {
-            "description": "Bank account ID",
             "in": "query",
             "name": "bank_account_id",
             "required": true,
             "schema": {
-              "description": "Bank account ID",
               "title": "Bank Account Id",
               "type": "string"
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -298030,7 +298331,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Balance comparison abrufen",
+        "summary": "Bank balance evidence",
         "tags": [
           "finance",
           "bank-reconciliation",
@@ -298041,7 +298342,6 @@
     },
     "/api/v1/finance/bank-reconciliation/{statement_id}/differences": {
       "get": {
-        "description": "Get list of differences between bank statement and accounting records.",
         "operationId": "get_reconciliation_differences_api_v1_finance_bank_reconciliation__statement_id__differences_get",
         "parameters": [
           {
@@ -298054,26 +298354,51 @@
             }
           },
           {
-            "description": "Bank account ID",
             "in": "query",
             "name": "bank_account_id",
             "required": true,
             "schema": {
-              "description": "Bank account ID",
               "title": "Bank Account Id",
               "type": "string"
             }
           },
           {
-            "description": "Tenant ID",
             "in": "query",
-            "name": "tenant_id",
+            "name": "offset",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -298108,7 +298433,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Reconciliation differences abrufen",
+        "summary": "Unresolved bank lines",
         "tags": [
           "finance",
           "bank-reconciliation",
@@ -298119,7 +298444,6 @@
     },
     "/api/v1/finance/bank-reconciliation/{statement_id}/reconcile": {
       "post": {
-        "description": "Perform a read-only comparison. Journal posting belongs to the journal workflow.",
         "operationId": "reconcile_bank_statement_api_v1_finance_bank_reconciliation__statement_id__reconcile_post",
         "parameters": [
           {
@@ -298132,25 +298456,11 @@
             }
           },
           {
-            "description": "Bank account ID",
             "in": "query",
             "name": "bank_account_id",
             "required": true,
             "schema": {
-              "description": "Bank account ID",
               "title": "Bank Account Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           },
@@ -298165,6 +298475,22 @@
               "title": "Auto Book",
               "type": "boolean"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -298172,7 +298498,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__endpoints__bank_reconciliation__ReconciliationResult"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__bank_reconciliation_schemas__ReconciliationResult"
                 }
               }
             },
@@ -298194,7 +298520,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Bank statement reconcile",
+        "summary": "Read-only bank comparison",
         "tags": [
           "finance",
           "bank-reconciliation",
@@ -298205,7 +298531,6 @@
     },
     "/api/v1/finance/bank-reconciliation/{statement_id}/summary": {
       "get": {
-        "description": "Get summary of bank reconciliation status.",
         "operationId": "get_reconciliation_summary_api_v1_finance_bank_reconciliation__statement_id__summary_get",
         "parameters": [
           {
@@ -298218,26 +298543,28 @@
             }
           },
           {
-            "description": "Bank account ID",
             "in": "query",
             "name": "bank_account_id",
             "required": true,
             "schema": {
-              "description": "Bank account ID",
               "title": "Bank Account Id",
               "type": "string"
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -298246,7 +298573,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BankReconciliationOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__bank_reconciliation_schemas__ReconciliationResult"
                 }
               }
             },
@@ -298268,7 +298595,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Reconciliation summary abrufen",
+        "summary": "Canonical bank comparison summary",
         "tags": [
           "finance",
           "bank-reconciliation",

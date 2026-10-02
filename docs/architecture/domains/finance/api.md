@@ -10,6 +10,18 @@ version: 1.0.0
 
 # Finance — API
 
+## Bank-Hauptbuchvertrag und Integrationsvorbehalt
+
+Bankkonto Create/Update/Response: gl_account_id als eigene buchbare
+ASSET/bank-Konto-ID; gl_account_number entfaellt. Auswahl:
+GET /api/v1/finance/bank-accounts/ledger-options (Header-Tenant, limit<=200).
+Reconcile und Summary teilen ReconciliationResult. Geldwerte Decimal-Strings,
+fehlende Nachweise null. comparison_state INCOMPLETE/DIFFERENCES/BALANCES_EQUAL;
+BALANCES_EQUAL bedeutet Salden-/OP-Kohaerenz, keinen zeilenweisen Journal-Link.
+Differenzen maximal 100/Seite mit offset/limit, Gesamtzahl separat.
+Neue Migration und Parallel-Merge sind Betriebs-Voraussetzung; gemeinsamer
+Migrationsstand noch nicht integriert. [ADR-075](../../../adr/adr-075-bank-ledger-evidence.md).
+
 ## Bankvergleich ohne Direktbuchung
 
 POST /api/v1/finance/bank-reconciliation/{statement_id}/reconcile ist
