@@ -77,45 +77,64 @@ class FinanceTransactionService:
 
     # ── GoBD helpers ─────────────────────────────────────────────────────────
 
-    def _next_sequence_number(self) -> int:
-        row = self.db.execute(
-            text(
-                "SELECT COALESCE(MAX(sequence_number), 0) + 1 AS next "
-                "FROM domain_erp.journal_entries WHERE tenant_id = :tid"
-            ),
-            {"tid": self.tenant_id},
-        ).fetchone()
-        return int(row[0]) if row else 1
-
     @staticmethod
-    def _compute_hash(entry: JournalEntry, prev_hash: Optional[str]) -> str:
+    def _compute_hash(entry: JournalEntry, prev_hash: Optional[str], sequence_number: Optional[int] = None) -> str:
         payload = (
-            f"{entry.tenant_id}|{entry.sequence_number}|{entry.entry_number}|"
+            f"{entry.tenant_id}|{entry.sequence_number if sequence_number is None else sequence_number}|{entry.entry_number}|"
             f"{entry.entry_date}|{entry.total_debit}|{prev_hash or ''}"
         )
         return hashlib.sha256(payload.encode()).hexdigest()
 
-    def _prev_hash(self) -> Optional[str]:
-        row = self.db.execute(
-            text(
-                "SELECT hash_current FROM domain_erp.journal_entries "
-                "WHERE tenant_id = :tid AND sequence_number = ("
-                "  SELECT MAX(sequence_number) FROM domain_erp.journal_entries "
-                "  WHERE tenant_id = :tid"
-                ")"
-            ),
-            {"tid": self.tenant_id},
-        ).fetchone()
-        return str(row[0]) if row and row[0] else None
-
     def _stamp_gobd(self, obj: JournalEntry) -> None:
+        """Serialize chain allocation and refuse writes without valid evidence.
+
+        The transaction owns the tenant lock until commit/rollback. Existing
+        incomplete chains are rejected, never repaired by guessing a predecessor.
+        This validates chain metadata; the historical hash payload still needs
+        a separate canonical contract covering all journal attributes and lines.
+        """
+        if not self.tenant_id or obj.tenant_id != self.tenant_id:
+            raise ValidationFailedError("Journal stamp requires the owning tenant")
+        if obj.sequence_number is not None or obj.hash_current is not None or obj.hash_prev is not None:
+            raise ValidationFailedError("Existing journal stamp cannot be replaced")
         try:
-            obj.sequence_number = self._next_sequence_number()
-            prev = self._prev_hash()
-            obj.hash_prev = prev
-            obj.hash_current = self._compute_hash(obj, prev)
+            isolation = self.db.execute(
+                text("SELECT current_setting('transaction_isolation'), pg_advisory_xact_lock(hashtextextended(:chain_key, 0))"),
+                {"chain_key": f"journal-chain:{self.tenant_id}"},
+            ).fetchone()
+            if isolation is None or isolation[0] != "read committed":
+                raise ValidationFailedError("Journal allocation requires READ COMMITTED isolation")
+            row = self.db.execute(text("""
+                WITH chain AS (
+                    SELECT sequence_number, hash_current, hash_prev,
+                           LAG(hash_current) OVER (ORDER BY sequence_number) AS predecessor
+                    FROM domain_erp.journal_entries WHERE tenant_id = :tenant_id
+                )
+                SELECT COUNT(*), MAX(sequence_number), COUNT(DISTINCT sequence_number),
+                       COUNT(*) FILTER (WHERE sequence_number IS NULL OR sequence_number <= 0
+                         OR hash_current IS NULL OR hash_current !~ '^[0-9a-f]{64}$'
+                         OR hash_prev IS DISTINCT FROM predecessor),
+                       (SELECT hash_current FROM chain
+                        ORDER BY sequence_number DESC NULLS LAST LIMIT 1)
+                FROM chain
+            """), {"tenant_id": self.tenant_id}).fetchone()
+            if row is None:
+                raise ValidationFailedError("Journal chain evidence unavailable")
+            count, maximum, distinct, invalid, previous = row
+            if invalid or distinct != count or (maximum or 0) != count:
+                raise ValidationFailedError("Journal chain metadata is inconsistent")
+            # Assign only once every read and check succeeded; no partial stamp.
+            sequence = count + 1
+            current = self._compute_hash(obj, previous, sequence)
+            obj.sequence_number = sequence
+            obj.hash_prev = previous
+            obj.hash_current = current
+        except ValidationFailedError:
+            raise
         except Exception as exc:
-            logger.warning("GoBD stamp failed for %s: %s", obj.id, exc)
+            raise ValidationFailedError(
+                "Journal chain evidence unavailable; write rejected"
+            ) from exc
 
     def _resolve_account_id(self, account_ref: str) -> str:
         row = self.db.execute(
