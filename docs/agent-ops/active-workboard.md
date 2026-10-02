@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-AMOUNT-INTEGRITY-20261002 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Ein exakter positiver Decimal-Centvertrag
+fuer Service-Journalzeilen; leere/Null-/NaN-/negative/mehrseitige Buchungen
+vor Schreiben abweisen, gespeicherte Betraege vor Post/Reverse pruefen.
+**Dateibesitz:** finance_transaction_service.py Betragsvalidierung/Create/
+Post/Reverse; produktion_mischfutter.py nur Nullbetrags-GL-Platzhalterhelper
+entfernen. test_finance_transaction_service/test_posting_services/
+test_journal_stamp_integrity betroffene Testdoppel, test_journal_account_identity
+Retirement-Waechter, neues test_journal_amount_integrity.py; eigene QA/Slice/Gaps.
+**Abnahme:** Exakte endliche Centbetraege innerhalb NUMERIC(15,2); mindestens
+zwei einseitige positive Zeilen, positive ausgeglichene Summen; keine stillen
+Rundungen/Default-Nullen; widerspruechliche gespeicherte Betragsdubletten
+sperren Post/Reverse. Produktion erzeugt ohne Bewertung keine Scheinbuchung.
+**Risiken:** Andere Journal-Schreiber, Bewertungsmodell, Atomizitaet/Hash/
+Schema-Dubletten und Bankmigration bleiben offen. Keine neue Test-DB/Docker.
+
 ## JOURNAL-ACCOUNT-ID-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Service-Journalzeilen enthalten nur
