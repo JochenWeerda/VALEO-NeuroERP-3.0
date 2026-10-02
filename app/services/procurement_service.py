@@ -1016,9 +1016,9 @@ class ProcurementService:
                 # von GoBD geforderte Klarheit ist dahin. 5100 ist das Konto,
                 # das dieses Haus in finance/router.py ohnehin fuer die
                 # Eingangsrechnung vorsieht (ER -> 5100 / 1600).
-                {"account_id": "5100", "debit_amount": float(netto), "credit_amount": 0,
+                {"account_id": fin.account_id_for_number("5100"), "debit_amount": float(netto), "credit_amount": 0,
                  "description": "Einkauf Handelswaren (Bestellobligo)"},
-                {"account_id": "1600", "debit_amount": 0, "credit_amount": float(netto),
+                {"account_id": fin.account_id_for_number("1600"), "debit_amount": 0, "credit_amount": float(netto),
                  "description": "Verbindlichkeiten Lieferant"},
             ],
             reference=b.bestellnummer,

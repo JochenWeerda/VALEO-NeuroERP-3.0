@@ -48,8 +48,8 @@ def test_wareneinkauf_steht_nicht_auf_dem_lohnkonto() -> None:
     )
     obligo = quelle[quelle.index("OBLIGO-") : quelle.index("OBLIGO-") + 1500]
 
-    assert '"account_id": "5100"' in obligo, "Das Bestellobligo bucht nicht auf 5100"
-    assert '"account_id": "6000"' not in obligo, "Das Bestellobligo bucht noch auf 6000"
+    assert 'fin.account_id_for_number("5100")' in obligo, "Das Bestellobligo bucht nicht auf 5100"
+    assert 'fin.account_id_for_number("6000")' not in obligo, "Das Bestellobligo bucht noch auf 6000"
 
 
 def test_gutscheine_stehen_nicht_bei_den_lieferantenschulden() -> None:

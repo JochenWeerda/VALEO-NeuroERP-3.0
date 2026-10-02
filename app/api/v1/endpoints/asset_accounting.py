@@ -317,16 +317,16 @@ def dispose_asset(
             from app.services.finance_transaction_service import FinanceTransactionService
             fin = FinanceTransactionService(db, tenant_id)
             lines = [
-                {"account_id": "0800", "debit_amount": float(body.disposal_proceeds), "credit_amount": 0.0,
+                {"account_id": fin.account_id_for_number("0800"), "debit_amount": float(body.disposal_proceeds), "credit_amount": 0.0,
                  "description": "Veräußerungserlös Anlage"},
-                {"account_id": "0200", "debit_amount": 0.0, "credit_amount": book_value,
+                {"account_id": fin.account_id_for_number("0200"), "debit_amount": 0.0, "credit_amount": book_value,
                  "description": f"Abgang Anlage Buchwert {asset_id[:8]}"},
             ]
             if gain_loss > 0:
-                lines.append({"account_id": "2650", "debit_amount": 0.0, "credit_amount": gain_loss,
+                lines.append({"account_id": fin.account_id_for_number("2650"), "debit_amount": 0.0, "credit_amount": gain_loss,
                                "description": "Gewinn Anlagenabgang"})
             elif gain_loss < 0:
-                lines.append({"account_id": "6800", "debit_amount": abs(gain_loss), "credit_amount": 0.0,
+                lines.append({"account_id": fin.account_id_for_number("6800"), "debit_amount": abs(gain_loss), "credit_amount": 0.0,
                                "description": "Verlust Anlagenabgang"})
             fin.create(
                 entry_number=f"ABGANG-{asset_id[:8].upper()}-{body.disposal_date.strftime('%Y%m%d')}",

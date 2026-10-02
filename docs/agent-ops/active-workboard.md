@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## JOURNAL-ACCOUNT-ID-20261002 — reserviert, Codex (Chat 01a0f3fc)
+## JOURNAL-ACCOUNT-ID-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Service-Journalzeilen enthalten nur
 explizite eigene buchbare Konto-IDs; Kontonummern vor der Zeilenerzeugung
@@ -32,6 +32,15 @@ ungueltigem Konto. Alle bekannten Service-Verbraucher umgestellt.
 kein gemeinsamer Migrationslauf waehrend fremdem Claim. Andere Journal-
 Schreiber, Consumer-fail-soft und Betrags-/Auditkanonisierung weiter offen.
 **Architektur:** Bestehende Finance-Vertraege, keine neue Fachfunktionalitaet.
+
+**Ergebnis 2026-10-02:** Ein account_id-Vertrag, ausdruecklicher eigener
+Nummernlookup in neun Verbrauchern, gebuendelte ID-Pruefung vor Persistenz.
+Toter GL-/Ensure-Account-Weg in finance_invoices und Sales entfernt.
+**Abnahme:** 186 Tests (26 neue, davon 16 PostgreSQL), Kern-Ruff/Whitespace
+bestanden. 200 Zeilen eine Konto-ID-Validierungsabfrage.
+**Nachweis:** docs/quality-assurance/journal-account-identity-20261002.md.
+**Offen:** Globale UQ/andere Schreiber/Consumer-Atomizitaet und Bankintegration;
+Handbuch-Drift bei parallel ergaenzten ScreenDefinitions noch rot.
 
 ## JOURNAL-STAMP-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
@@ -88,7 +97,7 @@ Decimal/null, sichtbare Fehler und alle Statuswerte; kein Abgleich-DML.
 **Noch nicht abgeschlossen:** Gemeinsamer Migrations-Merge, Pruefstand- und
 Entwicklungsintegration/Betriebsprobe. Code als Draft-PR sichern.
 **Nachweis:** bank-reconciliation-proof-20261002.md, Proposed ADR-075.
-**Neue Folge-Gaps:** Journalservice globale LIMIT-1-Kontenaufloesung und
+**Neue Folge-Gaps:** Kontoreferenzen anderer Journalschreiber und
 unvollstaendiger GoBD-Hash-Payload; globale Kontennummer-UQ, doppelte Journalbetraege,
 Bank/GL-Zeilenlink und Bankstamm-Audit/RBAC. Gesamtziel bleibt offen.
 

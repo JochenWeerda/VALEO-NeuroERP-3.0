@@ -272,9 +272,9 @@ class EinkaufCompatService:
                 description=f"Wareneingang {receipt_id[:8]}",
                 entry_date=entry_date,
                 lines=[
-                    {"account_id": "2000", "debit_amount": float(total_cost), "credit_amount": 0,
+                    {"account_id": fin.account_id_for_number("2000"), "debit_amount": float(total_cost), "credit_amount": 0,
                      "description": "Warenbestand Zugang"},
-                    {"account_id": "1600", "debit_amount": 0, "credit_amount": float(total_cost),
+                    {"account_id": fin.account_id_for_number("1600"), "debit_amount": 0, "credit_amount": float(total_cost),
                      "description": "Verbindlichkeiten Lieferant"},
                 ],
                 reference=receipt_id[:8],

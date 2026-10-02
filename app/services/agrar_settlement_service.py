@@ -639,6 +639,7 @@ class AgrarSettlementService:
     def post_to_fibu_full(self, settlement_id: str, payload: Any) -> dict:
         """GL-Buchung + PDF-Archivierung + Status-Übergang in einem Schritt."""
         from app.services.finance_transaction_service import FinanceTransactionService
+        fin = FinanceTransactionService(self.db, self.tenant_id)
         from app.services.settlement_pdf_service import SettlementPdfService
 
         settlement, _ = self.get_settlement(settlement_id)
@@ -657,16 +658,15 @@ class AgrarSettlementService:
         net = _round_money(settlement.net_amount_eur)
 
         lines = [
-            {"account_id": payload.debit_account, "debit_amount": float(gross), "credit_amount": 0.0,
+            {"account_id": fin.account_id_for_number(payload.debit_account), "debit_amount": float(gross), "credit_amount": 0.0,
              "description": f"Agrar settlement {settlement.settlement_number} gross"},
-            {"account_id": payload.credit_account_supplier, "debit_amount": 0.0, "credit_amount": float(net),
+            {"account_id": fin.account_id_for_number(payload.credit_account_supplier), "debit_amount": 0.0, "credit_amount": float(net),
              "description": f"Supplier payable {settlement.supplier_id}"},
         ]
         if deductions_amt > 0:
-            lines.append({"account_id": payload.credit_account_deductions, "debit_amount": 0.0,
+            lines.append({"account_id": fin.account_id_for_number(payload.credit_account_deductions), "debit_amount": 0.0,
                           "credit_amount": float(deductions_amt), "description": "Settlement deductions"})
 
-        fin = FinanceTransactionService(self.db, self.tenant_id)
         je = fin.create(
             entry_number=journal_ref,
             description=f"Agrar settlement {settlement.settlement_number}",
