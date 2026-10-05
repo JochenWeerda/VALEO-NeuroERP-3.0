@@ -32,6 +32,9 @@ doc_drift_report.py nur eingebettete party-native-Komponente; passende Tests.
 **Frontend-Teilclaim:** Unveraenderte Dateien CallWidget.tsx (Callback-Narrowing),
 party-native.tsx (typisierte Query-Schluessel), bank-stamm.tsx (Null-/Betragstypen)
 und eigener Query-Vertragstest. Fremde Renderer-/Farb-WIP nicht uebernommen.
+**Security-Teilclaim:** package.json nur @fastify/busboy-Override und zugehoeriges
+pnpm-lock.yaml. Zwei Multipart-Advisories verlangen 3.2.1. Node-forge/braces
+ohne gepatchtes Release bleiben offen; keine Audit-Ausnahme oder Abschaltung.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
