@@ -40,6 +40,10 @@ folgt erst nach diesem Code-Meilenstein und erneuter Nutzungspruefung.
 bestanden, insgesamt 525 Regressionen. Architecture strict nach ADR-Index-
 Nachzug gruen. Agent-Handbuch zeigt Drift durch fremde Masken-WIP; keine
 fremden generierten Maskenartefakte uebernommen.
+**Nachzug Dateibesitz:** scripts/check_journal_identity.py als ausschliesslich
+lesendes Betriebs-Gate; tests/test_journal_number_tenant.py Gate-Abnahme.
+Es soll den realen DB-Vertrag pruefen, damit Code-Gruen keine fehlende
+Integration verdeckt. Keine fremden CI-/Masken-Dateien.
 **Integration angehalten:** Probe waehrenddessen auf fremde, noch uncommitted
 preisfindung_rabattregeln_20261005 weitergewandert. Guard hat vor DDL gestoppt;
 Journalnummer im gemeinsamen Schema noch global. Nach deren Commit beide
