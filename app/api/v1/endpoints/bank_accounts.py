@@ -129,7 +129,7 @@ async def list_ledger_options(tenant_id: str = Depends(get_tenant_id),
         WHERE tenant_id=:t AND is_active=TRUE AND coalesce(is_summary,FALSE)=FALSE
           AND deleted_at IS NULL AND upper(account_type)='ASSET' AND upper(category)='BANK'
         ORDER BY account_number,id LIMIT :limit OFFSET :offset
-    """), {"t": tenant_id, "limit": limit, "offset": offset}).mappings().all()
+    """), {"t": tenant_id, "limit": limit, "offset": offset}).mappings().fetchmany(limit)
     return [BankLedgerOption(**row) for row in rows]
 
 

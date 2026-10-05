@@ -31,6 +31,11 @@ keine neue Fachfunktion. Tests, Betriebs-/Datenvertrag und Doku nachziehen.
 valeo_probe nach privater Abnahme. Vorher Migrationshead und aktive
 DB-Nutzung nochmals pruefen; kurze Lock-Timeouts, kein Reset/Fremd-DML.
 Entwicklungsdatenbank wird in diesem Wartungsclaim nicht migriert.
+**Zwischenabnahme:** 380 Bank-/Journal-/Perioden-/Finance-Regressionen
+bestanden, davon 38 gezielte Bank-/Nummernvertraege. Paginierungsratsche
+gruen (285/258). ADR-077 entscheidet Inventory als fuehrenden Wiegeschein.
+Journalmigration im privaten Schema abgenommen; gemeinsamer Probe-Schritt
+folgt erst nach diesem Code-Meilenstein und erneuter Nutzungspruefung.
 
 ## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
