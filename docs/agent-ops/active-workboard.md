@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-CREATE-CANONICAL-20261005 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Zweiten Repository-Anlage-/Hashweg
+entfernen; zentraler Betrag/Konto/Tenant/Stempelvertrag, Datum und Waehrung
+erhalten, keine still verworfenen fachlichen Zusatzfelder.
+**Dateibesitz:** implementations.py nur Journal-Create/Hash; finance_transaction_service.py
+Create-Postingdatum/Waehrung und Reverse-Waehrung; journal.py vorhandene
+currency-Spalte mappen; neuer test_journal_create_canonical.py; eigene QA/Slice/Gaps.
+**Abnahme:** Echte PostgreSQL-Anlage/Storno mit erhaltenem Datum/Waehrung,
+exakten Betraegen und zentralem Stempel. Fehler vor DML; Payload nicht mutieren.
+**Risiken:** API/DTO bleiben fremd beansprucht, HTTP-Mapping/Audit/Session,
+vollstaendiger Hash und Schema-Laengendrift offen. Kein neuer API-Vertrag,
+keine Migration. Bestehender valeo_probe Revision zusammenfuehrung_20261005.
+
 ## JOURNAL-REPOSITORY-LIFECYCLE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Repository-Lifecycle an den zentralen
