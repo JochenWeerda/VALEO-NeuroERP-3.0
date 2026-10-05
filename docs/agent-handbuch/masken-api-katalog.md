@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (89 Masken).
+> Generiert aus `app/core/screen_definitions.py` (92 Masken).
 
 ## Übersicht
 
@@ -62,7 +62,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/kreditor` | Kreditor | finance | niedrig | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
+| `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
 | `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
+| `fuhrpark/rechnungen` | Fuhrpark-Rechnungen | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/rechnungen/agent-contract` |
+| `fuhrpark/terminarten` | Terminarten | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/terminarten/agent-contract` |
 | `fuhrpark/uebersicht` | Fuhrpark | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/uebersicht/agent-contract` |
 | `futtermittel/analyse` | Futteranalyse | futtermittel | hoch | — | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
 | `futtermittel/analysen` | Futteranalysen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
@@ -2221,6 +2224,35 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: logistics
 
+### `fuhrpark/ausgehende-dokumente` — Ausgehende Belege
+
+**Zweck:** Belegtypen fuer ausgehende Dokumente anlegen. Der Stand folgt dem Formular.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
+| Readiness | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/readiness` |
+| Rollout-Route | `/mask-rollout/fuhrpark__ausgehende-dokumente/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `dokumente` → `/api/v1/fuhrpark/ausgehende-dokumente`
+
+**Beispiel-Prompts:**
+
+- Welcher Belegtyp hat noch kein Formular?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt einen Belegtyp an oder aktualisiert den gewaehlten.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer einen neuen Belegtyp.` |
+
+---
+
 ### `fuhrpark/fahrzeuge` — Fahrzeuge
 
 **Zweck:** Fahrzeuge nach Kennzeichen, Typ und Status suchen und in die Erfassung oeffnen.
@@ -2246,6 +2278,64 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `neu` | Neues Fahrzeug | safe | nein | `Oeffnet die bestehende Fahrzeug-Erfassung.` |
+
+---
+
+### `fuhrpark/rechnungen` — Fuhrpark-Rechnungen
+
+**Zweck:** Fuhrpark-Rechnungen anlegen und aendern. Der Betrag folgt den Belegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fuhrpark/rechnungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fuhrpark/rechnungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/fuhrpark/rechnungen/readiness` |
+| Rollout-Route | `/mask-rollout/fuhrpark__rechnungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `rechnungen` → `/api/v1/fuhrpark/rechnungen`
+
+**Beispiel-Prompts:**
+
+- Welche Fuhrpark-Rechnung hat noch kein Fahrzeug?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt eine Rechnung an oder aktualisiert die gewaehlte.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Rechnung.` |
+
+---
+
+### `fuhrpark/terminarten` — Terminarten
+
+**Zweck:** Wartungsintervalle der Terminarten anlegen und aendern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fuhrpark/terminarten/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fuhrpark/terminarten/agent-contract` |
+| Readiness | `GET /api/v1/masks/fuhrpark/terminarten/readiness` |
+| Rollout-Route | `/mask-rollout/fuhrpark__terminarten/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `terminarten` → `/api/v1/fuhrpark/terminarten`
+
+**Beispiel-Prompts:**
+
+- Welche Terminart hat noch kein Kilometerintervall?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt eine Terminart an oder aktualisiert die gewaehlte.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Terminart.` |
 
 ---
 

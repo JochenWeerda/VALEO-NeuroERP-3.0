@@ -1,4 +1,5 @@
 import { type ChangeEvent, useMemo, useRef } from 'react'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -126,6 +127,13 @@ export function FieldRenderer({
           ref={inputRef}
           type="text"
           value={field.key === 'status' ? statusLabel(renderValue(value)) : formatReadOnlyValue(field.type, value)}
+        />
+      ) : field.type === 'boolean' ? (
+        <Checkbox
+          id={field.key}
+          aria-label={field.label}
+          checked={value === true || value === 'true' || value === 'JA'}
+          onCheckedChange={(checked) => onChange?.(checked === true)}
         />
       ) : (
         <Input

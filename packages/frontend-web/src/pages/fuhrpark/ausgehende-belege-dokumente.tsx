@@ -1,42 +1,34 @@
-﻿import { useMemo, useState } from 'react'
-import { useNavigate } from '@/app/routing/typed-router'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
+import { toast } from 'sonner'
+import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createFuhrparkAusgehendesDokument,
   deleteFuhrparkAusgehendesDokument,
   listFuhrparkAusgehendeDokumente,
   updateFuhrparkAusgehendesDokument,
-  type FuhrparkAusgehendesDokument,
+  type FuhrparkAusgehendesDokumentPayload,
 } from '@/lib/api/fuhrpark'
-import {
-  CrudCapabilityChecklist,
-  EvidenceTemplateLink,
-  ManagementDecisionPanel,
-  NextActionPanel,
-  OperationalTaskPlan,
-  RoleFocusBar,
-} from '@/components/workflow'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { fuhrparkAusgehendeDokumenteScreen } from '@/masks/capture-screens'
 
-type DokumentForm = {
-  beleg_typ: string
-  formular: string
-  ziel_modul: string
-  beschreibung: string
-  aktiv: boolean
+function text(value: unknown): string {
+  return String(value ?? '').trim()
 }
-type FleetDocumentRole = 'fuhrpark' | 'versand' | 'produktion' | 'it'
 
-const fleetDocumentRoles = [
-  { id: 'fuhrpark', label: 'Fuhrpark', description: 'Pflegt Belegtypen, Formulare und Zielmodule fuer Fahrzeugprozesse.' },
-  { id: 'versand', label: 'Versand', description: 'Prueft, ob passende Versand- und Frachtdokumente erreichbar sind.' },
-  { id: 'produktion', label: 'Produktion', description: 'Prueft, ob produktionsnahe Dokumente sauber verlinkt sind.' },
-  { id: 'it', label: 'IT', description: 'Klaert Formular, Zielmodul und technische Druckpfade.' },
-] satisfies Array<{ id: FleetDocumentRole; label: string; description: string }>
+function optional(value: unknown): string | null {
+  const raw = text(value)
+  return raw || null
+}
 
-const EMPTY_FORM: DokumentForm = {
+const leer = {
   beleg_typ: '',
   formular: '',
   ziel_modul: '',
@@ -44,246 +36,204 @@ const EMPTY_FORM: DokumentForm = {
   aktiv: true,
 }
 
-const quickLinks = [
-  { label: 'Frachtdokumente', path: '/versand/frachtdokumente' },
-  { label: 'Paket-Etikett', path: '/versand/paket-etikett' },
-  { label: 'Versand-Avis', path: '/versand/versand-avis' },
-  { label: 'Produktions-Dokumente', path: '/produktion/produktions-dokumente-drucken' },
-  { label: 'Kommissions-Aufträge', path: '/verkauf/kommissions-auftraege' },
-  { label: 'Betriebs-Aufträge', path: '/verkauf/betriebs-auftraege' },
-]
-
 export default function AusgehendeBelegeDokumentePage(): JSX.Element {
-  const navigate = useNavigate()
   const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
-  const [selected, setSelected] = useState<FuhrparkAusgehendesDokument | null>(null)
-  const [form, setForm] = useState<DokumentForm>(EMPTY_FORM)
-  const [roleFocus, setRoleFocus] = useState<FleetDocumentRole>('fuhrpark')
-
-  const { data: rows = [] } = useQuery({
+  const liste = useQuery({
     queryKey: ['fuhrpark', 'ausgehende-dokumente'],
     queryFn: listFuhrparkAusgehendeDokumente,
   })
-
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const payload = {
-        beleg_typ: form.beleg_typ,
-        formular: form.formular || undefined,
-        ziel_modul: form.ziel_modul || undefined,
-        beschreibung: form.beschreibung || undefined,
-        aktiv: form.aktiv,
-      }
-      if (selected) {
-        return updateFuhrparkAusgehendesDokument(selected.id, payload)
-      }
-      return createFuhrparkAusgehendesDokument(payload)
-    },
-    onSuccess: () => {
-      setForm(EMPTY_FORM)
-      setSelected(null)
-      void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'ausgehende-dokumente'] })
-    },
+  const rows = useMemo(
+    () => [...(liste.data ?? [])].sort((a, b) => a.beleg_typ.localeCompare(b.beleg_typ, 'de')),
+    [liste.data],
+  )
+  const ohneFormular = rows.filter((row) => !row.formular).length
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const [saving, setSaving] = useState(false)
+  const createMutation = useMutation({ mutationFn: createFuhrparkAusgehendesDokument })
+  const updateMutation = useMutation({
+    mutationFn: (input: { id: string; payload: FuhrparkAusgehendesDokumentPayload }) =>
+      updateFuhrparkAusgehendesDokument(input.id, input.payload),
   })
+  const deleteMutation = useMutation({ mutationFn: deleteFuhrparkAusgehendesDokument })
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => deleteFuhrparkAusgehendesDokument(id),
-    onSuccess: () => {
-      setForm(EMPTY_FORM)
-      setSelected(null)
-      void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'ausgehende-dokumente'] })
+  useEffect(() => {
+    if (!liste.isError) return
+    toast.error('Belege nicht geladen', { description: getAxiosErrorMessage(liste.error) })
+  }, [liste.error, liste.isError])
+
+  const schema = useMemo<ScreenDefinition>(() => ({
+    ...fuhrparkAusgehendeDokumenteScreen,
+    layout: {
+      ...fuhrparkAusgehendeDokumenteScreen.layout,
+      density: isTouch ? 'comfortable' : 'compact',
     },
-  })
+    summary: (fuhrparkAusgehendeDokumenteScreen.summary ?? []).map((item) => ({
+      ...item,
+      value: String(item.key === 'ohne_formular' ? ohneFormular : rows.length),
+    })),
+    actions: (fuhrparkAusgehendeDokumenteScreen.actions ?? []).map((action) => ({
+      ...action,
+      disabled: action.key === 'speichern' ? saving : false,
+    })),
+  }), [isTouch, ohneFormular, rows.length, saving])
 
-  const sortedRows = useMemo(() => [...rows].sort((a, b) => a.beleg_typ.localeCompare(b.beleg_typ, 'de')), [rows])
-  const activeRows = sortedRows.filter((row) => row.aktiv)
-  const missingFormula = sortedRows.filter((row) => !row.formular)
-  const documentBlockers = (sortedRows.length === 0 ? 1 : 0) + missingFormula.length
-  const nextDocumentAction = sortedRows.length === 0
-    ? 'Ersten Belegtyp mit Formular und Zielmodul anlegen.'
-    : missingFormula.length > 0
-      ? `${missingFormula.length} Belegtyp(en) ohne Formular pruefen.`
-      : 'Dokumentensteuerung ist arbeitsfaehig; Quicklink oder Belegtyp pruefen.'
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const form = useUniversalFormState({ screen: schema, initialValues: leer })
+
+  const workflow = useMemo<WorkflowState>(() => {
+    const keine = rows.length === 0
+    const offen = ohneFormular > 0
+    const label = keine ? 'Kein Belegtyp' : offen ? 'Formular offen' : 'Belege hinterlegt'
+    const naechste = keine
+      ? 'Beleg-Typ und Formular eintragen.'
+      : offen
+        ? `${ohneFormular} Belegtyp ohne Formular.`
+        : selectedId
+          ? 'Beleg ändern und speichern, oder Neu für einen weiteren Typ.'
+          : 'Einen Belegtyp wählen oder einen neuen anlegen.'
+    return {
+      status: {
+        currentStatus: keine ? 'leer' : offen ? 'offen' : 'hinterlegt',
+        statusLabel: label,
+        tone: keine || offen ? 'warning' : 'success',
+      },
+      nextAllowedActions: [{ actionKey: 'speichern', label: naechste, dangerLevel: 'safe', requiresConfirmation: false }],
+      blockingReasons: keine || offen ? [{ code: label, message: naechste, blocking: true }] : [],
+      auditTrail: [],
+      policyHints: [],
+      isBlocked: false,
+      isTerminal: false,
+    }
+  }, [ohneFormular, rows.length, selectedId])
+
+  const leeren = useCallback(() => {
+    setSelectedId(null)
+    form.setValue('beleg_typ', '')
+    form.setValue('formular', '')
+    form.setValue('ziel_modul', '')
+    form.setValue('beschreibung', '')
+    form.setValue('aktiv', true)
+  }, [form])
+
+  const speichern = useCallback(async () => {
+    if (saving) return
+    const belegTyp = text(form.values.beleg_typ)
+    if (belegTyp.length < 2) {
+      toast.error('Beleg-Typ fehlt', { description: 'Der Beleg-Typ braucht mindestens zwei Zeichen.' })
+      return
+    }
+    const payload: FuhrparkAusgehendesDokumentPayload = {
+      beleg_typ: belegTyp,
+      formular: optional(form.values.formular),
+      ziel_modul: optional(form.values.ziel_modul),
+      beschreibung: optional(form.values.beschreibung),
+      aktiv: form.values.aktiv !== false,
+    }
+    setSaving(true)
+    try {
+      if (selectedId) {
+        await updateMutation.mutateAsync({ id: selectedId, payload })
+        toast.success('Belegtyp gespeichert', { description: `${belegTyp} wurde aktualisiert.` })
+      } else {
+        await createMutation.mutateAsync(payload)
+        toast.success('Belegtyp angelegt', { description: `${belegTyp} wurde erstellt.` })
+      }
+      await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'ausgehende-dokumente'] })
+      leeren()
+    } catch (error) {
+      toast.error('Belegtyp nicht gespeichert', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setSaving(false)
+    }
+  }, [createMutation, form.values, leeren, queryClient, saving, selectedId, updateMutation])
+
+  const loeschen = useCallback(async (id: string, name: string) => {
+    if (!id || pendingDeletes.has(id)) return
+    setPendingDeletes((prev) => new Set(prev).add(id))
+    try {
+      await deleteMutation.mutateAsync(id)
+      toast.success('Belegtyp gelöscht', { description: `${name} wurde entfernt.` })
+      if (selectedId === id) leeren()
+      await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'ausgehende-dokumente'] })
+    } catch (error) {
+      toast.error('Belegtyp nicht gelöscht', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setPendingDeletes((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }
+  }, [deleteMutation, leeren, pendingDeletes, queryClient, selectedId])
+
+  const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
+    if (key === 'speichern') {
+      await speichern()
+      return
+    }
+    if (key === 'neu') {
+      leeren()
+      return
+    }
+    if (key === 'loeschen') {
+      await loeschen(text(payload.id), text(payload.beleg_typ))
+    }
+  }, [leeren, loeschen, speichern])
+
+  const selectRow = useCallback((row: Record<string, unknown>) => {
+    setSelectedId(text(row.id))
+    form.setValue('beleg_typ', text(row.beleg_typ))
+    form.setValue('formular', text(row.formular))
+    form.setValue('ziel_modul', text(row.ziel_modul))
+    form.setValue('beschreibung', text(row.beschreibung))
+    form.setValue('aktiv', row.aktiv === true || row.aktiv === 'JA')
+  }, [form])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { dokumente: rows },
+    permissions: { granted: [] },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'fuhrpark.saveDokument': () => handleAction('speichern', {}),
+      'fuhrpark.newDokument': () => handleAction('neu', {}),
+      'fuhrpark.deleteDokument': (payload) => handleAction('loeschen', payload),
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, handleAction, rows])
+
+  if (liste.isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-full space-y-4 bg-background p-3 text-foreground md:p-6">
-      <div>
-        <h1 className="text-2xl font-bold md:text-3xl">Ausgehende Belege und Dokumente</h1>
-        <p className="text-muted-foreground">Belegtypen, Formulare und Zielmodule pflegen</p>
-      </div>
-      {!isTouch ? (
-      <div className="mb-4 space-y-4">
-        <RoleFocusBar roles={fleetDocumentRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={sortedRows.length} totalCount={sortedRows.length} title="Wer pflegt die Fuhrpark-Dokumente?" />
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <ManagementDecisionPanel
-            decision={{
-              allowed: documentBlockers === 0,
-              allowedLabel: 'Dokumentsteuerung bereit',
-              blockedLabel: 'Dokumente pruefen',
-              summary: documentBlockers > 0
-                ? `${missingFormula.length} Belegtyp(en) haben kein Formular oder es fehlen Belegtypen.`
-                : `${activeRows.length} aktive Dokumentsteuerungen sind fuer Fuhrpark- und Folgeprozesse verfuegbar.`,
-              blockerCount: documentBlockers,
-              nextFocus: nextDocumentAction,
-              template: { label: 'Fuhrpark-Dokumentsteuerung', href: '/docs/fuhrpark/dokumentsteuerung.md' },
-            }}
-          />
-          <div className="space-y-4">
-            <NextActionPanel action={nextDocumentAction} tone={documentBlockers > 0 ? 'amber' : 'emerald'} />
-            <EvidenceTemplateLink link={{ label: 'Dokument- und Formularnachweis', href: '/docs/fuhrpark/dokumentnachweis.md' }} />
-          </div>
-        </div>
-        <div className="grid gap-4 lg:grid-cols-2">
-          <OperationalTaskPlan
-            title="Dokumentplan"
-            items={[
-              { label: 'Belegtypen pflegen', done: sortedRows.length > 0, hint: `${sortedRows.length} Belegtyp(en) vorhanden.` },
-              { label: 'Formulare pruefen', done: missingFormula.length === 0, hint: missingFormula.length > 0 ? `${missingFormula.length} Eintraege ohne Formular.` : 'Alle Eintraege haben ein Formular.' },
-              { label: 'Aktive Dokumente klaeren', done: activeRows.length > 0, hint: `${activeRows.length} aktive Dokumentsteuerungen.` },
-              { label: 'Quicklinks pruefen', done: quickLinks.length > 0, hint: `${quickLinks.length} Folgearbeitsflaechen erreichbar.` },
-            ]}
-          />
-          <CrudCapabilityChecklist
-            capabilities={[
-              { key: 'create', label: 'Belegtyp anlegen', available: true, hint: 'Neu und Speichern legen neue Steuerungen an.' },
-              { key: 'read', label: 'Dokumente lesen', available: true, hint: 'Belegtyp, Formular, Zielmodul und Aktivstatus sind sichtbar.' },
-              { key: 'update', label: 'Steuerung bearbeiten', available: true, hint: 'Auswahl in der Liste fuellt das Formular.' },
-              { key: 'delete', label: 'Loeschen', available: true, hint: 'Ausgewaehlte Steuerung kann geloescht werden.' },
-              { key: 'evidence', label: 'Nachweis', available: true, hint: 'Dokumentnachweis ist verlinkt.' },
-              { key: 'audit', label: 'Aktivstatus', available: true, hint: 'Aktiv/inaktiv ist je Belegtyp sichtbar.' },
-            ]}
-          />
-        </div>
-      </div>
-      ) : null}
-
-      <div className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
-        {quickLinks.map((entry) => (
-          <Button
-            key={entry.path}
-            type="button"
-            variant="outline"
-            className="min-h-touch justify-start touch-manipulation"
-            onClick={() => navigate(entry.path)}
-          >
-            {entry.label}
-          </Button>
-        ))}
-      </div>
-
-      <div className="mb-2 grid grid-cols-1 gap-2 md:grid-cols-[90px_1fr_90px_1fr_70px_auto]">
-        <label htmlFor="beleg-typ">Beleg-Typ</label>
-        <Input
-          id="beleg-typ"
-          aria-label="Beleg-Typ"
-          className="min-h-touch"
-          value={form.beleg_typ}
-          onChange={(e) => setForm((prev) => ({ ...prev, beleg_typ: e.target.value }))}
-        />
-        <label htmlFor="formular">Formular</label>
-        <Input
-          id="formular"
-          aria-label="Formular"
-          className="min-h-touch"
-          value={form.formular}
-          onChange={(e) => setForm((prev) => ({ ...prev, formular: e.target.value }))}
-        />
-        <label htmlFor="aktiv">Aktiv</label>
-        <label className="flex min-h-touch items-center gap-2">
-          <input
-            id="aktiv"
-            type="checkbox"
-            checked={form.aktiv}
-            onChange={(e) => setForm((prev) => ({ ...prev, aktiv: e.target.checked }))}
-            className="h-5 w-5"
-          />
-          ja
-        </label>
-      </div>
-
-      <div className="mb-2 grid grid-cols-1 gap-2 md:grid-cols-[90px_1fr]">
-        <label htmlFor="ziel-modul">Ziel-Modul</label>
-        <Input
-          id="ziel-modul"
-          aria-label="Ziel-Modul"
-          className="min-h-touch"
-          value={form.ziel_modul}
-          onChange={(e) => setForm((prev) => ({ ...prev, ziel_modul: e.target.value }))}
-        />
-        <label htmlFor="beschreibung">Beschreibung</label>
-        <Input
-          id="beschreibung"
-          aria-label="Beschreibung"
-          className="min-h-touch"
-          value={form.beschreibung}
-          onChange={(e) => setForm((prev) => ({ ...prev, beschreibung: e.target.value }))}
-        />
-      </div>
-
-      <div className="border border-[#bdbdbd] bg-white">
-        <div className="grid grid-cols-[180px_90px_220px_1fr_80px] border-b border-[#d0d0d0] bg-[#f3f3f3] px-1 py-[2px]">
-          <span>Beleg-Typ</span>
-          <span>Formular</span>
-          <span>Ziel-Modul</span>
-          <span>Beschreibung</span>
-          <span>Aktiv</span>
-        </div>
-        {sortedRows.map((row) => (
-          <button
-            key={row.id}
-            type="button"
-            onClick={() => {
-              setSelected(row)
-              setForm({
-                beleg_typ: row.beleg_typ,
-                formular: row.formular ?? '',
-                ziel_modul: row.ziel_modul ?? '',
-                beschreibung: row.beschreibung ?? '',
-                aktiv: row.aktiv,
-              })
-            }}
-            className={`min-h-11 grid w-full grid-cols-[180px_90px_220px_1fr_80px] px-2 text-left touch-manipulation ${selected?.id === row.id ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
-          >
-            <span>{row.beleg_typ}</span>
-            <span>{row.formular}</span>
-            <span>{row.ziel_modul}</span>
-            <span>{row.beschreibung}</span>
-            <span>{row.aktiv ? 'JA' : 'NEIN'}</span>
-          </button>
-        ))}
-        <div className="h-[330px] bg-white" />
-      </div>
-
-      <div className="mt-2 flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            className="min-h-touch touch-manipulation"
-            onClick={() => {
-              setSelected(null)
-              setForm(EMPTY_FORM)
-            }}
-          >
-            Neu
-          </Button>
-          <Button
-            className="min-h-touch touch-manipulation"
-            onClick={() => saveMutation.mutate()}
-            disabled={!form.beleg_typ.trim() || saveMutation.isPending}
-          >
-            Speichern
-          </Button>
-          <Button
-            variant="destructive"
-            className="min-h-touch touch-manipulation"
-            onClick={() => {
-              if (selected) deleteMutation.mutate(selected.id)
-            }}
-            disabled={!selected || deleteMutation.isPending}
-          >
-            Loeschen
-          </Button>
-      </div>
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        workflowState={workflow}
+        tables={{
+          dokumente: rows.map((row) => ({
+            id: row.id,
+            beleg_typ: row.beleg_typ,
+            formular: row.formular ?? '',
+            ziel_modul: row.ziel_modul ?? '',
+            beschreibung: row.beschreibung ?? '',
+            aktiv: row.aktiv ? 'JA' : 'NEIN',
+            gesperrt: pendingDeletes.has(row.id),
+          })),
+        }}
+        onAction={handleAction}
+        onRowSelect={selectRow}
+      />
     </div>
   )
 }
