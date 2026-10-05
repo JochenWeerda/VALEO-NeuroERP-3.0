@@ -11,6 +11,22 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## JOURNAL-REPOSITORY-LIFECYCLE — Mutationen zentral, API/Anlage offen
+
+2026-10-05: JournalEntryRepositoryImpl delegiert Update/Delete/Post/Reverse
+an FinanceTransactionService. Get/Exists/Count greifen nicht mehr auf die
+fehlende is_active-Spalte zu; Lesefehler werden nicht als leeres Journal
+verschluckt. 282 Tests, 35 neue (27 PostgreSQL), zwei neue echte
+Repository-Wartebelege inkl. vorab gecachtem Zustand. QA:
+[Repository-Lifecycle](../quality-assurance/journal-repository-lifecycle-20261005.md).
+Offen: Repository-Create mit anderem Hashpayload und still verworfenen
+DTO-Feldern; API faengt Domainfehler noch als HTTP 500 ab, hat einen eigenen
+Session-/Audit-/Anchor-Weg. Nicht unterstuetzte Datumsupdates werden jetzt
+explizit abgewiesen statt ungesichert geschrieben. API/DTO-Dateibesitz ist
+weiter im fremden L3-JOURNAL-SOURCE-20260910 als in arbeit eingetragen.
+Cancel-Grund, vollstaendiger Hash/Schema, weitere SQL-Schreiber, Consumer-
+Atomizitaet und Bankintegration offen. Keine globale GoBD-/API-Abnahme.
+
 ## JOURNAL-LIFECYCLE-INTEGRITY — Service serialisiert, API/Repository noch offen
 
 2026-10-02: Kopf-FOR-UPDATE mit frischem ORM-Zustand fuer alle Service-
@@ -18,7 +34,8 @@ Mutationen; Zeilen-Lesesperre, Stempelerhalt bei Delete-Abweisung/Cancel,
 eigene ungestempelte Altentwuerfe loeschbar. 247 Tests, 16 neue PostgreSQL-
 Faelle, fuenf echte wartende Paralleltransaktionen inkl. gecachtem Zustand.
 QA: [Lifecycle-Vertrag](../quality-assurance/journal-lifecycle-integrity-20261002.md).
-Offen: Journal-API/JournalEntryRepository eigener Mutation-/Delete-Weg;
+Fortschritt 2026-10-05: Repository-Lifecycle delegiert jetzt an den Service.
+Offen: Journal-API Fehler-/Session-/Auditvertrag und Repository-Create;
 Cancel-Grund ohne Journal-ORM-Mapping/Audit, Consumer-Atomizitaet, Schema/Hash,
 Bewertung und Bankintegration. Kein globaler Stempel-/Delete-/Concurrency-Beleg.
 

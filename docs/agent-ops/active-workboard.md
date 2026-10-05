@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## JOURNAL-REPOSITORY-LIFECYCLE-20261005 — reserviert, Codex (Chat 01a0f3fc)
+## JOURNAL-REPOSITORY-LIFECYCLE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Repository-Lifecycle an den zentralen
 FinanceTransactionService binden; kein eigener ungesperrter Post/Storno/
@@ -25,6 +25,18 @@ Tenant-/Status-/Stempelguards; keine Zweitstornos; Fehler kein leerer Erfolg.
 **Risiken:** Repository-Create eigener Hashweg, API-Fehlermapping/Session,
 Audit-/Anchor-Atomizitaet und DTO-Datenverlust bleiben offen. Vorhandener
 valeo_probe ohne Reset/Migration/neue DB oder Container.
+
+**Ergebnis 2026-10-05:** Update/Delete/Post/Reverse delegieren an den
+zentralen Service; keine eigene ungesperrte Status-/Stornoimplementierung.
+Get/Exists/Count verwenden reale Journalspalten; Lesefehler propagieren.
+Nicht persistierbare/arbitraere Updatefelder werden explizit abgewiesen.
+**Nachweis:** 282 Tests (35 neue, 27 echte PostgreSQL), zwei neue echte
+Repository-Wartebelege mit gecachtem Status; neue Pythonanteile lint-sauber.
+13 bestehende Ruff-Befunde anderer Repositoryklassen und E401 im unangetasteten
+Create-Helper bleiben offen. QA: journal-repository-lifecycle-20261005.md.
+**Handoff:** Create-Hashweg und API-Domainfehler/Session/Audit/Anchor offen;
+L3-JOURNAL-SOURCE-20260910 fremd in arbeit, API/DTO nicht uebernommen.
+Keine globale API-/GoBD-Abnahme. Kein gemeinsamer DB-Reset/Migrationslauf.
 
 ## JOURNAL-LIFECYCLE-INTEGRITY-20261002 — abgeschlossen, Codex (Chat 01a0f3fc)
 
