@@ -11,6 +11,20 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## CASH-CLOSE-DIRECTBOOK — Scheinbuchung entfernt, echter Abschluss offen
+
+2026-10-05: cash/close-day summiert keine Tagesjournale mehr und erzeugt
+keinen posted-Header/Zeilen auf geratenem Konto 1000. HTTP 409 mit
+fachlichem Grund, keine SQL/DML/Commits, wiederholte Aufrufe unveraendert.
+397 Regressionen plus 12 gezielte API-/OpenAPI-Checks bestanden; reale private
+Journal-Snapshots erhalten. ADR-076 Proposed und Finance Domain Pack;
+QA: [Kassen-Direktbuchung](../quality-assurance/cash-close-retirement-20261005.md).
+Offen: Belegter Kassenbestand, Bewertung, Gegenkontierung und atomarer
+Abschluss ueber zentralen Journal-/Perioden-/Auditvertrag. Vorhandene Maske
+zeigt HTTP-Fehler; sie ist kein fachlich fertiger Kassenabschluss. Fremdes
+Global-OpenAPI-Refresh unberuehrt, eigener Routen-Snapshot bereit.
+Source-Whitelist/weitere rohe Journal-Schreiber bleiben separate Integration.
+
 ## JOURNAL-TRANSACTION-OWNERSHIP — Service bereit, Consumer-Integration offen
 
 2026-10-05: commit_on_success=False erlaubt aeussere Transaktionen fuer alle

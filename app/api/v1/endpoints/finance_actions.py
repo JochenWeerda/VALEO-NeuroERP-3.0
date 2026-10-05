@@ -168,80 +168,23 @@ async def post_journal_entry_action(
 
 # ── Cash close day ─────────────────────────────────────────────────────────────
 
-@router.post("/cash/close-day", response_model=ActionResponse, summary="Close day cash")
+@router.post(
+    "/cash/close-day", status_code=409, response_model=None,
+    summary="Kassenabschluss ohne Bewertungsmodell gesperrt",
+    responses={409: {"description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung."}},
+)
 async def cash_close_day(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Kasse Tagesabschluss — erzeugt Abschlussbuchung fuer den aktuellen Tag."""
-    from datetime import date as _date
-    today = _date.today()
-    _period = today.strftime("%Y-%m")  # noqa: F841
-
-    try:
-        row = db.execute(
-            text("""
-                SELECT COUNT(*) AS cnt,
-                       COALESCE(SUM(CASE WHEN je.status = 'posted' THEN je.total_debit ELSE 0 END), 0) AS total_debit,
-                       COALESCE(SUM(CASE WHEN je.status = 'posted' THEN je.total_credit ELSE 0 END), 0) AS total_credit
-                FROM domain_erp.journal_entries je
-                WHERE je.tenant_id = :tid
-                  AND je.entry_date = :today
-            """),
-            {"tid": tenant_id, "today": today},
-        ).fetchone()
-
-        buchungen = row.cnt if row else 0
-        soll = float(row.total_debit) if row else 0
-        haben = float(row.total_credit) if row else 0
-
-        entry_id = f"cash-close-{tenant_id}-{today}"
-        db.execute(
-            text("""
-                INSERT INTO domain_erp.journal_entries
-                    (id, tenant_id, entry_number, entry_date, posting_date, description,
-                     source, status, total_debit, total_credit, created_at)
-                VALUES
-                    (:id, :tid, :nr, :today, :today, :desc, 'cash_close', 'posted', :debit, :credit, NOW())
-                ON CONFLICT DO NOTHING
-            """),
-            {
-                "id": entry_id,
-                "tid": tenant_id,
-                "nr": f"KA-{today.strftime('%Y%m%d')}",
-                "today": today,
-                "desc": f"Kassen-Tagesabschluss {today}: {buchungen} Buchungen, Soll {soll:.2f}, Haben {haben:.2f}",
-                "debit": soll,
-                "credit": haben,
-            },
-        )
-        # FIN-CASHCLOSE-JE-001: GL-Zeilen für Tagesabschluss (Belegbruch schliessen)
-        if soll > 0 or haben > 0:
-            try:
-                db.execute(text("""
-                INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES
-                    (:id1, :tid, :eid, '1000', 'Kasse Soll Tagesabschluss', :soll, 0, 1, NOW()),
-                    (:id2, :tid, :eid, '1000', 'Kasse Haben Tagesabschluss', 0, :haben, 2, NOW())
-                ON CONFLICT DO NOTHING
-                """), {
-                    "id1": f"{entry_id}-L1", "id2": f"{entry_id}-L2",
-                    "tid": tenant_id, "eid": entry_id,
-                    "soll": soll, "haben": haben,
-                })
-            except AssertionError:
-                # Unit-test doubles often model only the header insert. Real DB errors
-                # still flow into the outer handler and fail the closeout.
-                pass
-        db.commit()
-
-        return ActionResponse(
-            success=True,
-            message=f"Tagesabschluss {today}: {buchungen} Buchungen, Soll {soll:.2f} EUR, Haben {haben:.2f} EUR.",
-        )
-    except Exception as e:
-        return ActionResponse(success=False, message=f"Tagesabschluss fehlgeschlagen: {e!s}")
+    """Reject the retired synthetic closing until cash valuation is defined."""
+    raise HTTPException(
+        status_code=409,
+        detail=(
+            "Kassenabschluss gesperrt: Ein belegter Kassenbestand und eine "
+            "fachliche Gegenkontierung fehlen. Es wurde keine Journalbuchung erstellt."
+        ),
+    )
 
 
 # ── Direct debit run ───────────────────────────────────────────────────────────
