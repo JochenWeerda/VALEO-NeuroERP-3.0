@@ -11,6 +11,45 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-TRANSACTION-OWNERSHIP-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Explizit aeussere Transaktionssteuerung
+fuer den Journal-Service; mehrere Schritte koennen gemeinsam committen/
+rollbacken, ohne vorhandene Aufrufer implizit umzustellen.
+**Dateibesitz:** finance_transaction_service.py Konstruktor/Abschlusshelfer
+und Commitstellen; neuer test_journal_transaction_ownership.py;
+eigene QA/Slice/Workboard/Gaps. Keine API/DTO/Consumer-Edits im fremden Claim.
+**Abnahme:** Alle sechs Mutationen flushen ohne Commit im aeusseren Modus;
+reale Rollbacks und Peer-Sichtbarkeit vor/nach Commit, Guards unveraendert.
+**Risiken:** API/Audit/Anchor-Consumer noch explizit zu integrieren; diese
+Faehigkeit allein beweist keine Consumer-Atomizitaet. Bestehender valeo_probe,
+keine neue DB/Docker/Migration/Reset; fremder Godfile-Verstoss unangetastet.
+
+**Ergebnis 2026-10-05:** Explizites commit_on_success=False fuer aeussere
+Unit-of-Work; alle sechs Mutationen flushen/refreshen und behalten Sperren
+bis zum aeusseren Commit/Rollback. Default-Aufrufer unveraendert.
+**Nachweis:** 337 Tests (16 neue echte PostgreSQL), alle Mutationen mit
+Commit/Rollback/Peer-Sichtbarkeit, Create/Post/Reverse gemeinsam sowie
+spaeterer Domain-/SQL-Fehler rollen alles zurueck. Ruff/Whitespace sauber.
+QA: journal-transaction-ownership-20261005.md. Claim d65ab10ea.
+**Handoff:** Vorhandene API/Audit/Anchor-Aufrufer noch nicht umgestellt;
+log_fibu_audit committet selbst und darf im aeusseren Modus nicht benutzt
+werden. Keine behauptete Consumer-Atomizitaet. Probe Revision
+ genossenschaft_mitgliederregister_20261005, kein Reset/Migrationslauf.
+
+## JOURNAL-PERIOD-ENFORCEMENT-20261005 — offen
+
+**Owner:** frei. **Ziel:** Periodenpruefung aus dem gespeicherten Buchungsdatum
+ableiten und bei Anlage/Post/Storno erzwingen; optionales period darf sie
+nicht umgehen. Sperrvertrag mit Periodenabschluss koordinieren.
+**Dateibesitz geplant:** finance_transaction_service.py Periodenguard und
+eigene Tests/QA; finance_periods.py nur nach Pruefung des Dateibesitzes.
+**Abnahme geplant:** Geschlossene echte Periode sperrt Mutation, Fremdtenant
+beeinflusst sie nicht, Datum/Periodenargument widerspruchsfrei; Abschluss-
+Konkurrenz und fehlender Schema-/Statusnachweis verhindern falsche Freigabe.
+**Risiken:** Create prueft bisher nur optionales period; Post/Reverse
+haben keinen Periodenguard. Perioden-API/SQL-Schreiber separat integrieren.
+
 ## JOURNAL-CREATE-CANONICAL-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Zweiten Repository-Anlage-/Hashweg

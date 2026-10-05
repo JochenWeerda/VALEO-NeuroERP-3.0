@@ -1,0 +1,31 @@
+slice_id: JOURNAL-TRANSACTION-OWNERSHIP-20261005
+title: Explizite aeussere Journaltransaktionssteuerung
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-05
+updated_at: 2026-10-05
+coordination: Claim d65ab10ea; keine fremden API/DTO/Consumer-Edits.
+goal: Journalmutationen gemeinsam mit weiteren aeusseren Schritten rollbacken.
+file_ownership:
+  - finance_transaction_service.py Konstruktor/Abschlusshelfer/Commitstellen
+  - tests/test_journal_transaction_ownership.py
+acceptance:
+  - Alle sechs Mutationen ohne eigenen Commit im expliziten aeusseren Modus.
+  - Exakte Peer-Snapshots vor/nach Commit/Rollback.
+  - Spaetere Domain-/SQL-Fehler rollen fruehere erfolgreiche Schritte zurueck.
+test_evidence:
+  - 337 Tests; 16 neue echte PostgreSQL-Faelle.
+  - Bestehende 321 Regressionen, Default und Sperrwartebelege bestanden.
+  - Service/Test Ruff- und Whitespace-sauber.
+risks:
+  - API/Repository/Posting-Consumer noch nicht auf aeussere Steuerung umgestellt.
+  - Audit/Anchor besitzen noch eigene Commits und teils verschluckte Fehler.
+  - Periodenpflicht, Schema/Hash/NULL-Waehrung und Cancel-Grund offen.
+ai_harness:
+  fachlicher_vertrag: Keine vorzeitigen Teilerfolge im expliziten aeusseren Modus.
+  architektur_vertrag: Bestehender Journal-Service mit klarer Transaktionsverantwortung.
+  daten_vertrag: Sichtbarkeit erst nach Commit; vollstaendiges Snapshot-Rollback.
+  test_vertrag: Zwei reale Sessions und echte spaete Domain-/SQL-Fehler.
+  security_vertrag: Alle bisherigen Tenant/Konto/Betrag/Status/Stempelguards identisch.
+  betriebs_vertrag: Vorhandener valeo_probe ohne neue DB/Container/Reset/Migration.
+  dokumentations_vertrag: QA/Slice/Workboard/Gaps grenzen Consumer-Abnahme ab.
