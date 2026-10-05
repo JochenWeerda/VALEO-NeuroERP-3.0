@@ -282,6 +282,83 @@ diesem Slice, nicht angefasst — gehoert dem Tourenplanungs-Agenten.
 
 **Doku:** `docs/quality-assurance/eudr-chargenkennzeichnung-20261001.md`.
 
+## GENOSSENSCHAFT-MITGLIEDERREGISTER-20261005 — in Arbeit, Claude Code
+
+**Befund:** `domain_shared.genossenschaft_mitglieder` und
+`genossenschaft_anteilsbewegungen` existieren in **keiner** Datenbank — weder in
+der frischen `valeo_probe` noch in der gewachsenen `valeo_neuro_erp`. Keine
+Migration legt sie an. Die Mitgliederliste faengt den Lesefehler und antwortet
+`[]`; die Kapitaluebersicht faengt ihn und antwortet 0 Mitglieder, 0 Anteile,
+**0,00 EUR Kapital**. Fuer eine eingetragene Genossenschaft ist beides nie eine
+wahre Antwort: § 30 GenG verpflichtet zur Mitgliederliste, und das
+Geschaeftsguthaben der Mitglieder ist eine Bilanzposition (§ 337 HGB). Der
+ganze Weg hat nie funktioniert, und nichts hat es gemeldet.
+
+**Zweiter Befund — kein `tenant_id`:** Jede Abfrage in `genossenschaft.py` liest
+und schreibt ohne Mandantengrenze, obwohl `get_tenant_id` als Abhaengigkeit
+haengt. Haette die Tabelle existiert, saehe Genossenschaft A die Mitgliederliste
+von Genossenschaft B.
+
+**Ziel:** Das Register anlegen und auf eine Wahrheit stellen.
+
+**Die Modellierung, und warum so:**
+* **Der Anteilsbestand wird nicht gespeichert.** Bisher trug das Mitglied eine
+  Spalte `genossenschaftsanteile`, die bei jeder Bewegung per `+ :delta`
+  fortgeschrieben wurde — neben dem Bewegungsjournal, das dasselbe sagt. Zwei
+  Wahrheiten, die auseinanderlaufen, sobald eine Bewegung fehlschlaegt oder
+  korrigiert wird. Der Bestand wird aus den Bewegungen abgeleitet; die Spalte
+  entfaellt. `PATCH` auf den Bestand wird abgewiesen (422) mit Verweis auf den
+  Bewegungsweg: Eine Anteilsaenderung ohne Bewegung ist genau die
+  unbelegte Aenderung, die GoBD (Rz. 107 ff.) ausschliesst.
+* **Das Vokabular wird festgelegt** statt frei: `ZEICHNUNG`, `ERHOEHUNG`,
+  `TEILRUECKZAHLUNG`, `VOLLRUECKZAHLUNG`, `UEBERTRAGUNG_AB`, `UEBERTRAGUNG_AN`.
+  Der alte Wert `TRANSFER` wird nicht uebernommen: Er bekam im Vorzeichen eine
+  `+1` und haette Anteile aus nichts geschaffen. Eine Uebertragung hat zwei
+  Seiten, also zwei gerichtete Typen und eine Gegenseite als Pflichtfeld.
+* **Kein negativer Bestand.** Die Buchung liest den abgeleiteten Bestand mit
+  `FOR UPDATE` auf der Mitgliedszeile und weist einen Abgang ab, der ihn
+  unterschreiten wuerde. `VOLLRUECKZAHLUNG` muss den ganzen Bestand treffen,
+  sonst ist sie keine.
+* **Austritt braucht Datum und Abwicklung.** `AUSGETRETEN` ohne
+  `austrittsdatum` ist per Pruefbedingung unmoeglich (§ 30 Abs. 2 GenG), und ein
+  Austritt mit Restbestand wird abgewiesen — das Auseinandersetzungsguthaben
+  nach § 73 GenG ist zuerst zu buchen.
+
+**Die GL-Buchung wird verbindlich.** Heute steht sie in
+`except Exception: pass  # GL-Buchung nicht kritisch` — unter einem Kommentar,
+der behauptet, den Belegbruch zu schliessen. Faellt sie aus, weicht das
+gezeichnete Kapital im Hauptbuch dauerhaft von der Mitgliederliste ab, und
+niemand erfaehrt es. Sie laeuft in derselben Transaktion; scheitert sie, ist die
+Bewegung nicht gebucht und nennt den Grund. `_is_test_double_session` entfaellt:
+Produktionscode darf nicht nach Testdoubles verzweigen.
+
+**Dateibesitz:** `alembic/versions/genossenschaft_mitgliederregister_20261005.py`,
+`app/api/v1/endpoints/genossenschaft.py`,
+`app/api/v1/schemas/genossenschaft_schemas.py`,
+`app/services/genossenschaft_service.py` (neu),
+`packages/frontend-web/src/pages/genossenschaft/mitglieder.tsx`,
+`tests/test_genossenschaft_register_vertrag.py` (neu),
+`tests/test_sanctions_genossenschaft_intrastat.py` (nur der Genossenschafts-Teil,
+der heute die Luege festschreibt), eigene QA-Doku und dieser Abschnitt.
+**Nicht angefasst:** `tests/test_journal_account_identity.py` — deshalb bleibt
+die Konstruktion der Buchungszeilen im Endpunkt und wandert nicht in den Dienst.
+
+**Abnahme:** Beide Tabellen in einer frischen Installation vorhanden; jede
+Abfrage mandantengebunden; ein Lesefehler ist ein 503 und keine leere Liste und
+keine 0,00 EUR; der Bestand stimmt mit der Summe der Bewegungen ueberein, weil
+er sie ist; `TRANSFER` wird abgewiesen; ein Abgang ueber den Bestand wird
+abgewiesen; eine Uebertragung ohne Gegenseite wird abgewiesen; ein Austritt mit
+Restbestand wird abgewiesen; eine gescheiterte GL-Buchung laesst keine gebuchte
+Bewegung zurueck; ein Mitglied mit Bewegungen ist nicht loeschbar; Vertraege
+gegen die frische DB und alle Ratschen gruen.
+
+**Risiken:** Die Kontenzuordnung (1200/0900/1600) folgt dem Bestandscode und
+gehoert fachlich dem Finanz-Owner; sie wird nicht erweitert, nur verbindlich
+gemacht. Die Satzungsgroessen (Hoehe des Geschaeftsanteils, Mindestbeteiligung,
+Nachschusspflicht nach § 7/§ 7a GenG) sind **nicht** Teil dieses Slices und
+bleiben eine benannte Luecke: `anteilswert_eur` steht weiterhin am Mitglied.
+Die fachjuristische Abnahme gehoert dem Genossenschafts-Owner.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
