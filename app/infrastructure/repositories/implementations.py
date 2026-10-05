@@ -428,69 +428,53 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
     def __init__(self, session: Session):
         super().__init__(session, JournalEntry)
 
-    @staticmethod
-    def _compute_hash(seq: int, entry_date: str, total_debit: float, total_credit: float, reference: str, hash_prev: str) -> str:
-        import hashlib, json
-        payload = json.dumps({
-            "seq": seq, "entry_date": str(entry_date),
-            "debit": str(total_debit), "credit": str(total_credit),
-            "reference": reference or "", "prev": hash_prev,
-        }, sort_keys=True)
-        return hashlib.sha256(payload.encode()).hexdigest()
-
     async def create(self, data: dict, tenant_id: str) -> JournalEntry:
-        """Create a new journal entry with GoBD-compliant hash-chain."""
-        from sqlalchemy.exc import SQLAlchemyError
-        from ..repositories.base_repository import logger
-        try:
-            lines_data = data.pop("lines", [])
-            data.setdefault("tenant_id", tenant_id)
+        """One journal writer; reject fields that cannot be persisted."""
+        from app.core.exceptions import ValidationFailedError
 
-            # GoBD: lückenlose Sequenz + Hash-Kette
-            last = (
-                self.session.query(JournalEntry)
-                .filter(JournalEntry.tenant_id == tenant_id)
-                .order_by(JournalEntry.sequence_number.desc())
-                .first()
-            )
-            seq = (last.sequence_number or 0) + 1 if last else 1
-            hash_prev = last.hash_current if last else "GENESIS"
-            entry_date = data.get("entry_date") or data.get("posting_date") or datetime.utcnow().isoformat()
-            hash_current = self._compute_hash(
-                seq, entry_date,
-                float(data.get("total_debit", 0)), float(data.get("total_credit", 0)),
-                data.get("reference", ""), hash_prev,
-            )
-            data["sequence_number"] = seq
-            data["hash_prev"] = hash_prev
-            data["hash_current"] = hash_current
-
-            # Strip keys not in ORM columns
-            orm_cols = {c.key for c in JournalEntry.__table__.columns}
-            clean = {k: v for k, v in data.items() if k in orm_cols}
-            entry = JournalEntry(**clean)
-            self.session.add(entry)
-            self.session.flush()
-
-            # Persist lines if provided as dicts
-            for line in lines_data:
-                if isinstance(line, dict):
-                    line.setdefault("tenant_id", tenant_id)
-                    line["journal_entry_id"] = entry.id
-                    line_orm = JournalEntryLine(**{
-                        k: v for k, v in line.items()
-                        if k in {c.key for c in JournalEntryLine.__table__.columns}
-                    })
-                    self.session.add(line_orm)
-
-            self.session.commit()
-            self.session.refresh(entry)
-            logger.info("Created JournalEntry %s seq=%s hash=%s…", entry.id, seq, hash_current[:8])
-            return entry
-        except SQLAlchemyError as e:
-            self.session.rollback()
-            logger.error("Error creating JournalEntry: %s", e)
-            raise
+        service = self._transaction_service(tenant_id)
+        allowed = {
+            "tenant_id", "entry_number", "entry_date", "posting_date", "description",
+            "reference", "source", "document_type", "period", "currency", "lines",
+            "total_debit", "total_credit",
+        }
+        if not isinstance(data, dict) or set(data) - allowed:
+            raise ValidationFailedError("Unsupported journal create fields")
+        if data.get("tenant_id") not in (None, tenant_id):
+            raise ValidationFailedError("Journal tenant differs from request tenant")
+        lines = data.get("lines")
+        total = service.validate_balanced(lines)
+        for field in ("total_debit", "total_credit"):
+            if field in data and service._money(data[field]) != total:
+                raise ValidationFailedError("Journal header total differs from lines")
+        normalized = []
+        persisted = {"account_id", "debit_amount", "credit_amount", "description", "line_number"}
+        # These DTO defaults carry no information; populated unsupported dimensions must fail.
+        empty_dimensions = {"tax_code", "cost_center", "profit_center", "segment"}
+        for index, line in enumerate(lines, start=1):
+            if set(line) - persisted - empty_dimensions - {"tax_amount"}:
+                raise ValidationFailedError("Unsupported journal line fields")
+            if any(line.get(field) is not None for field in empty_dimensions):
+                raise ValidationFailedError("Journal dimensions are not persisted")
+            if "tax_amount" in line and service._money(line["tax_amount"]) != 0:
+                raise ValidationFailedError("Journal tax amount is not persisted")
+            if "line_number" in line and (
+                isinstance(line["line_number"], bool) or line["line_number"] != index
+            ):
+                raise ValidationFailedError("Journal line numbers must be contiguous")
+            normalized.append({key: value for key, value in line.items() if key in persisted})
+        return service.create(
+            entry_number=data.get("entry_number"),
+            description=data.get("description"),
+            entry_date=data.get("entry_date"),
+            posting_date=data.get("posting_date"),
+            reference=data.get("reference"),
+            source=data.get("source"),
+            document_type=data.get("document_type"),
+            period=data.get("period"),
+            currency=data.get("currency", "EUR"),
+            lines=normalized,
+        )
 
     async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs):
         """Tenant-scoped reads propagate failures instead of reporting an empty ledger."""

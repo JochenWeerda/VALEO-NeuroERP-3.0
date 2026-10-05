@@ -309,7 +309,29 @@ class FinanceTransactionService:
         source: Optional[str] = None,
         document_type: Optional[str] = None,
         period: Optional[str] = None,
+        posting_date: Optional[datetime] = None,
+        currency: str = "EUR",
     ) -> JournalEntry:
+        from datetime import date
+
+        if not isinstance(entry_number, str) or not entry_number.strip():
+            raise ValidationFailedError("A nonempty journal entry number is required")
+        if not isinstance(description, str) or not description.strip():
+            raise ValidationFailedError("A nonempty journal description is required")
+        effective_posting_date = entry_date if posting_date is None else posting_date
+        if not isinstance(entry_date, date) or not isinstance(effective_posting_date, date):
+            raise ValidationFailedError("Journal dates must be date or datetime values")
+        entry_day = entry_date.date() if isinstance(entry_date, datetime) else entry_date
+        posting_day = (
+            effective_posting_date.date()
+            if isinstance(effective_posting_date, datetime) else effective_posting_date
+        )
+        if posting_day < entry_day:
+            raise ValidationFailedError("Posting date cannot precede entry date")
+        if not isinstance(currency, str) or len(currency) != 3 or any(
+            letter < "A" or letter > "Z" for letter in currency
+        ):
+            raise ValidationFailedError("Currency must be a three-letter uppercase code")
         if not reference or not str(reference).strip():
             raise ValidationFailedError(
                 "Belegprinzip: Jede Buchung muss eine Belegreferenz haben (reference-Feld)"
@@ -324,9 +346,10 @@ class FinanceTransactionService:
             entry_number=entry_number,
             description=description,
             entry_date=entry_date,
-            posting_date=entry_date,
+            posting_date=effective_posting_date,
             reference=reference,
             source=source or "manual",
+            currency=currency,
             document_type=document_type,
             status="draft",
             total_debit=total_debit,
@@ -434,6 +457,7 @@ class FinanceTransactionService:
             posting_date=now,
             reference=original.reference,
             source="reversal",
+            currency=getattr(original, "currency", None),
             document_type=original.document_type,
             status="posted",
             total_debit=original.total_credit,
