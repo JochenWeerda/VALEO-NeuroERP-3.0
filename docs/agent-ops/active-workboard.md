@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## HANDSHAKE-GAP-CLOSURE-20261005 — reserviert, Codex (Chat 01a0f3fc)
+## HANDSHAKE-GAP-CLOSURE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** User-Auftrag: vier gemeldete Handshake-Luecken
 schliessen und anschliessend Stabilisierung fortsetzen.
@@ -46,11 +46,17 @@ Es soll den realen DB-Vertrag pruefen, damit Code-Gruen keine fehlende
 Integration verdeckt. Keine fremden CI-/Masken-Dateien.
 **Betriebs-Gate geliefert:** Nur Metadaten, keine Zeilenscans/DML/Migration;
 40 gezielte Tests bestanden (zwei neue echte positive/negative Gatefaelle).
-Aktuelle Shared-Probe-Pruefung korrekt rot; Integration weiterhin erforderlich.
-**Integration angehalten:** Probe waehrenddessen auf fremde, noch uncommitted
-preisfindung_rabattregeln_20261005 weitergewandert. Guard hat vor DDL gestoppt;
-Journalnummer im gemeinsamen Schema noch global. Nach deren Commit beide
-Migrationszweige zusammenfuehren; keine uncommitted Fremd-Abhaengigkeit.
+Fruehere Shared-Probe-Pruefung korrekt rot; inzwischen integriert (siehe Abschluss).
+**Integrationshistorie:** Guard hielt vor DDL an, solange die Preisfindungs-
+Migration fremd und uncommitted war. Anschliessend hat der parallele Owner
+beide committed Zweige mit zusammenfuehrung_20261005_preis_journal integriert.
+**Abschluss:** Commit 4b513ff75 fuer die Merge-Revision; vorhandener Probe
+auf diesem Head, globaler Nummern-UQ entfernt, Tenant/Nummern-UQ vorhanden.
+Unabhaengiger check_journal_identity.py PASS und Single-Head-Gate gruen.
+40 gezielte Bank-/Journal-/Betriebsvertraege nach Integration bestanden.
+Die vier beauftragten Handshake-Befunde sind damit geschlossen; technischer
+Rueckbau der Wiege-Altverbraucher bleibt der bereits benannte Folge-Slice.
+Keine neue DB/Dockerinstanz, kein Reset. Fremde WIP bleiben beim Owner.
 
 ## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 

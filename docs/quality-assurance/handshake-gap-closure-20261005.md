@@ -10,6 +10,10 @@ version: 1.0.0
 
 # Handshake-Luecken 2026-10-05
 
+**Finaler Stand:** Die vier benannten Befunde sind geschlossen. Gemeinsamer
+Probe integriert; Laufzeit- und Single-Head-Gate PASS. Die unten beschriebenen
+Integrationsstopps sind Zwischenstaende; siehe Abschlussnachweis.
+
 ## Bank-Fixture und Paginierung
 
 Das migrierte Shared-Probe-Schema enthaelt die Bank-GL-Spalte bereits.
@@ -88,3 +92,20 @@ zwei neuer realer positiver/negativer Gate-Faelle. Die Shared-Probe-Pruefung
 ist bewusst rot: globale UQ noch aktiv und Tenantspalte noch nullable.
 Dies ist ein Integrationsbefund, kein gruener Laufzeitnachweis. Der lokale
 Handbuch-Drift aus fremden Masken-WIP bleibt ebenfalls benannt.
+
+## Abschlussnachweis der gemeinsamen Integration
+
+Der parallele Owner hat nach dem Preisfindungscommit beide Zweige mit
+zusammenfuehrung_20261005_preis_journal zusammengefuehrt (Commit 4b513ff75).
+Unabhaengig nachgeprueft: vorhandener valeo_probe auf genau dieser Revision;
+check_alembic_single_head.py gruen; check_journal_identity.py PASS.
+Der globale journal_entries_entry_number_key ist entfernt und
+uq_journal_tenant_number UNIQUE(tenant_id,entry_number) vorhanden. Ein eigener
+neuer Migrationslauf war nicht erforderlich; keine Doppelarbeit/Reset.
+40 gezielte Bank-/Journal-/Runtime-Vertraege nach Integration bestanden.
+Log: artifacts/handshake-integrated-tests.log.
+
+Die Wiegemodell-Entscheidung ist geschlossen. Technischer Rueckbau der
+Mobile-/Operations-Altverbraucher bleibt Folge-Slice, kein abgeschlossener
+Rueckbau behauptet. Kein eigener Entwicklungsdatenbank-Nachweis in diesem
+Protokoll und keine vollstaendige Security-/CI-/UI-/GoBD-Abnahme.

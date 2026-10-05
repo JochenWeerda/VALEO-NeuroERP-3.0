@@ -1,7 +1,7 @@
 slice_id: HANDSHAKE-GAP-CLOSURE-20261005
 title: Vier benannte Handshake-Luecken schliessen
 owner: Codex-01a0f3fc
-status: in_progress
+status: completed
 created_at: 2026-10-05
 updated_at: 2026-10-05
 coordination: User-Auftrag und Claims c57fd297a, c595c6174; fremde WIP geschuetzt.
@@ -22,9 +22,10 @@ acceptance:
 test_evidence:
   - 525 Regressionen und danach 40 gezielte Bank-/Journal-/Runtime-Checks bestanden.
   - Architektur strict gruen; fremder Masken-Handbuchdrift offen.
+  - Probe integriert auf zusammenfuehrung_20261005_preis_journal, Runtime-Gate PASS.
+  - Single-Head-Gate und 40 gezielte Tests nach Integration gruen.
 risks:
-  - Gemeinsame Integration angehalten, weil fremde Probe-Migration noch uncommitted.
-  - Shared-Probe-Runtime-Gate korrekt rot bis zur koordinierten Integration.
+  - Technischer Wiege-Altverbraucher-Rueckbau bleibt eigener Folge-Slice.
   - Wiege-Altverbraucher-Rueckbau bleibt Folge-Slice.
 ai_harness:
   fachlicher_vertrag: Mandantengebundene Belegidentitaet und kanonischer Wiegeschein.
