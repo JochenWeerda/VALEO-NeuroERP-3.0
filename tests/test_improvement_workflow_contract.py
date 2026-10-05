@@ -53,3 +53,16 @@ def test_keine_pr_aenderung_umgeht_qualitaetsgate():
     assert "paths" not in events["pull_request"]
     guards = "\n".join(step.get("run", "") for step in gate["jobs"]["path-guard"]["steps"])
     assert 'check_baseline_integrity.py --base "${{ steps.range.outputs.base }}"' in guards
+
+
+def test_openapi_artefaktkorrekturen_starten_driftabnahme():
+    gate = workflow('openapi-drift.yml')
+    events = gate.get('on', gate.get(True))
+    assert {
+        'app/**', 'requirements.txt', 'docs/schnittstellen/openapi.json',
+        'scripts/generate_openapi.py', '.github/workflows/openapi-drift.yml',
+    } <= set(events['push']['paths'])
+    checks = [step for step in gate['jobs']['openapi-check']['steps']
+              if 'generate_openapi.py --check' in step.get('run', '')]
+    assert len(checks) == 1
+    assert not checks[0].get('continue-on-error', False)
