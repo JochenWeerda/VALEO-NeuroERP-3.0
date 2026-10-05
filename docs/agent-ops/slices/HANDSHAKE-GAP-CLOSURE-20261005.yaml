@@ -12,6 +12,7 @@ file_ownership:
   - journal.py nur tenant_id und unique constraint
   - journal_number_tenant_20261005.py und test_journal_number_tenant.py
   - ADR-077 und Inventory-Entscheidungsindex
+  - scripts/check_journal_identity.py lesendes Betriebs-Gate
   - eigene QA/Slice/Workboard/Open-Gaps
 acceptance:
   - Bankvertraege und Paginierungsratsche gruen.
@@ -19,9 +20,11 @@ acceptance:
   - Migration ohne DML/erfundene Zuordnung; fehlende Tenantdaten stoppen atomar.
   - Fuehrendes Wiegemodell entschieden; technischer Folge-Slice klar benannt.
 test_evidence:
-  - 38 gezielte Bank-/Journalvertraege bestanden.
+  - 525 Regressionen und danach 40 gezielte Bank-/Journal-/Runtime-Checks bestanden.
+  - Architektur strict gruen; fremder Masken-Handbuchdrift offen.
 risks:
-  - Gemeinsame Integration nach privater Abnahme und Nutzungspruefung.
+  - Gemeinsame Integration angehalten, weil fremde Probe-Migration noch uncommitted.
+  - Shared-Probe-Runtime-Gate korrekt rot bis zur koordinierten Integration.
   - Wiege-Altverbraucher-Rueckbau bleibt Folge-Slice.
 ai_harness:
   fachlicher_vertrag: Mandantengebundene Belegidentitaet und kanonischer Wiegeschein.

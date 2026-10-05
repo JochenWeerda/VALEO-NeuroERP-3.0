@@ -18,7 +18,10 @@ privaten FK ergaenzen; 32 Bankvertraege bestanden statt 31 Setup-Fehler.
 Ledger-Optionen SQL-begrenzt und fetchmany(limit), Seitentest und Ratsche
 gruen. Journalnummern-UQ je Mandant statt systemweit: Migration/ORM und
 sechs echte private PG-Vertraege bereit; gemeinsame Integration folgt im
-dokumentierten Wartungsclaim. 380 Regressionen insgesamt bestanden.
+dokumentierten Wartungsclaim. Read-only check_journal_identity.py macht die
+fehlende Shared-Probe-Integration als roten Laufzeitbefund sichtbar, statt
+Code-Gruen als Betriebsnachweis auszugeben. 40 gezielte Checks bestanden
+inklusive zweier echter Gate-Faelle. 380 Regressionen insgesamt bestanden.
 ADR-077 entscheidet `domain_inventory.weighing_tickets` als fuehrenden
 Wiegeschein; Entscheidungs-Handshake geschlossen. Technischer Rueckbau der
 Mobile-/Operations-Wiege-Altverbraucher bleibt ausdruecklicher Folge-Slice.

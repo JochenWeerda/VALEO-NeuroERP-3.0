@@ -72,3 +72,19 @@ Diese fremde Migration ist noch nicht committed. Der Head-Guard hat deshalb
 vor jedem eigenen DDL abgebrochen. Nach dem Fremd-Commit beide committed
 Zweige mit einer eigenen Merge-Revision zusammenfuehren, dann gezielt ohne
 Reset integrieren. Kein impliziter Bezug auf fremdes uncommitted Material.
+
+## Fortlaufender Betriebsnachweis
+
+`python scripts/check_journal_identity.py` liest die bereits konfigurierte
+TEST_DATABASE_URL oder DATABASE_URL, ohne Migration, Reparatur oder Zeilenscan.
+Es prueft erforderliche Nummer und Mandant, eine Unique-Regel ueber beide
+Felder und das Fehlen globaler Nummern-Eindeutigkeit. Fehler oder nicht
+pruefbarer Stand liefern Exit 1; URLs und Treiberfehler werden nicht ausgegeben.
+Nach Migration und als bestehende Betriebspruefung ausfuehren. Der Check
+benoetigt dieselbe vorhandene Datenbank; keine separate DB pro Lauf.
+
+40 gezielte Bank-/Journal-/Betriebsgate-Vertraege bestanden, einschliesslich
+zwei neuer realer positiver/negativer Gate-Faelle. Die Shared-Probe-Pruefung
+ist bewusst rot: globale UQ noch aktiv und Tenantspalte noch nullable.
+Dies ist ein Integrationsbefund, kein gruener Laufzeitnachweis. Der lokale
+Handbuch-Drift aus fremden Masken-WIP bleibt ebenfalls benannt.
