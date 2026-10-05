@@ -40,6 +40,9 @@ mapFahrerZeile, screenTitle-Typvertrag im TabContentRenderer sowie ErrorState
 Recovery-Kontrast werden als minimale Aenderung auf committed Dateien
 integriert. Laufende Layout-/Farbumbauten bleiben im Arbeitsbaum erhalten;
 keine vollstaendige Uebernahme fremder Masken-WIP.
+Der screenTitle-Vertrag wird im gemeinsamen TableRenderer tatsaechlich
+beruecksichtigt (nur Caption-Unterdrueckung, keine Layoutaenderung);
+dieser Hunk und Meridian-Doku sind ebenfalls reserviert.
 **Inventar-Nachtrag:** Drei Code-Inventare und Router-Inventare ausschliesslich
 aus committed Quellen plus eigenen CI-Hunks regenerieren; keine fremden
 Routen oder laufende Masken-WIP aus dem Arbeitsbaum uebernehmen.
