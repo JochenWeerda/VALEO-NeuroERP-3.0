@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-02
+# Architecture Index — generiert 2026-10-05
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-02T04:26:27Z'
+generated_at: '2026-10-05T18:37:34Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -478,6 +478,7 @@ domains:
     - docs/adr/adr-059-production-control-projection.md
     - docs/adr/adr-066-tank-adapter-intake-outbox.md
     - docs/adr/adr-067-governed-l3-report-catalog.md
+    - docs/adr/adr-077-leading-weighing-ticket.md
     status: active
   crm:
     owner: domain/crm
@@ -1307,6 +1308,7 @@ domains:
     - docs/adr/adr-073-bank-model-retirement.md
     - docs/adr/adr-074-bank-directbook-retirement.md
     - docs/adr/adr-075-bank-ledger-evidence.md
+    - docs/adr/adr-076-cash-close-retirement.md
     status: active
   hr:
     owner: domain/hr
@@ -1511,6 +1513,7 @@ domains:
     - docs/adr/adr-059-production-control-projection.md
     - docs/adr/adr-060-governed-inventory-auxiliary-batches.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
+    - docs/adr/adr-077-leading-weighing-ticket.md
     status: active
   logistics:
     owner: domain/logistics

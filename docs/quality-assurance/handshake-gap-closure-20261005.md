@@ -59,3 +59,16 @@ ist nicht Bestandteil dieses Wartungsclaims. Kein Gesamt-GoBD-/UI-Nachweis.
 
 380 Bank-/Journal-/Perioden-/Finance-Vertraege bestanden, einschliesslich
 der 38 gezielten Checks. Log: artifacts/handshake-regression.log.
+
+145 weitere Parser-/Bankimport-/Matching-Vertraege bestanden (getrennte
+Auswahl), insgesamt 525. Architektur strict nach ADR-Index-Nachzug gruen.
+Handbuch-Check meldet fremde Masken-WIP-Drift, kein umfassender Gruen-Nachweis.
+Log: artifacts/handshake-bank-import-regression.log.
+
+## Integrationsguard
+
+Die Probe ist inzwischen auf preisfindung_rabattregeln_20261005 weitergewandert.
+Diese fremde Migration ist noch nicht committed. Der Head-Guard hat deshalb
+vor jedem eigenen DDL abgebrochen. Nach dem Fremd-Commit beide committed
+Zweige mit einer eigenen Merge-Revision zusammenfuehren, dann gezielt ohne
+Reset integrieren. Kein impliziter Bezug auf fremdes uncommitted Material.

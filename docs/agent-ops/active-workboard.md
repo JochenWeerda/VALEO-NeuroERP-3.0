@@ -36,6 +36,14 @@ bestanden, davon 38 gezielte Bank-/Nummernvertraege. Paginierungsratsche
 gruen (285/258). ADR-077 entscheidet Inventory als fuehrenden Wiegeschein.
 Journalmigration im privaten Schema abgenommen; gemeinsamer Probe-Schritt
 folgt erst nach diesem Code-Meilenstein und erneuter Nutzungspruefung.
+**Weitere Abnahme:** 145 getrennte Parser-/Bankimport-/Matching-Vertraege
+bestanden, insgesamt 525 Regressionen. Architecture strict nach ADR-Index-
+Nachzug gruen. Agent-Handbuch zeigt Drift durch fremde Masken-WIP; keine
+fremden generierten Maskenartefakte uebernommen.
+**Integration angehalten:** Probe waehrenddessen auf fremde, noch uncommitted
+preisfindung_rabattregeln_20261005 weitergewandert. Guard hat vor DDL gestoppt;
+Journalnummer im gemeinsamen Schema noch global. Nach deren Commit beide
+Migrationszweige zusammenfuehren; keine uncommitted Fremd-Abhaengigkeit.
 
 ## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 

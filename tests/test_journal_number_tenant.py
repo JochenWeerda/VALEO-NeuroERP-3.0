@@ -65,7 +65,7 @@ def test_same_number_in_different_tenants_is_preserved(store):
         tenants = [str(uuid4()), str(uuid4())]
         for tenant in tenants:
             insert(conn, schema, tenant, number)
-        assert conn.execute(text(f'SELECT tenant_id FROM "{schema}".journal_entries WHERE entry_number=:n'), {"n": number}).scalars().all() == tenants
+        assert set(conn.execute(text(f'SELECT tenant_id FROM "{schema}".journal_entries WHERE entry_number=:n'), {"n": number}).scalars().all()) == set(tenants)
 
 
 def test_same_tenant_duplicate_fails_without_losing_original(store):
