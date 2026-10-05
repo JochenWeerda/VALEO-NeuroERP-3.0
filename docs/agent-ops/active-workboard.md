@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-RUN-REPAIR-20261005 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
+beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
+**Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
+mkdocs.yml, table_ownership.py Zuordnung domain_contracts und Tests;
+Baseline-Integritaetspruefer/Workflow-Mergevergleich mit Regressionen;
+eigene QA/Slice/Workboard/Gaps. Weitere nachgewiesene CI-Befunde separat
+claimen, fremde Preis-/Masken-WIP bleiben geschuetzt.
+**Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
+bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
+rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
+**Risiken:** Weitere Jobs queued; externe Security-/Provider-/Runner-Fehler
+nach Logs unterscheiden. Bestehender Probe, keine neue DB/Docker/Reset.
+
 ## HANDSHAKE-GAP-CLOSURE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** User-Auftrag: vier gemeldete Handshake-Luecken
