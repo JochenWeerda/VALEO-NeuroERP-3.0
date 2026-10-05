@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Kassen-Scheinabschluss ohne Bestand/
+Gegenkontierung entfernen; keine Tagesjournal-Doppelbuchung auf Konto 1000.
+**Dateibesitz:** finance_actions.py nur cash_close_day; test_finance_actions.py
+nur Cash-Vertrag/Testdouble; neuer test_cash_close_retirement.py;
+Finance Domain Pack API/Entscheidung, eigener ADR/QA/Slice/Workboard/Gaps.
+OpenAPI nur eigener Routenausschnitt als Abnahme-Artefakt, keine fremde
+Gesamtdatei/Frontend-Maske uebernehmen.
+**Abnahme:** POST cash/close-day gibt 409 mit fachlichem Grund, keine DB-/
+Journal-DML/Commits auch mit gespeicherten Journalen und Wiederholungen.
+**Risiken:** Echte Kassenbewertung/Abschlussmodell fehlen; UI meldet bestehende
+HTTP-Fehler statt Erfolg. Andere Journal-Schreiber/Audit offen. Keine neue
+Testdatenbank/Docker/Migration/Reset, fremde Godfile/UI-Edits geschuetzt.
+
 ## JOURNAL-TRANSACTION-OWNERSHIP-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Explizit aeussere Transaktionssteuerung
