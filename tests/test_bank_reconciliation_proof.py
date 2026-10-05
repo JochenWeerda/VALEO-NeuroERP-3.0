@@ -1,7 +1,5 @@
 """Real PostgreSQL contract in an owned schema on the existing shared database."""
-import importlib.util
 import os
-from pathlib import Path
 from uuid import uuid4
 
 import pytest
@@ -31,21 +29,13 @@ def schema():
         conn.execute(text(f'CREATE SCHEMA "{name}"'))
         for table in tables:
             conn.execute(text(f'CREATE TABLE "{name}".{table} (LIKE domain_erp.{table} INCLUDING ALL)'))
-    path = Path("alembic/versions/bank_gl_binding_20261001.py")
-    spec = importlib.util.spec_from_file_location("bank_gl_migration", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # Clone the current migrated schema; never replay an already applied migration.
     try:
         with engine.begin() as conn:
-            class Bind:
-                def execute(self, statement):
-                    return conn.execute(text(str(statement).replace("domain_erp.", f'"{name}".')))
-            previous = module.op.get_bind
-            module.op.get_bind = lambda: Bind()
-            try:
-                module.upgrade()
-            finally:
-                module.op.get_bind = previous
+            # LIKE copies indexes/checks, but PostgreSQL does not copy foreign keys.
+            conn.execute(text(f'''ALTER TABLE "{name}".bank_accounts
+                ADD CONSTRAINT fk_bank_gl_tenant FOREIGN KEY (gl_account_id, tenant_id)
+                REFERENCES "{name}".chart_of_accounts (id, tenant_id)'''))
         yield engine, name
     finally:
         # UUID-derived identifier, confined to this fixture's one owned schema.
@@ -325,3 +315,23 @@ def test_unresolved_page_is_bounded_and_count_is_total(case):
     assert len(response.json()) == 41
     assert not set(item["statement_line_id"] for item in data["differences"]) & set(item["statement_line_id"] for item in response.json())
     assert result(case, "differences", extra={"limit": 101}).status_code == 422
+
+
+def test_ledger_options_have_stable_bounded_pages(case):
+    db, client, tenant, foreign, *_ = case
+    for owner in (tenant, foreign):
+        for index in range(5):
+            db.execute(text("""INSERT INTO domain_erp.chart_of_accounts
+                (id,tenant_id,account_number,account_name,account_type,category,is_active,is_summary)
+                VALUES (:id,:t,:n,'Page proof','ASSET','bank',TRUE,FALSE)"""),
+                {"id": str(uuid4()), "t": owner, "n": f"PAGE-{index}"})
+    db.commit()
+    expected = [row[0] for row in db.execute(text("""SELECT id FROM domain_erp.chart_of_accounts
+        WHERE tenant_id=:t AND upper(category)='BANK' AND upper(account_type)='ASSET'
+        ORDER BY account_number,id"""), {"t": tenant}).all()]
+    pages = [client.get('/bank-accounts/ledger-options', params={"limit": 2, "offset": offset})
+             for offset in range(0, len(expected) + 2, 2)]
+    assert all(page.status_code == 200 and len(page.json()) <= 2 for page in pages)
+    assert [item['id'] for page in pages for item in page.json()] == expected
+    for params in ({"limit": 0}, {"limit": 201}, {"offset": -1}):
+        assert client.get('/bank-accounts/ledger-options', params=params).status_code == 422

@@ -48,6 +48,8 @@ Die MkDocs-Sidebar listet alle ADRs einzeln (Generator: `python scripts/generate
 - [ADR-071 Security-Dependency-Gate statt automatischer Major-Upgrades](adr-071-security-dependency-gate.md)
 - [ADR-CRM-001](ADR-CRM-001.md)
 
+- [ADR-077 Fuehrender Wiegeschein im Inventory-Kern](adr-077-leading-weighing-ticket.md)
+
 ## Hinweis zu Doppelnummern
 
 Einige ADRs teilen sich historische Nummern (parallele Entscheidungsstränge):

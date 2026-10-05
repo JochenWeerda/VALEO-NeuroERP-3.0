@@ -11,6 +11,20 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## HANDSHAKE-GAP-CLOSURE — vier benannte Befunde (2026-10-05)
+
+Bank-Proof-Fixture korrigiert: migriertes Schema kopieren, nur fehlenden
+privaten FK ergaenzen; 32 Bankvertraege bestanden statt 31 Setup-Fehler.
+Ledger-Optionen SQL-begrenzt und fetchmany(limit), Seitentest und Ratsche
+gruen. Journalnummern-UQ je Mandant statt systemweit: Migration/ORM und
+sechs echte private PG-Vertraege bereit; gemeinsame Integration folgt im
+dokumentierten Wartungsclaim. 380 Regressionen insgesamt bestanden.
+ADR-077 entscheidet `domain_inventory.weighing_tickets` als fuehrenden
+Wiegeschein; Entscheidungs-Handshake geschlossen. Technischer Rueckbau der
+Mobile-/Operations-Wiege-Altverbraucher bleibt ausdruecklicher Folge-Slice.
+Nachweis: [Handshake-Abnahme](../quality-assurance/handshake-gap-closure-20261005.md).
+
+
 ## CASH-CLOSE-DIRECTBOOK — Scheinbuchung entfernt, echter Abschluss offen
 
 2026-10-05: cash/close-day summiert keine Tagesjournale mehr und erzeugt

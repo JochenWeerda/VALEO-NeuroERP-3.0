@@ -10,6 +10,10 @@ version: 1.0.0
 
 # Inventory — Entscheidungen
 
+Fuehrender Wiegeschein: `domain_inventory.weighing_tickets`, entschieden in
+[ADR-077](../../../adr/adr-077-leading-weighing-ticket.md). Die technische
+Umstellung der Mobile-/Operations-Altverbraucher ist der benannte Folge-Slice.
+
 Der MDE-Eingang auf dem Mobile-Sync-Kern ist in
 [ADR-057](../../../adr/adr-057-mde-inbox-on-mobile-sync-core.md) entschieden.
 
