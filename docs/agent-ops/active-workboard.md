@@ -50,6 +50,10 @@ Routen oder laufende Masken-WIP aus dem Arbeitsbaum uebernehmen.
 OpenAPI-Workflow muss auch Spec-/Generator-Korrekturen selbst abnehmen.
 Nur diese Triggerpfade, keine Gate-Ausnahme. AI-Chroma und ungepatchte
 Cache-/Krypto-Pakete werden nach bestehenden ADRs getrennt bewertet.
+**CSS-Performance-Claim:** src/index.css ausschliesslich Tailwind-Quellenbereich
+auf die tatsaechlichen Frontend-Quellen begrenzen, indexseitiger Minimalhunk
+auf committed CSS. Fremde Token-/Layout-WIP bleiben erhalten. CSS-Kompilation,
+Klassenabdeckung und Browser-WCAG pruefen; keine Timeout-Erhoehung.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
