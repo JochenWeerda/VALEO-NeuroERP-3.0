@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import date
 from types import SimpleNamespace
 
 from fastapi import FastAPI
@@ -18,6 +18,10 @@ class _FakeResult:
         self._first = first
         self._scalar = scalar
         self.rowcount = rowcount
+
+    def scalar_one(self):
+        assert self._scalar is not None
+        return self._scalar
 
     def scalar(self):
         return self._scalar
@@ -45,7 +49,6 @@ class FakeDb:
         self.entry_periods = {"je-1": "2026-04", "je-locked": "2026-03"}
         self.period_status = {"2026-04": "OPEN", "2026-03": "CLOSED"}
         self.post_entry_success = True
-        self.cash_row = SimpleNamespace(cnt=3, total_debit=120.0, total_credit=120.0)
         self.direct_debit_ids = [("dd-1",), ("dd-2",)]
         self.credit_limits = [
             {
@@ -102,11 +105,17 @@ class FakeDb:
         ]
         self.closed_period_updates: list[str] = []
         self.gespeicherte_perioden: list[dict] = []
-        self.inserted_cash_close = None
+        self.executed_statements = []
 
     def execute(self, statement, params=None):
         sql = " ".join(str(statement).split())
         params = params or {}
+        self.executed_statements.append(sql)
+
+        if "current_setting('transaction_isolation')" in sql:
+            return _FakeResult(scalar="read committed")
+        if "pg_advisory_xact_lock" in sql:
+            return _FakeResult()
 
         if "FROM domain_erp.journal_entries WHERE tenant_id = :tenant_id AND entry_number = :entry_number" in sql:
             entry_id = self.entry_lookup.get(params["entry_number"])
@@ -121,13 +130,6 @@ class FakeDb:
         if "finance_accounting_periods WHERE tenant_id = :tenant_id AND period = :period" in sql:
             status = self.period_status.get(params["period"])
             return _FakeResult(fetchone=(status,) if status else None)
-
-        if "FROM domain_erp.journal_entries je WHERE je.tenant_id = :tid AND je.entry_date = :today" in sql:
-            return _FakeResult(fetchone=self.cash_row)
-
-        if "INSERT INTO domain_erp.journal_entries" in sql and "source, status, total_debit, total_credit" in sql:
-            self.inserted_cash_close = params
-            return _FakeResult()
 
         if "INSERT INTO domain_shared.direct_debit_items" in sql:
             return _FakeResult(fetchall=self.direct_debit_ids)
@@ -288,15 +290,15 @@ def test_post_journal_entry_handles_lookup_period_lock_success_and_repo_failure(
     assert failed.json()["success"] is False
 
 
-def test_cash_close_day_and_direct_debit_cover_success_and_empty_run():
+def test_cash_close_is_blocked_and_direct_debit_covers_success_and_empty_run():
     db = FakeDb()
     client = _build_client(db)
 
     close_day = client.post("/finance/cash/close-day")
-    assert close_day.status_code == 200
-    assert close_day.json()["success"] is True
-    assert db.inserted_cash_close is not None
-    assert db.commit_count == 1
+    assert close_day.status_code == 409
+    assert "Kassenabschluss gesperrt" in close_day.json()["detail"]
+    assert db.executed_statements == []
+    assert db.commit_count == 0
 
     direct_debit = client.post("/finance/direct-debit/run")
     assert direct_debit.status_code == 200

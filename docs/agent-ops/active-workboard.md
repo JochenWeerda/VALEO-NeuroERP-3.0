@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — reserviert, Codex (Chat 01a0f3fc)
+## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Kassen-Scheinabschluss ohne Bestand/
 Gegenkontierung entfernen; keine Tagesjournal-Doppelbuchung auf Konto 1000.
@@ -25,6 +25,19 @@ Journal-DML/Commits auch mit gespeicherten Journalen und Wiederholungen.
 **Risiken:** Echte Kassenbewertung/Abschlussmodell fehlen; UI meldet bestehende
 HTTP-Fehler statt Erfolg. Andere Journal-Schreiber/Audit offen. Keine neue
 Testdatenbank/Docker/Migration/Reset, fremde Godfile/UI-Edits geschuetzt.
+
+**Ergebnis 2026-10-05:** Gesamter Tagesjournal-Summen-/Direktbuchungsweg
+entfernt. Handler 409 ohne SQL/DML/Commit, klarer fachlicher Grund; keine
+positive Erfolgsmeldung. Vorhandene Masken-Fehlerbehandlung greift bereits.
+**Nachweis:** 397 Regressionen plus 12 gezielte API-/Snapshotchecks bestanden;
+private PostgreSQL-Snapshots bleiben nach drei Wiederholungen unveraendert.
+Architektur-Render/Index/Container/strict Drift und Agent-Handbuch-Check gruen.
+Neue Cash-/Testanteile Ruff-sauber, vier alte Modulbefunde bleiben ausserhalb.
+**Doku:** ADR-076 Proposed, Finance-Domain-Pack, eigener OpenAPI-Routenausschnitt,
+QA cash-close-retirement-20261005.md. Claim a41ba8833.
+**Handoff:** Echte Kassenbewertung/Bestand/Gegenkontierung weiterhin offen.
+Globale OpenAPI-Datei im fremden Refresh-Claim unangetastet; kein umfassender
+Kassen-/GoBD-/UI-Beleg. Shared probe wiegung_kanonisch_20261005 wiederverwendet.
 
 ## JOURNAL-TRANSACTION-OWNERSHIP-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 

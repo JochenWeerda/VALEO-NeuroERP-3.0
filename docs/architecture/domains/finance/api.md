@@ -10,6 +10,17 @@ version: 1.0.0
 
 # Finance — API
 
+## Kassen-Tagesabschluss: unbewerteten Direktbuchungsweg gesperrt
+
+POST /api/v1/finance/cash/close-day antwortet mit HTTP 409 und fachlichem
+Grund. Kein belegter Kassenbestand und keine Gegenkontierung: keine
+Journal-/Zeilenbuchung, kein Commit und kein erfolgreicher Tagesabschluss.
+Die alte Summe aller Tagesjournale auf dem geratenen Konto 1000 ist entfernt.
+Ein echter Kassenabschluss braucht den fachlichen Bestands-/Bewertungsvertrag.
+[ADR-076](../../../adr/adr-076-cash-close-retirement.md).
+Routenabnahme: [OpenAPI-Ausschnitt](../../../schnittstellen/contracts/cash-close-retirement-20261005.openapi.json).
+Die globale OpenAPI-Datei bleibt beim fremden OPENAPI-DRIFT-REFRESH-Owner.
+
 ## Bank-Hauptbuchvertrag und Integrationsvorbehalt
 
 Bankkonto Create/Update/Response: gl_account_id als eigene buchbare

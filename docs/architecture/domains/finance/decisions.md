@@ -28,3 +28,5 @@ version: 1.0.0
 - [ADR-074](../../../adr/adr-074-bank-directbook-retirement.md): konkurrierende Direktbuchung entfernen; Abgleich ohne Buchungsfreigabe.
 
 - [ADR-075](../../../adr/adr-075-bank-ledger-evidence.md): explizite GL-ID und typisierter Saldennachweis; gemeinsame Integration noch offen.
+
+- [ADR-076](../../../adr/adr-076-cash-close-retirement.md): unbewertete Kassen-Direktbuchung entfernen; Tagesabschluss ohne Bestand/Gegenkontierung mit 409 sperren.
