@@ -75,13 +75,18 @@ export type PreisfindungResult = {
     | 'base'
     | 'price_list'
     | 'contract'
+    | 'customer_price'
     | 'staffelrabatt'
+    | 'customer_article_discount'
     | 'customer_discount'
     | 'employee_discount'
   price_list_id?: string | null
   contract_id?: string | null
   staffelrabatt_id?: string | null
   staffel_ab_menge?: number | string | null
+  /** Ein nicht rabattfähiger Artikel oder eine Zusage ohne Rabatt — mit Grund. */
+  rabatt_gesperrt?: boolean
+  rabatt_sperrgrund?: string | null
 }
 
 export async function calculatePrice(params: {

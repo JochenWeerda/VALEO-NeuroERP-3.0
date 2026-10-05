@@ -943,7 +943,7 @@ committet.
 
 **Doku:** `docs/quality-assurance/preisfindung-kaskade-20261005.md`.
 
-## PREISMODELL-KUNDENSTUFE-20261005 — in Arbeit, Claude Code
+## PREISMODELL-KUNDENSTUFE-20261005 — abgeschlossen, Claude Code
 
 **Auftrag:** Die beiden offenen Punkte aus `PREISFINDUNG-KASKADE-20261005`
 schliessen — den wirkungslosen Kundenrabatt und das fehlende ADR zum fuehrenden
@@ -1019,6 +1019,65 @@ das ADR nennt alle zwanzig Tabellen; Vertraege und alle Ratschen gruen.
 Entscheidung (Abnahme Vertriebs-Owner). Dass `rabattfaehig` jetzt greift, kann
 Preise aendern, die bisher stillschweigend rabattiert wurden — das ist der Zweck
 und gehoert vor der Inbetriebnahme kommuniziert.
+
+**Ergebnis (2026-10-05):** Beide offenen Punkte aus
+`PREISFINDUNG-KASKADE-20261005` sind geschlossen.
+
+**Kundenstufe:** `get_customer_discount` liest den Partnerstamm
+(`business_partners.discount_percent`) statt `customers.discount` — zwei Spalten,
+die es nicht gibt. Dazu zwei neue Leser: `get_customer_price_agreement`
+(Kunde + Artikel -> Preis, `discount_allowed`) und
+`get_customer_article_discount`. Die Satelliten fuehren **kein** `tenant_id`; die
+Grenze kommt aus dem Verbund mit `business_partners`, und ein Vertrag prueft das
+strukturell. `partner_id_fuer_kunden` nimmt Kunden- **und** Partnerkennung, weil
+die Aufrufer je nach Maske das eine oder andere geben.
+
+**Zwei Sperren, die der Bestand kannte und die Kaskade nie las:**
+`articles.rabattfaehig` (ein nicht rabattfaehiger Artikel bekam Rabatt) und
+`price_agreements.discount_allowed`. Beide stehen **ueber** den Stufen und werden
+in der Antwort benannt (`rabatt_gesperrt`, `rabatt_sperrgrund`) — ein stiller
+Rabatt von null waere nicht unterscheidbar von "keiner gefunden".
+
+**Kaskade jetzt achtstufig:** base, price_list, contract, **customer_price**,
+staffelrabatt, **customer_article_discount**, customer_discount,
+employee_discount. `customer_price` vor der Staffel, weil eine Zusage eine
+allgemeine Hausregel schlaegt.
+
+**ADR** `docs/architecture/domains/preise/fuehrendes-modell.md` ordnet **alle
+zwanzig** Preis- und Rabatttabellen: 8 fuehrend, 7 eigener Zweck (Tagespreise,
+qualitaetsbezogene Rohware-Zu-/Abschlaege, MATIF, Abweichungsprotokoll,
+Provisionen, Partnerparameter), 2 abzuloesen (`individualpreise`,
+`article_price_thresholds`). Die Rabattmatrix
+(`preis_rabattgruppen/_klassen/_saetze`) ist **keine** Doppelung, sondern die
+Gruppenebene — aber nicht anschliessbar: `articles` fuehrt keine
+`rabattklasse_nr`. Die fehlende Voraussetzung und der Platz der Stufe
+`group_discount` stehen im ADR, damit sie spaeter nicht erfunden werden.
+
+**Maske `individualpreise`** sagt jetzt, dass sie den Preis nicht bestimmt. Eine
+Maske, in der man einen Preis erfasst, der nie gilt, ist dieselbe Taeuschung wie
+ein verschluckter Fehler. Die Abloesung ist entschieden, aber ein eigener Slice
+(Maske, Routen, API-Modul, Endpunkt, Navigation).
+
+**Keine Migration** — alle Spalten waren vorhanden. Das war der eigentliche
+Befund: Die Information lag da, sie wurde nur nicht gelesen.
+
+**20 neue Vertraege, 67 im Preisumfeld gruen**; alle vier Ratschen gruen.
+
+**Handshakes:**
+1. Abnahme der Stufenreihenfolge beim Vertriebs-Owner.
+2. `rabattfaehig` greift jetzt — kann Preise aendern, die bisher stillschweigend
+   rabattiert wurden. Vor Inbetriebnahme kommunizieren.
+3. Rabattmatrix braucht `articles.rabattklasse_nr` — eigener Slice.
+4. Abloesung `individualpreise` — eigener Slice.
+5. `business_partner_pricing_rules` (Selbstabholerrabatt) als moegliche weitere
+   Stufe — benannte Luecke.
+6. **Fremder Rotstand:** `tests/test_crm_customer_business_partner_link.py` zwei
+   Fehler — `_FakeResult` ohne `mappings()`, `_CapturingDb` ohne `rollback()`,
+   seit `customer_service._attach_partner_mask_fields` (`c4a206f04`) so liest.
+   Kette vollstaendig in `customer_service.py`; nicht angefasst — CRM-Agent.
+
+**Doku:** `docs/quality-assurance/preismodell-kundenstufe-20261005.md`,
+ADR `docs/architecture/domains/preise/fuehrendes-modell.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

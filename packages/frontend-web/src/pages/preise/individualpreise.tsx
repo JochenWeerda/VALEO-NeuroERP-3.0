@@ -25,6 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Callout } from '@/components/ui/callout'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Trash2, Plus } from 'lucide-react'
@@ -287,16 +288,37 @@ function IndividualpreisTab({ preisTyp }: { preisTyp: PreisTyp }) {
   )
 }
 
+/**
+ * Individualpreise — Erfassungsweg, **nicht** preisbestimmend.
+ *
+ * Das ADR `docs/architecture/domains/preise/fuehrendes-modell.md` hat am
+ * 05.10.2026 `domain_crm.business_partner_price_agreements` als führende Quelle
+ * für kundenspezifische Preise entschieden. Die Preisfindung
+ * (`/api/v1/pricing/calculate`) liest diese Tabelle hier nicht.
+ *
+ * Der Hinweis in der Maske ist kein Schmuck: Eine Maske, in der man einen Preis
+ * erfasst, der nie gilt, ist dieselbe Täuschung wie ein verschluckter Fehler.
+ * Die Ablösung ist entschieden und als eigener Slice terminiert (Maske, Routen,
+ * API-Modul, Endpunkt, Navigationseintrag).
+ */
 export default function IndividualpreisePage() {
   return (
     <div className="p-6 space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">Individualpreise [PRI/PRIE]</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Individualpreise [PRI/PRIE]</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Artikel- und partnerspezifische Einzelpreise mit Gültigkeitszeitraum und Staffelmengen.
           VK = Verkaufspreise, EK = Einkaufspreise.
         </p>
       </div>
+
+      <Callout variant="warning">
+        <span className="font-semibold">Dieser Weg bestimmt den Preis nicht.</span>{' '}
+        Die Preisfindung liest kundenspezifische Preise aus den Preisvereinbarungen
+        am Geschäftspartner (Partnerakte → Preisvereinbarungen). Hier erfasste
+        Preise wirken nicht auf Angebot, Auftrag oder Rechnung. Entscheidung und
+        Ablösungsplan: ADR „Führendes Preismodell".
+      </Callout>
       <Tabs defaultValue="vk">
         <TabsList>
           <TabsTrigger value="vk">VK-Preise</TabsTrigger>

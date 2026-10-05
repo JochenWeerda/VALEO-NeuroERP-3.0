@@ -210,30 +210,120 @@ class BusinessPartnerService:
         ).mappings().all()
         return [str(r["id"]) for r in rows]
 
-    def get_customer_discount(self, crm_customer_id: str) -> Optional[Decimal]:
-        """Effektiver Kundenrabatt (discount_percent bevorzugt, sonst discount). None wenn keiner.
+    # ── Kundenstufe der Preisfindung ──────────────────────────────────────────
+    #
+    # Bis zum 05.10.2026 las `get_customer_discount` ``domain_crm.customers.discount``
+    # und ``.discount_percent`` — zwei Spalten, die es nicht gibt. Die Methode fing
+    # den Fehler und lieferte ``None``; sie sagte das im Docstring, also log sie
+    # nicht, aber die Stufe wirkte nie.
+    #
+    # Die Rabattinformation liegt vollstaendig an anderer Stelle, vom Besonderen
+    # zum Allgemeinen:
+    #
+    #   1. `business_partner_price_agreements`  Kunde + Artikel -> Preis
+    #   2. `business_partner_discount_items`    Kunde + Artikel -> Rabatt
+    #   3. `business_partners.discount_percent` Kunde          -> pauschaler Rabatt
+    #
+    # Die beiden Satelliten fuehren **kein** `tenant_id`. Die Mandantengrenze kommt
+    # aus dem Verbund mit `business_partners` — eine zweite Mandantenspalte neben
+    # der des Vaters waere eine zweite Wahrheit, die abweichen kann.
 
-        Hinweis: ``domain_crm.customers`` führt aktuell keine Rabattspalten — fehlt die
-        Spalte/Tabelle, wird sauber ``None`` geliefert (Fallback auf Basispreis) statt
-        zu scheitern. Zielquelle künftig BP-Rabatt-Satelliten (BusinessPartnerDiscountItem
-        /PriceAgreement).
+    def partner_id_fuer_kunden(self, kunden_id: str) -> Optional[str]:
+        """Die Partnerkennung zu einer Kundenkennung — oder die Kennung selbst.
+
+        Aufrufer geben je nach Weg eine CRM-Kundenkennung oder direkt eine
+        Partnerkennung. Beide werden gegen den Mandanten geprueft; eine fremde
+        Kennung ergibt ``None`` und damit keinen Rabatt.
         """
-        try:
-            # reviewed-safe: addr_cols is a fixed local column list; values are bound.
-            row = self.db.execute(
-                text("SELECT discount, discount_percent FROM domain_crm.customers WHERE id = :id AND tenant_id = :tid"),
-                {"id": crm_customer_id, "tid": self.tenant_id},
-            ).mappings().first()
-        except (OperationalError, ProgrammingError):
-            self.db.rollback()
+        partner = self.db.execute(
+            text(
+                "SELECT business_partner_id FROM domain_crm.customers "
+                "WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"id": kunden_id, "tid": self.tenant_id},
+        ).scalar()
+        if partner:
+            return str(partner)
+        eigener = self.db.execute(
+            text(
+                "SELECT partner_id FROM domain_crm.business_partners "
+                "WHERE partner_id = :id AND tenant_id = :tid"
+            ),
+            {"id": kunden_id, "tid": self.tenant_id},
+        ).scalar()
+        return str(eigener) if eigener else None
+
+    def get_customer_price_agreement(
+        self, kunden_id: str, artikel_nr: str
+    ) -> Optional[dict]:
+        """Die gueltige Preisvereinbarung fuer Kunde und Artikel.
+
+        ``discount_allowed`` gehoert zur Zusage: Ist ein Preis vereinbart und
+        weiterer Rabatt ausgeschlossen, darf keine spaetere Stufe ihn noch
+        senken.
+        """
+        partner = self.partner_id_fuer_kunden(kunden_id)
+        if not partner or not artikel_nr:
             return None
-        if not row:
+        zeile = self.db.execute(
+            text(
+                "SELECT v.price_net, v.price_incl_freight, v.price_unit, "
+                "       v.discount_allowed, v.description "
+                "FROM domain_crm.business_partner_price_agreements v "
+                "JOIN domain_crm.business_partners p "
+                "     ON p.partner_id = v.partner_id AND p.tenant_id = :tid "
+                "WHERE v.partner_id = :partner AND v.article_number = :artikel "
+                "  AND (v.valid_from IS NULL OR v.valid_from <= CURRENT_DATE) "
+                "  AND (v.valid_to IS NULL OR v.valid_to >= CURRENT_DATE) "
+                "ORDER BY v.valid_from DESC NULLS LAST LIMIT 1"
+            ),
+            {"tid": self.tenant_id, "partner": partner, "artikel": artikel_nr},
+        ).mappings().first()
+        return dict(zeile) if zeile else None
+
+    def get_customer_article_discount(
+        self, kunden_id: str, artikel_nr: str
+    ) -> Optional[Decimal]:
+        """Der artikelbezogene Kundenrabatt — spezifischer als der pauschale."""
+        partner = self.partner_id_fuer_kunden(kunden_id)
+        if not partner or not artikel_nr:
             return None
-        if row.get("discount_percent"):
-            return Decimal(str(row["discount_percent"]))
-        if row.get("discount"):
-            return Decimal(str(row["discount"]))
-        return None
+        wert = self.db.execute(
+            text(
+                "SELECT r.discount_percent "
+                "FROM domain_crm.business_partner_discount_items r "
+                "JOIN domain_crm.business_partners p "
+                "     ON p.partner_id = r.partner_id AND p.tenant_id = :tid "
+                "WHERE r.partner_id = :partner AND r.article_number = :artikel "
+                "  AND (r.valid_from IS NULL OR r.valid_from <= CURRENT_DATE) "
+                "  AND (r.valid_to IS NULL OR r.valid_to >= CURRENT_DATE) "
+                "ORDER BY r.discount_percent DESC LIMIT 1"
+            ),
+            {"tid": self.tenant_id, "partner": partner, "artikel": artikel_nr},
+        ).scalar()
+        return None if wert is None else Decimal(str(wert))
+
+    def get_customer_discount(self, kunden_id: str) -> Optional[Decimal]:
+        """Der pauschale Rabatt des Kunden aus dem Partnerstamm.
+
+        Gelesen wird ``business_partners.discount_percent`` — die Spalte, die es
+        gibt. Vorher stand hier ``domain_crm.customers.discount``, und die gibt es
+        nicht.
+        """
+        partner = self.partner_id_fuer_kunden(kunden_id)
+        if not partner:
+            return None
+        wert = self.db.execute(
+            text(
+                "SELECT discount_percent FROM domain_crm.business_partners "
+                "WHERE partner_id = :partner AND tenant_id = :tid"
+            ),
+            {"partner": partner, "tid": self.tenant_id},
+        ).scalar()
+        if wert is None:
+            return None
+        rabatt = Decimal(str(wert))
+        return rabatt if rabatt > 0 else None
 
     def get_customer_party(self, crm_customer_id: str) -> dict:
         """Rechnungs-Partyadresse (E-Rechnung) für einen CRM-Kunden.

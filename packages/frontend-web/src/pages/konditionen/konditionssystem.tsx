@@ -714,8 +714,10 @@ const SOURCE_LABELS: Record<string, string> = {
   base: 'Artikelstamm',
   price_list: 'Preisliste',
   contract: 'Kontrakt',
+  customer_price: 'Preisvereinbarung (Kunde/Artikel)',
   staffelrabatt: 'Mengenstaffel',
-  customer_discount: 'Kundenrabatt',
+  customer_article_discount: 'Kundenrabatt (Artikel)',
+  customer_discount: 'Kundenrabatt (pauschal)',
   employee_discount: 'Mitarbeiterrabatt',
 }
 
@@ -753,10 +755,12 @@ function PreisfindungTab() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" /> Preisfindung (Live-Kalkulator)</CardTitle>
           <CardDescription>
-            Hierarchische Preisfindung: Preisliste → Kontrakt → Mengenstaffel →
-            Kundenrabatt → Mitarbeiterrabatt → Basispreis. Nur eine Stufe wird
-            angewendet (nicht additiv). Die Mengenstaffel steht über dem Kundenrabatt,
-            weil sie an der tatsächlich bestellten Menge hängt.
+            Hierarchische Preisfindung vom Besonderen zum Allgemeinen: Preisliste →
+            Kontrakt → Preisvereinbarung → Mengenstaffel → Kundenrabatt (Artikel) →
+            Kundenrabatt (pauschal) → Mitarbeiterrabatt → Basispreis. Nur eine Stufe
+            wird angewendet (nicht additiv). Zwei Sperren stehen darüber: ein nicht
+            rabattfähiger Artikel und eine Preisvereinbarung, die weiteren Rabatt
+            ausschließt. Festlegung: ADR „Führendes Preismodell".
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -814,6 +818,12 @@ function PreisfindungTab() {
               )}
               {result.contract_id && (
                 <div><span className="text-muted-foreground">Kontrakt: </span><span className="font-mono text-xs">{result.contract_id}</span></div>
+              )}
+              {result.rabatt_gesperrt && (
+                <div>
+                  <span className="text-muted-foreground">Rabatt gesperrt: </span>
+                  <span className="text-status-warning">{result.rabatt_sperrgrund}</span>
+                </div>
               )}
               {result.staffel_ab_menge != null && (
                 <div>
