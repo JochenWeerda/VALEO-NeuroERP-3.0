@@ -913,6 +913,83 @@ committet.
 
 **Doku:** `docs/quality-assurance/preisfindung-kaskade-20261005.md`.
 
+## PREISMODELL-KUNDENSTUFE-20261005 — in Arbeit, Claude Code
+
+**Auftrag:** Die beiden offenen Punkte aus `PREISFINDUNG-KASKADE-20261005`
+schliessen — den wirkungslosen Kundenrabatt und das fehlende ADR zum fuehrenden
+Preismodell.
+
+**Befund 1 — der Kundenrabatt las die falsche Tabelle.**
+`BusinessPartnerService.get_customer_discount` liest
+`domain_crm.customers.discount` / `.discount_percent`. Diese Spalten gibt es
+nicht; die Methode faengt den Fehler und liefert `None`. Sie sagt das im
+Docstring, also lugt sie nicht — aber die Stufe wirkt nie.
+
+Die Rabattinformation liegt an anderer Stelle, und zwar vollstaendig:
+
+| Quelle | Aussage | Zeilen (Dev) |
+| --- | --- | --- |
+| `domain_crm.business_partner_price_agreements` | Kunde + Artikel -> **Preis** (`price_net`, `discount_allowed`, `price_incl_freight`) | 0 |
+| `domain_crm.business_partner_discount_items` | Kunde + Artikel -> **Rabatt** | 0 |
+| `domain_crm.business_partners.discount_percent` | Kunde -> pauschaler Rabatt | vorhanden |
+
+`domain_crm.customers.business_partner_id` ist die Bruecke. Die beiden
+Satellitentabellen fuehren **kein** `tenant_id` — die Mandantengrenze kommt aus
+dem Verbund mit `business_partners`. Das ist richtig so: Eine zweite
+Mandantenspalte neben der des Vaters waere eine zweite Wahrheit.
+
+**Befund 2 — `articles.rabattfaehig` wird nie geprueft.** Der Artikelstamm sagt
+je Artikel, ob er rabattfaehig ist (und kennt daneben
+`rabatt_auftrag_rechnung`, `rabatt_selbstabholer`, `rabatt_lose`). Die Kaskade
+liest nichts davon. Ein nicht rabattfaehiger Artikel bekam Rabatt — und das ist
+eine Preiszusage, die das Haus nicht geben wollte.
+
+**Befund 3 — die Rabattmatrix ist nicht anschliessbar.**
+`domain_shared.preis_rabattsaetze` schluesselt auf `rabattgruppe_nr` (Kundenseite)
+und `rabattklasse_nr` (Artikelseite). Die Kundenseite gibt es
+(`business_partners.price_group`), die **Artikelseite nicht**: `articles` fuehrt
+keine Rabattklasse. Die Matrix kann heute nicht ausgewertet werden, egal wie
+sorgfaeltig sie gepflegt wird. Das gehoert ins ADR als benannte Luecke mit der
+genauen fehlenden Spalte — nicht als stille Nichtbenutzung.
+
+**Ziel:**
+1. Die Kundenstufe der Kaskade liest die fuehrenden Quellen, vom Besonderen zum
+   Allgemeinen: Kundenpreis (Artikel) -> Kundenrabatt (Artikel) -> pauschaler
+   Kundenrabatt. `discount_allowed = false` an einer Preisvereinbarung schliesst
+   weitere Rabatte aus; `rabattfaehig = false` am Artikel schliesst **jeden**
+   Rabatt aus.
+2. Ein ADR `docs/architecture/domains/preise/fuehrendes-modell.md` ordnet **alle
+   zwanzig** Preis- und Rabatttabellen: fuehrend, eigener Zweck, oder abzuloesen —
+   je mit Begruendung und, wo noetig, der genauen fehlenden Voraussetzung.
+
+**Dateibesitz:** `app/services/business_partner_service.py` (nur
+`get_customer_discount` und die neuen Leser),
+`app/services/preisfindung_service.py`, `app/api/v1/endpoints/pricing.py` (nur die
+Kundenstufe und `QUELLEN`),
+`docs/architecture/domains/preise/fuehrendes-modell.md` (neu),
+`tests/test_preismodell_kundenstufe_vertrag.py` (neu),
+`tests/test_preisfindung_kaskade_vertrag.py` (Erweiterung um die Kundenstufe),
+`packages/frontend-web/src/pages/preise/individualpreise.tsx` (nur der Hinweis,
+dass dieser Weg nicht preisbestimmend ist),
+`packages/frontend-web/src/pages/konditionen/konditionssystem.tsx` (nur die
+Quellenbezeichnungen), eigene QA-Doku und dieser Abschnitt.
+**Keine Migration:** Alle benoetigten Spalten sind vorhanden. Es wird keine
+Tabelle angelegt und keine geloescht — die Abloesung von
+`domain_shared.individualpreise` wird im ADR entschieden und terminiert, aber
+nicht hier ausgefuehrt (Maske, Routen, API-Modul, Navigationseintrag).
+
+**Abnahme:** Eine Preisvereinbarung bestimmt den Preis; ein artikelbezogener
+Kundenrabatt den Rabatt; ohne beides greift der pauschale Rabatt des Partners;
+alles mandantengebunden ueber den Verbund mit `business_partners`;
+`discount_allowed = false` verhindert weitere Rabatte; `rabattfaehig = false`
+verhindert jeden Rabatt; `domain_crm.customers.discount` wird nicht mehr gelesen;
+das ADR nennt alle zwanzig Tabellen; Vertraege und alle Ratschen gruen.
+
+**Risiken:** Die Reihenfolge innerhalb der Kundenstufe ist eine fachliche
+Entscheidung (Abnahme Vertriebs-Owner). Dass `rabattfaehig` jetzt greift, kann
+Preise aendern, die bisher stillschweigend rabattiert wurden — das ist der Zweck
+und gehoert vor der Inbetriebnahme kommuniziert.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
