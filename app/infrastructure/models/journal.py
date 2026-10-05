@@ -47,6 +47,7 @@ class JournalEntry(Base):
     description = Column(String(200), nullable=False)
     reference = Column(String(50), nullable=True)
     source = Column(String(50), nullable=True)
+    currency = Column(String(3).evaluates_none(), nullable=True, default="EUR")
     document_type = Column(String(30), nullable=True)  # RE, GU, AB etc. (GoBD Belegart)
     status = Column(String(20), default="draft")
     total_debit = Column(DECIMAL(15, 2), default=0)
