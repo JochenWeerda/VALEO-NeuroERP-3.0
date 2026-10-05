@@ -1106,7 +1106,7 @@ Befund: Die Information lag da, sie wurde nur nicht gelesen.
 **Doku:** `docs/quality-assurance/preismodell-kundenstufe-20261005.md`,
 ADR `docs/architecture/domains/preise/fuehrendes-modell.md`.
 
-## PERSONAL-ORGANISATION-ZEITKONTO-20261006 — in Arbeit, Claude Code
+## PERSONAL-ORGANISATION-ZEITKONTO-20261006 — abgeschlossen, Claude Code
 
 **Befund:** Drei Verweise ins Leere in `personal.py`, und sie haengen an zwei
 Faechern, die beide nachweispflichtig sind.
@@ -1188,6 +1188,62 @@ zeigen danach etwas anderes — richtiger, aber anderes. Die Abnahme der
 Saldodefinition gehoert dem Personal-Owner. `shifts.assigned_employee_refs` ist
 eine JSONB-Liste ohne Fremdschluessel auf die Person; das bleibt so und wird
 benannt.
+
+**Ergebnis (2026-10-06):** Migration
+`personal_organisation_zeitkonto_20261006` legt `domain_hr.org_units` und
+`domain_hr.time_account_adjustments` an — mit `tenant_id`, sieben
+Pruefbedingungen und zwei `RESTRICT`-Fremdschluesseln (Elternverweis,
+Kostenstelle). `domain_hr.schichten` wird **nicht** nachgebaut: Die Planstunden
+kommen aus der vorhandenen `domain_hr.shifts`, gerechnet aus `starts_at`/`ends_at`
+und nur fuer zugeordnete, nicht abgesagte Schichten. Das Statuswoerterbuch dort
+ist englisch (`planned/warning/blocked/cancelled`) und steht jetzt einmal im
+Dienst.
+
+**Zyklenschutz dreifach:** Pruefbedingung fuer den trivialen Fall, Pruefung beim
+Umhaengen (409, **bevor** der Zyklus entsteht), Tiefengrenze beim Lesen (409 statt
+gekuerzter Baum).
+
+**Saldoformel richtiggestellt:** Uebertrag = (Ist − Plan + Korrekturen) der
+Vorperioden, laufende Periode analog, Saldo = Summe. Die Korrektur zaehlt genau
+einmal (vorher zweimal), und der "Uebertrag" ist kein Lebenssummenwert mehr
+(vorher Ist-Stunden aller Vorjahre).
+
+**Maske:** `organigramm.tsx` las `data.units` — ein Feld, das die Antwort nie
+hatte. Sie haette also auch nach der Migration "Keine Organisationseinheiten
+vorhanden" gezeigt. Liest jetzt `org_chart` und baut den Baum nicht zweimal.
+
+**Godfile:** Logik in `app/services/personal_organisation_service.py`;
+`personal.py` 3345 -> **3315** Zeilen, Baseline nachgezogen.
+
+**Zwei Funde des Pruefstands:** Eine Addition von 24 Stunden **auf einen
+`time`-Wert** rechnet modulo 24 und ergab fuer die Nachtschicht −16 Stunden —
+richtig ist die Addition auf das Intervall. Und `time_entries` hat eine
+Bereichspruefung, die meinen Testwert von 40 Stunden an einem Tag zu Recht
+abwies.
+
+**Altlasttest:** `test_time_account_uses_canonical_time_entries_columns` mockte
+`domain_hr.schichten` in die Welt und bestaetigte damit die doppelt gezaehlte
+Korrektur. Ersetzt durch drei Tests auf Tabellenziel, Saldogleichung und
+Zyklenschutz.
+
+**44 neue Vertraege, 48 mit den ersetzten Unittests gruen**; Migration auf beiden
+Datenbanken; alle vier Ratschen gruen.
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **7 -> 4**. Es bleiben:
+`domain_crm.interessenten` (customers.py), `domain_erp.druckauftraege`
+(etiketten.py), `domain_erp.schaden_meldungen` (schaeden.py),
+`domain_shared.notifications` (compat.py).
+
+**Handshakes:**
+1. `uebertrag_vorperioden` ersetzt `transferred_from_prev_period` und bedeutet
+   etwas anderes (richtiger, aber anderes). Abnahme der Saldodefinition beim
+   Personal-Owner.
+2. `shifts.assigned_employee_refs` bleibt eine JSONB-Liste ohne Fremdschluessel
+   auf die Person.
+3. Die Einheitenart `GESCHAEFTSBEREICH` ist neu; das Woerterbuch steht an einer
+   Stelle, falls im Haus eine andere Gliederung gilt.
+
+**Doku:** `docs/quality-assurance/personal-organisation-zeitkonto-20261006.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

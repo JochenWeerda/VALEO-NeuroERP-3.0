@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import json
 from datetime import date, datetime, time
 from typing import Any, Literal
@@ -17,6 +18,7 @@ from app.core.database import get_db
 from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.tenant import get_tenant_id
+from app.core.uuid7 import uuid7
 from app.services.personal_service import PersonalService
 from app.api.v1.schemas.base import BaseSchema, CompatBridgeOut, IDResponse
 from pydantic import ConfigDict as _ConfigDict
@@ -49,6 +51,10 @@ class PersonalOut(BaseSchema):
     """Typed response schema for PersonalOut endpoints (extra fields forwarded)."""
     model_config = _ConfigDict(extra="allow")
 
+
+from app.services import personal_organisation_service as orga
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/personal", tags=["personal", "hr"])
 
@@ -2833,280 +2839,244 @@ async def delete_driver_time_event(
 # ── Organisationsstruktur ────────────────────────────────────────────────────
 
 class OrgUnitIn(BaseModel):
+    """Eine Organisationseinheit. Die Arten stehen im Dienst, nicht zweimal hier."""
+
+    model_config = _ConfigDict(extra="forbid")
+
     unit_code: str = Field(..., max_length=40)
-    name: str = Field(..., max_length=200)
-    unit_type: str = Field(default="ABTEILUNG", pattern="^(ABTEILUNG|TEAM|STANDORT|KOSTENSTELLE)$")
+    name: str = Field(..., min_length=1, max_length=200)
+    unit_type: Literal[
+        "ABTEILUNG", "TEAM", "STANDORT", "KOSTENSTELLE", "GESCHAEFTSBEREICH"
+    ] = "ABTEILUNG"
     parent_id: str | None = None
     cost_center_id: str | None = None
     manager_ref: str | None = None
 
 
 class OrgUnitPatch(BaseModel):
-    name: str | None = None
+    model_config = _ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, min_length=1, max_length=200)
     parent_id: str | None = None
-    unit_type: str | None = None
+    unit_type: Literal[
+        "ABTEILUNG", "TEAM", "STANDORT", "KOSTENSTELLE", "GESCHAEFTSBEREICH"
+    ] | None = None
+    cost_center_id: str | None = None
     manager_ref: str | None = None
+    aktiv: bool | None = None
 
 
-def _build_org_tree(rows: list[dict], parent_id: Any = None) -> list[dict]:
-    """Recursively build org tree from flat list."""
-    children = [r for r in rows if r.get("parent_id") == parent_id]
-    for child in children:
-        child["children"] = _build_org_tree(rows, child["id"])
-    return children
+# ── Organigramm ──────────────────────────────────────────────────────────────
+#
+# `domain_hr.org_units` existierte bis zum 06.10.2026 in keiner Datenbank: Alle
+# vier Wege antworteten 503. Angelegt von
+# `personal_organisation_zeitkonto_20261006`. Begruendungen (Zyklenschutz,
+# Kostenstellenpruefung) im Dienst und in
+# ``docs/quality-assurance/personal-organisation-zeitkonto-20261006.md``.
 
 
-@router.get("/org-chart", summary="Org chart abrufen",
-    response_model=CompatBridgeOut
-)
+@router.get("/org-chart", summary="Organigramm abrufen", response_model=CompatBridgeOut)
 async def get_org_chart(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Gesamtes Organigramm als verschachtelter Baum."""
+) -> dict:
+    """Das Organigramm als verschachtelter Baum."""
     try:
-        rows = db.execute(
-            text("""
-                WITH RECURSIVE org_tree AS (
-                    SELECT id, unit_code, name, unit_type, parent_id, cost_center_id, manager_ref, tenant_id, 0 AS depth
-                    FROM domain_hr.org_units
-                    WHERE tenant_id = :tenant_id AND parent_id IS NULL
-                    UNION ALL
-                    SELECT u.id, u.unit_code, u.name, u.unit_type, u.parent_id, u.cost_center_id, u.manager_ref, u.tenant_id, ot.depth + 1
-                    FROM domain_hr.org_units u
-                    JOIN org_tree ot ON u.parent_id = ot.id
-                    WHERE u.tenant_id = :tenant_id
-                )
-                SELECT * FROM org_tree ORDER BY depth, name
-            """),
-            {"tenant_id": tenant_id},
-        ).fetchall()
-    except Exception:
-        raise HTTPException(status_code=503, detail="org_units table not available")
-    flat = [dict(r._mapping) for r in rows]
-    # Convert UUID/special types to str for JSON
-    for r in flat:
-        for k, v in r.items():
-            if v is not None and not isinstance(v, (str, int, float, bool)):
-                r[k] = str(v)
-    tree = _build_org_tree(flat, None)
-    return {"org_chart": tree}
+        zeilen = orga.baum_zeilen(db, tenant_id)
+    except Exception as fehler:  # noqa: BLE001
+        raise orga.nicht_lesbar(db, fehler, "Organigramm", tenant_id) from fehler
+    orga.zyklus_pruefen(zeilen)
+    return {"org_chart": orga.baum_bauen(zeilen, None)}
 
 
-@router.get("/org-chart/{unit_id}", summary="Org subtree abrufen",
-    response_model=PersonalOut
-)
+@router.get("/org-chart/{unit_id}", summary="Teilbaum abrufen", response_model=PersonalOut)
 async def get_org_subtree(
     unit_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Teilbaum ab einer bestimmten Org-Einheit."""
+) -> dict:
+    """Der Teilbaum ab einer Einheit."""
     try:
-        rows = db.execute(
-            text("""
-                WITH RECURSIVE subtree AS (
-                    SELECT id, unit_code, name, unit_type, parent_id, cost_center_id, manager_ref, 0 AS depth
-                    FROM domain_hr.org_units
-                    WHERE id = :unit_id AND tenant_id = :tenant_id
-                    UNION ALL
-                    SELECT u.id, u.unit_code, u.name, u.unit_type, u.parent_id, u.cost_center_id, u.manager_ref, s.depth + 1
-                    FROM domain_hr.org_units u
-                    JOIN subtree s ON u.parent_id = s.id
-                    WHERE u.tenant_id = :tenant_id
-                )
-                SELECT * FROM subtree ORDER BY depth, name
-            """),
-            {"unit_id": unit_id, "tenant_id": tenant_id},
-        ).fetchall()
-    except Exception:
-        raise HTTPException(status_code=503, detail="org_units table not available")
-    if not rows:
-        raise HTTPException(status_code=404, detail=f"OrgUnit {unit_id} not found")
-    flat = [dict(r._mapping) for r in rows]
-    for r in flat:
-        for k, v in r.items():
-            if v is not None and not isinstance(v, (str, int, float, bool)):
-                r[k] = str(v)
-    root_parent = flat[0].get("parent_id") if flat else None
-    tree = _build_org_tree(flat, root_parent)
-    return {"org_chart": tree[0] if tree else {}}
+        zeilen = orga.baum_zeilen(db, tenant_id, wurzel=unit_id)
+    except Exception as fehler:  # noqa: BLE001
+        raise orga.nicht_lesbar(db, fehler, "Organigramm-Teilbaum", tenant_id) from fehler
+    if not zeilen:
+        raise HTTPException(status_code=404, detail=f"Organisationseinheit {unit_id} nicht gefunden")
+    orga.zyklus_pruefen(zeilen)
+    baum = orga.baum_bauen(zeilen, zeilen[0].get("parent_id"))
+    return {"org_chart": baum[0] if baum else {}}
 
 
-@router.post("/org-units", status_code=201, summary="Org unit anlegen",
-    response_model=PersonalOut
-)
+@router.post("/org-units", status_code=201, summary="Organisationseinheit anlegen",
+             response_model=PersonalOut)
 async def create_org_unit(
     payload: OrgUnitIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Neue Abteilung / Team / Standort / Kostenstelle anlegen."""
-    unit_id = str(uuid4())
+) -> dict:
+    """Legt eine Abteilung, ein Team, einen Standort oder eine Kostenstelle an."""
+    unit_id = str(uuid7())
     try:
+        orga.eltern_pruefen(db, tenant_id, payload.parent_id, unit_id)
+        orga.kostenstelle_pruefen(db, tenant_id, payload.cost_center_id)
         db.execute(
-            text("""
-                INSERT INTO domain_hr.org_units
-                    (id, unit_code, name, unit_type, parent_id, cost_center_id, manager_ref, tenant_id)
-                VALUES
-                    (:id, :unit_code, :name, :unit_type, :parent_id, :cost_center_id, :manager_ref, :tenant_id)
-            """),
+            text(
+                f"INSERT INTO {orga.EINHEITEN} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                "(id, tenant_id, unit_code, name, unit_type, parent_id, "
+                " cost_center_id, manager_ref) "
+                "VALUES (:id, :tid, :code, :name, :art, :eltern, :kostenstelle, :leitung)"
+            ),
             {
                 "id": unit_id,
-                "unit_code": payload.unit_code,
+                "tid": tenant_id,
+                "code": payload.unit_code,
                 "name": payload.name,
-                "unit_type": payload.unit_type,
-                "parent_id": payload.parent_id,
-                "cost_center_id": payload.cost_center_id,
-                "manager_ref": payload.manager_ref,
-                "tenant_id": tenant_id,
+                "art": payload.unit_type,
+                "eltern": payload.parent_id,
+                "kostenstelle": payload.cost_center_id,
+                "leitung": payload.manager_ref,
             },
         )
         db.commit()
-    except Exception:
+    except HTTPException:
         db.rollback()
-        raise HTTPException(status_code=503, detail="org_units table not available")
-    return {"id": unit_id, "status": "created"}
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        logger.exception("Organisationseinheit nicht anlegbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=409,
+            detail={"error": "Organisationseinheit nicht angelegt", "grund": str(fehler),
+                    "migration_hint": orga.MIGRATIONS_HINWEIS["X-Migration-Hint"]},
+            headers=orga.MIGRATIONS_HINWEIS,
+        ) from fehler
+    return {"id": unit_id, "unit_code": payload.unit_code, "status": "angelegt"}
 
 
-@router.patch("/org-units/{unit_id}", summary="Org unit aktualisieren",
-    response_model=PersonalOut
-)
+@router.patch("/org-units/{unit_id}", summary="Organisationseinheit aendern",
+              response_model=PersonalOut)
 async def patch_org_unit(
     unit_id: str,
     payload: OrgUnitPatch,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Org-Einheit umbenennen oder Elternteil ändern."""
-    updates = {k: v for k, v in payload.model_dump().items() if v is not None}
-    if not updates:
-        raise HTTPException(status_code=400, detail="No fields to update")
-    set_clause = ", ".join(f"{k} = :{k}" for k in updates)
-    updates.update({"id": unit_id, "tenant_id": tenant_id})
-    try:
-        result = db.execute(
-            text(f"UPDATE domain_hr.org_units SET {set_clause} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-            updates,
+) -> dict:
+    """Aendert eine Einheit. Ein Umhaengen, das einen Zyklus ergaebe, wird abgewiesen."""
+    aenderungen = {
+        k: v for k, v in payload.model_dump(exclude_unset=True).items() if v is not None
+    }
+    if not aenderungen:
+        raise HTTPException(status_code=400, detail="Keine Aenderungen uebergeben")
+    erlaubt = {"name", "parent_id", "unit_type", "cost_center_id", "manager_ref", "aktiv"}
+    unbekannt = set(aenderungen) - erlaubt
+    if unbekannt:
+        raise HTTPException(
+            status_code=422, detail=f"Nicht aenderbar: {', '.join(sorted(unbekannt))}"
         )
-        if result.rowcount == 0:
-            raise HTTPException(status_code=404, detail=f"OrgUnit {unit_id} not found")
+    try:
+        if "parent_id" in aenderungen:
+            orga.eltern_pruefen(db, tenant_id, aenderungen["parent_id"], unit_id)
+            if orga.wuerde_zyklus(db, tenant_id, unit_id, aenderungen["parent_id"]):
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        "Dieses Umhaengen ergaebe einen Zyklus: Die Einheit liegt im "
+                        "Aufwaertspfad der neuen uebergeordneten Einheit."
+                    ),
+                )
+        if "cost_center_id" in aenderungen:
+            orga.kostenstelle_pruefen(db, tenant_id, aenderungen["cost_center_id"])
+        zuweisungen = ", ".join(f"{k} = :{k}" for k in aenderungen)
+        ergebnis = db.execute(
+            text(
+                f"UPDATE {orga.EINHEITEN} SET {zuweisungen}, updated_at = NOW() "  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
+                "WHERE id = :id AND tenant_id = :tid"
+            ),
+            {**aenderungen, "id": unit_id, "tid": tenant_id},
+        )
+        if ergebnis.rowcount == 0:
+            raise HTTPException(
+                status_code=404, detail=f"Organisationseinheit {unit_id} nicht gefunden"
+            )
         db.commit()
     except HTTPException:
-        raise
-    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail="org_units table not available")
-    return {"id": unit_id, "status": "updated"}
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        raise HTTPException(
+            status_code=409, detail={"error": "Aenderung abgewiesen", "grund": str(fehler)}
+        ) from fehler
+    return {"id": unit_id, "geaenderte_felder": sorted(aenderungen), "status": "aktualisiert"}
 
 
 # ── Arbeitszeitkonto ─────────────────────────────────────────────────────────
+#
+# `domain_hr.time_account_adjustments` existierte nicht, und die Planstunden kamen
+# aus `domain_hr.schichten` — einer Tabelle, die es nicht gibt, mit Spalten, die
+# die vorhandene `domain_hr.shifts` nicht hat. Weil alle drei Abfragen in einem
+# `try` standen, antwortete dieser Weg ausnahmslos 503: Das Arbeitszeitkonto hat
+# nie funktioniert. Die Saldoformel zaehlte die Korrektur zweimal.
+
 
 class TimeAccountAdjustIn(BaseModel):
-    delta_hours: float = Field(..., description="Positive = Gutschrift, Negative = Abbuchung")
-    reason: str = Field(..., max_length=400)
-    adjustment_date: str | None = None  # ISO date, default: today
+    model_config = _ConfigDict(extra="forbid")
+
+    delta_hours: float = Field(..., description="Positiv = Gutschrift, negativ = Abbuchung")
+    reason: str = Field(..., min_length=1, max_length=400)
+    adjustment_date: str | None = None
+    erfasst_durch: str | None = None
 
 
-@router.get("/time-accounts/{employee_ref}", summary="Time account abrufen",
-    response_model=PersonalOut
-)
+@router.get("/time-accounts/{employee_ref}", summary="Arbeitszeitkonto abrufen",
+            response_model=PersonalOut)
 async def get_time_account(
     employee_ref: str,
+    jahr: int | None = None,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Arbeitszeitkonto: Saldo, Monats-Breakdown, Übertrag aus Vorperiode."""
+) -> dict:
+    """Saldo, Uebertrag und Monatsaufstellung.
+
+    Jede Stunde steckt in genau einer ausgewiesenen Zahl: Der Saldo ist die Summe
+    aus Uebertrag der Vorperioden, laufender Periode und Folgeperioden.
+    """
     try:
-        rows = db.execute(
-            text("""
-                SELECT
-                    TO_CHAR(entry_date, 'YYYY-MM') AS monat,
-                    SUM(hours) AS actual_hours,
-                    COUNT(*) AS eintraege
-                FROM domain_hr.time_entries
-                WHERE employee_ref = :employee_ref
-                  AND tenant_id = :tenant_id
-                GROUP BY TO_CHAR(entry_date, 'YYYY-MM')
-                ORDER BY monat
-            """),
-            {"employee_ref": employee_ref, "tenant_id": tenant_id},
-        ).fetchall()
-        # Manual adjustments
-        adj_rows = db.execute(
-            text("""
-                SELECT COALESCE(SUM(delta_hours), 0) AS total_adj
-                FROM domain_hr.time_account_adjustments
-                WHERE employee_ref = :employee_ref AND tenant_id = :tenant_id
-            """),
-            {"employee_ref": employee_ref, "tenant_id": tenant_id},
-        ).fetchone()
-        # Planned hours: 8h per workday estimate — use schichten if available
-        planned = db.execute(
-            text("""
-                SELECT COALESCE(SUM(planned_hours), 0) AS total_planned
-                FROM domain_hr.schichten
-                WHERE employee_ref = :employee_ref AND tenant_id = :tenant_id
-            """),
-            {"employee_ref": employee_ref, "tenant_id": tenant_id},
-        ).fetchone()
-    except Exception:
-        raise HTTPException(status_code=503, detail="time_entries table not available")
-    breakdown = [
-        {"monat": r[0], "actual_hours": float(r[1]), "eintraege": r[2]}
-        for r in rows
-    ]
-    total_actual = sum(b["actual_hours"] for b in breakdown)
-    total_planned = float(planned[0]) if planned else 0.0
-    total_adj = float(adj_rows[0]) if adj_rows else 0.0
-    current_year = datetime.utcnow().year
-    current_breakdown = [b for b in breakdown if b["monat"].startswith(str(current_year))]
-    prev_breakdown = [b for b in breakdown if not b["monat"].startswith(str(current_year))]
-    transferred = sum(b["actual_hours"] for b in prev_breakdown) + total_adj
-    current_period_hours = sum(b["actual_hours"] for b in current_breakdown)
-    saldo = total_actual - total_planned + total_adj
-    return {
-        "employee_ref": employee_ref,
-        "saldo_hours": round(saldo, 2),
-        "transferred_from_prev_period": round(transferred, 2),
-        "current_period_hours": round(current_period_hours, 2),
-        "breakdown_by_month": breakdown,
-    }
+        return orga.zeitkonto(db, tenant_id, employee_ref, jahr)
+    except Exception as fehler:  # noqa: BLE001
+        raise orga.nicht_lesbar(db, fehler, "Arbeitszeitkonto", tenant_id) from fehler
 
 
-@router.post("/time-accounts/{employee_ref}/adjust", status_code=201, summary="Time account adjust",
-    response_model=PersonalOut
-)
+@router.post("/time-accounts/{employee_ref}/adjust", status_code=201,
+             summary="Zeitkonto korrigieren", response_model=PersonalOut)
 async def adjust_time_account(
     employee_ref: str,
     payload: TimeAccountAdjustIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Manuelle Saldo-Korrektur (Urlaubsabgeltung, Übertrag etc.)."""
-    adj_id = str(uuid4())
-    adj_date = payload.adjustment_date or business_today().isoformat()
+) -> dict:
+    """Manuelle Saldokorrektur — mit Grund, sonst gar nicht."""
+    datum = payload.adjustment_date or business_today().isoformat()
     try:
-        db.execute(
-            text("""
-                INSERT INTO domain_hr.time_account_adjustments
-                    (id, employee_ref, delta_hours, reason, adjustment_date, tenant_id)
-                VALUES (:id, :employee_ref, :delta_hours, :reason, :adjustment_date, :tenant_id)
-            """),
-            {
-                "id": adj_id,
-                "employee_ref": employee_ref,
-                "delta_hours": payload.delta_hours,
-                "reason": payload.reason,
-                "adjustment_date": adj_date,
-                "tenant_id": tenant_id,
-            },
+        ergebnis = orga.korrektur_schreiben(
+            db, tenant_id, str(uuid7()), employee_ref,
+            payload.delta_hours, payload.reason, datum, payload.erfasst_durch,
         )
         db.commit()
-    except Exception:
+    except HTTPException:
         db.rollback()
-        raise HTTPException(status_code=503, detail="time_account_adjustments table not available")
-    return {"id": adj_id, "employee_ref": employee_ref, "delta_hours": payload.delta_hours, "status": "adjusted"}
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        logger.exception("Zeitkontokorrektur nicht buchbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=409,
+            detail={"error": "Korrektur nicht gebucht", "grund": str(fehler),
+                    "migration_hint": orga.MIGRATIONS_HINWEIS["X-Migration-Hint"]},
+            headers=orga.MIGRATIONS_HINWEIS,
+        ) from fehler
+    ergebnis["status"] = "gebucht"
+    return ergebnis
 
 
 # ── Bewerbermanagement (Recruiting-Pipeline) ─────────────────────────────────

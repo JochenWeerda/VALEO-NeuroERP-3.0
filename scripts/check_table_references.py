@@ -127,7 +127,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: Kontraktpreis aus dem fuehrenden Kontraktmodell statt aus
 #: `domain_contracts.contracts.discount_percent` — zwei Spalten, die es nicht
 #: gibt.
-BASELINE_LEBEND = 7
+#:
+#: 2026-10-06, lebend 7 -> 4: `personal_organisation_zeitkonto_20261006` legt
+#: `domain_hr.org_units` und `domain_hr.time_account_adjustments` an, und das
+#: Arbeitszeitkonto liest die vorhandene `domain_hr.shifts` statt der
+#: deutschen Dublette `domain_hr.schichten`, die es nie gab.
+BASELINE_LEBEND = 4
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")
