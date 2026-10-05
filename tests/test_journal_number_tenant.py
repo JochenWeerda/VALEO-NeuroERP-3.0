@@ -10,6 +10,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.exc import IntegrityError
 
 from app.infrastructure.models.journal import JournalEntry
+from scripts.check_journal_identity import violations
 
 spec = importlib.util.spec_from_file_location("journal_number_migration", Path("alembic/versions/journal_number_tenant_20261005.py"))
 migration = importlib.util.module_from_spec(spec)
@@ -107,6 +108,29 @@ def test_migration_rejects_unknown_tenant_without_partial_changes(store):
         with engine.connect() as conn:
             assert conn.execute(text(f'SELECT count(*) FROM "{schema}".journal_entries WHERE tenant_id IS NULL')).scalar_one() == 1
             assert next(c for c in inspect(conn).get_columns('journal_entries', schema=schema) if c['name'] == 'tenant_id')['nullable']
+    finally:
+        with engine.begin() as conn:
+            conn.execute(text(f'DROP SCHEMA "{schema}" CASCADE'))
+
+
+def test_runtime_gate_accepts_migrated_database(store):
+    engine, schema = store
+    with engine.connect() as conn:
+        assert violations(conn, schema) == []
+
+
+def test_runtime_gate_rejects_old_contract(store):
+    engine, _ = store
+    schema = 'journalnumber_' + uuid4().hex
+    try:
+        with engine.begin() as conn:
+            conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+            conn.execute(text(f'CREATE TABLE "{schema}".journal_entries (id text, tenant_id text, entry_number text NOT NULL UNIQUE)'))
+            problems = violations(conn, schema)
+            assert len(problems) == 3
+            assert any('Global' in problem for problem in problems)
+            assert any('NOT NULL' in problem for problem in problems)
+            assert any('missing' in problem for problem in problems)
     finally:
         with engine.begin() as conn:
             conn.execute(text(f'DROP SCHEMA "{schema}" CASCADE'))

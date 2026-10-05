@@ -44,6 +44,9 @@ fremden generierten Maskenartefakte uebernommen.
 lesendes Betriebs-Gate; tests/test_journal_number_tenant.py Gate-Abnahme.
 Es soll den realen DB-Vertrag pruefen, damit Code-Gruen keine fehlende
 Integration verdeckt. Keine fremden CI-/Masken-Dateien.
+**Betriebs-Gate geliefert:** Nur Metadaten, keine Zeilenscans/DML/Migration;
+40 gezielte Tests bestanden (zwei neue echte positive/negative Gatefaelle).
+Aktuelle Shared-Probe-Pruefung korrekt rot; Integration weiterhin erforderlich.
 **Integration angehalten:** Probe waehrenddessen auf fremde, noch uncommitted
 preisfindung_rabattregeln_20261005 weitergewandert. Guard hat vor DDL gestoppt;
 Journalnummer im gemeinsamen Schema noch global. Nach deren Commit beide
