@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HANDSHAKE-GAP-CLOSURE-20261005 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** User-Auftrag: vier gemeldete Handshake-Luecken
+schliessen und anschliessend Stabilisierung fortsetzen.
+**Dateibesitz:** bank_accounts.py nur list_ledger_options, eigenes Bank-Proof-Fixture;
+journal.py nur Tenant/Nummern-UQ, neue isolierte Migration/Vertragstests;
+ADR zum fuehrenden Wiegemodell und zugehoerige Domain-/QA-/Slice-Doku.
+Bestehender BANK-RECONCILIATION-PROOF-Claim gehoert diesem Chat.
+**Abnahme:** Paginierungsratsche gruen, echte Bank-Proof-Tests gruen;
+Journalnummern je Mandant einzigartig mit DB-Beleg; Wiegemodell anhand
+lebender Verbraucher verbindlich dokumentiert, Rueckbauumfang explizit.
+**Risiken:** Shared Probe ohne Reset/Migration bei fremder Nutzung;
+keine neue DB/Docker, fremde WIP/Claims unangetastet. Schemaaenderung
+zuerst im eigenen Schema pruefen, gemeinsame Integration koordiniert.
+**Architektur:** bestehende Finance/Inventory-Grenzen; Significant ADR,
+keine neue Fachfunktion. Tests, Betriebs-/Datenvertrag und Doku nachziehen.
+
 ## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Kassen-Scheinabschluss ohne Bestand/
