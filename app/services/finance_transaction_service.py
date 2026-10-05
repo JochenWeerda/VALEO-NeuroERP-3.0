@@ -27,9 +27,19 @@ MONEY_CENT = Decimal("0.01")
 class FinanceTransactionService:
     """Encapsulates journal entry creation, validation, posting, and GoBD compliance."""
 
-    def __init__(self, db: Session, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str, *, commit_on_success: bool = True) -> None:
+        """Set False when the caller owns commit/rollback for a larger transaction."""
         self.db = db
         self.tenant_id = tenant_id
+        self.commit_on_success = commit_on_success
+
+    def _finish_mutation(self, *entries: JournalEntry) -> None:
+        if self.commit_on_success:
+            self.db.commit()
+        else:
+            self.db.flush()
+        for entry in entries:
+            self.db.refresh(entry)
 
     # ── validation ────────────────────────────────────────────────────────────
 
@@ -376,8 +386,7 @@ class FinanceTransactionService:
             )
             self.db.add(line)
 
-        self.db.commit()
-        self.db.refresh(obj)
+        self._finish_mutation(obj)
         logger.info("Created JournalEntry %s (%s)", obj.id, entry_number)
         return obj
 
@@ -390,8 +399,7 @@ class FinanceTransactionService:
         for field in ("description", "reference", "document_type"):
             if field in data:
                 setattr(obj, field, data[field])
-        self.db.commit()
-        self.db.refresh(obj)
+        self._finish_mutation(obj)
         return obj
 
     def delete(self, entry_id: str) -> None:
@@ -410,7 +418,7 @@ class FinanceTransactionService:
             JournalEntryLine.tenant_id == self.tenant_id,
         ).delete(synchronize_session=False)
         self.db.delete(obj)
-        self.db.commit()
+        self._finish_mutation()
 
     def post(self, entry_id: str, posted_by: Optional[str] = None) -> JournalEntry:
         obj = self._locked_entry(entry_id)
@@ -421,8 +429,7 @@ class FinanceTransactionService:
         obj.posted_at = datetime.utcnow()
         if resolved_posted_by:
             obj.posted_by = resolved_posted_by
-        self.db.commit()
-        self.db.refresh(obj)
+        self._finish_mutation(obj)
         logger.info("Posted JournalEntry %s", entry_id)
         return obj
 
@@ -432,8 +439,7 @@ class FinanceTransactionService:
         obj.status = "cancelled"
         if hasattr(obj, "cancel_reason"):
             obj.cancel_reason = reason
-        self.db.commit()
-        self.db.refresh(obj)
+        self._finish_mutation(obj)
         return obj
 
     def reverse(self, entry_id: str, reason: str = "") -> Tuple[JournalEntry, JournalEntry]:
@@ -490,8 +496,6 @@ class FinanceTransactionService:
         original.status = "reversed"
         original.reversed_entry_id = reversal.id
 
-        self.db.commit()
-        self.db.refresh(original)
-        self.db.refresh(reversal)
+        self._finish_mutation(original, reversal)
         logger.info("Reversed JournalEntry %s → reversal %s", entry_id, reversal.id)
         return original, reversal
