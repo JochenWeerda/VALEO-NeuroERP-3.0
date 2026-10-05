@@ -20,6 +20,15 @@ mkdocs.yml, table_ownership.py Zuordnung domain_contracts und Tests;
 Baseline-Integritaetspruefer/Workflow-Mergevergleich mit Regressionen;
 eigene QA/Slice/Workboard/Gaps. Weitere nachgewiesene CI-Befunde separat
 claimen, fremde Preis-/Masken-WIP bleiben geschuetzt.
+**OpenAPI-Integration:** Ueberlappung mit OPENAPI-DRIFT-REFRESH: ausschliesslich
+Artefakt aus committed HEAD generieren und indexseitig integrieren; fremde
+Arbeitsbaumfassung der globalen Spec nicht ueberschreiben. Neue Router-WIP
+nicht importieren/veroeffentlichen. Kein API-Gate abschwaechen.
+**Erweiterter Claim (2026-10-05):** Nachgewiesene neue SQL-Ratschenbefunde
+in finance_transaction_service.py nur Kontohelfer und webhook_service.py;
+neue Kalenderquellen in frachtbrief_service.py und kontrakt_disposition_service.py.
+Keine Baseline-Erhoehung. Doku-Drift: eigener Logistik-Runbook-Nachtrag und
+doc_drift_report.py nur eingebettete party-native-Komponente; passende Tests.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
