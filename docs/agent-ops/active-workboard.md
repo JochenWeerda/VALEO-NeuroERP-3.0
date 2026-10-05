@@ -609,7 +609,7 @@ unvollstaendiger Nachweis, der vollstaendig wirkt. Summe 292 -> 286.
 
 **Doku:** `docs/quality-assurance/wiegung-kanonisch-20261005.md`.
 
-## KONTRAKT-DISPOSITION-20261005 — in Arbeit, Claude Code
+## KONTRAKT-DISPOSITION-20261005 — abgeschlossen, Claude Code
 
 **Befund:** `domain_agrar.kontrakt_dispositionen` existiert in keiner Datenbank.
 Angelegt wird sie **zur Laufzeit** vom Anwendungscode:
@@ -685,6 +685,50 @@ moeglich). Begruendung: Sonst ist die Freigabe kein Tor. Die Abnahme gehoert dem
 Kontrakt-Owner. Die Bindung an den Wiegeschein setzt voraus, dass die Wiegung im
 System steht; eine Fremdwiegung ohne Schein im System kann nicht als Lieferung
 gemeldet werden — das ist beabsichtigt und benannt.
+
+**Ergebnis (2026-10-05):** Migration `kontrakt_disposition_20261005` legt die
+Tabelle an — `tenant_id`, `ux_dispo_nummer`, FK auf den kanonischen Wiegeschein
+mit `ON DELETE RESTRICT`, fuenf Pruefbedingungen. Kein `CREATE TABLE` mehr im
+Anwendungscode; die drei alten Helfer in `kontrakte_service.py` sind weg.
+`freigabe` ist abgeleitet statt gespeichert; das Eingabeschema kennt das Feld
+nicht und traegt `extra="forbid"`. Die Abrufmenge laeuft gegen
+`kon_contract_line.qty_contract` mit der Ausnahme `allow_overdelivery` — die
+Regel stand im Modell und wurde nie gelesen. Ein stornierter Abruf bindet keine
+Menge. Zustandsuebergaenge an **einer** Stelle mit `FOR UPDATE`; `GELIEFERT` und
+`STORNIERT` sind endgueltig; geliefert wird nur aus der Freigabe. Die Lieferung
+loest die Wiegescheinnummer gegen das eigene Wiegeregister auf; eine Nummer ohne
+Schein ist ein 422. Neuer Weg `GET /kontrakte/{id}/abrufstand` mit kontrahierter,
+abgerufener und offener Menge je Position. **35 neue Vertraege, 83 mit den
+ersetzten Unittests, 105 im Kontraktumfeld gruen**; Migration auf beiden
+Datenbanken.
+
+**Godfile:** Fachlogik in `app/services/kontrakt_disposition_service.py`;
+`kontrakte.py` 1099 -> **1088** Zeilen, Baseline nachgezogen (down-only).
+
+**Beim Pruefen gefunden:** Ein ungebundenes `NULL` in einem `CASE` leitet
+Postgres als `text` ab und bricht an der Datumsspalte. Die Umwandlung ist
+ausgeschrieben. Erwaehnenswert, weil der 503 genau gesagt hat, was fehlt — das
+ist der Unterschied zu einem verschluckten Fehler.
+
+**Altlasttests:** `test_disposition_list_returns_empty_on_missing_table` ("muss
+[] zurueckgeben wenn Tabelle fehlt") und vier Formtests gegen `fetchone()`-Doubles
+sind durch acht Tests auf Woerterbuch, Uebergaenge und Mengenregel ersetzt.
+
+**Handshakes:**
+1. **Lieferung setzt Freigabe voraus** — fachliche Verscharfung, Abnahme beim
+   Kontrakt-Owner.
+2. `DispositionCreate`/`DispositionOut` in `kontrakte_schemas.py` sind jetzt
+   ungenutzt; Aufraeumen gehoert in einen Durchgang ueber die Kontraktschemata.
+3. `bank_accounts.py::list_ledger_options` bricht weiter die Paginierungsratsche
+   — Bank-Slice, einziger roter Eintrag.
+4. `tests/test_bank_reconciliation_proof.py` weiter 31 Fehler — Bank-Slice.
+5. `journal_entries_entry_number_key` systemweit statt je Mandant — Finanz-Owner.
+6. Fuehrendes Wiegemodell (`domain_agrar.weighing_tickets`,
+   `domain_ops.ops_wiegungen`, beide leer) — ADR offen.
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **9 -> 8**.
+
+**Doku:** `docs/quality-assurance/kontrakt-disposition-20261005.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

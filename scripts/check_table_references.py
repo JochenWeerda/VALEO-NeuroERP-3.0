@@ -116,7 +116,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: 2026-10-05, lebend 10 -> 9: `domain_agrar.wiegungen` wird nicht angelegt,
 #: sondern abgeloest — die Doppelwiegung schreibt das kanonische Rueckgrat
 #: `domain_inventory.weighing_tickets` (`wiegung_kanonisch_20261005`).
-BASELINE_LEBEND = 9
+#:
+#: 2026-10-05, lebend 9 -> 8: `kontrakt_disposition_20261005` legt
+#: `domain_agrar.kontrakt_dispositionen` an. Vorher legte der
+#: Anwendungscode die Tabelle zur Laufzeit selbst an; vor dem ersten POST
+#: antwortete das Auflisten `[]`.
+BASELINE_LEBEND = 8
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

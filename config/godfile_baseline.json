@@ -9,7 +9,7 @@
     "app/api/v1/endpoints/compliance.py": 1127,
     "app/api/v1/endpoints/einkauf_bestellvorschlag.py": 1058,
     "app/api/v1/endpoints/flow_spines.py": 1499,
-    "app/api/v1/endpoints/kontrakte.py": 1099,
+    "app/api/v1/endpoints/kontrakte.py": 1088,
     "app/api/v1/endpoints/logistics_tours.py": 1031,
     "app/api/v1/endpoints/mask_frontend_bridges.py": 1476,
     "app/api/v1/endpoints/personal.py": 3345,

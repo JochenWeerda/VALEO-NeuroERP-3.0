@@ -401,101 +401,11 @@ def contract_to_dict(contract: KonContract, line_out: list[dict[str, Any]], cont
     }
 
 
-# ── Disposition helpers (moved from endpoint) ─────────────────────────────────
+# ── Disposition ──────────────────────────────────────────────────────────────
+#
+# Hier standen bis zum 05.10.2026 drei Helfer: einer legte die Tabelle zur
+# Laufzeit selbst an (Fehlschlag in ein stilles ``except: rollback``), einer las
+# ohne Mandanten, einer schrieb ohne Mengenpruefung. Die Tabelle legt jetzt die
+# Migration ``kontrakt_disposition_20261005`` an; die Fachlogik steht in
+# ``app/services/kontrakt_disposition_service.py``.
 
-def ensure_disposition_table(db: Session) -> None:
-    """Erstellt domain_agrar.kontrakt_dispositionen falls die Tabelle fehlt."""
-    try:
-        db.execute(_sql_text("""
-            CREATE TABLE IF NOT EXISTS domain_agrar.kontrakt_dispositionen (
-                id               TEXT PRIMARY KEY,
-                kontrakt_id      TEXT NOT NULL,
-                disposition_nr   INTEGER NOT NULL,
-                kontrakt_nr      TEXT NOT NULL,
-                kontrakt_pos_nr  INTEGER NOT NULL DEFAULT 1,
-                geplantes_lieferdatum TEXT,
-                lieferdatum      TEXT,
-                menge            NUMERIC(18,3) NOT NULL,
-                freigabe         BOOLEAN NOT NULL DEFAULT FALSE,
-                wiegeschein_nr   TEXT,
-                bemerkung        TEXT,
-                status           TEXT NOT NULL DEFAULT 'OFFEN',
-                created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-                updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
-            )
-        """))
-        db.commit()
-    except Exception:
-        db.rollback()
-
-
-def list_dispositionen_db(db: Session, kontrakt_id: str) -> list[dict[str, Any]]:
-    rows = db.execute(
-        _sql_text(
-            "SELECT id, kontrakt_id, disposition_nr, kontrakt_nr, kontrakt_pos_nr, "
-            "geplantes_lieferdatum, lieferdatum, menge, freigabe, wiegeschein_nr, "
-            "bemerkung, status, created_at, updated_at "
-            "FROM domain_agrar.kontrakt_dispositionen "
-            "WHERE kontrakt_id = :kid ORDER BY disposition_nr ASC"
-        ),
-        {"kid": kontrakt_id},
-    ).fetchall()
-    return [
-        {
-            "id": r[0], "kontrakt_id": r[1], "disposition_nr": r[2],
-            "kontrakt_nr": r[3], "kontrakt_pos_nr": r[4],
-            "geplantes_lieferdatum": r[5], "lieferdatum": r[6],
-            "menge": float(r[7]) if r[7] is not None else None,
-            "freigabe": bool(r[8]), "wiegeschein_nr": r[9], "bemerkung": r[10],
-            "status": r[11],
-            "created_at": r[12].isoformat() if r[12] else None,
-            "updated_at": r[13].isoformat() if r[13] else None,
-        }
-        for r in rows
-    ]
-
-
-def create_disposition_db(db: Session, kontrakt_id: str, payload: Any) -> dict[str, Any]:
-    ensure_disposition_table(db)
-    new_id = str(_uuid_mod.uuid4())
-    db.execute(
-        _sql_text("""
-            INSERT INTO domain_agrar.kontrakt_dispositionen (
-                id, kontrakt_id, disposition_nr, kontrakt_nr, kontrakt_pos_nr,
-                geplantes_lieferdatum, lieferdatum, menge, freigabe,
-                wiegeschein_nr, bemerkung, status, created_at, updated_at
-            ) VALUES (
-                :id, :kontrakt_id,
-                COALESCE((SELECT MAX(disposition_nr) FROM domain_agrar.kontrakt_dispositionen
-                           WHERE kontrakt_id = :kontrakt_id), 0) + 1,
-                :kontrakt_nr, :kontrakt_pos_nr,
-                :geplantes_lieferdatum, :lieferdatum, :menge, :freigabe,
-                :wiegeschein_nr, :bemerkung,
-                CASE WHEN :freigabe THEN 'FREIGEGEBEN' ELSE 'OFFEN' END,
-                now(), now()
-            )
-        """),
-        {
-            "id": new_id, "kontrakt_id": kontrakt_id,
-            "kontrakt_nr": payload.kontrakt_nr, "kontrakt_pos_nr": payload.kontrakt_pos_nr,
-            "geplantes_lieferdatum": payload.geplantes_lieferdatum,
-            "lieferdatum": payload.lieferdatum, "menge": payload.menge,
-            "freigabe": payload.freigabe,
-            "wiegeschein_nr": payload.wiegeschein_nr, "bemerkung": payload.bemerkung,
-        },
-    )
-    db.commit()
-    row = db.execute(
-        _sql_text("SELECT id, disposition_nr, status FROM domain_agrar.kontrakt_dispositionen WHERE id = :id"),
-        {"id": new_id},
-    ).fetchone()
-    return {
-        "id": row[0] if row else new_id,
-        "kontrakt_id": kontrakt_id,
-        "disposition_nr": row[1] if row else 1,
-        "kontrakt_nr": payload.kontrakt_nr,
-        "kontrakt_pos_nr": payload.kontrakt_pos_nr,
-        "menge": payload.menge,
-        "freigabe": payload.freigabe,
-        "status": row[2] if row else ("FREIGEGEBEN" if payload.freigabe else "OFFEN"),
-    }
