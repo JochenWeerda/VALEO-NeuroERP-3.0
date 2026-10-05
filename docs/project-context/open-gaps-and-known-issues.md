@@ -11,6 +11,25 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## JOURNAL-CREATE-CANONICAL — Zweiter Anlageweg entfernt, API/Schema offen
+
+2026-10-05: Repository-Create nutzt FinanceTransactionService statt eigener
+JSON/Float-Hashberechnung. Explizite Waehrung und Buchungsdatum gespeichert;
+Storno erhaelt Waehrung einschliesslich explizitem NULL. Nicht speicherbare
+Steuer-/Kostenstellen-/Profitcenter-/Segmentangaben werden abgewiesen;
+DTO-Leerdefaults enthalten keine Fachinformation. Fremdtenant, freie
+Stempel/Status/ID-Felder und widerspruechliche Kopfsummen abgewiesen.
+321 Regressionen, 39 neue (fuenf PostgreSQL); vorhandener valeo_probe,
+Revision zusammenfuehrung_20261005, ohne eigenen Migrationslauf. QA:
+[Journalanlage](../quality-assurance/journal-create-canonical-20261005.md).
+Die darunter genannten Repository-Create-Gaps vom vorherigen Stand sind
+mit diesem begrenzten Vertrag geschlossen. Offen bleiben API-HTTP-Mapping/
+Session/Audit/Anchor, NULL-Waehrung im Response-DTO, aktive fremde API/DTO-
+Claims, Datumsnormalisierung und vollstaendiger Hash. ORM-Laengen und
+reales Schema widersprechen sich noch (entry_number 20/50, reference 50/255,
+description VARCHAR(200)/TEXT; Datum DateTime/DATE). Keine Migration in
+fremder Nutzung, keine erfundene Datenkorrektur oder globale API-Abnahme.
+
 ## JOURNAL-REPOSITORY-LIFECYCLE — Mutationen zentral, API/Anlage offen
 
 2026-10-05: JournalEntryRepositoryImpl delegiert Update/Delete/Post/Reverse

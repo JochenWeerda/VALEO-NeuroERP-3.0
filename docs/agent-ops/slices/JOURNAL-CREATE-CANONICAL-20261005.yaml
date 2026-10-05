@@ -1,0 +1,34 @@
+slice_id: JOURNAL-CREATE-CANONICAL-20261005
+title: Konkurrierende Journalanlage und stillen Metadatenverlust entfernen
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-05
+updated_at: 2026-10-05
+coordination: Claim 72aafed8a; fremde API/DTO/UI/Godfile-Edits geschuetzt.
+goal: Repositoryanlage verwendet einen zentralen validierten Journal-Schreibweg.
+file_ownership:
+  - implementations.py Journal-Create und Hashhelper
+  - finance_transaction_service.py Create-Datum/Waehrung und Reverse-Waehrung
+  - journal.py vorhandene currency-Spalte
+  - tests/test_journal_create_canonical.py
+acceptance:
+  - Zentraler Betrag/Konto/Tenant/Stempelvertrag statt JSON/Float-Hashweg.
+  - Waehrung und Buchungsdatum gespeichert; Storno erhaelt explizites NULL.
+  - Fachlich nicht speicherbare Metadaten abweisen; Input nicht mutieren.
+test_evidence:
+  - 321 Tests; 39 neue davon fuenf echte PostgreSQL-Faelle.
+  - Neue Pythonanteile und gesamte Journal-Repositoryklasse Ruff-sauber.
+  - Probe Revision zusammenfuehrung_20261005 ohne eigene Migration.
+risks:
+  - Fremder API/DTO-Claim; HTTP-Mapping/Session/Audit/Anchor offen.
+  - NULL-Waehrung im Response-DTO und Schema-Laengen-/Datumskonflikte offen.
+  - Vollstaendiger Hash und weitere SQL-Schreiber/Atomizitaet offen.
+  - Fremder Godfile-Handshake logistics_tours.py 1033 auf 1059.
+ai_harness:
+  fachlicher_vertrag: Ein Journal-Anlageweg ohne unbemerkten Metadatenverlust.
+  architektur_vertrag: Bestehender Service und vorhandene currency-Spalte.
+  daten_vertrag: Eingabe unveraendert; gespeicherte Waehrung und Kalendertage erhalten.
+  test_vertrag: Echte PostgreSQL-Anlage/Post/Storno und fruehe Abweisung.
+  security_vertrag: Keine Fremdtenant- oder freien Stempel/Status/ID-Eingaben.
+  betriebs_vertrag: Gemeinsamer valeo_probe ohne neue DB/Container/Reset.
+  dokumentations_vertrag: QA/Slice/Workboard/Gaps ohne globale Abnahmebehauptung.

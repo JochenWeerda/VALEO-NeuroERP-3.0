@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## JOURNAL-CREATE-CANONICAL-20261005 — reserviert, Codex (Chat 01a0f3fc)
+## JOURNAL-CREATE-CANONICAL-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Zweiten Repository-Anlage-/Hashweg
 entfernen; zentraler Betrag/Konto/Tenant/Stempelvertrag, Datum und Waehrung
@@ -24,6 +24,20 @@ exakten Betraegen und zentralem Stempel. Fehler vor DML; Payload nicht mutieren.
 **Risiken:** API/DTO bleiben fremd beansprucht, HTTP-Mapping/Audit/Session,
 vollstaendiger Hash und Schema-Laengendrift offen. Kein neuer API-Vertrag,
 keine Migration. Bestehender valeo_probe Revision zusammenfuehrung_20261005.
+
+**Ergebnis 2026-10-05:** Repository-Create und zweiter JSON/Float-Hashhelper
+entfernt; Anlage delegiert an den zentralen Service. Explizite gespeicherte
+Waehrung und Buchungsdatum, Storno erhaelt auch NULL statt EUR zu erfinden.
+Unbekannte/nicht speicherbare fachliche Angaben und widerspruechliche
+Kopfsummen vor DML abgewiesen; Eingabedictionary unveraendert.
+**Nachweis:** 321 Regressionen bestanden, 39 neue (fuenf PostgreSQL).
+Ruff fuer Service/Modell/Tests und gesamte Journal-Repositoryklasse sauber;
+13 fremde bestehende Repository-Ruff-Befunde weiterhin offen.
+QA: journal-create-canonical-20261005.md. Claim 72aafed8a.
+**Handoff:** API-HTTP-Mapping/Session/Audit/Anchor, NULL-Waehrung im DTO,
+Schema-Laengendrift/Datumsnormalisierung/vollstaendiger Hash bleiben offen.
+Godfile-Handshakemeldung logistics_tours.py (1033 -> 1059) unveraendert;
+keine globale Gate-/Journal-/GoBD-Abnahme. Keine Migration/Reset/neue DB.
 
 ## JOURNAL-REPOSITORY-LIFECYCLE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
