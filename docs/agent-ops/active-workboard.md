@@ -747,6 +747,91 @@ sind durch acht Tests auf Woerterbuch, Uebergaenge und Mengenregel ersetzt.
 
 **Doku:** `docs/quality-assurance/kontrakt-disposition-20261005.md`.
 
+## PREISFINDUNG-KASKADE-20261005 — in Arbeit, Claude Code
+
+**Befund:** `/pricing/calculate` ist **der** Preisfindungsweg (die Maske
+Lieferscheinerfassung und `lib/api/konditionen.ts` rufen ihn). Er hat fuenf
+Stufen, und **drei von ihnen haben nie funktioniert**:
+
+| Stufe | Liest | Lage |
+| --- | --- | --- |
+| 1 Preisliste | `domain_pricing.price_list_items` | funktioniert |
+| 2 Kontraktrabatt | `domain_contracts.contracts.discount_percent/_amount` | **Spalten gibt es nicht** — die Tabelle hat nur `title`, `counterparty_id`, `notice_period_days`; sie ist ein Vertragsregister, kein Handelskontrakt |
+| 3 Kundenrabatt | `BusinessPartnerService.get_customer_discount` | funktioniert |
+| 4 Mitarbeiterrabatt | `domain_pricing.discount_rules` | **Tabelle gibt es nicht** |
+| 5 Basispreis | `domain_inventory.articles.sales_price` | funktioniert |
+
+Jeder Fehlschlag laeuft in `except Exception: db.rollback()`. Das Ergebnis ist
+der **volle Listenpreis** mit `source: "base"` — ein plausibler, falscher Preis.
+Ein Preis ist keine Anzeige, sondern die Grundlage der Rechnung; ein
+verschluckter Rabatt ist ein Abrechnungsfehler, der wie ein richtiger Preis
+aussieht.
+
+**Dazu die vierte Luecke:** `domain_pricing.staffelrabatte` fuehrt in der
+Entwicklungsdatenbank **20 Zeilen** — Mengenstaffeln, die ein Haus gepflegt hat.
+Die Kaskade liest sie **nicht**. Es gibt Wege zum Anlegen und Auflisten, aber
+keinen Einfluss auf den Preis. Zwei Umsetzungen eines Begriffs, von denen die
+gepflegte wirkungslos ist.
+
+**Und der Mandant kommt aus einem Query-Parameter:**
+`tenant_id: str = Query(DEFAULT_TENANT)`. Wer den Parameter setzt, fragt die
+Preislisten und Kundenrabatte eines **fremden** Hauses ab; wer ihn weglaesst,
+bekommt stillschweigend die des Vorgabemandanten. Die Aufrufer im Frontend
+setzen ihn nicht und schicken ohnehin `X-Tenant-ID`.
+
+**Ziel:** Eine Kaskade, die den Mandanten aus dem Kopf nimmt, ihre Stufen
+tatsaechlich auswertet und einen Fehlschlag meldet statt ihn in den Listenpreis
+zu verwandeln.
+
+**Die Entscheidungen, und warum so:**
+
+1. **Der Kontraktrabatt kommt aus dem fuehrenden Kontraktmodell.**
+   `domain_ops.kon_contract_line` traegt `unit_price`, `discount_pct` und
+   `surcharge` **je Artikel** — das ist genauer als ein pauschaler Rabatt am
+   Kontraktkopf, den es ohnehin nicht gibt. `domain_contracts.contracts` bleibt
+   unberuehrt (Vertragsregister, eigener Zweck, `central_contracts.py`).
+2. **Die Mengenstaffel wird Teil der Kaskade** — zwischen Kontrakt und
+   Kundenrabatt. Begruendung: Eine Staffel haengt an der **tatsaechlich
+   bestellten Menge** und ist damit die spezifischere Aussage als ein pauschaler
+   Kundenrabatt; der Kontrakt bleibt darueber, weil er eine Zusage ist. Ein
+   `festpreis` in der Staffel ersetzt den Listenpreis, wie es eine Preisliste
+   tut.
+3. **Ein Fehlschlag in einer Stufe ist ein 503**, nicht der Listenpreis. Welche
+   Stufe gescheitert ist, steht in der Antwort.
+4. **`domain_pricing.discount_rules` wird angelegt** — mit `tenant_id`,
+   Gueltigkeitszeitraum und `CHECK` auf 0..100 Prozent. Ein Rabatt ueber 100 %
+   waere ein negativer Preis.
+5. **`source` wird vollstaendig**: Die Antwort nennt die Stufe, die den Preis
+   bestimmt hat, und `staffelrabatt` kommt dazu.
+
+**Dateibesitz:** `alembic/versions/preisfindung_rabattregeln_20261005.py`,
+`app/api/v1/endpoints/pricing.py` (nur Kaskade und Schemata),
+`app/services/preisfindung_service.py` (neu),
+`packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx` (nur der
+Preisfindungs-`catch`, der den Fehler heute verschluckt),
+`packages/frontend-web/src/lib/api/konditionen.ts` (nur `PreisfindungResult`),
+`tests/test_preisfindung_kaskade_vertrag.py` (neu),
+`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
+dieser Abschnitt.
+**Nicht angefasst:** `domain_contracts.contracts` und `central_contracts.py`;
+die uebrigen sechzehn Preis- und Rabatttabellen (`preis_rabattsaetze`,
+`individualpreise`, `article_price_thresholds`, …) — ihre Zusammenfuehrung
+gehoert in einen ADR zum fuehrenden Preismodell und ist **nicht** Teil dieses
+Slices.
+
+**Abnahme:** Der Mandant kommt aus dem Kopf, nicht aus einem Query-Parameter;
+jede Stufe wird ausgewertet und ein Fehlschlag ist ein 503 mit der Stufe im
+Text; der Kontraktpreis kommt aus `kon_contract_line`; eine Mengenstaffel
+wirkt auf den Preis; `discount_rules` entsteht durch die Migration; ein Rabatt
+ueber 100 % ist unmoeglich; die Maske verschluckt den Fehler nicht mehr;
+Vertraege gegen die frische DB und alle Ratschen gruen.
+
+**Risiken:** Die Reihenfolge Kontrakt > Staffel > Kundenrabatt ist eine
+**fachliche Entscheidung** und gehoert dem Vertriebs-Owner zur Abnahme. Dass die
+Kaskade jetzt 503 statt des Listenpreises liefert, macht bisher unsichtbare
+Stoerungen sichtbar — das ist beabsichtigt, kann aber in Masken auffallen, die
+den Fehler bisher verschluckt haben.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
