@@ -269,7 +269,7 @@ def ungepruefte_vorgelagerte(
                 "ORDER BY erfasst_am LIMIT :limit"
             ),
             {"tid": tenant_id, "limit": limit},
-        ).mappings().all()
+        ).mappings().fetchmany(limit)
     except Exception as fehler:  # noqa: BLE001
         raise dienst.nicht_lesbar(db, fehler, "Vorgelagerte EUDR-Erklaerungen", tenant_id) from fehler
     return [

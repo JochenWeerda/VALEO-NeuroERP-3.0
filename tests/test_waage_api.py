@@ -469,32 +469,45 @@ class TestWaageLiveUnit:
         with pytest.raises(HTTPException):
             asyncio.run(waage.get_kalibrierung("missing", db=db_missing))
 
-    def test_dual_wiegung_create_fallback_and_extended_read(self):
+    def test_dual_wiegung_schreibt_den_kanonischen_schein(self):
+        """Vorher prueffte dieser Test den JSONB-Rueckfall als Erfolgsfall.
+
+        Schlug der erste INSERT fehl, schrieb der Weg die ganze Wiegung als
+        undurchsichtigen Klumpen in ``extended_data`` — ohne Gewicht, ohne Waage
+        — und antwortete ``201 created``. Ein Wiegeschein ohne Gewicht in einer
+        Spalte ist nicht abrechenbar und nicht pruefbar. Der Rueckfall ist weg.
+        """
         import asyncio
-        from datetime import datetime
         from app.api.v1.endpoints.waage import (
             WiegungErweitert,
             WiegescheinMitDoppelwiegung,
             create_dual_wiegung,
-            get_wiegung_extended,
         )
 
         db = MagicMock()
-        db.execute.side_effect = [Exception("column does not exist"), MagicMock()]
+        db.execute.return_value.scalar.side_effect = [2026, 41]
         payload = WiegescheinMitDoppelwiegung(
             waage_id="WA-1",
-            wiegung_erweitert=WiegungErweitert(waage_id="WA-1", wiegung1=1000, wiegung2=400, gosse=2),
+            wiegung_erweitert=WiegungErweitert(waage_id="WA-1", brutto_kg=1000, tara_kg=400, gosse=2),
             kfz_kennzeichen="HB-1",
         )
-        created = asyncio.run(create_dual_wiegung(payload=payload, db=db))
-        assert created["netto"] == pytest.approx(600)
+        created = asyncio.run(
+            create_dual_wiegung(payload=payload, tenant_id="t-1", db=db)
+        )
+        assert created["netto_kg"] == pytest.approx(600)
+        assert created["brutto_kg"] == pytest.approx(1000)
+        assert created["tara_kg"] == pytest.approx(400)
         assert created["gosse"] == 2
-
-        row = ("WG-1", "WA-1", 600.0, 2, "EL", "HB-1", {"x": 1}, datetime(2026, 1, 1))
-        db_read = MagicMock()
-        db_read.execute.return_value.fetchone.return_value = row
-        got = asyncio.run(get_wiegung_extended("WG-1", db=db_read))
-        assert got["extended_data"] == {"x": 1}
+        assert created["ticket_number"] == "WS-2026-000042"
+        # Keine zweite Schreibrunde als Rueckfall, und geschrieben wird das
+        # kanonische Rueckgrat. ``TextClause`` druckt sich nicht aus, also wird
+        # der SQL-Text selbst gelesen.
+        anweisungen = " ".join(
+            str(aufruf.args[0]) for aufruf in db.execute.call_args_list if aufruf.args
+        )
+        assert "extended_data" not in anweisungen
+        assert "domain_inventory.weighing_tickets" in anweisungen
+        assert "domain_agrar.wiegungen" not in anweisungen
 
     def test_import_ascii_success_quality_and_strict_parse_error(self):
         from app.api.v1.endpoints import waage
@@ -528,18 +541,18 @@ class TestWaageLiveUnit:
         assert exc.value.status_code == 503
 
         db_extended_missing = MagicMock()
-        db_extended_missing.execute.return_value.fetchone.return_value = None
+        db_extended_missing.execute.return_value.mappings.return_value.first.return_value = None
         with pytest.raises(HTTPException) as missing:
-            asyncio.run(waage.get_wiegung_extended("missing", db=db_extended_missing))
+            asyncio.run(waage.get_wiegung_extended("missing", tenant_id="t-1", db=db_extended_missing))
         assert missing.value.status_code == 404
 
         db_extended_error = MagicMock()
         db_extended_error.execute.side_effect = Exception("relation missing")
         with pytest.raises(HTTPException) as db_exc:
-            asyncio.run(waage.get_wiegung_extended("WG-1", db=db_extended_error))
+            asyncio.run(waage.get_wiegung_extended("WG-1", tenant_id="t-1", db=db_extended_error))
         assert db_exc.value.status_code == 503
 
-    def test_dual_wiegung_db_error_paths_and_explicit_netto(self):
+    def test_dual_wiegung_fehlerwege_und_ausgewiesenes_netto(self):
         import asyncio
         from fastapi import HTTPException
         from app.api.v1.endpoints.waage import (
@@ -549,21 +562,23 @@ class TestWaageLiveUnit:
         )
 
         db = MagicMock()
+        db.execute.return_value.scalar.side_effect = [2026, None]
         payload = WiegescheinMitDoppelwiegung(
-            wiegung_erweitert=WiegungErweitert(waage_id="WA-1", netto=123.0, zielschein_typ="VL"),
+            wiegung_erweitert=WiegungErweitert(
+                waage_id="WA-1", netto_kg=123.0, zielschein_typ="VL", handwiegung=True
+            ),
         )
-        created = asyncio.run(create_dual_wiegung(payload=payload, db=db))
-        assert created["netto"] == pytest.approx(123.0)
-        assert created["zielschein_typ"] == "VL"
+        created = asyncio.run(create_dual_wiegung(payload=payload, tenant_id="t-1", db=db))
+        assert created["netto_kg"] == pytest.approx(123.0)
+        assert created["richtung"] == "out"
+        assert created["handwiegung"] is True
 
+        # Ein Schreibfehler ist ein 503 mit Hinweis — und kein stiller Rueckfall.
         db_bad = MagicMock()
         db_bad.execute.side_effect = Exception("permission denied")
         with pytest.raises(HTTPException) as exc:
-            asyncio.run(create_dual_wiegung(payload=payload, db=db_bad))
+            asyncio.run(create_dual_wiegung(payload=payload, tenant_id="t-1", db=db_bad))
         assert exc.value.status_code == 503
+        assert "migration_hint" in str(exc.value.detail)
+        db_bad.rollback.assert_called()
 
-        db_fallback_bad = MagicMock()
-        db_fallback_bad.execute.side_effect = [Exception("column missing"), Exception("fallback failed")]
-        with pytest.raises(HTTPException) as fallback_exc:
-            asyncio.run(create_dual_wiegung(payload=payload, db=db_fallback_bad))
-        assert fallback_exc.value.status_code == 503

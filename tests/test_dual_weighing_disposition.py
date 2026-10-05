@@ -31,77 +31,95 @@ def _mock_db():
 # ---------------------------------------------------------------------------
 # Dual-Wiegung unit tests
 # ---------------------------------------------------------------------------
+#
+# Bis zum 05.10.2026 forderte ein Test hier genau den Fehler ein:
+# "Reihenfolge der Wiegungen darf kein negatives Netto erzeugen" — mit
+# ``netto = abs(wiegung1 - wiegung2)`` als Beweis. Der Absolutbetrag verdeckt
+# aber den Vorzeichenfehler: Eine Tara schwerer als das Brutto ist ein Messfehler
+# oder eine Verwechslung der beiden Eingaben, und daraus wurde ein plausibles
+# positives Nettogewicht, auf dem die Rechnung aufbaute.
+#
+# Drei weitere Tests riefen ``create_dual_wiegung(payload, db)`` positionell auf
+# und trafen damit den Parameter ``tenant_id``. Sie waren rot, seit der Weg eine
+# Mandantenabhaengigkeit hat — der Weg war kaputt und nur scheinbar geprueft.
+#
+# Der fachliche Nachweis gegen eine echte Datenbank steht in
+# ``tests/test_wiegung_kanonisch_vertrag.py``.
+
 
 @pytest.mark.unit
-def test_dual_weighing_netto_computed():
-    """netto = abs(wiegung1 - wiegung2) muss korrekt berechnet werden."""
-    from app.api.v1.endpoints.waage import WiegungErweitert, WiegescheinMitDoppelwiegung
+def test_netto_ist_brutto_minus_tara():
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    ext = WiegungErweitert(waage_id="W1", wiegung1=32500.0, wiegung2=5000.0)
-    payload = WiegescheinMitDoppelwiegung(waage_id="W1", wiegung_erweitert=ext)
-
-    # Simulate netto computation (the same logic used in the endpoint)
-    netto = abs(ext.wiegung1 - ext.wiegung2)
+    brutto, tara, netto = netto_aus_doppelwiegung(32500.0, 5000.0, None)
+    assert brutto == pytest.approx(32500.0)
+    assert tara == pytest.approx(5000.0)
     assert netto == pytest.approx(27500.0)
 
 
 @pytest.mark.unit
-def test_dual_weighing_netto_computed_reverse():
-    """Reihenfolge der Wiegungen darf kein negatives Netto erzeugen."""
-    netto = abs(5000.0 - 32500.0)
-    assert netto == pytest.approx(27500.0)
+def test_vertauschte_waegungen_sind_ein_fehler():
+    """Vorher: ``abs(5000 - 32500) == 27500`` — ein Netto aus einem Messfehler."""
+    from fastapi import HTTPException
+
+    from app.services.wiegung_service import netto_aus_doppelwiegung
+
+    with pytest.raises(HTTPException) as fehler:
+        netto_aus_doppelwiegung(5000.0, 32500.0, None)
+    assert fehler.value.status_code == 422
+    assert "vertauscht" in str(fehler.value.detail)
 
 
 @pytest.mark.unit
-def test_dual_weighing_with_gosse():
-    """Gosse-Feld muss in der Response vorhanden sein."""
-    from app.api.v1.endpoints.waage import WiegungErweitert, WiegescheinMitDoppelwiegung, create_dual_wiegung
+def test_gleiche_waegungen_ergeben_kein_netto():
+    from fastapi import HTTPException
 
-    ext = WiegungErweitert(waage_id="W2", wiegung1=10000.0, wiegung2=2000.0, gosse=3)
-    payload = WiegescheinMitDoppelwiegung(waage_id="W2", wiegung_erweitert=ext)
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    db = _mock_db()
-    # Simulate successful INSERT (no exception)
-    db.execute.return_value = MagicMock()
-
-    result = _run(create_dual_wiegung(payload, db))
-
-    assert result["gosse"] == 3
-    assert result["netto"] == pytest.approx(8000.0)
-    assert result["status"] == "created"
-    assert "id" in result
+    with pytest.raises(HTTPException):
+        netto_aus_doppelwiegung(20000.0, 20000.0, None)
 
 
 @pytest.mark.unit
-def test_dual_weighing_zielschein_typ():
-    """zielschein_typ muss in der Response korrekt übergeben werden."""
-    from app.api.v1.endpoints.waage import WiegungErweitert, WiegescheinMitDoppelwiegung, create_dual_wiegung
+def test_ausgewiesenes_netto_wird_uebernommen():
+    """Handwiegung oder Fremdwaage: Es gibt keine zwei Messungen zum Nachrechnen."""
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    ext = WiegungErweitert(
-        waage_id="W3", wiegung1=20000.0, wiegung2=4000.0, zielschein_typ="VL"
-    )
-    payload = WiegescheinMitDoppelwiegung(waage_id="W3", wiegung_erweitert=ext)
-
-    db = _mock_db()
-    db.execute.return_value = MagicMock()
-
-    result = _run(create_dual_wiegung(payload, db))
-    assert result["zielschein_typ"] == "VL"
+    assert netto_aus_doppelwiegung(None, None, 18000.0)[2] == pytest.approx(18000.0)
 
 
 @pytest.mark.unit
-def test_dual_weighing_no_extended_block():
-    """Payload ohne wiegung_erweitert darf nicht crashen, netto bleibt None."""
-    from app.api.v1.endpoints.waage import WiegescheinMitDoppelwiegung, create_dual_wiegung
+def test_ohne_jedes_gewicht_ist_der_schein_kein_beleg():
+    from fastapi import HTTPException
 
-    payload = WiegescheinMitDoppelwiegung(waage_id="W4", lieferant_id="L-001")
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    db = _mock_db()
-    db.execute.return_value = MagicMock()
+    with pytest.raises(HTTPException) as fehler:
+        netto_aus_doppelwiegung(None, None, None)
+    assert "kein Beleg" in str(fehler.value.detail)
 
-    result = _run(create_dual_wiegung(payload, db))
-    assert result["netto"] is None
-    assert result["status"] == "created"
+
+@pytest.mark.unit
+def test_zielscheintyp_wird_auf_die_richtung_abgebildet():
+    """EL = Eingangslieferschein (Zugang), VL = Verkaufslieferschein (Abgang)."""
+    from app.services.wiegung_service import richtung
+
+    assert richtung("EL") == "in"
+    assert richtung("VL") == "out"
+    # Ohne Angabe gilt der Zugang — das ist der Regelfall an der Annahme.
+    assert richtung(None) == "in"
+
+
+@pytest.mark.unit
+def test_unbekannter_zielscheintyp_ist_kein_stiller_zugang():
+    """Ein stilles ``in`` haette eine Verkaufslieferung als Zugang gefuehrt."""
+    from fastapi import HTTPException
+
+    from app.services.wiegung_service import richtung
+
+    with pytest.raises(HTTPException) as fehler:
+        richtung("UMLAGERUNG")
+    assert fehler.value.status_code == 422
 
 
 # ---------------------------------------------------------------------------

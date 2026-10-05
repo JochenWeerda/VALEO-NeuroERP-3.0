@@ -2,6 +2,7 @@
 Waage API Endpoints - SQLAlchemy Version
 """
 
+import logging
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
@@ -15,6 +16,7 @@ from sqlalchemy.inspection import inspect as sa_inspect
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.uuid7 import uuid7
 from app.services.frachtbrief_service import finalize_menge_from_outbound_weighing
 
 from app.domains.operations.repository import WaageRepository, WiegungRepository
@@ -27,6 +29,8 @@ class WaageOut(BaseSchema):
     """Typed response schema for WaageOut endpoints (extra fields forwarded)."""
     model_config = _ConfigDict(extra="allow")
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/waage", tags=["Waage"])
 
@@ -557,172 +561,141 @@ async def update_kalibrierung(
 # DUAL-WIEGUNG â€” Doppelwiegung (Brutto/Tara als zwei separate WiegevorgÃ¤nge)
 # ===========================================================================
 
-import json as _json
+# ============================================================
+# Doppelwiegung auf dem kanonischen Wiegeschein
+# ============================================================
+#
+# Bis zum 05.10.2026 schrieb dieser Teil ``domain_agrar.wiegungen`` — eine
+# Tabelle, die keine Migration anlegt und die in keiner Datenbank existiert.
+# Daneben stehen drei weitere Wiegetabellen. Geschrieben wird jetzt
+# ``domain_inventory.weighing_tickets``: das Rueckgrat, auf das die
+# Rueckverfolgbarkeit zeigt und das alle Felder der Doppelwiegung schon hat.
+#
+# Drei Fehler sind damit weg:
+#
+# 1. ``netto = abs(wiegung1 - wiegung2)`` — der Absolutbetrag verdeckte den
+#    Vorzeichenfehler und machte aus einer Verwechslung der Eingaben ein
+#    plausibles Nettogewicht, auf dem die Rechnung aufbaute.
+# 2. Der JSONB-Rueckfall — schlug der INSERT fehl, wurde die ganze Wiegung als
+#    undurchsichtiger Klumpen gespeichert, ohne Gewicht, ohne Waage, und der Weg
+#    antwortete ``201 created``. Ein Wiegeschein ohne Gewicht ist kein Beleg.
+# 3. Kein ``tenant_id`` — weder beim Schreiben noch beim Lesen.
+#
+# Entscheidungen: ``docs/quality-assurance/wiegung-kanonisch-20261005.md``.
+
+from app.api.v1.schemas.waage_schemas import (  # noqa: E402
+    WiegescheinMitDoppelwiegung,
+    WiegescheinOut,
+    WiegungAngelegt,
+    WiegungErweitert,
+)
+from app.services import wiegung_service as wiegung  # noqa: E402
+
+__all__ = ["WiegungErweitert", "WiegescheinMitDoppelwiegung"]
 
 
-class WiegungErweitert(BaseModel):
-    waage_id: str
-    ident_nr: Optional[str] = None
-    wiegung1: Optional[float] = None
-    wiegung2: Optional[float] = None
-    netto: Optional[float] = None
-    gosse: Optional[int] = None
-    muster_nr: Optional[str] = None
-    handwiegung: bool = False
-    export_flag: bool = False
-    zielschein_typ: Optional[str] = None  # VL=Verkaufslieferschein, EL=Eingangslieferschein
-
-
-class WiegescheinMitDoppelwiegung(BaseModel):
-    # Core Wiegevorgang fields (flexible dict-based submission)
-    waage_id: Optional[str] = None
-    lieferant_id: Optional[str] = None
-    artikel_id: Optional[str] = None
-    partie_id: Optional[str] = None
-    # Extended dual-weighing block
-    wiegung_erweitert: Optional[WiegungErweitert] = None
-    zielscheinfestgelegt: bool = False
-    disponr: Optional[str] = None
-    charge_nr: Optional[str] = None
-    kfz_kennzeichen: Optional[str] = None
-
-
-@router.post("/wiegungen/dual", response_model=WaageOut, status_code=201, summary="Dual wiegung anlegen")
+@router.post(
+    "/wiegungen/dual",
+    response_model=WiegungAngelegt,
+    status_code=201,
+    summary="Doppelwiegung buchen (Brutto und Tara)",
+)
 async def create_dual_wiegung(
     payload: WiegescheinMitDoppelwiegung,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Doppelwiegung: Nimmt Brutto- und Tara-Wiegung entgegen und berechnet Netto automatisch."""
-    ext = payload.wiegung_erweitert
-    netto: Optional[float] = None
-    gosse: Optional[int] = None
-    zielschein_typ: Optional[str] = None
+) -> dict:
+    """Nimmt Brutto- und Tarawiegung entgegen und rechnet das Netto.
 
-    if ext:
-        # Compute netto from the two weighings if both provided
-        if ext.wiegung1 is not None and ext.wiegung2 is not None:
-            netto = abs(ext.wiegung1 - ext.wiegung2)
-            # Propagate back into model (for storage)
-            ext.netto = netto
-        elif ext.netto is not None:
-            netto = ext.netto
-        gosse = ext.gosse
-        zielschein_typ = ext.zielschein_typ
+    ``netto = brutto - tara`` — ohne Absolutbetrag. Ist die Tara nicht kleiner
+    als das Brutto, ist das ein Messfehler oder eine Verwechslung der beiden
+    Waegungen; dann entsteht kein Wiegeschein, sondern ein 422. Das
+    Nettogewicht ist die abgerechnete Menge.
+    """
+    ext = payload.wiegung_erweitert or WiegungErweitert()
+    brutto, tara, netto = wiegung.netto_aus_doppelwiegung(
+        ext.brutto_kg, ext.tara_kg, ext.netto_kg
+    )
+    richtung = wiegung.richtung(ext.zielschein_typ)
 
-    new_id = str(uuid.uuid4())
-    extended_data = ext.model_dump() if ext else {}
-    extended_data["zielscheinfestgelegt"] = payload.zielscheinfestgelegt
-    extended_data["disponr"] = payload.disponr
-    extended_data["charge_nr"] = payload.charge_nr
-    extended_data["kfz_kennzeichen"] = payload.kfz_kennzeichen
-
-    # Try inserting with native columns first; fall back to JSONB extended_data column
+    schein_id = str(uuid7())
     try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_agrar.wiegungen (
-                    id, waage_id, lieferant_id, artikel_id, partie_id,
-                    netto_kg, gosse, zielschein_typ, kfz_kennzeichen,
-                    extended_data, created_at
-                ) VALUES (
-                    :id, :waage_id, :lieferant_id, :artikel_id, :partie_id,
-                    :netto_kg, :gosse, :zielschein_typ, :kfz_kennzeichen,
-                    CAST(:extended_data AS jsonb), now()
-                )
-                """
-            ),
-            {
-                "id": new_id,
-                "waage_id": payload.waage_id or (ext.waage_id if ext else None),
-                "lieferant_id": payload.lieferant_id,
-                "artikel_id": payload.artikel_id,
-                "partie_id": payload.partie_id,
-                "netto_kg": netto,
-                "gosse": gosse,
-                "zielschein_typ": zielschein_typ,
-                "kfz_kennzeichen": payload.kfz_kennzeichen,
-                "extended_data": _json.dumps(extended_data),
-            },
+        scheinnummer = wiegung.naechste_scheinnummer(db, tenant_id)
+        wiegung.schreiben(
+            db,
+            tenant_id,
+            schein_id,
+            scheinnummer,
+            scale_id=payload.waage_id or ext.waage_id,
+            vehicle_plate=payload.kfz_kennzeichen,
+            brutto=brutto,
+            tara=tara,
+            netto=netto,
+            richtung_=richtung,
+            gosse=ext.gosse,
+            muster_nr=ext.muster_nr,
+            handwiegung=ext.handwiegung,
+            ident_nr=ext.ident_nr,
+            disposition_nr=payload.disponr,
+            charge_nr=payload.charge_nr,
+            article_id=payload.artikel_id,
+            reference_doc=payload.partie_id,
+            notes=payload.bemerkung,
         )
         finalize_menge_from_outbound_weighing(
             db,
             tenant_id=tenant_id,
             kennzeichen=payload.kfz_kennzeichen,
             netto_kg=netto,
-            zielschein_typ=zielschein_typ,
+            zielschein_typ=ext.zielschein_typ,
         )
         db.commit()
-    except Exception as e:
+    except HTTPException:
         db.rollback()
-        err_str = str(e).lower()
-        # Column missing â†’ fallback: store everything as JSONB in extended_data column
-        if "column" in err_str or "does not exist" in err_str or "relation" in err_str:
-            try:
-                db.execute(
-                    text(
-                        """
-                        INSERT INTO domain_agrar.wiegungen (id, extended_data, created_at)
-                        VALUES (:id, CAST(:extended_data AS jsonb), now())
-                        """
-                    ),
-                    {"id": new_id, "extended_data": _json.dumps(extended_data)},
-                )
-                db.commit()
-            except Exception as e2:
-                db.rollback()
-                raise HTTPException(
-                    status_code=503,
-                    detail=f"DB-Fehler (JSONB-Fallback): {e2}",
-                    headers={"X-Migration-Hint": "Run: alembic upgrade head (domain_agrar.wiegungen fehlt)"},
-                )
-        else:
-            raise HTTPException(
-                status_code=503,
-                detail=f"DB-Fehler: {e}",
-                headers={"X-Migration-Hint": "Run: alembic upgrade head"},
-            )
-
-    return {
-        "id": new_id,
-        "netto": netto,
-        "gosse": gosse,
-        "zielschein_typ": zielschein_typ,
-        "status": "created",
-    }
-
-
-@router.get("/wiegungen/{wiegeschein_id}/extended", response_model=WaageOut, summary="Wiegung extended abrufen")
-async def get_wiegung_extended(wiegeschein_id: str, db: Session = Depends(get_db)):
-    """Gibt erweiterte Daten einer Wiegung zurÃ¼ck inkl. Doppelwiegungsinformationen."""
-    try:
-        row = db.execute(
-            text(
-                "SELECT id, waage_id, netto_kg, gosse, zielschein_typ, "
-                "kfz_kennzeichen, extended_data, created_at "
-                "FROM domain_agrar.wiegungen WHERE id = :id"
-            ),
-            {"id": wiegeschein_id},
-        ).fetchone()
-    except Exception as e:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        logger.exception("Doppelwiegung nicht buchbar (Mandant %s)", tenant_id)
         raise HTTPException(
             status_code=503,
-            detail=f"DB-Fehler: {e}",
-            headers={"X-Migration-Hint": "Run: alembic upgrade head"},
-        )
-
-    if row is None:
-        raise HTTPException(status_code=404, detail=f"Wiegung {wiegeschein_id} nicht gefunden")
+            detail={
+                "error": "Wiegung nicht gebucht",
+                "grund": str(fehler),
+                "migration_hint": wiegung.MIGRATIONS_HINWEIS["X-Migration-Hint"],
+            },
+            headers=wiegung.MIGRATIONS_HINWEIS,
+        ) from fehler
 
     return {
-        "id": row[0],
-        "waage_id": row[1],
-        "netto_kg": float(row[2]) if row[2] is not None else None,
-        "gosse": row[3],
-        "zielschein_typ": row[4],
-        "kfz_kennzeichen": row[5],
-        "extended_data": row[6] or {},
-        "created_at": row[7].isoformat() if row[7] else None,
+        "id": schein_id,
+        "ticket_number": scheinnummer,
+        "brutto_kg": brutto,
+        "tara_kg": tara,
+        "netto_kg": netto,
+        "richtung": richtung,
+        "gosse": ext.gosse,
+        "handwiegung": ext.handwiegung,
     }
 
+
+@router.get(
+    "/wiegungen/{wiegeschein_id}/extended",
+    response_model=WiegescheinOut,
+    summary="Wiegeschein abrufen",
+)
+async def get_wiegung_extended(
+    wiegeschein_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Den Wiegeschein des Mandanten lesen.
+
+    Vorher hatte dieser Weg nicht einmal die Mandantenabhaengigkeit: Jedes Haus
+    konnte jeden Wiegeschein lesen, wenn es die Kennung kannte.
+    """
+    try:
+        return wiegung.holen(db, tenant_id, wiegeschein_id)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise wiegung.nicht_lesbar(db, fehler, "Wiegeschein", tenant_id) from fehler

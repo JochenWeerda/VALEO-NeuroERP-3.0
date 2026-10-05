@@ -112,7 +112,11 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: `.genossenschaft_anteilsbewegungen` an. Beide Tabellen existierten in
 #: keiner Datenbank; die Mitgliederliste antwortete `[]` und die
 #: Kapitaluebersicht 0,00 EUR.
-BASELINE_LEBEND = 10
+#:
+#: 2026-10-05, lebend 10 -> 9: `domain_agrar.wiegungen` wird nicht angelegt,
+#: sondern abgeloest — die Doppelwiegung schreibt das kanonische Rueckgrat
+#: `domain_inventory.weighing_tickets` (`wiegung_kanonisch_20261005`).
+BASELINE_LEBEND = 9
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

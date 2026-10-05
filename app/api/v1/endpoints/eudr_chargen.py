@@ -157,7 +157,7 @@ def offene_chargen(
                 "ORDER BY (k.menge_kg - k.gedeckte_menge_kg) DESC LIMIT :limit"
             ),
             {"tid": tenant_id, "limit": limit},
-        ).mappings().all()
+        ).mappings().fetchmany(limit)
     except Exception as fehler:  # noqa: BLE001
         raise dienst.nicht_lesbar(db, fehler, "Offene EUDR-Chargen", tenant_id) from fehler
     return [dienst.kennzeichnung(z) for z in zeilen]

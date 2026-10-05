@@ -37,7 +37,7 @@ log_fibu_audit committet selbst und darf im aeusseren Modus nicht benutzt
 werden. Keine behauptete Consumer-Atomizitaet. Probe Revision
  genossenschaft_mitgliederregister_20261005, kein Reset/Migrationslauf.
 
-## JOURNAL-PERIOD-ENFORCEMENT-20261005 — reserviert
+## JOURNAL-PERIOD-ENFORCEMENT-20261005 — abgeschlossen
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Periodenpruefung aus dem gespeicherten Buchungsdatum
 ableiten und bei Anlage/Post/Storno erzwingen; optionales period darf sie
@@ -45,13 +45,28 @@ nicht umgehen. Sperrvertrag mit Periodenabschluss koordinieren.
 **Dateibesitz:** finance_transaction_service.py Periodenguard, finance_periods.py
 Sperrhelfer, finance_period_service.py Close/Reopen-Sperre, accounting_periods.py
 nur Create/Update-Sperrhunks; neue Periodentests und betroffene Journal-
-Testdoppel/Tabellenfixtures; eigene QA/Slice/Gaps. Bestehende Periodenclaims
+Testdoppel/Tabellenfixtures; test_periode_ein_zustand_vertrag.py nur alten
+globalen DDL-Test entfernen (durch privaten Schematest ersetzt); eigene
+QA/Slice/Gaps. Bestehende Periodenclaims
 sind abgeschlossen, keine fremden UI/Journal-API/DTO/Godfile-Edits.
-**Abnahme geplant:** Geschlossene echte Periode sperrt Mutation, Fremdtenant
+**Abnahme:** Geschlossene echte Periode sperrt Mutation, Fremdtenant
 beeinflusst sie nicht, Datum/Periodenargument widerspruchsfrei; Abschluss-
 Konkurrenz und fehlender Schema-/Statusnachweis verhindern falsche Freigabe.
-**Risiken:** Create prueft bisher nur optionales period; Post/Reverse
-haben keinen Periodenguard. Perioden-API/SQL-Schreiber separat integrieren.
+**Ergebnis 2026-10-05:** Anlage leitet Periode aus Buchungsdatum ab,
+explizite Periode muss dazu passen; Post prueft gespeichertes Buchungsdatum,
+Storno seine neue Zielperiode. Fehlende/malformed Argumente kein Bypass.
+Journal-Shared-/Perioden-Exclusive-Transaktionssperre auch ohne Zeile;
+FOR SHARE fuer vorhandene Zeile und READ COMMITTED gegen alte Snapshots.
+Close/Reopen und Perioden-API Create/Update nehmen dieselbe Sperre.
+**Nachweis:** 371 Journal-/Periodentests plus 25 Statusvertraege bestanden;
+29 neue, davon 19 echte PostgreSQL und vier pg_locks-Wartebelege. Alter
+Test mit globalem Tabellen-ALTER entfernt, privater Schemafehlerbeleg ersetzt ihn.
+Neue Pythonanteile lint-sauber; bestehende Periodenservice/API-Befunde offen.
+QA: journal-period-enforcement-20261005.md. Claim 1238e843a.
+**Risiken:** Andere rohe Journal/OP/Consumer-Schreiber, Audit/Anchor-Atomizitaet,
+Schema/Hash/NULL-Waehrung und Cancel-Grund offen. Keine globale Sperren-/GoBD-
+Abnahme. Probe wiegung_kanonisch_20261005, keine Migration/Reset/neue DB.
+
 
 ## JOURNAL-CREATE-CANONICAL-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
@@ -456,7 +471,7 @@ nachgezogen und begruendet.
 
 **Doku:** `docs/quality-assurance/genossenschaft-mitgliederregister-20261005.md`.
 
-## WIEGUNG-KANONISCH-20261005 — in Arbeit, Claude Code
+## WIEGUNG-KANONISCH-20261005 — abgeschlossen, Claude Code
 
 **Befund:** Vier Tabellen fuer **einen** Begriff, und die, die der
 Doppelwiegungsweg benutzt, existiert in keiner Datenbank:
@@ -525,6 +540,46 @@ vor; Vertraege gegen die frische DB und alle Ratschen gruen.
 fuehrenden Wiegemodell. Die Zuordnung der Ausgangswaegung zum Frachtbrief laeuft
 weiterhin ueber das Kennzeichen und ist damit mehrdeutig, wenn derselbe Lkw
 mehrere offene Frachtbriefe hat; das wird hier benannt, nicht geaendert.
+
+**Ergebnis (2026-10-05):** `domain_agrar.wiegungen` wird **nicht** angelegt,
+sondern abgeloest: Die Doppelwiegung schreibt `domain_inventory.weighing_tickets`.
+Migration `wiegung_kanonisch_20261005` ergaenzt sechs Waagenspalten (`gosse`,
+`muster_nr`, `handwiegung`, `ident_nr`, `disposition_nr`, `charge_nr`) und vier
+Pruefbedingungen; vor dem Anlegen zaehlt sie die Verstoesse im Bestand und bricht
+ab, statt eine Bedingung zu ueberspringen (49 Zeilen, 0 Verstoesse).
+`netto = brutto - tara` ohne Absolutbetrag, `tara >= brutto` ist ein 422; ohne
+Gewicht entsteht kein Schein; `EL`/`VL` werden auf `in`/`out` abgebildet, ein
+unbekannter Typ ist ein 422 und kein stilles `in`. JSONB-Rueckfall entfernt,
+`tenant_id` in beiden Wegen, beide Antwortmodelle typisiert statt `WaageOut` mit
+`extra="allow"`. **30 neue Vertraege, 232 im Umfeld gruen**; die drei dauerhaft
+roten Dispositionstests (positioneller Aufruf traf `tenant_id`) sind ersetzt.
+
+**Nachgezogen — eigener Fehler:** Ich hatte die Paginierungsratsche in den beiden
+EUDR-Slices an der Summenzeile gelesen statt am Exit-Code. Sie war rot, und vier
+Eintraege waren meine (`eudr_register::auflisten`, `::abrufen` 2x,
+`eudr_chargen::offene_chargen`, `eudr_anbindung::ungepruefte_vorgelagerte`). Alle
+vier waren in SQL begrenzt — der AST-Pruefer sieht ein `LIMIT` in einer
+Zeichenkette nicht. Die Grenze ist jetzt im Code sichtbar
+(`.mappings().fetchmany(limit)`), und bei den zwei Kindlisten einer Erklaerung
+kam die Antwort hinzu, was passiert, wenn sie greift: ein 503. Art. 9 verlangt
+**alle** Flurstuecke; eine Liste, die bei 5000 abschneidet, waere ein
+unvollstaendiger Nachweis, der vollstaendig wirkt. Summe 292 -> 286.
+
+**Handshakes:**
+1. `bank_accounts.py::list_ledger_options` bricht die Paginierungsratsche
+   (0 -> 1, aus `bank_gl_binding_20261001`) — Bank-Slice. Das ist der einzige
+   verbleibende rote Eintrag.
+2. `tests/test_bank_reconciliation_proof.py` weiter 31 Fehler
+   (`DuplicateColumn` im eigenen Fixture) — Bank-Slice.
+3. `journal_entries_entry_number_key UNIQUE (entry_number)` systemweit statt je
+   Mandant — Finanz-Owner.
+4. **Fuehrendes Wiegemodell offen:** `domain_agrar.weighing_tickets`
+   (Quittierung, `waage_mobile.py`) und `domain_ops.ops_wiegungen` (ORM-CRUD
+   unter `/waage/wiegungen`) bleiben bestehen, beide leer. Gehoert in einen ADR.
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **10 -> 9**.
+
+**Doku:** `docs/quality-assurance/wiegung-kanonisch-20261005.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

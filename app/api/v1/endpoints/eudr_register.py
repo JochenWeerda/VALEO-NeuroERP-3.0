@@ -40,6 +40,10 @@ from app.api.v1.schemas.eudr_register_schemas import (
     VorgelagerteErklaerungOut,
 )
 
+#: Obergrenze fuer die Kindlisten einer Erklaerung. Wird sie erreicht, ist die
+#: Antwort ein 503 und keine stillschweigend gekuerzte Liste.
+GRENZE_KINDLISTE = 5000
+
 router = APIRouter(prefix="/eudr/sorgfaltserklaerungen", tags=["EUDR", "Compliance"])
 logger = logging.getLogger(__name__)
 
@@ -182,7 +186,7 @@ def auflisten(
                 "ORDER BY created_at DESC OFFSET :skip LIMIT :limit"
             ),
             werte,
-        ).mappings().all()
+        ).mappings().fetchmany(limit)
     except Exception as fehler:  # noqa: BLE001
         raise dienst.nicht_lesbar(db, fehler, "EUDR-Erklaerungen", tenant_id) from fehler
     return [dienst.als_dict(z) for z in zeilen]
@@ -314,23 +318,38 @@ def abrufen(
             text(
                 "SELECT id, flurstueck_kennung, breitengrad, laengengrad, flaeche_ha, polygon "
                 f"FROM {dienst.GEOLOKATIONEN} WHERE erklaerung_id = :eid AND tenant_id = :tid "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
-                "ORDER BY erfasst_am LIMIT 5000"
+                f"ORDER BY erfasst_am LIMIT {GRENZE_KINDLISTE}"
             ),
             {"eid": erklaerung_id, "tid": tenant_id},
-        ).mappings().all()
+        ).mappings().fetchmany(GRENZE_KINDLISTE)
         vorgelagert = db.execute(
             text(
                 "SELECT id, referenznummer, verifizierungsnummer, lieferant_name, "
                 "       pruefung_status, geprueft_am, pruefung_quelle "
                 f"FROM {dienst.VORGELAGERT} WHERE erklaerung_id = :eid AND tenant_id = :tid "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
-                "ORDER BY erfasst_am LIMIT 5000"
+                f"ORDER BY erfasst_am LIMIT {GRENZE_KINDLISTE}"
             ),
             {"eid": erklaerung_id, "tid": tenant_id},
-        ).mappings().all()
+        ).mappings().fetchmany(GRENZE_KINDLISTE)
     except HTTPException:
         raise
     except Exception as fehler:  # noqa: BLE001
         raise dienst.nicht_lesbar(db, fehler, "EUDR-Erklaerung", tenant_id) from fehler
+
+    # Eine abgeschnittene Liste darf nicht wie eine vollstaendige aussehen:
+    # Art. 9 verlangt **alle** Flurstuecke, und eine Erklaerung, die nur die
+    # ersten zeigt, waere ein unvollstaendiger Nachweis, der vollstaendig wirkt.
+    for was, zeilen in (("Flurstuecke", orte), ("vorgelagerte Erklaerungen", vorgelagert)):
+        if len(zeilen) >= GRENZE_KINDLISTE:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"Die Erklaerung fuehrt mindestens {GRENZE_KINDLISTE} {was}. "
+                    "Diese Ansicht kann sie nicht vollstaendig zeigen, und eine "
+                    "unvollstaendige Sorgfaltserklaerung ist kein Nachweis "
+                    "(Art. 9 Verordnung (EU) 2023/1115)."
+                ),
+            )
 
     kopf["geolokationen"] = [
         {

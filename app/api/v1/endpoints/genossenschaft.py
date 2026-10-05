@@ -88,7 +88,7 @@ def list_mitglieder(
                 "ORDER BY q.mitglieds_nr LIMIT :limit OFFSET :offset"
             ),
             {"tid": tenant_id, "status": status, "limit": limit, "offset": offset},
-        ).mappings().all()
+        ).mappings().fetchmany(limit)
     except Exception as fehler:  # noqa: BLE001
         raise dienst.nicht_lesbar(db, fehler, "Mitgliederliste", tenant_id) from fehler
     return [dienst.als_dict(z) for z in zeilen]
