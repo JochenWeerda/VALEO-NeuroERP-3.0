@@ -1100,6 +1100,89 @@ Befund: Die Information lag da, sie wurde nur nicht gelesen.
 **Doku:** `docs/quality-assurance/preismodell-kundenstufe-20261005.md`,
 ADR `docs/architecture/domains/preise/fuehrendes-modell.md`.
 
+## PERSONAL-ORGANISATION-ZEITKONTO-20261006 — in Arbeit, Claude Code
+
+**Befund:** Drei Verweise ins Leere in `personal.py`, und sie haengen an zwei
+Faechern, die beide nachweispflichtig sind.
+
+| Verweis | Lage |
+| --- | --- |
+| `domain_hr.org_units` | **existiert nicht** — das ganze Organigramm (zwei Lesewege, zwei Schreibwege) antwortet 503 |
+| `domain_hr.time_account_adjustments` | **existiert nicht** — jede Saldokorrektur antwortet 503 |
+| `domain_hr.schichten` | **existiert nicht** — aber `domain_hr.shifts` gibt es. Eine deutsche Dublette desselben Begriffs |
+
+**Die Dublette ist die interessanteste:** Der Weg liest
+`SELECT SUM(planned_hours) FROM domain_hr.schichten WHERE employee_ref = ...`.
+Die vorhandene Tabelle heisst `shifts` und hat **keine** dieser Spalten: Sie
+fuehrt `shift_date`, `starts_at`, `ends_at` (Uhrzeiten) und
+`assigned_employee_refs` als JSONB-Liste. Der Verweis ist also zweifach falsch —
+Name und Spalten. Weil alle drei Abfragen des Zeitkontos in **einem** `try`
+stehen, antwortet `/time-accounts/{ref}` ausnahmslos 503: Das Arbeitszeitkonto
+hat nie funktioniert.
+
+**Und die Formel darunter stimmt nicht.** `total_adj` geht **zweimal** ein — in
+`saldo_hours` und in `transferred_from_prev_period`. Letzteres summiert
+ausserdem die **Ist-Stunden aller Vorjahre**; das ist kein Uebertrag, sondern
+eine Lebenssumme. Ein Arbeitszeitkonto ist die Grundlage von
+Ueberstundenabrechnung und Nachweisen nach § 16 Abs. 2 ArbZG — eine falsche Zahl
+dort ist kein Anzeigefehler.
+
+**Ziel:**
+1. `domain_hr.org_units` und `domain_hr.time_account_adjustments` per Migration
+   anlegen.
+2. Den Verweis auf `schichten` ersetzen: Die Planstunden kommen aus `shifts`,
+   gerechnet aus `starts_at`/`ends_at` und nur fuer Schichten, in deren
+   `assigned_employee_refs` der Mitarbeiter steht.
+3. Die Saldoformel richtigstellen: Die Korrektur zaehlt **einmal**; der
+   Uebertrag ist ein Uebertrag (Ist minus Plan der Vorperioden plus deren
+   Korrekturen), nicht eine Lebenssumme.
+
+**Die Modellierung, und warum so:**
+* `org_units` traegt `tenant_id`, eine eindeutige `unit_code` je Mandant und
+  einen Selbstverweis `parent_id` mit `ON DELETE RESTRICT`: Eine Abteilung mit
+  Unterabteilungen verschwindet nicht einfach.
+* **Zyklenschutz.** Die Lesewege sind rekursive CTEs; ein Zyklus im Baum laeuft
+  endlos. `CHECK (parent_id <> id)` deckt den trivialen Fall; darueber hinaus
+  bekommt die Rekursion eine Tiefengrenze, und wird sie erreicht, ist das ein
+  **409 mit Begruendung** und kein gekuerzter Baum. Ein Organigramm, das Teile
+  stillschweigend weglaesst, ist schlimmer als eines, das sich beschwert.
+* `cost_center_id` zeigt auf `domain_finance.kostenstellen` mit
+  `ON DELETE RESTRICT`, und beim Schreiben wird geprueft, dass die Kostenstelle
+  dem **eigenen** Mandanten gehoert: Eine fremde Kostenstelle im Organigramm
+  waere ein Auswertungsfehler, der wie eine Zuordnung aussieht.
+* `time_account_adjustments`: `delta_hours <> 0` (eine Korrektur um null ist
+  keine) und ein **nicht leerer** Grund. Eine Korrektur am Zeitkonto ohne Grund
+  ist nicht nachvollziehbar — § 16 ArbZG und GoBD Rz. 30 ff. verlangen das
+  Gegenteil.
+
+**Dateibesitz:** `alembic/versions/personal_organisation_zeitkonto_20261006.py`,
+`app/services/personal_organisation_service.py` (neu),
+`app/api/v1/endpoints/personal.py` (nur Organigramm und Zeitkonto),
+`app/api/v1/schemas/personal_organisation_schemas.py` (neu),
+`tests/test_personal_organisation_zeitkonto_vertrag.py` (neu),
+`tests/test_personal_major_gap_extensions.py` (nur der Zeitkontotest, der heute
+`domain_hr.schichten` in die Welt mockt),
+`packages/frontend-web/src/pages/personal/organigramm.tsx` (nur die
+Fehlerbehandlung), `scripts/check_table_references.py` (nur die Schwelle),
+eigene QA-Doku und dieser Abschnitt.
+**Godfile:** `personal.py` steht mit 3345 Zeilen in der Ratsche; die Logik geht
+in den Dienst, die Datei wird kleiner.
+
+**Abnahme:** Beide Tabellen entstehen durch die Migration; das Organigramm
+liefert einen Baum statt 503; ein Zyklus ist ein 409 und kein gekuerzter Baum;
+eine fremde Kostenstelle wird abgewiesen; `domain_hr.schichten` kommt im Code
+nicht mehr vor; die Planstunden kommen aus `shifts` und nur fuer zugeordnete
+Mitarbeiter; die Korrektur zaehlt im Saldo genau einmal; eine Korrektur ohne
+Grund oder mit null Stunden wird abgewiesen; alles mandantengebunden; Vertraege
+gegen die frische DB und alle Ratschen gruen.
+
+**Risiken:** Die Bedeutung von `transferred_from_prev_period` aendert sich (vorher
+Lebenssumme plus Korrektur, jetzt Uebertrag). Masken, die die Zahl anzeigen,
+zeigen danach etwas anderes — richtiger, aber anderes. Die Abnahme der
+Saldodefinition gehoert dem Personal-Owner. `shifts.assigned_employee_refs` ist
+eine JSONB-Liste ohne Fremdschluessel auf die Person; das bleibt so und wird
+benannt.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
