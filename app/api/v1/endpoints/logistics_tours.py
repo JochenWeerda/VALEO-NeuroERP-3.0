@@ -18,7 +18,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.domains.logistik.strecke import anreichern_stopp, strecke_km, zielort_des_kunden
+from app.domains.logistik.strecke import stopp_mit_zielort, touren_mit_stopps
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
@@ -209,40 +209,18 @@ def list_tours(
         ).mappings().all()
         tour_rows = [dict(r) for r in rows]
         ids = [str(r["id"]) for r in tour_rows if r.get("id")]
+        stopps: List[Any] = []
         if ids:
             bind = {f"id{i}": tid for i, tid in enumerate(ids)}
             placeholders = ", ".join(f":id{i}" for i in range(len(ids)))
-            counts = db.execute(
+            stopps = db.execute(
                 text(
-                    f"SELECT tour_id, COUNT(*)::int AS stop_count FROM domain_logistics.tour_stops "  # nosec B608
-                    f"WHERE tour_id IN ({placeholders}) GROUP BY tour_id"
-                ),
-                bind,
-            ).mappings().all()
-            cmap = {str(c["tour_id"]): int(c["stop_count"] or 0) for c in counts}
-            for r in tour_rows:
-                r["stop_count"] = cmap.get(str(r["id"]), 0)
-        else:
-            for r in tour_rows:
-                r["stop_count"] = 0
-        if ids:
-            punkte = db.execute(
-                text(
-                    f"SELECT tour_id, stop_order, lat, lng FROM domain_logistics.tour_stops "  # nosec B608
+                    f"SELECT tour_id, lat, lng FROM domain_logistics.tour_stops "  # nosec B608
                     f"WHERE tour_id IN ({placeholders}) ORDER BY stop_order"
                 ),
                 bind,
             ).mappings().all()
-            nach_tour: Dict[str, List[tuple[float, float]]] = {}
-            for p in punkte:
-                if p["lat"] is None or p["lng"] is None:
-                    continue
-                nach_tour.setdefault(str(p["tour_id"]), []).append((float(p["lat"]), float(p["lng"])))
-            for r in tour_rows:
-                r["distance_km"] = strecke_km(nach_tour.get(str(r["id"]), []))
-        else:
-            for r in tour_rows:
-                r["distance_km"] = None
+        touren_mit_stopps(tour_rows, stopps)
         return tour_rows
     except HTTPException:
         raise
@@ -280,13 +258,7 @@ def create_tour(
         stops = []
         for i, stop in enumerate(body.stops or []):
             stop_id = str(uuid.uuid4())
-            lage = zielort_des_kunden(db, x_tenant_id, stop.customer_id)
-            daten = anreichern_stopp(
-                stop.model_dump(),
-                ziel_lat=lage["lat"],
-                ziel_lng=lage["lng"],
-                ziel_adresse=lage["address"],
-            )
+            daten = stopp_mit_zielort(db, x_tenant_id, stop.model_dump())
             db.execute(
                 text("""
                     INSERT INTO domain_logistics.tour_stops

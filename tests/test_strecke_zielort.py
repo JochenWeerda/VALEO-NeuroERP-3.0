@@ -1,6 +1,6 @@
 """Zielort trägt die Fahrtposition, solange Webfleet keine liefert."""
 
-from app.domains.logistik.strecke import anreichern_stopp, fahrtposition, strecke_km, webfleet_punkt
+from app.domains.logistik.strecke import anreichern_stopp, fahrtposition, strecke_km, touren_mit_stopps, webfleet_punkt
 
 
 def test_nur_status_a_ist_ein_webfleet_fix():
@@ -58,3 +58,16 @@ def test_vorhandene_stoppkoordinate_bleibt():
     )
     assert stopp["lat"] == 52.0
     assert stopp["address"] == "Silo Ost"
+
+
+def test_stopps_zaehlen_auch_ohne_koordinate():
+    touren = [{"id": "t1"}, {"id": "t2"}]
+    touren_mit_stopps(touren, [
+        {"tour_id": "t1", "lat": 53.55, "lng": 8.58},
+        {"tour_id": "t1", "lat": None, "lng": None},
+        {"tour_id": "t1", "lat": 53.08, "lng": 8.80},
+    ])
+    assert touren[0]["stop_count"] == 3
+    assert touren[0]["distance_km"] is not None
+    assert touren[1]["stop_count"] == 0
+    assert touren[1]["distance_km"] is None

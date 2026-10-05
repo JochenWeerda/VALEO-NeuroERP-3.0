@@ -91,6 +91,34 @@ def streckenpunkte(
     return ziele
 
 
+def touren_mit_stopps(touren: list[dict[str, Any]], stopps: list[Any]) -> None:
+    """Stoppzahl und Luftlinie je Tour. Stopps ohne Koordinate zählen mit, sie strecken nicht."""
+    zaehler: dict[str, int] = {}
+    punkte: dict[str, list[tuple[float, float]]] = {}
+    for stopp in stopps:
+        tour_id = str(stopp["tour_id"])
+        zaehler[tour_id] = zaehler.get(tour_id, 0) + 1
+        lat, lng = stopp["lat"], stopp["lng"]
+        if lat is None or lng is None:
+            continue
+        punkte.setdefault(tour_id, []).append((float(lat), float(lng)))
+    for tour in touren:
+        tour_id = str(tour.get("id"))
+        tour["stop_count"] = zaehler.get(tour_id, 0)
+        tour["distance_km"] = strecke_km(punkte.get(tour_id, []))
+
+
+def stopp_mit_zielort(db: Session, tenant_id: str | None, stopp: dict[str, Any]) -> dict[str, Any]:
+    """Fehlende Koordinate und Platzhalteradresse kommen vom Kunden, nicht vom Disponenten."""
+    lage = zielort_des_kunden(db, tenant_id, stopp.get("customer_id"))
+    return anreichern_stopp(
+        stopp,
+        ziel_lat=lage["lat"],
+        ziel_lng=lage["lng"],
+        ziel_adresse=lage["address"],
+    )
+
+
 def anreichern_stopp(
     stopp: dict[str, Any],
     *,
