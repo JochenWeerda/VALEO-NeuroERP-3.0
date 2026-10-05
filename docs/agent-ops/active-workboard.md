@@ -27,6 +27,10 @@ keine neue DB/Docker, fremde WIP/Claims unangetastet. Schemaaenderung
 zuerst im eigenen Schema pruefen, gemeinsame Integration koordiniert.
 **Architektur:** bestehende Finance/Inventory-Grenzen; Significant ADR,
 keine neue Fachfunktion. Tests, Betriebs-/Datenvertrag und Doku nachziehen.
+**Wartungsclaim:** Nur Journal-Tenant/Nummern-Migration im vorhandenen
+valeo_probe nach privater Abnahme. Vorher Migrationshead und aktive
+DB-Nutzung nochmals pruefen; kurze Lock-Timeouts, kein Reset/Fremd-DML.
+Entwicklungsdatenbank wird in diesem Wartungsclaim nicht migriert.
 
 ## CASH-CLOSE-DIRECTBOOK-RETIREMENT-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
