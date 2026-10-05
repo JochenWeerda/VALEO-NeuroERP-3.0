@@ -25,13 +25,12 @@ def schema():
     name = "bankproof_" + uuid4().hex
     tables = ("bank_accounts", "chart_of_accounts", "bank_statements", "bank_statement_lines",
               "journal_entries", "journal_entry_lines", "offene_posten")
-    with engine.begin() as conn:
-        conn.execute(text(f'CREATE SCHEMA "{name}"'))
-        for table in tables:
-            conn.execute(text(f'CREATE TABLE "{name}".{table} (LIKE domain_erp.{table} INCLUDING ALL)'))
     # Clone the current migrated schema; never replay an already applied migration.
     try:
         with engine.begin() as conn:
+            conn.execute(text(f'CREATE SCHEMA "{name}"'))
+            for table in tables:
+                conn.execute(text(f'CREATE TABLE "{name}".{table} (LIKE domain_erp.{table} INCLUDING ALL)'))
             # LIKE copies indexes/checks, but PostgreSQL does not copy foreign keys.
             conn.execute(text(f'''ALTER TABLE "{name}".bank_accounts
                 ADD CONSTRAINT fk_bank_gl_tenant FOREIGN KEY (gl_account_id, tenant_id)
@@ -41,7 +40,7 @@ def schema():
         # UUID-derived identifier, confined to this fixture's one owned schema.
         assert name.startswith("bankproof_") and len(name) == 42
         with engine.begin() as conn:
-            conn.execute(text(f'DROP SCHEMA "{name}" CASCADE'))
+            conn.execute(text(f'DROP SCHEMA IF EXISTS "{name}" CASCADE'))
         engine.dispose()
 
 
