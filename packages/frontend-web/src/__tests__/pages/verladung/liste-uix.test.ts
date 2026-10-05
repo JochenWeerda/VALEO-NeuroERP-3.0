@@ -8,11 +8,10 @@ const src = readFileSync(
 )
 
 describe('Verladungen-Liste UIX', () => {
-  it('stellt Suche und Tabelle vor den KPI-Karten und macht CTAs 44 px', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src.indexOf('Suche Verladungen')).toBeLessThan(src.indexOf('Verladungen Heute'))
-    expect(src).toContain('min-h-touch gap-2 touch-manipulation')
-    expect(src).toContain('{!isTouch ? <KeyboardShortcutBar')
-    expect(src).not.toContain('border-indigo-500')
+  it('zeichnet die Verladung ueber den Masken-Builder und oeffnet die Beladung', () => {
+    expect(src).toContain('CaptureScreenHost')
+    expect(src).toContain('logistik/verladung')
+    expect(src).toContain("navigate('/verladung/lkw-beladung')")
+    expect(src).not.toContain('Neuer Frachtbrief')
   })
 })

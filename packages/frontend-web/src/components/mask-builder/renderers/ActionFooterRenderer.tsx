@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { actionIsEnabled } from '../governance/screen-context'
 import type { RenderActionPlan } from '../render-plan/types'
 
 function isDangerAction(action: RenderActionPlan): boolean {
@@ -17,11 +18,13 @@ export function ActionFooterRenderer({
   actions,
   sticky,
   payload,
+  conditionRoot,
   onAction,
 }: {
   actions: RenderActionPlan[]
   sticky: boolean
   payload: Record<string, unknown>
+  conditionRoot?: Record<string, unknown>
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
 }): JSX.Element | null {
   if (actions.length === 0) return null
@@ -33,7 +36,8 @@ export function ActionFooterRenderer({
       key={action.key}
       type="button"
       variant={actionVariant(action)}
-      disabled={action.disabled}
+      className="min-h-touch"
+      disabled={!actionIsEnabled(action, conditionRoot)}
       data-testid={`action-${action.key}`}
       data-action-kind={action.kind}
       data-action-zone={action.zone}

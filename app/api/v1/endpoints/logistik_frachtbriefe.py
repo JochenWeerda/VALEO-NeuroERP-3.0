@@ -37,17 +37,19 @@ def _db_unavailable(exc: SQLAlchemyError, db: Session) -> HTTPException:
 # ── Schemas ──────────────────────────────────────────────────────────────────
 
 class FrachtbriefOut(BaseSchema):
+    """Transportbeleg. Der Lieferschein bleibt der Warenbeleg und steht nur als Referenz."""
+
     id: str
-    nummer: str
-    kennzeichen: Optional[str] = None
-    artikel: Optional[str] = None
-    menge: Optional[Decimal] = None
-    absender: Optional[str] = None
-    empfaenger: Optional[str] = None
+    nummer: str = Field(description="Frachtbrief-Nr.")
+    kennzeichen: Optional[str] = Field(default=None, description="Kennzeichen der Zugmaschine")
+    artikel: Optional[str] = Field(default=None, description="Transportgut")
+    menge: Optional[Decimal] = Field(default=None, description="Transportierte Menge; nach Ausgangswägung das Netto")
+    absender: Optional[str] = Field(default=None, description="Absender / Übernahmeort")
+    empfaenger: Optional[str] = Field(default=None, description="Empfänger der Beförderung")
     datum: date
     status: str
-    tour_id: Optional[str] = None
-    lieferschein_ref: Optional[str] = None
+    tour_id: Optional[str] = Field(default=None, description="Transportauftrag, sofern eine Tour führt")
+    lieferschein_ref: Optional[str] = Field(default=None, description="Referenz auf den Lieferschein, nicht der Frachtbrief selbst")
 
 
 class FrachtbriefCreate(BaseSchema):

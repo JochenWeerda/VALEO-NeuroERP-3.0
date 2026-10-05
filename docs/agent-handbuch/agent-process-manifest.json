@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01",
+  "generatedAt": "2026-10-05",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1495,6 +1495,40 @@
       ]
     },
     {
+      "mask_id": "strecke/nawaro-ernterklaerung-drucken",
+      "title": "NaWaRo-Ernterklärung drucken",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__nawaro-ernterklaerung-drucken/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/nawaro-ernterklaerung-drucken/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/nawaro-ernterklaerung-drucken/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/nawaro-ernterklaerung-drucken/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "strecke/nawaro-lieferungen",
+      "title": "NaWaRo-Lieferungen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__nawaro-lieferungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/nawaro-lieferungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/nawaro-lieferungen/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/nawaro-lieferungen/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "tankstelle/adapter-inbox",
       "title": "Tankanlagen-Eingang",
       "domain": "agrar",
@@ -2742,6 +2776,394 @@
       ]
     },
     {
+      "mask_id": "fuhrpark/fahrzeuge",
+      "title": "Fahrzeuge",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fuhrpark__fahrzeuge/:entityId",
+      "agent_contract_url": "/api/v1/masks/fuhrpark/fahrzeuge/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fuhrpark/fahrzeuge/screen-definition",
+      "readiness_url": "/api/v1/masks/fuhrpark/fahrzeuge/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Fahrzeug",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die bestehende Fahrzeug-Erfassung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "fuhrpark/uebersicht",
+      "title": "Fuhrpark",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fuhrpark__uebersicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/fuhrpark/uebersicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fuhrpark/uebersicht/screen-definition",
+      "readiness_url": "/api/v1/masks/fuhrpark/uebersicht/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/frachtbrief",
+      "title": "Frachtbriefe",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__frachtbrief/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/frachtbrief/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/frachtbrief/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/frachtbrief/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "verladung",
+          "label": "Zur Verladung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Verladung. Dort entsteht der Frachtbrief."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/frachttabellen",
+      "title": "Frachttabellen",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__frachttabellen/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/frachttabellen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/frachttabellen/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/frachttabellen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Tabelle speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt die Frachttabelle an."
+        },
+        {
+          "key": "position",
+          "label": "Position anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Haengt eine Staffelposition an die gewaehlte Tabelle."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/tour-fracht-arbeitsraum",
+      "title": "Tour & Fracht",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__tour-fracht-arbeitsraum/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/tour-fracht-arbeitsraum/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/tour-fracht-arbeitsraum/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/tour-fracht-arbeitsraum/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "touren",
+          "label": "Zur Tourenplanung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt in die Tourenplanung."
+        },
+        {
+          "key": "fracht",
+          "label": "Zu Frachtbriefen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu den Frachtbriefen."
+        },
+        {
+          "key": "tabellen",
+          "label": "Frachttabellen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Frachttabellen."
+        },
+        {
+          "key": "probe",
+          "label": "Probe berechnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Simuliert die Frachtkosten des ersten aktiven Tarifs."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/tourenplanung",
+      "title": "Tourenplanung",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__tourenplanung/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/tourenplanung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/tourenplanung/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/tourenplanung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "dispo",
+          "label": "Dispo-Arbeitsraum",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum."
+        },
+        {
+          "key": "aufloesen",
+          "label": "Auflösen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Liest den Lieferschein und setzt das Ziel."
+        },
+        {
+          "key": "anlegen",
+          "label": "Tour anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt die Tour aus dem aufgeloesten Lieferschein an."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/verladung",
+      "title": "Verladung",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__verladung/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/verladung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/verladung/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/verladung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Beladung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die bestehende LKW-Beladung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/disposition",
+      "title": "Strecken-Disposition",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__disposition/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/disposition/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/disposition/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/disposition/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Strecke",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "logistics.strecke.schreiben",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/dokumente-drucken",
+      "title": "Strecken-Dokumente drucken",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__dokumente-drucken/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/dokumente-drucken/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/dokumente-drucken/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/dokumente-drucken/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/streckengeschaeft",
+      "title": "Streckengeschäft",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__streckengeschaeft/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/streckengeschaeft/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/streckengeschaeft/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/streckengeschaeft/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/vorlaeufig",
+      "title": "Vorläufige Streckengeschäfte",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__vorlaeufig/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/vorlaeufig/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/vorlaeufig/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/vorlaeufig/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "transporte/fahrer",
+      "title": "Fahrer",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/transporte__fahrer/:entityId",
+      "agent_contract_url": "/api/v1/masks/transporte/fahrer/agent-contract",
+      "screen_definition_url": "/api/v1/masks/transporte/fahrer/screen-definition",
+      "readiness_url": "/api/v1/masks/transporte/fahrer/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neuer Fahrer",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet das bestehende Fahrerformular."
+        },
+        {
+          "key": "verfuegbar",
+          "label": "Verfügbaren Fahrer öffnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet den ersten verfuegbaren Fahrer."
+        },
+        {
+          "key": "touren",
+          "label": "Tourenplanung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt in die Tourenplanung."
+        },
+        {
+          "key": "dokumente",
+          "label": "Dokumente",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Dokumentenablage."
+        },
+        {
+          "key": "export",
+          "label": "Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die sichtbare Fahrerliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "versand/versand-avis",
+      "title": "Versand-Avis",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/versand__versand-avis/:entityId",
+      "agent_contract_url": "/api/v1/masks/versand/versand-avis/agent-contract",
+      "screen_definition_url": "/api/v1/masks/versand/versand-avis/screen-definition",
+      "readiness_url": "/api/v1/masks/versand/versand-avis/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "workspace/leitung",
       "title": "Leitungs-Cockpit",
       "domain": "management",
@@ -2852,6 +3274,20 @@
           "stubReason": null
         }
       ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/qualitaets-abweichung",
+      "title": "Qualitätsabweichung",
+      "domain": "qualitaet",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__qualitaets-abweichung/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/qualitaets-abweichung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/qualitaets-abweichung/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/qualitaets-abweichung/readiness",
+      "risk_summary": "low",
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -3050,6 +3486,23 @@
         "einzelpreis",
         "betrag"
       ],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
+      "mask_id": "verkauf/betriebsauftrag",
+      "title": "Betriebsauftrag drucken",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/verkauf__betriebsauftrag/:entityId",
+      "agent_contract_url": "/api/v1/masks/verkauf/betriebsauftrag/agent-contract",
+      "screen_definition_url": "/api/v1/masks/verkauf/betriebsauftrag/screen-definition",
+      "readiness_url": "/api/v1/masks/verkauf/betriebsauftrag/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.invoice.propose"

@@ -1,6 +1,7 @@
 import { SourceProposalRenderer } from './renderers/SourceProposalRenderer'
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { ColumnLayoutRenderer, type NavigationColumn } from './renderers/ColumnLayoutRenderer'
+import { getValue, repeatsCaption } from './renderers/render-utils'
 import { DerivedColumnLayout, shouldDeriveColumns } from './renderers/DerivedColumnLayout'
 import { MessagePanelRenderer, type ScreenMessage } from './renderers/MessagePanelRenderer'
 import { LazyTabs } from '@/components/ui/LazyTabs'
@@ -31,7 +32,7 @@ import {
   type PageSection,
 } from './renderers'
 import { UnsavedChangesGuard } from './renderers/UnsavedChangesGuard'
-import { getValue } from './renderers/render-utils'
+import { conditionRoot, dispatchScreenAction, type ScreenContext } from './governance/screen-context'
 
 const PROCESS_FLOW_SECTION_KEY = 'belegfluss'
 
@@ -80,6 +81,12 @@ interface UniversalMaskRendererProps {
   workflowState?: WorkflowState
   /** Deep-link into a section or register (`?tab=`). */
   requestedSectionKey?: string
+  /** Zeilenklick fuellt den Vorgangskopf. */
+  onRowSelect?: (_row: Record<string, unknown>) => void
+  /** Die Seite loest Speichern ueber deklarierte Aktionen aus. */
+  hideFormSubmit?: boolean
+  /** Daten, Policies und Befehle der Anwendung. Der Renderer ruft keine API auf. */
+  screenContext?: ScreenContext
 }
 
 function matchesShortcut(event: ReactKeyboardEvent<HTMLElement>, shortcut: string): boolean {
@@ -94,6 +101,16 @@ function matchesShortcut(event: ReactKeyboardEvent<HTMLElement>, shortcut: strin
   if (event.altKey !== wantsAlt || event.shiftKey !== wantsShift) return false
   if (!wantsMod && !wantsCtrl && !wantsMeta && (event.ctrlKey || event.metaKey)) return false
   return event.key.toLowerCase() === key
+}
+
+function declaredAction(plan: RenderPlan, key: string): { key: string; command?: string } {
+  const header = plan.actions.find((action) => action.key === key)
+  if (header) return header
+  for (const table of Object.values(plan.tablesByKey)) {
+    const rowAction = table.rowActions?.find((action) => action.key === key)
+    if (rowAction) return rowAction
+  }
+  return { key }
 }
 
 function handleScreenKeyDown(
@@ -180,6 +197,9 @@ function RenderFromPlan({
   workflowState,
   entityId,
   requestedSectionKey,
+  onRowSelect,
+  hideFormSubmit,
+  screenContext,
 }: {
   columns?: NavigationColumn[]
   messages?: ScreenMessage[]
@@ -198,6 +218,9 @@ function RenderFromPlan({
   formState?: UniversalFormState
   workflowState?: WorkflowState
   requestedSectionKey?: string
+  onRowSelect?: (_row: Record<string, unknown>) => void
+  hideFormSubmit?: boolean
+  screenContext?: ScreenContext
 }): JSX.Element {
   const container = useRef<HTMLDivElement>(null)
   const [activeTab, setActiveTab] = useState<string | undefined>(requestedSectionKey)
@@ -257,6 +280,10 @@ function RenderFromPlan({
   const footerActions = plan.actions.filter((action) => action.zone !== 'header')
   const deriveColumns = shouldDeriveColumns(plan, columns)
   const onePage = plan.shell.sectionNavigation === 'anchors' && !deriveColumns && !columns
+  const boundRoot = conditionRoot(screenContext)
+  const dispatchAction = (key: string, actionPayload: Record<string, unknown>) => (
+    dispatchScreenAction(screenContext, declaredAction(plan, key), actionPayload, onAction)
+  )
 
   const renderHeader = (condensed: boolean, sticky: boolean): JSX.Element => (
     <ActionBarRenderer
@@ -271,8 +298,9 @@ function RenderFromPlan({
       contextRail={plan.shell.contextRail}
       headerClassName={cn(classes.header, sticky && 'sticky top-0 z-20')}
       touchTargetClass={classes.touchTarget}
-      onAction={onAction}
+      onAction={dispatchAction}
       payload={effectivePayload}
+      conditionRoot={boundRoot}
       condensed={condensed}
     />
   )
@@ -290,7 +318,7 @@ function RenderFromPlan({
       onResetOverlay={onOverlayReset}
       tableLoadError={tableLoadError}
       onRetry={onRetry}
-      onRowAction={onAction}
+      onRowAction={dispatchAction}
     />
   )
 
@@ -313,6 +341,17 @@ function RenderFromPlan({
       ]
     : []
 
+  const statusAfterFields = plan.shell.statusPlacement === 'afterFields'
+  const workflowNode = (
+    <WorkflowPanelRenderer
+      workflow={plan.workflow}
+      workflowState={workflowState}
+      contextRailSections={plan.shell.contextRailSections}
+      entityType={plan.screenId}
+      entityId={effectiveEntityId}
+    />
+  )
+
   const pageBody = (
     <>
       <MessagePanelRenderer messages={visibleMessages} onRetry={onRetry}
@@ -333,7 +372,7 @@ function RenderFromPlan({
           onOverlayChange={onOverlayChange}
           onOverlayReset={onOverlayReset}
           onTabChange={onTabChange}
-          onAction={onAction}
+          onAction={dispatchAction}
           activeTab={activeTab}
           onActiveTabChange={setActiveTab}
           tableLoadError={tableLoadError}
@@ -342,14 +381,8 @@ function RenderFromPlan({
       ) : null}
       {plan.shell.processRibbon && !onePage ? <ProcessRibbonRenderer ribbon={plan.shell.processRibbon} /> : null}
 
-      <WorkflowPanelRenderer
-        workflow={plan.workflow}
-        workflowState={workflowState}
-        contextRailSections={plan.shell.contextRailSections}
-        entityType={plan.screenId}
-        entityId={effectiveEntityId}
-      />
-      {plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
+      {statusAfterFields ? null : workflowNode}
+      {!statusAfterFields && plan.shell.summaryPlacement === 'header' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
       <TileGridRenderer tiles={plan.tiles} />
       <CalendarRenderer calendar={plan.calendar} />
       <TwinReadModelRenderer twin={plan.twin} />
@@ -383,12 +416,16 @@ function RenderFromPlan({
             onQueryChange={onTableQueryChange ? (patch) => onTableQueryChange(tableKey, patch) : undefined}
             onVisibleColumnsChange={onOverlayChange ? (visibleColumns) => onOverlayChange({ tables: { [tableKey]: { visibleColumns } } }) : undefined}
             onResetOverlay={onOverlayReset}
-            onRowAction={onAction}
+            onRowAction={dispatchAction}
+            onRowSelect={onRowSelect}
             errorMessage={tableLoadError(tableKey)}
             onRetry={onRetry}
+            suppressHeading={repeatsCaption(tablePlan.label, plan.shell.title)}
           />
         )
       })}
+      {statusAfterFields ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
+      {statusAfterFields ? workflowNode : null}
 
         </>
       )}
@@ -400,7 +437,7 @@ function RenderFromPlan({
     <div
       ref={container}
       className={classes.root}
-      onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, onAction)}
+      onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, dispatchAction)}
       data-screen-definition={plan.screenId}
       data-testid={`screen-${plan.screenId}`}
       data-layout-mode={plan.shell.layoutMode}
@@ -427,7 +464,8 @@ function RenderFromPlan({
         <>
           {renderHeader(false, plan.shell.stickyHeader)}
           {pageBody}
-          {!deriveColumns && plan.visibleTabs.length > 0 && (
+          {!deriveColumns && plan.visibleTabs.length === 1 && renderTab(plan.visibleTabs[0].key)}
+          {!deriveColumns && plan.visibleTabs.length > 1 && (
             <LazyTabs
               value={activeTab}
               variant="register"
@@ -444,15 +482,16 @@ function RenderFromPlan({
         </>
       )}
 
-      {plan.shell.summaryPlacement === 'footer' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
+      {!statusAfterFields && plan.shell.summaryPlacement === 'footer' ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
       <ActionFooterRenderer
         actions={footerActions}
         sticky={plan.shell.stickyFooter && !formState}
         payload={effectivePayload}
-        onAction={onAction}
+        conditionRoot={boundRoot}
+        onAction={dispatchAction}
       />
 
-      {formState && (
+      {formState && !hideFormSubmit && (
         <div
           className="sticky bottom-0 flex items-center justify-between gap-3 border-t bg-background px-4 py-3"
           data-testid="form-submit-bar"
@@ -504,6 +543,7 @@ function RenderFromScreen({
   onTabChange,
   onAction,
   entityId,
+  screenContext,
 }: {
   screen: ScreenDefinition
   payload: Record<string, unknown>
@@ -512,8 +552,15 @@ function RenderFromScreen({
   allowedPermissions: string[]
   onTabChange?: (_tabKey: string) => void
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
+  screenContext?: ScreenContext
 }): JSX.Element {
   const classes = layoutClasses(screen.layout?.preferredMode ?? 'desktopDense', screen.layout?.density ?? 'compact')
+  const boundRoot = conditionRoot(screenContext)
+  const dispatchAction = (key: string, actionPayload: Record<string, unknown>) => {
+    const declared = (screen.actions ?? []).find((action) => action.key === key)
+      ?? (screen.tables ?? []).flatMap((table) => table.rowActions ?? []).find((action) => action.key === key)
+    return dispatchScreenAction(screenContext, declared ?? { key }, actionPayload, onAction)
+  }
   const visibleActions = (screen.actions ?? []).filter(
     (action) => !action.permission || allowedPermissions.includes(action.permission),
   )
@@ -546,8 +593,9 @@ function RenderFromScreen({
         contextRail={contextRail}
         headerClassName={classes.header}
         touchTargetClass={classes.touchTarget}
-        onAction={onAction}
+        onAction={dispatchAction}
         payload={payload}
+        conditionRoot={boundRoot}
       />
 
       <WorkflowPanelRenderer
@@ -570,6 +618,7 @@ function RenderFromScreen({
               label: column.label,
               width: column.width,
               numeric: column.numeric,
+              priority: column.priority,
             })),
             pageSize: Math.min(table.pageSize ?? 25, 50),
             virtualized: table.virtualized ?? true,
@@ -578,10 +627,21 @@ function RenderFromScreen({
             tableProfile: screen.layout?.tableProfile ?? 'standard',
           }}
           rows={tables[table.key] ?? []}
+          suppressHeading={repeatsCaption(table.label, screen.title)}
         />
       ))}
 
-      {screen.tabs && screen.tabs.length > 0 && (
+      {screen.tabs && screen.tabs.length === 1 && (
+        <TabContentRenderer
+          fields={screen.tabs[0].fields}
+          tables={screen.tabs[0].tables}
+          fieldsClassName={classes.fields}
+          payload={payload}
+          tableRows={tables}
+          screenTitle={screen.title}
+        />
+      )}
+      {screen.tabs && screen.tabs.length > 1 && (
         <LazyTabs
           onValueChange={onTabChange}
           tabs={screen.tabs.map((tab) => ({
@@ -596,6 +656,7 @@ function RenderFromScreen({
                 fieldsClassName={classes.fields}
                 payload={payload}
                 tableRows={tables}
+                screenTitle={screen.title}
               />
             ),
           }))}
@@ -627,6 +688,9 @@ export function UniversalMaskRenderer({
   entityId,
   region,
   requestedSectionKey,
+  onRowSelect,
+  hideFormSubmit,
+  screenContext,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
 
@@ -656,6 +720,9 @@ export function UniversalMaskRenderer({
           workflowState={workflowState}
           entityId={entityId}
           requestedSectionKey={requestedSectionKey}
+          onRowSelect={onRowSelect}
+          hideFormSubmit={hideFormSubmit}
+          screenContext={screenContext}
         />
       </LookupBindingContext.Provider>
     )
@@ -671,6 +738,7 @@ export function UniversalMaskRenderer({
         onTabChange={onTabChange}
         onAction={onAction}
         entityId={entityId}
+        screenContext={screenContext}
       />
     )
   }

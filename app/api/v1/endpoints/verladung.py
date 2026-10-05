@@ -9,7 +9,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.domains.operations.models import Verladung, VerladungStatus
+from app.services.frachtbrief_service import generate_from_verladung
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.verladung_schemas import VerladungOut
@@ -93,9 +95,15 @@ def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
 @router.post("", status_code=201, summary="Verladung anlegen",
     response_model=VerladungOut
 )
-def create_verladung(payload: VerladungPayload, db: Session = Depends(get_db)):
+def create_verladung(
+    payload: VerladungPayload,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
     obj = Verladung(**payload.model_dump())
     db.add(obj)
+    db.flush()
+    generate_from_verladung(db, obj, tenant_id)
     db.commit()
     db.refresh(obj)
     return _to_dict(obj)
@@ -104,13 +112,19 @@ def create_verladung(payload: VerladungPayload, db: Session = Depends(get_db)):
 @router.patch("/{verladung_id}", summary="Verladung aktualisieren",
     response_model=VerladungOut
 )
-def update_verladung(verladung_id: str, payload: VerladungPatch, db: Session = Depends(get_db)):
+def update_verladung(
+    verladung_id: str,
+    payload: VerladungPatch,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
     if not obj:
         raise HTTPException(404, "Verladung nicht gefunden")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(obj, field, value)
     obj.updated_at = datetime.utcnow()
+    generate_from_verladung(db, obj, tenant_id)
     db.commit()
     db.refresh(obj)
     return _to_dict(obj)

@@ -14,6 +14,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.inspection import inspect as sa_inspect
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.services.frachtbrief_service import finalize_menge_from_outbound_weighing
 
 from app.domains.operations.repository import WaageRepository, WiegungRepository
 
@@ -588,6 +590,7 @@ class WiegescheinMitDoppelwiegung(BaseModel):
 @router.post("/wiegungen/dual", response_model=WaageOut, status_code=201, summary="Dual wiegung anlegen")
 async def create_dual_wiegung(
     payload: WiegescheinMitDoppelwiegung,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Doppelwiegung: Nimmt Brutto- und Tara-Wiegung entgegen und berechnet Netto automatisch."""
@@ -642,6 +645,13 @@ async def create_dual_wiegung(
                 "kfz_kennzeichen": payload.kfz_kennzeichen,
                 "extended_data": _json.dumps(extended_data),
             },
+        )
+        finalize_menge_from_outbound_weighing(
+            db,
+            tenant_id=tenant_id,
+            kennzeichen=payload.kfz_kennzeichen,
+            netto_kg=netto,
+            zielschein_typ=zielschein_typ,
         )
         db.commit()
     except Exception as e:

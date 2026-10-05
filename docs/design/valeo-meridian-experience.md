@@ -78,6 +78,20 @@ eigene Achse und nicht die Kontextleiste:
 | `wizard` | Mehrstufige Vorgänge mit Abschlussprüfung | gesperrt |
 | `analyticalList` | Kennzahlen und Datensätze gemeinsam | erlaubt |
 
+Die Dichte folgt derselben Kette. `comfortable` hält 52-px-Zeilen,
+`compact` 44 px (Fiori Cozy, Touch-Untergrenze) und `expertDense` 36 px
+(Fiori Compact, über der 32-px-Stufe). Eine Maske ist eine ScreenDefinition, die der Builder zeichnet. Eine freie
+Seite ist nur der Einstieg, der diese Definition lädt. Der Arbeitsbereich setzt `compact`
+und einen einzigen Seitenrand von 16 px. Die Seitenwurzel, Maskenrahmen,
+Listen und Objektseiten legen keinen zweiten Rand darüber. Eingabe, Auswahl und
+Schaltfläche lesen `--control-height`; in `expertDense` folgt auch die
+Touch-Untergrenze auf 36 px. `PageSurface` ist eine flache Arbeitsfläche
+ohne eigenen Scroll und ohne Verlauf. Eine native Maske überschreibt die
+Dichte aus `ScreenDefinition.layout`. Klassische Erfassungsmasken sitzen
+als Arbeitsfläche im Seitenrand, tragen genau eine Überschrift und halten
+die Felder auf 36 px, damit feste Spaltenraster nicht umbrechen. Die
+Objektüberschrift folgt derselben Stufe wie die Werkzeugleiste: halbfett
+und eng laufend, ohne Display-Größe.
 `single` ist eine konzentrierte Erfassung oder eine breite Tabelle.
 `listDetail` hält die Arbeitsliste neben dem Objekt. `listDetailDetail`
 öffnet bei Bedarf die dritte Spalte (Liste → Objekt → Unterobjekt).
@@ -211,6 +225,14 @@ nicht als herstellerspezifisches Theme. Additive Meridian-Vertraege sind:
 L3-Referenzfaelle und Datenschutzregeln:
 [`l3-to-meridian-habit-parity.md`](l3-to-meridian-habit-parity.md).
 
+## Disposition
+
+Operative Masken folgen einer Reihenfolge: Identität, Arbeitsdaten, Ressourcen, Validierung, Aktion, Ergebnis. Die Ampel steht hinter den Eingaben, aus denen sie entsteht. Aktionen sitzen am Auslöser. Primäraktionen stehen im Kopf, Folgeaktionen an der Zeile.
+
+Produktive Felder starten leer. Kennzahlen, die aus Tour, Fahrzeug oder Lieferschein folgen, werden gezählt und nicht ein zweites Mal gespeichert. Tabellen tragen eine Spaltenpriorität: `primary` bleibt bei schmaler Breite, `secondary` folgt, `tertiary` weicht zuerst. Touch benutzt dieselbe Fachregel, nur die Dichte ändert sich.
+
+Eine operative Maske hat eine ScreenDefinition. Der Builder zeichnet sie und enthält keine Abfrage auf eine Masken-Id. Die Seite lädt Daten und löst Aktionen aus.
+
 ## Governance
 
 `generatorReady=true` ist nur erlaubt, wenn die Meridian-Metadaten vorhanden sind.
@@ -225,3 +247,29 @@ Referenzmasken sind Abnahmefaelle:
 - Lager: `inventory` profile, Mengen/Einheiten, Reservierungen, Bewegungen und Status.
 
 Abweichungen werden im Builder oder in der ScreenDefinition behoben.
+
+## Screen-System
+
+Vier Schichten, eine Definition:
+
+```text
+Domain / Application
+       ↓
+Queries + Commands
+       ↓
+ScreenContext
+       ↓
+ScreenDefinition
+       ↓
+MaskBuilder
+       ↓
+UI
+```
+
+Die ScreenDefinition beschreibt, was der Benutzer sieht und tun darf. Der MaskBuilder zeichnet daraus die Oberfläche und enthält keine Fachregel und keinen API-Aufruf. Die Anwendung entscheidet, was gültig ist, und legt Daten, Policies und Befehle in den ScreenContext. Der Builder wertet nur aus, was dort steht.
+
+Gespeichert bleibt Schema-Version 1 mit `layout.floorplan`: `worklist`, `objectPage`, `transaction`, `cockpit`, `wizard`, `analyticalList`. Daraus folgt der Typ Arbeitsliste, Objekt, Vorgang, Cockpit, Bericht oder Master-Detail über die Spaltennavigation. Felder wie `screenType`, `listReport` oder `form` sind kein zweites Format.
+
+Eine Aktion nennt einen Befehl (`tour.create`) und optional `enabledWhen`. Ein String darin ist eine Domänen-Policy. `all` / `any` / `path` bleiben UI-Bedingungen. Destruktive Aktionen ohne Bestätigung, unbekannte Befehle der Referenzmasken und mehr als zwei Primäraktionen meldet `app/core/screen_governance.py` in der CI.
+
+Die erlaubten Bausteine sind die vorhandenen Feldtypen: Text, Zahl, Datum, Auswahl, EntityPicker, Tabelle, Status, Kennzahlen, Aktionsleiste. Dichte, Touch-Höhe und Statustöne kommen aus den bestehenden Tokens. Referenzmasken sind Tourenplanung, Fahrer und Fahrzeuge. Der Vertrag steht in `docs/architecture/uix/screen-governance.md`.

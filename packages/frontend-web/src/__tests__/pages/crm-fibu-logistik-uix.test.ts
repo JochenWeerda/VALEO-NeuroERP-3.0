@@ -5,13 +5,11 @@ import { describe, expect, it } from 'vitest'
 const read = (rel: string) => readFileSync(resolve(__dirname, rel), 'utf8')
 
 describe('CRM/FIBU/Logistik UIX', () => {
-  it('stellt Fuhrpark 44 px und blendet Theater auf Touch aus', () => {
+  it('oeffnet den Fuhrpark als Maske und legt ein Fahrzeug ueber den Stamm an', () => {
     const src = read('../../pages/fuhrpark/fahrzeuge.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-11 font-mono font-medium text-primary')
-    expect(src).toContain('Suche Fahrzeuge')
-    expect(src).toContain('handleExport')
+    expect(src).toContain('CaptureScreenHost')
+    expect(src).toContain('fuhrpark/fahrzeuge')
+    expect(src).toContain("navigate('/fuhrpark/fahrzeug/neu')")
     expect(src).not.toContain('text-blue-600')
   })
 
@@ -252,8 +250,10 @@ describe('CRM/FIBU/Logistik UIX', () => {
 
   it('stellt Fahrer 44 px ohne Hover-Blau', () => {
     const src = read('../../pages/transporte/fahrer-liste.tsx')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).toContain('{!isTouch ? (')
+    expect(src).toContain('transporteFahrerScreen')
+    expect(src).toContain('tourenHeuteFuerFahrer')
+    expect(src).toContain("density: isTouch ? 'comfortable' : 'compact'")
+    expect(src).toContain('min-h-touch')
     expect(src).not.toContain('text-blue-600')
   })
 })

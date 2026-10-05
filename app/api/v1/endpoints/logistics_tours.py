@@ -18,6 +18,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.domains.logistik.strecke import anreichern_stopp, strecke_km, zielort_des_kunden
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
@@ -224,6 +225,24 @@ def list_tours(
         else:
             for r in tour_rows:
                 r["stop_count"] = 0
+        if ids:
+            punkte = db.execute(
+                text(
+                    f"SELECT tour_id, stop_order, lat, lng FROM domain_logistics.tour_stops "  # nosec B608
+                    f"WHERE tour_id IN ({placeholders}) ORDER BY stop_order"
+                ),
+                bind,
+            ).mappings().all()
+            nach_tour: Dict[str, List[tuple[float, float]]] = {}
+            for p in punkte:
+                if p["lat"] is None or p["lng"] is None:
+                    continue
+                nach_tour.setdefault(str(p["tour_id"]), []).append((float(p["lat"]), float(p["lng"])))
+            for r in tour_rows:
+                r["distance_km"] = strecke_km(nach_tour.get(str(r["id"]), []))
+        else:
+            for r in tour_rows:
+                r["distance_km"] = None
         return tour_rows
     except HTTPException:
         raise
@@ -261,6 +280,13 @@ def create_tour(
         stops = []
         for i, stop in enumerate(body.stops or []):
             stop_id = str(uuid.uuid4())
+            lage = zielort_des_kunden(db, x_tenant_id, stop.customer_id)
+            daten = anreichern_stopp(
+                stop.model_dump(),
+                ziel_lat=lage["lat"],
+                ziel_lng=lage["lng"],
+                ziel_adresse=lage["address"],
+            )
             db.execute(
                 text("""
                     INSERT INTO domain_logistics.tour_stops
@@ -273,16 +299,16 @@ def create_tour(
                     "id": stop_id,
                     "tour_id": tour_id,
                     "stop_order": stop.stop_order if stop.stop_order is not None else i,
-                    "address": stop.address,
-                    "lat": stop.lat,
-                    "lng": stop.lng,
+                    "address": daten.get("address"),
+                    "lat": daten.get("lat"),
+                    "lng": daten.get("lng"),
                     "customer_id": stop.customer_id,
                     "delivery_note_ref": stop.delivery_note_ref,
                     "planned_arrival": stop.planned_arrival,
                     "tenant_id": x_tenant_id,
                 },
             )
-            stops.append({"id": stop_id, **stop.model_dump()})
+            stops.append({"id": stop_id, **daten})
         db.commit()
         return {"id": tour_id, **body.model_dump(exclude={"stops"}), "stops": stops, "tenant_id": x_tenant_id}
     except HTTPException:

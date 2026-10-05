@@ -82,6 +82,9 @@ export type ScreenColumnRenderKind =
   | 'status'
   | 'boolean'
 
+/** Schmälere Fenster blenden von hinten aus: tertiary zuerst, primary bleibt. */
+export type ScreenColumnPriority = 'primary' | 'secondary' | 'tertiary'
+
 export interface ScreenTableColumn {
   key: string
   label: string
@@ -91,6 +94,7 @@ export interface ScreenTableColumn {
   filterable?: boolean
   renderKind?: ScreenColumnRenderKind
   defaultSort?: 'asc' | 'desc'
+  priority?: ScreenColumnPriority
   render?: (_value: unknown, _row: Record<string, unknown>) => ReactNode
 }
 
@@ -109,8 +113,12 @@ export interface ScreenTableDefinition {
   rowActions?: Array<{
     key: string
     label: string
+    command?: string
     dangerLevel?: ActionDangerLevel
+    requiresConfirmation?: boolean
+    enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
+    disabledWhen?: { field: string; values: Array<string | number | boolean> }
   }>
   /** Selection-based actions; payload contains selectedRows and selectedIds. */
   bulkActions?: Array<{
@@ -135,10 +143,22 @@ export interface ScreenRowDetailField {
 
 export type ActionDangerLevel = 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
 
+/** Deklarative UI-Bedingung. Ein String ist ein Domänen-Policy-Pfad, den die Anwendung setzt. */
+export type ScreenCondition =
+  | string
+  | { path: string; exists?: boolean; equals?: string | number | boolean | null; notEquals?: string | number | boolean | null }
+  | { all: ScreenCondition[] }
+  | { any: ScreenCondition[] }
+  | { not: ScreenCondition }
+
 export interface ScreenActionDefinition {
   key: string
   label: string
   kind?: 'primary' | 'secondary' | 'danger' | 'workflow'
+  /** Name im Action Registry der Anwendung, zum Beispiel `tour.create`. */
+  command?: string
+  /** UI-Bedingung oder Policy-Pfad. Fachregeln bleiben in der Anwendung. */
+  enabledWhen?: ScreenCondition
   permission?: string
   disabled?: boolean
   // Action Runtime (Phase 026)
@@ -425,6 +445,8 @@ export interface ScreenDefinition {
     contextRailSections?: ScreenContextRailSection[]
     tableProfile?: ScreenTableProfile
     summaryPlacement?: ScreenSummaryPlacement
+    /** `afterFields`: Status folgt den Eingaben. Voreinstellung bleibt vor den Feldern. */
+    statusPlacement?: 'beforeFields' | 'afterFields'
     stickyHeader?: boolean
     stickyFooter?: boolean
   }

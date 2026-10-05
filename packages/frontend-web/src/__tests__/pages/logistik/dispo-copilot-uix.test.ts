@@ -13,13 +13,12 @@ describe('Copilot und Dispo-UIX', () => {
     expect(read('../../../features/copilot/CopilotDockPanel.tsx')).toContain('hidden={!open}')
   })
 
-  it('stellt Frachtbriefe Arbeit zuerst und filtert die Suche', () => {
+  it('zeichnet Frachtbriefe ueber den Masken-Builder ohne freie Neuanlage', () => {
     const src = read('../../../pages/logistik/frachtbriefe.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('filtered')
-    expect(src).toContain('Suche Frachtbriefe')
-    expect(src).toContain('min-h-11 font-medium font-mono text-primary')
-    expect(src).toContain('{!isTouch ? (')
+    expect(src).toContain('CaptureScreenHost')
+    expect(src).toContain('logistik/frachtbrief')
+    expect(src).toContain("navigate('/verladung')")
+    expect(src).not.toContain('Neuer Frachtbrief')
   })
 
   it('stellt Tourenplanung ohne tote Neue-Tour-CTA', () => {

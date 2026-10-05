@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { actionIsEnabled } from '../governance/screen-context'
 import type { ScreenActionDefinition } from '../schema'
 
 function isDangerAction(action: Pick<ScreenActionDefinition, 'kind' | 'dangerLevel'>): boolean {
@@ -19,6 +20,7 @@ export function ActionBarRenderer({
   touchTargetClass,
   onAction,
   payload,
+  conditionRoot,
   condensed = false,
   identity,
 }: {
@@ -36,6 +38,7 @@ export function ActionBarRenderer({
   touchTargetClass: string
   onAction?: (_actionKey: string, _payload: Record<string, unknown>) => void | Promise<void>
   payload: Record<string, unknown>
+  conditionRoot?: Record<string, unknown>
   /** One-line header while the page is scrolled; identity and actions stay reachable. */
   condensed?: boolean
 }): JSX.Element {
@@ -52,7 +55,7 @@ export function ActionBarRenderer({
         key={action.key}
         className={cn(touchTargetClass)}
         variant={variant}
-        disabled={action.disabled}
+        disabled={!actionIsEnabled(action, conditionRoot)}
         data-action-kind={action.kind ?? 'secondary'}
         data-danger-level={action.dangerLevel ?? 'safe'}
         data-requires-confirmation={action.requiresConfirmation ? 'true' : 'false'}

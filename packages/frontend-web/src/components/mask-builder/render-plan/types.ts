@@ -13,6 +13,7 @@ import type {
   ScreenSummaryItem,
   ScreenSummaryPlacement,
   ScreenActionZone,
+  ScreenCondition,
   ScreenTableProfile,
   ScreenTwinMetricKind,
   ScreenVoiceProvider,
@@ -50,6 +51,7 @@ export interface RenderShellPlan {
   contextRailSections: ScreenContextRailSection[]
   tableProfile: ScreenTableProfile
   summaryPlacement: ScreenSummaryPlacement
+  statusPlacement: 'beforeFields' | 'afterFields'
   stickyHeader: boolean
   stickyFooter: boolean
   summaryEndpoint?: string
@@ -167,6 +169,8 @@ export type RenderColumnKind =
   | 'status'
   | 'boolean'
 
+export type RenderColumnPriority = 'primary' | 'secondary' | 'tertiary'
+
 export interface RenderTableColumnPlan {
   key: string
   label: string
@@ -176,6 +180,7 @@ export interface RenderTableColumnPlan {
   filterable?: boolean
   renderKind?: RenderColumnKind
   defaultSort?: 'asc' | 'desc'
+  priority?: RenderColumnPriority
 }
 
 export interface RenderTableVariant {
@@ -201,8 +206,12 @@ export interface RenderTablePlan {
   rowActions?: Array<{
     key: string
     label: string
+    command?: string
     dangerLevel?: 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
+    requiresConfirmation?: boolean
+    enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
+    disabledWhen?: { field: string; values: Array<string | number | boolean> }
   }>
   bulkActions?: Array<{
     key: string
@@ -228,6 +237,8 @@ export interface RenderActionPlan {
   humanApprovalRequired?: boolean
   zone: ScreenActionZone
   keyboardShortcut?: string
+  command?: string
+  enabledWhen?: ScreenCondition
 }
 
 export interface RenderInteractionPlan {

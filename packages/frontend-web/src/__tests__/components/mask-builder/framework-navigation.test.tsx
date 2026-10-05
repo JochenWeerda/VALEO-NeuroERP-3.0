@@ -124,6 +124,41 @@ describe('Table load errors', () => {
   })
 })
 
+describe('Worklist title', () => {
+  it('nennt die Liste einmal, nicht noch im Register und über der Tabelle', () => {
+    const definition: ScreenDefinition = {
+      id: 'sales/invoices',
+      schemaVersion: 1,
+      domain: 'sales',
+      mode: 'list',
+      title: 'Ausgangsrechnungen',
+      subtitle: 'Faktura / Forderungen',
+      layout: { floorplan: 'worklist', contextRail: 'none' },
+      tabs: [{
+        key: 'rechnungen',
+        label: 'Ausgangsrechnungen',
+        tables: [{
+          key: 'list',
+          label: 'Ausgangsrechnungen',
+          columns: [{ key: 'invoice_number', label: 'Rechnungsnr.' }],
+        }],
+      }],
+    }
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <MemoryRouter>
+          <UniversalMaskRenderer plan={compileRenderPlanFromScreenDefinition(definition)} tables={{ list: [] }} />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    expect(screen.getAllByText('Ausgangsrechnungen')).toHaveLength(1)
+    expect(screen.getByRole('heading', { name: 'Ausgangsrechnungen' })).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Ansichten' })).not.toBeInTheDocument()
+  })
+})
+
 describe('Derived worklist columns', () => {
   const definition: ScreenDefinition = {
     id: 'test/derived-worklist',

@@ -3,7 +3,7 @@
  * TouchCards für Verladeort- und Artikel-Auswahl, Keyboard-Shortcuts für Desktop
  */
 import { useState } from 'react'
-import { useNavigate } from '@/app/routing/typed-router'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
@@ -38,10 +38,17 @@ const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer',
 
 type SiloOption = { id: string; label: string; description: string }
 
+function istKennzeichen(wert: string): boolean {
+  return wert.length > 0 && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(wert)
+}
+
 export default function LKWBeladungPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const isTouch = useTouchDevice()
+  const lieferscheinAusTour = searchParams.get('lieferschein') ?? ''
+  const kennzeichenAusTour = searchParams.get('kennzeichen') ?? ''
 
   const { data: articlesData } = useQuery({
     queryKey: ['articles', 'lkw-beladung'],
@@ -75,8 +82,8 @@ export default function LKWBeladungPage(): JSX.Element {
     { id: 'halle-a', label: 'Halle A', description: 'Schüttgut allgemein' },
   ]
   const [beladung, setBeladung] = useState<BeladungData>({
-    kennzeichen: '',
-    lieferscheinNr: '',
+    kennzeichen: istKennzeichen(kennzeichenAusTour) ? kennzeichenAusTour : '',
+    lieferscheinNr: istKennzeichen(lieferscheinAusTour) ? lieferscheinAusTour : '',
     artikel: '',
     menge: 0,
     chargenId: '',

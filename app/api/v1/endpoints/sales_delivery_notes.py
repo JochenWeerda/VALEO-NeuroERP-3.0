@@ -15,6 +15,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.domains.sales.lieferschein_status import pruefe_status
 from app.core.business_time import business_date_after, business_today
 from app.services.document_allocation_service import (
     AllocationError,
@@ -275,6 +276,10 @@ async def create_delivery_note(
     db: Session = Depends(get_db),
 ):
     """Create a new delivery note."""
+    try:
+        pruefe_status(payload.status)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     if payload.customer_id:
         assert_customer_allowed_for_delivery(db, tenant_id, payload.customer_id)
 
@@ -289,9 +294,12 @@ async def create_delivery_note(
         rabatt = pos.rabatt or Decimal("0")
         menge = pos.menge
         mwst_prozent = pos.mwst_prozent or Decimal("19")
-        
-        netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
-        netto_betrag = netto_preis * menge
+        if pos.listenpreis is None and pos.netto_preis is not None:
+            netto_preis = pos.netto_preis
+            netto_betrag = pos.netto_betrag if pos.netto_betrag is not None else netto_preis * menge
+        else:
+            netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
+            netto_betrag = netto_preis * menge
         mwst_betrag = netto_betrag * mwst_prozent / Decimal("100")
         
         netto += netto_betrag
@@ -340,9 +348,12 @@ async def create_delivery_note(
         listenpreis = pos.listenpreis or Decimal("0")
         rabatt = pos.rabatt or Decimal("0")
         menge = pos.menge
-        
-        netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
-        netto_betrag = netto_preis * menge
+        if pos.listenpreis is None and pos.netto_preis is not None:
+            netto_preis = pos.netto_preis
+            netto_betrag = pos.netto_betrag if pos.netto_betrag is not None else netto_preis * menge
+        else:
+            netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
+            netto_betrag = netto_preis * menge
         
         db.execute(
             text("""
@@ -363,9 +374,9 @@ async def create_delivery_note(
             {
                 "id": pos_id,
                 "delivery_note_id": ls_id,
+                **pos.model_dump(),
                 "netto_preis": netto_preis,
                 "netto_betrag": netto_betrag,
-                **pos.model_dump(),
             }
         )
     
@@ -444,6 +455,11 @@ async def update_delivery_note(
     db: Session = Depends(get_db),
 ):
     """Update a delivery note. When status is draft and positionen is provided, positions are replaced (Option A)."""
+    if payload.status is not None:
+        try:
+            pruefe_status(payload.status)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     if row["status"] != "draft" and payload.positionen is not None:
         raise HTTPException(
@@ -460,12 +476,17 @@ async def update_delivery_note(
         netto = Decimal("0")
         mwst = Decimal("0")
         for pos in payload.positionen:
-            listenpreis = pos.listenpreis or Decimal("0")
             rabatt = pos.rabatt or Decimal("0")
             menge = pos.menge
             mwst_prozent = pos.mwst_prozent or Decimal("19")
-            netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
-            netto_betrag = netto_preis * menge
+            if pos.listenpreis is None and pos.netto_preis is not None:
+                netto_preis = pos.netto_preis
+                netto_betrag = pos.netto_betrag if pos.netto_betrag is not None else netto_preis * menge
+                listenpreis = pos.listenpreis
+            else:
+                listenpreis = pos.listenpreis or Decimal("0")
+                netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
+                netto_betrag = netto_preis * menge
             mwst_betrag = netto_betrag * mwst_prozent / Decimal("100")
             netto += netto_betrag
             mwst += mwst_betrag
@@ -489,9 +510,9 @@ async def update_delivery_note(
                 {
                     "id": pos_id,
                     "delivery_note_id": ls_id,
+                    **pos.model_dump(),
                     "netto_preis": netto_preis,
                     "netto_betrag": netto_betrag,
-                    **pos.model_dump(),
                 },
             )
         brutto = netto + mwst

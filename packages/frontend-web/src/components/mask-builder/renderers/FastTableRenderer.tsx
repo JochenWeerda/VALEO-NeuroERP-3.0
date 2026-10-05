@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, type ReactNode } from 'react'
+import { memo, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Columns3, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,6 +7,8 @@ import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
 import type { RenderColumnKind, RenderTablePlan } from '../render-plan/types'
 import type { FilterPlan, TableQueryState } from '../runtime/types'
 import { navigateRowRoute, rowIdentity } from './row-identity'
+import { columnsForWidth } from './column-priority'
+import { evaluateCondition, matchesValueList } from '../governance/condition-engine'
 import { statusLabel } from './status-labels'
 
 interface FastTableRendererProps {
@@ -26,6 +28,8 @@ interface FastTableRendererProps {
   onRetry?: () => void
   selectedRowKey?: string
   onRowSelect?: (_row: Record<string, unknown>) => void
+  /** Die Seitenüberschrift trägt den Namen schon. Keine zweite Überschrift darüber. */
+  suppressHeading?: boolean
 }
 
 export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
@@ -121,6 +125,7 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   onRetry,
   selectedRowKey,
   onRowSelect,
+  suppressHeading = false,
 }: FastTableRendererProps): JSX.Element {
   const isServerPaged = table.serverPagination && Boolean(onQueryChange)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
@@ -142,9 +147,22 @@ export const FastTableRenderer = memo(function FastTableRenderer({
       return next.size === current.size ? current : next
     })
   }, [rows])
+  const frameRef = useRef<HTMLDivElement>(null)
+  const [frameWidth, setFrameWidth] = useState(1280)
+  useEffect(() => {
+    const node = frameRef.current
+    if (!node || typeof ResizeObserver === 'undefined') return undefined
+    const observer = new ResizeObserver((entries) => {
+      const next = entries[0]?.contentRect.width
+      if (typeof next === 'number') setFrameWidth(next)
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+  const priorityColumns = columnsForWidth(table.columns, frameWidth)
   const availableColumns = table.availableColumns ?? table.columns
-  const visibleColumnKeys = new Set(table.columns.map((column) => column.key))
-  const dataColumns = table.columns.map((column) => ({
+  const visibleColumnKeys = new Set(priorityColumns.map((column) => column.key))
+  const dataColumns = priorityColumns.map((column) => ({
     key: column.key,
     label: column.label,
     width: column.width,
@@ -194,16 +212,14 @@ export const FastTableRenderer = memo(function FastTableRenderer({
           sortable: false,
           render: (_value: unknown, row: Record<string, unknown>) => (
             <span className="flex gap-1">
-              {table.rowActions?.filter((action) => {
-                const condition = action.visibleWhen
-                return !condition || condition.values.includes(row[condition.field] as string | number | boolean)
-              }).map((action) => (
+              {table.rowActions?.filter((action) => matchesValueList(row, action.visibleWhen)).map((action) => (
                 <Button
                   key={action.key}
                   type="button"
                   variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
                   className="min-h-touch px-2 text-xs"
                   data-testid={`row-action-${action.key}`}
+                  disabled={Boolean(action.disabledWhen && matchesValueList(row, action.disabledWhen)) || Boolean(action.enabledWhen && !evaluateCondition(action.enabledWhen, row))}
                   onClick={(event) => {
                     event.stopPropagation()
                     void onRowAction(action.key, row)
@@ -251,10 +267,11 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   }
 
   return (
+    <div ref={frameRef}>
     <Card data-table-profile={table.tableProfile} data-testid={`table-${table.key}`}>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="text-base">{table.label}</CardTitle>
+          {suppressHeading ? null : <CardTitle className="text-base">{table.label}</CardTitle>}
           {table.bulkActions?.length && onRowAction ? (
             <div className="flex items-center gap-1" data-testid={`bulk-actions-${table.key}`}>
               <span className="mr-1 text-xs text-muted-foreground">{selectedIds.size} gewaehlt</span>
@@ -451,5 +468,6 @@ export const FastTableRenderer = memo(function FastTableRenderer({
         ) : null}
       </CardContent>
     </Card>
+    </div>
   )
 })

@@ -85,6 +85,7 @@ function compileTable(
       filterable: column.filterable,
       renderKind: column.renderKind,
       defaultSort: column.defaultSort,
+      priority: column.priority,
     })),
     dataSourceKey: table.dataSourceKey,
     pageSize,
@@ -125,6 +126,8 @@ function filterActionsByPermission(
       humanApprovalRequired: action.humanApprovalRequired,
       zone: action.zone ?? 'header',
       keyboardShortcut: action.keyboardShortcut,
+      command: action.command,
+      enabledWhen: action.enabledWhen,
     }))
 }
 
@@ -207,11 +210,20 @@ export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefine
   }
 }
 
+function schemaVolatility(schema: ScreenDefinition): string {
+  const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
+  const options = (schema.fields ?? []).map((field) => (
+    field.options ? `${field.key}=${field.options.map((option) => String(option.value)).join('|')}` : ''
+  )).join(';')
+  const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}`).join(',')
+  return `${summary}#${options}#${actions}#${schema.layout?.density ?? ''}`
+}
+
 export function compileRenderPlan(
   schema: ScreenDefinition,
   context: CompileContext,
 ): RenderPlan {
-  const cacheKey = buildRenderPlanCacheKey(context)
+  const cacheKey = `${buildRenderPlanCacheKey(context)}::${schemaVolatility(schema)}`
   const cached = globalRenderPlanCache.get(cacheKey)
   if (cached && cached.screenId === schema.id) {
     return cached
@@ -322,6 +334,7 @@ export function compileRenderPlan(
       contextRailSections,
       tableProfile,
       summaryPlacement: schema.layout?.summaryPlacement ?? 'header',
+      statusPlacement: schema.layout?.statusPlacement ?? 'beforeFields',
       stickyHeader: schema.layout?.stickyHeader ?? onePage,
       stickyFooter: schema.layout?.stickyFooter ?? onePage,
       summaryEndpoint: schema.summaryEndpoint,

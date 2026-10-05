@@ -79,6 +79,8 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
       humanApprovalRequired: action.humanApprovalRequired,
       zone: action.zone,
       keyboardShortcut: action.keyboardShortcut,
+      command: action.command,
+      enabledWhen: action.enabledWhen,
     })),
     workflow: plan.workflow,
     sourceProposals: plan.sourceProposals,
@@ -95,6 +97,7 @@ export function renderPlanToScreenDefinition(plan: RenderPlan): ScreenDefinition
       summaryPlacement: plan.shell.summaryPlacement,
       stickyHeader: plan.shell.stickyHeader,
       stickyFooter: plan.shell.stickyFooter,
+      statusPlacement: plan.shell.statusPlacement,
     },
     interaction: plan.interaction,
     performance: {
