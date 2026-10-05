@@ -18,6 +18,12 @@ from app.infrastructure.models.journal import JournalEntry
 from app.services.finance_transaction_service import FinanceTransactionService
 
 
+@pytest.fixture(autouse=True)
+def isolate_period_contract(monkeypatch, request):
+    if "case" not in request.fixturenames:
+        monkeypatch.setattr(FinanceTransactionService, "check_period_open", lambda self, period: None)
+
+
 def entry(tenant):
     return JournalEntry(id=str(uuid4()), tenant_id=tenant, entry_number=uuid4().hex[:20],
         entry_date=datetime(2026, 10, 2, tzinfo=timezone.utc),

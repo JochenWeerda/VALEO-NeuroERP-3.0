@@ -120,9 +120,9 @@ class FinanceTransactionService:
         Periode offen ist, darf nicht buchen lassen.
         """
         if not period:
-            return
+            raise ValidationFailedError("A booking period is required")
         try:
-            gesperrt = finance_periods.gesperrter_zustand(self.db, self.tenant_id, period)
+            gesperrt = finance_periods.gesperrter_zustand(self.db, self.tenant_id, period, sperren=True)
         except Exception as fehler:  # noqa: BLE001
             raise ValidationFailedError(
                 f"Zustand der Periode {period} ist nicht feststellbar "
@@ -347,7 +347,10 @@ class FinanceTransactionService:
                 "Belegprinzip: Jede Buchung muss eine Belegreferenz haben (reference-Feld)"
             )
         total_debit = self.validate_balanced(lines)
-        self.check_period_open(period)
+        derived_period = posting_day.strftime("%Y-%m")
+        if period is not None and period != derived_period:
+            raise ValidationFailedError("Period differs from posting date")
+        self.check_period_open(derived_period)
         account_ids = self._validate_line_accounts(lines)
 
         obj = JournalEntry(
@@ -423,6 +426,7 @@ class FinanceTransactionService:
     def post(self, entry_id: str, posted_by: Optional[str] = None) -> JournalEntry:
         obj = self._locked_entry(entry_id)
         self.validate_status_transition(obj.status, "posted")
+        self.check_period_open(obj.posting_date.strftime("%Y-%m"))
         self._validated_existing_lines(obj)
         resolved_posted_by = self._resolve_user_id(posted_by)
         obj.status = "posted"
@@ -446,11 +450,11 @@ class FinanceTransactionService:
         """Mark original as reversed and create a mirror entry with inverted debit/credit."""
         original = self._locked_entry(entry_id)
         self.validate_status_transition(original.status, "reversed")
-
+        now = datetime.utcnow()
+        self.check_period_open(now.strftime("%Y-%m"))
         orig_lines = self._validated_existing_lines(original)
 
         # Build reversal entry
-        now = datetime.utcnow()
         rev_number = f"STORNO-{original.entry_number}"
         rev_desc = f"Storno: {original.description}" + (f" — {reason}" if reason else "")
 

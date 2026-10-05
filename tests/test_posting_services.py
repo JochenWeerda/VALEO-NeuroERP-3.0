@@ -28,6 +28,7 @@ TENANT = "tenant-test"
 
 @pytest.fixture(autouse=True)
 def explicit_account_identity(monkeypatch):
+    monkeypatch.setattr(FinanceTransactionService, "check_period_open", lambda self, period: None)
     monkeypatch.setattr(FinanceTransactionService, "account_id_for_number", lambda self, number: "id-" + number)
 
 

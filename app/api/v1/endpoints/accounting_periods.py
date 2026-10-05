@@ -78,6 +78,7 @@ async def create_period(
             )
 
         # Check if period already exists
+        finance_periods.sperre_periode(db, tenant_id, period_data.period, exklusiv=True)
         existing = db.execute(
             text("""
                 SELECT id FROM finance_accounting_periods
@@ -271,6 +272,7 @@ async def update_period(
             raise HTTPException(status_code=404, detail="Period not found")
 
         # Update status
+        finance_periods.sperre_periode(db, tenant_id, existing[2], exklusiv=True)
         update_query = "UPDATE finance_accounting_periods SET"
         params = {"id": period_id, "tenant_id": tenant_id}
         updates = []

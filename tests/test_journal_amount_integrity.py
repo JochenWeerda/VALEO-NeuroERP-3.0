@@ -93,12 +93,19 @@ def store():
                 )
             )
 
+    with engine.begin() as conn:
+        conn.execute(text(f'CREATE TABLE "{name}".finance_accounting_periods (LIKE public.finance_accounting_periods INCLUDING ALL)'))
+
     class OwnedSession(Session):
         def execute(self, statement, params=None, **kwargs):
             if isinstance(statement, TextClause):
                 sql = (
                     str(statement)
+                    .replace("FROM finance_accounting_periods", "FROM public.finance_accounting_periods")
+                    .replace("INSERT INTO finance_accounting_periods", "INSERT INTO public.finance_accounting_periods")
+                    .replace("UPDATE finance_accounting_periods", "UPDATE public.finance_accounting_periods")
                     .replace("domain_erp.", f'"{name}".')
+                    .replace("public.finance_accounting_periods", f'"{name}".finance_accounting_periods')
                     .replace("(__[POSTCOMPILE_account_ids])", ":account_ids")
                 )
                 statement = text(sql)

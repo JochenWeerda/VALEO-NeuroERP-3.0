@@ -20,6 +20,7 @@ braucht **ein** Woerterbuch und **eine** Stelle, die es anwendet. Diese hier.
 from __future__ import annotations
 
 from typing import Any, Optional
+import re
 
 from sqlalchemy import text
 
@@ -86,7 +87,19 @@ def sperrt(status: Any) -> bool:
     return zustand not in (OFFEN, ABSCHLUSSBUCHUNGEN)
 
 
-def gesperrter_zustand(db: Any, tenant_id: str, period: str) -> Optional[str]:
+def sperre_periode(db: Any, tenant_id: str, period: str, *, exklusiv: bool = False) -> None:
+    """Serialize period changes with journal writers, including an absent row."""
+    if not isinstance(period, str) or not re.fullmatch(r"[0-9]{4}-(0[1-9]|1[0-2])", period) or period[:4] == "0000":
+        raise ValueError("Period must be YYYY-MM")
+    isolation = db.execute(text("SELECT current_setting('transaction_isolation')")).scalar_one()
+    if isolation != "read committed":
+        raise ValueError("Period locks require READ COMMITTED")
+    function = "pg_advisory_xact_lock" if exklusiv else "pg_advisory_xact_lock_shared"
+    db.execute(text(f"SELECT {function}(hashtextextended(:key, 0))"),  # nosec B608
+               {"key": f"finance-period:{tenant_id}:{period}"})
+
+
+def gesperrter_zustand(db: Any, tenant_id: str, period: str, *, sperren: bool = False) -> Optional[str]:
     """Gibt den sperrenden Zustand der Periode zurueck, sonst ``None``.
 
     ``None`` heisst: buchen erlaubt. Das gilt auch, wenn es **keine** Zeile zur
@@ -95,15 +108,20 @@ def gesperrter_zustand(db: Any, tenant_id: str, period: str) -> Optional[str]:
     **nicht** gefangen: Wer nicht sagen kann, ob eine Periode offen ist, darf
     nicht buchen lassen.
     """
+    if sperren:
+        sperre_periode(db, tenant_id, period)
     zeile = db.execute(
         text(
             f"SELECT status FROM {TABELLE} "  # nosec B608  # reviewed-safe: TABELLE ist ein Code-Literal
             "WHERE tenant_id = :tenant_id AND period = :period LIMIT 1"
+            + (" FOR SHARE" if sperren else "")
         ),
         {"tenant_id": tenant_id, "period": period},
     ).fetchone()
     if not zeile:
         return None
+    if zeile[0] is None:
+        return "UNKNOWN"
     if sperrt(zeile[0]):
         return normalisiere(zeile[0])
     return None
