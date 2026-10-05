@@ -71,6 +71,22 @@ prueft 932 von 932 Routen. Die drei Code-Inventare sind aktuell.
 Der erste Reparaturcommit c50379d2e ist auf main gepusht. Seine Docs- und
 API-Laeufe stoppten an Inventaren bzw. diesen zwei Preisfeldern; beide werden
 im zweiten Meilenstein korrigiert. Eingereihte Runs sind kein Gruennachweis.
+
+Der zweite Meilenstein 0b373a432 ist auf main, develop wurde mit dem echten
+Merge db97ee665 nachgezogen. Der Folgepatch sperrt markdown-it auf 14.3.1
+(Advisory GHSA-253c-mchw-3w2r). Formatierung, automatische Link-Erkennung und
+begrenzte Verarbeitung eines 200-KB-Eingangs wurden mit dem heruntergeladenen
+Paket ohne Installationsskripte geprueft. OpenAPI-Artefakt-, Generator- und
+Workflow-Aenderungen starten kuenftig ebenfalls den unveraenderten Driftcheck;
+so bekommt eine alleinige Spec-Korrektur eine neue Abnahme.
+
+Die bestehende ADR-071-Evidenz fuer eingebettetes Chroma ist unveraendert;
+neun Security-Gate-Vertraege bestehen. Es wurde keine neue Ausnahme eingefuehrt
+und die Rohwarnungen bleiben sichtbar. Zusaetzlicher offener Sensorbefund:
+[http-cache-semantics GHSA-ch52-4w7c-c8xp](https://github.com/advisories/GHSA-ch52-4w7c-c8xp),
+ebenfalls ohne gepatchtes Release. Keine Gesamt-Security-Freigabe.
+Ueberholte noch wartende Laeufe des eigenen ersten Reparaturcommits werden
+beendet; gestartete, aktuelle und fremde Dependabot-Laeufe bleiben erhalten.
 114 gezielte Konto-/Webhook-/Frachtbrief-/Doku-/Ratschen-/Workflow-/Besitztests bestanden;
 Webhooks wurden mit beiden DB-Verbindungen explizit auf dem gemeinsamen Probe
 geprueft. MkDocs (derselbe Buildmodus wie CI), ADR-Nav, Slice-Harness, SQL-,
