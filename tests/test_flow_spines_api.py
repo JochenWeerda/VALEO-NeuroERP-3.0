@@ -370,6 +370,87 @@ def test_flow_spine_instance_transition(monkeypatch, db):
         db.commit()
 
 
+def test_workspace_unknown_instance_is_404_not_catalog(db):
+    _require_flow_spine_table(db)
+    response = client.get(
+        "/api/v1/process/flow-spines/order-to-cash?instance_id=00000000-0000-0000-0000-000000000000",
+        headers=AUTH_HEADERS,
+    )
+    assert response.status_code == 404
+
+
+def test_workspace_instance_fields_match_declared_event_source(monkeypatch, db):
+    """FSX-001: timestamp/detail_rows gegen das Knotenereignis, undeclared Felder leer."""
+    _require_flow_spine_table(db)
+    _require_flow_spine_event_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-FSX001-001"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    create_resp = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={"subject": "Herkunftskarte"},
+        headers=AUTH_HEADERS,
+    )
+    assert create_resp.status_code == 201
+    instance_id = create_resp.json()["instance_id"]
+
+    trans_resp = client.post(
+        f"/api/v1/process/flow-spines/order-to-cash/instances/{instance_id}/transitions",
+        json={
+            "node_id": "order",
+            "new_status": "ok",
+            "action_label": "Auftrag bestaetigt",
+            "user_id": "user-origin",
+        },
+        headers=AUTH_HEADERS,
+    )
+    assert trans_resp.status_code == 200
+
+    timeline_resp = client.get(
+        f"/api/v1/process/flow-spines/order-to-cash/instances/{instance_id}/timeline",
+        headers=AUTH_HEADERS,
+    )
+    assert timeline_resp.status_code == 200
+    order_events = [
+        event for event in timeline_resp.json()["events"] if event.get("node_id") == "order"
+    ]
+    assert order_events, "Transition muss ein Knotenereignis schreiben"
+    source = order_events[-1]
+
+    workspace_resp = client.get(
+        f"/api/v1/process/flow-spines/order-to-cash?instance_id={instance_id}",
+        headers=AUTH_HEADERS,
+    )
+    assert workspace_resp.status_code == 200
+    body = workspace_resp.json()
+    order = next(node for node in body["nodes"] if node["id"] == "order")
+    delivery = next(node for node in body["nodes"] if node["id"] == "delivery")
+
+    assert order["timestamp"] == source["created_at"]
+    rows = {row["label"]: row["value"] for row in order["detail_rows"]}
+    assert rows["Aktion"] == source["event_type"]
+    assert rows["Akteur"] == source["actor_id"]
+    assert rows["Vorgang"] == "WF-FSX001-001"
+    assert order["metric"] is None
+    assert order["kpis"] == []
+    assert order["documents"] == []
+    assert order["agent"] is None
+    assert order["data_state"] == "instance"
+
+    assert delivery["timestamp"] is None
+    assert delivery["metric"] is None
+    assert delivery["agent"] is None
+
+    inst = db.get(FlowSpineInstance, instance_id)
+    if inst:
+        db.delete(inst)
+        db.commit()
+
+
 def test_flow_spine_instance_delete(monkeypatch, db):
     _require_flow_spine_table(db)
 
@@ -589,8 +670,276 @@ def test_flow_spine_instance_complete_sets_closed_fields(monkeypatch, db):
 
     inst = db.get(FlowSpineInstance, instance_id)
     if inst:
+        db.delete(inst        )
+        db.commit()
+
+
+def test_flow_spine_list_filters_by_linked_document(monkeypatch, db):
+    """FSX-010: die Belegmaske fragt nach genau diesem Beleg, nicht nach der ganzen Liste."""
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        _counter = 0
+
+        def next_number(self, domain: str) -> str:
+            self._counter += 1
+            return f"WF-DOC-{self._counter:05d}"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+    created: list[str] = []
+    doc_id = "PO-FSX-010-FILTER"
+
+    matched = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json={
+            "subject": "Belegfall",
+            "linked_document_id": doc_id,
+            "linked_document_type": "purchase_order",
+        },
+        headers=AUTH_HEADERS,
+    )
+    other = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json={"subject": "Ohne Beleg"},
+        headers=AUTH_HEADERS,
+    )
+    assert matched.status_code == 201
+    assert other.status_code == 201
+    created.extend([matched.json()["instance_id"], other.json()["instance_id"]])
+
+    listed = client.get(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        params={"linked_document_id": doc_id, "linked_document_type": "purchase_order"},
+        headers=AUTH_HEADERS,
+    )
+    assert listed.status_code == 200
+    ids = {item["instance_id"] for item in listed.json()["instances"]}
+    assert matched.json()["instance_id"] in ids
+    assert other.json()["instance_id"] not in ids
+
+    half = client.get(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        params={"linked_document_id": doc_id},
+        headers=AUTH_HEADERS,
+    )
+    assert half.status_code == 422
+
+    for iid in created:
+        inst = db.get(FlowSpineInstance, iid)
+        if inst:
+            db.delete(inst)
+    db.commit()
+
+
+def test_flow_spine_create_is_idempotent_for_open_document(monkeypatch, db):
+    """FSX-011: derselbe offene Beleg liefert dieselbe Fall-ID, 200 statt 201."""
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        _counter = 0
+
+        def next_number(self, domain: str) -> str:
+            self._counter += 1
+            return f"WF-IDEM-{self._counter:05d}"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+    payload = {
+        "subject": "Idempotenz",
+        "linked_document_id": "PO-FSX-011-IDEM",
+        "linked_document_type": "purchase_order",
+    }
+    first = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json=payload,
+        headers=AUTH_HEADERS,
+    )
+    second = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json=payload,
+        headers=AUTH_HEADERS,
+    )
+    assert first.status_code == 201
+    assert second.status_code == 200
+    assert first.json()["instance_id"] == second.json()["instance_id"]
+
+    inst = db.get(FlowSpineInstance, first.json()["instance_id"])
+    if inst:
         db.delete(inst)
         db.commit()
+
+
+def test_flow_spine_empty_document_ref_does_not_collide(monkeypatch, db):
+    """Leerstring ist keine Belegreferenz — zwei manuelle Faelle duerfen parallel existieren."""
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        _counter = 0
+
+        def next_number(self, domain: str) -> str:
+            self._counter += 1
+            return f"WF-EMPTY-{self._counter:05d}"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+    created: list[str] = []
+    for _ in range(2):
+        resp = client.post(
+            "/api/v1/process/flow-spines/procure-to-pay/instances",
+            json={
+                "subject": "Manuell",
+                "linked_document_id": "   ",
+                "linked_document_type": "   ",
+            },
+            headers=AUTH_HEADERS,
+        )
+        assert resp.status_code == 201
+        created.append(resp.json()["instance_id"])
+        stored = db.get(FlowSpineInstance, resp.json()["instance_id"])
+        assert stored is not None
+        assert stored.linked_document_id is None
+        assert stored.linked_document_type is None
+
+    assert created[0] != created[1]
+    for iid in created:
+        inst = db.get(FlowSpineInstance, iid)
+        if inst:
+            db.delete(inst)
+    db.commit()
+
+
+def test_flow_spine_completed_case_does_not_block_new_open_case(monkeypatch, db):
+    """Ein abgeschlossener Erstfall darf eine Reklamation zum selben Beleg nicht blockieren."""
+    _require_flow_spine_table(db)
+    _require_flow_spine_event_table(db)
+
+    class _DummyNumbering:
+        _counter = 0
+
+        def next_number(self, domain: str) -> str:
+            self._counter += 1
+            return f"WF-REOPEN-{self._counter:05d}"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+    payload = {
+        "subject": "Erstfall",
+        "linked_document_id": "PO-FSX-011-REOPEN",
+        "linked_document_type": "purchase_order",
+    }
+    first = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json=payload,
+        headers=AUTH_HEADERS,
+    )
+    assert first.status_code == 201
+    first_id = first.json()["instance_id"]
+    complete = client.post(
+        f"/api/v1/process/flow-spines/procure-to-pay/instances/{first_id}/complete",
+        json={"reason_code": "workflow_completed", "user_id": "tester"},
+        headers=AUTH_HEADERS,
+    )
+    assert complete.status_code == 200
+
+    listed = client.get(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        params={
+            "linked_document_id": "PO-FSX-011-REOPEN",
+            "linked_document_type": "purchase_order",
+        },
+        headers=AUTH_HEADERS,
+    )
+    assert listed.status_code == 200
+    statuses = {item["instance_id"]: item["lifecycle_status"] for item in listed.json()["instances"]}
+    assert statuses.get(first_id) == "completed"
+
+    second = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json=payload,
+        headers=AUTH_HEADERS,
+    )
+    assert second.status_code == 201
+    assert second.json()["instance_id"] != first_id
+
+    for iid in (first_id, second.json()["instance_id"]):
+        inst = db.get(FlowSpineInstance, iid)
+        if inst:
+            db.delete(inst)
+    db.commit()
+
+
+def test_flow_spine_get_instance_wrong_process_is_404_not_403(monkeypatch, db):
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-FSX012-404"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    created = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={"subject": "404-Check"},
+        headers=AUTH_HEADERS,
+    )
+    assert created.status_code == 201
+    instance_id = created.json()["instance_id"]
+
+    wrong_process = client.get(
+        f"/api/v1/process/flow-spines/procure-to-pay/instances/{instance_id}",
+        headers=AUTH_HEADERS,
+    )
+    assert wrong_process.status_code == 404
+
+    inst = db.get(FlowSpineInstance, instance_id)
+    if inst:
+        db.delete(inst)
+        db.commit()
+
+
+def test_flow_spine_patch_rejects_rebind_to_other_document(monkeypatch, db):
+    """FSX-012: unverknuepft darf binden, anderer Beleg am selben Fall ist 409."""
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-FSX012-409"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    created = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json={"subject": "Handover"},
+        headers=AUTH_HEADERS,
+    )
+    assert created.status_code == 201
+    instance_id = created.json()["instance_id"]
+    path = f"/api/v1/process/flow-spines/procure-to-pay/instances/{instance_id}"
+
+    first = client.patch(
+        path,
+        json={"linked_document_id": "PO-A", "linked_document_type": "purchase_order"},
+        headers=AUTH_HEADERS,
+    )
+    assert first.status_code == 200
+    assert first.json()["linked_document_id"] == "PO-A"
+
+    same = client.patch(
+        path,
+        json={"linked_document_id": "PO-A", "linked_document_type": "purchase_order"},
+        headers=AUTH_HEADERS,
+    )
+    assert same.status_code == 200
+
+    rebound = client.patch(
+        path,
+        json={"linked_document_id": "PO-B", "linked_document_type": "purchase_order"},
+        headers=AUTH_HEADERS,
+    )
+    assert rebound.status_code == 409
+    stored = db.get(FlowSpineInstance, instance_id)
+    assert stored is not None
+    assert stored.linked_document_id == "PO-A"
+
+    db.delete(stored)
+    db.commit()
 
 
 # ── PCN-Meldungen (Gap 104-C/D — DB-backed) ──────────────────────────────────

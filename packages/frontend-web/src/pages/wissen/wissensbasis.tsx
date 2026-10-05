@@ -20,7 +20,7 @@ import {
 import { useDebounce } from '@/hooks/useDebounce'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -61,10 +61,10 @@ const TYP_FARBEN: Record<string, string> = {
   PROZESSDEFINITION: 'bg-indigo-100 text-indigo-800',
 }
 
-const STATUS_FARBEN: Record<string, string> = {
-  FREIGEGEBEN: 'bg-green-100 text-green-800',
-  ENTWURF: 'bg-gray-100 text-gray-700',
-  ARCHIVIERT: 'bg-red-100 text-red-700',
+const STATUS_VARIANTEN: Record<string, BadgeVariant> = {
+  FREIGEGEBEN: 'success',
+  ENTWURF: 'secondary',
+  ARCHIVIERT: 'error',
 }
 
 const TYP_FILTER_OPTIONEN: Array<{ value: string; label: string }> = [
@@ -117,11 +117,10 @@ function TypBadge({ typ }: { typ: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const farbe = STATUS_FARBEN[status] ?? 'bg-gray-100 text-gray-700'
   return (
-    <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${farbe}`}>
+    <Badge variant={STATUS_VARIANTEN[status] ?? 'secondary'} className="text-xs">
       {status}
-    </span>
+    </Badge>
   )
 }
 
@@ -348,7 +347,7 @@ function VersionenTab({ item }: { item: KnowledgeItem }) {
         >
           <span className="font-semibold text-gray-600 w-14">v{row.version}</span>
           {row.isCurrent && (
-            <Badge className="text-xs bg-blue-600 text-white">Aktuell</Badge>
+            <Badge variant="info" className="text-xs text-white">Aktuell</Badge>
           )}
         </div>
       ))}
@@ -414,7 +413,7 @@ function DetailPanel({ knowledgeId }: DetailPanelProps) {
 
       {/* Tabs */}
       <Tabs defaultValue="inhalt" className="flex-1 flex flex-col overflow-hidden bg-white">
-        <TabsList className="mx-4 mt-3 w-fit flex-shrink-0">
+        <TabsList className="mx-4 mt-3 w-fit shrink-0">
           <TabsTrigger value="inhalt">Inhalt</TabsTrigger>
           <TabsTrigger value="versionen">Versionen ({item.versionen_count})</TabsTrigger>
           <TabsTrigger value="metadaten">Metadaten</TabsTrigger>
@@ -503,23 +502,21 @@ function DetailPanel({ knowledgeId }: DetailPanelProps) {
 
       {/* Aktionsleiste */}
       <div className="p-4 border-t bg-white flex gap-2 flex-wrap">
-        <Button variant="outline" size="sm" onClick={() => setNeueVersionOpen(true)}>
+        <Button variant="outline" onClick={() => setNeueVersionOpen(true)} className="min-h-touch">
           Neue Version
         </Button>
         <Button
           variant="outline"
-          size="sm"
           onClick={toggleAgentenfreigabe}
           disabled={updateMutation.isPending}
-        >
+         className="min-h-touch">
           {item.agentenfreigabe ? 'Agenten-Freigabe entziehen' : 'Agenten-Freigabe erteilen'}
         </Button>
         <Button
           variant="destructive"
-          size="sm"
           onClick={handleArchive}
           disabled={archiveMutation.isPending || item.status === 'ARCHIVIERT'}
-        >
+         className="min-h-touch">
           Archivieren
         </Button>
       </div>
@@ -556,7 +553,7 @@ export default function WissensbasisPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
       {/* Page-Header */}
-      <div className="bg-white border-b px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <div className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Wissensbasis</h1>
           <p className="text-sm text-gray-500">
@@ -574,7 +571,7 @@ export default function WissensbasisPage() {
       {/* Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Linke Spalte — Liste */}
-        <div className="w-80 flex-shrink-0 flex flex-col border-r bg-white overflow-hidden">
+        <div className="w-80 shrink-0 flex flex-col border-r bg-white overflow-hidden">
           {/* Suche */}
           <div className="p-3 border-b">
             <Input

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -45,6 +46,7 @@ const serviceEntryRoles = [
 ] satisfies Array<{ id: ServiceEntryRole; label: string; description: string }>
 
 export default function ServiceEntrySheetsPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const { data = [], isLoading, isError, error, refetch } = useServiceEntrySheets()
   const createSes = useCreateServiceEntrySheet()
   const updateSes = useUpdateServiceEntrySheet()
@@ -54,6 +56,7 @@ export default function ServiceEntrySheetsPage(): JSX.Element {
   const [quantity, setQuantity] = useState(1)
   const [unitPrice, setUnitPrice] = useState(0)
   const [role, setRole] = useState<ServiceEntryRole>('einkauf')
+  const [pendingApproveId, setPendingApproveId] = useState<string | null>(null)
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -67,7 +70,13 @@ export default function ServiceEntrySheetsPage(): JSX.Element {
   }
 
   const handleApprove = async (item: ServiceEntrySheet) => {
-    await updateSes.mutateAsync({ id: item.id, data: { status: 'FREIGEGEBEN' } })
+    if (pendingApproveId) return
+    setPendingApproveId(item.id)
+    try {
+      await updateSes.mutateAsync({ id: item.id, data: { status: 'FREIGEGEBEN' } })
+    } finally {
+      setPendingApproveId(null)
+    }
   }
 
   const openSheets = data.filter((item) => item.status !== 'FREIGEGEBEN')
@@ -83,6 +92,12 @@ export default function ServiceEntrySheetsPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Leistungsnachweise</h1>
+        <p className="text-muted-foreground">Dienstleistung erfassen und freigeben</p>
+      </div>
+      {!isTouch ? (
+      <>
       <RoleFocusBar roles={serviceEntryRoles} value={role} onChange={setRole} visibleCount={data.length} totalCount={data.length} title="Wer prueft die Dienstleistung?" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -127,6 +142,8 @@ export default function ServiceEntrySheetsPage(): JSX.Element {
           ]}
         />
       </div>
+      </>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -134,12 +151,12 @@ export default function ServiceEntrySheetsPage(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
-            <Input placeholder="Lieferanten-ID" value={supplierId} onChange={(e) => setSupplierId(e.target.value)} />
-            <Input placeholder="Beschreibung" value={description} onChange={(e) => setDescription(e.target.value)} />
-            <Input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value) || 0)} />
-            <Input type="number" value={unitPrice} onChange={(e) => setUnitPrice(Number(e.target.value) || 0)} />
+            <Input aria-label="Lieferanten-ID" className="min-h-touch" placeholder="Lieferanten-ID" value={supplierId} onChange={(e) => setSupplierId(e.target.value)} />
+            <Input aria-label="Beschreibung" className="min-h-touch" placeholder="Beschreibung" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Input aria-label="Menge" className="min-h-touch" type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value) || 0)} />
+            <Input aria-label="Einzelpreis" className="min-h-touch" type="number" value={unitPrice} onChange={(e) => setUnitPrice(Number(e.target.value) || 0)} />
           </div>
-          <Button onClick={() => { void handleCreate() }} disabled={createSes.isPending || !supplierId || !description}>
+          <Button className="min-h-touch touch-manipulation" onClick={() => { void handleCreate() }} disabled={createSes.isPending || !supplierId || !description}>
             Leistungsnachweis anlegen
           </Button>
         </CardContent>
@@ -153,7 +170,7 @@ export default function ServiceEntrySheetsPage(): JSX.Element {
           {isLoading ? (
             <div className="text-sm text-muted-foreground">Lade Leistungsnachweise ...</div>
           ) : data.length === 0 ? (
-            <div className="rounded border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+            <div className="rounded border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
               Noch kein Leistungsnachweis vorhanden. Lege zuerst den Nachweis an, sobald eine Dienstleistung erbracht wurde.
             </div>
           ) : (
@@ -179,7 +196,7 @@ export default function ServiceEntrySheetsPage(): JSX.Element {
                     <TableCell className="text-right">{s.amount.toFixed(2)} EUR</TableCell>
                     <TableCell>{s.status}</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => { void handleApprove(s) }} disabled={s.status === 'FREIGEGEBEN'}>
+                      <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => { void handleApprove(s) }} disabled={s.status === 'FREIGEGEBEN' || pendingApproveId === s.id}>
                         Freigeben
                       </Button>
                     </TableCell>

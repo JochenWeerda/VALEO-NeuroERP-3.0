@@ -16,6 +16,9 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type DokumentForm = {
   beleg_typ: string
@@ -52,6 +55,7 @@ const quickLinks = [
 
 export default function AusgehendeBelegeDokumentePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const [selected, setSelected] = useState<FuhrparkAusgehendesDokument | null>(null)
   const [form, setForm] = useState<DokumentForm>(EMPTY_FORM)
@@ -103,10 +107,13 @@ export default function AusgehendeBelegeDokumentePage(): JSX.Element {
       : 'Dokumentensteuerung ist arbeitsfaehig; Quicklink oder Belegtyp pruefen.'
 
   return (
-    <div className="min-h-full bg-[#ececec] p-4 text-[11px] text-black">
-      <div className="mb-2 text-[12px] font-semibold uppercase">Ausgehende Belege und Dokumente</div>
-
-      <div className="mb-4 space-y-4 text-[13px]">
+    <div className="min-h-full space-y-4 bg-background p-3 text-foreground md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Ausgehende Belege und Dokumente</h1>
+        <p className="text-muted-foreground">Belegtypen, Formulare und Zielmodule pflegen</p>
+      </div>
+      {!isTouch ? (
+      <div className="mb-4 space-y-4">
         <RoleFocusBar roles={fleetDocumentRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={sortedRows.length} totalCount={sortedRows.length} title="Wer pflegt die Fuhrpark-Dokumente?" />
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <ManagementDecisionPanel
@@ -149,57 +156,68 @@ export default function AusgehendeBelegeDokumentePage(): JSX.Element {
           />
         </div>
       </div>
+      ) : null}
 
       <div className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
         {quickLinks.map((entry) => (
-          <button
+          <Button
             key={entry.path}
             type="button"
+            variant="outline"
+            className="min-h-touch justify-start touch-manipulation"
             onClick={() => navigate(entry.path)}
-            className="border border-[#b8b8b8] bg-[#f2f2f2] px-3 py-2 text-left hover:bg-[#e8f1ff]"
           >
             {entry.label}
-          </button>
+          </Button>
         ))}
       </div>
 
-      <div className="mb-2 grid grid-cols-[90px_160px_80px_120px_70px_1fr] items-center gap-1">
-        <label>Beleg-Typ:</label>
-        <input
+      <div className="mb-2 grid grid-cols-1 gap-2 md:grid-cols-[90px_1fr_90px_1fr_70px_auto]">
+        <label htmlFor="beleg-typ">Beleg-Typ</label>
+        <Input
+          id="beleg-typ"
+          aria-label="Beleg-Typ"
+          className="min-h-touch"
           value={form.beleg_typ}
           onChange={(e) => setForm((prev) => ({ ...prev, beleg_typ: e.target.value }))}
-          className="h-5 border border-[#a8a8a8] bg-white px-1"
         />
-        <label>Formular:</label>
-        <input
+        <label htmlFor="formular">Formular</label>
+        <Input
+          id="formular"
+          aria-label="Formular"
+          className="min-h-touch"
           value={form.formular}
           onChange={(e) => setForm((prev) => ({ ...prev, formular: e.target.value }))}
-          className="h-5 border border-[#a8a8a8] bg-white px-1"
         />
-        <label>Aktiv:</label>
-        <label className="flex items-center gap-1">
+        <label htmlFor="aktiv">Aktiv</label>
+        <label className="flex min-h-touch items-center gap-2">
           <input
+            id="aktiv"
             type="checkbox"
             checked={form.aktiv}
             onChange={(e) => setForm((prev) => ({ ...prev, aktiv: e.target.checked }))}
-            className="h-3 w-3"
+            className="h-5 w-5"
           />
           ja
         </label>
       </div>
 
-      <div className="mb-2 grid grid-cols-[90px_1fr] items-center gap-1">
-        <label>Ziel-Modul:</label>
-        <input
+      <div className="mb-2 grid grid-cols-1 gap-2 md:grid-cols-[90px_1fr]">
+        <label htmlFor="ziel-modul">Ziel-Modul</label>
+        <Input
+          id="ziel-modul"
+          aria-label="Ziel-Modul"
+          className="min-h-touch"
           value={form.ziel_modul}
           onChange={(e) => setForm((prev) => ({ ...prev, ziel_modul: e.target.value }))}
-          className="h-5 border border-[#a8a8a8] bg-white px-1"
         />
-        <label>Beschreibung:</label>
-        <input
+        <label htmlFor="beschreibung">Beschreibung</label>
+        <Input
+          id="beschreibung"
+          aria-label="Beschreibung"
+          className="min-h-touch"
           value={form.beschreibung}
           onChange={(e) => setForm((prev) => ({ ...prev, beschreibung: e.target.value }))}
-          className="h-5 border border-[#a8a8a8] bg-white px-1"
         />
       </div>
 
@@ -225,7 +243,7 @@ export default function AusgehendeBelegeDokumentePage(): JSX.Element {
                 aktiv: row.aktiv,
               })
             }}
-            className={`grid w-full grid-cols-[180px_90px_220px_1fr_80px] px-1 py-[2px] text-left ${selected?.id === row.id ? 'bg-[#0078d7] text-white' : 'bg-white hover:bg-[#edf5ff]'}`}
+            className={`min-h-11 grid w-full grid-cols-[180px_90px_220px_1fr_80px] px-2 text-left touch-manipulation ${selected?.id === row.id ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
           >
             <span>{row.beleg_typ}</span>
             <span>{row.formular}</span>
@@ -237,34 +255,34 @@ export default function AusgehendeBelegeDokumentePage(): JSX.Element {
         <div className="h-[330px] bg-white" />
       </div>
 
-      <div className="mt-2 flex justify-between">
-        <div className="flex gap-1">
-          <button
+      <div className="mt-2 flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            className="min-h-touch touch-manipulation"
             onClick={() => {
               setSelected(null)
               setForm(EMPTY_FORM)
             }}
-            className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2"
           >
             Neu
-          </button>
-          <button
+          </Button>
+          <Button
+            className="min-h-touch touch-manipulation"
             onClick={() => saveMutation.mutate()}
-            disabled={!form.beleg_typ.trim()}
-            className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 disabled:opacity-50"
+            disabled={!form.beleg_typ.trim() || saveMutation.isPending}
           >
             Speichern
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="destructive"
+            className="min-h-touch touch-manipulation"
             onClick={() => {
               if (selected) deleteMutation.mutate(selected.id)
             }}
-            disabled={!selected}
-            className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 disabled:opacity-50"
+            disabled={!selected || deleteMutation.isPending}
           >
-            Löschen
-          </button>
-        </div>
+            Loeschen
+          </Button>
       </div>
     </div>
   )

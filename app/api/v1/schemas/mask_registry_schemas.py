@@ -13,3 +13,49 @@ from pydantic import ConfigDict
 class MaskRegistryOut(BaseSchema):
     """Response schema for mask registry endpoints."""
     model_config = ConfigDict(extra="allow")
+
+
+class OmniboxFilterFieldOut(BaseSchema):
+    """Filterbares Feld einer Maske fuer den Omnibox-Intent-Compiler (UIX-060)."""
+    key: str
+    label: str
+    type: str  # 'enum' | 'date' | 'number' | 'text'
+
+
+class WorkspaceStartpageOut(BaseSchema):
+    """Rollen-Startseite (UIX-061): screenId/route null wenn keine Zuordnung."""
+    role: str | None
+    screenId: str | None
+    route: str | None
+
+
+class OmniboxActionFieldOut(BaseSchema):
+    """Formularfeld einer draftbaren Aktion (Slot-Filling, UIX-070)."""
+    key: str
+    type: str
+    required: bool
+
+
+class OmniboxActionOut(BaseSchema):
+    """Draftbare Command-Aktion je Maske (UIX-070). Sicherheit entscheidet der
+    Frontend-Klassifikator classifyOmniboxAction."""
+    key: str
+    label: str
+    dangerLevel: str
+    requiresConfirmation: bool
+    forbiddenForAgents: bool
+    verbs: list[str]
+    fields: list[OmniboxActionFieldOut]
+
+
+class OmniboxCatalogEntryOut(BaseSchema):
+    """Katalog-Eintrag fuer die Omnibox: Matching-Basis je ScreenDefinition."""
+    screen_id: str
+    title: str
+    domain: str
+    floorplan: str
+    route: str  # kuratierte Frontend-Listen-Route (UIX-060), leer wenn ungebunden
+    synonyms: list[str]
+    example_prompts: list[str]
+    filterable_fields: list[OmniboxFilterFieldOut]
+    actions: list[OmniboxActionOut] = []

@@ -1,0 +1,63 @@
+slice_id: UIX-061
+title: Rollen-Workspaces (kontextabhaengige Startseiten)
+owner: Claude
+status: fertig
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m1-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Fuenf native cockpit-SDs (einkauf/verkauf/lager/fibu/leitung) mit KPI-Summary und Worklist-Kacheln als Login-Startseiten je Rolle.
+file_ownership:
+  - "app/core/screen_definitions.py"
+  - "config/workspace_roles.yaml"
+  - "packages/frontend-web/src/components/mask-builder/renderers/TileGridRenderer.tsx"
+  - "packages/frontend-web/src/components/mask-builder/render-plan/**"
+acceptance:
+  - "5 SDs generatorReady mit Meridian-Metadaten, advisoryScore>=0.8."
+  - "Login leitet rollenbasiert auf Workspace (Fallback bisherige Startseite)."
+  - "tiles-Block additiv im Schema, Compiler erzeugt RenderPlan.tiles."
+  - "Saison-Profil sortiert Kacheln um, ohne Inhalte zu wechseln."
+tests:
+  - "pytest SD-Readiness + tiles-Endpoints"
+  - "Vitest TileGridRenderer"
+  - "Playwright Route-Smoke der 5 Workspaces"
+progress: >-
+  2026-07-07 umgesetzt: (a) Backend (662bb1fe2) — 5 native cockpit-SDs
+  (workspace/einkauf|verkauf|lager|fibu|leitung), alle generatorReady +
+  advisoryScore 1.0; additiver tiles-Block; get_screen_definition loest
+  targetRoute via _SCREEN_LIST_ROUTE auf; _apply_season_profile (MM-TT-Fenster,
+  auch jahresuebergreifend); Readiness-Advisory cockpit_content + table_profile-
+  Relaxierung fuer tabellenlose Screens; Workspaces in _AGENT_SYNONYMS +
+  _SCREEN_LIST_ROUTE. (b) Frontend — ScreenTileDefinition/seasonProfile +
+  RenderTilePlan; compileTiles (Route+Filter-Query); TileGridRenderer (Ton
+  neutral|warning|danger, optionaler Live-Zaehler); in UniversalMaskRenderer
+  nach dem Summary; UniversalNativeCockpitPage + 5 Seiten + route-aliases
+  (route-tree regeneriert). (c) Rollen-Redirect — config/workspace_roles.yaml
+  (tenant-ueberschreibbar), app/core/workspace_roles.py, GET /ui/mask-registry/
+  workspace-startpage, useWorkspaceRedirect (Flag roleWorkspaces default off,
+  einmalig je Session) in start-dashboard. Tests: 27 pytest + 6 Vitest +
+  Playwright Route-Smoke (5 Workspaces + Kachel-Navigation). tsc 0, ESLint
+  sauber, OpenAPI 2541 Pfade. Offen (v1.1): Live-Zaehler brauchen count_only-
+  Worklist-GETs (existieren noch nicht).
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Rolle sieht beim Start ihre Arbeit (Worklists, KPIs) statt eines generischen Menues.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    tiles/seasonProfile als additive SD-Bloecke; Rollen-Mapping in config, tenant-ueberschreibbar; keine DB-Migration.
+  test_vertrag: >-
+    Readiness + Route-Smoke + advisoryScore sichern die 5 SDs.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

@@ -24,17 +24,17 @@ const typeIcons = {
 }
 
 const typeColors = {
-  info: 'text-blue-500',
-  success: 'text-green-500',
-  warning: 'text-amber-500',
-  error: 'text-red-500',
+  info: 'text-status-info',
+  success: 'text-status-success',
+  warning: 'text-status-warning',
+  error: 'text-status-error',
 }
 
 const typeBgColors = {
-  info: 'bg-blue-50 dark:bg-blue-950',
-  success: 'bg-green-50 dark:bg-green-950',
-  warning: 'bg-amber-50 dark:bg-amber-950',
-  error: 'bg-red-50 dark:bg-red-950',
+  info: 'bg-[hsl(var(--color-semantic-info-50-hsl))] dark:bg-[hsl(var(--color-semantic-info-500-hsl)/0.12)]',
+  success: 'bg-[hsl(var(--color-semantic-success-50-hsl))] dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)]',
+  warning: 'bg-[hsl(var(--color-semantic-warning-50-hsl))] dark:bg-[hsl(var(--color-semantic-warning-500-hsl)/0.12)]',
+  error: 'bg-[hsl(var(--color-semantic-error-50-hsl))] dark:bg-[hsl(var(--color-semantic-error-500-hsl)/0.12)]',
 }
 
 interface NotificationItemProps {
@@ -58,7 +58,7 @@ const NotificationItem = memo(function NotificationItem({ notification, onMarkAs
         notification.read && 'opacity-70'
       )}
     >
-      <div className={cn('mt-0.5 flex-shrink-0', typeColors[notification.type])}>
+      <div className={cn('mt-0.5 shrink-0', typeColors[notification.type])}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
@@ -69,7 +69,7 @@ const NotificationItem = memo(function NotificationItem({ notification, onMarkAs
               e.stopPropagation()
               onClear(notification.id)
             }}
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground"
+            className="shrink-0 text-muted-foreground hover:text-foreground"
             title="Entfernen"
           >
             <Trash2 className="h-3 w-3" />
@@ -148,7 +148,7 @@ export function NotificationCenter() {
         {unreadCount > 0 && (
           <Badge
             variant="destructive"
-            className="absolute -right-1 -top-1 h-5 min-w-[1.25rem] px-1 text-xs"
+            className="absolute -right-1 -top-1 h-5 min-w-5 px-1 text-xs"
           >
             {unreadCount > 99 ? '99+' : unreadCount}
           </Badge>
@@ -161,14 +161,13 @@ export function NotificationCenter() {
             <div className="flex items-center gap-2">
               <span className="font-medium">Benachrichtigungen</span>
               {!isConnected && (
-                <span className="h-2 w-2 rounded-full bg-amber-500" title="Verbindung getrennt" />
+                <span className="h-2 w-2 rounded-full bg-[hsl(var(--color-semantic-warning-500-hsl))]" title="Verbindung getrennt" />
               )}
             </div>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-auto p-1 text-xs"
+                className="min-h-touch px-2"
                 onClick={markAllAsRead}
               >
                 <CheckCheck className="mr-1 h-3 w-3" />

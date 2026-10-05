@@ -9,6 +9,7 @@ export const LookupField = memo(function LookupField({
   value,
   lookupEndpoint,
   performance,
+  onSelect,
 }: {
   field: RenderFieldPlan
   value: unknown
@@ -19,8 +20,10 @@ export const LookupField = memo(function LookupField({
     lookupCacheTtlMs?: number
     lookupDebounceMs?: number
   }
+  onSelect?: (_value: string, _item: { value: string; label: string }) => void
 }): JSX.Element {
   const [query, setQuery] = useState('')
+  const [pickedLabel, setPickedLabel] = useState<string | null>(null)
   const minChars = field.minSearchChars ?? performance?.lookupMinChars ?? 2
   const search = useLookupSearch({
     endpoint: lookupEndpoint,
@@ -33,18 +36,27 @@ export const LookupField = memo(function LookupField({
   })
 
   const displayValue = value == null || value === '' ? '' : String(value)
+  const inputValue = field.readOnly
+    ? displayValue
+    : query.length > 0
+      ? query
+      : (pickedLabel ?? displayValue)
 
   return (
     <div className="space-y-2">
       <Label htmlFor={field.key}>{field.label}</Label>
       <Input
         id={field.key}
-        value={field.readOnly ? displayValue : query || displayValue}
+        value={inputValue}
         placeholder={field.placeholder}
         readOnly={field.readOnly}
         aria-label={field.label}
+        aria-autocomplete="list"
+        aria-controls={!field.readOnly ? `lookup-results-${field.key}` : undefined}
         onChange={(event) => {
-          if (!field.readOnly) setQuery(event.target.value)
+          if (field.readOnly) return
+          setPickedLabel(null)
+          setQuery(event.target.value)
         }}
       />
       {!field.readOnly && query.length > 0 && query.length < minChars ? (
@@ -53,10 +65,27 @@ export const LookupField = memo(function LookupField({
         </p>
       ) : null}
       {!field.readOnly && search.data && search.data.length > 0 ? (
-        <ul className="max-h-40 overflow-y-auto rounded border text-sm" data-testid={`lookup-results-${field.key}`}>
+        <ul
+          id={`lookup-results-${field.key}`}
+          role="listbox"
+          aria-label={`${field.label} Treffer`}
+          className="max-h-56 overflow-y-auto rounded border border-border"
+          data-testid={`lookup-results-${field.key}`}
+        >
           {search.data.map((item) => (
-            <li key={item.value} className="border-b px-2 py-1 last:border-b-0">
-              {item.label}
+            <li key={item.value} role="none">
+              <button
+                type="button"
+                role="option"
+                className="flex min-h-touch w-full items-center px-3 py-2 text-left text-sm hover:bg-accent"
+                onClick={() => {
+                  setQuery('')
+                  setPickedLabel(item.label)
+                  onSelect?.(item.value, item)
+                }}
+              >
+                {item.label}
+              </button>
             </li>
           ))}
         </ul>

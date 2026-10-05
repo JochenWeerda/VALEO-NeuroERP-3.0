@@ -16,6 +16,8 @@ import { useAnlieferavis, type Anlieferavis, einkaufKeys } from '@/lib/api/einka
 import { apiClient } from '@/lib/api-client'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
 
 const createAnlieferavisConfig = (t: TFunction): ListConfig => ({
   title: 'Anlieferavis',
@@ -130,6 +132,7 @@ export default function AnlieferavisListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const isTouch = useTouchDevice()
   const baseConfig = createAnlieferavisConfig(t)
   const anlieferavisConfig = useMemo<ListConfig>(() => ({
     ...baseConfig,
@@ -253,21 +256,7 @@ export default function AnlieferavisListePage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4">
-      <OperationalCaseHeader
-        title="Anlieferavis-Sammelarbeitsplatz"
-        description="Lieferavise werden als logistischer Sammelvorgang mit Stau-, Blocker- und Folgeaktionssicht gefuehrt."
-        status={operationalStatus}
-        owner="Einkauf / Wareneingang"
-        blocker={blocker}
-        nextAction={sentCount > 0 ? 'Rueckmeldungen bestaetigen oder klaeren' : 'Neue Avis einplanen und versenden'}
-        caseLabel="Vorgang: Avissteuerung"
-        tags={['Einkauf', 'Logistik']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
-        <OperationalTimeline title="Letzte Bewegung" items={timelineItems} />
-        <OperationalContextPanel title="Avis-Kontext" sections={contextSections} />
-      </div>
+    <div className="space-y-4 p-3 md:p-6">
       <ListReport
         config={anlieferavisConfig}
         data={data}
@@ -276,13 +265,58 @@ export default function AnlieferavisListePage(): JSX.Element {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onExport={() => {
-          toast({ title: 'Export erstellt', description: `${data.length} Avis fuer den Versand-/Wareneingangspfad exportiert.` })
+          if (data.length === 0) {
+            toast({ title: 'Keine Daten', description: 'Es gibt keine Avis zum Exportieren.', variant: 'destructive' })
+            return
+          }
+          exportToCSV(
+            data.map((item) => ({
+              avisNummer: item.avisNummer,
+              bestellung: isRecord(item.bestellung) ? stringValue(item.bestellung.nummer) : stringValue(item.bestellung),
+              lieferant: item.lieferant,
+              status: item.status,
+              geplantesAnlieferDatum: item.geplantesAnlieferDatum,
+              kennzeichen: isRecord(item.fahrzeug) ? stringValue(item.fahrzeug.kennzeichen) : stringValue(item.kennzeichen),
+            })),
+            `anlieferavis-${new Date().toISOString().slice(0, 10)}.csv`,
+            [
+              { key: 'avisNummer', label: 'Avis-Nr' },
+              { key: 'bestellung', label: 'Bestellung' },
+              { key: 'lieferant', label: 'Lieferant' },
+              { key: 'status', label: 'Status' },
+              { key: 'geplantesAnlieferDatum', label: 'Geplantes Datum' },
+              { key: 'kennzeichen', label: 'Kennzeichen' },
+            ],
+          )
+          toast({ title: 'Export erfolgreich', description: `${data.length} Avis exportiert.` })
         }}
         onImport={() => {
-          toast({ title: t('crud.messages.importInfo'), description: 'Importpfad bleibt bewusst dateibasiert ausserhalb des Leitstands.' })
+          toast({
+            title: 'Import nicht am Server',
+            description: t('crud.messages.importInfo', { defaultValue: 'Import bleibt dateibasiert ausserhalb dieser Maske.' }),
+            variant: 'destructive',
+          })
         }}
         isLoading={isLoading}
       />
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title="Anlieferavis-Sammelarbeitsplatz"
+            description="Lieferavise werden als logistischer Sammelvorgang mit Stau-, Blocker- und Folgeaktionssicht gefuehrt."
+            status={operationalStatus}
+            owner="Einkauf / Wareneingang"
+            blocker={blocker}
+            nextAction={sentCount > 0 ? 'Rueckmeldungen bestaetigen oder klaeren' : 'Neue Avis einplanen und versenden'}
+            caseLabel="Vorgang: Avissteuerung"
+            tags={['Einkauf', 'Logistik']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+            <OperationalTimeline title="Letzte Bewegung" items={timelineItems} />
+            <OperationalContextPanel title="Avis-Kontext" sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

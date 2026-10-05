@@ -1,6 +1,7 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,8 +12,9 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Building2, Save, Plus, X, AlertTriangle, CheckCircle, Archive, Lock } from 'lucide-react'
+import { Building2, Save, Plus, AlertTriangle, CheckCircle, Archive, Lock } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
@@ -210,6 +212,7 @@ const DOKUMENT_TYP_SHORT: Record<DokumentTyp, string> = {
 export default function LieferantenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { id } = useParams<{ id: string }>()
   const entityType = 'supplier'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lieferant')
@@ -568,24 +571,24 @@ export default function LieferantenStammPage(): JSX.Element {
             )}
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDuplicateCheck} disabled={loading}>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="min-h-touch" onClick={handleDuplicateCheck} disabled={loading}>
             <AlertTriangle className="h-4 w-4 mr-2" />
             {t('crud.actions.duplicateCheck')}
           </Button>
           {lieferant.status === 'aktiv' && (
             <>
-              <Button variant="outline" onClick={() => setBlockDialogOpen(true)} disabled={loading}>
+              <Button variant="outline" className="min-h-touch" onClick={() => setBlockDialogOpen(true)} disabled={loading}>
                 <Lock className="h-4 w-4 mr-2" />
                 {t('crud.actions.block')}
               </Button>
-              <Button variant="outline" onClick={() => setArchiveDialogOpen(true)} disabled={loading}>
+              <Button variant="outline" className="min-h-touch" onClick={() => setArchiveDialogOpen(true)} disabled={loading}>
                 <Archive className="h-4 w-4 mr-2" />
                 {t('crud.actions.archive')}
               </Button>
             </>
           )}
-          <Button onClick={handleSave} disabled={loading} className="gap-2">
+          <Button onClick={handleSave} disabled={loading} className="min-h-touch gap-2">
             <Save className="h-4 w-4" />
             {loading ? t('common.loading') : t('common.save')}
           </Button>
@@ -593,6 +596,8 @@ export default function LieferantenStammPage(): JSX.Element {
       </div>
 
       <div className="space-y-4">
+        {!isTouch ? (
+        <>
         <RoleFocusBar
           roles={supplierRoleProfiles}
           value={roleFocus}
@@ -625,24 +630,26 @@ export default function LieferantenStammPage(): JSX.Element {
             />
             <EvidenceTemplateLink link={{ label: 'Lieferantendokumente pruefen', href: '/einkauf/lieferanten-dokumente' }} />
             {expiringDocuments > 0 ? (
-              <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+              <Callout variant="warning" className="rounded border px-3 py-2 text-xs font-bold">
                 {expiringDocuments} Dokumente laufen bald ab.
-              </div>
+              </Callout>
             ) : null}
           </div>
         </div>
         <CrudCapabilityChecklist capabilities={supplierCrudCapabilities} />
+        </>
+        ) : null}
       </div>
 
       <Tabs defaultValue="stammdaten">
         <TabsList>
-          <TabsTrigger value="stammdaten">{t('crud.detail.basicInfo')}</TabsTrigger>
-          <TabsTrigger value="kontakt">{t('crud.fields.contact')}</TabsTrigger>
-          <TabsTrigger value="bank">{t('crud.fields.bankDetails')}</TabsTrigger>
-          <TabsTrigger value="steuer">{t('crud.fields.tax')}</TabsTrigger>
-          <TabsTrigger value="klassifikation">{t('crud.fields.classification')}</TabsTrigger>
-          <TabsTrigger value="compliance">{t('crud.fields.compliance')} & {t('crud.fields.documents')}</TabsTrigger>
-          <TabsTrigger value="qs">{t('crud.fields.quality')} & {t('crud.fields.rating')}</TabsTrigger>
+          <TabsTrigger value="stammdaten" className="min-h-touch">{t('crud.detail.basicInfo')}</TabsTrigger>
+          <TabsTrigger value="kontakt" className="min-h-touch">{t('crud.fields.contact')}</TabsTrigger>
+          <TabsTrigger value="bank" className="min-h-touch">{t('crud.fields.bankDetails')}</TabsTrigger>
+          <TabsTrigger value="steuer" className="min-h-touch">{t('crud.fields.tax')}</TabsTrigger>
+          <TabsTrigger value="klassifikation" className="min-h-touch">{t('crud.fields.classification')}</TabsTrigger>
+          <TabsTrigger value="compliance" className="min-h-touch">{t('crud.fields.compliance')} & {t('crud.fields.documents')}</TabsTrigger>
+          <TabsTrigger value="qs" className="min-h-touch">{t('crud.fields.quality')} & {t('crud.fields.rating')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stammdaten">
@@ -783,7 +790,7 @@ export default function LieferantenStammPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{t('crud.fields.contactPerson')}</span>
-                <Button size="sm" onClick={() => setNewContactDialogOpen(true)}>
+                <Button className="min-h-touch" onClick={() => setNewContactDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t('crud.actions.addContact')}
                 </Button>
@@ -810,8 +817,8 @@ export default function LieferantenStammPage(): JSX.Element {
                         <TableCell>{contact.funktion}</TableCell>
                         <TableCell>
                           <Button
-                            size="sm"
                             variant="ghost"
+                            className="min-h-touch"
                             onClick={() => {
                               setLieferant(prev => ({
                                 ...prev,
@@ -819,7 +826,7 @@ export default function LieferantenStammPage(): JSX.Element {
                               }))
                             }}
                           >
-                            <X className="h-4 w-4" />
+                            Löschen
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -838,7 +845,7 @@ export default function LieferantenStammPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{t('crud.fields.bankDetails')}</span>
-                <Button size="sm" onClick={() => setNewBankDialogOpen(true)}>
+                <Button className="min-h-touch" onClick={() => setNewBankDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t('crud.actions.addBankAccount')}
                 </Button>
@@ -870,8 +877,8 @@ export default function LieferantenStammPage(): JSX.Element {
                         <TableCell>{bank.kontoinhaber}</TableCell>
                         <TableCell>
                           <Button
-                            size="sm"
                             variant="ghost"
+                            className="min-h-touch"
                             onClick={() => {
                               setLieferant(prev => ({
                                 ...prev,
@@ -879,7 +886,7 @@ export default function LieferantenStammPage(): JSX.Element {
                               }))
                             }}
                           >
-                            <X className="h-4 w-4" />
+                            Löschen
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -926,7 +933,7 @@ export default function LieferantenStammPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{t('crud.fields.classification')}</span>
-                <Button size="sm" onClick={() => setNewClassificationDialogOpen(true)}>
+                <Button className="min-h-touch" onClick={() => setNewClassificationDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t('crud.actions.addClassification')}
                 </Button>
@@ -949,8 +956,8 @@ export default function LieferantenStammPage(): JSX.Element {
                         <TableCell>{klass.wert}</TableCell>
                         <TableCell>
                           <Button
-                            size="sm"
                             variant="ghost"
+                            className="min-h-touch"
                             onClick={() => {
                               setLieferant(prev => ({
                                 ...prev,
@@ -958,7 +965,7 @@ export default function LieferantenStammPage(): JSX.Element {
                               }))
                             }}
                           >
-                            <X className="h-4 w-4" />
+                            Löschen
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -978,7 +985,7 @@ export default function LieferantenStammPage(): JSX.Element {
               <div className="flex items-center justify-between">
                 <CardTitle>{t('crud.fields.compliance')} & {t('crud.fields.documents')}</CardTitle>
                 <Button
-                  size="sm"
+                  className="min-h-touch"
                   onClick={() => setNewDocumentDialogOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -1014,7 +1021,7 @@ export default function LieferantenStammPage(): JSX.Element {
                           <TableCell className="max-w-xs truncate">{doc.dateiname}</TableCell>
                           <TableCell>
                             {doc.gueltigBis ? (
-                              <span className={isExpired ? 'text-destructive font-semibold' : isExpiring ? 'text-orange-600 font-semibold' : ''}>
+                              <span className={isExpired ? 'text-destructive font-semibold' : isExpiring ? 'text-status-warning font-semibold' : ''}>
                                 {formatDate(doc.gueltigBis)}
                               </span>
                             ) : (
@@ -1031,8 +1038,8 @@ export default function LieferantenStammPage(): JSX.Element {
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Button
-                                size="sm"
                                 variant="ghost"
+                                className="min-h-touch"
                                 onClick={async () => {
                                   try {
                                     const url = `/api/v1/einkauf/lieferanten/${id}/dokumente/${doc.id}/download`
@@ -1060,8 +1067,8 @@ export default function LieferantenStammPage(): JSX.Element {
                                 {t('crud.actions.download')}
                               </Button>
                               <Button
-                                size="sm"
                                 variant="ghost"
+                                className="min-h-touch"
                                 onClick={() => {
                                   setLieferant(prev => ({
                                     ...prev,
@@ -1069,7 +1076,7 @@ export default function LieferantenStammPage(): JSX.Element {
                                   }))
                                 }}
                               >
-                                <X className="h-4 w-4" />
+                                Löschen
                               </Button>
                             </div>
                           </TableCell>
@@ -1094,18 +1101,18 @@ export default function LieferantenStammPage(): JSX.Element {
 
               {/* Expiring/Expired Documents Warning */}
               {lieferant.dokumente && lieferant.dokumente.some(d => d.status === 'abgelaufen' || d.status === 'wird_abgelaufen') && (
-                <div className="mt-4 border border-orange-500 rounded-lg p-4 bg-orange-50">
+                <Callout variant="warning" className="mt-4 border rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-5 w-5 text-orange-600" />
-                    <Label className="text-orange-800 font-semibold">{t('crud.fields.expiringDocumentsWarning')}</Label>
+                    <AlertTriangle className="h-5 w-5 text-status-warning" />
+                    <Label className="text-status-warning font-semibold">{t('crud.fields.expiringDocumentsWarning')}</Label>
                   </div>
-                  <p className="text-sm text-orange-700 mb-3">
+                  <p className="text-sm text-status-warning mb-3">
                     {t('crud.fields.expiringDocumentsDescription')}
                   </p>
                   {lieferant.dokumente.filter(d => d.status === 'abgelaufen').length > 0 && (
                     <Button
                       variant="destructive"
-                      size="sm"
+                      className="min-h-touch"
                       onClick={() => {
                         setBlockDialogOpen(true)
                       }}
@@ -1113,7 +1120,7 @@ export default function LieferantenStammPage(): JSX.Element {
                       {t('crud.actions.block')} {entityTypeLabel}
                     </Button>
                   )}
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>
@@ -1254,7 +1261,7 @@ export default function LieferantenStammPage(): JSX.Element {
                     </p>
                     <Button
                       variant="destructive"
-                      size="sm"
+                      className="min-h-touch"
                       onClick={() => setBlockDialogOpen(true)}
                     >
                       {t('crud.actions.block')} {entityTypeLabel}
@@ -1297,8 +1304,8 @@ export default function LieferantenStammPage(): JSX.Element {
                       <TableCell>{stringValue(dup.city ?? dup.ort, '-')}</TableCell>
                       <TableCell>
                         <Button
-                          size="sm"
                           variant="outline"
+                          className="min-h-touch"
                           onClick={() => {
                             navigate(`/einkauf/lieferant/${String(dup.id ?? '')}`)
                             setDuplicateCheckDialogOpen(false)
@@ -1313,7 +1320,7 @@ export default function LieferantenStammPage(): JSX.Element {
               </Table>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-status-success">
               <CheckCircle className="h-5 w-5" />
               <p>{t('crud.messages.noDuplicatesFound')}</p>
             </div>

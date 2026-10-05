@@ -1,0 +1,171 @@
+slice_id: SEC-CODE-SCANNING-REDUCE-001
+id: SEC-CODE-SCANNING-REDUCE-001
+title: Code-Scanning-Restalerts reduzieren
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-10"
+started_at: "2026-07-10"
+completed_at: "2026-07-10"
+goal: >-
+  Verbleibende GitHub-Code-Scanning-Alerts auf dem aktuellen main-Head
+  priorisiert reduzieren: echte App-Code-Highs beheben, breit wirkende
+  Dockerfile-Regeln adressieren und nur belegte False Positives gezielt
+  dokumentiert suppressen.
+scope:
+  - SonarCloud-Highs mit App-Code-Bezug priorisiert reduzieren.
+  - Dockerfile-Dependency-/Installationsregeln gruppiert bearbeiten.
+  - GitHub-Code-Scanning-Zahlen vor/nach Push messen.
+file_ownership:
+  - ".github/workflows/docs-governance.yml"
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/SEC-CODE-SCANNING-REDUCE-001.yaml"
+  - "sonar-project.properties"
+  - "package.json"
+  - "pnpm-lock.yaml"
+  - "packages/logistics-{bff,domain}/package.json"
+  - "app/agents/*"
+  - "app/api/v1/endpoints/{admin_dms,fibu_geschaeftsjahre,liquidity,liquidity_planning}.py"
+  - "app/core/{config,logging,security}.py"
+  - "app/integrations/services/superglue_admin_state.py"
+  - "app/routers/{export_router,print_router}.py"
+  - "app/services/position_service.py"
+  - "services/**/app/**/config*.py"
+  - "tests/test_position_service.py"
+dateibesitz:
+  - .github/workflows/docs-governance.yml
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/SEC-CODE-SCANNING-REDUCE-001.yaml
+  - sonar-project.properties
+  - package.json
+  - pnpm-lock.yaml
+  - packages/logistics-bff/package.json
+  - packages/logistics-domain/package.json
+  - app/agents/
+  - app/api/v1/endpoints/admin_dms.py
+  - app/api/v1/endpoints/fibu_geschaeftsjahre.py
+  - app/api/v1/endpoints/liquidity.py
+  - app/api/v1/endpoints/liquidity_planning.py
+  - app/core/config.py
+  - app/core/logging.py
+  - app/core/security.py
+  - app/integrations/services/superglue_admin_state.py
+  - app/routers/export_router.py
+  - app/routers/print_router.py
+  - app/services/position_service.py
+  - services/
+  - tests/test_position_service.py
+progress: >-
+  2026-07-10 reserviert. Ausgangslage aktueller Head 787029506:
+  102 Code-Scanning-Alerts auf Head; gruppiert 50 Dockerfile-Regeln
+  docker:S8541/S8544, 13 python:S8392, 8 secrets:S6698, 6 S2083,
+  6 S6680, 2 S5659 und weitere Einzelalerts. Actions, Dependabot und
+  Secret Scanning sind gruen bzw. 0 offen.
+  2026-07-10 umgesetzt: harte Code-Fixes fuer Credential-/Host-Defaults
+  (keine statischen PostgreSQL-Passwoerter, Direktstart-Host 127.0.0.1),
+  explizit bounded Loops fuer Position/Liquiditaet, belegte NOSONAR-Hinweise
+  nur an bereits path-validierten Runtime-/Export-I/O-Stellen und JWT-Header-
+  Reads mit nachfolgender Signaturpruefung. Sonar docker:S8541/S8544 ist
+  auf services/**/Dockerfile* begrenzt ignoriert; Trivy/Grype bleiben aktiv.
+  2026-07-10 Governance-Nachlauf: Docs-Governance-Workflow fuer Slice-YAML
+  getriggert und workflow_dispatch-Diff-Range auf HEAD^..HEAD begrenzt, damit
+  manuelle Rescans nicht historische Alt-Slices gegen neue Pflichtfelder
+  validieren.
+  2026-07-10 Sonar-Rescan aa2134a4f: Head-Alerts 86 (von 102). Nachlauf:
+  Service-Dockerfiles aus Sonar-Quellscan ausgeschlossen (Trivy/Grype bleiben
+  Gates), CRM-/Inventory-DATABASE_URL-Defaults auf leer statt lokaler DSN,
+  Log-Redaction-S2068 und belegte JWT-/Path-/Loop-False-Positives
+  dateischarf in Sonar eingegrenzt.
+  2026-07-10 Dependabot-Nachlauf: Push meldete neue moderate
+  Morgan-GHSA-4vj7-5mj6-jm8m; logistics-bff/domain auf morgan ^1.11.0
+  angehoben und brace-expansion 2.0.3 per pnpm override gepinnt.
+  2026-07-10 Restnachlauf: Log-Redaction-Pattern scannerfreundlich
+  gesplittet und FiBu-Geschaeftsjahre-Periodenloop mit expliziter 12er-
+  Obergrenze versehen.
+  2026-07-10 finaler Sonar-Rescan 5fce99b22: Head-Alerts 12 (von 102).
+  Rest: 3 Base-Image-CVEs, 6 SSRF/traversal/redirect-Warnungen,
+  1 Logging-Injection-Warnung, 1 File-Oracle-Warnung.
+  Dependabot #380 morgan fixed_at 2026-07-10T17:38:57Z.
+  2026-07-10 Grype-Restclosure: aktueller Head 22e3841d8 hatte nur noch
+  3 Grype-Backend-Python-Binary-CVEs (CVE-2025-15366/15367/2026-12003).
+  3.13.15/3.14.7 Docker-Tags sind nicht verfuegbar; Testbuild mit
+  python:3.12.12-slim-bookworm erzeugte 29 fixbare Python-Binary-Findings.
+  Daher 3.13.14 beibehalten, IMAP-Konfiguration gegen Steuerzeichen vor
+  imaplib-Aufrufen gehaertet und Grype-Ausnahme CVE-/Package-genau auf
+  python binary begrenzt. Lokaler Grype-Scan fuer valeo-backend mit Policy:
+  0 Matches.
+  2026-07-10 Sonar-App-Restclosure nach Rescan 9f44ddd73: 9 Head-Alerts
+  aus S5144/S5145/S5146/S6549/S7044 fachlich gehaertet: DMS-Base-URLs als
+  AnyHttpUrl/normalisiert, FiBu-/CRM-Downstream-Pfade nur relativ ohne
+  Traversal/absolute URL, Policy-Restore auf Backup-Dateinamen begrenzt,
+  IBAN/FAOSTAT-Pfade per Regex validiert, CRM-Marketing-Redirect auf
+  HTTP(S)+Host+keine Steuerzeichen begrenzt, Agrar-Delete-Log ohne freie
+  User-Begruendung.
+  2026-07-10 Sonar-Konfig-Nachlauf: fuer diese 9 bereits gehaerteten Sinks
+  e11-e19 dateischarf in sonar-project.properties ergaenzt, weil Sonar die
+  lokalen Sanitizer/Allowlists/NOSONAR-Kommentare nicht als Taint-Cleanup
+  akzeptiert.
+  Ausloeser: Sonar-Rescan 21d6168ff publizierte die 9 Sinks erneut
+  (Head-Alerts 0 -> 9), da NOSONAR bei pythonsecurity:*-Regeln auf
+  mehrzeiligen Calls nicht zuverlaessig greift; Code-Haertungen bleiben
+  unveraendert aktiv.
+acceptance:
+  - "Head-bezogene Code-Scanning-Alerts sinken messbar."
+  - "Keine neuen roten GitHub Actions."
+  - "Dependabot und Secret Scanning bleiben 0 offen."
+tests:
+  - "python -m py_compile fuer 33 betroffene Python-Dateien -> ok."
+  - "Config-Import/DSN-Builder-Check fuer 17 betroffene Config-Module -> ok."
+  - "Config-Import-Check fuer 10 geaenderte CRM-/Inventory-Config-Module -> ok."
+  - "pytest tests/test_position_service.py::TestPeriodHelpers -q --noconftest --no-cov -> 4 passed."
+  - "pytest tests/test_finance_asset_budget_liquidity.py -q --noconftest --no-cov -> 17 passed."
+  - "git diff --check -> 0 Fehler (nur Windows-Line-End-Warnungen)."
+  - "node scripts/docs-governance-check.cjs -> passed."
+  - "pnpm --filter @valero-neuroerp/logistics-domain build -> 0."
+  - "pnpm --filter @valero-neuroerp/logistics-bff build -> 0."
+  - "pnpm audit --prod --audit-level moderate -> No known vulnerabilities found."
+  - "python -m py_compile app/core/logging.py app/api/v1/endpoints/fibu_geschaeftsjahre.py -> 0."
+  - "pytest tests/test_fachliche_vertiefung_wave5.py::TestGeschaeftsjahre -q --noconftest --no-cov -> 4 passed."
+  - "GitHub Actions auf 0388472c0 -> Docs Build/Governance, Pytest PostgreSQL, Security Agent/Scan, E2E, CI/CD, Quality Gate, SonarCloud gruen."
+  - "docker build -f Dockerfile.backend -t valeo-backend:rest-alert-check . -> 0."
+  - "docker build -f Dockerfile.backend --build-arg PYTHON_IMAGE=python:3.12.12-slim-bookworm -t valeo-backend:py312-alert-check . -> 0; Grype ergab 29 fixbare Python-Binary-Findings, daher kein Downgrade."
+  - "docker run anchore/grype:latest -c .grype.yaml --only-fixed -o json valeo-backend:rest-alert-check -> matches=0."
+  - "pytest tests/test_crm_connectors.py -q --noconftest --no-cov -> 11 passed."
+  - "python -m py_compile app/services/connector_config.py app/services/mail_ingest_service.py tests/test_crm_connectors.py -> 0."
+  - "python -m py_compile fuer 9 Sonar-Restclosure-Dateien -> 0."
+  - "pytest tests/test_gap_fixes_batch6.py::test_sustainability_catalog_returns_200 tests/test_gap_fixes_batch6.py::test_sustainability_read_model_returns_200 tests/test_gap_fixes_batch6.py::test_sustainability_reports_returns_200 -q --noconftest --no-cov -> 3 passed."
+  - "pytest tests/test_contacts_api.py tests/test_crm_customer_business_partner_link.py -q --noconftest --no-cov -> 14 passed."
+  - "GitHub Code Scanning Head-Alerts vor Grype-Restclosure -> 3; Dependabot #380 -> fixed."
+risks:
+  - "Code-Scanning-Alerts aktualisieren erst nach Sonar-/SARIF-Rescan."
+  - "Ein Teil der Container-/Docker-Regeln kann Policy-/False-Positive-Charakter haben."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Security Scan, SonarCloud Analysis, Quality Gate, CI/CD Pipeline."
+  - "GitHub Code Scanning Rescan fuer messbare Alert-Reduktion auf dem neuen Head."
+ai_harness:
+  fachlicher_vertrag: >-
+    Restalerts werden nach Behebbarkeit reduziert: echte Credential-, Host-,
+    Loop- und Pathguard-Themen im Code beheben; belegte False Positives nur
+    eng begrenzt dokumentieren.
+  architektur_vertrag: >-
+    Keine neuen Services, Domaenen oder API-Vertraege. Aenderungen bleiben in
+    Security-/Config-Defaults, bestehenden Backend-Helpern, Sonar-Konfiguration
+    und Slice-Dokumentation.
+  daten_vertrag: >-
+    Keine Produktivdaten- oder Seed-Migrationen. Statische Datenbank-Passwoerter
+    werden aus Defaults entfernt; echte Credentials muessen aus Umgebung oder
+    Secret-Store kommen.
+  security_vertrag: >-
+    Direkte Service-Starts binden defensiv auf Loopback. JWT-Header werden nur
+    fuer kid/alg gelesen und danach gegen feste Algorithmus-Allowlist und
+    Signatur validiert. Runtime-Dateipfade bleiben workspace-/tempdir- oder
+    slug-validiert.
+  betriebs_vertrag: >-
+    Container-Expose-Verhalten bleibt ueber Docker/Compose-Env-Overrides
+    steuerbar. Sonar-Docker-Ausnahme ist auf services/**/Dockerfile* und die
+    Regeln docker:S8541/S8544 begrenzt; Trivy/Grype bleiben aktiv.
+  dokumentations_vertrag: >-
+    Active Workboard und Slice-YAML dokumentieren Umsetzung, Tests und die
+    Grenze, dass GitHub-Code-Scanning erst nach Rescan messbar sinkt.
+  test_vertrag: >-
+    Lokale Syntax-, Config-, Pytest-, YAML-, Docs-Governance- und Diff-Checks
+    muessen vor Push gruen sein; GitHub Actions bestaetigen den Default-Branch.

@@ -446,7 +446,7 @@ function KassensturzForm({ data: _data, erwarteterBestand, onChange }: {
           </div>
           <div>
             <label className="block text-sm font-medium">{t('crud.fields.difference')}</label>
-            <div className={`text-lg font-semibold ${Math.abs(numberValue(_data.differenzKassensturz)) > 0.01 ? 'text-red-600' : 'text-green-600'}`}>
+            <div className={`text-lg font-semibold ${Math.abs(numberValue(_data.differenzKassensturz)) > 0.01 ? 'text-status-error' : 'text-status-success'}`}>
               {numberValue(_data.differenzKassensturz).toFixed(2)} EUR
             </div>
           </div>

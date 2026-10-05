@@ -101,19 +101,18 @@ async def put_quadriga_config(
             updates.append("name = :name")
             params["name"] = payload.name
         if payload.config_json is not None:
-            updates.append("config_json = :config_json::jsonb")
+            updates.append("config_json = CAST(:config_json AS jsonb)")
             import json
             params["config_json"] = json.dumps(payload.config_json)
         if payload.is_active is not None:
             updates.append("is_active = :is_active")
             params["is_active"] = payload.is_active
         db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 UPDATE domain_erp.connector_configs
                 SET {", ".join(updates)}
                 WHERE tenant_id = :tenant_id AND connector_code = :code
-            """),
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()
@@ -129,7 +128,7 @@ async def put_quadriga_config(
             text("""
                 INSERT INTO domain_erp.connector_configs
                 (id, tenant_id, connector_code, name, config_json, is_active, created_at, updated_at)
-                VALUES (:id, :tenant_id, :code, :name, :config_json::jsonb, :is_active, NOW(), NOW())
+                VALUES (:id, :tenant_id, :code, :name, CAST(:config_json AS jsonb), :is_active, NOW(), NOW())
             """),
             {
                 "id": config_id,

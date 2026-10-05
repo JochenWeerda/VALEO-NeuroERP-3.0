@@ -11,7 +11,13 @@ permissions:
   contents: read
 
 jobs:
+  service-dependencies:
+    uses: ./.github/workflows/service-security.yml
+    with:
+      release_sha: ${{ inputs.release_sha || github.sha }}
+
   release-gates:
+    needs: service-dependencies
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -73,6 +79,7 @@ jobs:
         run: |
           python scripts/check_alembic_single_head.py
           python scripts/check_sql_fstrings.py
+          python scripts/check_sql_bind_casts.py
           python scripts/check_tenant_isolation.py
           python scripts/init_db.py
           python scripts/check_required_domain_schemas.py
@@ -85,6 +92,17 @@ jobs:
           pnpm --filter @valero-neuroerp/frontend-web typecheck
           pnpm --filter @valero-neuroerp/frontend-web exec eslint "src/**/*.{ts,tsx}" --report-unused-disable-directives --quiet
           pnpm --filter @valero-neuroerp/frontend-web build
+
+      - name: Restore drill evidence (SPEC-P0-08)
+        run: |
+          set +e
+          python scripts/check_restore_drill_evidence.py
+          code=$?
+          if [ "$code" -eq 2 ]; then
+            echo "::notice title=SPEC-P0-08 EXTERNAL_GATE::Kein Restore-Drill-Protokoll — Ops muss scripts/run_restore_drill.sh fahren und docs/operations/drill-protocols/ committen."
+            exit 0
+          fi
+          exit "$code"
 
       - name: Simulated external assessors
         run: |

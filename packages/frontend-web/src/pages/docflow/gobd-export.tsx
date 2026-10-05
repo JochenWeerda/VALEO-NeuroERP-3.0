@@ -48,7 +48,7 @@ export default function GobdExportPage() {
       <div className="flex items-center gap-2">
         <PackageOpen size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">GoBD-Export</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => { void docs.refetch(); void probe.refetch() }} disabled={docs.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => { void docs.refetch(); void probe.refetch() }} disabled={docs.isFetching}>
           {docs.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -58,11 +58,11 @@ export default function GobdExportPage() {
         <CardContent className="p-3 flex items-center gap-2 text-sm">
           <span className="text-muted-foreground">DMS / Paperless:</span>
           {probe.isLoading ? <Loader2 size={14} className="animate-spin" /> : !probe.data?.konfiguriert ? (
-            <Badge variant="outline" className="text-amber-700">nicht konfiguriert</Badge>
+            <Badge variant="outline" className="text-status-warning">nicht konfiguriert</Badge>
           ) : probe.data?.erreichbar ? (
-            <Badge className="bg-emerald-100 text-emerald-800"><CheckCircle2 size={12} className="mr-1" />erreichbar</Badge>
+            <Badge variant="success"><CheckCircle2 size={12} className="mr-1" />erreichbar</Badge>
           ) : (
-            <Badge className="bg-red-100 text-red-800"><XCircle size={12} className="mr-1" />nicht erreichbar</Badge>
+            <Badge variant="error"><XCircle size={12} className="mr-1" />nicht erreichbar</Badge>
           )}
           <span className="text-xs text-muted-foreground">{probe.data?.detail}</span>
         </CardContent>
@@ -104,11 +104,11 @@ export default function GobdExportPage() {
             <>
               <div className="flex items-center gap-2">
                 <span className="font-medium">{selected}</span>
-                <Button size="sm" className="ml-auto" onClick={runExport} disabled={exp.isPending}>
+                <Button className="min-h-touch ml-auto" onClick={runExport} disabled={exp.isPending}>
                   {exp.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <FileArchive size={14} className="mr-1" />}
                   GoBD-Paket erzeugen
                 </Button>
-                {manifest && <Button size="sm" variant="outline" onClick={downloadManifest}>Manifest (JSON)</Button>}
+                {manifest && <Button variant="outline" onClick={downloadManifest} className="min-h-touch">Manifest (JSON)</Button>}
               </div>
 
               {manifest && (
@@ -119,7 +119,7 @@ export default function GobdExportPage() {
                       <div><div className="text-xs text-muted-foreground">Artefakte</div><div className="font-semibold tabular-nums">{manifest.anzahl_artefakte}</div></div>
                       <div><div className="text-xs text-muted-foreground">Buchungen</div><div className="font-semibold tabular-nums">{manifest.buchungen}</div></div>
                       <div><div className="text-xs text-muted-foreground">Offene Lücken</div><div className="font-semibold tabular-nums">{manifest.offene_luecken}</div></div>
-                      <div><div className="text-xs text-muted-foreground">Revisionssicher</div><div>{manifest.revisionssicher ? <Badge className="bg-emerald-100 text-emerald-800">ja</Badge> : <Badge className="bg-red-100 text-red-800">nein</Badge>}</div></div>
+                      <div><div className="text-xs text-muted-foreground">Revisionssicher</div><div>{manifest.revisionssicher ? <Badge variant="success">ja</Badge> : <Badge variant="error">nein</Badge>}</div></div>
                     </div>
                     <div className="text-xs"><span className="text-muted-foreground">Prüfsumme (SHA-256): </span><span className="font-mono">{manifest.pruefsumme_sha256}</span></div>
                     <div className="overflow-x-auto">

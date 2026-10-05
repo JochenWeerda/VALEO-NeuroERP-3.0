@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useBankkonten, type BankKonto } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -9,9 +9,14 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Building2, Euro, FileDown, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 
 export default function BankkontenPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: konten = [], isLoading, isError, error, refetch } = useBankkonten()
 
@@ -26,6 +31,30 @@ export default function BankkontenPage(): JSX.Element {
   }, [konten, searchTerm])
 
   const gesamtSaldo = filteredKonten.reduce((sum, k) => sum + (k.saldo || 0), 0)
+
+  function handleExport(): void {
+    if (filteredKonten.length === 0) {
+      toast({ title: 'Kein Export', description: 'Keine Konten in der aktuellen Sicht.', variant: 'destructive' })
+      return
+    }
+    exportToCSV(
+      filteredKonten.map((k) => ({
+        bank: k.bank,
+        iban: k.iban,
+        kontoart: k.kontoart,
+        saldo: k.saldo,
+        status: k.status,
+      })),
+      `bankkonten-${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { key: 'bank', label: 'Bank' },
+        { key: 'iban', label: 'IBAN' },
+        { key: 'kontoart', label: 'Kontoart' },
+        { key: 'saldo', label: 'Saldo' },
+        { key: 'status', label: 'Status' },
+      ],
+    )
+  }
 
   // Loading skeleton
   if (isLoading) {
@@ -55,7 +84,7 @@ export default function BankkontenPage(): JSX.Element {
       key: 'bank' as const,
       label: 'Bank',
       render: (k: BankKonto) => (
-        <button onClick={() => navigate(`/banken/konto/${k.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/banken/konto/${k.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {k.bank}
         </button>
       ),
@@ -83,18 +112,19 @@ export default function BankkontenPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Bankkonten</h1>
-          <p className="text-muted-foreground">Konten-Verwaltung</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Bankkonten</h1>
+          <p className="text-muted-foreground">Konten suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/banken/konto/neu')} className="gap-2">
+        <Button onClick={() => navigate('/banken/konto/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neues Konto
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -102,7 +132,7 @@ export default function BankkontenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-blue-600" />
+              <Building2 className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{konten.length}</span>
             </div>
           </CardContent>
@@ -114,8 +144,8 @@ export default function BankkontenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <Euro className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtSaldo)}
               </span>
             </div>
@@ -131,18 +161,19 @@ export default function BankkontenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Bankkonten" placeholder="Bank, IBAN, Kontoart" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

@@ -9,6 +9,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.exceptions import ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.services.finance_transaction_service import FinanceTransactionService
@@ -28,57 +29,21 @@ class SalesPostingService:
     ACCOUNT_COGS = "7000"         # Wareneinsatz / cost of goods sold
     ACCOUNT_INVENTORY = "2000"    # Warenbestand
     ACCOUNT_REVENUE = "8400"      # Umsatzerlöse
-    ACCOUNT_RECEIVABLES = "1200"  # Forderungen L+L
+    # Forderungen aus Lieferungen und Leistungen.
+    #
+    # Gebucht wurde auf 1200 — das ist in SKR03 die Bank, und der Kassendienst
+    # fuehrt es auch so ("Bank / EC"). Eine Forderung auf dem Bankkonto ist
+    # nicht nur unsauber, sie ist sachlich falsch: Sie behauptet Geld, das
+    # noch nicht da ist. GoBD verlangt Richtigkeit und Klarheit (Rz. 30 ff.) —
+    # ein Konto, das zugleich Bestand und Forderung traegt, kann ein
+    # sachverstaendiger Dritter nicht in angemessener Zeit nachvollziehen.
+    ACCOUNT_RECEIVABLES = "1400"  # Forderungen aus Lieferungen und Leistungen
     ACCOUNT_TAX = "1776"          # Umsatzsteuer 19%
 
     def __init__(self, db: Session, tenant_id: str) -> None:
         self.db = db
         self.tenant_id = tenant_id
         self._fin = FinanceTransactionService(db, tenant_id)
-
-    def _ensure_account(
-        self,
-        account_number: str,
-        account_name: str,
-        account_type: str,
-        category: str,
-    ) -> str:
-        row = self.db.execute(
-            text(
-                """
-                SELECT id
-                FROM domain_erp.chart_of_accounts
-                WHERE account_number = :account_number
-                LIMIT 1
-                """
-            ),
-            {"account_number": account_number},
-        ).first()
-        if row:
-            return str(row[0])
-        account_id = str(uuid7())
-        self.db.execute(
-            text(
-                """
-                INSERT INTO domain_erp.chart_of_accounts
-                (id, tenant_id, account_number, account_name, account_type, category,
-                 is_active, created_at, updated_at)
-                VALUES
-                (:id, :tenant_id, :account_number, :account_name, :account_type, :category,
-                 TRUE, NOW(), NOW())
-                """
-            ),
-            {
-                "id": account_id,
-                "tenant_id": self.tenant_id,
-                "account_number": account_number,
-                "account_name": account_name,
-                "account_type": account_type,
-                "category": category,
-            },
-        )
-        self.db.commit()
-        return account_id
 
     # ── Delivery note posted → Warenabgang ────────────────────────────────────
 
@@ -103,7 +68,7 @@ class SalesPostingService:
         if total_cost == Decimal("0.00"):
             return
 
-        entry_date = _coerce_date(delivery_date) or datetime.utcnow().date()
+        entry_date = _coerce_date(delivery_date) or business_today()
         period = str(entry_date)[:7]
 
         self._fin.create(
@@ -112,13 +77,13 @@ class SalesPostingService:
             entry_date=entry_date,
             lines=[
                 {
-                    "account_id": self.ACCOUNT_COGS,
+                    "account_id": self._fin.account_id_for_number(self.ACCOUNT_COGS),
                     "debit_amount": float(total_cost),
                     "credit_amount": 0,
                     "description": "Wareneinsatz",
                 },
                 {
-                    "account_id": self.ACCOUNT_INVENTORY,
+                    "account_id": self._fin.account_id_for_number(self.ACCOUNT_INVENTORY),
                     "debit_amount": 0,
                     "credit_amount": float(total_cost),
                     "description": f"Bestandsabgang {delivery_note_number}",
@@ -142,8 +107,8 @@ class SalesPostingService:
     ) -> None:
         """Book AR invoice: Debit 1200 Forderungen / Credit 8400 Umsatz + 1776 USt.
 
-        This mirrors the existing _create_gl_booking_and_op logic but uses
-        FinanceTransactionService for consistent GoBD chain stamping.
+        Account numbers are explicitly resolved to own IDs before the shared
+        FinanceTransactionService creates and stamps journal lines.
         Caller is responsible for idempotency (check if already booked).
         """
         net = Decimal(str(net_amount)).quantize(Decimal("0.01"))
@@ -153,18 +118,18 @@ class SalesPostingService:
         if gross == Decimal("0.00"):
             return
 
-        entry_date = _coerce_date(invoice_date) or datetime.utcnow().date()
+        entry_date = _coerce_date(invoice_date) or business_today()
         period = str(entry_date)[:7]
 
         lines = [
             {
-                "account_id": self.ACCOUNT_RECEIVABLES,
+                "account_id": self._fin.account_id_for_number(self.ACCOUNT_RECEIVABLES),
                 "debit_amount": float(gross),
                 "credit_amount": 0,
                 "description": f"Forderung {invoice_number}",
             },
             {
-                "account_id": self.ACCOUNT_REVENUE,
+                "account_id": self._fin.account_id_for_number(self.ACCOUNT_REVENUE),
                 "debit_amount": 0,
                 "credit_amount": float(net),
                 "description": "Umsatzerlös",
@@ -173,7 +138,7 @@ class SalesPostingService:
         if tax > Decimal("0.00"):
             lines.append(
                 {
-                    "account_id": self.ACCOUNT_TAX,
+                    "account_id": self._fin.account_id_for_number(self.ACCOUNT_TAX),
                     "debit_amount": 0,
                     "credit_amount": float(tax),
                     "description": "Umsatzsteuer",
@@ -210,7 +175,7 @@ class SalesPostingService:
         if gross <= Decimal("0.00"):
             raise ValidationFailedError("Sales invoice gross amount must be positive")
 
-        entry_date = _coerce_date(invoice_date) or datetime.utcnow().date()
+        entry_date = _coerce_date(invoice_date) or business_today()
         effective_due_date = _coerce_date(due_date) or entry_date + timedelta(days=30)
         period = str(entry_date)[:7]
         existing = self.db.execute(
@@ -237,34 +202,15 @@ class SalesPostingService:
                     f"Sales invoice journal entry is already {status}"
                 )
         else:
-            self._ensure_account(
-                self.ACCOUNT_RECEIVABLES,
-                "Forderungen aus Lieferungen und Leistungen",
-                "asset",
-                "current_assets",
-            )
-            self._ensure_account(
-                self.ACCOUNT_REVENUE,
-                "Umsatzerloese",
-                "revenue",
-                "sales",
-            )
-            if tax > Decimal("0.00"):
-                self._ensure_account(
-                    self.ACCOUNT_TAX,
-                    "Umsatzsteuer",
-                    "liability",
-                    "tax",
-                )
             lines = [
                 {
-                    "account_id": self.ACCOUNT_RECEIVABLES,
+                    "account_id": self._fin.account_id_for_number(self.ACCOUNT_RECEIVABLES),
                     "debit_amount": float(gross),
                     "credit_amount": 0,
                     "description": f"Forderung {invoice_number}",
                 },
                 {
-                    "account_id": self.ACCOUNT_REVENUE,
+                    "account_id": self._fin.account_id_for_number(self.ACCOUNT_REVENUE),
                     "debit_amount": 0,
                     "credit_amount": float(net),
                     "description": "Umsatzerloes",
@@ -273,7 +219,7 @@ class SalesPostingService:
             if tax > Decimal("0.00"):
                 lines.append(
                     {
-                        "account_id": self.ACCOUNT_TAX,
+                        "account_id": self._fin.account_id_for_number(self.ACCOUNT_TAX),
                         "debit_amount": 0,
                         "credit_amount": float(tax),
                         "description": "Umsatzsteuer",

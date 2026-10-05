@@ -17,7 +17,7 @@
           </div>
 
           <div className="border border-[#c2c2c2] bg-[#efefef] p-2">
-            <div className="-mx-2 -mt-2 mb-2 flex border-b border-[#c2c2c2] bg-[#f3f3f3] px-2 pt-[1px]">
+            <div className="-mx-2 -mt-2 mb-2 flex border-b border-[#c2c2c2] bg-[#f3f3f3] px-2 pt-px">
               <button className="mr-1 border border-[#7ea7de] border-b-white bg-white px-2 py-[2px] text-[#0f4eb9]">WARENSENDUNG</button>
               <button className="mr-1 border border-transparent px-2 py-[2px]">DPD</button>
               <button className="border border-transparent px-2 py-[2px]">JET</button>

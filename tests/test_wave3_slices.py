@@ -1,4 +1,4 @@
-"""Wave-3 Integration Tests: WF-TRIGGER, STMD-DUP, XRECHNUNG, BANK-IMPORT, WGE-MOB.
+"""Wave-3 Integration Tests: WF-TRIGGER, STMD-DUP, XRECHNUNG, WGE-MOB; Bank-Retirement separat.
 
 Alle Tests laufen ohne echte DB (Unit-Ebene mit Mocks).
 Marker: unit
@@ -159,77 +159,7 @@ class TestXrechnungBuilder:
         assert any("batch" in p for p in paths)
 
 
-# ── INT-BANK-001 MT940 ────────────────────────────────────────────────────────
-
-class TestMt940Parser:
-    def test_parse_single_credit_line(self):
-        from app.api.v1.endpoints.bank_import import _parse_mt940
-        content = ":20:STARTUMFELD\n:60F:C260618EUR1000,\n:61:260618C1000,NTRFREF001\n:86:Verwendungszweck RE-0001\n:62F:C260618EUR2000,"
-        txs = _parse_mt940(content)
-        assert len(txs) == 1
-        assert txs[0]["side"] == "credit"
-        assert txs[0]["amount"] == 1000.0
-
-    def test_parse_debit_line(self):
-        from app.api.v1.endpoints.bank_import import _parse_mt940
-        content = ":61:260618D500,NCHKREF002\n:86:Überweisung Lieferant"
-        txs = _parse_mt940(content)
-        assert len(txs) == 1
-        assert txs[0]["side"] == "debit"
-        assert txs[0]["amount"] == 500.0
-
-    def test_parse_purpose_extracted(self):
-        from app.api.v1.endpoints.bank_import import _parse_mt940
-        content = ":61:260618C250,NTRFREF003\n:86:RE-2026-9999"
-        txs = _parse_mt940(content)
-        assert "RE-2026-9999" in txs[0]["purpose"]
-
-    def test_empty_content_returns_empty_list(self):
-        from app.api.v1.endpoints.bank_import import _parse_mt940
-        assert _parse_mt940("") == []
-
-
-class TestCamt053Parser:
-    def _make_camt_xml(self, amount="100.00", cd="CRDT"):
-        ns = "urn:iso:std:iso:20022:tech:xsd:camt.053.001.08"
-        return f"""<?xml version="1.0"?>
-<Document xmlns="{ns}">
-  <BkToCstmrStmt>
-    <Stmt>
-      <Ntry>
-        <Amt Ccy="EUR">{amount}</Amt>
-        <CdtDbtInd>{cd}</CdtDbtInd>
-        <BookgDt><Dt>2026-06-18</Dt></BookgDt>
-        <NtryDtls><TxDtls><Refs><EndToEndId>E2E-001</EndToEndId></Refs></TxDtls></NtryDtls>
-        <AddtlNtryInf>RE-TEST-001</AddtlNtryInf>
-      </Ntry>
-    </Stmt>
-  </BkToCstmrStmt>
-</Document>"""
-
-    def test_parse_credit_entry(self):
-        from app.api.v1.endpoints.bank_import import _parse_camt053
-        txs = _parse_camt053(self._make_camt_xml("500.00", "CRDT"))
-        assert len(txs) == 1
-        assert txs[0]["side"] == "credit"
-        assert txs[0]["amount"] == 500.0
-
-    def test_parse_debit_entry(self):
-        from app.api.v1.endpoints.bank_import import _parse_camt053
-        txs = _parse_camt053(self._make_camt_xml("200.00", "DBIT"))
-        assert txs[0]["side"] == "debit"
-
-    def test_parse_booking_date(self):
-        from app.api.v1.endpoints.bank_import import _parse_camt053
-        txs = _parse_camt053(self._make_camt_xml())
-        assert txs[0]["booking_date"] == "2026-06-18"
-
-    def test_invalid_xml_raises_422(self):
-        from fastapi import HTTPException
-        from app.api.v1.endpoints.bank_import import _parse_camt053
-        with pytest.raises(HTTPException) as exc_info:
-            _parse_camt053("<<not xml>>")
-        assert exc_info.value.status_code == 422
+# Bank shadow-model contracts retired: test_bank_legacy_retirement.py
 
 
 # ── WGE-MOB-001 ──────────────────────────────────────────────────────────────

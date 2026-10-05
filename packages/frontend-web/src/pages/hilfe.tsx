@@ -42,11 +42,11 @@ export default function HilfePage(): JSX.Element {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => openDocs(DOCS_USER_MANUAL_URL)}>
+          <Button variant="outline" onClick={() => openDocs(DOCS_USER_MANUAL_URL)} className="min-h-touch">
             <Home className="mr-2 h-4 w-4" />
             Handbuch-Start
           </Button>
-          <Button variant="outline" size="sm" onClick={() => openDocs(url)}>
+          <Button variant="outline" onClick={() => openDocs(url)} className="min-h-touch">
             <ExternalLink className="mr-2 h-4 w-4" />
             In neuem Tab öffnen
           </Button>

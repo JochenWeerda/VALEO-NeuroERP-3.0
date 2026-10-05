@@ -124,7 +124,7 @@ export default function PricingPanel(): JSX.Element {
                   <TableCell>{price.unit}</TableCell>
                   <TableCell>{price.currency}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" onClick={() => setSel(price)}>Edit</Button>
+                    <Button onClick={() => setSel(price)} className="min-h-touch">Edit</Button>
                   </TableCell>
                 </TableRow>
               ))}

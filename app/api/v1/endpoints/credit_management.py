@@ -93,14 +93,23 @@ def get_credit_status_data(db: Session, customer_id: str, tenant_id: str) -> Cre
         warn_pct = 80.0
         block_pct = 100.0
 
-    # 2. open invoices
+    # 2. Offene Rechnungen
+    #
+    # Gelesen wurde hier `domain_finance.finance_invoices` — eine Tabelle, die
+    # es nicht gibt. Die Summe war deshalb **immer null**: Die Kreditpruefung
+    # hat offene Forderungen schlicht nicht gesehen und jeden Kunden als
+    # unbelastet ausgewiesen.
+    #
+    # Gezaehlt wird der **Bruttobetrag**, denn gefordert wird brutto, und nur
+    # was heraus ist: Ein Entwurf ist keine Forderung, ein bezahlter oder
+    # stornierter Beleg auch nicht.
     open_invoices = db.execute(
         text(
             """
-            SELECT COALESCE(SUM(amount), 0)
-            FROM domain_finance.finance_invoices
+            SELECT COALESCE(SUM(gross_amount), 0)
+            FROM domain_sales.sales_invoices
             WHERE customer_id = :cid AND tenant_id = :tid
-              AND status NOT IN ('BEZAHLT', 'STORNIERT')
+              AND status NOT IN ('entwurf', 'bezahlt', 'storniert')
             """
         ),
         {"cid": customer_id, "tid": tenant_id},

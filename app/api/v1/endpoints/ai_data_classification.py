@@ -7,11 +7,12 @@ from pydantic import BaseModel
 from typing import Any
 
 from app.services.ai_data_classification_service import DataClass, ai_data_classification_service
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/ai-data-classes", tags=["ai-data-classification", "compliance"])
 
 
-@router.get("/", summary="Alle KI-Datenkategorien auflisten", response_model=list[dict[str, Any]])
+@router.get("/", summary="Alle KI-Datenkategorien auflisten", response_model=list[TypedObjectOut])
 async def list_categories(data_class: str | None = None) -> list[dict[str, Any]]:
     parsed: DataClass | None = None
     if data_class:
@@ -22,12 +23,12 @@ async def list_categories(data_class: str | None = None) -> list[dict[str, Any]]
     return ai_data_classification_service.list_categories(data_class=parsed)
 
 
-@router.get("/summary", summary="Zusammenfassung der Datenklassen", response_model=dict[str, Any])
+@router.get("/summary", summary="Zusammenfassung der Datenklassen", response_model=TypedObjectOut)
 async def get_summary() -> dict[str, Any]:
     return ai_data_classification_service.summary()
 
 
-@router.get("/{category_id}", summary="Einzelne Datenkategorie", response_model=dict[str, Any])
+@router.get("/{category_id}", summary="Einzelne Datenkategorie", response_model=TypedObjectOut)
 async def get_category(category_id: str) -> dict[str, Any]:
     try:
         return ai_data_classification_service.get_category(category_id)
@@ -40,7 +41,7 @@ class ModelCheckRequest(BaseModel):
     model_pattern: str
 
 
-@router.post("/check-model", summary="Pruefen ob KI-Modell fuer Kategorie erlaubt", response_model=dict[str, Any])
+@router.post("/check-model", summary="Pruefen ob KI-Modell fuer Kategorie erlaubt", response_model=TypedObjectOut)
 async def check_model(req: ModelCheckRequest) -> dict[str, Any]:
     try:
         return ai_data_classification_service.check_model_allowed(req.category_id, req.model_pattern)

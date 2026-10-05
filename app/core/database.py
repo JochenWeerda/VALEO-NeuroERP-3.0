@@ -12,6 +12,15 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+# Fail fast when Postgres is unreachable (Docker host name "postgres"
+# otherwise waits on TCP until the OS gives up).
+POSTGRES_CONNECT_TIMEOUT_SECONDS = 5
+
+
+def postgres_connect_args() -> dict[str, int]:
+    return {"connect_timeout": POSTGRES_CONNECT_TIMEOUT_SECONDS}
+
+
 # SQLAlchemy setup for PostgreSQL
 engine = create_engine(
     settings.DATABASE_URL,
@@ -21,6 +30,7 @@ engine = create_engine(
     pool_timeout=10,    # fail fast instead of queueing for 30s
     pool_recycle=1800,
     pool_pre_ping=True, # detect stale connections after fork
+    connect_args=postgres_connect_args(),
     echo=settings.DEBUG,
 )
 
@@ -100,6 +110,12 @@ def create_tables():
             logger.info("L3C models imported")
         except Exception as e:
             logger.warning(f"L3C models import failed: {e}")
+
+        try:
+            from app.infrastructure.models import studio_models  # noqa: F401
+            logger.info("Studio draft models imported")
+        except Exception as e:
+            logger.warning(f"Studio draft models import failed: {e}")
 
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")

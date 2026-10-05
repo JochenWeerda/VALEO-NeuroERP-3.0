@@ -3,6 +3,7 @@ import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useKulturen, useSorten, useKunden, useSchlaege } from '@/lib/api/agrar'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -226,7 +227,7 @@ export default function SaatgutBestellungPage(): JSX.Element {
               />
               </div>
               {bestellung.kulturArt && (
-                <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
                   <h4 className="font-medium text-blue-900">Ausgewählte Kultur: {kulturArten.find(k => k.value === bestellung.kulturArt)?.label}</h4>
                   <p className="text-sm text-blue-700 mt-1">
                     Wählen Sie die gewünschte Sorte im nächsten Schritt aus.
@@ -262,9 +263,9 @@ export default function SaatgutBestellungPage(): JSX.Element {
               />
               </div>
               {bestellung.saatgutName && (
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <h4 className="font-medium text-green-900">Ausgewähltes Saatgut</h4>
-                  <p className="text-sm text-green-700 mt-1">{bestellung.saatgutName}</p>
+                <div className="p-4 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded-lg">
+                  <h4 className="font-medium text-status-success">Ausgewähltes Saatgut</h4>
+                  <p className="text-sm text-status-success mt-1">{bestellung.saatgutName}</p>
                 </div>
               )}
             </CardContent>
@@ -297,9 +298,9 @@ export default function SaatgutBestellungPage(): JSX.Element {
                   />
                 </div>
               </div>
-              <div className="p-4 bg-yellow-50 rounded-lg">
-                <h4 className="font-medium text-yellow-900">Empfohlene Menge</h4>
-                <p className="text-sm text-yellow-700 mt-1">
+              <div className="p-4 bg-[hsl(var(--color-semantic-warning-50-hsl))] rounded-lg">
+                <h4 className="font-medium text-status-warning">Empfohlene Menge</h4>
+                <p className="text-sm text-status-warning mt-1">
                   Für {bestellung.flaeche} ha: {empfohleneMenge.min} - {empfohleneMenge.max} kg
                 </p>
               </div>
@@ -397,10 +398,10 @@ export default function SaatgutBestellungPage(): JSX.Element {
                 </div>
               </div>
               {bestellung.menge > (saatgutOptionen.find(s => s.id === bestellung.saatgutId)?.verfuegbar || 0) && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <span className="text-red-800 font-medium">Bestellmenge überschreitet verfügbaren Bestand!</span>
-                </div>
+                <Callout variant="error" className="flex items-center gap-2 p-3 border rounded">
+                  <AlertTriangle className="h-5 w-5 text-status-error" />
+                  <span className="text-status-error font-medium">Bestellmenge überschreitet verfügbaren Bestand!</span>
+                </Callout>
               )}
             </CardContent>
           </Card>

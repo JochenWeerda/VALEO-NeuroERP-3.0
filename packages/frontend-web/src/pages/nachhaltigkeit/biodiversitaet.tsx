@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -83,9 +84,9 @@ export default function BiodiversitaetPage(): JSX.Element {
         <p className="text-muted-foreground">Ökologische Nachhaltigkeit {reportYear}</p>
       </div>
 
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <Callout variant="info" className="rounded-lg border p-4">
         <div className="flex items-start gap-2">
-          <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
           <div className="text-sm text-blue-900">
             <p className="font-semibold">Nachhaltigkeits-Datenquelle: ESG Read-Model ({reportYear})</p>
             <p className="mt-1">
@@ -94,7 +95,7 @@ export default function BiodiversitaetPage(): JSX.Element {
             </p>
           </div>
         </div>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -103,7 +104,7 @@ export default function BiodiversitaetPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-green-600" />
+              <Leaf className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">
                 {totalCo2eT.toLocaleString('de-DE', { maximumFractionDigits: 2 })} t
               </span>
@@ -117,7 +118,7 @@ export default function BiodiversitaetPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Flower2 className="h-5 w-5 text-green-600" />
+              <Flower2 className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">
                 {agrarCo2e.toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg
               </span>
@@ -190,7 +191,7 @@ export default function BiodiversitaetPage(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-status-success" />
               Agrarbezogene Emissionskategorien
             </CardTitle>
           </CardHeader>
@@ -203,7 +204,7 @@ export default function BiodiversitaetPage(): JSX.Element {
                     <div className="text-sm text-muted-foreground">{cat.position_count} Positionen</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-green-700">
+                    <div className="font-bold text-status-success">
                       {cat.co2e_kg.toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg CO₂e
                     </div>
                     <Badge variant="outline">Aktiv</Badge>

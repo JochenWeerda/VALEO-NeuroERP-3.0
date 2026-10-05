@@ -21,14 +21,14 @@ const severityVariant = (s: string): 'outline' | 'secondary' | 'destructive' => 
 }
 
 const wetterIcon = (cond?: string) => {
-  if (!cond) return <Cloud className="h-10 w-10 text-gray-400" />
+  if (!cond) return <Cloud className="h-10 w-10 text-muted-foreground" />
   if (cond.includes('rain') || cond.includes('drizzle') || cond.includes('shower'))
-    return <CloudRain className="h-10 w-10 text-blue-500" />
+    return <CloudRain className="h-10 w-10 text-muted-foreground" />
   if (cond.includes('thunder') || cond.includes('lightning'))
-    return <Zap className="h-10 w-10 text-yellow-500" />
+    return <Zap className="h-10 w-10 text-status-warning" />
   if (cond.includes('cloud') || cond.includes('fog') || cond.includes('overcast'))
-    return <Cloud className="h-10 w-10 text-gray-500" />
-  return <Sun className="h-10 w-10 text-yellow-500" />
+    return <Cloud className="h-10 w-10 text-muted-foreground" />
+  return <Sun className="h-10 w-10 text-status-warning" />
 }
 
 const fmt = (n?: number | null, unit = '') =>
@@ -63,7 +63,7 @@ export default function WetterPrognosePage(): JSX.Element {
           <h1 className="text-3xl font-bold">Wetter-Prognose</h1>
           <p className="text-muted-foreground">7-Tage-Vorhersage · DWD ICON-D2 via Open-Meteo · Stationsdaten via BrightSky</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
+        <Button variant="outline" onClick={handleRefresh} className="min-h-touch gap-2 touch-manipulation">
           <RefreshCw className="h-4 w-4" />
           Aktualisieren
         </Button>
@@ -97,7 +97,7 @@ export default function WetterPrognosePage(): JSX.Element {
                 placeholder="z.B. 9.73"
               />
             </div>
-            <Button onClick={handleApply} size="sm">Übernehmen</Button>
+            <Button onClick={handleApply} className="min-h-touch touch-manipulation">Übernehmen</Button>
             {aktuell?.station_name && (
               <span className="text-sm text-muted-foreground">
                 Nächste DWD-Station: <strong>{aktuell.station_name}</strong>
@@ -114,7 +114,7 @@ export default function WetterPrognosePage(): JSX.Element {
             <Card key={w.id} className="border-orange-400 bg-orange-50">
               <CardContent className="pt-4">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 shrink-0" />
+                  <AlertTriangle className="h-5 w-5 text-status-warning mt-0.5 shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-orange-900">{w.headline}</span>
@@ -144,7 +144,7 @@ export default function WetterPrognosePage(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sun className="h-6 w-6 text-yellow-500" />
+              <Sun className="h-6 w-6 text-status-warning" />
               Aktuell
               {aktuell.timestamp && (
                 <span className="text-sm font-normal text-muted-foreground ml-2">
@@ -222,23 +222,23 @@ export default function WetterPrognosePage(): JSX.Element {
                         <div className="text-xs font-medium text-muted-foreground">{label}</div>
                         <div className="my-2">
                           {regen
-                            ? <CloudRain className="h-8 w-8 mx-auto text-blue-500" />
-                            : <Sun className="h-8 w-8 mx-auto text-yellow-500" />}
+                            ? <CloudRain className="h-8 w-8 mx-auto text-muted-foreground" />
+                            : <Sun className="h-8 w-8 mx-auto text-status-warning" />}
                         </div>
                         <div className="text-lg font-bold">{fmt(tag.temperatur_max, '°')}</div>
                         <div className="text-sm text-muted-foreground">{fmt(tag.temperatur_min, '°')}</div>
                         {regen && (
-                          <div className="text-xs text-blue-600 font-medium">
+                          <div className="text-xs font-medium text-primary">
                             {fmt(tag.niederschlag_summe, ' mm')}
                           </div>
                         )}
                         {tag.et0_fao !== undefined && tag.et0_fao !== null && (
-                          <div className="text-xs text-green-700 mt-1" title="FAO Grasreferenz-Evapotranspiration">
+                          <div className="text-xs text-status-success mt-1" title="FAO Grasreferenz-Evapotranspiration">
                             ET₀ {fmt(tag.et0_fao, ' mm')}
                           </div>
                         )}
                         {tag.wachstumsgradtage !== undefined && tag.wachstumsgradtage !== null && (
-                          <div className="text-xs text-amber-700" title="Wachstumsgradtage (base 0°C)">
+                          <div className="text-xs text-status-warning" title="Wachstumsgradtage (base 0°C)">
                             GDD {fmt(tag.wachstumsgradtage)}
                           </div>
                         )}

@@ -8,6 +8,7 @@ import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { CrudAuditTrailPanel } from '@/features/crud/components'
 import { useCrudAuditTrail } from '@/features/crud/hooks'
+import { Callout } from '@/components/ui/callout'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
@@ -19,11 +20,14 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { History, XCircle, AlertTriangle, Mail, Globe } from 'lucide-react'
 import { usePoCommunications, useSendPoCommunication } from '@/lib/api/procurement-plus'
-import { useApprovePurchaseOrder, useCancelPurchaseOrder } from '@/lib/api/purchase-orders'
+import { useFreigebenBestellung, useStornierenBestellung } from '@/lib/api/purchase-orders'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { DocumentCaseBand } from '@/components/workflow/DocumentCaseBand'
+import { PositionAllocationState } from '@/components/documents/PositionAllocationState'
+import { linkPurchaseOrderToFlowSpine, PURCHASE_ORDER_DOCUMENT_TYPE } from '@/lib/workflow/purchase-order-flow-spine'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -40,14 +44,14 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
       label: t('crud.detail.basicInfo'),
       fields: [
         {
-          name: 'nummer',
+          name: 'bestellnummer',
           label: t('crud.fields.number'),
           type: 'text',
           required: true,
           readonly: true
         },
         {
-          name: 'lieferantId',
+          name: 'lieferant_id',
           label: t('crud.entities.supplier'),
           type: 'lookup',
           required: true,
@@ -145,7 +149,7 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
           required: true,
           columns: [
             {
-              key: 'artikelId',
+              key: 'artikel_nr',
               label: t('crud.fields.product'),
               type: 'lookup',
               required: true
@@ -163,12 +167,12 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
               required: true
             },
             {
-              key: 'preis',
+              key: 'einzelpreis',
               label: t('crud.fields.price'),
               type: 'number'
             },
             {
-              key: 'wunschtermin',
+              key: 'lieferdatum_wunsch',
               label: t('crud.fields.dueDate'),
               type: 'date'
             }
@@ -182,7 +186,7 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
       label: t('crud.detail.additionalInfo'),
       fields: [
         {
-          name: 'bemerkungen',
+          name: 'notiz',
           label: t('crud.fields.notes'),
           type: 'textarea',
           placeholder: t('crud.fields.notes')
@@ -212,14 +216,21 @@ const createBestellungConfig = (t: TFunction, entityTypeLabel: string): MaskConf
       type: 'secondary',
     }
   ],
+  // Der fuehrende Bestellbestand, nicht der Compat-Dokumentenspeicher.
+  //
+  // Die Maske las /api/v1/purchase-orders — dort liegen Dokumente eines
+  // generischen Speichers, waehrend die Bestellungen selbst in
+  // domain_einkauf.bestellungen stehen. Sie zeigte damit dieselbe halbe
+  // Wahrheit wie die Liste: Belege aus einem Verkaufsauftrag fehlten ganz.
+  // Der Nummernkreis ist EK-.
   api: {
-    baseUrl: '/api/v1/purchase-orders',
+    baseUrl: '/api/v1/einkauf/bestellungen',
     endpoints: {
-      list: '/api/v1/purchase-orders',
-      get: '/api/v1/purchase-orders/{id}',
-      create: '/api/v1/purchase-orders',
-      update: '/api/v1/purchase-orders/{id}',
-      delete: '/api/v1/purchase-orders/{id}'
+      list: '/api/v1/einkauf/bestellungen',
+      get: '/api/v1/einkauf/bestellungen/{id}',
+      create: '/api/v1/einkauf/bestellungen',
+      update: '/api/v1/einkauf/bestellungen/{id}',
+      delete: '/api/v1/einkauf/bestellungen/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write']
@@ -251,12 +262,12 @@ export default function BestellungStammPage(): JSX.Element {
     apiUrl: bestellungConfig.api.baseUrl,
     id: id || undefined
   })
-  const poCommunicationId = stringValue(id || data?.nummer || data?.purchaseOrderNumber || data?.id)
+  const poCommunicationId = stringValue(id || data?.bestellnummer || data?.nummer || data?.id)
   const { data: poCommunications = [] } = usePoCommunications(poCommunicationId)
   const sendPoEmail = useSendPoCommunication(poCommunicationId, 'email')
   const sendPoPortal = useSendPoCommunication(poCommunicationId, 'portal')
-  const approvePurchaseOrder = useApprovePurchaseOrder()
-  const cancelPurchaseOrder = useCancelPurchaseOrder()
+  const approvePurchaseOrder = useFreigebenBestellung()
+  const cancelPurchaseOrder = useStornierenBestellung()
 
   // Audit Trail
   const { changeLogs, isLoading: isLoadingAudit, refetch: refetchAudit } = useCrudAuditTrail({
@@ -359,7 +370,7 @@ export default function BestellungStammPage(): JSX.Element {
   }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (key: string, formData: Record<string, unknown>) => {
-    const purchaseOrderId = id || formData?.id || data?.id || data?.nummer || data?.purchaseOrderNumber
+    const purchaseOrderId = id || formData?.id || data?.id || data?.bestellnummer || data?.nummer
     if (key === 'freigeben') {
       if (!purchaseOrderId) {
         toast({
@@ -370,7 +381,7 @@ export default function BestellungStammPage(): JSX.Element {
         return
       }
       await approvePurchaseOrder.mutateAsync(String(purchaseOrderId))
-      toast({ title: 'Bestellung freigegeben', description: `Bestellung ${data?.nummer || data?.purchaseOrderNumber || purchaseOrderId} wurde freigegeben.` })
+      toast({ title: 'Bestellung freigegeben', description: `Bestellung ${data?.bestellnummer || data?.nummer || purchaseOrderId} wurde freigegeben.` })
       navigate('/einkauf/bestellungen')
     } else if (key === 'stornieren') {
       setStornoDialogOpen(true)
@@ -379,7 +390,7 @@ export default function BestellungStammPage(): JSX.Element {
         window.open(`/api/mcp/documents/purchase_order/${purchaseOrderId}/print?locale=${sendLanguage}`, '_blank')
       }
     } else if (key === 'senden') {
-      if (formData?.lieferantId || data?.lieferantId) {
+      if (formData?.lieferant_id || data?.lieferant_id) {
         setSendDialogOpen(true)
       }
     }
@@ -397,7 +408,7 @@ export default function BestellungStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const purchaseOrderId = id || data?.id || data?.nummer || data?.purchaseOrderNumber
+      const purchaseOrderId = id || data?.id || data?.bestellnummer || data?.nummer
       if (!purchaseOrderId) {
         throw new Error('Bestellung muss zuerst gespeichert werden.')
       }
@@ -463,7 +474,7 @@ export default function BestellungStammPage(): JSX.Element {
     data?.createdAt
       ? {
           label: 'Bestellung angelegt',
-          detail: `Beleg ${data?.nummer || data?.purchaseOrderNumber || id || 'neu'} wurde als Vorgang erfasst.`,
+          detail: `Beleg ${data?.bestellnummer || data?.nummer || id || 'neu'} wurde als Vorgang erfasst.`,
           timestamp: data.createdAt,
         }
       : null,
@@ -492,7 +503,36 @@ export default function BestellungStammPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      {workflowContext ? <WorkflowEntryBanner context={workflowContext} /> : null}
+      {/*
+        FSX-013 plus FSX-012-Nachlauf: Gehoert die Bestellung zu einem Vorgang,
+        zeigt das Band Phasen und Stand. Gehoert sie zu keinem, wird die
+        Verknuepfung angeboten — das ist der Fall, in dem jemand beim Speichern
+        den Wiederholungsversuch abgebrochen hat und spaeter zurueckkommt.
+      */}
+      <DocumentCaseBand
+        documentType={PURCHASE_ORDER_DOCUMENT_TYPE}
+        documentId={poCommunicationId || undefined}
+        handoverContext={workflowContext}
+        linkLabel="Beschaffungsvorgang verknuepfen"
+        onLink={async () => {
+          await linkPurchaseOrderToFlowSpine({
+            documentId: poCommunicationId,
+            documentNumber: stringValue(data?.nummer ?? data?.purchaseOrderNumber) || undefined,
+            supplierName: stringValue(data?.lieferant ?? data?.supplierName) || undefined,
+            resumeRoute: window.location.pathname + window.location.search,
+          })
+        }}
+      />
+
+      {/*
+        FSX-MENGENMODELL / K5: Mengenstand je Position — geliefert, berechnet,
+        offen — mit aufklappbaren Zuordnungen. Zeigt sich nur, wenn es zu diesem
+        Beleg Zuordnungen gibt; sonst rendert der Baustein nichts.
+      */}
+      <PositionAllocationState
+        documentType={PURCHASE_ORDER_DOCUMENT_TYPE}
+        documentId={poCommunicationId}
+      />
 
       <OperationalCaseHeader
         title={stringValue(data?.nummer ?? data?.purchaseOrderNumber, 'Bestellung')}
@@ -648,14 +688,14 @@ export default function BestellungStammPage(): JSX.Element {
               </p>
             </div>
             {data?.status === 'FREIGEGEBEN' && (
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <Callout variant="warning" className="p-3 border rounded-md">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                  <div className="text-sm text-yellow-800">
+                  <AlertTriangle className="h-4 w-4 text-status-warning mt-0.5" />
+                  <div className="text-sm text-status-warning">
                     {t('crud.dialogs.cancel.warning')}
                   </div>
                 </div>
-              </div>
+              </Callout>
             )}
           </div>
           <DialogFooter>
@@ -763,7 +803,7 @@ export default function BestellungStammPage(): JSX.Element {
                   const poId = id || data?.nummer
                   const sendPayload = {
                     subject: `Bestellung ${stringValue(data?.nummer ?? data?.purchaseOrderNumber ?? poId)}`,
-                    recipient: sendRecipients[0] || stringValue(data?.lieferantId ?? data?.supplierId),
+                    recipient: sendRecipients[0] || stringValue(data?.lieferant_id ?? data?.supplierId),
                     message: sendMessage || undefined,
                     language: sendLanguage,
                   }
@@ -819,12 +859,12 @@ export default function BestellungStammPage(): JSX.Element {
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <AlertTriangle className="h-5 w-5 text-status-warning mt-0.5" />
               <div>
-                <div className="font-semibold text-yellow-800 mb-1">
+                <div className="font-semibold text-status-warning mb-1">
                   {t('crud.messages.approvalRequired')}
                 </div>
-                <p className="text-sm text-yellow-700">
+                <p className="text-sm text-status-warning">
                   {t('crud.messages.approvalRequiredDesc')}
                 </p>
               </div>

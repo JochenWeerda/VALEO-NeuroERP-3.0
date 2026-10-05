@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_auto_capture_service import CrmAutoCaptureService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -31,7 +32,7 @@ class AutoCaptureIn(BaseModel):
     bediener: Optional[str] = None     # Default 'AUTO'
 
 
-@router.post("/auto-capture", response_model=dict, summary="Kontakt automatisch erfassen (Telefon/E-Mail/WhatsApp)")
+@router.post("/auto-capture", response_model=TypedObjectOut, summary="Kontakt automatisch erfassen (Telefon/E-Mail/WhatsApp)")
 def auto_capture(
     body: AutoCaptureIn,
     db: Session = Depends(get_db),

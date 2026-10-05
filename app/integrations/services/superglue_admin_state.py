@@ -15,11 +15,19 @@ def _utcnow() -> str:
 
 
 def _state_path() -> Path:
-    return Path(settings.SUPERGLUE_ADMIN_STATE_PATH)
+    return _resolve_runtime_path(settings.SUPERGLUE_ADMIN_STATE_PATH)
 
 
 def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _resolve_runtime_path(configured_path: str) -> Path:
+    path = Path(configured_path).expanduser().resolve()
+    cwd = Path.cwd().resolve()
+    if path != cwd and cwd not in path.parents:
+        raise ValueError(f"Runtime path must stay inside the working directory: {configured_path}")
+    return path
 
 
 def _read_state() -> dict[str, Any]:
@@ -41,7 +49,10 @@ def _read_state() -> dict[str, Any]:
 def _write_state(payload: dict[str, Any]) -> None:
     path = _state_path()
     _ensure_parent(path)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    path.write_text(  # NOSONAR - path is resolved and constrained by _resolve_runtime_path.
+        json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _tenant_state(payload: dict[str, Any], tenant_id: str) -> dict[str, Any]:

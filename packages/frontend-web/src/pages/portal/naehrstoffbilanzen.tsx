@@ -11,6 +11,7 @@ import {
   usePortalNaehrstoffbilanzen,
 } from '@/lib/api/portal'
 import { useSustainabilityProviders, useSustainabilityPsm } from '@/lib/api/sustainability'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -111,9 +112,9 @@ export default function PortalNaehrstoffbilanzen() {
 
   const getSaldoColor = (saldo: number, grenzwert: number) => {
     if (saldo < 0) return 'text-blue-600'
-    if (saldo > grenzwert * 0.8) return 'text-amber-600'
-    if (saldo > grenzwert) return 'text-red-600'
-    return 'text-emerald-600'
+    if (saldo > grenzwert * 0.8) return 'text-status-warning'
+    if (saldo > grenzwert) return 'text-status-error'
+    return 'text-status-success'
   }
 
   const getSaldoIcon = (saldo: number) => {
@@ -251,10 +252,10 @@ export default function PortalNaehrstoffbilanzen() {
           </AlertDescription>
         </Alert>
       ) : (
-        <Alert className="border-emerald-200 bg-emerald-50">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-          <AlertTitle className="text-emerald-800">Grenzwerte eingehalten</AlertTitle>
-          <AlertDescription className="text-emerald-700">
+        <Alert variant="success">
+          <CheckCircle2 className="h-4 w-4 text-status-success" />
+          <AlertTitle className="text-status-success">Grenzwerte eingehalten</AlertTitle>
+          <AlertDescription className="text-status-success">
             Der 3-Jahres-Durchschnitt liegt innerhalb der gesetzlichen Grenzwerte.
           </AlertDescription>
         </Alert>
@@ -267,9 +268,9 @@ export default function PortalNaehrstoffbilanzen() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+                  <Callout variant="info" className="rounded-lg p-2">
                     <Droplets className="h-5 w-5" />
-                  </div>
+                  </Callout>
                   <div>
                     <p className="text-sm text-muted-foreground">N-Saldo {selectedJahr}</p>
                     <p className={`text-2xl font-bold ${getSaldoColor(currentBilanz.stickstoff.saldo, N_GRENZWERT)}`}>
@@ -286,7 +287,7 @@ export default function PortalNaehrstoffbilanzen() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+                  <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
                     <Leaf className="h-5 w-5" />
                   </div>
                   <div>
@@ -325,7 +326,7 @@ export default function PortalNaehrstoffbilanzen() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+                <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
@@ -405,7 +406,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <TableCell className="font-medium">Kalium (K₂O)</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.zugang} kg/ha</TableCell>
                   <TableCell className="text-right">{currentBilanz.kalium.abgang} kg/ha</TableCell>
-                  <TableCell className={`text-right font-bold ${currentBilanz.kalium.saldo < 0 ? 'text-blue-600' : 'text-emerald-600'}`}>
+                  <TableCell className={`text-right font-bold ${currentBilanz.kalium.saldo < 0 ? 'text-blue-600' : 'text-status-success'}`}>
                     {currentBilanz.kalium.saldo > 0 ? '+' : ''}{currentBilanz.kalium.saldo} kg/ha
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">-</TableCell>
@@ -502,8 +503,7 @@ export default function PortalNaehrstoffbilanzen() {
                   </div>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="w-full mt-3 gap-2"
+                    className="min-h-touch w-full mt-3 gap-2"
                     disabled={exporting !== null}
                     onClick={() => {
                       setSelectedJahr(String(bilanz.jahr))

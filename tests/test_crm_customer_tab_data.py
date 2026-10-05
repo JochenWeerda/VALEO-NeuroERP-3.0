@@ -1,7 +1,5 @@
-from app.api.v1.endpoints.crm_360 import (
-    _fetch_customer_tab_items,
-    build_customer_screen_summary,
-)
+from app.api.v1.endpoints.crm_360 import build_customer_screen_summary
+from app.api.v1.endpoints.crm_360_reads import _fetch_customer_tab_items
 
 
 class _FakeSession:
@@ -26,9 +24,9 @@ def test_fetch_customer_tab_items_returns_empty_for_unmapped_tabs() -> None:
         _FakeSession(),
         customer_id="cust-1",
         tenant_id="tenant-1",
-        tab_key="angebote",
+        tab_key="tax",
         kunden_nr="K-100",
     )
 
-    assert table_key == "angebote"
+    assert table_key == "tax"
     assert items == []

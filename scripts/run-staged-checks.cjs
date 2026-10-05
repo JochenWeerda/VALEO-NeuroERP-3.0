@@ -53,7 +53,9 @@ const scriptLikeFiles = stagedFiles.filter(
   (file) =>
     /\.(ts|tsx|js|jsx)$/i.test(file) &&
     !/\.(spec|test)\.(ts|tsx|js|jsx)$/i.test(file) &&
-    !/\/vite\.config(?:\.performance)?\.ts$/i.test(file),
+    !/\/vite\.config(?:\.performance)?\.ts$/i.test(file) &&
+    // Archivierte Altbestaende (ADR-039) sind von Lint/Typecheck ausgenommen
+    !/^docs\/(_internal|archive)\//i.test(file.replace(/\\/g, '/')),
 )
 const markdownFiles = stagedFiles.filter((file) => /\.md$/i.test(file))
 

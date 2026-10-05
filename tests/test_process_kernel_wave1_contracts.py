@@ -332,6 +332,17 @@ def test_ap_invoice_legacy_approve_facade_delegates_to_workflow(monkeypatch):
         "get_from_store",
         lambda doc_type, invoice_id, repo: {"number": invoice_id, "tenantId": "tenant-wave1", "status": "ENTWURF"},
     )
+    # Der Test setzt ein nacktes object() als Repository ein. save_to_store hat
+    # dessen AttributeError frueher verschluckt und in den Prozessspeicher
+    # ausgewichen - seit SILENT-FAILURE-20260914 meldet es den Fehlschlag. Der
+    # Schreibvorgang ist fuer diesen Vertrag ohnehin Beiwerk; er wird deshalb
+    # ausdruecklich mitgestellt statt sich auf ein verschlucktes Scheitern zu
+    # verlassen.
+    monkeypatch.setattr(
+        ap_invoices,
+        "save_to_store",
+        lambda doc_type, doc_number, data, repo=None: {"ok": True, "number": doc_number},
+    )
 
     async def fake_get_approval_status(invoice_id, tenant_id, db):
         return build_approval_status_response(
@@ -920,9 +931,12 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
     } == {
         ("1000", Decimal("219.00"), Decimal("0.00")),
         ("1200", Decimal("238.00"), Decimal("0.00")),
-        ("1600", Decimal("50.00"), Decimal("0.00")),
+        # Gutscheine stehen auf 1700, nicht bei den Lieferantenschulden:
+        # ein Gutschein ist eine Leistungsverpflichtung gegenueber dem
+        # Kunden (GoBD-Kontentrennung, erp_gutscheinkonto_20260928).
+        ("1700", Decimal("50.00"), Decimal("0.00")),
         ("8400", Decimal("0.00"), Decimal("407.00")),
-        ("1600", Decimal("0.00"), Decimal("100.00")),
+        ("1700", Decimal("0.00"), Decimal("100.00")),
         ("1800", Decimal("80.00"), Decimal("0.00")),
         ("1000", Decimal("0.00"), Decimal("80.00")),
     }

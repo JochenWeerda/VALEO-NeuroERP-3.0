@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
@@ -86,6 +87,7 @@ export default function DmsIntegrationCard(): JSX.Element {
   const [testState, setTestState] = useState<TestState>('idle')
   const [status, setStatus] = useState<DmsStatus | null>(null)
   const [roleFocus, setRoleFocus] = useState<DmsSetupRole>('it')
+  const isTouch = useTouchDevice()
 
   const hasCredentials = useMemo(() => isNonEmptyString(baseUrl) && isNonEmptyString(token), [baseUrl, token])
   const isConfigured = status?.configured === true
@@ -216,6 +218,8 @@ export default function DmsIntegrationCard(): JSX.Element {
 
       <CardContent className="p-0 space-y-4">
         <div className="space-y-4 p-6 pb-0">
+          {!isTouch ? (
+          <>
           <RoleFocusBar roles={dmsSetupRoles} value={roleFocus} onChange={setRoleFocus} title="Wer richtet das DMS ein?" />
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
             <ManagementDecisionPanel
@@ -257,6 +261,8 @@ export default function DmsIntegrationCard(): JSX.Element {
               ]}
             />
           </div>
+          </>
+          ) : null}
         </div>
 
         {isConfigured ? (
@@ -274,7 +280,7 @@ export default function DmsIntegrationCard(): JSX.Element {
               <Badge variant="outline">{status?.metadata_types ?? 0}</Badge>
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" onClick={() => openExternal(configuredBaseUrl)} disabled={!isNonEmptyString(configuredBaseUrl)}>
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => openExternal(configuredBaseUrl)} disabled={!isNonEmptyString(configuredBaseUrl)}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Im DMS oeffnen
               </Button>
@@ -285,7 +291,7 @@ export default function DmsIntegrationCard(): JSX.Element {
           </div>
         ) : (
           <>
-            <Button onClick={() => setDialogOpen(true)}>Jetzt einrichten</Button>
+            <Button className="min-h-touch touch-manipulation" onClick={() => setDialogOpen(true)}>Jetzt einrichten</Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogContent className="sm:max-w-[560px]">
               <DialogHeader>

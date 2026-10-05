@@ -1,0 +1,28 @@
+id: UIX-AGENT-CONTRACT-ALL-20260927
+owner: Codex
+status: abgeschlossen
+goal: AgentMaskContract und Generator-Readiness fuer alle nativen ScreenDefinitions als CI-Ratchet pruefen.
+scope: Registry-dynamischer Backend-Test und Einbindung in universal-mask-ci.
+file_ownership:
+  - tests/test_agent_mask_contract.py
+  - .github/workflows/universal-mask-ci.yml
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/quality-assurance/uix-agent-contract-all-20260927.md
+acceptance:
+  - Jede native Maske erzeugt einen vollstaendigen AgentMaskContract.
+  - Jede native Maske besteht das Generator-Readiness-Gate.
+  - Ein Rueckgang unter 71 native Masken blockiert das Ratchet.
+  - Der Test laeuft verpflichtend in universal-mask-ci.
+tests:
+  - 25 AgentMaskContract- und Readiness-Tests bestanden.
+risks:
+  - Das Gate prueft den Serververtrag; Browser- und Fach-UAT bleiben getrennt.
+ai_harness:
+  fachlicher_vertrag: Agenten sehen pro Maske Zweck, Felder, Aktionen und Verbote.
+  architektur_vertrag: Ein Registry-Gate statt maskenspezifischer Paralleltests.
+  daten_vertrag: Keine Persistenz und keine Migration.
+  test_vertrag: Alle nativen Registry-Eintraege werden bei jedem Lauf dynamisch geprueft.
+  security_vertrag: Vorhandene Human-Approval- und Sensitivitaetsmetadaten bleiben Vertragsbestandteil.
+  betriebs_vertrag: universal-mask-ci blockiert bei Vertrags- oder Readiness-Drift.
+  dokumentations_vertrag: UIX-Status, Workboard, Open-Gaps, Slice und QA aktualisiert.
+external_gates: []

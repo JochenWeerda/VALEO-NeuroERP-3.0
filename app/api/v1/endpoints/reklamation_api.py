@@ -7,21 +7,39 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.reklamation import Reklamation, ReklamationsStatus, ReklamationsTyp, ReklamationZustandsmaschine
 from app.core.tenant import get_tenant_id
 from app.domains.operations.models import ReklamationDB
+from app.services.customer_reference import resolve_reference
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
 
 
 class ReklamationOut(BaseSchema):
-    """Typed response schema for ReklamationOut endpoints (extra fields forwarded)."""
+    """Kopffelder der Maske qualitaet/reklamation; weitere Schluessel bleiben erlaubt."""
+
     model_config = _ConfigDict(extra="allow")
+    reklamation_id: Optional[str] = None
+    reklamation_nr: Optional[str] = None
+    typ: Optional[str] = None
+    lieferant_id: Optional[str] = None
+    kontrakt_id: Optional[str] = None
+    #: Nur in der Einzelabfrage gefuellt (Maskenkopf).
+    lieferant_name: Optional[str] = None
+    lieferant_nummer: Optional[str] = None
+    kontrakt_nummer: Optional[str] = None
+    erstellt_am: Optional[str] = None
+    frist_datum: Optional[str] = None
+    sla_status: Optional[str] = None
+    zustaendiger: Optional[str] = None
+    status: Optional[str] = None
 
 
 router = APIRouter(prefix="/reklamationen", tags=["reklamationen"])
@@ -186,6 +204,7 @@ def _to_dict(row: ReklamationDB) -> dict:
     folge = _folgeentscheidungen(row)
     return {
         "reklamation_id": row.reklamation_id,
+        "reklamation_nr": row.reklamation_nr,
         "tenant_id": row.tenant_id,
         "lieferant_id": row.lieferant_id,
         "typ": row.typ,
@@ -211,6 +230,25 @@ def _to_dict(row: ReklamationDB) -> dict:
         "abschlussfaehig": folge["can_close"],
         "schema_version": 1,
     }
+
+
+def _naechste_reklamation_nr(db: Session, tenant_id: str) -> str:
+    jahr = business_today().year
+    praefix = f"REK-{jahr}-"
+    # Der Lock gilt bis zum Commit der Anlage: Zwei gleichzeitige Anlagen
+    # desselben Mandanten lesen sonst dasselbe Maximum.
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:schluessel, 0))"),
+        {"schluessel": f"reklamation_nr:{tenant_id}:{jahr}"},
+    )
+    letzte = db.execute(
+        text(
+            "SELECT max(substring(reklamation_nr FROM :ab)::int) FROM domain_ops.reklamationen "
+            "WHERE tenant_id = :tenant_id AND reklamation_nr ~ :muster"
+        ),
+        {"ab": len(praefix) + 1, "tenant_id": tenant_id, "muster": f"^REK-{jahr}-[0-9]+$"},
+    ).scalar()
+    return f"{praefix}{(letzte or 0) + 1:05d}"
 
 
 def _add_audit(
@@ -245,6 +283,7 @@ def create_reklamation(
     gobd = req.gobd_beleg_id or (dms[0]["dokument_id"] if dms else None)
     row = ReklamationDB(
         reklamation_id=str(uuid.uuid4()),
+        reklamation_nr=_naechste_reklamation_nr(db, tenant_id),
         tenant_id=tenant_id,
         lieferant_id=req.lieferant_id,
         typ=req.typ,
@@ -274,7 +313,17 @@ def create_reklamation(
 )
 def get_reklamation(reklamation_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     row = _query_reklamation(db, reklamation_id, tenant_id)
-    return _to_dict(row)
+    lieferant = resolve_reference(db, tenant_id, "supplier", row.lieferant_id)
+    # The complaint stores the contract as free text; purchase and harvest contracts both occur.
+    kontrakt = resolve_reference(db, tenant_id, "einkauf_contract", row.kontrakt_id)
+    if not kontrakt.found:
+        kontrakt = resolve_reference(db, tenant_id, "agrar_contract", row.kontrakt_id)
+    return {
+        **_to_dict(row),
+        "lieferant_name": lieferant.name,
+        "lieferant_nummer": lieferant.number,
+        "kontrakt_nummer": kontrakt.number,
+    }
 
 
 @router.get("/{reklamation_id}/audit", summary="Audit trail abrufen",

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Calculator, Banknote, Ban, Plus } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -62,7 +63,7 @@ export default function OpSkontoAuszifferungPage() {
     <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <Banknote className="h-7 w-7 text-emerald-700" /> OP Skonto-Auszifferung
+          <Banknote className="h-7 w-7 text-status-success" /> OP Skonto-Auszifferung
         </h1>
         <p className="mt-2 text-muted-foreground">
           Offene Posten mit Zahlungseingang und Skontoabzug ausziffern; FIBU-Skontokonto-gerecht.
@@ -97,7 +98,7 @@ export default function OpSkontoAuszifferungPage() {
                             try { await storno.mutateAsync(a.id); toast.success('Storniert.') }
                             catch (e) { toast.error(e instanceof Error ? e.message : 'Stornieren fehlgeschlagen') }
                           }}>
-                          <Ban className="h-4 w-4 text-red-600" />
+                          <Ban className="h-4 w-4 text-status-error" />
                         </Button>
                       )}
                     </TableCell>
@@ -146,11 +147,11 @@ export default function OpSkontoAuszifferungPage() {
               <div className="col-span-2"><Button type="submit" variant="secondary" disabled={berechne.isPending}><Calculator className="mr-2 h-4 w-4" />Berechnen</Button></div>
             </form>
             {calcResult && (
-              <div className={`rounded-md border p-3 text-sm ${calcResult.skonto_gueltig ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+              <Callout variant={calcResult.skonto_gueltig ? 'success' : 'warning'} className="rounded-md p-3">
                 <div className="flex justify-between"><span>Skontobetrag:</span><strong className="font-mono">{eur(calcResult.skontobetrag_eur)}</strong></div>
                 <div className="flex justify-between"><span>Zahlungsbetrag:</span><strong className="font-mono">{eur(calcResult.zahlungsbetrag_eur)}</strong></div>
-                {calcResult.hinweis && <p className="mt-1 text-amber-800">{calcResult.hinweis}</p>}
-              </div>
+                {calcResult.hinweis && <p className="mt-1 text-status-warning">{calcResult.hinweis}</p>}
+              </Callout>
             )}
           </CardContent>
         </Card>

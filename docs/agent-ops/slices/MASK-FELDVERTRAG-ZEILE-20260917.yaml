@@ -1,0 +1,49 @@
+---
+slice_id: MASK-FELDVERTRAG-ZEILE
+id: MASK-FELDVERTRAG-ZEILE
+title: Feldvertrag der Tabellenzeile
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  sales/invoice und sales_invoices.py bleiben Claude. Keine FSX-Dateien.
+  lager/leitstand nicht anfassen. coverage_path_check.xml nicht committen.
+goal: >
+  Tabellenspalten der Maske gegen die deklarierte Zeilenform. Abweichungen 0.
+  Ungetypte Tabellenquellen only-up.
+file_ownership:
+  - scripts/check_field_contracts.py
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_entity_contracts.py
+  - docs/quality-assurance/feldvertrag-masken-2026-09-17.md
+  - docs/agent-ops/todo-datenmodell-katalog.md
+acceptance:
+  - python scripts/check_field_contracts.py Exit 0, Abweichungen 0
+  - mindestens 250 gepruefte Felder (Kopf plus typisierte Zeilen)
+  - ZEILEN_NICHT_PRUEFBAR_MAX = 49, darf sinken nicht steigen
+  - sales_invoices.py bleibt Claude (8da5d757b)
+tests:
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_entity_contracts.py
+risks:
+  - Generic-Stubs bleiben blind, bis Domain-Endpunkte eine Zeilenform zusagen
+  - Claude hat die drei Rechnungsregister typisiert; die Ratsche bleibt 49
+ai_harness:
+  fachlicher_vertrag: >
+    Spalten folgen den JSON-Schluesseln der Zeile. Leer sieht aus wie nichts erfasst.
+  architektur_vertrag: >
+    Gate liest OpenAPI, nicht die Laufzeit-Antwort. TypedObjectOut ohne Felder ist unpruefbar.
+  daten_vertrag: >
+    Kein DROP. Keine neuen Tabellen. Rechnungsweg bleibt Claude.
+  test_vertrag: >
+    Unit gegen Listenform und Seitenhuelle ohne App. Gate gegen echte OpenAPI.
+  security_vertrag: >
+    Keine Secrets. Nur Schema-Vergleich.
+  betriebs_vertrag: >
+    pytest haelt die Ratsche. Rollback = Commit revertieren.
+  dokumentations_vertrag: >
+    Workboard, todo P7, feldvertrag-masken, tenancy.
+external_gates:
+  - not_applicable
+---

@@ -19,6 +19,7 @@ import {
 } from '@/lib/api/weighing-tickets'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { Scale, Search, Plus, Link2 } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -86,6 +87,7 @@ const initialForm: NewTicketForm = {
 
 export default function WiegungenPage(): JSX.Element {
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTicketId, setSelectedTicketId] = useState<string>('')
   const [selectedContractId, setSelectedContractId] = useState<string>('')
@@ -276,106 +278,10 @@ export default function WiegungenPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold">Wiegungen</h1>
-        <p className="text-muted-foreground">Wiegeschein-Erfassung und Kontraktzuordnung</p>
-      </div>
-
-      <div className="space-y-4">
-        <RoleFocusBar
-          roles={weighingRoleProfiles}
-          value={roleFocus}
-          onChange={setRoleFocus}
-          visibleCount={roleFocus === 'all' ? 5 : 1}
-          totalCount={5}
-        />
-        <ManagementDecisionPanel
-          decision={{
-            allowed: canProceedWeighing,
-            allowedLabel: 'Bearbeitbar',
-            blockedLabel: 'Stopper offen',
-            summary: canProceedWeighing
-              ? `Die Waagearbeit kann fortgesetzt werden. ${tickets.length} Tickets, ${openTickets} offen, ${ticketsWithoutContract} ohne Kontrakt.`
-              : `Vor der naechsten Buchung ist noch etwas offen: ${weighingNextAction}`,
-            blockerCount: [!hasCreateInput, !hasWeightInput, ticketsWithoutContract > 0 && !hasAllocationInput].filter(Boolean).length,
-            nextFocus: weighingNextAction,
-            template: {
-              label: 'Hofliste oeffnen',
-              href: '/waage/hofliste',
-            },
-          }}
-        />
-        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-          <OperationalTaskPlan title="Waage-Aufgabenplan" items={weighingTaskItems} />
-          <div className="space-y-3">
-            <NextActionPanel
-              action={weighingNextAction}
-              tone={canProceedWeighing ? 'emerald' : ticketsWithoutContract > 0 ? 'amber' : 'blue'}
-            />
-            <EvidenceTemplateLink link={{ label: 'Wiegescheinliste pruefen', href: '/waage/liste' }} />
-          </div>
-        </div>
-        <CrudCapabilityChecklist capabilities={weighingCrudCapabilities} />
-      </div>
-
-      {/* Operativer Fallkopf */}
-      <Card className={`border ${fallkopf.statusColor}`}>
-        <CardContent className="pt-4 pb-3 text-sm space-y-1">
-          <div className="font-semibold">Wiegungen: {fallkopf.status}</div>
-          <div>Rueckstand: {fallkopf.rueckstand}</div>
-          <div>Blocker: {fallkopf.blocker}</div>
-          <div>Folgepfad: {fallkopf.folgepfad}</div>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Wiegescheine</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{tickets.length}</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Netto gesamt (kg)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{totalNetKg.toFixed(3)}</span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Abrechnungsgewicht (kg)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{totalBillingKg.toFixed(3)}</span>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Wartende Annahmen</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold">{chain.waitingInbound}</span></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Wiegungen</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold">{chain.openWeighingTickets}</span></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesperrte Chargen</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold">{chain.blockedCharges}</span></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fracht in Transit</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold">{chain.freightInTransit}</span></CardContent>
-        </Card>
+        <h1 className="text-2xl font-bold md:text-3xl">Wiegungen</h1>
+        <p className="text-muted-foreground">Wiegeschein anlegen, schließen, Kontrakt zuordnen</p>
       </div>
 
       <Card>
@@ -425,7 +331,7 @@ export default function WiegungenPage(): JSX.Element {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Ticket gegen Kontrakt allokieren</CardTitle>
+          <CardTitle className="text-base">Kontrakt zuordnen</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-3">
           <div>
@@ -463,7 +369,7 @@ export default function WiegungenPage(): JSX.Element {
           <div className="flex items-end">
             <Button size="touch" className="gap-2" onClick={() => { void onAllocate() }} disabled={allocateMutation.isPending}>
               <Link2 className="h-5 w-5" />
-              Allokieren
+              Zuordnen
             </Button>
           </div>
         </CardContent>
@@ -476,7 +382,14 @@ export default function WiegungenPage(): JSX.Element {
         <CardContent>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input ref={searchRef} placeholder="Ticket, Kennzeichen, Waage..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            <Input
+              ref={searchRef}
+              aria-label="Wiegeschein suchen"
+              placeholder="Ticket, Kennzeichen, Waage..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="min-h-touch pl-10"
+            />
           </div>
         </CardContent>
       </Card>
@@ -504,7 +417,7 @@ export default function WiegungenPage(): JSX.Element {
               {
                 key: 'status',
                 label: 'Status',
-                render: (t: WeighingTicket) => <Badge variant={t.status === 'closed' ? 'outline' : 'secondary'}>{t.status}</Badge>,
+                render: (t: WeighingTicket) => <Badge variant={t.status === 'closed' ? 'outline' : 'secondary'}>{t.status === 'closed' ? 'geschlossen' : 'offen'}</Badge>,
               },
               {
                 key: 'allocation_status',
@@ -521,8 +434,8 @@ export default function WiegungenPage(): JSX.Element {
                 render: (t: WeighingTicket) => (
                   <Button
                     variant="outline"
-                    size="sm"
-                    disabled={updateMutation.isPending || t.status === 'closed'}
+                    className="min-h-touch touch-manipulation"
+                    disabled={(updateMutation.isPending && updateMutation.variables?.id === t.id) || t.status === 'closed'}
                     onClick={() => { void onSetSecondWeighing(t) }}
                   >
                     Schließen
@@ -533,8 +446,105 @@ export default function WiegungenPage(): JSX.Element {
           />
         </CardContent>
       </Card>
+
+      {!isTouch ? (
+      <div className="space-y-4">
+        <RoleFocusBar
+          roles={weighingRoleProfiles}
+          value={roleFocus}
+          onChange={setRoleFocus}
+          visibleCount={roleFocus === 'all' ? 5 : 1}
+          totalCount={5}
+        />
+        <ManagementDecisionPanel
+          decision={{
+            allowed: canProceedWeighing,
+            allowedLabel: 'Bearbeitbar',
+            blockedLabel: 'Stopper offen',
+            summary: canProceedWeighing
+              ? `Die Waagearbeit kann fortgesetzt werden. ${tickets.length} Tickets, ${openTickets} offen, ${ticketsWithoutContract} ohne Kontrakt.`
+              : `Vor der naechsten Buchung ist noch etwas offen: ${weighingNextAction}`,
+            blockerCount: [!hasCreateInput, !hasWeightInput, ticketsWithoutContract > 0 && !hasAllocationInput].filter(Boolean).length,
+            nextFocus: weighingNextAction,
+            template: {
+              label: 'Hofliste oeffnen',
+              href: '/waage/hofliste',
+            },
+          }}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTaskPlan title="Waage-Aufgabenplan" items={weighingTaskItems} />
+          <div className="space-y-3">
+            <NextActionPanel
+              action={weighingNextAction}
+              tone={canProceedWeighing ? 'emerald' : ticketsWithoutContract > 0 ? 'amber' : 'blue'}
+            />
+            <EvidenceTemplateLink link={{ label: 'Wiegescheinliste pruefen', href: '/waage/liste' }} />
+          </div>
+        </div>
+        <CrudCapabilityChecklist capabilities={weighingCrudCapabilities} />
+
+        <Card className={`border ${fallkopf.statusColor}`}>
+          <CardContent className="pt-4 pb-3 text-sm space-y-1">
+            <div className="font-semibold">Wiegungen: {fallkopf.status}</div>
+            <div>Rueckstand: {fallkopf.rueckstand}</div>
+            <div>Blocker: {fallkopf.blocker}</div>
+            <div>Folgepfad: {fallkopf.folgepfad}</div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Wiegescheine</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-muted-foreground" />
+                <span className="text-2xl font-bold">{tickets.length}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Netto gesamt (kg)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-2xl font-bold">{totalNetKg.toFixed(3)}</span>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Abrechnungsgewicht (kg)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-2xl font-bold">{totalBillingKg.toFixed(3)}</span>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Wartende Annahmen</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain?.waitingInbound ?? 0}</span></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Wiegungen</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain?.openWeighingTickets ?? 0}</span></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesperrte Chargen</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain?.blockedCharges ?? 0}</span></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fracht in Transit</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain?.freightInTransit ?? 0}</span></CardContent>
+          </Card>
+        </div>
+      </div>
+      ) : null}
     </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

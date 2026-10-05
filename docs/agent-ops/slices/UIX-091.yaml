@@ -1,0 +1,63 @@
+slice_id: UIX-091
+title: Prozessband (P9) flaechendeckend
+owner: Claude
+status: in_arbeit
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Deklarative Prozessketten (config/process_chains.yaml) + processChain-Feld je SD; Compiler erzeugt shell.processRibbon; Chips navigieren entlang K1-K4.
+file_ownership:
+  - "config/process_chains.yaml"
+  - "app/core/screen_definitions.py"
+  - "packages/frontend-web/src/components/mask-builder/render-plan/**"
+  - "packages/frontend-web/src/components/mask-builder/renderers/ProcessRibbonRenderer.tsx"
+  - "scripts/check_process_chains.py"
+acceptance:
+  - "Beleg-SDs (sales/einkauf/finance/agrar detail+transaction) tragen processChain oder noProcessChainReason; sonst Readiness-Error."
+  - "Jede screenId in Ketten existiert in der Registry (CI-Check)."
+  - "Aktueller Schritt markiert; Klick navigiert; nav-Semantik mit Tastatur."
+  - "Anhebung Warnung->Error nach Voll-Rollout erfolgt (UIX-091-GATE)."
+tests:
+  - "Vitest Compiler+Renderer"
+  - "pytest YAML-Validierung + Readiness-Errorfall"
+  - "Playwright Band-Navigation ueber 2 Ketten"
+progress: >-
+  2026-07-07 Compiler-Kern + Config + Gate-Script geliefert (isoliert): config/
+  process_chains.yaml (4 Ketten k1_ernte/k2_verkauf/k3_einkauf/k4_crm, nur real
+  existierende screenIds); scripts/check_process_chains.py (Quality-Gate:
+  Struktur + jede screenId in Registry, exit 1 bei Fehler; validate() testbar);
+  renderers/process-ribbon.ts compileProcessRibbon (chainId/stepKey → Ribbon,
+  v1-state current vs neutral, unbekannte chain/step/route → Warnung nie Fehler);
+  ProcessRibbonRenderer (nav mit Chips, current gold, Klick-Navigation,
+  deaktiviert ohne Route). 5 pytest (check-script) + 7 Vitest (Compiler+Renderer).
+  tsc 0, ESLint sauber. PIPELINE-Tail 2026-09-15 (Cursor): processChain-SD-Feld
+  + Compiler-Einbindung in RenderShellPlan + zentraler Renderer.
+  CONTRACT-Tail 2026-09-15 (Cursor): Katalog+Mitgliedschaft in get_screen_definition,
+  Readiness-Advisory missing_process_chain, Quality-Gate-Step, Playwright zwei Ketten.
+  ROLLOUT-Tail 2026-09-15 (Cursor): 22/22 Domain-SDs klassifiziert (Kette oder
+  noProcessChainReason); Auftragsbestaetigung in k3. GATE-Tail 2026-09-15
+  (Cursor): missing_process_chain ist mandatory; Roh-SD ohne Kette/Reason
+  blockiert generatorReady. Registry bleibt gruen.
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Maske zeigt Woher/Wo/Wohin — die Doc-Chain wird sichtbar und begehbar.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    processChain additiv; Ketten zentral in config, tenant-ueberschreibbar; kein Instanz-Fortschritt in v1 (Feld vorbereitet).
+  test_vertrag: >-
+    Registry-Konsistenz-Check verhindert tote Ketten-Schritte.
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

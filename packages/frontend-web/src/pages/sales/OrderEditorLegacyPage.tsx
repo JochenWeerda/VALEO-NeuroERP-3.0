@@ -5,6 +5,7 @@
 
 import { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -1261,28 +1262,27 @@ export default function OrderEditorLegacyPage(): JSX.Element {
 
       {/* Belegfolge-Hinweis */}
       {vorgaengerCount > 0 && state.customer && (
-        <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
-          <span className="text-amber-800 text-sm font-medium">
+        <Callout variant="warning" className="border-b px-4 py-1.5 flex items-center gap-3">
+          <span className="text-status-warning text-sm font-medium">
             {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Angebote' : 's Angebot'} für{' '}
             <strong>{state.customer.name}</strong> vorhanden
           </span>
           <Button
-            size="sm"
             variant="outline"
-            className="h-6 text-xs border-amber-400 text-amber-800 hover:bg-amber-100"
+            className="min-h-touch touch-manipulation text-status-warning"
             onClick={() => setShowBelegfolgeDialog(true)}
           >
             Positionen übernehmen
           </Button>
           <Button
-            size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0 text-amber-600 ml-auto"
+            className="min-h-touch min-w-touch touch-manipulation text-status-warning ml-auto"
+            aria-label="Hinweis schließen"
             onClick={() => setVorgaengerCount(0)}
           >
             ×
           </Button>
-        </div>
+        </Callout>
       )}
 
       <div className="flex-1 overflow-auto p-4">
@@ -1346,23 +1346,23 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                   placeholder="Wird beim Speichern aus dem Nummernkreis vergeben"
                   className="flex-1 h-8"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation p-0"
                   onClick={() => setShowAuftragAuswahl(true)} title="Auftrag suchen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleAuftragPrev} title="Vorheriger Auftrag">
+                <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation p-0" onClick={handleAuftragPrev} title="Vorheriger Auftrag">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleAuftragNext} title="Nächster Auftrag">
+                <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation p-0" onClick={handleAuftragNext} title="Nächster Auftrag">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
               {isWorkflowEntry ? (
-                <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+                <Callout variant="info" className="rounded-md border px-3 py-2 text-xs">
                   {workflowCase ? `Workflow-Vorgang ${workflowCase}` : 'Workflow-Einstieg'}
                   {workflowEntryMode ? ` · ${workflowEntryMode}` : ''}
                   {workflowCustomerName ? ` · ${workflowCustomerName}` : ''}
-                </div>
+                </Callout>
               ) : null}
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Auftrag-Datum:</Label>
@@ -1440,14 +1440,14 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                   onChange={(e) => setState((prev) => ({ ...prev, niederlassung: Number(e.target.value) }))}
                   className="flex-1 h-8"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleNiederlassungOpen()} title="Niederlassung auswählen">
+                <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation p-0" onClick={() => void handleNiederlassungOpen()} title="Niederlassung auswählen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Vertreter:</Label>
                 <Input value={state.vertreter} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleVertreterOpen} title="Vertreter eingeben">
+                <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation p-0" onClick={handleVertreterOpen} title="Vertreter eingeben">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
@@ -1494,13 +1494,14 @@ export default function OrderEditorLegacyPage(): JSX.Element {
             {/* Rechte Spalte — Kunden-Tabs */}
             <div className="space-y-2">
               <Tabs value={customerTab} onValueChange={(v) => setCustomerTab(v)}>
-                <TabsList className="grid w-full grid-cols-4 h-auto">
+                {/* Eine Registerleiste statt zwei getrennter TabsLists — sonst
+                    navigieren Pfeiltasten nur innerhalb je einer 4er-Reihe.
+                    Gleicher Aufbau wie Lieferschein (Gewohnheits-Prinzip). */}
+                <TabsList variant="register" className="flex-wrap overflow-x-visible" aria-label="Kundenbereich-Register">
                   <TabsTrigger value="kunde" className="text-xs py-1">KUNDE</TabsTrigger>
                   <TabsTrigger value="lieferanschr" className="text-xs py-1">LIEFER-ANSCHR.</TabsTrigger>
                   <TabsTrigger value="rechnanschrift" className="text-xs py-1">RECHN.-ANSCHRIFT</TabsTrigger>
                   <TabsTrigger value="angebot" className="text-xs py-1">ANGEBOT</TabsTrigger>
-                </TabsList>
-                <TabsList className="grid w-full grid-cols-4 h-auto mt-1">
                   <TabsTrigger value="rechnung" className="text-xs py-1">RECHNUNG/ZAHLUNGSBED.</TabsTrigger>
                   <TabsTrigger value="texte" className="text-xs py-1">TEXTE</TabsTrigger>
                   <TabsTrigger value="spediteur" className="text-xs py-1">SPEDITEUR</TabsTrigger>
@@ -1598,7 +1599,6 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                           </ul>
                           <Button
                             variant="outline"
-                            size="sm"
                             className="mt-2"
                             onClick={() => setShowBelegfolgeDialog(true)}
                           >
@@ -1660,9 +1660,9 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                       {(state.customer.chefanweisung || state.customer.executiveNote) && (
                         <div>
                           <div className="font-semibold mb-1">Chefanweisung</div>
-                          <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs whitespace-pre-wrap">
+                          <Callout variant="warning" className="p-2 border rounded text-xs whitespace-pre-wrap">
                             {state.customer.chefanweisung || state.customer.executiveNote}
-                          </div>
+                          </Callout>
                         </div>
                       )}
                     </div>
@@ -1715,7 +1715,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                 <Label className="w-32 text-sm">Debitor-Kto.:</Label>
                 <Input value={state.customer?.debitorAccount || ''} readOnly className="flex-1 h-8" />
                 <ShortcutHintButton shortcut="Strg+F1">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                  <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation p-0"
                     onClick={() => setShowCustomerDialog(true)}>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -1815,34 +1815,31 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                           <Button
                             type="button"
                             variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
+                            className="min-h-touch touch-manipulation"
                             title="Hoch"
                             onClick={() => handleMovePositionUp(idx)}
                             disabled={idx <= 0}
                           >
-                            <ChevronUp className="h-4 w-4" />
+                            <ChevronUp className="h-4 w-4" /> Hoch
                           </Button>
                           <Button
                             type="button"
                             variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
+                            className="min-h-touch touch-manipulation"
                             title="Runter"
                             onClick={() => handleMovePositionDown(idx)}
                             disabled={idx >= state.positionen.length - 1}
                           >
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-4 w-4" /> Runter
                           </Button>
                           <Button
                             type="button"
                             variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-red-600 hover:text-red-700"
+                            className="min-h-touch touch-manipulation text-status-error hover:text-status-error"
                             title="Position löschen"
                             onClick={() => handleDeletePosition(idx)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" /> Löschen
                           </Button>
                         </div>
                       )}
@@ -1878,7 +1875,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
               <div className="flex gap-1">
                 <Input value={currentPosition.artikelNr} readOnly className="flex-1 h-8" />
                 <ShortcutHintButton shortcut="Strg+F2">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                  <Button variant="ghost" className="min-h-touch min-w-touch touch-manipulation p-0"
                     onClick={() => setShowArticleDialog(true)}>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -1977,8 +1974,9 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-8 px-2"
+                  className="min-h-touch min-w-touch touch-manipulation px-2"
                   onClick={() => setShowKontraktLookup(true)}
+                  aria-label="Kontrakt suchen"
                   title="Kontrakt suchen"
                 >
                   <Search className="h-3.5 w-3.5" />
@@ -2016,7 +2014,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                 <Button
                   onClick={handlePositionOK}
                   disabled={!currentPosition.artikelNr || !currentPosition.mengeGebinde}
-                  className="h-8 gap-1"
+                  className="min-h-touch touch-manipulation gap-1"
                 >
                   <Check className="h-4 w-4" />
                   Zeile OK
@@ -2024,7 +2022,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
               </ShortcutHintButton>
               {state.aktivePositionIndex !== null && (
                 <Button
-                  variant="outline" size="sm" className="h-8"
+                  variant="outline" className="min-h-touch touch-manipulation"
                   onClick={() => {
                     setState((prev) => ({ ...prev, aktivePositionIndex: null }))
                     setCurrentPosition(emptyCurrentPosition(currentPosition.posNr + 10))
@@ -2081,36 +2079,36 @@ export default function OrderEditorLegacyPage(): JSX.Element {
       {/* ── Bottom-Toolbar ────────────────────────────────────────────────── */}
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={() => setShowPrintDialog(true)} variant="outline" size="sm" className="gap-2">
+          <Button onClick={() => setShowPrintDialog(true)} variant="outline" className="gap-2">
             <Printer className="h-4 w-4" />
             Auftrag drucken
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="gap-2"
             onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-4 w-4" />
             Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="gap-2"
             onClick={() => setShowAttachmentDialog(true)}>
             <Folder className="h-4 w-4" />
             Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geöffnet.'); }} title="Kontrakte anzeigen/verknüpfen">
+          <Button variant="outline" className="gap-2" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geöffnet.'); }} title="Kontrakte anzeigen/verknüpfen">
             <FileCheck className="h-4 w-4" />
             Kontrakte
           </Button>
-          <Button variant="outline" size="sm" className="gap-2"
+          <Button variant="outline" className="gap-2"
             onClick={() => void handleCreateLieferschein()}
             disabled={isSaving}
             data-action-id="sales.order.create-delivery">
             <LinkIcon className="h-4 w-4" />
             In Lieferschein wandeln
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleSofortRechnung()} title="Direkt Rechnung aus Auftrag" disabled={isSaving}>
+          <Button variant="outline" className="gap-2" onClick={() => void handleSofortRechnung()} title="Direkt Rechnung aus Auftrag" disabled={isSaving}>
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-red-600"
+          <Button variant="outline" className="gap-2 text-status-error"
             onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />
             Auftrag löschen
@@ -2118,13 +2116,13 @@ export default function OrderEditorLegacyPage(): JSX.Element {
         </div>
         <div className="flex gap-2">
           <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSaveClick()} size="sm" className="gap-2" disabled={isSaving}>
+            <Button onClick={() => void handleSaveClick()} className="gap-2" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>
           </ShortcutHintButton>
           <ShortcutHintButton shortcut="Strg+F7">
-            <Button variant="outline" onClick={() => navigate('/verkauf')} size="sm">
+            <Button variant="outline" onClick={() => navigate('/verkauf')}>
               Schließen
             </Button>
           </ShortcutHintButton>
@@ -2145,7 +2143,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
               value={sucheText}
               onChange={(e) => setSucheText(e.target.value)}
               placeholder="Auftrag-Nr. oder Kunde suchen…"
-              className="h-8 text-sm"
+              className="min-h-touch text-sm"
               autoFocus
             />
           </div>
@@ -2194,8 +2192,7 @@ export default function OrderEditorLegacyPage(): JSX.Element {
             </Table>
           </div>
           <DialogFooter className="mt-2">
-            <Button variant="outline" size="sm"
-              onClick={() => {
+            <Button variant="outline"              onClick={() => {
                 setState((prev) => ({
                   ...prev, id: null, auftragNr: '',
                   auftragDatum: formatDateForInput(new Date()), liefertermin: '',
@@ -2205,11 +2202,10 @@ export default function OrderEditorLegacyPage(): JSX.Element {
               }}>
               Neuer Auftrag
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowAuftragAuswahl(false)}>
+            <Button variant="outline" onClick={() => setShowAuftragAuswahl(false)}>
               Abbrechen
             </Button>
-            <Button size="sm"
-              onClick={() => filteredAuftraege[0] && handleAuftragAuswaehlen(filteredAuftraege[0])}>
+            <Button              onClick={() => filteredAuftraege[0] && handleAuftragAuswaehlen(filteredAuftraege[0])}>
               Übernehmen
             </Button>
           </DialogFooter>
@@ -2319,9 +2315,9 @@ export default function OrderEditorLegacyPage(): JSX.Element {
                 <div>
                   <h4 className="font-semibold mb-2">Chefanweisung</h4>
                   {state.customer.chefanweisung || state.customer.executiveNote ? (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm whitespace-pre-wrap">
+                    <Callout variant="warning" className="p-3 border rounded text-sm whitespace-pre-wrap">
                       {state.customer.chefanweisung || state.customer.executiveNote}
-                    </div>
+                    </Callout>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">
                       Keine Chefanweisung für diesen Kunden hinterlegt.

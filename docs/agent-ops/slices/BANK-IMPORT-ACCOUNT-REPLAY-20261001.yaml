@@ -1,0 +1,44 @@
+slice_id: BANK-IMPORT-ACCOUNT-REPLAY-20261001
+title: Kontobindung und sichere Dateiwiederholung im Bankimport
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claim 2ef0ed2a3; keine Uebernahme fremder aktiver Slices.
+goal: Eigene aktive Konten pruefen und identische Dateien nur einmal speichern und verrechnen.
+file_ownership:
+  - app/api/v1/endpoints/bank_statement_import.py
+  - app/api/v1/endpoints/payment_matching.py
+  - tests/test_bank_import_account_replay.py
+  - tests/test_bank_payment_matching_integrity.py
+  - tests/test_bank_statement_import_integrity.py
+  - tests/test_payment_csv_import_integrity.py
+  - docs/architecture/domains/finance/workflows.md
+  - docs/quality-assurance/bank-import-account-replay-20261001.md
+acceptance:
+  - Aktives eigenes Konto mit gueltiger IBAN und gleicher Waehrung vor Writes.
+  - Gleiche Bytes in Tenant/Konto/Format sind auch parallel und ueber beide CSV-Routen eindeutig.
+  - Replay liefert gespeicherten Status ohne neues Matching oder Audit.
+  - Fehler rollen zurueck; fruehe DQ-Fehler bleiben ohne Datenbankzugriff.
+tests:
+  - python -m ruff check app/api/v1/endpoints/bank_statement_import.py app/api/v1/endpoints/payment_matching.py tests/test_bank_import_account_replay.py tests/test_bank_payment_matching_integrity.py tests/test_bank_statement_import_integrity.py tests/test_payment_csv_import_integrity.py
+  - python scripts/generate_agent_handbuch.py --check
+  - python scripts/check_baseline_integrity.py --base 2ef0ed2a3
+test_evidence:
+  - 96 reale Finanzvertraege bestanden, davon 27 neue Konto- und Replay-Vertraege.
+  - Nach Rollback-Guard 47 Vertraege erneut bestanden; insgesamt 106 verschiedene Tests.
+  - Ruff, Whitespace und Agent-Handbuch bestanden.
+risks:
+  - Historische UUID-Importe ohne Fingerprint und abweichende Bytes sind nicht semantisch dedupliziert.
+  - Parserdetails, Rueckbuchung und GL-Journalintegration bleiben eigene Fachvertraege.
+ai_harness:
+  fachlicher_vertrag: Ein neuer Dateiupload darf dieselbe gespeicherte Zahlung nicht erneut verfuegbar machen.
+  architektur_vertrag: Minor-Bugfix vorhandener Finance-Routes und Tabellen.
+  daten_vertrag: Tenant, aktives Konto, IBAN und Kontowaehrung gemeinsam pruefen.
+  test_vertrag: Echte Parallelaufrufe, Datenbankfehler und routenuebergreifendes Replay.
+  security_vertrag: Kein fremdes Konto ueber frei gewaehlte Konto-ID.
+  betriebs_vertrag: Vorhandener gemeinsamer Pruefstand; keine neuen Datenbanken oder Container.
+  dokumentations_vertrag: QA, Finance-Workflow, Workboard und Open-Gaps synchronisiert.
+external_gates:
+  - Fremde CRM-Godfile-Ratsche bleibt beim aktiven Owner offen.
+  - GitHub-CI und Deployment.

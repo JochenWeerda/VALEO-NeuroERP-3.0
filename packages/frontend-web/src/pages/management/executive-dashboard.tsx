@@ -24,6 +24,7 @@ import { TrendChart, TrendDataPoint } from '@/components/management/TrendChart'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
 
 type TimeRange = '7d' | '30d' | '90d' | '365d' | 'ytd'
 
@@ -107,6 +108,7 @@ function mapToDashboardData(api: ManagementDashboard, range: TimeRange): Dashboa
 
 export default function ExecutiveDashboardPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [timeRange, setTimeRange] = useState<TimeRange>('30d')
   const { data: apiData, isLoading, refetch, isFetching } = useManagementDashboard()
   const data = useMemo(() => (apiData ? mapToDashboardData(apiData, timeRange) : null), [apiData, timeRange])
@@ -125,7 +127,7 @@ export default function ExecutiveDashboardPage(): JSX.Element {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Executive Dashboard</h1>
+          <h1 className="text-2xl font-bold">Leitungs-Dashboard</h1>
           <p className="text-muted-foreground">
             Übersicht der wichtigsten Geschäftskennzahlen
           </p>
@@ -138,20 +140,25 @@ export default function ExecutiveDashboardPage(): JSX.Element {
               value={timeRange}
               onValueChange={(value) => setTimeRange(value as TimeRange)}
               options={timeRangeOptions}
-              className="w-[180px] pl-9"
+              className="min-h-touch w-[180px] pl-9"
+              ariaLabel="Zeitraum"
             />
           </div>
 
           <Button
             variant="outline"
-            size="icon"
+            className="min-h-touch"
             onClick={() => refetch()}
             disabled={isFetching}
           >
-            <RefreshCw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
+            <RefreshCw className={cn('mr-2 h-4 w-4', isFetching && 'animate-spin')} />
+            Aktualisieren
           </Button>
 
-          <Button variant="outline">
+          <Button variant="outline" className="min-h-touch" onClick={() => toast({
+            title: 'Export nicht angebunden',
+            description: 'Ein CSV-Export der Leitungsübersicht ist in dieser Maske nicht verfügbar.',
+          })}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -257,7 +264,7 @@ export default function ExecutiveDashboardPage(): JSX.Element {
         <div className="bg-card rounded-xl border p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Top Produkte</h3>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/artikel')}>
+            <Button variant="ghost" className="min-h-touch" onClick={() => navigate('/artikel')}>
               Alle anzeigen
             </Button>
           </div>
@@ -297,7 +304,7 @@ export default function ExecutiveDashboardPage(): JSX.Element {
         <div className="bg-card rounded-xl border p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Top Kunden</h3>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/verkauf/kunden-liste')}>
+            <Button variant="ghost" className="min-h-touch" onClick={() => navigate('/verkauf/kunden-liste')}>
               Alle anzeigen
             </Button>
           </div>

@@ -1,0 +1,101 @@
+slice_id: FEED-CONS-031
+id: FEED-CONS-031
+title: Beratungsfall und Beobachtungen mit idempotentem Mobil-Vertrag
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+requirements: [FEED-CONS-001, FEED-MOB-001]
+work_packages: [FEED-WP-171, FEED-WP-172]
+decision_level: significant
+dependencies: [FEED-CORE-015, FEED-CORE-016]
+goal: >-
+  Start Inkrement 5 gemaess Slice-Spec (FEED-SPEC-CONTINUATION-049): Berater
+  dokumentieren Besuche/Remote-Beratungen als Faelle mit chronologischen,
+  unveraenderlichen Beobachtungen (Kategorien, Freitext, DMS-Fotoreferenzen,
+  fachliche Verknuepfungen) und schliessen sie mit Abschlussbewertung;
+  der mobile Erfassungspfad ist gegen Doppel-Submit/Retry idempotent.
+scope:
+  - "Migration feed_consulting_20260716: consulting_cases (visit|remote,
+    Betrieb-/Gruppenbezug, Status open|closed, Abschlussfelder) +
+    consulting_observations (append-only per Trigger, photo_document_refs
+    JSONB, optionale ration_id/analysis_ref/observation_date,
+    UNIQUE tenant+case+client_ref als Idempotenzvertrag). Single-Head auf
+    Codex' benannter 030-Revision verkettet."
+  - "feeding_consulting_service.py: create/list/get/close; add_observation
+    idempotent (gleiche client_ref -> dieselbe Beobachtung mit duplicate=true);
+    geschlossene Faelle lehnen neue Beobachtungen ab
+    (ConsultingCaseClosedError -> 409); Referenzpruefung Betrieb/Gruppe/Ration
+    (404 statt Waisen)."
+  - "API /feeding/consulting-cases (WRITE/READ-Rollen, typisierte Vertraege)."
+  - "Frontend ConsultingCases (Worklist + Falldetail, Beobachtungserfassung
+    mit Guard und crypto.randomUUID-client_ref, Abschluss mit Pflicht-Fazit,
+    Lade-/Leer-/Fehlerzustaende) + Route futtermittel/beratung; responsives
+    Layout = mobiler Pfad."
+file_ownership:
+  - alembic/versions/feed_consulting_20260716.py
+  - app/services/feeding_consulting_service.py
+  - app/api/v1/endpoints/feeding_consulting.py
+  - app/api/v1/endpoints/rations_optimization.py (nur Router-Include)
+  - tests/test_feeding_consulting_api.py
+  - packages/frontend-web/src/features/feed-advice/ConsultingCases.tsx
+  - packages/frontend-web/src/lib/api/feeding-consulting.ts
+  - packages/frontend-web/src/pages/futtermittel/beratung.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/consulting-cases.test.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-CONS-031.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    Backend: 6 failed (ImportError app.api.v1.endpoints.feeding_consulting)
+    vor Implementierung. Frontend: Modulaufloesung ConsultingCases
+    fehlgeschlagen.
+  green: >-
+    Backend 6/6 (RBAC-Matrix 5 Endpoints + Journey inkl. Idempotenz,
+    409 nach Abschluss, Tenant-404, Waisen-404); Frontend 3/3 (ein Testfix
+    dokumentiert: mehrdeutiger LabelText-Matcher praezisiert).
+  refactor: >-
+    Referenzpruefung als generischer _assert_ref-Helper; Kategorienliste
+    zentral in der Komponente.
+acceptance:
+  - "Fall buendelt Beobachtungen chronologisch mit Herkunft (Akteur, Zeit)."
+  - "Doppelte mobile Einreichung (gleiche client_ref) erzeugt keine Dublette
+    und meldet duplicate=true."
+  - "Abgeschlossene Faelle sind unveraenderlich fuer neue Beobachtungen (409);
+    Abschluss verlangt ein Fazit."
+  - "Fotos ausschliesslich als DMS-Referenzen (kein Upload-Bypass)."
+tests:
+  - "pytest test_feeding_consulting_api.py -> 6/6 (nach Red-Welle)."
+  - "Vitest consulting-cases.test.tsx -> 3/3; tsc 0; eslint 0."
+  - "Routen 904 + routing-Kette; Architecture Validate/Drift 904/904;
+    Alembic Single-Head feed_consulting_20260716."
+risks:
+  - "Migration haengt an Codex' benannter WIP-Revision
+    feed_actual_measures_20260716 — bei Umbenennung dort muss down_revision
+    nachziehen (bewusst dokumentiert, Single-Head-Regel)."
+  - "Strukturierte Bewertung/Empfehlung und Massnahmen-Verknuepfung folgen
+    in FEED-CONS-032; Beratungsbericht in FEED-REP-040."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Beratungsdokumentation ist chronologisch, unveraenderlich und
+    nachvollziehbar; mobile Erfassung verliert nichts und dupliziert nichts.
+  architektur_vertrag: >-
+    Neues Aggregat dockt additiv an Betriebe/Gruppen/Rationen an; Meridian-
+    Grundmuster (Worklist+Detail) ohne zweite UI-Welt; Rollen aus authz.
+  daten_vertrag: >-
+    Additive Migration; Beobachtungen append-only per Trigger; Idempotenz
+    ueber UNIQUE-Constraint statt Anwendungslogik allein.
+  security_vertrag: >-
+    WRITE fuer Mutationen, READ fuer Lesen; Tenant-Scope auf allen Pfaden;
+    DMS-Referenzen ohne eigene Dateiannahme.
+  betriebs_vertrag: >-
+    Rollback = Revert + downgrade(); keine neuen Abhaengigkeiten.
+  dokumentations_vertrag: >-
+    Traceability FEED-CONS-001/FEED-MOB-001 fortgeschrieben; Workboard;
+    dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz im YAML; Idempotenz-, Abschluss-, Tenant- und RBAC-Pfade
+    getestet; Gates gruen.

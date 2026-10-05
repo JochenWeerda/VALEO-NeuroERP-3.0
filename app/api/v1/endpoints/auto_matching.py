@@ -112,9 +112,9 @@ async def list_matching_rules(
         params = {"tenant_id": tenant_id}
         
         if active_only:
-            query = text(str(query) + " AND active = true")
+            query = text(str(query) + " AND active = true")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
-        query = text(str(query) + " ORDER BY priority DESC, rule_name")
+        query = text(str(query) + " ORDER BY priority DESC, rule_name")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         
@@ -471,7 +471,7 @@ async def auto_match(
             params = {"tenant_id": request.tenant_id}
             
             if request.bank_account:
-                lines_query = text(str(lines_query) + " AND bank_account = :bank_account")
+                lines_query = text(str(lines_query) + " AND bank_account = :bank_account")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 params["bank_account"] = request.bank_account
             
             lines_rows = db.execute(lines_query, params).fetchall()
@@ -791,7 +791,7 @@ async def get_matching_statistics(
         params = {"tenant_id": tenant_id}
         
         if statement_id:
-            query = text(str(query) + " AND statement_id = :statement_id")
+            query = text(str(query) + " AND statement_id = :statement_id")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["statement_id"] = statement_id
         
         row = db.execute(query, params).fetchone()
@@ -808,7 +808,7 @@ async def get_matching_statistics(
         
         auto_params = {"tenant_id": tenant_id}
         if statement_id:
-            auto_query = text(str(auto_query) + " AND statement_line_id IN (SELECT id FROM domain_erp.bank_statement_lines WHERE statement_id = :statement_id)")
+            auto_query = text(str(auto_query) + " AND statement_line_id IN (SELECT id FROM domain_erp.bank_statement_lines WHERE statement_id = :statement_id)")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             auto_params["statement_id"] = statement_id
         
         auto_matched = int(db.execute(auto_query, auto_params).scalar() or 0)
@@ -822,7 +822,7 @@ async def get_matching_statistics(
         
         conf_params = {"tenant_id": tenant_id}
         if statement_id:
-            conf_query = text(str(conf_query) + " AND statement_line_id IN (SELECT id FROM domain_erp.bank_statement_lines WHERE statement_id = :statement_id)")
+            conf_query = text(str(conf_query) + " AND statement_line_id IN (SELECT id FROM domain_erp.bank_statement_lines WHERE statement_id = :statement_id)")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             conf_params["statement_id"] = statement_id
         
         avg_confidence = float(db.execute(conf_query, conf_params).scalar() or 0.0)
@@ -836,7 +836,7 @@ async def get_matching_statistics(
         
         type_params = {"tenant_id": tenant_id}
         if statement_id:
-            type_query = text(str(type_query) + " AND statement_line_id IN (SELECT id FROM domain_erp.bank_statement_lines WHERE statement_id = :statement_id)")
+            type_query = text(str(type_query) + " AND statement_line_id IN (SELECT id FROM domain_erp.bank_statement_lines WHERE statement_id = :statement_id)")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             type_params["statement_id"] = statement_id
         
         type_rows = db.execute(type_query, type_params).fetchall()

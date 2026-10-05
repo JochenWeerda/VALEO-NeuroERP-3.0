@@ -1,0 +1,108 @@
+slice_id: OPENAPI-SUMMARY-20260909
+id: OPENAPI-SUMMARY-20260909
+title: Routen-Summaries nachziehen — OpenAPI-Deckung von 97,1 auf 100 Prozent
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-09"
+started_at: "2026-09-09"
+completed_at: "2026-09-09"
+goal: >-
+  Die 101 Routen ohne summary fachlich benennen, nicht generisch auffuellen, und
+  den Gate-Schritt "OpenAPI docs coverage" ohne Schwellenaenderung schliessen.
+file_ownership:
+  - docs/agent-ops/slices/OPENAPI-SUMMARY-20260909.yaml
+  - app/api/v1/endpoints/billing_batch.py
+  - app/api/v1/endpoints/feeding_actual.py
+  - app/api/v1/endpoints/feeding_consulting.py
+  - app/api/v1/endpoints/feeding_feed_catalog.py
+  - app/api/v1/endpoints/feeding_measures.py
+  - app/api/v1/endpoints/feeding_plans.py
+  - app/api/v1/endpoints/feeding_ration_templates.py
+  - app/api/v1/endpoints/feeding_supply.py
+  - app/api/v1/endpoints/foreign_goods_worklist.py
+  - app/api/v1/endpoints/inventory_auxiliary.py
+  - app/api/v1/endpoints/l3_report_catalog.py
+  - app/api/v1/endpoints/legacy_interface_adapters.py
+  - app/api/v1/endpoints/mail_workspace.py
+  - app/api/v1/endpoints/production_control.py
+  - app/api/v1/endpoints/query_center.py
+  - app/api/v1/endpoints/recent_documents.py
+  - app/api/v1/endpoints/tank_adapter.py
+  - docs/schnittstellen/openapi.json
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+ausloeser: >-
+  Nach dem Pagination-Fix aus QG-GREEN-20260909 lief der Backend-Job weiter und
+  fiel einen Schritt spaeter: 101 Routen ohne summary gegen Schwelle 0. Der
+  Rueckstand war hinter dem frueheren Blocker verdeckt.
+befund:
+  verteilung: >-
+    17 Dateien; dreizehn davon ohne eine einzige Summary. Schwerpunkt sind die
+    juengeren Programme: acht Fuetterungs-Router, dazu L3-Berichtskatalog,
+    Rechnungsstapel, Legacy-Adapter, Mailarbeitsplatz, Produktionsleitstand,
+    Abfrage-Center, Tankanlagen-Adapter, Fremdware-Worklist, Nebenbuch und
+    zuletzt geoeffnete Belege.
+  vorgehen: >-
+    Jede Route wurde am Handler gelesen, nicht am Pfad geraten. Drei
+    mehrdeutige Faelle wurden gezielt nachgeprueft: feeding_supply GET '' ist
+    eine Bedarfsvorausrechnung ueber horizon_days mit Sicherheitszuschlag,
+    l3 drilldown liefert Detailzeilen zu einem Dimensionswert, query_center
+    export erzeugt einen signierten Export.
+  messung_vorher:
+    routen_ohne_summary: 101
+    deckung_prozent: 97.1
+  messung_nachher:
+    routen_ohne_summary: 0
+    deckung_prozent: 100.0
+result: >-
+  101 fachliche Summaries in deutscher Sprache ergaenzt, Deckung 3445/3445.
+  docs/schnittstellen/openapi.json neu erzeugt (2752 Pfade), weil der
+  Drift-Check in quality-gate.yml blockierend ist.
+acceptance:
+  - "check_openapi_docs.py meldet 0 fehlende Summaries bei unveraenderter Schwelle"
+  - "generate_openapi.py --check meldet die Spec als aktuell"
+  - Alle 17 betroffenen Module bleiben importierbar
+  - Keine Summary ist generisch aus dem Pfad abgeleitet
+tests:
+  - "scripts/check_openapi_docs.py (Gate)"
+  - "scripts/generate_openapi.py --check (Gate)"
+risks:
+  - >-
+    Eine falsch benannte Route ist schaedlicher als eine unbenannte: sie
+    erscheint in Katalogen, Handbuechern und Agent-Werkzeugen als Wahrheit.
+    Deshalb wurde jeder Handler gelesen; die drei mehrdeutigen Faelle sind im
+    Befund einzeln benannt.
+  - >-
+    openapi.json wurde in einem sauberen HEAD-Worktree erzeugt. Eine Generierung
+    im geteilten Arbeitsbaum haette fremden, unversionierten WIP aus zwei
+    weiteren Endpunktdateien in die Spec geschrieben.
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Route traegt eine Kurzbeschreibung in der Fachsprache der Domaene —
+    deutsch, taetigkeitsbezogen, ohne technische Umschreibung des Pfades.
+  architektur_vertrag: >-
+    summary steht als Argument am Route-Dekorator, nicht als nachgelagerte
+    Anreicherung. Die Spec bleibt damit aus dem Code ableitbar.
+  daten_vertrag: >-
+    Keine Verhaltens-, Schema- oder Signaturaenderung; ergaenzt wird
+    ausschliesslich Metadatentext.
+  test_vertrag: >-
+    Die beiden Generator-Gates sind der Test: Deckung 100 Prozent und Spec ohne
+    Drift. Ein Regressionstest je Route waere eine Verdopplung des Gates.
+  security_vertrag: >-
+    Keine Summary nennt Geheimnisse, interne Hostnamen oder personenbezogene
+    Daten.
+  betriebs_vertrag: >-
+    Die Schwelle 0 bleibt unveraendert; jede neue Route ohne summary laesst den
+    Gate ab sofort sofort fallen.
+  dokumentations_vertrag: >-
+    Workboard und dieses YAML nennen Messung vorher/nachher, die 17 Dateien und
+    die drei fachlich nachgeprueften Zweifelsfaelle.
+external_gates:
+  - >-
+    Bestaetigung liefert der Quality-Gate-Lauf; lokal sind beide Schritte
+    nachgestellt.
+  - >-
+    Der naechste Schritt im selben Job, "Doc generator meta-check", faellt
+    weiterhin: 29 Backend-Services und 28 Endpoints ohne Domain-Mapping im
+    Architektur-Index. Das liegt in fremdem, noch unversioniertem WIP
+    (L3-DESKTOP-REBUILD-20260908) und wurde bewusst nicht angefasst.

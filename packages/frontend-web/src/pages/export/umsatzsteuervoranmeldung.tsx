@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -86,7 +87,7 @@ export default function UmsatzsteuerVoranmeldungPage(): JSX.Element {
           </div>
           <div className="rounded-lg bg-muted p-4">
             <div className="text-sm text-muted-foreground mb-1">Umsatzsteuer-Zahllast</div>
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-primary">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ustData.zahllast)}
             </div>
             <p className="text-xs text-muted-foreground mt-2">
@@ -103,7 +104,7 @@ export default function UmsatzsteuerVoranmeldungPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">UStVA bereit</h3>
             <dl className="grid gap-3">
@@ -125,7 +126,7 @@ export default function UmsatzsteuerVoranmeldungPage(): JSX.Element {
               </div>
               <div className="flex justify-between pt-2">
                 <dt className="font-bold">Zahllast</dt>
-                <dd className="font-bold text-blue-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ustData.zahllast)}</dd>
+                <dd className="font-bold text-primary">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(ustData.zahllast)}</dd>
               </div>
             </dl>
             <div className="mt-6 space-y-2">
@@ -133,10 +134,10 @@ export default function UmsatzsteuerVoranmeldungPage(): JSX.Element {
                 <FileDown className="h-4 w-4" />
                 ELSTER-XML Export
               </Button>
-              <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+              <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
                 <p className="font-semibold">Übermittlung an Finanzamt</p>
                 <p className="mt-1">Via ELSTER-Schnittstelle</p>
-              </div>
+              </Callout>
             </div>
           </CardContent>
         </Card>

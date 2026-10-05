@@ -13,6 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundError
+from app.core.business_time import business_today
 from app.core.uuid7 import uuid7
 from app.api.v1.schemas.personal_schemas import (
     HrmOperationsGateOut,
@@ -145,7 +146,7 @@ class PersonalService:
             text(
                 f"SELECT id, username, email, first_name, last_name, roles, is_active, preferences, created_at "
                 f"FROM domain_shared.users WHERE {' AND '.join(where)} "
-                f"ORDER BY last_name ASC, first_name ASC, username ASC"
+                f"ORDER BY last_name ASC, first_name ASC, username ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -224,7 +225,7 @@ class PersonalService:
             rows = self.db.execute(
                 text(
                     f"SELECT {self._TIME_ENTRY_COLS} FROM domain_hr.time_entries "
-                    f"WHERE {' AND '.join(where)} ORDER BY entry_date DESC, employee_ref ASC"
+                    f"WHERE {' AND '.join(where)} ORDER BY entry_date DESC, employee_ref ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             ).mappings().all()
@@ -237,7 +238,7 @@ class PersonalService:
         row = self.db.execute(
             text(
                 f"SELECT {self._TIME_ENTRY_COLS} FROM domain_hr.time_entries "
-                f"WHERE id = :id AND tenant_id = :tenant_id"
+                f"WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"id": entry_id, "tenant_id": self.tenant_id},
         ).mappings().first()
@@ -255,7 +256,7 @@ class PersonalService:
                 "entry_type, source, status, cost_center, work_area, notes, created_at, updated_at) "
                 "VALUES (:id, :tenant_id, :employee_ref, :entry_date, :start_time, :end_time, :hours, "
                 ":entry_type, :source, 'Draft', :cost_center, :work_area, :notes, NOW(), NOW()) "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {
                 "id": entry_id,
@@ -282,7 +283,7 @@ class PersonalService:
                 "SET status = 'Submitted', updated_at = NOW(), version = version + 1 "
                 "WHERE id = :entry_id AND tenant_id = :tenant_id "
                 "  AND status IN ('Draft', 'Rejected', 'Corrected') "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"entry_id": entry_id, "tenant_id": self.tenant_id},
         ).mappings().first()
@@ -299,7 +300,7 @@ class PersonalService:
                 "SET status = 'Approved', approved_by = :approved_by, "
                 "    approved_at = NOW(), updated_at = NOW(), version = version + 1 "
                 "WHERE id = :entry_id AND tenant_id = :tenant_id AND status = 'Submitted' "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"entry_id": entry_id, "tenant_id": self.tenant_id, "approved_by": approved_by},
         ).mappings().first()
@@ -328,7 +329,7 @@ class PersonalService:
                 "work_area = :work_area, correction_reason = :correction_reason, "
                 "notes = :notes, updated_at = NOW(), version = version + 1 "
                 "WHERE id = :entry_id AND tenant_id = :tenant_id "
-                f"RETURNING {self._TIME_ENTRY_COLS}"
+                f"RETURNING {self._TIME_ENTRY_COLS}"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {
                 "entry_id": entry_id,
@@ -372,7 +373,7 @@ class PersonalService:
                 text(
                     f"SELECT id, employee_ref, entry_date, entry_type, source, status, notes, audit_ref "
                     f"FROM domain_hr.time_entries WHERE {' AND '.join(where)} "
-                    f"ORDER BY entry_date ASC, employee_ref ASC"
+                    f"ORDER BY entry_date ASC, employee_ref ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             ).mappings().all()
@@ -423,7 +424,7 @@ class PersonalService:
             text(
                 f"SELECT id, status FROM domain_hr.time_entries "
                 f"WHERE id = :id AND tenant_id = :tenant_id "
-                f"AND entry_type IN ({', '.join(self._ABSENCE_ENTRY_TYPES)})"
+                f"AND entry_type IN ({', '.join(self._ABSENCE_ENTRY_TYPES)})"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"id": absence_id, "tenant_id": self.tenant_id},
         ).fetchone()
@@ -461,7 +462,7 @@ class PersonalService:
                     f"cost_center, payroll_group, qualifications, can_drive, driver_card_id, "
                     f"vehicle_refs, calendar_provider, status "
                     f"FROM domain_hr.employee_time_profiles WHERE {' AND '.join(where)} "
-                    f"ORDER BY location_code ASC, department ASC, display_name ASC"
+                    f"ORDER BY location_code ASC, department ASC, display_name ASC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             ).mappings().all()
@@ -618,7 +619,7 @@ class PersonalService:
             params["loc"] = location
             where.append("location_code = :loc")
         rows = self.db.execute(
-            text(f"SELECT id, shift_date, name, location_code, required_role, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT id, shift_date, name, location_code, required_role, "  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                  f"required_qualifications, required_headcount, starts_at, ends_at, "
                  f"assigned_employee_refs, status, conflicts, notes "
                  f"FROM domain_hr.shifts WHERE {' AND '.join(where)} "
@@ -695,7 +696,7 @@ class PersonalService:
             params["etype"] = event_type
             where.append("event_type = :etype")
         rows = self.db.execute(
-            text(f"SELECT id, source_system, provider, external_event_ref, event_type, title, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT id, source_system, provider, external_event_ref, event_type, title, "  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                  f"employee_ref, resource_ref, starts_at, ends_at, timezone, visibility, "
                  f"status, sync_state, conflict_level, source_ref, metadata "
                  f"FROM domain_hr.calendar_events WHERE {' AND '.join(where)} "
@@ -814,7 +815,7 @@ class PersonalService:
             params["eref"] = employee_ref
             where.append("employee_ref = :eref")
         rows = self.db.execute(
-            text(f"SELECT id, employee_ref, customer_ref, territory_code, campaign_code, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT id, employee_ref, customer_ref, territory_code, campaign_code, "  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                  f"visit_type, starts_at, ends_at, status, conflicts, notes "
                  f"FROM domain_hr.field_service_plans WHERE {' AND '.join(where)} "
                  f"ORDER BY starts_at ASC, employee_ref ASC"),
@@ -897,7 +898,7 @@ class PersonalService:
             where.append("entry_date <= :db")
             params["db"] = datum_bis
         rows = self.db.execute(
-            text(f"SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, "  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT id, entry_date, driver_name, vehicle_plate, tours, total_hours, "  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                  f"overtime_hours, created_at FROM domain_hr.driver_timesheets "
                  f"WHERE {' AND '.join(where)} ORDER BY entry_date DESC, created_at DESC"),
             params,
@@ -1835,9 +1836,9 @@ class PersonalService:
     @staticmethod
     def _add_years(date_text: str | None, years: int) -> str:
         try:
-            base = date.fromisoformat(str(date_text)) if date_text else datetime.utcnow().date()
+            base = date.fromisoformat(str(date_text)) if date_text else business_today()
         except ValueError:
-            base = datetime.utcnow().date()
+            base = business_today()
         try:
             return base.replace(year=base.year + years).isoformat()
         except ValueError:
@@ -1922,7 +1923,7 @@ class PersonalService:
             retention=EmployeeFileRetentionOut(
                 deletionConcept="Dokumentklasse bestimmt Mindestaufbewahrung; Zweckfortfall und Rechtsfristen blockieren automatische Loeschung.",
                 reviewCadence="jaehrlich und bei Austritt",
-                blockedDocumentCount=sum(1 for d in visible if d.retentionUntil >= datetime.utcnow().date().isoformat()),
+                blockedDocumentCount=sum(1 for d in visible if d.retentionUntil >= business_today().isoformat()),
                 nextReviewHint="HR prueft Retention, DMS-Referenz und Zweckbindung vor Loeschlauf.",
             ),
         )

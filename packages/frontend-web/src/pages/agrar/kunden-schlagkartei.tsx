@@ -31,10 +31,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   Map,
   Droplets,
-  ArrowLeft,
   Leaf,
   FileText,
   Users,
@@ -149,7 +149,7 @@ function LohndienstDialog({
           {schlaege.length > 0 && (
             <div>
               <Label>Schlag auswählen</Label>
-              <NativeSelect value={schlagId} onChange={(e) => {
+              <NativeSelect ariaLabel="Schlag auswählen" value={schlagId} onChange={(e) => {
                 setSchlagId(e.target.value)
                 const s = schlaege.find((x) => x.id === e.target.value)
                 if (s) {
@@ -168,7 +168,7 @@ function LohndienstDialog({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label>Fläche (ha)</Label>
               <Input
@@ -176,6 +176,7 @@ function LohndienstDialog({
                 step="0.1"
                 value={flaeche}
                 onChange={(e) => setFlaeche(e.target.value)}
+                className="min-h-touch"
               />
             </div>
             <div>
@@ -184,6 +185,7 @@ function LohndienstDialog({
                 type="date"
                 value={wunschDatum}
                 onChange={(e) => setWunschDatum(e.target.value)}
+                className="min-h-touch"
               />
             </div>
           </div>
@@ -191,7 +193,7 @@ function LohndienstDialog({
           {isSpritze && (
             <div>
               <Label>Kultur</Label>
-              <NativeSelect value={kultur} onChange={(e) => setKultur(e.target.value)}>
+              <NativeSelect ariaLabel="Kultur" value={kultur} onChange={(e) => setKultur(e.target.value)}>
                 {kulturen.map((k) => <option key={k} value={k}>{k}</option>)}
                 <option value="">— Sonstige —</option>
               </NativeSelect>
@@ -252,10 +254,17 @@ function LohndienstDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={onClose} disabled={mutation.isPending}>
             Abbrechen
           </Button>
-          <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+          <Button
+            className="min-h-touch touch-manipulation"
+            onClick={() => {
+              if (mutation.isPending) return
+              mutation.mutate()
+            }}
+            disabled={mutation.isPending}
+          >
             {mutation.isPending ? 'Wird angelegt...' : 'Auftrag anlegen'}
           </Button>
         </DialogFooter>
@@ -317,7 +326,7 @@ function AnkaufsangebotDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-amber-500" />
+            <Sparkles className="h-5 w-5 text-status-warning" />
             Ankaufsangebote erstellen
           </DialogTitle>
           <DialogDescription>
@@ -328,7 +337,7 @@ function AnkaufsangebotDialog({
 
         {result ? (
           <div className="py-4 text-center space-y-3">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
+            <CheckCircle2 className="h-12 w-12 text-status-success mx-auto" />
             <p className="font-semibold text-gray-900">
               {result.count} Empfehlung{result.count !== 1 ? 'en' : ''} erstellt
             </p>
@@ -342,7 +351,7 @@ function AnkaufsangebotDialog({
               <p className="text-sm font-medium text-gray-700">Angebaute Kulturen ({kulturen.length}):</p>
               <div className="flex flex-wrap gap-1">
                 {kulturen.map((k) => (
-                  <Badge key={k} variant="outline" className="bg-green-50 text-green-800">{k}</Badge>
+                  <Badge variant="success" key={k}>{k}</Badge>
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-1">
@@ -358,8 +367,8 @@ function AnkaufsangebotDialog({
                 })}
               </NativeSelect>
             </div>
-            <Alert className="border-amber-200 bg-amber-50">
-              <AlertDescription className="text-amber-800 text-sm">
+            <Alert variant="warning">
+              <AlertDescription className="text-status-warning text-sm">
                 Für jede Kultur wird ein Ankaufsangebot + Lohnspritz-Empfehlung generiert.
                 Bereits vorhandene Angebote werden nicht dupliziert.
               </AlertDescription>
@@ -393,6 +402,7 @@ function AnkaufsangebotDialog({
 
 export default function KundenSchlagkarteiPage() {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const kundenNr = DEMO_KUNDEN_NR
   const [massnahmeTypFilter, setMassnahmeTypFilter] = useState<string>('')
   const [dialog, setDialog] = useState<'lohn_spritz' | 'mahl_misch' | 'ankauf' | null>(null)
@@ -423,92 +433,91 @@ export default function KundenSchlagkarteiPage() {
   const kulturen = [...new Set(alleSchlaege.map((s) => s.kultur).filter(Boolean))]
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" />
+    <div className="mx-auto max-w-5xl space-y-6 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(-1)}>
+          Zurück
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Map className="h-6 w-6 text-green-600" />
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
+            <Map className="h-6 w-6 text-status-success" />
             Schlagkartei — Kunde {kundenNr}
           </h1>
-          <p className="text-gray-500 text-sm">Innendienst-Sicht: Auftragsvororbereitung Lohnspritz / Mahl+Misch</p>
+          <p className="text-sm text-muted-foreground">Lohnspritz, Mahl+Misch und Ankauf vorbereiten</p>
         </div>
       </div>
 
       {/* KPI-Leiste */}
-      <div className="grid grid-cols-3 gap-4">
+      {!isTouch ? (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-green-700">{schlaege?.count ?? '—'}</div>
-            <div className="text-sm text-gray-500">Schläge</div>
+            <div className="text-3xl font-bold text-status-success">{schlaege?.count ?? '—'}</div>
+            <div className="text-sm text-muted-foreground">Schläge</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-blue-700">{gesamtFlaeche.toFixed(1)} ha</div>
-            <div className="text-sm text-gray-500">Gesamtfläche</div>
+            <div className="text-3xl font-bold">{gesamtFlaeche.toFixed(1)} ha</div>
+            <div className="text-sm text-muted-foreground">Gesamtfläche</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-amber-700">{kulturen.length}</div>
-            <div className="text-sm text-gray-500">Kulturen</div>
+            <div className="text-3xl font-bold text-status-warning">{kulturen.length}</div>
+            <div className="text-sm text-muted-foreground">Kulturen</div>
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       {kulturen.length > 0 && (
         <div className="flex gap-2 flex-wrap">
-          <span className="text-sm text-gray-500 self-center">Angebaute Kulturen:</span>
+          <span className="self-center text-sm text-muted-foreground">Angebaute Kulturen:</span>
           {kulturen.map((k) => (
-            <Badge key={k} variant="outline" className="bg-green-50">{k}</Badge>
+            <Badge variant="success" key={k}>{k}</Badge>
           ))}
         </div>
       )}
 
       {/* Lohndienst-Schnellaktionen — jetzt verdrahtet */}
-      <Card className="border-amber-200 bg-amber-50">
+      <Card className="border-status-warning/40 bg-status-warning/10">
         <CardContent className="pt-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Users className="h-5 w-5 text-amber-600" />
-            <span className="font-medium text-amber-900">Auftrag direkt aus Schlagkartei anlegen</span>
+          <div className="mb-3 flex items-center gap-2">
+            <Users className="h-5 w-5 text-status-warning" />
+            <span className="font-medium text-status-warning">Auftrag direkt aus der Schlagkartei anlegen</span>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex flex-wrap gap-2">
             <Button
-              size="sm"
               variant="outline"
-              className="bg-white"
+              className="min-h-touch touch-manipulation"
               disabled={alleSchlaege.length === 0}
               onClick={() => setDialog('lohn_spritz')}
             >
-              <Droplets className="h-4 w-4 mr-1" />
+              <Droplets className="mr-1 h-4 w-4" />
               Lohnspritz-Auftrag anlegen
             </Button>
             <Button
-              size="sm"
               variant="outline"
-              className="bg-white"
+              className="min-h-touch touch-manipulation"
               disabled={alleSchlaege.length === 0}
               onClick={() => setDialog('mahl_misch')}
             >
-              <Leaf className="h-4 w-4 mr-1" />
+              <Leaf className="mr-1 h-4 w-4" />
               Mahl+Misch-Termin anfragen
             </Button>
             <Button
-              size="sm"
               variant="outline"
-              className="bg-white"
+              className="min-h-touch touch-manipulation"
               disabled={kulturen.length === 0}
               onClick={() => setDialog('ankauf')}
             >
-              <FileText className="h-4 w-4 mr-1" />
+              <FileText className="mr-1 h-4 w-4" />
               Ankaufsangebot erstellen
             </Button>
           </div>
           {alleSchlaege.length === 0 && !loadingS && (
-            <p className="text-xs text-amber-700 mt-2">
+            <p className="text-xs text-status-warning mt-2">
               Buttons aktiv sobald Schläge geladen sind.
             </p>
           )}
@@ -517,9 +526,9 @@ export default function KundenSchlagkarteiPage() {
 
       {/* Tabs: Schläge / Maßnahmen */}
       <Tabs defaultValue="schlaege">
-        <TabsList>
-          <TabsTrigger value="schlaege">Schläge ({schlaege?.count ?? 0})</TabsTrigger>
-          <TabsTrigger value="massnahmen">Maßnahmen ({massnahmen?.count ?? 0})</TabsTrigger>
+        <TabsList className="h-auto min-h-11 w-full flex-wrap justify-start">
+          <TabsTrigger value="schlaege" className="min-h-11">Schläge ({schlaege?.count ?? 0})</TabsTrigger>
+          <TabsTrigger value="massnahmen" className="min-h-11">Maßnahmen ({massnahmen?.count ?? 0})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="schlaege" className="mt-4">
@@ -530,33 +539,31 @@ export default function KundenSchlagkarteiPage() {
           ) : (
             <div className="rounded-lg border overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50">
+                <thead className="bg-muted">
                   <tr>
                     {['Name', 'Fläche (ha)', 'Kultur', 'Vorkultur', 'Gemeinde', 'Status', ''].map((h) => (
-                      <th key={h} className="text-left px-3 py-2 font-medium text-gray-600">{h}</th>
+                      <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {alleSchlaege.map((s) => (
-                    <tr key={s.id} className="border-t hover:bg-gray-50">
+                    <tr key={s.id} className="border-t">
                       <td className="px-3 py-2 font-medium">{s.name}</td>
                       <td className="px-3 py-2">{s.flaeche?.toFixed(2)}</td>
                       <td className="px-3 py-2">{s.kultur}</td>
-                      <td className="px-3 py-2 text-gray-500">{s.vorkultur ?? '—'}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{s.vorkultur ?? '—'}</td>
                       <td className="px-3 py-2">{s.gemeinde}</td>
                       <td className="px-3 py-2">
                         <Badge variant="outline">{s.status}</Badge>
                       </td>
                       <td className="px-3 py-2">
                         <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-xs text-blue-600 hover:text-blue-800 h-7"
+                          variant="outline"
+                          className="min-h-touch touch-manipulation"
                           onClick={() => setDialog('lohn_spritz')}
                         >
-                          <Droplets className="h-3 w-3 mr-1" />
-                          Spritz
+                          Lohnspritz
                         </Button>
                       </td>
                     </tr>
@@ -570,27 +577,27 @@ export default function KundenSchlagkarteiPage() {
         <TabsContent value="massnahmen" className="mt-4">
           {loadingM ? (
             <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14" />)}</div>
-          ) : massnahmen?.massnahmen.length === 0 ? (
+          ) : (massnahmen?.massnahmen ?? []).length === 0 ? (
             <Alert><AlertDescription>Keine Maßnahmen für diesen Kunden erfasst.</AlertDescription></Alert>
           ) : (
             <div className="rounded-lg border overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50">
+                <thead className="bg-muted">
                   <tr>
                     {['Datum', 'Typ', 'Schlag', 'Mittel', 'Menge', 'Bemerkung'].map((h) => (
-                      <th key={h} className="text-left px-3 py-2 font-medium text-gray-600">{h}</th>
+                      <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {massnahmen?.massnahmen.map((m) => (
-                    <tr key={m.id} className="border-t hover:bg-gray-50">
+                  {(massnahmen?.massnahmen ?? []).map((m) => (
+                    <tr key={m.id} className="border-t">
                       <td className="px-3 py-2">{m.datum}</td>
                       <td className="px-3 py-2"><Badge variant="outline">{m.typ}</Badge></td>
                       <td className="px-3 py-2">{m.schlag_name}</td>
                       <td className="px-3 py-2">{m.mittel ?? '—'}</td>
                       <td className="px-3 py-2">{m.menge ? `${m.menge} ${m.einheit ?? ''}` : '—'}</td>
-                      <td className="px-3 py-2 text-gray-500">{m.bemerkung ?? '—'}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{m.bemerkung ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>

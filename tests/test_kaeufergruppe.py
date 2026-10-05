@@ -1,9 +1,13 @@
 """Unit-Tests für Käufergruppen-Logik + realistisch gewinnbare Bedarfslücke."""
 
 import pytest
+from fastapi.testclient import TestClient
 
+from app.api.v1.endpoints import kaeufergruppe as kaeufer_endpoint
+from main import app
 from app.services.kaeufergruppe import (
     BuyingGroup,
+    Klassifikation,
     Verhaltenssignale,
     bewerte_luecke,
     grenzaufwand_faktor,
@@ -14,6 +18,131 @@ from app.services.kaeufergruppe import (
 )
 
 pytestmark = pytest.mark.unit
+
+_client = TestClient(app, raise_server_exceptions=False)
+_HEADERS = {
+    "Authorization": "Bearer dev-token",
+    "X-Tenant-ID": "00000000-0000-0000-0000-000000000001",
+}
+
+
+class _Result:
+    def __init__(self, *, row=None, scalar_value=None):
+        self._row = row
+        self._scalar = scalar_value
+
+    def mappings(self):
+        return self
+
+    def first(self):
+        return self._row
+
+    def scalar(self):
+        return self._scalar
+
+
+class _KaeuferDb:
+    def __init__(self, *, has_profile: bool = True):
+        self.profile = self._profile() if has_profile else None
+        self.statements: list[tuple[str, dict]] = []
+        self.commits = 0
+
+    @staticmethod
+    def _profile(group: str = "unbekannt") -> dict:
+        return {
+            "kunden_nr": "K-001",
+            "tenant_id": "tenant-a",
+            "buying_group": group,
+            "buying_group_confidence": 0.4,
+            "buying_group_reason": "Testprofil",
+            "buying_group_source": "rule_based",
+            "target_share_override": None,
+            "offer_win_rate_12m": 0.2,
+            "average_discount_rate": 0.01,
+            "multi_supplier_prob": 0.65,
+            "season_concentration": 0.1,
+            "loyalty_score": 0.5,
+            "churn_risk_score": 0.2,
+        }
+
+    def execute(self, statement, params=None):
+        sql = str(statement)
+        params = params or {}
+        self.statements.append((sql, params))
+        if "SELECT * FROM public.kunden_kaeufer_profil" in sql:
+            return _Result(row=self.profile)
+        if "SELECT buying_group FROM public.kunden_kaeufer_profil" in sql:
+            row = {"buying_group": self.profile["buying_group"]} if self.profile else None
+            scalar_value = self.profile["buying_group"] if self.profile else None
+            return _Result(row=row, scalar_value=scalar_value)
+        if "INSERT INTO public.kunden_kaeufer_profil" in sql:
+            self.profile = self._profile(params["g"])
+            self.profile["buying_group_confidence"] = params["conf"]
+            self.profile["buying_group_reason"] = params["reason"]
+            self.profile["buying_group_source"] = params["src"]
+            return _Result()
+        if "INSERT INTO public.kunden_kaeufer_audit" in sql:
+            return _Result()
+        if "UPDATE public.kunden_kaeufer_profil" in sql:
+            if self.profile:
+                self.profile["signal_source"] = params["s"]
+            return _Result()
+        if "UPDATE public.kunden_produktgruppen_bezug" in sql:
+            return _Result()
+        return _Result()
+
+    def commit(self):
+        self.commits += 1
+
+
+class _FakeBedarfsdeckungService:
+    cockpit_payload = {
+        "deckung_pct_gesamt": 20,
+        "bedarf_jahr_eur_gesamt": 100000,
+        "produktgruppen": [
+            {"key": "kraftfutter", "deckung_pct": 15, "bedarf_jahr_eur": 20000, "ist_12m_eur": 1000},
+            {"key": "mineral_spezial", "deckung_pct": 0, "bedarf_jahr_eur": 5000, "ist_12m_eur": 0},
+        ],
+    }
+
+    def __init__(self, db, tenant_id):
+        self.db = db
+        self.tenant_id = tenant_id
+
+    def cockpit(self, kunden_nr):
+        return self.cockpit_payload
+
+
+class _FakeKaeuferSignalService:
+    def __init__(self, db, tenant_id):
+        self.db = db
+        self.tenant_id = tenant_id
+
+    def aggregiere(self, kunden_nr, deckung_pct, bedarf_eur):
+        return Verhaltenssignale(deckung_gesamt_pct=deckung_pct, bedarf_gesamt_eur=bedarf_eur), "belege"
+
+    def aggregiere_gruppe(self, kunden_nr, deckung_pct, bedarf_eur, bezogen):
+        return Verhaltenssignale(deckung_gesamt_pct=deckung_pct, bedarf_gesamt_eur=bedarf_eur)
+
+
+@pytest.fixture
+def kaeufer_api(monkeypatch):
+    db = _KaeuferDb()
+    app.dependency_overrides[kaeufer_endpoint.get_db] = lambda: db
+    app.dependency_overrides[kaeufer_endpoint.get_tenant_id] = lambda: "tenant-a"
+    monkeypatch.setattr(kaeufer_endpoint, "BedarfsdeckungService", _FakeBedarfsdeckungService)
+    monkeypatch.setattr(kaeufer_endpoint, "KaeuferSignalService", _FakeKaeuferSignalService)
+    monkeypatch.setattr(
+        kaeufer_endpoint,
+        "klassifiziere_mit",
+        lambda _sig, prefer_ai=False: (
+            Klassifikation(BuyingGroup.BEZIEHUNGSKAEUFER, 0.72, "regelbasiert getestet"),
+            "rule_based",
+        ),
+    )
+    yield db
+    app.dependency_overrides.pop(kaeufer_endpoint.get_db, None)
+    app.dependency_overrides.pop(kaeufer_endpoint.get_tenant_id, None)
 
 
 # ── Zielanteil ────────────────────────────────────────────────────────────────
@@ -175,3 +304,98 @@ def test_signale_aus_werten_hohe_deckung_senkt_multi():
                            gruppen_bezogen=8, deckung_pct=90, bedarf_eur=100000)
     assert s.multi_lieferant_wahrsch < 0.4
     assert s.abschlussquote == 0.0  # keine Interaktionen
+
+
+def test_api_katalog_returns_all_groups():
+    resp = _client.get("/api/v1/crm/kaeufergruppe/katalog", headers=_HEADERS)
+    assert resp.status_code == 200
+    groups = {item["group"] for item in resp.json()}
+    assert BuyingGroup.BEZIEHUNGSKAEUFER.value in groups
+    assert BuyingGroup.UNBEKANNT.value in groups
+
+
+def test_api_get_profil_200(kaeufer_api):
+    kaeufer_api.profile = kaeufer_api._profile(BuyingGroup.RISIKO_STREUER.value)
+    resp = _client.get("/api/v1/crm/kaeufergruppe/K-001", headers=_HEADERS)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["buying_group"] == BuyingGroup.RISIKO_STREUER.value
+    assert body["label"]
+    assert body["ziel_anteil_korridor"][0] >= 0.3
+
+
+def test_api_get_profil_404(monkeypatch):
+    db = _KaeuferDb(has_profile=False)
+    app.dependency_overrides[kaeufer_endpoint.get_db] = lambda: db
+    app.dependency_overrides[kaeufer_endpoint.get_tenant_id] = lambda: "tenant-a"
+    try:
+        resp = _client.get("/api/v1/crm/kaeufergruppe/K-404", headers=_HEADERS)
+    finally:
+        app.dependency_overrides.pop(kaeufer_endpoint.get_db, None)
+        app.dependency_overrides.pop(kaeufer_endpoint.get_tenant_id, None)
+    assert resp.status_code == 404
+
+
+def test_api_setzen_updates_profile_and_writes_audit(kaeufer_api):
+    resp = _client.post(
+        "/api/v1/crm/kaeufergruppe/K-001/setzen",
+        headers=_HEADERS,
+        json={
+            "group": BuyingGroup.BEZIEHUNGSKAEUFER.value,
+            "source": "manual",
+            "bediener": "vertrieb",
+            "kommentar": "Korrektur nach Gespraech",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.json()["buying_group"] == BuyingGroup.BEZIEHUNGSKAEUFER.value
+    assert kaeufer_api.commits == 1
+    assert any("kunden_kaeufer_audit" in sql for sql, _params in kaeufer_api.statements)
+
+
+def test_api_setzen_rejects_unknown_group(kaeufer_api):
+    resp = _client.post(
+        "/api/v1/crm/kaeufergruppe/K-001/setzen",
+        headers=_HEADERS,
+        json={"group": "gibt-es-nicht"},
+    )
+    assert resp.status_code == 422
+
+
+def test_api_neu_klassifizieren_uses_services_and_commits(kaeufer_api):
+    resp = _client.post("/api/v1/crm/kaeufergruppe/K-001/neu-klassifizieren", headers=_HEADERS)
+    assert resp.status_code == 200
+    assert resp.json()["buying_group"] == BuyingGroup.BEZIEHUNGSKAEUFER.value
+    assert kaeufer_api.commits == 1
+    assert any("UPDATE public.kunden_kaeufer_profil" in sql for sql, _params in kaeufer_api.statements)
+
+
+def test_api_ki_klassifizieren_falls_back_to_rule_source(kaeufer_api):
+    resp = _client.post("/api/v1/crm/kaeufergruppe/K-001/ki-klassifizieren", headers=_HEADERS)
+    assert resp.status_code == 200
+    assert resp.json()["buying_group_source"] == "rule_based"
+
+
+def test_api_klassifizieren_404_when_no_bedarfsprofil(kaeufer_api):
+    _FakeBedarfsdeckungService.cockpit_payload = {}
+    try:
+        resp = _client.post("/api/v1/crm/kaeufergruppe/K-001/neu-klassifizieren", headers=_HEADERS)
+    finally:
+        _FakeBedarfsdeckungService.cockpit_payload = {
+            "deckung_pct_gesamt": 20,
+            "bedarf_jahr_eur_gesamt": 100000,
+            "produktgruppen": [
+                {"key": "kraftfutter", "deckung_pct": 15, "bedarf_jahr_eur": 20000, "ist_12m_eur": 1000},
+                {"key": "mineral_spezial", "deckung_pct": 0, "bedarf_jahr_eur": 5000, "ist_12m_eur": 0},
+            ],
+        }
+    assert resp.status_code == 404
+
+
+def test_api_produktgruppen_klassifizieren_updates_each_group(kaeufer_api):
+    resp = _client.post("/api/v1/crm/kaeufergruppe/K-001/produktgruppen-klassifizieren", headers=_HEADERS)
+    assert resp.status_code == 200
+    assert resp.json() == {"kunden_nr": "K-001", "klassifiziert": 2}
+    updates = [params for sql, params in kaeufer_api.statements if "UPDATE public.kunden_produktgruppen_bezug" in sql]
+    assert [params["pg"] for params in updates] == ["kraftfutter", "mineral_spezial"]
+    assert kaeufer_api.commits == 1

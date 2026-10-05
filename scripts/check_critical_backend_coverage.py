@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -27,7 +28,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     # Finance ergänzend (neu)
     "api/v1/endpoints/journal_entries.py": 0.25,    #  COV-RATCHET-002: +6pp (Ziel 30%)
     "api/v1/endpoints/open_items.py": 0.42,         #  COV-RATCHET-002: +3pp
-    "api/v1/endpoints/financial_reports.py": 0.5,  #  25.4% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/financial_reports.py": 0.70,  # SPEC-P0-05-BELEGE-70: ≥70% (lokal 95%)
 
     # ── Inventory / Warehouse (COV-INV-001/002) ───────────────────────────────
     "api/v1/endpoints/waage.py": 0.88,              #  91.1% measured  (COV-RATCHET-004: +3pp)
@@ -39,12 +40,6 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     # ── Feed production chain (FEED-CHAIN-004 / COV-RATCHET-FEED-001) ─────────
     "services/feed_inventory_link_service.py": 0.55,
     "api/v1/endpoints/produktion_mischfutter.py": 0.35,
-
-    # ── DOM-CON-004: Kontrakt Lifecycle / Fixing / Settlement ─────────────────
-    "services/kontrakt_lifecycle_service.py": 0.80,   #  83% measured
-    "services/kontrakt_fixing_service.py": 0.58,      #  61% measured
-    "services/kontrakt_settlement_service.py": 0.60,  #  63% measured
-    "api/v1/endpoints/kontrakt_actions.py": 0.58,     #  62% measured
 
     # ── DOM-FEED-PROD-004: Mischfutter-Produktion ─────────────────────────────
     "services/feed_produktion_lifecycle_service.py": 0.73, #  76% measured
@@ -101,13 +96,13 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/sanctions_compliance.py": 0.66,  #  69% measured — Sanktionsliste
     "api/v1/endpoints/webhook_system.py": 0.61,     #  64% measured — Webhook-System
     "api/v1/endpoints/erechnung_import.py": 0.78,   #  81% measured — E-Rechnung Import
-    "api/v1/endpoints/sales_invoice_einvoice.py": 0.42,  #  33% measured — XRechnung/ZUGFeRD Export
+    "api/v1/endpoints/sales_invoice_einvoice.py": 0.70,  # SPEC-P0-05-BELEGE-70: ≥70% (lokal 96%)
     "api/v1/endpoints/waagen_vorlagen.py": 0.50,    #  53% measured — Waagenvorlagen
-    "api/v1/endpoints/rohware_sammelabrechnung.py": 0.58,  #  35% measured — Sammelabrechnung
+    "api/v1/endpoints/rohware_sammelabrechnung.py": 0.70,  # SPEC-P0-05-BELEGE-70: ≥70% (lokal 90%)
 
     # ── COV-RATCHET-009 (2026-06-26): Welle-13-Endpoints ────────────────────
     "api/v1/endpoints/futtermittel_qs.py": 0.40,       # FEED-QS-001: HACCP/VLOG/QS-Pruefpunkte
-    "domains/agrar/api/psm_proplanta.py": 0.15,        # 15.8% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "domains/agrar/api/psm_proplanta.py": 0.60,        # 84% measured locally 2026-07-06 (A6-Restmodul, Import-Worker-Fix)
 
     # ── COV-RATCHET-008 (2026-06-26): Welle-9-Endpoints ─────────────────────
     "api/v1/endpoints/einkauf_lieferschein.py": 0.45,  # EINKAUF-LS-REPAIR-001: GET/POST/PATCH Lieferschein
@@ -116,7 +111,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/logistik_frachtbriefe.py": 0.60,  # LOG-FRACHTBRIEF-001: GET/POST/PATCH + Enum-Check
     "api/v1/endpoints/silo_target_cell.py": 0.50,       # WM-AGRI-MAP-001: Zielzellen-Vorschlag
     "api/v1/endpoints/policies.py": 0.40,               # RUNTIME-KAT-C-002: policy/list (success-Key-Fix)
-    "api/v1/endpoints/kaeufergruppe.py": 0.41,          # 41.5% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/kaeufergruppe.py": 0.60,          # 99% measured locally 2026-07-05 (A6-Restmodule)
     "api/v1/endpoints/messages.py": 0.35,               # RUNTIME-KAT-C-002: health dict[str,str]-Fix
 
     # ── MCP-ERP-TOOLS-001 (2026-06-25) ────────────────────────────────────────
@@ -145,13 +140,12 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
     # ── WM-SILO-RULE-ENGINE-001 (2026-06-25) ─────────────────────────────────
     "services/silo_rule_engine_service.py": 0.80,          #  ~82% estimated
-    "api/v1/endpoints/silo_target_cell.py": 0.50,          #  ~55% estimated
 
     # ── WM-SILO-RULE-UPGRADE-001 (2026-06-25) ────────────────────────────────
     "services/agri_lot_link_booking_service.py": 0.50,     #  ~52% estimated (Regelengine-Fallback)
 
     # ── HRM-ABWESENHEIT-ANTRAG-001 (2026-06-25) ──────────────────────────────
-    "api/v1/endpoints/hrm_abwesenheit.py": 0.43,           #  43.7% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/hrm_abwesenheit.py": 0.60,           #  98% measured locally 2026-07-05 (A6-Restmodule)
 
     # ── WF-COCKPIT-PERSIST-001 (2026-06-25) ──────────────────────────────────
     "services/wf_cockpit_persist_service.py": 0.70,        #  70.9% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
@@ -175,7 +169,7 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/portal_interessent.py": 0.50,
 
     # ── PORTAL-INNENDIENST-001 (2026-06-25) ──────────────────────────────────
-    "api/v1/endpoints/portal_innendienst.py": 0.30,        #  30.2% measured in CI 2026-06-27 (COV-RATCHET-010 baseline)
+    "api/v1/endpoints/portal_innendienst.py": 0.60,        # 100% measured locally 2026-07-05 (A6-Restmodule)
 
     # ── OPERATOR-AGENT Execute-Erweiterung + Externe Gates (2026-06-26) ───────
     "api/v1/endpoints/external_gates.py": 0.70,           # Gate-Dashboard Produktiv-API
@@ -184,10 +178,22 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
 
 
 def _normalise(filename: str) -> str:
-    return filename.replace("\\", "/").lstrip("./")
+    normalised = filename.replace("\\", "/").lstrip("./")
+    if normalised.startswith("app/"):
+        return normalised[len("app/"):]
+    return normalised
 
 
 def main() -> None:
+    from scripts.check_baseline_integrity import coverage_source
+
+    def validate_rates(values: dict, label: str) -> None:
+        for filename, rate in values.items():
+            if type(rate) not in {int, float} or not math.isfinite(rate) or not 0 <= rate <= 1:
+                raise SystemExit(f'{label}: ungueltiger Wert fuer {filename}; endliche Zahl 0..1 erforderlich')
+
+    validate_rates(CRITICAL_THRESHOLDS, 'CRITICAL_THRESHOLDS')
+
     if not COVERAGE_XML.exists():
         raise SystemExit("coverage.xml not found. Run pytest with coverage reporting first.")
 
@@ -197,18 +203,25 @@ def main() -> None:
     measured: dict[str, float] = {}
     for cls in root.findall(".//class"):
         filename = _normalise(cls.attrib.get("filename", ""))
-        line_rate = float(cls.attrib.get("line-rate", "0"))
+        try:
+            line_rate = float(cls.attrib.get("line-rate", "0"))
+        except (ValueError, TypeError) as exc:
+            raise SystemExit(f'Ungueltiger Coverage-Messwert: {filename}') from exc
+        validate_rates({filename: line_rate}, 'Coverage-Messung')
         measured[filename] = line_rate
 
     failures: list[str] = []
 
     # SPEC-P0-05 "only up": Schwellwerte duerfen gegenueber der committeten
-    # Baseline nie sinken; Pfade duerfen nicht entfernt werden. Beim Anheben
-    # eines Schwellwerts die Baseline mit anheben.
+    # Baseline nie sinken. Echte Modul-Loeschung wird separat gegen Git in
+    # check_baseline_integrity geprueft; lebende Pfade bleiben verbindlich.
     import json
     baseline_path = PROJECT_ROOT / "config" / "coverage_ratchet_baseline.json"
+    if not baseline_path.is_file():
+        raise SystemExit("Coverage-Ratchet-Baseline fehlt; Integritaet nicht nachweisbar.")
     if baseline_path.exists():
         baseline = json.loads(baseline_path.read_text(encoding="utf-8")).get("thresholds", {})
+        validate_rates(baseline, 'Coverage-Baseline')
         for filename, base_value in baseline.items():
             current = CRITICAL_THRESHOLDS.get(filename)
             if current is None:
@@ -221,13 +234,20 @@ def main() -> None:
                 )
         for filename, current in CRITICAL_THRESHOLDS.items():
             base_value = baseline.get(filename)
-            if base_value is not None and current > base_value:
-                print(
-                    f"HINWEIS: {filename} Schwellwert {current:.0%} > Baseline {base_value:.0%} — "
-                    "bitte config/coverage_ratchet_baseline.json mit anheben."
+            if base_value is None:
+                failures.append(f"{filename}: fehlt in der Coverage-Ratchet-Baseline")
+            elif current > base_value:
+                failures.append(
+                    f"{filename}: Schwellwert {current:.0%} > Baseline {base_value:.0%} — "
+                    "config/coverage_ratchet_baseline.json im selben Commit anheben."
                 )
 
     for filename, threshold in CRITICAL_THRESHOLDS.items():
+        try:
+            if not coverage_source(PROJECT_ROOT, filename).is_file():
+                failures.append(f'{filename}: kritisches Quellmodul fehlt; verwaiste Schwelle bereinigen')
+        except ValueError as exc:
+            failures.append(str(exc))
         actual = measured.get(filename)
         if actual is None:
             failures.append(f"{filename}: not present in coverage.xml")
@@ -244,4 +264,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    sys.path.insert(0, str(PROJECT_ROOT))
     main()

@@ -1,4 +1,17 @@
-"""Zentrale Kontrakte-Engine — thin-router, sqlalchemy.text()."""
+"""Zentrales Vertragsregister — thin-router, sqlalchemy.text().
+
+Haengt unter ``/api/v1/vertraege``. Bis zum 01.10.2026 lag es unter
+``/api/v1/contracts`` und teilte den Pfad mit dem Warenkontrakt: Die
+Compat-Route ``GET /contracts/{contract_id}`` (``compat.py`` ->
+``contracts_router``) ist zuerst eingebunden und verschluckte sowohl den
+Detailabruf dieses Registers als auch ``/contracts/expiring`` — die Liste, die
+einen auslaufenden Vertrag anzeigt, bevor er sich stillschweigend verlaengert.
+
+"Kontrakt" und "Vertrag" sind im Haus zwei Dinge: der Warenkontrakt des
+Landhandels und der Vertrag (Miete, Pacht, Dienstleistung). Sie bekommen
+deshalb zwei Pfade. Siehe
+``docs/quality-assurance/kontraktregister-20261001.md``.
+"""
 
 from __future__ import annotations
 
@@ -149,7 +162,7 @@ def _create_version(
             INSERT INTO domain_contracts.contract_versions
               (id, contract_id, version_number, changed_at, changed_by, change_summary, content_snapshot, tenant_id)
             VALUES
-              (:id, :cid, :ver, :now, :by, :summary, :snap::jsonb, :tid)
+              (:id, :cid, :ver, :now, :by, :summary, CAST(:snap AS jsonb), :tid)
             """
         ),
         {
@@ -180,7 +193,7 @@ def _next_version_number(db: Session, contract_id: str, tenant_id: str) -> int:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/contracts", response_model=list[ContractOut], summary="Contracts auflisten")
+@router.get("", response_model=list[ContractOut], summary="Vertraege auflisten")
 async def list_contracts(
     contract_type: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
@@ -206,7 +219,7 @@ async def list_contracts(
         rows = db.execute(
             text(
                 f"SELECT * FROM domain_contracts.contracts WHERE {where_sql} "
-                "ORDER BY created_at DESC OFFSET :skip LIMIT :limit"
+                "ORDER BY created_at DESC OFFSET :skip LIMIT :limit"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -215,7 +228,7 @@ async def list_contracts(
     return [_row_to_contract(dict(r)) for r in rows]
 
 
-@router.post("/contracts", response_model=ContractOut, status_code=status.HTTP_201_CREATED, summary="Contract anlegen")
+@router.post("", response_model=ContractOut, status_code=status.HTTP_201_CREATED, summary="Vertrag anlegen")
 async def create_contract(
     payload: ContractCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -255,7 +268,7 @@ async def create_contract(
     return _row_to_contract(_get_contract(db, cid, tenant_id))
 
 
-@router.get("/contracts/expiring", response_model=list[ContractOut], summary="Contracts expiring")
+@router.get("/expiring", response_model=list[ContractOut], summary="Auslaufende Vertraege")
 async def expiring_contracts(
     days_ahead: int = Query(90, ge=1, le=365),
     tenant_id: str = Depends(get_tenant_id),
@@ -281,213 +294,9 @@ async def expiring_contracts(
     return [_row_to_contract(dict(r)) for r in rows]
 
 
-@router.get("/contracts/{contract_id}", response_model=CentralContractsOut, summary="Contract abrufen")
-async def get_contract(
-    contract_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    row = _get_contract(db, contract_id, tenant_id)
-    try:
-        versions = db.execute(
-            text(
-                "SELECT id, version_number, changed_at, changed_by, change_summary "
-                "FROM domain_contracts.contract_versions "
-                "WHERE contract_id = :cid AND tenant_id = :tid ORDER BY version_number ASC"
-            ),
-            {"cid": contract_id, "tid": tenant_id},
-        ).mappings().all()
-        obligations = db.execute(
-            text(
-                "SELECT * FROM domain_contracts.contract_obligations "
-                "WHERE contract_id = :cid AND tenant_id = :tid ORDER BY due_date ASC"
-            ),
-            {"cid": contract_id, "tid": tenant_id},
-        ).mappings().all()
-    except Exception:
-        raise HTTPException(status_code=503, detail="Datenbankfehler")
-    return {
-        **_row_to_contract(row).model_dump(),
-        "versions": [dict(v) for v in versions],
-        "obligations": [dict(o) for o in obligations],
-    }
-
-
-@router.patch("/contracts/{contract_id}", response_model=ContractOut, summary="Contract aktualisieren")
-async def update_contract(
-    contract_id: str,
-    payload: ContractUpdate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    row = _get_contract(db, contract_id, tenant_id)
-    data = payload.model_dump(exclude_unset=True, exclude={"change_summary", "changed_by"})
-    if not data:
-        return _row_to_contract(row)
-    sets = ", ".join(f"{k} = :{k}" for k in data)
-    data["id"] = contract_id
-    data["tenant_id"] = tenant_id
-    try:
-        db.execute(
-            text(f"UPDATE domain_contracts.contracts SET {sets} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
-            data,
-        )
-        ver_no = _next_version_number(db, contract_id, tenant_id)
-        updated = _get_contract(db, contract_id, tenant_id)
-        _create_version(
-            db, contract_id, tenant_id, ver_no,
-            payload.changed_by, payload.change_summary or "Update",
-            {k: str(updated.get(k)) for k in data if k not in ("id", "tenant_id")},
-        )
-        db.commit()
-    except HTTPException:
-        raise
-    except Exception:
-        db.rollback()
-        raise HTTPException(status_code=503, detail="Datenbankfehler")
-    return _row_to_contract(_get_contract(db, contract_id, tenant_id))
-
-
-@router.post("/contracts/{contract_id}/obligations", response_model=ObligationOut, status_code=status.HTTP_201_CREATED, summary="Obligation hinzufügen")
-async def add_obligation(
-    contract_id: str,
-    payload: ObligationCreate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    _get_contract(db, contract_id, tenant_id)
-    oid = str(uuid4())
-    now = datetime.now(timezone.utc)
-    initial_status = "OFFEN"
-    if payload.due_date < now:
-        initial_status = "UEBERFAELLIG"
-    try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_contracts.contract_obligations
-                  (id, contract_id, obligation_type, due_date, description, status, tenant_id, created_at)
-                VALUES
-                  (:id, :cid, :otype, :due, :desc, :status, :tid, :now)
-                """
-            ),
-            {
-                "id": oid, "cid": contract_id, "otype": payload.obligation_type,
-                "due": payload.due_date, "desc": payload.description,
-                "status": initial_status, "tid": tenant_id, "now": now,
-            },
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise HTTPException(status_code=503, detail="Datenbankfehler")
-    return ObligationOut(
-        id=oid, contract_id=contract_id,
-        obligation_type=payload.obligation_type,
-        due_date=payload.due_date,
-        description=payload.description,
-        status=initial_status,
-        tenant_id=tenant_id,
-    )
-
-
-@router.get("/contracts/{contract_id}/obligations", response_model=list[ObligationOut], summary="Obligations auflisten")
-async def list_obligations(
-    contract_id: str,
-    status_filter: Optional[str] = Query(None, alias="status"),
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    _get_contract(db, contract_id, tenant_id)
-    where = ["contract_id = :cid", "tenant_id = :tid"]
-    params: dict = {"cid": contract_id, "tid": tenant_id}
-    if status_filter:
-        where.append("status = :status")
-        params["status"] = status_filter
-    where_sql = " AND ".join(where)
-    try:
-        rows = db.execute(
-            text(f"SELECT * FROM domain_contracts.contract_obligations WHERE {where_sql} ORDER BY due_date ASC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
-            params,
-        ).mappings().all()
-    except Exception:
-        raise HTTPException(status_code=503, detail="Datenbankfehler")
-    return [
-        ObligationOut(
-            id=str(r["id"]), contract_id=str(r["contract_id"]),
-            obligation_type=str(r["obligation_type"]), due_date=r["due_date"],
-            description=str(r["description"]), status=str(r["status"]),
-            tenant_id=str(r["tenant_id"]),
-        )
-        for r in rows
-    ]
-
-
-@router.patch("/contracts/{contract_id}/obligations/{obligation_id}", response_model=ObligationOut, summary="Obligation status aktualisieren")
-async def update_obligation_status(
-    contract_id: str,
-    obligation_id: str,
-    payload: ObligationUpdate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    _get_contract(db, contract_id, tenant_id)
-    try:
-        db.execute(
-            text(
-                "UPDATE domain_contracts.contract_obligations SET status = :status "
-                "WHERE id = :oid AND contract_id = :cid AND tenant_id = :tid"
-            ),
-            {"status": payload.status, "oid": obligation_id, "cid": contract_id, "tid": tenant_id},
-        )
-        db.commit()
-        row = db.execute(
-            text(
-                "SELECT * FROM domain_contracts.contract_obligations WHERE id = :oid AND tenant_id = :tid"
-            ),
-            {"oid": obligation_id, "tid": tenant_id},
-        ).mappings().first()
-    except Exception:
-        db.rollback()
-        raise HTTPException(status_code=503, detail="Datenbankfehler")
-    if not row:
-        raise HTTPException(status_code=404, detail="Verpflichtung nicht gefunden")
-    r = dict(row)
-    return ObligationOut(
-        id=str(r["id"]), contract_id=str(r["contract_id"]),
-        obligation_type=str(r["obligation_type"]), due_date=r["due_date"],
-        description=str(r["description"]), status=str(r["status"]),
-        tenant_id=str(r["tenant_id"]),
-    )
-
-
-@router.post("/contracts/{contract_id}/renew", response_model=ContractOut, summary="Contract renew")
-async def renew_contract(
-    contract_id: str,
-    payload: RenewBody,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    row = _get_contract(db, contract_id, tenant_id)
-    try:
-        db.execute(
-            text(
-                "UPDATE domain_contracts.contracts SET end_date = :end_date, status = 'AKTIV' "
-                "WHERE id = :id AND tenant_id = :tid"
-            ),
-            {"end_date": payload.new_end_date, "id": contract_id, "tid": tenant_id},
-        )
-        ver_no = _next_version_number(db, contract_id, tenant_id)
-        _create_version(db, contract_id, tenant_id, ver_no, "system", "Verlängerung",
-                        {"end_date": str(payload.new_end_date), "status": "AKTIV"})
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise HTTPException(status_code=503, detail="Datenbankfehler")
-    return _row_to_contract(_get_contract(db, contract_id, tenant_id))
-
-
-@router.get("/analytics", response_model=CentralContractsOut, summary="Analytics contract")
+# Vor der Detailroute: ``/analytics`` ist ein Segment und wuerde von
+# ``/{contract_id}`` verschluckt. FastAPI entscheidet nach Deklarationsreihenfolge.
+@router.get("/analytics", response_model=CentralContractsOut, summary="Vertragsauswertung")
 async def contract_analytics(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -545,3 +354,209 @@ async def contract_analytics(
         "expiring_30days": int(expiring_30),
         "obligations_overdue": int(overdue),
     }
+
+
+@router.get("/{contract_id}", response_model=CentralContractsOut, summary="Vertrag abrufen")
+async def get_contract(
+    contract_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = _get_contract(db, contract_id, tenant_id)
+    try:
+        versions = db.execute(
+            text(
+                "SELECT id, version_number, changed_at, changed_by, change_summary "
+                "FROM domain_contracts.contract_versions "
+                "WHERE contract_id = :cid AND tenant_id = :tid ORDER BY version_number ASC"
+            ),
+            {"cid": contract_id, "tid": tenant_id},
+        ).mappings().all()
+        obligations = db.execute(
+            text(
+                "SELECT * FROM domain_contracts.contract_obligations "
+                "WHERE contract_id = :cid AND tenant_id = :tid ORDER BY due_date ASC"
+            ),
+            {"cid": contract_id, "tid": tenant_id},
+        ).mappings().all()
+    except Exception:
+        raise HTTPException(status_code=503, detail="Datenbankfehler")
+    return {
+        **_row_to_contract(row).model_dump(),
+        "versions": [dict(v) for v in versions],
+        "obligations": [dict(o) for o in obligations],
+    }
+
+
+@router.patch("/{contract_id}", response_model=ContractOut, summary="Vertrag aktualisieren")
+async def update_contract(
+    contract_id: str,
+    payload: ContractUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = _get_contract(db, contract_id, tenant_id)
+    data = payload.model_dump(exclude_unset=True, exclude={"change_summary", "changed_by"})
+    if not data:
+        return _row_to_contract(row)
+    sets = ", ".join(f"{k} = :{k}" for k in data)
+    data["id"] = contract_id
+    data["tenant_id"] = tenant_id
+    try:
+        db.execute(
+            text(f"UPDATE domain_contracts.contracts SET {sets} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
+            data,
+        )
+        ver_no = _next_version_number(db, contract_id, tenant_id)
+        updated = _get_contract(db, contract_id, tenant_id)
+        _create_version(
+            db, contract_id, tenant_id, ver_no,
+            payload.changed_by, payload.change_summary or "Update",
+            {k: str(updated.get(k)) for k in data if k not in ("id", "tenant_id")},
+        )
+        db.commit()
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbankfehler")
+    return _row_to_contract(_get_contract(db, contract_id, tenant_id))
+
+
+@router.post("/{contract_id}/obligations", response_model=ObligationOut, status_code=status.HTTP_201_CREATED, summary="Pflicht hinzufügen")
+async def add_obligation(
+    contract_id: str,
+    payload: ObligationCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    _get_contract(db, contract_id, tenant_id)
+    oid = str(uuid4())
+    now = datetime.now(timezone.utc)
+    initial_status = "OFFEN"
+    if payload.due_date < now:
+        initial_status = "UEBERFAELLIG"
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_contracts.contract_obligations
+                  (id, contract_id, obligation_type, due_date, description, status, tenant_id, created_at)
+                VALUES
+                  (:id, :cid, :otype, :due, :desc, :status, :tid, :now)
+                """
+            ),
+            {
+                "id": oid, "cid": contract_id, "otype": payload.obligation_type,
+                "due": payload.due_date, "desc": payload.description,
+                "status": initial_status, "tid": tenant_id, "now": now,
+            },
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbankfehler")
+    return ObligationOut(
+        id=oid, contract_id=contract_id,
+        obligation_type=payload.obligation_type,
+        due_date=payload.due_date,
+        description=payload.description,
+        status=initial_status,
+        tenant_id=tenant_id,
+    )
+
+
+@router.get("/{contract_id}/obligations", response_model=list[ObligationOut], summary="Pflichten auflisten")
+async def list_obligations(
+    contract_id: str,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    _get_contract(db, contract_id, tenant_id)
+    where = ["contract_id = :cid", "tenant_id = :tid"]
+    params: dict = {"cid": contract_id, "tid": tenant_id}
+    if status_filter:
+        where.append("status = :status")
+        params["status"] = status_filter
+    where_sql = " AND ".join(where)
+    try:
+        rows = db.execute(
+            text(f"SELECT * FROM domain_contracts.contract_obligations WHERE {where_sql} ORDER BY due_date ASC"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
+            params,
+        ).mappings().all()
+    except Exception:
+        raise HTTPException(status_code=503, detail="Datenbankfehler")
+    return [
+        ObligationOut(
+            id=str(r["id"]), contract_id=str(r["contract_id"]),
+            obligation_type=str(r["obligation_type"]), due_date=r["due_date"],
+            description=str(r["description"]), status=str(r["status"]),
+            tenant_id=str(r["tenant_id"]),
+        )
+        for r in rows
+    ]
+
+
+@router.patch("/{contract_id}/obligations/{obligation_id}", response_model=ObligationOut, summary="Pflicht-Status aktualisieren")
+async def update_obligation_status(
+    contract_id: str,
+    obligation_id: str,
+    payload: ObligationUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    _get_contract(db, contract_id, tenant_id)
+    try:
+        db.execute(
+            text(
+                "UPDATE domain_contracts.contract_obligations SET status = :status "
+                "WHERE id = :oid AND contract_id = :cid AND tenant_id = :tid"
+            ),
+            {"status": payload.status, "oid": obligation_id, "cid": contract_id, "tid": tenant_id},
+        )
+        db.commit()
+        row = db.execute(
+            text(
+                "SELECT * FROM domain_contracts.contract_obligations WHERE id = :oid AND tenant_id = :tid"
+            ),
+            {"oid": obligation_id, "tid": tenant_id},
+        ).mappings().first()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbankfehler")
+    if not row:
+        raise HTTPException(status_code=404, detail="Verpflichtung nicht gefunden")
+    r = dict(row)
+    return ObligationOut(
+        id=str(r["id"]), contract_id=str(r["contract_id"]),
+        obligation_type=str(r["obligation_type"]), due_date=r["due_date"],
+        description=str(r["description"]), status=str(r["status"]),
+        tenant_id=str(r["tenant_id"]),
+    )
+
+
+@router.post("/{contract_id}/renew", response_model=ContractOut, summary="Vertrag verlaengern")
+async def renew_contract(
+    contract_id: str,
+    payload: RenewBody,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = _get_contract(db, contract_id, tenant_id)
+    try:
+        db.execute(
+            text(
+                "UPDATE domain_contracts.contracts SET end_date = :end_date, status = 'AKTIV' "
+                "WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"end_date": payload.new_end_date, "id": contract_id, "tid": tenant_id},
+        )
+        ver_no = _next_version_number(db, contract_id, tenant_id)
+        _create_version(db, contract_id, tenant_id, ver_no, "system", "Verlängerung",
+                        {"end_date": str(payload.new_end_date), "status": "AKTIV"})
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbankfehler")
+    return _row_to_contract(_get_contract(db, contract_id, tenant_id))

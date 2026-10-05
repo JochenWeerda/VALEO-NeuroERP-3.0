@@ -358,7 +358,10 @@ class CampaignEvent(Base):
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, index=True)
     
     # Metadata
-    metadata: Mapped[dict | None] = mapped_column(JSONB)  # IP, User-Agent, Link-URL, etc.
+    # Attributname weicht ab: "metadata" ist auf der Declarative-Basisklasse belegt und
+    # laesst das Modul beim Import scheitern. Der DB-Spaltenname bleibt "metadata"
+    # (siehe alembic/versions/002_add_campaign_schema.py), daher keine Migration.
+    event_metadata: Mapped[dict | None] = mapped_column("metadata", JSONB)  # IP, User-Agent, Link-URL, etc.
     
     # Relationships
     campaign: Mapped["Campaign"] = relationship("Campaign", back_populates="events")

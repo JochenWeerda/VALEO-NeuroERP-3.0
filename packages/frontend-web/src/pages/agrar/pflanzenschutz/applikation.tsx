@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
 import { useSchlaege, usePSM } from '@/lib/api/agrar'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -144,7 +145,7 @@ export default function PflanzenschutzApplikationPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Applikation bereit</h3>
             <dl className="grid gap-3">
@@ -170,13 +171,13 @@ export default function PflanzenschutzApplikationPage(): JSX.Element {
               </div>
               <div className="flex justify-between pt-2">
                 <dt className="font-bold">Gesamtmenge</dt>
-                <dd className="font-bold text-green-600">{applikation.gesamtmenge.toFixed(1)} l</dd>
+                <dd className="font-bold text-status-success">{applikation.gesamtmenge.toFixed(1)} l</dd>
               </div>
             </dl>
-            <div className="mt-6 rounded-lg bg-orange-50 p-4 text-center text-sm text-orange-900">
+            <Callout variant="warning" className="mt-6 rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">⚠️ Wartezeit beachten!</p>
               <p className="mt-1">Dokumentation gemäß Pflanzenschutzgesetz</p>
-            </div>
+            </Callout>
           </CardContent>
         </Card>
       ),

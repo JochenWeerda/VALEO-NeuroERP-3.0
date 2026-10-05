@@ -84,7 +84,7 @@ export function InlineArticleLookup({ value, onPick }: InlineArticleLookupProps)
           placeholder="Artikel suchen..."
         />
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+      <PopoverContent className="w-(--radix-popover-trigger-width) p-0">
         <Command>
           <CommandInput placeholder="Suchen..." value={query} onValueChange={setQuery} />
           <CommandList>

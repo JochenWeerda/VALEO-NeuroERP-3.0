@@ -11,9 +11,14 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.crm_bundle_schemas import (
+    MarketingPrefOut,
+    MarketingPrefSetOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_contact_ext_service import CrmContactExtService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -29,7 +34,7 @@ class StatusOut(BaseModel):
     status: str = "success"
 
 
-@router.get("/contacts/{contact_id}/marketing-prefs", response_model=dict[str, Any], summary="Werbe-/Marketingpräferenzen")
+@router.get("/contacts/{contact_id}/marketing-prefs", response_model=list[MarketingPrefOut], summary="Werbe-/Marketingpräferenzen")
 def list_marketing(
     contact_id: str,
     db: Session = Depends(get_db),
@@ -38,7 +43,7 @@ def list_marketing(
     return CrmContactExtService(db, tenant_id).list_marketing(contact_id)
 
 
-@router.put("/contacts/{contact_id}/marketing-prefs", response_model=dict[str, Any], summary="Werbepräferenz setzen")
+@router.put("/contacts/{contact_id}/marketing-prefs", response_model=MarketingPrefSetOut, summary="Werbepräferenz setzen")
 def set_marketing(
     contact_id: str,
     body: MarketingPrefIn,
@@ -51,7 +56,7 @@ def set_marketing(
     )
 
 
-@router.post("/contacts/{contact_id}/pseudonymize", response_model=dict[str, Any], summary="Ansprechpartner DSGVO-pseudonymisieren")
+@router.post("/contacts/{contact_id}/pseudonymize", response_model=TypedObjectOut, summary="Ansprechpartner DSGVO-pseudonymisieren")
 def pseudonymize(
     contact_id: str,
     db: Session = Depends(get_db),

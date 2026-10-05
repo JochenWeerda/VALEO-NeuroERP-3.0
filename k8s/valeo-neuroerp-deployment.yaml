@@ -33,6 +33,14 @@ spec:
         valeo.io/architecture: "cost-effective-domain-driven"
     spec:
       serviceAccountName: valeo-neuroerp
+      # KSV-0118: ohne Pod-Ebene gilt fuer jeden weiteren Container wieder
+      # der Standardkontext mit Root-Rechten.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: neuroerp-api
         image: valeo/neuroerp-3.0:latest
@@ -102,6 +110,28 @@ spec:
           mountPath: /app/logs
       - name: valeo-domains
         image: valeo/neuroerp-domains:latest
+        # KSV-0014: Der Dienst haelt keinen Zustand ausserhalb von /tmp.
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: domains-tmp
+          mountPath: /tmp
+      # Diese Sektion fehlte bisher vollstaendig, obwohl oben drei Mounts
+      # darauf verweisen — in dieser Form haette der Pod nicht starten koennen
+      # ("volume not found"). shared-config zeigt auf die einzige ConfigMap
+      # dieses Manifests; bitte gegenpruefen, falls eine andere gemeint war.
+      volumes:
+      - name: shared-config
+        configMap:
+          name: valeo-neuroerp-config
+      - name: logs-volume
+        emptyDir: {}
+      - name: domains-tmp
+        emptyDir: {}
         ports:
         - containerPort: 3010
           name: crm-api

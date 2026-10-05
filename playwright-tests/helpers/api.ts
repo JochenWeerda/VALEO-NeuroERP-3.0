@@ -204,7 +204,14 @@ export async function loginToPage(
   }, token);
 
   await page.goto(`${root}/`, { waitUntil: 'domcontentloaded' });
-  await page.waitForLoadState('networkidle').catch(() => undefined);
+  // networkidle tritt bei offenen SSE-/Polling-Verbindungen der Universal-Masken nie
+  // ein (E2E-SMOKE-REPAIR-001). Best-effort auf die App-Shell warten — nicht kritisch,
+  // da die Specs ihre Zielelemente anschliessend deterministisch selbst abwarten.
+  await page
+    .locator('h1, h2, main, [role="main"]')
+    .first()
+    .waitFor({ state: 'visible', timeout: 15000 })
+    .catch(() => undefined);
 }
 
 /**

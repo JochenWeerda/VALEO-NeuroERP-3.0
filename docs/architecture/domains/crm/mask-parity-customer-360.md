@@ -4,8 +4,8 @@ type: reference
 audience: [agent, entwickler, fachlich]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-29
-version: 1.1.0
+last_reviewed: 2026-08-19
+version: 1.2.0
 description: Paritaetsmatrix Legacy-Kundenmaske vs. Universal Mask Generator (CRM 360 Pilot); Native-Runtime siehe UIX-034.
 ---
 
@@ -22,22 +22,33 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 |---|---|---|---|---|---|
 | Stammdaten (`masterdata`) | `masterdata` | Stammdaten-Felder | `GET /api/v1/crm/customers/{id}` | compiled | ok |
 | Adresse & Kommunikation (`address`) | `address` | Adress-/Kommunikationsfelder | `GET /api/v1/crm/customers/{id}` | compiled | ok |
-| System (`system`) | `system` | Metadaten, Sperren, Notizen | `GET /api/v1/crm/customers/{id}` | compiled | partial |
-| Steuern (`tax`) | `tax` | Steuerkennzeichen | `GET /api/v1/crm/customers/{id}` | compiled | partial |
-| Qualitaet / Compliance (`quality_compliance`) | `quality_compliance` | Farm-IDs, DSGVO | `GET /api/v1/crm/customers/{id}` | compiled | partial |
-| Finanzen (`finance`) | `finance` | Felder + Offene Posten (Liste) | Summary + `GET .../tabs/dokumente` | lazy table | partial |
-| Bank (`bank`) | `bank` | Bankverbindungen | `GET /api/v1/crm/customers/{id}` | partial |
-| Marketing (`marketing`) | `marketing` | Profile, Verteiler | `GET /api/v1/crm/customers/{id}` | partial |
-| Genossenschaft (`cooperative`) | `cooperative` | Anteile, Betriebsgruppen | `GET /api/v1/crm/customers/{id}` | partial |
-| Ausgabe (`output`) | `output` | Belegversand | `GET /api/v1/crm/customers/{id}` | partial |
-| Schnittstellen (`interfaces`) | `interfaces` | Integrationen | `GET /api/v1/crm/customers/{id}` | partial |
-| Potenzial (`potential`) | `potential` | GAP/Potenzial (Feature-Flag) | `GET /api/v1/crm/customers/{id}` | partial |
-| Ansprechpartner (`contacts`) | `contacts` | Felder + Kontaktliste | `GET .../tabs/contacts` | partial |
-| CRM 360 Auftraege | `auftraege` (supplemental) | Auftragsliste | `GET .../tabs/auftraege` | partial |
-| CRM 360 Aktivitaeten | `aktivitaeten` (supplemental) | Aktivitaetenliste | `GET .../tabs/aktivitaeten` | partial |
-| CRM 360 Dokumente | `dokumente` (supplemental) | Offene Posten als Belege | `GET .../tabs/dokumente` | partial |
-| CRM 360 Angebote | `angebote` (Summary only) | — | `GET .../tabs/angebote` | gap |
-| CRM 360 Historie | `historie` (Summary only) | — | `GET .../tabs/historie` | gap |
+| System (`system`) | `system` | Partnerstatus, Liefer- und Rechnungssperre | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Steuern (`tax`) | `tax` | USt-IdNr., Steuernummer, Steuerart | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Qualitaet / Compliance (`quality_compliance`) | `quality_compliance` | Betriebsnummer, QS, Bio | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Finanzen (`finance`) | `finance` | Offene Posten; Kreditlimit auf Stammdaten | Summary + `GET .../tabs/dokumente` | lazy table | ok |
+| Bank (`bank`) | `bank` | Kontoinhaber, Bank, IBAN, BIC | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Marketing (`marketing`) | `marketing` | Segment, Newsletter, E-Mail-Einwilligung | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Genossenschaft (`cooperative`) | `cooperative` | Mitgliedsnummer, Pflichtanteile, Beendet | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Ausgabe (`output`) | `output` | Rechnungs- und Mahnversand | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Schnittstellen (`interfaces`) | `interfaces` | EDIFACT INVOIC, ORDERS, DESADV | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Potenzial (`potential`) | `potential` | Juengster Satz aus `public.customer_potential_snapshot` | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Ansprechpartner (`contacts`) | `contacts` | `domain_crm.business_partner_contacts` und `public.kunden_ansprechpartner` | `GET .../tabs/contacts` | lazy table | ok |
+| CRM 360 Auftraege | `auftraege` (Belege) | Auftragsliste | `GET .../tabs/auftraege` | ok |
+| CRM 360 Aktivitaeten | `aktivitaeten` | Aktivitaetenliste | `GET .../tabs/aktivitaeten` | ok |
+| CRM 360 Dokumente | `dokumente` / `finance` | Offene Posten ueber `kunde_id` | `GET .../tabs/dokumente` | ok |
+| KIM Belege | `auftraege` | Auftragsliste | `GET .../tabs/auftraege` | ok |
+| KIM Finanzen | `finance` | Offene Posten | `GET .../tabs/dokumente` | ok |
+| KIM Aufgaben | `aufgaben` | Titel, Art, Faelligkeit, Status | `GET .../tabs/aufgaben` | ok |
+| KIM Kontrakte | `kontrakte` | Kontraktliste ueber `party_id` | `GET .../tabs/kontrakte` | ok |
+| CRM 360 Angebote | `angebote` | Verkaufschancen | `GET .../tabs/angebote` | lazy table | ok |
+| CRM 360 Historie | `historie` | Aktivitaetenhistorie | `GET .../tabs/historie` | lazy table | ok |
+| KIM Chef/Präsente/Postfach/Geo | `masterdata` / `praesente` / `postfach` / `address` | Chefanweisung, Präsenteliste, Postfachfelder, Koordinaten | `GET .../customers/{id}` + `GET .../tabs/praesente` | compiled | ok |
+| Pflege Tab 21 Chef-Anweisung | `chefanweisungen` | `domain_crm.business_partner_instructions` | `GET .../tabs/chefanweisungen` | lazy table | ok |
+| Pflege Tab 23 Anschriften | `anschriften` | `domain_crm.business_partner_addresses` | `GET .../tabs/anschriften` | lazy table | ok |
+| Pflege Tab 24 Kontoauszug | `kontoauszug` | `domain_crm.business_partner_billing_configs` | `GET /api/v1/crm/customers/{id}` | compiled | ok |
+| Pflege Tab 25 CPD-Konto | `cpd` | `domain_crm.business_partner_cpd_accounts` | `GET .../tabs/cpd` | lazy table | ok |
+| Rabatte | `rabatte` | `domain_crm.business_partner_discount_items` | `GET .../tabs/rabatte` | lazy table | ok |
+| Preise | `preise` | `domain_crm.business_partner_price_agreements` | `GET .../tabs/preise` | lazy table | ok |
 
 ## Summary vs. Mask-Tab-Keys
 
@@ -48,6 +59,8 @@ Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab
 | `auftraege` | `auftraege` | Supplemental Tab im Pilot |
 | `aktivitaeten` | `aktivitaeten` | Supplemental Tab im Pilot |
 | `dokumente` | `dokumente` | Supplemental Tab; `finance` nutzt gleiche API |
+| `aufgaben` | `aufgaben` | KIM-Aufgaben, leer wenn keine Quelle |
+| `kontrakte` | `kontrakte` | `domain_ops.kon_contract` nach `party_id` |
 
 ## Lazy-Load Vertrag (Wave 27)
 
@@ -61,5 +74,35 @@ Felder in `masterdata`, `address`, `contacts` und Summary-KPIs: **>= 90 % read-o
 
 ## Offene Luecken
 
-- Angebote und Historie: Endpunkt vorhanden, liefert leere Liste bis fachliche Quelle angebunden ist.
-- Vollstaendige Feld-Paritaet aller Legacy-Sections: bewusst ausserhalb Wave 27 (Adapter-Pilot).
+- Mutationen (Anlegen, Aendern, Loeschen) bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+  `Bearbeiten` auf der Akte oeffnet genau diese Pflege ueber die Partnerkennung.
+- Die Pflege-Register Chef-Anweisung, Anschriften, Kontoauszug und CPD-Konto
+  sind in der Akte lesbar. Ohne Partnersatz bleiben sie leer.
+- Potenzial ist der juengste GAP-Snapshot (`customer_potential_snapshot`);
+  ohne Pipeline-Lauf bleibt das Register leer.
+- Chef, Präsente, Postfach und Geo sitzen in der nativen Object Page
+  (`masterdata`/`praesente`/`postfach`/`address`); Mini-Apps bleiben weg.
+- Listen-IDs (`kunden_nr`, Partnernummer) oeffnen dieselbe Akte wie die UUID.
+- Jahresumsatz zaehlt Auftraege mit Status `completed`, `geliefert` oder `invoiced`.
+- Der letzte Wareneingang kommt vom Annahmeschein; fehlt der, von der
+  Lagerbewegung ueber `owner_partner_id`.
+- Laufende Agrarkontrakte haengen an der Partner-ID oder der Partnernummer.
+- Postfach kommt aus `public.kunden`, Koordinaten aus `public.kunden_geo`.
+- Ein reiner Bestandskunde ohne CRM-Satz oeffnet die Akte ueber `name1` und `tel`.
+- Adresse und Branche kommen aus `domain_crm.customers`, das Fax vom Partner.
+- Das Stammdaten-Segment ist das `marketing_segment` des Partners.
+- Präsente kommen aus `public.crm_gifts` ueber die Kundennummer.
+- Aufgaben sind Aktivitaeten vom Typ Aufgabe oder Task. Ein offener Besuch bleibt in der Historie.
+- Aktivitaet anlegen findet den Kunden auch ueber Kundennummer und Partnernummer.
+- Die Screen-Summary listet dieselben Register wie die ScreenDefinition, inklusive Pflege-Reiter, Potenzial, Rabatte und Preise.
+- Das Kreditlimit der Akte ist die Ausnahme aus `credit_limits`, sonst der Stamm.
+- `/verkauf/kunden-stamm/:id` und `/crm/kunden-cockpit?id=` leiten auf dieselbe Akte;
+  Mutationen der Tabs 21–25 bleiben unter `?pflege=1`.
+
+## Desktop-Gewohnheitsbruecke 2026-08-19
+
+Die native Maske nutzt den zentralen Meridian-Vertrag: stabiler Header und
+Footer, `create_activity` links als Fachaktion, `edit` rechts als
+Commit-Aktion sowie Enter-Feldfluss. Das Muster ist herstellerneutral; die
+redigierte L3-Ableitung steht in
+[`l3-to-meridian-habit-parity.md`](../../../design/l3-to-meridian-habit-parity.md).

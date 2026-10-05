@@ -17,14 +17,14 @@ import { useKaeufergruppenKatalog } from '@/lib/api/kaeufergruppe'
 
 const EUR = (n: number) => `${Math.round(n).toLocaleString('de-DE')} €`
 
-const SPARTE_BADGE: Record<string, string> = { milchvieh: 'bg-sky-100 text-sky-700', ackerbau: 'bg-lime-100 text-lime-700' }
+const SPARTE_BADGE: Record<string, string> = { milchvieh: 'bg-primary/10 text-primary', ackerbau: 'bg-status-success/10 text-status-success' }
 const SPARTE_LABEL: Record<string, string> = { milchvieh: 'Milchvieh', ackerbau: 'Ackerbau' }
 
 function deckungColor(pct: number): string {
-  if (pct >= 80) return 'bg-emerald-500'
-  if (pct >= 40) return 'bg-blue-500'
-  if (pct > 0) return 'bg-amber-500'
-  return 'bg-violet-500'
+  if (pct >= 80) return 'bg-status-success'
+  if (pct >= 40) return 'bg-primary'
+  if (pct > 0) return 'bg-status-warning'
+  return 'bg-muted-foreground'
 }
 
 export default function DurchdringungsPipelinePage(): JSX.Element {
@@ -62,14 +62,14 @@ export default function DurchdringungsPipelinePage(): JSX.Element {
   return (
     <div className="space-y-4 p-6">
       <div>
-        <h1 className="flex items-center gap-2 text-3xl font-bold"><ListChecks className="h-7 w-7 text-blue-600" />Durchdringungs-Pipeline</h1>
+        <h1 className="flex items-center gap-2 text-3xl font-bold"><ListChecks className="h-7 w-7 text-muted-foreground" />Durchdringungs-Pipeline</h1>
         <p className="text-muted-foreground">Priorisierte Arbeitsliste nach realistischer Chance — größte gewinnbare Lücke × Marge × Abschluss ÷ Aufwand.</p>
       </div>
 
       {/* Summen */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card><CardContent className="flex items-center gap-3 p-4"><Users className="h-5 w-5 text-blue-600" /><div><p className="text-xs text-muted-foreground">Betriebe</p><p className="text-2xl font-bold">{rows.length}</p></div></CardContent></Card>
-        <Card><CardContent className="flex items-center gap-3 p-4"><Target className="h-5 w-5 text-amber-600" /><div><p className="text-xs text-muted-foreground">Realist. Potenzial</p><p className="text-2xl font-bold text-amber-600">{EUR(summe)}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-4"><Users className="h-5 w-5 text-muted-foreground" /><div><p className="text-xs text-muted-foreground">Betriebe</p><p className="text-2xl font-bold">{rows.length}</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-4"><Target className="h-5 w-5 text-status-warning" /><div><p className="text-xs text-muted-foreground">Realist. Potenzial</p><p className="text-2xl font-bold text-status-warning">{EUR(summe)}</p></div></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Ø realist. Lücke/Betrieb</p><p className="text-2xl font-bold">{rows.length ? EUR(summe / rows.length) : '—'}</p></CardContent></Card>
       </div>
 
@@ -81,14 +81,14 @@ export default function DurchdringungsPipelinePage(): JSX.Element {
             <Input placeholder="Betrieb suchen…" value={term} onChange={(e) => setTerm(e.target.value)} className="pl-10" />
           </div>
           <label className="text-xs text-muted-foreground">Sparte
-            <NativeSelect value={sparte} onValueChange={setSparte} className="mt-1 w-40">
+            <NativeSelect ariaLabel="Sparte" value={sparte} onValueChange={setSparte} className="mt-1 min-h-touch w-40">
               <option value="">Alle</option>
               <option value="milchvieh">Milchvieh</option>
               <option value="ackerbau">Ackerbau</option>
             </NativeSelect>
           </label>
           <label className="text-xs text-muted-foreground">Käufergruppe
-            <NativeSelect value={gruppe} onValueChange={setGruppe} className="mt-1 w-52">
+            <NativeSelect ariaLabel="Käufergruppe" value={gruppe} onValueChange={setGruppe} className="mt-1 min-h-touch w-52">
               <option value="">Alle</option>
               {(katalog.data ?? []).map((k) => <option key={k.group} value={k.group}>{k.label}</option>)}
             </NativeSelect>
@@ -126,29 +126,29 @@ export default function DurchdringungsPipelinePage(): JSX.Element {
                     <tr key={p.kunden_nr} className="border-b last:border-0 hover:bg-muted/40">
                       <td className="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
                       <td className="px-3 py-2">
-                        <button onClick={() => navigate(`/crm/bedarfsdeckung-cockpit?kunde=${encodeURIComponent(p.kunden_nr)}`)} className="font-medium text-blue-600 hover:underline">
+                        <button type="button" onClick={() => navigate(`/crm/bedarfsdeckung-cockpit?kunde=${encodeURIComponent(p.kunden_nr)}`)} className="min-h-11 font-medium text-primary touch-manipulation">
                           {p.name}
                         </button>
                         <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
                           <span>{p.plz} {p.ort}</span>
-                          {p.sparten.map((s) => <span key={s} className={`rounded px-1 py-0.5 text-[10px] font-medium ${SPARTE_BADGE[s]}`}>{SPARTE_LABEL[s]}</span>)}
+                          {p.sparten.map((s) => <span key={s} className={`rounded px-1 py-0.5 text-2xs font-medium ${SPARTE_BADGE[s]}`}>{SPARTE_LABEL[s]}</span>)}
                         </div>
                       </td>
-                      <td className="px-3 py-2"><span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[11px] font-medium text-indigo-700">{p.kaeufergruppe_label}</span></td>
+                      <td className="px-3 py-2"><span className="rounded bg-primary/10 px-1.5 py-0.5 text-2xs font-medium text-primary">{p.kaeufergruppe_label}</span></td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-1.5">
                           <div className="h-2 w-16 overflow-hidden rounded-full bg-muted"><div className={`h-full ${deckungColor(p.deckung_pct_gesamt)}`} style={{ width: `${Math.min(p.deckung_pct_gesamt, 100)}%` }} /></div>
                           <span className="text-xs tabular-nums">{p.deckung_pct_gesamt}%</span>
                         </div>
                       </td>
-                      <td className="px-3 py-2 text-right font-medium tabular-nums text-amber-700">{EUR(p.realistische_luecke_eur_gesamt)}</td>
+                      <td className="px-3 py-2 text-right font-medium tabular-nums text-status-warning">{EUR(p.realistische_luecke_eur_gesamt)}</td>
                       <td className="px-3 py-2">
                         <span className="font-medium">{p.top_produktgruppe}</span>
                         <span className="ml-1 text-xs text-muted-foreground">· {EUR(p.top_luecke_eur)}</span>
                       </td>
                       <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{Math.round(p.top_score).toLocaleString('de-DE')}</td>
                       <td className="px-3 py-2 text-right">
-                        <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={() => angebot(p)}>Angebot <ArrowRight className="h-3 w-3" /></Button>
+                        <Button className="min-h-touch gap-1" variant="outline" onClick={() => angebot(p)}>Angebot <ArrowRight className="h-3 w-3" /></Button>
                       </td>
                     </tr>
                   ))}

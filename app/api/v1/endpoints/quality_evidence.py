@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/admin/quality-evidence", tags=["admin", "quality"])
 
@@ -97,7 +98,7 @@ async def get_quality_evidence(
     )
 
 
-@router.get("/drift", response_model=dict)
+@router.get("/drift", response_model=TypedObjectOut)
 async def get_drift_status(
     _tenant_id: str = Depends(get_tenant_id),
 ) -> dict:

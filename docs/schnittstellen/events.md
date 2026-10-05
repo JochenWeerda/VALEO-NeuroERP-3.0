@@ -5,7 +5,7 @@ type: reference
 audience: [integrator, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-07-16
 version: 3.0.0
 ---
 
@@ -16,11 +16,6 @@ version: 3.0.0
 
 VALEO NeuroERP publiziert fachliche Domänen-Events über das **Transactional Outbox Pattern**:
 Events werden atomar mit der fachlichen Änderung persistiert und über **NATS JetStream** ausgeliefert.
-
-**Architektur-Kontext:** Event-Publisher ist primär der `backend`-Container; NATS als
-Event-Bus — siehe [C4 Container](../architecture/views/c4-02-containers.md) und
-[ADR-036](../adr/adr-036-architecture-documentation-stack.md). AsyncAPI-Artefakte sind an
-dieselbe Container-Sicht gekoppelt (Slice `DOC-INTERFACES-001`).
 
 ## Namenskonvention
 
@@ -42,6 +37,7 @@ tenant.{tenantId}.<domäne>.<aggregat>.<aktion>
 | Event | Kanal | Quelle |
 |---|---|---|
 | `agrar.contract.allocated` | outbox | `api/v1/endpoints/weighing_tickets.py` |
+| `agrar.harvest_settlement.print_requested` | outbox | `api/v1/endpoints/mask_actions.py` |
 | `agrar.weighing_ticket.allocated` | outbox | `api/v1/endpoints/weighing_tickets.py` |
 
 ## Außendienst
@@ -55,6 +51,8 @@ tenant.{tenantId}.<domäne>.<aggregat>.<aktion>
 
 | Event | Kanal | Quelle |
 |---|---|---|
+| `crm.lead.qualified` | outbox | `api/v1/endpoints/mask_actions.py` |
+| `crm.opportunity.activity_created` | outbox | `api/v1/endpoints/mask_actions.py` |
 | `crm_case.created` | outbox | `services/crm_compat_service.py` |
 
 ## Einkauf
@@ -83,6 +81,8 @@ tenant.{tenantId}.<domäne>.<aggregat>.<aktion>
 |---|---|---|
 | `lager.auslagerung.created` | outbox | `services/inventory_compat_service.py` |
 | `lager.einlagerung.created` | outbox | `services/inventory_compat_service.py` |
+| `lager.stock_movement.storniert` | outbox | `api/v1/endpoints/mask_actions.py` |
+| `lager.wareneingang.booked` | outbox | `api/v1/endpoints/mask_actions.py` |
 
 ## Lager / Materialfluss
 
@@ -130,9 +130,18 @@ tenant.{tenantId}.<domäne>.<aggregat>.<aktion>
 
 | Event | Kanal | Quelle |
 |---|---|---|
+| `...` | outbox | `scripts/extract_events.py` |
 | `cash_closing.posted` | outbox | `api/v1/endpoints/compat.py` |
+| `collab.note.created` | outbox | `api/v1/endpoints/collab_notes.py` |
 | `compliance.violations_detected` | outbox | `workers/compliance_monitor.py` |
+| `einkauf.bestellung.created_from_angebot` | outbox | `api/v1/endpoints/mask_actions.py` |
+| `einkauf.bestellung.created_from_supplier` | outbox | `api/v1/endpoints/einkauf_kpis.py` |
+| `finance.ap_invoice.approved` | outbox | `api/v1/endpoints/ap_invoices.py` |
+| `finance.ar_open_item.dunning_created` | outbox | `api/v1/endpoints/open_items.py` |
+| `finance.payment_run.approved` | outbox | `api/v1/endpoints/mask_actions.py` |
 | `inventur.abgeschlossen` | outbox | `services/inventory_compat_service.py` |
+| `qualitaet.reklamation.closed` | outbox | `api/v1/endpoints/mask_actions.py` |
+| `sales.delivery_note.print_requested` | outbox | `api/v1/endpoints/mask_actions.py` |
 | `settlement.created` | outbox | `core/settlement_audit_chain.py` |
 
 ## System
@@ -151,11 +160,20 @@ tenant.{tenantId}.<domäne>.<aggregat>.<aktion>
 | `tenant.*.silo.transfer` | nats | `core/event_consumer_wiring.py` |
 | `tenant.*.sla.violated` | nats | `core/event_consumer_wiring.py` |
 | `tenant.*.workflow.{verb}` | nats | `core/event_consumer_wiring.py` |
+| `tenant.*.xxx` | nats | `scripts/extract_events.py` |
 
 ## Tierernährung
 
 | Event | Kanal | Quelle |
 |---|---|---|
+| `feeding.actual.recorded` | outbox | `services/feeding_actual_service.py` |
+| `feeding.analysis.released` | outbox | `services/feeding_feed_analysis_service.py` |
+| `feeding.deviation.exceeded` | outbox | `services/feeding_actual_measure_service.py` |
+| `feeding.import.quarantined` | outbox | `services/feeding_import_monitor_service.py` |
+| `feeding.measure.created` | outbox | `services/feeding_actual_measure_service.py` |
+| `feeding.plan.published` | outbox | `services/feeding_plan_service.py` |
+| `feeding.ration.version.activated` | outbox | `services/rations_lifecycle_service.py` |
+| `feeding.supply.procurement_handoff.created` | outbox | `services/feeding_supply_service.py` |
 | `ration.created` | outbox | `services/inventory_compat_service.py` |
 
 ## AsyncAPI-Spec
@@ -171,18 +189,4 @@ info:
 # ... (vollständige Spec in asyncapi.yaml)
 ```
 
-## Externe Mock-Endpunkte (E2E / Integration)
-
-Für Playwright-Semantiktests und lokale Integration ohne echte DATEV/TSE/ELSTER-Anbindung
-stehen Dev-/Test-Stubs unter `/api/v1/dev/external-mocks/*` bereit. Alle Antworten enthalten
-`simulated: true`.
-
-| Endpunkt | Verwendung in Specs |
-|---|---|
-| `/dev/external-mocks/datev/export` | `fibu-semantic-chain`, `o2c-semantic-chain`, `p2p-semantic-chain` |
-| `/dev/external-mocks/tse/sign` | `pos-tse-semantic-chain` |
-| `/dev/external-mocks/bank/camt-import` | `fibu-semantic-chain`, `p2p-semantic-chain` |
-
-Vertragsdokumentation: [`docs/agent-docs/runbooks/external-mock-vertraege.md`](../agent-docs/runbooks/external-mock-vertraege.md) (Slice: EXTERNAL-MOCK-WORKFLOW-001).
-
-*Stand: 2026-06-26 · 51 Events · Slice: DOC-ASYNCAPI-001*
+*Stand: 2026-07-16 · 74 Events · Slice: DOC-ASYNCAPI-001*

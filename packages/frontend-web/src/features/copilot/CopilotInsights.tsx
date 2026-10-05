@@ -56,21 +56,19 @@ export function CopilotInsights(): JSX.Element {
 
       <div className="flex flex-wrap gap-2 pt-2">
         <Button
-          size="sm"
           variant="secondary"
           onClick={(): void => {
             askCopilot("margin")
           }}
-        >
+         className="min-h-touch">
           Warum ändert sich die Marge?
         </Button>
         <Button
-          size="sm"
           variant="secondary"
           onClick={(): void => {
             askCopilot("inventory")
           }}
-        >
+         className="min-h-touch">
           Lagerentwicklung?
         </Button>
       </div>

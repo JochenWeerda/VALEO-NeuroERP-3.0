@@ -5,7 +5,7 @@ FIBU-AR-05: OP-Verwaltung Ausgleich/Verrechnung
 """
 
 from typing import Optional, List
-from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
+from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.open_items_schemas import OpenItemsOut
 
 
@@ -311,7 +311,7 @@ async def list_open_items(
             WHERE {' AND '.join(where_clauses)}
             ORDER BY {_expr(cols, "faelligkeit", "due_date")} ASC, rechnungsnr ASC
             LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
     rows = db.execute(
         text(
@@ -367,7 +367,7 @@ async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db:
                 {_expr(cols, "created_at")} AS created_at,
                 {_expr(cols, "updated_at")} AS updated_at
             FROM {table_ref} WHERE id = :id AND tenant_id = :tenant_id
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
     row = db.execute(
         text(
             select_sql
@@ -660,7 +660,7 @@ async def settle_open_item(
             audit_insert = text("""
                 INSERT INTO infrastructure.audit_log
                 (id, user_id, action, entity_type, entity_id, changes, created_at)
-                VALUES (:id, :user_id, :action, :entity_type, :entity_id, :changes::jsonb, NOW())
+                VALUES (:id, :user_id, :action, :entity_type, :entity_id, CAST(:changes AS jsonb), NOW())
                 RETURNING id
             """)
             
@@ -822,9 +822,15 @@ async def get_settlements(
             }
             for row in rows
         ]
-    except Exception:
-        # If table doesn't exist, return empty list
-        return []
+    except Exception as e:
+        # SPEC-P0-03: Finance darf bei DB-Fehlern nie still leere Daten liefern.
+        from app.core.critical_data_path import raise_critical_data_unavailable
+
+        raise_critical_data_unavailable(
+            endpoint="open_items_settlements",
+            exc=e,
+            label="OP-Ausgleichshistorie",
+        )
 
 
 @router.post("/{op_id}/reverse-settlement", response_model=OpenItemsOut, summary="Settlement reverse")
@@ -908,7 +914,7 @@ async def reverse_settlement(
             audit_insert = text("""
                 INSERT INTO infrastructure.audit_log
                 (id, user_id, action, entity_type, entity_id, changes, created_at)
-                VALUES (:id, :user_id, :action, :entity_type, :entity_id, :changes::jsonb, NOW())
+                VALUES (:id, :user_id, :action, :entity_type, :entity_id, CAST(:changes AS jsonb), NOW())
             """)
             
             changes = {
@@ -952,18 +958,31 @@ async def reverse_settlement(
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
 
 
-@router.post("/{entity_id}/actions/mahnen", response_model=dict, summary="Mahnung erstellen (UIX-046)")
+@router.post("/{entity_id}/actions/mahnen", response_model=TypedObjectOut, summary="Mahnung erstellen (SPEC-P1-04)")
 async def action_mahnen(
     entity_id: str,
+    body: dict = Body(default_factory=dict),
+    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Stub: Mahnung für offenen Posten erstellen — requiresConfirmation, execute folgt."""
-    return {
-        "success": True,
-        "actionKey": "mahnen",
-        "entityId": entity_id,
-        "tenantId": tenant_id,
-        "message": "Mahnung wird erstellt.",
-        "proposedChanges": {"mahnstatus": "erste_mahnung", "op_id": entity_id},
-    }
+    from app.services.mask_action_runtime_service import run_mask_action
+
+    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
+        return {
+            "summary": "Mahnung erstellt.",
+            "affectedIds": [eid],
+            "mutation": {"mahnstatus": payload.get("mahnstufe", "erste_mahnung"), "op_id": eid},
+        }
+
+    result = run_mask_action(
+        db,
+        action_key="mahnen",
+        entity_type="ar_open_item",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        execute_fn=execute,
+        outbox_event_type="finance.ar_open_item.dunning_created",
+    )
+    return result.model_dump()
 

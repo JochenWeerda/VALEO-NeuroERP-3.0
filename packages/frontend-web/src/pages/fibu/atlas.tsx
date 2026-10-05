@@ -192,7 +192,7 @@ export default function AtlasPage(): JSX.Element {
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold">ATLAS (Zoll)</h1>
-            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+            <Badge variant="success">
               Operations Console
             </Badge>
           </div>
@@ -202,7 +202,7 @@ export default function AtlasPage(): JSX.Element {
           </p>
         </div>
         <Link to="/fibu/schnittstellen-center">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" className="min-h-touch">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Zurueck zum Schnittstellen-Center
           </Button>
@@ -225,7 +225,7 @@ export default function AtlasPage(): JSX.Element {
         <OperationalContextPanel title="Nachweiskontext" sections={contextSections} />
       </div>
 
-      <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+      <Alert variant="warning">
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Kein isoliertes Zoll-Subprodukt</AlertTitle>
         <AlertDescription>
@@ -295,7 +295,7 @@ export default function AtlasPage(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldCheck className="h-5 w-5 text-emerald-600" />
+              <ShieldCheck className="h-5 w-5 text-status-success" />
               Operativer Ablauf
             </CardTitle>
             <CardDescription>Naechste Schritte fuer einen Zoll- oder Exportfall auf Basis des aktuellen Systemzustands.</CardDescription>
@@ -395,7 +395,7 @@ export default function AtlasPage(): JSX.Element {
                     {job.status}
                   </Badge>
                 </div>
-                {job.error_message ? <p className="mt-2 text-xs text-amber-700">{job.error_message}</p> : null}
+                {job.error_message ? <p className="mt-2 text-xs text-status-warning">{job.error_message}</p> : null}
               </div>
             )) : (
               <p className="text-sm text-muted-foreground">Noch keine Job-Laeufe vorhanden.</p>
@@ -421,7 +421,7 @@ export default function AtlasPage(): JSX.Element {
                   {latestJob?.status ?? 'n/a'}
                 </Badge>
               </div>
-              {latestJob?.error_message ? <p className="mt-2 text-xs text-amber-700">{latestJob.error_message}</p> : null}
+              {latestJob?.error_message ? <p className="mt-2 text-xs text-status-warning">{latestJob.error_message}</p> : null}
             </div>
             {latestArtifacts.length > 0 ? latestArtifacts.map((artifact) => (
               <div key={artifact.id} className="rounded-lg border p-3 text-sm">

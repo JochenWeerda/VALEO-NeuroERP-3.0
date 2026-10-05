@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timezone
 from decimal import Decimal
+import pytest
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -198,7 +199,7 @@ class FakeDb:
             return _FakeResult()
 
         if "UPDATE domain_erp.offene_posten SET offen = offen - :amount" in sql:
-            return _FakeResult()
+            return _FakeResult(fetchone=(Decimal("100.00"), "RE-1"))
 
         if "UPDATE domain_erp.offene_posten SET offen = 0" in sql:
             return _FakeResult()
@@ -249,6 +250,23 @@ def test_list_and_plan_payment_runs():
     planned = client.post("/finance/payment-runs/plan", json={"execution_date": "2026-04-20", "tenant_id": "system"})
     assert planned.status_code == 200
     assert planned.json()["suggested_payments"][0]["creditor_name"] == "Lieferant A"
+
+
+@pytest.mark.parametrize("path, detail", [
+    ("/finance/payment-runs", "Failed to list payment runs"),
+    ("/finance/payment-runs/run-1", "Failed to get payment run"),
+])
+def test_database_read_failure_is_not_empty_success(path, detail):
+    db = FakeDb()
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("private database diagnostic")
+
+    db.execute = fail
+    response = _build_client(db).get(path)
+    assert response.status_code == 500
+    assert response.json()["detail"] == detail
+    assert db.rollback_count == 1
 
 
 def test_create_and_fetch_payment_run():

@@ -7,23 +7,24 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Docflow - Nachweisraum-Lebenszyklus @smoke', () => {
   test('Artefakt-Upload & Freigabe lädt', async ({ adminPage }) => {
     await adminPage.goto('/docflow/artefakt-freigabe');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Artefakt-Upload & Freigabe' })).toBeVisible({ timeout: 15000 });
   });
 
   test('Wiedervorlagen & Bescheide lädt', async ({ adminPage }) => {
     await adminPage.goto('/docflow/wiedervorlagen');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'Wiedervorlagen & Bescheide' })).toBeVisible({ timeout: 15000 });
   });
 
   test('GoBD-Export lädt', async ({ adminPage }) => {
     await adminPage.goto('/docflow/gobd-export');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     await expect(adminPage.getByRole('heading', { name: 'GoBD-Export' })).toBeVisible({ timeout: 15000 });
   });
 });

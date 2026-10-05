@@ -11,9 +11,13 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { BookOpen, FileDown, Search } from 'lucide-react'
 import { useHauptbuch, type HauptbuchBuchung } from '@/lib/api/fibu'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { useNavigate } from '@/app/routing/typed-router'
 
 export default function HauptbuchPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
+  const isTouch = useTouchDevice()
+  const navigate = useNavigate()
   const { data: items, isLoading } = useHauptbuch()
 
   if (isLoading) return (
@@ -23,7 +27,11 @@ export default function HauptbuchPage(): JSX.Element {
     </div>
   )
 
-  const list = items ?? []
+  const list = (items ?? []).filter((b) => {
+    const q = searchTerm.trim().toLowerCase()
+    if (!q) return true
+    return [b.belegnummer, b.konto, b.text].some((v) => String(v ?? '').toLowerCase().includes(q))
+  })
 
   const columns = [
     {
@@ -93,6 +101,59 @@ export default function HauptbuchPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Hauptbuch</h1>
+        <p className="text-muted-foreground">Buchungsjournal</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Suche</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Suche..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+                aria-label="Hauptbuch suchen"
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => navigate('/fibu/schnittstelle-fibu?context=hauptbuch')}
+              data-global-button-handler="ignore"
+            >
+              <FileDown className="h-4 w-4" />
+              DATEV Export
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <DataTable data={list} columns={columns} />
+          <div className="mt-6 flex justify-between border-t pt-4 font-bold">
+            <span>Summen:</span>
+            <div className="flex gap-12">
+              <span>
+                Soll: {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(summen.soll)}
+              </span>
+              <span>
+                Haben: {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(summen.haben)}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Hauptbuch"
         description="Journalraum fuer Buchungsmenge, Ausgleich und DATEV-Folgepfad."
@@ -107,12 +168,6 @@ export default function HauptbuchPage(): JSX.Element {
         <OperationalTimeline title="Journalverlauf" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
       </div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Hauptbuch</h1>
-          <p className="text-muted-foreground">Buchungsjournal</p>
-        </div>
-      </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -121,7 +176,7 @@ export default function HauptbuchPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+              <BookOpen className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
@@ -149,41 +204,8 @@ export default function HauptbuchPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Suche</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
-            </div>
-            <Button variant="outline" className="gap-2">
-              <FileDown className="h-4 w-4" />
-              DATEV Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={list} columns={columns} />
-          <div className="mt-6 flex justify-between border-t pt-4 font-bold">
-            <span>Summen:</span>
-            <div className="flex gap-12">
-              <span>
-                Soll: {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(summen.soll)}
-              </span>
-              <span>
-                Haben: {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(summen.haben)}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </>
+      ) : null}
     </div>
   )
 }

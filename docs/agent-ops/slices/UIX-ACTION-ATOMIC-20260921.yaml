@@ -1,0 +1,31 @@
+id: UIX-ACTION-ATOMIC-20260921
+owner: Codex
+status: abgeschlossen
+goal: Keine erfolgreichen Maskenaktionen nach Rollback; Audit und Outbox atomar speichern.
+scope: Gemeinsame Runtime und fehlende Audit-Tabelle; Fachhandler separat.
+file_ownership:
+  - app/services/mask_action_runtime_service.py
+  - alembic/versions/mask_action_audit_20260921.py
+  - tests/test_mask_action_atomic.py
+  - docs/quality-assurance/uix-action-atomic-20260921.md
+acceptance:
+  - Unbekannte Modi schreiben nie.
+  - Mutation, Audit, Outbox und Commit muessen erfolgreich sein.
+  - Fehler liefern keine erfundenen Audit- oder Outbox-IDs.
+tests:
+  - 22 Python-Tests bestanden inklusive echter SQLite-Persistenz.
+  - PostgreSQL-Migration, Audit, Outbox und Rollback transaktional verifiziert.
+  - Lokales Upgrade und Tabellenexistenz verifiziert.
+risks:
+  - Einzelne Fachhandler und separater CRM-360-Pfad noch nicht abgenommen.
+  - MCP-Schreibadapter und Idempotenz noch offen.
+ai_harness:
+  fachlicher_vertrag: Kein Erfolg ohne Commit der beauftragten Mutation.
+  architektur_vertrag: Bestehende Runtime; additive Vervollstaendigung ihres Audit-Speichers.
+  daten_vertrag: Audit tenantbezogen; keine Datenloeschung bei Downgrade.
+  test_vertrag: Negativpfade, SQLite-Persistenz und PostgreSQL-Transaktion.
+  security_vertrag: Interne Datenbankfehler nicht an den Aufrufer ausgeben.
+  betriebs_vertrag: Migration angewendet; Code-Rollback ohne Loeschung der Audit-Tabelle.
+  dokumentations_vertrag: Workboard, Slice und QA mit ausdruecklichen Restpunkten.
+external_gates:
+  - Lokale PostgreSQL-Audit- und Outbox-Persistenz mit synthetischen Daten verifiziert.

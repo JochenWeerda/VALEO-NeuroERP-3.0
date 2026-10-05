@@ -177,7 +177,7 @@ def search_knowledge(
             where = " AND ".join(conditions)
             rows = db.execute(text(
                 f"SELECT id, knowledge_type, domain, key, title, content, metadata, version, active, created_at, updated_at "
-                f"FROM domain_shared.knowledge_store WHERE {where} ORDER BY updated_at DESC LIMIT :lim"
+                f"FROM domain_shared.knowledge_store WHERE {where} ORDER BY updated_at DESC LIMIT :lim"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ), params).fetchall()
 
             return [

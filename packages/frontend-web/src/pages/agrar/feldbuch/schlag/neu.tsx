@@ -112,8 +112,9 @@ export default function SchlagNeu() {
     <div className="space-y-6 p-3 md:p-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <Button variant="ghost" className="min-h-touch touch-manipulation" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
+          Zurück
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Neuen Schlag anlegen</h1>
@@ -184,6 +185,8 @@ export default function SchlagNeu() {
               <div className="space-y-2">
                 <Label htmlFor="kultur">Aktuelle Kultur *</Label>
                 <NativeSelect
+                  id="kultur"
+                  ariaLabel="Aktuelle Kultur"
                   value={formData.kultur}
                   onValueChange={(v) => handleChange('kultur', v)}
                   placeholder="Kultur waehlen..."
@@ -206,6 +209,8 @@ export default function SchlagNeu() {
               <div className="space-y-2">
                 <Label htmlFor="bodenart">Bodenart</Label>
                 <NativeSelect
+                  id="bodenart"
+                  ariaLabel="Bodenart"
                   value={formData.bodenart}
                   onValueChange={(v) => handleChange('bodenart', v)}
                   placeholder="Bodenart waehlen..."
@@ -256,10 +261,10 @@ export default function SchlagNeu() {
 
         {/* Aktionen */}
         <div className="flex justify-end gap-4 mt-6">
-          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+          <Button type="button" variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(-1)}>
             Abbrechen
           </Button>
-          <Button type="submit" disabled={!isValid || createMutation.isPending} className="gap-2">
+          <Button type="submit" disabled={!isValid || createMutation.isPending} className="min-h-touch gap-2 touch-manipulation">
             <Save className="h-4 w-4" />
             {createMutation.isPending ? 'Speichere...' : 'Schlag anlegen'}
           </Button>

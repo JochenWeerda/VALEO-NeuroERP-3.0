@@ -4,7 +4,7 @@ type: explanation
 audience: [entwickler, qa, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-09-17
 version: 3.0.0
 ---
 
@@ -48,6 +48,46 @@ API (FastAPI Router)
 
 Entscheidungen: [ADR-003 Canonical Domain Model](../adr/adr-003-canonical-domain-model.md),
 [ADR-014 Service-Layer](../adr/adr-014-service-layer-pattern.md).
+
+## Modell-Schichten und Lebenszyklus
+
+Drei Schichten, die nicht in eins fallen (Plan:
+[todo-datenmodell-katalog.md](../agent-ops/todo-datenmodell-katalog.md)):
+
+| Schicht | Wahrheit | Aendert sich wenn |
+|---|---|---|
+| Canonical Model | ADR-003, [ERD](../architecture/views/erd-canonical-domain.md), [UML](../architecture/views/uml-canonical-domain-class.md) | neues Fachaggregat |
+| Physisches Schema | Alembic + `information_schema` | Migration |
+| Vertrag / Sicht | OpenAPI, ScreenDefinition, Studio-Katalog | Maske oder Endpunkt |
+
+**Maske loeschen oder aendern droppt keine Spalte.** Eine ScreenDefinition ist
+eine Sicht. Spalten leben, bis eine eigene Migration sie streicht — mit
+Verbraucher-Suche und GoBD-/Belegketten-Pruefung. Umgekehrt erzeugt eine neue
+Maske keine Tabelle; fehlende Persistenz ist eine Migration, kein
+`CREATE TABLE` in der UI.
+
+**Neue Spalte nur per Alembic.** Kopffelder der Maske folgen den JSON-Schluesseln
+des Endpunkts (ADR-003 Regel 3: keine parallele fachliche Wahrheit in der UI).
+
+**Besitz** ist das PostgreSQL-Schema (`domain_crm`, `domain_agrar`, …).
+`scripts/table_ownership.py` mappt 29 Schemas auf Architecture-Domains;
+`scripts/check_domain_table_ownership.py` bewertet jede `domain_*`-Tabelle
+(only-up: unbekanntes Schema oder Praefix-Konflikt ohne Legacy-Zeile faellt).
+Der physische Katalog nennt `owner_domain` und `placement`
+([table-catalog.md](../admin/table-catalog.md),
+`python scripts/generate_table_catalog.py`). Fachliche Domäne steht im
+Architecture Index (`database_schemas`). Zwei Modelle duerfen nicht denselben
+Tabellennamen in einem Schema teilen.
+
+**Verbraucher** stehen im Katalog (`read_by`, `written_by`, `screens`), geerntet
+aus SQL/ORM unter `app/` (`scripts/table_lineage.py`). Native ScreenDefinitions
+duerfen `dataSources.entity.table` setzen — der Wert muss im Katalog vorkommen.
+Vor dem Loeschen einer Maske die Verbraucher-Suche, nicht `DROP COLUMN`.
+
+**Feldvertrag:** Kopffelder und Tabellenspalten der Maske folgen den
+JSON-Schluesseln des Endpunkts (`scripts/check_field_contracts.py`). Ein 200 mit
+anderen Schluesseln laesst Kopf oder Zeile leer — das Gate faellt dann, nicht
+erst der Anwender.
 
 ## Module & Feature-Flags
 

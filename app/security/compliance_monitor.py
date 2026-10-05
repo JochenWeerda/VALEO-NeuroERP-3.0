@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List
 import logging
 
+from app.core.business_time import business_today
+
 logger = logging.getLogger(__name__)
 
 
@@ -476,12 +478,13 @@ class ISO27001ComplianceMonitor:
         """Get compliance score trend over time"""
         # In production, query historical compliance data
         # Mock trend data
+        today = business_today()
         return [
-            {'date': (datetime.utcnow() - timedelta(days=6)).date(), 'score': 85},
-            {'date': (datetime.utcnow() - timedelta(days=5)).date(), 'score': 87},
-            {'date': (datetime.utcnow() - timedelta(days=4)).date(), 'score': 90},
-            {'date': (datetime.utcnow() - timedelta(days=3)).date(), 'score': 88},
-            {'date': (datetime.utcnow() - timedelta(days=2)).date(), 'score': 92},
-            {'date': (datetime.utcnow() - timedelta(days=1)).date(), 'score': 95},
-            {'date': datetime.utcnow().date(), 'score': 93}
+            {'date': today - timedelta(days=6), 'score': 85},
+            {'date': today - timedelta(days=5), 'score': 87},
+            {'date': today - timedelta(days=4), 'score': 90},
+            {'date': today - timedelta(days=3), 'score': 88},
+            {'date': today - timedelta(days=2), 'score': 92},
+            {'date': today - timedelta(days=1), 'score': 95},
+            {'date': today, 'score': 93}
         ]

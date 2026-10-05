@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.payment_runs_schemas import PaymentRunsOut
-from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+from app.documents.repository import DocumentRepository
 
 
 router = APIRouter(prefix="/payment-runs", tags=["finance", "ap", "sepa"])
@@ -355,9 +355,9 @@ async def plan_payment_run(
         """)
         params = {"tenant_id": request.tenant_id}
         if request.creditor_ids:
-            q = text(str(q) + " AND lieferant_id = ANY(:creditor_ids)")
+            q = text(str(q) + " AND lieferant_id = ANY(:creditor_ids)")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["creditor_ids"] = request.creditor_ids
-        q = text(str(q) + " ORDER BY lieferant_name, faelligkeit")
+        q = text(str(q) + " ORDER BY lieferant_name, faelligkeit")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         rows = db.execute(q, params).fetchall()
     except Exception:
         # Fallback if table/columns differ
@@ -542,10 +542,10 @@ async def list_payment_runs(
         params = {"tenant_id": tenant_id}
 
         if status:
-            query = text(str(query) + " AND status = :status")
+            query = text(str(query) + " AND status = :status")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["status"] = status
 
-        query = text(str(query) + " ORDER BY created_at DESC")
+        query = text(str(query) + " ORDER BY created_at DESC")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
         rows = db.execute(query, params).fetchall()
 
@@ -556,11 +556,11 @@ async def list_payment_runs(
                 SELECT creditor_id, creditor_name, iban, bic, amount, purpose, op_id, invoice_number,
                        discount_used, discount_amount, end_to_end_id, status
                 FROM domain_erp.payment_run_items
-                WHERE payment_run_id = :payment_run_id
+                WHERE payment_run_id = :payment_run_id AND tenant_id = :tenant_id
                 ORDER BY created_at
             """)
 
-            payments_rows = db.execute(payments_query, {"payment_run_id": str(row[0])}).fetchall()
+            payments_rows = db.execute(payments_query, {"payment_run_id": str(row[0]), "tenant_id": tenant_id}).fetchall()
 
             payments = [
                 {
@@ -585,8 +585,9 @@ async def list_payment_runs(
         return result
 
     except Exception as e:
+        db.rollback()
         logger.error(f"Error listing payment runs: {e}")
-        return []
+        raise HTTPException(status_code=500, detail="Failed to list payment runs") from e
 
 
 @router.get("/{run_id}", response_model=PaymentRunResponse, summary="Payment run abrufen")
@@ -620,11 +621,11 @@ async def get_payment_run(
             SELECT creditor_id, creditor_name, iban, bic, amount, purpose, op_id, invoice_number,
                    discount_used, discount_amount, end_to_end_id, status
             FROM domain_erp.payment_run_items
-            WHERE payment_run_id = :payment_run_id
+            WHERE payment_run_id = :payment_run_id AND tenant_id = :tenant_id
             ORDER BY created_at
         """)
 
-        payments_rows = db.execute(payments_query, {"payment_run_id": run_id}).fetchall()
+        payments_rows = db.execute(payments_query, {"payment_run_id": run_id, "tenant_id": tenant_id}).fetchall()
 
         payments = [
             {
@@ -649,8 +650,9 @@ async def get_payment_run(
     except HTTPException:
         raise
     except Exception as e:
+        db.rollback()
         logger.error(f"Error getting payment run: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get payment run: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get payment run") from e
 
 
 @router.post("/{run_id}/approve", response_model=PaymentRunResponse, summary="Payment run genehmigen")
@@ -703,11 +705,25 @@ async def execute_payment_run(
     Execute a payment run (generate SEPA XML and settle open items).
     """
     try:
+        # Serialize executions before reading the status; repeated requests cannot debit twice.
+        locked_run = db.execute(text("""
+            SELECT id FROM domain_erp.payment_runs
+            WHERE id = :run_id AND tenant_id = :tenant_id FOR UPDATE
+        """), {"run_id": run_id, "tenant_id": tenant_id}).fetchone()
+        if locked_run is None:
+            raise HTTPException(status_code=404, detail="Payment run not found")
         # Get payment run
         payment_run = await get_payment_run(run_id, tenant_id, db)
 
         if payment_run.status != "approved":
             raise HTTPException(status_code=400, detail="Payment run must be approved before execution")
+
+        if (
+            len(payment_run.payments) != payment_run.payment_count
+            or sum((Decimal(str(p["amount"])) for p in payment_run.payments), Decimal("0")) != payment_run.total_amount
+            or any(p["status"] != "pending" for p in payment_run.payments)
+        ):
+            raise HTTPException(status_code=409, detail="Payment run items do not match the approved run")
 
         # Generate SEPA XML
         generator = SEPAXMLGenerator(
@@ -754,61 +770,61 @@ async def execute_payment_run(
             "tenant_id": tenant_id
         })
 
-        # Settle open items
-        for payment in payment_run.payments:
-            if payment.get("op_id"):
-                try:
-                    # Settle open item
-                    settle_query = text("""
-                        UPDATE domain_erp.offene_posten
-                        SET offen = offen - :amount, updated_at = NOW()
-                        WHERE id = :op_id AND tenant_id = :tenant_id
-                    """)
+        # All OP and document writes belong to this transaction. No memory fallback.
+        repo = DocumentRepository(db)
+        for payment in sorted(payment_run.payments, key=lambda item: item.get("op_id") or ""):
+            if not payment.get("op_id"):
+                continue
+            amount = Decimal(str(payment["amount"]))
+            if amount <= 0:
+                raise HTTPException(status_code=409, detail="Settlement amount must be positive")
+            settled_row = db.execute(text("""
+                UPDATE domain_erp.offene_posten
+                SET offen = offen - :amount,
+                    op_status = CASE WHEN offen = :amount THEN 'ausgeziffert' ELSE op_status END,
+                    updated_at = NOW()
+                WHERE id = :op_id AND tenant_id = :tenant_id
+                    AND konto_typ = 'kreditoren' AND offen >= :amount
+                RETURNING offen, rechnungsnr
+            """), {
+                "op_id": payment["op_id"], "tenant_id": tenant_id, "amount": amount,
+            }).fetchone()
+            if settled_row is None:
+                raise HTTPException(status_code=409, detail="Open item missing or insufficient outstanding amount")
+            if payment.get("invoice_number") and settled_row[1] and payment["invoice_number"] != settled_row[1]:
+                raise HTTPException(status_code=409, detail="Payment and open item invoice references differ")
+            if Decimal(str(settled_row[0])) != 0:
+                continue  # An invoice number alone never proves full settlement.
+            inv_nr = settled_row[1] or payment.get("invoice_number")
+            if not inv_nr:
+                continue
+            inv = repo.get_document("ap_invoice", inv_nr)
+            if inv is None:
+                continue  # Imported OP may have no document in this document store.
+            invoice_tenant = inv.get("tenantId") or inv.get("tenant_id")
+            if invoice_tenant and invoice_tenant != tenant_id:
+                raise HTTPException(status_code=409, detail="Invoice belongs to another tenant")
+            if inv.get("status") == "STORNIERT":
+                raise HTTPException(status_code=409, detail="Cancelled invoice cannot be settled")
+            if inv.get("status") != "BEZAHLT":
+                inv = dict(inv)
+                inv["status"] = "BEZAHLT"
+                repo.save_document("ap_invoice", inv_nr, inv, commit=False)
 
-                    db.execute(settle_query, {
-                        "op_id": payment["op_id"],
-                        "tenant_id": tenant_id,
-                        "amount": payment["amount"]
-                    })
-
-                    # If fully settled, mark as closed and update AP invoice
-                    check_query = text("""
-                        UPDATE domain_erp.offene_posten
-                        SET offen = 0, op_status = 'ausgeziffert', updated_at = NOW()
-                        WHERE id = :op_id AND tenant_id = :tenant_id AND offen <= 0
-                        RETURNING rechnungsnr
-                    """)
-
-                    settled_row = db.execute(check_query, {
-                        "op_id": payment["op_id"],
-                        "tenant_id": tenant_id
-                    }).fetchone()
-
-                    # Belegbruch schließen: AP-Rechnung auf BEZAHLT setzen wenn OP vollständig ausgeziffert
-                    inv_nr = payment.get("invoice_number") or (settled_row[0] if settled_row else None)
-                    if inv_nr:
-                        try:
-                            repo = get_repository(db)
-                            inv = get_from_store("ap_invoice", inv_nr, repo)
-                            if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
-                                inv["status"] = "BEZAHLT"
-                                save_to_store("ap_invoice", inv_nr, inv, repo)
-                        except Exception as _e:  # noqa: BLE001 — non-blocking
-                            logger.debug("AP invoice status update skipped: %s", _e)
-
-                except Exception as e:
-                    logger.warning(f"Could not settle open item {payment.get('op_id')}: {e}")
-
+        # Build the response inside the transaction: a failed read must not follow a commit.
+        response = await get_payment_run(run_id, tenant_id, db)
         db.commit()
+        return response
 
-        return await get_payment_run(run_id, tenant_id, db)
-
-    except HTTPException:
+    except HTTPException as exc:
+        db.rollback()
+        if exc.status_code >= 500:
+            raise HTTPException(status_code=500, detail="Failed to execute payment run") from exc
         raise
     except Exception as e:
         db.rollback()
         logger.error(f"Error executing payment run: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to execute payment run: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to execute payment run")
 
 
 @router.get("/{run_id}/sepa-xml", summary="Sepa xml abrufen",

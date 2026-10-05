@@ -1,0 +1,76 @@
+# SD-Studio Katalog (UIX-090) — kuratierte Allowlist fuer No-Code-Admins.
+# Nur hier gelistete Read-Models/Endpoints und Command-Actions duerfen in einer
+# Studio-SD verwendet werden. KEIN freies URL-Feld, KEINE eigenen Endpoints.
+version: "2026-07"
+
+# Zulaessige Read-Model-/Listen-Endpoints je Datenquelle.
+data_sources:
+  - key: suppliers
+    label: Lieferanten
+    endpoint: /api/v1/einkauf/lieferanten
+  - key: customers
+    label: Kunden
+    endpoint: /api/v1/crm/customers
+  - key: articles
+    label: Artikel
+    endpoint: /api/v1/articles
+  - key: open_items
+    label: Offene Posten
+    endpoint: /api/v1/finance/open-items
+  - key: duenger
+    label: Duenger
+    endpoint: /api/v1/agrar/duenger
+  - key: saatgut
+    label: Saatgut
+    endpoint: /api/v1/agrar/saatgut
+  - key: purchase_inquiries
+    label: Einkaufsanfragen
+    endpoint: /api/v1/einkauf/anfragen
+  - key: purchase_offers
+    label: Lieferantenangebote
+    endpoint: /api/v1/einkauf/angebote
+  - key: debtors
+    label: Debitoren
+    endpoint: /api/v1/finance/debitoren
+  - key: creditors
+    label: Kreditoren
+    endpoint: /api/v1/finance/kreditoren
+  - key: consents
+    label: Einwilligungen
+    endpoint: /api/v1/crm/consents
+  - key: biostimulanzien
+    label: Biostimulanzien
+    endpoint: /api/v1/agrar/biostimulanzien
+  - key: agrar_kunden
+    label: Agrar-Kunden
+    endpoint: /api/v1/agrar/kunden
+  - key: reklamationen
+    label: Reklamationen
+    endpoint: /api/v1/qualitaet/reklamationen
+  - key: fixed_assets
+    label: Anlagen
+    endpoint: /api/v1/finance/fixed-assets
+
+# Zulaessige Command-Actions mit vorgegebenem dangerLevel (Studio darf ERHOEHEN,
+# nie senken) und forbiddenForAgents-Basis (darf nicht aufgehoben werden).
+command_actions:
+  - key: create_activity
+    label: Aktivitaet anlegen
+    commandEndpoint: /api/v1/crm/customers/{entity_id}/actions/create_activity
+    dangerLevel: safe
+    forbiddenForAgents: false
+  - key: mahnen
+    label: Mahnen
+    commandEndpoint: /api/v1/finance/open-items/{entity_id}/actions/mahnen
+    dangerLevel: moderate
+    forbiddenForAgents: false
+  - key: freigeben
+    label: Freigeben
+    commandEndpoint: /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
+    dangerLevel: moderate
+    forbiddenForAgents: false
+  - key: stornieren
+    label: Stornieren
+    commandEndpoint: /api/v1/sales/orders/{entity_id}/actions/stornieren
+    dangerLevel: high
+    forbiddenForAgents: true

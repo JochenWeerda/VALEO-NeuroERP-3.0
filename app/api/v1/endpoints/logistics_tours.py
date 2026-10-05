@@ -18,6 +18,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.domains.logistik.strecke import stopp_mit_zielort, touren_mit_stopps
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
@@ -146,8 +147,8 @@ class TourCancelIn(BaseModel):
 
 @router.get(
     "/sales-delivery-note-by-ref",
-    summary="Lieferschein zu Referenz (Read)",
     response_model=LogisticsTourOut,
+    summary="Lieferschein zu Referenz (Read)",
 )
 def resolve_sales_delivery_note_by_ref(
     ref: str = Query(..., min_length=1, description="Lieferschein-ID oder delivery_note_number"),
@@ -203,27 +204,23 @@ def list_tours(
             params["status"] = status
         where = " AND ".join(conditions)
         rows = db.execute(
-            text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_logistics.tours WHERE {where} ORDER BY created_at DESC"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         tour_rows = [dict(r) for r in rows]
         ids = [str(r["id"]) for r in tour_rows if r.get("id")]
+        stopps: List[Any] = []
         if ids:
             bind = {f"id{i}": tid for i, tid in enumerate(ids)}
             placeholders = ", ".join(f":id{i}" for i in range(len(ids)))
-            counts = db.execute(
+            stopps = db.execute(
                 text(
-                    f"SELECT tour_id, COUNT(*)::int AS stop_count FROM domain_logistics.tour_stops "  # nosec S608
-                    f"WHERE tour_id IN ({placeholders}) GROUP BY tour_id"
+                    f"SELECT tour_id, lat, lng FROM domain_logistics.tour_stops "  # nosec B608
+                    f"WHERE tour_id IN ({placeholders}) ORDER BY stop_order"
                 ),
                 bind,
             ).mappings().all()
-            cmap = {str(c["tour_id"]): int(c["stop_count"] or 0) for c in counts}
-            for r in tour_rows:
-                r["stop_count"] = cmap.get(str(r["id"]), 0)
-        else:
-            for r in tour_rows:
-                r["stop_count"] = 0
+        touren_mit_stopps(tour_rows, stopps)
         return tour_rows
     except HTTPException:
         raise
@@ -261,6 +258,7 @@ def create_tour(
         stops = []
         for i, stop in enumerate(body.stops or []):
             stop_id = str(uuid.uuid4())
+            daten = stopp_mit_zielort(db, x_tenant_id, stop.model_dump())
             db.execute(
                 text("""
                     INSERT INTO domain_logistics.tour_stops
@@ -273,16 +271,16 @@ def create_tour(
                     "id": stop_id,
                     "tour_id": tour_id,
                     "stop_order": stop.stop_order if stop.stop_order is not None else i,
-                    "address": stop.address,
-                    "lat": stop.lat,
-                    "lng": stop.lng,
+                    "address": daten.get("address"),
+                    "lat": daten.get("lat"),
+                    "lng": daten.get("lng"),
                     "customer_id": stop.customer_id,
                     "delivery_note_ref": stop.delivery_note_ref,
                     "planned_arrival": stop.planned_arrival,
                     "tenant_id": x_tenant_id,
                 },
             )
-            stops.append({"id": stop_id, **stop.model_dump()})
+            stops.append({"id": stop_id, **daten})
         db.commit()
         return {"id": tour_id, **body.model_dump(exclude={"stops"}), "stops": stops, "tenant_id": x_tenant_id}
     except HTTPException:
@@ -430,7 +428,7 @@ def patch_stop(
         if not updates:
             raise HTTPException(status_code=422, detail="Keine Felder zum Aktualisieren")
         db.execute(
-            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} WHERE id = :stop_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_logistics.tour_stops SET {', '.join(updates)} WHERE id = :stop_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()
@@ -449,8 +447,8 @@ def patch_stop(
 
 @router.post(
     "/tours/{tour_id}/cancel",
-    summary="Tour stornieren (fail-closed)",
     response_model=LogisticsTourOut,
+    summary="Tour stornieren (fail-closed)",
 )
 def cancel_tour(
     tour_id: str,
@@ -514,8 +512,8 @@ def cancel_tour(
 
 @router.post(
     "/tours/{tour_id}/stops/{stop_id}/cancel",
-    summary="Tour-Stopp stornieren (fail-closed)",
     response_model=LogisticsTourOut,
+    summary="Tour-Stopp stornieren (fail-closed)",
 )
 def cancel_stop(
     tour_id: str,
@@ -782,7 +780,7 @@ def save_pod(
         db.execute(
             text("""
                 UPDATE domain_logistics.tour_stops
-                SET pod_data = :pod::jsonb, status = 'ABGELIEFERT'
+                SET pod_data = CAST(:pod AS jsonb), status = 'ABGELIEFERT'
                 WHERE id = :stop_id AND tour_id = :tour_id
             """),
             {"pod": pod_json, "stop_id": stop_id, "tour_id": tour_id},
@@ -879,7 +877,6 @@ def get_statistics(
         where = " AND ".join(tour_conds)
 
         stats = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT
                     COUNT(DISTINCT t.id)                                        AS total_tours,
@@ -894,20 +891,19 @@ def get_statistics(
                 FROM domain_logistics.tours t
                 LEFT JOIN domain_logistics.tour_stops s ON s.tour_id = t.id
                 WHERE {where}
-            """),
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().first()
 
         # km aus GPS-Events (Haversine-Summe)
         gps_rows = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT e.lat, e.lng, e.event_ts
                 FROM domain_logistics.tour_events e
                 JOIN domain_logistics.tours t ON t.id = e.tour_id
                 WHERE e.event_type = 'GPS' AND {where}
                 ORDER BY e.tour_id, e.event_ts
-            """),
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
 
@@ -950,8 +946,8 @@ class DispositionCheckIn(BaseModel):
 @router.post(
     "/tours/{tour_id}/disposition-check",
     status_code=200,
-    summary="Kapazitäts- und Zeitfenster-Check (DOM-LOG-004.2)",
     response_model=LogisticsTourOut,
+    summary="Kapazitäts- und Zeitfenster-Check (DOM-LOG-004.2)",
 )
 def disposition_check(
     tour_id: str,
@@ -999,8 +995,8 @@ class EpodSettleIn(BaseModel):
 @router.post(
     "/tours/{tour_id}/stops/{stop_id}/settle",
     status_code=201,
-    summary="ePOD-Settlement (DOM-LOG-004.3)",
     response_model=LogisticsTourOut,
+    summary="ePOD-Settlement (DOM-LOG-004.3)",
 )
 def settle_epod_stop(
     tour_id: str,

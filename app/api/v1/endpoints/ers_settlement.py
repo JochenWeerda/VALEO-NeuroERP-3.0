@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.ers_settlement_schemas import ErsSettlementOut
@@ -79,7 +80,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
     ]:
         try:
             row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 {"id": gr_id, "tid": tenant_id},
             ).fetchone()
             if row:
@@ -227,10 +228,10 @@ def trigger_ers(
     # Belegbruch schließen: Kreditoren-OP für ERS-Rechnung anlegen
     if gr_amount and gr_amount > 0:
         try:
-            from datetime import date as _date
             import uuid as _uuid
-            today = _date.today().isoformat()
-            due_in_30 = (_date.today().replace(day=min(_date.today().day + 30, 28))).isoformat()
+            business_day = business_today()
+            today = business_day.isoformat()
+            due_in_30 = business_date_after(30, from_date=business_day).isoformat()
             ers_inv_nr = f"ERS-{inv_row[0]}"
             db.execute(text("""
                 INSERT INTO domain_erp.offene_posten

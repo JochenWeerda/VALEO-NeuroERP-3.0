@@ -33,7 +33,7 @@ const NUMPAD_KEYS = [
   [',', '0', 'C'],
 ] as const
 
-const TOUCH_BTN = 'min-h-[3rem] min-w-[3rem] text-lg font-semibold touch-manipulation active:scale-95'
+const TOUCH_BTN = 'min-h-12 min-w-12 text-lg font-semibold touch-manipulation active:scale-95'
 
 export function TouchBedienfeld({ onAction, disabled }: TouchBedienfeldProps): JSX.Element {
   return (

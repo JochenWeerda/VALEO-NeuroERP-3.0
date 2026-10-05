@@ -237,7 +237,7 @@ class IstAggregationService:
             FROM {src.header_table} h
             JOIN {src.item_table} i ON i.{src.join_key} = h.id
             WHERE {where}
-            """  # noqa: S608 — alle Identifier stammen aus code-kontrollierter Config
+            """  # noqa: S608 — alle Identifier stammen aus code-kontrollierter Config  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         )
         return [dict(r) for r in self.db.execute(sql).mappings().all()]
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kundenportal — Personalisierte Empfehlungen (Cross-Sell Intelligence)
  *
  * Zeigt dem Kunden:
@@ -12,7 +12,7 @@
 
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -56,10 +56,10 @@ const TYP_CONFIG: Record<string, { icon: React.ReactNode; farbe: string; badge: 
   vertrag_erinnerung: { icon: <Bell className="h-5 w-5" />, farbe: 'border-red-300 bg-red-50', badge: 'Erinnerung' },
 }
 
-const PRIORITAET_FARBE: Record<string, string> = {
-  hoch: 'bg-red-100 text-red-800',
-  mittel: 'bg-amber-100 text-amber-800',
-  niedrig: 'bg-gray-100 text-gray-600',
+const PRIORITAET_FARBE: Record<string, BadgeVariant> = {
+  hoch: 'error',
+  mittel: 'warning',
+  niedrig: 'muted',
 }
 
 function EmpfehlungCard({ e, onGesehen }: { e: Empfehlung; onGesehen: (id: string) => void }) {
@@ -70,33 +70,33 @@ function EmpfehlungCard({ e, onGesehen }: { e: Empfehlung; onGesehen: (id: strin
       <CardContent className="pt-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1">
-            <div className="mt-0.5 text-gray-600">{cfg.icon}</div>
+            <div className="mt-0.5 text-muted-foreground">{cfg.icon}</div>
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="font-semibold text-gray-900">{e.titel}</span>
-                <Badge className={PRIORITAET_FARBE[e.prioritaet]}>{e.prioritaet}</Badge>
+                <span className="font-semibold">{e.titel}</span>
+                <Badge variant={PRIORITAET_FARBE[e.prioritaet]}>{e.prioritaet}</Badge>
                 <Badge variant="outline">{cfg.badge}</Badge>
-                {e.gesehen && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                {e.gesehen && <CheckCircle2 className="h-4 w-4 text-status-success" />}
               </div>
-              <p className="text-sm text-gray-600 mb-3">{e.beschreibung}</p>
+              <p className="mb-3 text-sm text-muted-foreground">{e.beschreibung}</p>
               <div className="flex items-center gap-2">
                 <Button
-                  size="sm"
+
                   onClick={() => {
                     onGesehen(e.empfehlung_id)
                     // Navigation zu relativer Portal-Route
                     // In Produktion: navigate(e.cta_ziel)
                   }}
-                >
+                 className="min-h-touch">
                   {e.cta_label}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
                 {!e.gesehen && (
                   <Button
-                    size="sm"
+
                     variant="ghost"
                     onClick={() => onGesehen(e.empfehlung_id)}
-                    className="text-gray-500"
+                    className="min-h-touch text-muted-foreground"
                   >
                     Als gesehen markieren
                   </Button>
@@ -119,7 +119,7 @@ export default function EmpfehlungenPage() {
     queryKey: ['portal-empfehlungen', DEMO_KUNDEN_NR],
     queryFn: async () => {
       const res = await apiClient.get<{ items: Empfehlung[]; count: number }>(
-        `/portal/empfehlungen/${DEMO_KUNDEN_NR}`,
+        `/api/v1/portal/empfehlungen/${DEMO_KUNDEN_NR}`,
       )
       return res.data
     },
@@ -127,7 +127,7 @@ export default function EmpfehlungenPage() {
 
   const gesehenMutation = useMutation({
     mutationFn: async (empfehlung_id: string) => {
-      await apiClient.post(`/portal/empfehlungen/${DEMO_KUNDEN_NR}/gesehen/${empfehlung_id}`)
+      await apiClient.post(`/api/v1/portal/empfehlungen/${DEMO_KUNDEN_NR}/gesehen/${empfehlung_id}`)
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['portal-empfehlungen'] })
@@ -145,16 +145,16 @@ export default function EmpfehlungenPage() {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-amber-500" />
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-status-warning" />
             Empfehlungen für Sie
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Personalisierte Angebote basierend auf Ihrer Schlagkartei und Ihren Aktivitäten
           </p>
         </div>
         {ungesehen > 0 && (
-          <Badge className="bg-red-500 text-white text-base px-3 py-1">
+          <Badge variant="error" className="text-white text-base px-3 py-1">
             {ungesehen} neu
           </Badge>
         )}
@@ -165,9 +165,9 @@ export default function EmpfehlungenPage() {
         {['alle', 'ankauf_kontrakt', 'rohware_angebot', 'lohndienst', 'vertrag_erinnerung'].map((f) => (
           <Button
             key={f}
-            size="sm"
             variant={filter === f ? 'default' : 'outline'}
             onClick={() => setFilter(f)}
+            className="min-h-touch"
           >
             {f === 'alle' ? 'Alle' : TYP_CONFIG[f]?.badge ?? f}
           </Button>

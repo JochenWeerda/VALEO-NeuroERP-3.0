@@ -259,7 +259,7 @@ async def create_buchungslog_eintrag(
                  changes, user_id, user_email, ip_address, timestamp)
             VALUES
                 (:id, :tenant_id, :entity_id, 'journal_entry', :action,
-                 :changes::jsonb, :user_id, :user_id, NULL, :timestamp)
+                 CAST(:changes AS jsonb), :user_id, :user_id, NULL, :timestamp)
         """), {
             "id": log_id,
             "tenant_id": tenant_id,

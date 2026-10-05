@@ -3,9 +3,9 @@ import { Loader2, Volume2, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import type { ChatMessage } from './useCopilotChat'
 
-const DOCK_WIDTH = 384
 const BUTTON_SIZE = 48
 const BUTTON_BOTTOM_OFFSET = 24
 const BUTTON_RIGHT_OFFSET = 24
@@ -41,8 +41,10 @@ export function CopilotDockPanel({
   playingVoiceSummary = false,
   onDismissVoiceSummary,
 }: CopilotDockPanelProps): JSX.Element {
+  const isTouch = useTouchDevice()
   return (
     <>
+      {isTouch ? null : (
       <Button
         onClick={onToggleOpen}
         className="fixed z-40 rounded-full font-semibold shadow-lg"
@@ -56,19 +58,25 @@ export function CopilotDockPanel({
       >
         Chat
       </Button>
+      )}
 
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full flex-col border-l bg-card shadow-2xl transition-transform duration-300 ease-out ${
-          open ? 'translate-x-0' : 'translate-x-full'
-        }`}
-        style={{ width: `${DOCK_WIDTH}px` }}
+        className={`fixed inset-y-0 right-0 z-50 flex h-full flex-col border-l bg-card shadow-2xl transition-transform duration-300 ease-out ${
+          isTouch ? 'left-0 w-full max-w-none' : 'w-full max-w-md'
+        } ${open ? 'translate-x-0' : 'translate-x-full'}`}
+        hidden={!open}
         {...(!open ? { inert: '' } : { role: 'dialog' as const, 'aria-modal': true as const, 'aria-label': 'Copilot Advisor' })}
       >
         <div className="border-b bg-muted/50 p-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <span className="font-semibold text-primary">Copilot Advisor</span>
-            <Button size="sm" variant="ghost" onClick={onToggleOpen} aria-label="Chat schliessen">
-              x
+            <Button
+              variant="ghost"
+              className="min-h-touch shrink-0 touch-manipulation"
+              onClick={onToggleOpen}
+              aria-label="Chat schliessen"
+            >
+              Schliessen
             </Button>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
@@ -96,7 +104,7 @@ export function CopilotDockPanel({
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7"
+                      className="min-h-11 min-w-11"
                       disabled={playingVoiceSummary}
                       aria-label="Zusammenfassung vorlesen"
                       onClick={onPlayVoiceSummary}
@@ -113,7 +121,7 @@ export function CopilotDockPanel({
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7"
+                      className="min-h-11 min-w-11"
                       aria-label="Voice-Zusammenfassung schliessen"
                       onClick={onDismissVoiceSummary}
                     >

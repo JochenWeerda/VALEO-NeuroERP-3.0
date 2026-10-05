@@ -4,12 +4,671 @@ type: reference
 audience: [entwickler, agent]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-06-30
-version: 3.3.0
+last_reviewed: 2026-09-29
+version: 3.4.0
 description: Tracker aller bekannten offenen Luecken, Issues und technischen Schulden in VALEO NeuroERP — Referenz fuer Priorisierung und Gap-Closure.
 ---
 
 # Open Gaps and Known Issues
+
+## HANDSHAKE-GAP-CLOSURE — vier benannte Befunde (2026-10-05)
+
+Bank-Proof-Fixture korrigiert: migriertes Schema kopieren, nur fehlenden
+privaten FK ergaenzen; 32 Bankvertraege bestanden statt 31 Setup-Fehler.
+Ledger-Optionen SQL-begrenzt und fetchmany(limit), Seitentest und Ratsche
+gruen. Journalnummern-UQ je Mandant statt systemweit: Migration/ORM und
+sechs echte private PG-Vertraege und gemeinsame Integration abgeschlossen:
+Merge-Revision zusammenfuehrung_20261005_preis_journal (4b513ff75), genau ein
+Head. Read-only check_journal_identity.py ist im vorhandenen Probe PASS;
+Global-UQ entfernt und Tenant/Nummern-UQ wirksam. 40 gezielte Checks nach
+Integration bestanden, inklusive zweier echter Gate-Faelle. 380 Regressionen insgesamt bestanden.
+ADR-077 entscheidet `domain_inventory.weighing_tickets` als fuehrenden
+Wiegeschein; Entscheidungs-Handshake geschlossen. Technischer Rueckbau der
+Mobile-/Operations-Wiege-Altverbraucher bleibt ausdruecklicher Folge-Slice.
+Nachweis: [Handshake-Abnahme](../quality-assurance/handshake-gap-closure-20261005.md).
+
+
+## CASH-CLOSE-DIRECTBOOK — Scheinbuchung entfernt, echter Abschluss offen
+
+2026-10-05: cash/close-day summiert keine Tagesjournale mehr und erzeugt
+keinen posted-Header/Zeilen auf geratenem Konto 1000. HTTP 409 mit
+fachlichem Grund, keine SQL/DML/Commits, wiederholte Aufrufe unveraendert.
+397 Regressionen plus 12 gezielte API-/OpenAPI-Checks bestanden; reale private
+Journal-Snapshots erhalten. ADR-076 Proposed und Finance Domain Pack;
+QA: [Kassen-Direktbuchung](../quality-assurance/cash-close-retirement-20261005.md).
+Offen: Belegter Kassenbestand, Bewertung, Gegenkontierung und atomarer
+Abschluss ueber zentralen Journal-/Perioden-/Auditvertrag. Vorhandene Maske
+zeigt HTTP-Fehler; sie ist kein fachlich fertiger Kassenabschluss. Fremdes
+Global-OpenAPI-Refresh unberuehrt, eigener Routen-Snapshot bereit.
+Source-Whitelist/weitere rohe Journal-Schreiber bleiben separate Integration.
+
+## JOURNAL-TRANSACTION-OWNERSHIP — Service bereit, Consumer-Integration offen
+
+2026-10-05: commit_on_success=False erlaubt aeussere Transaktionen fuer alle
+sechs Journalmutationen. Sie flushen und behalten Sperren bis zum aeusseren
+Commit/Rollback. 337 Regressionen, 16 neue echte PostgreSQL-Faelle belegen
+Peer-Sichtbarkeit und vollstaendiges Rollback auch nach mehreren erfolgreichen
+Schritten und spaeterem Domain-/SQL-Fehler. QA:
+[Transaktionssteuerung](../quality-assurance/journal-transaction-ownership-20261005.md).
+Default-Aufrufer bleiben selbst committend. API/Repository/Posting-Consumer
+muessen die aeussere Steuerung explizit uebernehmen; log_fibu_audit und Anchor
+committen weiterhin selbst. Diese Faehigkeit allein ist keine geschlossene
+Audit-/Consumer-Atomizitaet. API/DTO-Fremdclaim und Schema/Hash-Gaps weiter offen.
+
+## JOURNAL-PERIOD-ENFORCEMENT — Zentraler Guard geschlossen, weitere Schreiber offen
+
+2026-10-05: Anlage/Post/Storno pruefen verpflichtend ihre Zielperiode.
+Anlage/Post verwenden Buchungsdatum, Storno das neue Buchungsdatum. Eine
+explizite Create-Periode muss passen. Shared-Journal-/Exclusive-Periodensperre
+schliesst das Rennen auch ohne Periodenzeile; READ COMMITTED und FOR SHARE
+sichern frischen Zustand. Close/Reopen und Perioden-API Create/Update
+verwenden dieselbe Sperre. Vorhandenes NULL/unknown sperrt, fehlende Zeile
+bleibt nach bestehendem Vertrag offen. ADJUSTING bleibt buchbar.
+371 Journal-/Periodentests plus 25 Statusvertraege bestanden; 29 neue
+(19 PostgreSQL), vier echte Wartebelege. Globalen DDL-Test durch privaten
+Schemafehlerfall ersetzt. QA:
+[Periodenpflicht](../quality-assurance/journal-period-enforcement-20261005.md).
+Offen bleiben andere rohe Journal-/OP-Schreiber und deren gemeinsame
+Abschlussreife-/Perioden-/Transaktionsintegration. Kein globaler Buchungs-
+oder GoBD-Beleg. API-Fehlermapping, Audit/Anchor-Atomizitaet, Schema/Hash,
+NULL-Waehrung und Cancel-Grund bleiben eigene offene Vertraege.
+
+## JOURNAL-CREATE-CANONICAL — Zweiter Anlageweg entfernt, API/Schema offen
+
+2026-10-05: Repository-Create nutzt FinanceTransactionService statt eigener
+JSON/Float-Hashberechnung. Explizite Waehrung und Buchungsdatum gespeichert;
+Storno erhaelt Waehrung einschliesslich explizitem NULL. Nicht speicherbare
+Steuer-/Kostenstellen-/Profitcenter-/Segmentangaben werden abgewiesen;
+DTO-Leerdefaults enthalten keine Fachinformation. Fremdtenant, freie
+Stempel/Status/ID-Felder und widerspruechliche Kopfsummen abgewiesen.
+321 Regressionen, 39 neue (fuenf PostgreSQL); vorhandener valeo_probe,
+Revision zusammenfuehrung_20261005, ohne eigenen Migrationslauf. QA:
+[Journalanlage](../quality-assurance/journal-create-canonical-20261005.md).
+Die darunter genannten Repository-Create-Gaps vom vorherigen Stand sind
+mit diesem begrenzten Vertrag geschlossen. Offen bleiben API-HTTP-Mapping/
+Session/Audit/Anchor, NULL-Waehrung im Response-DTO, aktive fremde API/DTO-
+Claims, Datumsnormalisierung und vollstaendiger Hash. ORM-Laengen und
+reales Schema widersprechen sich noch (entry_number 20/50, reference 50/255,
+description VARCHAR(200)/TEXT; Datum DateTime/DATE). Keine Migration in
+fremder Nutzung, keine erfundene Datenkorrektur oder globale API-Abnahme.
+
+## JOURNAL-REPOSITORY-LIFECYCLE — Mutationen zentral, API/Anlage offen
+
+2026-10-05: JournalEntryRepositoryImpl delegiert Update/Delete/Post/Reverse
+an FinanceTransactionService. Get/Exists/Count greifen nicht mehr auf die
+fehlende is_active-Spalte zu; Lesefehler werden nicht als leeres Journal
+verschluckt. 282 Tests, 35 neue (27 PostgreSQL), zwei neue echte
+Repository-Wartebelege inkl. vorab gecachtem Zustand. QA:
+[Repository-Lifecycle](../quality-assurance/journal-repository-lifecycle-20261005.md).
+Offen: Repository-Create mit anderem Hashpayload und still verworfenen
+DTO-Feldern; API faengt Domainfehler noch als HTTP 500 ab, hat einen eigenen
+Session-/Audit-/Anchor-Weg. Nicht unterstuetzte Datumsupdates werden jetzt
+explizit abgewiesen statt ungesichert geschrieben. API/DTO-Dateibesitz ist
+weiter im fremden L3-JOURNAL-SOURCE-20260910 als in arbeit eingetragen.
+Cancel-Grund, vollstaendiger Hash/Schema, weitere SQL-Schreiber, Consumer-
+Atomizitaet und Bankintegration offen. Keine globale GoBD-/API-Abnahme.
+
+## JOURNAL-LIFECYCLE-INTEGRITY — Service serialisiert, API/Repository noch offen
+
+2026-10-02: Kopf-FOR-UPDATE mit frischem ORM-Zustand fuer alle Service-
+Mutationen; Zeilen-Lesesperre, Stempelerhalt bei Delete-Abweisung/Cancel,
+eigene ungestempelte Altentwuerfe loeschbar. 247 Tests, 16 neue PostgreSQL-
+Faelle, fuenf echte wartende Paralleltransaktionen inkl. gecachtem Zustand.
+QA: [Lifecycle-Vertrag](../quality-assurance/journal-lifecycle-integrity-20261002.md).
+Fortschritt 2026-10-05: Repository-Lifecycle delegiert jetzt an den Service.
+Offen: Journal-API Fehler-/Session-/Auditvertrag und Repository-Create;
+Cancel-Grund ohne Journal-ORM-Mapping/Audit, Consumer-Atomizitaet, Schema/Hash,
+Bewertung und Bankintegration. Kein globaler Stempel-/Delete-/Concurrency-Beleg.
+
+## JOURNAL-AMOUNT-INTEGRITY — Service-Guard geschlossen, Bewertung/Schema offen
+
+2026-10-02: Exakte endliche positive ausgeglichene Centbuchungen im Service;
+Create ohne Datenbankzugriff bei ungueltigem Betrag, erneute echte Zeilen-/
+Kopf-/Tenant-/Kontopruefung vor Post/Reverse. Produktions-Nullbetragshelper
+entfernt, fehlende Bewertung gemeldet und keine FiBu-Referenz behauptet.
+231 Tests bestanden (46 neue, 18 PostgreSQL). QA:
+[Betrags-/Lifecycle-Vertrag](../quality-assurance/journal-amount-integrity-20261002.md).
+Offen bleiben reale Bewertung, andere Schreiber, physische Betragsdubletten,
+Concurrency weiterer Journalwege/Consumer-Atomizitaet, Hash, Bankintegration
+und Handbuch-Drift. Guard ist keine Produktionskosten- oder GoBD-Abnahme.
+
+## JOURNAL-ACCOUNT-ID — Service/Verbraucher kanonisch, Schema/andere Schreiber offen
+
+2026-10-02: Globale OR-Kontenaufloesung und accountId-Fallback im
+FinanceTransactionService entfernt. Neun nummernkonfigurierte Verbraucher
+loesen eigene Nummern ausdruecklich zu IDs auf; eine gebuendelte Pruefung
+vor Kopf/Zeilen-Schreiben. Automatische Sales-Kontenanlage und toter zweiter
+Invoice-GL-Weg entfernt. 186 Tests bestanden (26 neue, 16 PostgreSQL).
+QA: [Kontoreferenz-Vertrag](../quality-assurance/journal-account-identity-20261002.md).
+Weiter offen: globale account_number-UQ, Komposit-Tenant-FKs/andere Schreiber,
+Consumer-Atomizitaet, vollstaendiger Hash-Payload/Lifecycle/Betragskanonisierung,
+Bankintegration und Handbuch-Drift im parallelen Worktree. Neu belegt:
+Leere/Nullbetragsjournale im Service sind jetzt abgewiesen und Produktions-
+Scheinbuchungen entfernt (JOURNAL-AMOUNT-INTEGRITY). Reale Bewertung offen.
+
+## JOURNAL-STAMP-INTEGRITY — Service-Guard geschlossen, Journalkanonisierung offen
+
+2026-10-02: Verschluckter Stempelfehler und konkurrierende Sequenzvergabe im
+FinanceTransactionService behoben (115 Tests, 19 neue, 14 echte PostgreSQL).
+READ-COMMITTED-Transaktionssperre, konsistente Sequenz/Vorgaenger-Metadaten,
+keine Teilstempel oder Create/Reverse-Commits bei Fehler. QA-Nachweis:
+quality-assurance/journal-stamp-integrity-20261002.md.
+Offen bleiben kanonischer Hash-Payload inkl. Zeilen, alle weiteren Schreiber,
+Delete-Integration weiterer Journalwege, Konto-ID/Nummern-Verwechslung anderer Journalwege und
+skalierbarer Kettenzustand. Bankmigration/Betriebsprobe weiter offen.
+
+## BANK-RECONCILIATION-PROOF — Code geprueft, Integration noch offen
+
+Explizite GL-Konto-ID mit Tenant-FK statt verlorenem gl_account_number;
+Header-Tenant/Konto, ein SQL-Snapshot, Decimal/null und typisierte Statuswerte.
+55 Backend- und fuenf Maskentests bestanden. Gemeinsame Migration nicht
+angewandt: parallele EUDR-Kette braucht koordinierten Merge-Head und danach
+Betriebsprobe. Kein abgeschlossener Lieferstatus. QA:
+[Saldennachweis](../quality-assurance/bank-reconciliation-proof-20261002.md).
+Neu belegte Journal-Gaps: Kontoreferenzen anderer Journalwege, unvollstaendiger
+GoBD-Hash-Payload, globale account_number-UQ und Betragsdubletten. Auch Bank/GL-
+Zeilenlink, Bankstamm-Audit/RBAC und native Maskenkonvergenz offen.
+
+## BANK-DIRECTBOOK — unsicheren Altweg entfernt, Hauptbuchnachweis offen
+
+Entwicklungsfreigabe fuer Altlasten repositoryweit in AGENTS.md. Direkte
+Abgleichsbuchung mit geratenen Konten geloescht; true-Flag explizit 409 vor
+DB-Zugriff, False-Default fuer interne Calls. Keine Vorschlaege, stets keine
+Buchungsfreigabe. Maske entfernt lokale Scheinzuordnung und Book-Aktion;
+Save prueft. 62 Backend- und zwei Maskentests bestanden.
+Offen: Mandant/Konto-/GL-Bindung, Journalbetragsdubletten, stille Lesefehler,
+PARTIAL/Vollstaendigkeitsnachweis und CSV-Saldonachweis. Der bestehende
+Saldenvergleich ist hiermit nicht als korrekt abgenommen. Typecheck weiter
+rot durch bestehendes CallWidget.tsx:54. QA: bank-directbook-retirement-20261001.md.
+
+## BANK-STATEMENT-DATE — ein fachlicher Stichtag (2026-10-01)
+
+**Geschlossen:** Importdatum statt Saldo-Datum, verschiedene CSV-Stichtage,
+Datumskonflikt bei Replay, MT940-Buchungen ausserhalb Saldointervall und
+leere Fremdwaehrung. 169 Vertraege bestanden (15 neu), bestehender valeo_probe,
+keine neue Datenbank/Dockerinstanz oder Reset. Kein neues API-/Schemafeld.
+**Offen:** Historische kanonische Kopf-Daten, Bankreconciliation (Query-Tenant,
+Kontobindung/Hauptbuch/Stichtag und angenommene Abstimmbarkeit), weitere
+Bankprofile und GitHub-CI/Deployment. Lager-Referenzdubletten gefunden;
+Inventory-WIP wird separat bearbeitet. Nachweis:
+docs/quality-assurance/bank-statement-date-20261001.md.
+
+## BANK-LEGACY-IMPORT-INTEGRATION — zweiter Bankweg entfernt (2026-10-01)
+
+**Geschlossen:** bank_import.py / INT-BANK-001, vier alte DTOs, konkurrierende
+API-/Parser-/Testvertraege und zwei alte domain_finance-Banktabellen entfernt.
+Ein aktives Modell domain_erp unter /api/v1/finance. Nach expliziter User-
+Freigabe Entwicklungs-Altbestand entfernt, kein Archiv/Adapter. Migration auf
+beiden vorhandenen Datenbanken verifiziert; keine neue DB/Dockerinstanz,
+kein Reset, kein zweites Matching oder OP-Umschreiben. 187 Vertraege bestanden,
+davon 9 neue. Inventare, Architekturindex, OpenAPI und Tabellenkatalog nachgezogen.
+**Offen:** GitHub-CI/Deployment und kanonische Fachgaps (weitere CAMT-Profile,
+semantische Duplikate, Reversal/GL); keine pauschale Bank-/Gesamtfreigabe.
+Nachweis: docs/quality-assurance/bank-legacy-retirement-20261001.md.
+
+## COVERAGE-RETIRED-MODULE-INTEGRITY — reale Loeschung und Messwerte (2026-10-01)
+
+**Geschlossen:** verwaiste Coverage-Schwellen nach echter Modul-Loeschung,
+fehlende Quelldatei trotz XML-Erfolg und NaN/Infinity-Vergleichsumgehung.
+Git-/Dateinachweis schuetzt Retirement; Rename-Nachfolger behaelt mindestens
+die alte Schwelle. Umgeschriebene/aus app verschobene Nachfolger werden nicht
+als unbedeutende Loeschung angenommen. Vier Kontrakt-Leichen entfernt,
+alle 99 lebenden Schwellen exakt unveraendert.
+**Offen:** Reale Coverage-Unterschreitungen und fehlende Messwerte im vorhandenen
+datierten Bericht; frische SHA-/Run-gleiche CI-Evidence erforderlich. Keine
+behauptete Gesamtabdeckungsverbesserung. Nachweis:
+`docs/quality-assurance/coverage-retired-module-integrity-20261001.md`.
+
+## BANK-CAMT-PARSER-INTEGRITY — gebuchte Salden und Einzelzahlungen (2026-10-01)
+
+**Geschlossen:** falsche erste Saldoart/Vorzeichen, errechneter statt gepruefter
+Endsaldo, Datumsersatz durch heute, ungebuchte/mehrdeutige Einzelzuordnung,
+verschachtelte Ersatzwerte sowie verlorene Gegenkonten/Referenztexte.
+OPBD/CLBD und BOOK im CAMT.053.001.02-Einzelauszugsprofil abgestimmt;
+134 Vertraege, davon 32 neue CAMT-Vertraege bestanden auf vorhandenem valeo_probe.
+**Offen:** Weitere Versionen/Bankprofile und andere Importwege, Sammler-
+aufloesung, FX, Retouren, Rueckbuchung/GL und semantische/historische
+Datei-Duplikate. GitHub-CI/Bankprofil-/Deployment-Abnahme extern. Nachweis:
+`docs/quality-assurance/bank-camt-parser-integrity-20261001.md`.
+
+## BANK-MT940-PARSER-INTEGRITY — vollstaendige Zeilen und Salden (2026-10-01)
+
+**Geschlossen:** verlorene :61:-Zeilen ohne optionales :86:, falsche
+Datumslaenge, positive Sollsalden und ignorierter Endsaldo. Begrenztes
+IBAN-Einzelauszugsprofil; Bank-Saldo muss alle Zahlungszeilen exakt abdecken.
+102 Parser-, Finanz- und DQ-Vertraege bestanden auf bestehendem valeo_probe.
+**Offen:** RC/RD-Rueckbuchungsintegration, weitere Bankprofile/SWIFT-Umschlaege,
+nationale Kontokennungen, weitere CAMT-Bankprofile und semantische bzw.
+historische Datei-Duplikate. Fremde CRM-Baselineintegritaet bleibt beim Owner;
+GitHub-CI/Bankprofil-/Deployment-Abnahme extern. Nachweis:
+`docs/quality-assurance/bank-mt940-parser-integrity-20261001.md`.
+
+## BANK-IMPORT-ACCOUNT-REPLAY — Konto und Dateiwiederholung (2026-10-01)
+
+**Geschlossen:** Import auf unbekanntes/fremdes/inaktives Konto,
+ungepruefte IBAN und Kontowaehrung; erneute Zahlung durch identische
+Datei-Bytes in Tenant/Konto/Format. Beide CSV-Routen teilen Sperre und
+Identitaet; Replay zeigt gespeicherten Status ohne zweites Matching/Audit.
+106 verschiedene Vertraege bestanden auf vorhandenem valeo_probe.
+**Offen:** Historische UUID-Importe ohne Dateiidentitaet, gleiche Buchungen
+in unterschiedlichen Bytes/Konto-IDs/Formaten, weitergehende Parserdetails,
+Rueckbuchung/GL und externe CI-/Deployment-Abnahme. Slice-CLI-Fehlaufruf durch
+Ergebnisbeschreibungen als Befehle in beiden eigenen Slices korrigiert. CRM-Godfile
+bleibt beim aktiven Owner. Nachweis:
+`docs/quality-assurance/bank-import-account-replay-20261001.md`.
+
+## BANK-PAYMENT-MATCHING-INTEGRITY — sicherer Abgleich (2026-10-01)
+
+**Geschlossen:** angenommene statt gelesene Zahlung, falscher Belegstatus bei
+Teilzahlung, Fremdmandanten ueber Query, ungesicherte Wiederholung und
+fehlender atomarer Nachweis. Import-, Einzel- und Batchabgleich verwenden
+denselben Vertrag; 82 verschiedene echte und bestehende Vertraege bestanden.
+**Nachzug:** Kontobindung und identische Datei-Bytes in BANK-IMPORT-ACCOUNT-REPLAY
+abgesichert. **Offen:** Historische/semantische Duplikate, Rueckbuchung,
+GL-Journalintegration und weitergehende CAMT-/MT940-Abnahme. Fremde aktive
+CI-Gaps und externe Integration bleiben offen. Nachweis:
+`docs/quality-assurance/bank-payment-matching-integrity-20261001.md`.
+
+## BANK-STATEMENT-IMPORT-INTEGRITY — manueller Import (2026-10-01)
+
+**Geschlossen:** Selbstduplikate gueltiger Zeilen, Erfolg trotz SQL-/Commitfehler,
+Waehrungsverlust und kollidierende Import-IDs. 18 Vertraege im manuellen
+Meilenstein bestanden. Die damalige 501-Sperre fuer auto_match ist im Nachzug
+BANK-PAYMENT-MATCHING-INTEGRITY durch den sicheren gemeinsamen Vertrag ersetzt.
+Aktuelle Abnahme und verbleibende Fach-/Parsergaps stehen im Nachzug.
+Nachweis: `docs/quality-assurance/bank-statement-import-integrity-20261001.md`.
+
+## SECURITY-PATCH-MILESTONE — Paketbefunde (2026-10-01)
+
+**Repo-seitig repariert:** PyJWT 2.15.0, grpc-js 1.14.5, fastify 5.12.5,
+fast-uri 3.1.8 und moment 2.31.0. Frozen Install, JWT-Vertraege und Audits
+geprueft. Root/CRM-Marketing/JavaScript ohne Befunde; AI behaelt drei
+bestehende Embedded-only-Chroma-Bewertungen, ohne Review-Verlaengerung.
+**Extern offen:** GitHub-Alert-Schliessung nach Defaultbranch-Integration,
+CI und Deployment. Nachweis:
+`docs/quality-assurance/security-patch-milestone-20261001.md`.
+
+## TEST-DATABASE-RESOURCE-POLICY — alle Agenten (2026-10-01)
+
+**Verbindlich integriert:** keine zusätzlichen Datenbank-/Dockerinstanzen
+pro Test/Suite/Slice/Agent. Bestehenden Prüfstand mit eigenen isolierten
+Testdaten verwenden. 36 Finanzverträge auf vorhandenem `valeo_probe` grün;
+eigene zusätzliche Datenbank nach Nutzungsprüfung entfernt. Fremde
+Ressourcen bleiben unberührt. Runbook und gemeinsame Agentenregel:
+`docs/quality-assurance/test-database-resource-policy-20261001.md`, `AGENTS.md`.
+
+## PAYMENT-CSV-IMPORT-INTEGRITY — Zahlungsimport (2026-10-01)
+
+**Geschlossen:** Selbstduplikat-Blockade gültiger CSV-Daten, verschwiegene
+Schreibfehler, Verlust der Währung, ID-Kollisionen innerhalb einer Sekunde
+und Abweichung zwischen gerundetem SQL-Betrag und ungerundeter Antwort.
+10 echte PostgreSQL-/HTTP- und sechs bestehende DQ-Verträge grün;
+Dead-Transaction-Inventur und Ratsche stehen auf 75.
+**Offen:** Andere Bankimport-/Matchingwege und die restlichen 75 Fundstellen
+werden hier nicht als geschlossen gewertet. Nachweis:
+`docs/quality-assurance/payment-csv-import-integrity-20260930.md`.
+
+## PAYMENT-EXECUTION-ATOMICITY — Zahlungslauf (2026-09-30)
+
+**Repo-seitig geschlossen:** falscher BEZAHLT-Status bei Teilzahlung,
+interne Teilcommits und verschluckte Ausführungsfehler. Reale PostgreSQL-
+Rollback-, Mandanten-, Wiederholungs- und Paralleltests sind grün.
+**Separat offen:** Bankabnahme und Legacy-Belege ohne Tenantkennung;
+projektweite Godfile-Befunde in fremden aktiven Slices bleiben sichtbar.
+Nachweis: `docs/quality-assurance/payment-execution-atomicity-20260930.md`.
+
+## CODE-IMPROVEMENT-INTEGRITY — verlässliche Pruefungen (2026-09-30)
+
+**Repo-seitig abgeschlossen; externer CI-Nachweis offen.** Pagination wird pro Abfrage
+und Funktion gemessen, Baselines gegen den Ausgangscommit geschuetzt,
+Frontendtests sind verbindlich, Sonar verwendet SHA-/inhaltsgleiche Coverage
+aus demselben Run. Der vorhandene Nightly publiziert lesende Artefakte.
+Nachweis und Grenzen: `docs/quality-assurance/code-improvement-integrity-20260930.md`.
+90 fokussierte Vertraege und der volle Frontend-Lauf (914 Tests) sind lokal gruen.
+
+**Altbestand offen.** Die neue Messung erfasst 289 unbeschraenkte Abfragen in
+262 Funktionen statt der unzureichenden alten Dateizaehlung (53). Das ist
+keine Schuldentilgung. Fachliche Vollaggregate und echte Listen sind je
+Funktion zu klassifizieren und mit Fehlervertraegen abzusichern.
+Lokale Fremdaenderungen an CRM/Maskenbruecke verletzen aktuell die Godfile-
+Ratsche; deren Owner muessen den Strukturabbau liefern, die Baseline bleibt scharf.
+
+**Extern offen.** Erster realer GitHub-Lauf, Branchschutz mit erforderlichen
+Checks und Sonar-Projekt/Token. Keine externe Freigabe wird lokal fingiert.
+
+## DUE-DATE-CALENDAR — vergangene Faelligkeiten behoben (2026-09-30)
+
+**Erledigt.** Elf Pfade interpretierten „in 30 Tagen“ als Austausch des
+Monatstags und konnten dadurch vergangene Faelligkeiten erzeugen. Alle Aufrufer
+verwenden nun `business_today()` und `business_date_after(30)`; Monats-,
+Jahres- und Schaltjahrgrenzen sind getestet. Die Business-Time-Ratsche sinkt
+von 244 auf 212 direkte Kalenderquellen. Details:
+`docs/quality-assurance/due-date-calendar-20260930.md`.
+
+## GODFILE-RATCHET — Gate repariert, Zerlegung offen (2026-09-30)
+
+**Gate erledigt.** Der eingecheckte Stand enthaelt 15 Python-Endpunkte ueber
+1.000 Zeilen. Die alte globale Schwelle 12 war bereits unterschritten und
+blockierte alle spaeteren Backend-Pruefungen. Die neue pfad- und zeilengenaue
+Baseline blockiert neue, verschobene und gewachsene Godfiles und muss bei jedem
+Abbau sinken. Details:
+`docs/quality-assurance/godfile-ratchet-20260930.md`.
+
+**Abbau offen.** Zuerst eignen sich `logistics_tours.py` (1.033),
+`admin_suite.py` (1.038) und `einkauf_bestellvorschlag.py` (1.058).
+`crm_360.py` lag im Arbeitsbaum ueber 1.000 Zeilen. Die Register sind nach
+`crm_360_reads.py` und `crm_360_tabs.py` gezogen; die Datei liegt wieder darunter.
+
+## MERIDIAN-PARTY-OBJECTPAGE — eine Kundenakte (2026-09-30)
+
+**Erledigt.** Lead und Bestandskunde teilen eine native Object Page. KIM und das
+Kunden-Cockpit sind Redirects inklusive `?tab=`. Listen-IDs (`kunden_nr`,
+Partnernummer) und `/verkauf/kunden-stamm/:id` oeffnen denselben Stamm. Chef,
+Praesente, Postfach und Geo sitzen in der ScreenDefinition; Mini-Apps bleiben weg.
+Angebote kommen aus `crm_opportunities`, Historie aus den CRM-Aktivitaeten.
+Aufgaben sind nur Typ Aufgabe oder Task; ein offener Besuch bleibt in der Historie.
+Potenzial ist der juengste Satz aus `public.customer_potential_snapshot`.
+Chef-Anweisungen, Anschriften, Kontoauszug und CPD-Konten sind in der Akte lesbar.
+Rabatte, Preise und das SEPA-Mandat kommen vom Partner.
+Adresse, Branche und das operative Kreditlimit (Ausnahme aus `credit_limits`,
+sonst der Stamm) stehen in der Akte. Koordinaten kommen aus `public.kunden_geo`,
+ein reiner Bestandskunde aus `public.kunden` (`name1`, `tel`).
+Mutationen der Tabs 21–25 bleiben unter `/verkauf/kunden-stamm/:id?pflege=1`.
+`Bearbeiten` oeffnet diese Pflege ueber die Partnerkennung und schreibt auf der Akte nichts.
+
+## POS-ZAHLARTEN + AGRAR-KONTRAKTE — Welle 2, zweiter und dritter Eintrag (2026-09-30)
+
+**Erledigt (POS).** `domain_pos.payment_methods` und `domain_pos.promotions`
+kommen aus `pos_zahlarten_aktionen_20260930`; die Laufzeit-DDL im Endpunkt ist
+weg. Nebenbefund behoben: Ein **Datenbankfehler** lieferte dieselben drei
+Zahlarten wie leere Pflege — eine Stoerung sah aus wie eine Konfiguration.
+Jetzt 503. Fuenf Vertraege gruen gegen den frischen Stand.
+
+**Offen, gehoert dem Agrar-Owner.** `domain_agrar.kontrakt_dispositionen` und
+ihre **Elterntabelle** `domain_agrar.kontrakte` fehlen beide im
+Migrationsstand. Dazu: Laufzeit-DDL in `kontrakte_service.py:410`; die drei
+Dispositions-Endpunkte nehmen `tenant_id` entgegen und benutzen ihn nicht
+(fremder Lese- **und** Schreibzugriff ueber die Kontraktkennung); und
+`kontrakte.py:1001` verschluckt die fehlende Tabelle in eine leere Liste.
+Handshake im Workboard.
+
+
+## WHISTLEBLOWER-EINE-TABELLE — fuenf Befunde in einer Tabelle (2026-09-30)
+
+**Erledigt.** Gefunden beim Abarbeiten der Schema-Drift-Liste. Die Tabelle
+legte sich zur Laufzeit selbst an; zwei Endpunkte schrieben sie mit
+unvereinbaren Formen; es gab keinen Mandantenbezug, weshalb `GET` alle
+Meldungen aller Haeuser listete; die Notiz entstand per f-String in einem
+JSON-Text; und die Routen lagen ohne Praefix unter `/api/v1/reports`, neben den
+Verkaufsauswertungen.
+
+Behoben mit Migration `whistleblower_eine_tabelle_20260930` und einem
+ueberarbeiteten `compliance_whistleblower.py`. Sechs Vertraege gruen gegen
+beide Datenbankstaende. Details:
+`docs/quality-assurance/whistleblower-eine-tabelle-2026-09-30.md`.
+
+**Offen, Produktentscheidung:** Sind der kurze und der LkSG-Weg Dubletten? Beide
+schreiben jetzt dieselbe Tabelle; der eine bietet Token und Notizen, der andere
+Kontaktmail und Statusuebergaenge. Und: Soll die Meldung verschluesselt werden?
+Heute steht sie im Klartext — das ist jetzt wenigstens ehrlich benannt (die
+Spalte hiess `description_encrypted`).
+
+
+## GATE-BLOCKER — die zwei kleinen Blockierer des Quality Gate (2026-09-30)
+
+**Erledigt.** `brace-expansion` von `^2.1.4` auf `^2.1.6` (zwei High-Funde,
+`pnpm audit --audit-level high` jetzt Exit 0) und der Kontrast der
+Kachelueberschrift in `LaunchpadBoard.tsx` **und** `start-dashboard.tsx`.
+
+**Gemessen statt geschaetzt:** Mit `text-muted-foreground` verfehlen alle zwoelf
+Kombinationen aus sechs Chart-Toenen und zwei Deckungsgraden die 4,5:1 (3,18 bis
+4,50). Mit `text-foreground` sind es 8,84 bis 12,52.
+`src/__tests__/kachel-kontrast.test.ts` liest die echten Tokens aus
+`palette.css` und rechnet es nach — deterministisch, im Gegensatz zum axe-Lauf,
+der ohne Backend nur prueft, was gerendert wurde.
+
+**Erledigt (2026-09-30):** Die Pagination-Ratsche steht wieder bei 53 und ihre
+Schwelle blieb unveraendert. Drei CRM-Consent-Listen sind echt paginiert;
+`document_allocations.py` ist als vollstaendiges Belegaggregat begruendet
+ausgenommen. Eine Teilseite wuerde dort Summen und offene Mengen verfaelschen.
+Nachweis: `docs/quality-assurance/pagination-ratchet-restore-20260930.md`.
+
+
+## SCHEMA-DRIFT-GATE — Datenbank gegen Migrationsstand (2026-09-30)
+
+**Erledigt.** `scripts/check_schema_drift.py` vergleicht eine Ziel-Datenbank mit
+einer frisch migrierten: Tabellen, Spalten (Typ, Laenge, Skala, Nullbarkeit),
+Fremdschluessel, CHECK, UNIQUE und Indizes. 15 Unit-Tests ohne Datenbank, ein
+Lauf gegen echtes Postgres. Bewusst keine Ratsche und nicht in CI — der Abstand
+haengt vom Rechner ab.
+
+**Der Befund:** **881 Abweichungen** zwischen `valeo_neuro_erp` und dem
+Migrationsstand. Die Entwicklungsdatenbank ist nie das gewesen, was die
+Migrationen beschreiben. Vier Stichproben von Hand bestaetigt.
+
+**Offen, Entscheidung des Hauses:** 484 Funde sind „fehlt" — die Migration gibt
+es, sie ist auf dieser Datenbank nur nie vollstaendig angekommen. Die Reparatur
+ist ein Neuaufsetzen, keine Migration. Ob die gewachsenen Daten erhalten bleiben
+muessen, entscheidet das Haus; solange sie bleiben, gilt „Schema frisch pruefen,
+Daten gewachsen".
+
+**Offen, gehoert den Fachownern:** 76 Tabellen und Spalten, die der Code benutzt
+und die keine Migration anlegt, plus 21 reine Typunterschiede. Handshake im
+Workboard. 26 weitere ohne Codebezug: dokumentieren, nicht still loeschen.
+
+
+## TOTE-TRANSAKTION — except ohne Rollback (2026-09-30)
+
+**Erledigt.** `scripts/check_dead_transactions.py` (AST-Suche, Ratsche 78, im
+Quality Gate vor der Pagination-Pruefung), 10 Unit-Tests ohne Datenbank, 5
+HTTP-Vertraege gegen den frischen Pruefstand. Der Art.-17-Pfad ist behoben und
+**auditiert**: hashverketteter Eintrag in `domain_shared.audit_logs` mit dem
+Handelnden, dem Betroffenen und dem Loeschprotokoll; ein gescheiterter
+Auditeintrag steht als `audit_fehler` in der Antwort.
+
+**Offen, gehoert den Fachownern:** 18 mutierende Fundstellen in Finanzen (8),
+Agrar (2), Verkauf (1), Lager (3), Logistik (1) und CRM (1) plus zwei im
+Bankimport. Der schwerste ist `payment_runs.py:799`: Die erkennbare Absicht
+„einen Posten ueberspringen, mit den uebrigen weitermachen" haelt nicht — nach
+einem Fehlschlag faellt der ganze Lauf mit 500, und niemand erfaehrt, welcher
+Posten der Ausloeser war. Handshake im Workboard, Einordnung je Stelle in
+`docs/quality-assurance/tote-transaktion-2026-09-30.md`.
+
+**Offen, Entscheidung:** Die 59 lesenden Fundstellen richten keinen unmittelbaren
+Schaden an (die Anfrage endet, die Sitzung wird geschlossen). Ob sie trotzdem
+aufgeraeumt werden, ist eine Frage von Aufwand gegen Gleichfoermigkeit.
+
+
+## DB-PRUEFSTAND — frische Datenbank als Prüfstand (2026-09-30)
+
+**Erledigt.** `scripts/pruefstand_db.py` setzt eine frisch migrierte Datenbank
+auf (drop, create, migrate), idempotent und ohne Zugangsdaten im Code.
+`TEST_DATABASE_URL` oder Ableitung aus `DATABASE_URL`. Regel in CLAUDE.md,
+Runbook unter `docs/quality-assurance/pruefstand-datenbank.md`. Nachweis: die
+elf in CI roten Testdateien laufen gegen einen von null aufgebauten Prüfstand
+mit 87 bestandenen Tests durch.
+
+**Erledigt (SLICE-YAML-INTEGRITY-20260930).** Leere Schlussdokumente werden
+gelesen; befuellte zweite Dokumente und doppelte Schluessel sind explizite
+Fehler. 19 echte Formfehler in abgeschlossenen historischen Slices wurden
+inhaltserhaltend normalisiert. Inventur: 290/290 YAMLs lesbar, null Formfehler.
+Ein Bestandstest verhindert Rueckfaelle; fehlende aktuelle Harness-Felder
+in Legacy-Slices bleiben als Vertragsluecken erkennbar. Details:
+`docs/quality-assurance/slice-yaml-integrity-20260930.md`.
+
+**Offen, Entscheidung:** Der Prüfstand sagt nichts darüber, ob die gewachsene
+Datenbank noch zum Schema passt. Diese Frage beantwortet der Slice
+`SCHEMA-DRIFT-GATE`.
+
+
+## MERIDIAN-BELEG-SYSTEMWEIT — Beleg-Look als Voreinstellung (2026-09-29)
+
+Status: **abgeschlossen, Restpunkte offen.** Slice
+[`docs/agent-ops/slices/MERIDIAN-BELEG-SYSTEMWEIT-20260929.yaml`](../agent-ops/slices/MERIDIAN-BELEG-SYSTEMWEIT-20260929.yaml).
+
+| Lücke | Prio | Stand |
+|---|---|---|
+| Reklamation ohne fachliche Nummer; `reklamation_nr` ist der Primärschlüssel mit Präfix | P2 Qualität | geschlossen 2026-09-30: `REK-JJJJ-NNNNN` je Mandant und Geschaeftsjahr, Bestand migriert |
+| Pilotseiten (`usePilotRenderPlan`: Auftrag, Kontrakt, Kunde-Altpfad) laden nur das aktive Register und erzwingen deshalb `tabs` | P2 UIX | geschlossen 2026-09-30: drei Pilotseiten auf `useUniversalMaskRuntime`, `usePilotRenderPlan` entfernt |
+| Register-Endpunkte `mask-rollouts/*/tabs/*` verlangen UUIDs, Ernteabrechnungen haben Text-IDs; die Register bleiben dann leer mit Fehlermeldung | P2 Agrar | geschlossen 2026-09-30: Text-IDs fuer textbasierte Masken, UUID-Pruefung nur fuer Bestellung und Lieferant |
+| Verkaufschance: Kopfdaten kommen aus dem externen crm-sales-Dienst; Browser-Abnahme ohne Dev-Daten, nur HTTP-Vertrag | P3 | offen |
+| Futteranalyse-Tests hinterlassen Daten im Dev-Mandanten (wie die bestehenden Tests) | P3 | offen |
+| Fremd, nicht Teil des Slices: `test_sales_invoices_api.py` (Kunden ohne `company_name`), `test_feed_advice_screen_definition.py::test_feeding_businesses_are_a_native_grant_aware_worklist` (erwartet Layout ohne `columnNavigation`) | P2 | offen |
+
+## EK-BESTELLUNG-FUEHREND — Native Maske gegen L3 (2026-09-18)
+
+Status: **abgeschlossen 2026-09-29.** Slice
+[`docs/agent-ops/slices/EK-BESTELLUNG-FUEHREND-20260918.yaml`](../agent-ops/slices/EK-BESTELLUNG-FUEHREND-20260918.yaml).
+Die native Maske `einkauf/purchase-order` ist die fuehrende Bestellmaske
+(L3-Kopf, Positionsgrid, drei Bestellfaelle). Die Vereinheitlichung der beiden
+Bestandsspeicher Compat-`purchase-orders` und `domain_einkauf.bestellungen`
+ist ein eigener Folgeslice. Keine fuenfte Custom-Seite. HOME-UIX bleibt
+Besitzer von `bestellungen-liste.tsx`.
+
+| Luecke | Prio | Stand |
+|---|---|---|
+| Bestellkopf ohne Ladetermin, Kontrakt, Skontostaffel, Ansprechpartner | P1 Einkauf | geschlossen in der nativen SD + ORM |
+| Position ohne Lief-Artikel, Gebinde, Gewicht, Lagerfach | P1 Einkauf | geschlossen in der nativen SD + ORM |
+| Drei Bestellfaelle (Bestand/Abverkauf, Direktlieferung, Innovation) | P1 Einkauf | geschlossen als `bestellfall` |
+| Zwei Speicher Compat vs `domain_einkauf` | P1 Einkauf | ausserhalb dieses Slices; eigener Folgeslice |
+| `bestellung-stamm` neben native | P2 | bewusst Compat-Bruecke, nicht fuehrend |
+
+## HOME-UIX-ANWENDER-BEDIENWEGE — Touch, Sprache, Agent (2026-09-17)
+
+Status: **in Arbeit.** Diagnose und erster Schnitt:
+[`docs/design/uix-anwender-bedienwege.md`](../design/uix-anwender-bedienwege.md).
+Chrome (Top-Leiste, Sprache, Tastenkürzel auf Touch), Queue, Kundenliste,
+Ernte-Annahme, Aktivitäten (Datumsfilter), Bestand, OP, Waage-Liste,
+Hofliste und Prozessleitstand nachgeschärft. Bestellungen- und Lieferungen-Liste
+Arbeit zuerst. Verkauf-Lieferschein 44 px. Einkauf-Wareneingang 44 px inkl.
+LS-Suche/Niederlassung. Wizard/NativeSelect 44 px. Angebot 44 px, DS nur Desktop.
+Kundenstamm Register 44 px ohne Tab-23-Copy. Copilot-FAB auf Touch aus,
+Öffnen über Benutzermenü. Angebotsliste Arbeit zuerst, DS nur Desktop.
+Wiegungen: Anlegen zuerst, Schließen 44 px. Wiegeschein-Detail Register 44 px.
+Annahme-Abrechnung: Lieferdaten zuerst, Korrekturen 44 px, kein Settlement-MCP.
+Einkauf-Angebotsliste: ListReport zuerst, DS-Theater nur Desktop.
+Buchungsvorlagen: Anwenden/Löschen 44 px, Anlegen ehrlich noch API.
+LKW-Registrierung und Qualitätsprüfung: Wizard zuerst, Scan/QS 44 px.
+Ein-/Auslagerung und Beladung: Wizard zuerst. Disposition: Tabelle zuerst.
+Verladung-Liste und Inventur: Arbeit zuerst. Kontraktliste: Tipp statt Doppelklick.
+Reklamationen: Tabelle zuerst, kein Rohrot.
+Kontrakt-Detail: Operator-h1, Register 44 px. Rohware: Wizard zuerst.
+Positionsmonitor/Alarme/Labor-Liste: Arbeit zuerst, 44 px.
+Lieferanten, Rückverfolgbarkeit, Labor-Auftrag nachgezogen.
+Silo-Terminal, Mengenzeiträume, Ernte/Aussaat/PSM-Listen nachgezogen.
+Schlagkartei, Bodenproben, Sortenregister, Saatgut-Liste, Lagerplätze nachgezogen.
+Maßnahmen, Kulturpflanzen, Dünger, Kunden-Schlagkartei nachgezogen.
+Sachkunde, Auflagen, Biostimulanzien, Artikel, Lagerbewegungen,
+Düngemittel-Stamm, Chargen, Futter, Zertifikate, Versicherungen, Projekte,
+Förderung, Schäden, Schlag-anlegen nachgezogen (Code; Browser folgt).
+Listen-Kartenstapel gilt für DataTable, ListReport und FastTable; form-level MCP bleibt offen.
+Commit `e7aa92913`: Ablage-Export ohne Global-Intercept; KIM, Auftrag, Rechnung
+und Lieferschein 44 px bei unveränderter Claude-Struktur; Register-Tabs
+`min-h-touch`; ELSTER und Bankabgleich Arbeit zuerst, Theater nur Desktop;
+Sprache findet `elster-online` und `bankabgleich`. `sales.invoice.propose` legt einen
+ausstehenden Vorschlag an und bucht keine Rechnung. Weitere MCP-Schreibadapter bleiben offen.
+
+| Lücke | Prio | Stand |
+|---|---|---|
+| Top-Leiste auf 390 px unter 44 px gequetscht; Ctrl+K; Mikrofon `hidden sm:` | P1 | geschlossen im Chrome |
+| Tastenkürzel-Panel mit Hover-Modus auf Handy | P2 | geschlossen (`useTouchDevice` inkl. Breite) |
+| Queue-Zeilen-CTAs `size="sm"` ohne Touch-Höhe | P1 Annahme | geschlossen |
+| Kundenliste Rohblau-Link, knappe Toolbar | P2 Außendienst | geschlossen |
+| Ernte-Annahme 32-px-Felder, unbenannte Lookups | P1 Waage | geschlossen |
+| Aktivitäten KPI vor der Arbeit, Rohblau | P2 Außendienst | geschlossen |
+| Bestand Roh-Orange/Grün, kleine Drilldowns | P2 Disposition | geschlossen |
+| OP Rohblau, knappe Suche | P2 Buchhaltung | geschlossen |
+| Aktivitäten Heute/Diese Woche tot | P2 Außendienst | geschlossen |
+| Waage-Liste Arbeit unter DS-Theater | P1 Annahme | geschlossen |
+| Hofliste F-Tasten-Copy, knappe CTAs | P1 Annahme | geschlossen |
+| Prozessleitstand size=sm, Rohblau | P2 Leitung | geschlossen |
+| Bestellungen-Liste Arbeit unter DS-Theater | P1 Einkauf | geschlossen |
+| Lieferungen tot-Export, Rohblau, DS zuerst | P2 Versand | geschlossen |
+| Lieferschein-Erfassung 32-px-Felder | P1 Verkauf | geschlossen |
+| Einkauf-Wareneingang tote Lookups, 32 px | P1 Einkauf | geschlossen |
+| Angebot 32 px, tot-Chevrons, Doppelklick, DS zuerst | P1 Außendienst | geschlossen |
+| Kundenstamm Tab-23-Copy, 32-px-Zeilen, Header quetscht | P1 Außendienst | geschlossen |
+| Copilot-FAB verdeckt Felder auf 390 px | P1 Außendienst | geschlossen (Menü statt FAB) |
+| Angebotsliste Rollenfokus vor Suche, Rohblau | P1 Außendienst | geschlossen |
+| Wiegungen Theater vor Anlegen, Schließen size=sm | P1 Annahme | geschlossen |
+| Wiegeschein-Detail Eigenbau-Reiter, Theater zuerst | P1 Annahme | geschlossen |
+| Annahme-Abrechnung size=sm, Englisch, Theater zuerst | P1 Buchhaltung | geschlossen |
+| Einkauf-Angebotsliste Theater vor der Liste | P1 Einkauf | geschlossen |
+| Buchungsvorlagen size=sm, tote Neue-Vorlage | P1 Buchhaltung | geschlossen |
+| LKW-Registrierung Theater vor Wizard, Rohblau | P1 Annahme | geschlossen |
+| Qualitätsprüfung size=sm, Theater zuerst | P1 QS | geschlossen |
+| Einlagerung/Auslagerung Rohgrün, Fallkopf zuerst | P1 Disposition | geschlossen |
+| Disposition KPI vor der Tabelle | P1 Disposition | geschlossen |
+| Verladung-Liste KPI vor der Arbeit | P1 Disposition | geschlossen |
+| Inventur Fallkopf/KPI zuerst, 16-px-Checkbox | P1 Disposition | geschlossen |
+| Kontraktliste size=sm Pager, nur Doppelklick | P1 Handel | geschlossen |
+| Reklamationen Fallkopf/KPI zuerst, Hover-Blau | P1 QS | geschlossen |
+| Kontrakt-Detail Formularname, size=sm, Theater zuerst | P1 Handel | geschlossen |
+| Rohware Theater/KPI vor dem Wizard | P1 Annahme | geschlossen |
+| Reklamation-Detail Hover-Blau, Icon-Zurück | P1 QS | geschlossen |
+| Positionsmonitor Doppelklick, 16-px-Checkbox, KPI zuerst | P1 Handel | geschlossen |
+| Kontrakt-Alarme size=sm, KPI-Theater | P1 Handel | geschlossen |
+| Labor-Liste Hover-Blau, Theater zuerst | P1 QS | geschlossen |
+| Lieferanten Hover-Blau, KPI zuerst | P1 Einkauf | geschlossen |
+| Rückverfolgbarkeit size=sm, Hover-Punkte | P1 QS/Lager | geschlossen |
+| Labor-Auftrag 16-px-Checkbox, natives Select | P1 QS | geschlossen |
+| GS1-Scanner Eigenbau-Reiter, Rohindigo | P1 Lager | geschlossen |
+| Silo-Terminal Rohfarben, 40-px-Lagerwahl, nur Farbpunkte | P1 Disposition | geschlossen |
+| Mengenzeiträume Icon-Löschen, size=sm | P1 Handel | geschlossen |
+| Ernte/Aussaat/PSM Hover-Blau, tote Aussaat-Suche | P1 Agrar | geschlossen |
+| Schlagkartei Hover-Blau, Icon-Aktionen, Theater zuerst | P1 Agrar | geschlossen |
+| Bodenproben/Sorten Hover-Blau, KPI zuerst | P1 Agrar | geschlossen |
+| Saatgut-Liste size=sm Icons, KPI zuerst | P1 Agrar | geschlossen |
+| Lagerplätze size=sm, natives Select, Theater zuerst | P1 Disposition | geschlossen |
+| Maßnahmen Hover-Blau, Icon-Aktionen, Theater zuerst | P1 Agrar | geschlossen |
+| Kulturpflanzen Hover-Blau, KPI zuerst | P1 Agrar | geschlossen |
+| Dünger size=sm Icons, KPI zuerst | P1 Agrar | geschlossen |
+| Kunden-Schlagkartei size=sm, Rohamber, KPI zuerst | P1 Innendienst | geschlossen |
+| Sachkunde/Auflagen Hover-Blau, Icon-Erledigt | P1 Agrar | geschlossen |
+| Artikel toter Export, Hover-Blau | P1 Stamm | geschlossen |
+| Lagerbewegungen size=icon, englische Typen | P1 Disposition | geschlossen |
+| Chargen/Futter/Zertifikate/Versicherungen/Projekte/Förderung/Schäden Hover-Blau | P1 Betrieb | geschlossen |
+| Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
+| Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
+| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Kontakt-Log und Rechnungsvorschlag angebunden; Rechnung buchen und übrige Schreibtools offen |
+| KIM Object Page | P1 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
+| Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
+| Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |
+| Ablage-Export vom Global-Handler geschluckt; Folgezeile abgeschnitten | P1 Dokumente | geschlossen 2026-09-29 (`e7aa92913`) |
+| KIM/Auftrag/Rechnung/Lieferschein `size=sm` unter 44 px | P1 Innendienst | geschlossen 2026-09-29; Struktur bleibt Claude |
+| ELSTER Theater vor den Schritten | P1 Buchhaltung | geschlossen 2026-09-29; Sprache `elster-online` |
+| Bankabgleich Theater vor der ObjectPage | P1 Buchhaltung | geschlossen 2026-09-29; Sprache `bankabgleich` |
+| Übrige Fachmasken Seite für Seite | P1 | Slice weiter; weitere MCP-Schreibadapter offen |
+
+## HOME-IA-HIERARCHIE — Startseite zu viele Ebenen gleichzeitig (2026-09-17)
+
+Status: **Sprint 1+2 abgeschlossen.** Sidebar auf `/` eingeklappt,
+Meine Kunden drei Einstiege, Prozessraum als Auswahl statt Unterreiter,
+App-Finder mit Kategorie/Beschreibung ohne Anpassen, Schnellaktionen 4+Mehr,
+KPI mit Drilldown ohne Fake-Lagerzahl, Start-Steuerelemente 44 px. Sprint 3
+(KIM Object Page) ist geschlossen (`MERIDIAN-PARTY-OBJECTPAGE`); vollständige
+WCAG/Responsive/Heute der übrigen Masken bleiben offen.
+Entscheidung: [`docs/design/launchpad-informationshierarchie.md`](../design/launchpad-informationshierarchie.md).
+
+| Lücke | Prio | Slice |
+|---|---|---|
+| Fünf Navigationsebenen gleichzeitig; „Meine Kunden“ fünf überlappende Kacheln | P1 | Sprint 1 — umgesetzt, verifiziert |
+| Gleiche Kachelgewichtung, KPI ohne Trend, zu viele Schnellaktionen | P2 | Sprint 2 — Code da |
+| App-Finder ohne Kategorie, nur im Anpassen-Modus, Suche nur Label | P4 / Sprint 2 | geschlossen |
+| KIM nicht durchgängiger Object-Page-Workspace | P1/P3 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
+| Realtime-Leiste dauerhaft für alle | P4 | Code: nur bei Störung; rollenbasiert danach |
+
+Nicht in diesem Gap: SAP visuell kopieren; erfundene „Heute“-Kennzahlen.
+
+## ASK-ACKERSCHLAGKARTEI — Lastenheft LWK 2017+ (2026-07-16)
+
+Status: **repo-Gaps geschlossen** (Slice ACKER-OPEN-GAPS-009). Traceability: [`docs/specs/agrar/ackerschlagkartei-traceability.md`](../specs/agrar/ackerschlagkartei-traceability.md).
+
+| Cluster | Status |
+|---|---|
+| AS-W1…W10 + Ink.1–5 Kern (Stammdaten, Register, QS/AUM, Lager, Offline-Queue) | erledigt (TDD) |
+| NÄON/ENNI, Precision Farming / Telemetrie | BLOCKED / external_gate |
+| GIS-Geometrieversionierung, Bodenhistorie, native PWA | PARTIAL / Folge |
 
 ## PROD-READINESS-AUDIT-001 — Production-Readiness-Audit & Agenten-Programm (2026-07-02)
 
@@ -22,30 +681,51 @@ P0-Specs aus dem Audit:
 
 | Spec | Status | Kurzinhalt |
 |---|---|---|
-| SPEC-P0-01 | offen | CI-Voll-Gruen oeffentlich nachweisen |
-| SPEC-P0-02 | offen | Live-API-Sweep als Dauergate |
-| SPEC-P0-03 | offen | Kat.-B/D-Produktionsentscheidung und `/readyz` |
+| SPEC-P0-01 | erledigt 2026-07-05 (main) | quality-gate, security-scan, universal-mask-ci grün — Evidenz `artifacts/ci-green-evidence.md`, Run 28732436888 |
+| SPEC-P0-02 | erledigt 2026-07-05 | Runtime-Sweep Nightly-Gate 0×5xx (`scripts/api_runtime_sweep.py`, Repair-Migration `runtime_sweep_repair_20260702`) |
+| SPEC-P0-03 | erledigt 2026-08-23 | Kat.-B/D-Matrix + `/ready`/`/readyz`; Finance-/Bestands-Listen liefern bei DB-Fehler 503+Metrik (Nachzug OP/Matching/Bank) |
 | SPEC-P0-04 | in arbeit | Repo-Hygiene und PII-Bereinigung; Branch `fix/pii-remediation` enthaelt bereits Remediation-Commits |
-| SPEC-P0-05 | offen | Coverage-Ratchet nur noch steigend, kritische Pfade hochziehen |
-| SPEC-P0-06 | offen/external_gate | Branch-Protection und CODEOWNERS |
-| SPEC-P0-07 | offen | SOC-2-Prueferprofil ergaenzen |
-| SPEC-P0-08 | offen/external_gate | Restore-/Backup-Drill reproduzierbar vorbereiten |
+| SPEC-P0-05 | erledigt 2026-09-11 (Belege ≥70%; Gesamt-Coverage weiter COVERAGE-001) | only-up-Ratchet aktiv; `financial_reports`/`rohware_sammelabrechnung`/`sales_invoice_einvoice` Ratchet 0.70 (SPEC-P0-05-BELEGE-70) |
+| SPEC-P0-06 | erledigt 2026-09-11 (enforce_admins=false bis Zweit-Reviewer) | CODEOWNERS inkl. finance/pos/alembic/.github; Branch-Protection main (1 Review + CODEOWNERS + Pflicht-Checks); Gate `check_codeowners_spec_p0_06.py` |
+| SPEC-P0-07 | erledigt 2026-08-23 | SOC-2-Profil in `simulate_external_assessors.py` + `config/audit/soc2-tsc-matrix.yaml`; Type-II-/AVV-Gates bleiben extern |
+| SPEC-P0-08 | repo-seitig erledigt 2026-09-11 (Drill selbst external_gate) | `run_restore_drill.sh` + `check_restore_drill_evidence.py` + CI-Notice in release-gates; Ops muss Protokoll committen |
 
 P1-Specs aus dem Audit:
 
 | Spec | Status | Kurzinhalt |
 |---|---|---|
-| SPEC-P1-01..03 | teils erledigt, verifizieren | UIX-054/056/057 laut Workboard abgeschlossen; Audit fordert Evidenzabgleich |
-| SPEC-P1-04 | offen | Gestubte `commandEndpoints` fachlich implementieren |
-| SPEC-P1-05 | offen | SQL-Injection-Review fuer `nosec S608`-Stellen |
-| SPEC-P1-06 | offen | Legacy-Routen mit `response_model` typisieren |
-| SPEC-P1-07 | offen | `domains/inventory` konsolidieren oder archivieren |
-| SPEC-P1-08 | offen | Chargen-/MHD-Tiefenmodell |
-| SPEC-P1-09 | offen | Lizenzinventar und THIRD_PARTY_NOTICES |
-| SPEC-P1-10 | offen | Erntepeak-Lasttest lokal reproduzierbar |
+| SPEC-P1-01..03 | erledigt 2026-07-01 (Nachzug dokumentiert 2026-09-11) | UIX-054 Inventory, UIX-055 CI, UIX-056 Playwright, UIX-057 Rollback laut Workboard abgeschlossen |
+| SPEC-P1-04 | erledigt 2026-07-06 | Mask-CommandEndpoints via `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` — 26 native SDs, 0 stubReason |
+| SPEC-P1-05 | erledigt 2026-09-09 | S608-Restschuld einzeln reviewt (SPEC-P1-05-S608-RESTSCHULD): Baseline 167 -> 0, `bandit -t B608` -> 0, unreviewed 136 -> 0; Injection-Pfad env -> SQL-Bezeichner in `geo_pipeline` ueber `app/core/sql_identifiers` geschlossen |
+| SPEC-P1-06 | erledigt (geschlossen, Restschwelle 0) | Legacy-Routen mit `response_model` typisieren; W1–W14 erledigt, Gate `--threshold 0` (TypedObjectOut-Drain, kein CompatFlexOut) |
+| SPEC-P1-07 | erledigt 2026-07-06 (Nachzug dokumentiert 2026-09-11) | `domains/` (paralleles TS-Backend inkl. inventory) per ADR-039 nach `docs/_internal/archive/domains-ts-backend/` archiviert; Root-`domains/` und Workflows `inventory-domain-ci`/`finance-domain-ci` entfernt; kanonisch: `app/domains/inventory` + Domain Pack |
+| SPEC-P1-08 | erledigt 2026-07-06 | Chargen-Tiefenmodell: Lot-Attribute (herkunft, sperrgrund, qs_status, received_at); FEFO-Pick sortiert `mhd ASC NULLS LAST, created_at ASC`; Migration `inv_lot_depth_spec_p1_08` |
+| SPEC-P1-09 | erledigt 2026-08-23 | Lizenzinventar (`docs/operations/license-inventory.md`) + erweiterte `THIRD_PARTY_NOTICES.md`; SBOM weiter via CI CycloneDX |
+| SPEC-P1-10 | erledigt 2026-09-11 | Erntepeak-k6 lokal: `PROFILE=local|smoke` + `scripts/loadtest/run_harvest_peak_local.{ps1,sh}`; Staging bleibt `PROFILE=full` / externes Gate |
 
 Priorisierte Sequenz: A0 Verifikation und A2 PII parallel/sofort, danach
 A1 CI-Gruen, SPEC-P0-06 Governance, A3 Runtime-Sweep und A5 Modulaktivierung.
+
+## A10-DOKU-EVIDENZ-001 — Doku-Drift & Evidenzkette (Prompt A10, Teilstand 2026-07-06)
+
+Nachverifikation 2026-09-08: `doc_drift_report.py --fail-over 0` erneut gruen
+mit **0 Items** (zuvor 7). Alle drei Code-Inventare und das Drift-Dashboard
+erneuert; indirekt eingebundene Auswertungskomponenten durch Tests abgesichert.
+Die historische Release-/CI-Evidenz unten wurde dabei nicht neu erhoben.
+Details: [Uebergabe](../agent-ops/handoff-2026-09-08.md).
+
+Status: **teilweise**. Nach A8 umsetzbar ohne A9-Abschluss:
+
+| Check | Stand 2026-07-06 |
+|---|---|
+| `doc_drift_report.py --fail-over 0` | grün — 0 Drift-Items |
+| `docs/entwickler/drift-dashboard.md` | regeneriert (0 Items) |
+| `generate_openapi.py` | openapi.json aktualisiert (2537 Pfade) |
+| `release_evidence_report.py --fail-on-red` | **WARN** (4 PASS, 2 WARN, 0 FAIL) — coverage-Ratchet lokal ohne Vollsuite; `production-readiness-assessment.json` nur in CI |
+| README / Process-Kernel / Open-Gaps | auf gemessene Werte nachgezogen |
+| `artifacts/release_evidence.{json,md}` | lokal regeneriert, versionierbar via `.gitignore`-Ausnahme |
+
+Offen für Voll-A10: externe Assessment-Artefakte aus CI committen oder Gate anpassen; README-CI-Stand nach Merge `fix/pii-remediation` → `main` erneut verifizieren.
 
 ## API-GAP-STABILIZATION-001 — Lager/Pricing/Scan Nachzug (2026-07-02)
 
@@ -142,6 +822,136 @@ Visual-Audit-Abnahmepunkt ist als fokussierter Playwright-Test umgesetzt.
 Screenshot-Helfer fuer Render-Wait, Content-QC und Capture-Ziel und prueft
 Finance, CRM 360 und Lager bei 1366x768, 1440x900 und 1920x1080.
 
+Nachzug 2026-08-19 (`L3-HABIT-BRIDGE-001`): Die technische Gewohnheitsbruecke
+ist zentral im Single Mask Builder umgesetzt. CRM Customer 360, Lager
+Artikelbestand und Sales Lieferschein deklarieren Footer-/Commit-Aktionszonen,
+Sticky-Regionen und Enter-Fokus; der Lieferschein positioniert die Summary nach
+den Positionen. Kein offener Architektur-Gap. Externes Rollout-Gate bleibt die
+fachliche Pilotabnahme durch erfahrene L3-Anwender. Originalaufnahmen mit
+Echtdaten sind absichtlich nicht versioniert.
+
+Nachzug 2026-08-19 (`L3-FULL-MASK-GAP-002`): Die erreichbaren Funktionen der
+zehn L3-Ribbonbereiche und 37 Dropdown-Gruppen wurden read-only gegen aktuelle
+VALEO-Seiten, APIs und Lieferdokumentation abgeglichen. Es wurde kein neuer
+P0-Blocker gefunden. Offen sind sechs P1-Gaps (MDE-Verarbeitung,
+Dokumentenruecklauf, allgemeiner Produktionsleitstand, Inventur-Nebenlaeufe,
+zentrale Belegkontrolle, Rechnungstapel/Selbstabrechner), sechs P2-Gaps
+(Fremdware-Operator-UI, Abfrage-Center, Teamkalender, Mailarbeitsplatz,
+Tankanlagen-Import, Berichtskatalog-Paritaet) und zwei P3-Gaps. Die vollstaendige
+Evidenz, Abgrenzung und Abnahmekriterien stehen in
+[`l3-full-mask-functional-gap-inventory.md`](../design/l3-full-mask-functional-gap-inventory.md).
+Originalbilder mit Echtdaten bleiben lokal ausserhalb von Git.
+
+Nachzug 2026-08-21 (`L3-MDE-INBOX-003`): `L3-GAP-MDE-001` ist repo-seitig
+geschlossen. Der vorhandene Mobile-Sync-Kern besitzt nun Payload-Vorvalidierung,
+echte Idempotenzantworten, serverseitige Pagination/Filter, drei
+Verarbeitungsversuche mit Quarantaene, begruendetes Retry und append-only Audit.
+Die native Meridian-Worklist `schnittstelle/mde-inbox` ist navigierbar und
+nutzt zentrale statusabhaengige Tabellenzeilen-Aktionen. Damit verbleiben aus
+der L3-Vollinventur fuenf offene P1-Gaps. Reale Geraete-/Provider-Mappings und
+Pilotbetrieb bleiben externe Gates.
+
+Nachzug 2026-08-21 (`L3-DOCRET-INBOX-004`): `L3-GAP-DOCRET-002` ist
+repo-seitig geschlossen. Der kanonische Docflow besitzt nun eine
+mandantenbezogene Ruecklauf-Worklist mit getrennten Versand-/Ruecklaufstatus,
+serverseitigen Filtern nach Benutzer, Kontakt, Datum und Bezugsart,
+Schlagworten, Artefaktvorschau-Metadaten, Ursprungsbeleg-Deep-Link und
+begruendetem append-only Audit. Externe Provider-Zustellnachweise und der
+fachliche Pilot bleiben Rollout-Gates. Damit verbleiben vier offene P1-Gaps.
+
+Nachzug 2026-08-21 (L3-Delta-Inventur): Live-RDP-Erfassung der zehn
+Ribbonbereiche gegen die Inventur vom 19.08.2026. Kein neuer P0, kein neuer
+Ribbon-Hauptbereich; P1–P3-Liste bestaetigt. Feindetail DATEI-Hauptmodule
+dokumentiert. Kanonischer Bericht:
+[`l3-delta-mask-inventory-2026-08-21.md`](../design/l3-delta-mask-inventory-2026-08-21.md).
+Originalbilder lokal unter `Pictures\L3-Capture-2026-08-21-delta`, nicht in Git.
+
+Nachzug 2026-08-22 (`L3-DEEP-MASK-PARITY-020`): Die durch die
+Dropdown-Leaf-Tiefenpruefung bestaetigten P2/P3-Gaps sind repo-seitig
+geschlossen. Geliefert sind 30 feste L3-Berichte, DMS-Volltext,
+Aenderungshistorie, getrennte Terrorschutzpruefungen, Duengemittelmengen,
+Bonuslaeufe, tenant-sichere Chargenbearbeitung mit Auswahlfreigabe sowie
+gespeicherte Auftrags-/Lieferschein-/EB-Kontrollsichten. Kanonischer Bericht:
+[`l3-dropdown-leaf-gap-inventory.md`](../design/l3-dropdown-leaf-gap-inventory.md).
+Fehlerhafte Capture-Duplikate bleiben ausgeschlossen; Echtdatenbilder werden
+nicht versioniert. Offen bleiben nur externe DMS-, Rollen- und Echtdaten-UAT-Gates.
+
+Nachzug 2026-08-22 (`L3-RUNTIME-HARDENING-021`): Der Laufzeit-Nachtest hat
+die repo-seitigen Integrationsgaps der neuen Masken geschlossen. Bestehende
+Queryparameter bleiben beim Runtime-Paging erhalten; auch clientseitig
+paginierten Tabellen mit eigener DataSource werden geladen. Bulk-Auswahlen
+bleiben nach Fehlern erhalten und werden bei Seitenwechsel bereinigt.
+DMS-Metadaten verwenden das kanonische Artikeldokument-Schema mit Tenant-Link,
+Duengemittelmengen werden in der Datenbank paginiert, Bonuskorrekturen sind
+exportierbar und Chargen-IDs sind pro Tenant eindeutig. Die lokale
+Entwicklungsdatenbank wurde bis `l3_runtime_hardening_20260822` migriert. Es
+entsteht kein neues offenes Repo-Gap; externe DMS-/Rollen-/Echtdaten-UAT-Gates
+bleiben unveraendert.
+
+Nachzug 2026-08-23 (`L3-VISUAL-PARITY-AUDIT-031`): Acht lokale
+Capture-Verzeichnisse mit 1.022 PNGs wurden wiedergefunden und
+datenschutzkonform nur abstrakt inventarisiert. Alle 69 produktiven nativen
+ScreenDefinitions sind generator-ready und verwenden nach zentraler
+Normalisierung renderbare Floorplans, Context-Rails, Tabellenprofile und
+Aktionsrisiken. `expertDense` wirkt mit 36-px-Zeilen auch in Registertabellen;
+der Visual-Audit prueft sichtbare Datenzeilen und ist an drei Zielaufloesungen
+12/12 gruen. Es verbleibt kein aus den erreichbaren L3-Screenshots belegbarer
+repo-seitiger Funktions- oder zentraler GUI-Gap; Rollen-, Echtdaten-, Hardware-
+und Provider-UAT bleiben externe Gates.
+
+Nachzug 2026-08-23 (`L3-CUTOVER-UAT-032`): Die zuvor nur benannten externen
+Gates besitzen jetzt einen maschinenlesbaren, fail-closed Cutover-Vertrag und
+einen reproduzierbaren Go/No-Go-Runner. Sechs Rollen und Kernjourneys, zwei
+getrennte Import-Dry-runs, Reconciliation fuer sechs Migrationsdomaenen, sieben
+reale Integrationspiloten, Gewohnheitsbruecke, Defect-Grenzen, KPI und zehn
+Geschaeftstage Parallelbetrieb sind harte Gates. Repo-seitig ist das Programm
+vollstaendig ausfuehrbar; bis echte Key-User-, Echtdaten-, Hardware-/Provider-
+und finale Betriebsfreigaben als aktuelle Artefakte vorliegen, bleibt der
+Status bestimmungsgemaess `NO_GO` und damit ein externes Rollout-Gate.
+
+Nachzug 2026-08-21 (`L3-BELEGCHECK-WORKLIST-005`): `L3-GAP-BELEGCHECK-005` ist
+repo-seitig geschlossen. Native Worklist `auswertungen/beleg-kontrolle` mit
+vier Ausnahmearten, Zuweisung/Status-Audit, Filter/Pagination und Deep-Link.
+Navigations-Drill dokumentiert in
+[`l3-rdp-navigation-drill.md`](../design/l3-rdp-navigation-drill.md).
+
+Nachzug 2026-08-21 (`L3-BELEGCHECK-PROJECTION-016`): Live-Projektion der vier
+Ausnahmearten aus Einkaufs-/Verkaufs-Quellen via
+`POST /api/v1/document-control/project` (idempotent, resolved/waived bleiben
+unberuehrt). Codex-Slice `L3-RECENT-DOCUMENTS-015` unberuehrt.
+
+Nachzug 2026-08-21 (`L3-PRODUCTION-CONTROL-006`): `L3-GAP-PROD-003` ist
+repo-seitig geschlossen. Der native Produktionsleitstand projiziert kanonische
+Mischfutterauftraege und fuehrt Muehlenlauf, Umbuchung, Stapelbuchung und
+Nachbearbeitung als tenantgebundene, auditierte Operations-Lifecycles mit
+Quell-Deep-Link und Druckpfad. Damit verbleiben zwei offene P1-Gaps:
+Inventur-Nebenlaeufe und Rechnungstapel/Selbstabrechner. Physische SPS-/
+Muehlenadapter und der Standortpilot bleiben externe Gates.
+
+Nachzug 2026-08-21 (`L3-INVENTORY-AUX-007`): `L3-GAP-INV-004` ist
+repo-seitig geschlossen. Zaehlliste, kontrollierter Import, Kontrolllauf,
+vorlaeufige Bewertung und Bestandsvortrag werden als tenantgebundene,
+SHA-256-gebundene Batches mit abweichendem Pruefer und append-only Audit
+gefuehrt. Damit verbleibt ein offener P1-Gap: Rechnungstapel/
+Selbstabrechner. Produktive Dateiablage, Druckadapter und Pilot bleiben extern.
+
+Nachzug 2026-08-21 (`L3-BILLING-BATCH-008`): `L3-GAP-BILLBATCH-006` ist
+repo-seitig geschlossen. Ausgangs-, Eingangs- und beide Selbstabrechnerarten
+laufen ueber einen tenantgebundenen Rechnungstapel mit Pruefung, Vier-Augen-
+Freigabe, idempotenten Zeilen, sichtbarem Fehler, Quell-/Nachweislink und
+begruendetem Retry. Damit sind alle P1-Gaps der L3-Vollinventur repo-seitig
+geschlossen. Providerzustellung, fiskalische Pilotabnahme und Echtdaten-UAT
+bleiben externe Gates.
+
+Nachzug 2026-08-21 (`L3-LEGACY-INTERFACES-017`): Nach Abschluss von
+Berichtskatalog und persoenlichen letzten Dokumenten ist auch der letzte
+repo-seitige P3-Gap geschlossen. `l3_standard` und `unimet` besitzen feste,
+versionierte und standardmaessig inaktive Profile, hashgebundenen Intake,
+Quarantaene, deklaratives Dry-run-Staging, Reconciliation, Audit und nativen
+Betriebsmonitor. Reale Kundenformate, Mappingabnahme, Zieladapter und
+Produktivpilot bleiben externe Aktivierungs-Gates; `execution_enabled` bleibt
+bis dahin `false`.
+
 - Geliefert: kanonische `ScreenDefinition`, temporaere Uebersetzungsschicht fuer
   bestehende MaskConfig, UniversalMaskRenderer-Skelett, LazyTabs und
   VirtualDataTable.
@@ -200,6 +1010,77 @@ Status: abgeschlossen — zehn Rollout-Kandidaten mit zentralem `/api/v1/mask-ro
 - Geliefert: `mask_rollout_catalog`, `mask_rollout_summary_service`, pytest 24/24, Doku `mask-rollout-batch-w42-51.md`.
 - Grenzen: Adapter-Parität (Felder aus MaskConfig); generische Tab-Spalten; keine Detail-Route-Switches pro Legacy-Seite.
 - ~~**Naechster Architekturschritt:** UniversalMaskRuntime (`UIX-RUNTIME-020`…`024`)~~ → **abgeschlossen in UIX-022…030** (siehe unten).
+
+## MERIDIAN-BELEG-ONEPAGE — durchgehende Belegseite (2026-09-29)
+
+Status: **geliefert und im Browser abgenommen** (1440/1920/390 px). `layout.sectionNavigation=anchors`
+(nur `objectPage`/`transaction` mit `columnNavigation=single`) rendert Register als
+Abschnitte mit Sprungleiste, Scroll-Spy, `Alt+1..9`, Lazy-Mount, schrumpfendem Kopf,
+Belegfluss als letztem Abschnitt und Verwerfen-Rückfrage. Pilot `sales/delivery-note`.
+Die Google-Studio-Entwürfe dienten nur als visuelle Referenz, es wurde kein Code übernommen.
+
+Folgearbeiten (Stand 2026-09-29, zweite Runde):
+
+- ~~Positions-Detailband~~ → `table.rowDetail` (ScreenDefinition, RenderPlan, Readiness
+  `schema_valid`, Feldvertrags-Gate). `RowDetailBand` zeigt die gewählte Zeile unter dem
+  Raster, Escape oder erneuter Klick schließen. Nur für Tab-Tabellen ohne externe
+  Zeilenauswahl; Wurzeltabellen bekommen kein Band. Pilot: Rechnungspositionen.
+- ~~USt-Aufteilung 7 %/19 %~~ → Steuerausweis `GET /sales/invoices/{id}/tabs/steuer`,
+  je Position auf den Cent gerundet wie beim Anlegen, Summe = Kopf-USt. Nur Rechnung:
+  Auftrag und Lieferschein führen keinen Steuersatz je Position.
+- ~~Mobile Kartenliste~~ → bestand bereits (`VirtualDataTable` unter 768 px / grober
+  Zeiger). Neu: Karten werden gemessen statt mit 160 px geschätzt (vorher abgeschnitten).
+- ~~Sticky Tabellenkopf~~ → Kopfzeile stand bereits außerhalb des vertikalen Scrollbereichs.
+  Neu: `fitToContent` — kurze Tabellen schrumpfen auf ihre Zeilen (420 px bleibt Obergrenze).
+- ~~Browser-Abnahme~~ → Rechnung mit 15 Positionen (7 % und 19 %) bei 1440, 1920 und 390 px.
+  Dabei behoben: Sticky-Kopf klebte 32 px unter der Containerkante (AppShell-Padding);
+  Rechnungspositionen standen in Textfolge (1, 10, 11 … 2) → `positionsfolge`;
+  Nur-Lese-Beträge/-Datum ungeformt („19315“, „mm/dd/yyyy“) → `formatReadOnlyValue`.
+- ~~Rollout~~ → `sales/sales-order` (Kopf jetzt aus der Entität statt leerem Lazy-Tab),
+  `sales/invoice`, `einkauf/purchase-order` auf `sectionNavigation=anchors`.
+
+Dritte Runde (2026-09-29):
+
+- ~~Doppelte horizontale Scrollleiste~~ → Kopf und Körper des Desktop-Rasters reservieren
+  beide die Scrollleisten-Rinne (`scrollbarGutter: stable`), der Körper scrollt nur
+  vertikal. Browser: kein horizontaler Überlauf im Körper (Auftrag, Rechnung).
+- ~~`h1` der Rechnung~~ → neuer Vertrag `ScreenDefinition.identityField` (Frontend-
+  Validierung + Readiness `schema_valid`): `h1` = Belegnummer, Maskentitel wird Kicker.
+  Gesetzt für Auftrag, Lieferschein, Rechnung, Bestellung.
+- ~~Auftrag/Bestellung im Browser~~ → SO-00064 und DEMO-PO-001 (Default-Mandant) abgenommen.
+  Dabei behoben: Auftragskopf zeigte die Kunden-UUID — `_fetch_customer_name` las eine
+  nicht existierende Spalte in der falschen Tabelle und schluckte den Fehler still; liest
+  jetzt `domain_crm.customers.company_name`, Einzelabfrage liefert `customer_name`.
+- ~~Status-Schlüssel in Masken~~ („open“, „entwurf“, „bestellt“) → zentral `statusLabel()`
+  (`mask-builder/renderers/status-labels.ts`) für Tabellen-Chips (`renderKind: status`) und
+  Nur-Lese-Felder mit Schlüssel `status`; Unbekanntes bleibt stehen.
+- ~~„Standard Table Profile“~~ unter jeder Tabelle entfernt (interne Klassifikation,
+  englisch); maschinenlesbar bleibt `data-table-profile`.
+- ~~`debitoren.test.tsx`~~ → an die neue Unterzeile angepasst, Suchfilter-Test ergänzt.
+
+Vierte Runde (2026-09-29) — Rest geschlossen:
+
+- ~~`customer_id` in Rechnungs-/Lieferscheinkopf~~ → `app/services/customer_reference.py`
+  (`resolve_customer`) nimmt CRM-ID **oder** Kundennummer (beide Formen sind im Umlauf:
+  Lieferschein/Auftrag führen die CRM-ID, Rechnungen aus MCP/Import die Nummer; bei
+  Gleichstand gilt die ID). Einzelabfragen von Auftrag, Lieferschein und Rechnung liefern
+  `customer_name` + `customer_number`; alle drei Köpfe zeigen „Kunde“ und „Kunden-Nr.“
+  (Gewohnheits-Prinzip). Ohne CRM-Treffer bleibt der Name leer und die Referenz steht als
+  Nummer — kein erfundener Name. Rechnungs-Summary-Untertitel nennt ebenfalls den Namen.
+- ~~Auftrags-UUID im Lieferscheinkopf~~ → `sales_order_number` statt `sales_order_id`.
+- ~~Status-Wörterbuch lückenhaft~~ → gegen alle 229 Tabellen mit `status`-Spalte der
+  Dev-Datenbank abgeglichen, alle vorkommenden Werte abgedeckt; Schreibweise egal
+  (`in-bearbeitung`, `PENDING_APPROVAL`).
+- ~~Nur-Lese-Boolean als „false“~~ → `formatReadOnlyValue` zeigt Ja/Nein.
+
+Keine offenen Punkte aus MERIDIAN-BELEG-ONEPAGE. Neue Status werden in
+`renderers/status-labels.ts` ergänzt; unbekannte Werte erscheinen unverändert.
+
+## MERIDIAN-SCREEN-STUDIO-PERSIST — Drafts in Postgres (2026-09-16)
+
+Status: **geschlossen**. `domain_shared.screen_definition_drafts` persistiert Studio-Entwürfe;
+`published_temp` hängt in `get_screen_definition` / Omnibox / `/studio/run/:screenId`.
+Native Screen-IDs bleiben unbeschattet. JSON-Schema-Drift bleibt bei UIX-090.
 
 ## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
 
@@ -273,9 +1154,9 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 
 | Thema | Beschreibung | Priorität |
 |-------|-------------|-----------|
-| commandEndpoints | Gestubte Actions (drucken, stornieren, wareneingang, …) — **teilweise:** neue_bestellung, mahnen, freigeben ✅ | P2 |
-| Legacy-Routen umhängen | Bestehende `:id`-Routen auf `-native` umzeigen | P3 |
-| Agent E2E Coverage | Automatisierter Agent-Contract-Check alle 26 SDs | P3 |
+| commandEndpoints | ✅ 2026-09-27: `agrar/ration` bindet `submit_review`, `approve`, `schedule`, `activate`, `retire` und `archive` ueber schreibfreie Vorschau-/Validierungsmodi und den kanonischen Lifecycle-Service an die zentrale ActionRuntime. | P1 |
+| Legacy-Routen umhängen | ✅ 2026-09-27 revalidiert: 49/49 UIX-051-Tests; alle erwarteten `:id`-Routen zeigen auf native Wrapper, blockierendes Gate in `universal-mask-ci`. | P3 |
+| Agent E2E Coverage | ✅ 2026-09-27: Registry-dynamisches AgentMaskContract-/Readiness-Ratchet ueber alle 71 nativen ScreenDefinitions; blockierender Schritt in `universal-mask-ci`. | P3 |
 | UIX-054 Route Inventory | Generierte Route-Wahrheit (`route-inventory.gen.json`) | P1 | ✅ |
 | UIX-055 universal-mask-ci | GitHub Actions sichtbar grün | P1 | ✅ Run 28540744515 |
 | UIX-056 Native Route Smoke | Playwright über 5 repräsentative `/:id`-Routen | P1 | ✅ lokal |
@@ -284,9 +1165,17 @@ Kanonische Maschinenreferenz: [`universal-mask-runtime-status.md`](../architectu
 Nachzug 2026-06-30 (UIX-044/045): Der FilterPlan-HTTP-Vertrag ist auf `filter_plan`
 kanonisiert; Backend akzeptiert `filterPlan` nur noch als Kompatibilitaetsalias.
 Native Detailseiten fuehren Actions nicht mehr als No-op aus, sondern ueber
-`ActionRuntime` gegen `commandEndpoint` aus der `ScreenDefinition`. Offen bleiben
-fachliche CommandEndpoint-Implementierungen fuer die oben genannten gestubten
-Actions.
+`ActionRuntime` gegen `commandEndpoint` aus der `ScreenDefinition`.
+
+Nachzug 2026-07-06 (SPEC-P1-04/08, Prompt A8): Gemeinsamer `MaskActionRuntime`-Service;
+alle nativen ScreenDefinitions ohne `stubReason`; Inventur-Skript + pytest
+(`test_spec_p1_04_mask_commands.py`, `test_spec_p1_08_lot_fefo_pick.py`).
+Chargen-FEFO beruecksichtigt MHD vor Eingangsdatum.
+
+Nachzug 2026-07-15 (FEED-CORE-017): `agrar/feeding-reference-data` ist eine
+read-only native ScreenDefinition und besteht die Generator-Readiness. Das
+Command-Inventar bleibt ausschliesslich wegen der oben benannten fuenf
+Bestandsaktionen rot; die Referenzdatenmaske erzeugt keine neue Action-Luecke.
 
 ## UIX-SALES-PARITY-008 - Sales Order Lazy Tab Parity (2026-06-28)
 
@@ -504,6 +1393,15 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - **COV-RATCHET-007 (2026-06-27):** `wf_cockpit_nats_projector.py` jetzt mit echtem Unit-Test abgesichert (`tests/test_wf_cockpit_nats_projector.py` — 14 Tests, NATS-unabhaengig via MagicMock); zum Ratchet hinzugefuegt. HR-TIME UX-M1 (Suche/Filter/Sort in `zeiterfassung.tsx`) als umgesetzt dokumentiert.
 - **COV-RATCHET-010 (2026-06-27):** Quality-Gate-Baseline erneut auf echte CI-Messwerte kalibriert, nachdem geschaetzte Schwellen den Gate-Lauf blockierten. Betroffen: `domains/shared/events.py` 62%, `finance_actions.py` 78%, `financial_reports.py` 25%, `psm_proplanta.py` 15%, `kaeufergruppe.py` 41%, `ai_engineering_metrics_service.py` 38%, `hrm_abwesenheit.py` 43%, `wf_cockpit_persist_service.py` 70%, `wf_cockpit_persist.py` 44%, `portal_innendienst.py` 30%. Fachliche Vertiefung bleibt sinnvoll fuer Finance-Reports, Proplanta, AI-Metrics, HR-Abwesenheit und Portal-Innendienst; naechste Schritte sind gezielte Tests statt geschaetzter Gate-Werte.
 
+- **COV-RATCHET-011 / SPEC-P0-05-BELEGE-70 (2026-09-11):** Kritische Beleg-/Report-Pfade
+  auf ≥70% gehoben. Nach Qualitaetsnachzug (ohne MagicMock-DB, echte HTTP/`require_db`)
+  isoliert gemessen: `financial_reports` 70%, `rohware_sammelabrechnung` 72%,
+  `sales_invoice_einvoice` 90%. Ratchet+Baseline only-up auf 0.70. Tests:
+  `tests/test_spec_p0_05_belege_coverage.py` (+ Endpoint-Suiten). Produktfixes dabei:
+  Periodenformat 400, Bilanz-SQL `account_name`, Sammelabrechnung-Schema/fail-closed,
+  ZUGFeRD factur-x-Signatur, Document-Repo-Rollback nach fehlendem `documents`-Table.
+  Gesamt-Coverage-Repo bleibt COVERAGE-001-Folgearbeit.
+
 ### DOMAIN-PARITY-001: Fachliche Tiefe der Domains ist weiterhin ungleich
 
 - Der Repo-Schnitt ist breit, aber nicht alle Domaenen haben dieselbe fachliche Tiefe, denselben Testgrad oder dieselbe Integrationshaerte.
@@ -524,8 +1422,9 @@ Keine weiteren bekannten F-Lücken nach Wave 5.
 - Messbare Domaenenparitaet wird in [domain-parity-roadmap-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/domain-parity-roadmap-2026-04-24.md) gefuehrt.
 - **WM-AGRI-SUPPLY-LINK-001 (2026-06-13):** Doku- und UI-Brücke **Materialfluss (WM-AGRI-SILO-001)** ↔ **DOM-SUPPLY-004** / physische Logistik-Kette — [wm-agri-silo-supply-chain-integration-2026-06-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/wm-agri-silo-supply-chain-integration-2026-06-13.md); Toolbar-Overflow „Rückverfolgbarkeit“ auf `lager/materialfluss*`. **WM-AGRI-CHAIN-002 (2026-06-13):** `supply_chain_events` (`stage=materialfluss`) + Outbox `inventory.material_flow.*` bei Agrar-Materialfluss-API-Mutationen und `validate-route`. **WMS-FLOW-001 (2026-06-19):** Materialtransfer Silozelle → `inventory_stock_movements` + `current_stock_kg`, Backend + UI auf `lager/materialfluss`, Mobile-Sync; Slice [WMS-FLOW-001.yaml](../agent-ops/slices/WMS-FLOW-001.yaml). **WM-AGRI-LOT-LINK-001 (2026-06-18):** Backend-Kontrakt `POST /material-flow/lot-link` für Annahme/Waage-Lot → Silozelle mit Tenant-/Kapazitäts-/Konfliktschutz, Bewegungsbeleg, `current_*` und Trace-Event. ~~**Weiter offen:** UI-/Regel-Engine für automatische Zielzellen-Vorschläge aus WE/Waage~~ — **geschlossen Wave 14 2026-06-26** (WM-AGRI-MAP-001 retroaktiv): `silo_target_cell.py` + `silo_rule_engine_service.py` + `GET /silo/zielzellen-vorschlag[/lot/{id}]` vollständig implementiert.
 - **WM-AGRI-QS-003 (2026-06-18):** Backend-Kontrakt `POST /supply-chain/lots/{lot_id}/qs-transition` fuer Labor-/Lager-/Produktions-QS mit Pflichtgrund, Bediener, Probe/Analyse/Dokument, GMP+/VLOG-Payload, Update `silo_lots.status`, Rueckkopplung `silo_cells.qs_status` und append-only `supply_chain_events`. **WM-AGRI-QS-004 (2026-06-23):** Leitstand-UI `lager/qs-leitstand`, Worklist `GET /supply-chain/qs-worklist`, Freigabe-Vorschlag `GET …/qs-release-suggest` inkl. deterministischer Produktionsfreigabe-Regeln.
-- **FEED-CHAIN-004 (2026-06-23):** Einzelfuttermittel ↔ `domain_inventory.articles` (`inventory_article_id`); bei Mischfutter-Produktionsfreigabe/Storno kanonische `inventory_stock_movements` (`feed_production`); API `GET/POST /produktion/mischfutter/inventory-links`. **FEED-CHAIN-004.5:** UI-Verknüpfung auf `mischfutter-produktion`.
+- **FEED-CHAIN-004 (2026-06-23):** Einzelfuttermittel ↔ `domain_inventory.articles` (`inventory_article_id`); bei Mischfutter-Produktionsfreigabe/Storno kanonische `inventory_stock_movements` (`feed_production`); API `GET/POST /produktion/mischfutter/inventory-links`. **FEED-CHAIN-004.5:** UI-Verknüpfung auf `mischfutter-produktion`. **FEED-CHAIN-004.6 (2026-09-11):** `GET …/inventory-links` zählte `total`/`mapped_count`/`unmapped_count` auf der per `LIMIT` abgeschnittenen Seite — bei 558 aktiven Einzelfuttermitteln meldete die Oberfläche „0/100 verknüpft" und entwarnte fälschlich mit „Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft". Zähler kommen jetzt aus einer Aggregatabfrage über den Mandantenbestand, die Seite aus `limit`/`offset` mit Filter `mapped`; Antwort nennt zusätzlich `limit`, `offset`, `returned`, `filter_mapped`. Die UI lädt offene Verknüpfungen serverseitig (`mapped=false`). Die frühere Diagnose „Test hängt an fehlenden Seed-Daten" (Workboard-Übergabe, POS-FIBU-CLEANUP-20260910) war falsch.
 - UX-Paritaet wird ueber [ux-excellence-operating-standard-2026-05-13.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/ux-excellence-operating-standard-2026-05-13.md) gefuehrt. Stand 2026-05-16: systemweiter UX-Baukasten-Rollout abgeschlossen.
+- **BUSINESS-TIME-001 (2026-09-11):** Buchungsdaten kamen aus `datetime.utcnow().date()`. Da `period` als `YYYY-MM` aus `entry_date` gebildet wird, buchte das System zwischen 00:00 und 02:00 Ortszeit (MESZ) auf den Vortag — am Monatsersten in die Vorperiode. In CI unsichtbar, weil der Workflow `TZ: UTC` setzt. Behoben ueber `app/core/business_time.py` (`business_today()`, `business_now()`, pure `business_date_at()`; Zeitzone via `BUSINESS_TIMEZONE`, Standard `Europe/Berlin`) fuer alle buchungs- und periodenrelevanten Stellen. **Abgeschlossen:** Demo-/Fallbackdaten, agrarische Zulassungsablauf-Vergleiche, Portal-Shop, `/tours/today` sowie HR-Retention/-Defaults verwenden die fachliche Zeit und sind mit UTC-/Ortsdatum-Grenzfaellen abgesichert. Technische UTC-Zeitstempel bleiben bewusst UTC.
 
 ---
 
@@ -556,6 +1455,7 @@ Repo-seitige Vorbereitungen (Scripts, Templates, Gates) sind vollstaendig:
 - `scripts/check_integration_bootstrap.py --strict-live` blockiert bei nicht-bereiten Probes
 - `config/fibu_cutover_mapping.template.yaml` + `scripts/check_fibu_cutover_mapping.py --strict`
 - `.github/workflows/load-test.yml` fuehrt den Erntepeak-Lasttest nur aus, wenn `STAGING_URL`, `API_DEV_TOKEN` und DNS-Aufloesung im Runner vorhanden sind; andernfalls wird das externe Gate neutral dokumentiert statt als Produktfehler gemeldet.
+- SPEC-P1-10 (lokal): `PROFILE=local|smoke` + `scripts/loadtest/run_harvest_peak_local.{ps1,sh}` gegen docker-compose/localhost; Staging bleibt externes Ops-Gate.
 
 ---
 

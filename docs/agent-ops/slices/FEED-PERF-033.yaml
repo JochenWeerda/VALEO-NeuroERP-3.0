@@ -1,0 +1,85 @@
+slice_id: FEED-PERF-033
+id: FEED-PERF-033
+title: MLP-/Milchguete-Kennzahlen und Vorher/Nachher-Auswertung je Rationsversion
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+requirements: [FEED-PERF-004]
+work_packages: [FEED-WP-161, FEED-WP-162]
+decision_level: normal
+dependencies: [FEED-ACT-029, FEED-ACT-030]
+goal: >-
+  Abschluss Inkrement 5 gemaess Slice-Spec 049: Milchguete-Kennzahlen aus der
+  MLP (Harnstoff, Zellzahl, FEQ) fliessen mit Herkunft in die Tagesreihe, und
+  Rationswechsel werden mit ehrlicher Unsicherheitsangabe vorher/nachher
+  ausgewertet — keine Scheinsignifikanz.
+scope:
+  - "Migration feed_perf_mlp_20260716: additive Spalten milk_urea_mg_dl,
+    somatic_cell_count_k auf feeding_controlling_daily."
+  - "controlling.py: fat_protein_quotient (None-sicher, protein<=0 -> None,
+    nie 0-fabriziert); _decorate liefert FEQ je Punkt; record/series additiv
+    um die neuen Felder (Provenienz weiterhin ueber source je Beobachtung)."
+  - "GET /feeding/performance/version-impact?group_id&window_days: je
+    aktivierter Rationsversion Mittelwerte (Milch, ECM, DMI, IOFC) aus
+    bekannten Werten n Tage vor/nach activated_at; confidence=sufficient nur
+    ab n>=7 je Seite, sonst insufficient_data; Gruppen ohne Aktivierung ->
+    leere Liste."
+file_ownership:
+  - alembic/versions/feed_perf_mlp_20260716.py
+  - app/agrar/rations/controlling.py
+  - app/services/rations_controlling_service.py
+  - app/api/v1/endpoints/rations_controlling.py
+  - app/api/v1/endpoints/feeding_performance.py
+  - app/api/v1/endpoints/rations_optimization.py (nur Router-Include)
+  - tests/test_feeding_performance_api.py
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-PERF-033.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    4 failed vor Implementierung (ImportError fat_protein_quotient bzw.
+    app.api.v1.endpoints.feeding_performance; Journey-Asserts auf fehlende
+    Felder).
+  green: >-
+    4/4 nach Migration+Domain+Service+Endpoint; Regression Controlling+
+    Actual+Authz+Performance 34 passed.
+  refactor: >-
+    Impact-Seitenberechnung als lokale _side-Hilfe mit fester Metrikliste;
+    ueberfluessiges Zwischenmodell im Endpoint entfernt.
+acceptance:
+  - "Harnstoff/Zellzahl werden idempotent je Tagespunkt gespeichert und in
+    der Serie geliefert; FEQ nur bei bekannten Fett+Eiweiss-Werten."
+  - "Version-Impact benennt n, Fenster und Konfidenz; kleine Stichproben
+    heissen insufficient_data."
+  - "RBAC 403 ohne Domaenenrolle auf dem Performance-Endpoint."
+tests:
+  - "pytest test_feeding_performance_api.py -> 4/4 (nach Red-Welle)."
+  - "Regression 34 passed; Architecture Validate/Drift 905/905; Alembic
+    Single-Head feed_perf_mlp_20260716 (auf parallele Feldbuch-Revision
+    verkettet, benannter Bezeichner)."
+risks:
+  - "AMS-/MLP-Livepfade bleiben Partnervertrags-Gate; Harnstoff-/Zellzahl-
+    Trendcharts als FE-Rest (gemeinsam mit Versionsmarker-Feinschliff)."
+external_gates: >-
+  AMS-/MLP-Provider-Livepfade erst nach Partnervertrag.
+ai_harness:
+  fachlicher_vertrag: >-
+    Milchguete-Kennzahlen erscheinen nur mit Herkunft; Wirkungsaussagen zu
+    Rationswechseln tragen immer Stichprobengroesse und Konfidenz.
+  architektur_vertrag: >-
+    Additive Erweiterung des bestehenden Controlling-Aggregats; Berechnungen
+    bleiben reine Funktionen im Domainmodul.
+  daten_vertrag: >-
+    Nur additive Spalten; Upsert-Vertrag der Tagesreihe unveraendert.
+  security_vertrag: >-
+    READ fuer Auswertung; Tenant-Scope ueber bestehende Servicepfade.
+  betriebs_vertrag: >-
+    Rollback = Revert + downgrade().
+  dokumentations_vertrag: >-
+    Traceability FEED-PERF-004 VERIFIED (mit externem Gate + FE-Rest);
+    Workboard; dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz im YAML; None-Sicherheit, Provenienz, Unsicherheits- und
+    RBAC-Pfade getestet.

@@ -42,6 +42,7 @@ Negativ:
 - Hoehere Disziplin bei neuen Features und Refactorings
 - Zusaetzlicher Modellierungsaufwand vor schneller UI-Implementierung
 - Bestehende Schattenmodelle muessen schrittweise abgebaut werden
+- Das Canonical Model ist **kein** physischer Tabellenkatalog. Spalten, Schema-Besitz und Masken-Verbraucher: [todo-datenmodell-katalog.md](../agent-ops/todo-datenmodell-katalog.md)
 ## References
 - [Target State Landhandel ERP](../architecture/target-state-landhandel-erp.md)
 - [Top-50 Gap Backlog Landhandel](../project-context/open-gaps-and-known-issues.md)

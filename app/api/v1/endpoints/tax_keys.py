@@ -158,7 +158,7 @@ async def list_tax_keys(
             FROM domain_erp.tax_keys
             WHERE {' AND '.join(where_clauses)}
             ORDER BY code
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
         
         rows = db.execute(query, params).fetchall()
@@ -434,7 +434,6 @@ async def update_tax_key(
         
         update_fields.append("updated_at = NOW()")
         
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         update_query = text(f"""
             UPDATE domain_erp.tax_keys
             SET {', '.join(update_fields)}
@@ -443,7 +442,7 @@ async def update_tax_key(
                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                       debit_account, credit_account, country, region, active,
                       created_at, updated_at
-        """)
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
         

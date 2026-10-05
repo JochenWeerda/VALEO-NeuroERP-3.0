@@ -1,0 +1,38 @@
+slice_id: BANK-STATEMENT-DATE-20261001
+title: Ein Bankauszugsdatum durch Parser, Speicherung und Replay
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claim 6c6be7c67; fremde EUDR-/Inventory-Arbeit bleibt beim Owner.
+goal: Kein Importdatum als Banksaldo-Stichtag und keine stille Replay-Datumskorrektur.
+file_ownership:
+  - app/api/v1/endpoints/bank_statement_import.py
+  - app/api/v1/endpoints/payment_matching.py
+  - tests/test_bank_statement_date.py
+  - config/business_time_usage_baseline.json
+  - docs/quality-assurance/bank-statement-date-20261001.md
+acceptance:
+  - CAMT/MT940 Schlusssaldodatum speichern, auch fuer leere Auszuege.
+  - Beide CSV-Routen verwenden denselben synthetischen letzten Buchungstag.
+  - Widerspruechliches Kopfdatum im Replay wird ohne Writes mit 409 abgewiesen.
+  - MT940 Buchungen ausserhalb Saldenzeitraum und leere Fremdwaehrung ablehnen.
+tests:
+  - python -m ruff check app/api/v1/endpoints/bank_statement_import.py app/api/v1/endpoints/payment_matching.py tests/test_bank_statement_date.py
+  - python scripts/check_business_time_usage.py
+  - python scripts/generate_agent_handbuch.py --check
+test_evidence:
+  - 169 Parser-/Finanz-Vertraege bestanden, davon 15 neue Datumsvertraege.
+risks:
+  - Historische fehlerhafte Kopfdatensaetze brauchen Originaldatei oder zusammenhaengende Entwicklungsbereinigung.
+  - Bankreconciliation und weitere Bankprofile sind separate Abnahmen.
+ai_harness:
+  fachlicher_vertrag: Ein echter Bank-Schlussstichtag oder expliziter CSV-Buchungsstichtag.
+  architektur_vertrag: Minor Bugfix im vorhandenen Importvertrag ohne neue API-/Schemafelder.
+  daten_vertrag: Kein Heute-Ersatz oder stilles Umschreiben historischer Replay-Daten.
+  test_vertrag: Red-Green und reale Imports/Replays fuer beide CSV-Routen sowie MT940/CAMT.
+  security_vertrag: Bestehende Tenant- und Kontobindung; leere MT940 pruefen Waehrung.
+  betriebs_vertrag: Vorhandener valeo_probe, gezieltes Cleanup, keine neue DB oder Dockerinstanz.
+  dokumentations_vertrag: QA, Slice, Workboard, Open-Gaps und Finance-Workflow synchronisiert.
+external_gates:
+  - GitHub-CI, Bankprofile und Deployment.

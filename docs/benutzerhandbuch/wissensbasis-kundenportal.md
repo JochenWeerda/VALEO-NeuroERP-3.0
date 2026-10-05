@@ -185,31 +185,73 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
-### Feldbuch
+### Feldbuch / Ackerschlagkartei
 
 **Route:** `/portal/feldbuch` · **Modul:** `@/pages/portal/feldbuch`
+**Auswertungen:** `/portal/feldbuch-auswertungen`
+**Agent-API:** siehe [`docs/specs/agrar/ackerschlagkartei-agent-crud-api.md`](../specs/agrar/ackerschlagkartei-agent-crud-api.md)
 
-**Ziel:** Feldbuch in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+**Ziel:** Schläge und Maßnahmen im Kundenportal vollständig pflegen (Anlegen, Bearbeiten, Löschen), Sammeldüngung und Jahreswechsel ausführen, Schlaginfo drucken/exportieren, DüV-Auswertungen prüfen.
 
-![Feldbuch — Bedienoberfläche](img/portal__feldbuch.webp)
+![Feldbuch — Übersicht](img/portal__feldbuch.png)
 
+![Schlag angelegt](img/portal__feldbuch__schlag-angelegt.png)
 
-**Schritte:**
+![Schlag bearbeitet](img/portal__feldbuch__schlag-bearbeitet.png)
 
-1. Sidebar oder Suche: **Feldbuch** öffnen (`/portal/feldbuch`).
-2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
-3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
-4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+![Maßnahme angelegt](img/portal__feldbuch__massnahme-angelegt.png)
 
-**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+![Maßnahme bearbeitet](img/portal__feldbuch__massnahme-bearbeitet.png)
+
+![Schlaginformation](img/portal__feldbuch__schlaginfo.png)
+
+![Sammeldüngung](img/portal__feldbuch__sammelduengung.png)
+
+![Export](img/portal__feldbuch__export.png)
+
+![CSV-Import](img/portal__feldbuch__import.png)
+
+![CSV-Import Ergebnis](img/portal__feldbuch__import-ergebnis.png)
+
+![Jahreswechsel](img/portal__feldbuch__jahreswechsel.png)
+
+![PSM ohne Sachkunde](img/portal__feldbuch__psm-ohne-sachkunde.png)
+
+![PSM Prüfen-Badge](img/portal__feldbuch__psm-pruefen-badge.png)
+
+![PSM mit Sachkunde](img/portal__feldbuch__psm-mit-sachkunde.png)
+
+![DüV-Auswertungen](img/portal__feldbuch-auswertungen.png)
+
+**Praxis-Nachweis:** Playwright-Simulation `packages/frontend-web/tests/e2e/portal-feldbuch-crud-praxis.spec.ts` schreibt Screenshots hierher und protokolliert nach `artifacts/portal-feldbuch-crud-praxis.json` (CRUD, Sammel, Export, **CSV-Import**, **Jahreswechsel**, **PSM-Sachkunde-Pflichtpfad**, Auswertungen).
+
+**Schritte — Schläge (CRUD in der Zeile):**
+
+1. Sidebar: **Feldbuch** öffnen (`/portal/feldbuch`).
+2. Wirtschaftsjahr (WJ) oben wählen; Arbeitskontext prüfen.
+3. Tab **Schläge** → **Schlag anlegen**: Name, Fläche (ha), Kultur, Gemeinde, FLIK → speichern.
+4. In der Zeile: **Bearbeiten** (Stift), **Info** (Schlaginfo/DFL), **Löschen** (Papierkorb; Portal-Maßnahmen werden mitgelöscht; VALEO-Dienste blockieren mit Hinweis).
+5. Optional: **Sammeldüngung**, **Jahreswechsel**, **Import/Export**.
+
+**Schritte — Maßnahmen (CRUD in der Zeile):**
+
+1. Tab **Maßnahmen** → **Maßnahme erfassen**.
+2. Typ wählen (Düngung, PSM, Aussaat, Beregnung, AUM, Ernte, …); bei PSM Sachkunde/Begründung pflegen.
+3. PSM ohne Sachkunde/Begründung speichern → Badge **Prüfen**; nach Ergänzung der Pflichtangaben verschwindet der Hinweis.
+4. Zeile: **Bearbeiten** / **Löschen** — bei VALEO-Dienst (`erp_*`) ausgegraut.
+5. **Import**: CSV mit Schlag/Datum/Maßnahme/Mittel…; **Jahreswechsel**: Schläge ins Folge-WJ übernehmen.
+6. DüV-Auswertungen unter `/portal/feldbuch-auswertungen` (Bedarf, Bilanz, Stoffstrom, PSM, Ernte).
+
+**Ergebnis:** Schläge/Maßnahmen persistiert, Liste aktualisiert, Auswertungen aktuell.
 
 **Häufige Fehler:**
 
 | Symptom | Ursache | Maßnahme |
 |---------|---------|----------|
-| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
-| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
-| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+| Maske lädt nicht | Modul/Backend/Migration | `alembic upgrade head`, API erreichbar prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld (z. B. Sorte bei Aussaat, AUM-Code) | Meldung lesen, Felder ergänzen |
+| Löschen/Bearbeiten ausgegraut | VALEO-Dienstleistungs-Maßnahme | Nur Portal-Einträge ändern |
+| Schlag löschen 409 | ERP-Maßnahmen am Schlag | Nachweis belassen, Schlag nicht löschen |
 
 ### Lohndienste
 

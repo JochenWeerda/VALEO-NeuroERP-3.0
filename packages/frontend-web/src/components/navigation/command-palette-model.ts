@@ -12,6 +12,7 @@ import {
   Euro,
   FileText,
   HelpCircle,
+  Landmark,
   LayoutDashboard,
   Leaf,
   Monitor,
@@ -35,7 +36,7 @@ import {
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
 import { AI_SHORTCUTS } from '@/app/navigation/ai-shortcuts'
 import type { NavigationShortcut } from '@/app/navigation/types'
-import type { MaskRegistryEntry } from '@/lib/api/mask-registry'
+import type { MaskRegistryEntry, OmniboxCatalogEntry } from '@/lib/api/mask-registry'
 
 export interface PaletteCommand {
   id: string
@@ -95,11 +96,11 @@ const BASE_COMMANDS: PaletteCommand[] = [
   {
     id: 'nav-rechnungen',
     label: 'Rechnungen',
-    keywords: ['rechnung', 'rechnungen', 'invoice', 'faktura'],
+    keywords: ['rechnung', 'rechnungen', 'invoice', 'faktura', 'ausgangsrechnungen'],
     icon: FileText,
     category: 'Verkauf',
     actionId: 'nav-rechnungen',
-    actionParams: { path: '/sales/invoice' },
+    actionParams: { path: '/verkauf/rechnungen' },
     mcp: { intent: 'navigate', businessDomain: 'sales' },
   },
   {
@@ -164,6 +165,36 @@ const BASE_COMMANDS: PaletteCommand[] = [
     actionParams: { path: '/einkauf/wareneingang' },
     mcp: { intent: 'navigate', businessDomain: 'procurement' },
   },
+  {
+    id: 'nav-anlieferavis',
+    label: 'Anlieferavis',
+    keywords: ['anlieferavis', 'avis', 'anlieferung', 'lieferschein avis'],
+    icon: Truck,
+    category: 'Einkauf',
+    actionId: 'nav-anlieferavis',
+    actionParams: { path: '/einkauf/anlieferavis-liste' },
+    mcp: { intent: 'navigate', businessDomain: 'procurement' },
+  },
+  {
+    id: 'nav-auftragsbestaetigungen',
+    label: 'Auftragsbestaetigungen',
+    keywords: ['auftragsbestaetigungen', 'auftragsbestaetigung', 'lieferbestaetigung', 'order confirmation'],
+    icon: ClipboardList,
+    category: 'Einkauf',
+    actionId: 'nav-auftragsbestaetigungen',
+    actionParams: { path: '/einkauf/auftragsbestaetigungen' },
+    mcp: { intent: 'navigate', businessDomain: 'procurement' },
+  },
+  {
+    id: 'nav-einkaufsanfragen',
+    label: 'Einkaufsanfragen',
+    keywords: ['einkaufsanfragen', 'beschaffungsanfragen', 'bedarfsanfrage', 'banf'],
+    icon: ClipboardList,
+    category: 'Einkauf',
+    actionId: 'nav-einkaufsanfragen',
+    actionParams: { path: '/einkauf/anfragen' },
+    mcp: { intent: 'navigate', businessDomain: 'procurement' },
+  },
 
   // ── Lager ──────────────────────────────────────────────────────────────────
   {
@@ -217,6 +248,37 @@ const BASE_COMMANDS: PaletteCommand[] = [
     mcp: { intent: 'adjust-inventory', businessDomain: 'inventory' },
   },
 
+  {
+    id: 'nav-warteschlange',
+    label: 'Warteschlange',
+    keywords: ['warteschlange', 'waage', 'annahme', 'lkw', 'queue', 'hof'],
+    icon: Truck,
+    category: 'Annahme',
+    actionId: 'nav-warteschlange',
+    actionParams: { path: '/annahme/warteschlange' },
+    mcp: { intent: 'navigate', businessDomain: 'logistics' },
+  },
+  {
+    id: 'nav-hofliste',
+    label: 'Hofliste',
+    keywords: ['hofliste', 'hof', 'yard', 'waage'],
+    icon: Scale,
+    category: 'Annahme',
+    actionId: 'nav-hofliste',
+    actionParams: { path: '/waage/hofliste' },
+    mcp: { intent: 'navigate', businessDomain: 'logistics' },
+  },
+  {
+    id: 'nav-wiegungen',
+    label: 'Wiegungen',
+    keywords: ['wiegung', 'wiegungen', 'wiegen', 'waage', 'wiegeschein'],
+    icon: FileText,
+    category: 'Annahme',
+    actionId: 'nav-wiegungen',
+    actionParams: { path: '/waage/wiegungen' },
+    mcp: { intent: 'navigate', businessDomain: 'logistics' },
+  },
+
   // ── Finanzen ───────────────────────────────────────────────────────────────
   {
     id: 'nav-op-kreditoren',
@@ -241,7 +303,7 @@ const BASE_COMMANDS: PaletteCommand[] = [
   {
     id: 'nav-mahnwesen',
     label: 'Mahnwesen',
-    keywords: ['mahnung', 'mahnwesen', 'dunning', 'forderung'],
+    keywords: ['mahnung', 'mahnwesen', 'dunning', 'forderung', 'mahnvorschlag', 'mahnlauf'],
     icon: AlertCircle,
     category: 'Finanzen',
     actionId: 'nav-mahnwesen',
@@ -251,11 +313,11 @@ const BASE_COMMANDS: PaletteCommand[] = [
   {
     id: 'nav-buchungsimport',
     label: 'Buchhaltungsimport',
-    keywords: ['buchungsimport', 'import', 'csv', 'massenbuchung', 'datev'],
+    keywords: ['buchungsimport', 'massenbuchung', 'massen-buchungsimport'],
     icon: Upload,
     category: 'Finanzen',
     actionId: 'nav-buchungsimport',
-    actionParams: { path: '/fibu/buchungsimport' },
+    actionParams: { path: '/finance/buchungsimport' },
     mcp: { intent: 'navigate', businessDomain: 'finance' },
   },
   {
@@ -266,6 +328,76 @@ const BASE_COMMANDS: PaletteCommand[] = [
     category: 'Finanzen',
     actionId: 'nav-zahlungslaeufe',
     actionParams: { path: '/fibu/zahlungslaeufe' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-kreditoren',
+    label: 'Kreditorenbuchhaltung',
+    keywords: ['kreditoren', 'kreditorenbuchhaltung', 'lieferanten op', 'offene kreditoren'],
+    icon: Euro,
+    category: 'Finanzen',
+    actionId: 'nav-kreditoren',
+    actionParams: { path: '/fibu/kreditoren' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-zahlungsvorschlaege',
+    label: 'Zahlungsvorschlaege',
+    keywords: ['zahlungsvorschlag', 'zahlungsvorschlaege', 'skonto vorschlag', 'zahlungsplanung'],
+    icon: CreditCard,
+    category: 'Finanzen',
+    actionId: 'nav-zahlungsvorschlaege',
+    actionParams: { path: '/fibu/zahlungsvorschlaege' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-op-verwaltung',
+    label: 'OP-Verwaltung',
+    keywords: ['op verwaltung', 'offene posten verwaltung', 'op-clearing', 'op sammeln'],
+    icon: Euro,
+    category: 'Finanzen',
+    actionId: 'nav-op-verwaltung',
+    actionParams: { path: '/fibu/op-verwaltung' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-fibu-offene-posten',
+    label: 'Offene Posten (FIBU)',
+    keywords: ['forderungsmanagement', 'fibu offene posten', 'mahnposten', 'op liste fibu'],
+    icon: Euro,
+    category: 'Finanzen',
+    actionId: 'nav-fibu-offene-posten',
+    actionParams: { path: '/fibu/offene-posten' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-buchungsjournal',
+    label: 'Buchungsjournal',
+    keywords: ['buchungsjournal', 'journalbuchungen', 'buchungssaetze'],
+    icon: BookOpen,
+    category: 'Finanzen',
+    actionId: 'nav-buchungsjournal',
+    actionParams: { path: '/fibu/buchungsjournal' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-fibu-hauptbuch',
+    label: 'Hauptbuch',
+    keywords: ['hauptbuch', 'soll haben journal', 'hauptbuch fibu'],
+    icon: BookOpen,
+    category: 'Finanzen',
+    actionId: 'nav-fibu-hauptbuch',
+    actionParams: { path: '/fibu/hauptbuch' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-schnittstelle-fibu',
+    label: 'Buchungsübergabe',
+    keywords: ['schnittstelle fibu', 'buchungsuebergabe', 'asc datei', 'fibu schnittstelle'],
+    icon: BookOpen,
+    category: 'Finanzen',
+    actionId: 'nav-schnittstelle-fibu',
+    actionParams: { path: '/fibu/schnittstelle-fibu' },
     mcp: { intent: 'navigate', businessDomain: 'finance' },
   },
   {
@@ -306,6 +438,56 @@ const BASE_COMMANDS: PaletteCommand[] = [
     category: 'Finanzen',
     actionId: 'nav-bilanz',
     actionParams: { path: '/fibu/bilanz' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-bwa',
+    label: 'BWA',
+    keywords: ['bwa-auswertung', 'betriebswirtschaftliche auswertung'],
+    icon: BarChart3,
+    category: 'Finanzen',
+    actionId: 'nav-bwa',
+    actionParams: { path: '/fibu/bwa' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-guv',
+    label: 'GuV',
+    keywords: ['guv-rechnung', 'gewinnverlust'],
+    icon: BarChart3,
+    category: 'Finanzen',
+    actionId: 'nav-guv',
+    actionParams: { path: '/fibu/guv' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-elster-online',
+    label: 'ELSTER (Online)',
+    keywords: ['elster', 'elster-online', 'ustva', 'umsatzsteuer-voranmeldung'],
+    icon: FileText,
+    category: 'Finanzen',
+    actionId: 'nav-elster-online',
+    actionParams: { path: '/fibu/elster-online' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-bank-abgleich',
+    label: 'Bankabgleich',
+    keywords: ['bankabgleich', 'bank-abgleich', 'camt', 'kontoauszug'],
+    icon: Landmark,
+    category: 'Finanzen',
+    actionId: 'nav-bank-abgleich',
+    actionParams: { path: '/finance/bank-abgleich' },
+    mcp: { intent: 'navigate', businessDomain: 'finance' },
+  },
+  {
+    id: 'nav-lastschriften-debitoren',
+    label: 'Lastschriften Debitoren',
+    keywords: ['lastschriften-debitoren', 'sepa lastschrift'],
+    icon: CreditCard,
+    category: 'Finanzen',
+    actionId: 'nav-lastschriften-debitoren',
+    actionParams: { path: '/finance/lastschriften-debitoren' },
     mcp: { intent: 'navigate', businessDomain: 'finance' },
   },
   {
@@ -692,12 +874,120 @@ function buildMaskCommands(maskRegistry: MaskRegistryEntry[] | undefined, agrarE
         maskClass: mask.mask_class,
         processKey: mask.process_key ?? null,
       },
-      hint: `${mask.mask_class} | ${mask.domain}${mask.process_key ? ` | ${mask.process_key}` : ''}`,
+      hint: shortPathAlias(mask.route),
       mcp: {
         intent: 'open-process-mask',
         businessDomain: mask.domain,
       },
     }))
+}
+
+// ── Omnibox-Katalog-Anreicherung (UIX-060) ───────────────────────────────────
+// Der Backend-Katalog liefert kuratierte Synonyme + reale Listen-Route je
+// ScreenDefinition. Wir mergen ihn ueber die Route (== actionParams.path) in
+// den bestehenden Command-Katalog: vorhandene Commands bekommen die Synonyme
+// als zusaetzliche keywords; Katalog-Eintraege ohne passenden Command werden
+// synthetisiert, damit auch bisher nur per Menue erreichbare Masken ueber die
+// Omnibox findbar werden. Reine Funktion — im Compiler/Tests wiederverwendbar.
+
+const OMNIBOX_DOMAIN_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  agrar: Sprout,
+  finance: Calculator,
+  sales: ShoppingCart,
+  einkauf: Truck,
+  lager: Warehouse,
+  crm: Users,
+  futtermittel: Leaf,
+  qualitaet: ShieldCheck,
+}
+
+function normalizePath(path: string): string {
+  const trimmed = path.split('?')[0].replace(/\/+$/, '')
+  return trimmed.toLowerCase()
+}
+
+/** Letztes nicht-parametrisches Pfadsegment — Alias statt technischer Screen-ID. */
+export function shortPathAlias(path: string | undefined): string | undefined {
+  if (!path) return undefined
+  const segments = path.split(/[?#]/, 1)[0].replace(/^\/+|\/+$/g, '').split('/').filter(Boolean)
+  return [...segments].reverse().find((segment) => !segment.startsWith(':') && !segment.startsWith('$'))
+}
+
+function withPathAlias(command: PaletteCommand): PaletteCommand {
+  const path = typeof command.actionParams?.path === 'string' ? command.actionParams.path : undefined
+  const alias = shortPathAlias(path)
+  if (!alias) return command
+  return {
+    ...command,
+    hint: alias,
+    keywords: mergeKeywords(command.keywords, [alias]),
+  }
+}
+
+function mergeKeywords(existing: string[], incoming: string[]): string[] {
+  const seen = new Set(existing.map((k) => k.toLowerCase()))
+  const merged = [...existing]
+  for (const keyword of incoming) {
+    const key = keyword.trim()
+    if (key.length === 0 || seen.has(key.toLowerCase())) continue
+    merged.push(key)
+    seen.add(key.toLowerCase())
+  }
+  return merged
+}
+
+export function enrichCommandsWithOmniboxCatalog(
+  commands: PaletteCommand[],
+  catalog: OmniboxCatalogEntry[] | undefined,
+  agrarEnabled: boolean,
+): PaletteCommand[] {
+  if (!catalog || catalog.length === 0) return commands
+
+  const byPath = new Map<string, PaletteCommand>()
+  for (const command of commands) {
+    const path = command.actionParams?.path
+    if (typeof path === 'string') byPath.set(normalizePath(path), command)
+  }
+
+  const enriched = commands.map((command) => ({ ...command }))
+  const enrichedByPath = new Map<string, PaletteCommand>()
+  for (const command of enriched) {
+    const path = command.actionParams?.path
+    if (typeof path === 'string') enrichedByPath.set(normalizePath(path), command)
+  }
+
+  const synthesized: PaletteCommand[] = []
+  for (const entry of catalog) {
+    if (!entry.route) continue
+    if (!agrarEnabled && (entry.domain === 'agrar' || entry.route.startsWith('/agrar'))) continue
+
+    const synonyms = [...entry.synonyms, ...entry.example_prompts]
+    const target = enrichedByPath.get(normalizePath(entry.route))
+    if (target) {
+      target.keywords = mergeKeywords(target.keywords, synonyms)
+      const alias = shortPathAlias(entry.route)
+      if (alias) {
+        target.hint = alias
+        target.keywords = mergeKeywords(target.keywords, [alias])
+      }
+      continue
+    }
+    // Kein passender Command → synthetisieren, damit die Maske findbar wird.
+    synthesized.push(withPathAlias({
+      id: `omnibox:${entry.screen_id}`,
+      label: entry.title,
+      keywords: mergeKeywords([entry.screen_id, entry.domain], synonyms),
+      icon: OMNIBOX_DOMAIN_ICONS[entry.domain] ?? FileText,
+      category: 'Masken',
+      actionId: `omnibox:${entry.screen_id}`,
+      actionParams: { path: entry.route, screenId: entry.screen_id },
+      hint: shortPathAlias(entry.route),
+      mcp: { intent: 'navigate', businessDomain: entry.domain || 'core' },
+    }))
+  }
+
+  appendUniqueCommands(enriched, synthesized)
+  return enriched
 }
 
 export function buildPaletteCommands({
@@ -780,5 +1070,6 @@ export function buildPaletteCommands({
   appendUniqueCommands(commands, aiCommands)
   appendUniqueCommands(commands, buildMaskCommands(maskRegistry, agrarEnabled))
 
-  return agrarEnabled ? commands : commands.filter(supportsAgrarCommand)
+  const visible = agrarEnabled ? commands : commands.filter(supportsAgrarCommand)
+  return visible.map(withPathAlias)
 }

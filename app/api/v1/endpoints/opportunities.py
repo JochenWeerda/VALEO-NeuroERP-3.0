@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
+from ....services.customer_reference import resolve_customer
 from ....integrations.crm_core_client import (
     create_opportunity as crm_create_opportunity,
     delete_opportunity as crm_delete_opportunity,
@@ -55,6 +56,7 @@ async def list_opportunities(
     assigned_to: Optional[str] = Query(None, description="Filter by assigned user"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(50, ge=1, le=200, description="Maximum number of items to return"),
+    db: Session = Depends(get_db),
 ):
     """List sales opportunities from crm-sales with pagination."""
     try:
@@ -68,7 +70,7 @@ async def list_opportunities(
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except (httpx.RequestError, RuntimeError):
-        opportunities, total = [], 0
+        opportunities, total = _local_opportunities(db, tenant_id=tenant_id, skip=skip, limit=limit)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to list opportunities: {exc}") from exc
 
@@ -94,6 +96,75 @@ OPPORTUNITY_STAGES_LIST = [
 ]
 
 _STAGE_DEFAULT_PROB = {s["id"]: s["probability"] for s in OPPORTUNITY_STAGES_LIST}
+
+
+def _opportunity_from_local(row: dict[str, Any]) -> dict[str, Any]:
+    """Mappt die lokale Pipeline-Tabelle auf den crm-sales-Vertrag der Maske."""
+    return {
+        "id": row["id"],
+        "tenant_id": row["tenant_id"],
+        "name": row["title"],
+        "description": row.get("description"),
+        "amount": row.get("estimated_value"),
+        "probability": row.get("probability"),
+        "expected_close_date": row.get("expected_close_date"),
+        "status": row.get("status") or "prospecting",
+        "stage": row.get("stage") or "initial_contact",
+        "lead_source": row.get("source"),
+        "assigned_to": row.get("assigned_to"),
+        "customer_id": row.get("customer_id"),
+        "created_at": row.get("created_at"),
+        "updated_at": row.get("updated_at") or row.get("created_at"),
+    }
+
+
+def _local_opportunity(db: Session, opportunity_id: str) -> dict[str, Any] | None:
+    row = db.execute(
+        text(
+            """
+            SELECT id, tenant_id, title, description, estimated_value, probability,
+                   expected_close_date, status, stage, source, assigned_to, customer_id,
+                   created_at, COALESCE(updated_at, created_at) AS updated_at
+            FROM domain_crm.crm_opportunities
+            WHERE id = :id
+            """
+        ),
+        {"id": opportunity_id},
+    ).mappings().first()
+    return _opportunity_from_local(dict(row)) if row else None
+
+
+def _local_opportunities(
+    db: Session,
+    *,
+    tenant_id: str | None,
+    skip: int,
+    limit: int,
+) -> tuple[list[dict[str, Any]], int]:
+    total = db.execute(
+        text(
+            """
+            SELECT count(*) FROM domain_crm.crm_opportunities
+            WHERE (:tid IS NULL OR tenant_id = :tid)
+            """
+        ),
+        {"tid": tenant_id},
+    ).scalar_one()
+    rows = db.execute(
+        text(
+            """
+            SELECT id, tenant_id, title, description, estimated_value, probability,
+                   expected_close_date, status, stage, source, assigned_to, customer_id,
+                   created_at, COALESCE(updated_at, created_at) AS updated_at
+            FROM domain_crm.crm_opportunities
+            WHERE (:tid IS NULL OR tenant_id = :tid)
+            ORDER BY created_at DESC
+            OFFSET :skip LIMIT :limit
+            """
+        ),
+        {"tid": tenant_id, "skip": skip, "limit": limit},
+    ).mappings().all()
+    return [_opportunity_from_local(dict(row)) for row in rows], int(total or 0)
 
 
 def _ensure_opp_columns(db: Session) -> None:
@@ -334,7 +405,7 @@ async def patch_opportunity_stage(
                 UPDATE opportunities
                 SET stage = :stage,
                     probability = :prob,
-                    stage_history = :hist::jsonb,
+                    stage_history = CAST(:hist AS jsonb),
                     updated_at = NOW()
                 WHERE id = :oid
                 """
@@ -413,17 +484,30 @@ async def add_opportunity_activity(
 
 
 @router.get("/{opportunity_id}", response_model=Opportunity, summary="Opportunity abrufen")
-async def get_opportunity(opportunity_id: str):
+async def get_opportunity(opportunity_id: str, db: Session = Depends(get_db)):
     """Get a specific sales opportunity by ID."""
     try:
         opportunity = await crm_get_opportunity(opportunity_id)
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 404:
+            opportunity = _local_opportunity(db, opportunity_id)
+            if opportunity is None:
+                raise HTTPException(status_code=404, detail="Opportunity not found") from exc
+        else:
+            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except (httpx.RequestError, RuntimeError) as exc:
+        opportunity = _local_opportunity(db, opportunity_id)
+        if opportunity is None:
             raise HTTPException(status_code=404, detail="Opportunity not found") from exc
-        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve opportunity: {exc}") from exc
-    return Opportunity.model_validate(opportunity)
+    result = Opportunity.model_validate(opportunity)
+    # Resolved within the opportunity's own tenant, so the name never crosses tenants.
+    customer_ref = str(result.customer_id) if result.customer_id else None
+    kunde = resolve_customer(db, result.tenant_id, customer_ref)
+    # customer_id is always a UUID; echoing it back as "number" would put a raw key in the head.
+    number = None if kunde.number == customer_ref else kunde.number
+    return result.model_copy(update={"customer_name": kunde.name, "customer_number": number})
 
 
 @router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren")

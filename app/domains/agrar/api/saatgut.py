@@ -5,11 +5,11 @@ Full CRUD for Saatgut-Stammdaten management
 
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc, func, case
 
 from ....core.config import settings
+from ....core.business_time import business_today
 from ....core.database import get_db
 from ....infrastructure.models import Saatgut as SaatgutModel
 from ....api.v1.schemas.base import PaginatedResponse
@@ -20,7 +20,7 @@ router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
-@router.get("/", response_model=PaginatedResponse[Saatgut])
+@router.get("/", response_model=PaginatedResponse[Saatgut], summary="Saatgut auflisten")
 async def list_saatgut(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in name, article number, variety"),
@@ -81,7 +81,36 @@ async def list_saatgut(
     )
 
 
-@router.get("/{saatgut_id}", response_model=Saatgut)
+@router.get("/search", response_model=list[Saatgut], summary="Saatgut suchen")
+async def search_saatgut(
+    q: str = Query(..., min_length=2, description="Search term"),
+    limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Lightweight search endpoint for Saatgut."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    like = f"%{q}%"
+
+    query = (
+        db.query(SaatgutModel)
+        .filter(SaatgutModel.ist_aktiv == True)
+        .filter(SaatgutModel.tenant_id == effective_tenant)
+        .filter(
+            or_(
+                SaatgutModel.name.ilike(like),
+                SaatgutModel.artikelnummer.ilike(like),
+                SaatgutModel.sorte.ilike(like),
+            )
+        )
+        .order_by(SaatgutModel.name.asc())
+        .limit(limit)
+    )
+
+    return [Saatgut.model_validate(item) for item in query.all()]
+
+
+@router.get("/{saatgut_id}", response_model=Saatgut, summary="Saatgut abrufen")
 async def get_saatgut(
     saatgut_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -105,7 +134,7 @@ async def get_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.post("/", response_model=Saatgut, status_code=201)
+@router.post("/", response_model=Saatgut, status_code=201, summary="Saatgut anlegen")
 async def create_saatgut(
     saatgut_data: SaatgutCreate,
     tenant_id: Optional[str] = Query(None),
@@ -131,14 +160,14 @@ async def create_saatgut(
         )
 
     # Validate business rules
-    if saatgut_data.ablauf_zulassung and saatgut_data.ablauf_zulassung < datetime.utcnow().date():
+    if saatgut_data.ablauf_zulassung and saatgut_data.ablauf_zulassung.date() < business_today():
         raise HTTPException(
             status_code=400,
             detail="Approval expiry date cannot be in the past"
         )
 
     saatgut = SaatgutModel(
-        **saatgut_data.model_dump(),
+        **saatgut_data.model_dump(exclude={"tenant_id"}),
         tenant_id=effective_tenant
     )
 
@@ -149,7 +178,8 @@ async def create_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.put("/{saatgut_id}", response_model=Saatgut)
+@router.put("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren")
+@router.patch("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren")
 async def update_saatgut(
     saatgut_id: str,
     saatgut_data: SaatgutUpdate,
@@ -192,8 +222,7 @@ async def update_saatgut(
 
     # Validate approval expiry
     if "ablauf_zulassung" in update_data and update_data["ablauf_zulassung"]:
-        from datetime import datetime
-        if update_data["ablauf_zulassung"] < datetime.utcnow().date():
+        if update_data["ablauf_zulassung"].date() < business_today():
             raise HTTPException(
                 status_code=400,
                 detail="Approval expiry date cannot be in the past"
@@ -208,7 +237,7 @@ async def update_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.delete("/{saatgut_id}", status_code=204)
+@router.delete("/{saatgut_id}", status_code=204, summary="Saatgut deaktivieren")
 async def delete_saatgut(
     saatgut_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -235,36 +264,7 @@ async def delete_saatgut(
     return None
 
 
-@router.get("/search", response_model=list[Saatgut])
-async def search_saatgut(
-    q: str = Query(..., min_length=2, description="Search term"),
-    limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
-    tenant_id: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-):
-    """Lightweight search endpoint for Saatgut."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    like = f"%{q}%"
-
-    query = (
-        db.query(SaatgutModel)
-        .filter(SaatgutModel.ist_aktiv == True)
-        .filter(SaatgutModel.tenant_id == effective_tenant)
-        .filter(
-            or_(
-                SaatgutModel.name.ilike(like),
-                SaatgutModel.artikelnummer.ilike(like),
-                SaatgutModel.sorte.ilike(like),
-            )
-        )
-        .order_by(SaatgutModel.name.asc())
-        .limit(limit)
-    )
-
-    return [Saatgut.model_validate(item) for item in query.all()]
-
-
-@router.get("/stats/overview")
+@router.get("/stats/overview", summary="Saatgut-Kennzahlen")
 async def get_saatgut_stats(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),

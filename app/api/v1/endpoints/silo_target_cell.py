@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.services.silo_rule_engine_service import SiloRuleEngineService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/silo", tags=["silo", "rule-engine"])
 
@@ -21,7 +22,7 @@ def _svc(
     return SiloRuleEngineService(db=db, tenant_id=x_tenant_id)
 
 
-@router.get("/zielzellen-vorschlag", response_model=dict[str, Any], summary="Zielzellen-Vorschlag fuer Einlagerung")
+@router.get("/zielzellen-vorschlag", response_model=TypedObjectOut, summary="Zielzellen-Vorschlag fuer Einlagerung")
 def zielzellen_vorschlag(
     artikel_id: str = Query(..., description="Artikel-ID / Material-Nr"),
     menge_kg: float = Query(..., gt=0, description="Einzulagernde Menge in kg"),
@@ -51,7 +52,7 @@ def zielzellen_vorschlag(
 
 @router.get(
     "/zielzellen-vorschlag/lot/{lot_id}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Zielzellen-Vorschlag direkt aus Lot",
 )
 def zielzellen_vorschlag_lot(

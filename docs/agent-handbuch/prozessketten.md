@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-10-05
 version: 3.0.0
 description: End-to-End-Prozessräume mit Knoten, Masken-Deep-Links und Instanz-Lifecycle-API.
 ---
@@ -115,7 +115,7 @@ _Korrekturen, Gutschriften und Abschlusspruefungen folgen erst, wenn Lieferung, 
 
 ### Registrierte Masken (ScreenDefinition)
 
-- `crm/customer-360` — Kundenstamm · Contract: `GET /api/v1/masks/crm/customer-360/agent-contract` · Rollout: `/mask-rollout/crm__customer-360/:entityId`
+- `crm/customer-360` — Kundenakte · Contract: `GET /api/v1/masks/crm/customer-360/agent-contract` · Rollout: `/mask-rollout/crm__customer-360/:entityId`
 - `crm/opportunity` — Opportunity · Contract: `GET /api/v1/masks/crm/opportunity/agent-contract` · Rollout: `/mask-rollout/crm__opportunity/:entityId`
 - `finance/ar-open-item` — Offener Posten · Contract: `GET /api/v1/masks/finance/ar-open-item/agent-contract` · Rollout: `/mask-rollout/finance__ar-open-item/:entityId`
 - `finance/payment-run` — Zahlungslauf · Contract: `GET /api/v1/masks/finance/payment-run/agent-contract` · Rollout: `/mask-rollout/finance__payment-run/:entityId`
@@ -559,7 +559,7 @@ _Kundenrueckmeldung und Abschlussbewertung fehlen noch._
 
 ### Registrierte Masken (ScreenDefinition)
 
-- `crm/customer-360` — Kundenstamm · Contract: `GET /api/v1/masks/crm/customer-360/agent-contract` · Rollout: `/mask-rollout/crm__customer-360/:entityId`
+- `crm/customer-360` — Kundenakte · Contract: `GET /api/v1/masks/crm/customer-360/agent-contract` · Rollout: `/mask-rollout/crm__customer-360/:entityId`
 
 ---
 

@@ -1,0 +1,39 @@
+slice_id: UIX-091-GATE
+title: missing_process_chain von Warnung auf Error
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-09-15
+closed_at: 2026-09-15
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Eigener Commit nach UIX-091-ROLLOUT, wie in der M4-Spec gefordert.
+  Claude bleibt Owner des UIX-091-Kerns; dieser Tail hebt nur die Severity.
+goal: >-
+  Belegmasken ohne processChain und ohne noProcessChainReason sind nicht
+  generatorReady. Registry-SDs bleiben alle gruen, weil ROLLOUT sie
+  klassifiziert hat.
+file_ownership:
+  - docs/agent-ops/slices/UIX-091-GATE.yaml
+  - docs/agent-ops/slices/UIX-091.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/design/specs/uix-m4-spec.md
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - tests/test_uix091_process_chain_contract.py
+acceptance:
+  - missing_process_chain ist mandatory und steht in errors, nicht warnings.
+  - Roh-SD ohne Kette/Reason: generatorReady=false.
+  - Alle Registry-Beleg-SDs passieren das Gate (Kette oder Reason).
+tests:
+  - pytest tests/test_uix091_process_chain_contract.py tests/test_agent_mask_contract.py --noconftest -p no:cacheprovider --no-cov
+risks:
+  - Neue Beleg-SDs ohne Klassifikation blockieren ab jetzt den Generator.
+ai_harness:
+  fachlicher_vertrag: Unklassifizierte Belegmasken sind nicht generator-ready.
+  architektur_vertrag: Gleiches Gate, hoehere Severity; kein zweites System.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Block-Fall am Roh-Dict; Registry bleibt gruen.
+  security_vertrag: Keine neuen Secrets.
+  betriebs_vertrag: generatorReady faellt nur bei fehlender Klassifikation.
+  dokumentations_vertrag: Spec, Workboard, Slice, UIX-091-Fortschritt.
+external_gates:
+  - not_applicable

@@ -48,7 +48,7 @@ function CreateForm({ doc }: { doc: string }) {
           <option value="rueckmeldung">Rückmeldung</option>
         </NativeSelect>
       </label>
-      <label className="text-xs text-muted-foreground space-y-1 flex-1 min-w-[12rem]">
+      <label className="text-xs text-muted-foreground space-y-1 flex-1 min-w-48">
         <span>Betreff</span>
         <Input value={betreff} onChange={(e) => setBetreff(e.target.value)} placeholder="Betreff" className="h-8" />
       </label>
@@ -56,7 +56,7 @@ function CreateForm({ doc }: { doc: string }) {
         <span>Fällig {art === 'wiedervorlage' ? '(Pflicht)' : '(opt.)'}</span>
         <Input type="date" value={faellig} onChange={(e) => setFaellig(e.target.value)} className="h-8" />
       </label>
-      <Button size="sm" onClick={submit} disabled={!valid || create.isPending}>
+      <Button onClick={submit} disabled={!valid || create.isPending} className="min-h-touch">
         {create.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Plus size={14} className="mr-1" />}Erfassen
       </Button>
     </div>
@@ -66,11 +66,11 @@ function CreateForm({ doc }: { doc: string }) {
 function CompleteButton({ id }: { id: string }) {
   const complete = useCompleteFollowup()
   return (
-    <Button size="sm" variant="ghost" onClick={() => complete.mutate(id, {
+    <Button variant="ghost" onClick={() => complete.mutate(id, {
       onSuccess: () => toast({ title: 'Erledigt' }),
       onError: (err) => toast({ title: 'Fehlgeschlagen', description: errDetail(err), variant: 'destructive' }),
-    })} disabled={complete.isPending}>
-      {complete.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Check size={13} className="mr-1 text-emerald-600" />}Erledigen
+    })} disabled={complete.isPending} className="min-h-touch">
+      {complete.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Check size={13} className="mr-1 text-status-success" />}Erledigen
     </Button>
   )
 }
@@ -80,7 +80,7 @@ function FollowupRow({ f }: { f: Followup }) {
     <tr className="border-b last:border-0">
       <td className="px-3 py-1.5"><Badge className={`text-[10px] ${ART_BADGE[f.art] ?? ''}`}>{f.art}</Badge></td>
       <td className="px-3 py-1.5">{f.betreff}</td>
-      <td className="px-3 py-1.5">{f.faellig_am ? new Date(f.faellig_am).toLocaleDateString('de-DE') : '—'}{f.ueberfaellig && <AlertTriangle size={12} className="inline ml-1 text-red-600" />}</td>
+      <td className="px-3 py-1.5">{f.faellig_am ? new Date(f.faellig_am).toLocaleDateString('de-DE') : '—'}{f.ueberfaellig && <AlertTriangle size={12} className="inline ml-1 text-status-error" />}</td>
       <td className="px-3 py-1.5"><Badge variant={f.status === 'offen' ? 'secondary' : 'outline'} className="text-[10px]">{f.status}</Badge></td>
       <td className="px-3 py-1.5 text-right">{f.status === 'offen' && <CompleteButton id={f.followup_id} />}</td>
     </tr>
@@ -101,7 +101,7 @@ export default function WiedervorlagenPage() {
       <div className="flex items-center gap-2">
         <CalendarClock size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Wiedervorlagen & Bescheide</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => { void worklist.refetch(); void docs.refetch() }} disabled={worklist.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => { void worklist.refetch(); void docs.refetch() }} disabled={worklist.isFetching}>
           {worklist.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>

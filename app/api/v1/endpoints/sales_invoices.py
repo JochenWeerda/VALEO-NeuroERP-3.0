@@ -1,0 +1,833 @@
+"""Die Ausgangsrechnung mit ihren Positionen.
+
+Bisher war die Rechnung im Belegfluss kein Gegenstand: Aus einem Lieferschein
+wurde ein Journalsatz ueber den ganzen Beleg. Damit konnte eine
+Positionszuordnung auf nichts zeigen, und niemand konnte nachlesen, woher eine
+berechnete Menge kommt.
+
+Diese Endpunkte liefern die Rechnung **mit** ihren Positionen und — je Position
+— ihre **Herkunft**: aus welcher Lieferscheinposition welche Teilmenge stammt.
+Das ist dieselbe Zuordnung, die der Lieferschein nach vorn zeigt, nur von der
+anderen Seite gelesen.
+
+Die Sammelrechnung ist hier kein Sonderfall, sondern der Regelfall: Mehrere
+Lieferscheine in eine Rechnung sind nur eine laengere Quellenliste.
+"""
+
+from __future__ import annotations
+
+import json
+from datetime import date
+from decimal import Decimal
+from typing import Any, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import func, text
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from app.api.v1.schemas.base import BaseSchema
+from app.core.database import get_db
+from app.core.tenant_context import get_current_tenant_id
+from app.core.mask_screen_summary_common import build_screen_summary_payload, build_tab_page
+from app.core.uuid7 import uuid7
+from app.domains.documents.allocation_models import (
+    DocumentAllocation,
+    DocumentAllocationSource,
+)
+from app.domains.documents.sales_invoice_models import SalesInvoice, SalesInvoiceLine
+from app.services.customer_reference import resolve_customer
+from app.services.document_allocation_service import LineToRegister
+from app.services.sales_invoice_mask import (
+    herkunfts_zeilen,
+    lade_herkunft,
+    positions_zeilen,
+    steuer_zeilen,
+    ungedeckte_positionen,
+)
+from app.services.sales_invoice_service import (
+    InvoiceCreationError,
+    SalesInvoiceService,
+    SourceLine,
+)
+
+router = APIRouter()
+
+
+class SalesInvoiceOut(BaseSchema):
+    """Offene Huelle fuer die Antworten, die keine feste Form haben.
+
+    Anlegen, Maskenkopf und Registerdaten liefern je nach Lage andere Felder
+    (``skipped``, Seitenzahlen, Tabellenzeilen). Fuer den **Beleg** gilt das
+    nicht — er hat eine Form, und die steht unten.
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+
+class InvoiceLineOriginOut(BaseSchema):
+    """Woher eine berechnete Teilmenge stammt."""
+
+    source_document_type: str
+    source_document_id: str
+    source_line_id: str
+    quantity: str
+    unit: str
+    reason: Optional[str] = None
+
+
+class SalesInvoiceLineOut(BaseSchema):
+    """Eine Rechnungsposition mit ihrer Herkunft.
+
+    Mengen und Betraege sind **Zeichenketten**: Die Anzeige rundet, der Wert
+    nicht. Eine Gleitkommazahl an dieser Stelle waere eine stille Rundung, die
+    niemand sucht.
+    """
+
+    line_no: str
+    article_id: Optional[str] = None
+    article_number: Optional[str] = None
+    description: Optional[str] = None
+    quantity: str
+    unit: str
+    unit_price: str
+    net_amount: str
+    vat_rate: Optional[str] = None
+    #: Leer heisst: keine Zuordnung vorhanden — eine Auskunft, kein Ladezustand.
+    origins: list[InvoiceLineOriginOut] = Field(default_factory=list)
+
+
+class SalesInvoiceListRowOut(BaseSchema):
+    """Eine Zeile der Faktura-Liste.
+
+    Die Positionszahl steht bewusst in der Zeile: Sie beantwortet „sieht der
+    Beleg leer aus", ohne ihn zu oeffnen.
+    """
+
+    id: str
+    invoice_number: str
+    customer_id: str
+    invoice_date: str
+    due_date: Optional[str] = None
+    status: str
+    currency: str
+    net_amount: str
+    vat_amount: str
+    gross_amount: str
+    line_count: int
+
+
+class SalesInvoiceListOut(BaseSchema):
+    """Die Trefferliste mit ihrer Seitenangabe.
+
+    ``total`` ist die Trefferzahl **ohne** Seitenbegrenzung — ohne sie waere
+    „50 von 50" nicht von „50 von 900" zu unterscheiden.
+    """
+
+    items: list[SalesInvoiceListRowOut] = Field(default_factory=list)
+    total: int
+    limit: int
+    offset: int
+    page: int
+    table_key: str
+
+
+class InvoicePositionRowOut(BaseSchema):
+    """Eine Zeile im Register *Positionen* — mit ihrem Deckungsstand.
+
+    ``herkunft`` ist der Text, ``herkunft_art`` die Lage dahinter
+    (``belegt``/``teilweise``/``ohne``/``unvergleichbar``). Beides gehoert in
+    die Zeile: Wer die Menge sieht, soll sehen, ob sie belegt ist.
+    """
+
+    line_no: str
+    article_number: str
+    description: str
+    quantity: float
+    unit: str
+    unit_price: float
+    net_amount: float
+    vat_rate: Optional[float] = None
+    herkunft: str
+    herkunft_art: str
+    quellen: int
+
+
+class InvoiceOriginRowOut(BaseSchema):
+    """Eine Zeile im Register *Herkunft* — eine Zuordnung, nicht eine Position."""
+
+    line_no: str
+    source_type: str
+    source_document_id: str
+    source_line_id: str
+    quantity: float
+    unit: str
+    reason: str
+
+
+class InvoiceTaxRowOut(BaseSchema):
+    """Eine Zeile im Steuerausweis — ein Steuersatz mit seinen Summen."""
+
+    steuersatz: str
+    vat_rate: Optional[float] = None
+    net_amount: float
+    vat_amount: float
+    gross_amount: float
+    positionen: int
+
+
+class InvoiceTabOut(BaseSchema):
+    """Eine Registerseite des Builders."""
+
+    tab_key: str
+    table_key: str
+    items: list[dict[str, Any]] = Field(default_factory=list)
+    page: int
+    limit: int
+    total: int
+
+
+class InvoicePositionTabOut(InvoiceTabOut):
+    items: list[InvoicePositionRowOut] = Field(default_factory=list)
+
+
+class InvoiceOriginTabOut(InvoiceTabOut):
+    items: list[InvoiceOriginRowOut] = Field(default_factory=list)
+
+
+class InvoiceTaxTabOut(InvoiceTabOut):
+    items: list[InvoiceTaxRowOut] = Field(default_factory=list)
+
+
+class SalesInvoiceDetailOut(BaseSchema):
+    """Der Beleg, wie die Maske ihn liest.
+
+    Diese Form ist **zugesagt**, nicht geduldet: Solange sie eine offene Huelle
+    war, konnte `scripts/check_field_contracts.py` nicht pruefen, ob die Maske
+    nach Feldern fragt, die es gibt. Genau dort entstehen die 200er mit leerem
+    Kopf.
+    """
+
+    id: str
+    invoice_number: str
+    customer_id: str
+    #: Aus dem CRM aufgeloest (``customer_id`` ist CRM-ID oder Kundennummer).
+    customer_name: Optional[str] = None
+    customer_number: Optional[str] = None
+    invoice_date: str
+    due_date: Optional[str] = None
+    status: str
+    currency: str
+    net_amount: str
+    vat_amount: str
+    gross_amount: str
+    lines: list[SalesInvoiceLineOut] = Field(default_factory=list)
+    #: Anzahl der Positionen — die Maske zeigt sie im Kopf.
+    total: int
+
+
+class CreateFromDeliveryNotes(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    customer_id: str = Field(min_length=1, max_length=120)
+    delivery_note_ids: list[str] = Field(min_length=1)
+    invoice_date: date
+    invoice_number: Optional[str] = Field(default=None, max_length=60)
+    due_date: Optional[date] = None
+    note: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+def _ersatznummer() -> str:
+    """Rechnungsnummer, wenn der Aufrufer keine mitgibt.
+
+    **Nicht** der Kopf einer uuid7: Dessen erste acht Zeichen sind der
+    Zeitstempel, und der bleibt ueber rund eine Minute gleich — zwei Rechnungen
+    kurz hintereinander bekamen so dieselbe Nummer und die zweite lief in einen
+    500er. Genommen wird der Zufallsteil am Ende.
+
+    Das bleibt ein **Platzhalter**: Ein fortlaufender Nummernkreis je Mandant
+    und Jahr ist eine eigene Aufgabe (GoBD), keine Zeile in diesem Endpunkt.
+    """
+    return f"RE-{uuid7().replace('-', '')[-10:].upper()}"
+
+
+def _zahl(wert: Any) -> str:
+    """Mengen und Betraege als Zeichenkette — die Anzeige rundet, der Wert nicht."""
+    zahl = Decimal(str(wert)).normalize()
+    if zahl == zahl.to_integral_value():
+        zahl = zahl.quantize(Decimal(1))
+    return format(zahl, "f")
+
+
+def _delivery_note_sources(db: Session, tenant_id: str, ls_ids: list[str]) -> list[SourceLine]:
+    """Die Positionen der genannten Lieferscheine, in der Reihenfolge der Belege.
+
+    Fremde Lieferscheine bleiben draussen: Gefiltert wird ueber ``tenant_id``,
+    nicht nur ueber die Kennung aus dem Aufruf.
+    """
+    quellen: list[SourceLine] = []
+    for ls_id in ls_ids:
+        kopf = db.execute(
+            text(
+                "SELECT id FROM domain_sales.delivery_notes "
+                "WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"id": ls_id, "tid": tenant_id},
+        ).first()
+        if kopf is None:
+            raise HTTPException(
+                status_code=404, detail=f"Lieferschein {ls_id} nicht gefunden"
+            )
+        zeilen = (
+            db.execute(
+                text(
+                    "SELECT * FROM domain_sales.delivery_note_positions "
+                    "WHERE delivery_note_id = :id ORDER BY pos_nr"
+                ),
+                {"id": ls_id},
+            )
+            .mappings()
+            .all()
+        )
+        for zeile in zeilen:
+            eintrag = dict(zeile)
+            gelesen = LineToRegister.from_mapping(eintrag)
+            if not gelesen.line_id or not gelesen.unit:
+                continue
+            quellen.append(
+                SourceLine(
+                    document_type="delivery_note",
+                    document_id=ls_id,
+                    line_id=gelesen.line_id,
+                    article_id=gelesen.article_id,
+                    article_number=eintrag.get("artikel_nr"),
+                    description=eintrag.get("bezeichnung"),
+                    quantity=Decimal(str(gelesen.quantity or 0)),
+                    unit=str(gelesen.unit),
+                    unit_price=Decimal(str(eintrag.get("netto_preis") or 0)),
+                    vat_rate=(
+                        Decimal(str(eintrag["mwst_prozent"]))
+                        if eintrag.get("mwst_prozent") is not None
+                        else None
+                    ),
+                )
+            )
+    return quellen
+
+
+@router.post(
+    "/invoices/from-delivery-notes",
+    response_model=SalesInvoiceOut,
+    status_code=201,
+    summary="Rechnung aus Lieferscheinen anlegen",
+)
+def create_from_delivery_notes(
+    body: CreateFromDeliveryNotes,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Eine Rechnung mit eigenen Positionen, Menge fuer Menge zugeordnet.
+
+    Berechnet wird die **offene** Menge je Lieferscheinposition. Bereits
+    berechnete Positionen kommen nicht noch einmal mit; sie stehen mit Grund in
+    ``skipped``, damit nicht unbemerkt weniger berechnet wird als erwartet.
+    """
+    tenant_id = get_current_tenant_id()
+    quellen = _delivery_note_sources(db, tenant_id, body.delivery_note_ids)
+    nummer = body.invoice_number or _ersatznummer()
+
+    try:
+        ergebnis = SalesInvoiceService(db, tenant_id).create_from_sources(
+            invoice_number=nummer,
+            customer_id=body.customer_id,
+            invoice_date=body.invoice_date,
+            due_date=body.due_date,
+            sources=quellen,
+            reason="sammelrechnung" if len(body.delivery_note_ids) > 1 else "rechnung_aus_lieferschein",
+            user_id=body.user_id,
+            note=body.note,
+        )
+    except InvoiceCreationError as fehler:
+        db.rollback()
+        # 409: Der haeufigste Grund ist, dass bereits berechnet wurde. Das ist
+        # eine Lage, kein Fehler im Programm.
+        raise HTTPException(status_code=409, detail=str(fehler)) from fehler
+    except IntegrityError as fehler:
+        db.rollback()
+        # Eine doppelte Rechnungsnummer ist eine Lage, kein Programmfehler —
+        # und sie gehoert benannt, nicht als 500 ausgeliefert.
+        raise HTTPException(
+            status_code=409,
+            detail=f"Rechnungsnummer {nummer} ist fuer diesen Mandanten bereits vergeben.",
+        ) from fehler
+
+    db.commit()
+    return {
+        "id": ergebnis.invoice.id,
+        "invoice_number": ergebnis.invoice.invoice_number,
+        "status": ergebnis.invoice.status,
+        "net_amount": _zahl(ergebnis.invoice.net_amount),
+        "lines": [
+            {
+                "line_no": zeile.line_no,
+                "article_id": zeile.article_id,
+                "quantity": _zahl(zeile.quantity),
+                "unit": zeile.unit,
+                "net_amount": _zahl(zeile.net_amount),
+            }
+            for zeile in ergebnis.lines
+        ],
+        "skipped": [
+            {
+                "document_id": eintrag.source.document_id,
+                "line_id": eintrag.source.line_id,
+                "reason": eintrag.reason,
+            }
+            for eintrag in ergebnis.skipped
+        ],
+    }
+
+
+#: Spalten, nach denen die Maske filtern darf. Ein freier Spaltenname aus dem
+#: Aufruf waere eine Einladung, in die Abfrage zu schreiben.
+FILTERBAR = {
+    "invoice_number": SalesInvoice.invoice_number,
+    "customer_id": SalesInvoice.customer_id,
+    "status": SalesInvoice.status,
+}
+
+@router.get(
+    "/invoices",
+    response_model=SalesInvoiceListOut,
+    summary="Rechnungen suchen",
+)
+def list_invoices(
+    db: Session = Depends(get_db),
+    customer_id: Optional[str] = Query(default=None, max_length=120),
+    status: Optional[str] = Query(default=None, max_length=20),
+    invoice_number: Optional[str] = Query(default=None, max_length=60),
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    q: Optional[str] = Query(default=None, max_length=120, description="Freitext ueber Nummer und Kunde"),
+    sort: Optional[str] = Query(default=None, max_length=40),
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(default=None, description="JSON-Spaltenfilter der Maskenlaufzeit"),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    page: Optional[int] = Query(default=None, ge=1, description="Seite statt offset — die Maskenlaufzeit zaehlt Seiten"),
+) -> dict[str, Any]:
+    """Die Liste, ueber die eine Rechnung erreichbar wird.
+
+    Die Positionen kommen hier **nicht** mit: Eine Trefferliste ueber fuenfzig
+    Rechnungen wuerde sonst mehrere hundert Zeilen laden, von denen keine
+    angezeigt wird. Sichtbar ist die Positionszahl — sie beantwortet die Frage,
+    ob ein Beleg leer aussieht, ohne ihn zu oeffnen.
+
+    ``total`` ist die Trefferzahl **ohne** Seitenbegrenzung. Ohne sie waere
+    "50 von 50" nicht von "50 von 900" zu unterscheiden.
+    """
+    tenant_id = get_current_tenant_id()
+    # Die Maskenlaufzeit zaehlt Seiten, direkte Aufrufer rechnen in Zeilen.
+    # Beides fuehrt auf denselben Versatz; `page` gewinnt, wenn es gesetzt ist.
+    if page is not None:
+        offset = (page - 1) * limit
+
+    abfrage = db.query(SalesInvoice).filter(SalesInvoice.tenant_id == tenant_id)
+    if customer_id:
+        abfrage = abfrage.filter(SalesInvoice.customer_id == customer_id)
+    if status:
+        abfrage = abfrage.filter(SalesInvoice.status == status)
+    if invoice_number:
+        # Teiltreffer, weil in der Praxis die letzten Stellen gesucht werden.
+        abfrage = abfrage.filter(SalesInvoice.invoice_number.ilike(f"%{invoice_number}%"))
+    if date_from:
+        abfrage = abfrage.filter(SalesInvoice.invoice_date >= date_from)
+    if date_to:
+        abfrage = abfrage.filter(SalesInvoice.invoice_date <= date_to)
+    if q:
+        # Freitext trifft Nummer **oder** Kunde — mehr Felder waeren geraten.
+        muster = f"%{q}%"
+        abfrage = abfrage.filter(
+            SalesInvoice.invoice_number.ilike(muster) | SalesInvoice.customer_id.ilike(muster)
+        )
+
+    # Spaltenfilter der Maske. Nur benannte Spalten, und ein unlesbarer Plan
+    # wird abgewiesen statt stillschweigend ignoriert: Ein Filter, der nichts
+    # tut und nichts sagt, ist schlimmer als keiner.
+    if filter_plan:
+        try:
+            plan = json.loads(filter_plan)
+        except (ValueError, TypeError) as fehler:
+            raise HTTPException(status_code=422, detail="filter_plan ist kein gueltiges JSON") from fehler
+        if not isinstance(plan, dict):
+            raise HTTPException(status_code=422, detail="filter_plan muss ein Objekt sein")
+        for spalten_name, vorgabe in plan.items():
+            spalte = FILTERBAR.get(spalten_name)
+            if spalte is None or not isinstance(vorgabe, dict):
+                continue
+            wert = vorgabe.get("value")
+            if wert is None:
+                continue
+            operation = vorgabe.get("op", "eq")
+            if operation == "eq":
+                abfrage = abfrage.filter(spalte == wert)
+            elif operation == "neq":
+                abfrage = abfrage.filter(spalte != wert)
+            elif operation == "contains":
+                abfrage = abfrage.filter(spalte.ilike(f"%{wert}%"))
+            elif operation == "in" and isinstance(wert, list):
+                abfrage = abfrage.filter(spalte.in_(wert))
+
+    gesamt = abfrage.count()
+
+    # Sortiert wird nur nach benannten Spalten. Ein freier Spaltenname aus dem
+    # Aufruf waere eine Einladung, in die Abfrage zu schreiben.
+    SORTIERBAR = {
+        "invoice_number": SalesInvoice.invoice_number,
+        "customer_id": SalesInvoice.customer_id,
+        "invoice_date": SalesInvoice.invoice_date,
+        "due_date": SalesInvoice.due_date,
+        "status": SalesInvoice.status,
+        "net_amount": SalesInvoice.net_amount,
+        "gross_amount": SalesInvoice.gross_amount,
+    }
+    spalte = SORTIERBAR.get(sort or "")
+    if spalte is not None:
+        ordnung = [spalte.asc() if sort_dir == "asc" else spalte.desc()]
+    else:
+        ordnung = [SalesInvoice.invoice_date.desc(), SalesInvoice.invoice_number.desc()]
+
+    treffer = abfrage.order_by(*ordnung).offset(offset).limit(limit).all()
+
+    # Eine Abfrage fuer alle Positionszahlen, nicht eine je Rechnung.
+    zahlen: dict[str, int] = {}
+    if treffer:
+        for rechnung_id, anzahl in (
+            db.query(SalesInvoiceLine.invoice_id, func.count(SalesInvoiceLine.id))
+            .filter(
+                SalesInvoiceLine.tenant_id == tenant_id,
+                SalesInvoiceLine.invoice_id.in_([r.id for r in treffer]),
+            )
+            .group_by(SalesInvoiceLine.invoice_id)
+            .all()
+        ):
+            zahlen[rechnung_id] = int(anzahl)
+
+    return {
+        "items": [
+            {
+                "id": rechnung.id,
+                "invoice_number": rechnung.invoice_number,
+                "customer_id": rechnung.customer_id,
+                "invoice_date": rechnung.invoice_date.isoformat(),
+                "due_date": rechnung.due_date.isoformat() if rechnung.due_date else None,
+                "status": rechnung.status,
+                "currency": rechnung.currency,
+                "net_amount": _zahl(rechnung.net_amount),
+                "vat_amount": _zahl(rechnung.vat_amount),
+                "gross_amount": _zahl(rechnung.gross_amount),
+                "line_count": zahlen.get(rechnung.id, 0),
+            }
+            for rechnung in treffer
+        ],
+        "total": gesamt,
+        "limit": limit,
+        "offset": offset,
+        # Die Maskenlaufzeit liest die Seite zurueck, nicht den Versatz.
+        "page": (offset // limit) + 1,
+        "table_key": "sales_invoices",
+    }
+
+
+@router.get(
+    "/invoices/{invoice_id}",
+    response_model=SalesInvoiceDetailOut,
+    summary="Rechnung mit Positionen und Herkunft",
+)
+def get_invoice(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Kopf, Positionen und je Position die Herkunft der Menge.
+
+    Die Herkunft kommt in **einer** Abfrage mit, nicht in einer je Position:
+    Eine Rechnung ueber zwanzig Lieferscheinpositionen soll nicht zwanzig
+    Aufrufe ausloesen.
+    """
+    tenant_id = get_current_tenant_id()
+    gefunden = SalesInvoiceService(db, tenant_id).get_with_lines(invoice_id)
+    if gefunden is None:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    rechnung, positionen = gefunden
+
+    herkunft: dict[str, list[dict[str, Any]]] = {}
+    for zuordnung, quelle in (
+        db.query(DocumentAllocation, DocumentAllocationSource)
+        .join(
+            DocumentAllocationSource,
+            DocumentAllocation.source_id == DocumentAllocationSource.id,
+        )
+        .filter(
+            DocumentAllocation.tenant_id == tenant_id,
+            DocumentAllocation.target_document_type == "sales_invoice",
+            DocumentAllocation.target_document_id == invoice_id,
+        )
+        .order_by(DocumentAllocation.created_at.asc())
+        .all()
+    ):
+        herkunft.setdefault(zuordnung.target_line_id, []).append(
+            {
+                "source_document_type": quelle.document_type,
+                "source_document_id": quelle.document_id,
+                "source_line_id": quelle.line_id,
+                "quantity": _zahl(zuordnung.quantity),
+                "unit": zuordnung.unit,
+                "reason": zuordnung.reason,
+            }
+        )
+
+    kunde = resolve_customer(db, tenant_id, rechnung.customer_id)
+    return {
+        "id": rechnung.id,
+        "invoice_number": rechnung.invoice_number,
+        "customer_id": rechnung.customer_id,
+        "customer_name": kunde.name,
+        "customer_number": kunde.number,
+        "invoice_date": rechnung.invoice_date.isoformat(),
+        "due_date": rechnung.due_date.isoformat() if rechnung.due_date else None,
+        "status": rechnung.status,
+        "currency": rechnung.currency,
+        "net_amount": _zahl(rechnung.net_amount),
+        "vat_amount": _zahl(rechnung.vat_amount),
+        "gross_amount": _zahl(rechnung.gross_amount),
+        "lines": [
+            {
+                "line_no": zeile.line_no,
+                "article_id": zeile.article_id,
+                "article_number": zeile.article_number,
+                "description": zeile.description,
+                "quantity": _zahl(zeile.quantity),
+                "unit": zeile.unit,
+                "unit_price": _zahl(zeile.unit_price),
+                "net_amount": _zahl(zeile.net_amount),
+                "vat_rate": _zahl(zeile.vat_rate) if zeile.vat_rate is not None else None,
+                # Leer heisst hier: keine Zuordnung vorhanden. Das ist eine
+                # Auskunft — eine Rechnungsposition ohne Herkunft gehoert
+                # geprueft.
+                "origins": herkunft.get(zeile.line_no, []),
+            }
+            for zeile in positionen
+        ],
+        "total": len(positionen),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Die Maske
+#
+# Masken entstehen ueber ScreenDefinition -> RenderPlan -> UniversalMaskRenderer.
+# Diese beiden Endpunkte sind die Datenseite davon: Der Builder fragt Kopf und
+# Tabellen ab, die Maske selbst wird nicht von Hand gebaut.
+# ---------------------------------------------------------------------------
+
+SCREEN_ID = "sales/invoice"
+API_PREFIX = "/api/v1/sales/invoices"
+TABS = ("kopf", "positionen", "herkunft")
+LAZY_TABS = ("positionen", "herkunft")
+
+
+@router.get(
+    "/invoices/{invoice_id}/screen-summary",
+    response_model=SalesInvoiceOut,
+    summary="Rechnungsmaske: Kopf und Kennzahlen",
+)
+def get_invoice_screen_summary(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Kopfdaten der Maske — und der Deckungsstand als Kennzahl.
+
+    ``ungedeckte_positionen`` steht bewusst im Kopf: Wer eine Rechnung oeffnet,
+    soll ohne Klick in die Positionen sehen, ob eine Menge unbelegt ist.
+    """
+    tenant_id = get_current_tenant_id()
+    gefunden = SalesInvoiceService(db, tenant_id).get_with_lines(invoice_id)
+    if gefunden is None:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    rechnung, positionen = gefunden
+
+    herkunft = lade_herkunft(db, tenant_id, invoice_id)
+    zeilen = positions_zeilen(positionen, herkunft)
+    ungedeckt = ungedeckte_positionen(zeilen)
+    kunde = resolve_customer(db, tenant_id, rechnung.customer_id)
+
+    return build_screen_summary_payload(
+        screen_id=SCREEN_ID,
+        entity_id=invoice_id,
+        tenant_id=tenant_id,
+        title=rechnung.invoice_number,
+        subtitle=kunde.name or kunde.number or "",
+        summary={
+            "invoice_number": rechnung.invoice_number,
+            "customer_id": rechnung.customer_id,
+            "customer_name": kunde.name,
+            "customer_number": kunde.number,
+            "invoice_date": rechnung.invoice_date.isoformat(),
+            "due_date": rechnung.due_date.isoformat() if rechnung.due_date else None,
+            "status": rechnung.status,
+            "currency": rechnung.currency,
+            "net_amount": float(rechnung.net_amount or 0),
+            "vat_amount": float(rechnung.vat_amount or 0),
+            "gross_amount": float(rechnung.gross_amount or 0),
+            "positionen": len(positionen),
+            # Leere Liste heisst: alles belegt. Das ist eine Aussage, kein
+            # fehlender Wert.
+            "ungedeckte_positionen": ", ".join(ungedeckt),
+        },
+        available_tabs=list(TABS),
+        api_prefix=API_PREFIX,
+        lazy_tab_keys=list(LAZY_TABS),
+        initial_payload_budget_kb=48,
+        entity_key="invoice_id",
+    )
+
+
+def _register_daten(
+    db: Session,
+    invoice_id: str,
+    tab_key: str,
+    *,
+    page: int,
+    limit: int,
+    q: Optional[str],
+    sort: Optional[str],
+    sort_dir: Optional[str],
+) -> dict[str, Any]:
+    """Die Zeilen eines Registers — eine Stelle fuer beide Register.
+
+    Die Register haben je eine eigene Route, weil sie je eine eigene
+    **Zeilenform** haben: Positionen und Zuordnungen sind nicht dasselbe. Die
+    Beschaffung ist trotzdem dieselbe und steht deshalb nur einmal hier.
+    """
+    tenant_id = get_current_tenant_id()
+    gefunden = SalesInvoiceService(db, tenant_id).get_with_lines(invoice_id)
+    if gefunden is None:
+        raise HTTPException(status_code=404, detail="Rechnung nicht gefunden")
+    _, positionen = gefunden
+
+    herkunft = lade_herkunft(db, tenant_id, invoice_id)
+    if tab_key == "positionen":
+        items = positions_zeilen(positionen, herkunft)
+        table_key = "invoice_lines"
+    elif tab_key == "herkunft":
+        items = herkunfts_zeilen(herkunft)
+        table_key = "invoice_origins"
+    elif tab_key == "steuer":
+        items = steuer_zeilen(positionen)
+        table_key = "invoice_taxes"
+    else:
+        items, table_key = [], tab_key
+
+    return build_tab_page(
+        tab_key=tab_key,
+        table_key=table_key,
+        items=items,
+        page=page,
+        limit=limit,
+        q=q,
+        sort=sort,
+        sort_dir=sort_dir,
+        screen_id=SCREEN_ID,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/positionen",
+    response_model=InvoicePositionTabOut,
+    summary="Rechnungsmaske: Positionen mit Deckungsstand",
+)
+def get_invoice_positions_tab(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Die Positionen — je Zeile mit dem Stand ihrer Herkunft."""
+    return _register_daten(
+        db, invoice_id, "positionen",
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/herkunft",
+    response_model=InvoiceOriginTabOut,
+    summary="Rechnungsmaske: Zuordnungen je Position",
+)
+def get_invoice_origins_tab(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Eine Zeile je Zuordnung — sortier- und filterbar, statt zwanzigmal aufklappen."""
+    return _register_daten(
+        db, invoice_id, "herkunft",
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/steuer",
+    response_model=InvoiceTaxTabOut,
+    summary="Rechnungsmaske: Steuerausweis je Steuersatz",
+)
+def get_invoice_tax_tab(
+    invoice_id: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Netto, Umsatzsteuer und Brutto je Steuersatz — die Summe ergibt den Kopfbetrag."""
+    return _register_daten(
+        db, invoice_id, "steuer",
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/tabs/{tab_key}",
+    response_model=SalesInvoiceOut,
+    summary="Rechnungsmaske: Tabellendaten eines Registers",
+)
+def get_invoice_tab(
+    invoice_id: str,
+    tab_key: str,
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=25, ge=1, le=100),
+    q: Optional[str] = None,
+    sort: Optional[str] = None,
+    sort_dir: Optional[str] = Query(default=None, pattern="^(asc|desc)$"),
+) -> dict[str, Any]:
+    """Ein Register, das nicht benannt ist.
+
+    **Nach** den beiden benannten Routen deklariert, sonst faengt dieser Pfad
+    sie ab. Ein unbekanntes Register ergibt eine **leere** Seite und keinen
+    Fehler: Die Registerliste steht in der ScreenDefinition, und ein Tippfehler
+    dort soll die Maske nicht zerlegen.
+    """
+    return _register_daten(
+        db, invoice_id, tab_key,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+    )

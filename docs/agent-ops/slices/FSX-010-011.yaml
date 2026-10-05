@@ -1,0 +1,64 @@
+slice_id: FSX-010-011
+id: FSX-010-011
+title: Fallsuche je Beleg und nebenlaeufigkeitssichere Fallanlage
+owner: Cursor Auto
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-003-GATE-CI
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+coordination: >-
+  Im Arbeitsbaum lag ein angefangener Stand (Lookup-Index ohne process_key,
+  Migration an altem Head, kein btrim). An den Masterplan-Vertrag gezogen.
+  Registry und FlowSpineWorkspace bleiben bei Claude (FSX-001). FSX-012
+  (document-entry-policy, Bestellmaske) wartet, bis DESIGN-STATUS-COLORS-020
+  die Frontend-Dateien nicht mehr beansprucht.
+goal: >-
+  Belegmasken finden den Vorgang zu einem Beleg (FSX-010) und legen ihn
+  kollisionsfest an (FSX-011), ohne Doppelanlage und ohne stilles Wiederbeleben
+  abgeschlossener Faelle.
+file_ownership:
+  - docs/agent-ops/slices/FSX-010-011.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - app/api/v1/endpoints/flow_spines.py
+  - alembic/versions/flow_spine_document_link_unique_20260915.py
+  - tests/test_flow_spine_document_binding.py
+  - tests/test_flow_spines_api.py
+acceptance:
+  - GET filtert nach linked_document_id und linked_document_type; halbe Angabe 422.
+  - Ein partieller Unique-Index (tenant, process, type, id), inkl. btrim, nur offene Faelle.
+  - Kein zweiter Index ohne process_key.
+  - POST Kollision 200 mit bestehender Fall-ID; PATCH Kollision 409.
+  - Leerstring wird NULL; abgeschlossene Faelle blockieren keine Neuanlage.
+tests:
+  - python scripts/check_alembic_single_head.py
+  - >-
+    pytest tests/test_flow_spine_document_binding.py
+    tests/test_flow_spines_api.py
+    --no-cov -q
+risks:
+  - risiko: Migration an falschem Head erzeugt zwei Alembic-Heads.
+    bewertung: down_revision auf agrar_harvest_acceptances_sammel_20260911; Gate prueft 1 Head.
+  - risiko: Leerstring '' kollidiert alle manuellen Faelle.
+    bewertung: btrim in der Index-WHERE und Normalisierung beim Schreiben.
+  - risiko: FSX-012 Frontend noch nicht verdrahtet.
+    bewertung: Bewusst dieser Slice. API ist der Vertrag fuer die Maske.
+ai_harness:
+  fachlicher_vertrag: >-
+    Derselbe offene Beleg hat genau einen Fall je Prozess und Mandant.
+    Abgeschlossene Faelle bleiben sichtbar und blockieren keine Reklamation.
+  architektur_vertrag: >-
+    Eindeutigkeit in der Datenbank, nicht in der Anwendungslogik.
+    Ein Index, vier Spalten, partiell auf offene echte Belegreferenzen.
+  daten_vertrag: >-
+    Dubletten verlieren den Belegbezug, werden nicht geloescht.
+    Leere Strings werden NULL.
+  test_vertrag: >-
+    Source-Vertrag ohne DB plus HTTP-Vertraege gegen TestClient und Postgres
+    (skip wenn Tabelle fehlt).
+  security_vertrag: Tenant bleibt Teil des Schluessels; 422 statt stiller Vollliste.
+  betriebs_vertrag: alembic upgrade head vor Nutzung der Idempotenz unter Last.
+  dokumentations_vertrag: Slice, Workboard, Masterplan unveraendert im Vertrag.
+external_gates:
+  - Alembic single head in quality-gate.

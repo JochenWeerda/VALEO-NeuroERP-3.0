@@ -1,0 +1,38 @@
+slice_id: SPEC-P1-06-W13-PORTAL
+id: SPEC-P1-06-W13-PORTAL
+title: Legacy-Routen response_model typisieren — Welle 13 (Portal Intelligence/Interessent/Lohndienst)
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-11"
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  Dreizehnte Welle von SPEC-P1-06: portal_intelligence, portal_interessent und
+  portal_lohndienst (13 schwache response_model) auf echte Pydantic-Schemas heben.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W13-PORTAL.yaml
+  - docs/agent-ops/active-workboard.md
+  - app/api/v1/schemas/portal_bundle_schemas.py
+  - app/api/v1/endpoints/portal_intelligence.py
+  - app/api/v1/endpoints/portal_interessent.py
+  - app/api/v1/endpoints/portal_lohndienst.py
+  - tests/test_welle13_response_models.py
+acceptance:
+  - 13 Endpunkte tragen ein echtes response_model
+  - Kein Feldverlust gegen to_dict-/Service-Returns
+  - Bestandstest test_portal_services gruen
+  - Schwache response_model-Typen sinken von 186 auf 173
+tests:
+  - tests/test_welle13_response_models.py
+  - tests/test_portal_services.py
+ai_harness:
+  fachlicher_vertrag: Portal-Antworten sind OpenAPI-faehig typisiert.
+  architektur_vertrag: Schemas in app/api/v1/schemas.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Gate --threshold 173.
+  security_vertrag: Keine Gate-Lockerung ausser Absenkung der Weak-Schwelle.
+  betriebs_vertrag: Keine Deployments.
+  dokumentations_vertrag: Slice-YAML, Workboard, open-gaps.
+verification:
+  - "python scripts/check_weak_response_models.py --threshold 173"
+  - "pytest tests/test_welle13_response_models.py tests/test_portal_services.py -o addopts="

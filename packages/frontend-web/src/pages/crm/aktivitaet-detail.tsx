@@ -188,12 +188,12 @@ export default function AktivitaetDetailPage(): JSX.Element {
       <ModuleToolbar backTarget="/crm/aktivitaeten" closeTarget="/crm/aktivitaeten" title={pageTitle} />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate('/crm/aktivitaeten')}>
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate('/crm/aktivitaeten')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('common.back')}
           </Button>
           <div className="flex items-center gap-3">
-            <TypeIcon className="h-8 w-8 text-blue-600" />
+            <TypeIcon className="h-8 w-8 text-primary" />
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 {pageTitle}
@@ -215,20 +215,20 @@ export default function AktivitaetDetailPage(): JSX.Element {
               variant="outline"
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="text-red-600 hover:text-red-700"
+              className="min-h-touch text-status-error hover:text-status-error"
             >
               {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <Trash2 className="h-4 w-4 mr-2" />
               {t('common.delete')}
             </Button>
           )}
-          <Button variant="outline" onClick={() => navigate('/crm/aktivitaeten')}>
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate('/crm/aktivitaeten')}>
             {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
             disabled={createMutation.isPending || updateMutation.isPending}
-            className="gap-2"
+            className="min-h-touch gap-2"
           >
             {(createMutation.isPending || updateMutation.isPending) && (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -345,7 +345,7 @@ export default function AktivitaetDetailPage(): JSX.Element {
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Main Topics</CardTitle>
-            <Button type="button" size="sm" variant="outline" onClick={() => addStringListItem('mainTopics')}>
+            <Button type="button" className="min-h-touch" variant="outline" onClick={() => addStringListItem('mainTopics')}>
               <Plus className="h-4 w-4 mr-2" />
               Hinzufügen
             </Button>
@@ -358,8 +358,9 @@ export default function AktivitaetDetailPage(): JSX.Element {
                   onChange={(e) => updateStringList('mainTopics', index, e.target.value)}
                   placeholder="Thema"
                 />
-                <Button type="button" size="icon" variant="outline" onClick={() => removeStringListItem('mainTopics', index)}>
-                  <Minus className="h-4 w-4" />
+                <Button type="button" className="min-h-touch" variant="outline" onClick={() => removeStringListItem('mainTopics', index)}>
+                  <Minus className="h-4 w-4 mr-1" />
+                  Entfernen
                 </Button>
               </div>
             ))}
@@ -369,7 +370,7 @@ export default function AktivitaetDetailPage(): JSX.Element {
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Orders Placed</CardTitle>
-            <Button type="button" size="sm" variant="outline" onClick={() => addStringListItem('ordersPlaced')}>
+            <Button type="button" className="min-h-touch" variant="outline" onClick={() => addStringListItem('ordersPlaced')}>
               <Plus className="h-4 w-4 mr-2" />
               Hinzufügen
             </Button>
@@ -382,8 +383,9 @@ export default function AktivitaetDetailPage(): JSX.Element {
                   onChange={(e) => updateStringList('ordersPlaced', index, e.target.value)}
                   placeholder="Auftrag/Beleg"
                 />
-                <Button type="button" size="icon" variant="outline" onClick={() => removeStringListItem('ordersPlaced', index)}>
-                  <Minus className="h-4 w-4" />
+                <Button type="button" className="min-h-touch" variant="outline" onClick={() => removeStringListItem('ordersPlaced', index)}>
+                  <Minus className="h-4 w-4 mr-1" />
+                  Entfernen
                 </Button>
               </div>
             ))}
@@ -393,7 +395,7 @@ export default function AktivitaetDetailPage(): JSX.Element {
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Follow-up Actions</CardTitle>
-            <Button type="button" size="sm" variant="outline" onClick={() => addStringListItem('followUpActions')}>
+            <Button type="button" className="min-h-touch" variant="outline" onClick={() => addStringListItem('followUpActions')}>
               <Plus className="h-4 w-4 mr-2" />
               Hinzufügen
             </Button>
@@ -406,8 +408,9 @@ export default function AktivitaetDetailPage(): JSX.Element {
                   onChange={(e) => updateStringList('followUpActions', index, e.target.value)}
                   placeholder="Folgeaktion"
                 />
-                <Button type="button" size="icon" variant="outline" onClick={() => removeStringListItem('followUpActions', index)}>
-                  <Minus className="h-4 w-4" />
+                <Button type="button" className="min-h-touch" variant="outline" onClick={() => removeStringListItem('followUpActions', index)}>
+                  <Minus className="h-4 w-4 mr-1" />
+                  Entfernen
                 </Button>
               </div>
             ))}

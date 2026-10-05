@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends
 import psutil
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from app.auth.deps import User, get_current_user
@@ -157,7 +157,7 @@ async def get_business_metrics(
         # Events by type (for analysis)
         event_types = db.query(
             OutboxEvent.event_type,
-            db.func.count(OutboxEvent.id).label('count')
+            func.count(OutboxEvent.id).label('count')
         ).filter(
             OutboxEvent.published == False,  # noqa: E712
             OutboxEvent.tenant_id == tenant_id,

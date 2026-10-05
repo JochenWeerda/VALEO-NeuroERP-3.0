@@ -168,7 +168,7 @@ async def create_debtor(
         insert_query = text("""
             INSERT INTO domain_erp.debitors 
             (tenant_id, debitor_number, name, address, payment_terms, credit_limit, is_active)
-            VALUES (:tenant_id, :debtor_number, :company_name, :address::jsonb, :payment_terms, :credit_limit, :is_active)
+            VALUES (:tenant_id, :debtor_number, :company_name, CAST(:address AS jsonb), :payment_terms, :credit_limit, :is_active)
             RETURNING id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                       is_active, created_at, updated_at
         """)
@@ -226,14 +226,12 @@ async def list_debtors(
         where_sql = " AND ".join(where_clauses)
         
         # Count total
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         count_query = text(f"""
             SELECT COUNT(*) FROM domain_erp.debitors WHERE {where_sql}
-        """)
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         total = db.execute(count_query, params).scalar()
         
         # Get paginated results
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         list_query = text(f"""
             SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                    is_active, created_at, updated_at
@@ -241,7 +239,7 @@ async def list_debtors(
             WHERE {where_sql}
             ORDER BY debitor_number
             LIMIT :limit OFFSET :skip
-        """)
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params.update({"limit": limit, "skip": skip})
         
         rows = db.execute(list_query, params).fetchall()
@@ -378,7 +376,7 @@ async def update_debtor(
             params["is_active"] = debtor_data.is_active
         
         # Always update address JSONB
-        update_fields.append("address = :address::jsonb")
+        update_fields.append("address = CAST(:address AS jsonb)")
         params["address"] = json.dumps(updated_address)
         
         # Update payment_terms if payment_terms_days changed
@@ -388,14 +386,13 @@ async def update_debtor(
         
         update_fields.append("updated_at = NOW()")
         
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         update_query = text(f"""
             UPDATE domain_erp.debitors
             SET {', '.join(update_fields)}
             WHERE id = :debtor_id
             RETURNING id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
                       is_active, created_at, updated_at
-        """)
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         result = db.execute(update_query, params).fetchone()
         db.commit()

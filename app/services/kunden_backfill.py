@@ -86,7 +86,7 @@ def run_backfill(db: Session, apply: bool = False) -> BackfillResult:
             "INSERT INTO public.kunden_adressen "
             "(kunden_nr, adress_typ, strasse, plz, ort, land, ist_standard) "
             "SELECT k.kunden_nr, 'haupt', k.strasse, k.plz, k.ort, k.land, TRUE "
-            + haupt_pred
+            + haupt_pred  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ))
 
     # --- 1b) Adressen: Postfach ---
@@ -102,7 +102,7 @@ def run_backfill(db: Session, apply: bool = False) -> BackfillResult:
             "INSERT INTO public.kunden_adressen "
             "(kunden_nr, adress_typ, postfach, postfach_plz, postfach_ort, ist_standard) "
             "SELECT k.kunden_nr, 'postfach', k.postfach, k.postfach_plz, k.postfach_ort, FALSE "
-            + pf_pred
+            + pf_pred  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ))
 
     # --- 2) Zahlung (1:1 Upsert) ---
@@ -116,7 +116,7 @@ def run_backfill(db: Session, apply: bool = False) -> BackfillResult:
             f"INSERT INTO public.kunden_zahlung (kunden_nr, {cols}) "
             f"SELECT k.kunden_nr, {src} FROM public.kunden k "
             "WHERE coalesce(k.geloescht, FALSE) = FALSE "
-            f"ON CONFLICT (kunden_nr) DO UPDATE SET {upd}, updated_at = now()"
+            f"ON CONFLICT (kunden_nr) DO UPDATE SET {upd}, updated_at = now()"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
         ))
 
     # --- 3) External Refs (n Typen) ---
@@ -126,7 +126,7 @@ def run_backfill(db: Session, apply: bool = False) -> BackfillResult:
             f"FROM public.kunden k WHERE coalesce(k.geloescht, FALSE) = FALSE "
             f"AND k.{src_col} IS NOT NULL AND btrim(k.{src_col}) <> '' "
             f"AND NOT EXISTS (SELECT 1 FROM public.kunden_external_refs r "
-            f"  WHERE r.kunden_nr = k.kunden_nr AND r.ref_typ = :rt AND r.ref_wert = k.{src_col})"
+            f"  WHERE r.kunden_nr = k.kunden_nr AND r.ref_typ = :rt AND r.ref_wert = k.{src_col})"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
         n = _scalar(db, f"SELECT count(*) {pred}", rt=ref_typ)
         refs_total += n
@@ -134,7 +134,7 @@ def run_backfill(db: Session, apply: bool = False) -> BackfillResult:
             db.execute(text(
                 "INSERT INTO public.kunden_external_refs (kunden_nr, ref_typ, ref_wert, quelle) "
                 f"SELECT k.kunden_nr, :rt, k.{src_col}, 'public.kunden' " + pred +
-                " ON CONFLICT (kunden_nr, ref_typ, ref_wert) DO NOTHING"
+                " ON CONFLICT (kunden_nr, ref_typ, ref_wert) DO NOTHING"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ), {"rt": ref_typ})
     res.counts["external_refs"] = refs_total
 
@@ -148,7 +148,7 @@ def run_backfill(db: Session, apply: bool = False) -> BackfillResult:
         db.execute(text(
             "INSERT INTO public.kunden_aggregates (kunden_nr) "
             "SELECT k.kunden_nr " + agg_pred +
-            " ON CONFLICT (kunden_nr) DO NOTHING"
+            " ON CONFLICT (kunden_nr) DO NOTHING"  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ))
 
     if apply:

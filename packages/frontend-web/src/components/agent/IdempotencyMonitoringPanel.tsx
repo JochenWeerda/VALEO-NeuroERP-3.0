@@ -51,7 +51,7 @@ export function IdempotencyMonitoringPanel({
     <Card className={cn('border-slate-200', className)}>
       <CardHeader className="space-y-2">
         <CardTitle className="flex items-center gap-2 text-xl">
-          <Repeat2 className="h-5 w-5 text-slate-700" />
+          <Repeat2 className="h-5 w-5 text-muted-foreground" />
           Idempotency Monitoring
         </CardTitle>
         <CardDescription>

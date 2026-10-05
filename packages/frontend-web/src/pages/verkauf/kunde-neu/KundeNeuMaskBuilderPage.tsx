@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from '@/app/routing/typed-router'
 import { ObjectPage } from '@/components/mask-builder'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
@@ -46,6 +46,14 @@ export default function KundeNeuMaskBuilderPage(): JSX.Element {
   const [error, setError] = useState<string | null>(null)
 
   const cancelTarget = returnTo || '/verkauf/kunden-liste'
+  const handleMaskChange = useCallback((nextData: MaskCustomerData): void => {
+    setMaskData((currentData) => {
+      if (JSON.stringify(currentData) === JSON.stringify(nextData)) {
+        return currentData
+      }
+      return nextData
+    })
+  }, [])
 
   async function handleMaskSave(data: MaskCustomerData): Promise<void> {
     setError(null)
@@ -84,7 +92,7 @@ export default function KundeNeuMaskBuilderPage(): JSX.Element {
       <ObjectPage
         config={CUSTOMER_MASK_OBJECT_PAGE_CONFIG}
         data={maskData}
-        onChange={setMaskData}
+        onChange={handleMaskChange}
         onSave={handleMaskSave}
         onCancel={() => navigate(cancelTarget)}
       />

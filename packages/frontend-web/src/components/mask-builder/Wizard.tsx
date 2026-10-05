@@ -106,7 +106,7 @@ const Wizard: React.FC<WizardProps> = ({
       <div key={fieldName} className="space-y-2">
         <Label htmlFor={fieldName}>
           {field.label}
-          {field.required && <span className="text-red-500 ml-1">*</span>}
+          {field.required && <span className="text-status-error ml-1">*</span>}
         </Label>
 
         <Controller
@@ -211,7 +211,7 @@ const Wizard: React.FC<WizardProps> = ({
         />
 
         {error && (
-          <p className="text-sm text-red-600 flex items-center gap-1">
+          <p className="text-sm text-status-error flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
             {error}
           </p>
@@ -280,7 +280,7 @@ const Wizard: React.FC<WizardProps> = ({
                       : isCompleted
                       ? 'bg-green-100 border-2 border-green-500'
                       : 'bg-gray-100 border-2 border-gray-300'
-                  } ${isClickable ? 'cursor-pointer hover:bg-opacity-80' : 'cursor-not-allowed opacity-50'}`}
+                  } ${isClickable ? 'cursor-pointer hover:brightness-105' : 'cursor-not-allowed opacity-50'}`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium mb-1 ${
                     isCurrent

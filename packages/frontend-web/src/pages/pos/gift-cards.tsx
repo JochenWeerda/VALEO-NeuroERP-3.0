@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useGiftCards, type GiftCard as ApiGiftCard } from '@/lib/api/pos'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -44,7 +45,7 @@ export default function GiftCardsPage(): JSX.Element {
       key: 'cardNumber' as const,
       label: 'Karten-Nummer',
       render: (gc: GiftCard) => (
-        <button onClick={() => navigate(`/pos/gift-card/${gc.id}`)} className="font-mono font-bold text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/pos/gift-card/${gc.id}`)} className="min-h-11 font-mono font-bold text-primary touch-manipulation">
           {gc.cardNumber}
         </button>
       ),
@@ -58,7 +59,7 @@ export default function GiftCardsPage(): JSX.Element {
       key: 'restguthaben' as const,
       label: 'Restguthaben',
       render: (gc: GiftCard) => (
-        <span className={`font-bold ${gc.restguthaben === 0 ? 'text-gray-400' : 'text-green-600'}`}>
+        <span className={`font-bold ${gc.restguthaben === 0 ? 'text-gray-400' : 'text-status-success'}`}>
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gc.restguthaben)}
         </span>
       ),
@@ -75,7 +76,7 @@ export default function GiftCardsPage(): JSX.Element {
         const ablauf = new Date(gc.gueltigBis)
         const bald = ablauf <= new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         return (
-          <span className={bald ? 'font-semibold text-orange-600' : ''}>
+          <span className={bald ? 'font-semibold text-status-warning' : ''}>
             {ablauf.toLocaleDateString('de-DE')}
           </span>
         )
@@ -144,7 +145,7 @@ export default function GiftCardsPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <Gift className="h-4 w-4" />
           <p className="font-semibold">Gift Cards als Zahlungsmittel</p>
@@ -153,7 +154,7 @@ export default function GiftCardsPage(): JSX.Element {
           Im POS-Terminal scannen → Automatische Einlösung • Restguthaben bleibt auf Karte • Gültigkeit: 3 Jahre ab Ausstellung
         </p>
         <p className="mt-1 text-xs font-medium">Ausweis an der Ladenkasse als B2C-Endpreis inkl. gesetzl. MwSt.</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -179,7 +180,7 @@ export default function GiftCardsPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offenes Guthaben</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtGuthaben)}</span>
+            <span className="text-2xl font-bold text-status-success">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtGuthaben)}</span>
           </CardContent>
         </Card>
 

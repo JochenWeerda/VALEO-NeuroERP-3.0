@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient } from '@/lib/api-client'
 import { useRechnungseingaenge, type Rechnungseingang, einkaufKeys } from '@/lib/api/einkauf'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
@@ -208,6 +209,7 @@ async function bulkWorkflow(
 export default function RechnungseingaengeListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const [roleFocus, setRoleFocus] = useState<ProcurementRoleFocus>('all')
   const { data: apiData = [], isLoading } = useRechnungseingaenge()
@@ -474,6 +476,8 @@ export default function RechnungseingaengeListePage(): JSX.Element {
 
   return (
     <div className="space-y-6">
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Rechnungseingaenge steuern"
         description="Die Liste bleibt schlank, zeigt aber direkt den Freigabe- und Verbuchungsdruck der aktuellen Sicht."
@@ -521,6 +525,8 @@ export default function RechnungseingaengeListePage(): JSX.Element {
         <OperationalContextPanel title="Listenkontext" sections={contextSections} />
       </div>
       <CrudCapabilityChecklist capabilities={invoiceCrudCapabilities} />
+      </>
+      ) : null}
       <ListReport
         config={rechnungseingaengeConfig}
         data={data}

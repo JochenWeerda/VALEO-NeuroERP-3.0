@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.purchase_invoice_verification_schemas import PurchaseInvoiceVerificationOut
@@ -74,7 +75,7 @@ def _fetch_po_amount(db: Session, po_id: str, tenant_id: str) -> Optional[float]
     ]:
         try:
             row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 {"id": po_id, "tid": tenant_id},
             ).fetchone()
             if row:
@@ -93,7 +94,7 @@ def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]
     ]:
         try:
             row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 {"id": gr_id, "tid": tenant_id},
             ).fetchone()
             if row:
@@ -112,7 +113,7 @@ def _fetch_invoice_amount(db: Session, invoice_id: str, tenant_id: str) -> Optio
     ]:
         try:
             row = db.execute(
-                text(f"SELECT {col} FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"SELECT {col} FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 {"id": invoice_id, "tid": tenant_id},
             ).fetchone()
             if row:
@@ -312,8 +313,9 @@ def approve_verification(
         except Exception:  # noqa: BLE001 — AP-Invoice-Update nicht kritisch
             pass
         try:
-            today = _date.today().isoformat()
-            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            business_day = business_today()
+            today = business_day.isoformat()
+            due = business_date_after(30, from_date=business_day).isoformat()
             db.execute(text("""
                 INSERT INTO domain_erp.offene_posten
                     (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

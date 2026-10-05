@@ -1,0 +1,87 @@
+slice_id: FEED-ADVICE-TRENDS-012
+id: FEED-ADVICE-TRENDS-012
+title: Controlling-Langfristtrends + betriebsinterner Gruppen-Benchmark
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Naechster Ausbau der Controlling-Zeile der Paritaetsmatrix
+  (docs/project-context/fuetterungsberatung-feature-parity-2026-07-14.md):
+  Die idempotenten Soll-Ist-Tagesreihen aus FEED-ADVICE-CONTROLLING-009 waren
+  nur als Worklist-Tabelle sichtbar. Ziel: grafische Langfristtrends je KPI
+  und ein betriebsinterner Gruppenvergleich, damit Fuetterungsberater
+  Abweichungen ueber Wochen erkennen statt nur Tageszeilen zu lesen.
+scope:
+  - "lib/api/feed-controlling.ts: Read-Client fetchControllingSeries
+    (GET /agrar/rations-optimization/controlling/series, group_id/date_from/
+    date_to) + ControllingSeriesPoint-Typ; unbekannte Messwerte bleiben null."
+  - "features/feed-advice/FeedControllingTrends.tsx (neu): Filter Gruppe +
+    Zeitraum (30/90/180 Tage, aria-pressed-Gruppe); fuenf Soll-Ist-Charts
+    (TM-Aufnahme, Futterkosten, Milch+ECM, N-Effizienz, Methan) mit rezessiver
+    gestrichelter Soll-Linie (CHART_TARGET) und Ist in kategorialen Slots;
+    bei 'Alle Gruppen' Tagesmittel ueber Gruppen; null = Luecke, nie 0;
+    Methan-Charts kennzeichnen geschaetzte Werte; Benchmark-Sektion =
+    Periodenmittel je Fuetterungsgruppe fuer waehlbare Kennzahl
+    (SimpleComparisonBars, eine Kennzahl = ein Hue). Lade-Skeleton,
+    Fehlerzustand mit 'Erneut laden', Leerzustand mit Handlungsaufforderung."
+  - "FeedControllingPage: Ansichtsumschalter Tagesliste/Langfristtrends als
+    Default-Tabs (Regel R1, kein Belegregister); Trends lazy geladen, damit
+    der Worklist-Pfad unveraendert leicht bleibt."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/FEED-ADVICE-TRENDS-012.yaml"
+  - "docs/project-context/fuetterungsberatung-feature-parity-2026-07-14.md"
+  - "packages/frontend-web/src/lib/api/feed-controlling.ts"
+  - "packages/frontend-web/src/features/feed-advice/FeedControllingTrends.tsx"
+  - "packages/frontend-web/src/features/feed-advice/FeedControllingPage.tsx"
+  - "packages/frontend-web/src/__tests__/features/feed-advice/feed-controlling-trends.test.tsx"
+progress: >-
+  2026-07-15 umgesetzt und validiert. Kein neuer API-Vertrag: reine
+  Read-Konsumtion des bestehenden Serien-Endpoints aus 009, daher kein ADR
+  und kein Domain-Pack-Delta noetig.
+acceptance:
+  - "Trends-Tab zeigt fuenf Soll-Ist-Charts aus echten Tagesreihen; Soll ist
+    als rezessive gestrichelte Linie erkennbar und in der Legende benannt."
+  - "Unbekannte Werte erzeugen Luecken; geschaetzte Methanwerte sind als
+    Schaetzung gekennzeichnet."
+  - "Benchmark vergleicht eigene Gruppen ueber das Periodenmittel der
+    gewaehlten Kennzahl; ohne Istwerte erscheint ein benannter Leerzustand."
+  - "Gruppen-/Zeitraumfilter loesen serverseitige Neuabfrage aus."
+tests:
+  - "vitest feed-controlling-trends.test.tsx -> 3/3 (Charts+Benchmark,
+    Methan-Kennzeichnung+Gruppenfilter, Leer-/Fehlerzustand+Retry)."
+  - "vitest voll -> 91/91 Dateien, 382 passed, 1 skipped."
+  - "tsc --noEmit -> 0; eslint (geaenderte Dateien) -> 0; vite build -> 19,3 s gruen."
+risks:
+  - "Bei 'Alle Gruppen' sind Tagesmittel ungewichtet (Kuhzahl variiert je
+    Gruppe); fuer gewichtete Betriebsmittel spaeter cow_count-Gewichtung."
+  - "Serien-Endpoint liefert max. den abgefragten Zeitraum ohne Paginierung;
+    bei sehr vielen Gruppen x 180 Tagen spaeter serverseitige Verdichtung."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Fuetterungsberater sehen je Gruppe oder ueber alle Gruppen die Entwicklung
+    von TM-Aufnahme, Futterkosten, Milch/ECM, N-Effizienz und Methan gegen die
+    Sollwerte der aktiven Ration; unbekannte Messungen erscheinen nie als 0;
+    Methan-Schaetzungen bleiben als solche gekennzeichnet.
+  architektur_vertrag: >-
+    Frontend-only auf bestehendem Endpoint; Chart-Farben ausschliesslich aus
+    chart-palette.ts (DESIGN-CHARTS-TOKEN-006); Ansichtsumschalter als
+    Default-Tabs gemaess Designregel R1; Trends lazy nachgeladen.
+  daten_vertrag: >-
+    Keine Schemaaenderung; Read-only auf domain_agrar.feeding_controlling_daily
+    ueber den bestehenden tenant-gescopten Service.
+  security_vertrag: >-
+    Tenant-Isolation unveraendert ueber get_tenant_id im bestehenden Endpoint;
+    keine neuen Eingabepfade ausser Query-Parametern des bestehenden Vertrags.
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert; keine neuen Abhaengigkeiten.
+  dokumentations_vertrag: >-
+    Paritaetsmatrix-Zeile Controlling + Folge-Slice-Liste aktualisiert;
+    Workboard und dieses YAML.
+  test_vertrag: >-
+    Komponententest deckt Chart-Rendering, Soll-Kennzeichnung, Methan-Hinweis,
+    Gruppenfilter-Query, Leer- und Fehlerzustand ab; Gesamtsuite, tsc, eslint
+    und Build vor Push gruen.

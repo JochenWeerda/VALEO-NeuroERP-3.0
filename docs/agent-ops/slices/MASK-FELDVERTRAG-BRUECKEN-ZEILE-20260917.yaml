@@ -1,0 +1,51 @@
+---
+slice_id: MASK-FELDVERTRAG-BRUECKEN-ZEILE
+id: MASK-FELDVERTRAG-BRUECKEN-ZEILE
+title: Bruecken-Zeilen Bestellung Lieferant Eingangsrechnung
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  sales_invoices.py und sales_orders.py bleiben Claude. Keine FSX-Dateien.
+  lager/leitstand nicht anfassen. coverage_path_check.xml nicht committen.
+goal: >
+  Sechs Tabellen der P4-Bruecken mit echten Rollout-Daten haben eine
+  deklarierte Zeilenform. Abweichungen 0. Ratsche 43.
+file_ownership:
+  - app/api/v1/schemas/mask_entity_contracts.py
+  - app/api/v1/endpoints/mask_rollout_summaries.py
+  - app/services/mask_rollout_summary_service.py
+  - app/core/screen_definitions.py
+  - tests/test_mask_entity_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_field_contracts.py
+acceptance:
+  - python scripts/check_field_contracts.py Exit 0
+  - ZEILEN_NICHT_PRUEFBAR_MAX = 43
+  - die sechs Bruecken-Tabellen nicht in zeilen_nicht_pruefbar
+  - sales_orders.py und sales_invoices.py nicht in diesem Commit
+tests:
+  - tests/test_mask_entity_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_field_contracts.py
+risks:
+  - Der Catch-all /mask-rollouts/{screen_id:path}/... darf die spezifischen Routen nicht schlucken
+ai_harness:
+  fachlicher_vertrag: >
+    Spalten folgen den JSON-Schluesseln der Zeile. Wish-Namen ohne Feld werden gestrichen.
+  architektur_vertrag: >
+    Eigene Route, eigene Zeilenform, Muster 8da5d757b. Catch-all bleibt fuer den Rest.
+  daten_vertrag: >
+    Kein DROP. Aliase an der Antwort, nicht an der Tabelle.
+  test_vertrag: >
+    Alias-Unit ohne DB. Gate gegen OpenAPI.
+  security_vertrag: >
+    Keine Secrets.
+  betriebs_vertrag: >
+    pytest haelt die Ratsche. Rollback = Commit revertieren.
+  dokumentations_vertrag: >
+    Workboard, todo P8.
+external_gates:
+  - not_applicable
+---

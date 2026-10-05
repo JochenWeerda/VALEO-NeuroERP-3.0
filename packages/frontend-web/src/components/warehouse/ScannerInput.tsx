@@ -111,15 +111,15 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
     const stateStyles = {
       idle: 'border-border focus-within:border-primary',
       scanning: 'border-primary bg-primary/10 animate-pulse',
-      success: 'border-emerald-500 bg-emerald-500/20',
-      error: 'border-red-500 bg-red-500/20',
+      success: 'border-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-500-hsl)/0.2)]',
+      error: 'border-[hsl(var(--color-semantic-error-500-hsl))] bg-[hsl(var(--color-semantic-error-500-hsl)/0.2)]',
     }
 
     const stateIcons = {
       idle: <ScanLine className="h-8 w-8 text-muted-foreground" />,
       scanning: <ScanLine className="h-8 w-8 text-primary animate-pulse" />,
-      success: <Check className="h-8 w-8 text-emerald-500" />,
-      error: <AlertCircle className="h-8 w-8 text-red-500" />,
+      success: <Check className="h-8 w-8 text-status-success" />,
+      error: <AlertCircle className="h-8 w-8 text-status-error" />,
     }
 
     return (
@@ -133,13 +133,13 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
           )}
         >
           {/* Status Icon */}
-          <div className="flex-shrink-0">{stateIcons[scanState]}</div>
+          <div className="shrink-0">{stateIcons[scanState]}</div>
 
           {/* Input oder Status */}
           <div className="flex-1 min-w-0">
             {scanState === 'success' ? (
               <div>
-                <p className="text-lg font-bold text-emerald-500 truncate">
+                <p className="text-lg font-bold text-status-success truncate">
                   {lastValue}
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -148,7 +148,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
               </div>
             ) : scanState === 'error' ? (
               <div>
-                <p className="text-lg font-bold text-red-500">Fehler</p>
+                <p className="text-lg font-bold text-status-error">Fehler</p>
                 <p className="text-sm text-muted-foreground">
                   Barcode ungültig
                 </p>
@@ -175,7 +175,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
                 }}
                 placeholder={placeholder}
                 disabled={disabled || scanState !== 'idle'}
-                className="w-full bg-transparent text-xl font-medium placeholder:text-muted-foreground focus:outline-none"
+                className="w-full bg-transparent text-xl font-medium placeholder:text-muted-foreground focus:outline-hidden"
               />
             )}
           </div>
@@ -184,7 +184,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
           {manualInput && scanState === 'idle' && (
             <button
               onClick={() => setManualInput('')}
-              className="flex-shrink-0 h-12 w-12 flex items-center justify-center rounded-lg bg-neutral-700 text-white active:bg-neutral-600"
+              className="shrink-0 h-12 w-12 flex items-center justify-center rounded-lg bg-neutral-700 text-white active:bg-neutral-600"
               aria-label="Löschen"
             >
               <X className="h-6 w-6" />

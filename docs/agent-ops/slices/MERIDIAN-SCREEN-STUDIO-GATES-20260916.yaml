@@ -1,0 +1,41 @@
+slice_id: MERIDIAN-SCREEN-STUDIO-GATES-20260916
+title: Studio Quality-Gates tsc und OpenAPI-Summaries
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-09-16
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Folgt auf MERIDIAN-SCREEN-STUDIO-E2E. Claude bleibt Owner von UIX-090,
+  FSX und Rechnungsdateien. screen_definitions.py-Split wartet auf ruhigen Baum.
+goal: >-
+  tsc --noEmit und check_openapi_docs --threshold 0 sind gruen, damit
+  quality-gate-backend nicht am ersten roten Schritt abbricht.
+file_ownership:
+  - packages/frontend-web/src/features/screen-studio/studio-defaults.ts
+  - app/api/v1/endpoints/studio_drafts.py
+  - app/services/studio_propose.py
+  - docs/schnittstellen/openapi.json
+  - docs/agent-ops/slices/MERIDIAN-SCREEN-STUDIO-GATES-20260916.yaml
+acceptance:
+  - emptyStudioDraft liefert ein vollstaendiges AgentMaskContract via generateAgentMaskContract.
+  - Alle 9 Studio-Routen haben summary=.
+  - check_openapi_docs.py --threshold 0: 0 fehlende Summaries.
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false: Exit 0.
+tests:
+  - python scripts/check_openapi_docs.py --threshold 0
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
+  - pytest tests/test_meridian_screen_studio_api.py tests/test_meridian_screen_studio_persistence.py --no-cov
+  - pnpm --dir packages/frontend-web exec vitest run src/__tests__/features/screen-studio
+risks:
+  - Sichtpruefung /admin/screen-studio und /studio/run im laufenden Portal bleibt offen, bis Docker-Rebuild steht.
+  - JSON-Schema-Drift bleibt bei UIX-090.
+ai_harness:
+  fachlicher_vertrag: Studio-Default und Propose tragen denselben Agent-Vertrag wie native Masken.
+  architektur_vertrag: generateAgentMaskContract ist die Quelle, Overrides nur fuer Purpose/Prompts/Selectors.
+  daten_vertrag: Keine Schema-Aenderung.
+  test_vertrag: Bestehende Studio-pytest/Vitest plus tsc und OpenAPI-Gate.
+  security_vertrag: unveraendert.
+  betriebs_vertrag: Docker-Rebuild Backend/Frontend fuer Portal-Abnahme.
+  dokumentations_vertrag: Slice, Workboard, Runtime-Status.
+external_gates:
+  - not_applicable

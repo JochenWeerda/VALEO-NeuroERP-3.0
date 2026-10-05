@@ -7,6 +7,10 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
+from app.api.v1.schemas.docflow_bundle_schemas import (
+    GobdExportOut,
+    NachweisDokumentOut,
+)
 from app.core.database import get_db
 
 router = APIRouter(prefix="/nachweisraum", tags=["nachweisraum"])
@@ -42,7 +46,7 @@ class GoBDExportTransitionRequest(BaseModel):
     fehler: Optional[str] = None
 
 
-@router.post("/dokumente", response_model=Dict[str, Any], summary="Nachweisraum-Dokument anlegen")
+@router.post("/dokumente", response_model=NachweisDokumentOut, summary="Nachweisraum-Dokument anlegen")
 def create_dokument(
     req: DokumentCreateRequest,
     x_tenant_id: str = Header(...),
@@ -69,7 +73,7 @@ def create_dokument(
 
 @router.post(
     "/dokumente/{dokument_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=NachweisDokumentOut,
     summary="Nachweisraum-Dokumentstatus wechseln",
 )
 def transition_dokument(
@@ -96,7 +100,7 @@ def transition_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/gobd-exporte", response_model=Dict[str, Any], summary="GoBD-Export anlegen")
+@router.post("/gobd-exporte", response_model=GobdExportOut, summary="GoBD-Export anlegen")
 def create_gobd_export(
     req: GoBDExportCreateRequest,
     x_tenant_id: str = Header(...),
@@ -120,7 +124,7 @@ def create_gobd_export(
 
 @router.post(
     "/gobd-exporte/{export_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=GobdExportOut,
     summary="GoBD-Exportstatus wechseln",
 )
 def transition_gobd_export(

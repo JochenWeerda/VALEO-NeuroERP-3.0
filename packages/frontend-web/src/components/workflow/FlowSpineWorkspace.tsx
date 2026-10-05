@@ -12,6 +12,7 @@ import {
   Database,
   FileText,
   History,
+  Info,
   Landmark,
   Package,
   PauseCircle,
@@ -66,6 +67,8 @@ import {
   useResumeFlowSpineInstance,
   useSaveFlowSpineInstance,
   useFlowSpineCatalogHook,
+  flowSpineFooterItemHref,
+  flowSpineFooterItemLabel,
   type FlowSpineAction,
   type FlowSpineLifecycleActionPayload,
   type FlowSpineLifecycleStatus,
@@ -422,11 +425,16 @@ const LIFECYCLE_LABELS: Record<FlowSpineLifecycleStatus, string> = {
 
 const LIFECYCLE_TONE_CLASSES: Record<FlowSpineLifecycleStatus, string> = {
   draft: 'border-slate-500/40 bg-slate-500/10 text-slate-200',
-  in_progress: 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100',
-  on_hold: 'border-amber-400/40 bg-amber-500/15 text-amber-100',
-  completed: 'border-emerald-400/40 bg-emerald-500/15 text-emerald-100',
-  cancelled: 'border-rose-400/40 bg-rose-500/15 text-rose-100',
-  failed: 'border-red-400/40 bg-red-500/15 text-red-100',
+  in_progress:
+    'border-[hsl(var(--color-semantic-info-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-info-500-hsl)/0.15)] text-[hsl(var(--color-semantic-info-50-hsl))]',
+  on_hold:
+    'border-[hsl(var(--color-semantic-warning-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-warning-500-hsl)/0.15)] text-[hsl(var(--color-semantic-warning-50-hsl))]',
+  completed:
+    'border-[hsl(var(--color-semantic-success-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-success-500-hsl)/0.15)] text-[hsl(var(--color-semantic-success-50-hsl))]',
+  cancelled:
+    'border-[hsl(var(--color-semantic-error-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-error-500-hsl)/0.15)] text-[hsl(var(--color-semantic-error-50-hsl))]',
+  failed:
+    'border-[hsl(var(--color-semantic-error-500-hsl)/0.55)] bg-[hsl(var(--color-semantic-error-500-hsl)/0.2)] text-[hsl(var(--color-semantic-error-50-hsl))]',
 }
 
 const REASON_CATEGORY_OPTIONS = [
@@ -438,6 +446,57 @@ const REASON_CATEGORY_OPTIONS = [
   { value: 'compliance', label: 'Compliance' },
   { value: 'technical', label: 'Technik' },
   { value: 'internal', label: 'Intern' },
+]
+
+/**
+ * FSX-003 Fall 3 — ein operatives Feld ohne ermittelbaren Wert.
+ *
+ * Bewusst sichtbar und benannt: ein leerer Bereich liest sich wie ein Ladefehler,
+ * ein Vorgabewert aus dem Prozessregister waere eine Falschaussage. „Nicht
+ * ermittelt“ ist die einzige ehrliche dritte Moeglichkeit.
+ */
+function EmptyOperationalField({
+  label,
+  className,
+}: {
+  label: string
+  className?: string
+}): JSX.Element {
+  return (
+    <div className={cn('rounded-xl border border-dashed border-white/12 px-3 py-2.5', className)}>
+      <div className="text-xs text-slate-500">
+        {label}: <span className="text-slate-400">nicht ermittelt</span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * FSX-003 Fall 1/2-Abgrenzung — Hinweis, dass der Workspace ohne konkreten Vorgang
+ * Beispielinhalte aus dem Prozessregister zeigt. Ohne diesen Hinweis liest sich der
+ * Katalogfall wie ein echter Vorgang.
+ */
+function CatalogContentNotice(): JSX.Element {
+  return (
+    <div className="mb-4 flex items-start gap-3 rounded-2xl border border-dashed border-amber-400/25 bg-amber-500/5 px-4 py-3">
+      <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+      <div className="text-sm text-slate-300">
+        <span className="font-medium text-slate-100">Beispielinhalt</span> — es ist kein
+        Vorgang geladen. Kennzahlen, Zeitpunkte, Dokumente und Agentenhinweise stammen aus
+        der Prozessbeschreibung und gehoeren zu keinem konkreten Fall. Waehle links einen
+        Vorgang, um die tatsaechlichen Werte zu sehen.
+      </div>
+    </div>
+  )
+}
+
+/** FSX-020: die drei Arbeitsmodi des Leitstands. */
+type FlowSpineViewMode = 'flow' | 'fokus' | 'uebersicht'
+
+const VIEW_MODES: Array<{ id: FlowSpineViewMode; label: string; hint: string }> = [
+  { id: 'flow', label: 'Flow', hint: 'Vollbild: Prozess, Details, Kennzahlen und Agent.' },
+  { id: 'fokus', label: 'Fokus', hint: 'Nur der aktuelle Schritt und seine Aktionen.' },
+  { id: 'uebersicht', label: 'Uebersicht', hint: 'Nur Prozessverlauf und Vorgangsstatus.' },
 ]
 
 function formatDateTime(value?: string | null): string {
@@ -467,6 +526,15 @@ function lifecycleSummary(workspace: {
   }
   if (workspace.lifecycle_status === 'completed') {
     return workspace.completion_reason_code || workspace.reason_note || 'Fachlich abgeschlossen'
+  }
+  if (workspace.lifecycle_status === 'on_hold') {
+    // F2 aus der Begehung: Ein pausierter Vorgang ist nicht abgeschlossen, und
+    // ein Grund IST gesetzt — er steht nur im Ereignis, nicht auf der Instanz
+    // (hold_instance schreibt reason_* ausschliesslich in die Timeline).
+    // "Kein Abschlussgrund gesetzt" liess den Nutzer schliessen, es gebe keinen
+    // Grund. Seit FSX-001 steht er in den Knotendetails der Mitte — nicht mehr
+    // nur in der eingeklappten Timeline; der Verweis zeigt jetzt dorthin.
+    return workspace.reason_note || 'Pausiert — Grund in den Knotendetails'
   }
   return workspace.reason_note || 'Kein Abschlussgrund gesetzt'
 }
@@ -602,8 +670,20 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
     return []
   }, [workspace?.left_navigation?.processes, catalogQuery.data?.processes, processKey])
 
-  const navFavorites = workspace?.left_navigation?.favorites ?? []
-  const navRoleSwitches = workspace?.left_navigation?.role_switches ?? []
+  // FSX-024: Favoriten und Rollenwechsel sind Aufgaben der AppShell, nicht des
+  // Prozessraums. Sie werden hier nicht mehr gerendert; die Backend-Felder
+  // bleiben vorerst bestehen, damit die Shell sie uebernehmen kann.
+
+  // FSX-020: Die drei Modi waren beschriftete <span> ohne Wirkung. Jetzt tragen
+  // sie echten Zustand — 'fokus' ist dabei der eigentliche Dichte-Hebel: eine
+  // Aufgabe, ein Knoten, keine Nebenflaechen.
+  const [viewMode, setViewMode] = useState<FlowSpineViewMode>('flow')
+  const showNodeDetails = viewMode !== 'uebersicht'
+  const showSideFlaechen = viewMode === 'flow'
+
+  // FSX-023: Die Copilot-Spalte stand doppelt zur Mitte und beanspruchte 360 px
+  // dauerhaft. Sie bleibt erreichbar, aber eingeklappt, bis jemand sie braucht.
+  const [copilotOpen, setCopilotOpen] = useState(false)
 
   const completedCount = useMemo(() => nodes.filter((node) => node.status === 'ok').length, [nodes])
   const progressWidth = nodes.length
@@ -787,7 +867,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
     return (
       <PageSurface
         data-page-surface={`flow-spine-${processKey}`}
-        className="bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+        className="bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
       >
         <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0">
           {/* Header skeleton */}
@@ -807,7 +887,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             {/* Main content skeleton */}
             <div className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6 space-y-6">
               <div className="h-8 w-72 rounded-full bg-white/10 animate-pulse" />
-              <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+              <div className="rounded-[28px] border border-white/10 bg-white/3 p-8">
                 {/* Node circles */}
                 <div className="flex justify-around mb-8">
                   {Array.from({ length: 6 }).map((_, i) => (
@@ -886,7 +966,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
   return (
     <PageSurface
       data-page-surface={`flow-spine-${processKey}`}
-      className="bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+      className="bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
     >
       <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0 shadow-2xl shadow-indigo-950/20">
         <header className="flex h-16 items-center justify-between border-b border-white/5 px-5">
@@ -897,37 +977,70 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             </div>
           </div>
           <div className="relative w-full max-w-xl">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input aria-label="Globale Suche" placeholder={workspace.search_placeholder} className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500" />
           </div>
           <div className="flex items-center gap-3">
             <Button
-              size="sm"
               variant="outline"
-              className="border-indigo-400/30 bg-indigo-500/10 text-indigo-200 hover:bg-indigo-500/20"
+              className="min-h-touch border-indigo-400/30 bg-indigo-500/10 text-indigo-200 hover:bg-indigo-500/20"
               onClick={() => setShowNewInstanceDialog(true)}
             >
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               {startConfig.buttonLabel}
             </Button>
-            <div className="flex rounded-xl bg-white/5 p-1 text-xs">
-              {['Flow', 'Fokus', 'Uebersicht'].map((mode) => (
-                <span key={mode} className={cn('rounded-lg px-3 py-1.5 text-slate-400', workspace.mode === mode && 'bg-indigo-500/30 text-indigo-100')}>
-                  {mode}
-                </span>
+            <div className="flex rounded-xl bg-white/5 p-1 text-xs" role="group" aria-label="Ansicht">
+              {VIEW_MODES.map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  title={mode.hint}
+                  aria-pressed={viewMode === mode.id}
+                  onClick={() => setViewMode(mode.id)}
+                  className={cn(
+                    'rounded-lg px-3 py-1.5 transition',
+                    viewMode === mode.id
+                      ? 'bg-indigo-500/30 text-indigo-100'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-200',
+                  )}
+                >
+                  {mode.label}
+                </button>
               ))}
             </div>
-            <Bell className="h-4 w-4 text-slate-300" />
-            <Settings className="h-4 w-4 text-slate-300" />
+            <Bell className="h-4 w-4 text-muted-foreground" />
+            <Settings className="h-4 w-4 text-muted-foreground" />
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-100">
-              <UserCircle2 className="h-5 w-5 text-slate-300" />
+              <UserCircle2 className="h-5 w-5 text-muted-foreground" />
               <span>{workspace.user_role}</span>
             </div>
           </div>
         </header>
 
-        <div className="grid min-h-[720px] grid-cols-[220px_minmax(0,1fr)_360px]">
+        {/*
+          FSX-020/023/024: Das Raster stand fest auf 220 px + 360 px = 580 px, bevor
+          die eigentliche Arbeitsflaeche begann. Die Prozessspalte entfaellt in
+          'fokus' ganz, die Copilot-Spalte schrumpft auf 48 px, solange sie
+          eingeklappt ist.
+        */}
+        <div
+          className={cn(
+            'grid min-h-[720px]',
+            copilotOpen
+              ? 'grid-cols-[220px_minmax(0,1fr)_360px]'
+              : 'grid-cols-[220px_minmax(0,1fr)_48px]',
+          )}
+        >
           <aside className="border-r border-white/5 bg-slate-950/45 p-4">
+            {/*
+              F4 aus der Begehung: 'fokus' hatte die ganze linke Spalte
+              ausgeblendet — und damit auch den Vorgangswechsel. Fuer die Waage
+              ist der Wechsel zwischen Fahrzeugen aber **die Aufgabe**, nicht
+              eine Ablenkung davon. Deshalb wird jetzt getrennt: die
+              Prozessnavigation (zwischen neun Prozessarten wechseln) entfaellt
+              im Fokus, die Vorgangsliste bleibt.
+            */}
+            {viewMode !== 'fokus' ? (
             <div className="mb-6">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
               <div className="space-y-2">
@@ -951,14 +1064,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 ))}
               </div>
             </div>
-            <div className="mb-6">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Favoriten</p>
-              <div className="space-y-2 text-sm text-slate-300">
-                {navFavorites.map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/5 bg-white/[0.03] px-3 py-3">{item}</div>
-                ))}
-              </div>
-            </div>
+            ) : null}
             <div className="mb-6">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Vorgaenge</p>
               <Input
@@ -980,7 +1086,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       'w-full rounded-xl border px-3 py-2 text-left transition',
                       instanceId === inst.instance_id
                         ? 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100'
-                        : 'border-white/5 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]',
+                        : 'border-white/5 bg-white/3 text-slate-300 hover:bg-white/6',
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -1004,16 +1110,6 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 )}
               </div>
             </div>
-            <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Rollenwechsel</p>
-              <div className="space-y-2">
-                {navRoleSwitches.map((role) => (
-                  <Button key={role} variant="outline" className="w-full justify-start border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
-                    {role}
-                  </Button>
-                ))}
-              </div>
-            </div>
           </aside>
 
           <main className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6">
@@ -1031,9 +1127,11 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </div>
             </div>
 
+            {workspace.content_mode === 'catalog' ? <CatalogContentNotice /> : null}
+
             {workspace.customer_data && (
               <div className="mb-4 flex items-center gap-4 rounded-2xl border border-indigo-400/20 bg-indigo-500/8 px-5 py-3">
-                <Building2 className="h-5 w-5 text-indigo-300 shrink-0" />
+                <Building2 className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-slate-100">
                     {workspace.customer_data.name_1}
@@ -1072,11 +1170,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         </Badge>
                       ) : null}
                     </div>
-                    <div className="grid gap-2 text-xs text-slate-400 md:grid-cols-4">
-                      <div>
-                        <div className="uppercase tracking-[0.18em] text-slate-500">Resume</div>
-                        <div className="mt-1 text-slate-200">{workspace.resume_node_id || workspace.active_node_id || '—'}</div>
-                      </div>
+                    <div className="grid gap-2 text-xs text-slate-400 md:grid-cols-3">
                       <div>
                         <div className="uppercase tracking-[0.18em] text-slate-500">Owner</div>
                         <div className="mt-1 text-slate-200">{workspace.assigned_owner || 'Nicht gesetzt'}</div>
@@ -1090,69 +1184,80 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         <div className="mt-1 text-slate-200">{lifecycleSummary(workspace)}</div>
                       </div>
                     </div>
-                    {workspace.resume_route ? (
-                      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
-                        Letztes Resume-Ziel: <span className="text-slate-200">{workspace.resume_route}</span>
-                      </div>
+                    {/*
+                      FSX-021: Knoten-ID und Resume-Route sind Technik, keine Fachinformation.
+                      Sie bleiben erreichbar — fuer die Fehlersuche sind sie wertvoll —, stehen
+                      aber nicht mehr zwischen Status und Kundendaten.
+                    */}
+                    {workspace.resume_node_id || workspace.active_node_id || workspace.resume_route ? (
+                      <details className="rounded-xl border border-white/10 bg-white/3 px-3 py-2">
+                        <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300">
+                          Technische Details
+                        </summary>
+                        <div className="mt-2 space-y-1 text-xs text-slate-400">
+                          <div>
+                            Knoten: <span className="text-slate-200">{workspace.resume_node_id || workspace.active_node_id || '—'}</span>
+                          </div>
+                          {workspace.resume_route ? (
+                            <div>
+                              Letztes Resume-Ziel: <span className="text-slate-200">{workspace.resume_route}</span>
+                            </div>
+                          ) : null}
+                        </div>
+                      </details>
                     ) : null}
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Button
-                      size="sm"
                       onClick={() => void handleSaveLifecycle()}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="bg-white text-slate-950 hover:bg-white/90"
+                      className="min-h-touch bg-white text-slate-950 hover:bg-white/90"
                     >
                       <Save className="mr-1.5 h-4 w-4" />
                       Speichern
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => void handleResumeLifecycle()}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                      className="min-h-touch border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
                     >
                       <PlayCircle className="mr-1.5 h-4 w-4" />
                       Wieder aufnehmen
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('hold')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                      className="min-h-touch border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
                     >
                       <PauseCircle className="mr-1.5 h-4 w-4" />
                       Pause
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('complete')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-emerald-400/20 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
+                      className="min-h-touch border-emerald-400/20 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
                     >
                       <CheckCircle2 className="mr-1.5 h-4 w-4" />
                       Abschliessen
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('cancel')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-rose-400/20 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15"
+                      className="min-h-touch border-rose-400/20 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15"
                     >
                       <XCircle className="mr-1.5 h-4 w-4" />
                       Abbrechen
                     </Button>
                     <Button
-                      size="sm"
                       variant="outline"
                       onClick={() => openLifecycleDialog('fail')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="border-red-400/20 bg-red-500/10 text-red-100 hover:bg-red-500/15"
+                      className="min-h-touch border-red-400/20 bg-red-500/10 text-red-100 hover:bg-red-500/15"
                     >
                       <CircleAlert className="mr-1.5 h-4 w-4" />
                       Scheitern
@@ -1162,10 +1267,10 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </div>
             ) : null}
 
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+            <div className="rounded-[28px] border border-white/10 bg-white/3 p-8">
               <div className="relative mb-8">
                 <div className="absolute left-8 right-8 top-10 h-[2px] rounded-full bg-white/10" />
-                <div className="absolute left-8 top-10 h-[2px] rounded-full bg-gradient-to-r from-emerald-400 via-indigo-400 to-amber-400" style={{ width: progressWidth }} />
+                <div className="absolute left-8 top-10 h-[2px] rounded-full bg-linear-to-r from-emerald-400 via-indigo-400 to-amber-400" style={{ width: progressWidth }} />
                 <div className={cn('relative grid gap-4', nodes.length === 4 ? 'grid-cols-4' : nodes.length === 5 ? 'grid-cols-5' : 'grid-cols-6')}>
                   {nodes.map((node) => {
                     const Icon = ICONS[node.icon as keyof typeof ICONS] ?? Sparkles
@@ -1176,59 +1281,85 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                           <Icon className="h-6 w-6" />
                         </div>
                         <div className="mt-3 text-sm font-semibold text-slate-100">{node.label}</div>
-                        <div className="text-xs text-slate-500">{node.metric}</div>
-                        <div className="text-[11px] text-slate-400">{node.submetric}</div>
+                        {node.status === 'unknown' ? <div className="text-xs text-slate-500">Status nicht ermittelt</div> : null}
+                        {/* FSX-003: metric/submetric sind operativ. Fehlen sie, bleibt die
+                            Zeile leer statt einen Registry-Vorgabewert zu zeigen. */}
+                        {node.metric ? <div className="text-xs text-slate-500">{node.metric}</div> : null}
+                        {node.submetric ? <div className="text-[11px] text-slate-400">{node.submetric}</div> : null}
                       </button>
                     )
                   })}
                 </div>
               </div>
 
-              <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
+              {/*
+                FSX-020: In 'uebersicht' zaehlt der Prozessverlauf, nicht der einzelne
+                Knoten. Die Detailflaeche entfaellt dort ganz — das ist der Unterschied
+                zwischen einem Modus und einer Beschriftung.
+              */}
+              {showNodeDetails ? (
+              <div className={cn('grid gap-5', showSideFlaechen && 'xl:grid-cols-[1fr_300px]')}>
                 <div className="grid gap-5">
-                  <div className="grid gap-5 xl:grid-cols-[1.2fr_280px]">
-                    <Card className="border-white/10 bg-slate-950/50 text-slate-100">
-                      <CardHeader className="flex flex-row items-start justify-between gap-4">
-                        <div>
-                          <CardTitle className="text-xl">Status Details: {selectedNode.label}</CardTitle>
-                          <p className="mt-1 text-sm text-slate-400">{selectedNode.insight}</p>
-                        </div>
-                        <Badge className={cn('border px-2.5 py-1 text-xs', toneClasses(selectedNode.status))}>{selectedNode.status.toUpperCase()}</Badge>
-                      </CardHeader>
-                      <CardContent className="grid gap-4 md:grid-cols-2">
-                        {selectedNode.detail_rows.map((row) => (
+                  {/*
+                    FSX-002: Der "KPI Health Score" ist ersatzlos entfallen. Er zeigte einen
+                    Fallback von 92 % und eine fest verdrahtete Balkenbreite von ebenfalls
+                    92 % — eine Zahl ohne Quelle, die in jedem Vorgang gleich aussah. Eine
+                    Kennzahl kehrt erst zurueck, wenn sie an eine benannte Quelle gebunden
+                    ist (FSX-001). Mit ihr entfaellt auch die zweite Rasterspalte.
+                  */}
+                  <Card className="border-white/10 bg-slate-950/50 text-slate-100">
+                    <CardHeader className="flex flex-row items-start justify-between gap-4">
+                      <div>
+                        <CardTitle className="text-xl">Status Details: {selectedNode.label}</CardTitle>
+                        <p className="mt-1 text-sm text-slate-400">{selectedNode.insight}</p>
+                      </div>
+                      <Badge className={cn('border px-2.5 py-1 text-xs', toneClasses(selectedNode.status))}>{selectedNode.status.toUpperCase()}</Badge>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 md:grid-cols-2">
+                      {selectedNode.detail_rows.length > 0 ? (
+                        selectedNode.detail_rows.map((row) => (
                           <div key={row.label} className="space-y-1">
                             <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{row.label}</div>
                             <div className="text-sm font-medium text-slate-100">{row.value}</div>
                           </div>
-                        ))}
-                      </CardContent>
-                    </Card>
+                        ))
+                      ) : (
+                        <EmptyOperationalField label="Statusdetails" className="md:col-span-2" />
+                      )}
+                    </CardContent>
+                  </Card>
 
-                    <Card className="border-white/10 bg-white/[0.06] text-slate-100">
-                      <CardHeader>
-                        <CardTitle className="text-sm uppercase tracking-[0.2em] text-slate-400">KPI Health Score</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="mb-3 text-5xl font-bold text-white">{selectedNode.kpis[0]?.value ?? '92%'}</div>
-                        <div className="mb-4 h-2 rounded-full bg-white/10">
-                          <div className="h-2 rounded-full bg-indigo-400" style={{ width: '92%' }} />
-                        </div>
-                        <div className="text-sm text-slate-400">Prozesseffizienz liegt sichtbar ueber dem Quartalsdurchschnitt.</div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="grid gap-4 lg:grid-cols-4">
-                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                  {/*
+                    FSX-020: In 'fokus' bleibt nur, was zum Weiterarbeiten noetig ist —
+                    der Schritt und seine Aktionen. Kennzahlen, Belege und Agentenhinweis
+                    sind dort Nebenflaeche.
+                  */}
+                  <div className={cn('grid gap-4', showSideFlaechen ? 'lg:grid-cols-4' : 'lg:grid-cols-1')}>
+                    {showSideFlaechen ? (
+                    <>
+                    <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">KPIs</CardTitle></CardHeader>
-                      <CardContent className="space-y-2 text-sm">{selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-slate-400">{kpi.label}</span><span>{kpi.value}</span></div>)}</CardContent>
+                      <CardContent className="space-y-2 text-sm">
+                        {selectedNode.kpis.length > 0 ? (
+                          selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-slate-400">{kpi.label}</span><span>{kpi.value}</span></div>)
+                        ) : (
+                          <EmptyOperationalField label="Kennzahlen" />
+                        )}
+                      </CardContent>
                     </Card>
-                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                    <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Dokumente</CardTitle></CardHeader>
-                      <CardContent className="space-y-2 text-sm">{selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</button>)}</CardContent>
+                      <CardContent className="space-y-2 text-sm">
+                        {selectedNode.documents.length > 0 ? (
+                          selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</button>)
+                        ) : (
+                          <EmptyOperationalField label="Belege zum Vorgang" />
+                        )}
+                      </CardContent>
                     </Card>
-                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                    </>
+                    ) : null}
+                    <Card className="border-white/10 bg-white/3 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
                       <CardContent className="space-y-3">
                         {selectedNode.actions.map((action) => (
@@ -1237,7 +1368,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                             onClick={() => void handleAction(action)}
                             disabled={executeAction.isPending}
                             variant={action.variant === 'primary' ? 'default' : 'outline'}
-                            className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                            className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
                           >
                             {action.label}
                             <ChevronRight className="h-4 w-4" />
@@ -1245,17 +1376,26 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         ))}
                       </CardContent>
                     </Card>
+                    {showSideFlaechen ? (
                     <Card className="border-indigo-400/20 bg-indigo-500/10 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Agent</CardTitle></CardHeader>
                       <CardContent className="space-y-3 text-sm">
-                        <div className="font-semibold text-white">{selectedNode.agent.headline}</div>
-                        <p className="text-slate-300">{selectedNode.agent.message}</p>
-                        <ul className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <li key={reason}>- {reason}</li>)}</ul>
+                        {selectedNode.agent ? (
+                          <>
+                            <div className="font-semibold text-white">{selectedNode.agent.headline}</div>
+                            <p className="text-slate-300">{selectedNode.agent.message}</p>
+                            <ul className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <li key={reason}>- {reason}</li>)}</ul>
+                          </>
+                        ) : (
+                          <EmptyOperationalField label="Agentenbewertung" />
+                        )}
                       </CardContent>
                     </Card>
+                    ) : null}
                   </div>
                 </div>
 
+                {showSideFlaechen ? (
                 <div className="space-y-4">
                   <Suspense fallback={null}><AgentProcessPanel domain={workspace.right_panel.domain} className="max-w-none border-white/10 bg-slate-950/50" /></Suspense>
                   <Card className="border-white/10 bg-slate-950/50 text-slate-100">
@@ -1270,27 +1410,34 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                             }
                             if (module.href) go(module.href)
                           }}
-                          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200 hover:bg-white/5"
+                          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-200 hover:bg-white/5"
                         >
                           <span>{module.label}</span>
-                          <ChevronRight className="h-4 w-4 text-slate-500" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
                         </button>
                       ))}
                     </CardContent>
                   </Card>
                 </div>
+                ) : null}
               </div>
+              ) : null}
             </div>
 
+            {/* FSX-020: Die Fusskarten sind Prozessbeschreibung — in 'fokus' stehen sie im Weg. */}
+            {viewMode !== 'fokus' ? (
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
               {workspace.footer_cards.map((card) => {
                 const isNextSteps =
                   /schritt/i.test(card.title) || /naechste/i.test(card.title)
+                const hasNavigableItems = card.items.some(
+                  (item) => flowSpineFooterItemHref(item) !== undefined,
+                )
                 return (
                 <Card key={card.title} className="border-white/10 bg-slate-950/45 text-slate-100">
                   <CardHeader>
                     <CardTitle className="text-base">{card.title}</CardTitle>
-                    {isNextSteps ? (
+                    {isNextSteps && !hasNavigableItems ? (
                       <CardDescription className="text-slate-400">
                         Orientierung — keine Navigation; die Punkte sind als Checkliste gemeint.
                       </CardDescription>
@@ -1299,28 +1446,87 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                   <CardContent className="text-sm text-slate-300">
                     <ul
                       className={
-                        isNextSteps
+                        isNextSteps && !hasNavigableItems
                           ? 'list-disc space-y-1.5 pl-5 marker:text-slate-500'
                           : 'space-y-2'
                       }
                     >
-                      {card.items.map((item) => (
-                        <li
-                          key={item}
-                          className={isNextSteps ? 'leading-snug' : 'rounded-2xl border border-white/10 px-4 py-3'}
-                        >
-                          {item}
-                        </li>
-                      ))}
+                      {card.items.map((item) => {
+                        const label = flowSpineFooterItemLabel(item)
+                        const href = flowSpineFooterItemHref(item)
+                        if (href) {
+                          return (
+                            <li key={`${label}:${href}`}>
+                              <button
+                                type="button"
+                                onClick={() => go(href)}
+                                className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                              >
+                                <span>{label}</span>
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              </button>
+                            </li>
+                          )
+                        }
+                        return (
+                          <li
+                            key={label}
+                            className={
+                              isNextSteps
+                                ? 'leading-snug'
+                                : 'rounded-2xl border border-white/10 px-4 py-3'
+                            }
+                          >
+                            {label}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </CardContent>
                 </Card>
               )})}
             </div>
+            ) : null}
           </main>
 
-          <aside className="border-l border-white/5 bg-slate-950/45 p-5">
-            <div className="mb-4 text-sm font-semibold text-slate-100">AI Copilot</div>
+          {/*
+            FSX-023: Die Copilot-Spalte hat 360 px dauerhaft belegt und ihre Inhalte
+            (Aktionen, Agent, Dokumente) standen bereits in der Mitte. Sie bleibt
+            vollstaendig erreichbar, beansprucht aber keinen Platz mehr, solange
+            niemand sie aufklappt.
+          */}
+          <aside
+            className={cn(
+              'border-l border-white/5 bg-slate-950/45',
+              copilotOpen ? 'p-5' : 'flex w-12 flex-col items-center gap-3 py-4',
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => setCopilotOpen((open) => !open)}
+              aria-expanded={copilotOpen}
+              aria-label={copilotOpen ? 'Copilot einklappen' : 'Copilot aufklappen'}
+              className={cn(
+                'rounded-lg text-slate-400 transition hover:bg-white/5 hover:text-slate-100',
+                copilotOpen ? 'mb-3 flex w-full items-center justify-between px-2 py-1.5' : 'p-2',
+              )}
+            >
+              {copilotOpen ? (
+                <>
+                  <span className="text-sm font-semibold text-slate-100">AI Copilot</span>
+                  <ArrowLeftRight className="h-4 w-4" />
+                </>
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+            </button>
+            {!copilotOpen ? (
+              <span className="text-2xs uppercase tracking-wide text-slate-500 [writing-mode:vertical-rl]">
+                Copilot
+              </span>
+            ) : null}
+            {copilotOpen ? (
+            <>
             <Tabs defaultValue="agent" className="flex h-full flex-col">
               <TabsList className="grid w-full grid-cols-5 bg-white/5">
                 <TabsTrigger value="agent">Agent</TabsTrigger>
@@ -1330,7 +1536,10 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 <TabsTrigger value="kpis">KPIs</TabsTrigger>
               </TabsList>
               <TabsContent value="agent" className="mt-4 space-y-4">
-                <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                {!selectedNode.agent ? (
+                  <EmptyOperationalField label="Agentenbewertung" />
+                ) : (
+                <Card className="border-white/10 bg-white/3 text-slate-100">
                   <CardHeader><CardTitle className="text-base">{selectedNode.agent.headline}</CardTitle></CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <p>{selectedNode.agent.message}</p>
@@ -1339,11 +1548,13 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       {selectedNode.agent.actions.map((action) => (
                         <Button
                           key={action}
-                          size="sm"
                           disabled={executeAgentAction.isPending}
                           onClick={() => void handleAgentAction(action)}
                           variant={action === 'Uebernehmen' ? 'default' : 'outline'}
-                          className={cn(action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10')}
+                          className={cn(
+                            'min-h-touch',
+                            action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10',
+                          )}
                         >
                           {action}
                         </Button>
@@ -1351,6 +1562,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     </div>
                   </CardContent>
                 </Card>
+                )}
               </TabsContent>
               <TabsContent value="actions" className="mt-4 space-y-3">
                 {selectedNode.actions.map((action) => (
@@ -1358,7 +1570,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                     key={action.label}
                     onClick={() => void handleAction(action)}
                     disabled={executeAction.isPending}
-                    className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                    className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
                     variant={action.variant === 'primary' ? 'default' : 'outline'}
                   >
                     {action.label}
@@ -1368,21 +1580,21 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               </TabsContent>
               <TabsContent value="timeline" className="mt-4 space-y-3">
                 {!instanceId ? (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
                     Timeline verfuegbar, sobald eine konkrete Instanz geladen ist.
                   </div>
                 ) : timelineQuery.isLoading ? (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
                     Timeline wird geladen...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {timelineQuery.data?.events.length ? (
                       timelineQuery.data.events.slice().reverse().map((event) => (
-                        <div key={event.event_id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                        <div key={event.event_id} className="rounded-2xl border border-white/10 bg-white/3 p-4">
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 text-sm font-medium text-slate-100">
-                              <History className="h-4 w-4 text-slate-500" />
+                              <History className="h-4 w-4 text-muted-foreground" />
                               {event.event_type}
                             </div>
                             <div className="text-[11px] text-slate-500">{formatDateTime(event.created_at)}</div>
@@ -1396,7 +1608,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         </div>
                       ))
                     ) : (
-                      <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                      <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
                         Noch keine Timeline-Eintraege vorhanden.
                       </div>
                     )}
@@ -1404,26 +1616,31 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 )}
               </TabsContent>
               <TabsContent value="docs" className="mt-4 space-y-3">
+                {selectedNode.documents.length === 0 && workspace.right_panel.resources.length === 0 ? (
+                  <EmptyOperationalField label="Belege zum Vorgang" />
+                ) : null}
                 {selectedNode.documents.concat(workspace.right_panel.resources).map((doc) => (
                   <button
                     key={`${doc.label}-${doc.href}`}
                     onClick={() => go(doc.href)}
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
                   >
-                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</span>
-                    <ChevronRight className="h-4 w-4 text-slate-500" />
+                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </button>
                 ))}
               </TabsContent>
               <TabsContent value="kpis" className="mt-4 space-y-3">
                 {selectedNode.kpis.map((kpi) => (
-                  <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/3 p-4">
                     <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{kpi.label}</div>
                     <div className="mt-2 text-lg font-semibold text-white">{kpi.value}</div>
                   </div>
                 ))}
               </TabsContent>
             </Tabs>
+            </>
+            ) : null}
           </aside>
         </div>
       </PageSection>
@@ -1478,7 +1695,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 /></Suspense>
               ) : (
                 <div className="relative">
-                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="instance-partner"
                     value={newInstancePartnerName}
@@ -1500,7 +1717,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
               />
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+            <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-300">
               <div className="font-medium text-slate-100">Praxislogik</div>
               <div className="mt-1">{startConfig.explanation}</div>
             </div>
@@ -1577,7 +1794,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label className="text-slate-300">
-                      Kategorie <span className="text-rose-400">*</span>
+                      Kategorie <span className="text-status-error">*</span>
                     </Label>
                     <Select
                       value={lifecycleDialog.reasonCategory}
@@ -1599,12 +1816,12 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       </SelectContent>
                     </Select>
                     {!lifecycleDialog.reasonCategory && (
-                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                      <p className="text-2xs text-status-error">Pflichtfeld</p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <Label className="text-slate-300">
-                      Grundcode <span className="text-rose-400">*</span>
+                      Grundcode <span className="text-status-error">*</span>
                     </Label>
                     <Input
                       aria-required="true"
@@ -1617,7 +1834,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                       )}
                     />
                     {!lifecycleDialog.reasonCode.trim() && (
-                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                      <p className="text-2xs text-status-error">Pflichtfeld</p>
                     )}
                   </div>
                 </div>

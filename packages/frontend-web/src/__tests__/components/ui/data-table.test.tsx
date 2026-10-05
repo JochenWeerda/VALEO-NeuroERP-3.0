@@ -55,4 +55,59 @@ describe('DataTable', () => {
     expect(screen.getByText('€ 100')).toBeInTheDocument()
     expect(screen.getByText('€ 200')).toBeInTheDocument()
   })
+
+  it('stellt Zeilen auf Touch als Kartenstapel statt Tabelle', () => {
+    const original = window.matchMedia
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('max-width: 767px'),
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+      onchange: null,
+    })) as typeof window.matchMedia
+
+    const columns = [
+      { key: 'name' as const, label: 'Name' },
+      { key: 'value' as const, label: 'Wert' },
+    ]
+    render(<DataTable data={mockData} columns={columns} />)
+
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    expect(screen.getByRole('list')).toBeInTheDocument()
+    expect(screen.getByText('Test 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Wert')).toHaveLength(2)
+    window.matchMedia = original
+  })
+
+  it('legt Aktionen auf Touch in den Karten-Aktionsbereich, nicht in die Felder', () => {
+    const original = window.matchMedia
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('max-width: 767px'),
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+      onchange: null,
+    })) as typeof window.matchMedia
+
+    const columns = [
+      { key: 'name' as const, label: 'Name' },
+      { key: 'value' as const, label: 'Wert' },
+      {
+        key: 'actions' as const,
+        label: 'Aktionen',
+        render: () => <button type="button">Download</button>,
+      },
+    ]
+    render(<DataTable data={mockData} columns={columns} />)
+
+    expect(screen.getAllByRole('button', { name: 'Download' })).toHaveLength(2)
+    expect(screen.queryByText('Aktionen')).not.toBeInTheDocument()
+    window.matchMedia = original
+  })
 })

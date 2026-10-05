@@ -145,7 +145,7 @@ class WhatsAppIntakeService:
         params.update({f"o{i}": f"%{tok}%" for i, tok in enumerate(ort_tokens)})
         sql = (
             f"SELECT kunden_nr, name, plz, ort, business_partner_id, ({name_score}) AS nscore, ({ort_score}) AS oscore "
-            f"FROM kunden_lookup WHERE {where} ORDER BY nscore DESC, oscore DESC, length(name) ASC LIMIT 1"
+            f"FROM kunden_lookup WHERE {where} ORDER BY nscore DESC, oscore DESC, length(name) ASC LIMIT 1"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
         try:
             r = self.db.execute(text(sql), params).mappings().first()

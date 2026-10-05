@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kundenportal — Getreidekurs-Preisspiegel
  *
  * Zeigt dem Ackerbauer seine Erntefrüchte mit allen 4 Preisvarianten:
@@ -12,6 +12,7 @@
  */
 
 import { useState } from 'react'
+import { Callout, type CalloutVariant } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -61,29 +62,29 @@ type PreisspigelResponse = {
 // Produktiv: aus JWT + Schlagkartei-Kulturen ableiten
 const DEMO_ARTIKEL = 'WEI-001,GER-001,RAP-001'
 
-const VARIANTE_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string; beschreibung: string }> = {
+const VARIANTE_CONFIG: Record<string, { label: string; icon: React.ReactNode; variant: CalloutVariant; beschreibung: string }> = {
   altware_ab_hof: {
     label: 'Altware ab Hof',
     icon: <Home className="h-4 w-4" />,
-    color: 'bg-amber-50 border-amber-200',
+    variant: 'warning',
     beschreibung: 'Altjährige Ware, wir holen bei Ihnen ab',
   },
   altware_frei_lager: {
     label: 'Altware frei Lager',
     icon: <Truck className="h-4 w-4" />,
-    color: 'bg-blue-50 border-blue-200',
+    variant: 'info',
     beschreibung: 'Altjährige Ware, Sie liefern zu uns',
   },
   neue_ernte_frei_lager: {
     label: 'Neue Ernte frei Lager',
     icon: <Wheat className="h-4 w-4" />,
-    color: 'bg-green-50 border-green-200',
+    variant: 'success',
     beschreibung: 'Neue Ernte, angeliefert bei uns',
   },
   neue_ernte_ab_hof: {
     label: 'Neue Ernte ab Hof',
     icon: <Calendar className="h-4 w-4" />,
-    color: 'bg-emerald-50 border-emerald-200',
+    variant: 'success',
     beschreibung: 'Neue Ernte, Abholung ab Ihrem Hof',
   },
 }
@@ -92,7 +93,7 @@ function PreisKarte({ variante, preis }: { variante: string; preis: PreisVariant
   const cfg = VARIANTE_CONFIG[variante]
   if (!cfg) return null
   return (
-    <div className={`rounded-lg border p-4 ${cfg.color}`}>
+    <Callout variant={cfg.variant} className="rounded-lg p-4">
       <div className="flex items-center gap-2 mb-2">
         {cfg.icon}
         <span className="text-sm font-medium text-gray-700">{cfg.label}</span>
@@ -105,13 +106,13 @@ function PreisKarte({ variante, preis }: { variante: string; preis: PreisVariant
       )}
       <div className="text-xs text-gray-500 mt-1">{preis.basis_qualitaet}</div>
       {preis.hinweis && (
-        <div className="text-xs text-amber-700 mt-2 flex items-start gap-1">
-          <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
+        <div className="text-xs text-status-warning mt-2 flex items-start gap-1">
+          <Info className="h-3 w-3 mt-0.5 shrink-0" />
           {preis.hinweis}
         </div>
       )}
       <div className="text-xs text-gray-400 mt-2">Stand: {preis.gueltig_ab}</div>
-    </div>
+    </Callout>
   )
 }
 
@@ -151,7 +152,7 @@ export default function PreisspiedelPage() {
     queryKey: ['portal-preisspiegel', artikelFilter],
     queryFn: async () => {
       const res = await apiClient.get<PreisspigelResponse>(
-        `/portal/preisspiegel/kunde?artikel_ids=${artikelFilter}`,
+        `/api/v1/portal/preisspiegel/kunde?artikel_ids=${artikelFilter}`,
       )
       return res.data
     },
@@ -163,18 +164,18 @@ export default function PreisspiedelPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-green-600" />
+            <TrendingUp className="h-6 w-6 text-status-success" />
             Getreidekurse
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Aktuelle Ankaufspreise für Ihre Ernte — alle Liefervarianten im Überblick
           </p>
         </div>
         <Button
           variant="outline"
-          size="sm"
           onClick={() => refetch()}
           disabled={isFetching}
+          className="min-h-touch"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
           Aktualisieren
@@ -212,22 +213,22 @@ export default function PreisspiedelPage() {
 
       {data && (
         <div className="space-y-4">
-          {data.preisspiegel.length === 0 ? (
+          {(data.preisspiegel ?? []).length === 0 ? (
             <Alert>
               <AlertDescription>
                 Für Ihre Früchte liegen aktuell keine Ankaufspreise vor. Wenden Sie sich an Ihren Innendienst.
               </AlertDescription>
             </Alert>
           ) : (
-            data.preisspiegel.map((artikel) => (
+            (data.preisspiegel ?? []).map((artikel) => (
               <ArtikelPreiskarte key={artikel.artikel_id} artikel={artikel} />
             ))
           )}
 
-          <Card className="border-blue-200 bg-blue-50">
+          <Card className="border-[hsl(var(--color-semantic-info-500-hsl)/0.35)] bg-[hsl(var(--color-semantic-info-50-hsl))]">
             <CardContent className="pt-4">
               <div className="flex items-start gap-3">
-                <Phone className="h-5 w-5 text-blue-600 mt-0.5" />
+                <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="font-medium text-blue-900">Verbindliche Preisauskunft</div>
                   <div className="text-blue-700 text-sm mt-1">
@@ -238,7 +239,7 @@ export default function PreisspiedelPage() {
             </CardContent>
           </Card>
 
-          <div className="text-xs text-gray-400 text-right">Preisstand: {data.stand}</div>
+          <div className="text-xs text-gray-400 text-right">Preisstand: {data.stand ?? '—'}</div>
         </div>
       )}
     </div>

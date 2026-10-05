@@ -47,8 +47,8 @@ class GeschaeftsjahreCreate(BaseModel):
     groesstes_datum: Optional[date] = None
     warndatum_von: Optional[date] = None
     warndatum_bis: Optional[date] = None
-    anzahl_perioden_ware: int = Field(default=12, ge=1, le=14)
-    anzahl_perioden_fibu: int = Field(default=12, ge=1, le=14)
+    anzahl_perioden_ware: int = Field(default=12, ge=1, le=12)
+    anzahl_perioden_fibu: int = Field(default=12, ge=1, le=12)
     journal_nummernkreis: Optional[str] = None
 
     @model_validator(mode="after")
@@ -169,8 +169,11 @@ def create_geschaeftsjahr(
         "pfibu": payload.anzahl_perioden_fibu,
         "jnk": payload.journal_nummernkreis,
     })
-    # Automatisch 12 Monatsperioden anlegen
-    for monat in range(1, payload.anzahl_perioden_ware + 1):
+    # Automatisch maximal 12 Monatsperioden anlegen.
+    period_count = max(1, min(payload.anzahl_perioden_ware, 12))
+    for monat in range(1, 13):
+        if monat > period_count:
+            break
         _, letzter_tag = calendar.monthrange(payload.jahr_nr, monat)
         p_id = uuid7()
         db.execute(text("""

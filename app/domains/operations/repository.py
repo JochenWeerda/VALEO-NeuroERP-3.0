@@ -544,8 +544,9 @@ class DokumentVersionRepository:
 class ChargeRepository:
     """Repository for charge/lot operations."""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, tenant_id: str):
         self.db = db
+        self.tenant_id = tenant_id
 
     def get_all(
         self,
@@ -555,7 +556,7 @@ class ChargeRepository:
         status: Optional[str] = None,
         lagerort: Optional[str] = None,
     ) -> List[Charge]:
-        query = self.db.query(Charge)
+        query = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id)
         if search:
             pattern = f"%{search}%"
             query = query.filter((Charge.chargen_id.ilike(pattern)) | (Charge.artikel.ilike(pattern)))
@@ -566,7 +567,7 @@ class ChargeRepository:
         return query.order_by(desc(Charge.created_at)).offset(skip).limit(limit).all()
 
     def count(self, search: Optional[str] = None, status: Optional[str] = None, lagerort: Optional[str] = None) -> int:
-        query = self.db.query(Charge)
+        query = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id)
         if search:
             pattern = f"%{search}%"
             query = query.filter((Charge.chargen_id.ilike(pattern)) | (Charge.artikel.ilike(pattern)))
@@ -577,14 +578,15 @@ class ChargeRepository:
         return query.count()
 
     def get_by_id(self, charge_id: str) -> Optional[Charge]:
-        return self.db.query(Charge).filter(Charge.id == charge_id).first()
+        return self.db.query(Charge).filter(Charge.id == charge_id, Charge.tenant_id == self.tenant_id).first()
 
     def get_by_chargen_id(self, chargen_id: str) -> Optional[Charge]:
-        return self.db.query(Charge).filter(Charge.chargen_id == chargen_id).first()
+        return self.db.query(Charge).filter(Charge.chargen_id == chargen_id, Charge.tenant_id == self.tenant_id).first()
 
     def create(self, charge_data: dict) -> Charge:
         payload = dict(charge_data)
         payload.setdefault("status", ChargeStatus.ERFASST.value)
+        payload["tenant_id"] = self.tenant_id
         charge = Charge(
             id=prefixed_id("CH"),
             **payload,
@@ -612,14 +614,15 @@ class ChargeRepository:
         return False
 
     def get_stats(self) -> dict:
-        total = self.db.query(Charge).count()
-        in_pruefung = self.db.query(Charge).filter(Charge.status == ChargeStatus.IN_PRUEFUNG.value).count()
-        freigegeben = self.db.query(Charge).filter(Charge.status == ChargeStatus.FREIGEGEBEN.value).count()
-        gesperrt = self.db.query(Charge).filter(Charge.status == ChargeStatus.GESPERRT.value).count()
-        total_menge = self.db.query(func.coalesce(func.sum(Charge.menge), 0)).scalar() or 0
+        scoped = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id)
+        total = scoped.count()
+        in_pruefung = scoped.filter(Charge.status == ChargeStatus.IN_PRUEFUNG.value).count()
+        freigegeben = scoped.filter(Charge.status == ChargeStatus.FREIGEGEBEN.value).count()
+        gesperrt = scoped.filter(Charge.status == ChargeStatus.GESPERRT.value).count()
+        total_menge = self.db.query(func.coalesce(func.sum(Charge.menge), 0)).filter(Charge.tenant_id == self.tenant_id).scalar() or 0
 
         by_lagerort: dict[str, dict[str, float]] = {}
-        rows = self.db.query(Charge.lagerort, func.count(Charge.id), func.coalesce(func.sum(Charge.menge), 0)).group_by(Charge.lagerort).all()
+        rows = self.db.query(Charge.lagerort, func.count(Charge.id), func.coalesce(func.sum(Charge.menge), 0)).filter(Charge.tenant_id == self.tenant_id).group_by(Charge.lagerort).all()
         for lagerort, cnt, menge in rows:
             by_lagerort[lagerort] = {"count": int(cnt), "menge": float(menge)}
 

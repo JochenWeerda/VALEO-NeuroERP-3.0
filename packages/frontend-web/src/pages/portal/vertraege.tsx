@@ -6,9 +6,10 @@
 
 import { useState } from 'react'
 import { usePortalVertraege } from '@/lib/api/portal'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Progress } from '@/components/ui/progress'
@@ -48,10 +49,10 @@ interface Vertrag {
 }
 
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  'aktiv': { label: 'Aktiv', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
-  'auslaufend': { label: 'Läuft bald aus', color: 'bg-amber-100 text-amber-800', icon: <AlertCircle className="h-4 w-4" /> },
-  'abgelaufen': { label: 'Abgelaufen', color: 'bg-gray-100 text-gray-800', icon: <Clock className="h-4 w-4" /> },
+const statusConfig: Record<string, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  'aktiv': { label: 'Aktiv', color: 'success', icon: <CheckCircle2 className="h-4 w-4" /> },
+  'auslaufend': { label: 'Läuft bald aus', color: 'warning', icon: <AlertCircle className="h-4 w-4" /> },
+  'abgelaufen': { label: 'Abgelaufen', color: 'muted', icon: <Clock className="h-4 w-4" /> },
 }
 
 const typConfig: Record<string, { label: string; color: string }> = {
@@ -113,7 +114,7 @@ export default function PortalVertraege() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -126,7 +127,7 @@ export default function PortalVertraege() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <div>
@@ -154,9 +155,9 @@ export default function PortalVertraege() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+              <Callout variant="info" className="rounded-lg p-2">
                 <FileText className="h-5 w-5" />
-              </div>
+              </Callout>
               <div>
                 <p className="text-2xl font-bold">{vertraege.length}</p>
                 <p className="text-sm text-muted-foreground">Gesamt</p>
@@ -229,14 +230,16 @@ export default function PortalVertraege() {
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
-                      size="sm"
                       onClick={() => setSelectedVertrag(vertrag)}
+                      className="min-h-touch"
                     >
                       <Eye className="h-4 w-4" />
+                      Details
                     </Button>
                     {vertrag.dokument && (
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" className="min-h-touch">
                         <Download className="h-4 w-4" />
+                        Download
                       </Button>
                     )}
                   </div>
@@ -265,7 +268,7 @@ export default function PortalVertraege() {
               <div className="space-y-4">
                 {/* Status Badges */}
                 <div className="flex gap-2">
-                  <Badge className={`${statusConfig[selectedVertrag.status].color} gap-1`}>
+                  <Badge variant={statusConfig[selectedVertrag.status].color} className="gap-1">
                     {statusConfig[selectedVertrag.status].icon}
                     {statusConfig[selectedVertrag.status].label}
                   </Badge>

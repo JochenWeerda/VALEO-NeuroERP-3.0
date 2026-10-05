@@ -22,35 +22,24 @@ class PosPaymentOut(BaseSchema):
 router = APIRouter()
 
 
-def _ensure_tables(db: Session) -> None:
-    try:
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_pos.payment_methods (
-                id TEXT PRIMARY KEY,
-                method_code TEXT NOT NULL,
-                name TEXT NOT NULL,
-                is_active BOOLEAN DEFAULT TRUE,
-                tenant_id TEXT NOT NULL
-            )
-        """))
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_pos.promotions (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                promo_type TEXT NOT NULL,
-                article_id TEXT,
-                article_group TEXT,
-                discount_value NUMERIC,
-                min_quantity NUMERIC DEFAULT 1,
-                valid_from DATE,
-                valid_to DATE,
-                is_active BOOLEAN DEFAULT TRUE,
-                tenant_id TEXT NOT NULL
-            )
-        """))
-        db.commit()
-    except Exception:
-        db.rollback()
+#: Wortlaut, wenn die Migration nicht gelaufen ist. Frueher legte dieses Modul
+#: die Tabellen zur Laufzeit selbst an (`_ensure_tables`) — das Schema hing
+#: damit davon ab, ob jemand die Kasse geoeffnet hatte. Jetzt kommen sie aus
+#: `pos_zahlarten_aktionen_20260930`.
+_FEHLT = (
+    "Kassentabellen fehlen — Migration pos_zahlarten_aktionen_20260930 "
+    "ausfuehren."
+)
+
+#: Startkonfiguration, wenn ein Haus noch keine Zahlart eingerichtet hat.
+#: Bewusst **nur** fuer den leeren Fall, nicht fuer den Fehlerfall: Eine
+#: Datenbankstoerung sah zuvor aus wie eine Konfiguration, und ein Kassierer
+#: haette eine Zahlart waehlen koennen, die das Haus gar nicht annimmt.
+_START_ZAHLARTEN = [
+    {"method_code": "BAR", "name": "Bargeld"},
+    {"method_code": "KARTE", "name": "EC-/Kreditkarte"},
+    {"method_code": "SEPA", "name": "SEPA-Überweisung"},
+]
 
 
 # ── Schemas ────────────────────────────────────────────────────────────────
@@ -92,23 +81,19 @@ async def list_payment_methods(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     try:
         rows = db.execute(
             text("SELECT * FROM domain_pos.payment_methods WHERE tenant_id = :tid AND is_active = TRUE"),
             {"tid": tenant_id},
         ).fetchall()
-    except Exception:
-        # Return defaults if table not yet populated
-        return [
-            {"method_code": "BAR", "name": "Bargeld"},
-            {"method_code": "KARTE", "name": "EC-/Kreditkarte"},
-            {"method_code": "SEPA", "name": "SEPA-Überweisung"},
-        ]
-    return [dict(r._mapping) for r in rows] or [
-        {"method_code": "BAR", "name": "Bargeld"},
-        {"method_code": "KARTE", "name": "EC-/Kreditkarte"},
-    ]
+    except Exception as fehler:
+        # Kein Rueckfall auf erfundene Zahlarten: Eine Stoerung ist keine
+        # Konfiguration. Wer hier BAR/KARTE/SEPA sieht, glaubt, das Haus nehme
+        # sie an.
+        raise HTTPException(status_code=503, detail=_FEHLT) from fehler
+    # Nur wenn das Haus wirklich nichts gepflegt hat — nicht bei einer
+    # Stoerung, die oben als 503 herausgeht.
+    return [dict(r._mapping) for r in rows] or list(_START_ZAHLARTEN)
 
 
 @router.post("/checkout/split-payment", status_code=201, summary="Payment aufteilen",
@@ -142,7 +127,6 @@ async def list_promotions(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     try:
         rows = db.execute(
             text("""
@@ -166,7 +150,6 @@ async def create_promotion(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     promo_id = str(uuid4())
     try:
         db.execute(text("""
@@ -195,7 +178,6 @@ async def check_promotion(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    _ensure_tables(db)
     today = date.today().isoformat()
     try:
         rows = db.execute(text("""
@@ -230,7 +212,100 @@ async def check_promotion(
     }
 
 
-# ── X/Z-Report ─────────────────────────────────────────────────────────────
+# ── X/Z-Report ──────────────────────────────────────────────
+
+#: Der Kassenumsatz liegt in ``domain_docflow.pos_fiscal_transactions`` —
+#: dort schreibt ihn der Fiskalisierungsdienst mit Signatur, Geschaeftstag und
+#: Zahlarten-Aufteilung. Bis zum 01.10.2026 lasen X- und Z-Bericht
+#: ``domain_pos.pos_transactions``: ein Schema, in dem diese Tabelle nicht
+#: liegt. Jede Abfrage scheiterte, und das ``except`` meldete 0,00 Euro.
+_UMSATZ_JE_ZAHLART = """
+    SELECT z.schluessel            AS payment_method,
+           SUM((z.wert)::numeric)  AS total,
+           COUNT(*)                AS anzahl
+    FROM domain_docflow.pos_fiscal_transactions t
+    CROSS JOIN LATERAL jsonb_each_text(COALESCE(t.payment_breakdown, '{}'::jsonb))
+        AS z(schluessel, wert)
+    WHERE t.tenant_id = :tid AND t.business_date = :tag
+    GROUP BY z.schluessel
+    ORDER BY z.schluessel
+"""
+
+#: Kennzahlen des Tages, unabhaengig von der Zahlart: Bruttoumsatz, Anzahl der
+#: Vorgaenge und — fachlich das Wichtigste — wie viele davon **nicht**
+#: abgeschlossen sind. Ein Z-Bon ueber unfertige Vorgaenge ist kein Abschluss.
+_TAGESKENNZAHLEN = """
+    SELECT COALESCE(SUM(gross_total), 0) AS brutto,
+           COUNT(*)                      AS vorgaenge,
+           COUNT(*) FILTER (WHERE state <> 'FINISHED') AS unfertig
+    FROM domain_docflow.pos_fiscal_transactions
+    WHERE tenant_id = :tid AND business_date = :tag
+"""
+
+#: Ob der Tag abgeschlossen ist, weiss der Tagesabschluss
+#: (``pos_tagesabschluss_service``, Zustandsmaschine mit TSE und DSFinV-K) —
+#: nicht der Bericht, der ihn anzeigt. Vorher stand im Z-Bon ``closed: True``
+#: als Zuweisung.
+_ABSCHLUSS_STAND = """
+    SELECT status
+    FROM domain_pos.pos_tagesabschluesse
+    WHERE tenant_id = :tid AND datum = :tag
+    ORDER BY updated_at DESC NULLS LAST, created_at DESC
+    LIMIT 1
+"""
+
+
+#: Obergrenze fuer die Aufschluesselung: eine Zeile je Zahlart, die an diesem Tag
+#: benutzt wurde. Ein Haus pflegt eine einstellige Zahl davon; die Grenze ist
+#: Schutz, nicht Seitenteilung. Wird sie erreicht, ist die Summe nicht
+#: vollstaendig — dann meldet der Bericht das, statt zu wenig auszuweisen.
+_MAX_ZAHLARTEN = 200
+
+
+def _tagesbericht(db: Session, tenant_id: str, tag: str) -> dict:
+    """Liest einen Kassentag. Eine Stoerung wird gemeldet, nicht zu Null."""
+    try:
+        kennzahlen = db.execute(text(_TAGESKENNZAHLEN), {"tid": tenant_id, "tag": tag}).mappings().one()
+        zahlarten = (
+            db.execute(text(_UMSATZ_JE_ZAHLART), {"tid": tenant_id, "tag": tag})
+            .mappings()
+            .fetchmany(_MAX_ZAHLARTEN)
+        )
+    except Exception as fehler:
+        # Kein Nullbericht: Bei einer Kasse ist "0,00 Euro" eine Aussage ueber
+        # den Tag, keine ueber die Datenbank. Wer sie glaubt, verbucht einen
+        # umsatzlosen Tag und verliert den Kassenbestand aus dem Blick.
+        db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail="Kassenumsatz ist derzeit nicht lesbar — Bericht nicht aussagefaehig.",
+        ) from fehler
+
+    if len(zahlarten) >= _MAX_ZAHLARTEN:
+        # Ein Tagesabschluss ueber einen Teil der Zahlarten ist kein
+        # Tagesabschluss. Lieber keine Zahl als eine zu kleine.
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                f"Mehr als {_MAX_ZAHLARTEN} Zahlarten an einem Tag — der Bericht "
+                "waere unvollstaendig."
+            ),
+        )
+
+    return {
+        "brutto": float(kennzahlen["brutto"] or 0),
+        "vorgaenge": int(kennzahlen["vorgaenge"] or 0),
+        "unfertig": int(kennzahlen["unfertig"] or 0),
+        "zahlarten": [
+            {
+                "method": z["payment_method"],
+                "total": float(z["total"] or 0),
+                "count": int(z["anzahl"] or 0),
+            }
+            for z in zahlarten
+        ],
+    }
+
 
 @router.get("/x-report", summary="Report x",
     response_model=PosPaymentOut
@@ -239,22 +314,17 @@ async def x_report(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    try:
-        rows = db.execute(text("""
-            SELECT payment_method, SUM(amount) as total
-            FROM domain_pos.pos_transactions
-            WHERE tenant_id = :tid AND DATE(created_at) = CURRENT_DATE
-            GROUP BY payment_method
-        """), {"tid": tenant_id}).fetchall()
-        total = sum(r.total or 0 for r in rows)
-        return {
-            "report_type": "X",
-            "date": date.today().isoformat(),
-            "total_eur": float(total),
-            "by_payment_method": [{"method": r.payment_method, "total": float(r.total or 0)} for r in rows],
-        }
-    except Exception:
-        return {"report_type": "X", "date": date.today().isoformat(), "total_eur": 0.0, "by_payment_method": []}
+    """Zwischenbericht des laufenden Tages. Schliesst nichts ab."""
+    heute = date.today().isoformat()
+    bericht = _tagesbericht(db, tenant_id, heute)
+    return {
+        "report_type": "X",
+        "date": heute,
+        "total_eur": bericht["brutto"],
+        "transaction_count": bericht["vorgaenge"],
+        "unfinished_count": bericht["unfertig"],
+        "by_payment_method": bericht["zahlarten"],
+    }
 
 
 @router.get("/z-report/{report_date}", summary="Report z",
@@ -265,24 +335,27 @@ async def z_report(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
+    """Tagesbericht. ``closed`` kommt aus dem Tagesabschluss, nicht von hier."""
+    bericht = _tagesbericht(db, tenant_id, report_date)
     try:
-        rows = db.execute(text("""
-            SELECT payment_method, SUM(amount) as total, COUNT(*) as count
-            FROM domain_pos.pos_transactions
-            WHERE tenant_id = :tid AND DATE(created_at) = :dt
-            GROUP BY payment_method
-        """), {"tid": tenant_id, "dt": report_date}).fetchall()
-        total = sum(r.total or 0 for r in rows)
-        return {
-            "report_type": "Z",
-            "date": report_date,
-            "total_eur": float(total),
-            "transaction_count": sum(r.count or 0 for r in rows),
-            "by_payment_method": [{"method": r.payment_method, "total": float(r.total or 0)} for r in rows],
-            "closed": True,
-        }
-    except Exception:
-        return {"report_type": "Z", "date": report_date, "total_eur": 0.0, "closed": True}
+        stand = db.execute(text(_ABSCHLUSS_STAND), {"tid": tenant_id, "tag": report_date}).scalar()
+    except Exception as fehler:
+        db.rollback()
+        raise HTTPException(
+            status_code=503,
+            detail="Stand des Tagesabschlusses ist derzeit nicht lesbar.",
+        ) from fehler
+
+    return {
+        "report_type": "Z",
+        "date": report_date,
+        "total_eur": bericht["brutto"],
+        "transaction_count": bericht["vorgaenge"],
+        "unfinished_count": bericht["unfertig"],
+        "by_payment_method": bericht["zahlarten"],
+        "closing_status": stand,
+        "closed": stand == "ABGESCHLOSSEN",
+    }
 
 
 @router.post("/checkout/preview", summary="Preview checkout",

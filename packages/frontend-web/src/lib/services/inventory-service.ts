@@ -1,4 +1,5 @@
 import { apiClient } from '../api-client'
+import { isAxiosError } from 'axios'
 
 export interface EpcisEvent {
   id: string
@@ -34,11 +35,18 @@ export interface CreateEpcisEvent {
 export const inventoryService = {
   async listEpcisEvents(params?: { limit?: number }, tenantId?: string) {
     const headers = tenantId ? { 'X-Tenant-Id': tenantId } : undefined
-    const res = await apiClient.get<EpcisEventsResponse>('/api/v1/inventory/epcis/events', {
-      params,
-      headers
-    })
-    return res.data
+    try {
+      const res = await apiClient.get<EpcisEventsResponse>('/api/v1/inventory/epcis/events', {
+        params,
+        headers
+      })
+      return res.data
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        return { items: [], total: 0 }
+      }
+      throw error
+    }
   },
 
   async createEpcisEvent(payload: CreateEpcisEvent, tenantId?: string) {

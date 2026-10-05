@@ -45,7 +45,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+              <FileText className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(beantragt)}
               </span>
@@ -59,8 +59,8 @@ export default function SubventionenDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <TrendingUp className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bewilligt)}
               </span>
             </div>
@@ -73,7 +73,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-blue-600" />
+              <Euro className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(ausgezahlt)}
               </span>
@@ -86,7 +86,7 @@ export default function SubventionenDashboardPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Bewilligungsquote</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {quote}%
             </span>
           </CardContent>

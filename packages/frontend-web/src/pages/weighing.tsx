@@ -17,6 +17,7 @@ export default function WeighingPanel(): JSX.Element {
   const rows: Ticket[] = data?.data?.data ?? []
   const [search, setSearch] = useState("")
   const [selected, setSelected] = useState<Ticket | null>(null)
+  const [pendingFinalizeId, setPendingFinalizeId] = useState<string | null>(null)
   const { push } = useToast()
   const queryClient = useQueryClient()
   const queryKey = ["mcp", "weighing", "list"] as const
@@ -46,23 +47,23 @@ export default function WeighingPanel(): JSX.Element {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Weighing</h2>
+      <h1 className="text-2xl font-bold">Wiegescheine</h1>
       <Toolbar
         onSearch={setSearch}
         onCopilot={() => push("Copilot Hinweis: Abweichungen werden analysiert...")}
       />
       <Card className="p-4">
-        {isLoading ? "Loading..." : (
+        {isLoading ? "Wird geladen…" : (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Ticket</TableHead>
-                <TableHead>Vehicle</TableHead>
-                <TableHead className="text-right">Gross</TableHead>
-                <TableHead className="text-right">Tare</TableHead>
-                <TableHead className="text-right">Net</TableHead>
-                <TableHead>Material</TableHead>
-                <TableHead>Time</TableHead>
+                <TableHead>Kennzeichen</TableHead>
+                <TableHead className="text-right">Brutto</TableHead>
+                <TableHead className="text-right">Tara</TableHead>
+                <TableHead className="text-right">Netto</TableHead>
+                <TableHead>Ware</TableHead>
+                <TableHead>Zeit</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -77,22 +78,28 @@ export default function WeighingPanel(): JSX.Element {
                   <TableCell>{ticket.material}</TableCell>
                   <TableCell>{new Date(ticket.ts).toLocaleString()}</TableCell>
                   <TableCell className="space-x-2 text-right">
-                    <Button size="sm" variant="secondary" onClick={() => setSelected(ticket)}>Edit</Button>
+                    <Button className="min-h-touch" variant="secondary" onClick={() => setSelected(ticket)}>Bearbeiten</Button>
                     <Button
-                      size="sm"
+                      className="min-h-touch"
+                      disabled={pendingFinalizeId !== null}
                       onClick={() => {
+                        if (pendingFinalizeId) return
+                        setPendingFinalizeId(ticket.id)
                         const previous = queryClient.getQueryData<{ data: Ticket[] }>(queryKey)
                         finalize.mutate({ id: ticket.id }, {
                           onSuccess: () => push("Ticket finalisiert"),
                           onError: () => {
                             if (previous) queryClient.setQueryData(queryKey, previous)
-                            push("Finalize fehlgeschlagen")
+                            push("Abschließen fehlgeschlagen")
                           },
-                          onSettled: () => queryClient.invalidateQueries({ queryKey })
+                          onSettled: () => {
+                            setPendingFinalizeId(null)
+                            void queryClient.invalidateQueries({ queryKey })
+                          }
                         })
                       }}
                     >
-                      Finalize
+                      {pendingFinalizeId === ticket.id ? "Wird abgeschlossen…" : "Abschließen"}
                     </Button>
                   </TableCell>
                 </TableRow>

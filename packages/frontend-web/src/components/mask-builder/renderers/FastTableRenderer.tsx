@@ -1,9 +1,15 @@
-import { memo, useState, type ReactNode } from 'react'
+import { memo, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Columns3, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { NativeSelect } from '@/components/ui/native-select'
 import { VirtualDataTable } from '@/components/ui/VirtualDataTable'
 import type { RenderColumnKind, RenderTablePlan } from '../render-plan/types'
 import type { FilterPlan, TableQueryState } from '../runtime/types'
+import { navigateRowRoute, rowIdentity } from './row-identity'
+import { columnsForWidth } from './column-priority'
+import { evaluateCondition, matchesValueList } from '../governance/condition-engine'
+import { statusLabel } from './status-labels'
 
 interface FastTableRendererProps {
   table: RenderTablePlan
@@ -15,9 +21,18 @@ interface FastTableRendererProps {
   q?: string
   filterPlan?: FilterPlan
   onQueryChange?: (patch: Partial<TableQueryState>) => void
+  onVisibleColumnsChange?: (visibleColumns: string[]) => void | Promise<void>
+  onResetOverlay?: () => void | Promise<void>
+  onRowAction?: (_actionKey: string, _row: Record<string, unknown>) => void | Promise<void>
+  errorMessage?: string
+  onRetry?: () => void
+  selectedRowKey?: string
+  onRowSelect?: (_row: Record<string, unknown>) => void
+  /** Die Seitenüberschrift trägt den Namen schon. Keine zweite Überschrift darüber. */
+  suppressHeading?: boolean
 }
 
-function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
+export function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefined): ReactNode {
   if (value == null) return '–'
   switch (renderKind) {
     case 'currency':
@@ -31,7 +46,7 @@ function formatCellValue(value: unknown, renderKind: RenderColumnKind | undefine
     case 'status':
       return (
         <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ring-border">
-          {String(value)}
+          {statusLabel(String(value))}
         </span>
       )
     default:
@@ -44,13 +59,6 @@ function isProfileNumeric(table: RenderTablePlan, column: RenderTablePlan['colum
   if (table.tableProfile === 'financial') return /betrag|saldo|soll|haben|steuer|skonto|summe|differenz|amount|debit|credit/i.test(column.key)
   if (table.tableProfile === 'inventory') return /menge|bestand|reserv|verfueg|block|quantity|qty|stock|unit/i.test(column.key)
   return false
-}
-
-function profileLabel(profile: RenderTablePlan['tableProfile']): string {
-  if (profile === 'financial') return 'Financial Table Profile'
-  if (profile === 'inventory') return 'Inventory Table Profile'
-  if (profile === 'audit') return 'Audit Table Profile'
-  return 'Standard Table Profile'
 }
 
 function FilterChips({
@@ -88,7 +96,7 @@ function FilterChips({
             <button
               type="button"
               aria-label={`Filter ${colLabel} entfernen`}
-              className="ml-0.5 rounded-full hover:text-foreground focus:outline-none focus:ring-1"
+              className="ml-0.5 rounded-full hover:text-foreground focus:outline-hidden focus:ring-1"
               onClick={() => onRemove(colKey)}
             >
               ×
@@ -110,6 +118,14 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   q,
   filterPlan,
   onQueryChange,
+  onVisibleColumnsChange,
+  onResetOverlay,
+  onRowAction,
+  errorMessage,
+  onRetry,
+  selectedRowKey,
+  onRowSelect,
+  suppressHeading = false,
 }: FastTableRendererProps): JSX.Element {
   const isServerPaged = table.serverPagination && Boolean(onQueryChange)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
@@ -118,6 +134,105 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   const filterableColumns = table.columns.filter((column) => column.filterable)
   const [filterColumn, setFilterColumn] = useState<string>(filterableColumns[0]?.key ?? '')
   const [filterValue, setFilterValue] = useState('')
+  const [columnPickerOpen, setColumnPickerOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkActionPending, setBulkActionPending] = useState<string | null>(null)
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [page, sort, sortDir, q, filterPlan])
+  useEffect(() => {
+    const visibleIds = new Set(rows.flatMap((row) => row.id == null ? [] : [String(row.id)]))
+    setSelectedIds((current) => {
+      const next = new Set([...current].filter((id) => visibleIds.has(id)))
+      return next.size === current.size ? current : next
+    })
+  }, [rows])
+  const frameRef = useRef<HTMLDivElement>(null)
+  const [frameWidth, setFrameWidth] = useState(1280)
+  useEffect(() => {
+    const node = frameRef.current
+    if (!node || typeof ResizeObserver === 'undefined') return undefined
+    const observer = new ResizeObserver((entries) => {
+      const next = entries[0]?.contentRect.width
+      if (typeof next === 'number') setFrameWidth(next)
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+  const priorityColumns = columnsForWidth(table.columns, frameWidth)
+  const availableColumns = table.availableColumns ?? table.columns
+  const visibleColumnKeys = new Set(priorityColumns.map((column) => column.key))
+  const dataColumns = priorityColumns.map((column) => ({
+    key: column.key,
+    label: column.label,
+    width: column.width,
+    numeric: isProfileNumeric(table, column),
+    sortable: column.sortable,
+    render: column.renderKind
+      ? (value: unknown) => formatCellValue(value, column.renderKind)
+      : undefined,
+  }))
+  const selectableColumns = table.bulkActions?.length && onRowAction
+    ? [{
+        key: '__selected',
+        label: '',
+        width: 44,
+        sortable: false,
+        render: (_value: unknown, row: Record<string, unknown>) => {
+          const id = String(row.id ?? '')
+          const selectable = row.id != null && id.length > 0
+          return (
+            <input
+              type="checkbox"
+              aria-label={`Zeile ${id} auswaehlen`}
+              checked={selectedIds.has(id)}
+              disabled={!selectable}
+              onChange={(event) => {
+                event.stopPropagation()
+                setSelectedIds((current) => {
+                  const next = new Set(current)
+                  if (event.target.checked) next.add(id)
+                  else next.delete(id)
+                  return next
+                })
+              }}
+              onClick={(event) => event.stopPropagation()}
+            />
+          )
+        },
+      }, ...dataColumns]
+    : dataColumns
+  const renderedColumns = table.rowActions?.length && onRowAction
+    ? [
+        ...selectableColumns,
+        {
+          key: '__actions',
+          label: 'Aktionen',
+          width: 170,
+          sortable: false,
+          render: (_value: unknown, row: Record<string, unknown>) => (
+            <span className="flex gap-1">
+              {table.rowActions?.filter((action) => matchesValueList(row, action.visibleWhen)).map((action) => (
+                <Button
+                  key={action.key}
+                  type="button"
+                  variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
+                  className="min-h-touch px-2 text-xs"
+                  data-testid={`row-action-${action.key}`}
+                  disabled={Boolean(action.disabledWhen && matchesValueList(row, action.disabledWhen)) || Boolean(action.enabledWhen && !evaluateCondition(action.enabledWhen, row))}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    void onRowAction(action.key, row)
+                  }}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </span>
+          ),
+        },
+      ]
+    : selectableColumns
 
   function handleRemoveFilter(colKey: string) {
     if (!onQueryChange || !filterPlan) return
@@ -138,43 +253,133 @@ export const FastTableRenderer = memo(function FastTableRenderer({
     })
   }
 
+  function handleToggleColumn(columnKey: string): void {
+    if (!onVisibleColumnsChange) return
+    const next = new Set(visibleColumnKeys)
+    if (next.has(columnKey)) {
+      if (next.size <= 1) return
+      next.delete(columnKey)
+    } else {
+      next.add(columnKey)
+    }
+    const ordered = availableColumns.map((column) => column.key).filter((key) => next.has(key))
+    void onVisibleColumnsChange(ordered)
+  }
+
   return (
+    <div ref={frameRef}>
     <Card data-table-profile={table.tableProfile} data-testid={`table-${table.key}`}>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <CardTitle className="text-base">{table.label}</CardTitle>
-            <p className="mt-0.5 text-[11px] uppercase tracking-normal text-muted-foreground">
-              {profileLabel(table.tableProfile)}
-            </p>
-          </div>
+          {suppressHeading ? null : <CardTitle className="text-base">{table.label}</CardTitle>}
+          {table.bulkActions?.length && onRowAction ? (
+            <div className="flex items-center gap-1" data-testid={`bulk-actions-${table.key}`}>
+              <span className="mr-1 text-xs text-muted-foreground">{selectedIds.size} gewaehlt</span>
+              {table.bulkActions.map((action) => (
+                <Button
+                  key={action.key}
+                  type="button"
+                  variant={['high', 'critical', 'destructive'].includes(action.dangerLevel ?? '') ? 'destructive' : 'outline'}
+                  disabled={selectedIds.size === 0 || bulkActionPending !== null}
+                  data-testid={`bulk-action-${action.key}`}
+                  onClick={async () => {
+                    const selectedRows = rows.filter((row) => selectedIds.has(String(row.id ?? '')))
+                    setBulkActionPending(action.key)
+                    try {
+                      await onRowAction(action.key, { selectedIds: [...selectedIds], selectedRows })
+                      setSelectedIds(new Set())
+                    } catch {
+                      // The action runtime owns user-facing error reporting; retain selection for retry.
+                    } finally {
+                      setBulkActionPending(null)
+                    }
+                  }}
+                 className="min-h-touch">
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          ) : null}
           {onQueryChange && (
             <input
               type="search"
               placeholder="Suchen…"
               value={q ?? ''}
               onChange={(e) => onQueryChange({ q: e.target.value || undefined, page: 1 })}
-              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              className="min-h-touch w-40 rounded border border-input bg-background px-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-ring"
               aria-label={`Suche in ${table.label}`}
               data-testid={`search-${table.key}`}
             />
           )}
+          {(onVisibleColumnsChange || onResetOverlay) && (
+            <div className="flex items-center gap-1">
+              {onVisibleColumnsChange && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-touch px-2 text-xs"
+                  onClick={() => setColumnPickerOpen((open) => !open)}
+                  aria-expanded={columnPickerOpen}
+                  aria-controls={`column-picker-${table.key}`}
+                  data-testid={`column-picker-toggle-${table.key}`}
+                >
+                  <Columns3 className="mr-1 h-3.5 w-3.5" />
+                  Spalten
+                </Button>
+              )}
+              {onResetOverlay && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-touch px-2 text-xs"
+                  onClick={() => { void onResetOverlay() }}
+                  data-testid={`reset-overlay-${table.key}`}
+                  aria-label={`Ansicht ${table.label} zuruecksetzen`}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
+        {columnPickerOpen && onVisibleColumnsChange ? (
+          <div
+            id={`column-picker-${table.key}`}
+            className="flex flex-wrap gap-2 pt-2"
+            data-testid={`column-picker-${table.key}`}
+          >
+            {availableColumns.map((column) => (
+              <label
+                key={column.key}
+                className="inline-flex min-h-touch items-center gap-1.5 rounded border border-input bg-background px-2 text-xs"
+              >
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5"
+                  checked={visibleColumnKeys.has(column.key)}
+                  disabled={visibleColumnKeys.has(column.key) && visibleColumnKeys.size <= 1}
+                  onChange={() => handleToggleColumn(column.key)}
+                  data-testid={`column-toggle-${table.key}-${column.key}`}
+                />
+                <span>{column.label}</span>
+              </label>
+            ))}
+          </div>
+        ) : null}
         {onQueryChange && filterableColumns.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            <select
-              value={filterColumn}
-              onChange={(event) => setFilterColumn(event.target.value)}
-              className="h-7 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-              aria-label={`Filterspalte fuer ${table.label}`}
-              data-testid={`filter-column-${table.key}`}
-            >
-              {filterableColumns.map((column) => (
-                <option key={column.key} value={column.key}>
-                  {column.label}
-                </option>
-              ))}
-            </select>
+            <div className="min-w-32">
+              <NativeSelect
+                value={filterColumn}
+                onValueChange={setFilterColumn}
+                aria-label={`Filterspalte fuer ${table.label}`}
+                data-testid={`filter-column-${table.key}`}
+                options={filterableColumns.map((column) => ({
+                  value: column.key,
+                  label: column.label,
+                }))}
+              />
+            </div>
             <input
               type="text"
               value={filterValue}
@@ -183,15 +388,14 @@ export const FastTableRenderer = memo(function FastTableRenderer({
                 if (event.key === 'Enter') handleApplyFilter()
               }}
               placeholder="Filterwert"
-              className="h-7 w-40 rounded border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+              className="min-h-touch w-40 rounded border border-input bg-background px-2 text-sm focus:outline-hidden focus:ring-1 focus:ring-ring"
               aria-label={`Filterwert fuer ${table.label}`}
               data-testid={`filter-value-${table.key}`}
             />
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              className="h-7 px-2 text-xs"
+              className="min-h-touch px-2 text-xs"
               onClick={handleApplyFilter}
               disabled={!filterColumn || filterValue.trim().length === 0}
               data-testid={`apply-filter-${table.key}`}
@@ -209,34 +413,43 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             onRemove={handleRemoveFilter}
           />
         )}
-        <VirtualDataTable
-          data={visibleRows}
-          rowHeight={table.rowHeight}
-          sortColumn={sort}
-          sortDir={sortDir}
-          onSortChange={
-            onQueryChange
-              ? (colKey, dir) => onQueryChange({ sort: colKey, sortDir: dir })
-              : undefined
-          }
-          columns={table.columns.map((column) => ({
-            key: column.key,
-            label: column.label,
-            width: column.width,
-            numeric: isProfileNumeric(table, column),
-            sortable: column.sortable,
-            render: column.renderKind
-              ? (value: unknown) => formatCellValue(value, column.renderKind)
-              : undefined,
-          }))}
-        />
+        {errorMessage ? (
+          <div role="alert" className="space-y-2 pb-4 text-sm" data-testid={`table-load-error-${table.key}`}>
+            <p className="text-destructive">{errorMessage}</p>
+            {onRetry ? (
+              <Button type="button" variant="outline" onClick={onRetry} className="min-h-touch">Erneut laden</Button>
+            ) : null}
+          </div>
+        ) : null}
+        {errorMessage && visibleRows.length === 0 ? null : (
+          <VirtualDataTable
+            data={visibleRows}
+            rowHeight={table.rowHeight}
+            fitToContent
+            sortColumn={sort}
+            sortDir={sortDir}
+            onSortChange={
+              onQueryChange
+                ? (colKey, dir) => onQueryChange({ sort: colKey, sortDir: dir })
+                : undefined
+            }
+            onRowClick={onRowSelect
+              ? (row) => onRowSelect(row)
+              : table.rowRouteTemplate
+                ? (row) => navigateRowRoute(table.rowRouteTemplate, row)
+                : undefined}
+            selectedRowKey={selectedRowKey}
+            getRowKey={(row, index) => rowIdentity(row, index)}
+            columns={renderedColumns}
+          />
+        )}
         {isServerPaged && totalPages !== undefined && totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button
               variant="outline"
-              size="sm"
               disabled={!page || page <= 1}
               onClick={() => onQueryChange?.({ page: (page ?? 1) - 1 })}
+              className="min-h-touch"
             >
               Zurück
             </Button>
@@ -245,9 +458,9 @@ export const FastTableRenderer = memo(function FastTableRenderer({
             </span>
             <Button
               variant="outline"
-              size="sm"
               disabled={(page ?? 1) >= totalPages}
               onClick={() => onQueryChange?.({ page: (page ?? 1) + 1 })}
+              className="min-h-touch"
             >
               Weiter
             </Button>
@@ -255,5 +468,6 @@ export const FastTableRenderer = memo(function FastTableRenderer({
         ) : null}
       </CardContent>
     </Card>
+    </div>
   )
 })

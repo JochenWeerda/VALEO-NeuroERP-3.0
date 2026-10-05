@@ -24,7 +24,7 @@ export function DuplicateWarning({
   if (isChecking) {
     return (
       <Alert className={cn('border-blue-200 bg-blue-50', className)}>
-        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         <AlertTitle className="text-blue-800">Duplikat-Prüfung...</AlertTitle>
         <AlertDescription className="text-blue-700">
           Suche nach möglichen Duplikaten im System.
@@ -38,9 +38,9 @@ export function DuplicateWarning({
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 0.9) return 'bg-red-100 text-red-800 border-red-200'
-    if (score >= 0.8) return 'bg-amber-100 text-amber-800 border-amber-200'
-    return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    if (score >= 0.9) return 'error'
+    if (score >= 0.8) return 'warning'
+    return 'warning'
   }
 
   const getScoreLabel = (score: number) => {
@@ -52,10 +52,10 @@ export function DuplicateWarning({
   return (
     <Alert
       variant="destructive"
-      className={cn('border-amber-300 bg-amber-50', className)}
+      className={cn('warning', className)}
     >
-      <AlertTriangle className="h-4 w-4 text-amber-600" />
-      <AlertTitle className="text-amber-800 flex items-center gap-2">
+      <AlertTriangle className="h-4 w-4 text-status-warning" />
+      <AlertTitle className="text-status-warning flex items-center gap-2">
         Mögliche Duplikate gefunden
         <Badge variant="secondary" className="text-xs">
           {candidates.length} {candidates.length === 1 ? 'Eintrag' : 'Einträge'}
@@ -66,13 +66,13 @@ export function DuplicateWarning({
           {candidates.map((candidate) => (
             <div
               key={candidate.id}
-              className="flex items-center justify-between p-3 bg-white rounded-lg border border-amber-200"
+              className='warning'
             >
               <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-amber-600" />
+                <Users className="h-5 w-5 text-status-warning" />
                 <div>
-                  <div className="font-medium text-gray-900">{candidate.name}</div>
-                  <div className="text-xs text-gray-500 flex gap-2">
+                  <div className='muted'>{candidate.name}</div>
+                  <div className='muted'>
                     {candidate.email && <span>{candidate.email}</span>}
                     {candidate.phone && <span>{candidate.phone}</span>}
                   </div>
@@ -86,21 +86,21 @@ export function DuplicateWarning({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className={getScoreColor(candidate.matchScore)}>
+                <Badge variant={getScoreColor(candidate.matchScore)}>
                   {getScoreLabel(candidate.matchScore)} (
                   {Math.round(candidate.matchScore * 100)}%)
                 </Badge>
                 {onSelect && (
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={() => onSelect(candidate)}
+                    className="min-h-touch"
                   >
                     Auswählen
                   </Button>
                 )}
                 <Link to={`/crm/customers/${candidate.id}`}>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" className="min-h-touch min-w-touch" aria-label="Kandidatenstamm öffnen">
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -111,7 +111,7 @@ export function DuplicateWarning({
 
         {onIgnore && (
           <div className="mt-4 flex justify-end">
-            <Button variant="outline" size="sm" onClick={onIgnore}>
+            <Button variant="outline" onClick={onIgnore} className="min-h-touch">
               Warnung ignorieren und fortfahren
             </Button>
           </div>

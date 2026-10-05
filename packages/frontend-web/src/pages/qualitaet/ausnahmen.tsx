@@ -15,6 +15,7 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 import { AgentProcessPanel, AgentSuggestionBadge } from '@/components/agent'
 import { AlertCircle, AlertTriangle, CheckCircle, Plus } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -56,6 +57,7 @@ async function fetchAusnahmen(): Promise<AusnahmeRecord[]> {
 
 export default function AusnahmenPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [roleFocus, setRoleFocus] = useState<QualityExceptionRole>('qs')
   const { data: ausnahmen = [], refetch } = useQuery({
     queryKey: ['operations-ausnahmen'],
@@ -87,7 +89,7 @@ export default function AusnahmenPage(): JSX.Element {
   const fallkopf = useMemo(() => {
     return {
       status: eskaliert > 0 ? 'Eskalation aktiv' : hochprio > 0 ? 'Hohe Prioritaet offen' : offen > 0 ? 'Offene Ausnahmen' : 'Keine offenen Ausnahmen',
-      statusColor: eskaliert > 0 ? 'text-red-700 bg-red-50 border-red-300' : hochprio > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : 'text-green-700 bg-green-50 border-green-300',
+      statusColor: eskaliert > 0 ? 'text-status-error bg-status-error/10 border-status-error' : hochprio > 0 ? 'text-status-warning bg-status-warning/10 border-status-warning' : 'text-status-success bg-status-success/10 border-status-success',
       risiko: hochprio > 0 ? `${hochprio} Ausnahme(n) mit hoher Prioritaet` : 'Kein hohes Risiko',
       owner: eskaliert > 0 ? 'Betriebsleitung — sofortige Bearbeitung' : 'Qualitaetsteam',
       eskalationsdruck: eskaliert > 0 ? `${eskaliert} eskaliert — SLA-kritisch` : offen > 0 ? `${offen} offen — Bearbeitung ausstehend` : 'Kein Druck',
@@ -116,9 +118,9 @@ export default function AusnahmenPage(): JSX.Element {
       label: 'Status',
       render: (a: AusnahmeRecord) => (
         <div className="flex items-center gap-1">
-          {a.status === 'eskaliert' && <AlertTriangle className="h-4 w-4 text-red-600" />}
-          {a.status === 'geschlossen' && <CheckCircle className="h-4 w-4 text-green-600" />}
-          {a.status === 'offen' && <AlertCircle className="h-4 w-4 text-orange-600" />}
+          {a.status === 'eskaliert' && <AlertTriangle className="h-4 w-4 text-status-error" />}
+          {a.status === 'geschlossen' && <CheckCircle className="h-4 w-4 text-status-success" />}
+          {a.status === 'offen' && <AlertCircle className="h-4 w-4 text-status-warning" />}
           <span className="capitalize">{a.status.replace('_', ' ')}</span>
         </div>
       ),
@@ -133,8 +135,20 @@ export default function AusnahmenPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-4 p-6">
-      {/* Operativer Fallkopf */}
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">Betriebs-Ausnahmen</h1>
+          <p className="text-muted-foreground">Offene Ausnahmen und Eskalationen</p>
+        </div>
+        <Button onClick={() => navigate('/qualitaet/ausnahme-neu')} className="min-h-touch gap-2 touch-manipulation">
+          <Plus className="h-4 w-4" />
+          Ausnahme erfassen
+        </Button>
+      </div>
+
+      {!isTouch ? (
+      <>
       <Card className={`border ${fallkopf.statusColor}`}>
         <CardContent className="pt-4 pb-3 text-sm space-y-1">
           <div className="font-semibold">Ausnahmen-Lage: {fallkopf.status}</div>
@@ -143,17 +157,6 @@ export default function AusnahmenPage(): JSX.Element {
           <div>Eskalationsdruck: {fallkopf.eskalationsdruck}</div>
         </CardContent>
       </Card>
-
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Betriebs-Ausnahmen</h1>
-          <p className="text-muted-foreground">Offene Ausnahmen und Eskalationen (KI-gestützte Priorisierung)</p>
-        </div>
-        <Button onClick={() => navigate('/qualitaet/ausnahme-neu')} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Ausnahme erfassen
-        </Button>
-      </div>
 
       <RoleFocusBar roles={qualityExceptionRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={ausnahmen.length} totalCount={ausnahmen.length} title="Wer bearbeitet die QS-Ausnahmen?" />
 
@@ -198,8 +201,9 @@ export default function AusnahmenPage(): JSX.Element {
           ]}
         />
       </div>
-
       <AgentProcessPanel domain="operations" />
+      </>
+      ) : null}
 
       {hochprio > 0 && (
         <AgentSuggestionBadge<ExceptionSuggestion>
@@ -222,9 +226,9 @@ export default function AusnahmenPage(): JSX.Element {
       )}
 
       {eskaliert > 0 && (
-        <Card className="border-red-500 bg-red-50">
+        <Card className="border-status-error bg-status-error/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{eskaliert} Ausnahme(n) eskaliert — sofortige Bearbeitung erforderlich!</span>
             </div>
@@ -232,6 +236,7 @@ export default function AusnahmenPage(): JSX.Element {
         </Card>
       )}
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesamt</CardTitle></CardHeader>
@@ -239,17 +244,18 @@ export default function AusnahmenPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offen</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-orange-600">{offen}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-warning">{offen}</span></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Eskaliert</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-red-600">{eskaliert}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-error">{eskaliert}</span></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Hohe Priorität</CardTitle></CardHeader>
-          <CardContent><span className="text-2xl font-bold text-red-700">{hochprio}</span></CardContent>
+          <CardContent><span className="text-2xl font-bold text-status-error">{hochprio}</span></CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardContent className="pt-6">

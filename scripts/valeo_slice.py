@@ -39,9 +39,42 @@ REQUIRED_SLICE_FIELDS = {
 }
 
 
+class SliceYamlError(ValueError):
+    """Ein existierender, aber nicht eindeutiger/lesbarer Slice-Vertrag."""
+
+
+class _UniqueSafeLoader(yaml.SafeLoader):
+    def construct_mapping(self, node, deep=False):
+        seen = set()
+        for key_node, _value_node in node.value:
+            if key_node.tag == "tag:yaml.org,2002:merge":
+                continue
+            key = self.construct_object(key_node, deep=deep)
+            if not isinstance(key, (str, int, float, bool, type(None))):
+                raise yaml.constructor.ConstructorError(
+                    "Mapping", node.start_mark, "Skalarer Schluessel erforderlich", key_node.start_mark
+                )
+            if key in seen:
+                raise yaml.constructor.ConstructorError(
+                    "Mapping", node.start_mark, f"Doppelter Schluessel: {key}", key_node.start_mark
+                )
+            seen.add(key)
+        return super().construct_mapping(node, deep=deep)
+
+
 def _load_yaml(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as fh:
-        return yaml.safe_load(fh) or {}
+    try:
+        with path.open("r", encoding="utf-8-sig") as fh:
+            documents = [doc for doc in yaml.load_all(fh, Loader=_UniqueSafeLoader) if doc is not None]
+    except yaml.YAMLError as exc:
+        mark = getattr(exc, "problem_mark", None)
+        line = f":{mark.line + 1}" if mark is not None else ""
+        raise SliceYamlError(f"{path}{line}: {getattr(exc, 'problem', 'YAML-Formfehler')}") from exc
+    if len(documents) > 1:
+        raise SliceYamlError(f"{path}: Mehrere befuellte YAML-Dokumente; genau ein Slice-Vertrag erlaubt")
+    if documents and not isinstance(documents[0], dict):
+        raise SliceYamlError(f"{path}: Slice-Vertrag muss ein Mapping sein")
+    return documents[0] if documents else {}
 
 
 def _run(cmd: list[str], cwd: Path = REPO_ROOT) -> tuple[int, str]:
@@ -50,14 +83,27 @@ def _run(cmd: list[str], cwd: Path = REPO_ROOT) -> tuple[int, str]:
 
 
 def _find_slice_yaml(slice_id: str) -> Path | None:
+    # Formfehler der direkt angefragten Datei duerfen nicht als 'nicht gefunden' verschwinden.
+    direct = SLICES_DIR / f"{slice_id}.yaml"
+    matches = []
+    if direct.parent == SLICES_DIR and direct.is_file():
+        data = _load_yaml(direct)
+        if data.get("slice_id") == slice_id:
+            matches.append(direct)
+        else:
+            raise SliceYamlError(f"{direct}: slice_id stimmt nicht mit Dateiname/Anfrage ueberein")
     for p in SLICES_DIR.glob("*.yaml"):
+        if p == direct:
+            continue
         try:
             data = _load_yaml(p)
             if data.get("slice_id") == slice_id:
-                return p
-        except Exception:
+                matches.append(p)
+        except (OSError, SliceYamlError):
             continue
-    return None
+    if len(matches) > 1:
+        raise SliceYamlError(f"Slice-ID {slice_id} ist mehrfach definiert: {', '.join(p.name for p in matches)}")
+    return matches[0] if matches else None
 
 
 def _validate_yaml(data: dict) -> list[str]:
@@ -186,8 +232,8 @@ def cmd_list() -> int:
             status = data.get("status", "?")
             owner = data.get("owner", "?")
             print(f"{sid:<40} {status:<15} {owner}")
-        except Exception:
-            print(f"{p.stem:<40} [YAML-FEHLER]")
+        except (OSError, SliceYamlError) as exc:
+            print(f"{p.stem:<40} [YAML-FEHLER] {exc}")
     return 0
 
 
@@ -217,4 +263,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except (OSError, SliceYamlError) as exc:
+        print(f"[FEHLER] Slice-Vertrag nicht lesbar: {exc}")
+        sys.exit(1)

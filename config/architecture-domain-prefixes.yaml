@@ -76,6 +76,7 @@ domains:
 
   finance:
     route_segments:
+      - abrechnung
       - finance
       - fibu
       - finanzplanung
@@ -89,6 +90,7 @@ domains:
       - export
       - pricing
       - preise
+      - auswertungen
     service_prefixes:
       - finance_
       - finanz
@@ -105,6 +107,7 @@ domains:
       - tse_fiskaly_
       - vies_
       - ist_aggregation_
+      - query_center
     endpoint_prefixes:
       - finance
       - finanz
@@ -168,6 +171,7 @@ domains:
       - export_service
       - accounts
       - banken
+      - query_center
 
   agrar:
     route_segments:
@@ -205,6 +209,7 @@ domains:
       - contract_
       - settlement_
       - feed_
+      - feeding_
       - silo_rule_
       - supply_chain_
       - rations_
@@ -226,6 +231,7 @@ domains:
       - ers_settlement
       - farm_
       - feed_
+      - feeding_
       - foerderung
       - futter_
       - futtermittel_
@@ -404,6 +410,7 @@ domains:
 
   platform:
     route_segments:
+      - schnittstelle
       - admin
       - admin-suite
       - auth
@@ -425,6 +432,8 @@ domains:
       - verify
       - alerts
       - management
+      - planung
+      - workspace
       - einstellungen
       - genossenschaft
       - wissen
@@ -466,6 +475,9 @@ domains:
       - compensation_engine
       - article_image_enrichment
       - mask_rollout_
+      - mask_action_
+      - calendar_projection_
+      - studio_validation
     endpoint_prefixes:
       - admin_
       - agents
@@ -494,6 +506,7 @@ domains:
       - knowledge_
       - mask_registry
       - mask_actions
+      - mask_frontend_bridges
       - mask_rollout_
       - mask_screen_
       - beleg_vordrucke
@@ -562,9 +575,26 @@ domains:
       - data_quality
       - nutrient_compositions
       - supply_chain_blockchain
+      - collab_notes
+      - planning_kalender
+      - ux_
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  webhook_service: platform
+  document_allocation_service: platform
+  studio_draft_store: platform
+  studio_propose: platform
+  billing_batch_service: finance
+  document_control_projection: dms-compliance
+  document_control_service: dms-compliance
+  foreign_goods_worklist_service: inventory
+  l3_report_catalog_service: finance
+  legacy_interface_adapter_service: platform
+  mail_workspace_service: crm
+  production_control_service: agrar
+  recent_documents_service: platform
+  tank_adapter_service: agrar
   articles_service: inventory
   customer_service: crm
   customer_sales_eligibility: crm
@@ -574,6 +604,9 @@ exact_service_stems:
   scheduler_service: platform
   notification_service: crm
   process_map_service: platform
+  calendar_projection_service: platform
+  studio_validation: platform
+  esg_footprint_service: agrar
   workflow_service: platform
   workflow_guards: platform
   workflow_cockpit_service: platform
@@ -581,6 +614,17 @@ exact_service_stems:
   kaeufergruppe: crm
 
 exact_endpoint_stems:
+  document_allocations: platform
+  studio_drafts: platform
+  billing_batch: finance
+  document_control: dms-compliance
+  foreign_goods_worklist: inventory
+  l3_report_catalog: finance
+  legacy_interface_adapters: platform
+  mail_workspace: crm
+  production_control: agrar
+  recent_documents: platform
+  tank_adapter: agrar
   articles: inventory
   customers: crm
   contacts: crm
@@ -594,3 +638,8 @@ exact_endpoint_stems:
   milchvieh_crosssell: crm
   supply_chain: agrar
   vertraege: agrar
+  collab_notes: platform
+  esg_footprint: agrar
+  planung_kalender: platform
+  ux_overlays: platform
+  ux_telemetry: platform

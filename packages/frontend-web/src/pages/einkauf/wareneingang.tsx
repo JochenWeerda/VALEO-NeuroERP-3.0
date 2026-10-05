@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { Package } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   ManagementDecisionPanel,
@@ -123,6 +124,7 @@ function mapPurchaseOrder(po: Record<string, unknown>): PurchaseOrder {
 export default function WareneingangPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { poId } = useParams<{ poId?: string }>()
   const entityType = 'goodsReceipt'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Wareneingang')
@@ -375,16 +377,18 @@ export default function WareneingangPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{entityTypeLabel}</h1>
-          <p className="text-muted-foreground">{t('crud.actions.create')}</p>
+          <h1 className="text-2xl font-bold md:text-3xl">{entityTypeLabel}</h1>
+          <p className="text-muted-foreground">Wareneingang zur Bestellung buchen</p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/einkauf/bestellungen')}>
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/einkauf/bestellungen')}>
           {t('common.cancel')}
         </Button>
       </div>
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={goodsReceiptRoleProfiles}
         value={roleFocus}
@@ -416,6 +420,8 @@ export default function WareneingangPage(): JSX.Element {
         />
       </div>
       <CrudCapabilityChecklist capabilities={receiptCrudCapabilities} />
+      </>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -585,11 +591,11 @@ export default function WareneingangPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={() => navigate('/einkauf/bestellungen')} disabled={loading}>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/einkauf/bestellungen')} disabled={loading}>
           {t('common.cancel')}
         </Button>
-        <Button onClick={handleSubmit} disabled={loading || !purchaseOrder}>
+        <Button className="min-h-touch touch-manipulation" onClick={handleSubmit} disabled={loading || !purchaseOrder}>
           <Package className="h-4 w-4 mr-2" />
           {loading ? t('common.loading') : t('crud.actions.save')}
         </Button>

@@ -1,0 +1,166 @@
+slice_id: DESIGN-STATUS-COLORS-018
+id: DESIGN-STATUS-COLORS-018
+title: Getoente Flaechen und Resttabellen auf Designsystem-Komponenten (Welle 4)
+owner: Claude Code
+status: in arbeit
+teilschritte_abgeschlossen: 2
+created_at: "2026-09-13"
+started_at: "2026-09-13"
+vorgaenger: DESIGN-STATUS-COLORS-017
+goal: >-
+  Den Restbestand roher Palette-Statusfarben unter packages/frontend-web/src
+  schliessen: Hinweisboxen, sonstige getoente Flaechen, Ikonflaechen und die
+  aus Welle 3 zurueckgestellten Status-Tabellen.
+entscheidung:
+  wer: "User, 2026-09-13"
+  frage: >-
+    Die 69 Hinweisboxen brauchen ein Ziel im Designsystem. Alert fuehrt die
+    Varianten bereits auf semantischen Tokens, rendert aber hart role="alert".
+  was: >-
+    Neue schlanke Komponente Callout, die alertVariants wiederverwendet und
+    ohne role="alert" rendert. Alert bleibt fuer echte, erscheinende Meldungen.
+  begruendung: >-
+    Die Boxen stehen dauerhaft in der Maske. role="alert" liesse sie bei jedem
+    Render assertiv vorlesen - das waere eine A11y-Verschlechterung, keine
+    Verbesserung. Geteilte Varianten verhindern eine zweite Farbdefinition.
+  umfang: >-
+    Alle vier Bloecke, nicht nur die Hinweisboxen (User-Entscheidung).
+befund:
+  gemessen_am: "2026-09-13"
+  methode: >-
+    Zeilen unter packages/frontend-web/src mit bg-<familie>-50|100 aus den
+    Statusfamilien, klassifiziert nach der Form des Traegerelements.
+  bloecke:
+    hinweisbox: "69 Treffer in 45 Dateien - border + getoente Flaeche + Text"
+    sonstige_flaeche: "82 Treffer in 50 Dateien - Chips, Panel-Kopfzeilen, Zeilen-Hervorhebung"
+    ikonflaeche: "5 Treffer in 4 Dateien - runde Icon-Container ohne Text"
+    overlay: "1 Treffer - Karten-Overlay in SchlagKarte"
+    status_tabellen: "137 Treffer - Rest ohne Badge-Bezug oder kategorial"
+  luecke_im_designsystem: >-
+    alertVariants kennt success, warning, info und destructive, aber kein
+    error. destructive ist deckend und meint zerstoerende Aktionen, nicht
+    einen Zustand - dieselbe Luecke, die Welle 2 bei Badge geschlossen hat.
+file_ownership:
+  - docs/agent-ops/slices/DESIGN-STATUS-COLORS-018.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - packages/frontend-web/src/components/ui/callout.tsx
+  - packages/frontend-web/src/components/ui/alert.tsx
+  - "Dateien unter packages/frontend-web/src mit rohen Status-Flaechenklassen"
+abgrenzung: >-
+  RESTFEHLER-20260911 (Cursor) haelt produktion.ts und
+  mischfutter-produktion.tsx im geteilten Arbeitsbaum - beide werden nicht
+  angefasst, solange der Slice laeuft. Backend, k8s und Dependency-Welle
+  bleiben unberuehrt.
+acceptance:
+  - Callout existiert, teilt die Varianten mit Alert, rendert ohne role="alert".
+  - Rohe Status-Flaechenklassen in den vier Bloecken auf 0 bzw. begruendet ausgenommen.
+  - "tsc --noEmit exit 0; Vitest identisch zur Baseline (126 Dateien, 495 Tests, 1 Skip)."
+  - Kategoriale Faerbung wird nicht auf Statusvarianten gezwungen.
+risks:
+  - >-
+    Deckende Flaechen (bg-*-100) erscheinen nach der Umstellung weich getoent.
+    Beabsichtigt, wie in Welle 2 - die Vereinheitlichung ist der Zweck.
+  - >-
+    Ikonflaechen tragen keinen Text und verletzen die Kontrastregel nicht.
+    Sie brauchen dekorative Token-Flaechen, keine Statuskomponente.
+verification:
+  - "npx tsc --noEmit"
+  - "npm run test"
+  - "Gegenprobe mit dem Messskript: 0 verbleibende Treffer je Block"
+
+zwischenstand_2026_09_14:
+  schritt_1:
+    commit: cfd67c2a3
+    umfang: "76 Umstellungen in 54 Dateien"
+    funde:
+      - >-
+        alertVariants fehlte error - dieselbe Luecke wie bei Badge in Welle 2.
+        Ergaenzt auf denselben Tokens; destructive bleibt unveraendert.
+      - >-
+        Rund 20 Faelle waren bereits Alert, nur mit roher Palette im className
+        uebersteuert. Die richtige Komponente war da und wurde am
+        Designsystem vorbei eingefaerbt.
+    selbsttest_hat_gegriffen: >-
+      Zwei echte Fehler der ersten Codemod-Fassung: falsche Slicing-Arithmetik
+      (verschluckte den Kasteninhalt) und ein verschachteltes </div> als
+      Kastenende.
+  schritt_2:
+    commit: c2c923ed9
+    umfang: "10 Status-Tabellen auf Badge-/Callout-Varianten"
+    geloescht:
+      datei: packages/frontend-web/src/lib/design-tokens.ts
+      grund: >-
+        Zweite, konkurrierende Farbquelle mit 22 Palette-Eintraegen ohne einen
+        einzigen Importeur. Belegt per git grep und dadurch, dass tsc nach dem
+        Loeschen unveraendert durchlaeuft. CLAUDE.md nennt palette.css als
+        einzige Quelle; Mitmigrieren haette toten Code gepflegt.
+    kriterium_geschaerft: >-
+      Welle 3 erkannte kategoriale Tabellen an purple/violet. Das reicht nicht:
+      TYP_COLORS in rations-zugang faerbt Zugangsrollen mit rot/blau/gruen/gelb
+      und waere rein chromatisch als Status durchgegangen. Massgeblich ist die
+      Bedeutung des Schluessels, nicht die Farbfamilie des Werts.
+  messung:
+    hinweisbox: "69 -> 13 (Rest haengt an Bedingungen, kein Codemod moeglich)"
+    tabelleneintraege: "172 in 29 Dateien -> 109 in 21"
+    sonstige_flaeche: "98 -> 96 (an den Commits gemessen)"
+    ikonflaeche_overlay: "6 unveraendert"
+    messfehler_eingeraeumt: >-
+      Die Claim-Zahl 82 fuer sonstige Flaechen war mit einer anderen
+      Pill-Abgrenzung gezaehlt als die 96 hier. Der Block ist nicht gewachsen;
+      die Claim-Zahl war die unsauberere.
+  befund_restbloecke: >-
+    Die verbliebenen Flaechen, Ikonflaechen und das Overlay tragen keinen
+    farbigen Text und sind damit kein Kontrastfall nach der CLAUDE.md-Regel,
+    sondern dekorative Flaechen. Sie gehoeren auf semantische Tokens - so in
+    Schritt 2 fuer Ampel-Schaltflaeche, ungelesene Zeile und Touch-Flaeche
+    gemacht - und nicht in Badge oder Callout gezwungen.
+  nachweis:
+    - "tsc --noEmit exit 0 nach jedem Schritt"
+    - "eslint der geaenderten Dateien ohne Befund (4 vorbestehende Warnungen)"
+    - "vitest 126 Dateien, 495 passed, 1 skipped - identisch zur Baseline"
+    - >-
+      Vitest-Gotcha: der Vollauf mit Standardeinstellungen meldete 16
+      Fehlschlaege, alle 5-Sekunden-Timeouts unter Worker-Last (environment
+      1395 s). Mit --testTimeout=30000 --maxWorkers=2 reproduzierbar gruen.
+
+tests:
+  - >-
+    Codemod-Selbsttest ueber zehn Musterfaelle vor jedem Lauf: Alert mit
+    Palette-className, bereits gesetzte Variante, cn()-Ausdruck, Flaeche ohne
+    Rahmen, verschachteltes div, erhaltene Attribute, zwei Farbfamilien,
+    selbstschliessendes Element.
+  - "tsc --noEmit als Typpruefung jeder Umstellung (exit 0)."
+  - "eslint der geaenderten Dateien (ohne Befund, 4 vorbestehende Warnungen)."
+  - >-
+    vitest run --testTimeout=30000 --maxWorkers=2: 126 Dateien, 495 passed,
+    1 skipped - identisch zur Baseline.
+  - >-
+    Gegenprobe mit dem Messskript je Block (Hinweisbox 69 -> 13,
+    Tabelleneintraege 172 -> 109).
+external_gates:
+  - >-
+    Keine. Der Slice beruehrt kein Fremdsystem; alle Nachweise sind lokal und
+    in CI reproduzierbar.
+ai_harness:
+  fachlicher_vertrag: >-
+    Eine Farbe in der Oberflaeche benennt einen Zustand. Wo sie das nicht tut,
+    darf sie nicht aus der Statusskala stammen. Kategoriale Faerbung bleibt
+    kategorial und wird nicht zu einem Status umgedeutet.
+  architektur_vertrag: >-
+    Statusdarstellung laeuft ueber die zentralen Komponenten Badge, Callout
+    und Alert; Farbwerte liegen ausschliesslich in palette.css. Callout teilt
+    alertVariants mit Alert, damit es keine zweite Farbdefinition gibt.
+    lib/design-tokens.ts als konkurrierende Quelle ist entfernt.
+  daten_vertrag: "Keine Migration, keine Datenmutation, reine Darstellung."
+  test_vertrag: >-
+    Jede mechanische Umstellung wird von TypeScript geprueft, nicht geglaubt;
+    der Codemod hat einen Selbsttest, der vor dem Lauf gruen sein muss. Der
+    Vitest-Bestand muss der Baseline exakt entsprechen.
+  security_vertrag: >-
+    Keine Berechtigungen, keine Endpunkte, keine Abhaengigkeiten beruehrt.
+  betriebs_vertrag: >-
+    Rein clientseitig, kein Deployment-Schritt, kein Neustart noetig. Die
+    Aenderung wird mit dem naechsten Frontend-Build wirksam.
+  dokumentations_vertrag: >-
+    Ausnahmen werden benannt statt stillschweigend gelassen; der eigene
+    Messfehler in der Claim-Zahl ist ausdruecklich korrigiert.

@@ -45,7 +45,10 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
       <select
         ref={ref}
         id={id}
-        aria-label={ariaLabel ?? ariaLabelAttr}
+        // Ohne Label bleibt der Platzhalter der einzige beschreibende Text am
+        // Feld — axe (select-name) wertet eine <option> nicht als Namen. Er ist
+        // deshalb der Fallback; fehlt auch er, meldet axe die Luecke weiterhin.
+        aria-label={ariaLabel ?? ariaLabelAttr ?? placeholder}
         value={value}
         onChange={(event) => {
           onChange?.(event)
@@ -53,7 +56,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
         }}
         disabled={disabled}
         className={clsx(
-          'flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+          'flex min-h-touch w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
           className,
         )}
         {...rest}

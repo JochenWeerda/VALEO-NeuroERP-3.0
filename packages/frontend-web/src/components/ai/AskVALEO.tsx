@@ -18,6 +18,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Zap, Send, Loader2, Sparkles, X } from 'lucide-react'
 import { useTenant } from '@/hooks/useTenant'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import type { VALEOMessage } from '@/lib/services/openai-service'
 
 type Message = {
@@ -34,6 +35,7 @@ export function AskVALEO() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const { tenantId } = useTenant()
+  const isTouch = useTouchDevice()
   const isConfigured = Boolean(import.meta.env.VITE_OPENAI_API_KEY)
 
   // Listen for custom event to open dialog
@@ -120,16 +122,18 @@ export function AskVALEO() {
 
   return (
     <>
-      {/* Floating Action Button */}
+      {/* Floating Action Button — am Desktop; auf Touch deckt er Footer-CTAs zu, Ask VALEO sitzt in der Top-Leiste */}
+      {isTouch ? null : (
       <Button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow z-50 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow z-50 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         size="icon"
         type="button"
         aria-label="Ask VALEO oeffnen"
       >
         <Sparkles className="h-6 w-6" aria-hidden="true" />
       </Button>
+      )}
 
       {/* Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -178,7 +182,7 @@ export function AskVALEO() {
                   <Card key={i} className={msg.role === 'user' ? 'bg-primary/5' : 'bg-muted/50'}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0">
+                        <div className="shrink-0">
                           {msg.role === 'user' ? (
                             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
                               DU
@@ -220,9 +224,8 @@ export function AskVALEO() {
             {messages.length > 0 && (
               <Button
                 variant="ghost"
-                size="sm"
                 onClick={clearConversation}
-                className="gap-2"
+                className="min-h-touch gap-2"
               >
                 <X className="h-4 w-4" />
                 Neue Konversation

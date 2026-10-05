@@ -4,7 +4,7 @@ type: explanation
 audience: [entwickler, product, qa, admin]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-09-17
 version: 3.2.0
 ---
 
@@ -29,10 +29,14 @@ erfordern Review der jeweils Verantwortlichen.
 | `docs-staleness-check.cjs` | Blockiert PRs bei fehlendem oder veraltetem `last_reviewed` (365 Tage, kuratierte MkDocs-Seiten). |
 | `ai-slice-readiness-check.cjs` | Pflichtschema der Slice-YAMLs. |
 | `doc-drift-report.yml` (woechentlich) | Informativer Drift-Snapshot Code↔Doku; Artifact `doc_drift_report.json`. |
+| `quality-gate.yml`: `doc_drift_report.py --fail-over 0` | Blockierendes Code-Doku-Drift-Gate; kein Drift-Item erlaubt. |
 | `generate_code_inventories.py --check` | Endpoint-/Service-/Migrations-Inventare synchron zu Code (docs.yml). |
+| `generate_table_catalog.py --check` | Physischer domain_*-Katalog plus Verbraucher-Lineage; native `entity.table` muss existieren. |
+| `check_domain_table_ownership.py` | Jede domain_*-Tabelle hat Schema-Custodian; unbekanntes Schema faellt. |
+| `check_field_contracts.py` | Kopf- und Tabellenfelder der Maske gegen deklariertes Antwortschema (only-up). |
 | `generate_agent_handbuch.py --check` | Agent-Handbuch synchron zu Flow Spine, ScreenDefinitions, MCP, Events. |
 
-## Doku-Code-Drift (informativ)
+## Doku-Code-Drift
 
 Heuristik-Report: Endpoints, Migrationen, Services ohne Doku-Treffer; Frontend-Seiten
 ohne Route (`route-inventory.gen.json`) und ohne Nav-Hinweis.
@@ -42,7 +46,13 @@ python scripts/doc_drift_report.py
 ```
 
 Ergebnis: `artifacts/doc_drift_report.json` (gitignored). CI: `.github/workflows/doc-drift-report.yml`
-(Montag 05:00 UTC, **nicht blockierend**). Optional: `--fail-over N` fuer kuenftige Hard-Gates.
+(woechentlicher informativer Snapshot). Zusaetzlich prueft `quality-gate.yml`
+bereits blockierend mit `python scripts/doc_drift_report.py --fail-over 0`.
+Die Inventare werden mit `python scripts/generate_code_inventories.py`
+aktualisiert und mit `--check` auf Synchronitaet geprueft. Anschliessend den
+Drift-Report und `python scripts/generate_drift_dashboard_page.py` ausfuehren.
+Indirekt eingebundene Seitenkomponenten brauchen keine eigene Route; konkrete
+Ausnahmen im Report muessen durch geroutete Importstellen nachweisbar sein.
 
 ## Aktualität (Staleness)
 

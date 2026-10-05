@@ -2,6 +2,7 @@
  * DOM-FINANCE-004.5 — Finance Lifecycle @smoke Tests
  */
 import { test, expect, request } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:8000'
 const TENANT = 'test-tenant-finance-001'
@@ -31,11 +32,31 @@ test.describe('@smoke Finance Lifecycle', () => {
 
   test('3 — Mahnstufe eskalieren', async () => {
     const ctx = await request.newContext({ baseURL: BASE })
-    const res = await ctx.post('/api/v1/finance/mahnstufe/RE-SMOKE-001/eskalieren', {
-      headers: HEADERS,
-      data: { operator: 'smoke-test' },
-    })
-    expect([201, 422, 503]).toContain(res.status())
-    await ctx.dispose()
+    const invoice = `RE-SMOKE-${randomUUID()}`
+    const endpoint = `/api/v1/finance/mahnstufe/${invoice}`
+    try {
+      let previous: string | null = null
+      for (const stage of ['1', '2', '3', 'INKASSO']) {
+        const res = await ctx.post(`${endpoint}/eskalieren`, {
+          headers: HEADERS, data: { operator: 'smoke-test' },
+        })
+        expect(res.status(), await res.text()).toBe(201)
+        const body = await res.json()
+        expect(body.stufe).toBe(stage)
+        expect(body.vorherige_stufe).toBe(previous)
+        previous = stage
+      }
+      const blocked = await ctx.post(`${endpoint}/eskalieren`, {
+        headers: HEADERS, data: { operator: 'smoke-test' },
+      })
+      expect(blocked.status()).toBe(422)
+      const trail = await ctx.get(`${endpoint}/trail`, { headers: HEADERS })
+      expect(trail.status()).toBe(200)
+      const body = await trail.json()
+      expect(body.count).toBe(4)
+      expect(body.trail.map((entry: { stufe: string }) => entry.stufe)).toEqual(['1', '2', '3', 'INKASSO'])
+    } finally {
+      await ctx.dispose()
+    }
   })
 })

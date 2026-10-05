@@ -16,6 +16,8 @@ import { useAuftragsbestaetigungen, type Auftragsbestaetigung, einkaufKeys } fro
 import { apiClient } from '@/lib/api-client'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { isRecord, renderValue, stringValue } from '@/lib/record-utils'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
 
 const createAuftragsbestaetigungenConfig = (t: TFunction, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -125,6 +127,7 @@ async function bulkConfirmationMutation(selectedItems: Record<string, unknown>[]
 export default function AuftragsbestaetigungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
   const { data: apiData = [], isLoading } = useAuftragsbestaetigungen()
   const data = useMemo(() => apiData.map((item: Auftragsbestaetigung) => ({
@@ -234,52 +237,33 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
   }
 
   const handleExport = () => {
-    try {
-      const csvHeader = `${t('crud.fields.confirmationNumber')};${t('crud.entities.purchaseOrder')};${t('crud.entities.supplier')};${t('crud.fields.status')}\n`
-      const csvContent = data.map(ab =>
-        `"${ab.bestaetigungsNummer}";"${ab.bestellung?.nummer || ''}";"${ab.lieferant}";"${ab.status}"`
-      ).join('\n')
-
-      const csv = csvHeader + csvContent
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-      const link = document.createElement('a')
-      const url = URL.createObjectURL(blob)
-      link.setAttribute('href', url)
-      link.setAttribute('download', `auftragsbestaetigungen-liste-${new Date().toISOString().split('T')[0]}.csv`)
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      toast({
-        title: t('crud.messages.exportSuccess'),
-        description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
-      })
-    } catch {
-      toast({
-        variant: 'destructive',
-        title: t('crud.messages.exportError'),
-        description: t('crud.messages.exportFailed'),
-      })
+    if (data.length === 0) {
+      toast({ title: 'Keine Daten', description: 'Es gibt keine Auftragsbestaetigungen zum Exportieren.', variant: 'destructive' })
+      return
     }
+    exportToCSV(
+      data.map((item) => ({
+        bestaetigungsNummer: item.bestaetigungsNummer,
+        bestellung: isRecord(item.bestellung) ? stringValue(item.bestellung.nummer) : stringValue(item.bestellung),
+        lieferant: item.lieferant,
+        status: item.status,
+      })),
+      `auftragsbestaetigungen-${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        { key: 'bestaetigungsNummer', label: t('crud.fields.confirmationNumber') },
+        { key: 'bestellung', label: t('crud.entities.purchaseOrder') },
+        { key: 'lieferant', label: t('crud.entities.supplier') },
+        { key: 'status', label: t('crud.fields.status') },
+      ],
+    )
+    toast({
+      title: t('crud.messages.exportSuccess'),
+      description: t('crud.messages.exportedItems', { count: data.length, entityType: entityTypeLabel }),
+    })
   }
 
   return (
-    <div className="space-y-4">
-      <OperationalCaseHeader
-        title="Auftragsbestaetigungen"
-        description="Bestaetigungen werden als Pruef- und Freigabevorgang mit klarer Bulk-Aktion ueber der Liste gefuehrt."
-        status={operationalStatus}
-        owner="Einkauf"
-        blocker={blocker}
-        nextAction={openCount > 0 ? 'Offene Bestaetigungen pruefen' : reviewedCount > 0 ? 'Gepruefte Bestaetigungen final bestaetigen' : 'Bestaetigte Folgewege nutzen'}
-        caseLabel="Vorgang: Lieferfreigabe"
-        tags={['Einkauf', 'Bestellung']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
-        <OperationalTimeline title="Pruef- und Freigabeverlauf" items={timelineItems} />
-        <OperationalContextPanel title="Bestaetigungskontext" sections={contextSections} />
-      </div>
+    <div className="space-y-4 p-3 md:p-6">
       <ListReport
         config={auftragsbestaetigungenConfig}
         data={data}
@@ -293,6 +277,24 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
         }}
         isLoading={isLoading}
       />
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title="Auftragsbestaetigungen"
+            description="Bestaetigungen werden als Pruef- und Freigabevorgang mit klarer Bulk-Aktion ueber der Liste gefuehrt."
+            status={operationalStatus}
+            owner="Einkauf"
+            blocker={blocker}
+            nextAction={openCount > 0 ? 'Offene Bestaetigungen pruefen' : reviewedCount > 0 ? 'Gepruefte Bestaetigungen final bestaetigen' : 'Bestaetigte Folgewege nutzen'}
+            caseLabel="Vorgang: Lieferfreigabe"
+            tags={['Einkauf', 'Bestellung']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+            <OperationalTimeline title="Pruef- und Freigabeverlauf" items={timelineItems} />
+            <OperationalContextPanel title="Bestaetigungskontext" sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

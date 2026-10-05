@@ -12,11 +12,75 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Trash2 } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
-import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { isRecord, nullableStringValue, numberValue, stringValue } from '@/lib/record-utils'
+import {
+  linkPurchaseOrderToFlowSpine,
+  purchaseOrderWorkflowLinkErrorMessage,
+} from '@/lib/workflow/purchase-order-flow-spine'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+
+type Bestellfall = 'bestand_abgleich' | 'direktlieferung' | 'innovation'
+
+const BESTELLFALL_OPTIONS: Array<{ value: Bestellfall; title: string; text: string }> = [
+  {
+    value: 'bestand_abgleich',
+    title: 'Bestand / Abverkauf',
+    text: 'Tages-, Wochen-, Monats- oder Saisonbedarf mit Mindest- und Maximalmenge, Lagerplatz- und Frachtoptimierung, Opportunitaetskosten.',
+  },
+  {
+    value: 'direktlieferung',
+    title: 'Direktlieferung aus Verkauf',
+    text: 'Bestellung aus dem Auftrag, Lieferung an den Kunden, mit oder ohne Ueberschlag am Lager.',
+  },
+  {
+    value: 'innovation',
+    title: 'Neuer Artikel / Innovation',
+    text: 'Einfuehrung eines Produkts, das der Vertrieb testen will — ohne historischen Abverkauf.',
+  },
+]
+
+type Horizont = 'taeglich' | 'woechentlich' | 'monatlich' | 'saisonal'
+
+const HORIZONT_OPTIONS: Array<{ value: Horizont; label: string }> = [
+  { value: 'taeglich', label: 'Taeglich' },
+  { value: 'woechentlich', label: 'Woechentlich' },
+  { value: 'monatlich', label: 'Monatlich' },
+  { value: 'saisonal', label: 'Saisonal (Vorjahresfenster)' },
+]
+
+/** Ein offener Verkaufsauftrag, aus dem direkt bestellt werden kann. */
+type AuftragsZeile = {
+  id: string
+  order_number?: string | null
+  customer_name?: string | null
+  delivery_date?: string | null
+  delivery_address?: string | null
+  total_amount?: number | null
+  status?: string | null
+}
+
+/** Eine Zeile der Bedarfsrechnung, so wie der Endpunkt sie liefert. */
+type BedarfsZeile = {
+  article_id: string
+  artikel_nr?: string | null
+  artikel_bezeichnung?: string | null
+  einheit?: string | null
+  abverkauf_pro_tag: number
+  ist_bestand: number
+  bedarf: number
+  reichweite_tage?: number | null
+  vorschlag_menge: number
+  lagerkosten: number
+  frachtkosten: number
+  begruendung?: string | null
+  lieferant_name?: string | null
+  letzter_preis?: number | null
+}
 
 type BestellungData = {
+  bestellfall: Bestellfall
   lieferant: string
   liefertermin: string
   zahlungsbedingung: string
@@ -114,6 +178,8 @@ export default function BestellungAnlegenPage(): JSX.Element {
   const contractId = searchParams.get('contractId')
   const rfqId = searchParams.get('rfqId')
   const workflowContext = useMemo(() => readWorkflowEntryContext(searchParams), [searchParams])
+  const [saving, setSaving] = useState(false)
+  const [pendingLink, setPendingLink] = useState<{ purchaseOrderId: string; message: string } | null>(null)
 
   const buildWorkflowResumeQuery = (purchaseOrderId?: string): string => {
     const params = new URLSearchParams(searchParams)
@@ -121,26 +187,83 @@ export default function BestellungAnlegenPage(): JSX.Element {
     return params.toString()
   }
 
-  const persistWorkflowResume = async (purchaseOrderId?: string): Promise<void> => {
-    if (!workflowContext?.process || !workflowContext.instanceId) return
+  const persistPurchaseOrder = async (): Promise<{ id: string }> => {
+    const purchaseOrder = {
+      orderDate: new Date().toISOString().slice(0, 10),
+      supplierId: bestellung.lieferant,
+      subject: workflowContext?.subject || 'Bestellung',
+      description: bestellung.notizen || '',
+      status: 'ENTWURF',
+      deliveryDate: bestellung.liefertermin,
+      deliveryAddress: bestellung.lieferadresse,
+      shippingAddress: bestellung.lieferadresse,
+      paymentTerms: bestellung.zahlungsbedingung,
+      incoterms: bestellung.incoterms,
+      requisitionId: bestellung.requisitionId,
+      contractId: bestellung.contractId,
+      rfqId: bestellung.rfqId,
+      bestellfall: bestellung.bestellfall,
+      innovationshinweis:
+        bestellung.bestellfall === 'innovation' ? innovationshinweis || undefined : undefined,
+      notes: bestellung.notizen || undefined,
+      taxRate: 19,
+      items: bestellung.positionen.map((pos) => ({
+        itemType: 'PRODUCT',
+        description: pos.artikel,
+        quantity: pos.menge,
+        unitPrice: pos.preis,
+        discountPercent: 0,
+      })),
+    }
+
+    const created = await apiClient.post<{ id?: string; purchaseOrderNumber?: string }>(
+      '/api/v1/purchase-orders',
+      purchaseOrder,
+    )
+    const purchaseOrderId = created.id || created.purchaseOrderNumber
+    if (!purchaseOrderId) {
+      throw new Error('Bestellung gespeichert, aber ohne Belegnummer zurueckgekommen.')
+    }
+    return { id: purchaseOrderId }
+  }
+
+  const persistWorkflowLink = async (purchaseOrderId: string): Promise<void> => {
     const query = buildWorkflowResumeQuery(purchaseOrderId)
-    const basePath = purchaseOrderId
-      ? `/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}`
-      : '/einkauf/bestellungen/neu'
-    await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
-      resume_node_id: 'purchase-order',
-      resume_route: `${basePath}${query ? `?${query}` : ''}`,
-      resume_payload: {
-        screen: purchaseOrderId ? 'purchase-order-detail' : 'purchase-order-create',
-        purchaseOrderId: purchaseOrderId || undefined,
-        workflowCase: workflowContext.caseNumber || undefined,
-      },
-      business_status: purchaseOrderId ? 'bestellung_erfasst' : 'bestellung_in_bearbeitung',
-      action_label: purchaseOrderId ? 'Bestellung gespeichert' : 'Bestellentwurf gesichert',
+    const resumeRoute = `/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}${query ? `?${query}` : ''}`
+    await linkPurchaseOrderToFlowSpine({
+      documentId: purchaseOrderId,
+      documentNumber: purchaseOrderId,
+      supplierId: bestellung.lieferant,
+      supplierName: bestellung.lieferant,
+      subject: workflowContext?.subject,
+      requisitionId: bestellung.requisitionId,
+      contractId: bestellung.contractId,
+      rfqId: bestellung.rfqId,
+      handover: workflowContext?.instanceId
+        ? { process: workflowContext.process, instanceId: workflowContext.instanceId }
+        : null,
+      resumeRoute,
     })
   }
   
+  const [innovationshinweis, setInnovationshinweis] = useState('')
+  const [auftraege, setAuftraege] = useState<AuftragsZeile[]>([])
+  const [auftragId, setAuftragId] = useState('')
+  const [ueberschlagLager, setUeberschlagLager] = useState(false)
+  const [auftraegeLaufen, setAuftraegeLaufen] = useState(false)
+  const [direktFehler, setDirektFehler] = useState<string | null>(null)
+  const [direktLaeuft, setDirektLaeuft] = useState(false)
+
+  const [horizont, setHorizont] = useState<Horizont>('monatlich')
+  const [lagerkostenSatz, setLagerkostenSatz] = useState('')
+  const [frachtkostenFix, setFrachtkostenFix] = useState('')
+  const [bedarf, setBedarf] = useState<BedarfsZeile[]>([])
+  const [bedarfLaeuft, setBedarfLaeuft] = useState(false)
+  const [bedarfFehler, setBedarfFehler] = useState<string | null>(null)
+  const [bedarfGeholt, setBedarfGeholt] = useState(false)
+
   const [bestellung, setBestellung] = useState<BestellungData>({
+    bestellfall: 'bestand_abgleich',
     lieferant: '',
     liefertermin: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     zahlungsbedingung: 'net30',
@@ -264,6 +387,134 @@ export default function BestellungAnlegenPage(): JSX.Element {
     setBestellung((prev) => ({ ...prev, [key]: value }))
   }
 
+  /**
+   * Die offenen Auftraege holen, sobald der Fall Direktlieferung gewaehlt ist.
+   *
+   * Ein Lesevorgang — kein Doppelklick-Schutz noetig, aber eine sichtbare
+   * Rueckmeldung: Ohne Auftrag laesst sich keine Direktlieferung bestellen,
+   * und eine leere Auswahl ohne Grund waere eine Sackgasse.
+   */
+  useEffect(() => {
+    if (bestellung.bestellfall !== 'direktlieferung' || auftraege.length > 0) {
+      return
+    }
+    let abgebrochen = false
+    const laden = async () => {
+      setAuftraegeLaufen(true)
+      setDirektFehler(null)
+      try {
+        const antwort = await apiClient.get<{ items?: AuftragsZeile[] } | AuftragsZeile[]>(
+          '/api/v1/sales/orders/?limit=50',
+        )
+        const daten = antwort.data
+        const liste = Array.isArray(daten) ? daten : (daten.items ?? [])
+        if (!abgebrochen) setAuftraege(liste)
+      } catch (fehler) {
+        if (!abgebrochen) {
+          setDirektFehler(
+            fehler instanceof Error
+              ? fehler.message
+              : 'Die offenen Auftraege konnten nicht geladen werden.',
+          )
+        }
+      } finally {
+        if (!abgebrochen) setAuftraegeLaufen(false)
+      }
+    }
+    void laden()
+    return () => {
+      abgebrochen = true
+    }
+  }, [bestellung.bestellfall, auftraege.length])
+
+  /**
+   * Aus dem gewaehlten Auftrag eine Bestellung erzeugen.
+   *
+   * Das ist ein Schreibvorgang: Guard, deaktivierter Knopf, Aufraeumen im
+   * finally, sichtbarer Erfolg und sichtbarer Fehler.
+   */
+  const direktlieferungErzeugen = async () => {
+    if (!auftragId || direktLaeuft) return
+    setDirektLaeuft(true)
+    setDirektFehler(null)
+    try {
+      const antwort = await apiClient.post<{ id: string; bestellnummer?: string; aus_auftrag?: string; uebersprungen?: string[] }>(
+        '/api/v1/einkauf/bestellungen/aus-auftrag',
+        {
+          auftrag_id: auftragId,
+          ueberschlag_lager: ueberschlagLager,
+          lieferant_id: bestellung.lieferant || undefined,
+        },
+      )
+      const beleg = antwort.data
+      toast({
+        title: 'Bestellung erzeugt',
+        description: [
+          `${beleg.bestellnummer ?? beleg.id} aus Auftrag ${beleg.aus_auftrag ?? ''}`.trim(),
+          ...(beleg.uebersprungen ?? []),
+        ].join(' · '),
+      })
+      navigate(`/einkauf/bestellung/${beleg.id}`)
+    } catch (fehler) {
+      const text =
+        fehler instanceof Error ? fehler.message : 'Die Bestellung konnte nicht erzeugt werden.'
+      setDirektFehler(text)
+      toast({ title: 'Nicht erzeugt', description: text, variant: 'destructive' })
+    } finally {
+      setDirektLaeuft(false)
+    }
+  }
+
+  /**
+   * Den Bedarf holen.
+   *
+   * Ein Lesevorgang, kein Schreibvorgang — er braucht keinen Doppelklick-Schutz,
+   * aber sehr wohl eine sichtbare Rueckmeldung: Wer eine Bestellmenge
+   * vorgeschlagen bekommt, muss wissen, woher sie kommt, und wer keine bekommt,
+   * muss den Grund sehen statt einer leeren Liste.
+   */
+  const bedarfHolen = async () => {
+    setBedarfLaeuft(true)
+    setBedarfFehler(null)
+    try {
+      const params = new URLSearchParams({ horizont, nur_mit_bedarf: 'true' })
+      if (lagerkostenSatz.trim()) params.set('lagerkosten_satz', lagerkostenSatz.trim())
+      if (frachtkostenFix.trim()) params.set('frachtkosten_fix', frachtkostenFix.trim())
+      const antwort = await apiClient.get<BedarfsZeile[]>(
+        `/api/v1/einkauf/bestellvorschlaege/bedarf?${params.toString()}`,
+      )
+      setBedarf(Array.isArray(antwort.data) ? antwort.data : [])
+      setBedarfGeholt(true)
+    } catch (fehler) {
+      const text =
+        fehler instanceof Error ? fehler.message : 'Der Bedarf konnte nicht geladen werden.'
+      setBedarfFehler(text)
+      toast({ title: 'Bedarf nicht geladen', description: text, variant: 'destructive' })
+    } finally {
+      setBedarfLaeuft(false)
+    }
+  }
+
+  /** Eine Vorschlagszeile als Position uebernehmen. */
+  const vorschlagUebernehmen = (zeile: BedarfsZeile) => {
+    setBestellung((prev) => ({
+      ...prev,
+      positionen: [
+        ...prev.positionen,
+        {
+          artikel: zeile.artikel_nr || zeile.artikel_bezeichnung || '',
+          menge: zeile.vorschlag_menge,
+          einheit: zeile.einheit || 't',
+          preis: zeile.letzter_preis ?? 0,
+        },
+      ],
+    }))
+    toast({
+      title: 'Position uebernommen',
+      description: `${zeile.artikel_bezeichnung ?? zeile.artikel_nr}: ${zeile.vorschlag_menge} ${zeile.einheit ?? 't'}`,
+    })
+  }
+
   function addPosition(): void {
     setBestellung((prev) => ({
       ...prev,
@@ -335,7 +586,37 @@ export default function BestellungAnlegenPage(): JSX.Element {
     return null
   }
 
+  async function handleRetryWorkflowLink(): Promise<void> {
+    if (!pendingLink || saving) return
+    setSaving(true)
+    try {
+      await persistWorkflowLink(pendingLink.purchaseOrderId)
+      setPendingLink(null)
+      toast({
+        title: 'Vorgang verknuepft',
+        description: `Bestellung ${pendingLink.purchaseOrderId} ist dem Prozessfall zugeordnet.`,
+      })
+      navigate(
+        `/einkauf/bestellungen/${encodeURIComponent(pendingLink.purchaseOrderId)}?${buildWorkflowResumeQuery(pendingLink.purchaseOrderId)}`,
+      )
+    } catch (error) {
+      const message = purchaseOrderWorkflowLinkErrorMessage(error)
+      setPendingLink({ purchaseOrderId: pendingLink.purchaseOrderId, message })
+      toast({
+        title: 'Bestellung gespeichert, Vorgang noch nicht verknuepft',
+        description: message,
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function handleSubmit(): Promise<void> {
+    if (pendingLink) {
+      await handleRetryWorkflowLink()
+      return
+    }
     const validationError = validateBestellung()
     if (validationError) {
       toast({
@@ -346,45 +627,43 @@ export default function BestellungAnlegenPage(): JSX.Element {
       return
     }
 
+    if (saving) return
+    setSaving(true)
+    let purchaseOrderId: string | null = null
     try {
-      const purchaseOrder = {
-        orderDate: new Date().toISOString().slice(0, 10),
-        supplierId: bestellung.lieferant,
-        subject: workflowContext?.subject || 'Bestellung',
-        description: bestellung.notizen || '',
-        status: 'ENTWURF',
-        deliveryDate: bestellung.liefertermin,
-        deliveryAddress: bestellung.lieferadresse,
-        shippingAddress: bestellung.lieferadresse,
-        paymentTerms: bestellung.zahlungsbedingung,
-        incoterms: bestellung.incoterms,
-        requisitionId: bestellung.requisitionId,
-        contractId: bestellung.contractId,
-        rfqId: bestellung.rfqId,
-        notes: bestellung.notizen || undefined,
-        taxRate: 19,
-        items: bestellung.positionen.map((pos) => ({
-          itemType: 'PRODUCT',
-          description: pos.artikel,
-          quantity: pos.menge,
-          unitPrice: pos.preis,
-          discountPercent: 0,
-        })),
-      }
+      const created = await persistPurchaseOrder()
+      purchaseOrderId = created.id
+    } catch {
+      toast({
+        title: t('common.error', { defaultValue: 'Fehler' }),
+        description: t('crud.messages.createError', {
+          entityType: entityTypeLabel,
+          defaultValue: 'Erstellen fehlgeschlagen.',
+        }),
+        variant: 'destructive',
+      })
+      setSaving(false)
+      return
+    }
 
-      const created = await apiClient.post<{ id?: string; purchaseOrderNumber?: string }>(
-        '/api/v1/purchase-orders',
-        purchaseOrder,
-      )
-      const purchaseOrderId = created.id || created.purchaseOrderNumber
-      await persistWorkflowResume(purchaseOrderId)
-      if (purchaseOrderId) {
-        navigate(`/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}?${buildWorkflowResumeQuery(purchaseOrderId)}`)
-      } else {
-        navigate('/einkauf/bestellungen')
-      }
+    try {
+      await persistWorkflowLink(purchaseOrderId)
+      setPendingLink(null)
+      toast({
+        title: 'Bestellung angelegt',
+        description: `Beleg ${purchaseOrderId} gespeichert.`,
+      })
+      navigate(`/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}?${buildWorkflowResumeQuery(purchaseOrderId)}`)
     } catch (error) {
-      toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.createError', { entityType: entityTypeLabel, defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' })
+      const message = purchaseOrderWorkflowLinkErrorMessage(error)
+      setPendingLink({ purchaseOrderId, message })
+      toast({
+        title: 'Bestellung gespeichert, Vorgang noch nicht verknuepft',
+        description: message,
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -396,6 +675,281 @@ export default function BestellungAnlegenPage(): JSX.Element {
       title: t('crud.entities.supplier'),
       content: (
         <div className="space-y-4">
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium">Bestellfall *</legend>
+            <div className="grid gap-3 md:grid-cols-3">
+              {BESTELLFALL_OPTIONS.map((option) => {
+                const selected = bestellung.bestellfall === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    data-testid={`bestellfall-${option.value}`}
+                    aria-pressed={selected}
+                    onClick={() => updateField('bestellfall', option.value)}
+                    className={`min-h-11 rounded-md border p-3 text-left ${
+                      selected
+                        ? 'border-primary bg-primary/5'
+                        : 'border-input bg-background'
+                    }`}
+                  >
+                    <div className="font-medium">{option.title}</div>
+                    <p className="mt-1 text-sm text-muted-foreground">{option.text}</p>
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
+
+          {bestellung.bestellfall === 'innovation' ? (
+            <Card>
+              <CardContent className="space-y-4 pt-6">
+                <div>
+                  <h2 className="text-sm font-medium">Probe statt Bedarf</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ein neuer Artikel hat keine Historie — hier laesst sich nichts
+                    hochrechnen. Die Menge ist eine Entscheidung: klein genug, dass ein
+                    Fehlgriff nichts kostet, gross genug, dass der Verkauf etwas zu zeigen
+                    hat.
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="innovationshinweis">Warum diese Probe?</Label>
+                  <Textarea
+                    id="innovationshinweis"
+                    value={innovationshinweis}
+                    onChange={(e) => setInnovationshinweis(e.target.value)}
+                    placeholder="Wer hat es angeregt, was soll sich zeigen, bis wann?"
+                    rows={2}
+                  />
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Steht das nirgends, weiss in drei Monaten niemand mehr, warum der
+                    Artikel im Lager liegt.
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Die Nachschau laeuft ab der ersten Lieferung: Unter
+                  <span className="mx-1 font-medium">/einkauf/innovationen</span>
+                  steht je Probe, wieviel verkauft ist und ob das fuer eine Listung reicht.
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {bestellung.bestellfall === 'direktlieferung' ? (
+            <Card>
+              <CardContent className="space-y-4 pt-6">
+                <div>
+                  <h2 className="text-sm font-medium">Aus welchem Auftrag?</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ohne Ueberschlag geht die Ware vom Lieferanten direkt zum Kunden: bestellt
+                    wird die volle Auftragsmenge, Lieferadresse ist die des Kunden. Mit
+                    Ueberschlag laeuft sie ueber den eigenen Hof, der Bestand deckt einen Teil,
+                    und bestellt wird nur die Fehlmenge.
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="direkt-auftrag">Verkaufsauftrag *</Label>
+                  <NativeSelect
+                    id="direkt-auftrag"
+                    value={auftragId}
+                    onChange={(e) => setAuftragId(e.target.value)}
+                    disabled={auftraegeLaufen}
+                  >
+                    <option value="">
+                      {auftraegeLaufen ? 'Auftraege werden geladen…' : 'Auftrag waehlen'}
+                    </option>
+                    {auftraege.map((auftrag) => (
+                      <option key={auftrag.id} value={auftrag.id}>
+                        {[
+                          auftrag.order_number ?? auftrag.id.slice(0, 8),
+                          auftrag.customer_name,
+                          auftrag.delivery_date ? `Liefertermin ${auftrag.delivery_date}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                  {!auftraegeLaufen && auftraege.length === 0 && !direktFehler ? (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Kein offener Auftrag vorhanden. Eine Direktlieferung braucht einen — ohne
+                      Auftrag gibt es keinen Kunden, an den geliefert wird.
+                    </p>
+                  ) : null}
+                </div>
+
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={ueberschlagLager}
+                    onChange={(e) => setUeberschlagLager(e.target.checked)}
+                  />
+                  <span>
+                    <span className="font-medium">Ueberschlag am Lager</span>
+                    <span className="block text-muted-foreground">
+                      Die Ware laeuft ueber den eigenen Hof. Der vorhandene Bestand deckt einen
+                      Teil, und die Lieferadresse bleibt die eigene.
+                    </span>
+                  </span>
+                </label>
+
+                {direktFehler ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>Nicht erzeugt</AlertTitle>
+                    <AlertDescription>{direktFehler}</AlertDescription>
+                  </Alert>
+                ) : null}
+
+                <Button
+                  type="button"
+                  onClick={() => void direktlieferungErzeugen()}
+                  disabled={!auftragId || direktLaeuft}
+                >
+                  {direktLaeuft ? 'Bestellung wird erzeugt…' : 'Bestellung aus Auftrag erzeugen'}
+                </Button>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {bestellung.bestellfall === 'bestand_abgleich' ? (
+            <Card>
+              <CardContent className="space-y-4 pt-6">
+                <div>
+                  <h2 className="text-sm font-medium">Bedarf aus Bestand und Abverkauf</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Gerechnet wird aus den Lagerbewegungen: Abverkauf im Fenster, auf den
+                    Horizont hochgerechnet, plus Wiederbeschaffungszeit, minus Bestand und
+                    offenen Auftraegen. Mit Lager- und Frachtkosten kommt zusaetzlich die
+                    Losgroesse heraus, bei der beides zusammen am kleinsten ist.
+                  </p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div>
+                    <Label htmlFor="bedarf-horizont">Horizont</Label>
+                    <NativeSelect
+                      id="bedarf-horizont"
+                      value={horizont}
+                      onChange={(e) => setHorizont(e.target.value as Horizont)}
+                    >
+                      {HORIZONT_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                  </div>
+                  <div>
+                    <Label htmlFor="bedarf-lagerkosten">Lagerkosten je Einheit und Tag</Label>
+                    <Input
+                      id="bedarf-lagerkosten"
+                      type="number"
+                      step="0.001"
+                      value={lagerkostenSatz}
+                      onChange={(e) => setLagerkostenSatz(e.target.value)}
+                      placeholder="z. B. 0,02"
+                    />
+                    <p className="mt-1 text-2xs uppercase tracking-wide text-muted-foreground">
+                      Halle, Silozelle, Palettenstellplatz, gebundenes Kapital
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="bedarf-fracht">Frachtkosten je Anlieferung</Label>
+                    <Input
+                      id="bedarf-fracht"
+                      type="number"
+                      step="1"
+                      value={frachtkostenFix}
+                      onChange={(e) => setFrachtkostenFix(e.target.value)}
+                      placeholder="z. B. 250"
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void bedarfHolen()}
+                  disabled={bedarfLaeuft}
+                >
+                  {bedarfLaeuft ? 'Bedarf wird gerechnet…' : 'Bedarf berechnen'}
+                </Button>
+
+                {bedarfFehler ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>Bedarf nicht geladen</AlertTitle>
+                    <AlertDescription>{bedarfFehler}</AlertDescription>
+                  </Alert>
+                ) : null}
+
+                {bedarfGeholt && bedarf.length === 0 && !bedarfFehler ? (
+                  <p className="text-sm text-muted-foreground">
+                    Kein Artikel unterschreitet im gewaehlten Horizont seinen Bedarf. Das ist
+                    eine Auskunft, kein Fehler — mit einem laengeren Horizont sieht es anders
+                    aus.
+                  </p>
+                ) : null}
+
+                {bedarf.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-left">
+                          <th className="py-2 pr-3">Artikel</th>
+                          <th className="py-2 pr-3 text-right">Bestand</th>
+                          <th className="py-2 pr-3 text-right">Abverkauf/Tag</th>
+                          <th className="py-2 pr-3 text-right">Reichweite</th>
+                          <th className="py-2 pr-3 text-right">Bedarf</th>
+                          <th className="py-2 pr-3 text-right">Vorschlag</th>
+                          <th className="py-2 pr-3">Herkunft der Menge</th>
+                          <th className="py-2" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bedarf.map((zeile) => (
+                          <tr key={zeile.article_id} className="border-b align-top">
+                            <td className="py-2 pr-3">
+                              <div className="font-medium">
+                                {zeile.artikel_bezeichnung ?? zeile.artikel_nr}
+                              </div>
+                              <div className="text-2xs uppercase tracking-wide text-muted-foreground">
+                                {zeile.artikel_nr}
+                                {zeile.lieferant_name ? ` · ${zeile.lieferant_name}` : ''}
+                              </div>
+                            </td>
+                            <td className="py-2 pr-3 text-right tabular-nums">{zeile.ist_bestand}</td>
+                            <td className="py-2 pr-3 text-right tabular-nums">
+                              {zeile.abverkauf_pro_tag}
+                            </td>
+                            <td className="py-2 pr-3 text-right tabular-nums">
+                              {zeile.reichweite_tage == null ? '—' : `${zeile.reichweite_tage} T`}
+                            </td>
+                            <td className="py-2 pr-3 text-right tabular-nums">{zeile.bedarf}</td>
+                            <td className="py-2 pr-3 text-right font-medium tabular-nums">
+                              {zeile.vorschlag_menge} {zeile.einheit ?? 't'}
+                            </td>
+                            <td className="py-2 pr-3 text-muted-foreground">{zeile.begruendung}</td>
+                            <td className="py-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="min-h-touch touch-manipulation"
+                                onClick={() => vorschlagUebernehmen(zeile)}
+                              >
+                                Uebernehmen
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
+
           <div>
             <Label htmlFor="lieferant">{t('crud.entities.supplier')} *</Label>
             <Input
@@ -459,22 +1013,22 @@ export default function BestellungAnlegenPage(): JSX.Element {
             />
           </div>
           {bestellung.requisitionId && (
-            <div className="p-3 bg-blue-50 rounded-md">
+            <div className="p-3 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-md">
               <p className="text-sm text-blue-700">
                 {t('crud.fields.requisition')}: {bestellung.requisitionId}
               </p>
             </div>
           )}
           {bestellung.contractId && (
-            <div className="p-3 bg-green-50 rounded-md">
-              <p className="text-sm text-green-700">
+            <div className="p-3 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded-md">
+              <p className="text-sm text-status-success">
                 {t('crud.fields.contract')}: {bestellung.contractId}
               </p>
             </div>
           )}
           {bestellung.rfqId && (
-            <div className="p-3 bg-yellow-50 rounded-md">
-              <p className="text-sm text-yellow-700">
+            <div className="p-3 bg-[hsl(var(--color-semantic-warning-50-hsl))] rounded-md">
+              <p className="text-sm text-status-warning">
                 {t('crud.fields.rfq')}: {bestellung.rfqId}
               </p>
             </div>
@@ -652,12 +1206,22 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
-      {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Procure-to-Pay"
-          description="Lieferant, Positionen, Mengen, Preise, Incoterms und Termine werden jetzt in der Bestellmaske gepflegt. Die Bestellnummer wird erst beim Speichern im Backend aus dem Nummernkreis vergeben."
-        />
+      {/*
+        FSX-013: Aus dem Hinweiskasten mit Erklaertext und vier Merkmalschips wird
+        eine Zeile. Was der Kasten erklaerte — "die Fachdaten werden hier gepflegt,
+        der Prozessfall bleibt referenziert" — muss die Maske zeigen, nicht sagen.
+      */}
+      {workflowContext ? <WorkflowProcessBand context={workflowContext} /> : null}
+      {pendingLink ? (
+        <Alert>
+          <AlertTitle>Bestellung gespeichert, Vorgang noch nicht verknuepft</AlertTitle>
+          <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>{pendingLink.message}</span>
+            <Button type="button" onClick={() => void handleRetryWorkflowLink()} disabled={saving}>
+              Vorgang erneut verknuepfen
+            </Button>
+          </AlertDescription>
+        </Alert>
       ) : null}
       <Card className="border-dashed border-slate-300/60 bg-slate-50/40 dark:bg-slate-900/20">
         <CardContent className="py-3 text-sm text-muted-foreground">
@@ -677,6 +1241,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
           })
         }
         onFinish={handleSubmit}
+        loading={saving}
         onCancel={() => navigate('/einkauf/bestellungen')}
       />
     </div>

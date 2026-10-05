@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, BarChart3, Euro, FileText, ShoppingCart } from 'lucide-react'
 import { useProcurementDashboard } from '@/lib/api/dashboard'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -63,6 +64,7 @@ function DashboardSkeleton() {
 export default function EinkaufDashboardPage(): JSX.Element {
   const { data: dashboard, isLoading } = useProcurementDashboard()
   const [roleFocus, setRoleFocus] = useState<ProcurementDashboardRoleFocus>('all')
+  const isTouch = useTouchDevice()
 
   if (isLoading) {
     return <DashboardSkeleton />
@@ -109,6 +111,7 @@ export default function EinkaufDashboardPage(): JSX.Element {
         <p className="text-muted-foreground">Beschaffungs-Übersicht</p>
       </div>
 
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar roles={procurementDashboardRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
         <ManagementDecisionPanel
@@ -132,11 +135,12 @@ export default function EinkaufDashboardPage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={procurementCrudCapabilities} />
       </div>
+      ) : null}
 
       {dashboard.ueberfaellig > 0 && (
-        <Card className="border-red-500 bg-red-50">
+        <Card className="border-status-error bg-status-error/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{dashboard.ueberfaellig} Bestellung(en) überfällig!</span>
             </div>
@@ -151,7 +155,7 @@ export default function EinkaufDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+              <FileText className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{dashboard.bestellungenOffen}</span>
             </div>
           </CardContent>
@@ -163,7 +167,7 @@ export default function EinkaufDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-blue-600" />
+              <Euro className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.einkaufsvolumen)}
               </span>

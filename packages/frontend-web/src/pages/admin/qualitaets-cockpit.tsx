@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DOCS_BASE_URL } from "@/lib/docs-help";
+import { Callout } from '@/components/ui/callout'
 
 interface DimensionResult {
   dimension: string;
@@ -42,19 +43,19 @@ const STATUS_CONFIG = {
     label: "OK",
     variant: "default" as const,
     icon: CheckCircle2,
-    className: "text-green-600",
+    className: "text-status-success",
   },
   warn: {
     label: "Warnung",
     variant: "secondary" as const,
     icon: AlertTriangle,
-    className: "text-yellow-600",
+    className: "text-status-warning",
   },
   fail: {
     label: "Fehler",
     variant: "destructive" as const,
     icon: XCircle,
-    className: "text-red-600",
+    className: "text-status-error",
   },
 } as const;
 
@@ -114,10 +115,10 @@ export default function QualitaetsCockpitPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" asChild className="min-h-touch">
             <Link to="/admin/externe-gates">Externe Gates</Link>
           </Button>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" asChild className="min-h-touch">
             <a
               href={`${DOCS_BASE_URL}/entwickler/drift-dashboard/`}
               target="_blank"
@@ -127,7 +128,7 @@ export default function QualitaetsCockpitPage() {
               Drift-Dashboard
             </a>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching} className="min-h-touch">
             <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
             Aktualisieren
           </Button>
@@ -144,15 +145,15 @@ export default function QualitaetsCockpitPage() {
             <div className="text-xs text-muted-foreground">Gesamtstatus</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-green-600">{summary.pass ?? 0}</div>
+            <div className="text-2xl font-bold text-status-success">{summary.pass ?? 0}</div>
             <div className="text-xs text-muted-foreground">OK</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-yellow-600">{summary.warn ?? 0}</div>
+            <div className="text-2xl font-bold text-status-warning">{summary.warn ?? 0}</div>
             <div className="text-xs text-muted-foreground">Warnungen</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-red-600">{summary.fail ?? 0}</div>
+            <div className="text-2xl font-bold text-status-error">{summary.fail ?? 0}</div>
             <div className="text-xs text-muted-foreground">Fehler</div>
           </Card>
         </div>
@@ -163,7 +164,7 @@ export default function QualitaetsCockpitPage() {
       )}
 
       {error && (
-        <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-amber-900 text-sm space-y-2">
+        <Callout variant="warning" className="rounded-md border px-4 py-3 text-sm space-y-2">
           <p>
             <strong>Keine Release-Evidenz verfügbar.</strong>{" "}
             {error instanceof Error ? error.message : String(error)}
@@ -175,7 +176,7 @@ export default function QualitaetsCockpitPage() {
             </code>{" "}
             ausführen, oder CI-Artefakt abwarten.
           </p>
-        </div>
+        </Callout>
       )}
 
       {data && (

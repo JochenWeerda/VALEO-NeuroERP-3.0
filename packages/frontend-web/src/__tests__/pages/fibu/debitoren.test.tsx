@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from '@/app/routing/test-router'
 import DebitorenPage from '@/pages/fibu/debitoren'
@@ -55,7 +55,21 @@ describe('DebitorenPage', () => {
     renderPage()
     
     expect(screen.getByText('Debitorenbuchhaltung')).toBeInTheDocument()
-    expect(screen.getByText('Offene Posten Kunden')).toBeInTheDocument()
+    expect(screen.getByText('Offene Posten suchen und oeffnen')).toBeInTheDocument()
+  })
+
+  it('filtert offene Posten nach Kunde, Kundennummer und Rechnung', () => {
+    renderPage()
+    const suche = screen.getByLabelText('Suche Debitoren')
+
+    fireEvent.change(suche, { target: { value: 'schmidt' } })
+    expect(screen.getByText('RE-2025-0123')).toBeInTheDocument()
+
+    fireEvent.change(suche, { target: { value: '10001' } })
+    expect(screen.getByText('RE-2025-0123')).toBeInTheDocument()
+
+    fireEvent.change(suche, { target: { value: 'Meyer' } })
+    expect(screen.queryByText('RE-2025-0123')).not.toBeInTheDocument()
   })
 
   it('sollte KPIs anzeigen', () => {

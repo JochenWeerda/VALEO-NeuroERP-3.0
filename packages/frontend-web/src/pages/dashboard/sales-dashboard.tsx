@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, Euro, FileText, TrendingUp, Users, AlertCircle } from 'lucide-react'
 import { useSalesDashboard } from '@/lib/api/dashboard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -104,6 +105,7 @@ function DashboardSkeleton({ showMessage = false }: { showMessage?: boolean }) {
 export default function SalesDashboardPage(): JSX.Element {
   const { data: dashboard, isLoading } = useSalesDashboard()
   const [roleFocus, setRoleFocus] = useState<SalesDashboardRoleFocus>('all')
+  const isTouch = useTouchDevice()
   
   // Während des Ladens zeigen wir eine Skeleton-Vorschau
   if (isLoading) {
@@ -145,6 +147,7 @@ export default function SalesDashboardPage(): JSX.Element {
         <p className="text-muted-foreground">Aktuelle Kennzahlen</p>
       </div>
 
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar roles={salesDashboardRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 4 : 1} totalCount={4} />
         <ManagementDecisionPanel
@@ -167,6 +170,7 @@ export default function SalesDashboardPage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={dashboardCrudCapabilities} />
       </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
@@ -186,7 +190,7 @@ export default function SalesDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Euro className="h-5 w-5 text-blue-600" />
+              <Euro className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.totalRevenue)}
               </span>
@@ -200,8 +204,8 @@ export default function SalesDashboardPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <TrendingUp className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(dashboard.avgOrderValue)}
               </span>
             </div>

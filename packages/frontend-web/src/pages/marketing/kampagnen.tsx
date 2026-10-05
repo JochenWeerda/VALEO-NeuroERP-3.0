@@ -8,9 +8,14 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, Megaphone, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 
 export default function KampagnenPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: kampagnen = [], isError, error, refetch } = useMarketingKampagnen()
 
@@ -30,7 +35,7 @@ export default function KampagnenPage(): JSX.Element {
       key: 'name' as const,
       label: 'Kampagne',
       render: (k: Kampagne) => (
-        <button onClick={() => navigate(`/marketing/kampagne/${k.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/marketing/kampagne/${k.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {k.name}
         </button>
       ),
@@ -63,18 +68,19 @@ export default function KampagnenPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Marketing-Kampagnen</h1>
-          <p className="text-muted-foreground">Uebersicht</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Marketing-Kampagnen</h1>
+          <p className="text-muted-foreground">Kampagnen suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/marketing/kampagne/neu')} className="gap-2">
+        <Button onClick={() => navigate('/marketing/kampagne/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Kampagne
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -82,7 +88,7 @@ export default function KampagnenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5 text-blue-600" />
+              <Megaphone className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{kampagnen.length}</span>
             </div>
           </CardContent>
@@ -93,7 +99,7 @@ export default function KampagnenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{kampagnen.filter((k) => k.status === 'aktiv').length}</span>
+            <span className="text-2xl font-bold text-status-success">{kampagnen.filter((k) => k.status === 'aktiv').length}</span>
           </CardContent>
         </Card>
 
@@ -106,18 +112,49 @@ export default function KampagnenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Kampagnen" placeholder="Name, Typ, Zielgruppe" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={() => {
+                if (filteredData.length === 0) {
+                  toast({ title: 'Kein Export', description: 'Keine Kampagnen in der aktuellen Sicht.', variant: 'destructive' })
+                  return
+                }
+                exportToCSV(
+                  filteredData.map((k) => ({
+                    name: k.name,
+                    typ: k.typ,
+                    zielgruppe: k.zielgruppe,
+                    startdatum: k.startdatum,
+                    enddatum: k.enddatum,
+                    budget: k.budget,
+                    status: k.status,
+                  })),
+                  `kampagnen-${new Date().toISOString().slice(0, 10)}.csv`,
+                  [
+                    { key: 'name', label: 'Kampagne' },
+                    { key: 'typ', label: 'Typ' },
+                    { key: 'zielgruppe', label: 'Zielgruppe' },
+                    { key: 'startdatum', label: 'Start' },
+                    { key: 'enddatum', label: 'Ende' },
+                    { key: 'budget', label: 'Budget' },
+                    { key: 'status', label: 'Status' },
+                  ],
+                )
+              }}
+            >
               <FileDown className="h-4 w-4" />
               Export
             </Button>

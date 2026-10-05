@@ -4,7 +4,9 @@ from __future__ import annotations
 from datetime import date
 
 import pytest
+from fastapi.testclient import TestClient
 
+from main import app
 from app.services.hrm_abwesenheit_service import (
     AbwesenheitKonfliktError,
     AbwesenheitStatus,
@@ -12,7 +14,22 @@ from app.services.hrm_abwesenheit_service import (
     AntragNichtGefundenError,
     HrmAbwesenheitService,
     UngueltigerStatusUebergangError,
+    _svc_cache,
 )
+
+
+_client = TestClient(app, raise_server_exceptions=False)
+_HEADERS = {
+    "Authorization": "Bearer dev-token",
+    "X-Tenant-ID": "00000000-0000-0000-0000-000000000001",
+}
+
+
+@pytest.fixture(autouse=True)
+def clear_abwesenheit_cache():
+    _svc_cache.clear()
+    yield
+    _svc_cache.clear()
 
 
 @pytest.fixture()
@@ -228,3 +245,155 @@ class TestUrlaubskonto:
         svc.ablehnen(a.antrag_id, abgelehnt_von="HR", grund="Kein Vertreter")
         konto = svc.urlaubskonto("MA-001", 2026)
         assert konto["verbraucht_tage"] == 0
+
+
+def _create_request(*, mitarbeiter: str = "MA-100", von: str = "2026-07-06", bis: str = "2026-07-10", typ: str = "urlaub"):
+    return _client.post(
+        "/api/v1/personal/abwesenheit/antraege",
+        headers=_HEADERS,
+        json={
+            "mitarbeiter_nr": mitarbeiter,
+            "typ": typ,
+            "von_datum": von,
+            "bis_datum": bis,
+            "beantragt_von": mitarbeiter,
+            "kommentar": "Sommerurlaub",
+            "vertretung_durch": "MA-200",
+        },
+    )
+
+
+class TestAbwesenheitEndpoint:
+    def test_antrag_stellen_endpoint_created(self):
+        resp = _create_request()
+        assert resp.status_code == 201
+        body = resp.json()
+        assert body["mitarbeiter_nr"] == "MA-100"
+        assert body["status"] == "beantragt"
+        assert body["arbeitstage"] == 5
+        assert body["vertretung_durch"] == "MA-200"
+
+    def test_antrag_stellen_conflict_returns_409(self):
+        assert _create_request().status_code == 201
+        resp = _create_request(von="2026-07-08", bis="2026-07-13")
+        assert resp.status_code == 409
+        assert "Konflikt" in resp.json()["detail"]
+
+    def test_antrag_stellen_invalid_type_returns_422(self):
+        resp = _create_request(typ="gibt-es-nicht")
+        assert resp.status_code == 422
+
+    def test_antrag_stellen_invalid_date_range_returns_422(self):
+        resp = _create_request(von="2026-07-10", bis="2026-07-06")
+        assert resp.status_code == 422
+
+    def test_list_antraege_filters(self):
+        first = _create_request(mitarbeiter="MA-100", von="2026-07-06", bis="2026-07-10").json()
+        second = _create_request(mitarbeiter="MA-101", typ="krank", von="2026-08-03", bis="2026-08-04").json()
+        approve = _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{first['antrag_id']}/genehmigen",
+            headers=_HEADERS,
+            json={"genehmigt_von": "HR"},
+        )
+        assert approve.status_code == 200
+
+        by_employee = _client.get("/api/v1/personal/abwesenheit/antraege?mitarbeiter_nr=MA-101", headers=_HEADERS)
+        assert by_employee.status_code == 200
+        assert [item["antrag_id"] for item in by_employee.json()["items"]] == [second["antrag_id"]]
+
+        by_status = _client.get("/api/v1/personal/abwesenheit/antraege?status=genehmigt", headers=_HEADERS)
+        assert by_status.status_code == 200
+        assert [item["antrag_id"] for item in by_status.json()["items"]] == [first["antrag_id"]]
+
+        by_type_and_date = _client.get(
+            "/api/v1/personal/abwesenheit/antraege?typ=krank&von_ab=2026-08-01",
+            headers=_HEADERS,
+        )
+        assert by_type_and_date.status_code == 200
+        assert [item["antrag_id"] for item in by_type_and_date.json()["items"]] == [second["antrag_id"]]
+
+    def test_get_antrag_endpoint_200_and_404(self):
+        created = _create_request().json()
+        resp = _client.get(f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}", headers=_HEADERS)
+        assert resp.status_code == 200
+        assert resp.json()["antrag_id"] == created["antrag_id"]
+
+        missing = _client.get("/api/v1/personal/abwesenheit/antraege/missing", headers=_HEADERS)
+        assert missing.status_code == 404
+
+    def test_genehmigen_endpoint_happy_path_and_status_error(self):
+        created = _create_request().json()
+        resp = _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}/genehmigen",
+            headers=_HEADERS,
+            json={"genehmigt_von": "HR", "kommentar": "ok"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "genehmigt"
+
+        again = _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}/genehmigen",
+            headers=_HEADERS,
+            json={"genehmigt_von": "HR"},
+        )
+        assert again.status_code == 409
+
+    def test_ablehnen_endpoint_happy_path_and_errors(self):
+        created = _create_request().json()
+        resp = _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}/ablehnen",
+            headers=_HEADERS,
+            json={"abgelehnt_von": "HR", "grund": "Vertretung fehlt"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "abgelehnt"
+
+        missing = _client.post(
+            "/api/v1/personal/abwesenheit/antraege/missing/ablehnen",
+            headers=_HEADERS,
+            json={"abgelehnt_von": "HR", "grund": "x"},
+        )
+        assert missing.status_code == 404
+
+        no_reason = _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}/ablehnen",
+            headers=_HEADERS,
+            json={"abgelehnt_von": "HR", "grund": " "},
+        )
+        assert no_reason.status_code == 409
+
+    def test_zurueckziehen_endpoint_happy_path_and_permission_error(self):
+        created = _create_request(mitarbeiter="MA-100").json()
+        foreign = _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}/zurueckziehen",
+            headers=_HEADERS,
+            json={"mitarbeiter_nr": "MA-999"},
+        )
+        assert foreign.status_code == 409
+
+        resp = _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}/zurueckziehen",
+            headers=_HEADERS,
+            json={"mitarbeiter_nr": "MA-100"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "zurueckgezogen"
+
+    def test_urlaubskonto_endpoint(self):
+        created = _create_request().json()
+        _client.post(
+            f"/api/v1/personal/abwesenheit/antraege/{created['antrag_id']}/genehmigen",
+            headers=_HEADERS,
+            json={"genehmigt_von": "HR"},
+        )
+        resp = _client.get("/api/v1/personal/abwesenheit/urlaubskonto/MA-100?jahr=2026", headers=_HEADERS)
+        assert resp.status_code == 200
+        assert resp.json()["verbraucht_tage"] == 5
+        assert resp.json()["resturlaub_tage"] == 25
+
+    def test_missing_tenant_header_returns_400(self):
+        resp = _client.get(
+            "/api/v1/personal/abwesenheit/antraege",
+            headers={"Authorization": "Bearer dev-token"},
+        )
+        assert resp.status_code in {400, 422}

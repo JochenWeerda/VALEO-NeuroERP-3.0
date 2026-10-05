@@ -53,7 +53,7 @@ export function useAPApprovalStatus(invoiceId: string) {
     queryFn: async () =>
       (
         await apiClient.get<APApprovalStatusResponse>(
-          `/api/v1/ap/approval-workflow/status/${encodeURIComponent(invoiceId)}`
+          `/api/v1/finance/ap/approval-workflow/status/${encodeURIComponent(invoiceId)}`
         )
       ).data,
     enabled: invoiceId.length > 0,
@@ -67,7 +67,7 @@ export function useRequestAPApproval() {
     mutationFn: async (payload: APApprovalRequestPayload) =>
       (
         await apiClient.post<APApprovalStatusResponse>(
-          '/api/v1/ap/approval-workflow/request',
+          '/api/v1/finance/ap/approval-workflow/request',
           payload
         )
       ).data,
@@ -84,7 +84,7 @@ export function useActOnAPApproval() {
     mutationFn: async (payload: APApprovalActionPayload) =>
       (
         await apiClient.post<APApprovalStatusResponse>(
-          '/api/v1/ap/approval-workflow/approve',
+          '/api/v1/finance/ap/approval-workflow/approve',
           payload
         )
       ).data,

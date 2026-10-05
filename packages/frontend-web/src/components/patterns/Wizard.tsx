@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useRef, useState } from 'react'
 import { PageToolbar, type ToolbarAction } from '@/components/navigation/PageToolbar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -33,7 +33,7 @@ export interface WizardProps {
   initialStepId?: string
   onStepChange?: (_stepId: string) => void
   onCancel?: () => void
-  onFinish?: () => void
+  onFinish?: () => void | Promise<void>
   onNextStep?: (_currentStepId: string) => void
   onPreviousStep?: (_currentStepId: string) => void
   getStepValidationError?: (_currentStepId: string) => string | null | Promise<string | null>
@@ -124,6 +124,9 @@ export function Wizard({
   }
 
   const [activeStepId, setActiveStepId] = useState<string>(resolveInitialStep)
+  const [finishing, setFinishing] = useState(false)
+  const finishingRef = useRef(false)
+  const busy = loading || finishing
 
   const activeIndex = useMemo(() => {
     return Math.max(0, safeSteps.findIndex((step) => step.id === activeStepId))
@@ -190,12 +193,24 @@ export function Wizard({
   }
 
   const handleNext = async (): Promise<void> => {
+    if (finishingRef.current) return
+    const isLastStep = activeIndex === safeSteps.length - 1
+    if (isLastStep) {
+      finishingRef.current = true
+    }
     const canProceed = await validateActiveStep()
     if (!canProceed) {
+      finishingRef.current = false
       return
     }
-    if (activeIndex === safeSteps.length - 1) {
-      onFinish?.()
+    if (isLastStep) {
+      setFinishing(true)
+      try {
+        await onFinish?.()
+      } finally {
+        finishingRef.current = false
+        setFinishing(false)
+      }
       return
     }
     const nextStep = safeSteps[activeIndex + 1]
@@ -245,7 +260,7 @@ export function Wizard({
                     type="button"
                     onClick={() => void handleGoToStep(step.id, index)}
                     className={cn(
-                      'flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors',
+                      'flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm touch-manipulation transition-colors',
                       isActive && 'border-primary bg-primary/10 text-primary',
                       !isActive && isCompleted && 'border-primary/50 bg-primary/5 text-primary',
                       !isActive && !isCompleted && 'border-muted bg-muted/40 text-muted-foreground',
@@ -278,11 +293,11 @@ export function Wizard({
         </PageSection>
       </PageSurface>
 
-      <footer className="border-t bg-muted/40 px-6 py-4">
-        <div className="flex items-center justify-between gap-3">
+      <footer className="border-t bg-muted/40 px-4 py-4 pr-20 md:px-6 md:pr-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             {typeof onCancel === 'function' ? (
-              <Button variant="ghost" onClick={onCancel} disabled={loading}>
+              <Button variant="ghost" className="min-h-touch touch-manipulation" onClick={onCancel} disabled={busy}>
                 {mergedLabels.cancel}
               </Button>
             ) : (
@@ -293,14 +308,14 @@ export function Wizard({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleBack} disabled={activeIndex === 0 || loading}>
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={handleBack} disabled={activeIndex === 0 || busy}>
               {mergedLabels.back}
             </Button>
-            <Button onClick={() => void handleNext()} disabled={loading}>
-              {loading ? (
+            <Button className="min-h-touch touch-manipulation" onClick={() => void handleNext()} disabled={busy}>
+              {busy ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mergedLabels.next}
+                  {activeIndex === safeSteps.length - 1 ? mergedLabels.finish : mergedLabels.next}
                 </>
               ) : activeIndex === safeSteps.length - 1 ? (
                 mergedLabels.finish

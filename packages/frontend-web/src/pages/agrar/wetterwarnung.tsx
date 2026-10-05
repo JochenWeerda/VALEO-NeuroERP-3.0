@@ -36,12 +36,12 @@ function severityLabel(severity: string): string {
 function warnungIcon(event: string) {
   const lower = event.toLowerCase()
   if (lower.includes('regen') || lower.includes('niederschlag')) {
-    return <CloudRain className="h-8 w-8 text-blue-600" />
+    return <CloudRain className="h-8 w-8 text-muted-foreground" />
   }
   if (lower.includes('gewitter') || lower.includes('sturm') || lower.includes('wind')) {
-    return <ShieldAlert className="h-8 w-8 text-orange-600" />
+    return <ShieldAlert className="h-8 w-8 text-status-warning" />
   }
-  return <Cloud className="h-8 w-8 text-gray-600" />
+  return <Cloud className="h-8 w-8 text-muted-foreground" />
 }
 
 export default function WetterwarnungPage(): JSX.Element {
@@ -83,8 +83,8 @@ export default function WetterwarnungPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{aktiv}</span>
+              <AlertTriangle className="h-5 w-5 text-status-warning" />
+              <span className="text-2xl font-bold text-status-warning">{aktiv}</span>
             </div>
           </CardContent>
         </Card>

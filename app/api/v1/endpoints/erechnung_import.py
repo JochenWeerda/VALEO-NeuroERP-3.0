@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.erechnung_import_schemas import ErrechnungImportOut
@@ -244,9 +245,9 @@ def buchen(
     # ERECHNUNG-BUCHEN-OP-001: Kreditoren-OP für e-Rechnung (Belegbruch schliessen)
     if imp_row and imp_row[2] and float(imp_row[2]) > 0:
         try:
-            from datetime import date as _date
-            today = _date.today().isoformat()
-            due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+            business_day = business_today()
+            today = business_day.isoformat()
+            due = business_date_after(30, from_date=business_day).isoformat()
             db.execute(text("""
                 INSERT INTO domain_erp.offene_posten
                     (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

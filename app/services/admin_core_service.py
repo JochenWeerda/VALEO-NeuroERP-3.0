@@ -298,7 +298,7 @@ class AdminCoreService:
                 FROM domain_shared.users
                 {where}
                 ORDER BY last_name ASC, first_name ASC
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -603,7 +603,7 @@ class AdminCoreService:
                 {where}
                 ORDER BY timestamp DESC
                 LIMIT :limit
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -636,7 +636,7 @@ class AdminCoreService:
                 FROM domain_shared.api_keys
                 {where}
                 ORDER BY created_at DESC
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             {"tenant_id": self.tenant_id},
         ).mappings().all()

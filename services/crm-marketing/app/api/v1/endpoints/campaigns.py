@@ -3,6 +3,7 @@
 from datetime import datetime
 from uuid import UUID
 from typing import List
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, and_, func, delete, update
@@ -40,6 +41,15 @@ from app.services.events import get_event_publisher
 from app.api.deps import resolve_actor_id, require_tenant_id
 
 router = APIRouter()
+
+
+def _validated_redirect_url(raw_url: str) -> str:
+    if any(ord(ch) < 32 or ord(ch) == 127 for ch in raw_url):
+        raise HTTPException(status_code=400, detail="Invalid redirect URL")
+    parsed = urlsplit(raw_url.strip())
+    if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+        raise HTTPException(status_code=400, detail="Invalid redirect URL")
+    return raw_url.strip()
 
 
 @router.get("/recipients/by-contact", response_model=List[CampaignRecipientSchema])
@@ -618,5 +628,5 @@ async def track_campaign_click(
     
     # Redirect to target URL
     from fastapi.responses import RedirectResponse
-    return RedirectResponse(url=url, status_code=307)
+    return RedirectResponse(url=_validated_redirect_url(url), status_code=307)  # NOSONAR - URL is scheme/host validated.
 

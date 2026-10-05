@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Shield, Plus, Link2, Trash2, Ban, CheckCircle, Copy, AlertCircle } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -169,7 +170,7 @@ function AddZugangDialog({ tenantId, open, onClose }: AddDialogProps) {
           </div>
 
           {mut.error && (
-            <p className="text-sm text-red-600 flex gap-1 items-center">
+            <p className="text-sm text-status-error flex gap-1 items-center">
               <AlertCircle className="h-4 w-4" />
               Fehler beim Speichern.
             </p>
@@ -265,14 +266,14 @@ function ShareLinkDialog({ tenantId, open, onClose }: ShareLinkDialogProps) {
           </div>
         ) : (
           <div className="space-y-3 py-2">
-            <p className="text-sm text-green-700 font-medium">Link erfolgreich erstellt.</p>
+            <p className="text-sm text-status-success font-medium">Link erfolgreich erstellt.</p>
             <div className="flex gap-2">
               <Input value={fullUrl} readOnly className="font-mono text-xs" />
               <Button variant="outline" size="icon" onClick={handleCopy} title="Kopieren">
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            {copied && <p className="text-xs text-green-600">In Zwischenablage kopiert.</p>}
+            {copied && <p className="text-xs text-status-success">In Zwischenablage kopiert.</p>}
             {result.gueltig_bis && (
               <p className="text-xs text-muted-foreground">Gültig bis: {fmt(result.gueltig_bis)}</p>
             )}
@@ -332,7 +333,7 @@ export default function RationsZugangPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <Shield className="h-6 w-6 text-blue-600" />
+            <Shield className="h-6 w-6 text-muted-foreground" />
             Datenschutz – Zugangsverwaltung Rationen
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -407,16 +408,16 @@ export default function RationsZugangPage() {
                     {e.darf_lesen && <Badge variant="outline" className="text-xs">Lesen</Badge>}
                     {e.darf_rationen_anlegen && <Badge variant="outline" className="text-xs">Rationen</Badge>}
                     {e.darf_grundfutter_anlegen && <Badge variant="outline" className="text-xs">Grundfutter</Badge>}
-                    {e.darf_zugang_verwalten && <Badge variant="outline" className="text-xs text-red-600">Verwalten</Badge>}
+                    {e.darf_zugang_verwalten && <Badge variant="outline" className="text-xs text-status-error">Verwalten</Badge>}
                   </div>
                 </TableCell>
                 <TableCell>
                   {e.ist_aktiv ? (
-                    <span className="flex items-center gap-1 text-green-700 text-xs">
+                    <span className="flex items-center gap-1 text-status-success text-xs">
                       <CheckCircle className="h-3.5 w-3.5" /> Aktiv
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-red-600 text-xs">
+                    <span className="flex items-center gap-1 text-status-error text-xs">
                       <Ban className="h-3.5 w-3.5" /> Gesperrt
                     </span>
                   )}
@@ -425,28 +426,26 @@ export default function RationsZugangPage() {
                   <div className="flex justify-end gap-1">
                     <Button
                       variant="ghost"
-                      size="sm"
                       title={e.ist_aktiv ? 'Sperren' : 'Entsperren'}
                       onClick={() =>
                         sperrMut.mutate({ id: e.id, sperren: e.ist_aktiv })
                       }
-                    >
+                     className="min-h-touch">
                       {e.ist_aktiv ? (
-                        <Ban className="h-4 w-4 text-orange-500" />
+                        <Ban className="h-4 w-4 text-status-warning" />
                       ) : (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <CheckCircle className="h-4 w-4 text-status-success" />
                       )}
                     </Button>
                     <Button
                       variant="ghost"
-                      size="sm"
                       title="Löschen"
                       onClick={() => {
                         if (confirm(`Zugang für ${e.empfaenger_email} wirklich widerrufen?`))
                           delMut.mutate(e.id)
                       }}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                     className="min-h-touch">
+                      <Trash2 className="h-4 w-4 text-status-error" />
                     </Button>
                   </div>
                 </TableCell>
@@ -457,7 +456,7 @@ export default function RationsZugangPage() {
       </div>
 
       {/* Info-Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800 space-y-1">
+      <Callout variant="info" className="border rounded-lg p-4 text-sm space-y-1">
         <p className="font-medium">Datenschutzhinweis (DSGVO Art. 5)</p>
         <p>
           Betriebseigene Grundfutteranalysen und daraus berechnete Rationen sind
@@ -468,7 +467,7 @@ export default function RationsZugangPage() {
           Share-Links verfallen automatisch zum angegebenen Datum und berechtigen nur
           zum Lesen.
         </p>
-      </div>
+      </Callout>
 
       <AddZugangDialog tenantId={tenantId} open={showAdd} onClose={() => setShowAdd(false)} />
       <ShareLinkDialog tenantId={tenantId} open={showShare} onClose={() => setShowShare(false)} />

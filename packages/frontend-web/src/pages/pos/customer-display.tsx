@@ -57,7 +57,7 @@ export default function CustomerDisplayPage(): JSX.Element {
   }, [])
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-white overflow-hidden">
+    <div className="h-screen flex flex-col bg-linear-to-br from-primary via-primary/90 to-primary/70 text-white overflow-hidden">
       {/* Header */}
       <div className="p-8 text-center border-b border-white/20">
         <h1 className="text-5xl font-bold mb-2">Willkommen bei VALERO</h1>

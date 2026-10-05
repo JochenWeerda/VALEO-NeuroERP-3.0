@@ -10,6 +10,57 @@ def _now() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
 
 
+# ── FSX-003: Drei Feldzustaende ───────────────────────────────────────────────
+#
+# 1. Statisch und zulaessig  — Prozessdefinition (Phasenbezeichnung, Knotenlabel,
+#    Reihenfolge, Icon, Beschreibung, Zielrouten). Kommt aus dem Registry, bleibt
+#    dort und braucht keine Kennzeichnung.
+# 2. Operativ und vorhanden  — instanzbezogen, mit benannter Quelle (FSX-001).
+# 3. Operativ und nicht ermittelbar — sichtbar als fehlend, niemals durch einen
+#    Registry-Vorgabewert ersetzt.
+#
+# Verboten ist allein Fall 3, der wie Fall 2 aussieht. Deshalb werden die
+# operativen Felder im Instanzpfad geleert, solange keine Quelle sie speist.
+
+#: Felder eines Knotens, die einen operativen Wert des konkreten Vorgangs tragen.
+OPERATIONAL_NODE_FIELDS: tuple[str, ...] = (
+    "metric",
+    "submetric",
+    "timestamp",
+    "detail_rows",
+    "kpis",
+    "documents",
+    "agent",
+    "status",
+    "insight",
+)
+
+#: Felder eines Knotens, die zur Prozessdefinition gehoeren und statisch bleiben.
+DEFINITION_NODE_FIELDS: tuple[str, ...] = (
+    "id",
+    "label",
+    "icon",
+    "actions",
+)
+
+#: Leerwert je operativem Feld — kein Vorgabewert, sondern die Abwesenheit selbst.
+_OPERATIONAL_EMPTY: dict[str, Any] = {
+    "metric": None,
+    "submetric": None,
+    "timestamp": None,
+    "detail_rows": [],
+    "kpis": [],
+    "documents": [],
+    "agent": None,
+    "status": "unknown",
+    "insight": "",
+}
+
+#: Inhaltsmodus des Workspace.
+CONTENT_MODE_CATALOG = "catalog"  # ohne Instanz: Registry-Beispielinhalt, gekennzeichnet
+CONTENT_MODE_INSTANCE = "instance"  # mit Instanz: nur belegte Werte oder "nicht ermittelt"
+
+
 GERMAN_TRANSLATIONS: dict[str, str] = {
     "Order-to-Cash": "Auftrag bis Zahlung",
     "Procure-to-Pay": "Bedarf bis Zahlung",
@@ -151,6 +202,24 @@ CATALOG: list[dict[str, str]] = [
 ]
 
 
+def _footer_item(item: str | tuple[str, str]) -> str | dict[str, str]:
+    """FSX-022: Beobachtungen bleiben Strings, Schritte werden {label, href}.
+
+    Ein Schritt ohne Ziel entfaellt nicht hier, sondern beim Anlegen der Karte —
+    diese Hilfsfunktion nimmt nur an, was der Katalog bereits entschieden hat.
+    """
+    if isinstance(item, str):
+        return item
+    label, href = item
+    label = label.strip()
+    href = href.strip()
+    if not label:
+        raise ValueError("footer item label must not be empty")
+    if not href.startswith("/"):
+        raise ValueError(f"footer href must be an in-app path: {href!r}")
+    return {"label": label, "href": href}
+
+
 def _nav(active_key: str) -> list[dict[str, str | bool]]:
     return [
         {
@@ -182,6 +251,8 @@ def _node(
         "label": label,
         "status": status,
         "icon": icon,
+        # FSX-003: im Katalogfall sind die operativen Felder Beispielinhalt.
+        "data_state": "example",
         "metric": metric,
         "submetric": submetric,
         "timestamp": _now(),
@@ -218,13 +289,16 @@ def _workspace(
     linked_modules: list[tuple[str, str, str]],
     focus_node_id: str,
     nodes: list[dict],
-    footer_cards: list[tuple[str, list[str]]],
+    footer_cards: list[tuple[str, list[str | tuple[str, str]]]],
     domain: str,
 ) -> dict:
     return {
         "schema_version": 1,
         "manifest_kind": "FLOW_SPINE_WORKSPACE",
         "generated_at": _now(),
+        # FSX-003: ohne Instanz zeigt der Workspace Beispielinhalt aus dem
+        # Registry. Das wird ausgewiesen, nicht verschwiegen.
+        "content_mode": CONTENT_MODE_CATALOG,
         "process_key": process_key,
         "title": title,
         "subtitle": subtitle,
@@ -250,7 +324,12 @@ def _workspace(
             ],
             "domain": domain,
         },
-        "footer_cards": [{"title": title_value, "items": items} for title_value, items in footer_cards],
+        # FSX-022 / FSX-003 Fall 1: Prozessdefinition, keine Vorgangswerte.
+        # Strings = Feststellung; {label, href} = navigierbarer naechster Schritt.
+        "footer_cards": [
+            {"title": title_value, "items": [_footer_item(item) for item in items]}
+            for title_value, items in footer_cards
+        ],
     }
 
 
@@ -303,7 +382,7 @@ WORKSPACES["order-to-cash"] = _workspace(
         _node("payment", "Zahlung", "warning", "Wallet", "OP offen", "T+10", "Nach der Faktura steuern Zahlungsziel, Skonto und Mahnstatus den Debitorenprozess.", [("Faelligkeit", "T+10"), ("Skonto", "2%"), ("Forecast", "EUR 41.700")], [("Cash In", "EUR 41.700"), ("Skonto Potenzial", "EUR 834"), ("Mahnrisiko", "niedrig")], [("Offene-Posten-Liste", "/finance/reconciliation")], [("Offene Posten", "/finance/reconciliation", "primary", "/api/v1/finance/reconciliation"), ("Zahlungslauf", "/finance/zahlungslauf-kreditoren", "secondary", "/api/v1/finance/payment-runs")], ("Skonto-Fenster sichern", "Zahlung frueh terminieren, sobald Rechnung freigegeben ist.", ["2% Skonto moeglich"])),
         _node("close", "Abschluss", "critical", "BookOpen", "1 Risiko", "T+30", "Korrekturen, Gutschriften und Abschlusspruefungen folgen erst, wenn Lieferung, Faktura und Zahlung konsistent sind.", [("Abschlussstatus", "RISIKO"), ("Marge", "gefaehrdet"), ("Korrekturen", "1 moeglich")], [("Abschlussquote", "84%"), ("Marge", "14,8%"), ("Audit", "vollstaendig")], [("Abschlussprotokoll", "/finance/abschluss")], [("Abschlusspruefung", "/finance/abschluss", "primary", "/api/v1/process/settlement/completion/evaluate"), ("Gutschrift/Belastung", "/einkauf/gutschriften-belastungen", "secondary", "/api/v1/credit-debit-memos")], ("Abschluss noch nicht stabil", "Bitte Lieferabweichung und Faktura zuerst bereinigen.", ["ETA Drift", "Faktura wartet"])),
     ],
-    [("Operative Heatmap", ["Region Nord", "Region West", "Region Ost"]), ("Agent Events", ["Delay Prediction aktualisiert", "Skonto-Potenzial erkannt"]), ("Naechste Schritte", ["Auftrag erfassen", "Lieferung disponieren", "Faktura freigeben"])],
+    [("Operative Heatmap", ["Region Nord", "Region West", "Region Ost"]), ("Agent Events", ["Delay Prediction aktualisiert", "Skonto-Potenzial erkannt"]), ("Naechste Schritte", [("Auftrag erfassen", "/sales/orders/new"), ("Lieferung disponieren", "/verladung"), ("Faktura freigeben", "/sales/invoices/new")])],
     "workflow",
 )
 
@@ -334,7 +413,7 @@ WORKSPACES["procure-to-pay"] = _workspace(
         _node("invoice", "Rechnung", "warning", "Receipt", "2-way Match", "T+1", "Preisabweichung von 1,8% erwartet, Vorpruefung empfohlen.", [("Match", "2-way"), ("Abweichung", "1,8%"), ("Status", "wartet")], [("Match Quote", "96%"), ("Queue", "2"), ("Risk", "mittel")], [("Rechnungseingang.xml", "/einkauf/rechnungseingang")], [("Rechnungsabgleich", "/einkauf/rechnung-abgleich", "primary", "/api/v1/finance/ap/invoices")], ("Preisabweichung erkannt", "Vor Freigabe die Preisabweichung pruefen.", ["1,8% uebersetzt Toleranz"])),
         _node("payment", "Zahlung", "critical", "Wallet", "Skonto offen", "T+10", "Skontofenster gefaehrdet, wenn Wareneingang weiter rutscht.", [("Faelligkeit", "T+10"), ("Skonto", "2%"), ("Cash Impact", "EUR 370")], [("Skonto", "2%"), ("Cash Impact", "EUR 370"), ("Risk", "hoch")], [("Zahlungsvorschlag.pdf", "/finance/zahlungslauf-kreditoren")], [("Zahlungslauf", "/finance/zahlungslauf-kreditoren", "primary", "/api/v1/finance/payment-runs")], ("Skonto-Fenster gefaehrdet", "Wareneingang und AP-Freigabe priorisieren.", ["ETA Drift", "Rechnung wartet"])),
     ],
-    [("Lieferanten-Heatmap", ["TechLogistics", "Nordhafen", "Import Route A"]), ("Agent Events", ["ETA-Warnung aktualisiert", "Preisabweichung erkannt"]), ("Naechste Schritte", ["Match Engine verfeinern", "ETA-Dispatch live schalten"])],
+    [("Lieferanten-Heatmap", ["TechLogistics", "Nordhafen", "Import Route A"]), ("Agent Events", ["ETA-Warnung aktualisiert", "Preisabweichung erkannt"]), ("Naechste Schritte", [("Wareneingang pruefen", "/einkauf/wareneingang"), ("Rechnungsabgleich", "/einkauf/rechnung-abgleich")])],
     "workflow",
 )
 
@@ -365,7 +444,7 @@ WORKSPACES["inventory-to-settlement"] = _workspace(
         _node("billing", "Faktura", "warning", "FileText", "12 im Puffer", "T+0", "Faktura wartet auf Versandbestaetigung aus Welle 3.", [("Queue", "12"), ("Versandstatus", "wartet"), ("Abhaengigkeit", "Welle 3")], [("Queue", "12"), ("SLA", "83%"), ("Status", "wartet")], [("Faktura-Puffer.xlsx", "/sales/rechnungen")], [("Rechnungen", "/sales/rechnungen", "primary", "/api/v1/finance/invoices")], ("Faktura im Puffer", "Versandbestaetigung zuerst stabilisieren.", ["Shipping confirmation fehlt"])),
         _node("settlement", "Settlement", "critical", "Landmark", "T+1 Ziel", "T+1", "Settlement kippt, wenn Versandfenster und Faktura nicht stabilisiert werden.", [("Cycle Time", "T+1"), ("Marge", "sensibel"), ("Status", "RISIKO")], [("Settlement Forecast", "EUR 64.200"), ("Cycle Time", "T+1"), ("Risk", "hoch")], [("Settlement-Puffer.xlsx", "/annahme/abrechnung")], [("Settlement pruefen", "/annahme/abrechnung", "primary", "/api/v1/process/settlement/completion/evaluate")], ("Settlement gefaehrdet", "Versand und Faktura muessen vor T+1 stabilisiert werden.", ["Rampenkonflikt", "Faktura wartet"])),
     ],
-    [("Lager-Heatmap", ["Dock 4", "Halle B", "Welle 3"]), ("Agent Events", ["Rampenwarnung aktualisiert", "Settlement-Risiko gestiegen"]), ("Naechste Schritte", ["Rampendaten live anbinden", "Settlement-Automation koppeln"])],
+    [("Lager-Heatmap", ["Dock 4", "Halle B", "Welle 3"]), ("Agent Events", ["Rampenwarnung aktualisiert", "Settlement-Risiko gestiegen"]), ("Naechste Schritte", [("Verladung oeffnen", "/verladung"), ("Settlement pruefen", "/annahme/abrechnung")])],
     "workflow",
 )
 
@@ -396,7 +475,7 @@ WORKSPACES["harvest-to-settlement"] = _workspace(
         _node("abrechnung", "Abrechnung", "critical", "Receipt", "EUR 4.820", "T+5", "Abrechnung kippt, wenn Trocknungsgrad nicht stabil bleibt.", [("Settlement", "SET-2026-188"), ("Forecast", "EUR 4.820"), ("Marge", "sensibel")], [("Forecast", "EUR 4.820"), ("Cycle", "T+5"), ("Risk", "hoch")], [("Abrechnungsvorschau.pdf", "/annahme/abrechnung")], [("Abrechnung pruefen", "/annahme/abrechnung", "primary", "/api/v1/agrar/settlements")], ("Abrechnung gefaehrdet", "Vor Settlement Trocknung und Kontrakt klaeren.", ["Trocknung offen", "Kontrakt offen"])),
         _node("zahlung", "Zahlung", "critical", "Wallet", "Skonto offen", "T+10", "Skontofenster gefaehrdet, wenn Abrechnung weiter rutscht.", [("Faelligkeit", "T+10"), ("Skonto", "2%"), ("Cash", "EUR 96")], [("Skonto", "2%"), ("Cash Forecast", "EUR 96"), ("Risk", "hoch")], [("Zahlungsvorschlag.pdf", "/finance/zahlungslauf-kreditoren")], [("Zahlungslauf", "/finance/zahlungslauf-kreditoren", "primary", "/api/v1/finance/payment-runs")], ("Skonto-Fenster bedroht", "Abrechnung stabilisieren und Zahlung terminieren.", ["Abrechnung verzogen"])),
     ],
-    [("Silo-Heatmap", ["Silo 3", "Trockner T-3", "Kampagne ERN-2026-004"]), ("Agent Events", ["Trocknungswarnung aktualisiert", "Abrechnungsrisiko angestiegen"]), ("Naechste Schritte", ["Umlagerung anstoßen", "Abrechnung freigeben"])],
+    [("Silo-Heatmap", ["Silo 3", "Trockner T-3", "Kampagne ERN-2026-004"]), ("Agent Events", ["Trocknungswarnung aktualisiert", "Abrechnungsrisiko angestiegen"]), ("Naechste Schritte", [("Silokapazitaet pruefen", "/silo/kapazitaeten"), ("Abrechnung pruefen", "/annahme/abrechnung")])],
     "workflow",
 )
 
@@ -414,7 +493,7 @@ WORKSPACES["contract-to-settlement"] = _workspace(
         _node("quality", "Qualitaet", "ok", "ShieldCheck", "Prot-884", "Heute", "Qualitaetsprotokoll liegt vor und ist der Annahme zugeordnet.", [("Protein", "12,6%"), ("Feuchte", "13,9%"), ("Status", "freigegeben")], [("Protokoll", "vorhanden"), ("Abweichungen", "0"), ("SLA", "97%")], [("Qualitaetsprotokoll.pdf", "/annahme/qualitaets-check")], [("Qualitaet oeffnen", "/annahme/qualitaets-check", "primary", "/api/v1/agrar/quality-protocols")], ("Qualitaet innerhalb Toleranz", "Keine Abweichung zum Kontraktprofil.", ["Feuchte ok", "Protein ok"])),
         _node("settlement", "Settlement", "warning", "Receipt", "SET-551", "T+1", "Settlement ist vorbereitet, wartet aber auf finale Freigabe und Journal-Posting.", [("Settlement", "SET-551"), ("Netto", "EUR 5.492"), ("Freigabe", "offen")], [("Forecast", "EUR 5.492"), ("GoBD Check", "bereit"), ("Freigabe", "offen")], [("Settlement-Vorschau.pdf", "/annahme/abrechnung")], [("Abrechnung", "/annahme/abrechnung", "primary", "/api/v1/agrar/settlements"), ("Abschlusspruefung", "/finance/abschluss", "secondary", "/api/v1/process/settlement/completion/evaluate")], ("Freigabe noch offen", "Settlement-Journal und Abschlussvertrag zuerst pruefen.", ["Freigabe offen"])),
     ],
-    [("Medienbruch-KPI", ["95% Ziel", "digitale Kette aktiv", "keine Nebenliste"]), ("Agent Events", ["Qualitaet bestaetigt", "Settlement Preview aktualisiert"]), ("Naechste Schritte", ["Freigabe abschliessen", "Journal posten", "Blockchain-Anchor setzen"])],
+    [("Medienbruch-KPI", ["95% Ziel", "digitale Kette aktiv", "keine Nebenliste"]), ("Agent Events", ["Qualitaet bestaetigt", "Settlement Preview aktualisiert"]), ("Naechste Schritte", [("Abrechnung oeffnen", "/annahme/abrechnung"), ("Abschlusspruefung", "/finance/abschluss")])],
     "annahme",
 )
 
@@ -433,7 +512,7 @@ WORKSPACES["complaint-to-resolution"] = _workspace(
         _node("resolution", "Loesung", "warning", "Sparkles", "Kulanz offen", "T+1", "Loesungsweg ist vorbereitet, Freigabe fuer Kulanz steht noch aus.", [("Option", "Kulanz"), ("Wert", "EUR 620"), ("Status", "wartet")], [("Freigabe", "offen"), ("Kulanzwert", "EUR 620"), ("SLA", "im Ziel")], [("Kulanzfreigabe.pdf", "/workflows/approval")], [("Freigabe senden", "/workflows/approval", "primary", "/api/v1/reklamationen/REK-2026-044/transition")], ("Kulanzpfad plausibel", "Freigabe durch Vertrieb oder Qualitaet noetig.", ["Kundenwert hoch"])),
         _node("closure", "Abschluss", "critical", "BookOpen", "Audit offen", "T+2", "Abschluss erfordert finalen Audit-Trail und Rueckmeldung an den Kunden.", [("Audit", "offen"), ("Rueckmeldung", "ausstehend"), ("Status", "RISIKO")], [("SLA", "95%"), ("Abschlussquote", "88%"), ("Kundenfeedback", "ausstehend")], [("Audit-Trail.pdf", "/admin/audit-log")], [("Audit oeffnen", "/admin/audit-log", "primary", "/api/v1/reklamationen/REK-2026-044/audit")], ("Audit noch nicht komplett", "Rueckmeldung an Kunde und Abschlussbuchung fehlen.", ["Audit offen"])),
     ],
-    [("SLA-Board", ["24h Erstreaktion", "Kulanzqueue", "Abschlussquote"]), ("Agent Events", ["Kulanzpfad bewertet", "DMS-Link nachgezogen"]), ("Naechste Schritte", ["Freigabe abschliessen", "Kundenfeedback buchen"])],
+    [("SLA-Board", ["24h Erstreaktion", "Kulanzqueue", "Abschlussquote"]), ("Agent Events", ["Kulanzpfad bewertet", "DMS-Link nachgezogen"]), ("Naechste Schritte", [("Freigabe senden", "/workflows/approval"), ("Reklamation oeffnen", "/qualitaet/reklamationen")])],
     "quality",
 )
 
@@ -452,7 +531,7 @@ WORKSPACES["service-to-customer"] = _workspace(
         _node("report", "Rueckmeldung", "warning", "BookOpen", "Befund offen", "Heute", "Technikerbericht ist begonnen, Materialverbrauch muss noch erfasst werden.", [("Bericht", "begonnen"), ("Material", "offen"), ("Fotos", "1")], [("Report Completion", "60%"), ("Materialerfassung", "offen"), ("Kundenfreigabe", "wartet")], [("Technikerbericht.pdf", "/crm/aktivitaeten")], [("Aktivitaet buchen", "/crm/aktivitaeten", "primary", "/api/v1/crm/activities")], ("Materialverbrauch fehlt", "Rueckmeldung vor Kundenabschluss vervollstaendigen.", ["Material offen"])),
         _node("closure", "Kundenabschluss", "warning", "UserCircle2", "Feedback ausstehend", "T+1", "Kundenrueckmeldung und Abschlussbewertung fehlen noch.", [("Feedback", "ausstehend"), ("Status", "wartet"), ("CSAT", "-")], [("First-Time-Fix", "91%"), ("CSAT", "ausstehend"), ("Abschlusszeit", "T+1")], [("Abschlussnotiz.pdf", "/service/anfragen")], [("Abschluss senden", "/service/anfragen", "primary", "/api/v1/crm/cases")], ("Kundenfeedback fehlt", "Finale Rueckmeldung fuer sauberen Abschluss einholen.", ["Feedback ausstehend"])),
     ],
-    [("Tourenstatus", ["Route Nordwest", "ETA stabil", "1 kritischer Termin"]), ("Agent Events", ["Kundenfenster geaendert", "Techniker ETA aktualisiert"]), ("Naechste Schritte", ["Rueckmeldung vervollstaendigen", "Feedback sichern"])],
+    [("Tourenstatus", ["Route Nordwest", "ETA stabil", "1 kritischer Termin"]), ("Agent Events", ["Kundenfenster geaendert", "Techniker ETA aktualisiert"]), ("Naechste Schritte", [("Aktivitaet buchen", "/crm/aktivitaeten"), ("Anfrage oeffnen", "/service/anfragen")])],
     "service",
 )
 
@@ -483,7 +562,7 @@ WORKSPACES["finance-to-close"] = _workspace(
         _node("genehmigung", "Genehmigung", "critical", "UserCircle2", "CFO Sign-off", "T+7", "Genehmigungsfrist kippt, wenn Abstimmung nicht abgeschlossen wird.", [("Freigabe", "CFO"), ("Frist", "T+7"), ("Status", "wartet")], [("Sign-off", "offen"), ("Deadline", "T+7"), ("Risk", "hoch")], [("CFO-Signoff.pdf", "/workflows/approval")], [("Sign-off anfordern", "/workflows/approval", "primary", "/api/v1/channels/slack/process-actions/execute")], ("Sign-off gefaehrdet", "Abstimmung und Meldung zuerst stabilisieren.", ["Freigabe offen"])),
         _node("abschluss", "Abschluss", "critical", "Landmark", "T+10 Ziel", "T+10", "Abschluss gefaehrdet, wenn Genehmigung und USTVA nicht rechtzeitig vorliegen.", [("Ziel", "T+10"), ("Marge", "sensibel"), ("Status", "RISIKO")], [("Abschlussquote", "84%"), ("Periodenertrag", "EUR 284.000"), ("Risk", "hoch")], [("Abschlussprotokoll.pdf", "/finance/abschluss")], [("Abschluss cockpit", "/fibu/abschluss-cockpit", "primary", "/api/v1/finance/close-readiness")], ("Abschluss nicht stabil", "Offene Vorstufen blockieren den finalen Close.", ["USTVA offen", "Sign-off offen"])),
     ],
-    [("Abschluss-Heatmap", ["Periode 03/2026", "Konto 1200", "USTVA"]), ("Agent Events", ["Abstimmungsabweichung erkannt", "USTVA-Frist aktualisiert"]), ("Naechste Schritte", ["Abstimmung abschliessen", "CFO Sign-off sichern"])],
+    [("Abschluss-Heatmap", ["Periode 03/2026", "Konto 1200", "USTVA"]), ("Agent Events", ["Abstimmungsabweichung erkannt", "USTVA-Frist aktualisiert"]), ("Naechste Schritte", [("Nebenbuch-Abstimmung", "/finance/nebenbuch-abstimmung"), ("Sign-off anfordern", "/workflows/approval")])],
     "workflow",
 )
 
@@ -513,7 +592,7 @@ WORKSPACES["compliance-to-report"] = _workspace(
         _node("approval", "Freigabe", "warning", "UserCircle2", "Management offen", "T+2", "Management-Freigabe fuer das Quartalsreporting fehlt noch.", [("Freigabe", "Management"), ("Status", "offen"), ("Deadline", "T+2")], [("Freigabequote", "75%"), ("Owner", "Compliance Lead"), ("Risk", "mittel")], [("Freigabeprotokoll.pdf", "/workflows/approval")], [("Freigabe senden", "/workflows/approval", "primary", "/api/v1/channels/slack/process-actions/execute")], ("Freigabe steht aus", "Report kann nach Ausnahme-Klaerung direkt in Freigabe gehen.", ["Management offen"])),
         _node("reporting", "Reporting", "critical", "FileText", "Versand wartet", "T+3", "ESG- und Compliance-Report sind vorbereitet, aber noch nicht publiziert.", [("Report", "Q1 2026"), ("Status", "wartet"), ("Empfaenger", "Vorstand + Genossenschaft")], [("Readiness", "88%"), ("Distribution", "wartet"), ("Audit", "vollstaendig")], [("ESG_Report_Q1.pdf", "/nachhaltigkeit/esg-report")], [("ESG Report", "/nachhaltigkeit/esg-report", "primary", "/api/v1/sustainability/read-model")], ("Versand wartet auf Freigabe", "Publikation erst nach finalem Sign-off.", ["Freigabe offen"])),
     ],
-    [("Compliance Board", ["CO2", "EUDR", "ESG Report"]), ("Agent Events", ["EUDR-Ausnahme erkannt", "CO2-Daten aktualisiert"]), ("Naechste Schritte", ["Ausnahme klaeren", "Freigabe einholen", "Report publizieren"])],
+    [("Compliance Board", ["CO2", "EUDR", "ESG Report"]), ("Agent Events", ["EUDR-Ausnahme erkannt", "CO2-Daten aktualisiert"]), ("Naechste Schritte", [("EUDR pruefen", "/nachhaltigkeit/eudr-compliance"), ("Freigabe senden", "/workflows/approval"), ("ESG Report", "/nachhaltigkeit/esg-report")])],
     "workflow",
 )
 
@@ -551,21 +630,68 @@ def invalidate_flow_spine_cache(process_key: str | None = None) -> None:
         _catalog_json_cache.clear()
 
 
-def merge_instance_statuses(workspace: dict, instance: dict) -> dict:
-    """
-    Overlay node statuses from an instance onto a workspace dict.
+def _detail_rows_from_pairs(pairs: list[tuple[str, object | None]]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for label, value in pairs:
+        if value is None:
+            continue
+        text = str(value).strip()
+        if text:
+            rows.append({"label": label, "value": text})
+    return rows
 
-    Iterates workspace["nodes"] and, for each node whose id appears in
-    instance["node_statuses"], sets node["status"] to the stored value.
-    Also stamps instance_label and instance_id at the workspace root.
 
-    Returns the modified workspace (already a deep copy from get_flow_spine_workspace).
+def merge_instance_statuses(
+    workspace: dict,
+    instance: dict,
+    node_events: dict[str, dict] | None = None,
+) -> dict:
+    """Overlay instance status and declared operational fields onto a workspace.
+
+    Registry-Vorgaben werden zuerst geleert (FSX-003). Anschliessend fuellt
+    FSX-001 nur Felder mit deklarierter Quelle in flow_spine_field_origins.yaml:
+    timestamp und detail_rows aus dem juengsten Knotenereignis, plus instanzweite
+    Vorgangsfelder. metric/submetric/kpis/documents/agent bleiben leer.
+
+    node_events maps node_id → event dict (created_at, event_type, actor_id,
+    reason_*). Die Abfrage selbst liegt beim Aufrufer, eine je Instanz.
     """
     node_statuses: dict[str, str] = instance.get("node_statuses") or {}
+    events = node_events or {}
+    instance_rows = _detail_rows_from_pairs(
+        [
+            ("Vorgang", instance.get("case_number")),
+            ("Einstieg", instance.get("entry_mode")),
+            ("Bearbeiter", instance.get("assigned_owner")),
+            ("Vorgangsstatus", instance.get("business_status")),
+        ]
+    )
+    workspace["content_mode"] = CONTENT_MODE_INSTANCE
     for node in workspace.get("nodes", []):
         node_id = node.get("id")
-        if node_id and node_id in node_statuses:
-            node["status"] = node_statuses[node_id]
+        for field in OPERATIONAL_NODE_FIELDS:
+            if field in node:
+                node[field] = copy.deepcopy(_OPERATIONAL_EMPTY[field])
+
+        node["status"] = node_statuses.get(node_id) or "unknown"
+
+        event = events.get(node_id) if node_id else None
+        event_rows: list[dict[str, str]] = []
+        if event:
+            node["timestamp"] = event.get("created_at")
+            event_rows = _detail_rows_from_pairs(
+                [
+                    ("Aktion", event.get("event_type")),
+                    ("Akteur", event.get("actor_id")),
+                    ("Grundkategorie", event.get("reason_category")),
+                    ("Grund", event.get("reason_code")),
+                    ("Hinweis", event.get("reason_note")),
+                ]
+            )
+        node["detail_rows"] = event_rows + instance_rows
+        node["data_state"] = (
+            "instance" if node.get("timestamp") or node.get("detail_rows") else "not_determined"
+        )
 
     if instance.get("label"):
         workspace["instance_label"] = instance["label"]

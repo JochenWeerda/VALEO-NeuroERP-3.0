@@ -1,0 +1,511 @@
+{
+  "date": "2026-07-06",
+  "profiles": [
+    {
+      "id": "tax-gobd",
+      "assessor": "Simulierter Steuerberater / GoBD-Pruefer",
+      "standard": "GoBD, AO \u00a7\u00a7 146/147, VALEO-Zusatzstandard",
+      "source": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Weitere_Steuerthemen/Abgabenordnung/2025-07-14-GoBD-2-aenderung.html",
+      "status": "conditional",
+      "checks": [
+        {
+          "id": "GOBD-01",
+          "title": "Unveraenderbarkeit und Gegenbuchung",
+          "evidence": [
+            "app/services/finance_transaction_service.py",
+            "tests/test_crm360_finance_handover.py"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              "app/services/finance_transaction_service.py",
+              "reversal"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "GOBD-02",
+          "title": "Nachvollziehbare Audit-Kette",
+          "evidence": [
+            "app/middleware/audit_middleware.py",
+            "tests/test_audit_hash_chain.py"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              "tests/test_audit_hash_chain.py",
+              "hash"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "GOBD-03",
+          "title": "Datenzugriff und Export",
+          "evidence": [
+            "app/api/v1/endpoints/pos_dsfinvk.py",
+            "docs/architecture/pos-fiscalization-providers.md"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "GOBD-04",
+          "title": "Verfahrensdokumentation und Betriebsnachweis",
+          "evidence": [
+            "docs/operations/production-readiness-runbook.md"
+          ],
+          "external_gate": "Steuerberater-Abnahme der konkreten Verfahrensdokumentation",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        }
+      ]
+    },
+    {
+      "id": "cash-register",
+      "assessor": "Simulierter Kassen-Nachschau-/KassenSichV-Pruefer",
+      "standard": "KassenSichV Stand 14.01.2026, DSFinV-K 2.4, strengere VALEO-Gates",
+      "source": "https://www.gesetze-im-internet.de/kassensichv/BJNR351500017.html",
+      "status": "conditional",
+      "checks": [
+        {
+          "id": "KASSE-01",
+          "title": "Unmittelbarer Transaktionsstart und Abschluss",
+          "evidence": [
+            "app/services/fiscalization/service.py",
+            "tests/test_pos_fiscalization_providers.py"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "KASSE-02",
+          "title": "Belegpflichtdaten und Signaturreferenz",
+          "evidence": [
+            "app/services/fiscalization/contracts.py",
+            "packages/frontend-web/src/lib/services/fiskaly-tse.ts"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "KASSE-03",
+          "title": "DSFinV-K 2.4 Export- und Tagesabschluss-Gate",
+          "evidence": [
+            "app/api/v1/endpoints/pos_dsfinvk.py",
+            "docs/quality-assurance/pos-fiscalization-operations-uat.md"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              "docs/architecture/pos-fiscalization-providers.md",
+              "DSFinV-K 2.4"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "KASSE-04",
+          "title": "Reale TSE-/Pruefwerkzeugvalidierung",
+          "evidence": [
+            "docs/architecture/pos-fiscalization-providers.md"
+          ],
+          "external_gate": "Hersteller-/Pruefwerkzeug-Abnahme mit produktiver TSE",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        }
+      ]
+    },
+    {
+      "id": "information-security",
+      "assessor": "Simulierter BSI-/ISO-27001-Auditor",
+      "standard": "BSI IT-Grundschutz plus VALEO Null-Toleranz fuer ungepruefte Produktionskonfiguration",
+      "source": "https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/IT-Grundschutz/it-grundschutz_node.html",
+      "status": "conditional",
+      "checks": [
+        {
+          "id": "SEC-01",
+          "title": "IAM, Least Privilege und Tenant-Isolation",
+          "evidence": [
+            "app/middleware/tenant_enforcement.py",
+            "tests/test_tenant_enforcement.py"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SEC-02",
+          "title": "Blockierende High/Critical-Scans und SBOM",
+          "evidence": [
+            ".github/workflows/security-scan.yml",
+            ".github/workflows/quality-gate.yml"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              ".github/workflows/security-scan.yml",
+              "trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1"
+            ],
+            [
+              ".github/workflows/security-scan.yml",
+              "fail-build: true"
+            ],
+            [
+              ".github/workflows/security-scan.yml",
+              "Enforce ZAP medium/high gate"
+            ],
+            [
+              ".github/workflows/quality-gate.yml",
+              "SBOM (CycloneDX)"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SEC-03",
+          "title": "Backup und regelmaessiger Restore-Test",
+          "evidence": [
+            "k8s/helm/valeo-erp/templates/backup-cronjob.yaml",
+            "k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SEC-04",
+          "title": "Incident-, Rollback- und Monitoring-Vertrag",
+          "evidence": [
+            "docs/operations/production-readiness-runbook.md",
+            ".github/workflows/deploy-staging.yml",
+            ".github/workflows/valeo-erp-deployment.yml"
+          ],
+          "external_gate": "Betriebsuebung mit realem Cluster und Alarmkanal",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "assessor": "Simulierter Datenschutzbeauftragter",
+      "standard": "DSGVO Art. 5, 25, 30, 32, 33/34 plus VALEO-Nachweispflichten",
+      "source": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+      "status": "conditional",
+      "checks": [
+        {
+          "id": "DSGVO-01",
+          "title": "Privacy by Design und Zugriffstrennung",
+          "evidence": [
+            "app/middleware/tenant_enforcement.py",
+            "tests/test_gdpr_api.py"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "DSGVO-02",
+          "title": "Verzeichnis von Verarbeitungstaetigkeiten",
+          "evidence": [
+            "app/api/v1/endpoints/gdpr_art30_ropa.py",
+            "tests/test_gdpr_art30_ropa.py"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "DSGVO-03",
+          "title": "Breach-Prozess und Fristnachweis",
+          "evidence": [
+            "app/api/v1/endpoints/gdpr_art33_breach.py",
+            "tests/test_gdpr_art33_breach.py"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "DSGVO-04",
+          "title": "AVV, DSFA und reale Organisationsfreigabe",
+          "evidence": [
+            "docs/project-context/open-gaps-and-known-issues.md"
+          ],
+          "external_gate": "DSB-/Rechtsfreigabe und unterschriebene AVV/DSFA",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        }
+      ]
+    },
+    {
+      "id": "operations",
+      "assessor": "Simulierter Betriebs-/Notfallpruefer",
+      "standard": "BSI Datensicherung/Notfallmanagement plus strengere Release-Evidenz",
+      "source": "https://www.bsi.bund.de/DE/Themen/Unternehmen-und-Organisationen/Standards-und-Zertifizierung/IT-Grundschutz/it-grundschutz_node.html",
+      "status": "conditional",
+      "checks": [
+        {
+          "id": "OPS-01",
+          "title": "Immutable Release-Artefakte und geschuetzte Environments",
+          "evidence": [
+            ".github/workflows/deploy-staging.yml",
+            ".github/workflows/valeo-erp-deployment.yml",
+            "k8s/helm/valeo-erp/values-production.yaml"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              ".github/workflows/deploy-staging.yml",
+              "sha-${GITHUB_SHA}"
+            ],
+            [
+              ".github/workflows/deploy-staging.yml",
+              "Dockerfile.frontend"
+            ],
+            [
+              ".github/workflows/valeo-erp-deployment.yml",
+              "environment:"
+            ],
+            [
+              ".github/workflows/valeo-erp-deployment.yml",
+              "frontend.image.tag"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "OPS-02",
+          "title": "Migration vor Rollout und automatischer Smoke",
+          "evidence": [
+            ".github/workflows/deploy-staging.yml",
+            ".github/workflows/valeo-erp-deployment.yml",
+            "scripts/check_production_readiness.py"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              ".github/workflows/deploy-staging.yml",
+              "scripts/init_db.py"
+            ],
+            [
+              ".github/workflows/deploy-staging.yml",
+              "/readyz"
+            ],
+            [
+              ".github/workflows/valeo-erp-deployment.yml",
+              "scripts/init_db.py"
+            ],
+            [
+              ".github/workflows/valeo-erp-deployment.yml",
+              "/readyz"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "OPS-03",
+          "title": "Rollback bei fehlgeschlagenem Smoke",
+          "evidence": [
+            ".github/workflows/deploy-staging.yml",
+            ".github/workflows/valeo-erp-deployment.yml",
+            "docs/operations/production-readiness-runbook.md"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              ".github/workflows/deploy-staging.yml",
+              "--atomic --wait"
+            ],
+            [
+              ".github/workflows/valeo-erp-deployment.yml",
+              "helm rollback"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "OPS-04",
+          "title": "Wiederanlauf, RTO/RPO und Alarmierung im Zielbetrieb",
+          "evidence": [
+            "k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml",
+            "scripts/run_restore_drill.sh",
+            "scripts/check_restore_drill_evidence.py",
+            "docs/operations/drill-protocols/README.md"
+          ],
+          "external_gate": "Beobachteter Restore-/Incident-Drill im produktionsnahen Cluster (Protokoll via scripts/run_restore_drill.sh committen)",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        }
+      ]
+    },
+    {
+      "id": "soc2",
+      "assessor": "Simulierter SOC-2-Pruefer (Type-I-Readiness)",
+      "standard": "AICPA Trust Services Criteria: Security (Pflicht) + Availability + Confidentiality + Processing Integrity",
+      "source": "https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2",
+      "status": "conditional",
+      "checks": [
+        {
+          "id": "SOC2-CC1",
+          "title": "Kontrollumfeld: Review-Verantwortung und Arbeitssteuerung dokumentiert",
+          "evidence": [
+            ".github/CODEOWNERS",
+            "docs/agent-ops/active-workboard.md"
+          ],
+          "external_gate": null,
+          "required_content": [
+            [
+              ".github/CODEOWNERS",
+              "SPEC-P0-06"
+            ]
+          ],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SOC2-CC6",
+          "title": "Logischer Zugriff: OIDC/JWKS, Bearer-Enforcement, Tenant-Isolation mit Negativtests",
+          "evidence": [
+            "app/middleware/tenant_enforcement.py",
+            "tests/test_tenant_enforcement.py",
+            "app/core/security.py"
+          ],
+          "external_gate": "Offboarding-/Access-Review-Prozess des Betreibers (Prozessnachweis ausserhalb des Repos)",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SOC2-CC7",
+          "title": "Betrieb: Monitoring/Alerting, Incident-Runbook, nightly Runtime-Sweep als Betriebsevidenz",
+          "evidence": [
+            "docs/operations/production-readiness-runbook.md",
+            ".github/workflows/runtime-sweep.yml",
+            "scripts/api_runtime_sweep.py"
+          ],
+          "external_gate": "Beobachteter Incident-/Restore-Drill im Zielbetrieb",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SOC2-CC8",
+          "title": "Change Management: CI-Pflichtgates, unveraenderliche SHA-Images, only-up-Coverage-Ratchet",
+          "evidence": [
+            ".github/workflows/quality-gate.yml",
+            "config/coverage_ratchet_baseline.json",
+            "scripts/check_critical_backend_coverage.py"
+          ],
+          "external_gate": "Branch-Protection auf main (Review + required Status-Checks) \u2014 GitHub-Einstellung des Betreibers",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SOC2-CC9",
+          "title": "Lieferanten/Subprozessoren: Risiko- und Vertragsuebersicht inkl. LLM-Provider",
+          "evidence": [
+            "docs/operations/production-readiness-runbook.md"
+          ],
+          "external_gate": "AVV-/Subprozessor-Verzeichnis mit Unterschriften (Keycloak-Betrieb, Fiskaly, Paperless, DATEV, LLM-Provider)",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SOC2-A1",
+          "title": "Verfuegbarkeit: Backup-/Restore-Automation und Wiederanlauf-Vertrag",
+          "evidence": [
+            "k8s/helm/valeo-erp/templates/backup-cronjob.yaml",
+            "k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml",
+            "scripts/run_restore_drill.sh"
+          ],
+          "external_gate": "15-min-RTO-Drill (Protokoll in docs/operations/drill-protocols/) und Erntepeak-Lasttest auf Staging (Betreiber)",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SOC2-C1",
+          "title": "Vertraulichkeit: Secret-Scanning ohne Baseline, PII-Vorfall dokumentiert und remediert",
+          "evidence": [
+            ".gitleaks.toml",
+            "artifacts/pii-remediation-report.md",
+            "scripts/purge_pii_history.sh"
+          ],
+          "external_gate": "History-Purge-Ausfuehrung, Secret-Rotation und DSB-Entscheidung (external)",
+          "required_content": [],
+          "status": "external_gate",
+          "missing_evidence": [],
+          "failed_assertions": []
+        },
+        {
+          "id": "SOC2-PI1",
+          "title": "Verarbeitungsintegritaet: 3-Wege-Match, GoBD-Nachweisraum, Audit-Kette",
+          "evidence": [
+            "tests/test_einkauf_3way_match_ers_rfq.py",
+            "tests/test_docflow_gobd.py",
+            "app/middleware/audit_middleware.py"
+          ],
+          "external_gate": null,
+          "required_content": [],
+          "status": "pass",
+          "missing_evidence": [],
+          "failed_assertions": []
+        }
+      ]
+    }
+  ]
+}

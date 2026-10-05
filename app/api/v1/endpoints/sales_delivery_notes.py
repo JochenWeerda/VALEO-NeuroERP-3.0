@@ -5,17 +5,32 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Optional
+from uuid import UUID
 import json
 from app.core.uuid7 import uuid7
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.domains.sales.lieferschein_status import pruefe_status
+from app.core.business_time import business_date_after, business_today
+from app.services.document_allocation_service import (
+    AllocationError,
+    DocumentAllocationService,
+    LineToRegister,
+    OverAllocationError,
+)
+from app.services.sales_invoice_service import (
+    InvoiceCreationError,
+    SalesInvoiceService,
+    SourceLine,
+)
 from app.core.config import settings
 from app.core.tenant import get_tenant_id
+from app.services.customer_reference import resolve_customer, resolve_reference
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_delivery
 from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 from app.services.sales_posting_service import SalesPostingService
@@ -137,6 +152,12 @@ class DeliveryNoteUpdate(BaseModel):
 
 
 class DeliveryNote(DeliveryNoteBase):
+    @field_validator("sales_order_id", mode="before")
+    @classmethod
+    def serialize_order_reference(cls, value):
+        # PostgreSQL UUID columns are returned as UUID objects by psycopg.
+        return str(value) if isinstance(value, UUID) else value
+
     id: str
     tenant_id: str
     delivery_note_number: str
@@ -146,6 +167,11 @@ class DeliveryNote(DeliveryNoteBase):
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
     positionen: list[DeliveryNotePosition] = []
+    #: Nur in der Einzelabfrage gefuellt (Maskenkopf).
+    customer_name: Optional[str] = None
+    customer_number: Optional[str] = None
+    sales_order_number: Optional[str] = None
+    branch_name: Optional[str] = None
 
 
 def _generate_delivery_note_number(db: Session, tenant_id: str) -> str:
@@ -206,6 +232,42 @@ def _list_positions(db: Session, delivery_note_id: str) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def _register_allocation_sources(
+    db: Session, tenant_id: str, ls_id: str, positionen: list
+) -> None:
+    """Die Positionen als Quellen des Mengenmodells bekanntmachen.
+
+    Ohne diesen Schritt bleibt ``doc_allocation_sources`` leer: Der Mengenstand
+    an der Position — "100 dt geliefert, 60 dt berechnet, 40 dt offen" — haette
+    keine Grundlage, und eine Rechnung koennte sich auf nichts beziehen.
+
+    **Bewusst nicht best-effort.** Der Kontrakt-Movement-Sync daneben darf
+    scheitern, ohne das Speichern zu verhindern; dies hier nicht. Der einzige
+    Grund, aus dem die Registrierung fehlschlaegt, ist eine Position, deren
+    Menge unter die bereits berechnete gesenkt wurde — dann waere nach dem
+    Speichern mehr berechnet als geliefert, und genau dann soll das Speichern
+    scheitern statt stillschweigend eine Luecke zu hinterlassen.
+    """
+    service = DocumentAllocationService(db, tenant_id)
+    try:
+        service.register_document_lines(
+            "delivery_note",
+            ls_id,
+            [
+                LineToRegister.from_mapping(
+                    pos if isinstance(pos, dict) else pos.model_dump()
+                )
+                for pos in positionen
+            ],
+        )
+    except OverAllocationError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(fehler)) from fehler
+    except AllocationError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+
+
 @router.post("", response_model=DeliveryNote, status_code=status.HTTP_201_CREATED, summary="Delivery note anlegen")
 async def create_delivery_note(
     payload: DeliveryNoteCreate,
@@ -214,6 +276,10 @@ async def create_delivery_note(
     db: Session = Depends(get_db),
 ):
     """Create a new delivery note."""
+    try:
+        pruefe_status(payload.status)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     if payload.customer_id:
         assert_customer_allowed_for_delivery(db, tenant_id, payload.customer_id)
 
@@ -228,9 +294,12 @@ async def create_delivery_note(
         rabatt = pos.rabatt or Decimal("0")
         menge = pos.menge
         mwst_prozent = pos.mwst_prozent or Decimal("19")
-        
-        netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
-        netto_betrag = netto_preis * menge
+        if pos.listenpreis is None and pos.netto_preis is not None:
+            netto_preis = pos.netto_preis
+            netto_betrag = pos.netto_betrag if pos.netto_betrag is not None else netto_preis * menge
+        else:
+            netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
+            netto_betrag = netto_preis * menge
         mwst_betrag = netto_betrag * mwst_prozent / Decimal("100")
         
         netto += netto_betrag
@@ -279,9 +348,12 @@ async def create_delivery_note(
         listenpreis = pos.listenpreis or Decimal("0")
         rabatt = pos.rabatt or Decimal("0")
         menge = pos.menge
-        
-        netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
-        netto_betrag = netto_preis * menge
+        if pos.listenpreis is None and pos.netto_preis is not None:
+            netto_preis = pos.netto_preis
+            netto_betrag = pos.netto_betrag if pos.netto_betrag is not None else netto_preis * menge
+        else:
+            netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
+            netto_betrag = netto_preis * menge
         
         db.execute(
             text("""
@@ -302,12 +374,14 @@ async def create_delivery_note(
             {
                 "id": pos_id,
                 "delivery_note_id": ls_id,
+                **pos.model_dump(),
                 "netto_preis": netto_preis,
                 "netto_betrag": netto_betrag,
-                **pos.model_dump(),
             }
         )
     
+    _register_allocation_sources(db, tenant_id, ls_id, list(payload.positionen))
+
     try:
         sync_movements_for_delivery_note(
             db=db,
@@ -359,10 +433,17 @@ async def get_delivery_note(
     """Get a delivery note by ID."""
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)
-    
+    kunde = resolve_customer(db, tenant_id, row.get("customer_id"))
+    auftrag = resolve_reference(db, tenant_id, "sales_order", row.get("sales_order_id"))
+    niederlassung = resolve_reference(db, tenant_id, "branch", row.get("branch_id"))
+
     return DeliveryNote(
         **dict(row),
-        positionen=[DeliveryNotePosition(**dict(p)) for p in positions]
+        positionen=[DeliveryNotePosition(**dict(p)) for p in positions],
+        customer_name=kunde.name,
+        customer_number=kunde.number,
+        sales_order_number=auftrag.number,
+        branch_name=niederlassung.name or niederlassung.number,
     )
 
 
@@ -374,6 +455,11 @@ async def update_delivery_note(
     db: Session = Depends(get_db),
 ):
     """Update a delivery note. When status is draft and positionen is provided, positions are replaced (Option A)."""
+    if payload.status is not None:
+        try:
+            pruefe_status(payload.status)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     if row["status"] != "draft" and payload.positionen is not None:
         raise HTTPException(
@@ -390,12 +476,17 @@ async def update_delivery_note(
         netto = Decimal("0")
         mwst = Decimal("0")
         for pos in payload.positionen:
-            listenpreis = pos.listenpreis or Decimal("0")
             rabatt = pos.rabatt or Decimal("0")
             menge = pos.menge
             mwst_prozent = pos.mwst_prozent or Decimal("19")
-            netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
-            netto_betrag = netto_preis * menge
+            if pos.listenpreis is None and pos.netto_preis is not None:
+                netto_preis = pos.netto_preis
+                netto_betrag = pos.netto_betrag if pos.netto_betrag is not None else netto_preis * menge
+                listenpreis = pos.listenpreis
+            else:
+                listenpreis = pos.listenpreis or Decimal("0")
+                netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
+                netto_betrag = netto_preis * menge
             mwst_betrag = netto_betrag * mwst_prozent / Decimal("100")
             netto += netto_betrag
             mwst += mwst_betrag
@@ -419,9 +510,9 @@ async def update_delivery_note(
                 {
                     "id": pos_id,
                     "delivery_note_id": ls_id,
+                    **pos.model_dump(),
                     "netto_preis": netto_preis,
                     "netto_betrag": netto_betrag,
-                    **pos.model_dump(),
                 },
             )
         brutto = netto + mwst
@@ -435,6 +526,8 @@ async def update_delivery_note(
             {"id": ls_id, "tenant_id": tenant_id, "totals": json.dumps(totals)},
         )
 
+        _register_allocation_sources(db, tenant_id, ls_id, list(payload.positionen))
+
     # Build header update (exclude positionen)
     updates = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if k != "positionen" and v is not None}
     if updates:
@@ -442,12 +535,11 @@ async def update_delivery_note(
         updates["id"] = ls_id
         updates["tenant_id"] = tenant_id
         db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 UPDATE domain_sales.delivery_notes
                 SET {set_clause}, updated_at = NOW()
                 WHERE id = :id AND tenant_id = :tenant_id
-            """),
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             updates,
         )
 
@@ -721,6 +813,41 @@ async def get_last_delivery_note(
     )
 
 
+def _invoice_sources(ls_id: str, positions: list) -> list[SourceLine]:
+    """Die Lieferscheinpositionen als zu berechnende Quellen.
+
+    Preis und Steuersatz kommen mit, damit die Rechnungsposition eine eigene
+    Zeile werden kann statt einer blossen Mengenangabe. Die **Menge** kommt
+    ausdruecklich nicht mit: Berechnet wird die offene, und die kennt nur die
+    Restmengenfuehrung.
+    """
+    quellen: list[SourceLine] = []
+    for pos in positions:
+        eintrag = dict(pos)
+        zeile = LineToRegister.from_mapping(eintrag)
+        if not zeile.line_id or not zeile.unit:
+            continue
+        quellen.append(
+            SourceLine(
+                document_type="delivery_note",
+                document_id=ls_id,
+                line_id=zeile.line_id,
+                article_id=zeile.article_id,
+                article_number=eintrag.get("artikel_nr"),
+                description=eintrag.get("bezeichnung"),
+                quantity=Decimal(str(zeile.quantity or 0)),
+                unit=str(zeile.unit),
+                unit_price=Decimal(str(eintrag.get("netto_preis") or 0)),
+                vat_rate=(
+                    Decimal(str(eintrag["mwst_prozent"]))
+                    if eintrag.get("mwst_prozent") is not None
+                    else None
+                ),
+            )
+        )
+    return quellen
+
+
 @router.post("/{ls_id}/create-invoice", response_model=SalesDeliveryNotesOut, status_code=201, summary="Invoice from delivery anlegen")
 async def create_invoice_from_delivery(
     ls_id: str,
@@ -738,9 +865,27 @@ async def create_invoice_from_delivery(
         raise HTTPException(status_code=400, detail="Lieferschein muss gebucht/gedruckt sein, bevor eine Rechnung erstellt werden kann")
 
     positions = _list_positions(db, ls_id)
-    total = sum(Decimal(str(p.get("netto_betrag") or 0)) for p in positions)
-    inv_id = uuid7()
     inv_nr = f"RE-{row.get('ls_nummer', ls_id[:8])}"
+
+    # Die Rechnung mit eigenen Positionen — erst damit gibt es ein Ziel, auf das
+    # die Mengenzuordnung zeigen kann. Vorher entstand nur ein Journalsatz ueber
+    # den ganzen Beleg, und die Herkunft einer berechneten Menge war nirgends
+    # nachlesbar.
+    try:
+        rechnung = SalesInvoiceService(db, tenant_id).create_from_sources(
+            invoice_number=inv_nr,
+            customer_id=str(row.get("customer_id") or ""),
+            invoice_date=date.today(),
+            sources=_invoice_sources(ls_id, positions),
+        )
+    except InvoiceCreationError as fehler:
+        db.rollback()
+        # 409, nicht 500: Der haeufigste Grund ist, dass bereits berechnet
+        # wurde. Das ist eine Lage, kein Fehler im Programm.
+        raise HTTPException(status_code=409, detail=str(fehler)) from fehler
+
+    inv_id = rechnung.invoice.id
+    total = rechnung.invoice.net_amount
 
     db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_erp"))
     db.execute(
@@ -766,14 +911,15 @@ async def create_invoice_from_delivery(
         """),
         {"id": ls_id, "tenant_id": tenant_id},
     )
+
     db.commit()
 
     # SALES-DN-INV-OP-001: Debitoren-OP + Document-Store Eintrag (Belegbruch schliessen)
     try:
-        from datetime import date as _date
         import uuid as _uuid
-        today = _date.today().isoformat()
-        due = _date.today().replace(day=min(_date.today().day + 30, 28)).isoformat()
+        business_day = business_today()
+        today = business_day.isoformat()
+        due = business_date_after(30, from_date=business_day).isoformat()
         db.execute(text("""
             INSERT INTO domain_erp.offene_posten
                 (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,
@@ -820,4 +966,3 @@ async def create_invoice_from_delivery(
         "delivery_note_id": ls_id,
         "total": float(total),
     }
-

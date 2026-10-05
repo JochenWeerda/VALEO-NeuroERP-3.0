@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Any, Optional
 from uuid import UUID
 
-from pydantic import EmailStr, Field, ValidationInfo, field_validator, model_validator
+from pydantic import ConfigDict, EmailStr, Field, ValidationInfo, field_validator, model_validator
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
@@ -97,8 +97,29 @@ class CustomerUpdate(BaseSchema):
 
 
 class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
-    """Full customer schema"""
-    id: UUID = Field(..., description="Customer ID")
+    """Full customer schema.
+
+    Nur Antwortmodell: die Schreibwege laufen ueber ``CustomerCreate`` und
+    ``CustomerUpdate``, die keine ``id`` entgegennehmen.
+    """
+
+    model_config = ConfigDict(from_attributes=True, extra="allow")
+
+    # Leseweg: die Spalte ``domain_crm.customers.id`` ist ``character varying``
+    # und traegt neben UUIDs auch fachliche Schluessel aus Demo- und
+    # UAT-Bestaenden (z. B. ``DEMO-CUST-001``). Ein ``UUID``-Typ hier hat die
+    # gesamte Kundenliste mit HTTP 500 abgebrochen, sobald der CRM-Sidecar
+    # nicht erreichbar war und der Degrade-Pfad lokale Daten gelesen hat —
+    # sichtbar nur in Umgebungen ohne Sidecar, etwa im CI-Runtime-Sweep
+    # (SPEC-SOURCE-REALAPP-20260910). Gespeicherte Ids werden unveraendert
+    # durchgereicht, statt vorhandene Kunden aus der Liste zu entfernen.
+    id: str = Field(..., description="Customer ID (gespeicherter Schluessel, unveraendert)")
+    # Gleiche Begruendung fuer die Adresse: gespeicherte Werte werden gelesen,
+    # nicht erneut auf Zustellbarkeit geprueft. ``EmailStr`` lehnt unter anderem
+    # die per RFC 2606 fuer Testdaten reservierte Domain ``.invalid`` ab und
+    # brach damit dieselbe Liste ab. Der Schreibweg (``CustomerCreate`` und
+    # ``CustomerUpdate``) validiert weiterhin als ``EmailStr``.
+    email: Optional[str] = Field(None, description="Contact email (gespeichert, unveraendert)")
     business_partner_id: Optional[str] = Field(
         None,
         max_length=36,
@@ -112,6 +133,55 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     # Sales-spezifische Felder (nur neue)
     price_group: Optional[str] = Field(None, max_length=50, description="Price group")
     tax_category: Optional[str] = Field(None, max_length=50, description="Tax category")
+    ust_id: Optional[str] = None
+    steuernummer: Optional[str] = None
+    steuerart: Optional[str] = None
+    iban: Optional[str] = None
+    bic: Optional[str] = None
+    bankname: Optional[str] = None
+    kontoinhaber: Optional[str] = None
+    gesperrt_lieferung: Optional[bool] = None
+    gesperrt_rechnung: Optional[bool] = None
+    partner_status: Optional[str] = None
+    betriebsnummer: Optional[str] = None
+    eu_betriebsnummer: Optional[str] = None
+    qs_nummer: Optional[str] = None
+    bio: Optional[bool] = None
+    marketing_segment: Optional[str] = None
+    newsletter: Optional[bool] = None
+    email_opt_in: Optional[bool] = None
+    mitgliedsnummer: Optional[str] = None
+    pflichtanteile: Optional[float] = None
+    mitgliedschaft_beendet: Optional[bool] = None
+    rechnungsversand: Optional[str] = None
+    mahnversand: Optional[str] = None
+    edifact_invoic: Optional[bool] = None
+    edifact_orders: Optional[bool] = None
+    edifact_desadv: Optional[bool] = None
+    gap_ref_year: Optional[int] = None
+    gap_direct_total_eur: Optional[float] = None
+    gap_estimated_area_ha: Optional[float] = None
+    potential_seed_eur: Optional[float] = None
+    potential_fertilizer_eur: Optional[float] = None
+    potential_psm_eur: Optional[float] = None
+    potential_total_eur: Optional[float] = None
+    turnover_total_last_year_eur: Optional[float] = None
+    share_of_wallet_total_pct: Optional[float] = None
+    potential_segment: Optional[str] = None
+    potential_notes: Optional[str] = None
+    billing_customer_group: Optional[str] = None
+    billing_customer_type: Optional[str] = None
+    account_statement_print: Optional[bool] = None
+    account_statement_separate: Optional[bool] = None
+    last_account_statement_number: Optional[int] = None
+    account_balance: Optional[float] = None
+    settlement_mode: Optional[str] = None
+    invoice_number_range: Optional[str] = None
+    bonus_eligible: Optional[bool] = None
+    self_billing_sales: Optional[bool] = None
+    vat_optimizer: Optional[bool] = None
+    sepa_mandat_ref: Optional[str] = None
+    sepa_mandat_datum: Optional[str] = None
 
 
 # Lead Schemas
@@ -364,3 +434,5 @@ class Opportunity(OpportunityBase, TimestampMixin):
     """Full opportunity schema"""
     id: UUID = Field(..., description="Opportunity ID")
     tenant_id: str = Field(..., max_length=64, description="Tenant identifier")
+    customer_name: Optional[str] = Field(None, description="Customer name; filled by the single GET")
+    customer_number: Optional[str] = Field(None, description="Customer number; filled by the single GET")

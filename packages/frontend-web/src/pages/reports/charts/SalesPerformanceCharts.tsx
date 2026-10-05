@@ -1,4 +1,5 @@
 import { SimpleComparisonBars } from '@/components/charts/SimpleComparisonBars'
+import { CHART_POSITIVE, CHART_WARNING } from '@/components/charts/chart-palette'
 import type { ReportDashboardData } from '@/pages/reports/report-chart-types'
 
 export default function SalesPerformanceCharts({ data }: { data: ReportDashboardData }): JSX.Element {
@@ -8,8 +9,8 @@ export default function SalesPerformanceCharts({ data }: { data: ReportDashboard
         <h4 className="mb-4 font-semibold">Umsatz nach Status</h4>
         <SimpleComparisonBars
           data={[
-            { name: 'Bezahlt', value: data?.totalRevenue ?? 0, color: '#10B981' },
-            { name: 'Ausstehend', value: (data?.totalRevenue ?? 0) * 0.2, color: '#F59E0B' },
+            { name: 'Bezahlt', value: data?.totalRevenue ?? 0, color: CHART_POSITIVE },
+            { name: 'Ausstehend', value: (data?.totalRevenue ?? 0) * 0.2, color: CHART_WARNING },
           ]}
           valueFormatter={(value) => `${value.toLocaleString('de-DE')} EUR`}
         />
@@ -18,9 +19,9 @@ export default function SalesPerformanceCharts({ data }: { data: ReportDashboard
         <h4 className="mb-4 font-semibold">Konversionsraten</h4>
         <SimpleComparisonBars
           data={[
-            { name: 'Anfrage -> Angebot', value: data?.conversionRates?.inquiryToOffer ?? 0, color: '#10B981' },
-            { name: 'Angebot -> Auftrag', value: data?.conversionRates?.offerToOrder ?? 0, color: '#3B82F6' },
-            { name: 'Auftrag -> Rechnung', value: data?.conversionRates?.orderToInvoice ?? 0, color: '#8B5CF6' },
+            { name: 'Anfrage -> Angebot', value: data?.conversionRates?.inquiryToOffer ?? 0 },
+            { name: 'Angebot -> Auftrag', value: data?.conversionRates?.offerToOrder ?? 0 },
+            { name: 'Auftrag -> Rechnung', value: data?.conversionRates?.orderToInvoice ?? 0 },
           ]}
           valueFormatter={(value) => `${value.toFixed(1)} %`}
         />

@@ -27,6 +27,8 @@ import {
 } from 'lucide-react'
 import { financeService } from '@/lib/services/finance-service'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { NativeSelect } from '@/components/ui/native-select'
 import { exportToCSV } from '@/lib/export-utils'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
@@ -46,6 +48,7 @@ type MonatswerteExportRow = {
 
 export default function MonatswertePage(): JSX.Element {
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const currentYear = new Date().getFullYear()
   const [listeNr, setListeNr] = useState('1301 - Standard-Abc')
   const [firma, setFirma] = useState('Musterstandart')
@@ -185,62 +188,62 @@ export default function MonatswertePage(): JSX.Element {
       <div className="border-b bg-muted/30 shrink-0">
         <Tabs defaultValue="auswertungen" className="w-full">
           <TabsList className="w-full justify-start rounded-none h-12 bg-transparent border-0 gap-0 p-0">
-            <TabsTrigger value="datei" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">DATEI</TabsTrigger>
-            <TabsTrigger value="allgemein" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">ALLGEMEIN</TabsTrigger>
-            <TabsTrigger value="offene-posten" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">OFFENE POSTEN</TabsTrigger>
-            <TabsTrigger value="kostenrechnung" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">KOSTENRECHNUNG</TabsTrigger>
-            <TabsTrigger value="schnittstellen" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">SCHNITTSTELLEN</TabsTrigger>
-            <TabsTrigger value="abschluss" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">ABSCHLUSS</TabsTrigger>
-            <TabsTrigger value="auswertungen" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">AUSWERTUNGEN</TabsTrigger>
-            <TabsTrigger value="register" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">REGISTER</TabsTrigger>
+            <TabsTrigger value="datei" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">DATEI</TabsTrigger>
+            <TabsTrigger value="allgemein" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">ALLGEMEIN</TabsTrigger>
+            <TabsTrigger value="offene-posten" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">OFFENE POSTEN</TabsTrigger>
+            <TabsTrigger value="kostenrechnung" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">KOSTENRECHNUNG</TabsTrigger>
+            <TabsTrigger value="schnittstellen" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">SCHNITTSTELLEN</TabsTrigger>
+            <TabsTrigger value="abschluss" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">ABSCHLUSS</TabsTrigger>
+            <TabsTrigger value="auswertungen" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">AUSWERTUNGEN</TabsTrigger>
+            <TabsTrigger value="register" className="min-h-touch rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-background px-4">REGISTER</TabsTrigger>
           </TabsList>
           <TabsContent value="auswertungen" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
               <Link to="/fibu/buchungsjournal">
-                <Button variant="ghost" size="sm" className="gap-1.5"><Calendar className="h-4 w-4" /> Kontenauszüge</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><Calendar className="h-4 w-4" /> Kontenauszüge</Button>
               </Link>
               <Link to="/fibu/buchungsjournal">
-                <Button variant="ghost" size="sm" className="gap-1.5"><FileText className="h-4 w-4" /> Buchungs-Journal</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><FileText className="h-4 w-4" /> Buchungs-Journal</Button>
               </Link>
               <Link to="/fibu/buchungsjournal">
-                <Button variant="ghost" size="sm" className="gap-1.5"><Sigma className="h-4 w-4" /> Summen und Salden</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><Sigma className="h-4 w-4" /> Summen und Salden</Button>
               </Link>
               <Link to="/fibu/bwa">
-                <Button variant="ghost" size="sm" className="gap-1.5"><BarChart3 className="h-4 w-4" /> BWA</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><BarChart3 className="h-4 w-4" /> BWA</Button>
               </Link>
               <Link to="/fibu/bilanz">
-                <Button variant="ghost" size="sm" className="gap-1.5"><FileText className="h-4 w-4" /> Bilanz/GuV</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><FileText className="h-4 w-4" /> Bilanz/GuV</Button>
               </Link>
               <Link to="/export/ustva">
-                <Button variant="ghost" size="sm" className="gap-1.5"><FileText className="h-4 w-4" /> USt-Voranmeldung</Button>
+                <Button variant="ghost" className="min-h-touch gap-1.5"><FileText className="h-4 w-4" /> USt-Voranmeldung</Button>
               </Link>
             </div>
           </TabsContent>
           <TabsContent value="abschluss" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Link to="/fibu/buchungsjournal"><Button variant="ghost" size="sm" className="gap-1.5"><FileText className="h-4 w-4" /> Buchungs-Journal</Button></Link>
-              <Link to="/fibu/bwa"><Button variant="ghost" size="sm" className="gap-1.5"><BarChart3 className="h-4 w-4" /> BWA</Button></Link>
-              <Link to="/fibu/bilanz"><Button variant="ghost" size="sm" className="gap-1.5"><BarChart3 className="h-4 w-4" /> Bilanz/GuV</Button></Link>
+              <Link to="/fibu/buchungsjournal"><Button variant="ghost" className="min-h-touch gap-1.5"><FileText className="h-4 w-4" /> Buchungs-Journal</Button></Link>
+              <Link to="/fibu/bwa"><Button variant="ghost" className="min-h-touch gap-1.5"><BarChart3 className="h-4 w-4" /> BWA</Button></Link>
+              <Link to="/fibu/bilanz"><Button variant="ghost" className="min-h-touch gap-1.5"><BarChart3 className="h-4 w-4" /> Bilanz/GuV</Button></Link>
             </div>
           </TabsContent>
           <TabsContent value="datei" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Button variant="ghost" size="sm" className="gap-1.5"><FileDown className="h-4 w-4" /> Export</Button>
+              <Button variant="ghost" className="min-h-touch gap-1.5" onClick={() => toast({ title: 'Export', description: 'Nutzen Sie Excel in der Fußleiste für den CSV-Export.' })}><FileDown className="h-4 w-4" /> Export</Button>
             </div>
           </TabsContent>
           <TabsContent value="allgemein" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Button variant="ghost" size="sm" className="gap-1.5"><Search className="h-4 w-4" /> Suchen</Button>
+              <Button variant="ghost" className="min-h-touch gap-1.5" onClick={() => toast({ title: 'Suche nicht angebunden', description: 'Monatswerte filtern über Liste-Nr., Firma und Zeitraum.' })}><Search className="h-4 w-4" /> Suchen</Button>
             </div>
           </TabsContent>
           <TabsContent value="offene-posten" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Link to="/fibu/offene-posten"><Button variant="ghost" size="sm" className="gap-1.5">Offene Posten</Button></Link>
+              <Link to="/fibu/offene-posten"><Button variant="ghost" className="min-h-touch gap-1.5">Offene Posten</Button></Link>
             </div>
           </TabsContent>
           <TabsContent value="schnittstellen" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Link to="/fibu/schnittstelle-fibu"><Button variant="ghost" size="sm" className="gap-1.5"><FileDown className="h-4 w-4" /> Buchungsübergabe</Button></Link>
+              <Link to="/fibu/schnittstelle-fibu"><Button variant="ghost" className="min-h-touch gap-1.5"><FileDown className="h-4 w-4" /> Buchungsübergabe</Button></Link>
             </div>
           </TabsContent>
           <TabsContent value="kostenrechnung" className="mt-0 border-0 p-0" />
@@ -250,7 +253,7 @@ export default function MonatswertePage(): JSX.Element {
 
       {/* Titel + Filter */}
       <div className="shrink-0 border-b bg-muted/20 px-4 py-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Monatswerte für mehrere Monate</h2>
+        <h1 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Monatswerte für mehrere Monate</h1>
       </div>
       <Card className="rounded-none border-x-0 border-t-0 shrink-0">
         <CardContent className="p-4">
@@ -258,7 +261,7 @@ export default function MonatswertePage(): JSX.Element {
             <div className="flex items-center gap-2">
               <Label className="text-xs whitespace-nowrap">Liste-Nr.:</Label>
               <Input
-                className="w-48 h-8 text-sm"
+                className="w-48 min-h-touch text-sm"
                 value={listeNr}
                 onChange={(e) => setListeNr(e.target.value)}
                 list="liste-nr-list"
@@ -271,35 +274,37 @@ export default function MonatswertePage(): JSX.Element {
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-xs">Firma:</Label>
-              <Input className="w-40 h-8 text-sm" value={firma} onChange={(e) => setFirma(e.target.value)} />
+              <Input className="w-40 min-h-touch text-sm" value={firma} onChange={(e) => setFirma(e.target.value)} />
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-xs">Wirtschaftsjahr:</Label>
-              <Input className="w-20 h-8 text-sm" type="number" value={wirtschaftsjahr} onChange={(e) => setWirtschaftsjahr(e.target.value)} />
+              <Input className="w-20 min-h-touch text-sm" type="number" value={wirtschaftsjahr} onChange={(e) => setWirtschaftsjahr(e.target.value)} aria-label="Wirtschaftsjahr" />
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-xs">Zeitraum:</Label>
-              <select
-                className="h-8 rounded border bg-background px-2 text-sm"
+              <NativeSelect
+                ariaLabel="Zeitraum von"
+                className="w-32"
                 value={zeitraumVon}
                 onChange={(e) => setZeitraumVon(e.target.value)}
               >
                 {MONTHS.map((m) => (
                   <option key={m} value={m}>{m}</option>
                 ))}
-              </select>
+              </NativeSelect>
               <span className="text-xs">bis</span>
-              <select
-                className="h-8 rounded border bg-background px-2 text-sm"
+              <NativeSelect
+                ariaLabel="Zeitraum bis"
+                className="w-32"
                 value={zeitraumBis}
                 onChange={(e) => setZeitraumBis(e.target.value)}
               >
                 {MONTHS.map((m) => (
                   <option key={m} value={m}>{m}</option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
-            <Button size="sm" onClick={handleAnwenden} disabled={isLoading} className="gap-1.5">
+            <Button onClick={handleAnwenden} disabled={isLoading} className="min-h-touch gap-1.5">
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Anwenden
             </Button>
@@ -307,6 +312,7 @@ export default function MonatswertePage(): JSX.Element {
         </CardContent>
       </Card>
 
+      {!isTouch ? (
       <div className="px-4 pb-4 space-y-4">
         <OperationalCaseHeader
           title="Monatswerte fuer mehrere Monate"
@@ -323,6 +329,7 @@ export default function MonatswertePage(): JSX.Element {
           <OperationalContextPanel title="Monatswerte-Kontext" sections={contextSections} />
         </div>
       </div>
+      ) : null}
 
       {/* Inhalt: linke Liste + Grid */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
@@ -342,8 +349,8 @@ export default function MonatswertePage(): JSX.Element {
             <Skeleton className="h-64 w-full" />
           )}
           {isError && (
-            <Card className="border-amber-200 bg-amber-50">
-              <CardContent className="p-4 text-amber-800 text-sm">
+            <Card className="border-status-warning/40 bg-status-warning/10">
+              <CardContent className="p-4 text-status-warning text-sm">
                 Keine Daten für das gewählte Wirtschaftsjahr bzw. Zeitraum. Bitte Filter anpassen.
               </CardContent>
             </Card>
@@ -381,10 +388,10 @@ export default function MonatswertePage(): JSX.Element {
 
       {/* Fußleiste */}
       <div className="border-t bg-muted/30 px-4 py-2 flex items-center gap-2 shrink-0">
-        <Button variant="outline" size="sm">Drucker einrichten</Button>
-        <Button variant="outline" size="sm">Drucken</Button>
-        <Button variant="outline" size="sm">Vorschau</Button>
-        <Button variant="outline" size="sm" onClick={handleExcel} className="gap-1.5">
+        <Button variant="outline" className="min-h-touch" onClick={() => toast({ title: 'Drucker nicht angebunden', description: 'Druckereinrichtung ist in dieser Maske nicht verfügbar.' })}>Drucker einrichten</Button>
+        <Button variant="outline" className="min-h-touch" onClick={() => toast({ title: 'Druck nicht angebunden', description: 'Nutzen Sie Excel für den Export oder das Browser-Druckfenster über Strg+P.' })}>Drucken</Button>
+        <Button variant="outline" className="min-h-touch" onClick={() => toast({ title: 'Vorschau nicht angebunden', description: 'Eine Druckvorschau gibt es in Monatswerte nicht.' })}>Vorschau</Button>
+        <Button variant="outline" onClick={handleExcel} className="min-h-touch gap-1.5">
           <FileSpreadsheet className="h-4 w-4" /> Excel
         </Button>
       </div>

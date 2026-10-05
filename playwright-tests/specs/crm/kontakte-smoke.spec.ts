@@ -4,11 +4,12 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('CRM - Kontakte @smoke', () => {
   test.beforeEach(async ({ adminPage }) => {
     await adminPage.goto('/crm/kontakte-liste');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
   });
 
   test('Kontakte-Liste laedt ohne Fehler', async ({ adminPage }) => {

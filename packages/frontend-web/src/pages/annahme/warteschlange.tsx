@@ -14,6 +14,7 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Clock, Search, Truck } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useRepairWarteschlangeArticle, useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
@@ -22,6 +23,7 @@ import { normalizeOperationalStatus } from '@/lib/operational-status'
 export default function WarteschlangePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, refetch } = useWarteschlange()
@@ -129,13 +131,13 @@ export default function WarteschlangePage(): JSX.Element {
       label: 'Aktionen',
       render: (l: LKWEintrag) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => navigate('/annahme/qualitaets-check', { state: { eintragId: l.id } })}>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/annahme/qualitaets-check', { state: { eintragId: l.id } })}>
             Bearbeiten
           </Button>
           {!l.article_id && l.artikel ? (
             <Button
-              size="sm"
               variant="outline"
+              className="min-h-touch touch-manipulation"
               onClick={() =>
                 repairArticle.mutate(l.id, {
                   onSuccess: (result) => {
@@ -159,12 +161,12 @@ export default function WarteschlangePage(): JSX.Element {
             </Button>
           ) : null}
           {l.status === 'gesperrt' && (
-            <Button size="sm" variant="destructive" onClick={() => openKlaerung(l)}>
+            <Button variant="destructive" className="min-h-touch touch-manipulation" onClick={() => openKlaerung(l)}>
               Klaerung starten
             </Button>
           )}
           {l.status === 'abgeschlossen' && (
-            <Button size="sm" onClick={() => openHarvestAcceptance(l)}>
+            <Button className="min-h-touch touch-manipulation" onClick={() => openHarvestAcceptance(l)}>
               Ernte-Annahme anlegen
             </Button>
           )}
@@ -236,9 +238,7 @@ export default function WarteschlangePage(): JSX.Element {
 
   return (
     <PageSurface data-page-surface="annahme-warteschlange" contentClassName="space-y-6">
-      <PageSection
-        description="Rueckwirkend auf den DS-Rahmen, Keyboard-first und touch-feste Operator-Bedienung gehoben."
-      >
+      <PageSection description="Fahrzeuge in der Reihenfolge der Ankunft. QR-Code oder LKW anmelden, dann in der Liste weiterarbeiten.">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-3xl font-bold">Annahme-Warteschlange</h1>
@@ -278,7 +278,7 @@ export default function WarteschlangePage(): JSX.Element {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Truck className="h-5 w-5 text-blue-600" />
+                <Truck className="h-5 w-5 text-muted-foreground" />
                 <span className="text-2xl font-bold">{wartend}</span>
               </div>
             </CardContent>
@@ -289,7 +289,7 @@ export default function WarteschlangePage(): JSX.Element {
               <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-orange-600">{inBearbeitung}</span>
+              <span className="text-2xl font-bold text-status-warning">{inBearbeitung}</span>
             </CardContent>
           </Card>
 
@@ -310,7 +310,7 @@ export default function WarteschlangePage(): JSX.Element {
               <CardTitle className="text-sm font-medium">Heute abgefertigt</CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-green-600">{abgeschlossen}</span>
+              <span className="text-2xl font-bold text-status-success">{abgeschlossen}</span>
             </CardContent>
           </Card>
         </div>
@@ -355,7 +355,7 @@ export default function WarteschlangePage(): JSX.Element {
         </div>
       </PageSection>
 
-      <PageSection title="Arbeitsliste" description="Ctrl+F fokussiert die Suche, Ctrl+N oeffnet die Registrierung, F5 aktualisiert die Queue.">
+      <PageSection title="Arbeitsliste" description="Suche nach Kennzeichen, Lieferant oder Lieferschein. Tippen öffnet den nächsten Schritt.">
         <div className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -376,7 +376,7 @@ export default function WarteschlangePage(): JSX.Element {
         </div>
       </PageSection>
 
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </PageSurface>
   )
 }

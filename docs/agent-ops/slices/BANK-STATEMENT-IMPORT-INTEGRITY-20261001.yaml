@@ -1,0 +1,35 @@
+slice_id: BANK-STATEMENT-IMPORT-INTEGRITY-20261001
+title: Atomarer manueller Kontoauszugsimport
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claims c19646386 und 3c1a0304f; fremde Slices unveraendert.
+goal: Gueltige Imports speichern; Fehler niemals als Erfolg melden.
+file_ownership:
+  - app/api/v1/endpoints/bank_statement_import.py
+  - tests/test_bank_statement_import_integrity.py
+  - docs/quality-assurance/bank-statement-import-integrity-20261001.md
+acceptance:
+  - Manueller Kopf-/Zeilenimport hat genau einen Commit und atomaren Rollback.
+  - DQ unterscheidet aktuelle Zeile von echten Duplikaten.
+  - Antwort und gespeicherte Waehrung und Zaehler stimmen ueberein.
+  - Historische 501-Sperre ist im Nachzug BANK-PAYMENT-MATCHING-INTEGRITY-20261001 sicher ersetzt.
+tests:
+  - 12 echte PostgreSQL-/HTTP-Vertraege und sechs bestehende DQ-Vertraege bestanden.
+  - Ruff fuer neue Tests und Diff-Whitespacepruefung bestanden.
+  - Dead-Transaction-Scanner findet keine Importfundstelle mehr.
+risks:
+  - Historischer Auto-Abgleich-Gap ist im Nachzug BANK-PAYMENT-MATCHING-INTEGRITY-20261001 geschlossen.
+  - Aktueller Tenant-/Matchingstand und verbleibende Parsergaps stehen im Nachzug.
+ai_harness:
+  fachlicher_vertrag: Erfolg bedeutet vollstaendig gespeicherten manuellen Import.
+  architektur_vertrag: Bestehende Tabellen und gemeinsamer Pruefstand.
+  daten_vertrag: Waehrung und Centpraezision erhalten; UUIDv7 fuer Import-IDs.
+  test_vertrag: Echte SQL-/Commitfehler und HTTP-Antwortvertrag.
+  security_vertrag: Kein mandantenuebergreifendes Auto-Matching freischalten.
+  betriebs_vertrag: Keine neue Docker-/Datenbankressource; eigene Daten bereinigen.
+  dokumentations_vertrag: Workboard, Open-Gaps, Slice und Abnahmebericht.
+external_gates:
+  - GitHub-CI und Integration.
+  - Weiterfuehrende Fachvertraege gemaess BANK-PAYMENT-MATCHING-INTEGRITY-20261001.

@@ -89,7 +89,7 @@ export default function ContactPersonsTable({
           <UserCheck size={15} className="text-primary" />
           <span>Ansprechpartner / Anbauleitung ({contactPersons.length})</span>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setShowAddForm(!showAddForm)} className="gap-1">
+        <Button variant="outline" onClick={() => setShowAddForm(!showAddForm)} className="gap-1">
           {showAddForm ? <X size={13} /> : <Plus size={13} />}
           {showAddForm ? 'Schließen' : 'Neuer Kontakt'}
         </Button>
@@ -108,7 +108,6 @@ export default function ContactPersonsTable({
         </div>
         <Button
           variant="outline"
-          size="sm"
           disabled={!selectedContact}
           onClick={() => setShowDetails(true)}
           data-action-id="crm360.contact.open"
@@ -118,7 +117,6 @@ export default function ContactPersonsTable({
         </Button>
         <Button
           variant="outline"
-          size="sm"
           disabled={!selectedContact?.phone1 || !onCallContact}
           onClick={() => selectedContact && onCallContact?.(selectedContact)}
           data-action-id="crm360.contact.call"
@@ -128,7 +126,6 @@ export default function ContactPersonsTable({
         </Button>
         <Button
           variant="outline"
-          size="sm"
           disabled={!selectedContact}
           onClick={() => selectedContact && onEmailContact(selectedContact)}
           data-action-id="crm360.contact.email"
@@ -138,7 +135,6 @@ export default function ContactPersonsTable({
         </Button>
         <Button
           variant="outline"
-          size="sm"
           disabled={!selectedContact}
           onClick={() => selectedContact && onOpenPresents(selectedContact)}
           data-action-id="crm360.contact.presents"
@@ -197,14 +193,14 @@ export default function ContactPersonsTable({
                     key={i}
                     type="button"
                     onClick={() => handleToggleSchedule(i)}
-                    className={`w-6 h-6 text-xs rounded-md border transition ${schedule[i] ? 'bg-primary text-primary-foreground border-transparent' : 'bg-card border-border text-muted-foreground hover:bg-muted'}`}
+                    className={`min-h-touch min-w-touch touch-manipulation text-xs rounded-md border transition ${schedule[i] ? 'bg-primary text-primary-foreground border-transparent' : 'bg-card border-border text-muted-foreground hover:bg-muted'}`}
                   >
                     {i + 1}
                   </button>
                 ))}
               </div>
             </div>
-            <Button type="submit" size="sm" className="gap-1 self-end" disabled={isSaving || !lastName.trim()}>
+            <Button type="submit" className="gap-1 self-end" disabled={isSaving || !lastName.trim()}>
               <Check size={13} />
               Sichern
             </Button>

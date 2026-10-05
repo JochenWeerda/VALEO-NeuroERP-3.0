@@ -26,6 +26,7 @@ export default function AppLayout(): JSX.Element {
   const commandPaletteEnabled = useFeature('commandPalette')
   const voiceControlEnabled = useFeature('voiceControl')
   const realtimeEnabled = useFeature('sse')
+  const telephonyEnabled = useFeature('telephony')
 
   const [lastEvent, setLastEvent] = useState<string>(realtimeEnabled ? "idle" : "disabled")
   const connectionState = useMcpConnectionState({ enabled: realtimeEnabled })
@@ -59,12 +60,12 @@ export default function AppLayout(): JSX.Element {
       }
     }
     if (connectionState === "open") {
-      return { label: "Connected", className: "text-green-600" }
+      return { label: "Connected", className: "text-status-success" }
     }
     if (connectionState === "error") {
-      return { label: "Disconnected", className: "text-red-500" }
+      return { label: "Disconnected", className: "text-status-error" }
     }
-    return { label: "Connecting", className: "text-amber-700" }
+    return { label: "Connecting", className: "text-status-warning" }
   }, [connectionState, realtimeEnabled])
 
   return (
@@ -77,7 +78,7 @@ export default function AppLayout(): JSX.Element {
         <div className="flex-1 overflow-y-auto bg-background p-4 md:p-8">
           <Outlet />
         </div>
-        {realtimeEnabled ? (
+        {realtimeEnabled && connectionState !== 'open' ? (
           <footer className="border-t border-border bg-muted/40 px-6 py-2 text-xs text-muted-foreground">
             <div className="flex items-center justify-between gap-2">
               <span className={`${connectionMeta.className} font-medium`}>Realtime: {connectionMeta.label}</span>
@@ -92,9 +93,11 @@ export default function AppLayout(): JSX.Element {
         <GlobalButtonHandler />
       </Suspense>
       <AdvisorDock />
-      <Suspense fallback={null}>
-        <CallWidget />
-      </Suspense>
+      {telephonyEnabled ? (
+        <Suspense fallback={null}>
+          <CallWidget />
+        </Suspense>
+      ) : null}
       <Suspense fallback={null}>
         <AskVALEO />
       </Suspense>

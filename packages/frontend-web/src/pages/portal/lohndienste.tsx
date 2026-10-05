@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kundenportal — Lohndienstleistungen buchen und verwalten
  *
  * Unterstützte Dienste:
@@ -13,6 +13,7 @@
  */
 
 import { useState } from 'react'
+import { useLocation } from '@/app/routing/typed-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -137,7 +138,12 @@ const FORM_INIT: FormState = {
 export default function LohndienstePage() {
   const { toast } = useToast()
   const qc = useQueryClient()
-  const [open, setOpen] = useState(false)
+  // `/portal/lohndienste/neu` zeigte dieselbe Liste wie `/portal/lohndienste`:
+  // Die Route ist auf dieselbe Seite verdrahtet, und „Neu" oeffnete nichts.
+  // Wer den Pfad aufruft — aus dem Menue, einem Lesezeichen oder einem Link in
+  // einer Mail — will die Anfrage stellen, nicht die Liste lesen.
+  const { pathname } = useLocation()
+  const [open, setOpen] = useState(() => pathname.endsWith('/neu'))
   const [form, setForm] = useState<FormState>(FORM_INIT)
   const [saving, setSaving] = useState(false)
 
@@ -145,7 +151,7 @@ export default function LohndienstePage() {
     queryKey: ['portal-lohndienste', DEMO_KUNDEN_NR],
     queryFn: async () => {
       const res = await apiClient.get<{ items: LohnAuftrag[]; count: number }>(
-        `/portal/lohndienste?kunden_nr=${DEMO_KUNDEN_NR}`,
+        `/api/v1/portal/lohndienste?kunden_nr=${DEMO_KUNDEN_NR}`,
       )
       return res.data
     },
@@ -155,7 +161,7 @@ export default function LohndienstePage() {
     if (saving) return
     setSaving(true)
     try {
-      await apiClient.post('/portal/lohndienste', {
+      await apiClient.post('/api/v1/portal/lohndienste', {
         kunden_nr: DEMO_KUNDEN_NR,
         typ: form.typ,
         schlag_beschreibung: form.schlag_beschreibung,
@@ -187,7 +193,7 @@ export default function LohndienstePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Tractor className="h-6 w-6 text-amber-600" />
+            <Tractor className="h-6 w-6 text-status-warning" />
             Lohndienstleistungen
           </h1>
           <p className="text-gray-500 text-sm mt-1">
@@ -325,7 +331,7 @@ export default function LohndienstePage() {
         </div>
       )}
 
-      {data?.items.length === 0 && (
+      {(data?.items ?? []).length === 0 && !isLoading && (
         <Alert>
           <AlertDescription>
             Sie haben noch keine Lohndienstleistungen angefragt. Klicken Sie auf „Neuen Auftrag anfragen".
@@ -334,7 +340,7 @@ export default function LohndienstePage() {
       )}
 
       <div className="space-y-3">
-        {data?.items.map((a) => <AuftragKarte key={a.auftrag_id} a={a} />)}
+        {(data?.items ?? []).map((a) => <AuftragKarte key={a.auftrag_id} a={a} />)}
       </div>
     </div>
   )

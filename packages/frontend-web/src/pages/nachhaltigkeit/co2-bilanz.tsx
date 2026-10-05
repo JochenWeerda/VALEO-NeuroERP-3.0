@@ -8,7 +8,8 @@ import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { BarChart3, Leaf, TrendingDown } from 'lucide-react'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 
 type EsgReport = {
   totalCo2eKg: number
@@ -76,11 +77,7 @@ export default function CO2BilanzPage(): JSX.Element {
   return (
     <div className="space-y-6 p-6">
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Compliance-to-Report"
-          description="CO2-, EUDR- und ESG-Daten werden jetzt in den Reporting-Cockpits konsolidiert. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div>
         <h1 className="text-3xl font-bold">CO₂-Bilanz</h1>
@@ -94,7 +91,7 @@ export default function CO2BilanzPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 text-green-600" />
+              <Leaf className="h-5 w-5 text-status-success" />
               <span className="text-2xl font-bold">{gesamtTonnen.toLocaleString('de-DE')} t CO₂e</span>
             </div>
           </CardContent>
@@ -106,7 +103,7 @@ export default function CO2BilanzPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-blue-600" />
+              <TrendingDown className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{monthEntries.length}</span>
             </div>
           </CardContent>
@@ -117,7 +114,7 @@ export default function CO2BilanzPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gesamt CO₂e (kg)</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {(data?.totalCo2eKg ?? 0).toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg
             </span>
           </CardContent>

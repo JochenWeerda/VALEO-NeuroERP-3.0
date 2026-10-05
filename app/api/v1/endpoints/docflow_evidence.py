@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.docflow_evidence_service import DocflowEvidenceService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/docflow", tags=["docflow", "dms", "gobd"])
 
 
-@router.get("/evidence/documents", response_model=dict, summary="Dokumente mit Nachweis-Vollständigkeit (Picker)")
+@router.get("/evidence/documents", response_model=TypedObjectOut, summary="Dokumente mit Nachweis-Vollständigkeit (Picker)")
 def list_documents(
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -23,7 +24,7 @@ def list_documents(
     return {"items": DocflowEvidenceService(db, tenant_id).list_documents(limit=limit)}
 
 
-@router.get("/evidence/detail", response_model=dict, summary="Nachweiskette eines Dokuments (Artefakte/Kette/Buchungen/Lücken)")
+@router.get("/evidence/detail", response_model=TypedObjectOut, summary="Nachweiskette eines Dokuments (Artefakte/Kette/Buchungen/Lücken)")
 def evidence(
     doc: str = Query(..., description="Dokumentnummer oder -ID"),
     db: Session = Depends(get_db),

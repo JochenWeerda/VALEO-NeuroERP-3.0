@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-05",
+  "generatedAt": "2026-10-05",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -881,8 +881,335 @@
         }
       ],
       "sensitive_fields": [
-        "preis"
+        "vk_preis"
       ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feed-advice",
+      "title": "Fuetterungsberatung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feed-advice/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feed-advice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feed-advice/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feed-advice/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "futterkosten",
+        "milchleistung"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feed-controlling",
+      "title": "Fuetterungscontrolling",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feed-controlling/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feed-controlling/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feed-controlling/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feed-controlling/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "record_observation",
+          "label": "Tageswerte erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "actual_cost_eur_cow"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feed-readiness",
+      "title": "Futterversorgung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feed-readiness/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feed-readiness/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feed-readiness/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feed-readiness/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "create_handoff",
+          "label": "An Einkauf uebergeben",
+          "dangerLevel": "confirm",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "open_inventory",
+          "label": "Bestaende pflegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "stock_kg"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feeding-actuals",
+      "title": "Komponentenbezogene Ist-Fuetterung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-actuals/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-actuals/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-actuals/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-actuals/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export_csv",
+          "label": "CSV exportieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_measure",
+          "label": "Massnahme aus Abweichung",
+          "dangerLevel": "confirm",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "configure_threshold",
+          "label": "Schwellen konfigurieren",
+          "dangerLevel": "confirm",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "open_mobile",
+          "label": "Ist-Fuetterung erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "comment",
+        "value_consequences"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feeding-business",
+      "title": "Fuetterungsbetrieb",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-business/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-business/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-business/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-business/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "create_template",
+          "label": "Vorlage anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "apply_template",
+          "label": "Vorlage anwenden",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "business_partner_id",
+        "preferences",
+        "snapshot_checksum"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feeding-businesses",
+      "title": "Fuetterungsbetriebe",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-businesses/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-businesses/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-businesses/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-businesses/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "create_business",
+          "label": "Betrieb anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "business_partner_id",
+        "preferences"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feeding-group",
+      "title": "Tiergruppe",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-group/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-group/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-group/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-group/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit_group",
+          "label": "Tiergruppe bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "business_id",
+        "herd_id",
+        "external_ref"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feeding-plan",
+      "title": "Fuetterungsplan",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-plan/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-plan/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-plan/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-plan/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "print_plan",
+          "label": "Drucken / als PDF speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "open_mobile",
+          "label": "Mobile Stallansicht",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "source_ration_version_id",
+        "published_by"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/feeding-reference-data",
+      "title": "Naehrstoffe und Einheiten",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__feeding-reference-data/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/feeding-reference-data/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/feeding-reference-data/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/feeding-reference-data/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list"
@@ -909,9 +1236,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "agrar.abrechnung.drucken",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "PDF-Druck commandEndpoint folgt"
+          "commandEndpoint": "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -957,6 +1284,135 @@
       ]
     },
     {
+      "mask_id": "agrar/ration",
+      "title": "Rationsfreigabe",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__ration/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/ration/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/ration/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/ration/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "submit_review",
+          "label": "Zur Pruefung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/submit_review",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "approve",
+          "label": "Freigeben",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/approve",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "schedule",
+          "label": "Fuetterungsbeginn planen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/schedule",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "activate",
+          "label": "Jetzt aktivieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/activate",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "retire",
+          "label": "Fuetterung beenden",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "archive",
+          "label": "Archivieren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "snapshot",
+        "snapshot_checksum"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "agrar/rations-lifecycle",
+      "title": "Rationen und Freigaben",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__rations-lifecycle/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/rations-lifecycle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/rations-lifecycle/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/rations-lifecycle/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "plan_ration",
+          "label": "Neue Ration planen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_group",
+          "label": "Tiergruppe anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rations.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "snapshot_checksum"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
       "mask_id": "agrar/saatgut",
       "title": "Saatgut",
       "domain": "agrar",
@@ -986,8 +1442,198 @@
       ]
     },
     {
+      "mask_id": "auswertungen/duengemittelmengen",
+      "title": "Duengemittelmengen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__duengemittelmengen/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/duengemittelmengen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/duengemittelmengen/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/duengemittelmengen/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "customer_id",
+        "schlag_name",
+        "lieferschein_id"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "produktion/produktionsleitstand",
+      "title": "Produktionsleitstand",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/produktion__produktionsleitstand/:entityId",
+      "agent_contract_url": "/api/v1/masks/produktion/produktionsleitstand/agent-contract",
+      "screen_definition_url": "/api/v1/masks/produktion/produktionsleitstand/screen-definition",
+      "readiness_url": "/api/v1/masks/produktion/produktionsleitstand/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "sync",
+          "label": "Auftraege synchronisieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "production.control.write",
+          "commandEndpoint": "/api/v1/production-control/sync",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "assigned_user",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "strecke/nawaro-ernterklaerung-drucken",
+      "title": "NaWaRo-Ernterklärung drucken",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__nawaro-ernterklaerung-drucken/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/nawaro-ernterklaerung-drucken/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/nawaro-ernterklaerung-drucken/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/nawaro-ernterklaerung-drucken/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "strecke/nawaro-lieferungen",
+      "title": "NaWaRo-Lieferungen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__nawaro-lieferungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/nawaro-lieferungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/nawaro-lieferungen/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/nawaro-lieferungen/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "tankstelle/adapter-inbox",
+      "title": "Tankanlagen-Eingang",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/tankstelle__adapter-inbox/:entityId",
+      "agent_contract_url": "/api/v1/masks/tankstelle/adapter-inbox/agent-contract",
+      "screen_definition_url": "/api/v1/masks/tankstelle/adapter-inbox/screen-definition",
+      "readiness_url": "/api/v1/masks/tankstelle/adapter-inbox/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "external_id",
+        "payload_hash",
+        "validation_errors"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/aenderungshistorie",
+      "title": "Aenderungshistorie",
+      "domain": "audit",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__aenderungshistorie/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/aenderungshistorie/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/aenderungshistorie/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/aenderungshistorie/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "user_email",
+        "changes",
+        "entity_id"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/sanktionspruefung-kunden",
+      "title": "Terrorschutzpruefung Kunden",
+      "domain": "compliance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__sanktionspruefung-kunden/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/sanktionspruefung-kunden/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/sanktionspruefung-kunden/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "check",
+          "label": "Kunden pruefen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "compliance.sanctions.check",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "geprueft_name",
+        "entity_ref",
+        "checked_by"
+      ],
+      "mcp_tool_ids": [
+        "compliance.gate.status"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/sanktionspruefung-personal",
+      "title": "Terrorschutzpruefung Personal",
+      "domain": "compliance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__sanktionspruefung-personal/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/sanktionspruefung-personal/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/sanktionspruefung-personal/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "check",
+          "label": "Personal pruefen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "compliance.sanctions.check",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "geprueft_name",
+        "entity_ref",
+        "checked_by"
+      ],
+      "mcp_tool_ids": [
+        "compliance.gate.status"
+      ]
+    },
+    {
       "mask_id": "crm/customer-360",
-      "title": "Kundenstamm",
+      "title": "Kundenakte",
       "domain": "crm",
       "process_keys": [
         "order-to-cash",
@@ -1023,6 +1669,8 @@
         }
       ],
       "sensitive_fields": [
+        "iban",
+        "bic",
         "kreditlimit",
         "zahlungsbedingungen",
         "notizen"
@@ -1035,7 +1683,7 @@
     },
     {
       "mask_id": "crm/lead",
-      "title": "Lead",
+      "title": "Kundenakte",
       "domain": "crm",
       "process_keys": [],
       "rollout_route": "/mask-rollout/crm__lead/:entityId",
@@ -1077,6 +1725,42 @@
       ]
     },
     {
+      "mask_id": "crm/mail-arbeitsplatz",
+      "title": "Mail-Arbeitsplatz",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__mail-arbeitsplatz/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/mail-arbeitsplatz/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/mail-arbeitsplatz/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/mail-arbeitsplatz/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "draft",
+          "label": "Neue Mail",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.mail.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "from_address",
+        "to_addresses",
+        "subject",
+        "body_text",
+        "contact_id"
+      ],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.contact.log"
+      ]
+    },
+    {
       "mask_id": "crm/opportunity",
       "title": "Opportunity",
       "domain": "crm",
@@ -1107,9 +1791,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "commandEndpoint ueber crm_360 bei Bedarf"
+          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -1121,6 +1805,42 @@
         "crm.customer.summary360",
         "crm.contact.log"
       ]
+    },
+    {
+      "mask_id": "docflow/dokumenten-ruecklauf",
+      "title": "Dokumentenruecklauf",
+      "domain": "dms-compliance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/docflow__dokumenten-ruecklauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/docflow/dokumenten-ruecklauf/screen-definition",
+      "readiness_url": "/api/v1/masks/docflow/dokumenten-ruecklauf/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "contact_ref",
+        "subject_ref",
+        "storage_key"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/dms-volltext",
+      "title": "Volltextsuche Dokumentenverwaltung",
+      "domain": "documents",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__dms-volltext/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/dms-volltext/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/dms-volltext/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/dms-volltext/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "description",
+        "document_name",
+        "article_name"
+      ],
+      "mcp_tool_ids": []
     },
     {
       "mask_id": "einkauf/anfrage",
@@ -1250,7 +1970,7 @@
       "agent_contract_url": "/api/v1/masks/einkauf/purchase-order/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/purchase-order/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/purchase-order/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
           "key": "edit",
@@ -1262,10 +1982,34 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        },
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "versenden",
+          "label": "Versenden",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.bestellung.send",
+          "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/versenden",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
-        "zahlungsbedingungen",
+        "zahlungsbedingung",
+        "skonto1_prozent",
+        "skonto2_prozent",
         "betrag"
       ],
       "mcp_tool_ids": [
@@ -1314,6 +2058,106 @@
       ],
       "mcp_tool_ids": [
         "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "workspace/einkauf",
+      "title": "Einkauf-Cockpit",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__einkauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/einkauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/einkauf/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/einkauf/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list"
+      ]
+    },
+    {
+      "mask_id": "abrechnung/eb-lieferschein-kontrolle",
+      "title": "EB-Lieferschein-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/abrechnung__eb-lieferschein-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/abrechnung/eb-lieferschein-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/abrechnung/eb-lieferschein-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/auftrags-kontrolle",
+      "title": "Auftrags-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__auftrags-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/auftrags-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/auftrags-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/auftrags-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/beleg-kontrolle",
+      "title": "Beleg-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__beleg-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/beleg-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/beleg-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/beleg-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/lieferschein-kontrolle",
+      "title": "Lieferschein-Kontrolle",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__lieferschein-kontrolle/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/lieferschein-kontrolle/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/lieferschein-kontrolle/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/lieferschein-kontrolle/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "partner_ref",
+        "notes"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
       ]
     },
     {
@@ -1411,7 +2255,6 @@
         }
       ],
       "sensitive_fields": [
-        "konto_nr",
         "iban",
         "bic",
         "saldo"
@@ -1478,7 +2321,6 @@
         }
       ],
       "sensitive_fields": [
-        "iban",
         "steuernummer",
         "ust_id"
       ],
@@ -1509,12 +2351,13 @@
           "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "finance.payment_run.freigabe",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "commandEndpoint nur nach vollstaendiger AP+AR-Parity und 4-Augen-Freigabe"
+          "commandEndpoint": "/api/v1/finance/payment-runs/{entity_id}/actions/freigeben",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
+        "initiator_iban",
         "gesamtbetrag",
         "bank"
       ],
@@ -1522,6 +2365,122 @@
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
+    },
+    {
+      "mask_id": "finance/rechnungstapel",
+      "title": "Rechnungstapel",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__rechnungstapel/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/rechnungstapel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/rechnungstapel/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/rechnungstapel/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "validation_error",
+        "source_ref",
+        "maker",
+        "checker"
+      ],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "workspace/fibu",
+      "title": "FIBU-Cockpit",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__fibu/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/fibu/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/fibu/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/fibu/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "futtermittel/analyse",
+      "title": "Futteranalyse",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__analyse/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/analyse/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/analyse/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/analyse/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "validate",
+          "label": "Plausibilitaet pruefen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.analyse.validate",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "release",
+          "label": "Analyse freigeben",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.analyse.release",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "reject",
+          "label": "Zurueckweisen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "futtermittel.analyse.reject",
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "original_document_id",
+        "original_sha256"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "futtermittel/analysen",
+      "title": "Futteranalysen",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__analysen/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/analysen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/analysen/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/analysen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "import_analysis",
+          "label": "Analyse erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.analyse.create",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
     },
     {
       "mask_id": "futtermittel/einzelfuttermittel",
@@ -1574,10 +2533,136 @@
           "stubReason": null
         }
       ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "schnittstelle/legacy-adapter-monitor",
+      "title": "Standard-/Unimet-Adapter",
+      "domain": "integration",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schnittstelle__legacy-adapter-monitor/:entityId",
+      "agent_contract_url": "/api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schnittstelle/legacy-adapter-monitor/screen-definition",
+      "readiness_url": "/api/v1/masks/schnittstelle/legacy-adapter-monitor/readiness",
+      "risk_summary": "low",
+      "actions": [],
       "sensitive_fields": [
-        "preis_je_t"
+        "external_id",
+        "payload_hash",
+        "error_message"
       ],
       "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "lager/fremdware",
+      "title": "Fremdware und Fremdbestand",
+      "domain": "inventory",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__fremdware/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/fremdware/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/fremdware/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/fremdware/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "tenant_id",
+        "eigentuemer_id",
+        "eigentuemer_name",
+        "lagerort",
+        "notiz"
+      ],
+      "mcp_tool_ids": [
+        "wms.lot.trace",
+        "wms.cell.status"
+      ]
+    },
+    {
+      "mask_id": "lager/inventur-nebenlaeufe",
+      "title": "Inventur-Nebenlaeufe",
+      "domain": "inventory",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__inventur-nebenlaeufe/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/inventur-nebenlaeufe/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/inventur-nebenlaeufe/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/inventur-nebenlaeufe/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "create_count_sheet",
+          "label": "Zaehlliste",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_control",
+          "label": "Kontrolllauf",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_valuation",
+          "label": "Vorlaeufig bewerten",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_opening",
+          "label": "Bestandsvortrag",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "inventory.aux.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "maker",
+        "checker",
+        "source_hash"
+      ],
+      "mcp_tool_ids": [
+        "wms.lot.trace",
+        "wms.cell.status"
+      ]
+    },
+    {
+      "mask_id": "produktion/chargen-bearbeiten",
+      "title": "Chargen-Nummern bearbeiten",
+      "domain": "inventory",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/produktion__chargen-bearbeiten/:entityId",
+      "agent_contract_url": "/api/v1/masks/produktion/chargen-bearbeiten/agent-contract",
+      "screen_definition_url": "/api/v1/masks/produktion/chargen-bearbeiten/screen-definition",
+      "readiness_url": "/api/v1/masks/produktion/chargen-bearbeiten/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "lieferanten_charge",
+        "anerkennungs_nr",
+        "herkunft"
+      ],
+      "mcp_tool_ids": [
+        "wms.lot.trace",
+        "wms.cell.status"
+      ]
     },
     {
       "mask_id": "lager/article-stock",
@@ -1614,6 +2699,35 @@
       ]
     },
     {
+      "mask_id": "lager/leitstand",
+      "title": "Lager-Leitstand",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__leitstand/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/leitstand/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/leitstand/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/leitstand/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "refresh",
+          "label": "Aktualisieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "lager.silo.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status"
+      ]
+    },
+    {
       "mask_id": "lager/stock-movement",
       "title": "Lagerbewegung",
       "domain": "lager",
@@ -1643,6 +2757,523 @@
         "lager.bestand.get",
         "lager.inventur.status"
       ]
+    },
+    {
+      "mask_id": "workspace/lager",
+      "title": "Lager-Cockpit",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__lager/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/lager/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/lager/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/lager/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status"
+      ]
+    },
+    {
+      "mask_id": "fuhrpark/fahrzeuge",
+      "title": "Fahrzeuge",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fuhrpark__fahrzeuge/:entityId",
+      "agent_contract_url": "/api/v1/masks/fuhrpark/fahrzeuge/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fuhrpark/fahrzeuge/screen-definition",
+      "readiness_url": "/api/v1/masks/fuhrpark/fahrzeuge/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Fahrzeug",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die bestehende Fahrzeug-Erfassung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "fuhrpark/uebersicht",
+      "title": "Fuhrpark",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fuhrpark__uebersicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/fuhrpark/uebersicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fuhrpark/uebersicht/screen-definition",
+      "readiness_url": "/api/v1/masks/fuhrpark/uebersicht/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/frachtbrief",
+      "title": "Frachtbriefe",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__frachtbrief/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/frachtbrief/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/frachtbrief/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/frachtbrief/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "verladung",
+          "label": "Zur Verladung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Verladung. Dort entsteht der Frachtbrief."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/frachttabellen",
+      "title": "Frachttabellen",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__frachttabellen/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/frachttabellen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/frachttabellen/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/frachttabellen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Tabelle speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt die Frachttabelle an."
+        },
+        {
+          "key": "position",
+          "label": "Position anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Haengt eine Staffelposition an die gewaehlte Tabelle."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/tour-fracht-arbeitsraum",
+      "title": "Tour & Fracht",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__tour-fracht-arbeitsraum/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/tour-fracht-arbeitsraum/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/tour-fracht-arbeitsraum/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/tour-fracht-arbeitsraum/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "touren",
+          "label": "Zur Tourenplanung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt in die Tourenplanung."
+        },
+        {
+          "key": "fracht",
+          "label": "Zu Frachtbriefen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu den Frachtbriefen."
+        },
+        {
+          "key": "tabellen",
+          "label": "Frachttabellen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Frachttabellen."
+        },
+        {
+          "key": "probe",
+          "label": "Probe berechnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Simuliert die Frachtkosten des ersten aktiven Tarifs."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/tourenplanung",
+      "title": "Tourenplanung",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__tourenplanung/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/tourenplanung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/tourenplanung/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/tourenplanung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "dispo",
+          "label": "Dispo-Arbeitsraum",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum."
+        },
+        {
+          "key": "aufloesen",
+          "label": "Auflösen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Liest den Lieferschein und setzt das Ziel."
+        },
+        {
+          "key": "anlegen",
+          "label": "Tour anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt die Tour aus dem aufgeloesten Lieferschein an."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/verladung",
+      "title": "Verladung",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__verladung/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/verladung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/verladung/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/verladung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Beladung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die bestehende LKW-Beladung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "logistik/versandprofile",
+      "title": "Versandprofile",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__versandprofile/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/versandprofile/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/versandprofile/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/versandprofile/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "profil",
+          "label": "Profil speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt das Versandprofil an."
+        },
+        {
+          "key": "avis",
+          "label": "Avis speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt ein Lieferavis an."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/disposition",
+      "title": "Strecken-Disposition",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__disposition/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/disposition/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/disposition/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/disposition/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Strecke",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "logistics.strecke.schreiben",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/dokumente-drucken",
+      "title": "Strecken-Dokumente drucken",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__dokumente-drucken/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/dokumente-drucken/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/dokumente-drucken/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/dokumente-drucken/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/streckengeschaeft",
+      "title": "Streckengeschäft",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__streckengeschaeft/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/streckengeschaeft/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/streckengeschaeft/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/streckengeschaeft/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "strecke/vorlaeufig",
+      "title": "Vorläufige Streckengeschäfte",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__vorlaeufig/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/vorlaeufig/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/vorlaeufig/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/vorlaeufig/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "transporte/fahrer",
+      "title": "Fahrer",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/transporte__fahrer/:entityId",
+      "agent_contract_url": "/api/v1/masks/transporte/fahrer/agent-contract",
+      "screen_definition_url": "/api/v1/masks/transporte/fahrer/screen-definition",
+      "readiness_url": "/api/v1/masks/transporte/fahrer/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neuer Fahrer",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet das bestehende Fahrerformular."
+        },
+        {
+          "key": "verfuegbar",
+          "label": "Verfügbaren Fahrer öffnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet den ersten verfuegbaren Fahrer."
+        },
+        {
+          "key": "touren",
+          "label": "Tourenplanung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt in die Tourenplanung."
+        },
+        {
+          "key": "dokumente",
+          "label": "Dokumente",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Dokumentenablage."
+        },
+        {
+          "key": "export",
+          "label": "Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die sichtbare Fahrerliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "versand/versand-avis",
+      "title": "Versand-Avis",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/versand__versand-avis/:entityId",
+      "agent_contract_url": "/api/v1/masks/versand/versand-avis/agent-contract",
+      "screen_definition_url": "/api/v1/masks/versand/versand-avis/screen-definition",
+      "readiness_url": "/api/v1/masks/versand/versand-avis/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "workspace/leitung",
+      "title": "Leitungs-Cockpit",
+      "domain": "management",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__leitung/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/leitung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/leitung/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/leitung/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "planung/kalender",
+      "title": "Planungskalender",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/planung__kalender/:entityId",
+      "agent_contract_url": "/api/v1/masks/planung/kalender/agent-contract",
+      "screen_definition_url": "/api/v1/masks/planung/kalender/screen-definition",
+      "readiness_url": "/api/v1/masks/planung/kalender/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "reproject",
+          "label": "Neu projizieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "planung.calendar.reproject",
+          "commandEndpoint": "/api/v1/planung/kalender/reproject",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "owner_id",
+        "team_id",
+        "title",
+        "payload",
+        "object_route"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "schnittstelle/mde-inbox",
+      "title": "MDE-Eingangskorb",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schnittstelle__mde-inbox/:entityId",
+      "agent_contract_url": "/api/v1/masks/schnittstelle/mde-inbox/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schnittstelle/mde-inbox/screen-definition",
+      "readiness_url": "/api/v1/masks/schnittstelle/mde-inbox/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "process_pending",
+          "label": "Ausstehende verarbeiten",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "mobile.sync.process",
+          "commandEndpoint": "/api/v1/mobile/sync-process",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "error_message",
+        "idempotency_key"
+      ],
+      "mcp_tool_ids": []
     },
     {
       "mask_id": "qualitaet/reklamation",
@@ -1684,6 +3315,109 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "strecke/qualitaets-abweichung",
+      "title": "Qualitätsabweichung",
+      "domain": "qualitaet",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/strecke__qualitaets-abweichung/:entityId",
+      "agent_contract_url": "/api/v1/masks/strecke/qualitaets-abweichung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/strecke/qualitaets-abweichung/screen-definition",
+      "readiness_url": "/api/v1/masks/strecke/qualitaets-abweichung/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/abfrage-center",
+      "title": "Abfrage-Center",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__abfrage-center/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/abfrage-center/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/abfrage-center/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/abfrage-center/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "create",
+          "label": "Neue Abfrage",
+          "dangerLevel": "low",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "reporting.query.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "import",
+          "label": "Signiert importieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "reporting.query.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "filter_spec",
+        "selected_fields"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/bonus-berechnung",
+      "title": "Bonus-Berechnung",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__bonus-berechnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/bonus-berechnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/bonus-berechnung/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/bonus-berechnung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "calculate",
+          "label": "Bonuslauf berechnen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "reporting.bonus.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "total_basis",
+        "total_bonus",
+        "dimension_id",
+        "actor"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "auswertungen/l3-berichtskatalog",
+      "title": "L3-Berichtskatalog",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__l3-berichtskatalog/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/l3-berichtskatalog/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/l3-berichtskatalog/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/l3-berichtskatalog/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "customer_id",
+        "representative_id",
+        "source_ref"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "sales/delivery-note",
       "title": "Lieferschein",
       "domain": "sales",
@@ -1703,9 +3437,55 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "sales.lieferschein.drucken",
+          "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
+      "mask_id": "sales/invoice",
+      "title": "Ausgangsrechnung",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/sales__invoice/:entityId",
+      "agent_contract_url": "/api/v1/masks/sales/invoice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/sales/invoice/screen-definition",
+      "readiness_url": "/api/v1/masks/sales/invoice/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
+      "mask_id": "sales/invoices",
+      "title": "Ausgangsrechnungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/sales__invoices/:entityId",
+      "agent_contract_url": "/api/v1/masks/sales/invoices/agent-contract",
+      "screen_definition_url": "/api/v1/masks/sales/invoices/screen-definition",
+      "readiness_url": "/api/v1/masks/sales/invoices/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "Liste exportieren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.rechnung.lesen",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "PDF-Druck commandEndpoint folgt"
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -1747,6 +3527,58 @@
         "sales.order.status",
         "sales.invoice.propose"
       ]
+    },
+    {
+      "mask_id": "verkauf/betriebsauftrag",
+      "title": "Betriebsauftrag drucken",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/verkauf__betriebsauftrag/:entityId",
+      "agent_contract_url": "/api/v1/masks/verkauf/betriebsauftrag/agent-contract",
+      "screen_definition_url": "/api/v1/masks/verkauf/betriebsauftrag/screen-definition",
+      "readiness_url": "/api/v1/masks/verkauf/betriebsauftrag/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
+      "mask_id": "workspace/verkauf",
+      "title": "Verkauf-Cockpit",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__verkauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/verkauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/verkauf/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/verkauf/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.invoice.propose"
+      ]
+    },
+    {
+      "mask_id": "workspace/letzte-dokumente",
+      "title": "Letzte Dokumente",
+      "domain": "workspace",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workspace__letzte-dokumente/:entityId",
+      "agent_contract_url": "/api/v1/masks/workspace/letzte-dokumente/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workspace/letzte-dokumente/screen-definition",
+      "readiness_url": "/api/v1/masks/workspace/letzte-dokumente/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "partner_name",
+        "document_number",
+        "route"
+      ],
+      "mcp_tool_ids": []
     }
   ],
   "mcp_tools": [
@@ -1772,10 +3604,10 @@
       "tool_id": "crm.contact.log",
       "domain": "crm",
       "scope": "crm:write",
-      "idempotent": false,
+      "idempotent": true,
       "risk_class": "medium",
       "human_approval_required": false,
-      "endpoint": "POST /api/v1/crm/kontakte"
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "sales.order.status",
@@ -1793,7 +3625,7 @@
       "idempotent": false,
       "risk_class": "high",
       "human_approval_required": true,
-      "endpoint": "POST /api/v1/sales-invoices/propose"
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "fibu.open_items.list",
@@ -1913,5 +3745,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 53
+  "event_count": 75
 }

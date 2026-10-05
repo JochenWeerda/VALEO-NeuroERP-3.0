@@ -8,6 +8,7 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
@@ -221,6 +222,7 @@ const createMahnwesenConfig = (t: TFunction, entityTypeLabel: string): MaskConfi
 export default function MahnwesenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [isDirty, setIsDirty] = useState(false)
   const [roleFocus, setRoleFocus] = useState<DunningRoleFocus>('all')
   const entityType = 'dunning'
@@ -438,6 +440,8 @@ export default function MahnwesenPage(): JSX.Element {
       <ModuleToolbar backTarget="/finance/mahnwesen" closeTarget="/finance/mahnwesen" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(objectData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
       <div className="space-y-4 px-6 pt-4">
+        {!isTouch ? (
+        <>
         <OperationalCaseHeader
           title="Mahnfall steuern"
           description="Mahnlauf, Zinsdruck und Stammdatenlage werden vor dem eigentlichen Objektarbeitsplatz auf das Wesentliche verdichtet."
@@ -477,7 +481,11 @@ export default function MahnwesenPage(): JSX.Element {
           <OperationalContextPanel title="Mahnkontext" sections={contextSections} />
         </div>
         <CrudCapabilityChecklist capabilities={crudCapabilities} />
+        </>
+        ) : null}
       </div>
+      {!isTouch ? (
+      <>
       <div className="grid gap-4 px-6 pt-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Überfällige OP</CardTitle></CardHeader>
@@ -543,6 +551,8 @@ export default function MahnwesenPage(): JSX.Element {
             <CardContent><div className="text-sm font-semibold">{fibuCockpit.revision.export_runs > 0 ? `${fibuCockpit.revision.export_runs} Exportlaeufe sichtbar` : 'noch kein Lauf'}</div></CardContent>
           </Card>
         </div>
+      ) : null}
+      </>
       ) : null}
       <ObjectPage
         config={mahnwesenConfig}

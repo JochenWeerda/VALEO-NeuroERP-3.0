@@ -7,6 +7,10 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { Button } from '@/components/ui/button'
+import { NativeSelect } from '@/components/ui/native-select'
+import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type ProductionPrintRole = 'produktion' | 'versand' | 'qs' | 'it'
 
@@ -19,10 +23,26 @@ const productionPrintRoles = [
 
 export default function ProduktionsDokumenteDruckenPage(): JSX.Element {
   const [roleFocus, setRoleFocus] = useState<ProductionPrintRole>('produktion')
+  const isTouch = useTouchDevice()
+  const { toast } = useToast()
+  const documentOptions = [{ value: 'produktions-auftrag', label: 'Produktions-Auftrag' }]
+
+  const handlePrintUnavailable = (action: string) => {
+    toast({
+      title: `${action} nicht angebunden`,
+      description: 'Der Produktionsdruck hat keinen MCP-/API-Vertrag in dieser Maske.',
+      variant: 'destructive',
+    })
+  }
 
   return (
-    <div className="min-h-full bg-[#ececec] p-6 text-[11px] text-black">
-      <div className="mx-auto mb-6 max-w-6xl space-y-4 text-[13px]">
+    <div className="min-h-full space-y-4 bg-background p-3 text-foreground md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Produktions-Dokumente drucken</h1>
+        <p className="text-muted-foreground">Auftrag 2610147 pruefen und als Nachweis drucken</p>
+      </div>
+      {!isTouch ? (
+      <div className="mx-auto mb-6 max-w-6xl space-y-4">
         <RoleFocusBar roles={productionPrintRoles} value={roleFocus} onChange={setRoleFocus} title="Wer prueft den Produktionsdruck?" />
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <ManagementDecisionPanel
@@ -62,7 +82,17 @@ export default function ProduktionsDokumenteDruckenPage(): JSX.Element {
           />
         </div>
       </div>
+      ) : null}
 
+      <div className="space-y-3">
+        <NativeSelect ariaLabel="Dokument" value="produktions-auftrag" options={documentOptions} />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button className="min-h-touch touch-manipulation" onClick={() => handlePrintUnavailable('Drucken')}>Drucken</Button>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => handlePrintUnavailable('Vorschau')}>Vorschau</Button>
+        </div>
+      </div>
+
+      {!isTouch ? (
       <div className="mx-auto w-[600px] border border-[#8f8f8f] bg-[#efefef] shadow-[0_8px_24px_rgba(0,0,0,0.2)]">
         <div className="flex items-center justify-between border-b border-[#b8b8b8] bg-[#f4f4f4] px-3 py-1 text-[#5a5a5a]">
           <span>Produktion</span>
@@ -146,6 +176,7 @@ export default function ProduktionsDokumenteDruckenPage(): JSX.Element {
           </div>
         </div>
       </div>
+      ) : null}
     </div>
   )
 }

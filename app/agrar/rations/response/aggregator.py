@@ -81,6 +81,11 @@ class RationAggregates:
     na: float = 0.0
     mg: float = 0.0
     k: float = 0.0
+    s: float = 0.0
+    cl: float = 0.0
+    # F3 (DLG 01|2025, Kap. 9.2.2): TM-gewichtete DCAB-Summe [meq]; Rations-DCAB
+    # ergibt sich als dcab / total_dmi (meq/kg TM). DCAB = (Na+ + K+) - (Cl- + S2-).
+    dcab: float = 0.0
     sidlys: float = 0.0
     sidmet: float = 0.0
 
@@ -193,6 +198,9 @@ def aggregate_ration(
         na = _num(feed, "na")
         mg = _num(feed, "mg")
         k = _num(feed, "k")
+        s = _num(feed, "s")
+        cl = _num(feed, "cl")
+        dcab = _num(feed, "dcab")
         sidlys = _num(feed, "sidlys")
         sidmet = _num(feed, "sidmet")
 
@@ -214,6 +222,9 @@ def aggregate_ration(
         agg.na += amt * na
         agg.mg += amt * mg
         agg.k += amt * k
+        agg.s += amt * s
+        agg.cl += amt * cl
+        agg.dcab += amt * dcab
         agg.sidlys += amt * sidlys
         agg.sidmet += amt * sidmet
         agg.pendf += amt * ndf * pendf_factor_fn(feed)

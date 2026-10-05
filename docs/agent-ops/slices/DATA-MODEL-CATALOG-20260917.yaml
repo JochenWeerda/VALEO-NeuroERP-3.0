@@ -1,0 +1,47 @@
+---
+slice_id: DATA-MODEL-CATALOG
+id: DATA-MODEL-CATALOG
+title: Tabellenkatalog, Besitz und Masken-Lebenszyklus
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  P0–P5 geliefert. P6 nicht starten. UML/ERD nur noch bei neuem
+  ADR-003-Aggregat. Keine FSX-/Rechnungsdateien.
+goal: >
+  Canonical UML und ERD bleiben ADR-003. Review-Datum 2026-09-17.
+  Physische Tabellen leben im Katalog, nicht im classDiagram.
+file_ownership:
+  - docs/architecture/views/erd-canonical-domain.md
+  - docs/architecture/views/uml-canonical-domain-class.md
+  - docs/MASKEN.md
+  - docs/agent-ops/todo-datenmodell-katalog.md
+  - tests/test_canonical_domain_views.py
+acceptance:
+  - last_reviewed auf ERD und UML ist 2026-09-17
+  - kein neues ADR-003-Aggregat im classDiagram
+  - MASKEN.md bleibt Layout, ERD bleibt Objektmenge
+  - tests/test_canonical_domain_views.py Exit 0
+tests:
+  - tests/test_canonical_domain_views.py
+risks:
+  - Ein spaeteres Ticket will alle 635 Tabellen ins Mermaid zeichnen
+ai_harness:
+  fachlicher_vertrag: >
+    ADR-003-Aggregate sind die fachliche Wahrheit. Tabellen sind es nicht.
+  architektur_vertrag: >
+    classDiagram bleibt klein. Katalog ist das physische Inventar.
+  daten_vertrag: >
+    Kein DROP. Keine neuen Tabellen aus dem UML-Review.
+  test_vertrag: >
+    Klassenzahl begrenzt. Katalogtabellen nicht im Mermaid.
+  security_vertrag: >
+    Keine Secrets.
+  betriebs_vertrag: >
+    pytest haelt die Grenze. Rollback = Commit revertieren.
+  dokumentations_vertrag: >
+    Workboard, todo P5, ERD, UML, MASKEN.md.
+external_gates:
+  - not_applicable
+---

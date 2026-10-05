@@ -12,7 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -21,10 +23,8 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
-import {
-  WorkflowEntryBanner,
-  readWorkflowEntryContext,
-} from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { ArrowLeft, Loader2, Send } from 'lucide-react'
 
 type RueckmeldungForm = {
@@ -62,6 +62,7 @@ const rueckmeldungRoles = [
 
 export default function RueckmeldungPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const workflowContext = readWorkflowEntryContext(searchParams)
@@ -122,23 +123,18 @@ export default function RueckmeldungPage(): JSX.Element {
         : 'Rueckmeldung speichern und den Servicefall danach im Ticket weiterpruefen.'
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Workflow Banner */}
+    <div className="space-y-6 p-3 md:p-6">
       {workflowContext && (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover: Rueckmeldung"
-          description="Einsatzdaten und Ergebnis der Service-Anfrage werden hier dokumentiert."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       )}
 
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/service/anfragen')}>
-          <ArrowLeft className="h-5 w-5" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/service/anfragen')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Zur Anfragenliste
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Service-Rueckmeldung</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">Service-Rueckmeldung</h1>
           <p className="text-muted-foreground">
             Einsatzdaten und Ergebnis erfassen
             {anfrageId && <span> (Anfrage: {anfrageId.slice(0, 8)})</span>}
@@ -146,6 +142,8 @@ export default function RueckmeldungPage(): JSX.Element {
         </div>
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={rueckmeldungRoles}
         value={roleFocus}
@@ -214,8 +212,9 @@ export default function RueckmeldungPage(): JSX.Element {
           />
         </div>
       </div>
+      </>
+      ) : null}
 
-      {/* Form */}
       <Card>
         <CardHeader>
           <CardTitle>Rueckmeldung</CardTitle>
@@ -236,18 +235,19 @@ export default function RueckmeldungPage(): JSX.Element {
             </div>
             <div className="space-y-2">
               <Label htmlFor="ergebnis">Ergebnis</Label>
-              <select
+              <NativeSelect
                 id="ergebnis"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                ariaLabel="Ergebnis"
                 value={form.ergebnis}
-                onChange={(e) =>
-                  updateField('ergebnis', e.target.value as RueckmeldungForm['ergebnis'])
+                onValueChange={(value) =>
+                  updateField('ergebnis', value as RueckmeldungForm['ergebnis'])
                 }
-              >
-                <option value="erledigt">Erledigt</option>
-                <option value="teilweise">Teilweise erledigt</option>
-                <option value="offen">Offen / Folgeeinsatz noetig</option>
-              </select>
+                options={[
+                  { value: 'erledigt', label: 'Erledigt' },
+                  { value: 'teilweise', label: 'Teilweise erledigt' },
+                  { value: 'offen', label: 'Offen / Folgeeinsatz noetig' },
+                ]}
+              />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="material">Eingesetztes Material</Label>
@@ -270,14 +270,14 @@ export default function RueckmeldungPage(): JSX.Element {
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end gap-2">
-            <Button variant="outline" onClick={() => navigate('/service/anfragen')}>
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/service/anfragen')}>
               Abbrechen
             </Button>
             <Button
               onClick={() => submitMutation.mutate()}
               disabled={submitMutation.isPending || !canSendRueckmeldung}
-              className="gap-2"
+              className="min-h-touch gap-2 touch-manipulation"
             >
               {submitMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

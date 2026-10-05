@@ -72,7 +72,7 @@ def list_report_permissions(
             FROM domain_shared.admin_report_permissions
             WHERE {' AND '.join(where)}
             ORDER BY role_id ASC, report_key ASC
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()

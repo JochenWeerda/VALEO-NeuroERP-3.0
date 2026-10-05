@@ -105,7 +105,7 @@ export default function VerifyPage(): JSX.Element {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+              <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
               <p className="text-gray-600">Verifying document...</p>
             </div>
           </CardContent>
@@ -120,10 +120,10 @@ export default function VerifyPage(): JSX.Element {
         <Card className="w-full max-w-md border-red-200">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <XCircle className="h-8 w-8 text-red-600" />
+              <XCircle className="h-8 w-8 text-status-error" />
               <div>
-                <CardTitle className="text-red-900">Verification Failed</CardTitle>
-                <CardDescription className="text-red-600">{error}</CardDescription>
+                <CardTitle className="text-status-error">Verification Failed</CardTitle>
+                <CardDescription className="text-status-error">{error}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -153,15 +153,15 @@ export default function VerifyPage(): JSX.Element {
         <CardHeader>
           <div className="flex items-center gap-3">
             {isValid ? (
-              <CheckCircle2 className="h-10 w-10 text-green-600" />
+              <CheckCircle2 className="h-10 w-10 text-status-success" />
             ) : (
-              <AlertCircle className="h-10 w-10 text-yellow-600" />
+              <AlertCircle className="h-10 w-10 text-status-warning" />
             )}
             <div>
-              <CardTitle className={isValid ? 'text-green-900' : 'text-yellow-900'}>
+              <CardTitle className={isValid ? 'text-status-success' : 'text-status-warning'}>
                 {isValid ? 'Document Valid' : 'Document Not Verified'}
               </CardTitle>
-              <CardDescription className={isValid ? 'text-green-600' : 'text-yellow-600'}>
+              <CardDescription className={isValid ? 'text-status-success' : 'text-status-warning'}>
                 {result.message}
               </CardDescription>
             </div>

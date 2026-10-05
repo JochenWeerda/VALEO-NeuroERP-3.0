@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card } from '@/components/ui/card'
+import { Callout, CalloutDescription, CalloutTitle } from '@/components/ui/callout'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
@@ -27,6 +28,8 @@ import {
 import { useAngebote, type Angebot, type SalesOffer } from '@/lib/api/sales'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import {
   ChevronLeft,
   ChevronRight,
@@ -163,6 +166,7 @@ function getErrorMessage(error: unknown): string {
 export default function AngebotErstellenPage(): JSX.Element {
   const { push } = useToast()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { id: routeOfferId } = useParams<{ id?: string }>()
   const [searchParams] = useSearchParams()
   const handover = useMemo(() => parseSalesHandover(searchParams), [searchParams])
@@ -306,12 +310,32 @@ export default function AngebotErstellenPage(): JSX.Element {
   // ── Handler ───────────────────────────────────────────────────────────────
 
   function handleAngebotAuswaehlen(angebot: Angebot) {
-    setAngebotId(angebot.id)
-    setAngebotNr(angebot.nummer)
-    setDatum(angebot.datum)
-    setStatus(angebot.status)
     setShowAngebotAuswahl(false)
-    setIsDirty(false)
+    navigate(`/sales/angebot/${angebot.id}`)
+  }
+
+  function handleAngebotPrev() {
+    if (angebote.length === 0) {
+      push('Kein vorheriges Angebot')
+      return
+    }
+    const idx = angebotId ? angebote.findIndex((a) => a.id === angebotId) : -1
+    if (idx < 0) {
+      handleAngebotAuswaehlen(angebote[0])
+      return
+    }
+    if (idx > 0) handleAngebotAuswaehlen(angebote[idx - 1])
+    else push('Kein vorheriges Angebot')
+  }
+
+  function handleAngebotNext() {
+    if (angebote.length === 0) {
+      push('Kein nächstes Angebot')
+      return
+    }
+    const idx = angebotId ? angebote.findIndex((a) => a.id === angebotId) : -1
+    if (idx >= 0 && idx < angebote.length - 1) handleAngebotAuswaehlen(angebote[idx + 1])
+    else push('Kein nächstes Angebot')
   }
 
   function handleCustomerSelect(c: Customer) {
@@ -354,7 +378,10 @@ export default function AngebotErstellenPage(): JSX.Element {
   }
 
   function handlePositionOK() {
-    if (!currentPosition.artikelNr || !currentPosition.menge) return
+    if (!currentPosition.artikelNr || !currentPosition.menge) {
+      push('Bitte Artikel und Menge eingeben')
+      return
+    }
 
     const nettoPreis = currentPosition.listenpreis * (1 - currentPosition.rabatt / 100)
     const nettoBetrag = nettoPreis * currentPosition.menge
@@ -583,38 +610,23 @@ export default function AngebotErstellenPage(): JSX.Element {
     try {
       let id = angebotId
       if (!id) {
-        // Angebot speichern, um ID zu erhalten
-        const saved = await apiClient.post<{ id: string }>('/api/v1/sales/quotations', {
-          nummer: angebotNr,
-          datum,
-          gueltig_bis: gueltigBis || null,
-          status,
-          ist_pauschal: isPauschale,
-          customer_id: customer?.id || null,
-          kontakt,
-          positionen: positionen.map((p) => ({
-            pos_nr: p.posNr,
-            artikel_id: p.artikelId,
-            artikel_nr: p.artikelNr,
-            bezeichnung: p.bezeichnung,
-            menge: p.menge,
-            einheit: p.einheit,
-            listenpreis: p.listenpreis,
-            rabatt: p.rabatt,
-            netto_preis: p.nettoPreis,
-            netto_betrag: p.nettoBetrag,
-            mwst_prozent: p.mwstProzent,
-          })),
-        })
-        id = saved.id
+        // Dasselbe Anlegen wie beim Speichern: Der Druckweg hatte bis hierher
+        // einen eigenen Aufruf auf /sales/quotations — ein Objekt, das es im
+        // Backend nicht gibt. Das Angebot heisst dort `offer`.
+        const created = await apiClient.post<{ id: string; offer_number: string }>(
+          '/api/v1/sales/offers/',
+          buildOfferPayload(),
+        )
+        id = created.id
         setAngebotId(id)
+        if (created.offer_number) setAngebotNr(created.offer_number)
       }
 
       const params = new URLSearchParams()
       params.append('template', options.formatvorlage)
       params.append('copies', String(options.anzahlDrucke))
-      await apiClient.post(`/api/v1/sales/quotations/${id}/print?${params.toString()}`)
-      await apiClient.post(`/api/v1/sales/quotations/${id}/post`)
+      await apiClient.post(`/api/v1/sales/offers/${id}/print?${params.toString()}`)
+      await apiClient.post(`/api/v1/sales/offers/${id}/post`)
 
       push('Angebot erfolgreich gedruckt und gebucht')
       setShowPrintDialog(false)
@@ -639,18 +651,23 @@ export default function AngebotErstellenPage(): JSX.Element {
   // ── JSX ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50" data-offer-id={angebotId ?? undefined} aria-busy={isLoadingOffer}>
-      {/* Header */}
-      <div className="bg-amber-500 text-white px-4 py-2">
-        <h1 className="text-lg font-bold">ANGEBOT-ERFASSUNG</h1>
+    <div className="flex h-screen flex-col bg-background" data-offer-id={angebotId ?? undefined} aria-busy={isLoadingOffer}>
+      <div className="bg-primary px-4 py-2 text-primary-foreground">
+        <h1 className="text-lg font-bold">Angebot</h1>
       </div>
+      <ModuleToolbar backTarget="/verkauf" closeTarget="/verkauf" title="Angebot" />
 
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-auto p-3 md:p-4">
         {customer ? (
           <CustomerSalesEligibilityBanner crmCustomerId={customer.id} modus="auftrag" />
         ) : null}
 
-        {/* ── Kopf-Bereich ─────────────────────────────────────────────── */}
+        {isTouch ? (
+          <Callout variant={canConvertToOrder ? 'success' : 'warning'} className="mb-4">
+            <CalloutTitle>Nächster Schritt</CalloutTitle>
+            <CalloutDescription>{offerNextAction}</CalloutDescription>
+          </Callout>
+        ) : (
         <div className="mb-4 space-y-4">
           <RoleFocusBar
             roles={offerAssistantRoles}
@@ -704,37 +721,52 @@ export default function AngebotErstellenPage(): JSX.Element {
             />
           </div>
         </div>
+        )}
 
-        <Card className="mb-4 p-4">
-          <div className="grid grid-cols-3 gap-6">
+        <Card className="mb-4 p-3 md:p-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
 
             {/* Linke Spalte */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm whitespace-nowrap shrink-0">Angebot-Nr.:</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                <Label className="w-28 shrink-0 text-sm whitespace-nowrap">Angebot-Nr.:</Label>
                 <Input
                   value={angebotNr}
                   onChange={(e) => {
                     setAngebotNr(e.target.value)
                     setIsDirty(true)
                   }}
-                  className="flex-1 h-8 text-sm"
+                  className="min-h-touch min-w-[9rem] flex-1 text-sm"
                 />
+                <div className="flex shrink-0 gap-1">
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
                   title="Bestehendes Angebot suchen"
+                  aria-label="Angebot suchen"
                   onClick={() => setShowAngebotAuswahl(true)}
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button
+                  variant="ghost"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  aria-label="Vorheriges Angebot"
+                  title="Vorheriges Angebot"
+                  onClick={handleAngebotPrev}
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button
+                  variant="ghost"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  aria-label="Nächstes Angebot"
+                  title="Nächstes Angebot"
+                  onClick={handleAngebotNext}
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Datum:</Label>
@@ -745,7 +777,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                     setDatum(e.target.value)
                     setIsDirty(true)
                   }}
-                  className="flex-1 h-8 text-sm"
+                  className="min-h-touch flex-1 text-sm"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -757,16 +789,17 @@ export default function AngebotErstellenPage(): JSX.Element {
                     setGueltigBis(e.target.value)
                     setIsDirty(true)
                   }}
-                  className="flex-1 h-8 text-sm"
+                  className="min-h-touch flex-1 text-sm"
                 />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Status:</Label>
-                <Input value={status} readOnly className="flex-1 h-8 text-sm bg-muted" />
+                <Input value={status} readOnly className="min-h-touch flex-1 text-sm bg-muted" />
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <Checkbox
                   id="pauschale"
+                  className="min-h-11 min-w-11"
                   checked={isPauschale}
                   onCheckedChange={(c) => {
                     setIsPauschale(c === true)
@@ -790,12 +823,12 @@ export default function AngebotErstellenPage(): JSX.Element {
                   value={customer?.name || ''}
                   readOnly
                   placeholder="Kein Kunde gewählt"
-                  className="flex-1 h-8 text-sm"
+                  className="min-h-touch flex-1 text-sm"
                 />
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  aria-label="Kunde suchen"
                   title="Kunden suchen"
                   onClick={() => setShowCustomerDialog(true)}
                 >
@@ -803,7 +836,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 </Button>
               </div>
               {customer && (
-                <div className="text-xs text-muted-foreground space-y-0.5 pl-[7.5rem]">
+                <div className="text-xs text-muted-foreground space-y-0.5 pl-30">
                   <div>Kd-Nr.: {customer.customerNumber}</div>
                   {(customer.postalCode || customer.city) && (
                     <div>{[customer.postalCode, customer.city].filter(Boolean).join(' ')}</div>
@@ -819,7 +852,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                     setKontakt(e.target.value)
                     setIsDirty(true)
                   }}
-                  className="flex-1 h-8 text-sm"
+                  className="min-h-touch flex-1 text-sm"
                 />
               </div>
             </div>
@@ -853,7 +886,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                   <TableRow
                     key={idx}
                     className={`cursor-pointer text-xs ${
-                      aktivePositionIndex === idx ? 'bg-amber-100' : 'hover:bg-muted/50'
+                      aktivePositionIndex === idx ? 'bg-muted' : 'hover:bg-muted/50'
                     }`}
                     onClick={() => handlePositionRowClick(pos, idx)}
                   >
@@ -875,7 +908,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7"
+                          className="min-h-11 min-w-11 touch-manipulation"
                           title="Hoch"
                           onClick={() => handleMovePositionUp(idx)}
                           disabled={idx <= 0}
@@ -886,7 +919,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7"
+                          className="min-h-11 min-w-11 touch-manipulation"
                           title="Runter"
                           onClick={() => handleMovePositionDown(idx)}
                           disabled={idx >= positionen.length - 1}
@@ -897,7 +930,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-red-600 hover:text-red-700"
+                          className="min-h-11 min-w-11 touch-manipulation text-status-error hover:text-status-error"
                           title="Position löschen"
                           onClick={() => handlePositionDelete(idx)}
                         >
@@ -922,12 +955,12 @@ export default function AngebotErstellenPage(): JSX.Element {
         {/* ── Positions-Details ────────────────────────────────────────── */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">Positions-Details</h2>
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
 
             {/* Pos.-Nr. */}
             <div className="space-y-1">
               <Label className="text-xs">Pos.-Nr.:</Label>
-              <Input value={currentPosition.posNr} readOnly className="h-8 text-sm" />
+              <Input value={currentPosition.posNr} readOnly className="min-h-touch text-sm" />
             </div>
 
             {/* Artikel-Nr. + Suche */}
@@ -937,13 +970,13 @@ export default function AngebotErstellenPage(): JSX.Element {
                 <Input
                   value={currentPosition.artikelNr}
                   readOnly
-                  className="flex-1 h-8 text-sm"
+                  className="min-h-touch flex-1 text-sm"
                   placeholder="—"
                 />
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  aria-label="Artikel suchen"
                   title="Artikel suchen"
                   onClick={() => setShowArticleDialog(true)}
                 >
@@ -955,8 +988,8 @@ export default function AngebotErstellenPage(): JSX.Element {
             {/* Bezeichnung (2 Spalten) */}
             <div className="space-y-1 col-span-2">
               <Label className="text-xs">Bezeichnung:</Label>
-              <Input value={currentPosition.bezeichnung} readOnly className="h-8 text-sm" />
-              <Input value={currentPosition.bezeichnung2} readOnly className="h-8 text-sm" placeholder="Bezeichnung 2" />
+              <Input value={currentPosition.bezeichnung} readOnly className="min-h-touch text-sm" />
+              <Input value={currentPosition.bezeichnung2} readOnly className="min-h-touch text-sm" placeholder="Bezeichnung 2" />
             </div>
 
             {/* Menge */}
@@ -970,14 +1003,14 @@ export default function AngebotErstellenPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPosition((prev) => ({ ...prev, menge: Number(e.target.value) }))
                 }
-                className="h-8 text-sm"
+                className="min-h-touch text-sm"
               />
             </div>
 
             {/* Einheit */}
             <div className="space-y-1">
               <Label className="text-xs">Einheit:</Label>
-              <Input value={currentPosition.einheit} readOnly className="h-8 text-sm" />
+              <Input value={currentPosition.einheit} readOnly className="min-h-touch text-sm" />
             </div>
 
             {/* Listenpreis */}
@@ -990,7 +1023,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPosition((prev) => ({ ...prev, listenpreis: Number(e.target.value) }))
                 }
-                className="h-8 text-sm"
+                className="min-h-touch text-sm"
               />
             </div>
 
@@ -1006,7 +1039,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPosition((prev) => ({ ...prev, rabatt: Number(e.target.value) }))
                 }
-                className="h-8 text-sm"
+                className="min-h-touch text-sm"
               />
             </div>
 
@@ -1016,7 +1049,7 @@ export default function AngebotErstellenPage(): JSX.Element {
               <Input
                 value={currentPosition.einhPreis.toFixed(2)}
                 readOnly
-                className="h-8 text-sm bg-muted"
+                className="min-h-touch text-sm bg-muted"
               />
             </div>
 
@@ -1026,7 +1059,7 @@ export default function AngebotErstellenPage(): JSX.Element {
               <Input
                 value={currentPosition.betrag.toFixed(2)}
                 readOnly
-                className="h-8 text-sm bg-muted"
+                className="min-h-touch text-sm bg-muted"
               />
             </div>
 
@@ -1040,7 +1073,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPosition((prev) => ({ ...prev, ekPreis: Number(e.target.value) }))
                 }
-                className="h-8 text-sm"
+                className="min-h-touch text-sm"
               />
             </div>
 
@@ -1053,7 +1086,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPosition((prev) => ({ ...prev, mwstProzent: Number(e.target.value) }))
                 }
-                className="h-8 text-sm"
+                className="min-h-touch text-sm"
               />
             </div>
 
@@ -1062,7 +1095,7 @@ export default function AngebotErstellenPage(): JSX.Element {
               <Button
                 onClick={handlePositionOK}
                 disabled={!currentPosition.artikelNr || !currentPosition.menge}
-                className="h-8 gap-1 bg-amber-500 hover:bg-amber-600 text-white text-sm"
+                className="min-h-touch min-w-[136px] gap-1 touch-manipulation"
               >
                 <Check className="h-4 w-4" />
                 Zeile OK
@@ -1073,56 +1106,54 @@ export default function AngebotErstellenPage(): JSX.Element {
 
         {/* ── Summen ──────────────────────────────────────────────────── */}
         <Card className="mb-4 p-4">
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div className="space-y-1">
               <Label className="text-xs">Gewicht:</Label>
-              <Input value={`${summen.gewicht.toFixed(2)} kg`} readOnly className="h-8 text-sm" />
+              <Input value={`${summen.gewicht.toFixed(2)} kg`} readOnly className="min-h-touch text-sm" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Netto:</Label>
-              <Input value={summen.netto.toFixed(2)} readOnly className="h-8 text-sm" />
+              <Input value={summen.netto.toFixed(2)} readOnly className="min-h-touch text-sm" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">MwSt.:</Label>
-              <Input value={summen.mwst.toFixed(2)} readOnly className="h-8 text-sm" />
+              <Input value={summen.mwst.toFixed(2)} readOnly className="min-h-touch text-sm" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs font-semibold">Brutto:</Label>
-              <Input value={summen.brutto.toFixed(2)} readOnly className="h-8 text-sm font-semibold" />
+              <Input value={summen.brutto.toFixed(2)} readOnly className="min-h-touch text-sm font-semibold" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Währung:</Label>
-              <Input value="EUR" readOnly className="h-8 text-sm" />
+              <Input value="EUR" readOnly className="min-h-touch text-sm" />
             </div>
           </div>
         </Card>
       </div>
 
       {/* ── Bottom-Toolbar ─────────────────────────────────────────────── */}
-      <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
-        <div className="flex gap-2">
-          <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSave} disabled={isSaving}>
-            <Save className="h-3 w-3" /> Speichern
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t bg-background px-3 py-2 md:px-4">
+        <div className="flex flex-wrap gap-2">
+          <Button className="min-h-touch min-w-[136px] gap-2 touch-manipulation" onClick={() => void handleSave()} disabled={isSaving}>
+            <Save className="h-4 w-4" /> Speichern
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowPrintDialog(true)}>
-            <Printer className="h-3 w-3" /> Drucken
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowPrintDialog(true)}>
+            <Printer className="h-4 w-4" /> Drucken
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowAttachmentDialog(true)}>
-            <FileText className="h-3 w-3" /> Unterlagen
+          <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowAttachmentDialog(true)}>
+            <FileText className="h-4 w-4" /> Unterlagen
           </Button>
           <Button
             variant="outline"
-            size="sm"
-            className="h-7 text-xs gap-1"
-            onClick={handleConvertToOrder}
+            className="min-h-touch gap-2 touch-manipulation"
+            onClick={() => void handleConvertToOrder()}
             data-action-id="sales.offer.convert-to-order"
           >
-            <FileText className="h-3 w-3" /> In Auftrag wandeln
+            <FileText className="h-4 w-4" /> {isTouch ? 'Auftrag' : 'In Auftrag wandeln'}
           </Button>
           <Button
             variant="outline"
-            size="sm"
-            className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
+            className="min-h-touch gap-2 touch-manipulation text-status-error"
             onClick={() => {
               if (!angebotId) {
                 push('Kein gespeichertes Angebot zum Löschen')
@@ -1131,11 +1162,11 @@ export default function AngebotErstellenPage(): JSX.Element {
               if (window.confirm('Angebot wirklich löschen?')) void handleDelete()
             }}
           >
-            <Trash2 className="h-3 w-3" /> Löschen
+            <Trash2 className="h-4 w-4" /> Löschen
           </Button>
         </div>
-        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleBeenden}>
-          <X className="h-3 w-3" /> Beenden
+        <Button variant="ghost" className="min-h-touch gap-2 touch-manipulation" onClick={handleBeenden}>
+          <X className="h-4 w-4" /> Beenden
         </Button>
       </div>
 
@@ -1154,7 +1185,7 @@ export default function AngebotErstellenPage(): JSX.Element {
               value={sucheText}
               onChange={(e) => setSucheText(e.target.value)}
               placeholder="Angebot-Nr. oder Kunde suchen..."
-              className="h-8 text-sm"
+              className="min-h-touch text-sm"
               autoFocus
             />
           </div>
@@ -1190,7 +1221,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                       className={`text-xs cursor-pointer ${
                         idx === 0 ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/50'
                       }`}
-                      onDoubleClick={() => handleAngebotAuswaehlen(a)}
+                      onClick={() => handleAngebotAuswaehlen(a)}
                     >
                       <TableCell className="py-1 font-mono">{a.nummer}</TableCell>
                       <TableCell className="py-1">{a.datum}</TableCell>
@@ -1207,11 +1238,11 @@ export default function AngebotErstellenPage(): JSX.Element {
           </div>
 
           <DialogFooter className="mt-2">
-            <Button variant="outline" size="sm" onClick={() => setShowAngebotAuswahl(false)}>
+            <Button variant="outline" className="min-h-11" onClick={() => setShowAngebotAuswahl(false)}>
               Abbrechen
             </Button>
             <Button
-              size="sm"
+              className="min-h-11"
               onClick={() => filteredAngebote[0] && handleAngebotAuswaehlen(filteredAngebote[0])}
             >
               Übernehmen

@@ -1,4 +1,4 @@
-﻿"""PORTAL-INNENDIENST-001 — Innendienst-Sicht auf Kundenschlaege und Potentialanalyse.
+"""PORTAL-INNENDIENST-001 — Innendienst-Sicht auf Kundenschlaege und Potentialanalyse.
 
 Endpunkte:
   GET /innendienst/kunden/{kunden_nr}/schlaege   — Schlagkartei eines bestimmten Kunden
@@ -15,6 +15,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.api.v1.schemas.base import TypedObjectOut
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def _tid(x_tenant_id: Annotated[str | None, Header()] = None) -> str:
     return x_tenant_id
 
 
-@router.get("/kunden/{kunden_nr}/schlaege", response_model=dict[str, Any], summary="Kundenschlaege fuer Innendienst abrufen")
+@router.get("/kunden/{kunden_nr}/schlaege", response_model=TypedObjectOut, summary="Kundenschlaege fuer Innendienst abrufen")
 def kunden_schlaege(
     kunden_nr: str,
     db: Session = Depends(get_db),
@@ -71,7 +72,7 @@ def kunden_schlaege(
     }
 
 
-@router.get("/kunden/{kunden_nr}/massnahmen", response_model=dict[str, Any], summary="Kundenmassnahmen fuer Innendienst abrufen")
+@router.get("/kunden/{kunden_nr}/massnahmen", response_model=TypedObjectOut, summary="Kundenmassnahmen fuer Innendienst abrufen")
 def kunden_massnahmen(
     kunden_nr: str,
     schlag_id: str | None = Query(None),
@@ -120,7 +121,7 @@ def kunden_massnahmen(
     }
 
 
-@router.get("/potential", response_model=dict[str, Any], summary="Innendienst-Potentialanalyse abrufen")
+@router.get("/potential", response_model=TypedObjectOut, summary="Innendienst-Potentialanalyse abrufen")
 def potential_analyse(
     db: Session = Depends(get_db),
     x_tenant_id: Annotated[str | None, Header()] = None,

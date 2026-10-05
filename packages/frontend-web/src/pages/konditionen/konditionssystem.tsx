@@ -188,8 +188,9 @@ function PreislistenTab() {
                       <Badge variant={pl.is_active ? 'outline' : 'secondary'}>{pl.is_active ? 'Aktiv' : 'Inaktiv'}</Badge>
                     </td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === pl.id} onClick={() => void handleDelete(pl)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === pl.id} onClick={() => void handleDelete(pl)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -296,8 +297,9 @@ function RabattgruppenTab() {
                     <td className="py-2 pr-3">{g.bezeichnung}</td>
                     <td className="py-2 pr-3"><Badge variant="secondary">{g.richtung}</Badge></td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === g.id} onClick={() => void handleDelete(g)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === g.id} onClick={() => void handleDelete(g)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -402,8 +404,9 @@ function RabattklassenTab() {
                     <td className="py-2 pr-3">{k.bezeichnung}</td>
                     <td className="py-2 pr-3"><Badge variant="secondary">{k.richtung}</Badge></td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === k.id} onClick={() => void handleDelete(k)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === k.id} onClick={() => void handleDelete(k)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -535,13 +538,14 @@ function RabattsaetzeTab() {
                   <tr key={s.id} className="border-b border-border/50">
                     <td className="py-2 pr-3 font-mono">{s.rabattgruppe_nr}</td>
                     <td className="py-2 pr-3 font-mono">{s.rabattklasse_nr}</td>
-                    <td className="py-2 pr-3 tabular-nums font-medium text-green-700">{fmt(Number(s.rabatt_prozent))}%</td>
+                    <td className="py-2 pr-3 tabular-nums font-medium text-status-success">{fmt(Number(s.rabatt_prozent))}%</td>
                     <td className="py-2 pr-3 tabular-nums">{s.ab_menge != null ? fmt(Number(s.ab_menge)) : '—'}</td>
                     <td className="py-2 pr-3 text-xs">{s.gueltig_ab ? new Date(s.gueltig_ab).toLocaleDateString('de-DE') : '—'}</td>
                     <td className="py-2 pr-3 text-xs">{s.gueltig_bis ? new Date(s.gueltig_bis).toLocaleDateString('de-DE') : 'unbegrenzt'}</td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === s.id} onClick={() => void handleDelete(s)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === s.id} onClick={() => void handleDelete(s)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -688,8 +692,9 @@ function IndividualpreiseTab() {
                     <td className="py-2 pr-3 text-xs">{new Date(ip.gueltig_von).toLocaleDateString('de-DE')}</td>
                     <td className="py-2 pr-3 text-xs">{ip.gueltig_bis ? new Date(ip.gueltig_bis).toLocaleDateString('de-DE') : 'unbegrenzt'}</td>
                     <td className="py-2">
-                      <Button size="sm" variant="ghost" disabled={deletingId === ip.id} onClick={() => void handleDelete(ip)}>
-                        <Trash2 className="h-3 w-3 text-destructive" />
+                      <Button className="min-h-touch" variant="ghost" disabled={deletingId === ip.id} onClick={() => void handleDelete(ip)}>
+                        <Trash2 className="h-3 w-3 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </td>
                   </tr>
@@ -709,6 +714,7 @@ const SOURCE_LABELS: Record<string, string> = {
   base: 'Artikelstamm',
   price_list: 'Preisliste',
   contract: 'Kontrakt',
+  staffelrabatt: 'Mengenstaffel',
   customer_discount: 'Kundenrabatt',
   employee_discount: 'Mitarbeiterrabatt',
 }
@@ -747,8 +753,10 @@ function PreisfindungTab() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" /> Preisfindung (Live-Kalkulator)</CardTitle>
           <CardDescription>
-            Hierarchische Preisfindung: Preisliste → Kontrakt → Kundenrabatt → Basispreis.
-            Nur eine Rabattstufe wird angewendet (nicht additiv).
+            Hierarchische Preisfindung: Preisliste → Kontrakt → Mengenstaffel →
+            Kundenrabatt → Mitarbeiterrabatt → Basispreis. Nur eine Stufe wird
+            angewendet (nicht additiv). Die Mengenstaffel steht über dem Kundenrabatt,
+            weil sie an der tatsächlich bestellten Menge hängt.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -777,9 +785,9 @@ function PreisfindungTab() {
       </Card>
 
       {result && (
-        <Card className="border-green-200 bg-green-50/40 dark:bg-green-950/20">
+        <Card className="border-status-success/40 bg-status-success/10">
           <CardHeader>
-            <CardTitle className="text-base text-green-800">Ergebnis Preisfindung</CardTitle>
+            <CardTitle className="text-base text-status-success">Ergebnis Preisfindung</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
@@ -789,11 +797,11 @@ function PreisfindungTab() {
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">Rabatt</p>
-                <p className="text-xl font-bold tabular-nums text-amber-700">{fmt(Number(result.discount))}%</p>
+                <p className="text-xl font-bold tabular-nums text-status-warning">{fmt(Number(result.discount))}%</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">Nettopreis</p>
-                <p className="text-2xl font-bold tabular-nums text-green-700">{fmtEur(Number(result.net_price))}</p>
+                <p className="text-2xl font-bold tabular-nums text-status-success">{fmtEur(Number(result.net_price))}</p>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t flex gap-4 text-sm">
@@ -806,6 +814,12 @@ function PreisfindungTab() {
               )}
               {result.contract_id && (
                 <div><span className="text-muted-foreground">Kontrakt: </span><span className="font-mono text-xs">{result.contract_id}</span></div>
+              )}
+              {result.staffel_ab_menge != null && (
+                <div>
+                  <span className="text-muted-foreground">Staffelstufe ab: </span>
+                  <span className="font-mono text-xs">{fmt(Number(result.staffel_ab_menge))}</span>
+                </div>
               )}
             </div>
           </CardContent>
@@ -823,7 +837,7 @@ export default function KonditionssystemPage(): JSX.Element {
   return (
     <div className="p-6 space-y-4 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold">Konditionssystem / Preisfindung</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Konditionssystem / Preisfindung</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Preislisten · Rabattgruppen/-klassen · Individualpreise · Hierarchische Preisfindung
         </p>

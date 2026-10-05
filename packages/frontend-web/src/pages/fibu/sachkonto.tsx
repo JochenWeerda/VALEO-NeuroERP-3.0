@@ -87,8 +87,9 @@ export default function SachkontoPage(): JSX.Element {
             <p className="text-muted-foreground">{account.account_name}</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void refetch()} className="gap-2">
+        <Button variant="outline" className="min-h-touch gap-2" onClick={() => void refetch()}>
           <RefreshCw className="h-4 w-4" />
+          Aktualisieren
         </Button>
       </div>
 
@@ -146,7 +147,7 @@ export default function SachkontoPage(): JSX.Element {
             <CardContent className="space-y-6">
               <div className="rounded-lg border p-6 text-center">
                 <div className="text-sm text-muted-foreground mb-2">Aktueller Saldo</div>
-                <div className={`text-4xl font-bold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-4xl font-bold ${saldo >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                   {fmt(saldo)}
                 </div>
               </div>
@@ -157,11 +158,11 @@ export default function SachkontoPage(): JSX.Element {
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="text-sm text-muted-foreground mb-1">Soll (gesamt)</div>
-                  <div className="text-2xl font-bold text-green-600">{fmt(gesamtSoll)}</div>
+                  <div className="text-2xl font-bold text-status-success">{fmt(gesamtSoll)}</div>
                 </div>
                 <div className="rounded-lg border p-4">
                   <div className="text-sm text-muted-foreground mb-1">Haben (gesamt)</div>
-                  <div className="text-2xl font-bold text-red-600">{fmt(gesamtHaben)}</div>
+                  <div className="text-2xl font-bold text-status-error">{fmt(gesamtHaben)}</div>
                 </div>
               </div>
             </CardContent>

@@ -1,0 +1,131 @@
+"""Native entry cockpit for the feeding-advice task family."""
+
+from app.api.v1.endpoints.mask_screen_definition import _check_readiness
+from app.core.screen_definitions import get_screen_definition
+
+
+def test_feed_advice_cockpit_is_native_and_generator_ready() -> None:
+    definition = get_screen_definition("agrar/feed-advice")
+
+    assert definition is not None
+    assert definition["adapter"] == {
+        "type": "native",
+        "sourceId": "agrar/feed-advice",
+        "temporary": False,
+    }
+    assert definition["layout"]["floorplan"] == "cockpit"
+    assert definition["layout"]["mobileMode"] == "mobileStack"
+    assert definition["layout"]["touchTargetPx"] >= 44
+    assert _check_readiness(definition)["generatorReady"] is True
+
+
+def test_feed_advice_cockpit_separates_role_sized_tasks() -> None:
+    definition = get_screen_definition("agrar/feed-advice")
+    tiles = {tile["key"]: tile for tile in definition["tiles"]}
+
+    assert set(tiles) == {
+        "ration_planen",
+        "stallarbeit",
+        "aktive_rationen",
+        "betriebe",
+        "futterbestand",
+        "analysen",
+        "controlling",
+    }
+    assert tiles["ration_planen"]["targetRoute"].endswith("mode=expert")
+    assert tiles["stallarbeit"]["targetRoute"].endswith(
+        "fuetterungsdokumentation-mobil"
+    )
+    assert tiles["betriebe"]["targetRoute"].endswith("view=businesses")
+    assert tiles["analysen"]["targetRoute"].endswith("grundfutteranalysen")
+    assert all(tile["targetRoute"].startswith("/") for tile in tiles.values())
+
+
+def test_ration_lifecycle_worklist_and_detail_are_native_and_ready() -> None:
+    worklist = get_screen_definition("agrar/rations-lifecycle")
+    detail = get_screen_definition("agrar/ration")
+
+    assert worklist is not None and detail is not None
+    assert worklist["adapter"]["temporary"] is False
+    assert detail["adapter"]["temporary"] is False
+    assert worklist["tables"][0]["rowRouteTemplate"].endswith("ration_id={id}")
+    assert detail["workflow"]["processKey"] == "ration-version-lifecycle"
+    assert _check_readiness(worklist)["generatorReady"] is True
+    assert _check_readiness(detail)["generatorReady"] is True
+
+
+def test_feed_readiness_is_native_inventory_worklist() -> None:
+    definition = get_screen_definition("agrar/feed-readiness")
+    assert definition is not None
+    assert definition["layout"]["tableProfile"] == "inventory"
+    assert definition["dataSources"][0]["endpoint"].endswith("/feeding/supply")
+    assert any(
+        column["key"] == "suggested_order_kg"
+        for column in definition["tables"][0]["columns"]
+    )
+    assert any(action["key"] == "create_handoff" for action in definition["actions"])
+    assert _check_readiness(definition)["generatorReady"] is True
+
+
+def test_feed_controlling_is_native_time_series_worklist() -> None:
+    definition = get_screen_definition("agrar/feed-controlling")
+    assert definition is not None
+    assert definition["dataSources"][0]["endpoint"].endswith("/controlling/series")
+    assert any(
+        column["key"] == "actual_ecm_kg_cow"
+        for column in definition["tables"][0]["columns"]
+    )
+    assert _check_readiness(definition)["generatorReady"] is True
+
+
+def test_feeding_actuals_is_native_audit_worklist() -> None:
+    definition = get_screen_definition("agrar/feeding-actuals")
+    assert definition is not None
+    assert definition["layout"]["tableProfile"] == "audit"
+    assert definition["dataSources"][0]["endpoint"].endswith(
+        "/feeding/actuals/components"
+    )
+    assert {source["key"] for source in definition["dataSources"]} == {
+        "actuals",
+        "findings",
+        "measures",
+    }
+    assert {table["key"] for table in definition["tables"]} == {
+        "actuals",
+        "findings",
+        "measures",
+    }
+    assert {action["key"] for action in definition["actions"]} >= {
+        "export_csv",
+        "create_measure",
+        "configure_threshold",
+    }
+    assert _check_readiness(definition)["generatorReady"] is True
+
+
+def test_feeding_businesses_are_a_native_grant_aware_worklist() -> None:
+    definition = get_screen_definition("agrar/feeding-businesses")
+
+    assert definition is not None
+    assert definition["adapter"]["temporary"] is False
+    assert definition["layout"] == {
+        "preferredMode": "desktopDense",
+        "mobileMode": "mobileStack",
+        "touchTargetPx": 44,
+        "floorplan": "worklist",
+        "density": "compact",
+        "contextRail": "audit",
+        "tableProfile": "standard",
+        # Liste und Detail nebeneinander — aus der durchgehenden Belegseite.
+        "columnNavigation": "listDetail",
+    }
+    assert definition["dataSources"][0]["endpoint"].endswith("/feeding/businesses")
+    assert {column["key"] for column in definition["tables"][0]["columns"]} >= {
+        "name",
+        "production_type",
+        "feeding_system",
+        "advisory_status",
+        "herd_count",
+        "group_count",
+    }
+    assert _check_readiness(definition)["generatorReady"] is True

@@ -1,22 +1,30 @@
 """
 Outbound Webhook Registration
 Analog externe Agrar-ERP-Plattform Webhook-Modul
+
+Duenner Router. Die Anbindungen liegen in
+``domain_shared.webhook_registrations``, die Zustellversuche in
+``domain_shared.webhook_deliveries``, und die ganze Logik in
+``app/services/webhook_service.py`` — dieselbe, die ``webhooks.py`` benutzt.
+Bis zum 01.10.2026 hatten beide Module ihre eigene Tabelle, ihre eigene
+Bereichsliste und ihre eigene Vorstellung davon, woher der Mandant kommt.
+Siehe ``docs/quality-assurance/webhook-mandant-20261001.md``.
 """
 
 from __future__ import annotations
 
 import logging
-import uuid
-from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel, field_validator
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
+from ....core.outbound_security import OutboundTargetPolicyError
+from ....core.tenant import get_tenant_id
+from ....services import webhook_service as dienst
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -24,23 +32,10 @@ from app.api.v1.schemas.base import BaseSchema
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Valid event areas
-# ---------------------------------------------------------------------------
-
-VALID_BEREICHE = [
-    "WIEGUNG_NEU",
-    "WIEGUNG_GEAENDERT",
-    "KONTRAKT_NEU",
-    "KONTRAKT_FREIGEGEBEN",
-    "SETTLEMENT_GEBUCHT",
-    "RECHNUNG_NEU",
-    "BESTELLUNG_FREIGEGEBEN",
-    "LIEFERSCHEIN_ERSTELLT",
-    "INVENTUR_ABGESCHLOSSEN",
-    "KUNDE_NEU",
-    "INTERESSENT_KONVERTIERT",
-]
+#: Weiterhin unter dem alten Namen erreichbar, damit Aufrufer nichts aendern
+#: muessen; die Wahrheit steht im Dienst.
+SIGNATUR_KOPF = dienst.SIGNATUR_KOPF
+VALID_BEREICHE = dienst.BEREICHE
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -64,9 +59,7 @@ class WebhookCreate(BaseModel):
     @field_validator("bereich")
     @classmethod
     def bereich_must_be_valid(cls, v: str) -> str:
-        if v not in VALID_BEREICHE:
-            raise ValueError(f"Unbekannter Bereich '{v}'. Gültig: {VALID_BEREICHE}")
-        return v
+        return dienst.kanonischer_bereich(v)
 
 
 class WebhookOut(BaseModel):
@@ -79,6 +72,31 @@ class WebhookOut(BaseModel):
     erstellt_am: Optional[str] = None
     letzte_auslosung_am: Optional[str] = None
     fehler_count: int = 0
+    #: Ob ein Geheimnis hinterlegt ist — **nicht** das Geheimnis selbst.
+    signiert: bool = False
+
+
+class ZustellversuchOut(BaseSchema):
+    versucht_am: Optional[str] = None
+    erfolgreich: bool
+    status_code: Optional[int] = None
+    dauer_ms: Optional[int] = None
+    fehler: Optional[str] = None
+
+
+def _hinaus(anbindung: dienst.Anbindung, beschreibung: Optional[str] = None) -> WebhookOut:
+    return WebhookOut(
+        id=anbindung.id,
+        nr=anbindung.nr,
+        url=anbindung.url,
+        bereich=anbindung.bereich,
+        beschreibung=beschreibung,
+        is_active=anbindung.is_active,
+        erstellt_am=anbindung.erstellt_am,
+        letzte_auslosung_am=anbindung.letzte_auslosung_am,
+        fehler_count=anbindung.fehler_count,
+        signiert=anbindung.signiert,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -87,82 +105,96 @@ class WebhookOut(BaseModel):
 
 
 @router.get("", response_model=list[WebhookOut], tags=["webhooks"], summary="Webhooks auflisten")
-def list_webhooks(db: Session = Depends(get_db)) -> list[WebhookOut]:
-    """List all registered webhooks."""
+def list_webhooks(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[WebhookOut]:
+    """Die Webhooks des eigenen Hauses."""
     try:
-        rows = db.execute(
-            text("SELECT id, nr, url, bereich, beschreibung, is_active, erstellt_am, letzte_auslosung_am, fehler_count FROM domain_shared.webhooks ORDER BY nr")
-        ).mappings().all()
-        return [WebhookOut(**dict(r)) for r in rows]
-    except Exception:  # noqa: BLE001
-        return []
+        return [_hinaus(a) for a in dienst.auflisten(db, tenant_id)]
+    except dienst.NichtLesbar as fehler:
+        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
 
 
 @router.get("/bereiche", response_model=list[str], tags=["webhooks"], summary="Bereiche auflisten")
 def list_bereiche() -> list[str]:
-    """List available webhook event areas."""
-    return VALID_BEREICHE
+    """Das kanonische Bereichsvokabular."""
+    return dienst.BEREICHE
 
 
 @router.post("/bereiche/{bereich}", response_model=WebhookOut, status_code=201, tags=["webhooks"], summary="Webhook registrieren")
-def register_webhook(bereich: str, payload: WebhookCreate, db: Session = Depends(get_db)) -> WebhookOut:
+def register_webhook(
+    bereich: str,
+    payload: WebhookCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> WebhookOut:
     """Register a new outbound webhook for a given event area."""
-    # Validate bereich via model (will also be validated by Pydantic on the body, but bereich comes from path)
-    if bereich not in VALID_BEREICHE:
-        raise HTTPException(status_code=422, detail=f"Unbekannter Bereich '{bereich}'. Gültig: {VALID_BEREICHE}")
+    try:
+        # Der Bereich kommt aus dem Pfad; der Rumpf darf ihn nicht widersprechen.
+        kanonisch = dienst.kanonischer_bereich(bereich)
+    except dienst.UnbekannterBereich as fehler:
+        raise HTTPException(status_code=422, detail=str(fehler)) from fehler
     if not payload.url.startswith("https://"):
         raise HTTPException(status_code=422, detail="URL muss mit https:// beginnen")
 
-    new_id = str(uuid.uuid4())
-    now = datetime.now(timezone.utc).isoformat()
     try:
-        # Get next nr
-        row = db.execute(text("SELECT COALESCE(MAX(nr), 0) + 1 AS next_nr FROM domain_shared.webhooks")).mappings().one()
-        next_nr = row["next_nr"]
-        db.execute(
-            text(
-                "INSERT INTO domain_shared.webhooks (id, nr, url, bereich, beschreibung, is_active, erstellt_am, fehler_count) "
-                "VALUES (:id, :nr, :url, :bereich, :beschreibung, :is_active, :erstellt_am, 0)"
-            ),
-            {
-                "id": new_id,
-                "nr": next_nr,
-                "url": payload.url,
-                "bereich": bereich,
-                "beschreibung": payload.beschreibung,
-                "is_active": payload.is_active,
-                "erstellt_am": now,
-            },
-        )
-        db.commit()
-        return WebhookOut(
-            id=new_id,
-            nr=next_nr,
+        anbindung = dienst.registrieren(
+            db,
+            tenant_id,
             url=payload.url,
-            bereich=bereich,
-            beschreibung=payload.beschreibung,
+            bereich=kanonisch,
+            secret=payload.secret,
             is_active=payload.is_active,
-            erstellt_am=now,
-            fehler_count=0,
         )
-    except Exception as exc:  # noqa: BLE001
+    except OutboundTargetPolicyError as fehler:
         db.rollback()
-        raise HTTPException(status_code=503, detail=str(exc), headers={"X-Migration-Hint": "CREATE TABLE domain_shared.webhooks (...)"}) from exc
+        raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
+    return _hinaus(anbindung, payload.beschreibung)
 
 
-@router.delete("/{nr}", status_code=204, response_class=Response, tags=["webhooks"], response_model=None, summary="Webhook abmelden")
-def unregister_webhook(nr: int, db: Session = Depends(get_db)) -> Response:
-    """Unregister (delete) a webhook by its sequential number."""
+@router.get("/{webhook_id}/zustellversuche", response_model=list[ZustellversuchOut], tags=["webhooks"], summary="Zustellversuche abrufen")
+def list_zustellversuche(
+    webhook_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[ZustellversuchOut]:
+    """Die letzten Zustellversuche einer Anbindung des eigenen Hauses.
+
+    Der Nachweis zu ``fehler_count`` und ``letzte_auslosung_am``: Beide Felder
+    waren vorher Behauptungen ohne Beleg.
+    """
     try:
-        result = db.execute(text("DELETE FROM domain_shared.webhooks WHERE nr = :nr"), {"nr": nr})
-        db.commit()
-        if result.rowcount == 0:
-            raise HTTPException(status_code=404, detail=f"Webhook nr={nr} nicht gefunden")
-    except HTTPException:
-        raise
-    except Exception as exc:  # noqa: BLE001
+        return [ZustellversuchOut(**z) for z in dienst.zustellversuche(db, tenant_id, webhook_id)]
+    except Exception as fehler:  # noqa: BLE001
         db.rollback()
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
+
+
+@router.delete("/abmelden/{nr}", status_code=204, response_class=Response, tags=["webhooks"], response_model=None, summary="Webhook abmelden")
+def unregister_webhook(
+    nr: int,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> Response:
+    """Meldet den Webhook mit dieser laufenden Nummer im eigenen Haus ab.
+
+    Der Weg hiess vorher ``DELETE /webhooks/{nr}`` und war **unerreichbar**:
+    Unter demselben Prefix haengt ``webhooks.py`` mit ``DELETE /{webhook_id}``
+    und ist zuerst eingebunden, also traf jede Abmeldung dort eine Kennung, die
+    keine laufende Nummer ist.
+    """
+    try:
+        dienst.abmelden_nach_nummer(db, tenant_id, nr)
+    except dienst.NichtGefunden as fehler:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=str(fehler)) from fehler
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
     return Response(status_code=204)
 
 
@@ -170,37 +202,11 @@ def unregister_webhook(nr: int, db: Session = Depends(get_db)) -> Response:
 # Internal helper (not exposed as endpoint)
 # ---------------------------------------------------------------------------
 
-async def _trigger_webhook(bereich: str, payload: dict[str, Any], db: Session) -> None:
-    """Best-effort: fire all active webhooks for the given event area."""
-    try:
-        rows = db.execute(
-            text("SELECT id, nr, url FROM domain_shared.webhooks WHERE bereich = :b AND is_active = TRUE"),
-            {"b": bereich},
-        ).mappings().all()
-    except Exception:  # noqa: BLE001
-        logger.warning("_trigger_webhook: cannot read webhooks table")
-        return
-
-    for row in rows:
-        url = row["url"]
-        try:
-            import httpx  # optional dependency
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                await client.post(url, json=payload)
-            db.execute(
-                text("UPDATE domain_shared.webhooks SET letzte_auslosung_am = NOW() WHERE id = :id"),
-                {"id": row["id"]},
-            )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Webhook %s failed: %s", url, exc)
-            try:
-                db.execute(
-                    text("UPDATE domain_shared.webhooks SET fehler_count = fehler_count + 1 WHERE id = :id"),
-                    {"id": row["id"]},
-                )
-            except Exception:  # noqa: BLE001
-                pass
-    try:
-        db.commit()
-    except Exception:  # noqa: BLE001
-        pass
+async def _trigger_webhook(
+    bereich: str,
+    payload: dict,
+    db: Session,
+    tenant_id: str,
+) -> None:
+    """Weiterleitung auf ``webhook_service.trigger`` — alter Aufrufname."""
+    await dienst.trigger(db, tenant_id, bereich, payload)

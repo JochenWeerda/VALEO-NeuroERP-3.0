@@ -74,24 +74,11 @@ class TestCollectiveInvoiceValidation:
             await create_collective_invoice(payload=payload, tenant_id=TENANT, db=db)
         assert exc.value.status_code == 409
 
-    @pytest.mark.asyncio
-    async def test_marks_dns_as_berechnet(self):
-        from app.api.v1.endpoints.collective_documents import create_collective_invoice, CollectiveInvoiceCreate
-
-        db = MagicMock()
-        fetch_result = MagicMock()
-        fetch_result.mappings.return_value.first.return_value = _dn_row("shipped")
-        db.execute.return_value = fetch_result
-
-        payload = CollectiveInvoiceCreate(
-            customer_id="CUST-1", delivery_note_ids=["DN-A", "DN-B"], invoice_date="2026-06-13"
-        )
-        await create_collective_invoice(payload=payload, tenant_id=TENANT, db=db)
-
-        all_sqls = [str(c.args[0]) for c in db.execute.call_args_list]
-        update_sqls = [s for s in all_sqls if "BERECHNET" in s]
-        assert len(update_sqls) == 2, f"Expected 2 BERECHNET updates, got {len(update_sqls)}: {update_sqls}"
-        db.commit.assert_called_once()
+    # Der Nachweis, dass die Quell-Lieferscheine auf BERECHNET gesetzt werden,
+    # steht jetzt in tests/test_sales_sammelrechnung.py — gegen die echte
+    # Datenbank. Die Sammelrechnung entsteht seit 2026-09-17 ueber den
+    # SalesInvoiceService (Positionen und Mengenzuordnung); eine Attrappen-
+    # Sitzung koennte davon nur noch nachzeichnen, was sie selbst vorgibt.
 
 
 class TestCollectiveDeliveryValidation:

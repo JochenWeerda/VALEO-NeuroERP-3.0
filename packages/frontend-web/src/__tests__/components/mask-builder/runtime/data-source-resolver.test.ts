@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveEndpoint } from '@/components/mask-builder/runtime/data-source-resolver'
+import { appendQueryParams, resolveEndpoint } from '@/components/mask-builder/runtime/data-source-resolver'
 
 describe('resolveEndpoint', () => {
   it('substitutes a single variable', () => {
@@ -23,5 +23,17 @@ describe('resolveEndpoint', () => {
 
   it('returns template unchanged when no variables present', () => {
     expect(resolveEndpoint('/api/v1/stammdaten/laender', {})).toBe('/api/v1/stammdaten/laender')
+  })
+})
+
+describe('appendQueryParams', () => {
+  it('preserves fixed screen filters when adding paging', () => {
+    expect(appendQueryParams('/api/v1/checks?scope=personal', { page: '2', page_size: '50' }))
+      .toBe('/api/v1/checks?scope=personal&page=2&page_size=50')
+  })
+
+  it('adds the first query separator and preserves a hash', () => {
+    expect(appendQueryParams('/api/v1/items#results', { q: 'Saatgut' }))
+      .toBe('/api/v1/items?q=Saatgut#results')
   })
 })

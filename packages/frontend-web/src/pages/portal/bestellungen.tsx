@@ -6,9 +6,10 @@
 
 import { useState } from 'react'
 import { usePortalBestellungen } from '@/lib/api/portal'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
@@ -59,12 +60,12 @@ interface Bestellung {
   rechnung?: string
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  'offen': { label: 'Offen', color: 'bg-gray-100 text-gray-800', icon: <Clock className="h-4 w-4" /> },
-  'in_bearbeitung': { label: 'In Bearbeitung', color: 'bg-amber-100 text-amber-800', icon: <Package className="h-4 w-4" /> },
-  'versendet': { label: 'Versendet', color: 'bg-blue-100 text-blue-800', icon: <Truck className="h-4 w-4" /> },
-  'abgeschlossen': { label: 'Abgeschlossen', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
-  'storniert': { label: 'Storniert', color: 'bg-red-100 text-red-800', icon: <XCircle className="h-4 w-4" /> },
+const statusConfig: Record<string, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  'offen': { label: 'Offen', color: 'muted', icon: <Clock className="h-4 w-4" /> },
+  'in_bearbeitung': { label: 'In Bearbeitung', color: 'warning', icon: <Package className="h-4 w-4" /> },
+  'versendet': { label: 'Versendet', color: 'info', icon: <Truck className="h-4 w-4" /> },
+  'abgeschlossen': { label: 'Abgeschlossen', color: 'success', icon: <CheckCircle2 className="h-4 w-4" /> },
+  'storniert': { label: 'Storniert', color: 'error', icon: <XCircle className="h-4 w-4" /> },
 }
 
 export default function PortalBestellungen() {
@@ -109,7 +110,7 @@ export default function PortalBestellungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
                 <Clock className="h-5 w-5" />
               </div>
               <div>
@@ -124,9 +125,9 @@ export default function PortalBestellungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+              <Callout variant="info" className="rounded-lg p-2">
                 <Truck className="h-5 w-5" />
-              </div>
+              </Callout>
               <div>
                 <p className="text-2xl font-bold">
                   {bestellungen.filter(b => b.status === 'versendet').length}
@@ -139,7 +140,7 @@ export default function PortalBestellungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -228,14 +229,16 @@ export default function PortalBestellungen() {
                           <div className="flex gap-1">
                             <Button
                               variant="ghost"
-                              size="sm"
                               onClick={() => setSelectedBestellung(bestellung)}
+                              className="min-h-touch"
                             >
                               <Eye className="h-4 w-4" />
+                              Details
                             </Button>
                             {bestellung.rechnung && (
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" className="min-h-touch">
                                 <Download className="h-4 w-4" />
+                                Download
                               </Button>
                             )}
                           </div>
@@ -269,7 +272,7 @@ export default function PortalBestellungen() {
                 {/* Status */}
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">Status:</span>
-                  <Badge className={`${statusConfig[selectedBestellung.status].color} gap-1`}>
+                  <Badge variant={statusConfig[selectedBestellung.status].color} className="gap-1">
                     {statusConfig[selectedBestellung.status].icon}
                     {statusConfig[selectedBestellung.status].label}
                   </Badge>

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -230,7 +231,7 @@ export default function ComplianceExportPruefprotokollPage(): JSX.Element {
 
 function TraceResult({ result }: { result: LotTraceResponse }): JSX.Element {
   if (result.error) {
-    return <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-800">{result.error}</div>
+    return <Callout variant="error" className="rounded-md border p-3 text-sm">{result.error}</Callout>
   }
 
   return (

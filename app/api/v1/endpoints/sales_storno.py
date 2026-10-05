@@ -11,11 +11,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.sales_storno_service import SalesStornoService, StornoError
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/sales", tags=["sales", "o2c", "storno"])
 
 
-@router.get("/storno/status", response_model=dict, summary="Storno-/Gutschrift-Status je Auftrag")
+@router.get("/storno/status", response_model=TypedObjectOut, summary="Storno-/Gutschrift-Status je Auftrag")
 def storno_status(
     auftrag: str = Query(..., description="Auftragsnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -29,7 +30,7 @@ class StornoIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/deliveries/{delivery_no}/storno", response_model=dict, summary="Lieferschein stornieren (durchgängig in den Match)")
+@router.post("/deliveries/{delivery_no}/storno", response_model=TypedObjectOut, summary="Lieferschein stornieren (durchgängig in den Match)")
 def storno_delivery(
     delivery_no: str,
     body: StornoIn,

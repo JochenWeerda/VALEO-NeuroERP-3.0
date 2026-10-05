@@ -1,0 +1,57 @@
+slice_id: RATION-WB-05-COCKPIT
+id: RATION-WB-05-COCKPIT
+title: Rationswerkbank – Live-Ergebnisse-Cockpit (Erreichbarkeit + Best-Attainable + Preflight)
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Erste sichtbare Scheibe der Rationswerkbank aus dem Zielbild: das rechte
+  Live-Ergebnisse-Cockpit konsumiert den kanonischen Ergebnisvertrag
+  (CANON-01..04). Halbkreis-Tacho für die erreichbare Leistung, Erreichbarkeits-
+  Fünfling (sicher/technisch max/Ziel/Ziellücke, limitierende Achse), Best-
+  Attainable-Panel bei unerreichbarem Ziel, Preflight-Hinweise, sowie
+  Härteklassen-Badges im Constraint-Status. Bestehender Wizard-/Workbench-Flow
+  bleibt erhalten (Skill §6.3, §10.1: erweitern statt ersetzen).
+scope:
+  - Neue Anzeige-Komponenten PerformanceGauge, AttainabilityCockpit, PreflightPanel
+  - ConstraintStatusPanel um hardness/source_type-Badge erweitert
+  - Mount im rechten Cockpit der Workbench-View
+non_scope:
+  - Vollständiger Umbau zur 3-Spalten-Excel-Spielwiese mit Inline-CRUD (Folge-Slice)
+  - Ablösung/Redirect der Alt-Masken rationseditor/rationsvergleich/rations-zugang/-import (Konsolidierungs-Slice)
+  - Sensitivitäts-Sweep-Tabelle + Varianten-Tabs (Folge-Slice)
+  - Nutrient-Gauge-Reihe (ME/Stärke/Zucker/Fett …) – zunächst nur Leistungs-Tacho
+file_ownership:
+  - docs/agent-ops/slices/RATION-WB-05-COCKPIT.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+acceptance:
+  - "tsc --noEmit gruen (0 Fehler)"
+  - "eslint der geaenderten Datei gruen"
+  - "Cockpit rendert result_status, attainability, best_attainable_recovery, preflight"
+  - "Constraint-Status zeigt Härteklasse (safety/business/weich/fix)"
+tests:
+  - "npx tsc --noEmit -p tsconfig.json"
+  - "npx eslint src/pages/futtermittel/rationsoptimierung.tsx"
+risks:
+  - "SVG-Tacho ist neu; visuelle Endabnahme im laufenden Portal empfohlen (Backend + X-Tenant-Id)."
+  - "Volle Masken-Konsolidierung ist ein mehrstufiger Rollout; dieser Slice liefert das Cockpit, nicht die komplette Spielwiese."
+ai_harness:
+  fachlicher_vertrag: >-
+    Das Cockpit stellt die Wunschleistung nie als erreicht dar, wenn safe_attainable
+    sie nicht deckt; Best-Attainable wird als eigenes Panel mit technical_max und
+    Ziellücke ausgewiesen (Skill §2.3/§4.2).
+  test_vertrag: >-
+    Statischer Vertrag: tsc + eslint gruen; die Komponenten sind reine Anzeige
+    (keine Mutation, keine Async-Guards noetig).
+  daten_vertrag: >-
+    technical_max = null wird als '—' dargestellt, nicht als 0.
+  api_vertrag: >-
+    Konsumiert ausschliesslich die bereits typisierten CANON-Felder; keine neuen
+    Requests.
+  ui_vertrag: >-
+    Erweitert die bestehende Workbench statt sie zu ersetzen; Wizard/Assistent
+    bleiben als gleichberechtigte Modi erhalten (Skill §6.3).
+  persistenz_vertrag: >-
+    Reine Anzeige; keine Persistenzänderung.

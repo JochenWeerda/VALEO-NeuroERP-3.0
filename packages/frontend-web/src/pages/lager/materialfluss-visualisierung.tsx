@@ -54,19 +54,19 @@ const SiloCellRfNode = memo(function SiloCellRfNode(props: NodeProps): JSX.Eleme
   const qs = d?.qs ?? 'frei'
   const border =
     qs === 'gesperrt'
-      ? 'border-red-600'
+      ? 'border-status-error'
       : qs === 'in_pruefung'
-        ? 'border-amber-500'
+        ? 'border-status-warning'
         : 'border-border'
   return (
     <div
       className={`rounded-lg border-2 bg-card text-card-foreground px-2 py-2 text-xs shadow-sm min-w-[140px] max-w-[180px] ${border}`}
     >
-      <Handle type="target" position={Position.Top} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="target" position={Position.Top} className="h-2! w-2! bg-muted-foreground!" />
       <div className="font-semibold leading-tight">{d?.label ?? '—'}</div>
-      {d?.sub ? <div className="text-[10px] text-muted-foreground mt-0.5">{d.sub}</div> : null}
-      <div className="text-[10px] mt-1">{qsStatusGermanLabel(qs)}</div>
-      <Handle type="source" position={Position.Bottom} className="!h-2 !w-2 !bg-muted-foreground" />
+      {d?.sub ? <div className="text-2xs text-muted-foreground mt-0.5">{d.sub}</div> : null}
+      <div className="text-2xs mt-1">{qsStatusGermanLabel(qs)}</div>
+      <Handle type="source" position={Position.Bottom} className="h-2! w-2! bg-muted-foreground!" />
     </div>
   )
 })
@@ -81,11 +81,11 @@ const FlowProcRfNode = memo(function FlowProcRfNode(props: NodeProps): JSX.Eleme
     <div
       className={`rounded-md border-2 bg-card text-card-foreground px-2 py-1.5 text-xs shadow-sm min-w-[130px] max-w-[200px] ${border}`}
     >
-      <Handle type="target" position={Position.Left} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="target" position={Position.Left} className="h-2! w-2! bg-muted-foreground!" />
       <div className="font-semibold leading-tight">{d?.label ?? '—'}</div>
-      {d?.sub ? <div className="text-[10px] text-muted-foreground mt-0.5">{d.sub}</div> : null}
-      <div className="text-[10px] mt-1 opacity-90">{flowNodeStatusGermanLabel(st)}</div>
-      <Handle type="source" position={Position.Right} className="!h-2 !w-2 !bg-muted-foreground" />
+      {d?.sub ? <div className="text-2xs text-muted-foreground mt-0.5">{d.sub}</div> : null}
+      <div className="text-2xs mt-1 opacity-90">{flowNodeStatusGermanLabel(st)}</div>
+      <Handle type="source" position={Position.Right} className="h-2! w-2! bg-muted-foreground!" />
     </div>
   )
 })
@@ -138,15 +138,15 @@ function CreateNodeDialog({ warehouseId, onClose }: CreateNodeDialogProps): JSX.
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1">
               <label className="text-xs font-medium">Code *</label>
-              <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="z. B. FOERDER-01" className="h-9" />
+              <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="z. B. FOERDER-01" className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">Name</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="z. B. Förderer 1" className="h-9" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="z. B. Förderer 1" className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">Typ</label>
-              <NativeSelect value={nodeType} onChange={(e) => setNodeType(e.target.value)} className="h-9 w-full">
+              <NativeSelect value={nodeType} onChange={(e) => setNodeType(e.target.value)} ariaLabel="Knotentyp" className="w-full">
                 <option value="process">Prozess</option>
                 <option value="silo_cell">Silozelle</option>
                 <option value="conveyor">Förderband</option>
@@ -156,10 +156,10 @@ function CreateNodeDialog({ warehouseId, onClose }: CreateNodeDialogProps): JSX.
               </NativeSelect>
             </div>
             <div className="flex gap-2 pt-1">
-              <Button type="submit" size="sm" disabled={!code.trim() || createNode.isPending} className="flex-1">
+              <Button type="submit" disabled={!code.trim() || createNode.isPending} className="min-h-touch flex-1">
                 {createNode.isPending ? 'Anlegen…' : 'Anlegen'}
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={onClose} className="flex-1">Abbrechen</Button>
+              <Button type="button" variant="outline" onClick={onClose} className="min-h-touch flex-1">Abbrechen</Button>
             </div>
           </form>
         </CardContent>
@@ -208,21 +208,21 @@ function CreateEdgeDialog({ warehouseId, nodes, onClose }: CreateEdgeDialogProps
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1">
               <label className="text-xs font-medium">Von *</label>
-              <NativeSelect value={fromId} onChange={(e) => setFromId(e.target.value)} className="h-9 w-full">
+              <NativeSelect value={fromId} onChange={(e) => setFromId(e.target.value)} ariaLabel="Von-Knoten" className="w-full">
                 <option value="">— wählen —</option>
                 {nodes.map((n) => <option key={agriStr(n, 'id')} value={agriStr(n, 'id')}>{agriStr(n, 'name') || agriStr(n, 'code')}</option>)}
               </NativeSelect>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">Nach *</label>
-              <NativeSelect value={toId} onChange={(e) => setToId(e.target.value)} className="h-9 w-full">
+              <NativeSelect value={toId} onChange={(e) => setToId(e.target.value)} ariaLabel="Nach-Knoten" className="w-full">
                 <option value="">— wählen —</option>
                 {nodes.map((n) => <option key={agriStr(n, 'id')} value={agriStr(n, 'id')}>{agriStr(n, 'name') || agriStr(n, 'code')}</option>)}
               </NativeSelect>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium">Fördertyp</label>
-              <NativeSelect value={conveyorType} onChange={(e) => setConveyorType(e.target.value)} className="h-9 w-full">
+              <NativeSelect value={conveyorType} onChange={(e) => setConveyorType(e.target.value)} ariaLabel="Fördertyp" className="w-full">
                 <option value="belt">Förderband</option>
                 <option value="elevator">Elevator</option>
                 <option value="pipe">Rohrleitung</option>
@@ -231,10 +231,10 @@ function CreateEdgeDialog({ warehouseId, nodes, onClose }: CreateEdgeDialogProps
               </NativeSelect>
             </div>
             <div className="flex gap-2 pt-1">
-              <Button type="submit" size="sm" disabled={!fromId || !toId || fromId === toId || createEdge.isPending} className="flex-1">
+              <Button type="submit" disabled={!fromId || !toId || fromId === toId || createEdge.isPending} className="min-h-touch flex-1">
                 {createEdge.isPending ? 'Anlegen…' : 'Anlegen'}
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={onClose} className="flex-1">Abbrechen</Button>
+              <Button type="button" variant="outline" onClick={onClose} className="min-h-touch flex-1">Abbrechen</Button>
             </div>
           </form>
         </CardContent>
@@ -439,7 +439,8 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground whitespace-nowrap">Lager</span>
               <NativeSelect
-                className="h-11 min-w-[220px] text-sm"
+                className="min-w-[220px] text-sm"
+                ariaLabel="Lager"
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
               >
@@ -496,11 +497,11 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
 
       <Tabs defaultValue="silos" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2 h-11">
-          <TabsTrigger value="silos" className="gap-2">
+          <TabsTrigger value="silos" className="min-h-touch gap-2">
             <LayoutGrid className="h-4 w-4" />
             Statische Silos
           </TabsTrigger>
-          <TabsTrigger value="flow" className="gap-2">
+          <TabsTrigger value="flow" className="min-h-touch gap-2">
             <Share2 className="h-4 w-4" />
             Materialfluss
           </TabsTrigger>
@@ -538,8 +539,8 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                   proOptions={{ hideAttribution: true }}
                 >
                   <Background />
-                  <Controls className="!bg-card !border-border !shadow-md" />
-                  <MiniMap pannable zoomable className="!bg-card/95 !border-border" />
+                  <Controls className="bg-card! border-border! shadow-md!" />
+                  <MiniMap pannable zoomable className="bg-card/95! border-border!" />
                   <Panel
                     position="top-right"
                     className="text-xs text-muted-foreground rounded-md border border-border bg-card/95 px-2 py-1.5 shadow-sm"
@@ -567,8 +568,7 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                     {selectedNodeId && (
                       <Button
                         variant="destructive"
-                        size="sm"
-                        className="gap-1.5 h-8"
+                        className="gap-1.5 min-h-touch"
                         disabled={deleteNode.isPending}
                         onClick={handleDeleteNode}
                       >
@@ -579,8 +579,7 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                     {selectedEdgeId && (
                       <Button
                         variant="destructive"
-                        size="sm"
-                        className="gap-1.5 h-8"
+                        className="gap-1.5 min-h-touch"
                         disabled={deleteEdge.isPending}
                         onClick={handleDeleteEdge}
                       >
@@ -590,8 +589,7 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                     )}
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="gap-1.5 h-8"
+                      className="min-h-touch gap-1.5"
                       disabled={!warehouseId || nodesQ.isLoading}
                       onClick={() => setShowCreateEdge(true)}
                     >
@@ -599,8 +597,7 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                       Kante
                     </Button>
                     <Button
-                      size="sm"
-                      className="gap-1.5 h-8"
+                      className="min-h-touch gap-1.5"
                       disabled={!warehouseId}
                       onClick={() => setShowCreateNode(true)}
                     >
@@ -643,8 +640,8 @@ export default function MaterialflussVisualisierungPage(): JSX.Element {
                   proOptions={{ hideAttribution: true }}
                 >
                   <Background />
-                  <Controls className="!bg-card !border-border !shadow-md" />
-                  <MiniMap pannable zoomable className="!bg-card/95 !border-border" />
+                  <Controls className="bg-card! border-border! shadow-md!" />
+                  <MiniMap pannable zoomable className="bg-card/95! border-border!" />
                   <Panel
                     position="top-right"
                     className="text-xs text-muted-foreground rounded-md border border-border bg-card/95 px-2 py-1.5 shadow-sm"

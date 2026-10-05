@@ -10,11 +10,12 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
 from app.core.exceptions import EntityNotFoundError, ValidationFailedError
+from app.core.business_time import business_today
 
 
 # ── MRN-Generierung ─────────────────────────────────────────────────────────
@@ -43,7 +44,7 @@ def generate_mrn(ausfuhrland_code: str = "DE") -> str:
     Gesamt: 19 Stellen (EU-Norm: 18 Nutzdaten + 1 Prüfziffer)
     """
     land = (ausfuhrland_code or "DE").upper()[:2]
-    jahr = date.today().strftime("%y")
+    jahr = business_today().strftime("%y")
     uid = uuid4().hex[:14].upper()
     base = f"{land}{jahr}{uid}"
     pruefziffer = _compute_mrn_checkdigit(base)
@@ -260,7 +261,7 @@ class ATLASCustomsService:
                         "(id, tenant_id, referenz_nr, ausfuhrland_code, bestimmungsland_code, "
                         "anmelder_eori, waren_positionen, befoerderungsart, ausfuehrender_nr, "
                         "ausfuhrdatum, lieferbedingung, status, atlas_mrn, erstellt_am) "
-                        "VALUES (:id, :tid, :ref, :aus, :best, :eori, :waren::jsonb, "
+                        "VALUES (:id, :tid, :ref, :aus, :best, :eori, CAST(:waren AS jsonb), "
                         ":bef, :nr, :datum, :lb, 'ENTWURF', NULL, :now)"
                     ),
                     {
@@ -409,7 +410,7 @@ class ATLASCustomsService:
                 "status": "ERLEDIGT",
                 "erledigt_am": datetime.utcnow().isoformat() + "Z",
                 "ausgangszollstelle": "DE004020",
-                "ausgang_am": datetime.utcnow().date().isoformat(),
+                "ausgang_am": business_today().isoformat(),
                 "bescheinigung": "Ausfuhr ordnungsgemäß erfolgt — Erledigungsvermerk erteilt",
                 "verwendbar_fuer": ["Mehrwertsteuerbefreiung §6 UStG", "Ausfuhrnachweis"],
             }

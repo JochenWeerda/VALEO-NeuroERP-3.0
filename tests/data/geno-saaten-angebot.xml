@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<articleImport version="1.0">
+  <article>
+    <articleType>SAATGUT</articleType>
+    <description>
+      <name>WWH Hycard</name>
+      <category>Winterweizen</category>
+      <productGroup>Saatgut</productGroup>
+    </description>
+    <treatment>
+      <treated>true</treated>
+      <treatmentDescription>Beize lt. Etikett</treatmentDescription>
+    </treatment>
+    <baseUnit>KG</baseUnit>
+    <supplierRelations>
+      <supplierRelation>
+        <supplier>
+          <name>GENO-Saaten</name>
+          <role>HAUPTLIEFERANT</role>
+        </supplier>
+        <purchaseUnit>
+          <unit>KG</unit>
+          <packageSize unit="KG">1</packageSize>
+        </purchaseUnit>
+        <supplierPrices>
+          <supplierPrice>
+            <price>64.00</price>
+            <currency>EUR</currency>
+            <priceUnit>1</priceUnit>
+            <priceUnitMeasure>KG</priceUnitMeasure>
+            <freightCondition>
+              <type>NICHT_EINDEUTIG_ERKANNT</type>
+              <sourceValue>BKH</sourceValue>
+            </freightCondition>
+          </supplierPrice>
+          <supplierPrice>
+            <price>66.50</price>
+            <currency>EUR</currency>
+            <priceUnit>1</priceUnit>
+            <priceUnitMeasure>KG</priceUnitMeasure>
+            <freightCondition>
+              <type>FRANKO</type>
+              <sourceValue>franko</sourceValue>
+            </freightCondition>
+          </supplierPrice>
+        </supplierPrices>
+        <deliveryConditions>
+          <deliveryCondition>
+            <code>FRANKO_COMPLETE_LOAD</code>
+            <description>Frankopreise beziehen sich immer auf eine komplette Ladung.</description>
+          </deliveryCondition>
+          <deliveryCondition>
+            <code>THIRD_PARTY_PURCHASE_SURCHARGE</code>
+            <description>Bei zugekauften Partien koennen Preisaufschlaege und Vorfrachten entstehen.</description>
+          </deliveryCondition>
+        </deliveryConditions>
+        <paymentTerms>
+          <days>10</days>
+          <discountPercent>0</discountPercent>
+          <description>Zahlbar innerhalb von 10 Tagen nach Rechnungsdatum rein netto Kasse.</description>
+        </paymentTerms>
+        <tax>
+          <priceIncludesVAT>false</priceIncludesVAT>
+        </tax>
+      </supplierRelation>
+    </supplierRelations>
+  </article>
+
+  <supplierPackagingRules>
+    <supplier>GENO-Saaten</supplier>
+    <packagingRule>
+      <packageType>BIG_BAG</packageType>
+      <content unit="KG">1000</content>
+      <pricingAdjustment>
+        <type>DISCOUNT</type>
+        <value>-1.00</value>
+        <currency>EUR</currency>
+        <perUnit>DT</perUnit>
+      </pricingAdjustment>
+    </packagingRule>
+    <packagingRule>
+      <packageType>BIG_BAG</packageType>
+      <content unit="KG">500</content>
+      <pricingAdjustment>
+        <type>STANDARD</type>
+        <value>0.00</value>
+        <currency>EUR</currency>
+      </pricingAdjustment>
+    </packagingRule>
+    <packagingRule>
+      <packageType>BAG</packageType>
+      <content unit="KG">25</content>
+      <pricingAdjustment>
+        <type>SURCHARGE</type>
+        <value>1.00</value>
+        <currency>EUR</currency>
+        <perUnit>DT</perUnit>
+      </pricingAdjustment>
+      <exception>
+        <condition>HYBRID=true</condition>
+        <description>25-kg-Regel ausgenommen Hybriden</description>
+      </exception>
+    </packagingRule>
+    <palletRule>
+      <palletType>STANDARD_25KG</palletType>
+      <totalNetWeight unit="KG">1225</totalNetWeight>
+      <calculatedNumberOfBags>49</calculatedNumberOfBags>
+    </palletRule>
+    <palletRule>
+      <palletType>ORGANIC_25KG</palletType>
+      <totalNetWeight unit="KG">1000</totalNetWeight>
+      <calculatedNumberOfBags>40</calculatedNumberOfBags>
+    </palletRule>
+    <palletCharge>
+      <palletType>EURO_EXCHANGE_PALLET</palletType>
+      <amount>20.00</amount>
+      <currency>EUR</currency>
+    </palletCharge>
+    <palletCharge>
+      <type>BROKEN_PALLET_SURCHARGE</type>
+      <amount>20.00</amount>
+      <currency>EUR</currency>
+    </palletCharge>
+  </supplierPackagingRules>
+
+  <commercialTerms>
+    <offerBinding>false</offerBinding>
+    <terms>
+      <term>Dieses Angebot ist freibleibend und vorbehaltlich Anerkennung und Eigenbelieferung.</term>
+      <term>Es gelten die jeweils gueltigen Allgemeinen Einkaufs- und Verkaufsbedingungen.</term>
+    </terms>
+  </commercialTerms>
+</articleImport>

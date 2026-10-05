@@ -16,6 +16,7 @@ import {
 import { RefreshCw, Settings, Download, AlertTriangle } from 'lucide-react'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { AgentProcessPanel } from '@/components/agent'
 import {
   getMatrix,
@@ -43,12 +44,13 @@ function getDefaultPeriodTo(): string {
 }
 
 function cellBgClass(severity: string): string {
-  if (severity === 'RED') return 'bg-red-100 dark:bg-red-900/30'
-  if (severity === 'YELLOW') return 'bg-yellow-100 dark:bg-yellow-900/30'
-  return 'bg-green-50 dark:bg-green-900/20'
+  if (severity === 'RED') return 'bg-status-error/10 text-status-error'
+  if (severity === 'YELLOW') return 'bg-status-warning/10 text-status-warning'
+  return 'bg-status-success/10 text-status-success'
 }
 
 export default function LstCommodityPositionMatrix(): JSX.Element {
+  const isTouch = useTouchDevice()
   const navigate = useNavigate()
   const [branchId, setBranchId] = useState<string | undefined>(undefined)
   const [asOfDate, setAsOfDate] = useState<string>(() => new Date().toISOString().slice(0, 10))
@@ -225,28 +227,28 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
     <div className="flex flex-col">
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Commodity Position Matrix</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleExportMatrix} disabled={!matrix?.rows?.length}>
+        <h1 className="text-2xl font-semibold">Warenpositionsmatrix</h1>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="min-h-touch" onClick={handleExportMatrix} disabled={!matrix?.rows?.length}>
             <Download className="mr-1 h-4 w-4" />
             Export
           </Button>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" className="min-h-touch" asChild>
             <Link to="/disposition/regeln">
               <Settings className="mr-1 h-4 w-4" />
               Regeln
             </Link>
           </Button>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" className="min-h-touch" asChild>
             <Link to="/disposition/coverage-monitor">
               <AlertTriangle className="mr-1 h-4 w-4" />
-              Coverage Monitor
+              Deckungsmonitor
             </Link>
           </Button>
         </div>
       </div>
 
-      <AgentProcessPanel domain="einkauf" />
+      {!isTouch ? <AgentProcessPanel domain="einkauf" /> : null}
 
       {/* Filter */}
       <Card>
@@ -265,6 +267,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
           <div>
             <Label>Stichtag</Label>
             <Input
+              className="min-h-touch"
               type="date"
               value={asOfDate}
               onChange={(e) => setAsOfDate(e.target.value)}
@@ -273,7 +276,8 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
           <div>
             <Label>Betrachtung</Label>
             <select
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              className="flex min-h-touch w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              aria-label="Betrachtung"
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as NonNullable<MatrixParams['view_mode']>)}
             >
@@ -285,7 +289,8 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
           <div>
             <Label>Periodenmodus</Label>
             <select
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              className="flex min-h-touch w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              aria-label="Periodenmodus"
               value={periodMode}
               onChange={(e) => setPeriodMode(e.target.value)}
             >
@@ -366,7 +371,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
       <Tabs defaultValue="matrix">
         <TabsList>
           <TabsTrigger value="matrix">Periodenmatrix</TabsTrigger>
-          <TabsTrigger value="coverage">Coverage Monitor</TabsTrigger>
+          <TabsTrigger value="coverage">Deckungsmonitor</TabsTrigger>
         </TabsList>
         <TabsContent value="matrix" className="mt-4">
           {matrixQuery.isLoading && <p className="text-muted-foreground">Lade Matrix…</p>}
@@ -512,7 +517,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
         />
       )}
     </div>
-    <KeyboardShortcutBar shortcuts={shortcuts} />
+    {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

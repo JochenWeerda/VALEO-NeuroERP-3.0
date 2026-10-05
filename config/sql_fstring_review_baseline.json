@@ -1,0 +1,4 @@
+{
+  "_hinweis": "SPEC-P1-05-Restschuld: SQL-f-Strings ohne Security-Review. Die Liste darf nur schrumpfen. Eintrag entfernen, sobald die Stelle reviewed und mit wirksamem '# nosec B608  # ' versehen ist.",
+  "offen": []
+}

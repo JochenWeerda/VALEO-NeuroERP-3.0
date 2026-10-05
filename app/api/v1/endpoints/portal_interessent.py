@@ -6,6 +6,10 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Header, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.v1.schemas.portal_bundle_schemas import (
+    PortalInteressentListOut,
+    PortalInteressentOut,
+)
 from app.services.portal_interessent_service import (
     BetriebsTyp,
     InteressentNichtGefundenFehler,
@@ -46,7 +50,7 @@ class StatusWechselBody(BaseModel):
     kunden_nr: str | None = None
 
 
-@router.post("", response_model=dict[str, Any], status_code=201,
+@router.post("", response_model=PortalInteressentOut, status_code=201,
              summary="Interessent selbst registrieren (public)")
 def registrieren(body: RegistrierenBody, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     tid = _tid(x_tenant_id)
@@ -73,7 +77,7 @@ def registrieren(body: RegistrierenBody, x_tenant_id: Annotated[str | None, Head
     return i.to_dict()
 
 
-@router.get("", response_model=dict[str, Any], summary="Interessenten-Liste (Innendienst)")
+@router.get("", response_model=PortalInteressentListOut, summary="Interessenten-Liste (Innendienst)")
 def list_interessenten(
     status: str | None = Query(None),
     betrieb_typ: str | None = Query(None),
@@ -89,7 +93,7 @@ def list_interessenten(
     return {"items": items, "count": len(items)}
 
 
-@router.get("/{interessent_id}", response_model=dict[str, Any], summary="Interessent abrufen")
+@router.get("/{interessent_id}", response_model=PortalInteressentOut, summary="Interessent abrufen")
 def get_interessent(interessent_id: str, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     try:
         return get_interessent_service(_tid(x_tenant_id)).get(interessent_id)
@@ -97,7 +101,7 @@ def get_interessent(interessent_id: str, x_tenant_id: Annotated[str | None, Head
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
-@router.post("/{interessent_id}/status", response_model=dict[str, Any], summary="Interessentenstatus wechseln")
+@router.post("/{interessent_id}/status", response_model=PortalInteressentOut, summary="Interessentenstatus wechseln")
 def status_wechsel(
     interessent_id: str,
     body: StatusWechselBody,

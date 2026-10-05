@@ -5,14 +5,14 @@ Settings for CRM AI Service.
 import os
 from typing import Optional
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp"
+    DATABASE_URL: str = ""
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/7"
@@ -70,9 +70,7 @@ class Settings(BaseSettings):
         "contract_value", "industry", "region", "satisfaction_score"
     ]
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 
 settings = Settings()

@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from sqlalchemy import desc, text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_date_at
 from app.core.mask_rollout_catalog import MaskRolloutSpec, get_rollout_spec
 from app.core.mask_screen_summary_common import (
     build_screen_summary_payload,
@@ -19,19 +20,31 @@ from app.documents.router_helpers import get_from_store, get_repository
 from app.infrastructure.models import StockMovement as StockMovementModel
 
 
+# Nur diese Masken lesen Tabellen mit UUID-typisiertem Schluessel
+# (domain_einkauf.bestellungen, domain_einkauf.lieferanten). Dort bricht eine
+# Nicht-UUID den Vergleich in PostgreSQL ab; alle anderen fuehren Text-IDs.
+_UUID_KEYED_SCREENS = frozenset({"einkauf/purchase-order", "einkauf/supplier"})
+
+
+def _require_rollout_spec(screen_id: str, entity_id: str) -> MaskRolloutSpec:
+    spec = get_rollout_spec(screen_id)
+    if spec is None:
+        raise HTTPException(status_code=404, detail=f"Unknown rollout screen {screen_id}")
+    if spec.screen_id in _UUID_KEYED_SCREENS:
+        try:
+            uuid.UUID(entity_id)
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=404, detail=f"Entity '{entity_id}' not found")
+    return spec
+
+
 class MaskRolloutSummaryService:
     def __init__(self, db: Session, tenant_id: str) -> None:
         self.db = db
         self.tenant_id = tenant_id
 
     def build_summary(self, screen_id: str, entity_id: str) -> dict[str, Any]:
-        try:
-            uuid.UUID(entity_id)
-        except (ValueError, AttributeError):
-            raise HTTPException(status_code=404, detail=f"Entity '{entity_id}' not found")
-        spec = get_rollout_spec(screen_id)
-        if spec is None:
-            raise HTTPException(status_code=404, detail=f"Unknown rollout screen {screen_id}")
+        spec = _require_rollout_spec(screen_id, entity_id)
 
         loaders = {
             "lager/stock-movement": self._stock_movement_summary,
@@ -63,13 +76,7 @@ class MaskRolloutSummaryService:
         sort_dir: str | None = None,
         filter_plan: dict | None = None,
     ) -> dict[str, Any]:
-        try:
-            uuid.UUID(entity_id)
-        except (ValueError, AttributeError):
-            raise HTTPException(status_code=404, detail=f"Entity '{entity_id}' not found")
-        spec = get_rollout_spec(screen_id)
-        if spec is None:
-            raise HTTPException(status_code=404, detail=f"Unknown rollout screen {screen_id}")
+        spec = _require_rollout_spec(screen_id, entity_id)
         if tab_key not in spec.lazy_tabs:
             return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -144,24 +151,15 @@ class MaskRolloutSummaryService:
         if tab_key == "details":
             items = [
                 {
-                    "field": "charge",
-                    "value": row.charge or "-",
-                },
-                {
-                    "field": "warehouse_location",
-                    "value": row.warehouse_location or "-",
-                },
-                {
-                    "field": "unit_cost",
-                    "value": float(row.unit_cost) if row.unit_cost is not None else None,
-                },
-                {
-                    "field": "booking_user",
-                    "value": row.booking_user or "-",
-                },
-                {
-                    "field": "notes",
-                    "value": row.notes or "-",
+                    "datum": format_optional_date(row.movement_date) or format_optional_date(row.created_at),
+                    "typ": row.movement_type,
+                    "beleg_nr": row.movement_number or row.reference_number,
+                    "lagerort": row.warehouse_location,
+                    "status": None,
+                    "charge": row.charge or "-",
+                    "unit_cost": float(row.unit_cost) if row.unit_cost is not None else None,
+                    "booking_user": row.booking_user or "-",
+                    "notes": row.notes or "-",
                 },
             ]
             return build_tab_page(tab_key=tab_key, table_key="movement_details", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
@@ -216,7 +214,7 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT bs.id, w.name AS warehouse_name, bs.quantity_kg, bs.reserved_kg
+                    SELECT bs.id, w.warehouse_code, w.name AS warehouse_name, bs.quantity_kg
                     FROM domain_inventory.bin_stock bs
                     JOIN domain_inventory.warehouse_bins wb ON wb.id = bs.bin_id
                     JOIN domain_inventory.warehouse_zones wz ON wz.id = wb.zone_id
@@ -230,9 +228,15 @@ class MaskRolloutSummaryService:
             ).mappings().all()
             items = [
                 {
+                    "lagerort_nr": r["warehouse_code"],
+                    "lagerort_bezeichnung": r["warehouse_name"],
+                    "bestand_menge": float(r["quantity_kg"] or 0),
+                    "reserviert": 0.0,
+                    "mindestbestand": None,
+                    "einheit": "kg",
                     "warehouse_name": r["warehouse_name"],
                     "quantity_kg": float(r["quantity_kg"] or 0),
-                    "reserved_kg": float(r["reserved_kg"] or 0),
+                    "reserved_kg": 0.0,
                 }
                 for r in rows
             ]
@@ -251,7 +255,13 @@ class MaskRolloutSummaryService:
             )
             items = [
                 {
+                    "id": str(r.id),
                     "movement_id": str(r.id),
+                    "datum": format_optional_date(r.movement_date) or format_optional_date(r.created_at),
+                    "typ": r.movement_type,
+                    "menge": float(r.quantity or 0),
+                    "einheit": r.unit or "kg",
+                    "beleg_nr": r.movement_number or r.reference_number,
                     "movement_number": r.movement_number,
                     "movement_type": r.movement_type,
                     "quantity": float(r.quantity or 0),
@@ -308,22 +318,25 @@ class MaskRolloutSummaryService:
             raise HTTPException(status_code=404, detail="AP Invoice not found")
         if tab_key == "positionen":
             lines = invoice.get("lines") or []
+            from app.api.v1.schemas.mask_entity_contracts import ap_invoice_position_aliases
+
             items = [
-                {
-                    "position": idx + 1,
-                    "description": line.get("description") or line.get("itemDescription") or "",
-                    "quantity": float(line.get("quantity") or 0),
-                    "unit_price": float(line.get("unitPrice") or 0),
-                    "total": float(line.get("total") or line.get("lineTotal") or 0),
-                }
+                ap_invoice_position_aliases(
+                    {
+                        "position": idx + 1,
+                        "description": line.get("description") or line.get("itemDescription") or "",
+                        "quantity": float(line.get("quantity") or 0),
+                        "unit_price": float(line.get("unitPrice") or 0),
+                        "total": float(line.get("total") or line.get("lineTotal") or 0),
+                    }
+                )
                 for idx, line in enumerate(lines)
             ]
             return build_tab_page(tab_key=tab_key, table_key="invoice_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "freigabe":
-            items = [
-                {"key": "approval_status", "value": invoice.get("approval_status") or invoice.get("status") or "-"},
-                {"key": "semantic_status", "value": invoice.get("semantic_status") or "-"},
-            ]
+            from app.api.v1.schemas.mask_entity_contracts import ap_invoice_freigabe_zeilen
+
+            items = ap_invoice_freigabe_zeilen(invoice)
             return build_tab_page(tab_key=tab_key, table_key="approval", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -349,7 +362,7 @@ class MaskRolloutSummaryService:
                 SELECT id, beleg_nr, konto_nr, konto_name, konto_typ, offener_betrag, faellig_am, status
                 FROM {schema}.offene_posten
                 WHERE tenant_id = :tenant_id AND id = :op_id
-                """
+                """  # nosec B608  # reviewed-safe: Schemaname stammt aus dem information_schema-Katalog, Werte sind gebunden
             ),
             {"tenant_id": self.tenant_id, "op_id": entity_id},
         ).mappings().first()
@@ -397,17 +410,21 @@ class MaskRolloutSummaryService:
                 FROM {schema}.op_ausgleich
                 WHERE tenant_id = :tenant_id AND op_id = :op_id
                 ORDER BY buchungs_datum DESC NULLS LAST
-                """
+                """  # nosec B608  # reviewed-safe: Schemaname stammt aus dem information_schema-Katalog, Werte sind gebunden
             ),
             {"tenant_id": self.tenant_id, "op_id": entity_id},
         ).mappings().all()
+        from app.api.v1.schemas.mask_entity_contracts import ar_open_item_ausgleich_aliases
+
         items = [
-            {
-                "betrag": float(r["betrag"] or 0),
-                "buchungs_datum": format_optional_date(r["buchungs_datum"]),
-                "referenz": r["referenz"] or "",
-                "notiz": r["notiz"] or "",
-            }
+            ar_open_item_ausgleich_aliases(
+                {
+                    "betrag": float(r["betrag"] or 0),
+                    "buchungs_datum": format_optional_date(r["buchungs_datum"]),
+                    "referenz": r["referenz"] or "",
+                    "notiz": r["notiz"] or "",
+                }
+            )
             for r in rows
         ]
         return build_tab_page(tab_key=tab_key, table_key="settlements", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
@@ -416,9 +433,12 @@ class MaskRolloutSummaryService:
         row = self.db.execute(
             text(
                 """
-                SELECT id, bestell_nr, lieferant_id, status, bestelldatum, gesamtbetrag, waehrung
-                FROM domain_einkauf.bestellungen
-                WHERE tenant_id = :tenant_id AND id = :bestellung_id
+                SELECT b.id, b.bestellnummer, b.lieferant_id, l.firmenname AS lieferant_name,
+                       b.status, b.bestelldatum, b.brutto_summe, b.netto_summe, b.waehrung,
+                       b.bestellfall
+                FROM domain_einkauf.bestellungen b
+                LEFT JOIN domain_einkauf.lieferanten l ON l.id = b.lieferant_id
+                WHERE b.tenant_id = :tenant_id AND b.id = :bestellung_id
                 """
             ),
             {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
@@ -429,12 +449,13 @@ class MaskRolloutSummaryService:
             screen_id=spec.screen_id,
             entity_id=entity_id,
             tenant_id=self.tenant_id,
-            title=str(row["bestell_nr"] or entity_id),
-            subtitle=str(row["lieferant_id"] or ""),
+            title=str(row["bestellnummer"] or entity_id),
+            subtitle=str(row["lieferant_name"] or row["lieferant_id"] or ""),
             summary={
                 "status": str(row["status"] or ""),
+                "bestellfall": str(row["bestellfall"] or ""),
                 "bestelldatum": format_optional_date(row["bestelldatum"]),
-                "gesamtbetrag": float(row["gesamtbetrag"] or 0),
+                "gesamtbetrag": float(row["brutto_summe"] or row["netto_summe"] or 0),
                 "waehrung": str(row["waehrung"] or "EUR"),
             },
             available_tabs=list(spec.available_tabs),
@@ -462,15 +483,23 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT position_nr, artikel_nr, bezeichnung, menge, einheit, einzelpreis, gesamtpreis
-                    FROM domain_einkauf.bestellung_positionen
-                    WHERE tenant_id = :tenant_id AND bestellung_id = :bestellung_id
-                    ORDER BY position_nr
+                    SELECT p.pos_nr, p.artikel_nr, p.artikel_bezeichnung AS bezeichnung,
+                           p.lieferanten_artnr, p.menge, p.menge_geliefert, p.menge_offen,
+                           p.einheit, p.einzelpreis, p.preis_einheit, p.netto_betrag AS betrag,
+                           p.gebinde_menge, p.gebinde_einheit, p.gewicht_kg, p.kontrakt_nr,
+                           p.lagerort AS lager, p.lagerhalle, p.lagerfach,
+                           p.mindestmenge, p.maximalmenge
+                    FROM domain_einkauf.bestellung_positionen p
+                    JOIN domain_einkauf.bestellungen b ON b.id = p.bestellung_id
+                    WHERE b.tenant_id = :tenant_id AND p.bestellung_id = :bestellung_id
+                    ORDER BY p.pos_nr
                     """
                 ),
                 {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import purchase_order_position_aliases
+
+            items = [purchase_order_position_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="po_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "kommunikation":
             rows = self.db.execute(
@@ -484,7 +513,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import purchase_order_comm_aliases
+
+            items = [purchase_order_comm_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="po_comms", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -545,7 +576,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "lieferant_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import supplier_order_aliases
+
+            items = [supplier_order_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="supplier_pos", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "kontakte":
             rows = self.db.execute(
@@ -559,7 +592,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "lieferant_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import supplier_contact_aliases
+
+            items = [supplier_contact_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="supplier_contacts", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -622,7 +657,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "opportunity_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import opportunity_activity_aliases
+
+            items = [opportunity_activity_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="activities", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "angebote":
             rows = self.db.execute(
@@ -637,7 +674,9 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "opportunity_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import opportunity_quote_aliases
+
+            items = [opportunity_quote_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="quotes", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -689,12 +728,7 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT
-                        pos_nr AS position_no,
-                        artikel_id AS article_id,
-                        bezeichnung AS description,
-                        menge AS quantity,
-                        einheit AS unit
+                    SELECT pos_nr, artikel_id, bezeichnung, menge, einheit
                     FROM domain_sales.delivery_note_positions p
                     JOIN domain_sales.delivery_notes n ON n.id = p.delivery_note_id
                     WHERE n.tenant_id = :tenant_id AND p.delivery_note_id = :ls_id
@@ -703,10 +737,14 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "ls_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import delivery_note_position_aliases
+
+            items = [delivery_note_position_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="delivery_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "dokumente":
-            items = [{"document_type": "Lieferschein", "reference": entity_id}]
+            from app.api.v1.schemas.mask_entity_contracts import delivery_note_document_aliases
+
+            items = [delivery_note_document_aliases({"document_type": "Lieferschein", "reference": entity_id})]
             return build_tab_page(tab_key=tab_key, table_key="documents", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -714,7 +752,7 @@ class MaskRolloutSummaryService:
         row = self.db.execute(
             text(
                 """
-                SELECT id, settlement_number, status, net_amount, gross_amount, weighing_ticket_id
+                SELECT id, settlement_number, status, net_amount_eur, gross_amount_eur, ticket_id
                 FROM domain_inventory.agrar_settlements
                 WHERE tenant_id = :tenant_id AND id = :settlement_id
                 """
@@ -731,9 +769,9 @@ class MaskRolloutSummaryService:
             subtitle=str(row["status"] or ""),
             summary={
                 "status": str(row["status"] or ""),
-                "net_amount": float(row["net_amount"] or 0),
-                "gross_amount": float(row["gross_amount"] or 0),
-                "weighing_ticket_id": str(row["weighing_ticket_id"] or ""),
+                "net_amount": float(row["net_amount_eur"] or 0),
+                "gross_amount": float(row["gross_amount_eur"] or 0),
+                "weighing_ticket_id": str(row["ticket_id"] or ""),
             },
             available_tabs=list(spec.available_tabs),
             api_prefix=spec.api_prefix,
@@ -759,7 +797,7 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT deduction_type, amount, reason
+                    SELECT deduction_type, amount_eur AS amount, note AS reason, basis_quantity_tons AS quantity
                     FROM domain_inventory.agrar_settlement_deductions
                     WHERE tenant_id = :tenant_id AND settlement_id = :settlement_id
                     ORDER BY deduction_type
@@ -767,10 +805,38 @@ class MaskRolloutSummaryService:
                 ),
                 {"tenant_id": self.tenant_id, "settlement_id": entity_id},
             ).mappings().all()
-            items = [dict(r) for r in rows]
+            from app.api.v1.schemas.mask_entity_contracts import harvest_settlement_abzug_aliases
+
+            items = [harvest_settlement_abzug_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="deductions", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         if tab_key == "positionen":
-            items = [{"position": 1, "description": "Ernte-Abrechnung", "settlement_id": entity_id}]
+            # Eine Abrechnung rechnet genau einen Wiegeschein ab; er ist ihre Lieferposition.
+            rows = self.db.execute(
+                text(
+                    """
+                    SELECT w.ticket_number AS lieferschein_nr, w.weighing_date AS datum,
+                           a.name AS sorte, w.moisture_pct AS feuchtigkeit,
+                           COALESCE(w.billing_weight, w.net_weight) AS menge
+                    FROM domain_inventory.agrar_settlements s
+                    JOIN domain_inventory.weighing_tickets w
+                      ON w.id = s.ticket_id AND w.tenant_id = s.tenant_id
+                    LEFT JOIN domain_inventory.articles a
+                      ON a.id = COALESCE(w.article_id, s.article_id) AND a.tenant_id = s.tenant_id
+                    WHERE s.tenant_id = :tenant_id AND s.id = :settlement_id
+                    """
+                ),
+                {"tenant_id": self.tenant_id, "settlement_id": entity_id},
+            ).mappings().all()
+            items = [
+                {
+                    "lieferschein_nr": r["lieferschein_nr"],
+                    "datum": business_date_at(r["datum"]).isoformat() if r["datum"] else None,
+                    "sorte": r["sorte"],
+                    "feuchtigkeit": float(r["feuchtigkeit"]) if r["feuchtigkeit"] is not None else None,
+                    "menge": float(r["menge"]) if r["menge"] is not None else None,
+                }
+                for r in rows
+            ]
             return build_tab_page(tab_key=tab_key, table_key="settlement_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
@@ -833,5 +899,7 @@ class MaskRolloutSummaryService:
             ),
             {"run_id": entity_id},
         ).mappings().all()
-        items = [dict(r) for r in rows]
+        from app.api.v1.schemas.mask_entity_contracts import payment_run_zahlung_aliases
+
+        items = [payment_run_zahlung_aliases(dict(r)) for r in rows]
         return build_tab_page(tab_key=tab_key, table_key="payments", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)

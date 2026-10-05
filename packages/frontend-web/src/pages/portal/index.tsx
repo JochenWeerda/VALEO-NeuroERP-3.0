@@ -5,10 +5,12 @@
  */
 
 import { Link } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
 import { usePortalDashboard, type PortalDashboard as PortalDashboardApi } from '@/lib/api/portal'
 import { ErrorState } from '@/components/ErrorState'
 import { useQuery } from '@tanstack/react-query'
@@ -77,7 +79,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 
 function mapPortalDashboard(data: PortalDashboardApi): PortalDashboardView {
   const pickNumber = (label: string) => {
-    const raw = data.kpis.find((k) => k.label.toLowerCase() === label.toLowerCase())?.value
+    const raw = (data.kpis ?? []).find((k) => k.label.toLowerCase() === label.toLowerCase())?.value
     if (!raw) return 0
     const normalized = raw.replace(',', '.').replace(/[^\d.-]/g, '')
     const num = Number(normalized)
@@ -96,14 +98,14 @@ function mapPortalDashboard(data: PortalDashboardApi): PortalDashboardView {
       offenerBetrag: pickNumber('Letzte Rechnung'),
       verfuegbareDokumente: pickNumber('Neue Dokumente'),
     },
-    letzteBestellungen: data.letzteBestellungen.map((b) => ({
+    letzteBestellungen: (data.letzteBestellungen ?? []).map((b) => ({
       id: b.nummer || b.id,
       datum: b.datum,
       status: b.status === 'geliefert' ? 'abgeschlossen' : b.status === 'bestellt' ? 'in_bearbeitung' : b.status,
       betrag: b.betrag,
       artikel: 'Portal-Bestellung',
     })),
-    neueDokumente: data.neueDokumente.map((d, idx) => ({
+    neueDokumente: (data.neueDokumente ?? []).map((d, idx) => ({
       id: idx + 1,
       name: d.name,
       typ: d.typ,
@@ -129,7 +131,7 @@ function PreisspiegalWidget() {
     queryKey: ['portal-preisspiegel-widget', DEMO_ARTIKEL_IDS],
     queryFn: async () => {
       const res = await apiClient.get<PreisspiegalData>(
-        `/portal/preisspiegel/kunde?artikel_ids=${DEMO_ARTIKEL_IDS}`,
+        `/api/v1/portal/preisspiegel/kunde?artikel_ids=${DEMO_ARTIKEL_IDS}`,
       )
       return res.data
     },
@@ -148,15 +150,15 @@ function PreisspiegalWidget() {
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <div>
           <CardTitle className="text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-600" />
+            <TrendingUp className="h-5 w-5 text-status-success" />
             Aktuelle Getreidekurse
           </CardTitle>
           <CardDescription>
-            Ankaufspreise für Ihre Ernte{data ? ` — Stand ${data.stand}` : ''}
+            Ankaufspreise für Ihre Ernte{data?.stand ? ` — Stand ${data.stand}` : ''}
           </CardDescription>
         </div>
         <Link to="/portal/preisspiegel">
-          <Button variant="ghost" size="sm" className="gap-1 text-green-700">
+          <Button variant="ghost" className="min-h-touch gap-1 text-status-success">
             Alle Varianten <ChevronRight className="h-4 w-4" />
           </Button>
         </Link>
@@ -170,41 +172,41 @@ function PreisspiegalWidget() {
         {data && (
           <div className="space-y-1">
             {/* Tabellenkopf */}
-            <div className="grid grid-cols-5 gap-2 text-xs font-medium text-gray-500 px-2 pb-1 border-b">
+            <div className="grid grid-cols-5 gap-2 text-2xs font-medium tracking-wide uppercase text-muted-foreground px-2 pb-1 border-b">
               <span className="col-span-1">Frucht</span>
               {Object.values(VARIANTE_LABELS).map((l) => (
                 <span key={l} className="text-right leading-tight">{l}</span>
               ))}
             </div>
             {/* Preiszeilen */}
-            {data.preisspiegel.map((a) => (
+            {(data.preisspiegel ?? []).map((a) => (
               <div
                 key={a.artikel_id}
                 className="grid grid-cols-5 gap-2 items-center rounded-lg px-2 py-2 hover:bg-gray-50"
               >
                 <div className="col-span-1">
-                  <div className="font-medium text-sm text-gray-900">{a.artikel_name}</div>
-                  <div className="text-xs text-gray-400">{a.frucht_gruppe}</div>
+                  <div className="font-medium text-sm">{a.artikel_name}</div>
+                  <div className="text-2xs tracking-wide uppercase text-muted-foreground">{a.frucht_gruppe}</div>
                 </div>
                 {Object.keys(VARIANTE_LABELS).map((v) => {
                   const p = a.varianten[v]
                   return (
                     <div key={v} className="text-right">
                       {p ? (
-                        <span className="text-sm font-semibold text-gray-800">
+                        <span className="text-sm font-semibold">
                           {p.gesamtpreis_eur_dt.toFixed(2)}{' '}
-                          <span className="text-xs font-normal text-gray-400">€/dt</span>
+                          <span className="text-2xs font-normal text-muted-foreground">€/dt</span>
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-300">—</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </div>
                   )
                 })}
               </div>
             ))}
-            {data.preisspiegel.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-4">
+            {(data.preisspiegel ?? []).length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">
                 Keine Preise für Ihre Früchte hinterlegt.
               </p>
             )}
@@ -224,7 +226,7 @@ function EmpfehlungsBanner() {
     queryKey: ['portal-empfehlungen-badge', DEMO_KUNDEN_NR],
     queryFn: async () => {
       const res = await apiClient.get<EmpfehlungZusammenfassung>(
-        `/portal/empfehlungen/${DEMO_KUNDEN_NR}/zusammenfassung`,
+        `/api/v1/portal/empfehlungen/${DEMO_KUNDEN_NR}/zusammenfassung`,
       )
       return res.data
     },
@@ -240,25 +242,25 @@ function EmpfehlungsBanner() {
 
   return (
     <Link to="/portal/empfehlungen">
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 flex items-center justify-between gap-4 hover:bg-amber-100 transition-colors cursor-pointer">
+      <Callout variant="warning" className="rounded-xl border px-5 py-4 flex items-center justify-between gap-4 transition-colors cursor-pointer">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-400">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div>
-            <div className="font-semibold text-amber-900 flex items-center gap-2">
+            <div className="font-semibold text-status-warning flex items-center gap-2">
               {data.ungesehen} neue Empfehlung{data.ungesehen !== 1 ? 'en' : ''} für Sie
-              <Badge className="bg-amber-500 text-white text-xs">{data.ungesehen} neu</Badge>
+              <Badge variant="warning" className="text-white text-xs">{data.ungesehen} neu</Badge>
             </div>
-            <div className="text-sm text-amber-700 flex gap-3 mt-0.5">
+            <div className="text-sm text-status-warning flex gap-3 mt-0.5">
               {ankauf > 0 && <span>{ankauf} Ankaufsangebot{ankauf !== 1 ? 'e' : ''}</span>}
               {lohn > 0 && <span>{lohn} Lohndienstleistung{lohn !== 1 ? 'en' : ''}</span>}
               {rohware > 0 && <span>{rohware} Rohwaren-Angebot{rohware !== 1 ? 'e' : ''}</span>}
             </div>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-amber-600 flex-shrink-0" />
-      </div>
+        <ChevronRight className="h-5 w-5 text-status-warning shrink-0" />
+      </Callout>
     </Link>
   )
 }
@@ -266,6 +268,7 @@ function EmpfehlungsBanner() {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export default function PortalDashboard() {
+  const { toast } = useToast()
   const { data: portalData, isLoading, isError, error, refetch } = usePortalDashboard()
 
   if (isLoading) {
@@ -285,9 +288,9 @@ export default function PortalDashboard() {
   return (
     <div className="space-y-6">
       {/* Willkommens-Header */}
-      <div className="rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-800 p-6 text-white shadow-xl">
+      <div className="rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-800 p-6 text-white shadow-xl">
         <h1 className="text-2xl font-bold">Willkommen, {data.kunde.name}!</h1>
-        <p className="mt-1 text-emerald-100">Kundennummer: {data.kunde.kundennummer}</p>
+        <p className="mt-1 text-status-success">Kundennummer: {data.kunde.kundennummer}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link to="/portal/shop">
             <Button variant="secondary" className="h-auto gap-2 py-2">
@@ -368,7 +371,7 @@ export default function PortalDashboard() {
               <CardDescription>Ihre aktuellen Bestellungen</CardDescription>
             </div>
             <Link to="/portal/bestellungen">
-              <Button variant="ghost" size="sm" className="gap-1">
+              <Button variant="ghost" className="min-h-touch gap-1">
                 Alle <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -411,7 +414,7 @@ export default function PortalDashboard() {
               <CardDescription>Kürzlich bereitgestellt</CardDescription>
             </div>
             <Link to="/portal/dokumente">
-              <Button variant="ghost" size="sm" className="gap-1">
+              <Button variant="ghost" className="min-h-touch gap-1">
                 Alle <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -432,8 +435,11 @@ export default function PortalDashboard() {
                       <p className="text-xs text-muted-foreground">{dokument.datum}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    <Download className="h-4 w-4" />
+                  <Button variant="ghost" className="min-h-touch" onClick={() => toast({
+                    title: 'Download nicht angebunden',
+                    description: 'Dokumente öffnen Sie unter Dokumente im Kundenportal.',
+                  })}>
+                    Herunterladen
                   </Button>
                 </div>
               ))}
@@ -451,7 +457,7 @@ export default function PortalDashboard() {
         <CardContent className="space-y-4">
           {/* Neue Agrar-Dienste */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Markt & Dienste</p>
+            <p className="text-2xs font-semibold tracking-wide uppercase text-muted-foreground mb-2">Markt & Dienste</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <QuickAccessCard
                 title="Getreidekurse"
@@ -485,7 +491,7 @@ export default function PortalDashboard() {
           </div>
           {/* Feldbuch & Dokumente */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Flächen & Dokumente</p>
+            <p className="text-2xs font-semibold tracking-wide uppercase text-muted-foreground mb-2">Flächen & Dokumente</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <QuickAccessCard
                 title="Ackerschlagkartei"
@@ -539,9 +545,9 @@ function KPICard({
   color?: 'blue' | 'emerald' | 'amber' | 'purple'
 }) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    amber: 'bg-amber-50 text-amber-600',
+    blue: 'bg-status-info/10 text-status-info',
+    emerald: 'bg-emerald-50 text-status-success',
+    amber: 'bg-amber-50 text-status-warning',
     purple: 'bg-purple-50 text-purple-600',
   }
 

@@ -72,12 +72,12 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
           <span className="font-medium text-violet-900 truncate">{displayLabel}</span>
           {agent.isLoading && <Loader2 className="h-3 w-3 animate-spin text-violet-500 shrink-0" />}
           {agent.status === 'ready' && (
-            <Badge variant="outline" className="text-xs text-violet-700 border-violet-300 shrink-0">
+            <Badge variant="info" className="text-xs shrink-0">
               Vorschlag bereit
             </Badge>
           )}
           {agent.status === 'error' && (
-            <AlertCircle className="h-3 w-3 text-red-500 shrink-0" />
+            <AlertCircle className="h-3 w-3 text-status-error shrink-0" />
           )}
         </div>
 
@@ -85,8 +85,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
           {agent.status === 'idle' && (
             <Button
               variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-violet-700 hover:bg-violet-100"
+              className="min-h-touch h-7 text-xs text-violet-700 hover:bg-violet-100"
               onClick={agent.trigger}
             >
               Analysieren
@@ -95,8 +94,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
           {agent.status === 'error' && (
             <Button
               variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-slate-500 hover:bg-slate-100"
+              className="min-h-touch h-7 text-xs text-slate-500 hover:bg-slate-100"
               onClick={agent.reset}
             >
               Erneut versuchen
@@ -106,8 +104,7 @@ export function AgentSuggestionBadge<T = Record<string, unknown>>({
             <>
               <Button
                 variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-violet-700 hover:bg-violet-100 gap-1"
+                className="min-h-touch h-7 text-xs text-violet-700 hover:bg-violet-100 gap-1"
                 onClick={handleAccept}
               >
                 <Check className="h-3 w-3" />

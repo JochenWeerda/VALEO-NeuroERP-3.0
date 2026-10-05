@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient } from '@/lib/api-client'
 import { Plus, ArrowLeft, XCircle } from 'lucide-react'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -132,6 +133,7 @@ type SettlementCorrectionDraft = {
 export default function GutschriftenBelastungenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { type } = useParams<{ type?: string }>()
   const [searchParams] = useSearchParams()
   const invoiceId = searchParams.get('invoiceId')
@@ -216,7 +218,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
 
   const loadOpenInvoices = async () => {
     try {
-      const response = await apiClient.get<APInvoice[]>('/api/v1/ap/invoices?status=APPROVED')
+      const response = await apiClient.get<APInvoice[]>('/api/v1/finance/ap/invoices/?status=APPROVED')
       const rawList = Array.isArray(response.data) ? response.data : []
       const openItemsMap: Record<string, number> = {}
       try {
@@ -508,10 +510,10 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl font-bold md:text-3xl">
             {t('crud.entities.creditMemo')} / {t('crud.entities.debitMemo')}
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -520,6 +522,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         </div>
         <Button
           variant="outline"
+          className="min-h-touch touch-manipulation"
           onClick={() => navigate('/einkauf/rechnungseingaenge-liste')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -527,6 +530,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar roles={memoRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 4 : 1} totalCount={4} />
         <ManagementDecisionPanel
@@ -549,6 +553,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={memoCrudCapabilities} />
       </div>
+      ) : null}
 
       {settlementDraft ? (
         <Card>
@@ -623,7 +628,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
                         {!memo.settled && (
                           <Button
                             variant="outline"
-                            size="sm"
+                            className="min-h-touch"
                             onClick={() => handleSettle(memo)}
                           >
                             {t('crud.actions.settle')}
@@ -681,7 +686,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
                         {!memo.settled && (
                           <Button
                             variant="outline"
-                            size="sm"
+                            className="min-h-touch"
                             onClick={() => handleSettle(memo)}
                           >
                             {t('crud.actions.settle')}
@@ -781,7 +786,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label>{t('crud.fields.items')} *</Label>
-                <Button type="button" variant="outline" size="sm" onClick={addMemoItem}>
+                <Button type="button" variant="outline" className="min-h-touch" onClick={addMemoItem}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t('crud.actions.addItem')}
                 </Button>
@@ -861,10 +866,12 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
                       <TableCell>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          className="min-h-touch"
                           onClick={() => removeMemoItem(index)}
+                          aria-label="Position entfernen"
                         >
-                          <XCircle className="h-4 w-4" />
+                          <XCircle className="h-4 w-4" aria-hidden="true" />
+                          Entfernen
                         </Button>
                       </TableCell>
                     </TableRow>

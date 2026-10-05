@@ -112,7 +112,7 @@ export default function QrScannerPage(): JSX.Element {
         />
         <Card className="mx-auto max-w-md mt-8">
           <CardContent className="pt-8 pb-8 flex flex-col items-center gap-6 text-center">
-            <CheckCircle className="h-16 w-16 text-green-600" />
+            <CheckCircle className="h-16 w-16 text-status-success" />
             <div>
               <h2 className="text-xl font-bold">Erfolgreich eingereiht</h2>
               <p className="text-muted-foreground mt-1">
@@ -218,13 +218,13 @@ export default function QrScannerPage(): JSX.Element {
                 Format: <code>VALEO-LKW:&#123;kennzeichen&#125;:&#123;lieferant_id&#125;:&#123;artikel_code&#125;</code>
               </p>
               {parseError && (
-                <p className="mt-1 text-sm font-medium text-red-600">{parseError}</p>
+                <p className="mt-1 text-sm font-medium text-status-error">{parseError}</p>
               )}
             </div>
 
             {parsed && (
-              <div className="rounded-md border bg-green-50 p-3 space-y-1">
-                <div className="flex items-center gap-2 text-green-800 font-semibold text-sm mb-2">
+              <div className="rounded-md border bg-[hsl(var(--color-semantic-success-50-hsl))] p-3 space-y-1">
+                <div className="flex items-center gap-2 text-status-success font-semibold text-sm mb-2">
                   <CheckCircle className="h-4 w-4" />
                   QR-Code erkannt
                 </div>

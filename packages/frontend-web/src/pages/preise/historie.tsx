@@ -94,7 +94,7 @@ export default function PreishistoriePage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Veraenderung (Woche)</CardTitle></CardHeader>
           <CardContent>
-            <div className={`flex items-center gap-2 ${weeklyTrendUp ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`flex items-center gap-2 ${weeklyTrendUp ? 'text-status-success' : 'text-status-error'}`}>
               {weeklyTrendUp ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
               <span className="text-2xl font-bold">{preise.veraenderung.woche > 0 ? '+' : ''}{preise.veraenderung.woche}%</span>
             </div>
@@ -103,7 +103,7 @@ export default function PreishistoriePage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Veraenderung (Monat)</CardTitle></CardHeader>
           <CardContent>
-            <div className={`flex items-center gap-2 ${monthlyTrendUp ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`flex items-center gap-2 ${monthlyTrendUp ? 'text-status-success' : 'text-status-error'}`}>
               {monthlyTrendUp ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
               <span className="text-2xl font-bold">{preise.veraenderung.monat > 0 ? '+' : ''}{preise.veraenderung.monat}%</span>
             </div>
@@ -152,7 +152,7 @@ export default function PreishistoriePage(): JSX.Element {
                   <div className="text-right">
                     <div className="text-xl font-bold">{formatCurrency(entry.preis)} / t</div>
                     {trend !== 0 ? (
-                      <div className={`text-sm font-semibold ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={`text-sm font-semibold ${trend > 0 ? 'text-status-success' : 'text-status-error'}`}>
                         {trend > 0 ? <TrendingUp className="inline h-3 w-3" /> : <TrendingDown className="inline h-3 w-3" />}
                         {trend > 0 ? '+' : ''}{trend.toFixed(2)} EUR
                       </div>

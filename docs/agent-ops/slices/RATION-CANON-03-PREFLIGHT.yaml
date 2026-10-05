@@ -1,0 +1,60 @@
+slice_id: RATION-CANON-03-PREFLIGHT
+id: RATION-CANON-03-PREFLIGHT
+title: Rationsoptimierung – Preflight Phase 0 (strukturierte Eingabe-/Modellpruefung) TDD
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Skill §3/Phase 0 umsetzen: vor der Bewertung strukturierte Findings (Code,
+  Schweregrad, Groesse, Ist, Grenze, Einheit, Ursache, Abhilfe) erzeugen.
+  Fehlende Daten werden nicht als 0 interpretiert (Skill §10.3). Deckt die
+  Golden Cases 3 (Σ Minima > TM), 4 (Σ Maxima < TM) und 12 (fehlende Analyse als
+  Finding) ab. Ein blockierendes Datenfinding setzt den CANON-01-Status auf
+  DATA_INCOMPLETE.
+scope:
+  - Standalone-Modul app/agrar/rations/preflight.py (Severity/Finding/Report)
+  - Additive Verdrahtung in _build_response (optimal + infeasible) als preflight + data_incomplete
+  - Frontend-Typen PreflightReport/PreflightFinding
+  - Unit-Tests inkl. Golden Cases 3/4/12
+non_scope:
+  - Einheiten-Autokorrektur / Bezugsbasis-Umrechnung (nur Erkennung, keine stille Reparatur)
+  - Gueltigkeitsbereich der GfE-/DLG-Regeln als eigener Regel-Katalog (Folge-Ausbau)
+  - Preflight-UI-Panel im Werkbank-Rail (Werkbank-Slice)
+file_ownership:
+  - docs/agent-ops/slices/RATION-CANON-03-PREFLIGHT.yaml
+  - app/agrar/rations/preflight.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - tests/test_rations_preflight.py
+acceptance:
+  - "pytest tests/test_rations_preflight.py gruen (16 Faelle)"
+  - "Golden Cases 3/4/12 als Findings nachgewiesen"
+  - "Antwort enthaelt preflight in beiden Branches; Blocker => data_incomplete"
+  - "Bestehende Solvertests unveraendert gruen (kein Regress)"
+tests:
+  - "pytest tests/test_rations_preflight.py --noconftest -p no:cacheprovider --no-cov -o addopts=''"
+risks:
+  - "Preflight laeuft in _build_response auf den bereits aufbereiteten Feeds; die Roh-Analyse-Vollstaendigkeit vor der Aufbereitung ist ein Folge-Ausbau (Input-Stage-Preflight)."
+ai_harness:
+  fachlicher_vertrag: >-
+    Fehlende Pflicht-Analysewerte (me/sidp/dm_frac) werden als Blocker-Finding
+    ausgewiesen, nie als 0 gerechnet. me=0 (Mineralfutter) bleibt gueltig.
+    Σ-Minima>TM und Σ-Maxima<TM sind Blocker (ueberbestimmte bzw.
+    unterbestimmte Ration).
+  test_vertrag: >-
+    TDD: Preflight-Modul zuerst unit-getestet inkl. der drei Golden Cases; dann
+    additive Verdrahtung, bestehende Golden-Tests unveraendert.
+  daten_vertrag: >-
+    Fehlwert != 0 (Skill §10.3); Preis fehlt => Warnung (Kosten ohne Preisbasis
+    nicht belastbar, Skill §11.2).
+  api_vertrag: >-
+    Additiv: neues Feld preflight (Report-Dict) in beiden Branches; ein Blocker
+    setzt result_status auf DATA_INCOMPLETE.
+  ui_vertrag: >-
+    PreflightReport/PreflightFinding typisiert; Werkbank-Rail 'Hinweise &
+    Warnungen' konsumiert die Findings im Folge-Slice.
+  persistenz_vertrag: >-
+    Keine neuen Tabellen; der Preflight-Report wandert im Response-/Varianten-
+    Snapshot mit.

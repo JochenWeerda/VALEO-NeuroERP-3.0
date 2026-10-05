@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,7 +27,6 @@ import {
   wfStatusLabel,
   wfStatusVariant,
   type WfProcess,
-  type WfProcessStatus,
 } from '@/lib/api/workflow-cockpit'
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
@@ -40,12 +40,12 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
 ]
 
 function StatusIcon({ status }: { status: string }) {
-  if (status === 'completed') return <CheckCircle className="h-4 w-4 text-green-600" />
-  if (status === 'failed') return <XCircle className="h-4 w-4 text-red-600" />
-  if (status === 'blocked_external_gate') return <AlertTriangle className="h-4 w-4 text-orange-500" />
-  if (status === 'running') return <Zap className="h-4 w-4 text-blue-600" />
-  if (status === 'compensated') return <RotateCcw className="h-4 w-4 text-gray-500" />
-  return <Clock className="h-4 w-4 text-yellow-600" />
+  if (status === 'completed') return <CheckCircle className="h-4 w-4 text-status-success" />
+  if (status === 'failed') return <XCircle className="h-4 w-4 text-status-error" />
+  if (status === 'blocked_external_gate') return <AlertTriangle className="h-4 w-4 text-status-warning" />
+  if (status === 'running') return <Zap className="h-4 w-4 text-muted-foreground" />
+  if (status === 'compensated') return <RotateCcw className="h-4 w-4 text-muted-foreground" />
+  return <Clock className="h-4 w-4 text-status-warning" />
 }
 
 function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: string; onClose: () => void }) {
@@ -75,7 +75,7 @@ function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: stri
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 text-sm">
+      <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
         <div><span className="text-muted-foreground">Prozess-Key:</span> <strong>{process.process_key}</strong></div>
         <div><span className="text-muted-foreground">Status:</span> <Badge variant={wfStatusVariant(process.status)}>{wfStatusLabel(process.status)}</Badge></div>
         <div><span className="text-muted-foreground">Correlation-ID:</span> <code className="text-xs">{process.correlation_id}</code></div>
@@ -87,14 +87,14 @@ function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: stri
 
       {process.blockers.filter(b => !b.resolved).length > 0 && (
         <div>
-          <h4 className="text-sm font-semibold text-orange-600 mb-2">Aktive Blocker</h4>
+          <h4 className="text-sm font-semibold text-status-warning mb-2">Aktive Blocker</h4>
           <div className="space-y-2">
             {process.blockers.filter(b => !b.resolved).map(blocker => (
-              <div key={blocker.blocker_id} className="rounded border border-orange-200 bg-orange-50 p-2 text-sm">
+              <Callout key={blocker.blocker_id} variant="warning" className="rounded border p-2 text-sm">
                 <div className="font-medium">{blocker.message}</div>
                 {blocker.external_system && <div className="text-muted-foreground text-xs">System: {blocker.external_system}</div>}
                 <div className="text-xs text-muted-foreground">Seit: {new Date(blocker.since).toLocaleString('de-DE')}</div>
-              </div>
+              </Callout>
             ))}
           </div>
         </div>
@@ -107,7 +107,7 @@ function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: stri
           {process.events.map(evt => (
             <div key={evt.event_id} className="flex items-start gap-2 text-xs py-1 border-b last:border-0">
               <span className="text-muted-foreground w-32 shrink-0">{new Date(evt.occurred_at).toLocaleString('de-DE')}</span>
-              <span className="font-mono text-blue-700 w-28 shrink-0">{evt.kind}</span>
+              <span className="font-mono text-primary w-28 shrink-0">{evt.kind}</span>
               <span>{evt.message}</span>
             </div>
           ))}
@@ -117,27 +117,28 @@ function ProcessDetail({ processInstanceId, onClose }: { processInstanceId: stri
       {process.replayable && (
         <div className="border-t pt-3">
           {!showReplayForm ? (
-            <Button size="sm" variant="outline" onClick={() => setShowReplayForm(true)}>
-              <RotateCcw className="mr-2 h-3 w-3" />
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowReplayForm(true)}>
+              <RotateCcw className="mr-2 h-4 w-4" />
               Replay anfordern
             </Button>
           ) : (
             <div className="space-y-2">
               <input
-                className="w-full rounded border px-2 py-1 text-sm"
+                className="min-h-touch w-full rounded border px-3 text-sm"
                 placeholder="Begründung (Pflicht)"
                 value={replayReason}
                 onChange={e => setReplayReason(e.target.value)}
+                aria-label="Begründung für Replay"
               />
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
-                  size="sm"
+                  className="min-h-touch touch-manipulation"
                   disabled={!replayReason.trim() || replay.isPending}
                   onClick={() => { void handleReplay() }}
                 >
                   {replay.isPending ? 'Wird gesendet…' : 'Replay bestätigen'}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setShowReplayForm(false)}>Abbrechen</Button>
+                <Button className="min-h-touch touch-manipulation" variant="ghost" onClick={() => setShowReplayForm(false)}>Abbrechen</Button>
               </div>
             </div>
           )}
@@ -202,7 +203,7 @@ export default function WorkflowLeitstandPage(): JSX.Element {
       header: '',
       accessorKey: 'process_instance_id',
       cell: ({ row }: { row: { original: WfProcess } }) => (
-        <Button size="sm" variant="ghost" onClick={() => setSelectedId(row.original.process_instance_id)}>
+        <Button className="min-h-11 touch-manipulation" variant="ghost" onClick={() => setSelectedId(row.original.process_instance_id)}>
           Detail
         </Button>
       ),
@@ -210,15 +211,15 @@ export default function WorkflowLeitstandPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Workflow-Prozessleitstand</h1>
+          <h1 className="text-2xl font-bold">Prozessleitstand</h1>
           <p className="text-sm text-muted-foreground">
-            Operative Sicht auf Prozessinstanzen, externe Gate-Blocker und Replay-Anforderungen
+            Welche Instanzen laufen, welche hängen am Gate, welche brauchen Replay.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => { void refetch() }}>
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => { void refetch() }}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Aktualisieren
         </Button>
@@ -239,15 +240,15 @@ export default function WorkflowLeitstandPage(): JSX.Element {
               <CardTitle className="text-xs text-muted-foreground">Läuft</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-3">
-              <div className="text-2xl font-bold text-blue-600">{summary.by_status.running ?? 0}</div>
+              <div className="text-2xl font-bold text-primary">{summary.by_status.running ?? 0}</div>
             </CardContent>
           </Card>
-          <Card className="border-orange-200">
+          <Card>
             <CardHeader className="pb-1 pt-3 px-4">
               <CardTitle className="text-xs text-muted-foreground">Ext. Gate blockiert</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-3">
-              <div className="text-2xl font-bold text-orange-600">{summary.blocked_external_gate}</div>
+              <div className="text-2xl font-bold text-status-warning">{summary.blocked_external_gate}</div>
             </CardContent>
           </Card>
           <Card>
@@ -255,15 +256,15 @@ export default function WorkflowLeitstandPage(): JSX.Element {
               <CardTitle className="text-xs text-muted-foreground">Replay möglich</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-3">
-              <div className="text-2xl font-bold text-yellow-600">{summary.replayable}</div>
+              <div className="text-2xl font-bold text-status-warning">{summary.replayable}</div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-52">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Select value={statusFilter || 'all'} onValueChange={(value) => setStatusFilter(value === 'all' ? '' : value)}>
+          <SelectTrigger className="min-h-touch w-full touch-manipulation sm:w-52" aria-label="Status filtern">
             <SelectValue placeholder="Status filtern" />
           </SelectTrigger>
           <SelectContent>
@@ -279,14 +280,16 @@ export default function WorkflowLeitstandPage(): JSX.Element {
         </span>
       </div>
 
+      <div className="overflow-x-auto">
       <DataTable
         columns={columns}
         data={processes}
         onRowFocus={(row: WfProcess) => setSelectedId(row.process_instance_id)}
       />
+      </div>
 
       <Dialog open={Boolean(selectedId)} onOpenChange={open => { if (!open) setSelectedId(null) }}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Prozessinstanz-Detail</DialogTitle>
           </DialogHeader>

@@ -12,10 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import {
-  WorkflowEntryBanner,
-  readWorkflowEntryContext,
-} from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { ArrowLeft, CheckCircle, Loader2, Star } from 'lucide-react'
 
 type AbschlussForm = {
@@ -67,11 +65,7 @@ export default function AbschlussPage(): JSX.Element {
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
       {workflowContext && (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover: Abschluss"
-          description="Kundenzufriedenheit und Abschlusskommentar werden hier dokumentiert, um den Service-Fall zu schliessen."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       )}
 
       {/* Header */}
@@ -97,7 +91,7 @@ export default function AbschlussPage(): JSX.Element {
           {/* Star Rating */}
           <div className="space-y-2">
             <Label>
-              Kundenzufriedenheit <span className="text-red-500">*</span>
+              Kundenzufriedenheit <span className="text-status-error">*</span>
             </Label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((rating) => (

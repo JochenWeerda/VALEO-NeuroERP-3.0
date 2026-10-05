@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import {
   CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone,
   Grid3x3, Search, Keyboard, Settings, Clock, User, UserCheck,
-  CheckCircle2, AlertCircle, X, Trash2, Star, Percent, RotateCcw,
+  CheckCircle2, AlertCircle, Star, Percent, RotateCcw,
   SplitSquareHorizontal, WifiOff, Printer,
 } from 'lucide-react'
 import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/services/fiskaly-tse'
@@ -26,6 +26,7 @@ import { posOfflineQueue, usePosOfflineQueue } from '@/lib/services/pos-offline-
 import { bonDruck, type BonData } from '@/lib/services/bon-druck'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const POS_TOUCH_PANEL_KEY = 'pos-touch-bedienfeld'
 const POS_KASSIERER_KEY = 'pos-kassierer'
@@ -74,7 +75,7 @@ function TseStatusLight({ isInitialized }: { isInitialized: boolean }) {
   return (
     <div className="flex items-center gap-1.5 text-xs text-primary-foreground/80">
       <span
-        className={`h-2.5 w-2.5 rounded-full ${isInitialized ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`}
+        className={`h-2.5 w-2.5 rounded-full ${isInitialized ? 'bg-status-success' : 'bg-status-warning animate-pulse'}`}
         title={isInitialized ? 'Fiskalisierungsprovider online' : 'Fiskalisierung blockiert/offline'}
       />
       <span>TSE {isInitialized ? 'Online' : 'Blockiert'}</span>
@@ -86,6 +87,7 @@ function TseStatusLight({ isInitialized }: { isInitialized: boolean }) {
 export default function POSTerminalPage(): JSX.Element {
   const location = useLocation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const clock = useClock()
   const { pendingCount, isSyncing, sync: syncOfflineQueue } = usePosOfflineQueue()
 
@@ -514,27 +516,29 @@ export default function POSTerminalPage(): JSX.Element {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
 
       {/* ── Header ── */}
-      <div className="bg-primary text-primary-foreground px-5 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="bg-primary text-primary-foreground px-3 py-3 flex flex-wrap items-center justify-between gap-2 shrink-0">
         {/* Links: Logo */}
         <div className="flex items-center gap-3 min-w-0">
-          <ShoppingCart className="h-7 w-7 flex-shrink-0" />
+          <ShoppingCart className="h-7 w-7 shrink-0" />
           <div className="min-w-0">
             <h1 className="text-xl font-bold leading-none">VALEO POS</h1>
             <p className="text-xs opacity-75 mt-0.5">Haus & Gartenmarkt</p>
           </div>
         </div>
 
-        {/* Mitte: Uhrzeit */}
+        {/* Mitte: Uhrzeit — Desktop */}
+        {!isTouch ? (
         <div className="flex items-center gap-2 text-primary-foreground/90">
           <Clock className="h-4 w-4" />
           <span className="text-xl font-mono font-semibold tabular-nums">{clock}</span>
         </div>
+        ) : null}
 
-        {/* Rechts: Kassierer + Status + Settings */}
-        <div className="flex items-center gap-3">
+          {/* Rechts: Kassierer + Status + Settings */}
+        <div className={`flex items-center gap-2 flex-wrap ${isTouch ? 'w-full justify-end' : 'gap-3'}`}>
           {/* Offline-Queue Badge */}
           {pendingCount > 0 && (
             <button
@@ -549,20 +553,21 @@ export default function POSTerminalPage(): JSX.Element {
           )}
 
           {/* Retoure-Button */}
-          <Button
-            size="sm" variant="ghost"
+          <Button variant="ghost"
             onClick={() => navigate('/pos/retoure')}
-            className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/20 h-8 gap-1.5 text-xs"
-            title="Warenrückgabe"
+            className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/20 min-h-touch gap-1.5"
+            aria-label="Retoure"
           >
-            <RotateCcw className="h-3.5 w-3.5" />Retoure
+            <RotateCcw className="h-4 w-4" />Retoure
           </Button>
 
-          {/* Kassierer */}
+          {/* Kassierer — Desktop */}
+          {!isTouch ? (
           <div className="flex items-center gap-1.5 text-sm text-primary-foreground/80">
             <User className="h-4 w-4" />
             <span className="font-medium">{kassierer || 'Kein Kassierer'}</span>
           </div>
+          ) : null}
 
           {/* Kundenmodus */}
           <Badge
@@ -590,23 +595,25 @@ export default function POSTerminalPage(): JSX.Element {
               }}
               className="scale-90"
             />
-            <Label htmlFor="touch-bedienfeld" className="flex items-center gap-1 cursor-pointer text-xs text-primary-foreground/80">
-              <Keyboard className="h-3.5 w-3.5" />
+            <Label htmlFor="touch-bedienfeld" className="flex items-center gap-1 cursor-pointer min-h-touch px-2 text-sm text-primary-foreground/80">
+              <Keyboard className="h-4 w-4" />
+              Tastatur
             </Label>
           </div>
 
           {/* Settings */}
-          <Button size="sm" variant="ghost" onClick={() => setShowSettings(true)} className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/20 h-8 w-8 p-0">
+          <Button variant="ghost" onClick={() => setShowSettings(true)} className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/20 min-h-touch px-3" aria-label="Einstellungen">
             <Settings className="h-4 w-4" />
+            Einstellungen
           </Button>
         </div>
       </div>
 
       {/* ── Haupt-Layout ── */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className={isTouch ? 'flex-1 flex flex-col overflow-hidden' : 'flex-1 flex overflow-hidden'}>
 
-        {/* ── Warenkorb (links) ── */}
-        <div className="w-80 flex-shrink-0 border-r bg-white flex flex-col">
+        {/* ── Warenkorb (links / oben am Touch) ── */}
+        <div className={isTouch ? 'w-full max-h-[38vh] shrink-0 border-b bg-card flex flex-col' : 'w-80 shrink-0 border-r bg-card flex flex-col'}>
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">
             <h2 className="font-bold text-base flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
@@ -616,13 +623,12 @@ export default function POSTerminalPage(): JSX.Element {
               )}
             </h2>
             {cart.length > 0 && (
-              <Button
-                size="sm" variant="ghost"
-                className="text-destructive hover:text-destructive h-7 w-7 p-0"
-                title="Warenkorb leeren"
+              <Button variant="ghost"
+                className="min-h-touch px-3 text-destructive hover:text-destructive"
+                aria-label="Warenkorb leeren"
                 onClick={() => { if (confirm('Warenkorb wirklich leeren?')) setCart([]) }}
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                Leeren
               </Button>
             )}
           </div>
@@ -640,9 +646,9 @@ export default function POSTerminalPage(): JSX.Element {
                 <div
                   key={item.ean}
                   className={`
-                    flex items-center gap-2 rounded-lg border p-2 bg-white transition-all duration-200
+                    flex items-center gap-2 rounded-lg border p-2 bg-card transition-all duration-200
                     ${removingEans.has(item.ean) ? 'opacity-0 -translate-x-4' : 'opacity-100 translate-x-0'}
-                    ${lastAddedEan === item.ean ? 'border-green-400 bg-green-50' : 'border-transparent hover:border-gray-200'}
+                    ${lastAddedEan === item.ean ? 'border-status-success/50 bg-status-success/10' : 'border-transparent hover:border-border'}
                   `}
                 >
                   <ArticleImageSmall imageUrl={item.image_url} name={item.bezeichnung} category={item.category} />
@@ -650,24 +656,22 @@ export default function POSTerminalPage(): JSX.Element {
                     <div className="text-sm font-semibold leading-tight line-clamp-1">{item.bezeichnung}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       {item.menge} × {fmt(item.preis)}
-                      {item.rabatt_pct ? <span className="text-orange-500 ml-1">−{item.rabatt_pct}%</span> : null}
+                      {item.rabatt_pct ? <span className="text-status-warning ml-1">−{item.rabatt_pct}%</span> : null}
                       <span className="font-semibold text-foreground ml-1">= {fmt(item.preis * (1 - (item.rabatt_pct ?? 0) / 100) * item.menge)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateQuantity(item.ean, item.menge - 1)}>−</Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button variant="outline" className="min-h-touch min-w-11 p-0" aria-label="Menge verringern" onClick={() => updateQuantity(item.ean, item.menge - 1)}>−</Button>
                     <span className="w-7 text-center text-sm font-bold">{item.menge}</span>
-                    <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateQuantity(item.ean, item.menge + 1)}>+</Button>
-                    <Button
-                      size="sm" variant="ghost"
-                      className={`h-8 w-8 p-0 ${item.rabatt_pct ? 'text-orange-500' : 'text-muted-foreground'} hover:text-orange-500`}
+                    <Button variant="outline" className="min-h-touch min-w-11 p-0" aria-label="Menge erhöhen" onClick={() => updateQuantity(item.ean, item.menge + 1)}>+</Button>
+                    <Button variant="ghost"
+                      className={`min-h-touch px-2 ${item.rabatt_pct ? 'text-status-warning' : 'text-muted-foreground'} hover:text-status-warning`}
                       onClick={() => { setRabattTargetEan(item.ean); setRabattInput(String(item.rabatt_pct ?? '')); setShowRabattDialog(true) }}
-                      title="Rabatt"
                     >
-                      <Percent className="h-3.5 w-3.5" />
+                      Rabatt
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive" onClick={() => removeFromCart(item.ean)}>
-                      <X className="h-3.5 w-3.5" />
+                    <Button variant="ghost" className="min-h-touch px-2 text-destructive hover:text-destructive" onClick={() => removeFromCart(item.ean)}>
+                      Entfernen
                     </Button>
                   </div>
                 </div>
@@ -676,7 +680,7 @@ export default function POSTerminalPage(): JSX.Element {
           </div>
 
           {/* Gesamt-Anzeige */}
-          <div className="border-t bg-white px-4 py-3">
+          <div className="border-t bg-card px-4 py-3">
             <div className="flex justify-between items-center mb-3">
               <span className="text-sm text-muted-foreground">{cart.length} Position(en)</span>
               <div className="text-right">
@@ -747,15 +751,15 @@ export default function POSTerminalPage(): JSX.Element {
 
           <Tabs value={articleTab} onValueChange={(v) => setArticleTab(v as typeof articleTab)} className="flex-1 flex flex-col overflow-hidden">
             {/* Tab-Leiste */}
-            <div className="px-4 pt-3 pb-0 flex-shrink-0">
+            <div className="px-4 pt-3 pb-0 shrink-0">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="scanner" className="gap-1.5">
+                <TabsTrigger value="scanner" className="min-h-touch gap-1.5">
                   <Scan className="h-4 w-4" />Scanner
                 </TabsTrigger>
-                <TabsTrigger value="grid" className="gap-1.5">
+                <TabsTrigger value="grid" className="min-h-touch gap-1.5">
                   <Grid3x3 className="h-4 w-4" />Grid
                 </TabsTrigger>
-                <TabsTrigger value="search" className="gap-1.5">
+                <TabsTrigger value="search" className="min-h-touch gap-1.5">
                   <Search className="h-4 w-4" />Suche
                 </TabsTrigger>
               </TabsList>
@@ -783,22 +787,22 @@ export default function POSTerminalPage(): JSX.Element {
             {/* Artikel-Grid */}
             <TabsContent value="grid" className="flex-1 flex flex-col overflow-hidden px-4 pb-3 pt-2">
               {/* Mengen-Schnelleingabe */}
-              <div className="flex items-center gap-2 mb-2 flex-shrink-0">
+              <div className="flex items-center gap-2 mb-2 shrink-0">
                 <span className="text-xs text-muted-foreground">Menge:</span>
                 <div className="flex gap-1">
                   {[1, 2, 3, 5, 10, 25, 50].map((n) => (
                     <button
                       key={n}
                       onClick={() => setQtyBuffer(qtyBuffer === n ? null : n)}
-                      className={`h-7 px-2 rounded text-xs font-semibold border transition-colors ${
-                        qtyBuffer === n ? 'bg-primary text-primary-foreground border-primary' : 'border-gray-300 hover:border-primary hover:text-primary'
+                      className={`min-h-touch min-w-11 px-2 rounded text-xs font-semibold border transition-colors ${
+                        qtyBuffer === n ? 'bg-primary text-primary-foreground border-primary' : 'border-border'
                       }`}
                     >
                       {n}×
                     </button>
                   ))}
                   {qtyBuffer !== null && (
-                    <button onClick={() => setQtyBuffer(null)} className="h-7 px-2 rounded text-xs border border-gray-300 text-muted-foreground hover:text-destructive">✕</button>
+                    <button onClick={() => setQtyBuffer(null)} className="min-h-touch min-w-11 px-2 rounded text-xs border border-border text-muted-foreground" aria-label="Mengenvorgabe löschen">✕</button>
                   )}
                 </div>
                 {qtyBuffer !== null && (
@@ -808,23 +812,21 @@ export default function POSTerminalPage(): JSX.Element {
 
               {/* Kategorie-Filter */}
               {categories.length > 0 && (
-                <div className="w-full flex-shrink-0 mb-3 overflow-x-auto">
+                <div className="w-full shrink-0 mb-3 overflow-x-auto">
                   <div className="flex gap-2 pb-1 min-w-max">
                     <Button
-                      size="sm"
                       variant={categoryFilter === null ? 'default' : 'outline'}
                       onClick={() => setCategoryFilter(null)}
-                      className="whitespace-nowrap h-8 text-xs"
+                      className="whitespace-nowrap min-h-touch text-xs"
                     >
                       Alle ({articles.length})
                     </Button>
                     {categories.map((cat) => (
                       <Button
                         key={cat}
-                        size="sm"
                         variant={categoryFilter === cat ? 'default' : 'outline'}
                         onClick={() => setCategoryFilter(cat === categoryFilter ? null : cat)}
-                        className="whitespace-nowrap h-8 text-xs"
+                        className="whitespace-nowrap min-h-touch text-xs"
                       >
                         {cat} ({articles.filter((a) => a.category === cat).length})
                       </Button>
@@ -852,21 +854,21 @@ export default function POSTerminalPage(): JSX.Element {
                         className={`
                           cursor-pointer transition-all duration-150 overflow-hidden relative
                           hover:shadow-md active:scale-95
-                          ${lastAddedEan === article.ean ? 'ring-2 ring-green-400 shadow-lg' : ''}
-                          ${favorites.has(article.artikelnr) ? 'ring-1 ring-yellow-400' : ''}
+                          ${lastAddedEan === article.ean ? 'ring-2 ring-status-success shadow-lg' : ''}
+                          ${favorites.has(article.artikelnr) ? 'ring-1 ring-status-warning' : ''}
                         `}
                         onClick={() => addToCart(article)}
                       >
                         <button
-                          className="absolute top-1 right-1 z-10 h-6 w-6 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition-colors"
+                          className="absolute top-1 right-1 z-10 min-h-touch min-w-11 flex items-center justify-center rounded-full bg-card/80"
                           onClick={(e) => { e.stopPropagation(); toggleFavorite(article.artikelnr) }}
-                          title={favorites.has(article.artikelnr) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+                          aria-label={favorites.has(article.artikelnr) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
                         >
-                          <Star className={`h-3.5 w-3.5 ${favorites.has(article.artikelnr) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
+                          <Star className={`h-4 w-4 ${favorites.has(article.artikelnr) ? 'fill-status-warning text-status-warning' : 'text-muted-foreground'}`} />
                         </button>
                         <ArticleImageLarge imageUrl={article.image_url} name={article.bezeichnung} category={article.category} />
                         <CardContent className="p-2 text-center">
-                          <div className="font-semibold text-xs leading-tight line-clamp-2 mb-1 min-h-[2.5rem] flex items-center justify-center">
+                          <div className="font-semibold text-xs leading-tight line-clamp-2 mb-1 min-h-10 flex items-center justify-center">
                             {article.bezeichnung}
                           </div>
                           <div className="text-lg font-bold text-primary tabular-nums">{fmt(article.preis)}</div>
@@ -898,7 +900,7 @@ export default function POSTerminalPage(): JSX.Element {
 
         {/* ── Touch-Bedienfeld (rechts) ── */}
         {showTouchBedienfeld && (
-          <div className="w-64 flex-shrink-0 border-l bg-slate-50 flex flex-col overflow-auto">
+          <div className="w-64 shrink-0 border-l bg-slate-50 flex flex-col overflow-auto">
             <div className="px-3 pt-3 pb-1 text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
               <Keyboard className="h-3.5 w-3.5" />Bedienfeld
             </div>
@@ -1059,7 +1061,7 @@ export default function POSTerminalPage(): JSX.Element {
           <div className="space-y-3">
             <div className="flex gap-2">
               {[5, 10, 15, 20, 25].map((pct) => (
-                <Button key={pct} size="sm" variant={rabattInput === String(pct) ? 'default' : 'outline'}
+                <Button key={pct} className="min-h-touch" variant={rabattInput === String(pct) ? 'default' : 'outline'}
                   onClick={() => setRabattInput(String(pct))}>
                   {pct}%
                 </Button>
@@ -1090,7 +1092,7 @@ export default function POSTerminalPage(): JSX.Element {
               </Button>
             </div>
             {rabattInput && parseFloat(rabattInput) > 0 && (
-              <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground"
+              <Button variant="ghost" className="min-h-touch w-full text-xs text-muted-foreground"
                 onClick={() => {
                   if (rabattTargetEan) applyRabatt(rabattTargetEan, 0)
                   setShowRabattDialog(false); setRabattInput(''); setRabattTargetEan(null)

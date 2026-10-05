@@ -258,7 +258,7 @@ class WebshopIntegrationService:
                     "INSERT INTO domain_shared.webshop_bestellungen "
                     "(id, tenant_id, externe_bestellnr, shop_system, kunde_email, kunde_name, "
                     "artikel_positionen, gesamtbetrag_brutto, bestelldatum, status) "
-                    "VALUES (:id, :tid, :enr, :sys, :email, :name, :pos::jsonb, :betrag, :datum, :status) "
+                    "VALUES (:id, :tid, :enr, :sys, :email, :name, CAST(:pos AS jsonb), :betrag, :datum, :status) "
                     "ON CONFLICT (tenant_id, externe_bestellnr) DO UPDATE SET "
                     "artikel_positionen = EXCLUDED.artikel_positionen, "
                     "gesamtbetrag_brutto = EXCLUDED.gesamtbetrag_brutto, status = EXCLUDED.status"

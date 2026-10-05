@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -15,15 +17,26 @@ def _utcnow() -> str:
 
 
 def _state_path() -> Path:
-    return Path(settings.AGENT_OPS_STATE_PATH)
+    return _resolve_runtime_path(settings.AGENT_OPS_STATE_PATH)
 
 
 def _history_path() -> Path:
-    return Path(settings.AGENT_OPS_HISTORY_PATH)
+    return _resolve_runtime_path(settings.AGENT_OPS_HISTORY_PATH)
 
 
 def _ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _resolve_runtime_path(configured_path: str) -> Path:
+    path = Path(configured_path).expanduser().resolve()
+    cwd = Path.cwd().resolve()
+    temp_root = Path(tempfile.gettempdir()).resolve()
+    is_workspace_path = path == cwd or cwd in path.parents
+    is_pytest_temp_path = "PYTEST_CURRENT_TEST" in os.environ and (path == temp_root or temp_root in path.parents)
+    if not is_workspace_path and not is_pytest_temp_path:
+        raise ValueError(f"Runtime path must stay inside the working directory: {configured_path}")
+    return path
 
 
 def _read_state() -> dict[str, Any]:
@@ -59,7 +72,10 @@ def save_agent_ops_tenant_snapshot(tenant_id: str, snapshot: dict[str, Any], *, 
     }
     path = _state_path()
     _ensure_parent(path)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    path.write_text(  # NOSONAR - path is resolved and constrained by _resolve_runtime_path.
+        json.dumps(payload, indent=2, ensure_ascii=True) + "\n",
+        encoding="utf-8",
+    )
     append_agent_ops_history_entry(
         tenant_id,
         {
@@ -82,7 +98,7 @@ def append_agent_ops_history_entry(tenant_id: str, entry: dict[str, Any]) -> Non
         "timestamp": _utcnow(),
         **entry,
     }
-    with path.open("a", encoding="utf-8") as handle:
+    with path.open("a", encoding="utf-8") as handle:  # NOSONAR - path is resolved and constrained by _resolve_runtime_path.
         handle.write(json.dumps(history_entry, ensure_ascii=True) + "\n")
 
 

@@ -1,4 +1,5 @@
 import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
+import { chartSeriesColor } from '@/components/charts/chart-palette'
 
 type MetricPoint = {
   date: string
@@ -29,10 +30,10 @@ export default function CampaignDetailPerformanceChart({ chartData, labels }: Ca
         converted: item.converted,
       }))}
       series={[
-        { key: 'sent', color: '#8884d8', label: labels.sent },
-        { key: 'opened', color: '#82ca9d', label: labels.opened },
-        { key: 'clicked', color: '#ffc658', label: labels.clicked },
-        { key: 'converted', color: '#ff7300', label: labels.converted },
+        { key: 'sent', color: chartSeriesColor(0), label: labels.sent },
+        { key: 'opened', color: chartSeriesColor(1), label: labels.opened },
+        { key: 'clicked', color: chartSeriesColor(2), label: labels.clicked },
+        { key: 'converted', color: chartSeriesColor(3), label: labels.converted },
       ]}
       height={300}
     />

@@ -15,6 +15,7 @@ export default function SortenregisterPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
+  const [exporting, setExporting] = useState(false)
   const { data, isLoading, isError, error, refetch } = useSorten()
 
   const sorten: Sorte[] = data ?? []
@@ -39,7 +40,7 @@ export default function SortenregisterPage(): JSX.Element {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
-  const handleExport = () => {
+  function persistExport(): void {
     const header = 'Sorte;Art;Zuechter;Zulassung;Eigenschaften;Status\n'
     const rows = filteredData.map((s) =>
       [s.name, s.art ?? '', s.zuechter ?? '', s.zulassung ?? '', (s.eigenschaft ?? []).join(';'), s.status ?? ''].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
@@ -51,7 +52,19 @@ export default function SortenregisterPage(): JSX.Element {
     a.download = `Sortenregister_${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
-    toast({ title: 'Export', description: `${filteredData.length} Sorten exportiert.` })
+  }
+
+  function handleExport(): void {
+    if (exporting) return
+    setExporting(true)
+    try {
+      persistExport()
+      toast({ title: 'Export', description: `${filteredData.length} Sorten exportiert.` })
+    } catch {
+      toast({ variant: 'destructive', title: 'Export fehlgeschlagen' })
+    } finally {
+      setExporting(false)
+    }
   }
 
   const columns = [
@@ -59,13 +72,17 @@ export default function SortenregisterPage(): JSX.Element {
       key: 'name' as const,
       label: 'Sorte',
       render: (s: Sorte) => (
-        <button onClick={() => navigate(`/agrar/saatgut/sorte/${s.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button
+          type="button"
+          onClick={() => navigate(`/agrar/saatgut/sorte/${s.id}`)}
+          className="min-h-11 font-medium text-primary touch-manipulation"
+        >
           {s.name}
         </button>
       ),
     },
     { key: 'art' as const, label: 'Art' },
-    { key: 'zuechter' as const, label: 'Zuechter' },
+    { key: 'zuechter' as const, label: 'Züchter' },
     { key: 'zulassung' as const, label: 'Zulassung' },
     {
       key: 'eigenschaft' as const,
@@ -91,13 +108,13 @@ export default function SortenregisterPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Sortenregister</h1>
-          <p className="text-muted-foreground">Saatgut-Sorten</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Sortenregister</h1>
+          <p className="text-muted-foreground">Saatgut-Sorten suchen und öffnen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/saatgut/sorte/neu')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/saatgut/sorte/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Sorte
         </Button>
@@ -108,12 +125,23 @@ export default function SortenregisterPage(): JSX.Element {
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                aria-label="Suche Sorten"
+                placeholder="Sorte, Art oder Züchter suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={handleExport}
+              disabled={exporting}
+            >
               <FileDown className="h-4 w-4" />
               Export
             </Button>

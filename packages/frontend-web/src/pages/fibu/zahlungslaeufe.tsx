@@ -4,10 +4,12 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Calendar, CheckCircle, Euro, FileDown } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 import { toast } from '@/hooks/use-toast'
@@ -15,6 +17,7 @@ import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useDATEVExport, useFibuCockpit, useZahlungslauf, useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
 import { summarizeFibuConnectorOperations } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type ZahlungslaufData = {
   bezeichnung: string
@@ -24,6 +27,7 @@ type ZahlungslaufData = {
 
 export default function ZahlungslaeufeePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { data: fibuCockpit } = useFibuCockpit()
   const { data: zahlungsvorschlaege = [], isLoading, isError, error, refetch } = useZahlungsvorschlaege()
   const createZahlungslauf = useZahlungslauf()
@@ -51,6 +55,15 @@ export default function ZahlungslaeufeePage(): JSX.Element {
   }
 
   async function handleSubmit(): Promise<void> {
+    if (createZahlungslauf.isPending || exportDatev.isPending) return
+    if (selectedIds.length === 0) {
+      toast({ variant: 'destructive', title: 'Keine Auswahl', description: 'Bitte mindestens eine Zahlung auswaehlen.' })
+      return
+    }
+    if (!zahlungslauf.bezeichnung.trim()) {
+      toast({ variant: 'destructive', title: 'Bezeichnung fehlt', description: 'Bitte eine Bezeichnung fuer den Lauf erfassen.' })
+      return
+    }
     try {
       await createZahlungslauf.mutateAsync(selectedIds)
       if (zahlungslauf.format === 'datev') {
@@ -136,6 +149,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
               value={zahlungslauf.bezeichnung}
               onChange={(e) => updateField('bezeichnung', e.target.value)}
               placeholder="z.B. Zahlungslauf KW 41"
+              className="min-h-touch"
               required
             />
           </div>
@@ -146,6 +160,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
               type="date"
               value={zahlungslauf.ausfuehrungsdatum}
               onChange={(e) => updateField('ausfuehrungsdatum', e.target.value)}
+              className="min-h-touch"
               required
             />
           </div>
@@ -158,15 +173,18 @@ export default function ZahlungslaeufeePage(): JSX.Element {
             {zahlungsvorschlaege.map((zahlung: Zahlungsvorschlag) => {
               const isSelected = selectedIds.includes(zahlung.id)
               return (
-                <Card key={zahlung.id} className={isSelected ? 'border-blue-500' : ''}>
+                <Card key={zahlung.id} className={isSelected ? 'border-primary' : ''}>
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-4">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleZahlung(zahlung.id)}
-                        className="h-4 w-4"
-                      />
+                      <label className="flex min-h-touch min-w-11 cursor-pointer items-center justify-center touch-manipulation">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleZahlung(zahlung.id)}
+                          aria-label={`${zahlung.rechnungsNr} auswaehlen`}
+                          className="h-5 w-5"
+                        />
+                      </label>
                       <div className="flex-1">
                         <div className="font-semibold">{zahlung.lieferant}</div>
                         <div className="text-sm text-muted-foreground">Rechnung: {zahlung.rechnungsNr}</div>
@@ -195,15 +213,16 @@ export default function ZahlungslaeufeePage(): JSX.Element {
         <div className="space-y-4">
           <div>
             <Label htmlFor="format">Export-Format</Label>
-            <select
+            <NativeSelect
               id="format"
+              aria-label="Export-Format"
               value={zahlungslauf.format}
               onChange={(e) => updateField('format', e.target.value as 'sepa' | 'datev')}
-              className="w-full rounded-md border border-input bg-background px-3 py-2"
+              className="min-h-touch"
             >
               <option value="sepa">SEPA XML (pain.001)</option>
               <option value="datev">DATEV CSV</option>
-            </select>
+            </NativeSelect>
           </div>
           <Card>
             <CardContent className="pt-6">
@@ -239,7 +258,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-center mb-6">
-                <CheckCircle className="h-20 w-20 text-green-600" />
+                <CheckCircle className="h-20 w-20 text-status-success" />
               </div>
               <h3 className="text-center text-2xl font-bold mb-6">Zahlungslauf bereit</h3>
               <dl className="grid gap-4">
@@ -263,24 +282,41 @@ export default function ZahlungslaeufeePage(): JSX.Element {
                 </div>
                 <div className="flex justify-between pt-3">
                   <dt className="text-lg font-bold">Gesamtbetrag</dt>
-                  <dd className="text-lg font-bold text-green-600">
+                  <dd className="text-lg font-bold text-status-success">
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtbetrag)}
                   </dd>
                 </div>
               </dl>
             </CardContent>
           </Card>
-          <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
             <p className="font-semibold">Zahlungslauf wird erstellt und Datei generiert</p>
             <p className="mt-1">Die Datei kann anschliessend im Online-Banking importiert werden</p>
-          </div>
+          </Callout>
         </div>
       ),
     },
   ]
 
   return (
-    <div className="p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <Wizard
+        title="Zahlungslauf erstellen"
+        steps={steps}
+        loading={createZahlungslauf.isPending || exportDatev.isPending}
+        getStepValidationError={(stepId) => {
+          if (stepId === 'auswahl' && !zahlungslauf.bezeichnung.trim()) return 'Bitte eine Bezeichnung erfassen.'
+          if (stepId === 'auswahl' && selectedIds.length === 0) return 'Bitte mindestens eine Zahlung auswaehlen.'
+          return null
+        }}
+        onFinish={handleSubmit}
+        onStepValidationError={(_stepId, message) => {
+          toast({ variant: 'destructive', title: 'Eingabe unvollstaendig', description: message })
+        }}
+        onCancel={() => navigate('/fibu/zahlungsvorschlaege')}
+      />
+      {!isTouch ? (
+        <>
       <div className="mb-4 space-y-4">
         <OperationalCaseHeader
           title="Zahlungslauf"
@@ -322,12 +358,8 @@ export default function ZahlungslaeufeePage(): JSX.Element {
           <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Naechste Operator-Aktion</div><div className="text-sm font-semibold">{paymentOps.nextAction}</div></CardContent>
         </Card>
       </div>
-      <Wizard
-        title="Zahlungslauf erstellen"
-        steps={steps}
-        onFinish={handleSubmit}
-        onCancel={() => navigate('/fibu/zahlungsvorschlaege')}
-      />
+        </>
+      ) : null}
     </div>
   )
 }

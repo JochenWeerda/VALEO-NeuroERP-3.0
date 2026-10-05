@@ -1,13 +1,22 @@
 import type {
   ScreenDomain,
+  ScreenColumnNavigation,
+  ScreenCalendarView,
   ScreenContextRail,
+  ScreenContextRailSection,
   ScreenDensity,
   ScreenFieldType,
   ScreenFloorplan,
   ScreenLayoutMode,
   ScreenMode,
+  ScreenSectionNavigation,
   ScreenSummaryItem,
+  ScreenSummaryPlacement,
+  ScreenActionZone,
+  ScreenCondition,
   ScreenTableProfile,
+  ScreenTwinMetricKind,
+  ScreenVoiceProvider,
 } from '../schema'
 
 export type RenderComponentKind =
@@ -27,21 +36,53 @@ export type RenderComponentKind =
 export interface RenderShellPlan {
   title: string
   subtitle?: string
+  identityField?: string
   domain: ScreenDomain
   mode: ScreenMode
   layoutMode: ScreenLayoutMode
   mobileMode: ScreenLayoutMode
   touchTargetPx: number
   floorplan: ScreenFloorplan
+  columnNavigation?: ScreenColumnNavigation
+  /** `anchors`: durchgehende Belegseite; Kopf und Fussleiste bleiben stehen, der Kopf schrumpft beim Scrollen. */
+  sectionNavigation: ScreenSectionNavigation
   density: ScreenDensity
   contextRail: ScreenContextRail
+  contextRailSections: ScreenContextRailSection[]
   tableProfile: ScreenTableProfile
+  summaryPlacement: ScreenSummaryPlacement
+  statusPlacement: 'beforeFields' | 'afterFields'
+  stickyHeader: boolean
+  stickyFooter: boolean
   summaryEndpoint?: string
+  voice?: {
+    enabled: boolean
+    provider: ScreenVoiceProvider
+  }
+  processRibbon?: RenderProcessRibbonPlan
+  processRibbonWarnings?: string[]
+}
+
+export type RenderProcessStepState = 'done' | 'current' | 'upcoming'
+
+export interface RenderProcessRibbonStep {
+  key: string
+  label: string
+  screenId: string
+  routePath: string
+  state: RenderProcessStepState
+}
+
+export interface RenderProcessRibbonPlan {
+  chainId: string
+  label: string
+  steps: RenderProcessRibbonStep[]
 }
 
 export interface RenderSummarySlot {
   key: string
   label: string
+  kind?: ScreenSummaryItem['kind']
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
 }
 
@@ -51,6 +92,48 @@ export interface RenderTabPlan {
   lazy: boolean
   keepAlive: boolean
   order: number
+}
+
+/** Kompilierte cockpit-Kachel (UIX-061) — navigierbar, optional mit Zaehler. */
+export interface RenderTilePlan {
+  key: string
+  label: string
+  /** Aufgeloeste Ziel-Route inkl. angehaengter Filter-Query. */
+  targetPath: string
+  targetScreenId: string
+  countEndpoint?: string
+  tone: 'neutral' | 'warning' | 'danger'
+}
+
+export interface RenderCalendarLayerPlan {
+  key: string
+  label: string
+  defaultVisible: boolean
+}
+
+export interface RenderCalendarPlan {
+  endpoint: string
+  reprojectEndpoint?: string
+  icsTokenEndpoint?: string
+  defaultView: ScreenCalendarView
+  deadlineBandDays: number
+  layers: RenderCalendarLayerPlan[]
+}
+
+export interface RenderTwinMetricPlan {
+  key: string
+  label: string
+  kind: ScreenTwinMetricKind
+  warnAbove?: number
+}
+
+export interface RenderTwinPlan {
+  endpoint: string
+  planId: string
+  cacheTtlSeconds: number
+  activateRouteTemplate: string
+  activateScreenId?: string
+  metrics: RenderTwinMetricPlan[]
 }
 
 export interface RenderTabContentPlan {
@@ -86,6 +169,8 @@ export type RenderColumnKind =
   | 'status'
   | 'boolean'
 
+export type RenderColumnPriority = 'primary' | 'secondary' | 'tertiary'
+
 export interface RenderTableColumnPlan {
   key: string
   label: string
@@ -95,6 +180,13 @@ export interface RenderTableColumnPlan {
   filterable?: boolean
   renderKind?: RenderColumnKind
   defaultSort?: 'asc' | 'desc'
+  priority?: RenderColumnPriority
+}
+
+export interface RenderTableVariant {
+  key: string
+  label: string
+  filters?: Record<string, string>
 }
 
 export interface RenderTablePlan {
@@ -102,12 +194,36 @@ export interface RenderTablePlan {
   label: string
   tabKey?: string
   columns: RenderTableColumnPlan[]
+  /** Vollstaendige Spaltenbasis fuer Nutzer-Overlays; `columns` kann gefiltert sein. */
+  availableColumns?: RenderTableColumnPlan[]
   dataSourceKey?: string
   pageSize: number
   virtualized: boolean
   rowHeight: number
   serverPagination: boolean
   tableProfile: ScreenTableProfile
+  rowRouteTemplate?: string
+  rowActions?: Array<{
+    key: string
+    label: string
+    command?: string
+    dangerLevel?: 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
+    requiresConfirmation?: boolean
+    enabledWhen?: ScreenCondition
+    visibleWhen?: { field: string; values: Array<string | number | boolean> }
+    disabledWhen?: { field: string; values: Array<string | number | boolean> }
+  }>
+  bulkActions?: Array<{
+    key: string
+    label: string
+    dangerLevel?: 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
+  }>
+  /** Aufgeloestes Detailband der gewaehlten Zeile; `fields` ist nie leer. */
+  rowDetail?: { fields: Array<{ key: string; label: string; renderKind?: RenderColumnKind }> }
+  /** Aktive Nutzer-Variante (UIX-071 Overlay) */
+  activeVariant?: string
+  /** Nutzer-definierte Varianten (UIX-071 Overlay) */
+  customVariants?: RenderTableVariant[]
 }
 
 export interface RenderActionPlan {
@@ -119,6 +235,14 @@ export interface RenderActionPlan {
   requiresConfirmation?: boolean
   auditReasonRequired?: boolean
   humanApprovalRequired?: boolean
+  zone: ScreenActionZone
+  keyboardShortcut?: string
+  command?: string
+  enabledWhen?: ScreenCondition
+}
+
+export interface RenderInteractionPlan {
+  enterMovesFocus: boolean
 }
 
 export interface RenderWorkflowPlan {
@@ -127,6 +251,10 @@ export interface RenderWorkflowPlan {
   nextActionKey?: string
   auditRequired?: boolean
   evidenceRequired?: boolean
+  /** FSX-030: geordnete Phasen fuer das Prozessband (Ebene 1). */
+  phases?: Array<{ key: string; label: string }>
+  /** FSX-030: Belegart fuer die Fallsuche (FSX-010). */
+  documentType?: string
 }
 
 export interface RenderPerformancePlan {
@@ -146,6 +274,10 @@ export interface RenderPlan {
   shell: RenderShellPlan
   summarySlots: RenderSummarySlot[]
   summaryItems: ScreenSummaryItem[]
+  tiles: RenderTilePlan[]
+  calendar?: RenderCalendarPlan
+  sourceProposals?: { contextKey: string }
+  twin?: RenderTwinPlan
   visibleTabs: RenderTabPlan[]
   tabContent: Record<string, RenderTabContentPlan>
   rootFieldKeys: string[]
@@ -155,8 +287,13 @@ export interface RenderPlan {
   tablesByKey: Record<string, RenderTablePlan>
   tablesByTab: Record<string, RenderTablePlan[]>
   actions: RenderActionPlan[]
+  interaction: RenderInteractionPlan
   workflow?: RenderWorkflowPlan
   performance: RenderPerformancePlan
+  /** Vom Nutzer eingeklappte Sektionen (UIX-071 Overlay) */
+  collapsedSections?: string[]
+  /** Overlay-Keys ohne Entsprechung im Plan → Rail-Hinweis "Anpassung pruefen" (UIX-071) */
+  overlayInvalidPaths?: string[]
 }
 
 export function fieldTypeToComponentKind(type: ScreenFieldType): RenderComponentKind {

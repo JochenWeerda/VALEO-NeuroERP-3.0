@@ -1,0 +1,42 @@
+slice_id: SECURITY-PATCH-MILESTONE-20261001
+title: Gezielte Sicherheitsupdates fuer fuenf Abhaengigkeiten
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claims fc1502e67 und c1b3d765f; fremde POS-/CRM-/OpenAPI-Slices unberuehrt.
+goal: Erreichbare aktuelle Paketbefunde ohne neue Risikoausnahmen reparieren.
+file_ownership:
+  - requirements.txt
+  - services/ai/requirements.txt
+  - services/crm-marketing/requirements.txt
+  - package.json
+  - pnpm-lock.yaml
+  - config/security/dependency-decisions.json
+  - tests/test_jwt_payload_depth.py
+  - docs/quality-assurance/security-patch-milestone-20261001.md
+acceptance:
+  - Manifestpins und Lockfile enthalten die reparierten Paketversionen.
+  - JWT-Tiefenfehler ist ein Tokenfehler statt ungefangener Rekursion.
+  - Bestehende Chroma-Bewertung wird nicht erweitert oder verlaengert.
+tests:
+  - 17 JWT-/OIDC-Vertraege mit isoliertem PyJWT 2.15.0 gruen.
+  - 18 Sicherheitsgate-Tests und 14 Subtests gruen.
+  - Frozen pnpm-Install und Produktionsaudit ohne Befunde.
+  - Root und CRM-Marketing pip-audit ohne Befunde.
+  - AI-Audit mit drei bestehenden not_affected-Befunden freigegeben.
+  - Drei Kalendervertraege und zwei echte Laufzeit-Smokes gruen.
+risks:
+  - GitHub-Alert-Schliessung und CI sind externe Abnahmen.
+  - Vollstaendiger Serviceboot und Deployment sind nicht lokal bewiesen.
+ai_harness:
+  fachlicher_vertrag: Bestehende Kalenderzeiten und JWT-Verifikation erhalten.
+  architektur_vertrag: Keine neuen Services oder Datenbankkopien.
+  daten_vertrag: Keine Fachdatenaenderung; Kalender-UTC-Vertrag geprueft.
+  test_vertrag: Echte JWT-Fehlerreproduktion sowie Audit und Konsumententests.
+  security_vertrag: Reparierte Pins; Chroma-Review bleibt bis 2026-10-15 begrenzt.
+  betriebs_vertrag: Frozen Installation; Deployment muss neue Pins installieren.
+  dokumentations_vertrag: Workboard, Open-Gaps und Abnahmebericht aktualisiert.
+external_gates:
+  - GitHub-Alert-Auswertung nach Defaultbranch-Integration.
+  - Erforderliche CI-Checks und Deployment mit neuen Pins.

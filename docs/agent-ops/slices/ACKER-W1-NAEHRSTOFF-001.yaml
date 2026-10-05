@@ -1,0 +1,75 @@
+slice_id: ACKER-W1-NAEHRSTOFF-001
+id: ACKER-W1-NAEHRSTOFF-001
+title: Ackerschlagkartei Reinnaehrstoff-/Duengebilanz-Rechenkern (DueV)
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-13"
+started_at: "2026-07-13"
+completed_at: "2026-07-13"
+goal: >-
+  Erster Baustein der Ackerschlagkartei-Aufwertung auf LWK-Standard (Welle AS-W1):
+  ein DueV-fundierter, testbarer Rechenkern fuer Reinnaehrstoffe (N/P2O5/K2O/MgO/S),
+  organisch/mineralische N-Trennung und anrechenbare N-Menge, die 170-kg-N-Grenze
+  fuer organische Duengung sowie die vereinfachte N-Duengebedarfsermittlung
+  (Sollwert-Nmin+/-Zu-/Abschlaege). Grundlage fuer AS-W1 (Reinnaehrstoffe),
+  AS-W2 (Bedarf) und AS-W3 (Bilanz).
+scope:
+  - Reines Rechenmodul app/agrar/feldbuch/naehrstoff.py.
+  - Reinnaehrstoffe aus Produktmenge x Gehalt; org./min. Trennung; N-Wirksamkeit.
+  - DueV-170-kg-N-org.-Grenze (parametrisierbar fuer rote Gebiete).
+  - Vereinfachte N-Duengebedarfsformel.
+  - Regressionstest gegen DueV-Rechenbeispiele.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/ACKER-W1-NAEHRSTOFF-001.yaml"
+  - "app/agrar/feldbuch/__init__.py"
+  - "app/agrar/feldbuch/naehrstoff.py"
+  - "tests/test_feldbuch_naehrstoff_duev.py"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/ACKER-W1-NAEHRSTOFF-001.yaml
+  - app/agrar/feldbuch/__init__.py
+  - app/agrar/feldbuch/naehrstoff.py
+  - tests/test_feldbuch_naehrstoff_duev.py
+progress: >-
+  2026-07-13 umgesetzt: Paket app/agrar/feldbuch mit naehrstoff.py
+  (reinnaehrstoffe_kg, duengebilanz, duev_n_org_check, duengebedarf_n,
+  NaehrstoffGehalt/Duengemassnahme). Deklarierte Oxidprozente (N/P2O5/K2O/MgO/S)
+  je Produkt; Mengen je ha x Flaeche. Bestehende Modelle Duenger/PSM und die
+  ERP-Duengebilanz (agrar_feldbuch.py) bleiben unangetastet; dieser Kern loest
+  spaeter die hardcodierte N-Gehalt-Tabelle ab und ergaenzt P2O5/K2O. Endpoint-/
+  Portal-Anbindung und Duengemittel-Stammdaten-UI folgen als naechste W1-Schritte.
+acceptance:
+  - "Reinnaehrstoffe N/P2O5/K2O aus Menge x Gehalt korrekt (DueV-Beispiele)."
+  - "org./mineralische N-Trennung + anrechenbare N-Menge korrekt."
+  - "170-kg-N-org.-Grenze mit Auslastung; strengerer Parameter fuer rote Gebiete."
+  - "N-Duengebedarf = Sollwert-Nmin+/-Zu-/Abschlaege, nicht negativ."
+tests:
+  - "pytest tests/test_feldbuch_naehrstoff_duev.py -> 9 passed."
+  - "python -m py_compile app/agrar/feldbuch/naehrstoff.py -> 0."
+risks:
+  - "Gehalte werden als deklarierte Oxidprozente erwartet; Element/Oxid-Verwechslung vermeiden (dokumentiert)."
+  - "Regionale Sollwert-/Nmin-Tabellen sind konfigurierbar, nicht hart kodiert."
+external_gates:
+  - "GitHub Actions nach Push: Docs Governance, Pytest PostgreSQL, CI/CD, Quality Gate."
+ai_harness:
+  fachlicher_vertrag: >-
+    Reinnaehrstoffe und Bilanz folgen der DueV-Systematik (deklarierte Oxid-
+    prozente, org./min.-Trennung, 170-kg-N-org.-Grenze, Bedarf = Sollwert-Nmin
+    +/- Zu-/Abschlaege). Regionale Tabellenwerte sind Parameter.
+  architektur_vertrag: >-
+    Reines, seiteneffektfreies Rechenmodul im neuen Paket app/agrar/feldbuch;
+    kein neuer Service/Route, keine Aenderung bestehender Modelle/Endpunkte.
+  daten_vertrag: >-
+    Keine Datenmigration; nutzt keine DB. Anbindung an Duenger-Stammdaten und
+    FeldbuchMassnahme erfolgt in Folge-Schritten.
+  security_vertrag: >-
+    Keine Eingaben/Auth-/Tenant-Beruehrung; reine Berechnung.
+  betriebs_vertrag: >-
+    Keine Betriebs-/Deploy-Aenderung.
+  dokumentations_vertrag: >-
+    Masterplan (docs/design/ackerschlagkartei-lwk-gap-masterplan.md), Workboard
+    und Slice-YAML dokumentieren den Rechenkern und die Folge-Schritte.
+  test_vertrag: >-
+    DueV-Regressionstest und py_compile gruen vor Push; GitHub Actions bestaetigen
+    den Default-Branch.

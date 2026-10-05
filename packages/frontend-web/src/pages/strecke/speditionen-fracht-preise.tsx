@@ -15,6 +15,9 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { Callout } from '@/components/ui/callout'
+import { Button } from '@/components/ui/button'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type EditRow = SpeditionFrachttarifPayload & { id?: string }
 type FreightTariffRole = 'disposition' | 'einkauf' | 'finance' | 'leitung'
@@ -43,6 +46,7 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [roleFocus, setRoleFocus] = useState<FreightTariffRole>('disposition')
+  const isTouch = useTouchDevice()
   const firstInputRef = useRef<HTMLInputElement>(null)
 
   const load = async () => {
@@ -131,8 +135,13 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
           : 'Tarife sind arbeitsfaehig; naechste Frachtentscheidung kann gegen die Liste geprueft werden.'
 
   return (
-    <div className="min-h-full bg-[#ececec] p-4 text-[11px] text-black">
-      <div className="mb-4 space-y-4 text-[13px]">
+    <div className="min-h-full space-y-4 bg-background p-3 text-foreground md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Speditionen / Fracht-Preise</h1>
+        <p className="text-muted-foreground">Tarife nach PLZ anlegen und pflegen</p>
+      </div>
+      {!isTouch ? (
+      <div className="mb-4 space-y-4">
         <RoleFocusBar roles={freightTariffRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={rows.length} totalCount={rows.length} title="Wer klaert den Frachttarif?" />
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
           <ManagementDecisionPanel
@@ -175,21 +184,19 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
           />
         </div>
       </div>
-
-      <div className="mb-2 text-[12px] font-semibold uppercase">Speditionen / Fracht-Preise (nach PLZ)</div>
+      ) : null}
 
       {error && (
-        <div className="mb-2 border border-red-400 bg-red-50 px-2 py-1 text-red-700">{error}</div>
+        <Callout variant="error" className="mb-2 border px-2 py-1">{error}</Callout>
       )}
 
-      {/* Toolbar */}
-      <div className="mb-2 flex gap-1">
-        <button onClick={openNew} className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 hover:bg-[#ddd]">
+      <div className="mb-2 flex flex-wrap gap-2">
+        <Button className="min-h-touch touch-manipulation" onClick={openNew}>
           Neu
-        </button>
-        <button onClick={load} className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 hover:bg-[#ddd]">
+        </Button>
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => { void load() }}>
           Aktualisieren
-        </button>
+        </Button>
       </div>
 
       {/* Table */}
@@ -221,19 +228,13 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
             <span>{row.spediteur}</span>
             <span className="text-right pr-2">{Number(row.preis_eur_t).toFixed(2)}</span>
             <span>{row.aktiv ? 'Ja' : 'Nein'}</span>
-            <span className="flex gap-1">
-              <button
-                onClick={() => openEdit(row)}
-                className="h-4 border border-[#9b9b9b] bg-[#ececec] px-1 hover:bg-[#ddd]"
-              >
-                Bearb.
-              </button>
-              <button
-                onClick={() => setDeleteId(row.id)}
-                className="h-4 border border-[#e88] bg-[#fdd] px-1 hover:bg-[#fbb]"
-              >
-                Del
-              </button>
+            <span className="flex flex-wrap gap-1">
+              <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => openEdit(row)}>
+                Bearbeiten
+              </Button>
+              <Button className="min-h-touch touch-manipulation" variant="destructive" onClick={() => setDeleteId(row.id)}>
+                Loeschen
+              </Button>
             </span>
           </div>
         ))}
@@ -288,21 +289,13 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
                 <span className="text-[10px] text-[#555]">Aktiv</span>
               </label>
             </div>
-            <div className="flex justify-end gap-2 border-t border-[#d0d0d0] px-3 py-2">
-              <button
-                onClick={() => setEditRow(null)}
-                className="h-5 border border-[#9b9b9b] bg-[#ececec] px-3 hover:bg-[#ddd]"
-                disabled={saving}
-              >
+            <div className="flex justify-end gap-2 border-t border-border px-3 py-2">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setEditRow(null)} disabled={saving}>
                 Abbrechen
-              </button>
-              <button
-                onClick={handleSave}
-                className="h-5 border border-[#3a7abf] bg-[#dde8f5] px-3 hover:bg-[#c8dcf0]"
-                disabled={saving}
-              >
+              </Button>
+              <Button className="min-h-touch touch-manipulation" onClick={() => { void handleSave() }} disabled={saving}>
                 {saving ? 'Speichere...' : 'Speichern'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -316,21 +309,13 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
               Löschen bestätigen
             </div>
             <div className="p-3 text-[11px]">Frachttarif wirklich löschen?</div>
-            <div className="flex justify-end gap-2 border-t border-[#d0d0d0] px-3 py-2">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="h-5 border border-[#9b9b9b] bg-[#ececec] px-3 hover:bg-[#ddd]"
-                disabled={saving}
-              >
+            <div className="flex justify-end gap-2 border-t border-border px-3 py-2">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setDeleteId(null)} disabled={saving}>
                 Abbrechen
-              </button>
-              <button
-                onClick={handleDelete}
-                className="h-5 border border-[#c03030] bg-[#fdd] px-3 hover:bg-[#fbb]"
-                disabled={saving}
-              >
-                {saving ? '...' : 'Löschen'}
-              </button>
+              </Button>
+              <Button variant="destructive" className="min-h-touch touch-manipulation" onClick={() => { void handleDelete() }} disabled={saving}>
+                {saving ? '...' : 'Loeschen'}
+              </Button>
             </div>
           </div>
         </div>

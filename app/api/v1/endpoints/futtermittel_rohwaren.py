@@ -302,13 +302,12 @@ async def update_rohware(
     try:
         _ensure_tables(db)
         set_clauses = ", ".join(f"{k} = :{k}" for k in updates)
-        # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
         sql = text(f"""
             UPDATE domain_futtermittel.feed_raw_materials
             SET {set_clauses}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
             RETURNING *
-        """)
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         row = db.execute(sql, {"id": rohware_id, "tenant_id": tenant_id, **updates}).fetchone()
         db.commit()
     except Exception as exc:
@@ -369,7 +368,7 @@ async def create_analyse(
             INSERT INTO domain_futtermittel.raw_material_analyses
                 (id, material_id, analyse_datum, labor_ref, analysiert_von, werte, tenant_id)
             VALUES
-                (:id, :material_id, :analyse_datum, :labor_ref, :analysiert_von, :werte::JSONB, :tenant_id)
+                (:id, :material_id, :analyse_datum, :labor_ref, :analysiert_von, CAST(:werte AS JSONB), :tenant_id)
             RETURNING *
         """)
         row = db.execute(sql, {

@@ -1,0 +1,57 @@
+slice_id: DUE-DATE-CALENDAR-20260930
+id: DUE-DATE-CALENDAR-20260930
+title: Faelligkeit plus 30 Kalendertage zentral und korrekt berechnen
+status: abgeschlossen
+owner: Codex
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+result: >
+  Elf fehlerhafte Monatsersatz-Berechnungen verwenden nun echte 30
+  Kalendertage ab dem Geschaeftstag. Der Business-Time-Bestand sinkt von 244
+  auf 212 Stellen; das alte Muster ist aus app/ entfernt.
+goal: >
+  Elf fehlerhafte replace(day=min(day + 30, 28))-Berechnungen durch eine
+  zentrale, zeitzonenfeste Addition von 30 Kalendertagen ersetzen und das
+  Muster dauerhaft sperren.
+file_ownership:
+  - app/core/business_time.py
+  - app/services/agrar_settlement_service.py
+  - app/services/einkauf_compat_service.py
+  - app/api/v1/endpoints/zinsabrechnung.py
+  - app/api/v1/endpoints/collective_documents.py
+  - app/api/v1/endpoints/dauerauftraege.py
+  - app/api/v1/endpoints/erechnung_import.py
+  - app/api/v1/endpoints/ers_settlement.py
+  - app/api/v1/endpoints/purchase_invoice_verification.py
+  - app/api/v1/endpoints/rohware_sammelabrechnung.py
+  - app/api/v1/endpoints/sales_delivery_notes.py
+  - app/api/v1/endpoints/strecke.py
+  - tests/test_business_time.py
+  - tests/test_due_date_calendar_contract.py
+  - docs/quality-assurance/due-date-calendar-20260930.md
+  - docs/project-context/open-gaps-and-known-issues.md (nur eigener Befund)
+  - docs/agent-ops/active-workboard.md (nur eigener Abschnitt)
+  - docs/agent-ops/slices/DUE-DATE-CALENDAR-20260930.yaml
+acceptance:
+  - 30 Kalendertage funktionieren ueber Monats-, Jahres- und Schaltjahrgrenzen
+  - Alle elf produktiven Stellen verwenden Business-Time und den zentralen Helfer
+  - Das fehlerhafte replace-day-Muster ist im Produktcode nicht mehr vorhanden
+  - Fachtests, Mustervertrag und Dokumentationspruefungen sind gruen
+tests:
+  - "pytest tests/test_business_time.py tests/test_due_date_calendar_contract.py -q ohne Plugin-Autoload: 25 passed"
+  - "python scripts/check_business_time_usage.py: 212 Stellen in 117 Dateien, Exit 0"
+  - "rg replace-day-Muster app: keine Fundstelle"
+  - "pnpm docs:check: gruen"
+risks:
+  - 30 Kalendertage bleiben die bestehende Fachannahme; Zahlungsbedingungen werden nicht neu modelliert
+ai_harness:
+  fachlicher_vertrag: Faelligkeit plus 30 bedeutet exakt 30 Kalendertage ab Geschaeftstag.
+  architektur_vertrag: Tagesquelle und Datumsarithmetik liegen zentral in business_time.py.
+  daten_vertrag: Keine Schema- oder Datenmigration.
+  test_vertrag: Monats-, Jahres- und Schaltjahrgrenzen sowie alle Aufrufer sind abgesichert.
+  security_vertrag: Keine Aenderung an Zugriff oder Mandantengrenzen.
+  betriebs_vertrag: Deterministische Berechnung ohne Netzwerk oder Datenbank.
+  dokumentations_vertrag: Workboard, Slice, Open-Gaps und QA beschreiben Fehler und Behebung.
+external_gates:
+  - not_applicable

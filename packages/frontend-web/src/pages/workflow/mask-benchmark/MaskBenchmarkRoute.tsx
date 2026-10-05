@@ -1,23 +1,23 @@
 /**
- * E2E/Benchmark route: mounts Legacy or Pilot mask directly (no feature-flag split).
- * Path: /dev/mask-benchmark/:domain/:variant/:id
+ * E2E/Benchmark-Route: Legacy-Maske oder native Maske (kein Feature-Flag).
+ * Pfad: /dev/mask-benchmark/:domain/:variant/:id
  */
 import { lazy, Suspense, type ComponentType } from 'react'
 import { useParams } from '@/app/routing/typed-router'
 
 const SALES_LEGACY = lazy(() => import('@/pages/sales/OrderEditorLegacyPage'))
-const SALES_PILOT = lazy(() => import('@/pages/sales/UniversalSalesOrderPilotPage'))
+const SALES_NATIVE = lazy(() => import('@/pages/sales/sales-order-native'))
 const KONTRAKT_LEGACY = lazy(() => import('@/pages/kontrakte/FrmKontraktDetail'))
-const KONTRAKT_PILOT = lazy(() => import('@/pages/kontrakte/UniversalKontraktPilotPage'))
+const KONTRAKT_NATIVE = lazy(() => import('@/pages/agrar/kontrakt-native'))
 
 const COMPONENTS: Record<string, Record<string, ComponentType>> = {
   'sales-order': {
     legacy: SALES_LEGACY,
-    pilot: SALES_PILOT,
+    pilot: SALES_NATIVE,
   },
   kontrakt: {
     legacy: KONTRAKT_LEGACY,
-    pilot: KONTRAKT_PILOT,
+    pilot: KONTRAKT_NATIVE,
   },
 }
 

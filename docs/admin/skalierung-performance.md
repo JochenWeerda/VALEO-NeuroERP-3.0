@@ -4,8 +4,8 @@ type: explanation
 audience: [betrieb, entwickler]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
-version: 3.0.0
+last_reviewed: 2026-09-11
+version: 3.1.0
 ---
 
 # Skalierung & Performance
@@ -48,5 +48,32 @@ Optimierung aus **PERF-MULTIUSER-001**.
 
 ## Lasttests
 
-Reproduzierbare Lasttests über `scripts/loadtest/` (httpx-basiert). Ergebnisse
-gegen SLOs bewerten, nicht gegen Einzelwerte.
+### Erntepeak (SPEC-P1-10 / Gap 037)
+
+k6-Skript: `tests/load/harvest-peak.js` mit Profilen:
+
+| PROFILE | Zweck | Dauer / VU |
+|---------|-------|------------|
+| `full` | Staging-/Peak (Default) | ~20 min, bis 800 VU |
+| `local` | docker-compose / localhost | ~2,5 min, 50 VU |
+| `smoke` | schneller Smoke | 30 s, 5 VU |
+
+```powershell
+# Voraussetzung: Backend (z. B. docker compose -f docker-compose.dev.yml up -d), k6
+pwsh scripts/loadtest/run_harvest_peak_local.ps1
+pwsh scripts/loadtest/run_harvest_peak_local.ps1 -Profile smoke
+```
+
+```bash
+./scripts/loadtest/run_harvest_peak_local.sh
+./scripts/loadtest/run_harvest_peak_local.sh smoke
+```
+
+Summary: `reports/performance/harvest-peak-<profil>-summary.json`.
+Details: [tests/load/README.md](../../tests/load/README.md).
+Staging-Ausführung bleibt externes Ops-Gate (`load-test.yml`).
+
+### Weitere Scripts
+
+Reproduzierbare httpx-Lasttests unter `scripts/loadtest/` (neben k6).
+Ergebnisse gegen SLOs bewerten, nicht gegen Einzelwerte.

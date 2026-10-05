@@ -12,9 +12,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://valeo_dev:valeo_dev@localhost:5432/valeo_neuro_erp"
-    )
+    DATABASE_URL: str = Field(default="")
 
     # Service
     SERVICE_NAME: str = Field(default="crm-service")

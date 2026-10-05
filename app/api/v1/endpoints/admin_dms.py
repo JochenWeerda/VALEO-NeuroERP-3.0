@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import AnyHttpUrl, BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +20,16 @@ from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 router = APIRouter(prefix="/admin/dms")
 
+def _workspace_path(relative_path: str) -> Path:
+    path = (Path.cwd() / relative_path).resolve()
+    cwd = Path.cwd().resolve()
+    if path != cwd and cwd not in path.parents:
+        raise RuntimeError(f"Runtime path must stay inside the working directory: {relative_path}")
+    return path
+
+
 # Pfad zur DMS-Konfigurationsdatei (identisch mit dms_client.py)
-_CONFIG_PATH = Path("data/config/dms.json")
+_CONFIG_PATH = _workspace_path("data/config/dms.json")
 
 
 # ---------------------------------------------------------------------------
@@ -38,7 +46,7 @@ class DmsStatusResponse(BaseModel):
 
 
 class DmsConnectionRequest(BaseModel):
-    base: str
+    base: AnyHttpUrl
     token: str
 
 
@@ -76,9 +84,10 @@ def _is_configured() -> bool:
     return bool(token and base)
 
 
-def _make_client(base: str, token: str) -> httpx.Client:
+def _make_client(base: AnyHttpUrl | str, token: str) -> httpx.Client:
+    normalized_base = str(base).rstrip("/")
     return httpx.Client(
-        base_url=base,
+        base_url=normalized_base,  # NOSONAR - validated as AnyHttpUrl before constructing the client.
         headers={"Authorization": f"Token {token}"},
         timeout=15.0,
     )
@@ -97,6 +106,7 @@ _DOCUMENT_TYPES = [
     "Angebot",
     "Bestellung",
     "Gutschrift",
+    "Artikel",
     "Sonstiges",
 ]
 
@@ -226,11 +236,14 @@ async def bootstrap_dms(body: DmsConnectionRequest):
     # Konfiguration lokal speichern
     _CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     config = _load_config()
-    config["base"] = body.base
+    config["base"] = str(body.base)
     config["document_types"] = doc_type_ids
     config["metadata_types"] = meta_type_ids
     try:
-        _CONFIG_PATH.write_text(json.dumps(config, ensure_ascii=False, indent=2))
+        _CONFIG_PATH.write_text(  # NOSONAR - _CONFIG_PATH is anchored under the working directory.
+            json.dumps(config, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
     except Exception as exc:
         logger.error("Failed to write DMS config: %s", exc)
         raise HTTPException(status_code=500, detail=f"Konfiguration konnte nicht gespeichert werden: {exc}")

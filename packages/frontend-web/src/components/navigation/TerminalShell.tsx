@@ -33,13 +33,13 @@ export function TerminalShell({ children, title = 'Lager' }: TerminalShellProps)
         className="flex h-14 items-center justify-between border-b bg-[hsl(215,30%,14%)] px-4 text-white"
         role="banner"
       >
-        <Link to="/lager" className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white/30 rounded">
+        <Link to="/lager" className="flex items-center gap-2 focus:outline-hidden focus:ring-2 focus:ring-white/30 rounded">
           <img src="/branding/valeo-erp-logo.png" alt="VALEO ERP" className="h-8 w-8 rounded object-cover" />
           <span className="text-sm font-semibold">{title}</span>
         </Link>
         <Link
           to="/"
-          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-white/70 hover:text-white focus:outline-hidden focus:ring-2 focus:ring-white/30"
           aria-label="Zurück zur Hauptanwendung"
         >
           <LogOut className="h-4 w-4" aria-hidden="true" />
@@ -72,7 +72,7 @@ export function TerminalShell({ children, title = 'Lager' }: TerminalShellProps)
               clsx(
                 'flex flex-1 flex-col items-center justify-center gap-1 py-3',
                 'text-xs font-medium transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/30',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/30',
                 'min-h-[56px]',
                 isActive
                   ? 'bg-primary/20 text-white'

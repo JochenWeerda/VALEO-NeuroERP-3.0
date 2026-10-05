@@ -1,0 +1,28 @@
+id: UIX-SM-TOUCH-20260921
+owner: Codex
+status: abgeschlossen
+goal: Gemeinsame kleine Buttons mit mindestens 44 px statt Einzelmasken-Fixes.
+scope: Zentrale Button-Variante; keine FSX-, KIM- oder HOME-UIX-Fachdateien.
+file_ownership:
+  - packages/frontend-web/src/components/ui/button.tsx
+  - packages/frontend-web/src/__tests__/components/ui/button-touch.test.tsx
+  - docs/quality-assurance/uix-sm-touch-20260921.md
+acceptance:
+  - Mindesthoehe und Mindestbreite 44 px auch bei h-6.
+  - Events, Fokus, disabled und asChild bleiben funktionsfaehig.
+tests:
+  - 13 Vitest-Tests in vier Dateien bestanden.
+  - 48 Chromium-Komponentenmessungen bei vier Viewportbreiten bestanden.
+risks:
+  - Seitenabnahme fuer FSX/KIM und enge Toolbars bleibt offen.
+  - Kartenstapel im fremden Arbeitsbaum; MCP-Write weiterhin offen.
+ai_harness:
+  fachlicher_vertrag: Kompakte Aktionen per Finger erreichbar; keine fachliche Aktion geaendert.
+  architektur_vertrag: Bestehende gemeinsame UI-Komponente im Meridian-System.
+  daten_vertrag: Keine Daten- oder API-Aenderung.
+  test_vertrag: Vitest und reale CSS-Messung in Chromium.
+  security_vertrag: Keine Auth-, Tenant- oder Berechtigungsaenderung.
+  betriebs_vertrag: Ruecknahme durch Revert des abgegrenzten Slices.
+  dokumentations_vertrag: Workboard, Slice und eigener QA-Nachweis.
+external_gates:
+  - not_applicable

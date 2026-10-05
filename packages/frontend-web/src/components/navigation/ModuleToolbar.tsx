@@ -82,7 +82,7 @@ export function ModuleToolbar({
       aria-label="Modul-Navigation"
     >
       {backTarget != null && (
-        <Button variant="ghost" size="sm" onClick={handleBack} aria-label="Zurück">
+        <Button variant="ghost" className="min-h-11 min-w-11 touch-manipulation" onClick={handleBack} aria-label="Zurück">
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Zurück</span>
         </Button>

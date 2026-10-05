@@ -180,7 +180,6 @@ async def list_credit_notes(
         params["cid"] = customer_id
 
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, credit_note_number, customer_id, customer_name,
                    invoice_reference, reason, total_amount, currency, status, notes,
@@ -188,7 +187,7 @@ async def list_credit_notes(
             FROM domain_sales.sales_credit_notes
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -297,8 +296,19 @@ async def post_credit_note(
               AND op_status NOT IN ('geschlossen', 'ausgeziffert')
         """), {"tid": row[1], "betrag": float(total), "ref": cn_number, "cid": str(row[3])})
         db.commit()
-    except Exception:  # noqa: BLE001 — GL-Zeilen/OP-Reduktion nicht kritisch für Gutschrift-Buchung
-        pass
+    except Exception as exc:  # noqa: BLE001
+        # Nicht blockierend fuer die Gutschrift selbst. Faellt dieser Block aus,
+        # steht der Buchungskopf allerdings ohne GL-Zeilen da — das muss
+        # sichtbar sein und darf nicht still passieren.
+        from app.core.metrics import critical_data_path_errors_total
+
+        critical_data_path_errors_total.labels(
+            endpoint="sales_credit_note_gl", error_type="posting_failed"
+        ).inc()
+        logger.error(
+            "GL-Zeilen/OP-Reduktion fuer Gutschrift %s fehlgeschlagen: %s",
+            cn_id, exc, exc_info=True,
+        )
 
     log_fibu_audit(db, row[1], "post", "sales_credit_note", cn_id, {"total": float(total)}, request=request)
     return {"ok": True, "journal_entry_id": je_id}
@@ -405,7 +415,6 @@ async def list_returns(
         params["status"] = status
 
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, return_number, customer_id, customer_name,
                    delivery_note_reference, invoice_reference, reason,
@@ -413,7 +422,7 @@ async def list_returns(
             FROM domain_sales.sales_returns
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [

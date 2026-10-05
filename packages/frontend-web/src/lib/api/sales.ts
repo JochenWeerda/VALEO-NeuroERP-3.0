@@ -79,31 +79,6 @@ export type SalesOffer = {
   version: number
 }
 
-export type SalesOrderScreenSummary = {
-  schema_version: 1
-  screen_id: 'sales/sales-order'
-  order_id: string
-  tenant_id?: string | null
-  title: string
-  subtitle?: string | null
-  summary: {
-    total_amount: number
-    item_count: number
-    status: string
-    delivery_date?: string | null
-  }
-  available_tabs: string[]
-  tab_endpoints?: Record<string, string>
-  actions: Array<{ key: string; label: string; permission?: string }>
-  customer_name?: string | null
-  performance: {
-    initial_payload_budget_kb: number
-    tabs_lazy: boolean
-    lookup_min_chars: number
-    default_table_limit: number
-  }
-}
-
 type PaginatedResponse<T> = {
   items: T[]
   total: number
@@ -135,17 +110,27 @@ export type Lieferung = {
   status: LieferungStatus
 }
 
-export type RechnungStatus = 'offen' | 'teilbezahlt' | 'bezahlt' | 'ueberfaellig' | 'storniert'
+export type RechnungStatus =
+  | 'entwurf'
+  | 'gebucht'
+  | 'offen'
+  | 'teilbezahlt'
+  | 'bezahlt'
+  | 'ueberfaellig'
+  | 'storniert'
 
 export type Rechnung = {
   id: string
   nummer: string
   datum: string
   kunde: string
+  /** Leer, solange die Rechnung ihre Quelle ueber Zuordnungen fuehrt, nicht ueber eine Auftragsnummer. */
   auftragsNr: string
   betrag: number
   faelligAm: string
   status: RechnungStatus
+  /** Positionszahl aus dem Beleg; 0 ist ein Befund, kein Formfehler. */
+  positionen?: number
 }
 
 export type Auftrag = {
@@ -174,7 +159,6 @@ export const salesKeys = {
   all: ['sales'] as const,
   orders: (filters?: Record<string, unknown>) => [...salesKeys.all, 'orders', filters] as const,
   order: (id: string) => [...salesKeys.all, 'orders', id] as const,
-  orderScreenSummary: (id: string) => [...salesKeys.order(id), 'screen-summary'] as const,
   offers: (filters?: Record<string, unknown>) => [...salesKeys.all, 'offers', filters] as const,
   offer: (id: string) => [...salesKeys.all, 'offers', id] as const,
   // legacy aliases
@@ -251,18 +235,6 @@ export function useSalesOrder(id: string, options?: { enabled?: boolean }) {
     queryKey: salesKeys.order(id),
     queryFn: () => fetchSalesOrder(id),
     enabled: Boolean(id) && (options?.enabled ?? true),
-  })
-}
-
-export function useSalesOrderScreenSummary(id: string) {
-  return useQuery({
-    queryKey: salesKeys.orderScreenSummary(id),
-    queryFn: async () => {
-      const response = await apiClient.get<SalesOrderScreenSummary>(`/api/v1/sales/orders/${id}/screen-summary`)
-      return response.data
-    },
-    enabled: Boolean(id),
-    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -374,14 +346,76 @@ export function useDeleteOrder() {
 
 // ── Hooks: Deliveries ─────────────────────────────────────────────────────────
 
+/**
+ * Rohform eines Lieferscheins aus `GET /sales/delivery-notes`.
+ *
+ * Der Abruf ging bis hierher an `/api/v1/sales/deliveries/` — eine Route, die
+ * es nicht gibt. Der 404 lief in ein `catch`, und die Lieferliste war immer
+ * leer. Derselbe Fehler wie bei den Rechnungen, in derselben Datei.
+ */
+export type DeliveryNoteRow = {
+  id?: string
+  delivery_note_number?: string
+  delivery_date?: string
+  customer_id?: string
+  sales_order_id?: string | null
+  status?: string
+  is_delivered?: boolean
+  positionen?: Array<{ menge?: number | string | null }>
+}
+
+/**
+ * Lieferscheinstatus auf den Status der Lieferliste.
+ *
+ * `unterwegs` ist hier die **Annahme**, dass ein gebuchter, noch nicht
+ * zugestellter Lieferschein unterwegs ist — der Beleg fuehrt keinen
+ * Transportstand. Entwurf bleibt `geplant`, `is_delivered` entscheidet ueber
+ * `zugestellt`, damit die Zustellung nicht aus dem Status geraten wird.
+ */
+export function lieferungStatus(row: DeliveryNoteRow): LieferungStatus {
+  const status = String(row.status ?? '').toLowerCase()
+  if (status === 'storniert' || status === 'cancelled') return 'storniert'
+  if (row.is_delivered || status === 'geliefert' || status === 'delivered') return 'zugestellt'
+  if (status === 'draft' || status === 'entwurf' || !status) return 'geplant'
+  return 'unterwegs'
+}
+
+/** Summe der Positionsmengen — der Beleg fuehrt keine Kopfmenge. */
+function lieferMenge(row: DeliveryNoteRow): number {
+  const positionen = row.positionen ?? []
+  let summe = 0
+  for (const position of positionen) {
+    const menge = Number(position?.menge ?? 0)
+    if (Number.isFinite(menge)) summe += menge
+  }
+  return summe
+}
+
+export function zuLieferung(row: DeliveryNoteRow): Lieferung {
+  return {
+    id: String(row.id ?? ''),
+    nummer: String(row.delivery_note_number ?? ''),
+    datum: String(row.delivery_date ?? ''),
+    kunde: String(row.customer_id ?? ''),
+    auftragsNr: String(row.sales_order_id ?? ''),
+    menge: lieferMenge(row),
+    status: lieferungStatus(row),
+  }
+}
+
 export function useLieferungen() {
   return useQuery<Lieferung[]>({
     queryKey: [...salesKeys.all, 'deliveries'],
     queryFn: async () => {
       try {
-        const resp = await apiClient.get<{ items: Lieferung[] }>('/api/v1/sales/deliveries/?limit=100')
-        return resp.data.items ?? []
+        // Der Endpunkt liefert eine Liste, keine Huelle mit `items`.
+        const resp = await apiClient.get<DeliveryNoteRow[]>(
+          '/api/v1/sales/delivery-notes?limit=100',
+        )
+        const zeilen = Array.isArray(resp.data) ? resp.data : []
+        return zeilen.map(zuLieferung)
       } catch {
+        // Bewusst still: Die Liste ist eine Uebersicht, kein Vorgang.
         return []
       }
     },
@@ -392,14 +426,79 @@ export function useLieferungen() {
 
 // ── Hooks: Invoices ───────────────────────────────────────────────────────────
 
+/**
+ * Rohform einer Rechnung aus `GET /sales/invoices`.
+ *
+ * Bis zu FSX-RECHNUNGSMASKE gab es diesen Endpunkt nicht: Der Abruf lief in
+ * einen 404, das `catch` machte daraus eine leere Liste, und die Maske sah aus,
+ * als gaebe es keine Rechnungen. Seit es ihn gibt, muss die Antwort auch
+ * **gelesen** werden — die Feldnamen des Belegs sind andere als die der Maske.
+ */
+export type SalesInvoiceListRow = {
+  id?: string
+  invoice_number?: string
+  customer_id?: string
+  invoice_date?: string
+  due_date?: string | null
+  status?: string
+  net_amount?: string
+  gross_amount?: string
+  line_count?: number
+}
+
+/**
+ * Belegstatus auf den Status der Faktura-Liste.
+ *
+ * `gebucht` wird zu `offen`: Eine gebuchte Rechnung ist fachlich eine offene
+ * Forderung. `teilbezahlt` und `ueberfaellig` entstehen hier **nicht** — beide
+ * haengen am Zahlungsstand, den der Beleg nicht fuehrt. Sie aus dem
+ * Faelligkeitsdatum zu erfinden waere eine Aussage ueber Zahlungen, die wir an
+ * dieser Stelle nicht haben.
+ */
+export function rechnungStatus(status?: string): RechnungStatus {
+  switch (status) {
+    case 'entwurf':
+      return 'entwurf'
+    case 'gebucht':
+      return 'offen'
+    case 'bezahlt':
+      return 'bezahlt'
+    case 'storniert':
+      return 'storniert'
+    default:
+      return 'entwurf'
+  }
+}
+
+export function zuRechnung(zeile: SalesInvoiceListRow): Rechnung {
+  const betrag = Number(zeile.gross_amount ?? zeile.net_amount ?? '0')
+  return {
+    id: String(zeile.id ?? ''),
+    nummer: String(zeile.invoice_number ?? ''),
+    datum: String(zeile.invoice_date ?? ''),
+    kunde: String(zeile.customer_id ?? ''),
+    // Die Herkunft der Rechnung steht in den Zuordnungen, nicht in einer
+    // Auftragsnummer am Kopf. Leer ist hier richtig, nicht unvollstaendig.
+    auftragsNr: '',
+    betrag: Number.isFinite(betrag) ? betrag : 0,
+    faelligAm: String(zeile.due_date ?? ''),
+    status: rechnungStatus(zeile.status),
+    positionen: typeof zeile.line_count === 'number' ? zeile.line_count : undefined,
+  }
+}
+
 export function useRechnungen() {
   return useQuery<Rechnung[]>({
     queryKey: [...salesKeys.all, 'invoices'],
     queryFn: async () => {
       try {
-        const resp = await apiClient.get<{ items: Rechnung[] }>('/api/v1/sales/invoices/?limit=100')
-        return resp.data.items ?? []
+        const resp = await apiClient.get<{ items?: SalesInvoiceListRow[] }>(
+          '/api/v1/sales/invoices?limit=100',
+        )
+        return (resp.data?.items ?? []).map(zuRechnung)
       } catch {
+        // Bewusst still: Die Liste ist eine Uebersicht, kein Vorgang. Ein
+        // Fehlerbanner statt der Tabelle waere hier die schlechtere Auskunft.
         return []
       }
     },

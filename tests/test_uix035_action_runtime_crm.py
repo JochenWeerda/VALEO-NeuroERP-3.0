@@ -4,7 +4,8 @@ UIX-035 / UIX-036 — ActionRuntime Backend-Test für CRM create_activity.
 Testet alle vier Execution-Modes (validate, dryRun, propose, execute)
 sowie den Agent-Pfad (dryRun mit isAgentCaller-Logik).
 
-Kein Live-DB nötig: Tabellen fehlen im Test-SQLite → graceful degradation.
+Kein Live-DB nötig für validate, dryRun und propose. Execute gegen einen
+unbekannten Kunden schreibt nichts und meldet den Fehlschlag.
 """
 
 import pytest
@@ -101,8 +102,8 @@ def test_execute_mode_validation_blocks_on_empty_betreff():
     assert data.get("validationErrors") is not None
 
 
-def test_execute_mode_succeeds_or_degrades_gracefully():
-    """Execute kann entweder erfolgreich sein oder graceful degradieren (fehlende Tabelle)."""
+def test_execute_mode_rejects_unknown_customer():
+    """Ohne Stammkunden wird nichts simuliert."""
     resp = CLIENT.post(
         BASE,
         json={"betreff": "Jahresgespräch", "typ": "Meeting", "_mode": "execute", "_auditReason": "Kundentermin Q4"},
@@ -111,16 +112,15 @@ def test_execute_mode_succeeds_or_degrades_gracefully():
     assert resp.status_code == 200
     data = resp.json()
     assert data["mode"] == "execute"
-    assert data["success"] is True
-    assert data.get("affectedIds") and len(data["affectedIds"]) == 1
-    assert data.get("auditEntryId") is not None
+    assert data["success"] is False
+    assert data["error"] == "Kunde nicht gefunden."
 
 
-def test_execute_with_idempotency_key():
+def test_execute_with_idempotency_key_still_needs_a_customer():
     payload = {"betreff": "Idempotenz-Test", "typ": "Aufgabe", "_mode": "execute", "_idempotencyKey": "ikey-abc-123"}
     resp = CLIENT.post(BASE, json=payload, headers=HEADERS)
     assert resp.status_code == 200
-    assert resp.json()["success"] is True
+    assert resp.json()["success"] is False
 
 
 # ── UIX-036: Agent-Modus ─────────────────────────────────────────────────────
@@ -158,11 +158,16 @@ def test_agent_contract_gate_on_action_definition():
 
 
 def test_readiness_gates_all_mandatory_green():
-    """Nach UIX-034b/c müssen alle 6 mandatory Gates für crm/customer-360 grün sein."""
-    from app.api.v1.endpoints.mask_screen_definition import _check_readiness
-    from app.core.screen_definitions import build_crm_customer_360_screen_definition
+    """Nach UIX-034b/c müssen alle 6 mandatory Gates für crm/customer-360 grün sein.
 
-    sd = build_crm_customer_360_screen_definition()
+    Geprüft wird die ausgelieferte ScreenDefinition (get_screen_definition inkl.
+    Meridian-Layout-Dekoration) — der rohe Builder ist ein internes Vorprodukt.
+    """
+    from app.api.v1.endpoints.mask_screen_definition import _check_readiness
+    from app.core.screen_definitions import get_screen_definition
+
+    sd = get_screen_definition("crm/customer-360")
+    assert sd is not None
     result = _check_readiness(sd)
 
     assert result["generatorReady"] is True, f"Mandatory gates failed: {result['errors']}"
@@ -190,3 +195,5 @@ def test_command_endpoint_wired_in_screen_definition():
     assert "create_activity" in actions
     assert actions["create_activity"].get("commandEndpoint"), "commandEndpoint muss gesetzt sein"
     assert "{entity_id}" in actions["create_activity"]["commandEndpoint"]
+    assert actions["edit"]["navigationRoute"] == "/verkauf/kunden-stamm/{business_partner_id}?pflege=1"
+    assert "commandEndpoint" not in actions["edit"]

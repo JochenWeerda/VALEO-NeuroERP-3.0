@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -161,15 +162,15 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
       title: 'TSE-Daten',
       content: (
         <div className="space-y-4">
-          <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-sm">
             <p className="font-semibold">Daten aus dem signierten Fiskaljournal</p>
             <p className="mt-1">Datum: {new Date(abschluss.datum).toLocaleDateString('de-DE')}</p>
             {fiscalSummaryQuery.data && fiscalSummaryQuery.data.incomplete_count > 0 && (
-              <p className="mt-2 font-semibold text-red-700">
+              <p className="mt-2 font-semibold text-status-error">
                 Abschluss blockiert: {fiscalSummaryQuery.data.incomplete_count} unvollständige TSE-Transaktion(en).
               </p>
             )}
-          </div>
+          </Callout>
 
           <Card>
             <CardContent className="pt-4 space-y-3">
@@ -250,21 +251,21 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Bar:</span>
-                  <span className={`font-bold ${abschluss.differenzBar !== 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <span className={`font-bold ${abschluss.differenzBar !== 0 ? 'text-status-warning' : 'text-status-success'}`}>
                     {abschluss.differenzBar > 0 ? '+' : ''}
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzBar)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>EC:</span>
-                  <span className={`font-bold ${abschluss.differenzEC !== 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <span className={`font-bold ${abschluss.differenzEC !== 0 ? 'text-status-warning' : 'text-status-success'}`}>
                     {abschluss.differenzEC > 0 ? '+' : ''}
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzEC)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>PayPal:</span>
-                  <span className={`font-bold ${abschluss.differenzPayPal !== 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <span className={`font-bold ${abschluss.differenzPayPal !== 0 ? 'text-status-warning' : 'text-status-success'}`}>
                     {abschluss.differenzPayPal > 0 ? '+' : ''}
                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzPayPal)}
                   </span>
@@ -282,7 +283,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Tagesabschluss bereit</h3>
 
@@ -310,16 +311,16 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
               </div>
 
               {Math.abs(abschluss.differenzBar) > 0.01 && (
-                <div className="rounded-lg bg-orange-50 p-4 text-sm text-orange-900">
+                <Callout variant="warning" className="rounded-lg p-4 text-sm">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
                     <p className="font-semibold">Differenz Bar: {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenzBar)}</p>
                   </div>
                   <p className="mt-1 text-xs">Wird auf Konto 2150 (Kassenfehlbeträge) gebucht</p>
-                </div>
+                </Callout>
               )}
 
-              <div className="rounded-lg bg-green-50 p-4 text-sm text-green-900">
+              <Callout variant="success" className="rounded-lg p-4 text-sm">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <p className="font-semibold">TSE-Daten → Fibu-Journal</p>
@@ -329,14 +330,14 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                   Belegnummer: KA-{abschluss.datum} •
                   TSE-Transaktionen: {abschluss.tseTransaktionen}
                 </p>
-              </div>
+              </Callout>
 
               {/* DSFinV-K Export */}
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <Callout variant="info" className="rounded-lg border p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <ShieldCheck className="h-4 w-4 text-blue-700" />
+                      <ShieldCheck className="h-4 w-4 text-muted-foreground" />
                       <p className="font-semibold text-blue-900 text-sm">DSFinV-K Export</p>
                       <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 border border-green-300">
                         Gesetzlich vorgeschrieben (KassenSichV)
@@ -360,15 +361,14 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                   </div>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="shrink-0 border-blue-300 text-blue-800 hover:bg-blue-100"
+                    className="min-h-touch shrink-0 border-blue-300 text-blue-800 hover:bg-blue-100"
                     onClick={handleDsfinvkExport}
                   >
                     <Download className="mr-1.5 h-4 w-4" />
                     ZIP herunterladen
                   </Button>
                 </div>
-              </div>
+              </Callout>
             </div>
 
             <dl className="grid gap-3 mb-6">

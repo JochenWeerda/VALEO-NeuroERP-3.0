@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,7 +10,8 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2, CheckCircle2, XCircle, ChevronRight, Download } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, Download } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 
@@ -81,12 +81,9 @@ function mapDetails(value: unknown): ReconciliationDetail[] {
 }
 
 export default function NebenbuchAbstimmungPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const { t } = useTranslation()
   const { toast } = useToast()
-  const [searchParams] = useSearchParams()
-  const workflowInstanceId = searchParams.get('workflowInstanceId')
-  const workflowProcess = searchParams.get('workflowProcess')
-  const workflowCase = searchParams.get('workflowCase')
   const [loading, setLoading] = useState(false)
   const [ledgerType, setLedgerType] = useState<string>('AR')
   const [period, setPeriod] = useState<string>(new Date().toISOString().slice(0, 7))
@@ -262,25 +259,24 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <OperationalCaseHeader
-        title={t('crud.fields.subsidiaryLedgerReconciliation')}
-        description="Abgleich zwischen Nebenbuch und Hauptbuch mit Fokus auf Differenzen und Folgeklaerung."
-        status={operationalStatus}
-        owner="Finanzbuchhaltung"
-        blocker={unbalancedAccounts > 0 ? 'Es liegen unausgeglichene Konten im aktuellen Abstimmungsraum vor.' : null}
-        nextAction={unbalancedAccounts > 0 ? 'Differenzkonten und Einzelposten klaeren' : 'Abgleich exportieren oder Periode freigeben'}
-        caseLabel={`${ledgerType} ${period}`}
-        tags={['FIBU', 'Abstimmung']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
-        <OperationalTimeline title="Abstimmungsverlauf" items={timelineItems} />
-        <OperationalContextPanel sections={contextSections} />
-      </div>
-      {workflowInstanceId && (
-        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
-        </div>
-      )}
+      {!isTouch ? (
+        <>
+          <OperationalCaseHeader
+            title={t('crud.fields.subsidiaryLedgerReconciliation')}
+            description="Abgleich zwischen Nebenbuch und Hauptbuch mit Fokus auf Differenzen und Folgeklaerung."
+            status={operationalStatus}
+            owner="Finanzbuchhaltung"
+            blocker={unbalancedAccounts > 0 ? 'Es liegen unausgeglichene Konten im aktuellen Abstimmungsraum vor.' : null}
+            nextAction={unbalancedAccounts > 0 ? 'Differenzkonten und Einzelposten klaeren' : 'Abgleich exportieren oder Periode freigeben'}
+            caseLabel={`${ledgerType} ${period}`}
+            tags={['FIBU', 'Abstimmung']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+            <OperationalTimeline title="Abstimmungsverlauf" items={timelineItems} />
+            <OperationalContextPanel sections={contextSections} />
+          </div>
+        </>
+      ) : null}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">{t('crud.fields.subsidiaryLedgerReconciliation')}</h1>
@@ -288,7 +284,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
             {t('crud.tooltips.fields.subsidiaryLedgerReconciliation')}
           </p>
         </div>
-        <Button variant="outline" onClick={exportCsv} disabled={exporting}>
+        <Button variant="outline" className="min-h-touch" onClick={exportCsv} disabled={exporting}>
           {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
           Export CSV
         </Button>
@@ -310,7 +306,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <CardDescription>{t('crud.fields.balancedAccounts')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{summary.balanced_accounts ?? 0}</div>
+              <div className="text-2xl font-bold text-status-success">{summary.balanced_accounts ?? 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -318,7 +314,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <CardDescription>{t('crud.fields.unbalancedAccounts')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{summary.unbalanced_accounts ?? 0}</div>
+              <div className="text-2xl font-bold text-status-error">{summary.unbalanced_accounts ?? 0}</div>
             </CardContent>
           </Card>
           <Card>
@@ -347,6 +343,8 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                 value={ledgerType}
                 onValueChange={setLedgerType}
                 options={ledgerTypeOptions}
+                className="min-h-touch"
+                ariaLabel="Nebenbuch-Art"
               />
             </div>
             <div>
@@ -357,7 +355,8 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                 type="month"
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="min-h-touch w-full px-3 py-2 border rounded-md"
+                aria-label="Abstimmungsperiode"
               />
             </div>
           </div>
@@ -405,12 +404,12 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     <TableCell className="text-right">
                       {parseFloat(entry.general_ledger_balance).toFixed(2)} €
                     </TableCell>
-                    <TableCell className={`text-right ${Math.abs(parseFloat(entry.difference)) >= 0.01 ? 'text-red-600 font-bold' : ''}`}>
+                    <TableCell className={`text-right ${Math.abs(parseFloat(entry.difference)) >= 0.01 ? 'text-status-error font-bold' : ''}`}>
                       {parseFloat(entry.difference).toFixed(2)} €
                     </TableCell>
                     <TableCell>
                       {entry.is_balanced ? (
-                        <Badge variant="default" className="bg-green-600">
+                        <Badge variant="success">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           {t('crud.fields.balanced')}
                         </Badge>
@@ -424,10 +423,10 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        className="min-h-touch"
                         onClick={() => loadDetails(entry.account_number)}
                       >
-                        <ChevronRight className="h-4 w-4" />
+                        Details
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -447,7 +446,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                 {t('crud.fields.details')} - {selectedAccount}
               </CardTitle>
               <Button
-                size="sm"
+                className="min-h-touch"
                 disabled={matchingInProgress || !details.some(d => !d.matched)}
                 onClick={() => {
                   const unmatchedIds = details

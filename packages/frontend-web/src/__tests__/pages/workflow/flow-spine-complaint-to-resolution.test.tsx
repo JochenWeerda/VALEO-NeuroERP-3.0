@@ -49,6 +49,9 @@ describe('FlowSpineComplaintToResolutionPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Complaint-to-Resolution', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('Prioritaet hoch')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Kulanzpfad empfohlen' })).toBeInTheDocument()
+        // FSX-023: Die Agentenaussage steht weiterhin auf dem Schirm (Agent-Karte in
+    // der Mitte), aber nicht mehr als Ueberschrift der Copilot-Spalte — die ist
+    // jetzt eingeklappt. Geprueft wird deshalb die Aussage, nicht ihre Rolle.
+    expect(screen.getAllByText('Kulanzpfad empfohlen').length).toBeGreaterThan(0)
   })
 })

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import jwkToPem from 'jwk-to-pem';
 import axios from 'axios';
-import { JWTPayload, JWKS, UserContext } from '../types/auth-types';
+import { type JsonWebKey, createPublicKey } from 'crypto';
+import { JWKS, JWTPayload, UserContext } from '../types/auth-types';
 
 export interface JWTValidationOptions {
   jwksUrl?: string;
@@ -94,8 +94,14 @@ export class JWTValidator {
       throw new Error('Signing key not found in JWKS');
     }
 
-    // Convert JWK to PEM
-    const pem = jwkToPem(key as any);
+    // Convert JWK to a PEM public key through Node's native crypto implementation.
+    const pem = createPublicKey({
+      key: key as JsonWebKey,
+      format: 'jwk',
+    }).export({
+      type: 'spki',
+      format: 'pem',
+    });
 
     // Verify token
     jwt.verify(token, pem, {

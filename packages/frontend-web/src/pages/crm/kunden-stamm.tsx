@@ -442,7 +442,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
                 <div className="flex gap-2">
                   <Button
                     variant="ghost"
-                    size="sm"
+                    className="min-h-touch"
                     onClick={() => navigate(`/crm/gdpr-request/${requestId}`)}
                   >
                     {t('crud.actions.details')}
@@ -569,7 +569,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
                 <div className="flex gap-2">
                   <Button
                     variant="ghost"
-                    size="sm"
+                    className="min-h-touch"
                     onClick={() => navigate(`/crm/consent/${consentId}`)}
                   >
                     {t('crud.actions.details')}
@@ -635,7 +635,7 @@ function ContactsList({ customerId }: { customerId?: string }) {
       render: (contact: Contact) => (
         <Button
           variant="ghost"
-          size="sm"
+          className="min-h-touch"
           onClick={() => navigate(`/crm/kontakt/${contact.id}`)}
         >
           <ExternalLink className="h-4 w-4 mr-2" />
@@ -652,7 +652,7 @@ function ContactsList({ customerId }: { customerId?: string }) {
           <CardTitle>{t('crud.fields.contacts')}</CardTitle>
           <Button
             onClick={() => navigate(`/crm/kontakt/neu?customer_id=${customerId}`)}
-            size="sm"
+            className="min-h-touch"
           >
             <Plus className="h-4 w-4 mr-2" />
             {t('crud.actions.new')} {entityTypeLabel}

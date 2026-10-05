@@ -77,8 +77,8 @@ export default function GelangensBestaetigungPage(): JSX.Element {
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{items.length}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Ausstehend</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{ausstehend}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Erhalten</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{items.filter((i) => i.status === 'ERHALTEN').length}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Ausstehend</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{ausstehend}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm">Erhalten</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{items.filter((i) => i.status === 'ERHALTEN').length}</span></CardContent></Card>
         </div>
 
         <Card>

@@ -1,0 +1,68 @@
+slice_id: RATION-CANON-01-ERGEBNISVERTRAG
+id: RATION-CANON-01-ERGEBNISVERTRAG
+title: Rationsoptimierung – kanonischer Ergebnisvertrag (fachlicher Status-Enum + Erreichbarkeit) TDD
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Skill "GfE-2023-konforme Milchvieh-Rationsoptimierung" §3 (Phase 2) und §4.4
+  umsetzen: die Optimierungsantwort erhaelt einen kanonischen, fachlichen
+  Ergebnisstatus (RationResultStatus) und einen Erreichbarkeits-Fuenfling
+  (baseline_supported / safe_attainable / technical_max / target / target_gap
+  inkl. limitierender Achse). Additiv zum bestehenden technischen `status`;
+  keine Aenderung der Solver-Mathematik. Erste Scheibe des Programms
+  RATION-CANON (01 Ergebnisvertrag -> 02 Constraint-Meta-Modell ->
+  03 Preflight -> Werkbank).
+scope:
+  - Reines Vertragsmodul app/agrar/rations/contract.py (ohne SciPy/FastAPI)
+  - Additive Verdrahtung in _build_response (optimal + infeasible Branch)
+  - Frontend-Typen (OptimizationResult) end-to-end typisiert
+  - Unit- und End-to-End-Golden-Tests
+non_scope:
+  - Dedizierter Maximalleistungslauf (technical_max bleibt bewusst null)
+  - Best-Attainable-Recovery bei Infeasibility (Folge-Slice)
+  - Preflight/Datenvollstaendigkeit als eigener Vertrag (RATION-CANON-03)
+  - Werkbank-UI mit Tacho-Gauges (Werkbank-Slice)
+file_ownership:
+  - docs/agent-ops/slices/RATION-CANON-01-ERGEBNISVERTRAG.yaml
+  - app/agrar/rations/contract.py
+  - app/api/v1/endpoints/rations_optimization.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - tests/test_rations_result_contract.py
+  - tests/test_rations_result_contract_e2e.py
+acceptance:
+  - "pytest tests/test_rations_result_contract.py gruen (27 Faelle)"
+  - "pytest tests/test_rations_result_contract_e2e.py gruen (4 Faelle)"
+  - "Bestehende Rations-Solvertests unveraendert gruen (kein Regress)"
+  - "Antwort enthaelt result_status + attainability in beiden Branches"
+  - "technical_max und baseline_supported werden nie erfunden (null statt 0)"
+tests:
+  - "pytest tests/test_rations_result_contract.py --noconftest -p no:cacheprovider --no-cov -o addopts=''"
+  - "pytest tests/test_rations_result_contract_e2e.py --noconftest -p no:cacheprovider --no-cov -o addopts=''"
+risks:
+  - "technical_max ist bis zum Maximalleistungslauf null – UI muss 'nicht bestimmt' sauber darstellen."
+  - "Infeasible liefert vorerst CONSTRAINT_CONFLICT/TARGET_NOT_ATTAINABLE statt echter Best-Attainable-Loesung (Skill §4.2); folgt im Best-Attainable-Slice."
+ai_harness:
+  fachlicher_vertrag: >-
+    Wunschleistung bleibt Ziel, keine Wahrheit (Skill §2.3): das Ziel wird nie
+    als erreicht ausgegeben, wenn safe_attainable es nicht deckt. Der Status
+    unterscheidet FEASIBLE_OPTIMAL / FEASIBLE_NON_OPTIMAL / BEST_ATTAINABLE /
+    RELAXED_ACCEPTABLE / TARGET_NOT_ATTAINABLE / CONSTRAINT_CONFLICT /
+    DATA_INCOMPLETE / UNSAFE_REJECTED / SOLVER_ERROR.
+  test_vertrag: >-
+    TDD: reines Vertragsmodul zuerst unit-getestet (Statusmatrix + Arithmetik +
+    Invarianten), dann additive Verdrahtung end-to-end gegen den echten Solver
+    verifiziert; bestehende Golden-Tests unveraendert.
+  daten_vertrag: >-
+    Fehlende Kennwerte bleiben null, niemals 0 oder Schaetzwert (Skill §10.3).
+  api_vertrag: >-
+    Additiv, rueckwaertskompatibel: bestehendes Feld `status` bleibt; neue
+    Felder result_status (String-Enum) und attainability (Objekt) kommen hinzu.
+  ui_vertrag: >-
+    OptimizationResult ist end-to-end typisiert (RationResultStatus,
+    AttainabilityReport); Werkbank-Cockpit konsumiert die Felder im Folge-Slice.
+  persistenz_vertrag: >-
+    Keine neuen Tabellen; die Felder wandern im bestehenden Snapshot der
+    Variantenlifecycle mit (rations_lifecycle) als Teil der Response.

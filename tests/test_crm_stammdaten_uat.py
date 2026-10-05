@@ -33,6 +33,9 @@ def test_crm_stammdaten_uat_dry_run():
     mod = _load_uat_module()
     try:
         result = mod.run(execute=False)
-    except mod.UatFailure as exc:
+    except (mod.UatFailure, TimeoutError, OSError) as exc:
+        # Ohne laufendes Backend laeuft der Aufruf in einen Socket-Timeout;
+        # der wirft TimeoutError/OSError, nicht UatFailure. Ohne diese Zweige
+        # ist der Test rot statt uebersprungen — entgegen der Zusage oben.
         pytest.skip(f"Backend nicht erreichbar: {exc}")
     assert result.get("status") == "dry_run"

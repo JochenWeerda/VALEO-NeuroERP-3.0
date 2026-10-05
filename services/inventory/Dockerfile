@@ -7,25 +7,40 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./requirements.txt
+# Alle Quellpfade sind auf den Wurzelkontext bezogen (docker-compose.yml:
+# context "." mit dockerfile "services/inventory/Dockerfile"), weil
+# packages/auth-shared ausserhalb des Dienstverzeichnisses liegt.
+COPY services/inventory/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app/ ./app/
-COPY main.py ./main.py
-COPY alembic.ini ./alembic.ini
-COPY alembic/ ./alembic/
+# auth_shared ist keine Bequemlichkeit, sondern Voraussetzung: main.py bricht
+# ohne dieses Paket bewusst ab (SILENT-FAILURE-20260914). Frueher fehlte es im
+# Image, und der Dienst lief stillschweigend ohne Authentifizierung.
+COPY packages/auth-shared /opt/auth-shared
+RUN pip install --no-cache-dir /opt/auth-shared
+
+COPY services/inventory/app/ ./app/
+COPY services/inventory/main.py ./main.py
+COPY services/inventory/alembic.ini ./alembic.ini
+COPY services/inventory/alembic/ ./alembic/
 
 # Optional: set PYTHONPATH so Alembic env can import app.*
 ENV PYTHONPATH=/app
 
 # Entrypoint runs migrations before starting API
-COPY --chown=root:root docker-entrypoint.sh /entrypoint.sh
+COPY --chown=root:root services/inventory/docker-entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 5400
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD python -c "import http.client; conn=http.client.HTTPConnection('localhost', 5400, timeout=5); conn.request('GET', '/health'); resp=conn.getresponse(); exit(0 if resp.status==200 else 1)"
+
+# DS-0002: Nicht-Root-Betrieb. Der Benutzer wird erst hier angelegt, damit alle
+# vorherigen Schritte (apt, pip, chmod) noch Root-Rechte haben; anschliessend
+# gehoert /app dem Dienstbenutzer, damit Schreibpfade weiter funktionieren.
+RUN groupadd --system --gid 1000 appuser     && useradd --system --uid 1000 --gid appuser --no-create-home appuser     && chown -R appuser:appuser /app
+USER appuser
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5400"]

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
@@ -9,7 +9,8 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
-import { useTenant } from '@/hooks/useTenant'
+import { useBankLedgerOptions } from '@/features/finance/useBankOptions'
+import type { BankAccountPayload } from '@/features/finance/bank-contracts'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
@@ -50,7 +51,7 @@ const validateBankKontenForm = (formData: Record<string, unknown>, t: TFunction)
 }
 
 // Konfiguration für Bankkonten-Stammdaten ObjectPage
-const createBankKontenConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
+const createBankKontenConfig = (t: TFunction, entityTypeLabel: string, ledgerOptions: { value: string; label: string }[]): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.bankAccountMasterData'),
   type: 'object-page',
@@ -66,6 +67,7 @@ const createBankKontenConfig = (t: TFunction, entityTypeLabel: string): MaskConf
           required: true,
           placeholder: t('crud.tooltips.placeholders.accountNumber')
         },
+        { name: 'gl_account_id', label: 'Hauptbuchkonto', type: 'select', options: ledgerOptions },
         {
           name: 'bank_name',
           label: t('crud.fields.bankName'),
@@ -137,16 +139,17 @@ const createBankKontenConfig = (t: TFunction, entityTypeLabel: string): MaskConf
 export default function BankKontenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { tenantId } = useTenant()
+  const { data: ledgers = [] } = useBankLedgerOptions()
   const [isDirty, setIsDirty] = useState(false)
+  const lastLookedUpIban = useRef<string | null>(null)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
   const entityType = 'bankAccount'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bankkonto')
-  const bankKontenConfig = createBankKontenConfig(t, entityTypeLabel)
+  const bankKontenConfig = createBankKontenConfig(t, entityTypeLabel, ledgers.map(account => ({ value: account.id, label: `${account.account_number} - ${account.account_name}` })))
 
-  const { data, loading, saveData, updateData } = useMaskData({
+  const { data, loading, saveData, setData } = useMaskData({
     apiUrl: bankKontenConfig.api.baseUrl,
-    id: 'new'
+    autoLoad: false
   })
   const initialFormData = {
     account_number: '',
@@ -156,7 +159,7 @@ export default function BankKontenStammPage(): JSX.Element {
     currency: 'EUR',
     balance: 0,
     is_active: true,
-    gl_account_number: '',
+    gl_account_id: null,
   }
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
 
@@ -173,7 +176,7 @@ export default function BankKontenStammPage(): JSX.Element {
           updatedData.bic = result.bic
         }
         setFormData(updatedData)
-        updateData?.(updatedData)
+        setData(updatedData)
         
         toast.success(t('crud.messages.ibanLookupSuccess', { 
           defaultValue: 'Bankinformationen automatisch ausgefüllt',
@@ -191,8 +194,9 @@ export default function BankKontenStammPage(): JSX.Element {
     const iban = stringValue(formData?.iban)
     if (iban && iban.replace(/\s/g, '').length >= 15) {
       const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
-      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
+      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized) && lastLookedUpIban.current !== normalized) {
         const timer = setTimeout(() => {
+          lastLookedUpIban.current = normalized
           performLookup(normalized)
         }, 1000) // 1 second debounce
         
@@ -211,28 +215,18 @@ export default function BankKontenStammPage(): JSX.Element {
       if (lookupData.bic && !updatedData.bic) {
         updatedData.bic = lookupData.bic
       }
-      setFormData(updatedData)
-      updateData?.(updatedData)
+      if (updatedData.bank_name !== formData.bank_name || updatedData.bic !== formData.bic) {
+        setFormData(updatedData)
+        setData(updatedData)
+      }
     }
-  }, [lookupData, formData, updateData])
+  }, [lookupData, formData, setData])
 
   // Handle form data changes for IBAN lookup
   const handleFormChange = (newData: Record<string, unknown>) => {
     setFormData(newData)
     setIsDirty(true)
     
-    // Auto-lookup IBAN when it changes
-    const iban = stringValue(newData?.iban)
-    if (iban && iban.replace(/\s/g, '').length >= 15) {
-      const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
-      if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
-        const timer = setTimeout(() => {
-          performLookup(normalized)
-        }, 1000) // 1 second debounce
-        
-        return () => clearTimeout(timer)
-      }
-    }
   }
 
   const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
@@ -249,10 +243,13 @@ export default function BankKontenStammPage(): JSX.Element {
           formData.iban = formatIBAN(stringValue(formData.iban))
         }
 
-        await saveData({
-          ...formData,
-          tenant_id: tenantId
-        })
+        const payload: BankAccountPayload = {
+          account_number: stringValue(formData.account_number), bank_name: stringValue(formData.bank_name),
+          iban: stringValue(formData.iban) || null, bic: stringValue(formData.bic) || null,
+          currency: stringValue(formData.currency, 'EUR'), is_active: formData.is_active === true,
+          gl_account_id: stringValue(formData.gl_account_id) || null,
+        }
+        await saveData(payload)
         setIsDirty(false)
         toast.success(t('crud.messages.saveSuccess', { entityType: entityTypeLabel }))
         navigate('/finance/bankkonten')

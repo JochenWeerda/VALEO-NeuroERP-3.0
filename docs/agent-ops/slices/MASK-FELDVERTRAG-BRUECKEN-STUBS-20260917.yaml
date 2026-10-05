@@ -1,0 +1,54 @@
+---
+slice_id: MASK-FELDVERTRAG-BRUECKEN-STUBS
+id: MASK-FELDVERTRAG-BRUECKEN-STUBS
+title: Leere P4-Bruecken-Tab-Stubs typisieren
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-17
+created_at: 2026-09-17
+coordination: >
+  sales_invoices.py, sales_orders.py und screen_definitions.py bleiben Claude.
+  Keine FSX-Dateien. lager/leitstand nicht anfassen.
+  coverage_path_check.xml nicht committen.
+goal: >
+  Dreizehn leere /masks/.../tabs/-Register der restlichen P4-Bruecken haben
+  eine deklarierte Zeilenform. Abweichungen 0. Ratsche 27.
+file_ownership:
+  - app/api/v1/schemas/mask_entity_contracts.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - tests/test_mask_entity_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_entity_backends.py
+  - docs/agent-ops/todo-datenmodell-katalog.md
+acceptance:
+  - python scripts/check_field_contracts.py Exit 0
+  - ZEILEN_NICHT_PRUEFBAR_MAX = 27
+  - die dreizehn Stub-Tabellen nicht in zeilen_nicht_pruefbar
+  - screen_definitions.py, sales_orders.py, sales_invoices.py nicht in diesem Commit
+tests:
+  - tests/test_mask_entity_contracts.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_field_contracts.py
+  - tests/test_mask_entity_backends.py
+risks:
+  - Der Catch-all /masks/{mask_id:path}/entity/.../tabs/... darf die spezifischen Routen nicht schlucken
+  - URL-Plural (anfragen) ist nicht die kanonische Screen-ID (anfrage)
+ai_harness:
+  fachlicher_vertrag: >
+    Spalten folgen den JSON-Schluesseln der Zeile. Die Tabelle darf leer sein.
+  architektur_vertrag: >
+    Eigene Route vor dem Catch-all, eigene Zeilenform, Muster 8da5d757b.
+  daten_vertrag: >
+    Kein DROP. Keine echten Daten. screen_definitions.py unangetastet.
+  test_vertrag: >
+    Unit gegen Modellfelder und _operation. HTTP 200 leere Seite, 404 unbekannte Maske.
+  security_vertrag: >
+    Keine Secrets.
+  betriebs_vertrag: >
+    pytest haelt die Ratsche. Rollback = Commit revertieren.
+  dokumentations_vertrag: >
+    Workboard, todo P9, feldvertrag-masken.
+external_gates:
+  - not_applicable
+---

@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/stammdaten/duplikate", tags=["stammdaten", "qualitaet"])
 
@@ -30,7 +31,7 @@ class DuplikatTreffer(BaseModel):
 
 
 @router.get(
-    "/business-partner", response_model=dict,
+    "/business-partner", response_model=TypedObjectOut,
     summary="Dubletten-Check Business Partner (UST-ID, Name, Adresse) — STMD-DUP-001",
 )
 def check_bp_dubletten(
@@ -127,7 +128,7 @@ def check_bp_dubletten(
 
 
 @router.get(
-    "/artikel", response_model=dict,
+    "/artikel", response_model=TypedObjectOut,
     summary="Dubletten-Check Artikel (EAN, Name+Einheit) — STMD-DUP-001",
 )
 def check_artikel_dubletten(
@@ -185,7 +186,7 @@ def check_artikel_dubletten(
 
 
 @router.post(
-    "/zusammenfuehren", response_model=dict,
+    "/zusammenfuehren", response_model=TypedObjectOut,
     summary="Dubletten zusammenführen (Master bleibt, Duplikat wird deaktiviert)",
     status_code=200,
 )
@@ -205,12 +206,12 @@ def zusammenfuehren(
         raise HTTPException(status_code=422, detail=f"Unbekannter entity_type: {entity_type}")
 
     try:
-        result = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        result = db.execute(text(f"""
             UPDATE {table}
                SET is_active = false,
                    notes = COALESCE(notes, '') || ' [ZUSAMMENGEFUEHRT → ' || :master || ']'
              WHERE id = :dup AND tenant_id = :tid
-        """), {"master": master_id, "dup": duplikat_id, "tid": tenant_id})
+        """), {"master": master_id, "dup": duplikat_id, "tid": tenant_id})  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         db.commit()
         if result.rowcount == 0:
             raise HTTPException(status_code=404, detail="Duplikat nicht gefunden")

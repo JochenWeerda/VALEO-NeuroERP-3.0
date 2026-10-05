@@ -17,7 +17,6 @@ export default function DashboardWeighingBarChart({ trend, dateFormatter }: Dash
       data={trend.map((item) => ({
         label: dateFormatter.format(new Date(item.date)),
         value: item.contract_long_tons,
-        color: '#2563eb',
       }))}
       height={300}
       valueFormatter={(value) => `${value.toLocaleString('de-DE')} t`}

@@ -7,6 +7,7 @@ from decimal import Decimal
 from typing import Any, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from pydantic import ConfigDict, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -25,10 +26,7 @@ from app.services.kontrakte_service import (
     KontraktValidationService,
     build_contract_steering,
     contract_to_dict,
-    create_disposition_db,
-    ensure_disposition_table,
     line_to_dict,
-    list_dispositionen_db,
     # Re-exports for backwards-compatibility with tests
     _bool,
     _date,
@@ -38,6 +36,7 @@ from app.services.kontrakte_service import (
     _text,
     _contract_reference_price,
 )
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 
 # Backwards-compatible alias for tests
 _line_to_out = line_to_dict
@@ -54,6 +53,14 @@ from app.api.v1.schemas.kontrakte_schemas import (
     KonContractMovementOut,
     KontraktOut,
 )
+
+from app.api.v1.schemas.kontrakt_disposition_schemas import (
+    AbrufstandOut,
+    DispositionAnlegen,
+    DispositionGeliefert,
+    DispositionOut,
+)
+from app.services import kontrakt_disposition_service as dispo
 
 router = APIRouter(prefix="/kontrakte", tags=["kontrakte"])
 
@@ -235,7 +242,7 @@ def build_kontrakt_screen_summary(
 
 @router.get(
     "/{contract_id}/screen-summary",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["kontrakte", "screen-summary"],
     summary="Kontrakt screen summary abrufen",
 )
@@ -265,9 +272,123 @@ async def get_kontrakt_screen_summary(
     )
 
 
+# Zwei benannte Register vor der generischen Route
+# ----------------------------------------------
+#
+# Die generische Route antwortet mit ``TypedObjectOut`` — einer Huelle, durch
+# die jede Form durchgeht. Das Feldvertrags-Gate kann damit nicht pruefen, ob
+# die Spalten der Maske (ScreenDefinition `agrar/kontrakte`) den Schluesseln
+# der Antwort entsprechen. Deshalb je Register eine eigene Route mit
+# deklarierter Zeilenform — sie muss **vor** der generischen stehen, sonst
+# verschluckt `{tab_key}` sie.
+
+
+class KontraktTabOut(BaseSchema):
+    """Die Huelle jeder Register-Antwort der Kontraktmaske."""
+
+    model_config = ConfigDict(extra="allow")
+
+    tab_key: str
+    table_key: str
+    total: int = 0
+    page: int = 1
+    limit: int = 25
+
+
+class KontraktPositionRowOut(BaseSchema):
+    """Eine Kontraktposition — mit der offenen Restmenge."""
+
+    model_config = ConfigDict(extra="allow")
+
+    line_id: str
+    position_no: int | None = None
+    article_id: str | None = None
+    description1: str | None = None
+    description2: str | None = None
+    qty_contract: float = 0.0
+    qty_remaining: float | None = None
+    price_unit: str | None = None
+    unit_price: float | None = None
+    discount_pct: float | None = None
+    surcharge: float | None = None
+    rebate_type: str | None = None
+    is_bio: bool = False
+    is_matif: bool = False
+
+
+class KontraktUmsatzRowOut(BaseSchema):
+    """Eine Bewegung auf dem Kontrakt — Abruf, Lieferung, Rechnung."""
+
+    model_config = ConfigDict(extra="allow")
+
+    movement_id: str
+    line_id: str | None = None
+    order_no: str | None = None
+    delivery_note_no: str | None = None
+    invoice_no: str | None = None
+    movement_date: str | None = None
+    quantity: float = 0.0
+    unit_price: float | None = None
+    amount: float = 0.0
+    route_no: str | None = None
+    is_invoiced: bool = False
+
+
+class KontraktPositionenTabOut(KontraktTabOut):
+    items: list[KontraktPositionRowOut] = Field(default_factory=list)
+
+
+class KontraktUmsaetzeTabOut(KontraktTabOut):
+    items: list[KontraktUmsatzRowOut] = Field(default_factory=list)
+
+
+@router.get(
+    "/{contract_id}/tabs/positionen",
+    response_model=KontraktPositionenTabOut,
+    tags=["kontrakte", "screen-summary"],
+    summary="Kontrakt: Positionen",
+)
+async def get_kontrakt_tab_positionen(
+    contract_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Die Kontraktpositionen mit ihrer offenen Restmenge."""
+    return await get_kontrakt_tab_data(
+        contract_id=contract_id, tab_key="positionen", page=page, limit=limit,
+        q=q, db=db, tenant_id=tenant_id, user=user,
+    )
+
+
+@router.get(
+    "/{contract_id}/tabs/umsaetze",
+    response_model=KontraktUmsaetzeTabOut,
+    tags=["kontrakte", "screen-summary"],
+    summary="Kontrakt: Umsaetze",
+)
+async def get_kontrakt_tab_umsaetze(
+    contract_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Die Bewegungen auf dem Kontrakt."""
+    return await get_kontrakt_tab_data(
+        contract_id=contract_id, tab_key="umsaetze", page=page, limit=limit,
+        q=q, db=db, tenant_id=tenant_id, user=user,
+    )
+
+
 @router.get(
     "/{contract_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["kontrakte", "screen-summary"],
     summary="Kontrakt tab list data abrufen",
 )
@@ -317,6 +438,10 @@ async def get_kontrakt_tab_data(
                 "movement_date": _format_optional_date(r.movement_date),
                 "quantity": float(r.quantity or 0),
                 "unit_price": float(r.unit_price) if r.unit_price is not None else None,
+                # Die Maske fragt nach dem Betrag der Bewegung. Menge und Preis
+                # stehen da — den Wert daraus auszurechnen ist Aufgabe des
+                # Endpunkts, nicht der Maske.
+                "amount": round(float(r.quantity or 0) * float(r.unit_price or 0), 2),
                 "route_no": r.route_no,
                 "is_invoiced": bool(r.is_invoiced),
             }
@@ -866,114 +991,98 @@ def get_positionen(
     return KontraktPositionService(db).compute_positions(tenant_id, article_ids=ids, include_done=include_done).to_dict()
 
 
-# ── Dispositionen ─────────────────────────────────────────────────────────────
+# ── Dispositionen (Abruf kontrahierter Mengen) ───────────────────────────────
+# Die Tabelle legte bis zum 05.10.2026 der Anwendungscode selbst an; vor dem
+# ersten POST antwortete das Auflisten ``[]``. Fachlogik und Begruendungen:
+# ``app/services/kontrakt_disposition_service.py`` und
+# ``docs/quality-assurance/kontrakt-disposition-20261005.md``.
 
-@router.get("/{kontrakt_id}/dispositionen", response_model=list[KontraktOut], summary="Dispositionen auflisten")
+
+@router.get("/{kontrakt_id}/dispositionen", response_model=list[DispositionOut],
+            summary="Abrufe eines Kontrakts auflisten")
 async def list_dispositionen(
     kontrakt_id: str,
+    limit: int = Query(200, ge=1, le=1000),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     user: User = Depends(get_current_user),
-):
+) -> list[dict]:
+    """Die Abrufe eines Kontrakts. Ein Lesefehler ist ein 503, keine leere Liste."""
     _require_roles(user, KontraktSecurityService.ROLE_LESEN, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
     try:
-        return list_dispositionen_db(db, kontrakt_id)
-    except Exception as e:
-        err = str(e).lower()
-        if "relation" in err or "does not exist" in err:
-            return []
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}",
-                            headers={"X-Migration-Hint": "Run: alembic upgrade head"})
+        return dispo.auflisten(db, tenant_id, kontrakt_id, limit)
+    except Exception as fehler:  # noqa: BLE001
+        raise dispo.nicht_lesbar(db, fehler, "Kontraktabrufe", tenant_id) from fehler
 
 
-@router.post("/{kontrakt_id}/dispositionen", response_model=KontraktOut, status_code=201, summary="Disposition anlegen")
-async def create_disposition(
+@router.get("/{kontrakt_id}/abrufstand", response_model=list[AbrufstandOut],
+            summary="Was von jeder Position noch abrufbar ist")
+async def abrufstand(
     kontrakt_id: str,
-    payload: DispositionCreate,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     user: User = Depends(get_current_user),
-):
-    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+) -> list[dict]:
+    """Kontrahierte, abgerufene und offene Menge je Position."""
+    _require_roles(user, KontraktSecurityService.ROLE_LESEN, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
     try:
-        return create_disposition_db(db, kontrakt_id, payload)
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}",
-                            headers={"X-Migration-Hint": "Run: alembic upgrade head"})
+        return dispo.abrufstand(db, tenant_id, kontrakt_id)
+    except Exception as fehler:  # noqa: BLE001
+        raise dispo.nicht_lesbar(db, fehler, "Abrufstand", tenant_id) from fehler
 
 
-@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/freigabe", response_model=KontraktOut, summary="Disposition freigabe")
+@router.post("/{kontrakt_id}/dispositionen", response_model=DispositionOut, status_code=201,
+             summary="Menge abrufen")
+async def create_disposition(
+    kontrakt_id: str,
+    payload: DispositionAnlegen,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+) -> dict:
+    """Ruft eine Menge ab. Mehr als kontrahiert nur mit ``allow_overdelivery``."""
+    _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
+    return dispo.abrufen(db, tenant_id, kontrakt_id, payload)
+
+
+@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/freigabe", response_model=DispositionOut,
+              summary="Abruf freigeben")
 async def freigabe_disposition(
     kontrakt_id: str, disp_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     user: User = Depends(get_current_user),
-):
+) -> dict:
+    """Gibt den Abruf zur Lieferung frei."""
     _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
-    from sqlalchemy import text as _sql_text
-    try:
-        result = db.execute(_sql_text(
-            "UPDATE domain_agrar.kontrakt_dispositionen SET freigabe = true, status = 'FREIGEGEBEN', updated_at = now() "
-            "WHERE id = :id AND kontrakt_id = :kid RETURNING id, status"
-        ), {"id": disp_id, "kid": kontrakt_id}).fetchone()
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
-    if result is None:
-        raise HTTPException(status_code=404, detail=f"Disposition {disp_id} nicht gefunden")
-    return {"id": result[0], "status": result[1]}
+    return dispo.zustand_wechseln(db, tenant_id, kontrakt_id, disp_id, "FREIGEGEBEN")
 
 
-@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/geliefert", response_model=KontraktOut, summary="Disposition geliefert")
+@router.patch("/{kontrakt_id}/dispositionen/{disp_id}/geliefert", response_model=DispositionOut,
+              summary="Abruf als geliefert melden")
 async def geliefert_disposition(
     kontrakt_id: str, disp_id: str,
-    wiegeschein_nr: Optional[str] = Body(default=None, embed=True),
+    payload: DispositionGeliefert = Body(default_factory=DispositionGeliefert),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     user: User = Depends(get_current_user),
-):
+) -> dict:
+    """Meldet die Lieferung gegen einen vorhandenen Wiegeschein — nur aus der Freigabe."""
     _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
-    from sqlalchemy import text as _sql_text
-    try:
-        if wiegeschein_nr:
-            result = db.execute(_sql_text(
-                "UPDATE domain_agrar.kontrakt_dispositionen SET status = 'GELIEFERT', wiegeschein_nr = :ws, updated_at = now() "
-                "WHERE id = :id AND kontrakt_id = :kid RETURNING id, status, wiegeschein_nr"
-            ), {"id": disp_id, "kid": kontrakt_id, "ws": wiegeschein_nr}).fetchone()
-        else:
-            result = db.execute(_sql_text(
-                "UPDATE domain_agrar.kontrakt_dispositionen SET status = 'GELIEFERT', updated_at = now() "
-                "WHERE id = :id AND kontrakt_id = :kid RETURNING id, status, wiegeschein_nr"
-            ), {"id": disp_id, "kid": kontrakt_id}).fetchone()
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
-    if result is None:
-        raise HTTPException(status_code=404, detail=f"Disposition {disp_id} nicht gefunden")
-    return {"id": result[0], "status": result[1], "wiegeschein_nr": result[2]}
+    return dispo.zustand_wechseln(
+        db, tenant_id, kontrakt_id, disp_id, "GELIEFERT",
+        wiegeschein_nr=payload.wiegeschein_nr, lieferdatum=payload.lieferdatum,
+    )
 
 
-@router.delete("/{kontrakt_id}/dispositionen/{disp_id}", response_model=KontraktOut, summary="Disposition storniere")
+@router.delete("/{kontrakt_id}/dispositionen/{disp_id}", response_model=DispositionOut,
+               summary="Abruf stornieren")
 async def storniere_disposition(
     kontrakt_id: str, disp_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     user: User = Depends(get_current_user),
-):
+) -> dict:
+    """Storniert den Abruf. Eine gelieferte Menge wird nicht storniert."""
     _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
-    from sqlalchemy import text as _sql_text
-    try:
-        result = db.execute(_sql_text(
-            "UPDATE domain_agrar.kontrakt_dispositionen SET status = 'STORNIERT', updated_at = now() "
-            "WHERE id = :id AND kontrakt_id = :kid RETURNING id, status"
-        ), {"id": disp_id, "kid": kontrakt_id}).fetchone()
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
-    if result is None:
-        raise HTTPException(status_code=404, detail=f"Disposition {disp_id} nicht gefunden")
-    return {"id": result[0], "status": result[1]}
+    return dispo.zustand_wechseln(db, tenant_id, kontrakt_id, disp_id, "STORNIERT")

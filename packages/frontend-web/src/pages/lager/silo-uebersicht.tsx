@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react'
 
 import { useNavigate } from '@/app/routing/typed-router'
 import { PageToolbar } from '@/components/navigation/PageToolbar'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,9 +29,9 @@ function fillPct(stock: number, cap: number): number {
 }
 
 function qsColor(qs: string): string {
-  if (qs === 'gesperrt') return 'bg-red-500'
-  if (qs === 'in_pruefung') return 'bg-amber-400'
-  return 'bg-emerald-500'
+  if (qs === 'gesperrt') return 'bg-status-error'
+  if (qs === 'in_pruefung') return 'bg-status-warning'
+  return 'bg-status-success'
 }
 
 function qsLabel(qs: string): string {
@@ -40,9 +41,9 @@ function qsLabel(qs: string): string {
 }
 
 function fillBarColor(pct: number): string {
-  if (pct >= 95) return 'bg-red-500'
-  if (pct >= 80) return 'bg-amber-400'
-  return 'bg-emerald-500'
+  if (pct >= 95) return 'bg-status-error'
+  if (pct >= 80) return 'bg-status-warning'
+  return 'bg-status-success'
 }
 
 // ── Einzel-Kachel ────────────────────────────────────────────────────────────
@@ -72,17 +73,17 @@ function SiloCellCard({ row, onTransfer }: SiloCellCardProps): JSX.Element {
           <div className="min-w-0">
             <CardTitle className="text-sm font-semibold leading-tight truncate">{code}</CardTitle>
             {name && name !== code ? (
-              <p className="text-[11px] text-muted-foreground truncate mt-0.5">{name}</p>
+              <p className="text-2xs text-muted-foreground truncate mt-0.5">{name}</p>
             ) : null}
           </div>
           <Badge
             variant="outline"
-            className={`text-[10px] shrink-0 px-1.5 py-0 border-0 ${
+            className={`text-2xs shrink-0 px-1.5 py-0 border-0 ${
               qs === 'gesperrt'
-                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                ? 'bg-status-error/10 text-status-error'
                 : qs === 'in_pruefung'
-                  ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                  ? 'bg-status-warning/10 text-status-warning'
+                  : 'bg-status-success/10 text-status-success'
             }`}
           >
             {qsLabel(qs)}
@@ -93,7 +94,7 @@ function SiloCellCard({ row, onTransfer }: SiloCellCardProps): JSX.Element {
         {/* Füllstand */}
         <div>
           <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[11px] text-muted-foreground">Bestand</span>
+            <span className="text-2xs text-muted-foreground">Bestand</span>
             <span className="text-xs font-medium tabular-nums">
               {stock > 0 ? `${stock.toLocaleString('de-DE')} kg` : '—'}
               {cap > 0 ? (
@@ -109,12 +110,12 @@ function SiloCellCard({ row, onTransfer }: SiloCellCardProps): JSX.Element {
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="text-right text-[10px] text-muted-foreground mt-0.5">{pct} %</div>
+          <div className="mt-0.5 text-right text-2xs text-muted-foreground">{pct} %</div>
         </div>
 
         {/* Material / Lot */}
         {(mat || lot) && (
-          <div className="text-[11px] text-muted-foreground space-y-0.5">
+          <div className="space-y-0.5 text-2xs text-muted-foreground">
             {mat && (
               <div className="flex gap-1">
                 <span className="shrink-0 font-medium text-foreground/70">Artikel:</span>
@@ -134,8 +135,7 @@ function SiloCellCard({ row, onTransfer }: SiloCellCardProps): JSX.Element {
         <div className="mt-auto pt-1">
           <Button
             variant="outline"
-            size="sm"
-            className="w-full h-7 text-[11px] gap-1.5"
+            className="min-h-touch w-full gap-1.5"
             disabled={qs === 'gesperrt'}
             onClick={() => onTransfer(id, code)}
           >
@@ -163,32 +163,32 @@ function SummaryBar({ cells }: SummaryBarProps): JSX.Element {
   return (
     <div className="flex flex-wrap gap-3">
       <div className="flex flex-col rounded-md border border-border bg-card px-4 py-2 min-w-[120px]">
-        <span className="text-[11px] text-muted-foreground">Silozellen</span>
+        <span className="text-2xs text-muted-foreground">Silozellen</span>
         <span className="text-xl font-semibold tabular-nums">{cells.length}</span>
       </div>
       <div className="flex flex-col rounded-md border border-border bg-card px-4 py-2 min-w-[160px]">
-        <span className="text-[11px] text-muted-foreground">Gesamtbestand</span>
+        <span className="text-2xs text-muted-foreground">Gesamtbestand</span>
         <span className="text-xl font-semibold tabular-nums">
           {totalStock > 0 ? `${Math.round(totalStock / 1000).toLocaleString('de-DE')} t` : '—'}
         </span>
       </div>
       <div className="flex flex-col rounded-md border border-border bg-card px-4 py-2 min-w-[160px]">
-        <span className="text-[11px] text-muted-foreground">Kapazität gesamt</span>
+        <span className="text-2xs text-muted-foreground">Kapazität gesamt</span>
         <span className="text-xl font-semibold tabular-nums">
           {totalCap > 0 ? `${Math.round(totalCap / 1000).toLocaleString('de-DE')} t` : '—'}
         </span>
       </div>
       <div className="flex flex-col rounded-md border border-border bg-card px-4 py-2 min-w-[120px]">
-        <span className="text-[11px] text-muted-foreground">Auslastung</span>
-        <span className={`text-xl font-semibold tabular-nums ${pct >= 95 ? 'text-red-600' : pct >= 80 ? 'text-amber-600' : ''}`}>
+        <span className="text-2xs text-muted-foreground">Auslastung</span>
+        <span className={`text-xl font-semibold tabular-nums ${pct >= 95 ? 'text-status-error' : pct >= 80 ? 'text-status-warning' : ''}`}>
           {totalCap > 0 ? `${pct} %` : '—'}
         </span>
       </div>
       {locked > 0 && (
-        <div className="flex flex-col rounded-md border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 px-4 py-2 min-w-[120px]">
-          <span className="text-[11px] text-red-600 dark:text-red-400">QS-gesperrt</span>
-          <span className="text-xl font-semibold text-red-600 dark:text-red-400 tabular-nums">{locked}</span>
-        </div>
+        <Callout variant="error" className="flex flex-col rounded-md border px-4 py-2 min-w-[120px]">
+          <span className="text-2xs tracking-wide text-status-error">QS-gesperrt</span>
+          <span className="text-xl font-semibold text-status-error tabular-nums">{locked}</span>
+        </Callout>
       )}
     </div>
   )
@@ -262,7 +262,8 @@ export default function SiloUebersichtPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground whitespace-nowrap">Lager</span>
               <NativeSelect
-                className="h-10 min-w-[200px] text-sm"
+                ariaLabel="Lager"
+                className="min-h-touch min-w-[200px] text-sm"
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
               >
@@ -277,7 +278,8 @@ export default function SiloUebersichtPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground whitespace-nowrap">QS-Filter</span>
               <NativeSelect
-                className="h-10 min-w-[140px] text-sm"
+                ariaLabel="QS-Filter"
+                className="min-h-touch min-w-[140px] text-sm"
                 value={qsFilter}
                 onChange={(e) => setQsFilter(e.target.value as typeof qsFilter)}
               >

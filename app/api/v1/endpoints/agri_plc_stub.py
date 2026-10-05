@@ -14,6 +14,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.inventory_bundle_schemas import (
+    PlcDeviceStatusOut,
+    PlcInfoOut,
+    PlcIngestOut,
+    PlcSiloLevelOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
@@ -197,7 +203,7 @@ def _svc(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id))
 @router.post(
     "/plc/ingest",
     status_code=200,
-    response_model=dict[str, Any],
+    response_model=PlcIngestOut,
     summary="POST /plc/ingest — PLC/OPC-UA Batch-Datenpunkte einlesen (WM-AGRI-PLC-005)",
 )
 def plc_ingest(payload: PlcIngestIn, svc: AgriPlcService = Depends(_svc)) -> Any:
@@ -211,7 +217,7 @@ def plc_ingest(payload: PlcIngestIn, svc: AgriPlcService = Depends(_svc)) -> Any
 @router.post(
     "/plc/silo-level",
     status_code=200,
-    response_model=dict[str, Any],
+    response_model=PlcSiloLevelOut,
     summary="POST /plc/silo-level — Fuellstand-Update von PLC/Sensor (WM-AGRI-PLC-005)",
 )
 def plc_silo_level(payload: PlcSiloLevelIn, svc: AgriPlcService = Depends(_svc)) -> Any:
@@ -225,7 +231,7 @@ def plc_silo_level(payload: PlcSiloLevelIn, svc: AgriPlcService = Depends(_svc))
 @router.post(
     "/plc/device-status",
     status_code=200,
-    response_model=dict[str, Any],
+    response_model=PlcDeviceStatusOut,
     summary="POST /plc/device-status — Heartbeat/Statusmeldung vom PLC-Feldgeraet",
 )
 def plc_device_status(payload: PlcDeviceStatusIn, svc: AgriPlcService = Depends(_svc)) -> Any:
@@ -236,7 +242,7 @@ def plc_device_status(payload: PlcDeviceStatusIn, svc: AgriPlcService = Depends(
 @router.get(
     "/plc/info",
     status_code=200,
-    response_model=dict[str, Any],
+    response_model=PlcInfoOut,
     summary="GET /plc/info — PLC-Stub-Informationen und Integrations-Anleitung",
 )
 def plc_info() -> Any:

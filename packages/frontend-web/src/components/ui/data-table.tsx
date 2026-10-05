@@ -2,6 +2,8 @@ import { type ReactNode, useEffect, useRef, useState, useCallback } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Columns, BookmarkPlus, RotateCcw } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { TouchRecordStack } from '@/components/list/TouchRecordStack'
 
 export type ColumnRenderArgs<T> = {
   row: {
@@ -67,6 +69,7 @@ export function DataTable<T>({
   tableId,
   onRowFocus,
 }: DataTableProps<T>): JSX.Element {
+  const isTouch = useTouchDevice()
   useEffect(() => {
     if (selectable !== true) {
       onSelectionChange?.([])
@@ -121,6 +124,18 @@ export function DataTable<T>({
   const visibleColumns = normalizedColumns.filter(
     (col) => !hiddenCols.has(String(col.id ?? col.accessorKey)),
   )
+  const isActionColumn = (column: ColumnDef<T>): boolean => {
+    const key = String(column.id ?? column.accessorKey ?? '')
+    return key === 'actions' || key === '__actions'
+  }
+  const dataColumns = visibleColumns.filter((column) => !isActionColumn(column))
+  const actionColumn = visibleColumns.find((column) => isActionColumn(column))
+
+  const cellValue = (column: ColumnDef<T>, row: T): ReactNode => {
+    if (typeof column.cell === 'function') return column.cell({ row: { original: row } })
+    if (column.accessorKey) return (row as Record<string, unknown>)[column.accessorKey as string] as ReactNode
+    return null
+  }
 
   function toggleColumn(colKey: string): void {
     setHiddenCols((prev) => {
@@ -179,8 +194,7 @@ export function DataTable<T>({
           {tableId && (
             <Button
               variant="ghost"
-              size="sm"
-              className="gap-1.5 text-xs text-muted-foreground"
+              className="min-h-touch gap-1.5 text-xs text-muted-foreground"
               onClick={resetColumnVisibility}
               title="Spalten zurücksetzen"
               aria-label="Spaltenauswahl zurücksetzen"
@@ -190,8 +204,7 @@ export function DataTable<T>({
           )}
           <Button
             variant="outline"
-            size="sm"
-            className="gap-1.5 text-xs"
+            className="min-h-touch gap-1.5 text-xs"
             onClick={() => setPickerOpen((o) => !o)}
             aria-expanded={pickerOpen}
             aria-haspopup="listbox"
@@ -231,6 +244,22 @@ export function DataTable<T>({
         </div>
       )}
 
+      {isTouch && !loading ? (
+        <TouchRecordStack
+          items={data}
+          getKey={(_, index) => String(index)}
+          title={(row) => (dataColumns[0] ? cellValue(dataColumns[0], row) : null)}
+          fields={(row) =>
+            dataColumns.slice(1, 6).map((column, index) => ({
+              key: String(column.id ?? column.accessorKey ?? index),
+              label: typeof column.header === 'string' ? column.header : String(column.id ?? column.accessorKey ?? ''),
+              value: cellValue(column, row),
+            }))
+          }
+          actionContent={actionColumn ? (row) => cellValue(actionColumn, row) : undefined}
+          emptyMessage={emptyMessage}
+        />
+      ) : (
       <div className="overflow-x-auto">
       <Table>
         <TableHeader>
@@ -263,7 +292,7 @@ export function DataTable<T>({
                 tabIndex={0}
                 aria-selected={focusedRowIndex === rowIndex}
                 onFocus={() => { setFocusedRowIndex(rowIndex); onRowFocus?.(row) }}
-                className={focusedRowIndex === rowIndex ? 'outline outline-2 outline-primary/50' : undefined}
+                className={focusedRowIndex === rowIndex ? 'outline-solid outline-2 outline-primary/50' : undefined}
               >
                 {visibleColumns.map((column, columnIndex) => {
                   const cellContent =
@@ -285,6 +314,7 @@ export function DataTable<T>({
         </TableBody>
       </Table>
       </div>
+      )}
     </div>
   )
 }

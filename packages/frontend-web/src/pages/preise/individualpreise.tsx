@@ -267,12 +267,13 @@ function IndividualpreisTab({ preisTyp }: { preisTyp: PreisTyp }) {
                     <TableCell>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        className="min-h-touch"
                         disabled={deletingIds.has(p.id)}
                         onClick={() => handleDelete(p.id, p.artikel_nr)}
                         aria-label={`Individualpreis ${p.artikel_nr} deaktivieren`}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                        Löschen
                       </Button>
                     </TableCell>
                   </TableRow>

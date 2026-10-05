@@ -33,6 +33,10 @@ class CowProfile(BaseModel):
     milk_kg_day: float = Field(..., ge=0, description="Milk production in kg per day")
     milk_fat_pct: float = Field(..., ge=0, le=10, description="Milk fat percentage")
     milk_protein_pct: float = Field(..., ge=0, le=10, description="Milk protein percentage")
+    milk_lactose_pct: float = Field(
+        default=4.8, ge=0, le=10,
+        description="Milk lactose percentage (DLG 01|2025 ECM reference 4.8%)",
+    )
     lactation_stage_days: int = Field(..., ge=0, description="Days in lactation")
     parity: int = Field(..., ge=1, description="Lactation number (1 = first lactation)")
     target_dmi_kg: Optional[float] = Field(None, gt=0, description="Target dry matter intake in kg per day (if known)")

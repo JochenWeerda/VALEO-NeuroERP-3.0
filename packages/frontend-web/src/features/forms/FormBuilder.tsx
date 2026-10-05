@@ -147,10 +147,10 @@ export function FormBuilder<T extends Record<string, unknown>>({
 
       {validationSummary.length > 0 ? (
         <Card className="border border-red-300 bg-red-50 p-3">
-          <div className="text-sm font-medium text-red-800">
+          <div className="text-sm font-medium text-status-error">
             Validierung noch nicht abgeschlossen
           </div>
-          <ul className="mt-2 list-disc pl-5 text-sm text-red-700">
+          <ul className="mt-2 list-disc pl-5 text-sm text-status-error">
             {validationSummary.slice(0, 4).map((entry) => (
               <li key={entry}>{entry}</li>
             ))}
@@ -173,7 +173,7 @@ export function FormBuilder<T extends Record<string, unknown>>({
               }}
             />
             {errors[field.name] !== undefined ? (
-              <span className="text-sm text-red-600">{errors[field.name]}</span>
+              <span className="text-sm text-status-error">{errors[field.name]}</span>
             ) : null}
           </div>
         ))}
@@ -193,7 +193,7 @@ export function FormBuilder<T extends Record<string, unknown>>({
           {Object.entries(errors)
             .filter(([path]) => path.startsWith(`${schema.lines?.name}.`))
             .map(([path, message]) => (
-              <div key={path} className="text-sm text-red-600">
+              <div key={path} className="text-sm text-status-error">
                 {message}
               </div>
             ))}

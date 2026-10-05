@@ -1,3 +1,7 @@
 
 # Lokale Masken-Screenshots (Browser-Test)
 .mask-shots/
+
+# Durchklick-Messwerte — Ergebnis eines Laufs, kein Quelltext
+tests/e2e/durchklick-report.json
+tests/e2e/.durchklick-teile/

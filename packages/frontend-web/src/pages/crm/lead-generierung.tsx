@@ -3,7 +3,7 @@ import { Sparkles, Search, UserPlus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/hooks/use-toast'
@@ -16,7 +16,7 @@ import { useLeadPreview, useLeadsCount, useUebernehmenLeads, type LeadGenParams 
  */
 
 const nf = (n: number | null): string => (n === null ? '–' : n.toLocaleString('de-DE'))
-const QUELLE_BADGE: Record<string, string> = { gap: 'bg-emerald-100 text-emerald-800', lkv: 'bg-sky-100 text-sky-800' }
+const QUELLE_BADGE: Record<string, BadgeVariant> = { gap: 'success', lkv: 'info' }
 
 export default function LeadGenerierungPage(): JSX.Element {
   const [form, setForm] = useState<LeadGenParams>({ quelle: 'beide', plzMin: '', plzMax: '', topPct: 0.1, maxLeads: 200 })
@@ -78,7 +78,7 @@ export default function LeadGenerierungPage(): JSX.Element {
             <Input type="number" min={1} max={2000} className="w-28" value={form.maxLeads}
               onChange={(e) => set({ maxLeads: Number(e.target.value) || 200 })} />
           </label>
-          <Button onClick={() => setRun(true)} disabled={preview.isFetching && run}>
+          <Button onClick={() => setRun(true)} className="min-h-touch" disabled={preview.isFetching && run}>
             <Search className="mr-1 h-4 w-4" /> Vorschau generieren
           </Button>
         </CardContent>
@@ -96,7 +96,7 @@ export default function LeadGenerierungPage(): JSX.Element {
                 <Badge variant="secondary">{nf(leadsCount.data)} Leads im CRM</Badge>
               )}
               <Button
-                size="sm"
+                className="min-h-touch"
                 onClick={handleUebernehmen}
                 disabled={items.length === 0 || uebernehmen.isPending}
               >
@@ -130,7 +130,7 @@ export default function LeadGenerierungPage(): JSX.Element {
               <tbody>
                 {items.map((c, i) => (
                   <tr key={`${c.name}-${c.plz}-${i}`} className="border-b last:border-0 hover:bg-muted/40">
-                    <td className="py-2 pr-3"><Badge className={QUELLE_BADGE[c.quelle] ?? ''}>{c.quelle.toUpperCase()}</Badge></td>
+                    <td className="py-2 pr-3"><Badge variant={QUELLE_BADGE[c.quelle] ?? 'muted'}>{c.quelle.toUpperCase()}</Badge></td>
                     <td className="py-2 pr-3 font-medium">{c.name}</td>
                     <td className="py-2 pr-3 text-muted-foreground">{[c.plz, c.ort].filter(Boolean).join(' ')}</td>
                     <td className="py-2 pr-3 text-right">{nf(c.score)} <span className="text-xs text-muted-foreground">{c.score_label}</span></td>

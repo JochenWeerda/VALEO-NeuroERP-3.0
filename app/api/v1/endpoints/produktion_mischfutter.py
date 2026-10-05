@@ -6,6 +6,7 @@ Rezepturen aus futtermittel_rezepte und persistiert Produktionsauftraege
 in futtermittel_produktionsauftraege mit echtem Bestandsabzug.
 """
 
+import logging
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -30,10 +31,12 @@ from app.services.feed_production_chain_service import (
     compute_verbrauch,
     fehlende_komponenten,
 )
+from app.api.v1.schemas.base import TypedObjectOut
 
 
-from app.api.v1.schemas.base import BaseSchema
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/produktion/mischfutter", tags=["Produktion - Mischfutter"])
 
@@ -307,7 +310,7 @@ async def update_auftrag_status(
         )
         auftrag.bestands_abzug_erfolgt = False
 
-    # 'fertig' schließt die Belegkette: Fertigwaren-Charge entsteht + FiBu-Buchung (PROD-FIBU-001)
+    # 'fertig' erzeugt die Fertigwaren-Charge; die verifizierte FiBu-Bewertung fehlt noch.
     if payload.status == "fertig":
         try:
             chain.complete_to_charge(auftrag)
@@ -316,9 +319,9 @@ async def update_auftrag_status(
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         auftrag.fertig_am = datetime.now()
 
-        # Verbrauchsbuchung → JournalEntry (idempotent: nur wenn noch kein Ref vorhanden)
+        # Fehlende Bewertung sichtbar melden; ohne Beleg keine FiBu-Referenz setzen.
         if not auftrag.fibu_journal_ref:
-            _post_produktion_to_fibu(db, tenant_id, auftrag)
+            _report_missing_production_valuation(auftrag)
 
     auftrag.status = payload.status
     db.commit()
@@ -326,80 +329,21 @@ async def update_auftrag_status(
     return _to_out(auftrag)
 
 
-def _post_produktion_to_fibu(db: Session, tenant_id: str, auftrag: ProduktionsAuftrag) -> None:
-    """Verbrauchsbuchung bei Produktionsabschluss → JournalEntry (PROD-FIBU-001).
+def _report_missing_production_valuation(auftrag: ProduktionsAuftrag) -> None:
+    """Report the missing valuation; never produce a zero-value journal.
 
-    Buchungslogik:
-      Pro Komponente: Dr. Herstellungskosten / Cr. Rohwarenlager (Standard-Konten via Env/Fallback)
-      Fertigware:     Dr. Fertigwarenlager   / Cr. Herstellungskosten (Summe)
+    Operational completion remains possible with fibu_journal_ref unset.
+    A real booking requires a separately verified inventory valuation model.
     """
-    try:
-        from app.services.finance_transaction_service import FinanceTransactionService
+    from app.core.metrics import critical_data_path_errors_total
 
-        verbrauch: list[dict] = auftrag.verbrauch or []
-        if not verbrauch:
-            return  # Kein Snapshot → keine Buchung möglich
-
-        now = datetime.utcnow()
-        journal_ref = f"JE-PROD-{now.strftime('%Y%m%d')}-{auftrag.id[:8].upper()}"
-        menge_t = float(auftrag.menge_t or 0)
-
-        # Standardkonten (Fallback-Nummern nach SKR03-Landhandel)
-        KONTO_ROHWARENLAGER = "3100"      # Cr: Rohwarenlager-Abgang
-        KONTO_HERSTELLKOSTEN = "6800"     # Dr: Herstellungskosten, Cr: Verrechnungskonto
-        KONTO_FERTIGWARENLAGER = "3200"   # Dr: Fertigwarenlager-Zugang
-
-        lines: list[dict] = []
-        gesamt_herstellkosten = 0.0
-
-        for komp in verbrauch:
-            # Schätzwert: 0 EUR — echte Kosten kommen aus Einkaufspreis des Einzelfutters
-            # Wird hier als Mengenbuchung ohne Betrag erfasst (Anpassung via KST möglich)
-            menge_komp = float(komp.get("menge_t", 0))
-            # Placeholder-Betrag 0 — echtes Preismodell via Einkaufspreisfortschreibung
-            lines.append({
-                "account_id": KONTO_HERSTELLKOSTEN,
-                "debit_amount": 0.0,
-                "credit_amount": 0.0,
-                "description": f"Verbrauch {komp.get('name', komp.get('einzelfutter_id', '?'))} {menge_komp:.3f}t",
-                "quantity": menge_komp,
-                "unit": "t",
-            })
-            lines.append({
-                "account_id": KONTO_ROHWARENLAGER,
-                "debit_amount": 0.0,
-                "credit_amount": 0.0,
-                "description": f"Lagerabgang {komp.get('name', '?')} {menge_komp:.3f}t",
-                "quantity": menge_komp,
-                "unit": "t",
-            })
-
-        # Fertigwarenzugang
-        lines.append({
-            "account_id": KONTO_FERTIGWARENLAGER,
-            "debit_amount": 0.0,
-            "credit_amount": 0.0,
-            "description": f"Fertigwarenzugang {auftrag.chargen_id} {menge_t:.3f}t",
-            "quantity": menge_t,
-            "unit": "t",
-        })
-
-        fin = FinanceTransactionService(db, tenant_id)
-        je = fin.create(
-            entry_number=journal_ref,
-            description=f"Produktionsabschluss {auftrag.chargen_id} {menge_t:.3f}t",
-            entry_date=now.date(),
-            lines=lines,
-            reference=auftrag.id,
-            source="produktion_mischfutter",
-            document_type="produktionsauftrag",
-            period=now.strftime("%Y-%m"),
-        )
-        auftrag.fibu_journal_ref = str(je.entry_number)
-    except Exception:
-        # Nicht-kritisch: FiBu-Buchung schlägt fehl → Produktion trotzdem abgeschlossen
-        # Fehler wird im nächsten Buchungslauf nachgeholt (Nachbuchung via /fibu/nachbuchung)
-        pass
+    critical_data_path_errors_total.labels(
+        endpoint="produktion_mischfutter_fibu", error_type="valuation_missing"
+    ).inc()
+    logger.error(
+        "Keine FiBu-Buchung fuer Produktionsabschluss %s: verifizierte Bestandsbewertung fehlt",
+        auftrag.chargen_id,
+    )
 
 
 @router.get("/auftraege", response_model=list[ProduktionsauftragOut], summary="Auftraege auflisten")
@@ -416,7 +360,7 @@ async def list_auftraege(
     return [_to_out(a) for a in auftraege]
 
 
-@router.get("/auftraege/{ref}/trace", response_model=dict, summary="Belegkette Auftrag ↔ Charge ↔ Komponenten")
+@router.get("/auftraege/{ref}/trace", response_model=TypedObjectOut, summary="Belegkette Auftrag ↔ Charge ↔ Komponenten")
 async def trace_auftrag(
     ref: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -429,17 +373,21 @@ async def trace_auftrag(
     return result
 
 
-@router.get("/inventory-links", response_model=dict, summary="Einzelfutter ↔ Lagerartikel-Mapping (FEED-CHAIN-004)")
+@router.get("/inventory-links", response_model=TypedObjectOut, summary="Einzelfutter ↔ Lagerartikel-Mapping (FEED-CHAIN-004)")
 async def list_inventory_links(
     limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    mapped: bool | None = Query(None, description="true = nur verknuepfte, false = nur offene"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
-    return FeedInventoryLinkService(db, tenant_id).list_links(limit=limit)
+    return FeedInventoryLinkService(db, tenant_id).list_links(
+        limit=limit, offset=offset, mapped=mapped
+    )
 
 
 @router.post(
-    "/inventory-links/{einzelfutter_id}/ensure", response_model=dict,
+    "/inventory-links/{einzelfutter_id}/ensure", response_model=TypedObjectOut,
     summary="Lagerartikel für Einzelfuttermittel anlegen oder verknüpfen",
 )
 async def ensure_inventory_link(

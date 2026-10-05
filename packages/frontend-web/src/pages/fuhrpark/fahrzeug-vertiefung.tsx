@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -357,7 +358,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500" /> Neuen Schadensfall anlegen
+                <AlertTriangle className="h-4 w-4 text-status-warning" /> Neuen Schadensfall anlegen
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -421,7 +422,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                         </td>
                         <td className="py-2 pr-3">
                           {s.versicherung_gemeldet
-                            ? <Shield className="h-4 w-4 text-green-600" />
+                            ? <Shield className="h-4 w-4 text-status-success" />
                             : <span className="text-muted-foreground text-xs">nein</span>}
                         </td>
                         <td className="py-2 pr-3">
@@ -432,10 +433,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                         <td className="py-2">
                           {s.status !== 'abgeschlossen' && (
                             <Button
-                              size="sm"
                               variant="outline"
                               disabled={abschliessendePending.has(s.id)}
                               onClick={() => void handleSchadenAbschliessen(s)}
+                              className="min-h-touch"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               {abschliessendePending.has(s.id) ? '…' : 'Abschließen'}
@@ -525,10 +526,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                         <td className="py-2">
                           {bg.status === 'offen' && (
                             <Button
-                              size="sm"
                               variant="outline"
                               disabled={bezahlenPending.has(bg.id)}
                               onClick={() => void handleBgBezahlen(bg)}
+                              className="min-h-touch"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               {bezahlenPending.has(bg.id) ? '…' : 'Bezahlt'}
@@ -573,12 +574,12 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                       { label: 'ASU in Tagen', val: wartungQ.data.asu_faellig_in_tagen },
                       { label: 'Inspektion in Tagen', val: wartungQ.data.inspektion_faellig_in_tagen },
                     ].map(({ label, val }) => (
-                      <div key={label} className={`rounded border p-3 text-center ${val != null && val <= 30 ? 'border-amber-300 bg-amber-50' : ''}`}>
+                      <Callout key={label} variant={val != null && val <= 30 ? 'warning' : 'default'} className="rounded p-3 text-center">
                         <p className="text-xs text-muted-foreground">{label}</p>
-                        <p className={`text-lg font-bold tabular-nums ${val != null && val <= 30 ? 'text-amber-700' : ''}`}>
+                        <p className={`text-lg font-bold tabular-nums ${val != null && val <= 30 ? 'text-status-warning' : ''}`}>
                           {val != null ? val : '—'}
                         </p>
-                      </div>
+                      </Callout>
                     ))}
                   </div>
 
@@ -602,7 +603,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                               <td className="px-3 py-2 text-right tabular-nums">{v.faellig_in_km != null ? v.faellig_in_km.toLocaleString('de-DE') : '—'}</td>
                               <td className="px-3 py-2 text-right tabular-nums">{v.faellig_bei_km != null ? v.faellig_bei_km.toLocaleString('de-DE') : '—'}</td>
                               <td className="px-3 py-2 text-center">
-                                {v.dringend ? <AlertTriangle className="h-4 w-4 text-amber-500 mx-auto" /> : <span className="text-muted-foreground text-xs">—</span>}
+                                {v.dringend ? <AlertTriangle className="h-4 w-4 text-status-warning mx-auto" /> : <span className="text-muted-foreground text-xs">—</span>}
                               </td>
                             </tr>
                           ))}
@@ -623,7 +624,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
           <Card className="border-amber-200/80 bg-amber-50/40 dark:bg-amber-950/20">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Clock className="h-4 w-4 text-amber-600" /> Leasing-Rückgabe einleiten
+                <Clock className="h-4 w-4 text-status-warning" /> Leasing-Rückgabe einleiten
               </CardTitle>
               <CardDescription>
                 Setzt das Fahrzeug auf Status <strong>ausgeschieden</strong> und protokolliert den KM-Stand.
@@ -659,12 +660,12 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
               </Button>
 
               {lrErgebnis && (
-                <div className="rounded border border-green-200 bg-green-50 p-4 space-y-1 dark:bg-green-950/20">
-                  <p className="text-sm font-semibold text-green-700">Rückgabe protokolliert</p>
-                  <pre className="text-xs text-green-600 whitespace-pre-wrap">
+                <Callout variant="success" className="rounded border p-4 space-y-1">
+                  <p className="text-sm font-semibold text-status-success">Rückgabe protokolliert</p>
+                  <pre className="text-xs text-status-success whitespace-pre-wrap">
                     {JSON.stringify(lrErgebnis, null, 2)}
                   </pre>
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>

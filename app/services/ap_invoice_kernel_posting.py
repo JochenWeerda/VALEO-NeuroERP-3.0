@@ -16,6 +16,7 @@ from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.fibu_audit import log_fibu_audit
 from app.core.uuid7 import uuid7
 from app.documents.router_helpers import get_from_store, get_repository
@@ -23,6 +24,7 @@ from app.domains.shared.process_events import APInvoicePosted
 from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
 from app.infrastructure.eventbus.outbox import OutboxEvent
 from app.infrastructure.models.journal import JournalEntry, JournalEntryLine
+from app.core import finance_periods
 
 logger = logging.getLogger(__name__)
 
@@ -61,23 +63,11 @@ def post_ap_invoice_kernel_sync(
         )
         return
 
-    invoice_date = str(invoice.get("date") or datetime.utcnow().date().isoformat())[:10]
+    invoice_date = str(invoice.get("date") or business_today().isoformat())[:10]
     period = invoice_date[:7]
-    period_status = db.execute(
-        text(
-            """
-            SELECT status
-            FROM finance_accounting_periods
-            WHERE tenant_id = :tenant_id AND period = :period
-            LIMIT 1
-            """
-        ),
-        {"tenant_id": inv_tenant, "period": period},
-    ).fetchone()
-    if period_status and str(period_status[0]) != "OPEN":
-        logger.warning(
-            "PostAPInvoice: Periode %s nicht offen (%s)", period, period_status[0]
-        )
+    gesperrt = finance_periods.gesperrter_zustand(db, inv_tenant, period)
+    if gesperrt:
+        logger.warning("PostAPInvoice: Periode %s ist %s", period, gesperrt)
         return
 
     invoice_number = str(invoice.get("number") or invoice_id)

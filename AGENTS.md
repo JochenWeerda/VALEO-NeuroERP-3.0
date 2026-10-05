@@ -35,6 +35,41 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
 - Bei paralleler Arbeit immer einen klaren Dateibesitz oder Themenbesitz definieren.
 - Nach jeder relevanten Aenderung Tests, Doku und Workboard aktualisieren.
 
+## Entwicklungsphase und Altlasten (User-Vorgabe, alle Agenten)
+
+- Das Projekt befindet sich in der Entwicklungsphase, nicht im Produktivbetrieb.
+  Saemtliche fachlich/technisch ueberholten Altlasten duerfen entfernt werden.
+- Keine Archive, Adapter oder konkurrierenden Modelle allein zur Erhaltung
+  historischer Entwicklungsdaten einfuehren. Die kanonische Form ist das Ziel.
+- Abhaengigkeiten und vorhandene Verbraucher vor dem Rueckbau pruefen;
+  Tests, Vertraege und Dokumentation gemeinsam aktualisieren.
+- Die Freigabe betrifft Projektaltlasten; fremde laufende Aenderungen und
+  Ressourcen bleiben geschuetzt. Die gemeinsame Testdatenbankregel gilt weiter.
+
+## Testdatenbanken und Docker-Ressourcen (alle Agenten, verbindlich)
+
+- **Keine neue PostgreSQL-Testdatenbank und keinen neuen Docker-Container pro
+  Test, Testsuite, Slice oder Agent anlegen.** Keine aus Zeitstempeln, UUIDs oder
+  Agenten-IDs abgeleiteten Datenbank-/Container-Namen. Diese User-Vorgabe gilt
+  fuer alle Agenten und hat Vorrang vor aelteren Testanleitungen.
+- Den vorhandenen gemeinsamen Pruefstand `valeo_probe` bzw. die bereits
+  konfigurierte `TEST_DATABASE_URL` wiederverwenden. Vor Tests zuerst den
+  Stand mit `python scripts/pruefstand_db.py --status` pruefen.
+- Testdaten ueber Transaktionen/Savepoints oder eindeutig eigene Testdatensaetze
+  isolieren. Nur die eigenen Daten aufraeumen; gemeinsame Datenbanken nicht
+  pro Test zuruecksetzen. Keine Fachtests auf der Entwicklungsdatenbank schreiben.
+- `pruefstand_db.py` **ohne Option setzt den Pruefstand zurueck**: nicht als
+  Testvorbereitung aufrufen. `--keep` nur fuer einen abgestimmten Migrationsclaim
+  verwenden. Frische-Schema-Abnahmen verwenden denselben Pruefstand in einem
+  koordinierten Wartungsfenster, nicht zusaetzliche Kopien.
+- Vor Reset, Migration oder Ressourcenbereinigung aktiven Workboard-Besitz und
+  laufende Nutzung pruefen. Keine fremden Datenbanken, Container, Images oder
+  Volumes loeschen; kein pauschales Docker-Prune.
+- CI nutzt die vom Job bereits bereitgestellte Datenbank. Tests erzeugen darin
+  keine weiteren Datenbanken oder Dockerinstanzen.
+
+Runbook: [Gemeinsamer Testpruefstand](docs/quality-assurance/test-database-resource-policy-20261001.md).
+
 ## Parallelbetrieb mit zwei oder mehr Agenten
 
 - Ein Agent ist `Lead` fuer Priorisierung und Integration.

@@ -1,0 +1,70 @@
+---
+slice_id: SCHEMA-DRIFT-GATE
+id: SCHEMA-DRIFT-GATE
+title: Abweichungen zwischen Datenbank und Migrationsstand sichtbar machen
+status: abgeschlossen
+owner: Claude Code
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+coordination: >
+  Nur neue Dateien. Die Funde liegen in CRM, Einkauf, Finanzen, Futtermittel,
+  Lager, POS und Shared und gehen als Handshake an die Owner — welche Form
+  eine Tabelle haben soll, weiss der Owner; ein Nachbau aus dem lokalen Stand
+  wuerde einen gewachsenen Zufall zur Migration erheben.
+goal: >
+  Der Abstand zwischen der gewachsenen Datenbank und dem Migrationsstand ist
+  nicht mehr Vermutung, sondern eine gepruefte Liste mit einer Entscheidung je
+  Gruppe.
+file_ownership:
+  - scripts/check_schema_drift.py
+  - tests/test_check_schema_drift.py
+  - docs/quality-assurance/schema-drift-2026-09-30.md
+acceptance:
+  - 15 reine Unit-Tests fuer die Vergleichslogik, ohne Datenbank
+  - Ein Lauf gegen echtes Postgres (needs_live_db), kein MagicMock
+  - Fundliste im QA-Dokument, jede Gruppe mit einer der drei Entscheidungen
+  - Vier Stichproben von Hand in beiden Datenbanken nachgezaehlt
+  - Open-Gaps und Handshake nachgezogen
+tests:
+  - tests/test_check_schema_drift.py
+risks:
+  - Eine Ratsche auf diesen Abstand wuerde den Rechner messen, nicht die
+    Anwendung — deshalb ausdruecklich keine und nicht in CI
+  - Die Heuristik "wird der Name im Code erwaehnt" ist kein Beweis
+  - Eine Reparatur der Dev-Datenbank darf nicht als Migration getarnt werden
+ai_harness:
+  fachlicher_vertrag: >
+    Wer wissen will, ob seine Datenbank noch zum Migrationsstand passt,
+    bekommt eine Liste: fehlt, zusaetzlich, anders — je Schema, je Tabelle,
+    je Spalte, mit Fremdschluesseln, Pruef- und Eindeutigkeitsbedingungen und
+    Indizes.
+  architektur_vertrag: >
+    Vergleichslogik und Datenbankzugriff sind getrennt: reine Funktionen
+    nehmen Katalogauszuege und geben Funde zurueck, lies_katalog holt die
+    Auszuege. Deshalb ist die Logik ohne Datenbank pruefbar, und die Abfragen
+    sind es gegen echtes Postgres.
+  daten_vertrag: >
+    Nur lesend. Keine DDL, kein Schreibzugriff, keine Aenderung an einer der
+    verglichenen Datenbanken. Der Vorgabewert einer Spalte wird bewusst nicht
+    verglichen; Bedingungen und Indizes ueber ihre Definition, nicht ueber den
+    Namen.
+  test_vertrag: >
+    15 Unit-Tests halten die Unterscheidungen fest, darunter die beiden Faelle
+    vom 29.09. (zusaetzliche Spalte, gelockerte Nullbarkeit). Der
+    Integrationstest legt zwei Schemata an, verbiegt eines und prueft, dass
+    fehlende Spalte, fehlender Fremdschluessel, fehlende Pruefbedingung und
+    gelockerte Nullbarkeit gefunden werden.
+  security_vertrag: >
+    Keine Zugangsdaten im Code; beide Verbindungen kommen aus der Umgebung.
+    Die Ausgabe nennt Schema-, Tabellen- und Spaltennamen, keine Daten.
+  betriebs_vertrag: >
+    Laeuft von Hand, nicht in CI, und hat keine Ratsche: Der Abstand ist eine
+    Bestandsaufnahme, keine Regressionsschwelle. Exitcode 1 bei Funden, damit
+    ein Skript darauf reagieren kann.
+  dokumentations_vertrag: >
+    docs/quality-assurance/schema-drift-2026-09-30.md mit der Fundliste, der
+    Einordnung je Gruppe und den vier Stichproben; Workboard, Open-Gaps,
+    Handshake an die Fachowner.
+external_gates:
+  - not_applicable

@@ -1,0 +1,61 @@
+slice_id: RATION-CANON-04-BEST-ATTAINABLE
+id: RATION-CANON-04-BEST-ATTAINABLE
+title: Rationsoptimierung – Best-Attainable-Recovery bei Infeasibility TDD
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Skill §4.2 umsetzen: ein technischer INFEASIBLE-Status wird nicht als leere
+  fachliche Antwort weitergegeben. Bei positiver Wunschleistung sucht eine
+  Bisektion die hoechste unter ALLEN harten Grenzen erreichbare Zielleistung und
+  liefert die zugehoerige Ration als BEST_ATTAINABLE mit gefuelltem
+  technical_max, ohne die Solver-Mathematik zu aendern (nur die Zielleistung
+  wird abgesenkt, harte Grenzen bleiben aktiv).
+scope:
+  - _best_attainable_recovery + Verdrahtung in _optimize_internal (_enable_recovery)
+  - CANON-01-Vertrag: technical_max/target_gap gefuellt, Status BEST_ATTAINABLE
+  - Frontend-Typ best_attainable_recovery
+  - End-to-End-Tests inkl. struktureller Infeasibility-Abgrenzung
+non_scope:
+  - Kontrollierte Relaxation weicher Grenzen (RELAX_ADVISORY_CONSTRAINTS) als Alternativpfad
+  - Alternative-Futtermittel-Vorschlag als Teil der Recovery (bereits via feed_suggestions vorhanden)
+  - Strukturelle Infeasibility (Sigma-min>DMI): bleibt bewusst infeasible + Preflight-Blocker
+file_ownership:
+  - docs/agent-ops/slices/RATION-CANON-04-BEST-ATTAINABLE.yaml
+  - app/api/v1/endpoints/rations_optimization.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - tests/test_rations_best_attainable_recovery.py
+  - tests/test_rations_result_contract_e2e.py
+acceptance:
+  - "pytest tests/test_rations_best_attainable_recovery.py gruen (4 Faelle)"
+  - "Unerreichbares Ziel 60 kg -> BEST_ATTAINABLE mit echter Ration + technical_max"
+  - "Strukturelle Infeasibility (Sigma-min>DMI) bleibt infeasible (Recovery=None)"
+  - "Bestehende Solvertests unveraendert gruen (282 gruen)"
+tests:
+  - "pytest tests/test_rations_best_attainable_recovery.py --noconftest -p no:cacheprovider --no-cov -o addopts=''"
+risks:
+  - "Recovery loest bis zu 7 zusaetzliche LP-Sonden -> Latenz nur auf dem Infeasible-Pfad."
+  - "technical_max ist die hoechste loesbare Zielleistung (Bisektion, 0,5-kg-Aufloesung), kein exaktes Maximalleistungs-LP."
+ai_harness:
+  fachlicher_vertrag: >-
+    Nur die Zielleistung wird weich gesetzt (Skill §4.2 Schritt 3-4); harte
+    Grenzen (Mineralstoffe, Struktur, TM-Aufnahme) bleiben eingehalten. Ist
+    selbst der Erhaltungsfall (Ziel 0) unloesbar, bleibt die ehrliche
+    Infeasible-Antwort mit Preflight-Findings bestehen.
+  test_vertrag: >-
+    TDD: End-to-End gegen den echten Solver; ein Kontrolltest grenzt strukturelle
+    Infeasibility (kein Recovery) von zielbedingter (Recovery) ab.
+  daten_vertrag: >-
+    technical_max wird jetzt real gefuellt; keine Schaetzung, sondern die
+    hoechste tatsaechlich geloeste Zielleistung.
+  api_vertrag: >-
+    Additiv: neues Feld best_attainable_recovery; Status wird von infeasible auf
+    optimal/BEST_ATTAINABLE gehoben, wenn eine Ration gefunden wurde.
+  ui_vertrag: >-
+    best_attainable_recovery typisiert; Werkbank zeigt 'Best-Attainable statt
+    Solver-Abbruch' (Panel aus dem Zielbild) mit technical_max und Ziellücke.
+  persistenz_vertrag: >-
+    Keine neuen Tabellen; Recovery-Ergebnis wandert im Response-/Varianten-
+    Snapshot mit.

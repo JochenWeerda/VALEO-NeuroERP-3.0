@@ -1,5 +1,6 @@
-﻿import { useQSCheckliste, type QSItem } from '@/lib/api/betrieb'
+import { useQSCheckliste, type QSItem } from '@/lib/api/betrieb'
 import { useState } from 'react'
+import { useNavigate } from '@/app/routing/typed-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -16,6 +17,7 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 import { AgentProcessPanel } from '@/components/agent'
 import { AlertTriangle, CheckCircle, ClipboardCheck } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type QsRole = 'qs' | 'audit' | 'betrieb' | 'leitung'
 
@@ -29,6 +31,8 @@ const qsRoles = [
 export default function QSChecklistePage(): JSX.Element {
   const { data: qs = [], isError, error, refetch } = useQSCheckliste()
   const [roleFocus, setRoleFocus] = useState<QsRole>('qs')
+  const navigate = useNavigate()
+  const isTouch = useTouchDevice()
 
   const shortcuts = buildCoreMaskShortcuts({
     onRefresh: () => { void refetch() },
@@ -48,13 +52,13 @@ export default function QSChecklistePage(): JSX.Element {
       render: (q: QSItem) => (
         q.erfuellt ? (
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <span className="font-semibold text-green-600">Erfuellt</span>
+            <CheckCircle className="h-5 w-5 text-status-success" />
+            <span className="font-semibold text-status-success">Erfuellt</span>
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
-            <span className="font-semibold text-red-600">Offen</span>
+            <AlertTriangle className="h-5 w-5 text-status-error" />
+            <span className="font-semibold text-status-error">Offen</span>
           </div>
         )
       ),
@@ -78,14 +82,18 @@ export default function QSChecklistePage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">QS-Checkliste</h1>
-          <p className="text-muted-foreground">Quality & Safety</p>
+          <h1 className="text-2xl font-bold md:text-3xl">QS-Checkliste</h1>
+          <p className="text-muted-foreground">Pruefpunkte abarbeiten, offene Luecken klaeren</p>
         </div>
-        <Button>Audit starten</Button>
+        <Button className="min-h-touch touch-manipulation" onClick={() => navigate('/qualitaet/ausnahmen')}>
+          QS-Ausnahmen
+        </Button>
       </div>
+      {!isTouch ? (
+      <>
       <AgentProcessPanel domain="compliance" />
 
       <RoleFocusBar
@@ -137,11 +145,13 @@ export default function QSChecklistePage(): JSX.Element {
           />
         </div>
       </div>
+      </>
+      ) : null}
 
       {offen > 0 && (
-        <Card className="border-red-500 bg-red-50">
+        <Card className="border-status-error bg-status-error/10">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">{offen} Pruefpunkt(e) NICHT erfuellt!</span>
             </div>
@@ -149,6 +159,7 @@ export default function QSChecklistePage(): JSX.Element {
         </Card>
       )}
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -156,7 +167,7 @@ export default function QSChecklistePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-blue-600" />
+              <ClipboardCheck className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{qs.length}</span>
             </div>
           </CardContent>
@@ -168,8 +179,8 @@ export default function QSChecklistePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{erfuellt}</span>
+              <CheckCircle className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">{erfuellt}</span>
             </div>
           </CardContent>
         </Card>
@@ -179,10 +190,11 @@ export default function QSChecklistePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-red-600">{offen}</span>
+            <span className="text-2xl font-bold text-status-error">{offen}</span>
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardContent className="pt-6">

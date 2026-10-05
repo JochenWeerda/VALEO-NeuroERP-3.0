@@ -18,12 +18,13 @@ from app.core.tenant import get_tenant_id
 from app.services.fiscalization.contracts import ExportCommand
 from app.services.fiscalization.providers import FiscalProviderError
 from app.services.fiscalization.service import FiscalizationService
+from app.api.v1.schemas.base import TypedObjectOut
 
 
 router = APIRouter()
 
 
-@router.get("/dsfinvk/export", summary="Providergestuetzten DSFinV-K-Export anfordern")
+@router.get("/dsfinvk/export", response_model=None, summary="Providergestuetzten DSFinV-K-Export anfordern")
 async def dsfinvk_export(
     period_from: date | None = Query(default=None),
     period_to: date | None = Query(default=None),
@@ -53,7 +54,7 @@ async def dsfinvk_export(
     return result
 
 
-@router.get("/dsfinvk/status", response_model=dict, summary="Providergestuetzten DSFinV-K-Status abrufen")
+@router.get("/dsfinvk/status", response_model=TypedObjectOut, summary="Providergestuetzten DSFinV-K-Status abrufen")
 async def dsfinvk_status(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

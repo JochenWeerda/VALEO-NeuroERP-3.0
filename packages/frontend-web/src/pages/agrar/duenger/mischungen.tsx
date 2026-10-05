@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertTriangle, Calculator, ChevronDown, ChevronUp, FlaskConical, Plus, Save, Trash2 } from 'lucide-react'
+import { AlertTriangle, Calculator, FlaskConical, Plus, Save } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useDuengerKomponenten } from '@/lib/api/agrar'
 
@@ -307,7 +308,7 @@ export default function DuengerMischungenPage(): JSX.Element {
               <Plus className="h-5 w-5" />
               Komponenten ({mischung.komponenten.length})
             </span>
-            <Button onClick={addKomponente} size="sm" className="gap-2">
+            <Button onClick={addKomponente} className="min-h-touch gap-2 touch-manipulation">
               <Plus className="h-4 w-4" />
               Komponente hinzufügen
             </Button>
@@ -322,19 +323,18 @@ export default function DuengerMischungenPage(): JSX.Element {
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="font-medium">Komponente {index + 1}</h4>
                     <div className="flex items-center gap-1">
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => moveKomponenteUp(index)} disabled={index === 0} title="Nach oben">
-                        <ChevronUp className="h-4 w-4" />
+                      <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => moveKomponenteUp(index)} disabled={index === 0}>
+                        Nach oben
                       </Button>
-                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => moveKomponenteDown(index)} disabled={index === mischung.komponenten.length - 1} title="Nach unten">
-                        <ChevronDown className="h-4 w-4" />
+                      <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => moveKomponenteDown(index)} disabled={index === mischung.komponenten.length - 1}>
+                        Nach unten
                       </Button>
                       <Button
                         variant="outline"
-                        size="sm"
+                        className="min-h-touch touch-manipulation"
                         onClick={() => removeKomponente(index)}
-                        className="text-red-600 hover:text-red-700"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Entfernen
                       </Button>
                     </div>
                   </div>
@@ -409,36 +409,36 @@ export default function DuengerMischungenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <div className="text-sm text-blue-600">Gesamt N</div>
+              <div className="p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
+                <div className="text-sm text-primary">Gesamt N</div>
                 <div className="text-2xl font-bold text-blue-900">{mischung.berechnete_werte.gesamt_n}%</div>
-                <div className="text-xs text-blue-600">Ziel: {mischung.ziel_npk.n}%</div>
+                <div className="text-xs text-muted-foreground">Ziel: {mischung.ziel_npk.n}%</div>
               </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <div className="text-sm text-green-600">Gesamt P</div>
-                <div className="text-2xl font-bold text-green-900">{mischung.berechnete_werte.gesamt_p}%</div>
-                <div className="text-xs text-green-600">Ziel: {mischung.ziel_npk.p}%</div>
+              <div className="p-4 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded-lg">
+                <div className="text-sm text-status-success">Gesamt P</div>
+                <div className="text-2xl font-bold text-status-success">{mischung.berechnete_werte.gesamt_p}%</div>
+                <div className="text-xs text-status-success">Ziel: {mischung.ziel_npk.p}%</div>
               </div>
               <div className="p-4 bg-purple-50 rounded-lg">
                 <div className="text-sm text-purple-600">Gesamt K</div>
                 <div className="text-2xl font-bold text-purple-900">{mischung.berechnete_werte.gesamt_k}%</div>
                 <div className="text-xs text-purple-600">Ziel: {mischung.ziel_npk.k}%</div>
               </div>
-              <div className="p-4 bg-orange-50 rounded-lg">
-                <div className="text-sm text-orange-600">Kosten/Tonne</div>
+              <div className="p-4 bg-[hsl(var(--color-semantic-warning-50-hsl))] rounded-lg">
+                <div className="text-sm text-status-warning">Kosten/Tonne</div>
                 <div className="text-2xl font-bold text-orange-900">{mischung.berechnete_werte.kosten_pro_tonne}</div>
-                <div className="text-xs text-orange-600">Gesamt: {mischung.berechnete_werte.gesamt_menge}t</div>
+                <div className="text-xs text-status-warning">Gesamt: {mischung.berechnete_werte.gesamt_menge}t</div>
               </div>
             </div>
 
             {!validateMischung() && (
-              <div className="mt-4 flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-                <span className="text-red-800 font-medium">
+              <Callout variant="error" className="mt-4 flex items-center gap-2 p-3 border rounded">
+                <AlertTriangle className="h-5 w-5 text-status-error" />
+                <span className="text-status-error font-medium">
                   Die Anteile summieren sich nicht auf 100%!
                   Aktuell: {mischung.komponenten.reduce((sum, k) => sum + k.anteil, 0)}%
                 </span>
-              </div>
+              </Callout>
             )}
           </CardContent>
         </Card>

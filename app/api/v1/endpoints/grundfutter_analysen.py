@@ -31,6 +31,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.futtermittel_models import GrundfutterAnalyse, RationsZugang
+from app.services.feeding_feed_analysis_service import FeedAnalysisConflict, FeedingFeedAnalysisService
 
 logger = logging.getLogger(__name__)
 
@@ -586,6 +587,10 @@ def _analyse_to_dict(a: GrundfutterAnalyse) -> Dict[str, Any]:
     return {c.name: getattr(a, c.name) for c in a.__table__.columns}
 
 
+def _canonical_service(db: Session, tenant_id: str, actor: Optional[str]) -> FeedingFeedAnalysisService:
+    return FeedingFeedAnalysisService(db, tenant_id, actor or "legacy-ground-feed-api")
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -664,7 +669,8 @@ def create_analyse(
 
     a = GrundfutterAnalyse(id=uuid7(), tenant_id=tenant_id, **data.model_dump(exclude_none=True))
     db.add(a)
-    db.commit()
+    db.flush()
+    _canonical_service(db, tenant_id, x_user_email).record_legacy_create(str(a.id))
     db.refresh(a)
     return _analyse_to_dict(a)
 
@@ -688,7 +694,14 @@ def patch_analyse(
         raise HTTPException(404, "Analyse nicht gefunden")
     for k, v in data.model_dump(exclude_none=True).items():
         setattr(a, k, v)
-    db.commit()
+    db.flush()
+    try:
+        _canonical_service(db, tenant_id, x_user_email).record_legacy_update(
+            str(a.id), verified=bool(data.verifiziert), reason="Korrektur ueber kompatible Grundfutteranalyse-API",
+        )
+    except FeedAnalysisConflict as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     db.refresh(a)
     return _analyse_to_dict(a)
 
@@ -707,8 +720,14 @@ def delete_analyse(
     ).first()
     if not a:
         raise HTTPException(404, "Analyse nicht gefunden")
-    db.delete(a)
-    db.commit()
+    service = _canonical_service(db, tenant_id, x_user_email)
+    try:
+        current = service.get_analysis(str(a.id))
+        service.transition(str(a.id), "rejected", int(current["revision"]),
+                           "Loeschanforderung ueber kompatible API; fachlich als verworfen historisiert")
+    except (FeedAnalysisConflict, ValueError) as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     from fastapi.responses import Response
     return Response(status_code=204)
 
@@ -721,6 +740,8 @@ async def upload_pdf(
     save: bool = Query(default=False, description="Direkt in DB speichern"),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
+    x_share_token: Optional[str] = Header(default=None),
 ):
     """
     LUFA-PDF hochladen und automatisch parsen.
@@ -729,6 +750,7 @@ async def upload_pdf(
     1. pdfplumber für Textextraktion (native Text-PDFs)
     2. Falls kein Text erkannt → Hinweis auf Claude Vision (erfordert ANTHROPIC_API_KEY)
     """
+    _check_rations_write(tenant_id, db, x_user_email, x_share_token)
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(400, "Nur PDF-Dateien erlaubt")
 
@@ -771,7 +793,8 @@ async def upload_pdf(
             **result.parsed.model_dump(exclude_none=True),
         )
         db.add(a)
-        db.commit()
+        db.flush()
+        _canonical_service(db, tenant_id, None).record_legacy_create(str(a.id))
         db.refresh(a)
         return {
             "saved": True,
@@ -798,8 +821,11 @@ async def upload_csv(
     save: bool = Query(default=False),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
+    x_share_token: Optional[str] = Header(default=None),
 ):
     """LUFA-CSV-Export hochladen und parsen."""
+    _check_rations_write(tenant_id, db, x_user_email, x_share_token)
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Nur CSV-Dateien erlaubt")
 
@@ -817,7 +843,8 @@ async def upload_csv(
     if save:
         a = GrundfutterAnalyse(id=uuid7(), tenant_id=tenant_id, **parsed.model_dump(exclude_none=True))
         db.add(a)
-        db.commit()
+        db.flush()
+        _canonical_service(db, tenant_id, None).record_legacy_create(str(a.id))
         db.refresh(a)
         return {"saved": True, "analyse_id": a.id, "data": _analyse_to_dict(a)}
 
@@ -831,8 +858,11 @@ def promote_as_feed(
     analyse_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
+    x_share_token: Optional[str] = Header(default=None),
 ):
     """Übernimmt eine verifizierte Analyse als Einzelfuttermittel in die Futtermittel-DB."""
+    _check_rations_write(tenant_id, db, x_user_email, x_share_token)
     from app.infrastructure.models.futtermittel_models import Einzelfuttermittel
 
     a = db.query(GrundfutterAnalyse).filter(

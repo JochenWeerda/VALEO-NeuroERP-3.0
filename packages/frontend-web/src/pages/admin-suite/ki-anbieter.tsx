@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Link } from '@/app/routing/typed-router'
 import { ArrowLeft, BrainCircuit, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -96,7 +97,7 @@ export default function AdminSuiteKiAnbieterPage(): JSX.Element {
       <div className="flex justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-3xl font-bold">
-            <BrainCircuit className="h-7 w-7 text-emerald-700" /> KI-Anbieter (NeuroAI)
+            <BrainCircuit className="h-7 w-7 text-status-success" /> KI-Anbieter (NeuroAI)
           </h1>
           <p className="mt-2 text-muted-foreground">
             Anbieterunabhängige LLM-Konfiguration für NeuroAI-Dossiers und Textassistenten.
@@ -113,7 +114,7 @@ export default function AdminSuiteKiAnbieterPage(): JSX.Element {
           <CardTitle className="flex items-center gap-2">
             Aktueller Status
             {query.data.available
-              ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />Einsatzbereit</Badge>
+              ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />Einsatzbereit</Badge>
               : <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" />Nicht konfiguriert</Badge>}
           </CardTitle>
           <CardDescription>
@@ -160,9 +161,9 @@ export default function AdminSuiteKiAnbieterPage(): JSX.Element {
           </label>
 
           {testResult && (
-            <div className={`rounded-md border p-3 text-sm ${testResult.ok ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-red-200 bg-red-50 text-red-900'}`}>
+            <Callout variant={testResult.ok ? 'success' : 'error'} className="rounded-md p-3">
               <strong>{testResult.ok ? 'Verbindung OK' : 'Test fehlgeschlagen'}</strong> — {testResult.provider}/{testResult.model}: {testResult.detail}
-            </div>
+            </Callout>
           )}
 
           <div className="flex gap-2">

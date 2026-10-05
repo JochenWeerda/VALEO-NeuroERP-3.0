@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-10-05
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -33,7 +33,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/contracts/{kontrakt_id}` |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/weighing-tickets` |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `GET /api/v1/compliance/external-gates` |
-| `crm.contact.log` | crm | `crm:write` | nein | mittel | nein | `POST /api/v1/crm/kontakte` |
+| `crm.contact.log` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/kunden?search={query}&limit={limit}` |
 | `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/crm/kunden/{kunden_nr}/360` |
 | `dms.document.search` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein | `GET /api/v1/nachweisraum/dokumente` |
@@ -43,7 +43,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}` |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/bestand` |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/inventuren/status` |
-| `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/sales-invoices/propose` |
+| `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `GET /api/v1/sales-orders/{auftrag_nr}/status` |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `GET /api/v1/silo/cells/{cell_code}/status` |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `GET /api/v1/inventory/lots/{lot_id}/trace` |
@@ -59,6 +59,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `agrar.contract.allocated` | outbox | `app/api/v1/endpoints/weighing_tickets.py` |
+| `agrar.harvest_settlement.print_requested` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `agrar.weighing_ticket.allocated` | outbox | `app/api/v1/endpoints/weighing_tickets.py` |
 
 ### Außendienst
@@ -72,6 +73,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
+| `crm.lead.qualified` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `crm.opportunity.activity_created` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 
 ### Einkauf
@@ -100,6 +103,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `lager.auslagerung.created` | outbox | `app/services/inventory_compat_service.py` |
 | `lager.einlagerung.created` | outbox | `app/services/inventory_compat_service.py` |
+| `lager.stock_movement.storniert` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `lager.wareneingang.booked` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 
 ### Lager / Materialfluss
 
@@ -123,12 +128,6 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `lkw.registered` | outbox | `app/services/annahme_service.py` |
 
-### POS / Kasse
-
-| Event-ID | Kanal | Quelle |
-|---|---|---|
-| `pos.tagesabschluss.created` | outbox | `app/services/pos_compat_service.py` |
-
 ### Portal
 
 | Event-ID | Kanal | Quelle |
@@ -149,8 +148,16 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
+| `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
+| `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `einkauf.bestellung.created_from_supplier` | outbox | `app/api/v1/endpoints/einkauf_kpis.py` |
+| `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
+| `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
+| `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
+| `qualitaet.reklamation.closed` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `sales.delivery_note.print_requested` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `settlement.created` | outbox | `app/core/settlement_audit_chain.py` |
 
 ### System
@@ -175,6 +182,16 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
+| `feeding.actual.recorded` | outbox | `app/services/feeding_actual_service.py` |
+| `feeding.analysis.released` | outbox | `app/services/feeding_feed_analysis_service.py` |
+| `feeding.deviation.exceeded` | outbox | `app/services/feeding_actual_measure_service.py` |
+| `feeding.import.quarantined` | outbox | `app/services/feeding_import_monitor_service.py` |
+| `feeding.measure.completed` | outbox | `app/services/feeding_measure_lifecycle_service.py` |
+| `feeding.measure.created` | outbox | `app/services/feeding_actual_measure_service.py` |
+| `feeding.measure.overdue` | outbox | `app/services/feeding_measure_lifecycle_service.py` |
+| `feeding.plan.published` | outbox | `app/services/feeding_plan_service.py` |
+| `feeding.ration.version.activated` | outbox | `app/services/rations_lifecycle_service.py` |
+| `feeding.supply.procurement_handoff.created` | outbox | `app/services/feeding_supply_service.py` |
 | `ration.created` | outbox | `app/services/inventory_compat_service.py` |
 
 ## Verbotene Automatisierung

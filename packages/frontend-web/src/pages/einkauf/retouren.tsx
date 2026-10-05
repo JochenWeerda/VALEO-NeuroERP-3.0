@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient } from '@/lib/api-client'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PackageX, ArrowLeft, AlertTriangle } from 'lucide-react'
@@ -88,6 +90,7 @@ type ReturnData = {
 export default function RetourenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const { grId } = useParams<{ grId?: string }>()
   const entityType = 'goodsReturn'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Retoure')
@@ -274,15 +277,16 @@ export default function RetourenPage(): JSX.Element {
       {grLoading && (
         <div className="space-y-4"><Skeleton className="h-8 w-64" /><Skeleton className="h-[200px] w-full" /></div>
       )}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{t('crud.entities.goodsReturn')}</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">{t('crud.entities.goodsReturn')}</h1>
           <p className="text-muted-foreground mt-1">
             {t('crud.descriptions.goodsReturn', { defaultValue: 'Retouren an Lieferanten verwalten' })}
           </p>
         </div>
         <Button
           variant="outline"
+          className="min-h-touch touch-manipulation"
           onClick={() => navigate('/einkauf/wareneingang')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -290,6 +294,7 @@ export default function RetourenPage(): JSX.Element {
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar roles={returnRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
         <ManagementDecisionPanel
@@ -312,6 +317,7 @@ export default function RetourenPage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={returnCrudCapabilities} />
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -396,6 +402,7 @@ export default function RetourenPage(): JSX.Element {
               </div>
 
               <Button
+                className="min-h-touch touch-manipulation"
                 onClick={handleCreateReturn}
                 disabled={loading || goodsReceipt.items.every(item => item.quantityReturned >= item.quantityReceived)}
               >
@@ -599,21 +606,22 @@ export default function RetourenPage(): JSX.Element {
             </div>
 
             {returnData.creditMemoRequested && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+              <Callout variant="info" className="p-3 border rounded-md">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5" />
-                  <div className="text-sm text-blue-800">
+                  <AlertTriangle className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <div className="text-sm text-status-info">
                     {t('crud.dialogs.createReturn.creditMemoInfo')}
                   </div>
                 </div>
-              </div>
+              </Callout>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReturnDialogOpen(false)}>
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setReturnDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button
+              className="min-h-touch touch-manipulation"
               onClick={handleSaveReturn}
               disabled={loading || !returnData.returnReason || returnData.returnReason.length < 10}
             >

@@ -9,6 +9,7 @@ import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
@@ -41,6 +42,7 @@ const STRATEGIEN = [
 export default function AuslagerungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
@@ -78,6 +80,7 @@ export default function AuslagerungPage(): JSX.Element {
   }
 
   const handleFinish = async (): Promise<void> => {
+    if (saving) return
     setSaving(true)
     try {
       await apiClient.post('/api/v1/lager/auslagerung', {
@@ -120,7 +123,7 @@ export default function AuslagerungPage(): JSX.Element {
     const hatMenge = auslagerung.menge > 0
     return {
       status: hatArtikel && hatMenge ? 'Auslagerung vorbereitet' : 'Artikelauswahl offen',
-      statusColor: hatArtikel && hatMenge ? 'text-green-700 bg-green-50 border-green-300' : 'text-blue-700 bg-blue-50 border-blue-300',
+      statusColor: hatArtikel && hatMenge ? 'border-status-success/40 bg-status-success/10' : 'border-status-info/40 bg-status-info/10',
       verfuegbarkeit: `${artikelVerfuegbar} Artikel im Katalog`,
       reservierungsdruck: hatArtikel ? `${auslagerung.artikel}: ${auslagerung.menge} t angefordert (${strategieLabel})` : 'Noch kein Artikel gewaehlt',
       folgeweg: hatArtikel && hatMenge ? 'Strategie bestaetigen und buchen' : 'Artikel und Menge festlegen',
@@ -171,7 +174,7 @@ export default function AuslagerungPage(): JSX.Element {
             capabilityKey="auslagerung_assistant"
             parameters={{ artikel: auslagerung.artikel, menge: auslagerung.menge }}
             renderSuggestion={(s: { strategie?: string; chargenId?: string }) => (
-              <div className="space-y-1 text-xs text-violet-800">
+              <div className="space-y-1 text-xs text-foreground">
                 {s.strategie && <div><span className="font-medium">Strategie:</span> {s.strategie.toUpperCase()}</div>}
                 {s.chargenId && <div><span className="font-medium">Charge:</span> {s.chargenId}</div>}
               </div>
@@ -215,8 +218,8 @@ export default function AuslagerungPage(): JSX.Element {
       content: (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
-            <CheckCircle className="h-16 w-16 text-emerald-500" />
-            <h3 className="text-xl font-bold text-slate-800">Auslagerung prüfen</h3>
+            <CheckCircle className="h-16 w-16 text-status-success" />
+            <h3 className="text-xl font-bold text-foreground">Auslagerung prüfen</h3>
           </div>
           <TouchConfirmCard
             title="Zusammenfassung"
@@ -235,26 +238,27 @@ export default function AuslagerungPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-      <div className="p-6">
+      <div className="p-3 md:p-6">
         <ModuleToolbar backTarget="/lager/bestandsuebersicht" closeTarget="/lager/bestandsuebersicht" title="Auslagerung" />
-        {workflowInstanceId && (
-          <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-            Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        {workflowInstanceId && !isTouch ? (
+          <div className="mb-4 rounded-md border border-border bg-muted px-4 py-2 text-sm text-foreground">
+            Vorgang: {workflowCase || workflowProcess}
           </div>
-        )}
-        <AgentProcessPanel domain="lager" className="mb-4" />
-        {/* Operativer Fallkopf */}
-        <Card className={`border mb-4 ${fallkopf.statusColor}`}>
-          <CardContent className="pt-4 pb-3 text-sm space-y-1">
+        ) : null}
+        {!isTouch ? <AgentProcessPanel domain="lager" className="mb-4" /> : null}
+        <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} loading={saving} />
+        {!isTouch ? (
+        <Card className={`mb-4 mt-4 border ${fallkopf.statusColor}`}>
+          <CardContent className="space-y-1 pt-4 pb-3 text-sm">
             <div className="font-semibold">Auslagerung: {fallkopf.status}</div>
             <div>Verfuegbarkeit: {fallkopf.verfuegbarkeit}</div>
             <div>Reservierungsdruck: {fallkopf.reservierungsdruck}</div>
             <div>Folgeweg: {fallkopf.folgeweg}</div>
           </CardContent>
         </Card>
-        <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} />
+        ) : null}
       </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.warehouse_service import WarehouseService
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -224,8 +224,8 @@ def get_bin_stock(bin_id: str, svc: WarehouseService = Depends(_svc)):
 
 @router.patch(
     "/bins/{bin_id}/stock-lines/{stock_line_id}",
-    summary="Bestandszeile (bin_stock) absolute Menge setzen",
     response_model=WarehouseWmsOut,
+    summary="Bestandszeile (bin_stock) absolute Menge setzen",
 )
 def patch_bin_stock_line(
     bin_id: str,
@@ -316,7 +316,7 @@ def list_pick_lists(
         params["st"] = status_filter
     where = " AND ".join(filters)
     rows = svc.db.execute(
-        text(f"SELECT * FROM domain_inventory.pick_lists WHERE {where} ORDER BY created_at DESC LIMIT 100"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT * FROM domain_inventory.pick_lists WHERE {where} ORDER BY created_at DESC LIMIT 100"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [dict(r._mapping) for r in rows]
@@ -349,8 +349,8 @@ class PickListFromDeliveryNoteIn(BaseModel):
 @router.post(
     "/pick-lists/from-delivery-note/{ls_id}",
     status_code=status.HTTP_201_CREATED,
-    summary="Kommissionierliste aus Lieferschein (WMS-PICK-LINK-001)",
     response_model=WarehouseWmsOut,
+    summary="Kommissionierliste aus Lieferschein (WMS-PICK-LINK-001)",
 )
 def create_pick_list_from_delivery_note(
     ls_id: str,
@@ -444,7 +444,7 @@ class PutawayRequest(BaseModel):
     strategy: str = "CAPACITY"
 
 
-@router.post("/warehouses/{warehouse_id}/suggest-putaway", response_model=dict, summary="Einlagerungsvorschlag (Putaway)")
+@router.post("/warehouses/{warehouse_id}/suggest-putaway", response_model=TypedObjectOut, summary="Einlagerungsvorschlag (Putaway)")
 def suggest_putaway(
     warehouse_id: str,
     payload: PutawayRequest,

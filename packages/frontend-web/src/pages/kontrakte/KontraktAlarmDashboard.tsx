@@ -3,13 +3,14 @@ import { useNavigate } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { listKontrakte, type KontraktListItem } from '@/lib/api/kontrakte'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { AlertTriangle, Clock, TrendingUp, Package } from 'lucide-react'
 
 function daysUntil(dateStr: string | null | undefined): number | null {
@@ -27,6 +28,7 @@ type AlarmItem = KontraktListItem & {
 
 export default function KontraktAlarmDashboard(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
 
   const query = useQuery({
     queryKey: ['kontrakte', 'alarm-dashboard'],
@@ -166,41 +168,47 @@ export default function KontraktAlarmDashboard(): JSX.Element {
 
   const alarmIcon = (type: AlarmItem['alarmType']): JSX.Element => {
     switch (type) {
-      case 'expiring': return <Clock className="h-4 w-4 text-amber-600" />
-      case 'low_rest': return <Package className="h-4 w-4 text-orange-600" />
-      case 'matif_open': return <TrendingUp className="h-4 w-4 text-blue-600" />
-      case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-fuchsia-600" />
-      case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-red-600" />
-      case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-rose-700" />
-      case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-amber-700" />
-      case 'print_missing': return <Package className="h-4 w-4 text-slate-700" />
+      case 'expiring': return <Clock className="h-4 w-4 text-status-warning" />
+      case 'low_rest': return <Package className="h-4 w-4 text-status-warning" />
+      case 'matif_open': return <TrendingUp className="h-4 w-4 text-muted-foreground" />
+      case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-status-warning" />
+      case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-status-error" />
+      case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-status-error" />
+      case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-status-warning" />
+      case 'print_missing': return <Package className="h-4 w-4 text-muted-foreground" />
     }
   }
 
   const alarmBadge = (type: AlarmItem['alarmType']): JSX.Element => {
-    const styles = {
-      expiring: 'bg-amber-100 text-amber-800',
-      low_rest: 'bg-orange-100 text-orange-800',
-      matif_open: 'bg-blue-100 text-blue-800',
-      hedge_gap: 'bg-fuchsia-100 text-fuchsia-800',
-      dunning_due: 'bg-red-100 text-red-800',
-      market_valuation: 'bg-rose-100 text-rose-800',
-      washout_candidate: 'bg-amber-100 text-amber-800',
-      print_missing: 'bg-slate-100 text-slate-800',
+    const styles: Record<string, BadgeVariant> = {
+      expiring: 'warning',
+      low_rest: 'warning',
+      matif_open: 'info',
+      hedge_gap: 'secondary',
+      dunning_due: 'error',
+      market_valuation: 'error',
+      washout_candidate: 'warning',
+      print_missing: 'muted',
     }
     const labels = { expiring: 'Ablauf', low_rest: 'Restmenge', matif_open: 'MATIF', hedge_gap: 'Hedge', dunning_due: 'Mahnung', market_valuation: 'Marktwert', washout_candidate: 'Washout', print_missing: 'Druck' }
-    return <Badge className={styles[type]}>{labels[type]}</Badge>
+    return <Badge variant={styles[type]}>{labels[type]}</Badge>
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <h1 className="text-2xl font-semibold md:text-3xl">Kontrakt-Alarme</h1>
+        <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate('/kontrakte')}>Zur Kontraktliste</Button>
+      </div>
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Kontrakt-Alarme steuern"
-        description="Ablauf, Hedge-Luecken, Mahnfaelle und Washout-Druck werden als ein Operatorraum priorisiert."
+        description="Ablauf, Hedge-Lücken, Mahnfälle und Washout-Druck werden als ein Operatorraum priorisiert."
         status={operationalStatus}
         owner="Kontrakt / Handel"
-        blocker={alarms.length > 0 ? 'Offene Alarmfaelle muessen vor weiterem Vertragsdruck priorisiert werden.' : null}
-        nextAction={alarms.length > 0 ? 'Kritischste Alarmfaelle zuerst oeffnen und bearbeiten' : 'Kein unmittelbarer Eingriff erforderlich'}
+        blocker={alarms.length > 0 ? 'Offene Alarmfälle müssen vor weiterem Vertragsdruck priorisiert werden.' : null}
+        nextAction={alarms.length > 0 ? 'Kritischste Alarmfälle zuerst öffnen und bearbeiten' : 'Kein unmittelbarer Eingriff erforderlich'}
         caseLabel="Kontrakt-Alarmraum"
         tags={['Kontrakte', 'Risiko']}
       />
@@ -208,24 +216,20 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <OperationalTimeline title="Alarmverlauf" items={timelineItems} />
         <OperationalContextPanel title="Alarmkontext" sections={contextSections} />
       </div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-600" />
-          Kontrakt-Alarme
-        </h1>
-        <Button variant="outline" onClick={() => navigate('/kontrakte')}>Zur Kontraktliste</Button>
-      </div>
+      </>
+      ) : null}
 
+      {!isTouch ? (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-7">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Clock className="h-4 w-4 text-amber-600" />
+              <Clock className="h-4 w-4 text-status-warning" />
               Ablaufende Kontrakte
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-amber-700">{expiringCount}</div>
+            <div className="text-3xl font-bold text-status-warning">{expiringCount}</div>
             <p className="text-xs text-muted-foreground">Innerhalb 30 Tagen</p>
           </CardContent>
         </Card>
@@ -233,12 +237,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Package className="h-4 w-4 text-orange-600" />
+              <Package className="h-4 w-4 text-status-warning" />
               Niedrige Restmenge
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-700">{lowRestCount}</div>
+            <div className='warning'>{lowRestCount}</div>
             <p className="text-xs text-muted-foreground">Unter 10% Restmenge</p>
           </CardContent>
         </Card>
@@ -246,12 +250,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+              <TrendingUp className='info' />
               MATIF offen
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-700">{matifCount}</div>
+            <div className='info'>{matifCount}</div>
             <p className="text-xs text-muted-foreground">Preisfixierung ausstehend</p>
           </CardContent>
         </Card>
@@ -259,12 +263,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-fuchsia-600" />
-              Hedge-Luecken
+              <TrendingUp className="h-4 w-4 text-status-warning" />
+              Hedge-Lücken
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-fuchsia-700">{hedgeGapCount}</div>
+            <div className="text-3xl font-bold text-status-warning">{hedgeGapCount}</div>
             <p className="text-xs text-muted-foreground">Unter Zielabsicherung</p>
           </CardContent>
         </Card>
@@ -272,12 +276,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <AlertTriangle className="h-4 w-4 text-status-error" />
               Mahnfaellige
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-700">{dunningCount}</div>
+            <div className="text-3xl font-bold text-status-error">{dunningCount}</div>
             <p className="text-xs text-muted-foreground">Kontrakte mit Mahnbedarf</p>
           </CardContent>
         </Card>
@@ -285,12 +289,12 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <AlertTriangle className="h-4 w-4 text-amber-700" />
+              <AlertTriangle className="h-4 w-4 text-status-warning" />
               Washout
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-amber-700">{washoutCount}</div>
+            <div className="text-3xl font-bold text-status-warning">{washoutCount}</div>
             <p className="text-xs text-muted-foreground">Vorgemerkte Abschreibung / Washout</p>
           </CardContent>
         </Card>
@@ -298,16 +302,17 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Package className="h-4 w-4 text-slate-700" />
+              <Package className='muted' />
               Druck fehlt
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-700">{printCount}</div>
+            <div className='muted'>{printCount}</div>
             <p className="text-xs text-muted-foreground">Formular- oder Kanalsteuerung offen</p>
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       {alarms.length === 0 && !query.isLoading && (
         <Card>
@@ -340,15 +345,23 @@ export default function KontraktAlarmDashboard(): JSX.Element {
                     <TableRow key={`${alarm.contract_id}-${alarm.alarmType}-${idx}`}>
                       <TableCell>{alarmIcon(alarm.alarmType)}</TableCell>
                       <TableCell>{alarmBadge(alarm.alarmType)}</TableCell>
-                      <TableCell className="font-mono">{alarm.contract_no}</TableCell>
+                      <TableCell>
+                        <button
+                          type="button"
+                          className="min-h-11 font-mono text-primary touch-manipulation"
+                          onClick={() => navigate(`/kontrakte/${alarm.contract_id}`)}
+                        >
+                          {alarm.contract_no}
+                        </button>
+                      </TableCell>
                       <TableCell>{alarm.party_name || alarm.party_id}</TableCell>
                       <TableCell>{alarm.first_article_desc || alarm.first_article_id || '-'}</TableCell>
                       <TableCell>{alarm.valid_to ? new Date(alarm.valid_to).toLocaleDateString('de-DE') : '-'}</TableCell>
                       <TableCell className="text-right">{alarm.rest_quantity.toLocaleString('de-DE')} {alarm.unit}</TableCell>
                       <TableCell className="text-sm">{alarm.alarmText}</TableCell>
                       <TableCell>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/kontrakte/${alarm.contract_id}`)}>
-                          Oeffnen
+                        <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate(`/kontrakte/${alarm.contract_id}`)}>
+                          Öffnen
                         </Button>
                       </TableCell>
                     </TableRow>

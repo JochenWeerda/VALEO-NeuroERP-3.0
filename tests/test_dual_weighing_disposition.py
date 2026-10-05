@@ -31,215 +31,227 @@ def _mock_db():
 # ---------------------------------------------------------------------------
 # Dual-Wiegung unit tests
 # ---------------------------------------------------------------------------
+#
+# Bis zum 05.10.2026 forderte ein Test hier genau den Fehler ein:
+# "Reihenfolge der Wiegungen darf kein negatives Netto erzeugen" — mit
+# ``netto = abs(wiegung1 - wiegung2)`` als Beweis. Der Absolutbetrag verdeckt
+# aber den Vorzeichenfehler: Eine Tara schwerer als das Brutto ist ein Messfehler
+# oder eine Verwechslung der beiden Eingaben, und daraus wurde ein plausibles
+# positives Nettogewicht, auf dem die Rechnung aufbaute.
+#
+# Drei weitere Tests riefen ``create_dual_wiegung(payload, db)`` positionell auf
+# und trafen damit den Parameter ``tenant_id``. Sie waren rot, seit der Weg eine
+# Mandantenabhaengigkeit hat — der Weg war kaputt und nur scheinbar geprueft.
+#
+# Der fachliche Nachweis gegen eine echte Datenbank steht in
+# ``tests/test_wiegung_kanonisch_vertrag.py``.
+
 
 @pytest.mark.unit
-def test_dual_weighing_netto_computed():
-    """netto = abs(wiegung1 - wiegung2) muss korrekt berechnet werden."""
-    from app.api.v1.endpoints.waage import WiegungErweitert, WiegescheinMitDoppelwiegung
+def test_netto_ist_brutto_minus_tara():
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    ext = WiegungErweitert(waage_id="W1", wiegung1=32500.0, wiegung2=5000.0)
-    payload = WiegescheinMitDoppelwiegung(waage_id="W1", wiegung_erweitert=ext)
-
-    # Simulate netto computation (the same logic used in the endpoint)
-    netto = abs(ext.wiegung1 - ext.wiegung2)
+    brutto, tara, netto = netto_aus_doppelwiegung(32500.0, 5000.0, None)
+    assert brutto == pytest.approx(32500.0)
+    assert tara == pytest.approx(5000.0)
     assert netto == pytest.approx(27500.0)
 
 
 @pytest.mark.unit
-def test_dual_weighing_netto_computed_reverse():
-    """Reihenfolge der Wiegungen darf kein negatives Netto erzeugen."""
-    netto = abs(5000.0 - 32500.0)
-    assert netto == pytest.approx(27500.0)
+def test_vertauschte_waegungen_sind_ein_fehler():
+    """Vorher: ``abs(5000 - 32500) == 27500`` — ein Netto aus einem Messfehler."""
+    from fastapi import HTTPException
+
+    from app.services.wiegung_service import netto_aus_doppelwiegung
+
+    with pytest.raises(HTTPException) as fehler:
+        netto_aus_doppelwiegung(5000.0, 32500.0, None)
+    assert fehler.value.status_code == 422
+    assert "vertauscht" in str(fehler.value.detail)
 
 
 @pytest.mark.unit
-def test_dual_weighing_with_gosse():
-    """Gosse-Feld muss in der Response vorhanden sein."""
-    from app.api.v1.endpoints.waage import WiegungErweitert, WiegescheinMitDoppelwiegung, create_dual_wiegung
+def test_gleiche_waegungen_ergeben_kein_netto():
+    from fastapi import HTTPException
 
-    ext = WiegungErweitert(waage_id="W2", wiegung1=10000.0, wiegung2=2000.0, gosse=3)
-    payload = WiegescheinMitDoppelwiegung(waage_id="W2", wiegung_erweitert=ext)
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    db = _mock_db()
-    # Simulate successful INSERT (no exception)
-    db.execute.return_value = MagicMock()
-
-    result = _run(create_dual_wiegung(payload, db))
-
-    assert result["gosse"] == 3
-    assert result["netto"] == pytest.approx(8000.0)
-    assert result["status"] == "created"
-    assert "id" in result
+    with pytest.raises(HTTPException):
+        netto_aus_doppelwiegung(20000.0, 20000.0, None)
 
 
 @pytest.mark.unit
-def test_dual_weighing_zielschein_typ():
-    """zielschein_typ muss in der Response korrekt übergeben werden."""
-    from app.api.v1.endpoints.waage import WiegungErweitert, WiegescheinMitDoppelwiegung, create_dual_wiegung
+def test_ausgewiesenes_netto_wird_uebernommen():
+    """Handwiegung oder Fremdwaage: Es gibt keine zwei Messungen zum Nachrechnen."""
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    ext = WiegungErweitert(
-        waage_id="W3", wiegung1=20000.0, wiegung2=4000.0, zielschein_typ="VL"
-    )
-    payload = WiegescheinMitDoppelwiegung(waage_id="W3", wiegung_erweitert=ext)
-
-    db = _mock_db()
-    db.execute.return_value = MagicMock()
-
-    result = _run(create_dual_wiegung(payload, db))
-    assert result["zielschein_typ"] == "VL"
+    assert netto_aus_doppelwiegung(None, None, 18000.0)[2] == pytest.approx(18000.0)
 
 
 @pytest.mark.unit
-def test_dual_weighing_no_extended_block():
-    """Payload ohne wiegung_erweitert darf nicht crashen, netto bleibt None."""
-    from app.api.v1.endpoints.waage import WiegescheinMitDoppelwiegung, create_dual_wiegung
+def test_ohne_jedes_gewicht_ist_der_schein_kein_beleg():
+    from fastapi import HTTPException
 
-    payload = WiegescheinMitDoppelwiegung(waage_id="W4", lieferant_id="L-001")
+    from app.services.wiegung_service import netto_aus_doppelwiegung
 
-    db = _mock_db()
-    db.execute.return_value = MagicMock()
+    with pytest.raises(HTTPException) as fehler:
+        netto_aus_doppelwiegung(None, None, None)
+    assert "kein Beleg" in str(fehler.value.detail)
 
-    result = _run(create_dual_wiegung(payload, db))
-    assert result["netto"] is None
-    assert result["status"] == "created"
+
+@pytest.mark.unit
+def test_zielscheintyp_wird_auf_die_richtung_abgebildet():
+    """EL = Eingangslieferschein (Zugang), VL = Verkaufslieferschein (Abgang)."""
+    from app.services.wiegung_service import richtung
+
+    assert richtung("EL") == "in"
+    assert richtung("VL") == "out"
+    # Ohne Angabe gilt der Zugang — das ist der Regelfall an der Annahme.
+    assert richtung(None) == "in"
+
+
+@pytest.mark.unit
+def test_unbekannter_zielscheintyp_ist_kein_stiller_zugang():
+    """Ein stilles ``in`` haette eine Verkaufslieferung als Zugang gefuehrt."""
+    from fastapi import HTTPException
+
+    from app.services.wiegung_service import richtung
+
+    with pytest.raises(HTTPException) as fehler:
+        richtung("UMLAGERUNG")
+    assert fehler.value.status_code == 422
 
 
 # ---------------------------------------------------------------------------
 # Kontrakt-Disposition unit tests
 # ---------------------------------------------------------------------------
-
-def _make_user(roles=None):
-    return {"sub": "test-user", "roles": roles or ["KONTRAKT_BEARBEITEN"]}
-
-
-def _make_tenant():
-    return "test-tenant"
-
-
-@pytest.mark.unit
-def test_disposition_create_returns_id():
-    """POST Disposition muss eine id und einen status zurückgeben."""
-    from app.api.v1.endpoints.kontrakte import DispositionCreate, create_disposition
-
-    payload = DispositionCreate(kontrakt_nr="K-2026-001", menge=5000.0)
-    db = _mock_db()
-
-    # Mock for the SELECT RETURNING after INSERT
-    row_mock = MagicMock()
-    row_mock.__getitem__ = lambda self, i: ["some-uuid", 1, "OFFEN"][i]
-    db.execute.return_value.fetchone.return_value = row_mock
-
-    result = _run(
-        create_disposition(
-            kontrakt_id="kontrakt-123",
-            payload=payload,
-            db=db,
-            tenant_id=_make_tenant(),
-            user=_make_user(),
-        )
-    )
-
-    assert "id" in result
-    assert "status" in result
-    assert result["kontrakt_nr"] == "K-2026-001"
-    assert result["menge"] == pytest.approx(5000.0)
+#
+# Bis zum 05.10.2026 forderte ein Test hier den Fehler ein:
+# ``test_disposition_list_returns_empty_on_missing_table`` — "GET Dispositionen
+# muss [] zurückgeben wenn Tabelle fehlt". Die Tabelle fehlte in **jeder**
+# Datenbank, weil keine Migration sie anlegt; der Endpunkt fing den Lesefehler,
+# und ein Kontrakt ohne sichtbare Abrufe sieht aus wie ein ganz offener Kontrakt
+# — genau danach würde disponiert.
+#
+# Die vier anderen Tests prüften Antwortformen gegen `fetchone()`-Doubles, also
+# die Form und nicht die Regel: Keiner von ihnen hätte bemerkt, dass niemand die
+# Kontraktmenge prüft, dass `freigabe` und `status` dasselbe zweimal sagen oder
+# dass eine stornierte Disposition als geliefert gemeldet werden kann.
+#
+# Der fachliche Nachweis gegen eine echte Datenbank steht in
+# ``tests/test_kontrakt_disposition_vertrag.py``.
 
 
 @pytest.mark.unit
-def test_disposition_freigabe_sets_status():
-    """PATCH /freigabe muss status=FREIGEGEBEN zurückgeben."""
-    from app.api.v1.endpoints.kontrakte import freigabe_disposition
+def test_zustandswoerterbuch_hat_eine_quelle():
+    from app.services import kontrakt_disposition_service as dispo
 
-    db = _mock_db()
-    disp_id = str(uuid.uuid4())
-
-    row_mock = MagicMock()
-    row_mock.__getitem__ = lambda self, i: [disp_id, "FREIGEGEBEN"][i]
-    db.execute.return_value.fetchone.return_value = row_mock
-
-    result = _run(
-        freigabe_disposition(
-            kontrakt_id="kontrakt-123",
-            disp_id=disp_id,
-            db=db,
-            tenant_id=_make_tenant(),
-            user=_make_user(),
-        )
-    )
-
-    assert result["status"] == "FREIGEGEBEN"
-    assert result["id"] == disp_id
+    assert set(dispo.UEBERGAENGE) == set(dispo.ZUSTAENDE)
+    assert set(dispo.BINDEND) <= set(dispo.ZUSTAENDE)
+    assert "STORNIERT" not in dispo.BINDEND, "Ein stornierter Abruf bindet keine Menge"
 
 
 @pytest.mark.unit
-def test_disposition_soft_delete():
-    """DELETE Disposition muss status=STORNIERT zurückgeben (Soft-Delete)."""
-    from app.api.v1.endpoints.kontrakte import storniere_disposition
+def test_geliefert_nur_aus_der_freigabe():
+    """Sonst wäre die Freigabe kein Tor, sondern eine Notiz."""
+    from fastapi import HTTPException
 
-    db = _mock_db()
-    disp_id = str(uuid.uuid4())
+    from app.services import kontrakt_disposition_service as dispo
 
-    row_mock = MagicMock()
-    row_mock.__getitem__ = lambda self, i: [disp_id, "STORNIERT"][i]
-    db.execute.return_value.fetchone.return_value = row_mock
-
-    result = _run(
-        storniere_disposition(
-            kontrakt_id="kontrakt-123",
-            disp_id=disp_id,
-            db=db,
-            tenant_id=_make_tenant(),
-            user=_make_user(),
-        )
-    )
-
-    assert result["status"] == "STORNIERT"
-    assert result["id"] == disp_id
+    dispo.uebergang_pruefen("FREIGEGEBEN", "GELIEFERT", 1)
+    with pytest.raises(HTTPException) as fehler:
+        dispo.uebergang_pruefen("OFFEN", "GELIEFERT", 1)
+    assert fehler.value.status_code == 409
+    assert "Freigabe" in str(fehler.value.detail)
 
 
 @pytest.mark.unit
-def test_disposition_geliefert_with_wiegeschein():
-    """PATCH /geliefert mit wiegeschein_nr muss wiegeschein_nr in Response zurückgeben."""
-    from app.api.v1.endpoints.kontrakte import geliefert_disposition
+@pytest.mark.parametrize("von,nach", [
+    ("GELIEFERT", "STORNIERT"),
+    ("GELIEFERT", "FREIGEGEBEN"),
+    ("STORNIERT", "GELIEFERT"),
+    ("STORNIERT", "FREIGEGEBEN"),
+])
+def test_endgueltige_zustaende_bleiben(von, nach):
+    from fastapi import HTTPException
 
-    db = _mock_db()
-    disp_id = str(uuid.uuid4())
-    ws_nr = "WS-2026-999"
+    from app.services import kontrakt_disposition_service as dispo
 
-    row_mock = MagicMock()
-    row_mock.__getitem__ = lambda self, i: [disp_id, "GELIEFERT", ws_nr][i]
-    db.execute.return_value.fetchone.return_value = row_mock
-
-    result = _run(
-        geliefert_disposition(
-            kontrakt_id="kontrakt-123",
-            disp_id=disp_id,
-            wiegeschein_nr=ws_nr,
-            db=db,
-            tenant_id=_make_tenant(),
-            user=_make_user(),
-        )
-    )
-
-    assert result["status"] == "GELIEFERT"
-    assert result["wiegeschein_nr"] == ws_nr
+    with pytest.raises(HTTPException) as fehler:
+        dispo.uebergang_pruefen(von, nach, 7)
+    assert "endgueltig" in str(fehler.value.detail)
 
 
 @pytest.mark.unit
-def test_disposition_list_returns_empty_on_missing_table():
-    """GET Dispositionen muss [] zurückgeben wenn Tabelle fehlt."""
-    from app.api.v1.endpoints.kontrakte import list_dispositionen
+def test_abruf_ueber_der_kontraktmenge_wird_abgewiesen():
+    """Die Regel stand mit ``allow_overdelivery`` im Modell und wurde nie gelesen."""
+    from decimal import Decimal
 
-    db = _mock_db()
-    db.execute.side_effect = Exception('relation "domain_agrar.kontrakt_dispositionen" does not exist')
+    from fastapi import HTTPException
 
-    result = _run(
-        list_dispositionen(
-            kontrakt_id="kontrakt-123",
-            db=db,
-            tenant_id=_make_tenant(),
-            user=_make_user(),
+    from app.services import kontrakt_disposition_service as dispo
+
+    position = {
+        "contract_no": "K-2026-001", "position_no": 1,
+        "qty_contract": Decimal("100"), "ueberlieferung_erlaubt": False,
+    }
+    dispo.menge_pruefen(position, Decimal("40"), 60)
+    with pytest.raises(HTTPException) as fehler:
+        dispo.menge_pruefen(position, Decimal("40"), 61)
+    assert fehler.value.status_code == 409
+    assert "allow_overdelivery" in str(fehler.value.detail)
+
+
+@pytest.mark.unit
+def test_ueberlieferung_wenn_der_kontrakt_sie_erlaubt():
+    from decimal import Decimal
+
+    from app.services import kontrakt_disposition_service as dispo
+
+    position = {
+        "contract_no": "K-2026-002", "position_no": 1,
+        "qty_contract": Decimal("100"), "ueberlieferung_erlaubt": True,
+    }
+    dispo.menge_pruefen(position, Decimal("100"), 50)
+
+
+@pytest.mark.unit
+def test_position_ohne_kontraktmenge_ist_nicht_pruefbar():
+    """Keine kontrahierte Menge heisst nicht "beliebig viel"."""
+    from decimal import Decimal
+
+    from fastapi import HTTPException
+
+    from app.services import kontrakt_disposition_service as dispo
+
+    with pytest.raises(HTTPException) as fehler:
+        dispo.menge_pruefen(
+            {"contract_no": "K", "position_no": 1, "qty_contract": None,
+             "ueberlieferung_erlaubt": False},
+            Decimal("0"), 1,
         )
-    )
+    assert fehler.value.status_code == 409
 
-    assert result == []
+
+@pytest.mark.unit
+def test_freigabe_ist_abgeleitet_und_keine_spalte():
+    from app.services import kontrakt_disposition_service as dispo
+
+    assert "freigabe" not in dispo.FELDER
+    for zustand, erwartet in (
+        ("OFFEN", False), ("FREIGEGEBEN", True), ("GELIEFERT", True), ("STORNIERT", False),
+    ):
+        assert dispo.als_dict({"status": zustand})["freigabe"] is erwartet
+
+
+@pytest.mark.unit
+def test_lesefehler_wird_nicht_zur_leeren_liste():
+    """Vorher: ``if "relation" in err: return []``."""
+    from app.services import kontrakt_disposition_service as dispo
+
+    db = MagicMock()
+    db.execute.side_effect = Exception('relation "kontrakt_dispositionen" does not exist')
+    umgewandelt = dispo.nicht_lesbar(db, Exception("weg"), "Kontraktabrufe", "t-1")
+    assert umgewandelt.status_code == 503
+    assert "migration_hint" in str(umgewandelt.detail)
+    db.rollback.assert_called_once()

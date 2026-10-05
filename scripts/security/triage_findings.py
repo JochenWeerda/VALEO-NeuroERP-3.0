@@ -203,13 +203,42 @@ def generate_summary(findings: list[dict], report_dir: Path) -> str:
     # By severity
     lines.append("## Nach Severity")
     lines.append("")
-    lines.append("| Severity | Anzahl |")
-    lines.append("|----------|--------|")
+    lines.append("| Severity | Anzahl | davon durch Ausnahme gedeckt |")
+    lines.append("|----------|--------|------------------------------|")
     for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
         count = sum(1 for f in findings if f["severity"] == sev)
+        covered = sum(
+            1 for f in findings if f["severity"] == sev and f.get("gate_excluded")
+        )
         if count > 0:
-            lines.append(f"| {sev} | {count} |")
+            lines.append(f"| {sev} | {count} | {covered} |")
     lines.append("")
+
+    # Begruendete Ausnahmen - bewusst weit oben, damit sie nicht untergehen
+    excepted = [f for f in findings if f.get("exception")]
+    if excepted:
+        lines.append("## Begruendete Ausnahmen")
+        lines.append("")
+        lines.append(
+            "Diese Befunde bleiben bestehen und sind nicht behoben. Sie sind aus "
+            "der Gate-Wertung genommen, weil kein Herstellerfix existiert und der "
+            "Angriffsweg im Betrieb nachweislich nicht erreichbar ist."
+        )
+        lines.append("")
+        lines.append("| Befund | Severity | Ausnahme | Zu ueberpruefen bis | Status |")
+        lines.append("|--------|----------|----------|---------------------|--------|")
+        for f in excepted:
+            exc = f["exception"]
+            status = "ABGELAUFEN" if exc.get("expired") else "gueltig"
+            lines.append(
+                f"| {f.get('rule_id', '?')} | {f['severity']} | {exc['id']} "
+                f"| {exc['review_by']} | {status} |"
+            )
+        lines.append("")
+        for f in excepted:
+            exc = f["exception"]
+            lines.append(f"- **{f.get('rule_id', '?')}** ({exc['id']}): {exc['reason']}")
+        lines.append("")
 
     # By category
     lines.append("## Nach Kategorie")
@@ -267,6 +296,119 @@ def generate_summary(findings: list[dict], report_dir: Path) -> str:
     return "\n".join(lines)
 
 
+
+# ── Begruendete Ausnahmen ───────────────────────────────────────────────────
+#
+# Eine Ausnahme unterdrueckt keinen Befund. Sie nimmt ihn ausschliesslich aus
+# der Gate-Wertung heraus, bleibt im Bericht sichtbar und faellt nach dem
+# Ueberpruefungsdatum von selbst wieder weg. Zulaessig ist sie nur, wenn kein
+# Herstellerfix existiert - genau dann laesst sich ein Befund nicht beheben,
+# sondern nur bewerten und ueberwachen.
+#
+# Bewusst eng gehalten: exakte rule_id, exaktes Paket oder exakte Datei, keine
+# Platzhalter. Fehlt ein Pflichtfeld oder ist es unglaubwuerdig gefuellt, bricht
+# die Triage ab - ein defekter Ausnahmeeintrag darf nie stillschweigend als
+# "keine Ausnahme" durchgehen.
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+EXCEPTIONS_PATH = REPO_ROOT / "config" / "security" / "triage-exceptions.json"
+
+REQUIRED_EXCEPTION_FIELDS = (
+    "id",            # eigene Kennung, z. B. der Slice
+    "rule_id",       # exakte Regel-/CVE-Kennung
+    "scope",         # {"package": "..."} oder {"file": "..."}
+    "reason",        # warum der Befund nicht erreichbar oder nicht behebbar ist
+    "evidence",      # woran das nachpruefbar ist
+    "no_fix_available",  # muss true sein
+    "review_by",     # ISO-Datum; danach greift die Ausnahme nicht mehr
+    "owner",
+)
+
+
+class ExceptionConfigError(Exception):
+    """Der Ausnahmekatalog ist unbrauchbar - die Triage bricht ab."""
+
+
+def load_exceptions(path: Path = EXCEPTIONS_PATH) -> list[dict]:
+    if not path.exists():
+        return []
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ExceptionConfigError(f"{path} ist kein gueltiges JSON: {exc}") from exc
+
+    entries = raw.get("exceptions") if isinstance(raw, dict) else raw
+    if not isinstance(entries, list):
+        raise ExceptionConfigError(f"{path}: 'exceptions' muss eine Liste sein")
+
+    for idx, entry in enumerate(entries):
+        where = f"{path}, Eintrag {idx}"
+        if not isinstance(entry, dict):
+            raise ExceptionConfigError(f"{where}: kein Objekt")
+        missing = [f for f in REQUIRED_EXCEPTION_FIELDS if f not in entry]
+        if missing:
+            raise ExceptionConfigError(f"{where}: Pflichtfelder fehlen: {', '.join(missing)}")
+        if entry["no_fix_available"] is not True:
+            raise ExceptionConfigError(
+                f"{where}: Ausnahmen sind nur zulaessig, wenn kein Herstellerfix "
+                "existiert. Gibt es einen Fix, ist der Befund zu beheben."
+            )
+        scope = entry["scope"]
+        if not isinstance(scope, dict) or not ({"package", "file"} & set(scope)):
+            raise ExceptionConfigError(f"{where}: 'scope' braucht 'package' oder 'file'")
+        for key in ("package", "file"):
+            if key in scope and ("*" in str(scope[key]) or not str(scope[key]).strip()):
+                raise ExceptionConfigError(f"{where}: '{key}' muss exakt sein, keine Platzhalter")
+        if "*" in str(entry["rule_id"]):
+            raise ExceptionConfigError(f"{where}: 'rule_id' muss exakt sein, keine Platzhalter")
+        for key in ("reason", "evidence"):
+            if len(str(entry[key]).strip()) < 30:
+                raise ExceptionConfigError(
+                    f"{where}: '{key}' muss die Lage nachvollziehbar erklaeren"
+                )
+        try:
+            datetime.strptime(str(entry["review_by"]), "%Y-%m-%d")
+        except ValueError as exc:
+            raise ExceptionConfigError(f"{where}: 'review_by' muss YYYY-MM-DD sein") from exc
+
+    return entries
+
+
+def exception_matches(entry: dict, finding: dict) -> bool:
+    if str(entry["rule_id"]) != str(finding.get("rule_id", "")):
+        return False
+    scope = entry["scope"]
+    if "file" in scope and str(scope["file"]) != str(finding.get("file", "")):
+        return False
+    if "package" in scope:
+        match = str(finding.get("match", ""))
+        package = str(scope["package"])
+        if not (match == package or match.startswith(package + " ")):
+            return False
+    return True
+
+
+def apply_exceptions(findings: list[dict], entries: list[dict], today: str) -> list[dict]:
+    """Markiert Befunde als begruendete Ausnahme. Entfernt nichts."""
+    expired: list[dict] = []
+    for entry in entries:
+        is_expired = str(entry["review_by"]) < today
+        hit = False
+        for finding in findings:
+            if exception_matches(entry, finding):
+                hit = True
+                finding["exception"] = {
+                    "id": entry["id"],
+                    "reason": entry["reason"],
+                    "review_by": entry["review_by"],
+                    "expired": is_expired,
+                }
+                finding["gate_excluded"] = not is_expired
+        if is_expired and hit:
+            expired.append(entry)
+    return expired
+
+
 # ── Main ────────────────────────────────────────────────────────────────────
 
 def main():
@@ -299,6 +441,19 @@ def main():
     # Sortieren
     unique.sort(key=sort_key)
 
+    # Begruendete Ausnahmen anwenden (entfernt nichts, markiert nur)
+    try:
+        exceptions = load_exceptions()
+    except ExceptionConfigError as exc:
+        print(f"[triage] Ausnahmekatalog unbrauchbar: {exc}")
+        return 1
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    expired = apply_exceptions(unique, exceptions, today)
+    excepted = [f for f in unique if f.get("gate_excluded")]
+    if exceptions:
+        print(f"[triage] {len(exceptions)} Ausnahme(n) im Katalog, "
+              f"{len(excepted)} Befund(e) davon erfasst")
+
     # Unified JSON
     report = {
         "meta": {
@@ -310,6 +465,16 @@ def main():
                 sev: sum(1 for f in unique if f["severity"] == sev)
                 for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
             },
+            # Gate-Sicht: identisch, abzueglich der begruendeten Ausnahmen
+            "by_severity_gate": {
+                sev: sum(
+                    1 for f in unique
+                    if f["severity"] == sev and not f.get("gate_excluded")
+                )
+                for sev in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+            },
+            "exceptions_applied": len(excepted),
+            "exceptions_expired": [e["id"] for e in expired],
         },
         "findings": unique,
     }
@@ -332,7 +497,16 @@ def main():
     if high > 0:
         print(f"[triage] ! {high} HIGH findings — kurzfristig pruefen")
 
-    return 0 if crit == 0 else 1
+    for entry in expired:
+        print(f"[triage] !! Ausnahme {entry['id']} ist seit {entry['review_by']} "
+              "abgelaufen und greift nicht mehr - neu bewerten oder verlaengern")
+
+    crit_gate = report["meta"]["by_severity_gate"]["CRITICAL"]
+    if crit and not crit_gate:
+        print(f"[triage] {crit} CRITICAL durch begruendete Ausnahmen gedeckt "
+              "(siehe summary.md) - Gate bleibt gruen")
+
+    return 0 if crit_gate == 0 else 1
 
 
 if __name__ == "__main__":

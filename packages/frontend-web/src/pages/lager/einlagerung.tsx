@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Wizard } from '@/components/patterns/Wizard'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { CheckCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
@@ -42,6 +43,7 @@ const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer',
 export default function EinlagerungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
@@ -138,7 +140,7 @@ export default function EinlagerungPage(): JSX.Element {
     const hatPflichtfelder = einlagerung.chargenId !== '' && einlagerung.artikel !== '' && einlagerung.menge > 0
     return {
       status: hatPflichtfelder ? 'Buchungsbereit' : 'Eingabe laeuft',
-      statusColor: hatPflichtfelder ? 'text-green-700 bg-green-50 border-green-300' : 'text-blue-700 bg-blue-50 border-blue-300',
+      statusColor: hatPflichtfelder ? 'border-status-success/40 bg-status-success/10' : 'border-status-info/40 bg-status-info/10',
       ressourcen: `${artikelCount} Artikel, ${lagerortCount} Lagerorte verfuegbar`,
       blocker: artikelCount === 0 || lagerortCount === 0 ? 'Stammdaten fehlen — Artikel oder Lagerorte anlegen' : 'Keine Blocker',
       naechsteMassnahme: hatPflichtfelder ? 'Lagerort waehlen und buchen' : 'Charge, Artikel und Menge erfassen',
@@ -191,7 +193,7 @@ export default function EinlagerungPage(): JSX.Element {
             capabilityKey="einlagerung_assistant"
             parameters={{ artikel: einlagerung.artikel, menge: einlagerung.menge }}
             renderSuggestion={(s: { lagerort?: string; lagerplatz?: string }) => (
-              <div className="space-y-1 text-xs text-violet-800">
+              <div className="space-y-1 text-xs text-foreground">
                 {s.lagerort && <div><span className="font-medium">Lagerort:</span> {s.lagerort}</div>}
                 {s.lagerplatz && <div><span className="font-medium">Platz:</span> {s.lagerplatz}</div>}
               </div>
@@ -229,9 +231,9 @@ export default function EinlagerungPage(): JSX.Element {
       content: (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
-            <CheckCircle className="h-16 w-16 text-emerald-500" />
-            <h3 className="text-xl font-bold text-slate-800">Einlagerung prüfen</h3>
-            <p className="text-sm text-slate-500">Bitte alle Angaben bestätigen</p>
+            <CheckCircle className="h-16 w-16 text-status-success" />
+            <h3 className="text-xl font-bold text-foreground">Einlagerung prüfen</h3>
+            <p className="text-sm text-muted-foreground">Bitte alle Angaben bestätigen</p>
           </div>
           <TouchConfirmCard
             title="Zusammenfassung"
@@ -250,30 +252,31 @@ export default function EinlagerungPage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-      <div className="p-4 sm:p-6">
-        {workflowInstanceId && (
-          <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-            Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+      <div className="p-3 md:p-6">
+        {workflowInstanceId && !isTouch ? (
+          <div className="mb-4 rounded-md border border-border bg-muted px-4 py-2 text-sm text-foreground">
+            Vorgang: {workflowCase || workflowProcess}
           </div>
-        )}
-        <AgentProcessPanel domain="lager" className="mb-4" />
-        {/* Operativer Fallkopf */}
-        <Card className={`border mb-4 ${fallkopf.statusColor}`}>
-          <CardContent className="pt-4 pb-3 text-sm space-y-1">
-            <div className="font-semibold">Einlagerung: {fallkopf.status}</div>
-            <div>Ressourcenlage: {fallkopf.ressourcen}</div>
-            <div>Blocker: {fallkopf.blocker}</div>
-            <div>Naechste Massnahme: {fallkopf.naechsteMassnahme}</div>
-          </CardContent>
-        </Card>
+        ) : null}
+        {!isTouch ? <AgentProcessPanel domain="lager" className="mb-4" /> : null}
         <Wizard
           title="Einlagerung"
           steps={steps}
           onFinish={() => buchungMutation.mutate()}
           onCancel={() => navigate('/lager/bestandsuebersicht')}
         />
+        {!isTouch ? (
+        <Card className={`mb-4 mt-4 border ${fallkopf.statusColor}`}>
+          <CardContent className="space-y-1 pt-4 pb-3 text-sm">
+            <div className="font-semibold">Einlagerung: {fallkopf.status}</div>
+            <div>Ressourcenlage: {fallkopf.ressourcen}</div>
+            <div>Blocker: {fallkopf.blocker}</div>
+            <div>Naechste Massnahme: {fallkopf.naechsteMassnahme}</div>
+          </CardContent>
+        </Card>
+        ) : null}
       </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

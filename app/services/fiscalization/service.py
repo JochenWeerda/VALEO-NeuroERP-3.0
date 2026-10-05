@@ -317,7 +317,7 @@ class FiscalizationService:
                 WHERE tenant_id = :tenant_id
                   AND business_date = :business_date
                   {terminal_clause}
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().one()

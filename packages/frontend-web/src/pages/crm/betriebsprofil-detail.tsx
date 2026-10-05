@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -179,13 +180,13 @@ export default function BetriebsprofilePage(): JSX.Element {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {!isNew && (
-            <Button variant="outline" size="sm" onClick={() => navigate('/crm/betriebsprofile')}>
+            <Button variant="outline" className="min-h-touch" onClick={() => navigate('/crm/betriebsprofile')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               {t('common.back')}
             </Button>
           )}
           <div className="flex items-center gap-3">
-            <Tractor className="h-8 w-8 text-green-600" />
+            <Tractor className="h-8 w-8 text-status-success" />
             <div>
               <h1 className="text-3xl font-bold">{pageTitle}</h1>
               <p className="text-muted-foreground">
@@ -195,13 +196,13 @@ export default function BetriebsprofilePage(): JSX.Element {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/crm/betriebsprofile')}>
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate('/crm/betriebsprofile')}>
             {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
             disabled={createMutation.isPending || updateMutation.isPending}
-            className="gap-2"
+            className="min-h-touch gap-2"
           >
             {(createMutation.isPending || updateMutation.isPending) && (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -280,7 +281,7 @@ export default function BetriebsprofilePage(): JSX.Element {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t('crud.fields.cropAreas')}</CardTitle>
-              <Button onClick={addCrop} size="sm" className="gap-2">
+              <Button onClick={addCrop} className="min-h-touch gap-2">
                 <Plus className="h-4 w-4" />
                 {t('crud.actions.addCrop')}
               </Button>
@@ -309,11 +310,11 @@ export default function BetriebsprofilePage(): JSX.Element {
                     </div>
                     <Button
                       variant="outline"
-                      size="sm"
+                      className="mt-6 min-h-touch"
                       onClick={() => removeCrop(index)}
-                      className="mt-6"
                     >
-                      <Minus className="h-4 w-4" />
+                      <Minus className="h-4 w-4 mr-1" />
+                      Entfernen
                     </Button>
                   </div>
                 ))}
@@ -324,7 +325,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                     <span className="text-lg font-bold">{totalCropArea.toFixed(2)} {t('crud.fields.hectares')}</span>
                   </div>
                   {farmProfile.totalArea && totalCropArea > farmProfile.totalArea && (
-                    <p className="mt-2 flex items-center gap-1.5 text-sm text-red-600">
+                    <p className="mt-2 flex items-center gap-1.5 text-sm text-status-error">
                       <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
                       {t('crud.messages.cropAreaExceedsTotal')}
                     </p>
@@ -339,7 +340,7 @@ export default function BetriebsprofilePage(): JSX.Element {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>{t('crud.fields.livestock')}</CardTitle>
-              <Button onClick={addLivestock} size="sm" className="gap-2">
+              <Button onClick={addLivestock} className="min-h-touch gap-2">
                 <Plus className="h-4 w-4" />
                 {t('crud.actions.addLivestockType')}
               </Button>
@@ -377,11 +378,11 @@ export default function BetriebsprofilePage(): JSX.Element {
                     </div>
                     <Button
                       variant="outline"
-                      size="sm"
+                      className="mt-6 min-h-touch"
                       onClick={() => removeLivestock(index)}
-                      className="mt-6"
                     >
-                      <Minus className="h-4 w-4" />
+                      <Minus className="h-4 w-4 mr-1" />
+                      Entfernen
                     </Button>
                   </div>
                 ))}
@@ -490,16 +491,16 @@ export default function BetriebsprofilePage(): JSX.Element {
                 </div>
 
                 {farmProfile.certifications && farmProfile.certifications.length > 0 && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-semibold text-green-800 mb-2">Aktive Zertifizierungen:</h4>
+                  <Callout variant="success" className="p-4 border rounded-lg">
+                    <h4 className="font-semibold text-status-success mb-2">Aktive Zertifizierungen:</h4>
                     <div className="flex flex-wrap gap-2">
                       {farmProfile.certifications.map(cert => (
-                        <Badge key={cert} variant="default" className="bg-green-600">
+                        <Badge variant="success" key={cert}>
                           {cert}
                         </Badge>
                       ))}
                     </div>
-                  </div>
+                  </Callout>
                 )}
               </div>
             </CardContent>

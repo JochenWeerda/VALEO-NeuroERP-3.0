@@ -52,17 +52,17 @@ export function PutawayForm({ sku, fromLocation, onSubmit, submitting }: {
           value={qtyInput}
           onChange={(event) => setQtyInput(event.target.value)}
         />
-        {errors.qty ? <p className="text-sm text-red-600">{errors.qty}</p> : null}
+        {errors.qty ? <p className="text-sm text-status-error">{errors.qty}</p> : null}
       </div>
       <div>
         <Label>Von</Label>
         <Input placeholder="z. B. RAMPE-1" value={from} onChange={(event) => setFrom(event.target.value)} />
-        {errors.fromLocation ? <p className="text-sm text-red-600">{errors.fromLocation}</p> : null}
+        {errors.fromLocation ? <p className="text-sm text-status-error">{errors.fromLocation}</p> : null}
       </div>
       <div>
         <Label>Nach</Label>
         <Input placeholder="z. B. REGAL-A-03" value={to} onChange={(event) => setTo(event.target.value)} />
-        {errors.toLocation ? <p className="text-sm text-red-600">{errors.toLocation}</p> : null}
+        {errors.toLocation ? <p className="text-sm text-status-error">{errors.toLocation}</p> : null}
       </div>
       <div className="flex justify-end">
         <Button type="submit" disabled={submitting}>Einlagern</Button>

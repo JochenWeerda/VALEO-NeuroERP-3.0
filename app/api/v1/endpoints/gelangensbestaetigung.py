@@ -51,19 +51,68 @@ class GelangensbestaetigungCreate(BaseModel):
 
 
 class GelangensbestaetigungOut(BaseModel):
+    """Ein Nachweis, wie ihn die Liste zurueckgibt.
+
+    ``rechnung_nr`` und ``empfaenger_ust_id_nr`` sind **optional**: Beide duerfen
+    in der Datenbank fehlen, und ein Pflichtfeld hier haette jede Liste mit einer
+    solchen Zeile in einen 500er verwandelt. Aufgefallen ist das erst, als es die
+    Tabelle gab — vorher antwortete jeder Weg 503.
+    """
+
     id: str
     lieferschein_nr: str
-    rechnung_nr: str
+    rechnung_nr: Optional[str] = None
     kunde_nr: str
     bestimmungsland_code: str
     warenwert_eur: float
     versanddatum: str
     empfaenger_name: str
-    empfaenger_ust_id_nr: str
+    empfaenger_ust_id_nr: Optional[str] = None
     status: str  # AUSSTEHEND | ERHALTEN | ABGELAUFEN
     token: str
-    erinnerung_am: str
+    erinnerung_am: Optional[str] = None
     erhalten_am: Optional[str] = None
+
+
+class GelangensbestaetigungCreateOut(BaseModel):
+    """Was das Anlegen zurueckgibt.
+
+    Vorher stand hier ``GelangensbestaetigungOut`` — ein Modell mit zehn
+    Pflichtfeldern, von denen das Anlegen vier liefert. Der Weg konnte deshalb
+    **nie** 201 antworten; sichtbar wurde es nicht, weil die fehlende Tabelle
+    vorher 503 ergab.
+    """
+
+    id: str
+    token: str
+    erinnerung_am: str
+    status: str
+
+
+class GelangensbestaetigungFaelligOut(BaseModel):
+    """Was die Faelligkeitsliste zurueckgibt — ohne Status und USt-IdNr.
+
+    Dieselbe Falle wie beim Anlegen: Die Abfrage waehlt zehn Felder, das alte
+    Modell verlangte dreizehn.
+    """
+
+    id: str
+    lieferschein_nr: str
+    rechnung_nr: Optional[str] = None
+    kunde_nr: str
+    empfaenger_name: str
+    bestimmungsland_code: str
+    warenwert_eur: float
+    versanddatum: str
+    token: str
+    erinnerung_am: Optional[str] = None
+
+
+class MahnungOut(BaseModel):
+    """Was das Erinnern zurueckgibt."""
+
+    erinnerung_gesendet: bool
+    token: str
 
 
 # ---------------------------------------------------------------------------
@@ -100,8 +149,10 @@ def list_gelangensbestaetigung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
-    where_clauses = []
-    params: dict = {}
+    # Der Mandant ist nicht optional: Eine Gelangensbestaetigung enthaelt
+    # Kundennummer, Empfaengername und die USt-IdNr. eines Dritten.
+    where_clauses = ["tenant_id = :tenant_id"]
+    params: dict = {"tenant_id": tenant_id}
     if status:
         where_clauses.append("status = :status")
         params["status"] = status
@@ -109,7 +160,7 @@ def list_gelangensbestaetigung(
         where_clauses.append("lieferschein_nr = :lieferschein_nr")
         params["lieferschein_nr"] = lieferschein_nr
 
-    where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+    where_sql = "WHERE " + " AND ".join(where_clauses)
 
     try:
         rows = db.execute(
@@ -119,18 +170,26 @@ def list_gelangensbestaetigung(
                 f"status, token, erinnerung_am, erhalten_am "
                 f"FROM domain_compliance.gelangensbestaetigung "
                 f"{where_sql} "
-                f"ORDER BY versanddatum DESC"
+                f"ORDER BY versanddatum DESC"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).fetchall()
         return [_row_to_dict(r) for r in rows]
     except Exception as exc:
-        logger.warning("gelangensbestaetigung table not accessible: %s", exc)
-        return []
+        # Keine leere Liste: "kein Nachweis erfasst" und "die Tabelle ist nicht
+        # lesbar" sahen gleich aus. Ohne Gelangensbestaetigung entfaellt die
+        # Steuerfreiheit der innergemeinschaftlichen Lieferung (§ 6a UStG,
+        # § 17a UStDV) — das darf kein stiller Leerstand sein.
+        db.rollback()
+        logger.exception("Gelangensbestaetigungen nicht lesbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=503,
+            detail={"error": str(exc), "migration_hint": MIGRATION_HINT},
+        ) from exc
 
 
 @router.post("", status_code=201, summary="Gelangensbestätigung erstellen",
-    response_model=GelangensbestaetigungOut
+    response_model=GelangensbestaetigungCreateOut
 )
 def create_gelangensbestaetigung(
     payload: GelangensbestaetigungCreate,
@@ -145,15 +204,16 @@ def create_gelangensbestaetigung(
         db.execute(
             text(
                 "INSERT INTO domain_compliance.gelangensbestaetigung "
-                "(id, lieferschein_nr, rechnung_nr, kunde_nr, bestimmungsland_code, "
+                "(id, tenant_id, lieferschein_nr, rechnung_nr, kunde_nr, bestimmungsland_code, "
                 "warenwert_eur, versanddatum, empfaenger_name, empfaenger_ust_id_nr, "
                 "status, token, erinnerung_am, erhalten_am, created_at) "
-                "VALUES (:id, :lieferschein_nr, :rechnung_nr, :kunde_nr, :bestimmungsland_code, "
+                "VALUES (:id, :tenant_id, :lieferschein_nr, :rechnung_nr, :kunde_nr, :bestimmungsland_code, "
                 ":warenwert_eur, :versanddatum, :empfaenger_name, :empfaenger_ust_id_nr, "
                 "'AUSSTEHEND', :token, :erinnerung_am, NULL, NOW())"
             ),
             {
                 "id": entry_id,
+                "tenant_id": tenant_id,
                 "lieferschein_nr": payload.lieferschein_nr,
                 "rechnung_nr": payload.rechnung_nr,
                 "kunde_nr": payload.kunde_nr,
@@ -196,9 +256,9 @@ def bestaetigen(
             text(
                 "UPDATE domain_compliance.gelangensbestaetigung "
                 "SET status = 'ERHALTEN', erhalten_am = :erhalten_am "
-                "WHERE id = :id AND status = 'AUSSTEHEND'"
+                "WHERE id = :id AND tenant_id = :tenant_id AND status = 'AUSSTEHEND'"
             ),
-            {"id": entry_id, "erhalten_am": erhalten_am},
+            {"id": entry_id, "tenant_id": tenant_id, "erhalten_am": erhalten_am},
         )
         db.commit()
         if result.rowcount == 0:
@@ -218,7 +278,7 @@ def bestaetigen(
 
 
 @router.get("/faellig", summary="Überfällige Gelangensbestätigungen",
-    response_model=list[GelangensbestaetigungOut]
+    response_model=list[GelangensbestaetigungFaelligOut]
 )
 def list_faellig(
     db: Session = Depends(get_db),
@@ -231,20 +291,27 @@ def list_faellig(
                 "SELECT id, lieferschein_nr, rechnung_nr, kunde_nr, empfaenger_name, "
                 "bestimmungsland_code, warenwert_eur, versanddatum, token, erinnerung_am "
                 "FROM domain_compliance.gelangensbestaetigung "
-                "WHERE status = 'AUSSTEHEND' AND erinnerung_am <= :today "
+                "WHERE tenant_id = :tenant_id AND status = 'AUSSTEHEND' "
+                "  AND erinnerung_am <= :today "
                 "ORDER BY erinnerung_am ASC"
             ),
-            {"today": today},
+            {"tenant_id": tenant_id, "today": today},
         ).fetchall()
         return [_row_to_dict(r) for r in rows]
     except Exception as exc:
-        logger.warning("gelangensbestaetigung/faellig not accessible: %s", exc)
-        return []
+        # Das ist die Liste, die sagt, was nachzufassen ist. Ein leeres Ergebnis
+        # heisst "nichts nachzufassen" — mit Steuerwirkung, wenn es nicht stimmt.
+        db.rollback()
+        logger.exception("Faellige Gelangensbestaetigungen nicht lesbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=503,
+            detail={"error": str(exc), "migration_hint": MIGRATION_HINT},
+        ) from exc
 
 
 @router.post(
     "/{entry_id}/mahnung",
-    response_model=GelangensbestaetigungOut,
+    response_model=MahnungOut,
     summary="Erinnerung senden (Stub)",
 )
 def mahnung_senden(
@@ -255,9 +322,10 @@ def mahnung_senden(
     try:
         row = db.execute(
             text(
-                "SELECT token FROM domain_compliance.gelangensbestaetigung WHERE id = :id"
+                "SELECT token FROM domain_compliance.gelangensbestaetigung "
+                "WHERE id = :id AND tenant_id = :tenant_id"
             ),
-            {"id": entry_id},
+            {"id": entry_id, "tenant_id": tenant_id},
         ).fetchone()
     except Exception as exc:
         raise HTTPException(

@@ -1,0 +1,57 @@
+slice_id: SPEC-P1-06-W9-OPS-WORKLISTS
+id: SPEC-P1-06-W9-OPS-WORKLISTS
+title: Legacy-Routen response_model typisieren — Welle 9 (Produktionsleitstand, Tank-Adapter, Fremdware)
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-11"
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  Neunte Welle von SPEC-P1-06: die drei Ops-/Worklist-Dateien
+  production_control, tank_adapter und foreign_goods_worklist auf echte
+  Pydantic-Antwortschemata heben. Feldlisten stammen aus den expliziten
+  SELECT-/Return-Dicts der Services — kein SELECT *.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W9-OPS-WORKLISTS.yaml
+  - docs/agent-ops/active-workboard.md
+  - app/api/v1/schemas/ops_worklist_bundle_schemas.py
+  - app/api/v1/endpoints/production_control.py
+  - app/api/v1/endpoints/tank_adapter.py
+  - app/api/v1/endpoints/foreign_goods_worklist.py
+  - tests/test_welle9_response_models.py
+ausgeschlossen:
+  - recent_documents.py (Nachbar-Slice L3-RECENT-DOCUMENTS / fremder Besitz)
+  - l3_report_catalog.py / query_center.py (eigene Folge-Welle)
+  - SECURITY-REMAINDER / SECURITY-ARCHIVE-DEPS (fremde Claims)
+  - Lebende package.json / Lockfiles
+acceptance:
+  - 16 Endpunkte tragen ein echtes response_model
+  - Kein Feldverlust gegen die Service-Return-Dicts (Unit-Test)
+  - Bestandstests production_control, tank_adapter, foreign_goods_worklist gruen
+  - Schwache response_model-Typen sinken von 246 auf 230
+tests:
+  - tests/test_welle9_response_models.py
+  - tests/test_production_control.py
+  - tests/test_tank_adapter.py
+  - tests/test_foreign_goods_worklist.py
+risks:
+  - >-
+    JSONB-Felder (validation_errors, rule_result, payload) koennen als str oder
+    bereits geparstes Objekt ankommen; Schemas muessen beides akzeptieren oder
+    der Endpoint normalisiert vor der Validierung.
+ai_harness:
+  fachlicher_vertrag: >-
+    Ops-Worklist-Antworten sind OpenAPI-faehig typisiert; keine stillen
+    Feldverluste gegen die Service-Vertraege.
+  architektur_vertrag: >-
+    Antwortschemata liegen in app/api/v1/schemas, Endpoints importieren nur.
+  daten_vertrag: Keine Migration, keine Schemaaenderung an Tabellen.
+  test_vertrag: >-
+    Gate check_weak_response_models --threshold 230; fokussierte Welle-9- und
+    Bestands-API-Tests.
+  security_vertrag: Keine Gate-Lockerung ausser Absenkung der Weak-Schwelle.
+  betriebs_vertrag: Keine Deployments.
+  dokumentations_vertrag: Slice-YAML, Workboard, open-gaps SPEC-P1-06-Zeile.
+verification:
+  - "python scripts/check_weak_response_models.py --threshold 230"
+  - "pytest tests/test_welle9_response_models.py tests/test_production_control.py tests/test_tank_adapter.py tests/test_foreign_goods_worklist.py"

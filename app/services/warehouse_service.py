@@ -88,7 +88,7 @@ class WarehouseService:
             filters.append("is_active = true")
         where = " AND ".join(filters)
         rows = self.db.execute(
-            text(f"SELECT * FROM domain_inventory.warehouse_bins WHERE {where} ORDER BY bin_code"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_inventory.warehouse_bins WHERE {where} ORDER BY bin_code"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params).fetchall()
         return [dict(r._mapping) for r in rows]
 
@@ -170,7 +170,7 @@ class WarehouseService:
             return existing
         sql = (
             "UPDATE domain_inventory.warehouse_bins SET "
-            + ", ".join(set_parts)
+            + ", ".join(set_parts)  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             + " WHERE id = :bid AND tenant_id = :tid"
         )
         self.db.execute(text(sql), params)
@@ -603,7 +603,6 @@ class WarehouseService:
             filters.append("wb.warehouse_id = :wid")
             params["wid"] = warehouse_id
         where = " AND ".join(filters)
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         rows = self.db.execute(text(f"""
             SELECT bs.article_id, bs.batch_number,
                    SUM(bs.quantity_kg) as total_qty,
@@ -614,7 +613,7 @@ class WarehouseService:
             WHERE {where}
             GROUP BY bs.article_id, bs.batch_number
             ORDER BY bs.article_id
-        """), params).fetchall()
+        """), params).fetchall()  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         return [{"article_id": r.article_id, "batch_number": r.batch_number,
                  "total_quantity_kg": float(r.total_qty),
                  "total_value_eur": float(r.total_value),

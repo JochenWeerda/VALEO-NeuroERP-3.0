@@ -1,0 +1,37 @@
+slice_id: UI-SIDEBAR-SCROLL-001
+title: Linke Seitenleiste bis zum Ende scrollbar
+owner: Codex
+status: abgeschlossen
+created_at: 2026-07-08
+spec: Globaler AppShell-/Sidebar-UX-Fix
+coordination: >-
+  Kleiner UI-Bugfix ausserhalb der Masken-Pipeline. Der Fix bleibt auf die
+  zentrale Navigation beschraenkt und beruehrt keine reservierten UIX-091-Dateien.
+goal: >-
+  Desktop-Sidebar muss auch mit ausgeklappten Bereichen per Maus/Rad bis zum
+  letzten Eintrag scrollbar bleiben.
+file_ownership:
+  - "packages/frontend-web/src/components/navigation/Sidebar.tsx"
+  - "packages/frontend-web/tests/e2e/sidebar-scroll.spec.ts"
+  - "docs/agent-ops/slices/UI-SIDEBAR-SCROLL-001.yaml"
+  - "docs/agent-ops/active-workboard.md"
+acceptance:
+  - "Bei 1366x768 und ausgeklapptem Bereich ist der letzte Sidebar-Eintrag erreichbar."
+  - "Kein horizontales Layout-Wackeln beim Scrollen."
+  - "Collapsed Sidebar bleibt unveraendert nutzbar."
+tests:
+  - "pnpm --dir packages/frontend-web exec playwright test tests/e2e/sidebar-scroll.spec.ts --project=chromium -> 1 passed"
+  - "pnpm --dir packages/frontend-web exec eslint src/components/navigation/Sidebar.tsx -> 0"
+  - "pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> 0"
+progress: >-
+  2026-07-08 abgeschlossen: Sidebar-Aside ist jetzt hoehenbegrenzt
+  (h-full/max-h-screen/min-h-0), Header/Footer sind shrink-0, der Nav-Bereich
+  ist der einzige vertikale Scroller (min-h-0/flex-1/overflow-y-auto). Der
+  Playwright-Smoke wartet auf das lazy Nav-Manifest, oeffnet Gruppen und
+  verifiziert bei 1366x768, dass bis zum unteren Nav-Ende gescrollt werden kann.
+  Hinweis: Playwright-Global-Teardown meldet bestehende Visual-Tour-Console-
+  Issues ausserhalb des fokussierten Sidebar-Smokes.
+risks:
+  - "Bestehende AppShell nutzt h-screen/overflow-hidden; Scroll muss innerhalb der Sidebar liegen."
+external_gates:
+  - not_applicable

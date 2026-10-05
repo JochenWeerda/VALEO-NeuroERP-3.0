@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle } from 'lucide-react'
+import { NativeSelect } from '@/components/ui/native-select'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
@@ -73,12 +74,12 @@ export default function LaborAuftragPage(): JSX.Element {
               value={labor.chargenId}
               onChange={(e) => updateField('chargenId', e.target.value)}
               placeholder="z.B. 251011-WEI-001"
-              className="font-mono"
+              className="min-h-touch font-mono"
             />
           </div>
           <div>
             <Label htmlFor="artikel">Artikel</Label>
-            <Input id="artikel" value={labor.artikel} onChange={(e) => updateField('artikel', e.target.value)} />
+            <Input id="artikel" value={labor.artikel} onChange={(e) => updateField('artikel', e.target.value)} className="min-h-touch" />
           </div>
         </div>
       ),
@@ -91,8 +92,8 @@ export default function LaborAuftragPage(): JSX.Element {
           <Label>Analysen auswählen *</Label>
           <div className="space-y-2">
             {['Feuchtigkeit', 'Protein', 'Verunreinigung', 'Mykotoxine', 'Pestizide', 'Schwermetalle'].map((a) => (
-              <label key={a} className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer hover:bg-accent">
-                <input type="checkbox" checked={labor.analysen.includes(a)} onChange={() => toggleAnalyse(a)} className="h-4 w-4" />
+              <label key={a} className="flex min-h-touch items-center gap-3 rounded-lg border p-3 cursor-pointer touch-manipulation">
+                <input type="checkbox" checked={labor.analysen.includes(a)} onChange={() => toggleAnalyse(a)} className="h-11 w-11" />
                 <span className="font-medium">{a}</span>
                 {a === 'Mykotoxine' && <Badge variant="secondary">Empfohlen</Badge>}
               </label>
@@ -108,39 +109,42 @@ export default function LaborAuftragPage(): JSX.Element {
         <div className="space-y-4">
           <div>
             <Label htmlFor="labor">Labor *</Label>
-            <select
+            <NativeSelect
               id="labor"
+              aria-label="Labor"
               value={labor.labor}
               onChange={(e) => updateField('labor', e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2"
+              className="min-h-touch w-full"
             >
-              <option value="">-- Wählen --</option>
+              <option value="">Labor wählen</option>
               <option value="labor-nord">Labor Nord GmbH (5-7 Tage)</option>
               <option value="labor-sued">Labor Süd (3-5 Tage)</option>
               <option value="labor-express">Express Labor (24h)</option>
-            </select>
+            </NativeSelect>
           </div>
           <div>
             <Label>Priorität</Label>
             <div className="mt-2 space-y-2">
-              <label className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer hover:bg-accent">
+              <label className="flex min-h-touch items-center gap-3 rounded-lg border p-3 cursor-pointer touch-manipulation">
                 <input
                   type="radio"
                   name="prioritaet"
                   checked={labor.prioritaet === 'standard'}
                   onChange={() => updateField('prioritaet', 'standard')}
+                  className="h-11 w-11"
                 />
                 <div>
                   <div className="font-semibold">Standard</div>
                   <div className="text-sm text-muted-foreground">Reguläre Bearbeitung</div>
                 </div>
               </label>
-              <label className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer hover:bg-accent">
+              <label className="flex min-h-touch items-center gap-3 rounded-lg border p-3 cursor-pointer touch-manipulation">
                 <input
                   type="radio"
                   name="prioritaet"
                   checked={labor.prioritaet === 'express'}
                   onChange={() => updateField('prioritaet', 'express')}
+                  className="h-11 w-11"
                 />
                 <div>
                   <div className="font-semibold">Express</div>
@@ -155,6 +159,7 @@ export default function LaborAuftragPage(): JSX.Element {
               id="bemerkungen"
               value={labor.bemerkungen}
               onChange={(e) => updateField('bemerkungen', e.target.value)}
+              className="min-h-touch"
               rows={3}
             />
           </div>
@@ -168,7 +173,7 @@ export default function LaborAuftragPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Labor-Auftrag bereit</h3>
             <dl className="grid gap-3">
@@ -199,13 +204,19 @@ export default function LaborAuftragPage(): JSX.Element {
     },
   ]
 
+  function handleFinish(): void {
+    if (createMutation.isPending) return
+    createMutation.mutate(labor)
+  }
+
   return (
     <div className="p-3 md:p-6">
       <Wizard
         title="Labor-Auftrag erstellen"
         steps={steps}
-        onFinish={() => { createMutation.mutate(labor) }}
+        onFinish={handleFinish}
         onCancel={() => navigate('/qualitaet/labor-liste')}
+        loading={createMutation.isPending}
       />
     </div>
   )

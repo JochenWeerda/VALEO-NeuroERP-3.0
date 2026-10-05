@@ -1,0 +1,92 @@
+slice_id: RATION-WB-20-LIVE-PREVIEW
+id: RATION-WB-20-LIVE-PREVIEW
+title: Rationswerkbank – Excel-artige Live-Vorschau (Per-Keystroke-Aggregate + Debounce-Commit)
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-21"
+started_at: "2026-07-21"
+completed_at: "2026-07-21"
+goal: >-
+  Die Spielwiese soll sich beim Mengen-Editieren wie ein Tabellenblatt anfuehlen:
+  waehrend des Tippens laufen die rein additiven Groessen (kg TM, ME, sidP, nXP,
+  Rationssumme, Kosten) sofort lokal mit, und die autoritative Neuberechnung
+  startet automatisch ~400 ms nach der letzten Eingabe statt erst bei Enter/Blur.
+  Lokale Werte sind ausschliesslich lineare Skalierung serverseitig gelieferter
+  Naehrstoffbeitraege – kein Client-Evaluator, keine GfE-Formel im Frontend.
+scope:
+  - Reine Hilfsfunktion scaleRationItems() (lineare Skalierung me_mj/sidp_g/cp_g/kgdm/Kosten)
+  - Lokaler Override-State fuer in Bearbeitung befindliche Mengen (draft kg FM)
+  - Debounce-Commit (~400 ms) auf den bestehenden editMutation-Pfad
+  - Visuelle "vorlaeufig"-Kennzeichnung solange der Server nicht bestaetigt hat
+non_scope:
+  - Client-seitige GfE-Bedarfsrechnung oder Versorgungsurteil (Skill §10.2 – Evaluator bleibt Backend)
+  - Statusfarben/Ampel-Verdikt aus lokalen Werten ableiten (bleibt serverautoritativ)
+  - Constraints-Status, Best-Attainable, Sensitivitaet aus lokalen Werten
+  - Nichtlineare Kennzahlen (ECM, Strukturbewertung, FaN) lokal rechnen
+file_ownership:
+  - docs/agent-ops/slices/RATION-WB-20-LIVE-PREVIEW.yaml
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+  - packages/frontend-web/src/__tests__/pages/futtermittel/rations-live-preview.test.ts
+acceptance:
+  - "tsc --noEmit gruen (0 Fehler)"
+  - "eslint der geaenderten Dateien gruen"
+  - "Mengenaenderung aktualisiert kg TM / ME / sidP / Kosten ohne Serverantwort"
+  - "Autoritative Neuberechnung startet ohne Blur/Enter (Debounce)"
+  - "Vorlaeufige Werte sind visuell + per aria-Auszeichnung als solche erkennbar"
+  - "Serverantwort setzt den lokalen Override zurueck (kein Zahlen-Flackern)"
+tests:
+  - "npx vitest run src/__tests__/pages/futtermittel/rations-live-preview.test.ts"
+  - "npx tsc --noEmit -p tsconfig.json"
+  - "npx eslint src/pages/futtermittel/rationsoptimierung.tsx src/lib/api/rations-optimization.ts"
+risks:
+  - "Zwei Zahlenquellen (lokal vorlaeufig vs. server-autoritativ) koennen divergieren, wenn der Solver nicht-fixierte Zutaten verschiebt; deshalb ist die Kennzeichnung Pflicht und kein optionales Polish."
+  - "Debounce darf keine Mutations-Guard-Luecke oeffnen (CLAUDE.md Async-UI-Invariante): der Commit laeuft ueber den bestehenden editMutation-Pfad, isOptimizing bleibt fuehrend."
+  - "Waehrend eines laufenden Solve ist canEditRation false (isOptimizing) — bei sehr langsamem Backend kann die Eingabe kurz sperren. Beobachten; ggf. Folge-Slice, der das Mengenfeld waehrend eines Edit-Solve editierbar laesst."
+findings:
+  - "Gefunden bei der Umsetzung: der Vollbild-Spinner ersetzte die gesamte Spielwiese bei jedem Solve. Mit Debounce haette das die Tabelle im Sekundentakt verschwinden lassen und den Excel-Effekt zerstoert. Der Spinner greift jetzt nur noch, wenn keine anzeigbare Ration existiert (rationItems.length === 0)."
+ai_harness:
+  fachlicher_vertrag: >-
+    Lokal berechnet werden ausschliesslich Groessen, die bei fixierter Menge
+    linear im Futtermittel sind (Masse, ME-Beitrag, sidP-Beitrag, XP-Beitrag,
+    Kosten). Jede Aussage ueber Bedarfsdeckung, Zielbereich, Struktur oder
+    Erreichbarkeit bleibt dem Backend-Evaluator vorbehalten (Skill §10.2).
+    Vorlaeufige Werte duerfen nie als bestaetigtes Ergebnis dargestellt werden
+    (Skill §11.2: Wunschleistung nie als erreichbar ausgeben).
+  test_vertrag: >-
+    scaleRationItems() ist eine reine Funktion und wird per Unit-Test gegen
+    Linearitaet, Nullmenge und fehlende Beitragsfelder (undefined bleibt
+    undefined, kein 0-Default – Skill §10.3) geprueft.
+  daten_vertrag: >-
+    Fehlende Beitragsfelder (me_mj/sidp_g/cp_g undefined) werden nicht durch 0
+    ersetzt, sondern bleiben undefined und erscheinen als "–" (keine stillen
+    Defaults, Skill §10.3). Rundung erst bei Ausgabe (Skill §10.5).
+  api_vertrag: >-
+    Keine API-Aenderung. Der Debounce-Commit nutzt unveraendert
+    runOptimizeForWizard ueber editMutation.
+  ui_vertrag: >-
+    Spielwiese und Tachos bleiben strukturell unveraendert; ergaenzt wird nur
+    ein vorlaeufig-Zustand. Statusfarben der Tachos aendern sich nicht lokal.
+  persistenz_vertrag: >-
+    Vorlaeufige Werte werden nie persistiert; erst die Serverantwort aktualisiert
+    wizardBaselineKgDm und damit den speicherbaren Stand.
+  architektur_vertrag: >-
+    Keine dritte Solverarchitektur (Skill §10.1). scaleRationItems ist eine reine
+    Funktion in der bestehenden API-Lib; der Commit laeuft unveraendert ueber
+    editMutation -> runOptimizeForWizard. Der produktive Solverpfad
+    app/agrar/rations bleibt unberuehrt.
+  security_vertrag: >-
+    Kein neuer Endpoint, keine neue Datenquelle, keine Aenderung an Auth,
+    Tenant-Kontext oder RBAC. Rein clientseitige Darstellungslogik ueber bereits
+    autorisiert geladenen Daten.
+  betriebs_vertrag: >-
+    Der Debounce reduziert die Solverlast gegenueber Enter-pro-Zeichen nicht nur
+    kosmetisch, sondern begrenzt sie auf einen Lauf je Eingabepause. Bei langsamem
+    Backend bleibt die zuletzt bestaetigte Ration sichtbar statt eines Spinners.
+  dokumentations_vertrag: >-
+    Verhalten der Spielwiese (vorlaeufig vs. bestaetigt) ist im UI selbst
+    ausgewiesen (Statuszeile + Tacho-Kennzeichnung); dieses Slice-YAML ist die
+    Referenz fuer die Abgrenzung Vorschau/Evaluator.
+external_gates:
+  - "Keine. Slice ist rein clientseitig und ohne externe Abhaengigkeit abnehmbar."
+  - "Visuelle Endabnahme im laufenden Portal durch den Fachanwender steht aus (Bedienbarkeit des Tippgefuehls)."

@@ -49,6 +49,9 @@ describe('FlowSpineFinanceToClosePage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Finance-to-Close', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('3 Konten offen')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Abstimmungsabweichung erkannt' })).toBeInTheDocument()
+        // FSX-023: Die Agentenaussage steht weiterhin auf dem Schirm (Agent-Karte in
+    // der Mitte), aber nicht mehr als Ueberschrift der Copilot-Spalte — die ist
+    // jetzt eingeklappt. Geprueft wird deshalb die Aussage, nicht ihre Rolle.
+    expect(screen.getAllByText('Abstimmungsabweichung erkannt').length).toBeGreaterThan(0)
   })
 })

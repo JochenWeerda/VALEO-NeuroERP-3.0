@@ -3,6 +3,7 @@ import { useNavigate } from '@/app/routing/typed-router'
 import { useTSEJournal, type TSEEintrag } from '@/lib/api/pos'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -85,11 +86,11 @@ export default function TSEJournalPage(): JSX.Element {
       render: (t: TSETransaction) => (
         <div className="flex items-center gap-2">
           {t.fibuStatus === 'gebucht' ? (
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-status-success" />
           ) : t.fibuStatus === 'exportiert' ? (
-            <FileDown className="h-4 w-4 text-blue-600" />
+            <FileDown className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <XCircle className="h-4 w-4 text-orange-600" />
+            <XCircle className="h-4 w-4 text-status-warning" />
           )}
           <Badge variant={t.fibuStatus === 'gebucht' ? 'outline' : t.fibuStatus === 'exportiert' ? 'secondary' : 'default'}>
             {t.fibuStatus === 'gebucht' ? 'Gebucht' : t.fibuStatus === 'exportiert' ? 'Exportiert' : 'Offen'}
@@ -177,14 +178,14 @@ export default function TSEJournalPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <p className="font-semibold">🔐 TSE-Pflicht (KassenSichV)</p>
         <p className="mt-1">
           Alle Kassentransaktionen mit zertifizierter TSE signiert • Unveränderbar • 10 Jahre Aufbewahrungspflicht •
           DSFinV-K Export für DATEV/Finanzamt
         </p>
         <p className="mt-1 text-xs font-medium">POS-Umsätze werden als B2C-Endpreise inkl. gesetzl. MwSt. protokolliert.</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -210,7 +211,7 @@ export default function TSEJournalPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Noch nicht gebucht</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{offen}</span>
+            <span className="text-2xl font-bold text-status-warning">{offen}</span>
           </CardContent>
         </Card>
 
@@ -219,7 +220,7 @@ export default function TSEJournalPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offener Betrag</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(offenerBetrag)}</span>
+            <span className="text-2xl font-bold text-status-warning">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(offenerBetrag)}</span>
           </CardContent>
         </Card>
       </div>

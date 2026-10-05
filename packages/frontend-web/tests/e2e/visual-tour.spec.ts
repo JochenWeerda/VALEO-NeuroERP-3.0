@@ -8,8 +8,8 @@
  * Issues werden pro Test in issues-raw/ geschrieben und von
  * visual-tour-teardown.ts zu issues.json aggregiert.
  *
- * Schnellstart (Vite läuft bereits auf :3001):
- *   PLAYWRIGHT_SKIP_WEBSERVER=1 FRONTEND_BASE_URL=http://localhost:3001 \
+ * Schnellstart (Vite läuft bereits auf :5177):
+ *   FRONTEND_BASE_URL=http://127.0.0.1:5177 \
  *   VISUAL_TOUR_WORKERS=4 npx playwright test tests/e2e/visual-tour.spec.ts --project=chromium
  */
 import { test, expect } from '@playwright/test'
@@ -21,7 +21,8 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const BASE_URL = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3001'
+const PLAYWRIGHT_FRONTEND_PORT = process.env.PLAYWRIGHT_FRONTEND_PORT ?? '5177'
+const BASE_URL = process.env.FRONTEND_BASE_URL ?? `http://127.0.0.1:${PLAYWRIGHT_FRONTEND_PORT}`
 const SCREENSHOT_DIR = path.join(__dirname, '../../visual-tour-results')
 const RAW_DIR = path.join(SCREENSHOT_DIR, 'issues-raw')
 
@@ -578,6 +579,8 @@ for (const vp of VIEWPORTS) {
           if (t.includes('ERR_NETWORK_IO_SUSPENDED')) return // Netz kurz unterbrochen
           if (t.includes('ERR_NETWORK_CHANGED')) return      // Netz-Wechsel im Test
           if (t.includes('ERR_FAILED') && t.includes('Failed to load resource')) return
+          if (t.includes('Failed to load resource: the server responded with a status of 500')) return // Backend/API offline im Visual-Audit
+          if (t.includes('Failed to load resource: the server responded with a status of 503')) return // Backend/API bewusst nicht Teil der Visual-Tour
           if (t.includes('WebSocket connection to')) return  // Copilot-WS ohne Backend erwartet
           if (t.includes('fonts.gstatic.com') || t.includes('fonts.googleapis.com')) return
           if (t.includes('Access to font')) return
@@ -585,7 +588,7 @@ for (const vp of VIEWPORTS) {
         })
 
         await page.setExtraHTTPHeaders({ 'Authorization': 'Bearer dev-token' })
-        await page.goto(BASE_URL + route.path, { waitUntil: 'domcontentloaded', timeout: 20000 })
+        await page.goto(BASE_URL + route.path, { waitUntil: 'domcontentloaded', timeout: 30_000 })
         await page.waitForTimeout(600)
 
         // Screenshot nur auf Desktop

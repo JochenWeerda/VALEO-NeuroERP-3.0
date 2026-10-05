@@ -88,7 +88,7 @@ async def list_schemata(
 
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         rows = db.execute(
-            text(f"SELECT * FROM rohware_schemata {where} ORDER BY gueltig_ab DESC NULLS LAST LIMIT :limit OFFSET :skip"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM rohware_schemata {where} ORDER BY gueltig_ab DESC NULLS LAST LIMIT :limit OFFSET :skip"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return [dict(r) for r in rows]
@@ -192,7 +192,7 @@ async def update_schema(
         updates["updated_at"] = datetime.utcnow().isoformat()
         set_clause = ", ".join(f"{k} = :{k}" for k in updates)
         db.execute(
-            text(f"UPDATE rohware_schemata SET {set_clause} WHERE id = :id"),  # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE rohware_schemata SET {set_clause} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             {**updates, "id": schema_id},
         )
         db.commit()

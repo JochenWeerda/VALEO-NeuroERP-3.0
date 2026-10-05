@@ -69,10 +69,10 @@ function typLabel(typ: BelegTyp): string {
 }
 
 function typIcon(typ: BelegTyp) {
-  if (typ === 'angebot') return <FileText className="h-4 w-4 text-blue-500" />
-  if (typ === 'auftrag') return <ShoppingCart className="h-4 w-4 text-green-600" />
+  if (typ === 'angebot') return <FileText className="h-4 w-4 text-muted-foreground" />
+  if (typ === 'auftrag') return <ShoppingCart className="h-4 w-4 text-status-success" />
   if (typ === 'portalbestellung') return <Globe className="h-4 w-4 text-purple-500" />
-  return <Truck className="h-4 w-4 text-orange-500" />
+  return <Truck className="h-4 w-4 text-status-warning" />
 }
 
 function sourcesFor(target: TargetDocType): BelegTyp[] {
@@ -398,7 +398,7 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
         <DialogFooter className="border-t pt-3 mt-0 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {totalPositionen > 0 && (
-              <Button variant="ghost" size="sm" onClick={selectAllBelege}>
+              <Button variant="ghost" onClick={selectAllBelege} className="min-h-touch">
                 Alle laden &amp; auswählen
               </Button>
             )}

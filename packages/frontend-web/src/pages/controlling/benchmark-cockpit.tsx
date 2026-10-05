@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from '@/app/routing/typed-router'
 import { useBenchmark, useBenchmarkReadModel } from '@/lib/api/controlling'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Badge } from '@/components/ui/badge'
@@ -207,10 +208,10 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                 let statusBadge: React.ReactNode = <Badge variant="outline">ohne Referenz</Badge>
                 if (pct != null) {
                   if (pct > 0) {
-                    statusIcon = <TrendingUp className="h-4 w-4 text-green-600" />
-                    statusBadge = <Badge variant="default" className="bg-green-600">+{pct} %</Badge>
+                    statusIcon = <TrendingUp className="h-4 w-4 text-status-success" />
+                    statusBadge = <Badge variant="success">+{pct} %</Badge>
                   } else if (pct < 0) {
-                    statusIcon = <TrendingDown className="h-4 w-4 text-amber-600" />
+                    statusIcon = <TrendingDown className="h-4 w-4 text-status-warning" />
                     statusBadge = <Badge variant="secondary">{pct} %</Badge>
                   } else {
                     statusBadge = <Badge variant="outline">0 %</Badge>
@@ -248,21 +249,21 @@ export default function BenchmarkCockpitPage(): JSX.Element {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <CircleCheck className="h-5 w-5 text-emerald-600" />
+                    <CircleCheck className="h-5 w-5 text-status-success" />
                     Aktuelle Staerken
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {strongest.length > 0 ? strongest.map(([key, comp]) => (
-                    <div key={key} className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                    <Callout key={key} variant="success" className="rounded-xl border p-3">
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-medium">{KPI_LABELS[key] ?? key}</span>
-                        <Badge variant="default" className="bg-emerald-600">+{comp.deviation_pct ?? 0} %</Badge>
+                        <Badge variant="success">+{comp.deviation_pct ?? 0} %</Badge>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Eigener Wert {formatValue(key, comp.own)} gegenüber Branche {comp.branch != null ? formatValue(key, comp.branch) : 'n/a'}.
                       </p>
-                    </div>
+                    </Callout>
                   )) : <p className="text-sm text-muted-foreground">Keine belastbaren Stärken verfuegbar.</p>}
                 </CardContent>
               </Card>
@@ -270,19 +271,19 @@ export default function BenchmarkCockpitPage(): JSX.Element {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                    <AlertTriangle className="h-5 w-5 text-status-warning" />
                     Prioritaere Schwaechen
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {weakest.length > 0 ? weakest.map(([key, comp]) => (
-                    <div key={key} className="rounded-xl border border-amber-200 bg-amber-50/70 p-3">
+                    <Callout key={key} variant="warning" className="rounded-xl border p-3">
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-medium">{KPI_LABELS[key] ?? key}</span>
                         <Badge variant="secondary">{comp.deviation_pct ?? 0} %</Badge>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{actionFromDelta(comp.deviation_pct)}</p>
-                    </div>
+                    </Callout>
                   )) : <p className="text-sm text-muted-foreground">Keine prioritaeren Schwaechen verfuegbar.</p>}
                 </CardContent>
               </Card>
@@ -373,13 +374,13 @@ export default function BenchmarkCockpitPage(): JSX.Element {
                   </div>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <Link to="/analytics">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" className="min-h-touch">
                         Analytics oeffnen
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
                     <Link to="/admin/control-center/agent-ops">
-                      <Button variant="outline" size="sm">Agent Ops fuer Review</Button>
+                      <Button variant="outline" className="min-h-touch">Agent Ops fuer Review</Button>
                     </Link>
                   </div>
                 </CardContent>

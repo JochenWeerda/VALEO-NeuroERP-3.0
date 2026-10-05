@@ -119,6 +119,7 @@ packages/frontend-web/src/
 
 **Key patterns:**
 - **Mask Builder Framework** (`components/mask-builder/`): Config-driven ERP screens. Use `ObjectPage` for detail views with tabs, `ListReport` for filterable lists, `Wizard` for multi-step forms. Screens are defined declaratively via config objects, not custom JSX.
+- **Design rules** (details: `docs/design/frontend-design-skill-audit.md`): tab strips are always ARIA tabs via `components/ui/tabs.tsx` — `TabsList variant="register"` for document/file registers, default variant for view switchers; never hand-built `<button>` rows. One `h1` per mask = object identity. Micro labels use `text-2xs tracking-wide uppercase` (no `text-[10px]` arbitraries). Semantic colors only through central variants (Badge/Button) or the theme-aware status utilities `text-status-success|warning|error|info` — never raw palette classes like `text-green-600` (WCAG AA contrast). Chart colors only from `components/charts/chart-palette.ts` (token-based, CVD-validated) — never raw hex in chart code. Color raw values live in `styles/tokens/palette.css` (single source); Tailwind bridge aliases stay in `index.css`. Layer rule: config-driven master/document masks → `mask-builder/*`; free-form process/step masks with custom JSX → `patterns/*` (they are two expression layers, not duplicates). Toasts render exclusively via sonner (`ToastBootstrap`); `use-toast` and the legacy `push()` API delegate to it. Prozessstand in Fachmasken laeuft ueber `ProcessBand` (`mask-builder/renderers`), gespeist aus `workflow.phases` der ScreenDefinition (statische Prozessdefinition) und dem `WorkflowState` zur Laufzeit (Stand, eine naechste Aktion, Blocker) — nie interne Prozessschluessel in der Maske zeigen; Kriterien in `docs/design/flow-spine-ebene1-kriterienkatalog.md`. **`ProcessBand` und `ProcessRibbonRenderer` sind nicht dasselbe und duerfen nicht zusammengefuehrt werden:** das Band zeigt den *Stand eines Vorgangs* (Phasen, eine naechste Aktion, Blocker — keine Navigation), das Ribbon (UIX-091) navigiert die *Belegkette* (Schritte mit Zielmasken). Beide zeichnen eine Chevron-Reihe; das ist der einzige Gemeinsamkeit.
 - Path alias: `@/*` → `src/*`
 - Vite proxy: `/api/v1` → backend (port 8000), `/api/mcp` → BFF (port 4001), `/api/events` → SSE (port 5174)
 - State: Zustand for client state, TanStack React Query for server state
@@ -152,6 +153,29 @@ Key variables (see `.env.example`):
 - Frontend unit tests: Vitest
 - Frontend E2E: Playwright
 - Coverage reports: terminal + HTML + XML
+
+### Prüfstand-Datenbank (verbindlich)
+
+**Für das Schema ist eine frische Datenbank der Prüfstand, für die Daten die
+gewachsene.** Die Entwicklungsdatenbank `valeo_neuro_erp` weicht in **beide**
+Richtungen von einer frischen Installation ab: Sie hat Fremdschlüssel,
+Prüfbedingungen und NOT-NULL-Regeln **verloren** und Spalten und Tabellen
+**gewonnen**, die keine Migration anlegt. Am 29.09.2026 verdeckte das
+neunundfünfzig rote Tests und drei echte Fehler — darunter eine Löschung nach
+Art. 17 DSGVO, die nichts tat und 503 meldete.
+
+```bash
+export TEST_DATABASE_URL=postgresql://valeo_dev:…@127.0.0.1:5432/valeo_probe
+python scripts/pruefstand_db.py                                   # drop, create, migrate
+DATABASE_URL="$TEST_DATABASE_URL" python -m pytest tests/… -q     # so prüfen
+```
+
+Frisch prüfen: jede neue Alembic-Migration (auch eine, die lokal „schon läuft"),
+jedes Testfixture mit rohem SQL, Vertragstests, Ratschen, Inventare.
+Gewachsen prüfen: Maskenabnahme, Statuswörterbücher, Altbestände. Eine Migration
+braucht **beide** — Schema frisch, Daten gewachsen.
+
+Runbook: `docs/quality-assurance/pruefstand-datenbank.md`.
 
 ## Error Handling Invariant
 

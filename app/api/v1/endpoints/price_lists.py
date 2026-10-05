@@ -158,7 +158,6 @@ async def list_price_lists(
         params["active"] = is_active
 
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, name, description, currency, price_list_type,
                    valid_from, valid_until, is_active, created_at, updated_at,
@@ -166,7 +165,7 @@ async def list_price_lists(
             FROM domain_pricing.price_lists pl
             WHERE {' AND '.join(where)}
             ORDER BY name
-        """),
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -251,7 +250,7 @@ async def update_price_list(
             params[field] = val
 
     db.execute(
-        text(f"UPDATE domain_pricing.price_lists SET {', '.join(set_parts)} WHERE id = :id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_pricing.price_lists SET {', '.join(set_parts)} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     )
 

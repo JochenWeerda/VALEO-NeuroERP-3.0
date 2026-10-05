@@ -55,7 +55,7 @@ class CrmCaptureInboxService:
             existing = self.db.execute(
                 text(
                     f"SELECT {_COLS} FROM public.crm_capture_inbox "
-                    "WHERE tenant_id = :t AND verweis = :v LIMIT 1"
+                    "WHERE tenant_id = :t AND verweis = :v LIMIT 1"  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
                 ),
                 {"t": self.tenant_id, "v": verweis},
             ).mappings().first()
@@ -89,7 +89,7 @@ class CrmCaptureInboxService:
         self.db.commit()
         # reviewed-safe: _COLS is a module-owned constant; the inbox id is bound.
         r = self.db.execute(
-            text(f"SELECT {_COLS} FROM public.crm_capture_inbox WHERE id = :id"), {"id": new_id}
+            text(f"SELECT {_COLS} FROM public.crm_capture_inbox WHERE id = :id"), {"id": new_id}  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         ).mappings().first()
         return {"status": "inbox", **self._row(r)}
 
@@ -99,7 +99,7 @@ class CrmCaptureInboxService:
             text(
                 f"SELECT {_COLS} FROM public.crm_capture_inbox "
                 "WHERE tenant_id = :t AND (:s = 'alle' OR status = :s) "
-                "ORDER BY created_at DESC LIMIT :lim"
+                "ORDER BY created_at DESC LIMIT :lim"  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             ),
             {"t": self.tenant_id, "s": status or "offen", "lim": max(1, min(limit, 1000))},
         ).mappings().all()
@@ -116,7 +116,7 @@ class CrmCaptureInboxService:
     def _get(self, inbox_id: str) -> Optional[dict]:
         # reviewed-safe: _COLS is a module-owned constant; identifiers are bound.
         r = self.db.execute(
-            text(f"SELECT {_COLS} FROM public.crm_capture_inbox WHERE id = :id AND tenant_id = :t"),
+            text(f"SELECT {_COLS} FROM public.crm_capture_inbox WHERE id = :id AND tenant_id = :t"),  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             {"id": inbox_id, "t": self.tenant_id},
         ).mappings().first()
         return self._row(r) if r else None

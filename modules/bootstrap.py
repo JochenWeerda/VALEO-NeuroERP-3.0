@@ -20,5 +20,18 @@ def initialize_module_registry() -> None:
         )
     )
     registry.register(AGRAR_MODULE)
+    registry.register(
+        ModuleDefinition(
+            name="feeding_advisory",
+            title="Fütterungsberatung",
+            version="1.0.0",
+            description=(
+                "Fütterungsberatungs-Vertikal: Rationseditor, Fütterungspläne, "
+                "Ist-Erfassung, Controlling-Berichte, Beratung und Assistenz "
+                "(FEED-REL-047; per Tenant über TENANT_MODULE_FLAGS schaltbar)."
+            ),
+            required_modules=["agrar"],
+        )
+    )
     registry.mark_initialized()
 

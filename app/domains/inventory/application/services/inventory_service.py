@@ -6,6 +6,7 @@ Core business logic for inventory management
 from typing import List, Optional, Dict, Any
 from decimal import Decimal
 from datetime import datetime, date, time
+from app.core.business_time import business_now, business_today
 from app.core.uuid7 import uuid7
 from sqlalchemy.orm import Session
 
@@ -150,8 +151,8 @@ class InventoryService:
             unit_cost=unit_cost,
             unit=unit,
             movement_number=movement_number,
-            movement_date=movement_date or datetime.utcnow().date(),
-            movement_time=movement_time or datetime.utcnow().time().replace(microsecond=0),
+            movement_date=movement_date or business_today(),
+            movement_time=movement_time or business_now().time().replace(microsecond=0),
             reference_number=reference_number,
             notes=notes,
             warehouse_location=warehouse_location,

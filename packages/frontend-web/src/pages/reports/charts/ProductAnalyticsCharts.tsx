@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card'
+﻿import { Card } from '@/components/ui/card'
 import { SimpleVerticalBars } from '@/components/charts/SimpleVerticalBars'
 import type { ReportDashboardData } from '@/pages/reports/report-chart-types'
 
@@ -14,7 +14,6 @@ export default function ProductAnalyticsCharts({ data }: { data: ReportDashboard
           data={(data?.topProductsByRevenue ?? []).slice(0, 5).map(item => ({
             label: String(item.article),
             value: Number(item.revenue ?? 0),
-            color: '#8B5CF6',
           }))}
           height={CHART_HEIGHT}
           valueFormatter={(value) => formatCurrencyLabel(value)[0]}
@@ -26,7 +25,6 @@ export default function ProductAnalyticsCharts({ data }: { data: ReportDashboard
           data={(data?.topProductsByQuantity ?? []).slice(0, 5).map(item => ({
             label: String(item.article),
             value: Number(item.quantity ?? 0),
-            color: '#8B5CF6',
           }))}
           height={CHART_HEIGHT}
           valueFormatter={(value) => `${Number(value).toLocaleString('de-DE')} kg`}

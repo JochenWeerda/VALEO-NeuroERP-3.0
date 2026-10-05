@@ -1,0 +1,163 @@
+slice_id: DESIGN-STATUS-COLORS-019
+id: DESIGN-STATUS-COLORS-019
+title: Restbestand Statusfarben schliessen - bedingte Kaesten, Flaechen, Ikonflaechen (Welle 5)
+owner: Claude Code
+status: abgeschlossen
+completed_at: "2026-09-14"
+created_at: "2026-09-14"
+started_at: "2026-09-14"
+vorgaenger: DESIGN-STATUS-COLORS-018
+goal: >-
+  Den nach Welle 4 verbliebenen Restbestand roher Palette-Statusfarben unter
+  packages/frontend-web/src schliessen und dabei zwei Faelle sauber trennen:
+  getoente Flaechen mit farbigem Text sind Kontrastfaelle und gehoeren auf
+  Komponenten; getoente Flaechen ohne farbigen Text sind Dekoration und
+  gehoeren auf semantische Tokens.
+befund:
+  gemessen_am: "2026-09-14"
+  methode: >-
+    Zeilen unter packages/frontend-web/src mit bg-<statusfamilie>-50|100 am
+    div, klassifiziert nach Traegerform und danach, ob dieselbe Zeile eine
+    farbige Textklasse traegt.
+  bloecke:
+    hinweisbox_bedingt: >-
+      13 Treffer in 13 Dateien. Farbe haengt an einer Bedingung
+      (condition ? 'border-emerald-200 bg-emerald-50' : '...'), deshalb in
+      Welle 4 bewusst vom Codemod ausgenommen. Ziel: Callout mit berechneter
+      Variante.
+    warnkarte_idiom: >-
+      5 Treffer. Wiederkehrendes Muster Card className="border-orange-500
+      bg-orange-50" in zulassungen-register, fahrzeuge, versicherungen/liste,
+      vertrag/rahmenvertraege, wartung/anlagen-liste.
+    flaeche_mit_text: >-
+      54 Treffer in 43 Dateien. Getoente Flaeche plus farbiger Text - echter
+      Kontrastfall nach der CLAUDE.md-Regel.
+    flaeche_ohne_text: >-
+      42 Treffer in 22 Dateien. Getoente Flaeche ohne farbigen Text - kein
+      Kontrastfall, sondern Dekoration.
+    ikonflaeche_overlay: >-
+      5 runde Ikoncontainer und 1 Karten-Overlay. Tragen keinen Text.
+    tabelleneintraege: >-
+      109 in 21 Dateien. Nach Welle 4 ueberwiegend kategorial; jeder Eintrag
+      wird an der Bedeutung des Schluessels geprueft, nicht an der Farbfamilie.
+leitsatz: >-
+  Farbe, die einen Zustand benennt, gehoert in eine Komponente (Badge,
+  Callout, Alert). Farbe, die nur eine Flaeche toent, gehoert auf ein
+  semantisches Token. Farbe, die eine Kategorie unterscheidet, bleibt
+  ausgenommen und gehoert auf die Kategorienpalette.
+file_ownership:
+  - docs/agent-ops/slices/DESIGN-STATUS-COLORS-019.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - "Dateien unter packages/frontend-web/src mit rohen Status-Flaechenklassen"
+abgrenzung: >-
+  Backend, k8s und die Dependency-Welle bleiben unberuehrt. Dateien mit
+  fremdem, nicht committetem Arbeitsstand werden vor jedem Commit geprueft
+  und ausgelassen.
+acceptance:
+  - Bedingte Hinweiskaesten und das Warnkarten-Idiom auf Callout.
+  - Flaechen mit farbigem Text auf Komponenten oder Statusutilities.
+  - Flaechen ohne farbigen Text auf semantische Tokens statt Palette.
+  - Kategoriale Faerbung bleibt ausgenommen und wird begruendet benannt.
+  - "tsc --noEmit exit 0; vitest identisch zur Baseline (126 Dateien, 495 Tests, 1 Skip)."
+risks:
+  - >-
+    Deckende Flaechen (bg-*-100) erscheinen nach der Umstellung weich getoent.
+    Beabsichtigt seit Welle 2.
+  - >-
+    Bedingte Kaesten brauchen je Datei eine Entscheidung, welcher Zweig welche
+    Variante meint. Kein Codemod, sondern Einzelfallarbeit.
+verification:
+  - "npx tsc --noEmit"
+  - "npx vitest run --testTimeout=30000 --maxWorkers=2"
+  - "Gegenprobe mit dem Messskript je Block"
+
+abschluss_2026_09_14:
+  ergebnis: >-
+    0 verbleibende div-Flaechen mit Palette-Toenung unter
+    packages/frontend-web/src. Alle im Claim benannten Bloecke geschlossen
+    oder begruendet ausgenommen.
+  commits:
+    - "71000b6e4: 13 bedingte Hinweiskaesten, 6 Warnkarten, Ikonflaechen, Overlay"
+    - "73892e87b: 45 Flaechen mit farbigem Text auf Callout (Codemod)"
+    - "400e8c302: 41 dekorative Flaechen + 8 Tabellen auf semantische Tokens"
+    - "e86b029b7: 5 Restfaelle ohne Regelentsprechung"
+  bewusst_nicht_auf_komponenten_gedreht:
+    - >-
+      barcode-scanner traegt role="alert" und ist eine echte, erscheinende
+      Meldung - dort Alert statt Callout.
+    - >-
+      Die Absaetze in fuetterungsdokumentation-mobil tragen eigene ARIA-Rollen
+      als <p>. Ein div-basiertes Callout haette die Absatzsemantik ersetzt
+      oder die Rolle verdoppelt; dort wandern nur die Farben auf Tokens.
+    - >-
+      FlowSpineWorkspace ist eine dunkle Arbeitsflaeche. Toenung und
+      Deckkraft bleiben erhalten, eine helle Callout-Variante haette sie
+      zerlegt.
+  kategorial_ausgenommen_vollstaendig_benannt: >-
+    Suchergebnistypen, Aktions- und Spartenarten, Belegarten, Zugangsrollen,
+    Kachelfarben im Portal, Zertifikatstypen, Domaenen (zwei Tabellen),
+    Wissensarten. Sie faerben Kategorien, nicht Zustaende.
+  codemod_fehler_behoben: >-
+    Die Import-Einfuegung suchte die letzte Zeile, die mit "import" beginnt,
+    und landete damit mitten in einem mehrzeiligen Import. Dreimal
+    aufgetreten (speditionen-fracht-preise, TourList, lkw-beladung), jedes Mal
+    von tsc gefangen. Richtig ist das letzte vollstaendige import-Statement
+    bis zur schliessenden Quelle.
+  fehlgriff_und_ruecknahme: >-
+    Beim Warnkarten-Idiom wurde zuerst blind </CardContent></Card> ersetzt.
+    Das traf in fuhrpark/fahrzeuge.tsx eine fremde Karte und liess die
+    eigentliche offen. Zurueckgenommen per git checkout und mit einer
+    Tiefenzaehlung ab der Oeffnungsstelle neu gemacht.
+  offen_naechste_welle:
+    umfang: "620 Zeilen ausserhalb der Welle-5-Bloecke"
+    zusammensetzung: >-
+      242 Icon- und Textfarben (text-<familie>-600 an Symbolen), 79 bedingte
+      Ausdruecke, 35 Tabellen/Helfer, Rest verteilt - darunter
+      Button-Uebersteuerungen, Zeilen-Hervorhebungen in Auswahldialogen und
+      hover-Zustaende. Andere Fehlerklasse als die Flaechen dieser Welle und
+      eine eigene Entscheidung wert.
+  nachweis:
+    - "tsc --noEmit exit 0 nach jedem Schritt"
+    - "eslint der geaenderten Dateien ohne Befund"
+    - "vitest 126 Dateien, 495 passed, 1 skipped - identisch zur Baseline (4x)"
+    - "Gegenprobe: 0 verbleibende div-Flaechen mit Palette-Toenung"
+
+tests:
+  - >-
+    Codemod-Selbsttests: acht Musterfaelle fuer Flaechen mit farbigem Text,
+    sechs fuer dekorative Flaechen (darunter die Gegenproben "mit farbigem
+    Text" und "mit farbigem Rahmen", die nicht erfasst werden duerfen).
+  - "tsc --noEmit nach jedem der vier Schritte (exit 0)."
+  - "eslint der geaenderten Dateien (ohne Befund)."
+  - >-
+    vitest run --testTimeout=30000 --maxWorkers=2 nach jedem Schritt:
+    126 Dateien, 495 passed, 1 skipped - identisch zur Baseline.
+  - >-
+    Abschliessende Gegenprobe: 0 verbleibende div-Flaechen mit
+    Palette-Toenung unter packages/frontend-web/src.
+external_gates:
+  - >-
+    Keine. Alle Nachweise sind lokal und in CI reproduzierbar; kein
+    Fremdsystem beteiligt.
+ai_harness:
+  fachlicher_vertrag: >-
+    Getoente Flaechen mit farbigem Text sind Kontrastfaelle und gehoeren auf
+    eine Komponente. Flaechen ohne farbigen Text sind Dekoration und gehoeren
+    auf ein Token. Eine Entwarnung oder Warnung darf nicht allein aus der
+    Flaechenfarbe kommen.
+  architektur_vertrag: >-
+    Callout fuer dauerhafte Hinweiskaesten, Alert nur fuer echte, erscheinende
+    Meldungen. Elemente mit eigener ARIA-Rolle behalten ihr Element und
+    bekommen nur Tokenfarben.
+  daten_vertrag: "Keine Migration, keine Datenmutation, reine Darstellung."
+  test_vertrag: >-
+    Mechanische Umstellungen laufen nur ueber Codemods mit gruenem Selbsttest;
+    Faelle ausserhalb der Regeln werden einzeln angesehen und einzeln
+    geaendert. Der Vitest-Bestand muss der Baseline exakt entsprechen.
+  security_vertrag: >-
+    Keine Berechtigungen, Endpunkte oder Abhaengigkeiten beruehrt.
+  betriebs_vertrag: >-
+    Rein clientseitig, kein Deployment-Schritt, kein Neustart noetig.
+  dokumentations_vertrag: >-
+    Die drei bewussten Ausnahmen und beide eigenen Fehler samt Ruecknahme sind
+    im Slice und im Workboard festgehalten, nicht nur im Commit.

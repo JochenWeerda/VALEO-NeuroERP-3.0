@@ -1,0 +1,28 @@
+id: BUSINESS-TIME-AGRAR-VALIDITY-20260929
+owner: Codex
+status: abgeschlossen
+goal: Agrar-Zulassungsfristen am konfigurierten Geschaeftstag ausrichten.
+scope: PSM-, Saatgut- und Duenger-Validierung sowie PSM-90-Tage-Warnfenster.
+file_ownership:
+  - app/domains/agrar/api/psm.py
+  - app/domains/agrar/api/saatgut.py
+  - app/domains/agrar/api/duenger.py
+  - tests/test_agrar_business_time.py
+  - docs/quality-assurance/business-time-agrar-validity-20260929.md
+acceptance:
+  - Fachliche Zulassungsvergleiche verwenden business_today.
+  - Der PSM-Stichtag wird einmal je Statistikabfrage bestimmt.
+  - Technische Synchronisations- und Auditzeitpunkte bleiben unveraendert.
+tests:
+  - 16 Agrar- und Business-Time-Tests bestanden.
+risks:
+  - Die Persistenz verwendet weiterhin DateTime-Spalten fuer fachliche Datumswerte.
+ai_harness:
+  fachlicher_vertrag: Ablauf und Warnfenster folgen dem konfigurierten lokalen Geschaeftstag.
+  architektur_vertrag: Wiederverwendung des zentralen Business-Time-Moduls.
+  daten_vertrag: Keine Schema- oder Persistenzaenderung.
+  test_vertrag: Alle Schreibpfade und das PSM-Warnfenster sind abgedeckt.
+  security_vertrag: Keine Aenderung an Zugriff oder Mandantengrenzen.
+  betriebs_vertrag: BUSINESS_TIMEZONE steuert die Tagesgrenze.
+  dokumentations_vertrag: Workboard, Open-Gaps, Slice und QA aktualisiert.
+external_gates: []

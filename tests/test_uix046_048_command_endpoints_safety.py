@@ -162,7 +162,7 @@ class TestUIX048AgentSafety:
     def test_meridian_layout_metadata_declared(self, screen_id: str):
         sd = get_screen_definition(screen_id)
         layout = sd.get("layout", {})
-        assert layout.get("floorplan") in {"worklist", "objectPage", "transaction", "cockpit", "wizard"}, (
+        assert layout.get("floorplan") in {"worklist", "objectPage", "transaction", "cockpit", "wizard", "analyticalList"}, (
             f"{screen_id}: layout.floorplan fehlt oder ist ungueltig"
         )
         assert layout.get("density") in {"comfortable", "compact", "expertDense"}, (
@@ -215,10 +215,13 @@ class TestUIX048AgentSafety:
                         "entweder Endpoint aktivieren oder stubReason setzen"
                     )
 
-    def test_all_26_screen_definitions_present(self):
-        """Stellt sicher, dass genau 26 native ScreenDefinitions registriert sind."""
-        assert len(ALL_SCREEN_IDS) == 26, (
-            f"Erwartet 26 ScreenDefinitions, gefunden: {len(ALL_SCREEN_IDS)}: {ALL_SCREEN_IDS}"
+    def test_all_screen_definitions_present(self):
+        """Stellt sicher, dass alle produktiven nativen ScreenDefinitions registriert sind."""
+        registered = set(_sd_module.SCREEN_DEFINITION_BUILDERS)
+        discovered = set(ALL_SCREEN_IDS)
+        assert len(discovered) >= 33, "Die etablierte native Basis darf nicht schrumpfen"
+        assert discovered <= registered, (
+            f"Builder-Funktionen fehlen in der Registry: {sorted(discovered - registered)}"
         )
 
     def test_payment_run_is_critical(self):

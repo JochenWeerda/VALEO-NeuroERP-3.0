@@ -126,7 +126,7 @@ def _run_duplicate_check(db: Session, rule: DuplicateRule, tenant_id: str) -> li
         WHERE tenant_id = :tenant_id OR (:tenant_id = 'system' AND tenant_id IS NULL)
         GROUP BY {cols}
         HAVING COUNT(*) > 1
-        """
+        """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
     )
     try:
         rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
@@ -172,7 +172,7 @@ def _run_required_check(db: Session, rule: RequiredFieldRule, tenant_id: str) ->
         WHERE (tenant_id = :tenant_id OR (:tenant_id = 'system' AND tenant_id IS NULL))
           AND ({cond})
         LIMIT 100
-        """
+        """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
     )
     try:
         rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()
@@ -204,7 +204,7 @@ def _run_reference_check(db: Session, rule: ReferenceRule, tenant_id: str) -> li
           AND t."{rule.target_pk}" IS NULL
           AND (s.tenant_id = :tenant_id OR (:tenant_id = 'system' AND s.tenant_id IS NULL))
         LIMIT 100
-        """
+        """  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
     )
     try:
         rows = db.execute(q, {"tenant_id": tenant_id}).fetchall()

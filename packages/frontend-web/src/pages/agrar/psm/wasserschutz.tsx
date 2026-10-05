@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, MapPin, Shield, XCircle, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useWasserschutzZonen, usePSM } from '@/lib/api/agrar'
+import { Callout } from '@/components/ui/callout'
 
 type PSMMittel = {
   id: string
@@ -164,7 +165,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
           <h1 className="text-3xl font-bold">PSM-Wasserschutz-Prüfung</h1>
           <p className="text-muted-foreground">Geo-basierte Validierung für Wasserschutzgebiete</p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/agrar/psm/liste')}>
+        <Button variant="outline" className="min-h-touch" onClick={() => navigate('/agrar/psm/liste')}>
           Zurück zur Liste
         </Button>
       </div>
@@ -188,7 +189,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
                   placeholder="Adresse oder Ort eingeben"
                   className="flex-1"
                 />
-                <Button onClick={sucheAdresse} size="sm">
+                <Button onClick={sucheAdresse} className="min-h-touch touch-manipulation" aria-label="Adresse suchen">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
@@ -309,7 +310,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
             <Button
               onClick={pruefeWasserschutz}
               disabled={!ausgewaehltesPSM || isPruefLoading}
-              className="w-full"
+              className="min-h-touch w-full"
             >
               Wasserschutz-Prüfung durchführen
             </Button>
@@ -319,26 +320,26 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
 
       {/* Prüfergebnis */}
       {pruefErgebnis && (
-        <Card className={pruefErgebnis.zulaessig ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}>
+        <Card className={pruefErgebnis.zulaessig ? 'border-status-success bg-status-success/10' : 'border-status-error bg-status-error/10'}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {pruefErgebnis.zulaessig ? (
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-status-success" />
               ) : (
-                <XCircle className="h-5 w-5 text-red-600" />
+                <XCircle className="h-5 w-5 text-status-error" />
               )}
               Prüfergebnis
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className={`p-4 rounded-lg ${pruefErgebnis.zulaessig ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}`}>
+            <Callout variant={pruefErgebnis.zulaessig ? 'success' : 'error'} className="rounded-lg p-4">
               <p className="font-medium">{pruefErgebnis.begruendung}</p>
-            </div>
+            </Callout>
 
             {pruefErgebnis.risiken.length > 0 && (
               <div>
-                <h4 className="font-medium text-red-900 mb-2">Risiken:</h4>
-                <ul className="list-disc list-inside space-y-1 text-red-800">
+                <h4 className="font-medium text-status-error mb-2">Risiken:</h4>
+                <ul className="list-disc list-inside space-y-1 text-status-error">
                   {pruefErgebnis.risiken.map((risiko, i) => (
                     <li key={i}>{risiko}</li>
                   ))}
@@ -348,12 +349,12 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
 
             {pruefErgebnis.alternative_psm && pruefErgebnis.alternative_psm.length > 0 && (
               <div>
-                <h4 className="font-medium text-blue-900 mb-2">Alternative PSM:</h4>
+                <h4 className="font-medium text-foreground mb-2">Alternative PSM:</h4>
                 <div className="space-y-2">
                   {pruefErgebnis.alternative_psm.map((alt) => (
-                    <div key={alt.id} className="p-3 bg-blue-50 rounded border">
+                    <div key={alt.id} className="p-3 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded border">
                       <div className="font-medium">{alt.name} ({alt.wirkstoff})</div>
-                      <div className="text-sm text-blue-700">
+                      <div className="text-sm text-muted-foreground">
                         Max. {alt.max_dosierung} l/ha, Wartezeit: {alt.wartezeit} Tage
                       </div>
                     </div>

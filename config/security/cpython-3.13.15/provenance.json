@@ -1,0 +1,29 @@
+{
+  "python": "3.13.15",
+  "patches": [
+    {
+      "cve": "CVE-2025-15367",
+      "source": "https://github.com/python/cpython/commit/b234a2b67539f787e191d2ef19a7cbdce32874e7",
+      "upstream_status": "main; two-line guard applied to 3.13.15",
+      "sha256": "efec029f5da02b71f709ec26a2b1abb45ab5e754f230d4bebc0f6a21192c23a5"
+    },
+    {
+      "cve": "CVE-2026-15806",
+      "source": "https://github.com/python/cpython/commit/a2773a34183b7d94a243bb98fd658926cc5348ce",
+      "upstream_status": "merged 3.13 backport",
+      "sha256": "ff6dba33c8720c5dca6f3caf0bb051c07aa54c24201e87119d5f4c4b125464ef"
+    },
+    {
+      "cve": "CVE-2026-17084",
+      "source": "https://github.com/python/cpython/commit/c28b121a4f0b975937c8b5a1b4934bb361d84296",
+      "upstream_status": "merged 3.13 backport; C header changes only generator-path comments",
+      "sha256": "177e18082afc8f2558462f53557cdac05a0cbb26ad8b3311617bfa12b7d08f17"
+    },
+    {
+      "cve": "CVE-2026-15310",
+      "source": "https://github.com/python/cpython/pull/156738",
+      "upstream_status": "open 3.13 backport; exact head d53a41e8cf0148af073c46abc36c2969adcb70c2",
+      "sha256": "c403a420710557567e82b5fdced7e5f18ba212c9ac2b90720af93d3a11bc269a"
+    }
+  ]
+}

@@ -9,6 +9,9 @@ import type { ActionDangerLevel } from '../schema'
 
 export type ActionExecutionMode = 'execute' | 'dryRun' | 'validate' | 'propose'
 
+/** Ausloeser einer Aktion — landet als trigger_source im Audit-Event (UIX-070). */
+export type ActionTriggerSource = 'mask' | 'omnibox' | 'voice' | 'agent'
+
 export interface ActionRequest {
   actionKey: string
   entityId?: string
@@ -18,6 +21,8 @@ export interface ActionRequest {
   idempotencyKey?: string
   /** Required when auditReasonRequired: true */
   auditReason?: string
+  /** Herkunft des Ausloesers (Default 'mask') — fuers Audit (UIX-070). */
+  triggerSource?: ActionTriggerSource
 }
 
 export interface ActionResult {
@@ -92,4 +97,36 @@ export function buildActionPolicy(actionDef: {
     forbiddenForAgents: actionDef.forbiddenForAgents ?? false,
     idempotencyKey: actionDef.idempotencyKey,
   }
+}
+
+// ── Omnibox-NL-Sicherheitsmatrix (UIX-070) ───────────────────────────────────
+// Einzige Quelle der Wahrheit fuer die Frage: was darf der Sprach-/Omnibox-Pfad
+// mit einer Aktion tun? Die Matrix ist hart und spiegelt den Maskenpfad —
+// tests/test_uix070_conversational_safety.py re-implementiert sie identisch als
+// Gate ueber ALL_SCREEN_IDS. Zusammenhang:
+//  - unavailable  : Aktion existiert im NL-Pfad nicht (forbiddenForAgents).
+//  - navigateOnly : nur Navigation zur Maske, kein Draft (high/critical).
+//  - ritual       : Command-Draft mit vollem Confirmation-Ritual (UIX-047).
+//  - formPrefill  : Maske oeffnen + Felder vorfuellen, nichts armieren.
+// Kein Pfad umgeht jemals eine Confirmation, die der Maskenpfad verlangt.
+
+export type OmniboxActionDisposition = 'unavailable' | 'navigateOnly' | 'ritual' | 'formPrefill'
+
+/** Konfidenz unter dieser Schwelle degradiert jeden Draft auf formPrefill. */
+export const OMNIBOX_COMMAND_MIN_CONFIDENCE = 0.75
+
+export function classifyOmniboxAction(
+  policy: Pick<ActionPolicy, 'dangerLevel' | 'requiresConfirmation' | 'forbiddenForAgents'>,
+  confidence: number,
+): OmniboxActionDisposition {
+  // 1. forbiddenForAgents → im NL-Pfad unsichtbar (wie fuer Agenten).
+  if (policy.forbiddenForAgents) return 'unavailable'
+  // 2. high/critical → niemals draftbar, nur Navigation zur Maske.
+  if (policy.dangerLevel === 'high' || policy.dangerLevel === 'critical') return 'navigateOnly'
+  // 3. Konfidenz zu niedrig → konservativ auf Vorfuellen degradieren (nichts armieren).
+  if (confidence < OMNIBOX_COMMAND_MIN_CONFIDENCE) return 'formPrefill'
+  // 4. moderate → immer Ritual.
+  if (policy.dangerLevel === 'moderate') return 'ritual'
+  // 5. safe → Ritual nur wenn die Maske Confirmation verlangt, sonst Vorfuellen.
+  return policy.requiresConfirmation ? 'ritual' : 'formPrefill'
 }

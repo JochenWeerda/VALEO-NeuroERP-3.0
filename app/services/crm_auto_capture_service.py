@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import UTC, datetime
 from typing import Optional
 
 from sqlalchemy import text
@@ -116,6 +117,38 @@ class CrmAutoCaptureService:
         first_line = text_in.splitlines()[0][:80]
         return (first_line or f"{channel.capitalize()}-Kontakt", text_in)
 
+    def _sender_domain(self, peer: Optional[str]) -> Optional[str]:
+        if not peer or "@" not in peer:
+            return None
+        return peer.rsplit("@", 1)[1].strip().lower() or None
+
+    def _propose_email_terms(
+        self,
+        *,
+        mail_id: str,
+        subject: Optional[str],
+        content: str,
+        peer: Optional[str],
+        received_at: Optional[datetime],
+    ) -> dict:
+        if not mail_id or not content.strip():
+            return {"status": "skipped", "reason": "missing_mail_id_or_content"}
+        try:
+            from app.services.calendar_projection_service import CalendarProjectionService
+
+            result = CalendarProjectionService(self.db).propose_email_terms(
+                self.tenant_id,
+                mail_id=mail_id,
+                subject=subject,
+                body=content,
+                received_at=received_at or datetime.now(UTC),
+                sender_domain=self._sender_domain(peer),
+            )
+            return {"status": "ok", **result}
+        except Exception as exc:  # pragma: no cover - defensive capture path
+            self.db.rollback()
+            return {"status": "error", "reason": str(exc)[:200]}
+
     # ── Erfassung ─────────────────────────────────────────────────────────────
     def _existing_by_verweis(self, kunden_nr: str, verweis: str) -> Optional[dict]:
         try:
@@ -143,6 +176,7 @@ class CrmAutoCaptureService:
         verweis: Optional[str] = None,
         bediener: str = "AUTO",
         to_inbox: bool = True,
+        received_at: Optional[datetime] = None,
     ) -> dict:
         art = _ART_BY_CHANNEL.get((channel or "").lower(), "telefon")
         richtung = "ein" if (direction or "").lower().startswith(("in", "ein")) else "aus"
@@ -165,8 +199,19 @@ class CrmAutoCaptureService:
                     content=content,
                     verweis=verweis,
                 )
+            calendar_proposals = (
+                self._propose_email_terms(
+                    mail_id=verweis or str((inbox or {}).get("id") or ""),
+                    subject=betreff or auto_betreff,
+                    content=content,
+                    peer=peer,
+                    received_at=received_at,
+                )
+                if art == "email"
+                else {"status": "skipped", "reason": "not_email"}
+            )
             return {"status": "unresolved", "channel": art, "peer": peer,
-                    "inbox_id": (inbox or {}).get("id")}
+                    "inbox_id": (inbox or {}).get("id"), "calendar_proposals": calendar_proposals}
 
         if verweis:
             existing = self._existing_by_verweis(resolved, verweis)
@@ -185,5 +230,17 @@ class CrmAutoCaptureService:
             "bediener": bediener or "AUTO",
             "verweis": verweis,
         })
+        calendar_proposals = (
+            self._propose_email_terms(
+                mail_id=verweis or str(created.get("id") or ""),
+                subject=betreff or auto_betreff,
+                content=content,
+                peer=peer,
+                received_at=received_at,
+            )
+            if art == "email"
+            else {"status": "skipped", "reason": "not_email"}
+        )
         return {"status": "created", "id": created.get("id"), "kunden_nr": resolved,
-                "art": art, "richtung": richtung, "betreff": kurzinfo}
+                "art": art, "richtung": richtung, "betreff": kurzinfo,
+                "calendar_proposals": calendar_proposals}

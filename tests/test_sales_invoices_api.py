@@ -1,0 +1,631 @@
+"""Die Rechnungsendpunkte — der Weg, den die Maske geht.
+
+Die Auskunft, auf die es ankommt, steht am Ende in `GET /sales/invoices/{id}`:
+je Position die Menge **und ihre Herkunft**. Ohne sie steht in einer Rechnung
+eine Zahl ohne Nachweis.
+
+Die Sammelrechnung ist hier kein Sonderfall: Zwei Lieferscheine sind nur eine
+laengere Quellenliste.
+
+Ohne erreichbare Datenbank wird uebersprungen, nicht als gruen gewertet.
+"""
+
+from __future__ import annotations
+
+import os
+import uuid
+from decimal import Decimal
+
+import pytest
+
+pytestmark = pytest.mark.integration
+
+DB_URL = os.environ.get(
+    "DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp"
+)
+os.environ.setdefault("DATABASE_URL", DB_URL)
+os.environ.setdefault("API_DEV_TOKEN", "dev-token")
+
+
+@pytest.fixture(scope="module")
+def client():
+    from sqlalchemy import create_engine, text
+
+    try:
+        with create_engine(DB_URL).connect() as conn:
+            vorhanden = conn.execute(
+                text("SELECT to_regclass('domain_sales.sales_invoice_lines')")
+            ).scalar()
+    except Exception as fehler:  # noqa: BLE001
+        pytest.skip(f"Datenbank nicht erreichbar: {fehler}")
+    if not vorhanden:
+        pytest.skip("Migration sales_invoice_lines_20260915 nicht angewandt")
+
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    return TestClient(app, raise_server_exceptions=False)
+
+
+@pytest.fixture()
+def mandant():
+    from sqlalchemy import create_engine, text
+
+    name = f"test-{uuid.uuid4().hex[:8]}"
+    engine = create_engine(DB_URL)
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
+                "VALUES (:id, :id, :domain, true) ON CONFLICT (id) DO NOTHING"
+            ),
+            {"id": name, "domain": f"{name}.test"},
+        )
+    try:
+        yield name
+    finally:
+        with engine.begin() as verbindung:
+            for tabelle, spalte in (
+                ("domain_sales.sales_invoices", "tenant_id"),
+                ("domain_docs.doc_allocation_sources", "tenant_id"),
+                ("domain_sales.delivery_notes", "tenant_id"),
+                # Kunde und Artikel nach den Belegen, die auf sie zeigen —
+                # die Fremdschluessel gibt es nur in einer frischen Datenbank.
+                ("domain_crm.customers", "tenant_id"),
+                ("domain_inventory.articles", "tenant_id"),
+                ("domain_shared.tenants", "id"),
+            ):
+                verbindung.execute(
+                    text(f"DELETE FROM {tabelle} WHERE {spalte} = :id"),  # nosec B608
+                    {"id": name},
+                )
+
+
+@pytest.fixture()
+def kunde(mandant: str) -> str:
+    """K-100 muss es wirklich geben.
+
+    domain_sales.delivery_notes.customer_id zeigt per Fremdschluessel auf
+    domain_crm.customers, artikel_id auf domain_inventory.articles.
+    In einer gewachsenen Entwicklungsdatenbank fehlen
+    dieser Schluessel, in einer frischen ist er da — deshalb lief der Test
+    lokal gruen und in CI gegen einen 500er.
+    """
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine(DB_URL)
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+                # Ohne company_name: Der Kundensatz muss es geben, weil
+                # delivery_notes.customer_id ein Fremdschluessel ist — aber
+                # ein Name steht erst da, wenn ihn jemand pflegt. Genau das
+                # prueft test_kopf_nennt_den_kunden_statt_der_referenz.
+                "VALUES ('K-100', :tid, 'K-100', NULL) "
+                "ON CONFLICT (id) DO NOTHING"
+            ),
+            {"tid": mandant},
+        )
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_inventory.articles (id, tenant_id, article_number, name) "
+                "VALUES ('ART-WEIZEN', :tid, '10001', 'Weizen A') "
+                "ON CONFLICT (id) DO NOTHING"
+            ),
+            {"tid": mandant},
+        )
+    return "K-100"
+
+
+@pytest.fixture()
+def kopf(mandant: str, kunde: str) -> dict[str, str]:
+    return {
+        "Authorization": "Bearer dev-token",
+        "X-Tenant-ID": mandant,
+        "X-Tenant-Id": mandant,
+    }
+
+
+def lieferschein(client, kopf, menge: str = "100", preis: str = "25.00", mwst: str = "7") -> str:
+    antwort = client.post(
+        "/api/v1/sales/delivery-notes",
+        headers=kopf,
+        json={
+            "customer_id": "K-100",
+            "delivery_date": "2026-09-15",
+            "positionen": [
+                {
+                    "pos_nr": 1,
+                    "artikel_id": "ART-WEIZEN",
+                    "artikel_nr": "10001",
+                    "bezeichnung": "Weizen A",
+                    "menge": menge,
+                    "einheit": "dt",
+                    "netto_preis": preis,
+                    "mwst_prozent": mwst,
+                }
+            ],
+        },
+    )
+    assert antwort.status_code == 201, antwort.text
+    return antwort.json()["id"]
+
+
+def rechnung(client, kopf, *ls_ids: str):
+    return client.post(
+        "/api/v1/sales/invoices/from-delivery-notes",
+        headers=kopf,
+        json={
+            "customer_id": "K-100",
+            "delivery_note_ids": list(ls_ids),
+            "invoice_date": "2026-09-15",
+        },
+    )
+
+
+def test_rechnung_bekommt_positionen_und_die_position_ihre_herkunft(client, kopf) -> None:
+    """Der Kern des Slices in einem Durchlauf."""
+    ls_id = lieferschein(client, kopf)
+
+    angelegt = rechnung(client, kopf, ls_id)
+    assert angelegt.status_code == 201, angelegt.text
+    assert angelegt.json()["lines"][0]["quantity"] == "100"
+
+    gelesen = client.get(f"/api/v1/sales/invoices/{angelegt.json()['id']}", headers=kopf)
+    assert gelesen.status_code == 200
+    position = gelesen.json()["lines"][0]
+
+    assert position["quantity"] == "100"
+    assert position["unit"] == "dt"
+    assert position["net_amount"] == "2500"
+    herkunft = position["origins"][0]
+    assert herkunft["source_document_type"] == "delivery_note"
+    assert herkunft["source_document_id"] == ls_id
+    assert herkunft["source_line_id"] == "1"
+    assert herkunft["quantity"] == "100"
+
+
+def test_sammelrechnung_ist_nur_eine_laengere_quellenliste(client, kopf) -> None:
+    erster = lieferschein(client, kopf, "100")
+    zweiter = lieferschein(client, kopf, "40")
+
+    angelegt = rechnung(client, kopf, erster, zweiter)
+    assert angelegt.status_code == 201, angelegt.text
+
+    gelesen = client.get(f"/api/v1/sales/invoices/{angelegt.json()['id']}", headers=kopf).json()
+    assert [z["quantity"] for z in gelesen["lines"]] == ["100", "40"]
+    # Jede Position zeigt auf ihren eigenen Lieferschein.
+    quellen = {z["origins"][0]["source_document_id"] for z in gelesen["lines"]}
+    assert quellen == {erster, zweiter}
+    assert gelesen["net_amount"] == "3500"
+
+
+def test_kopf_nennt_den_kunden_statt_der_referenz(client, kopf, mandant) -> None:
+    """``customer_id`` ist hier die Kundennummer; Rechnung und Lieferschein zeigen den Namen."""
+    from sqlalchemy import create_engine, text
+
+    ohne_crm = client.get(
+        f"/api/v1/sales/invoices/{rechnung(client, kopf, lieferschein(client, kopf)).json()['id']}",
+        headers=kopf,
+    ).json()
+    # Kein gepflegter Name: kein erfundener Name, die Referenz bleibt als
+    # Nummer sichtbar.
+    assert ohne_crm["customer_name"] is None
+    assert ohne_crm["customer_number"] == "K-100"
+
+    # Jetzt bekommt derselbe Kundensatz einen Namen. Ein zweiter Satz waere
+    # nicht moeglich: customer_number ist eindeutig, und der Beleg zeigt per
+    # Fremdschluessel auf genau diese Kennung.
+    engine = create_engine(DB_URL)
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "UPDATE domain_crm.customers "
+                "SET company_name = 'Raiffeisen Warengenossenschaft Nord eG' "
+                "WHERE id = 'K-100' AND tenant_id = :tid"
+            ),
+            {"tid": mandant},
+        )
+    try:
+        ls_id = lieferschein(client, kopf)
+        angelegt = rechnung(client, kopf, ls_id)
+        assert angelegt.status_code == 201, angelegt.text
+
+        beleg = client.get(f"/api/v1/sales/invoices/{angelegt.json()['id']}", headers=kopf).json()
+        assert beleg["customer_id"] == "K-100"
+        assert beleg["customer_name"] == "Raiffeisen Warengenossenschaft Nord eG"
+        assert beleg["customer_number"] == "K-100"
+
+        ls = client.get(f"/api/v1/sales/delivery-notes/{ls_id}", headers=kopf)
+        assert ls.status_code == 200, ls.text
+        assert ls.json()["customer_name"] == "Raiffeisen Warengenossenschaft Nord eG"
+        assert ls.json()["customer_number"] == "K-100"
+    finally:
+        # Den Namen wieder wegnehmen; loeschen darf der Test den Satz nicht,
+        # die Belege zeigen darauf. Den Rest raeumt die mandant-Fixture ab.
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text(
+                    "UPDATE domain_crm.customers SET company_name = NULL "
+                    "WHERE id = 'K-100' AND tenant_id = :tid"
+                ),
+                {"tid": mandant},
+            )
+
+
+def test_zweimal_berechnen_wird_abgewiesen_statt_doppelt_gebucht(client, kopf) -> None:
+    """Der Fehler, den ohne Restmengenfuehrung niemand bemerkt haette.
+
+    Der Betrag der zweiten Rechnung waere fuer sich genommen richtig gewesen.
+    """
+    ls_id = lieferschein(client, kopf)
+    assert rechnung(client, kopf, ls_id).status_code == 201
+
+    zweite = rechnung(client, kopf, ls_id)
+    assert zweite.status_code == 409
+    assert "bereits vollstaendig berechnet" in zweite.json()["detail"]
+
+
+def test_fremder_lieferschein_wird_nicht_berechnet(client, kopf) -> None:
+    antwort = rechnung(client, kopf, "gibt-es-nicht")
+    assert antwort.status_code == 404
+
+
+def test_unbekannte_rechnung_meldet_404(client, kopf) -> None:
+    assert client.get("/api/v1/sales/invoices/gibt-es-nicht", headers=kopf).status_code == 404
+
+
+def test_liste_findet_die_rechnung_und_zaehlt_ihre_positionen(client, kopf) -> None:
+    """Ohne Liste ist die Maske nur ueber eine Kennung erreichbar, die niemand hat."""
+    ls_id = lieferschein(client, kopf)
+    angelegt = rechnung(client, kopf, ls_id).json()
+
+    antwort = client.get("/api/v1/sales/invoices", headers=kopf)
+    assert antwort.status_code == 200, antwort.text
+    daten = antwort.json()
+
+    treffer = [z for z in daten["items"] if z["id"] == angelegt["id"]]
+    assert len(treffer) == 1
+    zeile = treffer[0]
+    assert zeile["invoice_number"] == angelegt["invoice_number"]
+    assert zeile["customer_id"] == "K-100"
+    assert zeile["status"] == "entwurf"
+    # Die Positionszahl beantwortet "sieht der Beleg leer aus", ohne ihn zu oeffnen.
+    assert zeile["line_count"] == 1
+    assert daten["total"] >= 1
+
+
+def test_liste_zeigt_nur_die_rechnungen_des_eigenen_mandanten(client, kunde) -> None:
+    """Mandantentrennung an der Liste — hier faellt sie am ehesten auf.
+
+    ``kunde`` steht hier nur fuer den Fremdschluessel: Der Lieferschein
+    braucht die Kennung K-100 im Kundenstamm, gleich unter welchem Mandanten
+    sie gepflegt ist. Die Trennung, um die es geht, prueft der Test selbst.
+    """
+    import uuid as _uuid
+
+    from sqlalchemy import create_engine, text
+
+    fremd = f"test-{_uuid.uuid4().hex[:8]}"
+    engine = create_engine(DB_URL)
+    with engine.begin() as verbindung:
+        verbindung.execute(
+            text(
+                "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
+                "VALUES (:id, :id, :domain, true) ON CONFLICT (id) DO NOTHING"
+            ),
+            {"id": fremd, "domain": f"{fremd}.test"},
+        )
+    fremd_kopf = {
+        "Authorization": "Bearer dev-token",
+        "X-Tenant-ID": fremd,
+        "X-Tenant-Id": fremd,
+    }
+    try:
+        ls_id = lieferschein(client, fremd_kopf)
+        fremde = rechnung(client, fremd_kopf, ls_id).json()
+
+        eigener = f"test-{_uuid.uuid4().hex[:8]}"
+        with engine.begin() as verbindung:
+            verbindung.execute(
+                text(
+                    "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
+                    "VALUES (:id, :id, :domain, true) ON CONFLICT (id) DO NOTHING"
+                ),
+                {"id": eigener, "domain": f"{eigener}.test"},
+            )
+        eigen_kopf = {
+            "Authorization": "Bearer dev-token",
+            "X-Tenant-ID": eigener,
+            "X-Tenant-Id": eigener,
+        }
+        gelesen = client.get("/api/v1/sales/invoices", headers=eigen_kopf).json()
+        assert fremde["id"] not in {z["id"] for z in gelesen["items"]}
+        # Und einzeln ist sie auch nicht lesbar.
+        assert client.get(
+            f"/api/v1/sales/invoices/{fremde['id']}", headers=eigen_kopf
+        ).status_code == 404
+    finally:
+        with engine.begin() as verbindung:
+            for tabelle, spalte in (
+                ("domain_sales.sales_invoices", "tenant_id"),
+                ("domain_docs.doc_allocation_sources", "tenant_id"),
+                ("domain_sales.delivery_notes", "tenant_id"),
+                ("domain_shared.tenants", "id"),
+            ):
+                verbindung.execute(
+                    text(f"DELETE FROM {tabelle} WHERE {spalte} = :id"),  # nosec B608
+                    {"id": fremd},
+                )
+
+
+def test_liste_filtert_nach_nummer_status_und_zeitraum(client, kopf) -> None:
+    ls_id = lieferschein(client, kopf)
+    angelegt = rechnung(client, kopf, ls_id).json()
+    nummer = angelegt["invoice_number"]
+
+    # Teiltreffer, weil in der Praxis die letzten Stellen gesucht werden.
+    gefunden = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"invoice_number": nummer[-4:]}
+    ).json()
+    assert angelegt["id"] in {z["id"] for z in gefunden["items"]}
+
+    # Ein Status, den es hier nicht gibt, ergibt eine leere Liste — keinen Fehler.
+    gebucht = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"status": "bezahlt"}
+    ).json()
+    assert angelegt["id"] not in {z["id"] for z in gebucht["items"]}
+
+    # Zeitraum vor dem Rechnungsdatum: der Beleg faellt heraus.
+    davor = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"date_to": "2026-09-14"}
+    ).json()
+    assert angelegt["id"] not in {z["id"] for z in davor["items"]}
+
+    passend = client.get(
+        "/api/v1/sales/invoices",
+        headers=kopf,
+        params={"date_from": "2026-09-15", "date_to": "2026-09-15"},
+    ).json()
+    assert angelegt["id"] in {z["id"] for z in passend["items"]}
+
+
+def test_maske_bekommt_kopf_positionen_und_herkunft_als_register(client, kopf) -> None:
+    """Die Maske entsteht aus der ScreenDefinition — hier ist ihre Datenseite."""
+    ls_id = lieferschein(client, kopf)
+    angelegt = rechnung(client, kopf, ls_id).json()
+    rid = angelegt["id"]
+
+    summary = client.get(f"/api/v1/sales/invoices/{rid}/screen-summary", headers=kopf)
+    assert summary.status_code == 200, summary.text
+    daten = summary.json()
+    assert daten["screen_id"] == "sales/invoice"
+    assert daten["invoice_id"] == rid
+    assert daten["title"] == angelegt["invoice_number"]
+    assert daten["summary"]["positionen"] == 1
+    # Alles belegt: Die Meldung bleibt leer, und das ist eine Aussage.
+    assert daten["summary"]["ungedeckte_positionen"] == ""
+    assert set(daten["available_tabs"]) == {"kopf", "positionen", "herkunft"}
+
+    positionen = client.get(
+        f"/api/v1/sales/invoices/{rid}/tabs/positionen", headers=kopf
+    ).json()
+    assert positionen["total"] == 1
+    zeile = positionen["items"][0]
+    assert zeile["quantity"] == 100.0
+    assert zeile["herkunft"] == "Belegt"
+    assert zeile["herkunft_art"] == "belegt"
+
+    herkunft = client.get(f"/api/v1/sales/invoices/{rid}/tabs/herkunft", headers=kopf).json()
+    assert herkunft["total"] == 1
+    quelle = herkunft["items"][0]
+    assert quelle["source_type"] == "Lieferschein"
+    assert quelle["source_document_id"] == ls_id
+    assert quelle["source_line_id"] == "1"
+    assert quelle["quantity"] == 100.0
+
+
+def test_steuerausweis_trennt_die_saetze_und_ergibt_den_kopfbetrag(client, kopf) -> None:
+    """Sammelrechnung ueber 7 % und 19 %: je Satz eine Zeile, Summe = Kopf."""
+    ermaessigt = lieferschein(client, kopf, "100", "25.00", "7")
+    regulaer = lieferschein(client, kopf, "40", "25.00", "19")
+    angelegt = rechnung(client, kopf, ermaessigt, regulaer)
+    assert angelegt.status_code == 201, angelegt.text
+    rid = angelegt.json()["id"]
+
+    antwort = client.get(f"/api/v1/sales/invoices/{rid}/tabs/steuer", headers=kopf)
+    assert antwort.status_code == 200, antwort.text
+    seite = antwort.json()
+    assert seite["table_key"] == "invoice_taxes"
+    assert seite["total"] == 2
+    assert seite["items"] == [
+        {"steuersatz": "7 %", "vat_rate": 7.0, "net_amount": 2500.0, "vat_amount": 175.0,
+         "gross_amount": 2675.0, "positionen": 1},
+        {"steuersatz": "19 %", "vat_rate": 19.0, "net_amount": 1000.0, "vat_amount": 190.0,
+         "gross_amount": 1190.0, "positionen": 1},
+    ]
+
+    beleg = client.get(f"/api/v1/sales/invoices/{rid}", headers=kopf).json()
+    assert Decimal(beleg["vat_amount"]) == Decimal("365")
+    assert Decimal(beleg["gross_amount"]) == Decimal("3865")
+
+
+def test_positionen_stehen_in_zahlenfolge_nicht_in_textfolge(client, kopf, mandant) -> None:
+    """Ab der zehnten Position darf "10" nicht vor "2" stehen."""
+    from sqlalchemy import create_engine, text
+
+    # Elf echte Artikel — delivery_note_positions.artikel_id ist ein
+    # Fremdschluessel auf domain_inventory.articles.
+    with create_engine(DB_URL).begin() as verbindung:
+        for nr in range(1, 12):
+            verbindung.execute(
+                text(
+                    "INSERT INTO domain_inventory.articles "
+                    "(id, tenant_id, article_number, name) "
+                    "VALUES (:id, :tid, :nr, :name) ON CONFLICT (id) DO NOTHING"
+                ),
+                {
+                    "id": f"ART-{nr}",
+                    "tid": mandant,
+                    "nr": f"{20000 + nr}",
+                    "name": f"Sorte {nr}",
+                },
+            )
+
+    antwort = client.post(
+        "/api/v1/sales/delivery-notes",
+        headers=kopf,
+        json={
+            "customer_id": "K-100",
+            "delivery_date": "2026-09-15",
+            "positionen": [
+                {
+                    "pos_nr": nr,
+                    "artikel_id": f"ART-{nr}",
+                    "artikel_nr": f"{20000 + nr}",
+                    "bezeichnung": f"Sorte {nr}",
+                    "menge": "10",
+                    "einheit": "dt",
+                    "netto_preis": "20.00",
+                    "mwst_prozent": "7",
+                }
+                for nr in range(1, 12)
+            ],
+        },
+    )
+    assert antwort.status_code == 201, antwort.text
+    angelegt = rechnung(client, kopf, antwort.json()["id"])
+    assert angelegt.status_code == 201, angelegt.text
+
+    seite = client.get(
+        f"/api/v1/sales/invoices/{angelegt.json()['id']}/tabs/positionen", headers=kopf
+    ).json()
+    assert [zeile["line_no"] for zeile in seite["items"]] == [str(nr) for nr in range(1, 12)]
+
+
+def test_steuerausweis_einer_fremden_rechnung_bleibt_verschlossen(client, kopf) -> None:
+    rid = rechnung(client, kopf, lieferschein(client, kopf)).json()["id"]
+    fremd = {
+        "Authorization": "Bearer dev-token",
+        "X-Tenant-ID": "test-fremder-mandant",
+        "X-Tenant-Id": "test-fremder-mandant",
+    }
+    assert client.get(f"/api/v1/sales/invoices/{rid}/tabs/steuer", headers=fremd).status_code == 404
+
+
+def test_unbekanntes_register_bleibt_leer_statt_die_maske_zu_zerlegen(client, kopf) -> None:
+    ls_id = lieferschein(client, kopf)
+    rid = rechnung(client, kopf, ls_id).json()["id"]
+
+    antwort = client.get(f"/api/v1/sales/invoices/{rid}/tabs/gibt-es-nicht", headers=kopf)
+    assert antwort.status_code == 200
+    assert antwort.json()["items"] == []
+
+
+def test_maske_einer_fremden_rechnung_bleibt_verschlossen(client, kopf) -> None:
+    ls_id = lieferschein(client, kopf)
+    rid = rechnung(client, kopf, ls_id).json()["id"]
+
+    fremd = {
+        "Authorization": "Bearer dev-token",
+        "X-Tenant-ID": "test-fremder-mandant",
+        "X-Tenant-Id": "test-fremder-mandant",
+    }
+    assert client.get(f"/api/v1/sales/invoices/{rid}/screen-summary", headers=fremd).status_code == 404
+    assert client.get(f"/api/v1/sales/invoices/{rid}/tabs/positionen", headers=fremd).status_code == 404
+
+
+def test_liste_bedient_die_maskenlaufzeit_mit_seite_sortierung_und_spaltenfilter(
+    client, kopf
+) -> None:
+    """Die Faktura-Worklist fragt in Seiten, nicht in Zeilenversaetzen."""
+    erster = rechnung(client, kopf, lieferschein(client, kopf, "10")).json()
+    zweiter = rechnung(client, kopf, lieferschein(client, kopf, "20")).json()
+
+    seite = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"page": 1, "limit": 1}
+    ).json()
+    assert len(seite["items"]) == 1
+    assert seite["page"] == 1
+    assert seite["total"] >= 2
+
+    zweite_seite = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"page": 2, "limit": 1}
+    ).json()
+    assert zweite_seite["page"] == 2
+    assert zweite_seite["items"][0]["id"] != seite["items"][0]["id"]
+
+    # Sortierung nach einer benannten Spalte ...
+    aufsteigend = client.get(
+        "/api/v1/sales/invoices",
+        headers=kopf,
+        params={"sort": "net_amount", "sort_dir": "asc", "limit": 200},
+    ).json()
+    betraege = [float(z["net_amount"]) for z in aufsteigend["items"]]
+    assert betraege == sorted(betraege)
+
+    # ... und nach einer erfundenen Spalte: geordnet bleibt es trotzdem.
+    erfunden = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"sort": "drop table", "limit": 5}
+    )
+    assert erfunden.status_code == 200
+
+    # Freitext trifft Nummer oder Kunde.
+    gefunden = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"q": "K-100"}
+    ).json()
+    assert {erster["id"], zweiter["id"]} <= {z["id"] for z in gefunden["items"]}
+
+    # Spaltenfilter der Maske.
+    plan = client.get(
+        "/api/v1/sales/invoices",
+        headers=kopf,
+        params={"filter_plan": '{"status": {"op": "eq", "value": "entwurf"}}', "limit": 200},
+    ).json()
+    assert all(z["status"] == "entwurf" for z in plan["items"])
+
+    # Ein unlesbarer Plan wird abgewiesen, nicht stillschweigend ignoriert.
+    kaputt = client.get(
+        "/api/v1/sales/invoices", headers=kopf, params={"filter_plan": "{kein json"}
+    )
+    assert kaputt.status_code == 422
+
+
+def test_zwei_rechnungen_kurz_hintereinander_bekommen_zwei_nummern(client, kopf) -> None:
+    """Der Fehler, der den Slice aufgehalten hat.
+
+    Die Ersatznummer war der Kopf einer uuid7 — und der ist der Zeitstempel.
+    Ueber rund eine Minute war er identisch: Die zweite Rechnung lief in die
+    Eindeutigkeitsbedingung und der Aufrufer bekam einen 500er.
+    """
+    erste = rechnung(client, kopf, lieferschein(client, kopf, "10"))
+    zweite = rechnung(client, kopf, lieferschein(client, kopf, "20"))
+
+    assert erste.status_code == 201, erste.text
+    assert zweite.status_code == 201, zweite.text
+    assert erste.json()["invoice_number"] != zweite.json()["invoice_number"]
+
+
+def test_doppelte_rechnungsnummer_ist_eine_lage_kein_serverfehler(client, kopf) -> None:
+    ls_erster = lieferschein(client, kopf, "10")
+    ls_zweiter = lieferschein(client, kopf, "20")
+    nummer = f"RE-TEST-{uuid.uuid4().hex[:6].upper()}"
+
+    def mit_nummer(ls_id: str):
+        return client.post(
+            "/api/v1/sales/invoices/from-delivery-notes",
+            headers=kopf,
+            json={
+                "customer_id": "K-100",
+                "delivery_note_ids": [ls_id],
+                "invoice_date": "2026-09-15",
+                "invoice_number": nummer,
+            },
+        )
+
+    assert mit_nummer(ls_erster).status_code == 201
+    kollision = mit_nummer(ls_zweiter)
+    assert kollision.status_code == 409
+    assert "bereits vergeben" in kollision.json()["detail"]

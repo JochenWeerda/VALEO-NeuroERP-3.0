@@ -193,7 +193,8 @@ Produktionsfreigabe dokumentiert vorliegen.
 
 | Gate | Verantwortung | Repo-Vorbereitung |
 |------|--------------|-------------------|
-| GitHub-Environment `production` Reviewer/Branch-Protection setzen | DevOps/Ops | `.github/workflows/valeo-erp-deployment.yml` |
+| GitHub-Environment `production` Reviewer setzen | DevOps/Ops | `.github/workflows/valeo-erp-deployment.yml` |
+| Branch-Protection `main` (SPEC-P0-06) | DevOps — **aktiv 2026-09-11** | `docs/operations/governance/branch-protection-main.md`, `.github/CODEOWNERS`, `scripts/check_codeowners_spec_p0_06.py` |
 | Produktive Cluster-Secrets befuellen (`valeo-erp-runtime`, `valeo-erp-database`) | Ops | `k8s/helm/valeo-erp/values-production.yaml`, `.env.example` |
 | Monitoring-Alertmanager-URL und Grafana-Credentials setzen | Ops | `monitoring/prometheus/alerts-event-bus.yml` |
 | Erstmaligen Backup-/Restore-Drill durchfuehren und Ergebnis dokumentieren | Ops | Runbook Abschnitt "Rollback und Notfall" |

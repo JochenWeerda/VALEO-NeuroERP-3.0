@@ -1,0 +1,37 @@
+slice_id: SPEC-P1-06-W14-DRAIN
+id: SPEC-P1-06-W14-DRAIN
+title: Legacy-Routen response_model drain — Welle 14 (TypedObjectOut auf Rest 173)
+owner: Cursor Auto
+status: abgeschlossen
+completed_at: "2026-09-11"
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+goal: >-
+  Abschlusswelle von SPEC-P1-06: verbleibende 173 schwache response_model
+  (dict / dict[str, Any] / list[dict...]) mechanisch auf TypedObjectOut heben,
+  ohne CompatFlexOut. Gate von 173 → 0.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W14-DRAIN.yaml
+  - docs/agent-ops/active-workboard.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - app/api/v1/schemas/base.py
+  - app/api/v1/endpoints/*.py
+  - tests/test_welle14_response_models.py
+acceptance:
+  - Schwache response_model-Typen = 0
+  - CompatFlexOut-Nutzungen bleiben 0
+  - TypedObjectOut akzeptiert Extra-Keys ohne Feldverlust
+  - Stichproben-Module (kaeufergruppe, mobile_sync, process_map) ohne schwache Typen
+tests:
+  - tests/test_welle14_response_models.py
+ai_harness:
+  fachlicher_vertrag: Restliche Legacy-Antworten sind OpenAPI-faehig als TypedObjectOut.
+  architektur_vertrag: TypedObjectOut in app/api/v1/schemas/base.py; kein CompatFlexOut.
+  daten_vertrag: Keine Migration.
+  test_vertrag: Gate --threshold 0.
+  security_vertrag: Keine Gate-Lockerung; SECURITY-REMAINDER unberuehrt.
+  betriebs_vertrag: Keine Deployments.
+  dokumentations_vertrag: Slice-YAML, Workboard, open-gaps.
+verification:
+  - "python scripts/check_weak_response_models.py --threshold 0"
+  - "pytest tests/test_welle14_response_models.py -o addopts="

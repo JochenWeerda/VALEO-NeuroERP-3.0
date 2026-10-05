@@ -10,6 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { TouchRecordStack } from '@/components/list/TouchRecordStack'
 import { ListConfig, ListColumn, Action, Field } from './types'
 
 function inputValue(value: unknown): string | number {
@@ -70,6 +72,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
 }: ListReportProps<TItem>) => {
   const { t } = useTranslation()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, unknown>>({})
   const [sortField, setSortField] = useState(config.defaultSort?.field || '')
@@ -267,9 +270,9 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
   }
 
   return (
-    <div className="space-y-8 p-4 md:p-8">
+    <div className="space-y-6 p-3 md:p-8">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[var(--radius)] border border-border bg-card p-6 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-(--radius) border border-border bg-card p-4 shadow-sm md:p-6">
         <div>
           <h1 className="text-xl font-bold tracking-normal text-foreground">{displayTitle}</h1>
           {displaySubtitle && (
@@ -278,19 +281,24 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
         </div>
         <div className="flex flex-wrap gap-2">
           {onImport && (
-            <Button variant="outline" onClick={onImport} className="gap-2">
+            <Button variant="outline" onClick={onImport} className="min-h-touch gap-2 touch-manipulation">
               <Upload className="h-4 w-4" />
               {t('crud.actions.import')}
             </Button>
           )}
           {onExport && (
-            <Button variant="outline" onClick={onExport} className="gap-2">
+            <Button
+              variant="outline"
+              onClick={onExport}
+              className="min-h-touch gap-2 touch-manipulation"
+              data-global-button-handler="ignore"
+            >
               <Download className="h-4 w-4" />
               {t('crud.actions.export')}
             </Button>
           )}
           {onCreate && (
-            <Button onClick={onCreate} className="gap-2">
+            <Button onClick={onCreate} className="min-h-touch gap-2 touch-manipulation">
               <Plus className="h-4 w-4" />
               {t('crud.actions.new')}
             </Button>
@@ -319,7 +327,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                   placeholder={t('crud.list.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="min-h-touch pl-10"
                 />
               </div>
             </div>
@@ -334,6 +342,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                 {filter.type === 'select' ? (
                   <NativeSelect
                     id={filterId}
+                    className="min-h-touch"
                     value={inputValue(filters[filterName])}
                     onValueChange={(value) => handleFilterChange(filterName, value)}
                     options={((filter['options'] as Array<{ value: string | number; label: string; labelKey?: string }>) ?? []).map((option) => ({
@@ -353,7 +362,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                       min={filter['min'] as number | undefined}
                       max={filter['max'] as number | undefined}
                       step={(filter['step'] as number | undefined) || 0.01}
-                      className="pr-8"
+                      className="min-h-touch pr-8"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
                   </div>
@@ -367,6 +376,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                     max={(filter['maxDate'] as string | undefined) || new Date().toISOString().split('T')[0]}
                     min={filter['minDate'] as string | undefined}
                     lang="de-DE"
+                    className="min-h-touch"
                   />
                 ) : (
                   <Input
@@ -374,6 +384,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                     placeholder={getFilterPlaceholder(filter)}
                     value={inputValue(filters[filterName])}
                     onChange={(e) => handleFilterChange(filterName, e.target.value)}
+                    className="min-h-touch"
                   />
                 )}
               </div>
@@ -386,18 +397,17 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
       {selectedItems.length > 0 && config.bulkActions && (
         <Card className="border-primary/30 bg-primary/5">
           <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm font-medium">
                 {t('crud.list.selectedItems', { count: selectedItems.length })}
               </span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {config.bulkActions.map(action => (
                   <Button
                     key={action.key}
                     variant="outline"
-                    size="sm"
+                    className="min-h-touch gap-2 touch-manipulation"
                     onClick={() => handleBulkAction(action)}
-                    className="gap-2"
                   >
                     {getBulkActionLabel(action)}
                   </Button>
@@ -416,7 +426,53 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto rounded-[var(--radius)] border border-border">
+          {isTouch && !effectiveLoading && paginatedData.length > 0 ? (
+            <TouchRecordStack
+              items={paginatedData}
+              getKey={(item, index) => {
+                const itemRecord = recordFromItem(item)
+                return String(typeof itemRecord.id === 'string' || typeof itemRecord.id === 'number' ? itemRecord.id : index)
+              }}
+              title={(item) => renderCell(config.columns[0], item)}
+              fields={(item) =>
+                config.columns.slice(1, 6).map((column) => ({
+                  key: column.key,
+                  label: getColumnLabel(column),
+                  value: renderCell(column, item),
+                }))
+              }
+              actions={(item) => {
+                const itemRecord = recordFromItem(item)
+                const pending = pendingRows?.has(String(itemRecord.id))
+                if (onAction) {
+                  return config.actions
+                    .filter((a) => a.key !== 'create')
+                    .map((action) => ({
+                      key: action.key,
+                      label: action.labelKey ? t(action.labelKey) : action.label,
+                      onClick: () => { void onAction(action.key, item) },
+                      danger: action.type === 'danger',
+                      disabled: pending,
+                    }))
+                }
+                const next: Array<{ key: string; label: string; onClick: () => void; danger?: boolean; disabled?: boolean }> = []
+                if (onEdit) {
+                  next.push({ key: 'edit', label: t('crud.actions.edit'), onClick: () => onEdit(item) })
+                }
+                if (onDelete) {
+                  next.push({
+                    key: 'delete',
+                    label: t('crud.actions.delete'),
+                    onClick: () => onDelete(item),
+                    danger: true,
+                    disabled: pending,
+                  })
+                }
+                return next
+              }}
+            />
+          ) : (
+          <div className="overflow-x-auto rounded-(--radius) border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -474,7 +530,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                           <p className="text-sm">{config.emptyState.description}</p>
                         )}
                         {config.emptyState?.actionLabel && onCreate && (
-                          <Button size="sm" onClick={onCreate} className="mt-2">
+                          <Button onClick={onCreate} className="mt-2 min-h-touch touch-manipulation">
                             <Plus className="h-4 w-4 mr-1" aria-hidden="true" />
                             {config.emptyState.actionLabel}
                           </Button>
@@ -518,10 +574,9 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                                   <Button
                             key={action.key}
                             variant="ghost"
-                            size="sm"
+                            className={`min-h-11 touch-manipulation ${action.type === 'danger' ? 'text-destructive hover:text-destructive' : ''}`}
                             onClick={() => onAction(action.key, item)}
                                     disabled={pendingRows?.has(String(itemRecord.id))}
-                                    className={action.type === 'danger' ? 'text-destructive hover:text-destructive' : undefined}
                                   >
                                     {action.labelKey ? t(action.labelKey) : action.label}
                                   </Button>
@@ -529,17 +584,16 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
                             : (
                               <>
                                 {onEdit && (
-                                  <Button variant="ghost" size="sm" onClick={() => onEdit(item)}>
+                                  <Button variant="ghost" className="min-h-11 touch-manipulation" onClick={() => onEdit(item)}>
                                     {t('crud.actions.edit')}
                                   </Button>
                                 )}
                                 {onDelete && (
                                   <Button
                                     variant="ghost"
-                                    size="sm"
+                                    className="min-h-11 touch-manipulation text-destructive hover:text-destructive"
                                     onClick={() => onDelete(item)}
                                     disabled={pendingRows?.has(String(itemRecord.id))}
-                                    className="text-destructive hover:text-destructive"
                                   >
                                     {t('crud.actions.delete')}
                                   </Button>
@@ -554,14 +608,16 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
               </TableBody>
             </Table>
           </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Simple Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 rounded-[var(--radius)] border border-border bg-card p-3 shadow-sm">
+        <div className="flex items-center justify-center gap-4 rounded-(--radius) border border-border bg-card p-3 shadow-sm">
           <Button
             variant="outline"
+            className="min-h-touch"
             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
           >
@@ -574,6 +630,7 @@ const ListReport = <TItem extends object = Record<string, unknown>>({
 
           <Button
             variant="outline"
+            className="min-h-touch"
             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
           >

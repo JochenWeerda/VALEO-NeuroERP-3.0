@@ -5,15 +5,15 @@ Settings for CRM Security & Compliance Service.
 import os
 from typing import List, Optional
 
-from pydantic_settings import BaseSettings
 from pydantic import validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     """Application settings."""
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp"
+    DATABASE_URL: str = ""
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/11"

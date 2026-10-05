@@ -1,154 +1,33 @@
-"use client"
-
-// Inspired by react-hot-toast library
+// Toast-Konsolidierung (DESIGN-GAPS-FOLLOWUP-013): Dieses Modul behaelt
+// die shadcn-use-toast-API (255 Aufrufer), rendert aber ueber sonner — den
+// einzigen global gemounteten Toast-Renderer (app/ToastBootstrap.tsx).
+// Der fruehere lokale Store + <Toaster /> (TOAST_LIMIT 1, nie sichtbar
+// gestapelt) entfaellt; Tests, die '@/hooks/use-toast' mocken, bleiben gueltig.
 import * as React from "react"
+import { toast as sonnerToast } from "sonner"
 
-import type {
-  ToastActionElement,
-  ToastProps,
-} from "@/components/ui/toast"
+type ToastVariant = "default" | "destructive"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
-
-type ToasterToast = ToastProps & {
-  id: string
+interface ToastOptions {
   title?: React.ReactNode
   description?: React.ReactNode
-  action?: ToastActionElement
+  variant?: ToastVariant
+  duration?: number
+  /** Optionale Aktions-Schaltfläche im Toast (sonner rendert ReactNode direkt). */
+  action?: React.ReactNode
 }
 
-const actionTypes = {
-  ADD_TOAST: "ADD_TOAST",
-  UPDATE_TOAST: "UPDATE_TOAST",
-  DISMISS_TOAST: "DISMISS_TOAST",
-  REMOVE_TOAST: "REMOVE_TOAST",
-} as const
+type ToasterToast = ToastOptions & { id: string }
 
-let count = 0
-
-function genId(): string {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
-  return count.toString()
-}
-
-type ActionType = typeof actionTypes
-
-type Action =
-  | {
-      type: ActionType["ADD_TOAST"]
-      toast: ToasterToast
-    }
-  | {
-      type: ActionType["UPDATE_TOAST"]
-      toast: Partial<ToasterToast>
-    }
-  | {
-      type: ActionType["DISMISS_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
-  | {
-      type: ActionType["REMOVE_TOAST"]
-      toastId?: ToasterToast["id"]
-    }
-
-interface State {
-  toasts: ToasterToast[]
-}
-
-const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
-
-const addToRemoveQueue = (toastId: string): void => {
-  if (toastTimeouts.has(toastId)) {
-    return
-  }
-
-  const timeout = setTimeout((): void => {
-    toastTimeouts.delete(toastId)
-    dispatch({
-      type: "REMOVE_TOAST",
-      toastId: toastId,
-    })
-  }, TOAST_REMOVE_DELAY)
-
-  toastTimeouts.set(toastId, timeout)
-}
-
-export const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "ADD_TOAST":
-      return {
-        ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
-      }
-
-    case "UPDATE_TOAST":
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t
-        ),
-      }
-
-    case "DISMISS_TOAST": {
-      const { toastId } = action
-
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
-      if (typeof toastId === 'string' && toastId.length > 0) {
-        addToRemoveQueue(toastId)
-      } else {
-        state.toasts.forEach((toast): void => {
-          addToRemoveQueue(toast.id)
-        })
-      }
-
-      return {
-        ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === toastId || toastId === undefined
-            ? {
-                ...t,
-                open: false,
-              }
-            : t
-        ),
-      }
-    }
-    case "REMOVE_TOAST":
-      if (action.toastId === undefined) {
-        return {
-          ...state,
-          toasts: [],
-        }
-      }
-      return {
-        ...state,
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
-      }
-  }
-}
-
-const listeners: Array<(state: State) => void> = []
-
-let memoryState: State = { toasts: [] }
-
-function dispatch(action: Action): void {
-  memoryState = reducer(memoryState, action)
-  listeners.forEach((listener): void => {
-    listener(memoryState)
-  })
-}
-
-type Toast = Omit<ToasterToast, "id">
+type Toast = ToastOptions
 
 type ToastHandle = {
   id: string
   dismiss: () => void
-  update: (props: ToasterToast) => void
+  update: (props: Toast) => void
 }
 
-type ShortcutToastProps = Omit<Toast, "title" | "description" | "variant"> & {
+type ShortcutToastProps = Omit<Toast, "title" | "variant" | "description"> & {
   description?: string
 }
 
@@ -159,33 +38,27 @@ type ToastFn = ((props: Toast) => ToastHandle) & {
   warning: (_title: string, _descriptionOrProps?: string | ShortcutToastProps, _props?: ShortcutToastProps) => ToastHandle
 }
 
-function baseToast(props: Toast): ToastHandle {
-  const id = genId()
+type SonnerKind = "message" | "success" | "error" | "info" | "warning"
 
-  const update = (updateProps: ToasterToast): void =>
-    dispatch({
-      type: "UPDATE_TOAST",
-      toast: { ...updateProps, id },
-    })
-  const dismiss = (): void => dispatch({ type: "DISMISS_TOAST", toastId: id })
-
-  dispatch({
-    type: "ADD_TOAST",
-    toast: {
-      ...props,
-      id,
-      open: true,
-      onOpenChange: (open): void => {
-        if (!open) dismiss()
-      },
-    },
-  })
-
-  return {
-    id: id,
-    dismiss,
-    update,
+function emit(kind: SonnerKind, props: Toast, id?: string | number): ToastHandle {
+  const message = props.title ?? props.description ?? ""
+  const options = {
+    id,
+    description: props.title !== undefined && props.title !== null ? props.description : undefined,
+    duration: props.duration,
+    action: props.action,
   }
+  const emitter = kind === "message" ? sonnerToast : sonnerToast[kind]
+  const toastId = emitter(message, options)
+  return {
+    id: String(toastId),
+    dismiss: (): void => { sonnerToast.dismiss(toastId) },
+    update: (updateProps: Toast): void => { emit(kind, updateProps, toastId) },
+  }
+}
+
+function baseToast(props: Toast): ToastHandle {
+  return emit(props.variant === "destructive" ? "error" : "message", props)
 }
 
 const toast = baseToast as ToastFn
@@ -200,85 +73,36 @@ const normalizeShortcutToastProps = (
   title: string,
   descriptionOrProps?: string | ShortcutToastProps,
   props?: ShortcutToastProps,
-): { title: string; description?: string; props: ShortcutToastProps } => {
+): Toast => {
   if (isShortcutToastProps(descriptionOrProps)) {
-    return {
-      title,
-      description: descriptionOrProps.description,
-      props: descriptionOrProps,
-    }
+    return { ...descriptionOrProps, title, description: descriptionOrProps.description }
   }
-
-  return {
-    title,
-    description: descriptionOrProps,
-    props: props ?? {},
-  }
+  return { ...(props ?? {}), title, description: descriptionOrProps }
 }
 
-toast.success = (title, descriptionOrProps, props) => {
-  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
-  const { description, ...toastProps } = normalized.props
-  return baseToast({
-    ...toastProps,
-    title: normalized.title,
-    description: normalized.description ?? description,
-  })
-}
+toast.success = (title, descriptionOrProps, props) =>
+  emit("success", normalizeShortcutToastProps(title, descriptionOrProps, props))
 
-toast.error = (title, descriptionOrProps, props) => {
-  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
-  const { description, ...toastProps } = normalized.props
-  return baseToast({
-    ...toastProps,
-    title: normalized.title,
-    description: normalized.description ?? description,
-    variant: "destructive",
-  })
-}
+toast.error = (title, descriptionOrProps, props) =>
+  emit("error", normalizeShortcutToastProps(title, descriptionOrProps, props))
 
-toast.info = (title, descriptionOrProps, props) => {
-  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
-  const { description, ...toastProps } = normalized.props
-  return baseToast({
-    ...toastProps,
-    title: normalized.title,
-    description: normalized.description ?? description,
-  })
-}
+toast.info = (title, descriptionOrProps, props) =>
+  emit("info", normalizeShortcutToastProps(title, descriptionOrProps, props))
 
-toast.warning = (title, descriptionOrProps, props) => {
-  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
-  const { description, ...toastProps } = normalized.props
-  return baseToast({
-    ...toastProps,
-    title: normalized.title,
-    description: normalized.description ?? description,
-    variant: "destructive",
-  })
-}
+toast.warning = (title, descriptionOrProps, props) =>
+  emit("warning", normalizeShortcutToastProps(title, descriptionOrProps, props))
 
 function useToast(): {
   toasts: ToasterToast[]
   toast: typeof toast
   dismiss: (_toastId?: string) => void
 } {
-  const [state, setState] = React.useState<State>(memoryState)
-
-  React.useEffect((): (() => void) => {
-    listeners.push(setState)
-    return (): void => {
-      const index = listeners.indexOf(setState)
-      if (index > -1) {
-        listeners.splice(index, 1)
-      }
-    }
-  }, [])
-
+  // sonner haelt den Toast-Zustand selbst; `toasts` bleibt nur als leere
+  // Kompatibilitaetsflaeche fuer die bisherige Hook-Signatur erhalten.
   return {
-    ...state,
+    toasts: [],
     toast,
-    dismiss: (_toastId?: string): void => dispatch({ type: "DISMISS_TOAST", toastId: _toastId }),
+    dismiss: (_toastId?: string): void => { sonnerToast.dismiss(_toastId) },
   }
 }
 

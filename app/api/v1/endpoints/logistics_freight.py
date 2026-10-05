@@ -17,6 +17,7 @@ Alembic: ``log_freight_tariff_storno_20260613``.
 
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Any, Dict
@@ -28,9 +29,11 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 
-from app.api.v1.schemas.base import IDResponse
+from app.api.v1.schemas.base import IDResponse, TypedObjectOut
 from app.api.v1.schemas.logistics_freight_schemas import LogisticsFreightOut
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/logistik", tags=["logistik", "frachtkosten"])
 
@@ -161,7 +164,7 @@ def list_tariffs(
             conditions.append("tenant_id IS NULL")
         where = " AND ".join(conditions)
         rows = db.execute(
-            text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_logistics.freight_tariffs WHERE {where} ORDER BY carrier_id, weight_from_kg"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return [dict(r) for r in rows]
@@ -204,8 +207,8 @@ def create_tariff(
 
 @router.post(
     "/freight-tariffs/{tariff_id}/cancel",
-    summary="Fracht-Tarif stornieren (soft, Mandanten-Tarife)",
     response_model=LogisticsFreightOut,
+    summary="Fracht-Tarif stornieren (soft, Mandanten-Tarife)",
 )
 def cancel_tariff(
     tariff_id: str,
@@ -341,7 +344,7 @@ class CarrierInvoiceIn(BaseModel):
 
 
 @router.post(
-    "/freight-cost/carrier-invoice", response_model=dict,
+    "/freight-cost/carrier-invoice", response_model=TypedObjectOut,
     status_code=201,
     summary="Spediteur-Eingangsrechnung erfassen + FiBu-Buchung (LOG-FRACHT-001)",
 )
@@ -390,26 +393,26 @@ def create_carrier_invoice(
     # 2) FiBu: Dr. Frachtkosten / Cr. AP Spediteur (+ Vorsteuer wenn > 0)
     try:
         from app.services.finance_transaction_service import FinanceTransactionService
+        fin = FinanceTransactionService(db, x_tenant_id)
         from datetime import date as _date
 
         inv_date = _date.fromisoformat(body.invoice_date)
         lines = [
-            {"account_id": body.debit_account, "debit_amount": body.net_amount_eur,
+            {"account_id": fin.account_id_for_number(body.debit_account), "debit_amount": body.net_amount_eur,
              "credit_amount": 0.0,
              "description": f"Frachtkosten Tour {body.tour_id} ({body.carrier_id})"},
-            {"account_id": body.credit_account, "debit_amount": 0.0,
+            {"account_id": fin.account_id_for_number(body.credit_account), "debit_amount": 0.0,
              "credit_amount": gross,
              "description": f"AP Spediteur {body.carrier_id} {body.invoice_number}"},
         ]
         if body.tax_amount_eur > 0:
             lines.append({
-                "account_id": body.tax_account,
+                "account_id": fin.account_id_for_number(body.tax_account),
                 "debit_amount": body.tax_amount_eur,
                 "credit_amount": 0.0,
                 "description": f"Vorsteuer 19% Fracht {body.invoice_number}",
             })
 
-        fin = FinanceTransactionService(db, x_tenant_id)
         je = fin.create(
             entry_number=f"JE-FRACHT-{body.invoice_number}",
             description=f"Spediteur-Rechnung {body.invoice_number} Tour {body.tour_id}",
@@ -428,9 +431,19 @@ def create_carrier_invoice(
              WHERE id = :id AND tenant_id = :tenant_id
         """), {"ref": journal_ref, "id": invoice_id, "tenant_id": x_tenant_id})
 
-    except Exception:
-        # FiBu-Fehler → Invoice gespeichert, Status bleibt 'offen', manuell nachbuchen
-        pass
+    except Exception as exc:
+        # Nicht blockierend: Rechnung ist gespeichert, Status bleibt 'offen' und
+        # wird manuell nachgebucht. Der Fehlschlag wird gemeldet, damit die
+        # fehlende Buchung nicht unbemerkt bleibt.
+        from app.core.metrics import critical_data_path_errors_total
+
+        critical_data_path_errors_total.labels(
+            endpoint="logistics_freight_fibu", error_type="posting_failed"
+        ).inc()
+        logger.error(
+            "FiBu-Buchung fuer Frachtrechnung %s fehlgeschlagen: %s",
+            invoice_id, exc, exc_info=True,
+        )
 
     db.commit()
 
@@ -450,7 +463,7 @@ def create_carrier_invoice(
 
 
 @router.get(
-    "/freight-cost/carrier-invoices", response_model=dict,
+    "/freight-cost/carrier-invoices", response_model=TypedObjectOut,
     summary="Spediteur-Rechnungen auflisten",
 )
 def list_carrier_invoices(
@@ -474,7 +487,7 @@ def list_carrier_invoices(
         params["carrier_id"] = carrier_id
 
     try:
-        rows = db.execute(text(f"""  -- nosec S608 reviewed-safe: dynamic fragments are code-controlled and values parameterized
+        rows = db.execute(text(f"""
             SELECT id, tour_id, carrier_id, invoice_number, invoice_date,
                    net_amount_eur, tax_amount_eur, gross_amount_eur,
                    fibu_journal_ref, status, created_at
@@ -482,7 +495,7 @@ def list_carrier_invoices(
              WHERE {where}
              ORDER BY created_at DESC
              LIMIT :limit
-        """), params).mappings().all()
+        """), params).mappings().all()  # nosec B608  # reviewed-safe: dynamische Fragmente aus festen Literalen, Werte gebunden
         items = [dict(r) for r in rows]
         for item in items:
             for k, v in item.items():

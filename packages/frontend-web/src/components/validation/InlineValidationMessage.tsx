@@ -43,20 +43,20 @@ interface InlineValidationMessageProps {
 const _iconFor = (severity: ValidationSeverity) => {
   switch (severity) {
     case 'ERROR':
-      return <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+      return <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
     case 'WARNING':
-      return <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+      return <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
     case 'INFO':
-      return <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+      return <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
   }
 }
 
 const _colorFor = (severity: ValidationSeverity) => {
   switch (severity) {
     case 'ERROR':
-      return 'text-red-600'
+      return 'text-status-error'
     case 'WARNING':
-      return 'text-amber-600'
+      return 'text-status-warning'
     case 'INFO':
       return 'text-blue-600'
   }
@@ -111,7 +111,7 @@ export function InlineValidationMessage({
   if (result.is_valid && !result.has_warnings && result.messages.length === 0) {
     if (!showSuccessIcon) return null
     return (
-      <div className={cn('flex items-center gap-1 text-xs text-green-600', className)}>
+      <div className={cn('flex items-center gap-1 text-xs text-status-success', className)}>
         <CheckCircle2 className="h-3.5 w-3.5" />
         <span>Gültig</span>
       </div>

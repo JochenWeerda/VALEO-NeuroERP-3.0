@@ -11,6 +11,7 @@ from typing import Any
 from fastapi import APIRouter, Depends
 
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/external-gates", tags=["external-gates"])
 
@@ -121,7 +122,7 @@ def _gate_status(system_id: str, tenant_id: str) -> dict[str, Any]:
 @router.get(
     "/",
     summary="Alle externen Gate-Status abrufen",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
 )
 async def get_all_gates(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     gates = [_gate_status(sid, tenant_id) for sid in _SYSTEM_META]
@@ -141,7 +142,7 @@ async def get_all_gates(tenant_id: str = Depends(get_tenant_id)) -> dict[str, An
 @router.get(
     "/{system_id}",
     summary="Gate-Status eines externen Systems abrufen",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
 )
 async def get_gate(system_id: str, tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     from fastapi import HTTPException

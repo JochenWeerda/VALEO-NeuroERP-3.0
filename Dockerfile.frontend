@@ -6,11 +6,12 @@ RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/frontend-web/package.json packages/frontend-web/package.json
+COPY config/security/npm-patches/ config/security/npm-patches/
 RUN pnpm install --filter @valero-neuroerp/frontend-web --frozen-lockfile
 
 COPY packages/frontend-web/ packages/frontend-web/
 WORKDIR /app/packages/frontend-web
-RUN pnpm run build:prod
+RUN pnpm run routes:generate && pnpm run build:prod
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine3.23
 

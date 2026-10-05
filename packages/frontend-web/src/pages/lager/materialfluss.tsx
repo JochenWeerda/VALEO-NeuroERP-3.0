@@ -86,13 +86,13 @@ const MfProcessNode = memo(function MfProcessNode(props: NodeProps): JSX.Element
     <div
       className={`rounded-md border-2 bg-card text-card-foreground px-2 py-1.5 text-xs shadow-sm min-w-[130px] max-w-[200px] ${border}`}
     >
-      <Handle type="target" position={Position.Left} className="!h-2 !w-2 !bg-muted-foreground" />
+      <Handle type="target" position={Position.Left} className="h-2! w-2! bg-muted-foreground!" />
       <div className="font-semibold leading-tight">{data?.label}</div>
       {data?.sub ? (
-        <div className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{data.sub}</div>
+        <div className="text-2xs text-muted-foreground mt-0.5 leading-snug">{data.sub}</div>
       ) : null}
-      <div className="text-[10px] mt-1 opacity-90">{flowNodeStatusGermanLabel(st)}</div>
-      <Handle type="source" position={Position.Right} className="!h-2 !w-2 !bg-muted-foreground" />
+      <div className="text-2xs mt-1 opacity-90">{flowNodeStatusGermanLabel(st)}</div>
+      <Handle type="source" position={Position.Right} className="h-2! w-2! bg-muted-foreground!" />
     </div>
   )
 })
@@ -223,7 +223,7 @@ function SiloCellInventoryEditor(props: {
   return (
     <div className="flex flex-col gap-1 max-w-[240px]">
       <Input
-        className="h-7 text-[10px] font-mono"
+        className="min-h-touch font-mono text-2xs"
         value={mat}
         onChange={(e) => setMat(e.target.value)}
         disabled={props.disabled}
@@ -232,7 +232,7 @@ function SiloCellInventoryEditor(props: {
         spellCheck={false}
       />
       <Input
-        className="h-7 text-[10px] font-mono"
+        className="min-h-touch font-mono text-2xs"
         value={lot}
         onChange={(e) => setLot(e.target.value)}
         disabled={props.disabled}
@@ -242,9 +242,8 @@ function SiloCellInventoryEditor(props: {
       />
       <Button
         type="button"
-        size="sm"
         variant="secondary"
-        className="h-7 text-xs w-full"
+        className="min-h-touch w-full text-xs"
         disabled={props.disabled}
         onClick={() => void props.onSave(props.cellId, mat, lot)}
       >
@@ -270,7 +269,7 @@ function SiloCellLotLinkEditor(props: {
   return (
     <div className="flex flex-col gap-1 max-w-[200px]">
       <Input
-        className="h-7 text-[10px] font-mono"
+        className="min-h-touch font-mono text-2xs"
         value={legacySilo}
         onChange={(e) => setLegacySilo(e.target.value)}
         disabled={props.disabled}
@@ -280,9 +279,8 @@ function SiloCellLotLinkEditor(props: {
       />
       <Button
         type="button"
-        size="sm"
         variant="secondary"
-        className="h-7 text-xs w-full"
+        className="min-h-touch w-full text-xs"
         disabled={props.disabled}
         onClick={() => void props.onSaveLegacy(props.cellId, legacySilo)}
       >
@@ -290,9 +288,8 @@ function SiloCellLotLinkEditor(props: {
       </Button>
       <Button
         type="button"
-        size="sm"
         variant="outline"
-        className="h-7 text-xs w-full"
+        className="min-h-touch w-full text-xs"
         disabled={props.disabled || props.syncing}
         onClick={() => void props.onSync(props.cellId)}
       >
@@ -316,7 +313,7 @@ function SiloCellRiskEditor(props: {
   return (
     <div className="flex flex-col gap-1 max-w-[140px]">
       <Input
-        className="h-7 text-[10px] font-mono"
+        className="min-h-touch font-mono text-2xs"
         value={v}
         onChange={(e) => setV(e.target.value)}
         disabled={props.disabled}
@@ -326,9 +323,8 @@ function SiloCellRiskEditor(props: {
       />
       <Button
         type="button"
-        size="sm"
         variant="secondary"
-        className="h-7 text-xs w-full"
+        className="min-h-touch w-full text-xs"
         disabled={props.disabled}
         onClick={() => void props.onSave(props.cellId, v)}
       >
@@ -356,7 +352,7 @@ function NodeLayoutEditor(props: {
     <div className="flex flex-col gap-1 max-w-[200px]">
       <div className="grid grid-cols-2 gap-1">
         <Input
-          className="h-7 text-[10px] font-mono"
+          className="min-h-touch font-mono text-2xs"
           value={lx}
           onChange={(e) => setLx(e.target.value)}
           disabled={props.disabled}
@@ -365,7 +361,7 @@ function NodeLayoutEditor(props: {
           autoComplete="off"
         />
         <Input
-          className="h-7 text-[10px] font-mono"
+          className="min-h-touch font-mono text-2xs"
           value={ly}
           onChange={(e) => setLy(e.target.value)}
           disabled={props.disabled}
@@ -376,9 +372,8 @@ function NodeLayoutEditor(props: {
       </div>
       <Button
         type="button"
-        size="sm"
         variant="secondary"
-        className="h-7 text-xs w-full"
+        className="min-h-touch w-full text-xs"
         disabled={props.disabled}
         onClick={() => void props.onSave(props.nodeId, lx, ly)}
       >
@@ -462,7 +457,7 @@ function EdgeCapacityEditor(props: {
   return (
     <div className="flex flex-col gap-1 max-w-[120px]">
       <Input
-        className="h-7 text-[10px] font-mono"
+        className="min-h-touch font-mono text-2xs"
         value={v}
         onChange={(e) => setV(e.target.value)}
         disabled={props.disabled}
@@ -472,9 +467,8 @@ function EdgeCapacityEditor(props: {
       />
       <Button
         type="button"
-        size="sm"
         variant="secondary"
-        className="h-7 text-xs w-full"
+        className="min-h-touch w-full text-xs"
         disabled={props.disabled}
         onClick={() => void props.onSave(props.edgeId, v)}
       >
@@ -1453,7 +1447,7 @@ export default function MaterialflussPage(): JSX.Element {
 
       <Card className="border-amber-200/80 bg-amber-50/50 dark:bg-amber-950/20">
         <CardHeader className="flex flex-row items-start gap-2 py-3">
-          <AlertTriangle className="h-5 w-5 text-amber-700 shrink-0 mt-0.5" />
+          <AlertTriangle className="h-5 w-5 text-status-warning shrink-0 mt-0.5" />
           <div>
             <CardTitle className="text-base">Hinweis Prototyp</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
@@ -1740,8 +1734,8 @@ export default function MaterialflussPage(): JSX.Element {
             className="bg-muted/10"
           >
             <Background gap={16} />
-            <MiniMap pannable zoomable className="!bg-card/95 !border-border" />
-            <Controls className="!bg-card !border-border !shadow-md" />
+            <MiniMap pannable zoomable className="bg-card/95! border-border!" />
+            <Controls className="bg-card! border-border! shadow-md!" />
             {warehouseId && graphLoading ? (
               <Panel position="top-center" className="rounded-md bg-card/95 border px-3 py-2 text-sm shadow">
                 Lade Graph …
@@ -2012,13 +2006,13 @@ export default function MaterialflussPage(): JSX.Element {
                           <tr key={agriStr(row, 'id')} className="border-b border-border/60">
                             <td className="py-2 pr-2 align-top">
                               <div className="font-mono text-xs font-medium">{fromCode}</div>
-                              <div className="text-[10px] text-muted-foreground font-mono break-all max-w-[140px]">
+                              <div className="text-2xs text-muted-foreground font-mono break-all max-w-[140px]">
                                 {fromId}
                               </div>
                             </td>
                             <td className="py-2 pr-2 align-top">
                               <div className="font-mono text-xs font-medium">{toCode}</div>
-                              <div className="text-[10px] text-muted-foreground font-mono break-all max-w-[140px]">
+                              <div className="text-2xs text-muted-foreground font-mono break-all max-w-[140px]">
                                 {toId}
                               </div>
                             </td>

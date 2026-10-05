@@ -10,16 +10,17 @@ vi.mock('@/pages/kontrakte/FrmKontraktDetail', () => ({
   default: () => <div data-testid="legacy-kontrakt-detail">Legacy</div>,
 }))
 
-vi.mock('@/pages/kontrakte/UniversalKontraktPilotPage', () => ({
-  default: () => <div data-testid="universal-kontrakt-pilot">Pilot</div>,
+vi.mock('@/pages/agrar/kontrakt-native', () => ({
+  default: () => <div data-testid="agrar-kontrakt">Native</div>,
 }))
 
 vi.mock('@/app/routing/typed-router', () => ({
   useParams: () => ({ id: 'contract-1' }),
+  useSearchParams: () => [new URLSearchParams()],
 }))
 
 describe('KontraktDetailRoute switch', () => {
-  it('uses legacy editor when pilot flag is disabled', async () => {
+  it('uses the legacy editor when the native flag is disabled', async () => {
     render(<KontraktDetailRoute />)
     expect(await screen.findByTestId('legacy-kontrakt-detail')).toBeInTheDocument()
   })

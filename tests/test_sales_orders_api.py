@@ -136,6 +136,53 @@ def test_create_order_valid_payload_accepted():
     assert resp.status_code in (200, 201, 422)
 
 
+def test_order_detail_names_the_crm_customer(require_db):
+    """Der Maskenkopf zeigt den Kundennamen; die Partner-ID ist ein interner Schluessel."""
+    import uuid
+    from sqlalchemy import text
+    from app.core.database import SessionLocal
+
+    suffix = uuid.uuid4().hex[:8]
+    customer_id = f"cust-{suffix}"
+    order_id = f"so-{suffix}"
+    tenant = _HEADERS["X-Tenant-ID"]
+    with SessionLocal() as db:
+        db.execute(
+            text(
+                "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+                "VALUES (:id, :tid, :no, 'Landhandel Hofmann GmbH')"
+            ),
+            {"id": customer_id, "tid": tenant, "no": f"K-{suffix}"},
+        )
+        db.execute(
+            text(
+                # description, total_amount, currency und status sind NOT NULL
+                # (519e0d90cd66) — die dortigen `default=` sind Python-seitig
+                # und greifen bei rohem SQL nicht. Eine gewachsene
+                # Entwicklungsdatenbank hat die Bedingungen nicht mehr, eine
+                # frische schon; deshalb lief das lokal durch und in CI nicht.
+                "INSERT INTO domain_crm.sales_orders "
+                "(id, tenant_id, order_number, customer_id, subject, description, "
+                " total_amount, currency, status, version) "
+                "VALUES (:id, :tid, :no, :cid, 'Weizen Ernte', '', 0, 'EUR', 'ENTWURF', 1)"
+            ),
+            {"id": order_id, "tid": tenant, "no": f"SO-{suffix}", "cid": customer_id},
+        )
+        db.commit()
+    try:
+        resp = _client.get(f"/api/v1/sales/orders/{order_id}", headers=_HEADERS)
+        assert resp.status_code == 200, resp.text
+        body = resp.json()
+        assert body["customer_id"] == customer_id
+        assert body["customer_name"] == "Landhandel Hofmann GmbH"
+        assert body["customer_number"] == f"K-{suffix}"
+    finally:
+        with SessionLocal() as db:
+            db.execute(text("DELETE FROM domain_crm.sales_orders WHERE id = :id"), {"id": order_id})
+            db.execute(text("DELETE FROM domain_crm.customers WHERE id = :id"), {"id": customer_id})
+            db.commit()
+
+
 def test_delete_nonexistent_order_returns_404():
     resp = _client.delete("/api/v1/sales/orders/does-not-exist", headers=_HEADERS)
     skip_if_db_unavailable(resp)

@@ -1,0 +1,204 @@
+slice_id: L3-JOURNAL-SOURCE-20260910
+id: L3-JOURNAL-SOURCE-20260910
+title: Journal-Liste liest gespeicherte Buchungsherkunft unveraendert
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+completed_at: "2026-09-10"
+goal: >-
+  Den HTTP-500-Fehler von GET /api/v1/journal-entries/ an der Ursache beheben:
+  der Lesevertrag lehnte vorhandene fachliche source-Werte ab. Schreibvertrag
+  und Lesevertrag werden getrennt, ohne historische Herkunft umzudeuten und
+  ohne die Schreibvalidierung aufzugeben.
+coordination: >-
+  Codex ist Lead. Claude Code hat diesen Slice am 2026-09-10 geclaimt.
+  Nur eigener Workboard-Abschnitt; keine gemeinsamen Docker- oder
+  Sweep-Aenderungen, keine Container-Neustarts durch Claude.
+file_ownership:
+  - docs/agent-ops/slices/L3-JOURNAL-SOURCE-20260910.yaml
+  - app/api/v1/schemas/finance.py
+  - tests/test_journal_source_contract.py
+  # Der Stub fuehrte zusaetzlich app/api/v1/endpoints/journal_entries.py.
+  # Nicht benoetigt: die Ursache lag allein im Schema, der Endpunkt bleibt
+  # unveraendert. Besitz daher nicht in Anspruch genommen.
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt L3-JOURNAL-SOURCE-20260910"
+  - "docs/agent-ops/handoffs/l3-journal-source-20260910.md: ausschliesslich Nachweisabschnitt"
+ausloeser: >-
+  Der API-Sweep vom 2026-09-10 (artifacts/runtime-sweep-2026-09-10.json) meldet
+  fuer GET /api/v1/journal-entries/ HTTP 500 mit einem Pydantic-Fehler auf dem
+  Feld source. Codex hat den Befund als Parallelauftrag ausgegliedert.
+befund:
+  ursache: >-
+    Der Whitelist-Validator validate_source sass auf JournalEntryBase. Diese
+    Basisklasse wird sowohl von JournalEntryCreate (Schreibweg) als auch von
+    JournalEntry (Response-Model der Liste) geerbt. Damit galt eine
+    Schreibregel auf dem Leseweg: eine einzige gespeicherte Buchung mit nicht
+    gelisteter Herkunft liess die gesamte Liste mit HTTP 500 fehlschlagen,
+    weil list_journal_entries die ValidationError im generischen
+    except Exception faengt.
+  abgelehnter_wert: produktion_mischfutter
+  schreiber_des_abgelehnten_werts: app/api/v1/endpoints/produktion_mischfutter.py
+  alte_whitelist: [manual, system, integration, import, cash_close]
+  belegte_schreiber_gesamt: 17
+  nicht_abgedeckt_von_der_alten_whitelist:
+    - accrual_provision
+    - ap_invoice_kernel
+    - bank_reconciliation
+    - booking_template
+    - bulk_import
+    - connector
+    - op_settlement
+    - POS
+    - produktion_mischfutter
+    - reversal
+    - sales_credit_note
+    - sales_invoice
+  bestand_in_daten_2026_09_10:
+    manual: 362
+    produktion_mischfutter: 5
+    reversal: 1
+    sales_invoice: 1
+    bulk_import: 1
+result: >-
+  Schreibvertrag und Lesevertrag getrennt. JOURNAL_ENTRY_WRITE_SOURCES fuehrt
+  die 17 im Code belegten Herkuenfte je mit Fundstelle; JournalEntryCreate
+  validiert weiterhin dagegen und weist unbelegte Eingaben ab. JournalEntry
+  reicht gespeicherte Herkunft unveraendert durch und toleriert die nullable
+  Spalte. Keine Datenkorrektur, keine Umdeutung auf manual/system, keine leere
+  Liste als Fehlerersatz.
+datenbewertung: >-
+  Nur source blockierte real. Gegenprobe auf die uebrigen Pflichtfelder des
+  Lesemodells (posting_date, entry_number, description, entry_date, Betraege,
+  status, tenant_id) ergab null NULL-Werte und keine Laengen- oder
+  Reihenfolgeverletzung ueber alle 370 Buchungen.
+verifikation_codeaenderung: >-
+  In-Process-Lauf der echten Route gegen die echte Datenbank: Mandant des
+  Sweeps 00000000-0000-0000-0000-000000000001 liefert HTTP 200 mit sieben
+  Buchungen und unveraenderter Herkunft (produktion_mischfutter 5,
+  sales_invoice 1, reversal 1). test-tenant liefert HTTP 200 mit 363
+  Buchungen. Zusaetzlich alle 370 gespeicherten Buchungen einzeln durch das
+  Lesemodell validiert.
+acceptance:
+  - Reale Journal-Liste des Sweep-Mandanten antwortet mit HTTP 200.
+  - Gespeicherte Buchungsherkunft erscheint unveraendert in der Antwort.
+  - Unbelegte Herkunft wird auf dem Schreibweg weiterhin abgewiesen.
+  - Bestehende Journal-Tests bleiben gruen.
+  - Commit und Push isoliert, fremder WIP unangetastet.
+tests:
+  - python -m pytest tests/test_journal_source_contract.py
+  - python -m pytest tests/test_journal_entries.py tests/test_journal_entries_api.py
+  - python -m pytest tests -k "finance or journal or booking or accrual or open_item"
+risks:
+  - >-
+    Der Schreibvertrag ist eine Momentaufnahme der Schreiber vom 2026-09-10.
+    Ein neuer Schreiber ohne Eintrag wird auf dem Schreibweg abgewiesen, auf
+    dem Leseweg aber weiterhin angezeigt; der Vertragsdeckungstest macht das
+    sichtbar.
+  - >-
+    Die Werte system, integration und import bleiben als Bestandsvertrag
+    zulaessig, obwohl kein Schreiber im Code sie setzt. Entfernen waere eine
+    Verschaerfung des Schreibvertrags und gehoert in eine eigene Entscheidung.
+besitzerweiterung_2026_09_10: >-
+  Der User hat Claude Code Neustart und die verbliebenen Laufzeitfehler
+  uebertragen, weil Codex ruht. Zusaetzlich im Besitz: Backend-Neustart,
+  alembic/versions/admin_report_permissions_repair_20260910.py,
+  app/policy/router.py, app/api/v1/endpoints/policies.py,
+  tests/test_policy_response_contract.py.
+folgearbeiten:
+  neustart: >-
+    docker compose restart backend; Code ist ueber ./app:/app/app gemountet,
+    kein Rebuild noetig. Codex' untracked Migration
+    desktop_runtime_repair_20260909 war bereits DB-Head, der Startlauf von
+    alembic upgrade head daher ein No-op.
+  report_permissions: >-
+    domain_shared.admin_report_permissions fehlte in einer auf head
+    gestempelten DB. Neue additive Migration
+    admin_report_permissions_repair_20260910; angewandte Migrationen
+    unveraendert, ein Head.
+  policy_backup: >-
+    /api/mcp/policy/backup kopierte eine SQLite-Datei ueber DEFAULT_DB, das
+    seit der Umstellung auf PostgreSQL None ist. Gesichert wird jetzt der
+    JSON-Export; Backup-Namen auf .json begrenzt.
+  policy_response_models: >-
+    policies.py deklarierte response_model=StatusResponse (Feld success),
+    die Handler gaben {"ok": True} zurueck. FastAPI validiert nach der
+    Ausfuehrung: /policy/restore ersetzte alle Regeln und meldete danach
+    HTTP 500; /policy/list verlor still sein data. Antwortmodelle bilden
+    jetzt die Nutzlast ab.
+  gesamtnachweis: >-
+    scripts/api_runtime_sweep.py gegen das neu gestartete Backend: 980
+    Routen, 0x 5xx, 0 unerwartete 503, ok_2xx 913 (vorher 907).
+open:
+  - >-
+    R1 Korrektur einer frueheren Meldung: app/services/pos_compat_service.py
+    erzeugt keine mandantenlosen Zeilen, sondern schreibt gar nichts. Der
+    Kopf-INSERT nennt source_doc_id/source_doc_type, die Zeilen account_code
+    — keine dieser Spalten existiert; NOT-NULL-Felder entry_number,
+    posting_date, account_id, line_number fehlen. Der erste INSERT wirft
+    UndefinedColumn, das breite except macht daraus eine Warnung.
+    POS-Tagesabschluesse sind nie in der FiBu gelandet. Nicht repariert:
+    die Buchungslogik braucht eine fachliche Entscheidung, da alle drei
+    Zeilen im Soll stehen und nicht ausgeglichen buchen wuerden.
+  - >-
+    R2 aufgeklaert: die Zeilen ohne tenant_id gehoeren zu IMP-AUDIT-001,
+    Mandant system, Status draft, "Integrationstest Buchung" vom 2026-03-03.
+    Testrueckstand im Dev-Bestand, kein Produktivmandant betroffen. Keine
+    Datenkorrektur vorgenommen.
+  - >-
+    R3 neu: Routen-Ueberlagerung unter /api/mcp/policy —
+    app.api.v1.endpoints.policies gewinnt gegen app.policy.router fuer list,
+    create, update, delete, test, export, restore. Zwei divergierende
+    Restore-Implementierungen mit unterschiedlichem Request-Vertrag.
+  - >-
+    R4 neu: gesicherte Policy-Backups sind ueber die API nicht abrufbar; ein
+    Restore aus einer Sicherung setzt Server-Dateizugriff voraus.
+ai_harness:
+  fachlicher_vertrag: >-
+    Die Journal-Liste zeigt jede gespeicherte Buchung mit ihrer
+    urspruenglichen Herkunft. Der Schreibweg nimmt nur belegte Herkunft an.
+    Unbekannte gespeicherte Herkunft wird angezeigt, nicht umgedeutet und
+    nicht unterdrueckt.
+  architektur_vertrag: >-
+    Trennung von Schreib- und Lesemodell innerhalb
+    app/api/v1/schemas/finance.py. Der Whitelist-Validator gehoert an
+    JournalEntryCreate, nicht an die gemeinsame Basisklasse. Endpunkte,
+    Repositories, Buchungsservices und Migrationen bleiben unveraendert.
+  daten_vertrag: >-
+    Keine Migration, keine Datenmutation, kein Spalten-Drop. Die Spalte
+    journal_entries.source bleibt nullable; gespeicherte Werte werden
+    ausschliesslich gelesen. Aufbewahrungs- und Nachvollziehbarkeitspflicht
+    bleibt gewahrt.
+  test_vertrag: >-
+    tests/test_journal_source_contract.py deckt Leseweg (reale Herkunft, NULL,
+    unbekannter Wert, Strukturschutz gegen erneute Vererbung), Schreibweg
+    (alle belegten Werte, abgewiesene Eingaben, Default) und die
+    Vertragsdeckung ab. Ohne Datenbank und ohne Netzwerk lauffaehig.
+  security_vertrag: >-
+    Keine Aenderung an Authentifizierung, Rollen oder Tenant-Grenzen. Der
+    Tenant-Filter der Liste bleibt unveraendert. Das Lesemodell lockert
+    ausschliesslich die Herkunftspruefung, nicht die Mandantenpflicht der
+    Buchungszeilen; der offene tenant_id-Befund ist bewusst nicht durch
+    Aufweichen des Modells geschlossen worden.
+  betriebs_vertrag: >-
+    Reine Codeaenderung ohne Migration und ohne Konfiguration. Wirksam wird
+    sie erst mit einem Neustart der laufenden Worker; Neustarts liegen bei
+    Codex. Der Nachweis wurde deshalb in-process gegen die echte Datenbank
+    gefuehrt.
+  dokumentations_vertrag: >-
+    Diese Slice-YAML, der Abschnitt L3-JOURNAL-SOURCE-20260910 im Active
+    Workboard und der Nachweisabschnitt in
+    docs/agent-ops/handoffs/l3-journal-source-20260910.md werden konsistent
+    gehalten.
+external_gates:
+  - >-
+    Fachliche Abnahme der Buchungsherkunft durch die Finanzbuchhaltung steht
+    aus; der Schreibvertrag ist aus dem Code belegt, nicht fachlich bestaetigt.
+  - >-
+    Live-Nachweis am laufenden Container erfordert einen Neustart durch Codex
+    und ist hier nicht erbracht.
+verification:
+  - python -m pytest tests/test_journal_source_contract.py
+  - python -m pytest tests/test_journal_entries.py tests/test_journal_entries_api.py
+  - python -m pytest tests/test_policy_response_contract.py
+  - python scripts/api_runtime_sweep.py

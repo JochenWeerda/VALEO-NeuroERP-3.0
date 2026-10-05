@@ -656,6 +656,7 @@ class HarvestAcceptanceService:
         """Book self-billing credit note into GL: Debit 3100 / Credit 4000 + 1576 (non-blocking)."""
         try:
             from app.services.finance_transaction_service import FinanceTransactionService
+            fin = FinanceTransactionService(self.db, self.tenant_id)
             net = Decimal(str(invoice.total_net_amount_eur or 0))
             vat = Decimal(str(invoice.total_vat_amount_eur or 0))
             gross = Decimal(str(invoice.total_gross_amount_eur or 0))
@@ -663,21 +664,20 @@ class HarvestAcceptanceService:
                 return
             entry_date = delivery_date
             if entry_date is None:
-                from datetime import datetime as _dt
-                entry_date = _dt.utcnow().date()
+                from app.core.business_time import business_today
+                entry_date = business_today()
             period = str(entry_date)[:7]
             lines = [
-                {"account_id": "3100", "debit_amount": float(gross), "credit_amount": 0,
+                {"account_id": fin.account_id_for_number("3100"), "debit_amount": float(gross), "credit_amount": 0,
                  "description": f"Verbindlichkeit Self-Billing {invoice.invoice_number}"},
-                {"account_id": "4000", "debit_amount": 0, "credit_amount": float(net),
+                {"account_id": fin.account_id_for_number("4000"), "debit_amount": 0, "credit_amount": float(net),
                  "description": "Wareneinkauf Ernte"},
             ]
             if vat > Decimal("0"):
                 lines.append({
-                    "account_id": "1576", "debit_amount": 0, "credit_amount": float(vat),
+                    "account_id": fin.account_id_for_number("1576"), "debit_amount": 0, "credit_amount": float(vat),
                     "description": "Vorsteuer Self-Billing",
                 })
-            fin = FinanceTransactionService(self.db, self.tenant_id)
             fin.create(
                 entry_number=f"SB-{invoice.invoice_number}",
                 description=f"Self-Billing Gutschrift {invoice.invoice_number}",

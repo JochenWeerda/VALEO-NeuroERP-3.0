@@ -45,7 +45,7 @@ export function SchlagKarte({ height = '480px', className = '' }: SchlagKartePro
 
     import('maplibre-gl')
       .then((ml) => {
-        const MapLibreGL = (ml.default ?? ml) as unknown as { Map: new (opts: unknown) => NonNullable<typeof map> }
+        const MapLibreGL = ml as unknown as { Map: new (opts: unknown) => NonNullable<typeof map> }
         if (!mapContainer.current) return
         map = new MapLibreGL.Map({
           container: mapContainer.current,
@@ -153,9 +153,9 @@ export function SchlagKarte({ height = '480px', className = '' }: SchlagKartePro
       )}
       <div ref={mapContainer} className="h-full w-full" />
       {!mapReady && !mapError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-green-50 dark:bg-green-950/30">
+        <div className="absolute inset-0 flex items-center justify-center bg-[hsl(var(--color-semantic-success-50-hsl))] dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)]">
           <div className="text-center space-y-2">
-            <Map className="h-10 w-10 mx-auto text-green-600 animate-pulse" />
+            <Map className="h-10 w-10 mx-auto text-status-success animate-pulse" />
             <p className="text-sm text-muted-foreground">Karte wird geladen…</p>
           </div>
         </div>

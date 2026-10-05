@@ -38,9 +38,14 @@ export default function UniversalMaskRolloutPilotPage({ screenId, entityId }: Pr
     plan,
     entityData,
     tableRows,
+    messages,
+    refetch,
     tableTotals,
     tableQueryStates,
     setTableQuery,
+    userOverlay,
+    updateUserOverlay,
+    resetUserOverlay,
     lookupBindings,
     isEntityLoading,
     entityError,
@@ -88,9 +93,14 @@ export default function UniversalMaskRolloutPilotPage({ screenId, entityId }: Pr
           plan={plan}
           data={mergedData}
           tables={tableRows}
+          messages={messages}
+          onRetry={() => { void refetch() }}
           tableTotals={tableTotals}
           tableQueryStates={tableQueryStates}
           onTableQueryChange={setTableQuery}
+          overlay={userOverlay}
+          onOverlayChange={updateUserOverlay}
+          onOverlayReset={resetUserOverlay}
           lookupBindings={lookupBindings}
           onAction={() => undefined}
         />

@@ -12,6 +12,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from pydantic import BaseModel, Field
 
+from app.api.v1.schemas.finance_actions_schemas import (
+    MahnstufeOut,
+    MahnstufenTrailOut,
+    RateOut,
+    RatenzahlungsplanOut,
+    SepaBatchOut,
+    SepaMandatOut,
+)
 from ....core.database import get_db
 from ....core import endpoint_gateways
 from ....core.tenant import get_tenant_id
@@ -20,6 +28,7 @@ from ....core.gobd_artifact import register_artifact, sha256_hex
 from ....infrastructure.repositories import JournalEntryRepository
 
 from app.api.v1.schemas.base import BaseSchema
+from app.core import finance_periods
 from app.api.v1.schemas.finance_schemas import (
     ClosingCalculateOut,
     ClosingApproveOut,
@@ -84,15 +93,14 @@ async def run_bank_reconciliation(
             tenant_id=tenant_id,
             db=db,
         )
-        matched = getattr(result, "matched_count", 0) if hasattr(result, "matched_count") else len(getattr(result, "matched", []))
         return ActionResponse(
-            success=True,
-            message=f"Bankabgleich abgeschlossen: {matched} Zuordnung(en) fuer Konto {body.bank_account_id}.",
+            success=result.comparison_state == "BALANCES_EQUAL",
+            message=f"Bank-Saldenvergleich {result.comparison_state}: {result.line_counts.matched} Zuordnung(en) fuer Konto {body.bank_account_id}.",
         )
-    except Exception as e:
+    except Exception:
         return ActionResponse(
             success=False,
-            message=f"Bankabgleich fehlgeschlagen: {str(e)}",
+            message="Bankvergleich konnte nicht verlaesslich ermittelt werden",
         )
 
 
@@ -143,21 +151,10 @@ async def post_journal_entry_action(
             return ActionResponse(success=False, message="Buchung nicht gefunden.")
 
         period = str(entry_row[0])
-        period_status = db.execute(
-            text(
-                """
-                SELECT status
-                FROM finance_accounting_periods
-                WHERE tenant_id = :tenant_id AND period = :period
-                LIMIT 1
-                """
-            ),
-            {"tenant_id": tenant_id, "period": period},
-        ).fetchone()
-        if period_status and str(period_status[0]) != "OPEN":
+        gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period)
+        if gesperrt:
             return ActionResponse(
-                success=False,
-                message=f"Periode {period} ist {period_status[0]}. Buchung gesperrt.",
+                success=False, message=finance_periods.meldung(period, gesperrt)
             )
 
         entry_repo = container.resolve(JournalEntryRepository)
@@ -171,80 +168,23 @@ async def post_journal_entry_action(
 
 # ── Cash close day ─────────────────────────────────────────────────────────────
 
-@router.post("/cash/close-day", response_model=ActionResponse, summary="Close day cash")
+@router.post(
+    "/cash/close-day", status_code=409, response_model=None,
+    summary="Kassenabschluss ohne Bewertungsmodell gesperrt",
+    responses={409: {"description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung."}},
+)
 async def cash_close_day(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Kasse Tagesabschluss — erzeugt Abschlussbuchung fuer den aktuellen Tag."""
-    from datetime import date as _date
-    today = _date.today()
-    _period = today.strftime("%Y-%m")  # noqa: F841
-
-    try:
-        row = db.execute(
-            text("""
-                SELECT COUNT(*) AS cnt,
-                       COALESCE(SUM(CASE WHEN je.status = 'posted' THEN je.total_debit ELSE 0 END), 0) AS total_debit,
-                       COALESCE(SUM(CASE WHEN je.status = 'posted' THEN je.total_credit ELSE 0 END), 0) AS total_credit
-                FROM domain_erp.journal_entries je
-                WHERE je.tenant_id = :tid
-                  AND je.entry_date = :today
-            """),
-            {"tid": tenant_id, "today": today},
-        ).fetchone()
-
-        buchungen = row.cnt if row else 0
-        soll = float(row.total_debit) if row else 0
-        haben = float(row.total_credit) if row else 0
-
-        entry_id = f"cash-close-{tenant_id}-{today}"
-        db.execute(
-            text("""
-                INSERT INTO domain_erp.journal_entries
-                    (id, tenant_id, entry_number, entry_date, posting_date, description,
-                     source, status, total_debit, total_credit, created_at)
-                VALUES
-                    (:id, :tid, :nr, :today, :today, :desc, 'cash_close', 'posted', :debit, :credit, NOW())
-                ON CONFLICT DO NOTHING
-            """),
-            {
-                "id": entry_id,
-                "tid": tenant_id,
-                "nr": f"KA-{today.strftime('%Y%m%d')}",
-                "today": today,
-                "desc": f"Kassen-Tagesabschluss {today}: {buchungen} Buchungen, Soll {soll:.2f}, Haben {haben:.2f}",
-                "debit": soll,
-                "credit": haben,
-            },
-        )
-        # FIN-CASHCLOSE-JE-001: GL-Zeilen für Tagesabschluss (Belegbruch schliessen)
-        if soll > 0 or haben > 0:
-            try:
-                db.execute(text("""
-                INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES
-                    (:id1, :tid, :eid, '1000', 'Kasse Soll Tagesabschluss', :soll, 0, 1, NOW()),
-                    (:id2, :tid, :eid, '1000', 'Kasse Haben Tagesabschluss', 0, :haben, 2, NOW())
-                ON CONFLICT DO NOTHING
-                """), {
-                    "id1": f"{entry_id}-L1", "id2": f"{entry_id}-L2",
-                    "tid": tenant_id, "eid": entry_id,
-                    "soll": soll, "haben": haben,
-                })
-            except AssertionError:
-                # Unit-test doubles often model only the header insert. Real DB errors
-                # still flow into the outer handler and fail the closeout.
-                pass
-        db.commit()
-
-        return ActionResponse(
-            success=True,
-            message=f"Tagesabschluss {today}: {buchungen} Buchungen, Soll {soll:.2f} EUR, Haben {haben:.2f} EUR.",
-        )
-    except Exception as e:
-        return ActionResponse(success=False, message=f"Tagesabschluss fehlgeschlagen: {e!s}")
+    """Reject the retired synthetic closing until cash valuation is defined."""
+    raise HTTPException(
+        status_code=409,
+        detail=(
+            "Kassenabschluss gesperrt: Ein belegter Kassenbestand und eine "
+            "fachliche Gegenkontierung fehlen. Es wurde keine Journalbuchung erstellt."
+        ),
+    )
 
 
 # ── Direct debit run ───────────────────────────────────────────────────────────
@@ -262,12 +202,12 @@ async def run_direct_debit(
         result = db.execute(
             text("""
                 INSERT INTO domain_shared.direct_debit_items
-                    (id, tenant_id, run_id, debitor_id, amount, currency, mandate_ref, status, created_at)
+                    (id, tenant_id, run_id, debitor_id, amount, currency, mandate_id, status, created_at)
                 SELECT
                     gen_random_uuid()::text,
                     oi.tenant_id,
                     :run_id,
-                    oi.debitor_id,
+                    oi.partner_id,
                     oi.amount,
                     COALESCE(oi.currency, 'EUR'),
                     sm.mandate_reference,
@@ -275,7 +215,7 @@ async def run_direct_debit(
                     NOW()
                 FROM domain_shared.open_items oi
                 JOIN domain_shared.sepa_mandates sm
-                    ON sm.debitor_id = oi.debitor_id AND sm.tenant_id = oi.tenant_id
+                    ON sm.debitor_id = oi.partner_id AND sm.tenant_id = oi.tenant_id
                     AND sm.mandate_valid = true
                     AND (sm.mandate_expired_at IS NULL OR sm.mandate_expired_at > NOW())
                 WHERE oi.tenant_id = :tid
@@ -307,21 +247,6 @@ async def run_direct_debit(
 class ClosingRunRequest(BaseModel):
     period: str = Field(..., description="Periode im Format YYYY-MM")
     closing_type: str = Field("month", description="month | quarter | year")
-
-
-def _legacy_close_accounting_period(db: Session, tenant_id: str, period: str) -> None:
-    """Compatibility path for installations that still expose the legacy period table."""
-    db.execute(
-        text(
-            """
-            UPDATE domain_erp.accounting_periods
-            SET status = 'closed', closed_at = NOW()
-            WHERE tenant_id = :tenant_id AND period = :period
-            """
-        ),
-        {"tenant_id": tenant_id, "period": period},
-    )
-    db.commit()
 
 
 @router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen")
@@ -366,12 +291,14 @@ async def lock_closing(
     except ClosingError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
-        try:
-            _legacy_close_accounting_period(db, tenant_id, body.period)
-            return ActionResponse(success=True, message=f"Periode {body.period} gesperrt.")
-        except Exception:
-            pass
-        raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}")
+        # Kein Rueckfall, der Erfolg meldet. Hier stand ein UPDATE auf
+        # ``domain_erp.accounting_periods`` — ein Schema, das es in keinem
+        # Migrationsstand gibt. Traf es null Zeilen, antwortete der Endpunkt
+        # "Periode gesperrt." **ohne Sperre**. Eine Periode, die als gesperrt
+        # gemeldet und weiter bebucht werden kann, ist der GoBD-Verstoss, den
+        # die Sperre verhindern soll.
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}") from exc
 
 
 @router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen")
@@ -392,15 +319,12 @@ async def run_closing(
     except ClosingError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
-        try:
-            _legacy_close_accounting_period(db, tenant_id, period)
-            return ActionResponse(
-                success=True,
-                message=f"Abschluss {closing_type} fuer Periode {period} abgeschlossen.",
-            )
-        except Exception:
-            pass
-        raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}")
+        # Kein Rueckfall. Der entfernte Weg behauptete einen vollstaendigen
+        # Abschluss, nachdem er nur einen Status zu setzen versucht hatte: ohne
+        # Salden und ohne Abschlussbuchung. Ein gemeldeter Abschluss ohne
+        # Abschlussbuchung verfehlt die Vollstaendigkeit (GoBD Rz. 36 ff.).
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}") from exc
 
 
 @router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen")
@@ -559,7 +483,6 @@ async def buchungsuebergabe_export(
 
     try:
         rows = db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT
                     je.entry_date,
@@ -577,7 +500,7 @@ async def buchungsuebergabe_export(
                 LEFT JOIN domain_erp.chart_of_accounts ca ON ca.id = jel.account_id
                 WHERE {where_sql}
                 ORDER BY {sort_clause}, jel.line_number
-            """),
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
     except Exception:
@@ -716,7 +639,7 @@ class MahnstufeIn(_BM):
     operator: _Opt[str] = "system"
 
 
-@router.post("/sepa/mandate", response_model=dict[str, Any], status_code=201, summary="SEPA-Mandat anlegen")
+@router.post("/sepa/mandate", response_model=SepaMandatOut, status_code=201, summary="SEPA-Mandat anlegen")
 def create_sepa_mandat_endpoint(
     body: SEPAMandatIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -731,7 +654,7 @@ def create_sepa_mandat_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=dict[str, Any], summary="SEPA-Mandat widerrufen")
+@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=SepaMandatOut, summary="SEPA-Mandat widerrufen")
 def widerruf_sepa_mandat_endpoint(
     mandat_id: str,
     x_tenant_id: _Opt[str] = Header(None),
@@ -745,7 +668,7 @@ def widerruf_sepa_mandat_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/batches", response_model=dict[str, Any], status_code=201, summary="SEPA-Lastschrift-Batch erstellen")
+@router.post("/sepa/batches", response_model=SepaBatchOut, status_code=201, summary="SEPA-Lastschrift-Batch erstellen")
 def create_sepa_batch_endpoint(
     body: SEPABatchIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -760,7 +683,7 @@ def create_sepa_batch_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/plaene", response_model=dict[str, Any], status_code=201, summary="Ratenzahlungsplan anlegen")
+@router.post("/ratenzahlung/plaene", response_model=RatenzahlungsplanOut, status_code=201, summary="Ratenzahlungsplan anlegen")
 def create_ratenzahlungsplan_endpoint(
     body: RatenzahlungPlanIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -775,7 +698,7 @@ def create_ratenzahlungsplan_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=dict[str, Any], summary="Rate als bezahlt buchen")
+@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=RateOut, summary="Rate als bezahlt buchen")
 def buche_rate_endpoint(
     rate_id: str,
     body: RateBuchenIn,
@@ -790,7 +713,7 @@ def buche_rate_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=dict[str, Any], status_code=201, summary="Mahnstufe eskalieren")
+@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=MahnstufeOut, status_code=201, summary="Mahnstufe eskalieren")
 def eskaliere_mahnstufe_endpoint(
     rechnungsnr: str,
     body: MahnstufeIn,
@@ -805,7 +728,7 @@ def eskaliere_mahnstufe_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=dict[str, Any], summary="Mahnstufen-Trail abrufen")
+@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=MahnstufenTrailOut, summary="Mahnstufen-Trail abrufen")
 def get_mahnstufe_trail_endpoint(
     rechnungsnr: str,
     x_tenant_id: _Opt[str] = Header(None),

@@ -102,7 +102,7 @@ class SupplyChainEventService:
             self.db.flush()
         # reviewed-safe: _COLS is a module-owned constant; the event id is bound.
         r = self.db.execute(
-            text(f"SELECT {_COLS} FROM domain_inventory.supply_chain_events WHERE id = :id"),
+            text(f"SELECT {_COLS} FROM domain_inventory.supply_chain_events WHERE id = :id"),  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             {"id": new_id},
         ).mappings().first()
         return self._row(r)
@@ -144,7 +144,7 @@ class SupplyChainEventService:
                 f"SELECT {_COLS} FROM domain_inventory.supply_chain_events "
                 "WHERE tenant_id = :t AND ticket_id = :tk "
                 "ORDER BY CASE stage WHEN 'wiegung' THEN 1 WHEN 'annahme' THEN 2 "
-                "WHEN 'lager' THEN 3 WHEN 'abrechnung' THEN 4 ELSE 5 END, occurred_at, created_at"
+                "WHEN 'lager' THEN 3 WHEN 'abrechnung' THEN 4 ELSE 5 END, occurred_at, created_at"  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             ),
             {"t": self.tenant_id, "tk": ticket_id},
         ).mappings().all()

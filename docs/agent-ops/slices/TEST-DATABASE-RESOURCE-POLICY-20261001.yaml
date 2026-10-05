@@ -1,0 +1,36 @@
+slice_id: TEST-DATABASE-RESOURCE-POLICY-20261001
+title: Ein gemeinsamer Testprüfstand für alle Agenten
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claim 9dfc87e76; keine fremden Ressourcen entfernt oder zurückgesetzt.
+goal: User-Vorgabe dauerhaft in die gemeinsame Agentenarbeit integrieren.
+file_ownership:
+  - AGENTS.md
+  - docs/agent-ops/session-start-checklist.md
+  - scripts/pruefstand_db.py
+  - tests/test_payment_execution_atomicity.py
+  - tests/test_payment_csv_import_integrity.py
+  - docs/quality-assurance/test-database-resource-policy-20261001.md
+acceptance:
+  - AGENTS und Pflichtcheckliste verbieten DB-/Dockeranlage pro Test/Suite/Slice/Agent.
+  - Bestehender gemeinsamer Prüfstand wird ohne Reset wiederverwendet.
+  - Eigene Finanztests lassen keine Testdatensätze zurück.
+  - Eigene zusätzliche Datenbank ist nach Nutzungsprüfung entfernt.
+tests:
+  - 36 echte Finanzverträge auf vorhandenem valeo_probe ohne Neuanlage.
+  - node scripts/ai-slice-readiness-check.cjs --slice TEST-DATABASE-RESOURCE-POLICY-20261001
+risks:
+  - Laufende Agenten müssen die aktualisierte gemeinsame Ressourcenregel beachten.
+  - Frische-Schema-Abnahmen verlangen ein abgestimmtes Wartungsfenster.
+ai_harness:
+  fachlicher_vertrag: Reale Transaktionsabnahmen bleiben bestehen.
+  architektur_vertrag: Vorhandener Prüfstand statt weiterer Docker-/Datenbankkopien.
+  daten_vertrag: Eigene Datensätze isolieren und ausschließlich diese bereinigen.
+  test_vertrag: Bestehende Finanzverträge auf wiederverwendetem Prüfstand.
+  security_vertrag: Keine Schreibtests auf Entwicklungsdatenbank; keine fremde Ressourcenlöschung.
+  betriebs_vertrag: Status vor Nutzung und kein Reset während fremder Nutzung.
+  dokumentations_vertrag: Gemeinsame AGENTS-Regel, Checkliste, Runbook und Workboard.
+external_gates:
+  - Koordinierte Migration/Schema-Abnahme bei Nutzung des gemeinsamen Prüfstands.

@@ -14,9 +14,9 @@ import { useMatchOrders, useMatch, useCreateFollowUp, useCreateErsCredit, type M
  */
 
 const STATUS_STYLE: Record<string, string> = {
-  vollstaendig: 'text-emerald-700',
-  teilgeliefert: 'text-amber-700',
-  ueberliefert: 'text-red-700',
+  vollstaendig: 'text-status-success',
+  teilgeliefert: 'text-status-warning',
+  ueberliefert: 'text-status-error',
   offen: 'text-muted-foreground',
 }
 
@@ -100,7 +100,7 @@ export default function WareneingangsabgleichPage() {
         <ClipboardCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Wareneingangs-Abgleich</h1>
         <span className="text-sm text-muted-foreground">3-Wege-Match: Bestellung ↔ Wareneingang ↔ Rechnung</span>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void ordersQuery.refetch()} disabled={ordersQuery.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => void ordersQuery.refetch()} disabled={ordersQuery.isFetching}>
           {ordersQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -112,7 +112,7 @@ export default function WareneingangsabgleichPage() {
             <CardTitle className="text-sm">Bestellungen</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="min-h-touch pl-7" aria-label="Bestellnummer suchen" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
@@ -152,12 +152,12 @@ export default function WareneingangsabgleichPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{match.data.bestellnummer}</span>
                 {match.data.summary?.vollstaendig_geliefert
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig geliefert</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig geliefert</Badge>
                   : <Badge variant="secondary">offen/teilweise</Badge>}
                 {match.data.summary?.hat_abweichung && <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />Mengenabweichung</Badge>}
                 {!!match.data.summary?.offene_luecken && <Badge variant="outline">{match.data.summary.offene_luecken} Hinweis(e)</Badge>}
                 {match.data.summary?.drei_wege_abgeglichen
-                  ? <Badge className="bg-emerald-700">3-Wege abgeglichen</Badge>
+                  ? <Badge variant="success">3-Wege abgeglichen</Badge>
                   : match.data.three_way && <Badge variant="destructive">Rechnungsstufe offen</Badge>}
               </div>
 
@@ -245,7 +245,7 @@ export default function WareneingangsabgleichPage() {
                   <CardContent className="space-y-1.5">
                     {(match.data.ausnahmen ?? match.data.luecken ?? []).map((l, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm">
-                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-amber-600 shrink-0" /> : <Info size={15} className="mt-0.5 text-sky-600 shrink-0" />}
+                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-status-warning shrink-0" /> : <Info size={15} className="mt-0.5 text-muted-foreground shrink-0" />}
                         <span>{l.text}</span>
                       </div>
                     ))}
@@ -263,7 +263,7 @@ export default function WareneingangsabgleichPage() {
                       Vorschau: <span className="font-medium tabular-nums">{fmt(match.data.ers_preview.betrag_netto, ' € netto')}</span>
                       <span className="text-muted-foreground"> · {match.data.ers_preview.anzahl_zeilen} Position(en)</span>
                     </div>
-                    <Button size="sm" onClick={() => void submitErs()} disabled={ersMutation.isPending}>
+                    <Button className="min-h-touch" onClick={() => void submitErs()} disabled={ersMutation.isPending}>
                       {ersMutation.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : null}
                       Gutschrift erzeugen
                     </Button>
@@ -293,7 +293,7 @@ export default function WareneingangsabgleichPage() {
                       {(Object.keys(FOLLOW_UP_LABELS) as FollowUpCreate['action_type'][]).map((action) => (
                         <Button
                           key={action}
-                          size="sm"
+                          className="min-h-touch"
                           variant={pendingAction === action ? 'default' : 'outline'}
                           disabled={followUpMutation.isPending}
                           onClick={() => setPendingAction(action)}
@@ -311,11 +311,11 @@ export default function WareneingangsabgleichPage() {
                           rows={3}
                         />
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={() => void submitFollowUp()} disabled={followUpMutation.isPending}>
+                          <Button className="min-h-touch" onClick={() => void submitFollowUp()} disabled={followUpMutation.isPending}>
                             {followUpMutation.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : null}
                             Erfassen
                           </Button>
-                          <Button size="sm" variant="ghost" disabled={followUpMutation.isPending} onClick={() => { setPendingAction(null); setGrund('') }}>
+                          <Button className="min-h-touch" variant="ghost" disabled={followUpMutation.isPending} onClick={() => { setPendingAction(null); setGrund('') }}>
                             Abbrechen
                           </Button>
                         </div>

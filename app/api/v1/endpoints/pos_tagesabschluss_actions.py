@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
 from app.core.database import get_db
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/pos/tagesabschluss", tags=["pos-tagesabschluss"])
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ class TagesabschlussTransitionRequest(BaseModel):
     fehler_grund: Optional[str] = None
 
 
-@router.post("", response_model=Dict[str, Any], summary="POS-Tagesabschluss anlegen")
+@router.post("", response_model=TypedObjectOut, summary="POS-Tagesabschluss anlegen")
 def create_tagesabschluss(
     req: TagesabschlussCreateRequest,
     x_tenant_id: str = Header(...),
@@ -53,7 +54,7 @@ def create_tagesabschluss(
 
 @router.post(
     "/{abschluss_id}/transition",
-    response_model=Dict[str, Any],
+    response_model=TypedObjectOut,
     summary="POS-Tagesabschlussstatus wechseln",
 )
 def transition_tagesabschluss(
@@ -90,7 +91,7 @@ def transition_tagesabschluss(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/tse/simulate", response_model=Dict[str, Any], summary="POS-TSE-Signatur simulieren")
+@router.post("/tse/simulate", response_model=TypedObjectOut, summary="POS-TSE-Signatur simulieren")
 def simulate_tse(
     kasse_id: str,
     z_bon_nr: str,

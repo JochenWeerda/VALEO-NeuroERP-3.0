@@ -3,12 +3,13 @@
  * TouchCards für Verladeort- und Artikel-Auswahl, Keyboard-Shortcuts für Desktop
  */
 import { useState } from 'react'
-import { useNavigate } from '@/app/routing/typed-router'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 import { apiClient } from '@/lib/api-client'
@@ -22,6 +23,7 @@ import {
   TouchCardGroup,
   TouchConfirmCard,
 } from '@/components/touch/TouchFieldLayout'
+import { Callout } from '@/components/ui/callout'
 
 type BeladungData = {
   kennzeichen: string
@@ -36,9 +38,17 @@ const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer',
 
 type SiloOption = { id: string; label: string; description: string }
 
+function istKennzeichen(wert: string): boolean {
+  return wert.length > 0 && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(wert)
+}
+
 export default function LKWBeladungPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
+  const lieferscheinAusTour = searchParams.get('lieferschein') ?? ''
+  const kennzeichenAusTour = searchParams.get('kennzeichen') ?? ''
 
   const { data: articlesData } = useQuery({
     queryKey: ['articles', 'lkw-beladung'],
@@ -72,8 +82,8 @@ export default function LKWBeladungPage(): JSX.Element {
     { id: 'halle-a', label: 'Halle A', description: 'Schüttgut allgemein' },
   ]
   const [beladung, setBeladung] = useState<BeladungData>({
-    kennzeichen: '',
-    lieferscheinNr: '',
+    kennzeichen: istKennzeichen(kennzeichenAusTour) ? kennzeichenAusTour : '',
+    lieferscheinNr: istKennzeichen(lieferscheinAusTour) ? lieferscheinAusTour : '',
     artikel: '',
     menge: 0,
     chargenId: '',
@@ -86,6 +96,7 @@ export default function LKWBeladungPage(): JSX.Element {
   }
 
   const handleFinish = async (): Promise<void> => {
+    if (saving) return
     setSaving(true)
     try {
       await api.post('/api/v1/lager/verladung', {
@@ -200,8 +211,8 @@ export default function LKWBeladungPage(): JSX.Element {
       content: (
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-2">
-            <CheckCircle className="h-16 w-16 text-emerald-500" />
-            <h3 className="text-xl font-bold text-slate-800">Beladung prüfen</h3>
+            <CheckCircle className="h-16 w-16 text-status-success" />
+            <h3 className="text-xl font-bold text-foreground">Beladung prüfen</h3>
           </div>
           <TouchConfirmCard
             title="Zusammenfassung"
@@ -214,10 +225,10 @@ export default function LKWBeladungPage(): JSX.Element {
               { label: 'Verladeort', value: verladeortLabel || '—' },
             ]}
           />
-          <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
             <p className="font-semibold">Beladung wird dokumentiert</p>
             <p className="mt-1">Lieferschein wird automatisch erstellt</p>
-          </div>
+          </Callout>
         </div>
       ),
     },
@@ -227,7 +238,7 @@ export default function LKWBeladungPage(): JSX.Element {
     <div className="flex flex-col">
       <div className="p-3 md:p-6">
         <ModuleToolbar backTarget="/logistik/verladungen" closeTarget="/logistik/verladungen" title="LKW-Beladung" />
-        <AgentProcessPanel domain="lager" className="mb-4" />
+        {!isTouch ? <AgentProcessPanel domain="lager" className="mb-4" /> : null}
         <Wizard
           title="LKW-Beladung"
           steps={steps}
@@ -236,7 +247,7 @@ export default function LKWBeladungPage(): JSX.Element {
           loading={saving}
         />
       </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

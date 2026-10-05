@@ -254,7 +254,7 @@ export default function WorkflowSandboxPage(): JSX.Element {
                 <CardHeader>
                   <div className="flex items-center justify-between gap-3">
                     <CardTitle>Ablaufvorschau</CardTitle>
-                    <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handleExportPreview}>
+                    <Button type="button" variant="outline" className="min-h-touch gap-2" onClick={handleExportPreview}>
                       <Download className="h-4 w-4" />
                       JSON exportieren
                     </Button>
@@ -340,12 +340,12 @@ export default function WorkflowSandboxPage(): JSX.Element {
               {previewMutation.data.warnings.length > 0 ? (
                 <Card className="border-amber-300 bg-amber-50">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-amber-950">
+                    <CardTitle className="flex items-center gap-2 text-status-warning">
                       <ShieldAlert className="h-5 w-5" />
                       Hinweise
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2 text-sm text-amber-950">
+                  <CardContent className="space-y-2 text-sm text-status-warning">
                     {previewMutation.data.warnings.map((warning) => (
                       <p key={warning}>{warning}</p>
                     ))}

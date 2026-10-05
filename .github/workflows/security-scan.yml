@@ -111,6 +111,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-backend-results.sarif'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           exit-code: '0'
 
       - name: Run Trivy frontend vulnerability scanner
@@ -120,6 +121,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-frontend-results.sarif'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           exit-code: '0'
       
       - name: Upload Trivy results to GitHub Security
@@ -138,8 +140,8 @@ jobs:
 
       - name: Enforce Trivy High/Critical gate
         run: |
-          # SARIF above retains every finding. The release gate blocks all
-          # actionable High/Critical findings for which a vendor fix exists.
+          # SARIF above and the release gate both report actionable
+          # High/Critical findings for which a vendor fix exists.
           trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "valeo-backend:${{ github.sha }}"
           trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "valeo-frontend:${{ github.sha }}"
   

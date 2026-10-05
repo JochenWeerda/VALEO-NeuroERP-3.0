@@ -44,7 +44,11 @@ Die MkDocs-Sidebar listet alle ADRs einzeln (Generator: `python scripts/generate
 - [ADR-035 Kein interaktiver Workflow-Designer](adr-035-kein-workflow-designer.md)
 - [ADR-036 Architektur-Dokumentations-Stack](adr-036-architecture-documentation-stack.md)
 - [ADR-037 Structurizr C4 Source of Truth](adr-037-structurizr-c4-source-of-truth.md)
+- [ADR-056 Herstellerneutraler ERP-Gewohnheitsvertrag](adr-056-vendor-neutral-erp-habit-contract.md)
+- [ADR-071 Security-Dependency-Gate statt automatischer Major-Upgrades](adr-071-security-dependency-gate.md)
 - [ADR-CRM-001](ADR-CRM-001.md)
+
+- [ADR-077 Fuehrender Wiegeschein im Inventory-Kern](adr-077-leading-weighing-ticket.md)
 
 ## Hinweis zu Doppelnummern
 
@@ -63,3 +67,10 @@ ADR-030 ist **nicht vergeben** (Lücke in der Nummerierung).
 
 - [Architecture Index](../architecture/index.md)
 - [Process Kernel Status](../architecture/process-kernel/STATUS.md)
+- [ADR-072 Explizite MCP-Ausfuehrungsadapter](adr-072-mcp-execution-adapters.md)
+
+- [ADR-073 Ein aktives Bankauszugsmodell](adr-073-bank-model-retirement.md)
+
+- [ADR-074 Bankvergleich ohne Direktbuchung](adr-074-bank-directbook-retirement.md)
+
+- [ADR-075 Explizite Bank-Hauptbuchverbindung und Saldennachweis](adr-075-bank-ledger-evidence.md)

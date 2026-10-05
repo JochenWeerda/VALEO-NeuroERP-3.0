@@ -91,7 +91,7 @@ def list_partien(
             where += " AND status = :st"
             params["st"] = status
         rows = db.execute(
-            text(f"SELECT * FROM domain_agrar.saatgut_partien {where} ORDER BY erstellt_am DESC LIMIT 200"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_agrar.saatgut_partien {where} ORDER BY erstellt_am DESC LIMIT 200"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
         return [
@@ -238,7 +238,7 @@ def update_partie(
         params = {**updates, "id": id, "tid": tenant_id}
         try:
             db.execute(
-                text(f"UPDATE domain_agrar.saatgut_partien SET {set_clause} WHERE id=:id AND tenant_id=:tid"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+                text(f"UPDATE domain_agrar.saatgut_partien SET {set_clause} WHERE id=:id AND tenant_id=:tid"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
                 params,
             )
             db.commit()

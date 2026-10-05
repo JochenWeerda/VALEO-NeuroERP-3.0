@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useSaveSupplierRating, useSupplierRatings, type SupplierRating } from '@/lib/api/procurement-plus'
 import {
   CrudCapabilityChecklist,
@@ -46,10 +47,12 @@ const supplierRatingRoleProfiles: Array<{ id: SupplierRatingRoleFocus; label: st
 ]
 
 export default function LieferantenBewertungPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const { data = [], isLoading, isError, error, refetch } = useSupplierRatings()
   const save = useSaveSupplierRating()
   const [search, setSearch] = useState('')
   const [roleFocus, setRoleFocus] = useState<SupplierRatingRoleFocus>('all')
+  const [pendingScoreId, setPendingScoreId] = useState<string | null>(null)
 
   const filtered = useMemo(
     () => data.filter((i) => i.supplier.toLowerCase().includes(search.toLowerCase())),
@@ -135,12 +138,23 @@ export default function LieferantenBewertungPage(): JSX.Element {
   }
 
   const handleNudgeScore = async (row: SupplierRating, delta: number) => {
-    const overallScore = Math.max(1, Math.min(5, Number((row.overallScore + delta).toFixed(2))))
-    await save.mutateAsync({ ...row, overallScore })
+    if (pendingScoreId) return
+    setPendingScoreId(row.supplierId)
+    try {
+      const overallScore = Math.max(1, Math.min(5, Number((row.overallScore + delta).toFixed(2))))
+      await save.mutateAsync({ ...row, overallScore })
+    } finally {
+      setPendingScoreId(null)
+    }
   }
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">Lieferantenbewertung</h1>
+        <p className="text-muted-foreground">Scores suchen, pruefen und nachjustieren</p>
+      </div>
+      {!isTouch ? (
       <div className="space-y-4">
         <RoleFocusBar
           roles={supplierRatingRoleProfiles}
@@ -177,13 +191,14 @@ export default function LieferantenBewertungPage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={ratingCrudCapabilities} />
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Lieferantenbewertung</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Lieferant suchen" />
+          <Input aria-label="Suche Lieferantenbewertung" className="min-h-touch" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Lieferant suchen" />
           {isLoading ? (
             <div className="text-sm text-muted-foreground">Lade Bewertungen ...</div>
           ) : (
@@ -210,9 +225,11 @@ export default function LieferantenBewertungPage(): JSX.Element {
                     <TableCell className="text-right">{r.serviceScore.toFixed(2)}</TableCell>
                     <TableCell className="text-right font-semibold">{r.overallScore.toFixed(2)}</TableCell>
                     <TableCell className="text-right">{r.totalOrders}</TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => { void handleNudgeScore(r, -0.1) }}>-0.1</Button>
-                      <Button size="sm" onClick={() => { void handleNudgeScore(r, 0.1) }}>+0.1</Button>
+                    <TableCell className="text-right">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => { void handleNudgeScore(r, -0.1) }} disabled={pendingScoreId === r.supplierId} aria-label={`Score ${r.supplier} senken`}>Score senken</Button>
+                        <Button className="min-h-touch touch-manipulation" onClick={() => { void handleNudgeScore(r, 0.1) }} disabled={pendingScoreId === r.supplierId} aria-label={`Score ${r.supplier} erhoehen`}>Score erhoehen</Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

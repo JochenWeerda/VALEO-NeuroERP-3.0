@@ -1,0 +1,58 @@
+slice_id: RATION-WB-06-SPIELWIESE
+id: RATION-WB-06-SPIELWIESE
+title: Rationswerkbank – Excel-Spielwiese (Inline-CRUD + Grenzen + reicht-für-Milch)
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Center-Panel der Werkbank aus dem Zielbild als "Spielwiese / Ration am
+  Futtertisch": Kopfzeile mit Live-Neuberechnungs-Hinweis, Struktur-Spalte
+  (aNDFom-Dichte), getrennt editierbare Min/Max-Grenzen je Futtermittel
+  ("Grenzen öffnen/verdichten", Skill §6.1) und die Zeilen "reicht für Milch
+  nach ME / nach sidP" aus dem kanonischen Vertrag. Kein neuer Solver, keine
+  client-seitige GfE-Logik.
+scope:
+  - Patch-Erweiterung set_feed_min_fm / set_feed_max_fm (API-Typ + applyRationPatch + patchHasSolverKeys)
+  - Spielwiese-Kopf, Struktur-Spalte, Min/Max-Inputs, Rationssumme, reicht-für-Milch-Zeilen
+  - Horizontal scrollbarer Tabellencontainer
+non_scope:
+  - Client-seitiger Live-Evaluator ohne Backend (Skill §10.2 – Evaluator bleibt autoritativ Backend)
+  - Aktiv-Checkbox mit "deaktiviert aber gelistet"-Zustand (eigener State, Folge-Slice)
+  - Ersetzen/Duplizieren-Modal (Folge-Slice; kein Dummy-Button)
+  - Sensitivität (RATION-WB-07)
+file_ownership:
+  - docs/agent-ops/slices/RATION-WB-06-SPIELWIESE.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+acceptance:
+  - "tsc --noEmit gruen (0 Fehler)"
+  - "eslint der geaenderten Dateien gruen"
+  - "Min/Max-Eingabe setzt getrennte Grenzen und berechnet neu"
+  - "reicht-für-Milch nach ME/sidP wird aus forage_performance.supplemented gezeigt"
+tests:
+  - "npx tsc --noEmit -p tsconfig.json"
+  - "npx eslint src/pages/futtermittel/rationsoptimierung.tsx src/lib/api/rations-optimization.ts"
+risks:
+  - "Jede Mengen-/Grenzänderung löst weiterhin einen autoritativen Backend-Solve aus (kein reiner Client-Recalc); für die Bewertungsmodus-Semantik ausreichend, aber nicht instant."
+  - "Visuelle Endabnahme im laufenden Portal offen (Teil des Foto-Vergleichs)."
+ai_harness:
+  fachlicher_vertrag: >-
+    Grenzen (Min/Max) sind betriebliche/Beratungs-Grenzen; das Setzen öffnet oder
+    verdichtet den Suchraum, ohne harte GfE-/Sicherheitsgrenzen anzutasten
+    (die bleiben serverseitig aktiv). "reicht für Milch" stammt aus dem
+    autoritativen Vertrag, nicht aus einer Client-Formel (Skill §10.2).
+  test_vertrag: >-
+    Statischer Vertrag tsc+eslint gruen; die Edits nutzen den bestehenden
+    Re-Optimize-/Patch-Pfad (Async-Guard über isOptimizing bereits vorhanden).
+  daten_vertrag: >-
+    Leere Min/Max = keine Grenze/Solver-Standard (nicht 0-Interpretation im UI).
+  api_vertrag: >-
+    RationAdjustmentApplyPatch um set_feed_min_fm/set_feed_max_fm erweitert;
+    rueckwaertskompatibel (optionale Felder).
+  ui_vertrag: >-
+    Spielwiese erweitert die bestehende Workbench-Tabelle; Wizard/Assistent
+    unveraendert.
+  persistenz_vertrag: >-
+    Grenzen wandern in der persistierten Feed-Auswahl (feedMinFm/feedMaxFm) mit.

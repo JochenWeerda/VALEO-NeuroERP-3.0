@@ -1,0 +1,53 @@
+slice_id: CODE-IMPROVEMENT-INTEGRITY-20260930
+title: Korrektheit und Dauerbetrieb des Verbesserungszyklus
+owner: Codex-01a0f3fc
+status: completed
+completed_at: 2026-09-30
+created_at: 2026-09-30
+coordination: >-
+  Claim c42ec7d34. Keine Projektion-, OpenAPI- oder aktiven Domain-Dateien.
+  Gemeinsame Workboard/Open-Gaps-Dateien nur im eigenen Abschnitt.
+goal: >-
+  Messfehler, Baseline-Umgehung, unterdrueckte Frontend-Testfehler und
+  doppelte CI-Laeufe beseitigen; lesenden Verbesserungsbetrieb integrieren.
+file_ownership:
+  - scripts/check_pagination.py
+  - config/pagination_baseline.json
+  - scripts/check_baseline_integrity.py
+  - scripts/run_improvement_pipelines.py
+  - scripts/check_critical_backend_coverage.py
+  - tests/test_pagination_gate.py
+  - tests/test_baseline_integrity.py
+  - tests/test_improvement_pipeline.py
+  - tests/test_improvement_workflow_contract.py
+  - scripts/verify_quality_evidence.py
+  - packages/frontend-web/package.json
+  - pnpm-lock.yaml
+  - .github/workflows/quality-gate.yml
+  - .github/workflows/sonarcloud.yml
+  - .github/workflows/ai-engineering-metrics.yml
+  - docs/quality-assurance/code-improvement-integrity-20260930.md
+acceptance:
+  - Pagination wird an die Abfrage statt an Dateinamen oder Parameter gebunden.
+  - Baseline-Anhebungen werden gegen den PR-Ausgangsstand blockiert.
+  - Frontendtests sind verbindlich und Coverage wird nur einmal erzeugt.
+  - Sonar konsumiert Nachweise desselben Runs und Commits.
+  - Nightly erzeugt Artefakte ohne Git-Push.
+  - Lokaler Verbesserungsrunner ist ohne linkup_mcp lesend ausfuehrbar.
+tests:
+  - python -m pytest tests/test_pagination_gate.py tests/test_baseline_integrity.py tests/test_improvement_pipeline.py tests/test_improvement_workflow_contract.py --noconftest --no-cov -q -o addopts=
+  - python scripts/check_pagination.py
+  - node scripts/ai-slice-readiness-check.cjs --slice CODE-IMPROVEMENT-INTEGRITY-20260930
+risks:
+  - Eine genauere Erstinventur klassifiziert Altbestand und ist keine Fachreparatur.
+  - Sonar-Konfiguration und Branchschutz sind externe Repository-Einstellungen.
+ai_harness:
+  fachlicher_vertrag: Fehler und fehlende Nachweise duerfen keinen Erfolg melden.
+  architektur_vertrag: Bestehende CI und Ratschen bleiben zentral; kein neuer Service.
+  daten_vertrag: Keine Fachdatenmutation; SHA-bezogene JSON-Nachweise und Baselines.
+  test_vertrag: Reale Fehlerfaelle fuer Scanner/Runner und strukturelle CI-Vertraege.
+  security_vertrag: Kein Secret in Artefakten; CI lesend; Baselines fail-closed.
+  betriebs_vertrag: Timeouts, explizite Exitcodes und nachpruefbare Artefakte.
+  dokumentations_vertrag: Eigener QA-Bericht, Workboard und Open-Gaps.
+external_gates:
+  - GitHub required status checks und Sonar-Token durch Repository-Betrieb verifizieren.

@@ -1,14 +1,19 @@
-import type {
-  ScreenActionDefinition,
-  ScreenDefinition,
-  ScreenFieldDefinition,
-  ScreenTabDefinition,
-  ScreenTableDefinition,
-  ScreenTableProfile,
+import {
+  resolveContextRailSections,
+  type ScreenActionDefinition,
+  type ScreenDefinition,
+  type ScreenFieldDefinition,
+  type ScreenDensity,
+  type ScreenTabDefinition,
+  type ScreenTableDefinition,
+  type ScreenTableProfile,
+  type ScreenTileDefinition,
 } from '../schema'
+import { defaultColumnNavigation, FLOORPLAN_RULES, resolveSectionNavigation, ROW_DETAIL_MIN_COLUMNS } from '../floorplans'
+import { compileProcessRibbon, type ProcessChain } from '../renderers/process-ribbon'
 import { buildRenderPlanCacheKey, type CompileContext } from './compile-context'
 import { globalRenderPlanCache } from './cache'
-import { fieldTypeToComponentKind, type RenderActionPlan, type RenderFieldPlan, type RenderPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan } from './types'
+import { fieldTypeToComponentKind, type RenderActionPlan, type RenderCalendarPlan, type RenderFieldPlan, type RenderPlan, type RenderProcessRibbonPlan, type RenderTabContentPlan, type RenderTabPlan, type RenderTablePlan, type RenderTilePlan, type RenderTwinPlan } from './types'
 
 const DEFAULT_LOOKUP_MIN_CHARS = 2
 const DEFAULT_LOOKUP_RESULT_LIMIT = 25
@@ -42,12 +47,31 @@ function compileField(
   }
 }
 
+function compileRowDetail(table: ScreenTableDefinition, onePage: boolean): RenderTablePlan['rowDetail'] {
+  const declared = table.rowDetail
+  if (declared === false) return undefined
+  if (!declared && !(onePage && table.columns.length >= ROW_DETAIL_MIN_COLUMNS)) return undefined
+  return {
+    fields: declared?.fields?.length
+      ? declared.fields.map((field) => ({ key: field.key, label: field.label, renderKind: field.renderKind }))
+      : table.columns.map((column) => ({ key: column.key, label: column.label, renderKind: column.renderKind })),
+  }
+}
+
 function compileTable(
   table: ScreenTableDefinition,
   tableProfile: ScreenTableProfile,
+  density: ScreenDensity,
+  onePage: boolean,
   tabKey?: string,
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
+  const declaredRowHeight = table.rowHeight ?? (density === 'expertDense' ? 36 : density === 'compact' ? 44 : 52)
+  const rowHeight = density === 'expertDense'
+    ? Math.min(declaredRowHeight, 36)
+    : density === 'compact'
+      ? Math.min(declaredRowHeight, 44)
+      : Math.max(declaredRowHeight, 52)
   return {
     key: table.key,
     label: table.label,
@@ -61,13 +85,18 @@ function compileTable(
       filterable: column.filterable,
       renderKind: column.renderKind,
       defaultSort: column.defaultSort,
+      priority: column.priority,
     })),
     dataSourceKey: table.dataSourceKey,
     pageSize,
     virtualized: table.virtualized ?? true,
-    rowHeight: table.rowHeight ?? 52,
+    rowHeight,
     serverPagination: table.serverPagination ?? true,
     tableProfile,
+    rowRouteTemplate: table.rowRouteTemplate,
+    rowActions: table.rowActions,
+    bulkActions: table.bulkActions,
+    rowDetail: compileRowDetail(table, onePage),
   }
 }
 
@@ -95,14 +124,106 @@ function filterActionsByPermission(
       requiresConfirmation: action.requiresConfirmation,
       auditReasonRequired: action.auditReasonRequired,
       humanApprovalRequired: action.humanApprovalRequired,
+      zone: action.zone ?? 'header',
+      keyboardShortcut: action.keyboardShortcut,
+      command: action.command,
+      enabledWhen: action.enabledWhen,
     }))
+}
+
+/**
+ * Kompiliert cockpit-Kacheln (UIX-061): baut die Ziel-Route inkl. Filter-Query.
+ * Die Reihenfolge kommt bereits saisonal sortiert vom Backend; Kacheln ohne
+ * aufgeloeste targetRoute werden verworfen (kein toter Link).
+ */
+export function compileTiles(schema: ScreenDefinition): RenderTilePlan[] {
+  const tiles: ScreenTileDefinition[] = schema.tiles ?? []
+  const plans: RenderTilePlan[] = []
+  for (const tile of tiles) {
+    const base = tile.targetRoute ?? ''
+    if (!base) continue
+    const filters = tile.targetFilters ?? {}
+    const query = new URLSearchParams(filters).toString()
+    plans.push({
+      key: tile.key,
+      label: tile.label,
+      targetScreenId: tile.targetScreenId,
+      targetPath: query ? `${base}${base.includes('?') ? '&' : '?'}${query}` : base,
+      countEndpoint: tile.countEndpoint,
+      tone: tile.tone ?? 'neutral',
+    })
+  }
+  return plans
+}
+
+export function compileCalendar(schema: ScreenDefinition): RenderCalendarPlan | undefined {
+  const calendar = schema.calendar
+  if (!calendar?.endpoint || calendar.layers.length === 0) return undefined
+  return {
+    endpoint: calendar.endpoint,
+    reprojectEndpoint: calendar.reprojectEndpoint,
+    icsTokenEndpoint: calendar.icsTokenEndpoint,
+    defaultView: calendar.defaultView ?? 'agenda',
+    deadlineBandDays: calendar.deadlineBandDays ?? 14,
+    layers: calendar.layers.map((layer) => ({
+      key: layer.key,
+      label: layer.label,
+      defaultVisible: layer.defaultVisible ?? true,
+    })),
+  }
+}
+
+export function compileProcessRibbonPlan(schema: ScreenDefinition): {
+  ribbon?: RenderProcessRibbonPlan
+  warnings: string[]
+} {
+  const ref = schema.processChain
+  if (!ref?.chainId?.trim()) return { warnings: [] }
+
+  const chains = (schema.processChains ?? {}) as Record<string, ProcessChain>
+  const resolveRoute = (screenId: string): string | undefined => {
+    for (const chain of Object.values(chains)) {
+      const step = chain.steps.find((item) => item.screenId === screenId) as { routePath?: string } | undefined
+      const path = step?.routePath?.trim()
+      if (path) return path
+    }
+    return undefined
+  }
+  const { ribbon, warnings } = compileProcessRibbon(ref.chainId.trim(), ref.stepKey, chains, resolveRoute)
+  return { ribbon: ribbon ?? undefined, warnings }
+}
+
+export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefined {
+  const twin = schema.twin
+  if (!twin?.endpoint) return undefined
+  return {
+    endpoint: twin.endpoint,
+    planId: twin.planId ?? schema.id,
+    cacheTtlSeconds: twin.cacheTtlSeconds ?? 30,
+    activateRouteTemplate: twin.activateRouteTemplate ?? '/lager/silo-zellen/{cellId}',
+    activateScreenId: twin.activateScreenId,
+    metrics: twin.metrics ?? [
+      { key: 'fill_pct', label: 'Fuellstand', kind: 'percent', warnAbove: 90 },
+      { key: 'locked', label: 'Gesperrt', kind: 'flag' },
+      { key: 'qs_status', label: 'QS', kind: 'status' },
+    ],
+  }
+}
+
+function schemaVolatility(schema: ScreenDefinition): string {
+  const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
+  const options = (schema.fields ?? []).map((field) => (
+    field.options ? `${field.key}=${field.options.map((option) => String(option.value)).join('|')}` : ''
+  )).join(';')
+  const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}`).join(',')
+  return `${summary}#${options}#${actions}#${schema.layout?.density ?? ''}`
 }
 
 export function compileRenderPlan(
   schema: ScreenDefinition,
   context: CompileContext,
 ): RenderPlan {
-  const cacheKey = buildRenderPlanCacheKey(context)
+  const cacheKey = `${buildRenderPlanCacheKey(context)}::${schemaVolatility(schema)}`
   const cached = globalRenderPlanCache.get(cacheKey)
   if (cached && cached.screenId === schema.id) {
     return cached
@@ -118,7 +239,13 @@ export function compileRenderPlan(
     'objectPage'
   )
   const density = schema.layout?.density ?? 'compact'
-  const contextRail = schema.layout?.contextRail ?? (floorplan === 'worklist' ? 'none' : 'combined')
+  if (schema.layout?.columnNavigation && schema.layout.columnNavigation !== 'single' && !FLOORPLAN_RULES[floorplan].allowsColumns) {
+    throw new Error('Column navigation is not supported for this floorplan')
+  }
+  const contextRail = schema.layout?.contextRail ?? (
+    floorplan === 'worklist' || floorplan === 'analyticalList' ? 'none' : 'combined'
+  )
+  const contextRailSections = resolveContextRailSections(contextRail, schema.layout?.contextRailSections)
   const tableProfile = schema.layout?.tableProfile ?? 'standard'
   const performance = {
     initialPayloadBudgetKb: schema.performance?.initialPayloadBudgetKb ?? 64,
@@ -143,7 +270,12 @@ export function compileRenderPlan(
     fieldsByKey[field.key] = field
   }
 
-  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile))
+  const hasTables = (schema.tables?.length ?? 0) > 0 || (schema.tabs ?? []).some((tab) => (tab.tables?.length ?? 0) > 0)
+  const columnNavigation = defaultColumnNavigation(floorplan, hasTables, schema.layout?.columnNavigation)
+  const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
+  const onePage = sectionNavigation === 'anchors'
+
+  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage))
   for (const table of rootTables) {
     tablesByKey[table.key] = table
   }
@@ -166,7 +298,7 @@ export function compileRenderPlan(
       fieldsByKey[field.key] = field
     }
 
-    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, tab.key))
+    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, tab.key))
     tablesByTab[tab.key] = tabTables
     for (const table of tabTables) {
       tablesByKey[table.key] = table
@@ -179,6 +311,8 @@ export function compileRenderPlan(
     }
   }
 
+  const processRibbon = compileProcessRibbonPlan(schema)
+
   const plan: RenderPlan = {
     cacheKey,
     screenId: schema.id,
@@ -186,23 +320,42 @@ export function compileRenderPlan(
     shell: {
       title: context.summary?.title ?? schema.title,
       subtitle: context.summary?.subtitle ?? schema.subtitle,
+      identityField: schema.identityField,
       domain: schema.domain,
       mode: schema.mode,
       layoutMode: schema.layout?.preferredMode ?? 'desktopDense',
       mobileMode: schema.layout?.mobileMode ?? 'mobileStack',
       touchTargetPx: schema.layout?.touchTargetPx ?? 44,
       floorplan,
+      columnNavigation,
+      sectionNavigation,
       density,
       contextRail,
+      contextRailSections,
       tableProfile,
+      summaryPlacement: schema.layout?.summaryPlacement ?? 'header',
+      statusPlacement: schema.layout?.statusPlacement ?? 'beforeFields',
+      stickyHeader: schema.layout?.stickyHeader ?? onePage,
+      stickyFooter: schema.layout?.stickyFooter ?? onePage,
       summaryEndpoint: schema.summaryEndpoint,
+      voice: {
+        enabled: schema.voice?.enabled ?? true,
+        provider: schema.voice?.provider ?? 'webspeech',
+      },
+      processRibbon: processRibbon.ribbon,
+      processRibbonWarnings: processRibbon.warnings.length > 0 ? processRibbon.warnings : undefined,
     },
     summarySlots: (context.summary?.summaryItems ?? schema.summary ?? []).map((item) => ({
       key: item.key,
       label: item.label,
+      kind: item.kind,
       tone: item.tone,
     })),
     summaryItems: context.summary?.summaryItems ?? schema.summary ?? [],
+    tiles: compileTiles(schema),
+    calendar: compileCalendar(schema),
+    twin: compileTwin(schema),
+    sourceProposals: schema.sourceProposals ? { ...schema.sourceProposals } : undefined,
     visibleTabs,
     tabContent,
     rootFieldKeys: rootFields.map((field) => field.key),
@@ -212,6 +365,9 @@ export function compileRenderPlan(
     tablesByKey,
     tablesByTab,
     actions: filterActionsByPermission(schema.actions ?? [], context.auth.permissions),
+    interaction: {
+      enterMovesFocus: schema.interaction?.enterMovesFocus ?? false,
+    },
     workflow: schema.workflow
       ? {
           processKey: schema.workflow.processKey,
@@ -219,6 +375,10 @@ export function compileRenderPlan(
           nextActionKey: schema.workflow.nextActionKey,
           auditRequired: schema.workflow.auditRequired,
           evidenceRequired: schema.workflow.evidenceRequired,
+          // FSX-030: Prozessband und Belegbindung wandern mit in den RenderPlan,
+          // damit die Masken sie ohne eigenes JSX erhalten.
+          phases: schema.workflow.phases,
+          documentType: schema.workflow.documentType,
         }
       : undefined,
     performance,

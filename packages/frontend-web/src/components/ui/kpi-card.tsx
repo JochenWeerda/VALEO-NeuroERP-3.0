@@ -16,17 +16,17 @@ interface KpiCardProps {
 
 const accentStyles: Record<KpiAccent, string> = {
   primary: 'border-l-primary bg-primary/5',
-  amber:   'border-l-amber-500 bg-amber-50 dark:bg-amber-950/30',
-  green:   'border-l-green-600 bg-green-50 dark:bg-green-950/30',
-  red:     'border-l-red-500 bg-red-50 dark:bg-red-950/30',
+  amber:   'border-l-[hsl(var(--color-semantic-warning-500-hsl))] bg-[hsl(var(--color-semantic-warning-50-hsl))] dark:bg-[hsl(var(--color-semantic-warning-500-hsl)/0.12)]',
+  green:   'border-l-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-50-hsl))] dark:bg-[hsl(var(--color-semantic-success-500-hsl)/0.12)]',
+  red:     'border-l-[hsl(var(--color-semantic-error-500-hsl))] bg-[hsl(var(--color-semantic-error-50-hsl))] dark:bg-[hsl(var(--color-semantic-error-500-hsl)/0.12)]',
   neutral: 'border-l-muted-foreground/30 bg-muted/30',
 }
 
 const iconStyles: Record<KpiAccent, string> = {
   primary: 'text-primary',
-  amber:   'text-amber-600',
-  green:   'text-green-600',
-  red:     'text-red-600',
+  amber:   'text-status-warning',
+  green:   'text-status-success',
+  red:     'text-status-error',
   neutral: 'text-muted-foreground',
 }
 
@@ -51,7 +51,7 @@ export function KpiCard({
       )}
     >
       <div className="flex items-start justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </p>
         {Icon && <Icon className={cn('h-4 w-4', iconStyles[accent])} />}
@@ -61,8 +61,8 @@ export function KpiCard({
         <div
           className={cn(
             'mt-1 flex items-center gap-1 text-xs font-medium',
-            isPositive && 'text-green-600',
-            isNegative && 'text-red-600',
+            isPositive && 'text-status-success',
+            isNegative && 'text-status-error',
             !isPositive && !isNegative && 'text-muted-foreground',
           )}
         >

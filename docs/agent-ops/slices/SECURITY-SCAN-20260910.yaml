@@ -1,0 +1,157 @@
+slice_id: SECURITY-SCAN-20260910
+id: SECURITY-SCAN-20260910
+title: Security Scan ursachenbezogen schliessen (Trivy, Grype, OWASP ZAP)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-10"
+started_at: "2026-09-10"
+completed_at: "2026-09-10"
+goal: >-
+  Den weiterhin roten Security-Scan-Workflow anhand der aktuellen Trivy-,
+  Grype- und ZAP-Logs an den belegten Ursachen schliessen. Keine abgesenkten
+  Severity-Schwellen, keine pauschalen Ausnahmen, kein continue-on-error als
+  Reparatur.
+coordination: >-
+  Parallel zu Codex, das E2E-SMOKE-CONTRACT-20260910 bearbeitet. Deren
+  Finance-/Inventory-Smoke-Tests, app/api/v1/schemas/finance_actions_schemas.py
+  und die Mahnstufen-Regressionstests bleiben unangetastet, ebenso die
+  Reparaturmigration desktop_runtime_repair_20260909 und der abgeschlossene
+  Journal-Slice. Gemeinsame Backend-Aenderungen und Container-Neustarts vorher
+  ueber das Workboard abstimmen.
+file_ownership:
+  - docs/agent-ops/slices/SECURITY-SCAN-20260910.yaml
+  - Dockerfile.backend
+  - .grype.yaml
+  - "docs/agent-ops/active-workboard.md: ausschliesslich Abschnitt SECURITY-SCAN-20260910"
+  - ".github/workflows/security-scan.yml: nur falls eine belegte Ursache dort liegt"
+  - "Dependency-Manifeste, Lockfiles und Dockerfiles: exakte Liste wird vor jedem Codepaket im Workboard-Abschnitt ergaenzt"
+ausloeser: >-
+  Nach Abschluss von SPEC-SOURCE-REALAPP-20260910 blieben zwei Workflows rot.
+  E2E Smoke liegt bei Codex; der Security Scan ist dieser Slice.
+befund_erhebung:
+  lauf: 34470954356
+  commit: ef7e7707e
+  jobs:
+    - "Python and Node Dependency Audit: success"
+    - "Bandit Python Security Scan: success"
+    - "OWASP ZAP Full Scan: success"
+    - "Grype Vulnerability Scan: failure"
+    - "Trivy Container Scan: failure"
+    - "Security Scan Summary: failure (Folge der beiden)"
+  gate_semantik: >-
+    Beide Gates werten ausschliesslich behebbare Befunde: Trivy laeuft mit
+    --ignore-unfixed, Grype mit --only-fixed und --fail-on high. Gemeldet wird
+    also nur, wofuer ein Herstellerfix existiert.
+  trivy_backend_high:
+    - "msgpack 1.1.2 -> 1.2.1 (GHSA-6v7p-g79w-8964, HIGH)"
+    - "setuptools 70.3.0 -> 78.1.1 (CVE-2025-47273, Path Traversal, HIGH)"
+  offen_bei_erhebung:
+    - >-
+      Der Trivy-Schritt laeuft unter bash -e und bricht nach dem Backend-Image
+      ab; ob valeo-frontend eigene behebbare Befunde hat, ist noch nicht
+      belegt.
+    - >-
+      Grype schreibt nur SARIF, die konkrete Paketliste ist aus dem Konsolenlog
+      nicht ableitbar und muss ueber die Code-Scanning-Alerts oder einen
+      lokalen Lauf ermittelt werden.
+    - >-
+      Code-Scanning fuehrt 25 Grype- und 75 Trivy-Alerts, darunter unbehebbare.
+      Diese Zahl ist kein Mass fuer den Gate-Umfang.
+acceptance:
+  - Jeder Fix ist auf einen belegten Scanner-Befund zurueckgefuehrt.
+  - Severity-Schwellen, Exit-Codes und Gate-Umfang bleiben unveraendert.
+  - Kein continue-on-error und keine pauschalen Ignores.
+  - Nicht behebbare Befunde einzeln mit Ursache und naechstem Schritt benannt.
+  - Security-Scan-Ergebnis fuer den tatsaechlichen Commit dokumentiert.
+tests:
+  - docker build -f Dockerfile.backend .
+  - trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 <image>
+  - python -m pytest tests -k "security or bandit"
+risks:
+  - >-
+    Anhebung transitiver Abhaengigkeiten kann Laufzeitverhalten aendern; jeder
+    Sprung wird durch Build und Tests belegt, nicht nur durch den Scanner.
+  - >-
+    msgpack und setuptools sind nicht direkt gepinnt, sondern transitiv. Ein
+    Pin im Manifest ist ein neuer Vertrag und wird begruendet.
+ai_harness:
+  fachlicher_vertrag: >-
+    Der Security-Scan meldet nur noch Befunde ohne verfuegbaren Herstellerfix.
+    Behebbare Schwachstellen in den ausgelieferten Images sind geschlossen.
+  architektur_vertrag: >-
+    Aenderungen bleiben auf Dependency-Manifeste, Lockfiles, Dockerfiles und
+    den Security-Workflow begrenzt. Keine Anpassung von Anwendungscode ohne
+    belegten Scanner-Bezug und ohne Abstimmung im Workboard.
+  daten_vertrag: >-
+    Keine Migration, keine Datenmutation. Reine Build- und
+    Abhaengigkeitsaenderungen.
+  test_vertrag: >-
+    Jeder Fix wird durch einen Image-Build und einen erneuten Scanner-Lauf
+    belegt, ergaenzt um die bestehenden Backend-Tests der betroffenen Pfade.
+  security_vertrag: >-
+    Keine Absenkung von Severity-Schwellen, kein pauschales Ignorieren, kein
+    continue-on-error. Ausnahmen nur einzeln, mit Kennung und Begruendung, und
+    nur wenn kein Herstellerfix existiert. Keine Scans fremder Systeme.
+  betriebs_vertrag: >-
+    Keine Deployments. Container-Neustarts nur nach Abstimmung mit Codex ueber
+    das Workboard.
+  dokumentations_vertrag: >-
+    Diese Slice-YAML und der Workboard-Abschnitt SECURITY-SCAN-20260910 werden
+    konsistent gehalten; Dateibesitz wird vor jedem Codepaket konkretisiert.
+external_gates:
+  - >-
+    Fuer Befunde ohne Herstellerfix ist eine Betriebsentscheidung noetig
+    (Basis-Image-Wechsel oder dokumentierte Risikoannahme); hier nicht
+    vorweggenommen.
+verification:
+  - python -m pytest tests -k "security"
+
+behebung:
+  dockerfile_backend:
+    - >-
+      Basis-Image auf python:3.13.15-slim-bookworm gehoben (Builder und
+      Runtime ueber ARG PYTHON_IMAGE).
+    - >-
+      pip nach der Installation aus dem venv entfernt und im Runtime-Stage
+      deinstalliert. Ursache belegt: msgpack 1.1.2 und setuptools 70.3.0 sind
+      keine Anwendungsabhaengigkeiten, sondern Kopien in
+      pip/_vendor/vendor.txt, das Trivy als Manifest liest. Auch das neueste
+      pip vendort weiterhin dieselben Versionen, ein pip-Upgrade behebt es
+      also nicht. Kein Laufzeitpfad ruft pip auf; CMD ist init_db.py plus
+      uvicorn.
+  dockerfile_frontend: >-
+    Unveraendert. Neu gemessen mit --no-cache --pull, damit kein Layer-Cache
+    das Ergebnis verfaelscht: 0 Befunde in Trivy und Grype. Das bestehende
+    `apk upgrade --no-cache` genuegt.
+  grype_config: >-
+    Vier CPython-Ausnahmen entfernt, weil der Image-Bump sie nicht mehr
+    reproduziert: CVE-2025-15366, CVE-2026-12003, CVE-2026-7210,
+    CVE-2026-15308. Das verschaerft den Gate, es schwaecht ihn nicht.
+    CVE-2025-15367 bleibt paket-/binaer-scoped stehen, existiert aber nur noch
+    als Medium und damit unterhalb des Cutoffs `high`.
+messung_2026_09_10:
+  images: "lokal gebaut aus dem Arbeitsstand, Frontend mit --no-cache --pull"
+  ergebnisse:
+    - "trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend: exit 0"
+    - "trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 frontend: exit 0 (alpine 3.23.4, 0 Befunde)"
+    - "grype --only-fixed --fail-on high backend (mit bereinigter .grype.yaml): exit 0"
+    - "grype --only-fixed --fail-on high frontend: exit 0, keine Befunde"
+  funktionsnachweis: >-
+    Im gebauten Backend-Image importiert /opt/venv/bin/python fastapi,
+    uvicorn, sqlalchemy, alembic, pydantic und app.main fehlerfrei; weder im
+    venv noch im System ist pip noch vorhanden.
+  verbleibend_ohne_fix:
+    - >-
+      CPython-Binaerbefunde CVE-2026-17084, CVE-2026-15806, CVE-2025-15367 und
+      CVE-2026-15310. Alle Medium oder Low, also unterhalb des Gate-Cutoffs,
+      und ausschliesslich in 3.15.0a6/3.15.0rc2 behoben — kein Fix in der
+      unterstuetzten 3.13-Linie. Naechster Schritt: mit dem naechsten CPython-
+      Image-Refresh erneut pruefen, nicht vorzeitig auf eine Vorabversion
+      wechseln.
+  github_abnahme:
+    commit: 2d341cadc
+    lauf: 34480649358
+    ergebnis: >-
+      Security Scan vollstaendig gruen: OWASP ZAP, Grype, Bandit,
+      Dependency Audit, Trivy und Security Scan Summary alle success
+      (Dependency Review wie ueblich skipped).

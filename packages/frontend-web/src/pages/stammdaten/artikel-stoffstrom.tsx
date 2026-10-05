@@ -54,7 +54,7 @@ export default function ArtikelStoffstromPage() {
     <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <Leaf className="h-7 w-7 text-emerald-700" /> Stoffstrom &amp; THG-Bilanz
+          <Leaf className="h-7 w-7 text-status-success" /> Stoffstrom &amp; THG-Bilanz
         </h1>
         <p className="mt-2 text-muted-foreground">
           Nachhaltigkeits-/THG-Daten je Artikel (Anbauland, CO₂-Äquivalent, THG-Wert, ISCC/RED-Konformität).
@@ -80,7 +80,7 @@ export default function ArtikelStoffstromPage() {
                     <TableCell className="text-right font-mono">{num(s.co2_aequivalent_kg_per_t)}</TableCell>
                     <TableCell className="text-right font-mono">{num(s.thg_wert)}</TableCell>
                     <TableCell className="space-x-1">
-                      {s.nachhaltig && <Badge className="bg-emerald-600">nachhaltig</Badge>}
+                      {s.nachhaltig && <Badge variant="success">nachhaltig</Badge>}
                       {s.iscc_zertifiziert && <Badge variant="outline">ISCC</Badge>}
                       {s.red_konform && <Badge variant="outline">RED</Badge>}
                     </TableCell>
@@ -90,7 +90,7 @@ export default function ArtikelStoffstromPage() {
                           try { await remove.mutateAsync(s.id); toast.success('Gelöscht.') }
                           catch (e) { toast.error(e instanceof Error ? e.message : 'Löschen fehlgeschlagen') }
                         }}>
-                        <Trash2 className="h-4 w-4 text-red-600" />
+                        <Trash2 className="h-4 w-4 text-status-error" />
                       </Button>
                     </TableCell>
                   </TableRow>

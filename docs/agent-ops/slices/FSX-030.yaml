@@ -1,0 +1,143 @@
+slice_id: FSX-030
+id: FSX-030
+title: Prozessband als Vertrag — Ebene 1 deklarativ statt je Maske gebaut
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-15"
+started_at: "2026-09-15"
+completed_at: "2026-09-15"
+vorgaenger: FSX-020-024
+nachfolger: FSX-013 (Rollout des Prozessbands in die 18 Handover-Masken)
+masterplan: docs/design/flow-spine-entlastung-masterplan.md
+coordination: >-
+  Spurtrennung mit Cursor: ScreenDefinition/RenderPlan/Meridian und CLAUDE.md
+  liegen bei Claude Code. app/api/v1/endpoints/flow_spines.py und
+  app/core/flow_spine_registry.py wurden nicht angefasst.
+goal: >-
+  FSX-013 soll das Prozessband in 18 Masken tragen. Ohne Vertrag muessten alle
+  18 einzeln nachgezogen werden, sobald sich die Felddefinition aendert. Deshalb
+  steht der Vertrag vor dem Rollout, nicht daneben.
+
+befund:
+  vertrag_war_halb_vorhanden: >-
+    ScreenWorkflowDefinition trug bereits processKey, status, nextActionKey,
+    auditRequired und evidenceRequired. WorkflowRuntime liefert bereits
+    currentStatus, nextAllowedActions und blockingReasons. Es fehlten die
+    geordneten Phasen, die Belegbindung und eine kompakte Darstellung.
+  platzhalter_zeigte_technik: >-
+    WorkflowPanelRenderer rendert ohne WorkflowState einen gestrichelten Kasten
+    mit dem Text "Workflow: <processKey>" — ein interner Schluessel in der
+    Fachmaske. Dieselbe Klasse von Fehler wie die Resume-Route im Leitstand
+    (FSX-021).
+
+entscheidungen:
+  kein_zweiter_vertrag: >-
+    Der vorhandene workflow-Block wurde erweitert statt ein paralleler
+    Prozessband-Vertrag eingefuehrt. Zwei Vertraege fuer denselben Sachverhalt
+    waeren in einem Jahr auseinandergelaufen.
+  strenge_arbeitsteilung: >-
+    phases sind Prozessdefinition und duerfen statisch sein (FSX-003 Fall 1).
+    Stand, Aktionen und Blocker kommen ausschliesslich aus dem WorkflowState.
+    Ein Band, das seinen Stand aus der Definition zieht, zeigt in jedem Beleg
+    dasselbe — genau der Fehler, den FSX-002/003 beseitigt haben. Ein Test
+    haelt das fest ("ohne WorkflowState ist keine Phase aktiv").
+  genau_eine_aktion: >-
+    Das Band zeigt eine naechste Aktion, auch wenn mehrere erlaubt sind. Eine
+    Liste waere wieder ein Entscheidungsproblem; die Auswahl gehoert in die
+    Aktionsleiste der Maske.
+  ein_blocker: >-
+    Nur der erste blockierende Grund. Wer drei gleichzeitig liest, loest keinen.
+  lieber_nichts_als_platzhalter: >-
+    Ohne phases rendert das Band nichts, und der alte Platzhalter mit dem
+    internen Schluessel ist entfallen. Ein Kasten, der Platz kostet und dem
+    Sachbearbeiter nichts sagt, ist schlechter als kein Kasten.
+
+umsetzung:
+  - >-
+    ScreenWorkflowDefinition und RenderWorkflowPlan um phases (key + label) und
+    documentType erweitert; der schema-compiler traegt beide in den RenderPlan.
+  - >-
+    Neue Komponente mask-builder/renderers/ProcessBand.tsx — eine Zeile mit
+    Phasen, Stand, einer naechsten Aktion, Blocker und optionalem Sprung in den
+    Leitstand. Ueber den renderers-Barrel exportiert.
+  - >-
+    WorkflowPanelRenderer: Legacy-Platzhalter mit internem Prozessschluessel
+    entfernt, gibt jetzt null zurueck.
+  - >-
+    Kriterienkatalog docs/design/flow-spine-ebene1-kriterienkatalog.md mit
+    K1-K6 und einer ausdruecklichen Liste dessen, was Ebene 1 NICHT ist.
+  - "Designregel in CLAUDE.md ergaenzt."
+
+kriterienkatalog:
+  K1: Prozessstand ohne Maskenwechsel sichtbar; kein interner Schluessel.
+  K2: Genau eine naechste Aktion, keine Liste.
+  K3: Blocker nennen den Grund, nicht nur den Zustand.
+  K4: workflow.documentType gesetzt, damit FSX-010 greifen kann.
+  K5: Teilmengen und Belegbeziehungen in der Maske aufloesbar (aufklappbar genuegt).
+  K6: Kein operativer Wert ohne Quelle — FSX-003 gilt auf Ebene 1 weiter.
+  messung: >-
+    Je Maske gefuehrt, nicht als Gesamtquote. Ein Bericht lautet "14 von 18
+    erfuellen K1-K4, K5 fehlt bei 9" — nicht "78 Prozent fertig". Genau deshalb
+    ist die Angabe "70 Prozent" aus dem Masterplan entfernt worden.
+
+file_ownership:
+  - docs/agent-ops/slices/FSX-030.yaml
+  - docs/design/flow-spine-ebene1-kriterienkatalog.md
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - "CLAUDE.md: nur die Designregel-Zeile"
+  - packages/frontend-web/src/components/mask-builder/schema.ts
+  - packages/frontend-web/src/components/mask-builder/render-plan/types.ts
+  - packages/frontend-web/src/components/mask-builder/render-plan/schema-compiler.ts
+  - packages/frontend-web/src/components/mask-builder/renderers/ProcessBand.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/WorkflowPanelRenderer.tsx
+  - packages/frontend-web/src/components/mask-builder/renderers/index.ts
+  - packages/frontend-web/src/__tests__/components/mask-builder/process-band.test.tsx
+
+acceptance:
+  - Phasen und Belegbindung sind deklarativ in der ScreenDefinition.
+  - Das Band rendert nichts ohne Phasen — kein Platzhalter mit internem Schluessel.
+  - Ohne WorkflowState ist keine Phase aktiv; der Stand wird nicht geraten.
+  - Genau eine naechste Aktion, genau ein Blocker.
+  - Kriterienkatalog K1-K6 liegt vor und ist je Maske messbar.
+
+tests:
+  - >-
+    packages/frontend-web/src/__tests__/components/mask-builder/process-band.test.tsx
+    — 6 Tests gruen. Der wichtigste prueft, dass ohne WorkflowState keine Phase
+    aktiv wird und das Band nicht auf die erste Phase zurueckfaellt.
+  - "tsc --noEmit exit 0 ohne Ausgabe."
+  - "vitest src/__tests__/components — 34 Dateien, 167 Tests, gruen."
+
+risks:
+  - >-
+    Das Band ist gebaut, aber noch in keiner Maske verdrahtet. Bis FSX-013 ist
+    der Nutzen null — der Vertrag steht bewusst zuerst.
+  - >-
+    Der entfernte Platzhalter koennte irgendwo als Sichtnachweis gedient haben.
+    Die Suche nach workflow-panel-placeholder ergab keine Treffer ausserhalb der
+    Komponente selbst.
+
+external_gates:
+  - >-
+    FSX-013 (Rollout) und FSX-090b (Nutzerbeobachtung). Ob eine Zeile genuegt,
+    wo vorher ein Hinweiskasten stand, ist erst am Nutzer belegbar.
+
+ai_harness:
+  fachlicher_vertrag: >-
+    Der Sachbearbeiter sieht in der Belegmaske, wo der Vorgang steht, was als
+    naechstes zu tun ist und was ihn blockiert. Alles Uebergreifende bleibt im
+    Leitstand.
+  architektur_vertrag: >-
+    Ein Vertrag, nicht zwei: der vorhandene workflow-Block der ScreenDefinition
+    wird erweitert. Prozessdefinition ist statisch, Vorgangsstand ist Laufzeit —
+    die Trennung ist testgehalten.
+  daten_vertrag: "Keine Migration, keine Datenmutation. Reine Darstellung und Typen."
+  test_vertrag: >-
+    Jede neue Prozessband-Faehigkeit braucht eine Zusicherung darueber, woher
+    ihr Wert stammt. Tests, die nur die Existenz von Elementen pruefen, sind
+    hier nicht ausreichend — sie haetten auch den alten Platzhalter bestanden.
+  security_vertrag: "Keine Endpunkte, Berechtigungen oder Abhaengigkeiten beruehrt."
+  betriebs_vertrag: "Rein clientseitig, kein Rollout-Schritt."
+  dokumentations_vertrag: >-
+    Kriterienkatalog als eigenes Dokument, Designregel in CLAUDE.md,
+    Workboard-Abschnitt und dieser Slice.

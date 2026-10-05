@@ -44,7 +44,7 @@ export default function AdminSuiteCompliancePage(): JSX.Element {
             <Badge variant="outline">{gateLabel(item.external_gate)}</Badge>
           </div>
           <p className="break-all text-muted-foreground">Quelle: {item.source}</p>
-          {item.target_path ? <Button asChild size="sm" variant="outline"><Link to={item.target_path}>Fachbereich oeffnen<ExternalLink className="ml-2 h-3 w-3" /></Link></Button> : null}
+          {item.target_path ? <Button asChild variant="outline" className="min-h-touch"><Link to={item.target_path}>Fachbereich oeffnen<ExternalLink className="ml-2 h-3 w-3" /></Link></Button> : null}
         </CardContent>
       </Card>)}
     </div>

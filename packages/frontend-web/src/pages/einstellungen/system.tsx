@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -143,7 +144,7 @@ function LanguagePackageCard({
       </div>
       <div className="flex items-center gap-3">
         {status === 'active' && (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          <Badge variant="success">
             <Check className="mr-1 h-3 w-3" />
             {t('admin.languagePackage.active')}
           </Badge>
@@ -151,7 +152,7 @@ function LanguagePackageCard({
         {status === 'available' && (
           <>
             <Badge variant="outline">{t('admin.languagePackage.available')}</Badge>
-            <Button size="sm" onClick={onActivate}>{t('admin.languagePackage.activate')}</Button>
+            <Button onClick={onActivate} className="min-h-touch">{t('admin.languagePackage.activate')}</Button>
           </>
         )}
         {status === 'generating' && (
@@ -161,7 +162,7 @@ function LanguagePackageCard({
           </Badge>
         )}
         {status === 'not_available' && (
-          <Button size="sm" variant="outline" onClick={onGenerate}>
+          <Button variant="outline" onClick={onGenerate} className="min-h-touch">
             <Sparkles className="mr-1 h-3 w-3" />
             {t('admin.languagePackage.generate')}
           </Button>
@@ -331,14 +332,14 @@ export default function SystemEinstellungenPage(): JSX.Element {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 mb-6 dark:border-amber-800 dark:bg-amber-950">
+                <Callout variant="warning" className="rounded-lg border p-4 mb-6">
                   <div className="flex gap-3">
-                    <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                    <div className="text-sm text-amber-800 dark:text-amber-200">
+                    <AlertTriangle className="h-5 w-5 text-status-warning shrink-0 mt-0.5" />
+                    <div className="text-sm text-status-warning">
                       <p className="font-medium">{t('admin.languagePackage.switchWarning')}</p>
                     </div>
                   </div>
-                </div>
+                </Callout>
 
                 <div className="mb-4">
                   <Label className="text-sm text-muted-foreground">{t('admin.languagePackage.currentLanguage')}</Label>
@@ -377,7 +378,7 @@ export default function SystemEinstellungenPage(): JSX.Element {
             </Card>
 
             {switchingTo && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-xs">
                 <Card className="w-80 text-center">
                   <CardContent className="pt-6">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />

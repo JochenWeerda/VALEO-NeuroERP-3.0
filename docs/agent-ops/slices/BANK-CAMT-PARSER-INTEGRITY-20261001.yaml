@@ -1,0 +1,38 @@
+slice_id: BANK-CAMT-PARSER-INTEGRITY-20261001
+title: Gebuchte CAMT-Salden und sichere Einzelzahlungen
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claim 5aaa05e54; fremde aktive Slices bleiben beim Owner.
+goal: Keine angenommenen CAMT-Salden oder Zahlungsdaten und keine falsche Sammlerzuordnung.
+file_ownership:
+  - app/api/v1/endpoints/bank_statement_import.py
+  - tests/test_bank_camt_parser_integrity.py
+  - tests/test_bank_import_account_replay.py
+  - docs/architecture/domains/finance/workflows.md
+  - docs/quality-assurance/bank-camt-parser-integrity-20261001.md
+acceptance:
+  - OPBD und CLBD mit Vorzeichen und Waehrung exakt gegen Zahlungszeilen pruefen.
+  - Nur BOOK-Einzelzahlungen mit gueltiger Richtung und expliziten Daten verarbeiten.
+  - Sammler, Reversals, FX und Retouren ohne Fachvertrag ablehnen.
+  - Erstimport und Replay erhalten identische Centdarstellung und Gegenkonto-/Referenzdaten.
+tests:
+  - python -m ruff check app/api/v1/endpoints/bank_statement_import.py tests/test_bank_camt_parser_integrity.py tests/test_bank_import_account_replay.py
+  - python scripts/generate_agent_handbuch.py --check
+test_evidence:
+  - 134 Parser-/Finanz-/DQ-Vertraege bestanden, davon 32 neue CAMT-Vertraege.
+  - Red-Green-Parservertraege und realer Import-/Replay-/Fehlerlauf auf vorhandenem valeo_probe.
+risks:
+  - Begrenztes CAMT.053.001.02-Profil; keine volle XSD- oder Bankzertifizierung.
+  - Weitere Versionen und Sammler/FX/Return brauchen gesonderte Fachvertraege.
+ai_harness:
+  fachlicher_vertrag: Nur reale gebuchte Einzelzahlungen mit abgestimmten Bank-Salden.
+  architektur_vertrag: Minor-Bugfix bestehender Parser und Importpruefung ohne neues Schema.
+  daten_vertrag: Eindeutige direkte Felder und Centpraezision statt ersetzter Werte.
+  test_vertrag: Nachgewiesene Fehler vor Reparatur sowie echte Import- und Replayvertraege.
+  security_vertrag: DTD/Entities und ungesicherte Zahlungsprofile vor Writes ablehnen.
+  betriebs_vertrag: Gemeinsamer Pruefstand ohne neue Datenbanken oder Dockerinstanzen.
+  dokumentations_vertrag: Quellen, Profilgrenzen, QA, Workflow, Workboard und Gaps synchronisiert.
+external_gates:
+  - GitHub-CI, Bankprofile und Deployment.

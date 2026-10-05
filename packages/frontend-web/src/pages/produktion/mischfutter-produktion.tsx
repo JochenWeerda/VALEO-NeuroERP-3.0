@@ -32,9 +32,13 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { Callout } from '@/components/ui/callout'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type KomponentenBedarf = { name: string; bedarf: number; verfuegbar: number }
 type ProductionRole = 'produktion' | 'lager' | 'qs' | 'leitung'
+
+const EMPTY_LINKS: FeedInventoryLinkRow[] = []
 
 const productionRoles = [
   { id: 'produktion', label: 'Produktion', description: 'Plant Rezeptur, Menge, Charge und Start des Produktionsauftrags.' },
@@ -79,12 +83,13 @@ const nextTransitions: Record<ProduktionsauftragStatus, Array<{ to: Exclude<Prod
 export default function MischfutterProduktionPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
 
   const { data: verfuegbarkeit, isLoading: loadingV } = useMischfutterVerfuegbarkeit()
   const { data: rezepte, isLoading: loadingR } = useMischfutterRezepte()
   const { data: auftraege } = useProduktionsauftraege()
-  const { data: inventoryLinks, isLoading: loadingLinks } = useFeedInventoryLinks()
+  const { data: inventoryLinks, isLoading: loadingLinks } = useFeedInventoryLinks({ mapped: false })
   const ensureInventoryLink = useEnsureFeedInventoryLink()
   const createAuftrag = useCreateProduktionsauftrag()
 
@@ -162,10 +167,10 @@ export default function MischfutterProduktionPage(): JSX.Element {
     [ensureInventoryLink, toast, withPending],
   )
 
-  const unmappedLinks = useMemo(
-    () => (inventoryLinks?.items ?? []).filter((r) => !r.inventory_article_id),
-    [inventoryLinks],
-  )
+  // Die Abfrage liefert bereits nur offene Verknüpfungen; ``unmapped_count`` nennt
+  // den Gesamtbestand, ``items`` nur die geladene Seite.
+  const unmappedLinks = inventoryLinks?.items ?? EMPTY_LINKS
+  const unmappedTotal = inventoryLinks?.unmapped_count ?? 0
 
   // Build a map of component name -> available tons from the API
   const verfuegbarkeitMap = useMemo(() => {
@@ -329,7 +334,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Produktion bereit</h3>
             <dl className="grid gap-3">
@@ -350,10 +355,10 @@ export default function MischfutterProduktionPage(): JSX.Element {
                 <dd className="font-mono font-semibold">{chargenId}</dd>
               </div>
             </dl>
-            <div className="mt-6 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+            <Callout variant="info" className="mt-6 rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">Produktionsauftrag wird erstellt</p>
               <p className="mt-1">Komponenten werden automatisch ausgebucht</p>
-            </div>
+            </Callout>
           </CardContent>
         </Card>
       ),
@@ -362,6 +367,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      {!isTouch ? (
+        <>
       <RoleFocusBar roles={productionRoles} value={roleFocus} onChange={setRoleFocus} visibleCount={komponenten.length} totalCount={komponenten.length} title="Wer bereitet die Produktion vor?" />
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <ManagementDecisionPanel
@@ -403,6 +410,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
           ]}
         />
       </div>
+        </>
+      ) : null}
       <Wizard
         key={wizardKey}
         title="Mischfutter-Produktion"
@@ -411,7 +420,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
         onCancel={() => navigate('/futter/misch/liste')}
       />
 
-      {(roleFocus === 'lager' || unmappedLinks.length > 0) ? (
+      {(roleFocus === 'lager' || unmappedTotal > 0) ? (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -434,10 +443,15 @@ export default function MischfutterProduktionPage(): JSX.Element {
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Verknüpfungen laden…
               </p>
-            ) : unmappedLinks.length === 0 ? (
-              <p className="text-green-700">Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft.</p>
+            ) : unmappedTotal === 0 ? (
+              <p className="text-status-success">Alle aktiven Einzelfuttermittel sind mit Lagerartikeln verknüpft.</p>
             ) : (
               <ul className="space-y-2">
+                {unmappedTotal > unmappedLinks.length ? (
+                  <li className="text-xs text-muted-foreground">
+                    {unmappedLinks.length} von {unmappedTotal} offenen Verknüpfungen angezeigt.
+                  </li>
+                ) : null}
                 {unmappedLinks.map((row) => (
                   <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 rounded border px-3 py-2">
                     <div>
@@ -446,8 +460,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
                     </div>
                     <Button
                       type="button"
-                      size="sm"
                       variant="outline"
+                      className="min-h-touch"
                       disabled={pendingActions.has(`link:${row.id}`)}
                       onClick={() => void handleEnsureLink(row)}
                     >
@@ -487,9 +501,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
                     <Button
                       key={t.to}
                       type="button"
-                      size="sm"
                       variant={t.destructive ? 'outline' : 'default'}
-                      className={t.destructive ? 'border-destructive/40 text-destructive hover:bg-destructive/10' : undefined}
+                      className={`min-h-touch ${t.destructive ? 'border-destructive/40 text-destructive hover:bg-destructive/10' : ''}`}
                       disabled={rowPending}
                       onClick={() => void handleStatusAction(a, t.to)}
                     >
@@ -499,8 +512,8 @@ export default function MischfutterProduktionPage(): JSX.Element {
                   {a.status === 'fertig' ? (
                     <Button
                       type="button"
-                      size="sm"
                       variant="outline"
+                      className="min-h-touch"
                       disabled={rowPending}
                       onClick={() => void handleShowTrace(a)}
                     >
@@ -530,7 +543,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
                 {trace.kette_geschlossen ? 'Kette geschlossen' : 'Charge fehlt'}
               </Badge>
             </CardTitle>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setTrace(null)}>
+            <Button type="button" variant="ghost" className="min-h-touch" onClick={() => setTrace(null)}>
               Schließen
             </Button>
           </CardHeader>

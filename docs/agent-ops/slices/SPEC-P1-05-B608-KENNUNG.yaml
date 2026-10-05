@@ -1,0 +1,50 @@
+slice_id: SPEC-P1-05-B608-KENNUNG
+id: SPEC-P1-05-B608-KENNUNG
+title: nosec-Kennung von S608 auf B608 umstellen — pauschale Unterdrueckung beenden
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-23"
+started_at: "2026-08-23"
+completed_at: "2026-08-23"
+goal: >-
+  Die repo-weite Konvention '# nosec S608' nennt die Ruff-Kennung. Bandits Regel
+  heisst B608. Da Bandit keine gueltige ID fand, wirkte jede dieser Zeilen als
+  pauschales nosec und unterdrueckte dort JEDEN Bandit-Check, nicht nur die
+  SQL-Regel. Umstellung auf praezise Unterdrueckung genau einer Regel.
+befund:
+  bandit_regex: '#\s*nosec:?\s*(?P<tests>[^#]+)?#?'
+  erkenntnis: >-
+    Bandit liest alles nach 'nosec' bis zum naechsten '#' als Liste von
+    Test-IDs. Steht dort keine gueltige ID, wird die Zeile pauschal. Steht die
+    Begruendung hinter einem zweiten '#', wird sie gar nicht erst als ID-Liste
+    gelesen — das beseitigt zugleich die "Test in comment"-Warnungen.
+  zielform: '# nosec B608  # reviewed-safe: <Begruendung>'
+  belegt_durch: >-
+    Probelauf mit vier Formen; die Variante mit zweitem '#' unterdrueckt
+    nachweislich nur B608 und laesst B603/B607 auf derselben Zeile stehen.
+messung:
+  pauschale_unterdrueckungen: "142 -> 0"
+  spezifische_unterdrueckungen: "7 -> 149"
+  test_in_comment_warnungen: "1394 -> 0"
+  b608_befunde: "164 (unveraendert — die Restschuld bleibt sichtbar)"
+result: >-
+  149 Kommentare in 89 Dateien umgestellt, zusaetzlich 10 als cp1252 verunglueckte
+  Geviertstriche bereinigt. Gate und Generator dokumentieren die Zielform.
+fehler_im_verlauf:
+  - >-
+    Erster Migrationslauf hat auch Dokumentationstexte in den beiden Skripten
+    getroffen (dort steht die Kennung als Beispiel im Docstring) — repariert.
+  - >-
+    Zweiter Lauf hatte eine Backtracking-Falle: '(?P<id>B\d+)(?!\s*#)' fiel auf
+    'B60' zurueck, weil 'B608' am Lookahead scheiterte, und schrieb
+    '# nosec B60  # 8  # ...'. 149 zerlegte Kennungen wieder zusammengesetzt.
+    Aufgefallen, weil die Klassifikation mit Bandits eigenem Parser danach
+    142 pauschale Zeilen zeigte statt null.
+verifikation_codeaenderung: >-
+  Token-Vergleich HEAD gegen Arbeitsstand ueber alle 90 gestageten app/-Dateien:
+  Token-Strom identisch, ausschliesslich Kommentaraenderungen.
+verification:
+  - "python -m bandit -r app/ -t B608   # 0 pauschal, 149 spezifisch, 0 Warnungen"
+  - "python scripts/check_sql_fstrings.py"
+  - "python scripts/generate_s608_review.py --fail-on-unsuppressed"
+  - "python -c \"from app.main import app; print(len(app.routes))\""

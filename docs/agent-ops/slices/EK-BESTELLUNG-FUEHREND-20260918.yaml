@@ -1,0 +1,76 @@
+---
+slice_id: EK-BESTELLUNG-FUEHREND
+id: EK-BESTELLUNG-FUEHREND
+title: Fuehrende Einkaufsbestellung gegen L3 und drei Bestellfaelle
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-18
+created_at: 2026-09-18
+closed_at: 2026-09-29
+result: >
+  Auf main: 58d9d5d6e (fuehrende Bestellmaske mit L3-Kopf, drei Bestellfaellen,
+  Migration), be38c69f0 (Bedarf aus dem Abverkauf), dfad5118f (Bestellliste liest
+  beide Speicher), c40649364 (bestellung-stamm auf dem fuehrenden Beleg). Handshake
+  MERIDIAN-BELEG-ONEPAGE in 15c95552f nur additiv (sectionNavigation, rowDetail,
+  identityField). Nachweis 2026-09-29 auf main: pytest 61/61 ueber die sechs
+  Slice-Testdateien; Feldvertrag 0 Abweichungen.
+coordination: >
+  Nur build_einkauf_purchase_order_screen_definition in screen_definitions.py.
+  Keine FSX-Dateien. Auftrag, Rechnung, crm_360.py und KIM bleiben Claude.
+  HOME-UIX behaelt bestellungen-liste.tsx. coverage_path_check.xml nicht
+  committen. Kein zvoove-1:1 von bestellvorschlag-lager.
+goal: >
+  Die native Maske einkauf/purchase-order ist die fuehrende Bestellmaske.
+  Felder gegen L3 WWS_BESTELLUNG1/2 und die drei VALEO-Faelle Bestand/Abverkauf,
+  Direktlieferung, Innovation. Layout folgt MASKEN.md-Belegkette plus L3-Gruppen
+  aus den Captures, nicht Pixelgruen.
+file_ownership:
+  - app/core/screen_definitions.py
+  - app/infrastructure/models/einkauf_models.py
+  - app/services/procurement_service.py
+  - app/services/mask_rollout_summary_service.py
+  - app/core/mask_rollout_catalog.py
+  - app/api/v1/schemas/mask_entity_contracts.py
+  - app/api/v1/endpoints/einkauf_bestellvorschlag.py
+  - alembic/versions/einkauf_bestellung_fuehrend_20260918.py
+  - packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellung-native.tsx
+  - tests/test_einkauf_purchase_order_fuehrend.py
+  - docs/design/maskeninhalt-gegen-referenz-2026-09-17.md
+  - docs/MASKEN.md
+acceptance:
+  - ScreenDefinition hat Bestellfall, Ladetermin, Kontrakt, Skontostaffel, L3-Positionsspalten
+  - GET /einkauf/bestellungen/{id} liefert dieselben Schluessel wie die Maske
+  - Feldvertrag check_field_contracts.py Exit 0
+  - k3_einkauf/bestellung bleibt
+  - Keine fuenfte Custom-Seite
+tests:
+  - tests/test_einkauf_purchase_order_fuehrend.py
+  - tests/test_uix091_process_chain_contract.py
+  - tests/test_mask_bridge_field_contracts.py
+  - tests/test_mask_entity_contracts.py
+  - packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx
+risks:
+  - Zwei Speicher bleiben, domain_einkauf.bestellungen (native) und Compat-purchase_order (Wizard); die Liste liest seit dfad5118f beide
+  - Die Zusammenlegung beider Speicher ist nicht Teil dieses Slices
+ai_harness:
+  fachlicher_vertrag: >
+    Drei Bestellfaelle sind Pflicht: Bestand/Abverkauf, Direktlieferung mit oder
+    ohne Ueberschlag, Innovation/neuer Artikel. L3-Felder ohne Kontrakt und
+    Ladetermin machen die Maske fuer den Agrarhandel unbenutzbar.
+  architektur_vertrag: >
+    ScreenDefinition zu RenderPlan zu UniversalMaskRenderer. Nur die PO-Builder-
+    Funktion in screen_definitions.py.
+  daten_vertrag: >
+    ALTER TABLE ADD COLUMN IF NOT EXISTS. Kein DROP. Kommunikationstabelle neu,
+    weil die Rollout-SQL sie schon las.
+  test_vertrag: >
+    Feldvertrag gegen EinkaufBestellungOut. Unit ohne MagicMock-DB.
+  security_vertrag: >
+    Tenant-Filter ueber Bestellkopf, nicht ueber positionen.tenant_id.
+  betriebs_vertrag: >
+    Migration revises audit_attestations_20260917.
+  dokumentations_vertrag: >
+    Workboard, Slice, MASKEN.md, maskeninhalt, open-gaps.
+external_gates:
+  - not_applicable

@@ -65,11 +65,11 @@ export default function GlobalStatusIndicator(): JSX.Element {
   const getStatusStyle = (): string => {
     switch (status.status) {
       case 'online':
-        return 'text-green-500'
+        return 'text-status-success'
       case 'degraded':
-        return 'text-yellow-500 animate-pulse'
+        return 'text-status-warning animate-pulse'
       case 'offline':
-        return 'text-red-500 animate-pulse'
+        return 'text-status-error animate-pulse'
       default:
         return 'text-gray-500'
     }

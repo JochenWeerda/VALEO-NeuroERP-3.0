@@ -1,0 +1,76 @@
+slice_id: DESIGN-ROLLOUT-DENSITY-FIN-004
+id: DESIGN-ROLLOUT-DENSITY-FIN-004
+title: Rollout Prio 4+5 — Lager/Dispo-Density dense + Finanzen-Mutation-Audit
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-14"
+started_at: "2026-07-14"
+completed_at: "2026-07-14"
+goal: >-
+  Rollout-Plan-Positionen 4 und 5 aus docs/design/frontend-design-skill-audit.md:
+  operative Lager-/Dispositions-Masken auf Density "dense" (zentrale
+  data-density-Scopes statt per-Maske-Metriken) und Audit der Finanzen-
+  Massenaktionen gegen die Mutation-Lifecycle-Invariante.
+scope:
+  - data-density="dense" am Maskenwurzel von lager/bestandsuebersicht,
+    lager/lagerbewegungen, lager/kommissionierung, disposition/liste
+    (ui/table.tsx konsumiert --table-row-height; 32px-Zeilen fuer Operator-Masken).
+  - "Audit Finanzen-Massenaktionen: zahlungslauf-kreditoren.tsx und
+    lastschriften-debitoren.tsx nutzen bereits korrekt useMaskActions +
+    loadingActionKey an ObjectPage (Invariante erfuellt) - keine Aenderung noetig."
+  - "Befund dokumentiert: mahnwesen/mahnlauf.tsx sendet beim Abschluss KEINE
+    Backend-Mutation (onFinish = navigate; Erfolgstext suggeriert Versand).
+    Fachliches Gap, kein UI-Guard-Problem; Behebung braucht einen fachlichen
+    Slice mit API-Vertrag - hier bewusst nicht erfunden."
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/DESIGN-ROLLOUT-DENSITY-FIN-004.yaml"
+  - "docs/design/frontend-design-skill-audit.md"
+  - "packages/frontend-web/src/pages/lager/bestandsuebersicht.tsx"
+  - "packages/frontend-web/src/pages/lager/lagerbewegungen.tsx"
+  - "packages/frontend-web/src/pages/lager/kommissionierung.tsx"
+  - "packages/frontend-web/src/pages/disposition/liste.tsx"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DESIGN-ROLLOUT-DENSITY-FIN-004.yaml
+  - docs/design/frontend-design-skill-audit.md
+  - packages/frontend-web/src/pages/lager/bestandsuebersicht.tsx
+  - packages/frontend-web/src/pages/lager/lagerbewegungen.tsx
+  - packages/frontend-web/src/pages/lager/kommissionierung.tsx
+  - packages/frontend-web/src/pages/disposition/liste.tsx
+progress: >-
+  2026-07-14 umgesetzt: vier operative Masken mit dense-Scope (je 1-Zeilen-Diff);
+  Finanz-Audit ohne Befund bei den beiden grossen Massenmasken; Mahnlauf-Gap
+  als Folgearbeit dokumentiert (Audit-Doku Abschnitt 8).
+acceptance:
+  - "Tabellen der vier Masken rendern mit 32px-Zeilenhoehe (dense) ueber den zentralen Density-Scope."
+  - "Keine Geschaeftslogik-/API-/Routen-Aenderung; VirtualDataTable-Schwellen unangetastet."
+  - "Finanz-Massenaktionen erfuellen die Mask-Builder-Action-Invariante (auditiert)."
+tests:
+  - "tsc --noEmit -> 0; vite build -> gruen (32.7s)."
+  - "vitest run (voll) -> gruen (siehe Workboard-Abnahme)."
+risks:
+  - "Weitere Lager-Masken (silo-uebersicht, partiestamm u. a.) folgen bei Bedarf demselben 1-Zeilen-Muster."
+  - "Mahnlauf ohne Backend-Mutation bleibt offen (fachlicher Slice noetig)."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Operator-Masken in Lager/Disposition arbeiten mit hoher Zeilendichte
+    (dense, 32px) fuer schnelles Scannen grosser Bestaende; Dashboards und
+    CRM bleiben comfortable/compact.
+  architektur_vertrag: >-
+    Dichte ausschliesslich ueber den zentralen data-density-Scope
+    (styles/density.css), keine per-Maske-Metriken; nur Wurzel-Attribute
+    ergaenzt.
+  daten_vertrag: >-
+    Keine Daten-/Schemaaenderung.
+  security_vertrag: >-
+    Keine Auth-/Tenant-/Eingabepfad-Beruehrung.
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert.
+  dokumentations_vertrag: >-
+    Audit-Doku Abschnitt 7c/8 aktualisiert (Density-Rollout, Finanz-Audit-
+    Befund, Mahnlauf-Gap); Workboard + dieses YAML.
+  test_vertrag: >-
+    tsc, Build und volle Vitest-Suite vor Push; data-Attribute aendern keine
+    Testsemantik (UniversalMaskRenderer-Density-Test unberuehrt gruen).

@@ -22,6 +22,14 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.inventory_operations_schemas import InventoryOperationsOut
+from app.services.inventory_movement_direction import direction_sql, signed_quantity
+from app.services.inventory_stock_balance import current_stock
+from app.api.v1.schemas.inventory_lot_bundle_schemas import (
+    InventoryLotOut,
+    InventurDifferenzOut,
+    LotConsumeOut,
+    StornoKorrekturOut,
+)
 
 
 router = APIRouter()
@@ -348,9 +356,18 @@ async def create_bestandskorrektur(
                 amount=amount,
                 reference=ref_number,
             )
-    except Exception:
-        # GL posting is best-effort; don't block the correction
-        pass
+    except Exception as exc:
+        # Nicht blockierend: die Bestandskorrektur bleibt bestehen. Die
+        # ausgefallene GL-Buchung wird gemeldet statt verschluckt.
+        from app.core.metrics import critical_data_path_errors_total
+
+        critical_data_path_errors_total.labels(
+            endpoint="inventory_operations_gl", error_type="posting_failed"
+        ).inc()
+        logger.error(
+            "GL-Buchung fuer Bestandskorrektur %s fehlgeschlagen: %s",
+            ref_number, exc, exc_info=True,
+        )
 
     db.commit()
 
@@ -455,7 +472,6 @@ async def list_korrekturen(
 
     where = " AND ".join(conditions)
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, article_id, warehouse_id, quantity, charge, reference_number,
                    movement_date, notes, created_at
@@ -463,12 +479,12 @@ async def list_korrekturen(
             WHERE {where}
             ORDER BY created_at DESC
             OFFSET :skip LIMIT :limit
-        """),
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).mappings().all()
 
     total = db.execute(
-        text(f"SELECT COUNT(*) FROM domain_inventory.inventory_stock_movements WHERE {where}"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT COUNT(*) FROM domain_inventory.inventory_stock_movements WHERE {where}"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).scalar() or 0
 
@@ -554,7 +570,7 @@ class LotConsumeIn(BaseModel):
 @router.post(
     "/lots",
     status_code=201,
-    response_model=dict,
+    response_model=InventoryLotOut,
     tags=["lager", "inventory", "lots"],
     summary="Inventory-Lot anlegen (DOM-INV-004.2)",
 )
@@ -585,7 +601,7 @@ async def create_inventory_lot(
 
 @router.get(
     "/lots",
-    response_model=list[dict],
+    response_model=list[InventoryLotOut],
     tags=["lager", "inventory", "lots"],
     summary="Inventory-Lots (FEFO) auflisten (DOM-INV-004.2)",
 )
@@ -613,7 +629,7 @@ async def list_inventory_lots(
 
 @router.post(
     "/lots/{lot_id}/consume",
-    response_model=dict,
+    response_model=LotConsumeOut,
     tags=["lager", "inventory", "lots"],
     summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)",
 )
@@ -647,7 +663,7 @@ async def consume_inventory_lot(
 
 @router.post(
     "/inventur/{count_id}/differenz-buchen",
-    response_model=dict,
+    response_model=InventurDifferenzOut,
     status_code=201,
     tags=["lager", "inventory", "inventur"],
     summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)",
@@ -681,7 +697,7 @@ class StornoIn(BaseModel):
 
 @router.post(
     "/korrekturen/{korrektur_id}/storno",
-    response_model=dict,
+    response_model=StornoKorrekturOut,
     status_code=201,
     tags=["lager", "inventory", "korrekturen"],
     summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)",
@@ -758,12 +774,23 @@ async def get_bestaende(
         filters.append("sm.charge = :charge")
         params["charge"] = charge
 
-    having = "HAVING SUM(sm.quantity) > 0" if only_positive else ""
     where_clause = " AND ".join(filters)
+
+    # DOM-INV-005: Richtung zentral. Vorher hat der ELSE-Zweig jeden nicht
+    # aufgezaehlten Typ positiv gezaehlt - ZUGANG und ABGANG landeten damit
+    # beide als Zugang im Bestand, und der Bestandswert addierte jeden
+    # Warenausgang statt ihn abzuziehen.
+    richtung = direction_sql("sm.movement_type", "sm.quantity")
+    wert = direction_sql(
+        "sm.movement_type",
+        "sm.quantity * COALESCE(sm.unit_cost, a.purchase_price, 0)",
+    )
+    # HAVING muss dieselbe Richtung kennen wie die Menge, sonst filtert es
+    # auf einer anderen Zahl als es zurueckgibt.
+    having = f"HAVING SUM({richtung}) > 0" if only_positive else ""
 
     try:
         rows = db.execute(
-            # nosec S608 — where_clause/having aus festen Literalen dieser Funktion, alle Werte via Bind-Params
             text(f"""
                 SELECT
                     sm.article_id,
@@ -771,14 +798,10 @@ async def get_bestaende(
                     a.name AS article_name,
                     sm.warehouse_id,
                     w.name AS warehouse_name,
-                    SUM(CASE WHEN sm.movement_type IN ('wareneingang','inventur','umbuchung_eingang')
-                             THEN sm.quantity
-                             WHEN sm.movement_type IN ('warenausgang','umbuchung_ausgang')
-                             THEN -sm.quantity
-                             ELSE sm.quantity END) AS menge,
+                    SUM({richtung}) AS menge,
                     a.unit AS einheit,
                     sm.charge,
-                    SUM(sm.quantity * COALESCE(sm.unit_cost, a.purchase_price, 0)) AS bestandswert
+                    SUM({wert}) AS bestandswert
                 FROM domain_inventory.inventory_stock_movements sm
                 LEFT JOIN domain_inventory.articles a ON a.id = sm.article_id
                 LEFT JOIN domain_inventory.warehouses w ON w.id = sm.warehouse_id
@@ -786,7 +809,7 @@ async def get_bestaende(
                 GROUP BY sm.article_id, a.article_number, a.name, sm.warehouse_id, w.name, a.unit, sm.charge
                 {having}
                 ORDER BY a.name, sm.warehouse_id
-            """),
+            """),  # nosec B608  # where_clause/having aus festen Literalen dieser Funktion, alle Werte via Bind-Params
             params,
         ).mappings().all()
     except Exception as exc:  # noqa: BLE001
@@ -860,6 +883,14 @@ async def create_lagerbewegung(
 
     buch_datum = payload.buchungsdatum or date_type.today()
     movement_id = str(uuid4())
+    # Altname der Route: reference_type/reference_id. Spalten: source_document_type
+    # und reference_number. Der Adapter schreibt keine Beleg-Id.
+    from app.services.inventory_document_reference import buchungsbeleg
+
+    beleg = buchungsbeleg(
+        reference_type=payload.reference_type,
+        reference_id=payload.reference_id,
+    )
 
     article = db.execute(
         text("SELECT id FROM domain_inventory.articles WHERE id = :id AND tenant_id = :tid"),
@@ -868,20 +899,15 @@ async def create_lagerbewegung(
     if not article:
         raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
 
-    # previous_stock und new_stock sind NOT NULL in der Tabelle
-    prev_stock_row = db.execute(
-        text("""
-            SELECT COALESCE(SUM(CASE
-                WHEN movement_type IN ('wareneingang','inventur') THEN quantity
-                WHEN movement_type IN ('warenausgang') THEN -quantity
-                ELSE quantity END), 0)
-            FROM domain_inventory.inventory_stock_movements
-            WHERE tenant_id = :tid AND article_id = :aid AND warehouse_id = :wid
-        """),
-        {"tid": t_id, "aid": payload.article_id, "wid": payload.warehouse_id},
-    ).scalar() or 0
-    direction = -1 if payload.movement_type == "warenausgang" else 1
-    new_stock = float(prev_stock_row) + direction * payload.quantity
+    # previous_stock und new_stock sind NOT NULL in der Tabelle. Saldo und
+    # Vorzeichen kommen aus derselben Quelle wie alle anderen Aggregationen.
+    prev_stock_row = current_stock(
+        db,
+        tenant_id=t_id,
+        article_id=payload.article_id,
+        warehouse_id=payload.warehouse_id,
+    )
+    new_stock = prev_stock_row + signed_quantity(payload.movement_type, payload.quantity)
 
     db.execute(
         text("""
@@ -903,8 +929,8 @@ async def create_lagerbewegung(
             "quantity": payload.quantity,
             "movement_type": payload.movement_type,
             "charge": payload.charge,
-            "reference_number": payload.reference_id,
-            "source_document_type": payload.reference_type,
+            "reference_number": beleg.reference_number,
+            "source_document_type": beleg.source_document_type,
             "unit_cost": payload.unit_cost,
             "notes": payload.bemerkung,
             "movement_date": buch_datum,

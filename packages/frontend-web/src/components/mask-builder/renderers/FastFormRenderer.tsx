@@ -6,6 +6,7 @@ import { useFormStateContext } from '../runtime/FormStateContext'
 import { FieldRenderer } from './FieldRenderer'
 import { getValue } from './render-utils'
 import type { ScreenFieldDefinition } from '../schema'
+import type { SttProvider } from '@/lib/voice/stt-provider'
 
 function toScreenField(field: RenderFieldPlan): ScreenFieldDefinition {
   return {
@@ -27,10 +28,14 @@ const FastFieldItem = memo(function FastFieldItem({
   field,
   payload,
   performance,
+  voiceEnabled,
+  voiceProvider,
 }: {
   field: RenderFieldPlan
   payload: Record<string, unknown>
   performance?: RenderPerformancePlan
+  voiceEnabled?: boolean
+  voiceProvider?: SttProvider | null
 }): JSX.Element | null {
   const lookupBindings = useLookupBindingContext()
   const formState = useFormStateContext()
@@ -48,17 +53,18 @@ const FastFieldItem = memo(function FastFieldItem({
   if (field.componentKind === 'lookup') {
     const lookupEndpoint = lookupBindings[field.key]?.lookupEndpoint
     return (
-      <div>
+      <div data-meridian-field={field.key}>
         <LookupField
           field={field}
           value={value}
           lookupEndpoint={lookupEndpoint}
           performance={performance}
+          onSelect={isEditable ? (next) => handleChange(next) : undefined}
         />
         {fieldErrors.map((err) => (
           <p
             key={err.message}
-            className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-yellow-600'}`}
+            className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-status-warning'}`}
             role="alert"
             data-field-error={field.key}
           >
@@ -70,16 +76,18 @@ const FastFieldItem = memo(function FastFieldItem({
   }
 
   return (
-    <div>
+    <div data-meridian-field={field.key}>
       <FieldRenderer
         field={toScreenField(field)}
         value={value}
         onChange={isEditable ? handleChange : undefined}
+        voiceEnabled={voiceEnabled}
+        voiceProvider={voiceProvider}
       />
       {fieldErrors.map((err) => (
         <p
           key={err.message}
-          className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-yellow-600'}`}
+          className={`text-xs ${hasBlockingError ? 'text-destructive' : 'text-status-warning'}`}
           role="alert"
           data-field-error={field.key}
         >
@@ -96,12 +104,16 @@ export const FastFormRenderer = memo(function FastFormRenderer({
   payload,
   className,
   performance,
+  voiceEnabled = true,
+  voiceProvider,
 }: {
   fieldKeys: string[]
   fieldsByKey: Record<string, RenderFieldPlan>
   payload: Record<string, unknown>
   className: string
   performance?: RenderPerformancePlan
+  voiceEnabled?: boolean
+  voiceProvider?: SttProvider | null
 }): JSX.Element | null {
   const fields = fieldKeys.map((key) => fieldsByKey[key]).filter(Boolean)
   if (fields.length === 0) return null
@@ -109,7 +121,14 @@ export const FastFormRenderer = memo(function FastFormRenderer({
   return (
     <div className={className}>
       {fields.map((field) => (
-        <FastFieldItem key={field.key} field={field} payload={payload} performance={performance} />
+        <FastFieldItem
+          key={field.key}
+          field={field}
+          payload={payload}
+          performance={performance}
+          voiceEnabled={voiceEnabled}
+          voiceProvider={voiceProvider}
+        />
       ))}
     </div>
   )

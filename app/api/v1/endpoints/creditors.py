@@ -174,7 +174,7 @@ async def create_creditor(
                 """
                 INSERT INTO domain_erp.creditors
                 (id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active)
-                VALUES (:id, :tenant_id, :creditor_number, :company_name, :address::jsonb, :payment_terms, 0, :is_active)
+                VALUES (:id, :tenant_id, :creditor_number, :company_name, CAST(:address AS jsonb), :payment_terms, 0, :is_active)
                 """
             ),
             {
@@ -222,7 +222,7 @@ async def list_creditors(
             where.append("(name ILIKE :search OR creditor_number ILIKE :search)")
             params["search"] = f"%{search}%"
         where_sql = " AND ".join(where)
-        total = db.execute(text(f"SELECT COUNT(*) FROM domain_erp.creditors WHERE {where_sql}"), params).scalar()  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        total = db.execute(text(f"SELECT COUNT(*) FROM domain_erp.creditors WHERE {where_sql}"), params).scalar()  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params["limit"] = limit
         params["skip"] = skip
         rows = db.execute(
@@ -232,7 +232,7 @@ async def list_creditors(
                 FROM domain_erp.creditors WHERE {where_sql}
                 ORDER BY creditor_number
                 LIMIT :limit OFFSET :skip
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).fetchall()
@@ -345,7 +345,7 @@ async def update_creditor(
         if not dq_result.bestanden:
             raise HTTPException(status_code=422, detail=build_dq_error_detail("Lieferant", dq_result))
         payment_terms_days = address.get("payment_terms_days", 30)
-        set_parts = ["address = :address::jsonb", "payment_terms = :payment_terms", "updated_at = NOW()"]
+        set_parts = ["address = CAST(:address AS jsonb)", "payment_terms = :payment_terms", "updated_at = NOW()"]
         params_update: dict = {
             "id": creditor_id,
             "tenant_id": tenant_id,
@@ -360,7 +360,7 @@ async def update_creditor(
             params_update["is_active"] = payload.is_active
         db.execute(
             text(
-                f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+                f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params_update,
         )

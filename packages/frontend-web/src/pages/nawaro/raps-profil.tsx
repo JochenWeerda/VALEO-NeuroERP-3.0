@@ -215,13 +215,13 @@ export default function NawaroRapsProfilPage(): JSX.Element {
       <Card>
         <CardHeader><CardTitle>Profile</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" onClick={clearForm}>Neu</Button>
-          <Input className="w-32" placeholder="YYYY-MM" value={derivePeriod} onChange={(e) => setDerivePeriod(e.target.value)} />
-          <Button variant="outline" size="sm" onClick={() => deriveMutation.mutate()} disabled={!selectedId || deriveMutation.isPending}>
+          <Button variant="outline" className="min-h-touch" onClick={clearForm}>Neu</Button>
+          <Input className="min-h-touch w-32" placeholder="YYYY-MM" value={derivePeriod} onChange={(e) => setDerivePeriod(e.target.value)} aria-label="Ableitungsperiode" />
+          <Button variant="outline" className="min-h-touch" onClick={() => deriveMutation.mutate()} disabled={!selectedId || deriveMutation.isPending}>
             Aus Ops ableiten
           </Button>
           {(profileQuery.data ?? []).map((item) => (
-            <Button key={item.id} variant={item.id === selectedId ? 'default' : 'outline'} size="sm" onClick={() => loadProfile(item.id)}>
+            <Button key={item.id} variant={item.id === selectedId ? 'default' : 'outline'} className="min-h-touch" onClick={() => loadProfile(item.id)}>
               {item.harvest_year} {item.article_number ?? 'RAPS'}
             </Button>
           ))}
@@ -247,13 +247,13 @@ export default function NawaroRapsProfilPage(): JSX.Element {
         <CardContent className="grid gap-4 md:grid-cols-3">
           <div><Label>THG (gCO2eq/MJ)</Label><Input value={thgValue} onChange={(e) => setThgValue(e.target.value)} /></div>
           <div><Label>Ertrag (dt/ha)</Label><Input value={yieldPerHa} onChange={(e) => setYieldPerHa(e.target.value)} /></div>
-          <div className="rounded border p-3 text-sm">Verwendungssumme: <span className={usageTotal === 100 ? 'font-semibold text-green-700' : 'font-semibold text-red-700'}>{usageTotal.toFixed(2)}%</span></div>
+          <div className="rounded border p-3 text-sm">Verwendungssumme: <span className={usageTotal === 100 ? 'font-semibold text-status-success' : 'font-semibold text-status-error'}>{usageTotal.toFixed(2)}%</span></div>
           <div className="md:col-span-3"><Label>Notiz</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Zertifikatskette (REDcert/ISCC)</CardTitle><Button variant="outline" size="sm" onClick={() => setCerts((prev) => [...prev, emptyCert()])}><Plus className="h-4 w-4" /></Button></CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Zertifikatskette (REDcert/ISCC)</CardTitle><Button variant="outline" className="min-h-touch" onClick={() => setCerts((prev) => [...prev, emptyCert()])}><Plus className="h-4 w-4" /> Zertifikat</Button></CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader><TableRow><TableHead>Schema</TableHead><TableHead>Nummer</TableHead><TableHead>Stufe</TableHead><TableHead>Gueltig von</TableHead><TableHead>Gueltig bis</TableHead><TableHead>Issuer</TableHead><TableHead>Status</TableHead><TableHead className="w-12" /></TableRow></TableHeader>
@@ -267,7 +267,7 @@ export default function NawaroRapsProfilPage(): JSX.Element {
                   <TableCell><Input type="date" value={c.valid_until ?? ''} onChange={(e) => updateCert(i, 'valid_until', e.target.value)} /></TableCell>
                   <TableCell><Input value={c.issuer ?? ''} onChange={(e) => updateCert(i, 'issuer', e.target.value)} /></TableCell>
                   <TableCell><Input value={c.status} onChange={(e) => updateCert(i, 'status', e.target.value)} /></TableCell>
-                  <TableCell><Button variant="ghost" size="icon" onClick={() => setCerts((prev) => prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev)}><Trash2 className="h-4 w-4" /></Button></TableCell>
+                  <TableCell><Button variant="ghost" className="min-h-touch" onClick={() => setCerts((prev) => prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev)}>Löschen</Button></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -276,7 +276,7 @@ export default function NawaroRapsProfilPage(): JSX.Element {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Koppelprodukt-Bilanz (Oel/Schrot)</CardTitle><Button variant="outline" size="sm" onClick={() => setBalances((prev) => [...prev, emptyBalance()])}><Plus className="h-4 w-4" /></Button></CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Koppelprodukt-Bilanz (Oel/Schrot)</CardTitle><Button variant="outline" className="min-h-touch" onClick={() => setBalances((prev) => [...prev, emptyBalance()])}><Plus className="h-4 w-4" /> Bilanz</Button></CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader><TableRow><TableHead>Periode</TableHead><TableHead>Saat t</TableHead><TableHead>Oel t</TableHead><TableHead>Schrot t</TableHead><TableHead>Sonstige t</TableHead><TableHead>Kosten Oel %</TableHead><TableHead>Kosten Schrot %</TableHead><TableHead>Miete/Lager</TableHead><TableHead>Logistik-Notiz</TableHead><TableHead className="w-12" /></TableRow></TableHeader>
@@ -292,7 +292,7 @@ export default function NawaroRapsProfilPage(): JSX.Element {
                   <TableCell><Input value={b.allocation_meal_pct ?? ''} onChange={(e) => updateBalance(i, 'allocation_meal_pct', e.target.value)} /></TableCell>
                   <TableCell><Input value={b.heap_location ?? ''} onChange={(e) => updateBalance(i, 'heap_location', e.target.value)} /></TableCell>
                   <TableCell><Input value={b.logistics_note ?? ''} onChange={(e) => updateBalance(i, 'logistics_note', e.target.value)} /></TableCell>
-                  <TableCell><Button variant="ghost" size="icon" onClick={() => setBalances((prev) => prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev)}><Trash2 className="h-4 w-4" /></Button></TableCell>
+                  <TableCell><Button variant="ghost" className="min-h-touch" onClick={() => setBalances((prev) => prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev)}>Löschen</Button></TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -301,8 +301,8 @@ export default function NawaroRapsProfilPage(): JSX.Element {
       </Card>
 
       <div className="flex gap-2">
-        <Button className="gap-2" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}><Save className="h-4 w-4" />Speichern</Button>
-        <Button variant="destructive" className="gap-2" onClick={() => deleteMutation.mutate()} disabled={!selectedId || deleteMutation.isPending}><Trash2 className="h-4 w-4" />Loeschen</Button>
+        <Button className="min-h-touch gap-2" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}><Save className="h-4 w-4" />Speichern</Button>
+        <Button variant="destructive" className="min-h-touch gap-2" onClick={() => deleteMutation.mutate()} disabled={!selectedId || deleteMutation.isPending}><Trash2 className="h-4 w-4" />Löschen</Button>
       </div>
     </div>
   )

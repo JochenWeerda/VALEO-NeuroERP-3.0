@@ -109,36 +109,36 @@ export default function FibuSuiteLayout({ children }: FibuSuiteLayoutProps): JSX
           <span className="text-xs text-muted-foreground">Ansicht:</span>
           <Button
             variant={viewMode === 'desktop' ? 'secondary' : 'ghost'}
-            size="sm"
             onClick={() => setView('desktop')}
             aria-label="Desktop mit Ribbon"
+            className="min-h-touch"
           >
             <Monitor className="h-4 w-4 mr-1" />
             Desktop
           </Button>
           <Button
             variant={viewMode === 'mobile' ? 'secondary' : 'ghost'}
-            size="sm"
             onClick={() => setView('mobile')}
-            aria-label="Cards-Dashboard"
+            aria-label="Karten-Dashboard"
+            className="min-h-touch"
           >
             <Smartphone className="h-4 w-4 mr-1" />
-            Cards
+            Karten
           </Button>
-          <span className="text-xs text-muted-foreground ml-2">Theme:</span>
+          <span className="text-xs text-muted-foreground ml-2">Darstellung:</span>
           <Button
             variant={theme === 'light' ? 'secondary' : 'ghost'}
-            size="sm"
             onClick={() => setThemeMode('light')}
-            aria-label="Hell"
+            aria-label="Helle Darstellung"
+            className="min-h-touch min-w-touch"
           >
             <Sun className="h-4 w-4" />
           </Button>
           <Button
             variant={theme === 'dark' ? 'secondary' : 'ghost'}
-            size="sm"
             onClick={() => setThemeMode('dark')}
-            aria-label="Dark"
+            aria-label="Dunkle Darstellung"
+            className="min-h-touch min-w-touch"
           >
             <Moon className="h-4 w-4" />
           </Button>
@@ -150,7 +150,7 @@ export default function FibuSuiteLayout({ children }: FibuSuiteLayoutProps): JSX
         <div className="border-b bg-muted/30 shrink-0">
           <div className="flex flex-wrap items-center gap-1 px-4 py-2">
             <Link to={suiteBase}>
-              <Button variant="ghost" size="sm" className="gap-1.5">
+              <Button variant="ghost" className="min-h-touch gap-1.5">
                 <Home className="h-4 w-4" /> START
               </Button>
             </Link>
@@ -160,8 +160,7 @@ export default function FibuSuiteLayout({ children }: FibuSuiteLayoutProps): JSX
                 <Link key={child.id} to={child.suitePath}>
                   <Button
                     variant={location.pathname === child.suitePath ? 'secondary' : 'ghost'}
-                    size="sm"
-                    className="gap-1.5"
+                    className="min-h-touch gap-1.5"
                   >
                     <Icon className="h-4 w-4" />
                     {child.label}

@@ -137,8 +137,8 @@ export default function TimeseriesErfassungPage(): JSX.Element {
                     Wert: {entry.value} {entry.source ? `| Quelle: ${entry.source}` : ''}
                   </div>
                 </div>
-                <Button size="sm" variant="destructive" onClick={() => remove(entry.id)}>
-                  Loeschen
+                <Button variant="destructive" onClick={() => remove(entry.id)} className="min-h-touch">
+                  Löschen
                 </Button>
               </div>
             </div>

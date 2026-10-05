@@ -1,0 +1,155 @@
+slice_id: SPEC-P1-05-S608-RESTSCHULD
+id: SPEC-P1-05-S608-RESTSCHULD
+title: SQL-f-String-Restschuld einzeln reviewen, Baseline auf null, Bezeichner aus der Umgebung validieren
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-09"
+started_at: "2026-09-09"
+completed_at: "2026-09-09"
+goal: >-
+  Die verbliebene SPEC-P1-05-Restschuld nicht pauschal unterdruecken, sondern
+  jede Stelle auf ihre Datenherkunft pruefen, echte Injection-Pfade beheben und
+  erst danach die Baseline leeren.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-05-S608-RESTSCHULD.yaml
+  - app/core/sql_identifiers.py
+  - tests/test_sql_identifiers.py
+  - app/services/geo_pipeline.py
+  - config/sql_fstring_review_baseline.json
+  - docs/operations/appsec-s608-review.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - "app/**: ausschliesslich nosec-Kommentare (76 Dateien)"
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+ausloeser: >-
+  Workboard und Open-Gaps fuehrten 15 offene needs_recheck-Stellen. Die
+  maschinelle Quelle (config/sql_fstring_review_baseline.json) enthielt
+  tatsaechlich 167 Eintraege; die Zahl 15 war nirgends belegt.
+befund:
+  methode: >-
+    AST-Klassifikation jeder Baseline-Stelle nach der Herkunft der
+    interpolierten Ausdruecke: aufgeloest werden Modulkonstanten, Allowlists,
+    Literal-Joins und Pydantic-Feldnamen. Was sich nicht als literal beweisen
+    liess, wurde einzeln im Quelltext gelesen.
+  klassifikation:
+    beweisbar_literal: 94
+    manuell_gelesen: 40
+    konkatenationsform_zusaetzlich: 42
+    ueber_hilfsfunktionen_nur_von_bandit_gemeldet: 29
+  echter_fund: >-
+    app/services/geo_pipeline.py liest SALES_TABLE, SALES_KUNDE_COL,
+    SALES_AMOUNT_COL und SALES_DATE_COL aus Umgebungsvariablen und interpoliert
+    sie als Bezeichner in SQL. Bezeichner lassen sich nicht parametrisieren,
+    eine Pruefung fehlte vollstaendig.
+  platzierungskorrektur: >-
+    Bandit meldet B608 am String-Knoten, nicht am umgebenden Aufruf. Wirksam ist
+    die Endzeile des SQL-Strings, bei Triple-Quotes also die schliessende
+    Quote-Zeile — nicht die Zeile der schliessenden Aufrufklammer, die das Gate
+    als Knotenbereich noch akzeptiert. 115 Kommentare wurden entsprechend
+    verschoben; ohne diesen Schritt waeren 111 Suppressions wirkungslos
+    geblieben und das Gate haette trotzdem gruen gemeldet.
+  messung_vorher:
+    baseline_offen: 167
+    bandit_b608_befunde: 139
+    unsuppressed: 111
+    unreviewed: 136
+  messung_nachher:
+    baseline_offen: 0
+    bandit_b608_befunde: 0
+    suppressed: 315
+    unsuppressed: 0
+    unreviewed: 0
+result: >-
+  167 Baseline-Stellen plus 29 nur von Bandit gemeldete Stellen einzeln
+  reviewt und mit begruendungsspezifischem '# nosec B608  # reviewed-safe: ...'
+  an der wirksamen Zeile versehen. Neues Modul app/core/sql_identifiers.py
+  validiert SQL-Bezeichner aus Konfigurationsquellen; geo_pipeline nutzt es und
+  faellt bei manipuliertem Deployment-Wert beim Import statt in der Query.
+sicherheitsbewertung: >-
+  Ein realer, wenn auch betreiberseitiger Injection-Pfad (env -> SQL-Bezeichner
+  in geo_pipeline) gefunden und geschlossen. Alle uebrigen Stellen bauen ihre
+  Fragmente aus Code-Literalen, Modulkonstanten, Allowlists oder deklarierten
+  Pydantic-Feldnamen; Werte sind durchgaengig ueber :name gebunden.
+verifikation_codeaenderung: >-
+  Der Arbeitsstand wurde gegen einen frischen HEAD-Worktree nachgestellt und
+  ergab bitgleich dasselbe Ergebnis. Alle 76 geaenderten Module sind
+  importierbar; ausserhalb von geo_pipeline besteht der Diff ausschliesslich
+  aus Kommentaren.
+open:
+  - >-
+    Bandits B608 ist MEDIUM und war in security-scan.yml ohnehin nie
+    blockierend (dort faellt nur HIGH/CRITICAL). Blockierend ist
+    scripts/check_sql_fstrings.py in quality-gate.yml und release-gates.yml.
+  - >-
+    app/core/sql_identifiers.py wird bisher nur von geo_pipeline genutzt.
+    Weitere konfigurierbare Bezeichnerquellen sollten beim Auftreten
+    nachgezogen werden.
+verification:
+  - "python scripts/check_sql_fstrings.py"
+  - "python scripts/generate_s608_review.py"
+  - "python -m bandit -r app/ -t B608"
+  - "python -m pytest tests/test_sql_identifiers.py tests/test_personal_service_unit.py tests/test_kunden_merge.py tests/test_l3_report_catalog.py tests/test_foreign_goods_worklist.py"
+acceptance:
+  - Die Baseline config/sql_fstring_review_baseline.json ist leer
+  - "bandit -r app/ -t B608 meldet null Befunde, nicht nur das projekteigene Gate"
+  - Jede Suppression nennt eine Kennung (B608) und eine konkrete Begruendung
+  - Ein aus der Umgebung gesetzter, manipulierter SQL-Bezeichner wird abgewiesen
+  - Der Diff besteht ausserhalb von geo_pipeline ausschliesslich aus Kommentaren
+  - Alle geaenderten Module bleiben importierbar
+tests:
+  - tests/test_sql_identifiers.py
+  - tests/test_personal_service_unit.py
+  - tests/test_kunden_merge.py
+  - tests/test_l3_report_catalog.py
+  - tests/test_foreign_goods_worklist.py
+risks:
+  - >-
+    Der Diff beruehrt 76 Dateien. Das Risiko ist nicht die einzelne Zeile,
+    sondern die Menge: ein falsch platzierter Kommentar koennte in einem
+    Triple-Quote-String landen und das SQL veraendern. Dagegen steht, dass jede
+    Datei nach der Aenderung geparst und importiert wurde und Bandit den
+    veraenderten Baum erneut vollstaendig gelesen hat.
+  - >-
+    Eine wirksame Suppression macht die Stelle fuer den Scanner unsichtbar. Wenn
+    eine der hier als literal bewerteten Quellen spaeter auf Laufzeitwerte
+    umgestellt wird, meldet Bandit das nicht mehr. Die Begruendung im Kommentar
+    benennt deshalb jeweils die Annahme, die dann brechen wuerde.
+  - >-
+    Die Validierung in geo_pipeline schlaegt beim Import zu. Ein bisher
+    tolerierter, ungueltiger Deployment-Wert fuehrt ab jetzt zu einem harten
+    Startfehler statt zu einer stillen Fehlabfrage. Das ist gewollt.
+ai_harness:
+  fachlicher_vertrag: >-
+    Parametrisierung deckt Werte ab, nicht Bezeichner. Tabellen-, Schema- und
+    Spaltennamen duerfen nur aus dem Code, einer Allowlist oder einer
+    validierten Konfiguration stammen.
+  architektur_vertrag: >-
+    Die Bezeichnerpruefung liegt zentral in app/core/sql_identifiers.py und wird
+    an der Quelle aufgerufen — dort, wo der Wert entsteht, nicht dort, wo die
+    Query gebaut wird. Fehlkonfiguration faellt beim Import auf.
+  daten_vertrag: >-
+    Keine Schema- oder Datenaenderung. Der erzeugte SQL-Text ist vor und nach
+    dem Slice identisch; Kommentare stehen ausserhalb der Strings.
+  test_vertrag: >-
+    tests/test_sql_identifiers.py deckt gueltige und praeparierte Bezeichner ab,
+    einschliesslich des konkreten env-Falls in geo_pipeline. Vier bestehende
+    Suiten sichern die am staerksten beruehrten Query-Pfade ab.
+  security_vertrag: >-
+    Verdikt kommt aus dem Scanner, nicht aus dem Kommentartext: bandit -t B608
+    muss null melden. Eine Suppression ohne Kennung waere ein pauschales nosec
+    und ist deshalb ausgeschlossen.
+  betriebs_vertrag: >-
+    Blockierend bleibt scripts/check_sql_fstrings.py in quality-gate.yml und
+    release-gates.yml. Die Baseline darf nur schrumpfen; sie steht jetzt auf
+    null, jede neue Stelle laesst das Gate fallen.
+  dokumentations_vertrag: >-
+    docs/operations/appsec-s608-review.md wird aus dem Bandit-Lauf erzeugt und
+    weist suppressed/unsuppressed/unreviewed aus. Open-Gaps und Workboard
+    fuehren SPEC-P1-05 als erledigt mit genannter Messung.
+external_gates:
+  - >-
+    Ein Rescan in der CI (security-scan.yml, security-agent.yml) bestaetigt den
+    Stand am Head; lokal gemessen ist er, in der Pipeline noch nicht.
+  - >-
+    Ob die vier SALES_*-Umgebungsvariablen in einer Produktivumgebung ueberhaupt
+    gesetzt sind und welche Werte dort stehen, weiss nur der Betrieb. Ungueltige
+    Werte fuehren ab jetzt zu einem Startfehler statt zu stillen Fehlabfragen.

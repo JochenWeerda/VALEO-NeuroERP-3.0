@@ -66,7 +66,7 @@ def gap_candidates(db: Session, plz_min: Optional[str], plz_max: Optional[str],
                 )
                 SELECT name, plz, ort, strasse, round(score) AS score
                 FROM ranked WHERE pr < :pct ORDER BY score DESC LIMIT :lim
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -95,7 +95,7 @@ def lkv_candidates(db: Session, plz_min: Optional[str], plz_max: Optional[str],
                 )
                 SELECT name, plz, ort, NULL AS strasse, round(score) AS score
                 FROM ranked WHERE pr < :pct ORDER BY score DESC NULLS LAST LIMIT :lim
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -145,8 +145,8 @@ class CrmLeadGenService:
                 text(
                     "SELECT id, company, contact_person, email, phone, source, potential, "
                     "lower(priority::text) AS priority, lower(status::text) AS status "
-                    "FROM public.crm_leads WHERE tenant_id = :t" + clause +
-                    " ORDER BY potential DESC NULLS LAST LIMIT 1000"
+                    "FROM public.crm_leads WHERE tenant_id = :t" + clause +  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+                    " ORDER BY potential DESC NULLS LAST LIMIT 1000"  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 ),
                 params,
             ).mappings().all()

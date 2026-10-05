@@ -1,0 +1,37 @@
+slice_id: BANK-MT940-PARSER-INTEGRITY-20261001
+title: Vollstaendige MT940-Zeilen und konsistente Salden
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-01
+completed_at: 2026-10-01
+coordination: Claim 72e1f6ac0; fremde CRM-Baseline bleibt beim Owner.
+goal: Keine verlorenen Zahlungszeilen und kein erfundener Schlusssaldo.
+file_ownership:
+  - app/api/v1/endpoints/bank_statement_import.py
+  - tests/test_bank_mt940_parser_integrity.py
+  - docs/architecture/domains/finance/workflows.md
+  - docs/quality-assurance/bank-mt940-parser-integrity-20261001.md
+acceptance:
+  - Jede Zahlungszeile auch ohne optionales Beschreibungsfeld erhalten.
+  - Buchungsdatum, Valutadatum, Richtung, Waehrung und Funds-Code pruefen.
+  - Exakter Schlusssaldo-Abgleich und Ablehnung von Mehrfachauszuegen vor Writes.
+tests:
+  - python -m ruff check app/api/v1/endpoints/bank_statement_import.py tests/test_bank_mt940_parser_integrity.py
+  - python scripts/generate_agent_handbuch.py --check
+test_evidence:
+  - 98 Parser- und Finanzvertraege bestanden, davon 19 neue Parser- und HTTP-Vertraege.
+  - Finaler Guard gegen mehrdeutiges Jahr mit 102 Vertraegen bestanden, davon 20 neue MT940-Vertraege.
+risks:
+  - Reversals, nationale Kontoformate und weitere Bankprofile erfordern eigene Fachabnahme.
+  - Semantische Duplikate, historische Importe und weitere CAMT-Profile bleiben offen; begrenztes CAMT-Profil im Nachzug abgesichert.
+ai_harness:
+  fachlicher_vertrag: Zahlungszeilen und Bank-Saldo stimmen exakt ueberein.
+  architektur_vertrag: Minor-Bugfix bestehenden Parsers ohne neue Route oder Schema.
+  daten_vertrag: Strikte Dekodierung und vollstaendige Zeilen statt stiller Ersatzwerte.
+  test_vertrag: Red-Green-Parservertraege und realer Import auf bestehendem Pruefstand.
+  security_vertrag: Unbekannte und widerspruechliche Profile vor Writes ablehnen.
+  betriebs_vertrag: Keine weiteren Testdatenbanken oder Dockerinstanzen.
+  dokumentations_vertrag: Quellen, Profilgrenzen, Tests und offene Gates dokumentiert.
+external_gates:
+  - Fremde CRM-Baselineintegritaet im parallelen Arbeitsstand.
+  - GitHub-CI, Bankprofile und Deployment.

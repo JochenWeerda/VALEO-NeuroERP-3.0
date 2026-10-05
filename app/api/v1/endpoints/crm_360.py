@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Literal, Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -18,35 +18,34 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
+# Der Mandant kam hier aus einem **Query-Parameter** (`?tenant_id=`), den kein
+# Aufrufer setzt — weder die Kunden-360-Maske noch das Frontend. Damit war der
+# Filter in jeder Abfrage (`:tid IS NULL OR ...`) dauerhaft offen und jeder
+# Aufruf sah die Kunden, Auftraege und Kontrakte *aller* Mandanten. Der Mandant
+# kommt aus dem Header `X-Tenant-ID`, wie ueberall sonst im Haus.
+
+from app.api.v1.endpoints.crm_360_sql import _kunde_finden, _query_one
+from app.api.v1.endpoints.crm_360_tabs import router as _customer_tabs_router
+from app.api.v1.schemas.base import TypedObjectOut
 from app.api.v1.schemas.crm_360_schemas import Crm360Out
 
-
 router = APIRouter()
+router.include_router(_customer_tabs_router)
 
 
 def _query_many(db: Session, sql: str, params: dict) -> list[dict]:
-    """Schema-qualifizierte Query; gibt leere Liste bei Fehler zurück."""
+    """Schema-qualifizierte Query, hoechstens 25 Zeilen.
+
+    Jede Abfrage der Akte begrenzt sich im SQL auf hoechstens 25 Zeilen.
+    Dieselbe Grenze gilt hier noch einmal, damit ein vergessenes LIMIT
+    keine unbegrenzte Liste aus der Datenbank zieht.
+    """
     try:
-        rows = db.execute(text(sql), params).mappings().all()
+        rows = db.execute(text(sql), params).mappings().fetchmany(25)
         return [dict(r) for r in rows]
     except Exception:
         db.rollback()
         return []
-
-
-def _query_one(db: Session, sql: str, params: dict) -> dict | None:
-    try:
-        row = db.execute(text(sql), params).mappings().first()
-        return dict(row) if row else None
-    except Exception:
-        db.rollback()
-        return None
-
-
-def _safe_query(db: Session, sql: str, params: dict) -> dict | None:
-    """Backward-compatible single-row safe query used by older CRM 360 tests."""
-    return _query_one(db, sql, params)
 
 
 def _customer_tab_endpoint(customer_id: str, tab_key: str) -> str:
@@ -82,24 +81,80 @@ def build_customer_screen_summary(
         ],
         "available_tabs": [
             "stammdaten",
+            "masterdata",
+            "address",
             "kontakte",
+            "contacts",
             "angebote",
             "auftraege",
+            "belege",
             "dokumente",
+            "finance",
             "aktivitaeten",
+            "aufgaben",
+            "kontrakte",
+            "praesente",
+            "postfach",
+            "geo",
             "historie",
+            "tax",
+            "bank",
+            "system",
+            "quality_compliance",
+            "marketing",
+            "cooperative",
+            "output",
+            "interfaces",
+            "potential",
+            "chefanweisungen",
+            "anschriften",
+            "kontoauszug",
+            "cpd",
+            "rabatte",
+            "preise",
         ],
         "tab_endpoints": {
             "stammdaten": _customer_tab_endpoint(customer_id, "stammdaten"),
+            "masterdata": _customer_tab_endpoint(customer_id, "stammdaten"),
             "kontakte": _customer_tab_endpoint(customer_id, "kontakte"),
             "contacts": _customer_tab_endpoint(customer_id, "contacts"),
             "finance": _customer_tab_endpoint(customer_id, "dokumente"),
             "angebote": _customer_tab_endpoint(customer_id, "angebote"),
             "auftraege": _customer_tab_endpoint(customer_id, "auftraege"),
+            "belege": _customer_tab_endpoint(customer_id, "auftraege"),
             "dokumente": _customer_tab_endpoint(customer_id, "dokumente"),
             "aktivitaeten": _customer_tab_endpoint(customer_id, "aktivitaeten"),
+            "aufgaben": _customer_tab_endpoint(customer_id, "aufgaben"),
+            "kontrakte": _customer_tab_endpoint(customer_id, "kontrakte"),
+            "praesente": _customer_tab_endpoint(customer_id, "praesente"),
+            "gifts": _customer_tab_endpoint(customer_id, "praesente"),
+            "postfach": _customer_tab_endpoint(customer_id, "postfach"),
+            "geo": _customer_tab_endpoint(customer_id, "geo"),
             "historie": _customer_tab_endpoint(customer_id, "historie"),
+            "chefanweisungen": _customer_tab_endpoint(customer_id, "chefanweisungen"),
+            "anschriften": _customer_tab_endpoint(customer_id, "anschriften"),
+            "cpd": _customer_tab_endpoint(customer_id, "cpd"),
+            "rabatte": _customer_tab_endpoint(customer_id, "rabatte"),
+            "preise": _customer_tab_endpoint(customer_id, "preise"),
         },
+        "summary_items": [
+            {"key": "kunden_nr", "label": "Kunden-Nr.", "value": customer.get("kunden_nr"), "kind": "identity"},
+            {"key": "party_status", "label": "Status", "value": "Kunde", "kind": "status", "tone": "success"},
+            {"key": "sales_ytd", "label": "Umsatz 12M", "value": sales_ytd, "kind": "kpi"},
+            {
+                "key": "open_items_total",
+                "label": "Offene Posten",
+                "value": open_items_total,
+                "kind": "kpi",
+                "tone": "warning" if open_items_total > 0 else "neutral",
+            },
+            {
+                "key": "recent_activity_count",
+                "label": "Aktivitaeten 90T",
+                "value": recent_activity_count,
+                "kind": "contact",
+            },
+        ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "permission": "crm.customer.update"},
             {"key": "create_activity", "label": "Aktivitaet anlegen", "permission": "crm.activity.create"},
@@ -115,13 +170,13 @@ def build_customer_screen_summary(
 
 @router.get(
     "/{customer_id}/screen-summary",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["crm", "customers", "screen-summary"],
     summary="Customer screen summary abrufen",
 )
 async def get_customer_screen_summary(
     customer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Kompakter Startvertrag fuer den Universal Mask Generator.
@@ -130,55 +185,60 @@ async def get_customer_screen_summary(
     bleiben separate, limitierte Endpunkte.
     """
 
-    customer = _query_one(
-        db,
-        """
-        SELECT id, name, kunden_nr
-        FROM domain_erp.business_partners
-        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
-        LIMIT 1
-        """,
-        {"cid": customer_id, "tid": tenant_id},
-    )
+    customer = _kunde_finden(db, customer_id, tenant_id)
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
+    canonical_id = str(customer.get("id") or customer_id)
 
     sales_row = _query_one(
         db,
         """
         SELECT COALESCE(SUM(total_amount), 0)::float AS sales_ytd
         FROM domain_crm.sales_orders
-        WHERE customer_id = :cid
+        WHERE (
+                customer_id::text = :cid
+             OR (:nr IS NOT NULL AND customer_id::text = :nr)
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
+          AND deleted_at IS NULL
+          AND status IN ('completed', 'geliefert', 'invoiced')
           AND created_at >= NOW() - INTERVAL '12 months'
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": canonical_id, "tid": tenant_id, "nr": customer.get("kunden_nr")},
     ) or {}
     open_items_row = _query_one(
         db,
         """
         SELECT COALESCE(SUM(offen), 0)::float AS open_items_total
         FROM domain_erp.offene_posten
-        WHERE (kunden_id = :cid OR debitor_id::text = :cid)
+        WHERE (
+                kunde_id::text = :cid
+             OR debtor_id::text = :cid
+             OR (:kunden_nr IS NOT NULL AND (
+                    kunde_id::text = :kunden_nr OR debtor_id::text = :kunden_nr
+                ))
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
-          AND op_status NOT IN ('bezahlt', 'storniert')
+          AND COALESCE(op_status, '') NOT IN ('bezahlt', 'storniert')
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": canonical_id, "tid": tenant_id, "kunden_nr": customer.get("kunden_nr")},
     ) or {}
     activity_row = _query_one(
         db,
         """
         SELECT COUNT(*)::int AS recent_activity_count
         FROM domain_crm.activities
-        WHERE customer_id = :cid
+        WHERE customer = :kunde
           AND (:tid IS NULL OR tenant_id::text = :tid)
           AND created_at >= NOW() - INTERVAL '90 days'
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        # Die Aktivitaet kennt ihren Kunden nur beim Namen: `customer` ist ein
+        # String(100), keine Kundenreferenz. Mehr gibt das Modell nicht her.
+        {"kunde": customer.get("name"), "tid": tenant_id},
     ) or {}
 
     return build_customer_screen_summary(
-        customer_id=customer_id,
+        customer_id=canonical_id,
         tenant_id=tenant_id,
         customer=customer,
         sales_ytd=float(sales_row.get("sales_ytd") or 0.0),
@@ -187,230 +247,22 @@ async def get_customer_screen_summary(
     )
 
 
-def _normalize_tab_key(tab_key: str) -> str:
-    aliases = {
-        "contacts": "kontakte",
-        "kontakte": "kontakte",
-        "stammdaten": "stammdaten",
-        "masterdata": "stammdaten",
-        "finance": "dokumente",
-    }
-    return aliases.get(tab_key, tab_key)
-
-
-def _fetch_customer_tab_items(
-    db: Session,
-    *,
-    customer_id: str,
-    tenant_id: str | None,
-    tab_key: str,
-    kunden_nr: str | None,
-) -> tuple[str, list[dict[str, Any]]]:
-    normalized = _normalize_tab_key(tab_key)
-
-    if normalized in {"stammdaten", "angebote", "historie"}:
-        return normalized, []
-
-    if normalized == "kontakte":
-        if not kunden_nr:
-            return "contacts_list", []
-        rows = _query_many(
-            db,
-            """
-            SELECT id::text AS id,
-                   COALESCE(nachname, '') AS name,
-                   COALESCE(vorname, '') AS "firstName",
-                   COALESCE(position, '') AS position,
-                   COALESCE(email, '') AS email,
-                   COALESCE(telefon1, '') AS phone1
-            FROM public.kunden_ansprechpartner
-            WHERE kunden_nr = :kunden_nr
-            ORDER BY prioritaet NULLS LAST, nachname
-            LIMIT 25
-            """,
-            {"kunden_nr": kunden_nr},
-        )
-        return "contacts_list", rows
-
-    if normalized == "auftraege":
-        rows = _query_many(
-            db,
-            """
-            SELECT id::text AS id,
-                   order_number,
-                   status,
-                   COALESCE(total_amount, 0)::float AS total_amount,
-                   created_at::text AS created_at
-            FROM domain_crm.sales_orders
-            WHERE customer_id = :cid
-              AND (:tid IS NULL OR tenant_id::text = :tid)
-            ORDER BY created_at DESC
-            LIMIT 25
-            """,
-            {"cid": customer_id, "tid": tenant_id},
-        )
-        return "recent_orders", rows
-
-    if normalized == "aktivitaeten":
-        rows = _query_many(
-            db,
-            """
-            SELECT id::text AS id,
-                   activity_type,
-                   subject,
-                   COALESCE(assigned_to, '') AS assigned_to,
-                   created_at::text AS created_at
-            FROM domain_crm.activities
-            WHERE customer_id = :cid
-              AND (:tid IS NULL OR tenant_id::text = :tid)
-            ORDER BY created_at DESC
-            LIMIT 25
-            """,
-            {"cid": customer_id, "tid": tenant_id},
-        )
-        return "recent_activities", rows
-
-    if normalized == "dokumente":
-        rows = _query_many(
-            db,
-            """
-            SELECT id::text AS id,
-                   rechnungsnr,
-                   faelligkeit::text AS faelligkeit,
-                   offen::float AS amount,
-                   GREATEST(0, (CURRENT_DATE - faelligkeit::date))::int AS days_overdue,
-                   op_status
-            FROM domain_erp.offene_posten
-            WHERE (kunden_id = :cid OR debitor_id::text = :cid)
-              AND (:tid IS NULL OR tenant_id::text = :tid)
-              AND op_status NOT IN ('bezahlt', 'storniert')
-            ORDER BY faelligkeit ASC
-            LIMIT 25
-            """,
-            {"cid": customer_id, "tid": tenant_id},
-        )
-        table_key = "open_documents" if tab_key == "dokumente" else "open_items"
-        return table_key, rows
-
-    return normalized, []
-
-
-from app.core.mask_screen_summary_common import get_sortable_columns, paginate_tab_items as _paginate_tab_items
-
-
-def _paginate_items(
-    items: list[dict[str, Any]],
-    *,
-    page: int = 1,
-    limit: int = 25,
-    q: str | None = None,
-    sort: str | None = None,
-    sort_dir: str | None = None,
-    screen_id: str | None = None,
-    tab_key: str | None = None,
-    filter_plan: dict | None = None,
-) -> tuple[list[dict[str, Any]], int]:
-    allowed = get_sortable_columns(screen_id, tab_key) if screen_id and tab_key else None
-    return _paginate_tab_items(
-        items, page=page, limit=limit, q=q,
-        sort=sort, sort_dir=sort_dir, allowed_sort_columns=allowed,
-        filter_plan=filter_plan,
-    )
-
-
-@router.get(
-    "/{customer_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
-    tags=["crm", "customers", "screen-summary"],
-    summary="Customer tab list data abrufen",
-)
-async def get_customer_tab_data(
-    customer_id: str,
-    tab_key: str,
-    tenant_id: Optional[str] = Query(None),
-    page: int = Query(1, ge=1),
-    limit: int = Query(25, ge=1, le=50),
-    q: Optional[str] = Query(None),
-    sort: Optional[str] = Query(None),
-    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
-    filter_plan: Optional[str] = Query(None, description="JSON FilterPlan"),
-    filter_plan_legacy: Optional[str] = Query(
-        None,
-        alias="filterPlan",
-        include_in_schema=False,
-        description="Deprecated camelCase alias for filter_plan.",
-    ),
-    db: Session = Depends(get_db),
-):
-    """Limitierte Tab-Listen fuer den Universal Mask Generator (read-only)."""
-    import json
-
-    customer = _query_one(
-        db,
-        """
-        SELECT id, name, kunden_nr
-        FROM domain_erp.business_partners
-        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
-        LIMIT 1
-        """,
-        {"cid": customer_id, "tid": tenant_id},
-    )
-    if customer is None:
-        raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
-
-    parsed_filter_plan: dict | None = None
-    raw_filter_plan = filter_plan or filter_plan_legacy
-    if raw_filter_plan:
-        try:
-            parsed_filter_plan = json.loads(raw_filter_plan)
-        except (ValueError, TypeError):
-            raise HTTPException(status_code=422, detail="filter_plan must be valid JSON")
-
-    table_key, items = _fetch_customer_tab_items(
-        db,
-        customer_id=customer_id,
-        tenant_id=tenant_id,
-        tab_key=tab_key,
-        kunden_nr=customer.get("kunden_nr"),
-    )
-    paged_items, total = _paginate_items(
-        items, page=page, limit=limit, q=q,
-        sort=sort, sort_dir=sort_dir,
-        screen_id="crm/customer-360", tab_key=tab_key,
-        filter_plan=parsed_filter_plan,
-    )
-    return {
-        "tab_key": tab_key,
-        "table_key": table_key,
-        "items": paged_items,
-        "page": page,
-        "limit": limit,
-        "total": total,
-    }
-
-
 @router.get("/{customer_id}/360", response_model=Crm360Out, tags=["crm", "customers"], summary="Customer 360 abrufen")
 async def get_customer_360(
     customer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """360°-Kundensicht: aggregiert Aufträge, Rechnungen, OP, Kontrakte,
     Aktivitäten, Wareneingänge und Kreditlimit aus echten ERP-Tabellen."""
 
-    # Kunde muss existieren (domain_erp.business_partners ist kanonisch)
-    customer = _query_one(
-        db,
-        """
-        SELECT id, name, kunden_nr
-        FROM domain_erp.business_partners
-        WHERE id = :cid AND (:tid IS NULL OR tenant_id::text = :tid)
-        LIMIT 1
-        """,
-        {"cid": customer_id, "tid": tenant_id},
-    )
+    # Kunde muss existieren — gefuehrt wird er in domain_crm.customers
+    # bzw. im Partnerstamm; domain_erp.business_partners ist leer.
+    customer = _kunde_finden(db, customer_id, tenant_id)
     if customer is None:
         raise HTTPException(status_code=404, detail=f"Kunde {customer_id} nicht gefunden")
+    customer_id = str(customer.get("id") or customer_id)
+    kunden_nr = customer.get("kunden_nr")
 
     # 1. Letzte 10 Aufträge (domain_crm.sales_orders)
     orders = _query_many(
@@ -420,26 +272,35 @@ async def get_customer_360(
                COALESCE(total_amount, 0)::float AS total_amount,
                created_at::text
         FROM domain_crm.sales_orders
-        WHERE customer_id = :cid
+        WHERE (
+                customer_id::text = :cid
+             OR (:nr IS NOT NULL AND customer_id::text = :nr)
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
+          AND deleted_at IS NULL
         ORDER BY created_at DESC
         LIMIT 10
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": customer_id, "tid": tenant_id, "nr": kunden_nr},
     )
 
-    # 2. Jahresumsatz (aktuelle 12 Monate) — Summe abgeschlossener Aufträge
+    # 2. Jahresumsatz der letzten 12 Monate. Gezaehlt werden die Status, die
+    # der Auftrag wirklich schreibt: completed, geliefert, invoiced.
     umsatz_row = _query_one(
         db,
         """
         SELECT COALESCE(SUM(total_amount), 0)::float AS jahresumsatz
         FROM domain_crm.sales_orders
-        WHERE customer_id = :cid
+        WHERE (
+                customer_id::text = :cid
+             OR (:nr IS NOT NULL AND customer_id::text = :nr)
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
-          AND status IN ('GELIEFERT', 'ABGESCHLOSSEN', 'BERECHNET')
+          AND deleted_at IS NULL
+          AND status IN ('completed', 'geliefert', 'invoiced')
           AND created_at >= NOW() - INTERVAL '12 months'
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": customer_id, "tid": tenant_id, "nr": kunden_nr},
     )
     jahresumsatz = umsatz_row["jahresumsatz"] if umsatz_row else 0.0
 
@@ -452,60 +313,93 @@ async def get_customer_360(
                GREATEST(0, (CURRENT_DATE - faelligkeit::date))::int AS days_overdue,
                op_status
         FROM domain_erp.offene_posten
-        WHERE (kunden_id = :cid OR debitor_id::text = :cid)
+        WHERE (
+                kunde_id::text = :cid
+             OR debtor_id::text = :cid
+             OR (:kunden_nr IS NOT NULL AND (
+                    kunde_id::text = :kunden_nr OR debtor_id::text = :kunden_nr
+                ))
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
-          AND op_status NOT IN ('bezahlt', 'storniert')
+          AND COALESCE(op_status, '') NOT IN ('bezahlt', 'storniert')
         ORDER BY faelligkeit ASC
         LIMIT 20
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": customer_id, "tid": tenant_id, "kunden_nr": kunden_nr},
     )
     # Summe offener OP
     op_summe = sum(r.get("amount") or 0.0 for r in open_payments)
 
-    # 4. Aktive Kontrakte (domain_agrar.agrar_contracts)
+    # 4. Laufende Kontrakte
+    #
+    # Gelesen wurde ``domain_agrar.agrar_contracts`` — das Schema gibt es nicht.
+    # Gefuehrt werden die Kontrakte in ``domain_inventory.agrar_contracts``, und
+    # zwar mit anderen Spalten *und* anderen Statuswerten: `open` und
+    # `partially_allocated`, nicht `AKTIV`. Beides zusammen haette auch nach dem
+    # blossen Umhaengen des Schemas noch eine leere Liste ergeben.
+    #
+    # Der Schluessel partner_id ist der Geschaeftspartner (UUID) oder dessen
+    # Partnernummer. Die Kunden-UUID allein trifft die geschriebenen Kontrakte nicht.
+    partner_id = customer.get("business_partner_id")
     active_contracts = _query_many(
         db,
         """
-        SELECT id, contract_number, status,
-               lieferbeginn::text AS start_date,
-               lieferende::text AS end_date,
-               COALESCE(gesamtmenge_t * preis_eur_per_t, 0)::float AS total_value
-        FROM domain_agrar.agrar_contracts
-        WHERE (customer_id = :cid OR lieferant_id = :cid OR partner_id = :cid)
+        SELECT id::text AS id, contract_number, status,
+               valid_from::text AS start_date,
+               valid_until::text AS end_date,
+               COALESCE(total_quantity_kg / 1000.0 * fixed_price, 0)::float AS total_value
+        FROM domain_inventory.agrar_contracts
+        WHERE (
+                partner_id::text = :cid
+             OR (:pid IS NOT NULL AND partner_id::text = :pid)
+             OR (:nr IS NOT NULL AND partner_id::text = :nr)
+             OR partner_id::text IN (
+                    SELECT partner_number
+                    FROM domain_crm.business_partners
+                    WHERE partner_id::text = :cid
+                       OR (:pid IS NOT NULL AND partner_id::text = :pid)
+                )
+              )
           AND (:tid IS NULL OR tenant_id::text = :tid)
-          AND status IN ('AKTIV', 'aktiv', 'OFFEN')
-        ORDER BY lieferbeginn DESC
+          AND status IN ('open', 'partially_allocated')
+        ORDER BY valid_from DESC NULLS LAST
         LIMIT 10
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"cid": customer_id, "tid": tenant_id, "pid": partner_id, "nr": kunden_nr},
     )
 
     # 5. Letzte 5 CRM-Aktivitäten (domain_crm.activities)
     recent_activities = _query_many(
         db,
         """
-        SELECT id, activity_type, subject,
-               created_at::text, assigned_to
+        SELECT id::text AS id,
+               type AS activity_type,
+               title AS subject,
+               COALESCE(date, created_at)::text AS created_at,
+               assigned_to
         FROM domain_crm.activities
-        WHERE customer_id = :cid
+        WHERE customer = :kunde
           AND (:tid IS NULL OR tenant_id::text = :tid)
-        ORDER BY created_at DESC
+        ORDER BY COALESCE(date, created_at) DESC
         LIMIT 5
         """,
-        {"cid": customer_id, "tid": tenant_id},
+        {"kunde": customer.get("name"), "tid": tenant_id},
     )
 
-    # 6. Letzter Wareneingang (domain_agrar.harvest_acceptances)
+    # 6. Letzte Ernteannahme. Quelle: domain_inventory.harvest_acceptances
+    # (Annahmeschein). domain_agrar.harvest_acceptances ist die Sammelabrechnung
+    # und hat weder customer_id noch Annahmescheinnummer.
     last_receipt_row = _query_one(
         db,
         """
-        SELECT id, acceptance_number,
-               accepted_at::text, net_weight_kg::float, product_id
-        FROM domain_agrar.harvest_acceptances
-        WHERE (supplier_id = :cid OR customer_id = :cid)
+        SELECT id::text AS id,
+               acceptance_number,
+               delivery_date::text AS accepted_at,
+               article_id::text AS product_id
+        FROM domain_inventory.harvest_acceptances
+        WHERE customer_id::text = :cid
           AND (:tid IS NULL OR tenant_id::text = :tid)
-        ORDER BY accepted_at DESC
+        ORDER BY delivery_date DESC, created_at DESC NULLS LAST
         LIMIT 1
         """,
         {"cid": customer_id, "tid": tenant_id},
@@ -516,25 +410,35 @@ async def get_customer_360(
             "id": str(last_receipt_row["id"]),
             "reference_number": last_receipt_row.get("acceptance_number"),
             "received_at": last_receipt_row.get("accepted_at"),
-            "quantity_kg": last_receipt_row.get("net_weight_kg"),
-            "product_id": str(last_receipt_row["product_id"]) if last_receipt_row.get("product_id") else None,
+            "product_id": last_receipt_row.get("product_id"),
             "source": "harvest_acceptances",
         }
     else:
-        # Fallback: letzter Warenzugang aus Lagerbewegungen
+        # Fallback, wenn kein Annahmeschein da ist. Verknuepfung ist
+        # owner_partner_id, nicht ein Textsuche in notes.
         sm_row = _query_one(
             db,
             """
-            SELECT id, reference_number, movement_date::text,
-                   quantity::float, article_id
+            SELECT id::text AS id,
+                   reference_number,
+                   created_at::text AS movement_date,
+                   quantity::float AS quantity,
+                   article_id::text AS article_id
             FROM domain_inventory.inventory_stock_movements
-            WHERE (:tid IS NULL OR tenant_id::text = :tid)
-              AND movement_type = 'in'
-              AND notes ILIKE :pattern
-            ORDER BY movement_date DESC
+            WHERE movement_type = 'in'
+              AND (
+                    owner_partner_id::text = :cid
+                 OR (:pid IS NOT NULL AND owner_partner_id::text = :pid)
+              )
+              AND (:tid IS NULL OR tenant_id::text = :tid)
+            ORDER BY created_at DESC
             LIMIT 1
             """,
-            {"cid": customer_id, "tid": tenant_id, "pattern": f"%{customer_id[:8]}%"},
+            {
+                "cid": customer_id,
+                "tid": tenant_id,
+                "pid": customer.get("business_partner_id"),
+            },
         )
         if sm_row:
             last_goods_receipt = {
@@ -546,20 +450,39 @@ async def get_customer_360(
                 "source": "inventory_stock_movements",
             }
 
-    # 7. Kreditlimit (domain_crm.credit_limits wenn vorhanden)
-    credit_limit_status = _query_one(
+    # 7. Kreditlimit. Ausnahme in credit_limits, sonst der Stamm.
+    # Die Migration legt credit_limit_eur an, nicht credit_limit/credit_used.
+    ausnahme = _query_one(
         db,
         """
-        SELECT credit_limit::float, credit_used::float,
-               (credit_limit - credit_used)::float AS credit_available,
-               credit_status
+        SELECT credit_limit_eur::float AS credit_limit,
+               warning_threshold_percent::float AS warning_threshold_percent,
+               block_threshold_percent::float AS block_threshold_percent
         FROM domain_crm.credit_limits
-        WHERE customer_id = :cid
+        WHERE customer_id::text = :cid
           AND (:tid IS NULL OR tenant_id::text = :tid)
         LIMIT 1
         """,
         {"cid": customer_id, "tid": tenant_id},
     )
+    if ausnahme is not None:
+        credit_limit_status = {**ausnahme, "source": "ausnahme"}
+    else:
+        stamm_limit = _query_one(
+            db,
+            """
+            SELECT credit_limit::float AS credit_limit
+            FROM domain_crm.customers
+            WHERE id::text = :cid
+            LIMIT 1
+            """,
+            {"cid": customer_id},
+        )
+        credit_limit_status = (
+            {"credit_limit": stamm_limit["credit_limit"], "source": "stamm"}
+            if stamm_limit is not None
+            else None
+        )
 
     return {
         "customer_id": customer_id,
@@ -681,38 +604,57 @@ async def create_activity_action(
 
     activity_id = str(uuid.uuid4())
     audit_id = str(uuid.uuid4())
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc)
+
+    kunde = _kunde_finden(db, customer_id, tenant_id)
+    if kunde is None:
+        return ActionResult(
+            actionKey="create_activity",
+            mode=mode,
+            success=False,
+            error="Kunde nicht gefunden.",
+        )
+    customer_id = str(kunde.get("id") or customer_id)
+
+    verantwortlich = (body.get("verantwortlich") or "Akte")[:100]
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_crm.activities
+                  (id, type, title, customer, contact_person, date, status, assigned_to, description, tenant_id)
+                VALUES
+                  (:aid, :typ, :titel, :kunde, :person, :datum, 'offen', :verantwortlich, :notiz, :tid)
+                """
+            ),
+            {
+                "aid": activity_id,
+                "typ": (body.get("typ") or "Sonstiges")[:20],
+                "titel": body.get("betreff", "")[:200],
+                "kunde": str(kunde.get("name") or "")[:100] or customer_id[:100],
+                "person": verantwortlich,
+                "datum": body.get("datum") or now.date().isoformat(),
+                "verantwortlich": verantwortlich,
+                "notiz": body.get("notiz"),
+                "tid": tenant_id,
+            },
+        )
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Aktivität konnte nicht gespeichert werden: {exc}") from exc
 
     try:
         db.execute(
-            text("""
-                INSERT INTO domain_crm.crm_activities
-                  (id, customer_id, tenant_id, betreff, typ, datum, verantwortlich, notiz, status, created_at)
-                VALUES
-                  (:aid, :cid, :tid, :betreff, :typ, :datum, :verantwortlich, :notiz, 'offen', :now)
-                ON CONFLICT DO NOTHING
-            """),
-            {
-                "aid": activity_id,
-                "cid": customer_id,
-                "tid": tenant_id,
-                "betreff": body.get("betreff", ""),
-                "typ": body.get("typ", "Sonstiges"),
-                "datum": body.get("datum") or datetime.now(timezone.utc).date().isoformat(),
-                "verantwortlich": body.get("verantwortlich"),
-                "notiz": body.get("notiz"),
-                "now": now,
-            },
-        )
-        db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO domain_crm.crm_action_audit_log
                   (id, tenant_id, action_key, entity_type, entity_id, idempotency_key, audit_reason,
                    performed_at, result_summary)
                 VALUES
                   (:id, :tid, 'create_activity', 'customer', :cid, :ikey, :areason, :now, :summary)
-                ON CONFLICT DO NOTHING
-            """),
+                """
+            ),
             {
                 "id": audit_id,
                 "tid": tenant_id,
@@ -724,19 +666,11 @@ async def create_activity_action(
             },
         )
         db.commit()
-    except Exception as exc:
+    except Exception:
+        # Die Aktivitaet ist bereits festgeschrieben. Ein fehlendes Audit
+        # darf sie nicht als Fehlschlag ausgeben.
         db.rollback()
-        # Fehlende Tabellen im Dev/Test → graceful degradation, kein 500
-        if "does not exist" in str(exc) or "UndefinedTable" in type(exc).__name__:
-            return ActionResult(
-                actionKey="create_activity",
-                mode=mode,
-                success=True,
-                summary=f"Aktivität '{body.get('betreff')}' simuliert (Tabelle noch nicht angelegt).",
-                affectedIds=[activity_id],
-                auditEntryId=audit_id,
-            )
-        raise HTTPException(status_code=500, detail=f"Aktivität konnte nicht gespeichert werden: {exc}") from exc
+        audit_id = None
 
     return ActionResult(
         actionKey="create_activity",

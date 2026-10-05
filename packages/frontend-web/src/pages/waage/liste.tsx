@@ -17,6 +17,8 @@ import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { useWaagen, type Waage } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Callout, CalloutDescription, CalloutTitle } from '@/components/ui/callout'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
@@ -61,12 +63,12 @@ function LoadingSkeleton(): JSX.Element {
 function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => void }): JSX.Element {
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center">
-      <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-      <h2 className="text-xl font-semibold text-red-600 mb-2">Backend nicht erreichbar</h2>
+      <AlertTriangle className="h-12 w-12 text-status-error mb-4" />
+      <h2 className="text-xl font-semibold text-status-error mb-2">Backend nicht erreichbar</h2>
       <p className="text-muted-foreground mb-4">
         {error?.message || 'Die Waagen-Daten konnten nicht geladen werden.'}
       </p>
-      <Button onClick={onRetry} variant="outline" className="gap-2">
+      <Button onClick={onRetry} variant="outline" className="min-h-touch gap-2 touch-manipulation">
         <Scale className="h-4 w-4" />Erneut versuchen
       </Button>
     </div>
@@ -76,6 +78,7 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 export default function WaageListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const { data: chain } = useSupplyChainOverview()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -111,7 +114,21 @@ export default function WaageListePage(): JSX.Element {
   if (isLoading) return <LoadingSkeleton />
 
   const columns = [
-    { key: 'standort' as const, label: 'Standort', render: (w: Waage) => <div><div className="font-medium">{w.standort}</div><div className="text-sm text-muted-foreground">{w.id}</div></div> },
+    {
+      key: 'standort' as const,
+      label: 'Standort',
+      render: (w: Waage) => (
+        <button
+          type="button"
+          onClick={() => navigate('/waage/hofliste')}
+          className="inline-flex min-h-11 flex-col items-start justify-center text-left font-medium text-primary underline-offset-4 hover:underline"
+          aria-label={`Hofliste für ${w.standort} öffnen`}
+        >
+          <span>{w.standort}</span>
+          <span className="text-sm font-normal text-muted-foreground">{w.id}</span>
+        </button>
+      ),
+    },
     { key: 'typ' as const, label: 'Typ' },
     { key: 'maxKapazitaet' as const, label: 'Max. Kapazitaet (t)' },
     { key: 'naechsteEichung' as const, label: 'Naechste Eichung', render: (w: Waage) => new Date(w.naechsteEichung).toLocaleDateString('de-DE') },
@@ -151,7 +168,7 @@ export default function WaageListePage(): JSX.Element {
     { label: 'Nachweis exportieren', done: filteredWaagen.length > 0, hint: filteredWaagen.length > 0 ? 'CSV-Export ist fuer den aktuellen Ausschnitt verfuegbar.' : 'Export braucht sichtbare Waagen.' },
   ]
   const scaleListCrudCapabilities = [
-    { key: 'create', label: 'Neue Waage', available: true, hint: 'Neue Waage kann per Button oder Ctrl+N angelegt werden.' },
+    { key: 'create', label: 'Neue Waage', available: true, hint: 'Neue Waage kann über den Button angelegt werden.' },
     { key: 'read', label: 'Lesen', available: true, hint: 'Waagen, Status, Eichung und Kettenlage sind sichtbar.' },
     { key: 'filter', label: 'Suchen', available: true, hint: 'Suche filtert nach Standort, Waagen-ID oder Typ.' },
     { key: 'export', label: 'Export/Nachweis', available: filteredWaagen.length > 0, hint: filteredWaagen.length > 0 ? 'CSV-Export dokumentiert den aktuellen Stand.' : 'Kein Export ohne sichtbare Waagen.' },
@@ -199,56 +216,57 @@ export default function WaageListePage(): JSX.Element {
 
   return (
     <PageSurface data-page-surface="waage-liste" contentClassName="space-y-6">
-      <PageSection
-        description="Bestandsseite rueckwirkend auf den DS-Surface, Keyboard-first und touch-feste Bedienung gezogen."
-      >
+      <PageSection description="Welche Waage ist frei, welche Eichung ist fällig, welcher Hof wartet.">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-3xl font-bold">Waagen</h1>
-            <p className="text-muted-foreground">Waagen-Management und Eichfaelligkeit.</p>
+            <p className="text-muted-foreground">Waagen-Management und Eichfälligkeit.</p>
           </div>
-          <Button onClick={() => navigate('/waage/neu')} className="min-h-touch gap-2 touch-manipulation">
-            <Plus className="h-4 w-4" />Neue Waage
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/waage/hofliste')}
+              className="min-h-touch gap-2 touch-manipulation"
+            >
+              Hofliste
+            </Button>
+            <Button onClick={() => navigate('/waage/neu')} className="min-h-touch gap-2 touch-manipulation">
+              <Plus className="h-4 w-4" />Neue Waage
+            </Button>
+          </div>
         </div>
       </PageSection>
 
-      <PageSection>
-        <div className="mb-4 space-y-4">
-          <RoleFocusBar roles={scaleListRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
-          <ManagementDecisionPanel
-            decision={{
-              allowed: scaleListWorkable,
-              allowedLabel: 'Arbeitsfaehig',
-              blockedLabel: 'Stopper offen',
-              summary: scaleListWorkable ? `${filteredWaagen.length} Waagen sichtbar, ${activeScales} aktiv, keine faellige Eichung.` : `Vor weiterer Planung ist noch etwas offen: ${scaleListNextAction}`,
-              blockerCount: [!hasScales, dueCalibrations > 0, supplyOps.pressure === 'hoch'].filter(Boolean).length,
-              nextFocus: scaleListNextAction,
-              template: { label: 'Hofliste oeffnen', href: '/waage/hofliste' },
-            }}
-          />
-          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-            <OperationalTaskPlan title="Waagen-Prioritaetsplan" items={scaleListTaskItems} />
-            <div className="space-y-3">
-              <NextActionPanel action={scaleListNextAction} tone={scaleListWorkable ? 'emerald' : dueCalibrations > 0 || supplyOps.pressure === 'hoch' ? 'red' : 'blue'} />
-              <EvidenceTemplateLink link={{ label: 'Waage Export vorbereiten', href: '/waage/liste' }} />
+      {dueCalibrations > 0 ? (
+        <Callout variant="warning">
+          <CalloutTitle>{dueCalibrations} Eichtermine fällig</CalloutTitle>
+          <CalloutDescription>{scaleListNextAction}</CalloutDescription>
+        </Callout>
+      ) : null}
+
+      <PageSection title="Suche und Liste" description="Standort, Waagen-ID oder Typ. Die Zeile öffnet die Hofliste.">
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                ref={searchInputRef}
+                aria-label="Suche Waagen"
+                placeholder="Standort, Waagen-ID oder Typ suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
             </div>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
+              <FileDown className="h-4 w-4" />Export
+            </Button>
           </div>
-          <CrudCapabilityChecklist capabilities={scaleListCrudCapabilities} />
-        </div>
-        <OperationalCaseHeader
-          title="Waagensteuerung"
-          description="Die Waagenliste fuehrt die physische Kette als kompakten Vorgang zwischen Annahme, Wiegung, Charge und Fracht."
-          status={operationalStatus}
-          owner="Waagenleitstand"
-          blocker={supplyOps.pressure === 'hoch' ? `Bottleneck ${supplyOps.bottleneck} erzeugt aktuell hohen operativen Druck.` : dueCalibrations > 0 ? `${dueCalibrations} Waagen haben einen faelligen Eichtermin.` : null}
-          nextAction={supplyOps.nextAction}
-          caseLabel="Vorgang: Wiegung"
-          tags={['Waage', 'Physische Kette', 'Operator']}
-        />
-        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
-          <OperationalTimeline title="Kettenverlauf" items={timelineItems} />
-          <OperationalContextPanel title="Waagen-Kontext" sections={contextSections} />
+          <Card>
+            <CardContent className="overflow-x-auto pt-6">
+              <DataTable data={filteredWaagen} columns={columns} />
+            </CardContent>
+          </Card>
         </div>
       </PageSection>
 
@@ -260,7 +278,7 @@ export default function WaageListePage(): JSX.Element {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Scale className="h-5 w-5 text-blue-600" />
+                <Scale className="h-5 w-5 text-muted-foreground" />
                 <span className="text-2xl font-bold">{filteredWaagen.length}</span>
               </div>
             </CardContent>
@@ -270,7 +288,7 @@ export default function WaageListePage(): JSX.Element {
               <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold text-status-success">
                 {filteredWaagen.filter((w) => w.status === 'aktiv').length}
               </span>
             </CardContent>
@@ -288,84 +306,101 @@ export default function WaageListePage(): JSX.Element {
         </div>
       </PageSection>
 
-      <PageSection title="Kettenlage" description="Einheitliche Sicht auf Annahme, Wiegung, Charge und Fracht direkt an der Waage.">
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-2xl font-semibold">{chain?.waitingInbound ?? 0}</div></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-2xl font-semibold">{chain?.openWeighingTickets ?? 0}</div></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Chargen in Prüfung</div><div className="text-2xl font-semibold">{chain?.blockedCharges ?? 0}</div></CardContent></Card>
-          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-2xl font-semibold">{chain?.freightInTransit ?? 0}</div></CardContent></Card>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Bottleneck</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-semibold capitalize">{supplyOps.bottleneck}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Druck</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : supplyOps.pressure === 'mittel' ? 'secondary' : 'outline'}>
-                {supplyOps.pressure}
-              </Badge>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Naechste Aktion</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm font-semibold">{supplyOps.nextAction}</div>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Uebergaberisiko</CardTitle></CardHeader>
-            <CardContent><div className="text-lg font-semibold">{transferSummary.transferPressure}</div></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Uebergaben</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-semibold">{transferSummary.handoverRisk}</div></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kettenfokus</CardTitle></CardHeader>
-            <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
-          </Card>
-        </div>
-      </PageSection>
-
-      <PageSection title="Suche und Liste" description="Ctrl+F fokussiert die Suche, Ctrl+N legt eine neue Waage an, F5 aktualisiert die Liste.">
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-4">
-            <div className="relative min-w-[18rem] flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                ref={searchInputRef}
-                aria-label="Suche Waagen"
-                placeholder="Standort, Waagen-ID oder Typ suchen"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="min-h-touch pl-10"
+      {!isTouch ? (
+        <>
+          <PageSection>
+            <div className="mb-4 space-y-4">
+              <RoleFocusBar roles={scaleListRoleProfiles} value={roleFocus} onChange={setRoleFocus} visibleCount={roleFocus === 'all' ? 5 : 1} totalCount={5} />
+              <ManagementDecisionPanel
+                decision={{
+                  allowed: scaleListWorkable,
+                  allowedLabel: 'Arbeitsfaehig',
+                  blockedLabel: 'Stopper offen',
+                  summary: scaleListWorkable ? `${filteredWaagen.length} Waagen sichtbar, ${activeScales} aktiv, keine faellige Eichung.` : `Vor weiterer Planung ist noch etwas offen: ${scaleListNextAction}`,
+                  blockerCount: [!hasScales, dueCalibrations > 0, supplyOps.pressure === 'hoch'].filter(Boolean).length,
+                  nextFocus: scaleListNextAction,
+                  template: { label: 'Hofliste oeffnen', href: '/waage/hofliste' },
+                }}
               />
+              <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+                <OperationalTaskPlan title="Waagen-Prioritaetsplan" items={scaleListTaskItems} />
+                <div className="space-y-3">
+                  <NextActionPanel action={scaleListNextAction} tone={scaleListWorkable ? 'emerald' : dueCalibrations > 0 || supplyOps.pressure === 'hoch' ? 'red' : 'blue'} />
+                  <EvidenceTemplateLink link={{ label: 'Waage Export vorbereiten', href: '/waage/liste' }} />
+                </div>
+              </div>
+              <CrudCapabilityChecklist capabilities={scaleListCrudCapabilities} />
             </div>
-            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
-              <FileDown className="h-4 w-4" />Export
-            </Button>
-          </div>
-          <Card>
-            <CardContent className="pt-6">
-              <DataTable data={filteredWaagen} columns={columns} />
-            </CardContent>
-          </Card>
-        </div>
-      </PageSection>
+            <OperationalCaseHeader
+              title="Waagensteuerung"
+              description="Die Waagenliste fuehrt die physische Kette als kompakten Vorgang zwischen Annahme, Wiegung, Charge und Fracht."
+              status={operationalStatus}
+              owner="Waagenleitstand"
+              blocker={supplyOps.pressure === 'hoch' ? `Bottleneck ${supplyOps.bottleneck} erzeugt aktuell hohen operativen Druck.` : dueCalibrations > 0 ? `${dueCalibrations} Waagen haben einen faelligen Eichtermin.` : null}
+              nextAction={supplyOps.nextAction}
+              caseLabel="Vorgang: Wiegung"
+              tags={['Waage', 'Physische Kette', 'Operator']}
+            />
+            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+              <OperationalTimeline title="Kettenverlauf" items={timelineItems} />
+              <OperationalContextPanel title="Waagen-Kontext" sections={contextSections} />
+            </div>
+          </PageSection>
 
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+          <PageSection title="Kettenlage" description="Einheitliche Sicht auf Annahme, Wiegung, Charge und Fracht direkt an der Waage.">
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-2xl font-semibold">{chain?.waitingInbound ?? 0}</div></CardContent></Card>
+              <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-2xl font-semibold">{chain?.openWeighingTickets ?? 0}</div></CardContent></Card>
+              <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Chargen in Prüfung</div><div className="text-2xl font-semibold">{chain?.blockedCharges ?? 0}</div></CardContent></Card>
+              <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-2xl font-semibold">{chain?.freightInTransit ?? 0}</div></CardContent></Card>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Bottleneck</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-semibold capitalize">{supplyOps.bottleneck}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Druck</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : supplyOps.pressure === 'mittel' ? 'secondary' : 'outline'}>
+                    {supplyOps.pressure}
+                  </Badge>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Naechste Aktion</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm font-semibold">{supplyOps.nextAction}</div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Uebergaberisiko</CardTitle></CardHeader>
+                <CardContent><div className="text-lg font-semibold">{transferSummary.transferPressure}</div></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Uebergaben</CardTitle></CardHeader>
+                <CardContent><div className="text-2xl font-semibold">{transferSummary.handoverRisk}</div></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kettenfokus</CardTitle></CardHeader>
+                <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
+              </Card>
+            </div>
+          </PageSection>
+        </>
+      ) : null}
+
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </PageSurface>
   )
 }

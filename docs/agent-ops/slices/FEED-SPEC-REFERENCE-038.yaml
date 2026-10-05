@@ -1,0 +1,80 @@
+slice_id: FEED-SPEC-REFERENCE-038
+id: FEED-SPEC-REFERENCE-038
+title: Architektur-Referenzwerk 00-17 und 240-Pakete-Arbeitsprogramm
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+goal: >-
+  Ein vollstaendiges, querverlinktes Feeding-Fachkonzept auf Architektenniveau
+  mit 300-500 Seiten Zielumfang und 200-300 vertikalen Arbeitspaketen erstellen.
+scope:
+  - Nummerierte Kapitel 00 bis 17 mit stabilen IDs und Quellenvertrag.
+  - DDD, Daten, API, Masken, Workflows, Regeln, Agenten, Integrationen und Tests.
+  - Migration, Rollout, Traceability und 240 vertikale Arbeitspakete.
+  - Pflegeprozess gegen Doku-, Code-, OpenAPI- und Migrationsdrift.
+  - Verbindlicher Red-Green-Refactor-TDD-Nachweis je produktivem Arbeitspaket.
+file_ownership:
+  - docs/specs/feeding/00-*.md bis 17-*.md
+  - docs/specs/feeding/reference-maintenance.md
+  - docs/specs/feeding/work-packages/*.md
+  - docs/specs/feeding/README.md
+  - docs/agent-ops/slices/FEED-SPEC-REFERENCE-038.yaml
+  - docs/agent-ops/active-workboard.md
+progress: >-
+  Tranche 1: Pflegevertrag, 00 Vision, 01 Glossar und 04 Domaenenmodell erstellt.
+  Tranche 9: 02 als normativer, navigierbarer Lastenheft-Index und 03 als
+  integriertes Fachkonzept von Datenreife ueber Rationsentscheidung,
+  Plan/Ausfuehrung und Wirkung bis Beratung erstellt.
+  Tranche 2: 05 Datenmodell mit Gesamt-Tabellenkatalog, ERD, Tenant-, Historien-,
+  Audit- und Indexregeln sowie 06 API mit Bestands-/Zielendpunkten, Schemas,
+  Fehlern, Autorisierung, Jobs und Contract-Tests erstellt. Weitere Kapitel und
+  Arbeitspaketkatalog folgen im selben Slice. Tranche 3: 07 Maskenkatalog mit
+  22 eigenstaendigen Meridian-Masken, Feldern, Validierungen, Actions, Rollen,
+  Navigation, Zustaenden, Responsive/A11y-Regeln und Low-Fidelity-Mockups erstellt.
+  Tranche 4: 08 Workflowkatalog mit 15 E2E-Ablaeufen, State Machines, Guards,
+  Kompensationen, Blocking Reasons, Benachrichtigungen und Testmustern erstellt.
+  Tranche 5: 09 Berechnungsregeln mit GfE-/DLG-Inventar, NRC-Gate,
+  Grenzwerten, Prioritaeten, Readiness/Plausibilitaet, Regelupdate und
+  Golden-/Property-Testvertrag erstellt; Formeln bleiben Code-SSOT. Tranche 6:
+  10 UI/UX mit Aufgabenmodi, Rations-Workbench, Warnungs-/Provenienzdesign,
+  Accessibility, Research und Metriken sowie 11 Agenten mit sechs Fachagenten,
+  Tool-/Human-Gates, Security, Audit und Evaluation erstellt. Tranche 7: 12
+  Integrationen mit Provider-ACL, Labor, Herd-Data/DDW-Klasse, ICAR, agrirouter,
+  Mixer, ERP-Events, Quarantaene, Resilienz, Security und Live-Gates erstellt.
+  Tranche 8: 13 Testkatalog mit 200 stabilen Akzeptanztests sowie Golden-,
+  Property-, Playwright-, A11y-, Performance-, Security- und Release-Gates erstellt.
+  Tranche 10: 14 Migrationskonzept mit Expand/Backfill/Validate/Switch/Contract,
+  Aequivalenz und Schuldentriage sowie 15 Rollout mit R0-R4, Gate-Matrix,
+  Feature-Flags, SLO, Cutover, Rollback und Hypercare erstellt.
+  Tranche 11: 16 Traceability-Evidenzmodell und 17 Roadmap erstellt; exakt 240
+  vertikale, einzeln claimbare TDD-Pakete in 24 Capability-Katalogen deterministisch
+  generiert und durch Generator-Drift- sowie Katalogtests abgesichert.
+acceptance:
+  - Jedes Kapitel besitzt Owner, Status, Version, Quellen und Driftregeln.
+  - Normative Aussagen tragen stabile IDs oder referenzieren bestehende FEED-IDs.
+  - API-/Daten-/Regelkataloge erfinden keine Laufzeitvertraege oder Formeln.
+  - Masken folgen Meridian und der zentralen ScreenDefinition-Renderkette.
+  - 200-300 Pakete nennen Abnahme, Abhaengigkeit, DoD, Test und Aufwand.
+  - Jedes produktive Paket benennt Red-Test, minimale Green-Implementierung,
+    Refactoring und relevante Regression; Bugfixes beginnen mit Regressionstest.
+tests:
+  - "Red: test_feeding_reference_catalog.py -> 3 Fehler (Kapitel 16/17 und Pakete fehlten)."
+  - "Green: test_feeding_reference_catalog.py -> 3 passed."
+  - "python scripts/generate_feeding_work_packages.py --check -> gruen."
+  - "Markdown -> 127 Dateien; Docs-Governance -> 124 Dateien, gruen."
+  - "Inventar: 51 Feeding-Markdowndateien, 8.558 Zeilen, exakt 240 Pakete."
+risks:
+  - Fachreview GfE/DLG und Live-Providervertraege bleiben externe Gates der
+    betroffenen produktiven Pakete, nicht dieses Referenzwerks.
+external_gates:
+  - Fachreview GfE/DLG und Live-Providervertraege bleiben externe Gates.
+ai_harness:
+  fachlicher_vertrag: Vollstaendige Produkt-, Prozess- und Regelabdeckung.
+  architektur_vertrag: DDD und Meridian ohne parallele Laufzeit-/UI-Architektur.
+  daten_vertrag: Physische Aussagen sind an Alembic und Tenantregeln gebunden.
+  security_vertrag: RBAC, Business-Grants, Audit und Connector-Gates durchgaengig.
+  betriebs_vertrag: Feature-Flag, Pilot, Rollback und Observability im Rollout.
+  dokumentations_vertrag: 00-17, Pflegevertrag, Pakete, README, Slice, Workboard.
+  test_vertrag: Akzeptanz-, Golden-, Property-, API-, E2E-, A11y- und Performancekatalog.

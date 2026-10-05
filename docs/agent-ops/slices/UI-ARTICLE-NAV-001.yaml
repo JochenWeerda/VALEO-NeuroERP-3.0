@@ -1,0 +1,25 @@
+id: UI-ARTICLE-NAV-001
+title: Artikelstamm in Stammdaten-Navigation sichtbar machen
+status: abgeschlossen
+owner: Codex
+priority: P1
+claimed_at: 2026-07-08
+completed_at: 2026-07-08
+goal: >-
+  Die vorhandene Artikel-Liste und Artikel-Neuanlage fuer Anwender sichtbar
+  machen. Der Artikelstamm existiert bereits unter /artikel und /artikel/neu,
+  ist aber im Bereich Artikel-Stammdaten nicht direkt verlinkt.
+file_ownership:
+  - packages/frontend-web/src/app/navigation/domains/commercial.tsx
+  - docs/agent-ops/slices/UI-ARTICLE-NAV-001.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Artikel-Stammdaten enthaelt einen direkten Navigationseintrag fuer den Artikelstamm.
+  - Bestehender Verkaufs-Eintrag routet eindeutig auf /artikel.
+  - Fokussierter Navigationstest ist gruen.
+evidence:
+  - pnpm --dir packages/frontend-web test:run src/__tests__/navigation-wiring.test.ts -> 4 passed
+  - pnpm --dir packages/frontend-web exec eslint src/app/navigation/domains/commercial.tsx -> 0
+  - pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false -> lokaler Timeout nach 120s und 240s ohne Fehlerausgabe
+risks:
+  - Route ist vorhanden, aber lokale Backend-Daten koennen wegen Docker/Postgres-Blocker leer oder fehlerhaft laden.

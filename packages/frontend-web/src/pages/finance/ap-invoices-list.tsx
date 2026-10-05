@@ -151,16 +151,16 @@ export default function APInvoicesListPage(): JSX.Element {
       header: t('crud.fields.actions'),
       cell: ({ row }: { row: { original: APInvoice } }) => (
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/finance/ap/invoices/${row.original.number}`)}>
+          <Button variant="ghost" className="min-h-touch" onClick={() => navigate(`/finance/ap/invoices/${row.original.number}`)}>
             {t('crud.actions.view')}
           </Button>
           {(row.original.semantic_status ?? row.original.status) === 'ENTWURF' && (
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               disabled={pendingActions.has(`approval-${row.original.number}`)}
               onClick={() => void withPending(`approval-${row.original.number}`, async () => {
-                await apiClient.post('/api/v1/ap/approval-workflow/request', {
+                await apiClient.post('/api/v1/finance/ap/approval-workflow/request', {
                   invoice_id: row.original.number,
                   requested_by: 'current_user',
                 })
@@ -181,7 +181,7 @@ export default function APInvoicesListPage(): JSX.Element {
           {row.original.approval_can_post === true && (
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               disabled={pendingActions.has(`post-${row.original.number}`)}
               onClick={() => void withPending(`post-${row.original.number}`, async () => {
                 await apiClient.post(`/api/v1/finance/ap/invoices/${row.original.number}/post?posted_by=current_user`)

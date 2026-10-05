@@ -108,10 +108,9 @@ export default function ReportBerechtigungenPage(): JSX.Element {
               </div>
               <Button
                 variant="ghost"
-                size="sm"
                 onClick={() => deleteMutation.mutate(item.id)}
                 disabled={deleteMutation.isPending}
-              >
+               className="min-h-touch">
                 Loeschen
               </Button>
             </div>

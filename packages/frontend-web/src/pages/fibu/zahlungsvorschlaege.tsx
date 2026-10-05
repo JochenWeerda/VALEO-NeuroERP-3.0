@@ -12,6 +12,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const vorschlagVariantMap: Record<Zahlungsvorschlag['vorschlag'], 'default' | 'secondary' | 'outline'> = {
   skonto: 'default',
@@ -27,6 +28,7 @@ const vorschlagLabelMap: Record<Zahlungsvorschlag['vorschlag'], string> = {
 
 export default function ZahlungsvorschlaegePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const { data: items, isLoading } = useZahlungsvorschlaege()
@@ -112,12 +114,15 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
       key: 'select' as const,
       label: '',
       render: (vorschlag: Zahlungsvorschlag) => (
-        <input
-          type="checkbox"
-          checked={selected.has(vorschlag.id)}
-          onChange={() => toggleSelect(vorschlag.id)}
-          className="h-4 w-4"
-        />
+        <label className="flex min-h-touch min-w-11 cursor-pointer items-center justify-center touch-manipulation">
+          <input
+            type="checkbox"
+            checked={selected.has(vorschlag.id)}
+            onChange={() => toggleSelect(vorschlag.id)}
+            aria-label={`${vorschlag.rechnungsNr} auswaehlen`}
+            className="h-5 w-5"
+          />
+        </label>
       ),
     },
     {
@@ -152,7 +157,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
       render: (vorschlag: Zahlungsvorschlag) =>
         vorschlag.skonto > 0 ? (
           <div className="text-sm">
-            <div className="font-semibold text-green-600">{vorschlag.skonto}%</div>
+            <div className="font-semibold text-status-success">{vorschlag.skonto}%</div>
             <div className="text-muted-foreground">
               bis {new Date(vorschlag.skontoBis).toLocaleDateString('de-DE')}
             </div>
@@ -166,7 +171,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
       label: 'Ersparnis',
       render: (vorschlag: Zahlungsvorschlag) =>
         vorschlag.skonto > 0 ? (
-          <span className="font-semibold text-green-600">
+          <span className="font-semibold text-status-success">
             {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
               (vorschlag.betrag * vorschlag.skonto) / 100
             )}
@@ -198,6 +203,65 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold md:text-3xl">Zahlungsvorschlaege</h1>
+          <p className="text-muted-foreground">Skonto-optimierte Zahlungsplanung</p>
+        </div>
+        <Button
+          className="min-h-touch touch-manipulation"
+          disabled={selected.size === 0}
+          onClick={handleZahlungslaufErstellen}
+        >
+          Zahlungslauf erstellen ({selected.size})
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Suche</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label="Suche Zahlungsvorschlaege"
+                placeholder="Rechnung oder Lieferant"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="min-h-touch touch-manipulation"
+              onClick={() => setSelected(new Set(filteredVorschlaege.map((v) => v.id)))}
+            >
+              Alle auswaehlen
+            </Button>
+            <Button
+              variant="outline"
+              className="min-h-touch touch-manipulation"
+              onClick={() => setSelected(new Set())}
+            >
+              Auswahl aufheben
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <DataTable data={filteredVorschlaege} columns={columns} emptyMessage="Keine Zahlungsvorschlaege im aktuellen Suchraum." />
+          <div className="mt-4 text-sm text-muted-foreground">
+            {filteredVorschlaege.length} Vorschlag/Vorschlaege • {selected.size} ausgewaehlt
+          </div>
+        </CardContent>
+      </Card>
+
+      {!isTouch ? (
+        <>
       <OperationalCaseHeader
         title="Zahlungsvorschlaege"
         description="Skonto- und faelligkeitsorientierte Zahlungsplanung fuer Kreditoren."
@@ -211,15 +275,6 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
       <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
         <OperationalTimeline title="Verlauf" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
-      </div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Zahlungsvorschläge</h1>
-          <p className="text-muted-foreground">Skonto-optimierte Zahlungsplanung</p>
-        </div>
-        <Button disabled={selected.size === 0} onClick={handleZahlungslaufErstellen}>
-          Zahlungslauf erstellen ({selected.size})
-        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -240,8 +295,8 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
+              <TrendingDown className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
                 {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
                   skontoErsparnis
                 )}
@@ -256,46 +311,14 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-blue-600" />
+              <CheckCircle className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{selected.size}</span>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Filter & Suche</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Suche nach Rechnung oder Lieferant..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button variant="outline" onClick={() => setSelected(new Set(filteredVorschlaege.map((v) => v.id)))}>
-              Alle auswählen
-            </Button>
-            <Button variant="outline" onClick={() => setSelected(new Set())}>
-              Auswahl aufheben
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={filteredVorschlaege} columns={columns} />
-          <div className="mt-4 text-sm text-muted-foreground">
-            {filteredVorschlaege.length} Vorschlag/Vorschläge • {selected.size} ausgewählt
-          </div>
-        </CardContent>
-      </Card>
+        </>
+      ) : null}
     </div>
   )
 }

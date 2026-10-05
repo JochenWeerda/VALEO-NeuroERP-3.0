@@ -1,0 +1,32 @@
+slice_id: JOURNAL-LIFECYCLE-INTEGRITY-20261002
+title: Journal-Service-Mutationen serialisieren und Stempelketten bewahren
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-02
+updated_at: 2026-10-02
+coordination: Claim 46a1d01b4; keine fremden EUDR/UI-Edits.
+goal: Kein stale Statuswechsel und kein physischer Stempelverlust im Service.
+file_ownership:
+  - finance_transaction_service.py Lock/Mutationen/Delete
+  - test_journal_lifecycle_integrity.py
+  - Betroffene Journal-/Posting-/Stempel-Testdoppel
+acceptance:
+  - Frischer mandantengebundener Journalkopf unter FOR UPDATE.
+  - Fuenf echte wartende Paralleltransaktionen sehen aktuellen Status.
+  - Stempelteile sperren Delete; Cancel erhaelt Kette; eigene Legacy-Drafts loeschbar.
+  - Fremde Zeilen sperren Delete; Pflichtreferenz nicht leer machen.
+test_evidence:
+  - 247 Tests bestanden; 16 neue echte PostgreSQL-Faelle.
+  - Ruff/Whitespace bestanden; gemeinsamer Pruefstand ohne Reset/Migration.
+risks:
+  - Journal-API/Repository benutzt noch eigenen Mutation-/Delete-Weg.
+  - Cancel-Grund nicht ORM-gemappt; Audit und weitere Schreiber offen.
+  - Consumer-Atomizitaet, Schema/Hash, Bewertung und Bankintegration offen.
+ai_harness:
+  fachlicher_vertrag: Aktueller Status unter Sperre, gestempelter Entwurf bleibt in Kette.
+  architektur_vertrag: Bestehender Finance-Service, weitere Schreiber noch zu integrieren.
+  daten_vertrag: Frische ORM-Werte, Tenant-gebundene Header/Zeilen und Stempelerhalt.
+  test_vertrag: Echte pg_locks-Wartebelege und Zustands-/Zeilenpruefung.
+  security_vertrag: Fremdtenant/Fremdzeile kann nicht mutiert oder geloescht werden.
+  betriebs_vertrag: Vorhandener valeo_probe, wiederverwendete eigene Tabellenfixtures.
+  dokumentations_vertrag: QA/Slice/Workboard/Gaps begrenzen Abnahme auf Service.

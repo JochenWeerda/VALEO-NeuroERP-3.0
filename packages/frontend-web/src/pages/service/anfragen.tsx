@@ -12,13 +12,15 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 function exportCsv(rows: ServiceAnfrage[]): void {
   const header = ['Ticket-Nr.', 'Kunde', 'Betreff', 'Datum', 'Prioritaet', 'Status']
@@ -63,6 +65,7 @@ const serviceRoles = [
 
 export default function ServiceAnfragenPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFocus, setRoleFocus] = useState<ServiceRole>('service')
@@ -130,7 +133,7 @@ export default function ServiceAnfragenPage(): JSX.Element {
       render: (a: ServiceAnfrage) => (
         <button
           onClick={() => { void navigateWithWorkflowResume(`/service/anfrage/${a.id}`, 'service') }}
-          className="font-medium text-blue-600 hover:underline"
+          className="min-h-11 font-medium text-primary touch-manipulation"
         >
           {a.nummer}
         </button>
@@ -164,26 +167,24 @@ export default function ServiceAnfragenPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Service-to-Customer"
-          description="Ticketdaten, Prioritaet, Einsatzplanung und Rueckmeldung werden jetzt in den Service-Masken gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Service-Anfragen</h1>
-          <p className="text-muted-foreground">Kundenservice, Rueckmeldung und Aussendienst in einem Vorgang.</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Service-Anfragen</h1>
+          <p className="text-muted-foreground">Tickets suchen, oeffnen und rueckmelden</p>
         </div>
-        <Button onClick={() => { void navigateWithWorkflowResume('/service/anfrage/neu', 'service') }} className="gap-2">
+        <Button onClick={() => { void navigateWithWorkflowResume('/service/anfrage/neu', 'service') }} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Anfrage
         </Button>
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={serviceRoles}
         value={roleFocus}
@@ -211,10 +212,10 @@ export default function ServiceAnfragenPage(): JSX.Element {
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Anfragen Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><HeadphonesIcon className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{anfragen.length}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Neu</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-red-600">{neu}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{inBearbeitung}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abschlussfaehig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-700">{erledigt}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Anfragen Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><HeadphonesIcon className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{anfragen.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Neu</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-error">{neu}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{inBearbeitung}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abschlussfaehig</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{erledigt}</span></CardContent></Card>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr_1fr]">
@@ -261,17 +262,19 @@ export default function ServiceAnfragenPage(): JSX.Element {
           />
         </div>
       </div>
+      </>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <Card>
           <CardHeader><CardTitle>Service-Tickets</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+                <Input aria-label="Suche Service-Anfragen" placeholder="Nummer, Kunde, Betreff" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
               </div>
-              <Button variant="outline" className="gap-2" onClick={() => exportCsv(filteredAnfragen)}>
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => exportCsv(filteredAnfragen)}>
                 <FileDown className="h-4 w-4" />
                 Export
               </Button>
@@ -304,9 +307,9 @@ export default function ServiceAnfragenPage(): JSX.Element {
                   <p>Export, Dokumentation und Eskalation sind keine isolierten Aktionen mehr, sondern Teil des Ticket-Fortschritts.</p>
                 </div>
                 <div className="grid gap-2">
-                  <Button onClick={() => { void navigateWithWorkflowResume(`/service/anfrage/${focusRequest.id}`, 'service') }}>Anfrage oeffnen</Button>
-                  <Button variant="outline" onClick={() => { void navigateWithWorkflowResume(`/service/rueckmeldung?anfrage_id=${focusRequest.id}`, 'service') }}>Rueckmeldung erfassen</Button>
-                  <Button variant="outline" onClick={() => navigate('/agribusiness/field-service-tasks')}>
+                  <Button className="min-h-touch touch-manipulation" onClick={() => { void navigateWithWorkflowResume(`/service/anfrage/${focusRequest.id}`, 'service') }}>Anfrage oeffnen</Button>
+                  <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => { void navigateWithWorkflowResume(`/service/rueckmeldung?anfrage_id=${focusRequest.id}`, 'service') }}>Rueckmeldung erfassen</Button>
+                  <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/agribusiness/field-service-tasks')}>
                     <Wrench className="mr-2 h-4 w-4" />
                     Aussendienst koordinieren
                   </Button>

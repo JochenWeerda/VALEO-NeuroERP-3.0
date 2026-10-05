@@ -9,6 +9,7 @@ import { clsx } from 'clsx'
 import { ChevronLeft, Keyboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export type ShortcutDefinition = {
   key: string
@@ -32,6 +33,8 @@ export function ShortcutHelpPanel({
   onDisplayModeChange,
   className,
 }: ShortcutHelpPanelProps): JSX.Element {
+  const isTouchChrome = useTouchDevice()
+  const [, setViewportTick] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false) // Standardmäßig eingeklappt
   
   // Expose toggle function globally for Strg+N
@@ -56,6 +59,12 @@ export function ShortcutHelpPanel({
   }, [])
   const [isHovering, setIsHovering] = useState(false)
 
+  useEffect(() => {
+    const onResize = (): void => setViewportTick((tick) => tick + 1)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
   // Lade gespeicherte Präferenz
   useEffect(() => {
     const saved = localStorage.getItem('shortcut-help-display-mode')
@@ -74,8 +83,8 @@ export function ShortcutHelpPanel({
     return acc
   }, {} as Record<string, ShortcutDefinition[]>)
 
-  // Rendere nichts wenn hidden
-  if (displayMode === 'hidden') {
+  // Rendere nichts wenn hidden oder auf Touch/Handy (Hover-Kürzel sind dort tot)
+  if (displayMode === 'hidden' || isTouchChrome) {
     return <></>
   }
 
@@ -103,15 +112,15 @@ export function ShortcutHelpPanel({
       <Card
         className={clsx(
           'w-80 max-h-[80vh] overflow-hidden flex flex-col shadow-lg',
-          'bg-white/95 backdrop-blur-sm border-r-0 rounded-l-lg',
+          'bg-white/95 backdrop-blur-xs border-r-0 rounded-l-lg',
           displayMode === 'hover' && 'opacity-90'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b bg-green-50">
+        <div className="flex items-center justify-between p-3 border-b bg-[hsl(var(--color-semantic-success-50-hsl))]">
           <div className="flex items-center gap-2">
-            <Keyboard className="h-4 w-4 text-green-700" />
-            <h3 className="font-semibold text-sm text-green-900">Tastenkürzel</h3>
+            <Keyboard className="h-4 w-4 text-status-success" />
+            <h3 className="font-semibold text-sm text-status-success">Tastenkürzel</h3>
           </div>
           <div className="flex items-center gap-1">
             {/* Display-Mode Toggle */}
@@ -135,8 +144,7 @@ export function ShortcutHelpPanel({
             {/* Expand/Collapse */}
             <Button
               variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
+              className="min-h-touch h-6 w-6 p-0"
               onClick={() => setIsExpanded(!isExpanded)}
               aria-label={isExpanded ? 'Tastenkuerzel-Panel einklappen' : 'Tastenkuerzel-Panel ausklappen'}
             >

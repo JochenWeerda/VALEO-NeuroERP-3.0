@@ -290,7 +290,7 @@ export function useKonten(filters?: { typ?: string }) {
       const params: Record<string, string> = {}
       if (filters?.typ) params.account_type = filters.typ
       const response = await apiClient.get<{ items: Record<string, unknown>[]; total: number }>(
-        '/api/v1/chart-of-accounts', { params }
+        '/api/v1/finance/chart-of-accounts/', { params }
       )
       return (response.data.items ?? []).map((a): Konto => ({
         id: stringValue(a.id),

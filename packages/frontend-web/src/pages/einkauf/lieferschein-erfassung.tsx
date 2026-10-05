@@ -21,6 +21,7 @@ import { apiClient } from '@/lib/api-client'
 import { isRecord, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import {
@@ -40,7 +41,7 @@ type Lieferant = {
   kontaktperson?: string
 }
 
-type EinkaufLSResponse = {
+export type EinkaufLSResponse = {
   id: string
   tenant_id: string
   lieferschein_nr: string
@@ -151,6 +152,69 @@ type CurrentEinkaufPosition = {
   skontierf: boolean
 }
 
+type EinkaufLsListItem = {
+  id: string
+  lieferschein_nr: string
+  lieferant_name: string
+}
+
+export function mapEinkaufLsPositions(data: EinkaufLSResponse): EinkaufPosition[] {
+  return (data.positionen || []).map((pos) => {
+    const ep = parseFloat(pos.einzelpreis || '0')
+    const mwst = 19
+    const bruttoPreis = ep * (1 + mwst / 100)
+    const menge = parseFloat(pos.menge || '0')
+    return {
+      posNr: pos.pos_nr,
+      artikelNr: pos.artikel_nr || '',
+      artikelId: null,
+      lieferantArtikelNr: pos.lieferant_artikel_nr || '',
+      bezeichnung: pos.bezeichnung || '',
+      bezeichnung2: '',
+      gebindeNr: pos.gebinde_nr || '',
+      gebinde: parseFloat(pos.gebinde || '0'),
+      menge,
+      einheit: pos.einheit || '',
+      einzelpreis: ep,
+      nettoBetrag: parseFloat(pos.nettobetrag || '0'),
+      mwstProzent: mwst,
+      bruttoPreis,
+      bruttoBetrag: bruttoPreis * menge,
+      niederlassung: '',
+      lagerhalle: pos.lagerhalle || '',
+      lagerfach: pos.lagerfach || '',
+      charge: pos.charge || '',
+      serienNr: pos.serien_nr || '',
+      kontraktNr: pos.kontakt || '',
+      streckeNr: '',
+      naBio: '',
+      musterNr: pos.master_nr || '',
+      prozent: parseFloat(pos.prozent || '0'),
+      skontierf: false,
+    }
+  })
+}
+
+function lieferantFromLs(data: EinkaufLSResponse, fallback: Lieferant | null = null): Lieferant | null {
+  if (!data.lieferant_id) return fallback
+  return {
+    id: data.lieferant_id,
+    lieferantNr: data.lieferant_id,
+    name: data.lieferant_name || '',
+    kreditorAccount: data.lieferant_id,
+  }
+}
+
+function einkaufLsListItems(raw: unknown): EinkaufLsListItem[] {
+  return recordArrayFromResponse(raw)
+    .map((row) => ({
+      id: stringValue(row.id),
+      lieferschein_nr: stringValue(row.lieferschein_nr),
+      lieferant_name: stringValue(row.lieferant_name),
+    }))
+    .filter((row) => row.id)
+}
+
 // ==================== Lieferant-Suche Dialog ====================
 
 function LieferantSuchDialog({
@@ -238,7 +302,7 @@ function LieferantSuchDialog({
                   <TableCell>{l.name}</TableCell>
                   <TableCell>{l.address?.city || '—'}</TableCell>
                   <TableCell>
-                    <Button size="sm" variant="outline" className="h-6 text-xs">
+                    <Button variant="outline" className="min-h-11 text-xs touch-manipulation">
                       Übernehmen
                     </Button>
                   </TableCell>
@@ -261,6 +325,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
   const navigate = useNavigate()
   const { push } = useToast()
   const { user } = useAuth()
+  const isTouch = useTouchDevice()
   const { id: lsId } = useParams<{ id?: string }>()
 
   const generateLsNr = (): string => {
@@ -338,6 +403,10 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
   const [selectedBestellungId, setSelectedBestellungId] = useState<string | null>(null)
   const [loadingBestellungen, setLoadingBestellungen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showLsSearchDialog, setShowLsSearchDialog] = useState(false)
+  const [lsSearchItems, setLsSearchItems] = useState<EinkaufLsListItem[]>([])
+  const [lsSearchPending, setLsSearchPending] = useState(false)
+  const [lieferantPickMode, setLieferantPickMode] = useState<'lieferant' | 'zwischenhaendler'>('lieferant')
 
   // Bediener aus Session aktualisieren
   useEffect(() => {
@@ -379,84 +448,142 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
     return () => { cancelled = true }
   }, [showImportBestellungDialog, state.lieferant?.id])
 
-  // Bestehenden Lieferschein laden
+  const applyEinkaufLs = (data: EinkaufLSResponse, mode: 'load' | 'copy'): void => {
+    const positionen = mapEinkaufLsPositions(data)
+    const lieferant = lieferantFromLs(data, mode === 'copy' ? state.lieferant : null)
+    setState({
+      id: mode === 'copy' ? null : data.id,
+      lieferscheinNr: mode === 'copy' ? generateLsNr() : data.lieferschein_nr,
+      lieferNr: data.liefer_nr || '',
+      lieferDatum: data.lieferschein_datum
+        ? formatDate(new Date(data.lieferschein_datum))
+        : formatDate(new Date()),
+      niederlassung: data.niederlassung || '',
+      bediener: mode === 'copy' ? getBediener() : (data.bediener || getBediener()),
+      erledigt: mode === 'copy' ? false : data.erledigt,
+      lieferant,
+      zahlungsbedingung: data.zahlungsbedingung || '',
+      texte: data.texte || '',
+      zwischenhaendler: data.zwischenhaendler || '',
+      positionen,
+      aktivePositionIndex: null,
+      positionCharge: '',
+      positionSerienNr: '',
+    })
+    setCurrentPos(emptyPosition(10))
+  }
+
+  const loadEinkaufLsById = async (id: string): Promise<boolean> => {
+    const data = await apiClient.get<EinkaufLSResponse>(`/api/v1/einkauf/lieferscheine/${id}`)
+    if (!data?.id) {
+      push('Lieferschein nicht gefunden.')
+      return false
+    }
+    applyEinkaufLs(data, 'load')
+    return true
+  }
+
+  const loadLsIndex = async (): Promise<EinkaufLsListItem[]> => {
+    const raw = await apiClient.get<EinkaufLSResponse[]>('/api/v1/einkauf/lieferscheine')
+    return einkaufLsListItems(raw)
+  }
+
+  const handleLsSearchOpen = async (): Promise<void> => {
+    setLsSearchPending(true)
+    try {
+      const items = await loadLsIndex()
+      setLsSearchItems(items)
+      setShowLsSearchDialog(true)
+      if (items.length === 0) {
+        push('Kein gespeicherter Wareneingang gefunden.')
+      }
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string }
+      push(`Suche fehlgeschlagen: ${err.response?.data?.detail || err.message}`)
+    } finally {
+      setLsSearchPending(false)
+    }
+  }
+
+  const handleLsPrev = async (): Promise<void> => {
+    setLsSearchPending(true)
+    try {
+      const list = await loadLsIndex()
+      if (list.length === 0) {
+        push('Kein vorheriger Lieferschein')
+        return
+      }
+      const idx = state.id ? list.findIndex((item) => item.id === state.id) : -1
+      if (idx < 0) {
+        const loaded = await loadEinkaufLsById(list[0].id)
+        if (loaded) push('Lieferschein geladen')
+        return
+      }
+      if (idx > 0 && list[idx - 1]) {
+        const loaded = await loadEinkaufLsById(list[idx - 1].id)
+        if (loaded) push('Lieferschein geladen')
+      } else {
+        push('Kein vorheriger Lieferschein')
+      }
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string }
+      push(`Laden fehlgeschlagen: ${err.response?.data?.detail || err.message}`)
+    } finally {
+      setLsSearchPending(false)
+    }
+  }
+
+  const handleLsNext = async (): Promise<void> => {
+    setLsSearchPending(true)
+    try {
+      const list = await loadLsIndex()
+      const idx = state.id ? list.findIndex((item) => item.id === state.id) : -1
+      if (idx >= 0 && idx < list.length - 1 && list[idx + 1]) {
+        const loaded = await loadEinkaufLsById(list[idx + 1].id)
+        if (loaded) push('Lieferschein geladen')
+      } else {
+        push('Kein nächster Lieferschein')
+      }
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string }
+      push(`Laden fehlgeschlagen: ${err.response?.data?.detail || err.message}`)
+    } finally {
+      setLsSearchPending(false)
+    }
+  }
+
+  const copyPreviousLs = async (): Promise<void> => {
+    try {
+      const params: Record<string, string> = {}
+      if (state.lieferant?.id) params.lieferant_id = state.lieferant.id
+      const data = await apiClient.get<EinkaufLSResponse | null>(
+        '/api/v1/einkauf/lieferscheine/last',
+        { params },
+      )
+      if (!data?.id) {
+        push('Kein vorheriger Lieferschein gefunden.')
+        return
+      }
+      applyEinkaufLs(data, 'copy')
+      push('Daten vom vorherigen Lieferschein übernommen.')
+    } catch (_rawErr: unknown) {
+      const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string }
+      push(`Fehler: ${err.response?.data?.detail ?? err.message}`)
+    }
+  }
+
+  // Bestehenden Lieferschein laden (Route hat derzeit kein :id — bleibt für Alias/Deep-Link)
   useEffect(() => {
     if (!lsId) return
-    const load = async (): Promise<void> => {
-      try {
-        const data = await apiClient.get<EinkaufLSResponse>(`/api/v1/einkauf/lieferscheine/${lsId}`)
-        const positionen: EinkaufPosition[] = (data.positionen || []).map((pos) => {
-          const ep = parseFloat(pos.einzelpreis || '0')
-          const mwst = 19
-          const bruttoPreis = ep * (1 + mwst / 100)
-          const menge = parseFloat(pos.menge || '0')
-          return {
-            posNr: pos.pos_nr,
-            artikelNr: pos.artikel_nr || '',
-            artikelId: null,
-            lieferantArtikelNr: pos.lieferant_artikel_nr || '',
-            bezeichnung: pos.bezeichnung || '',
-            bezeichnung2: '',
-            gebindeNr: pos.gebinde_nr || '',
-            gebinde: parseFloat(pos.gebinde || '0'),
-            menge,
-            einheit: pos.einheit || '',
-            einzelpreis: ep,
-            nettoBetrag: parseFloat(pos.nettobetrag || '0'),
-            mwstProzent: mwst,
-            bruttoPreis,
-            bruttoBetrag: bruttoPreis * menge,
-            niederlassung: '',
-            lagerhalle: pos.lagerhalle || '',
-            lagerfach: pos.lagerfach || '',
-            charge: pos.charge || '',
-            serienNr: pos.serien_nr || '',
-            kontraktNr: pos.kontakt || '',
-            streckeNr: '',
-            naBio: '',
-            musterNr: pos.master_nr || '',
-            prozent: parseFloat(pos.prozent || '0'),
-            skontierf: false,
-          }
-        })
-
-        // Lieferant aus Daten zusammensetzen
-        const lieferant: Lieferant | null = data.lieferant_id
-          ? {
-              id: data.lieferant_id,
-              lieferantNr: data.lieferant_id,
-              name: data.lieferant_name || '',
-              kreditorAccount: data.lieferant_id,
-            }
-          : null
-
-        setState({
-          id: data.id,
-          lieferscheinNr: data.lieferschein_nr,
-          lieferNr: data.liefer_nr || '',
-          lieferDatum: data.lieferschein_datum
-            ? formatDate(new Date(data.lieferschein_datum))
-            : formatDate(new Date()),
-          niederlassung: data.niederlassung || '',
-          bediener: data.bediener || getBediener(),
-          erledigt: data.erledigt,
-          lieferant,
-          zahlungsbedingung: data.zahlungsbedingung || '',
-          texte: data.texte || '',
-          zwischenhaendler: data.zwischenhaendler || '',
-          positionen,
-          aktivePositionIndex: null,
-          positionCharge: '',
-          positionSerienNr: '',
-        })
-        push('Lieferschein geladen')
-      } catch (_rawErr: unknown) {
-        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
+    void loadEinkaufLsById(lsId)
+      .then((ok) => {
+        if (ok) push('Lieferschein geladen')
+      })
+      .catch((_rawErr: unknown) => {
+        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string }
         push(`Fehler beim Laden: ${err.response?.data?.detail || err.message}`)
-      }
-    }
-    void load()
-  }, [lsId, push])
+      })
+  }, [lsId])
 
   // Brutto-Preis/Betrag neu berechnen
   useEffect(() => {
@@ -473,8 +600,13 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
     return { netto, mwst, brutto }
   }, [state.positionen])
 
-  // Lieferant ausgewählt
   const handleLieferantSelect = (lieferant: Lieferant): void => {
+    if (lieferantPickMode === 'zwischenhaendler') {
+      setState((prev) => ({ ...prev, zwischenhaendler: lieferant.name }))
+      setLieferantPickMode('lieferant')
+      push('Zwischenhändler übernommen.')
+      return
+    }
     setState((prev) => ({
       ...prev,
       lieferant,
@@ -790,37 +922,58 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
   })
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="bg-green-600 text-white px-4 py-2">
-        <h1 className="text-lg font-bold">EINKAUF-LIEFERSCHEIN</h1>
+    <div className="flex h-screen flex-col bg-background">
+      <div className="bg-primary px-4 py-2 text-primary-foreground">
+        <h1 className="text-lg font-bold">Wareneingang</h1>
       </div>
       <ModuleToolbar
         backTarget="/einkauf"
         closeTarget="/einkauf"
-        title="Einkauf Lieferschein"
+        title="Wareneingang"
       />
 
-      <div className="flex-1 overflow-auto p-4">
-        {/* Header-Bereich (3 Spalten) */}
-        <Card className="mb-4 p-4">
-          <div className="grid grid-cols-3 gap-4">
+      <div className="flex-1 overflow-auto p-3 md:p-4">
+        <Card className="mb-4 p-3 md:p-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 
             {/* Linke Spalte */}
             <div className="space-y-2">
               {/* int.Liefersch.-Nr. */}
-              <div className="flex items-center gap-2">
-                <Label className="w-36 text-sm shrink-0">int.Liefersch.-Nr.:</Label>
-                <Input value={state.lieferscheinNr} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Label className="w-36 shrink-0 text-sm">int.Liefersch.-Nr.:</Label>
+                <Input value={state.lieferscheinNr} readOnly className="min-h-touch min-w-[9rem] flex-1" />
+                <div className="flex shrink-0 gap-1">
+                <Button
+                  variant="ghost"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  onClick={() => void handleLsSearchOpen()}
+                  disabled={lsSearchPending}
+                  aria-label="Lieferschein suchen"
+                  title="Lieferschein suchen"
+                >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button
+                  variant="ghost"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  onClick={() => void handleLsPrev()}
+                  disabled={lsSearchPending}
+                  aria-label="Vorheriger Lieferschein"
+                  title="Vorheriger Lieferschein"
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button
+                  variant="ghost"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  onClick={() => void handleLsNext()}
+                  disabled={lsSearchPending}
+                  aria-label="Nächster Lieferschein"
+                  title="Nächster Lieferschein"
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
+                </div>
               </div>
               {/* Lieferschein-Nr. (Lieferant) */}
               <div className="flex items-center gap-2">
@@ -828,7 +981,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 <Input
                   value={state.lieferNr}
                   onChange={(e) => setState((p) => ({ ...p, lieferNr: e.target.value }))}
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                   placeholder="Nummer des Lieferanten"
                 />
               </div>
@@ -839,12 +992,13 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                   type="date"
                   value={state.lieferDatum}
                   onChange={(e) => setState((p) => ({ ...p, lieferDatum: e.target.value }))}
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
               </div>
               {/* Erledigt */}
               <div className="flex items-center gap-2">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={state.erledigt}
                   onCheckedChange={(v) => setState((p) => ({ ...p, erledigt: v === true }))}
                 />
@@ -854,131 +1008,54 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
 
             {/* Mittlere Spalte */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm shrink-0">Niederlassung:</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                <Label className="w-28 shrink-0 text-sm">Niederlassung:</Label>
                 <Input
                   value={state.niederlassung}
                   onChange={(e) => setState((p) => ({ ...p, niederlassung: e.target.value }))}
-                  className="flex-1 h-8"
+                  className="min-h-touch min-w-[9rem] flex-1"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button
+                  variant="ghost"
+                  className="min-h-11 min-w-11 p-0 touch-manipulation"
+                  onClick={() => setShowNiederlassungDialog(true)}
+                  aria-label="Niederlassung auswählen"
+                  title="Niederlassung auswählen"
+                >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Kostenstelle:</Label>
-                <Input value="" readOnly className="flex-1 h-8 bg-muted" />
+                <Input value="" readOnly className="min-h-touch flex-1 bg-muted" />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Bediener:</Label>
                 <Input
                   value={state.bediener}
                   onChange={(e) => setState((p) => ({ ...p, bediener: e.target.value }))}
-                  className="flex-1 h-8"
+                  className="min-h-touch flex-1"
                 />
               </div>
-              <div className="flex items-center gap-2 pt-1">
-                <a
-                  href="#"
-                  className="text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={async (e) => {
-                    e.preventDefault()
-                    try {
-                      const params: Record<string, string> = {}
-                      if (state.lieferant?.id) params.lieferant_id = state.lieferant.id
-                      const data = await apiClient.get<EinkaufLSResponse | null>(
-                        '/api/v1/einkauf/lieferscheine/last',
-                        { params }
-                      )
-                      if (!data?.id) {
-                        push('Kein vorheriger Lieferschein gefunden.')
-                        return
-                      }
-                      const positionen: EinkaufPosition[] = (data.positionen || []).map((pos) => {
-                        const ep = parseFloat(pos.einzelpreis || '0')
-                        const mwst = 19
-                        const bruttoPreis = ep * (1 + mwst / 100)
-                        const menge = parseFloat(pos.menge || '0')
-                        return {
-                          posNr: pos.pos_nr,
-                          artikelNr: pos.artikel_nr || '',
-                          artikelId: null,
-                          lieferantArtikelNr: pos.lieferant_artikel_nr || '',
-                          bezeichnung: pos.bezeichnung || '',
-                          bezeichnung2: '',
-                          gebindeNr: pos.gebinde_nr || '',
-                          gebinde: parseFloat(pos.gebinde || '0'),
-                          menge,
-                          einheit: pos.einheit || '',
-                          einzelpreis: ep,
-                          nettoBetrag: parseFloat(pos.nettobetrag || '0'),
-                          mwstProzent: mwst,
-                          bruttoPreis,
-                          bruttoBetrag: bruttoPreis * menge,
-                          niederlassung: '',
-                          lagerhalle: pos.lagerhalle || '',
-                          lagerfach: pos.lagerfach || '',
-                          charge: pos.charge || '',
-                          serienNr: pos.serien_nr || '',
-                          kontraktNr: pos.kontakt || '',
-                          streckeNr: '',
-                          naBio: '',
-                          musterNr: pos.master_nr || '',
-                          prozent: parseFloat(pos.prozent || '0'),
-                          skontierf: false,
-                        }
-                      })
-                      const lieferant: Lieferant | null = data.lieferant_id
-                        ? {
-                            id: data.lieferant_id,
-                            lieferantNr: data.lieferant_id,
-                            name: data.lieferant_name || '',
-                            kreditorAccount: data.lieferant_id,
-                          }
-                        : state.lieferant
-                      setState((prev) => ({
-                        ...prev,
-                        id: null,
-                        lieferscheinNr: generateLsNr(),
-                        lieferNr: data.liefer_nr || '',
-                        lieferDatum: data.lieferschein_datum
-                          ? formatDate(new Date(data.lieferschein_datum))
-                          : prev.lieferDatum,
-                        niederlassung: data.niederlassung ?? prev.niederlassung,
-                        bediener: getBediener(),
-                        lieferant,
-                        zahlungsbedingung: data.zahlungsbedingung ?? prev.zahlungsbedingung,
-                        texte: data.texte ?? prev.texte,
-                        zwischenhaendler: data.zwischenhaendler ?? prev.zwischenhaendler,
-                        positionen,
-                        aktivePositionIndex: null,
-                        positionCharge: '',
-                        positionSerienNr: '',
-                      }))
-                      push('Daten vom vorherigen Lieferschein übernommen.')
-                    } catch (_rawErr: unknown) {
-        const err = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-                      push(`Fehler: ${err.response?.data?.detail ?? err.message}`)
-                    }
-                  }}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
+                  onClick={() => void copyPreviousLs()}
                 >
-                  wie vorh. LS (F11)
-                </a>
+                  {isTouch ? 'wie vorheriger Beleg' : 'wie vorh. LS (F11)'}
+                </button>
                 <span className="text-muted-foreground text-sm mx-1">|</span>
-                <a
-                  href="#"
-                  className="text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    if (state.lieferant) {
-                      push(`Öffne Lieferanten-Stamm: ${state.lieferant.name}`)
-                    } else {
-                      setShowLieferantDialog(true)
-                    }
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center text-sm text-primary underline underline-offset-4"
+                  onClick={() => {
+                    setLieferantPickMode('lieferant')
+                    setShowLieferantDialog(true)
                   }}
                 >
                   Lieferanten-Stamm
-                </a>
+                </button>
               </div>
             </div>
 
@@ -988,11 +1065,12 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 value={lieferantTab}
                 onValueChange={(v) => setLieferantTab(v as typeof lieferantTab)}
               >
-                <TabsList className="grid w-full grid-cols-4 h-auto">
-                  <TabsTrigger value="lieferant" className="text-xs py-1">LIEFERANT</TabsTrigger>
-                  <TabsTrigger value="zahlungsbed" className="text-xs py-1">ZAHLUNGSBED.</TabsTrigger>
-                  <TabsTrigger value="texte" className="text-xs py-1">TEXTE</TabsTrigger>
-                  <TabsTrigger value="zwhaendler" className="text-xs py-1">ZW-HÄNDLER</TabsTrigger>
+                {/* Belegkopf-Register wie in der Verkaufskette (Gewohnheits-Prinzip) */}
+                <TabsList variant="register" className="flex-wrap overflow-x-visible" aria-label="Lieferantenbereich-Register">
+                  <TabsTrigger value="lieferant" className="min-h-11 text-xs">LIEFERANT</TabsTrigger>
+                  <TabsTrigger value="zahlungsbed" className="min-h-11 text-xs">ZAHLUNGSBED.</TabsTrigger>
+                  <TabsTrigger value="texte" className="min-h-11 text-xs">TEXTE</TabsTrigger>
+                  <TabsTrigger value="zwhaendler" className="min-h-11 text-xs">ZW-HÄNDLER</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="lieferant" className="mt-2 space-y-1 min-h-[80px]">
@@ -1036,7 +1114,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                         onChange={(e) =>
                           setState((p) => ({ ...p, zahlungsbedingung: e.target.value }))
                         }
-                        className="flex-1 h-8 text-sm"
+                        className="min-h-touch flex-1 text-sm"
                         placeholder="z.B. 30 Tage netto"
                       />
                     </div>
@@ -1049,7 +1127,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                     <textarea
                       value={state.texte}
                       onChange={(e) => setState((p) => ({ ...p, texte: e.target.value }))}
-                      className="w-full h-16 text-sm border rounded p-2 resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="w-full h-16 text-sm border rounded p-2 resize-none focus:outline-hidden focus:ring-1 focus:ring-ring"
                       placeholder="Freitext..."
                     />
                   </div>
@@ -1064,9 +1142,18 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                         onChange={(e) =>
                           setState((p) => ({ ...p, zwischenhaendler: e.target.value }))
                         }
-                        className="flex-1 h-8 text-sm"
+                        className="min-h-touch flex-1 text-sm"
                       />
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <Button
+                        variant="ghost"
+                        className="min-h-11 min-w-11 p-0 touch-manipulation"
+                        onClick={() => {
+                          setLieferantPickMode('zwischenhaendler')
+                          setShowLieferantDialog(true)
+                        }}
+                        aria-label="Zwischenhändler suchen"
+                        title="Zwischenhändler suchen"
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1075,19 +1162,22 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
               </Tabs>
 
               {/* Kreditor-Kto. unter den Tabs */}
-              <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm shrink-0">Kreditor-Kto.:</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                <Label className="w-28 shrink-0 text-sm">Kreditor-Kto.:</Label>
                 <Input
                   value={state.lieferant?.kreditorAccount || ''}
                   readOnly
-                  className="flex-1 h-8"
+                  className="min-h-touch min-w-[9rem] flex-1"
                 />
                 <ShortcutHintButton shortcut="Strg+F1">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setShowLieferantDialog(true)}
+                    className="min-h-11 min-w-11 p-0 touch-manipulation"
+                    onClick={() => {
+                      setLieferantPickMode('lieferant')
+                      setShowLieferantDialog(true)
+                    }}
+                    aria-label="Lieferant suchen"
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -1106,7 +1196,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
         <div className="mb-2 flex items-center gap-2">
           <Button
             variant="link"
-            className="text-sm text-blue-600 underline hover:text-blue-800 p-0 h-auto font-medium"
+            className="min-h-11 text-sm text-primary underline underline-offset-4 p-0 h-auto font-medium touch-manipulation"
             onClick={() => setShowImportBestellungDialog(true)}
           >
             → Bestellung(en) importieren
@@ -1155,7 +1245,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                   <TableRow
                     key={idx}
                     className={
-                      state.aktivePositionIndex === idx ? 'bg-green-100' : 'cursor-pointer hover:bg-muted/50'
+                      state.aktivePositionIndex === idx ? 'bg-muted' : 'cursor-pointer hover:bg-muted/50'
                     }
                     onClick={() =>
                       setState((p) => ({ ...p, aktivePositionIndex: idx }))
@@ -1211,7 +1301,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-red-600 hover:text-red-700"
+                          className="h-7 w-7 text-status-error hover:text-status-error"
                           title="Position löschen"
                           onClick={() => handleDeletePosition(idx)}
                         >
@@ -1229,21 +1319,22 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
         {/* Positions-Details */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">Positions-Details</h2>
-          <div className="grid grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
             <div className="space-y-1">
               <Label className="text-xs">Pos.-Nr.:</Label>
-              <Input value={currentPos.posNr} readOnly className="h-8" />
+              <Input value={currentPos.posNr} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Artikel-Nr.:</Label>
               <div className="flex gap-1">
-                <Input value={currentPos.artikelNr} readOnly className="flex-1 h-8" />
+                <Input value={currentPos.artikelNr} readOnly className="min-h-touch flex-1" />
                 <ShortcutHintButton shortcut="Strg+F2">
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    className="min-h-11 min-w-11 p-0 touch-manipulation"
                     onClick={() => setShowArticleDialog(true)}
+                    aria-label="Artikel suchen"
+                    title="Artikel suchen"
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -1257,20 +1348,20 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, lieferantArtikelNr: e.target.value }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
-            <div className="space-y-1 col-span-2">
+            <div className="space-y-1 sm:col-span-2">
               <Label className="text-xs">Bezeichnung:</Label>
-              <Input value={currentPos.artikelBezeichnung} readOnly className="h-8" />
-              <Input value={currentPos.artikelBezeichnung2} readOnly className="h-8" />
+              <Input value={currentPos.artikelBezeichnung} readOnly className="min-h-touch" />
+              <Input value={currentPos.artikelBezeichnung2} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Gebinde-Me.:</Label>
               <Input
                 value={currentPos.gebindeNr}
                 onChange={(e) => setCurrentPos((p) => ({ ...p, gebindeNr: e.target.value }))}
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
@@ -1281,7 +1372,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, gebinde: Number(e.target.value) }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
@@ -1292,12 +1383,12 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, menge: Number(e.target.value) }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Einheit:</Label>
-              <Input value={currentPos.einheit} readOnly className="h-8" />
+              <Input value={currentPos.einheit} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Einh.-Preis:</Label>
@@ -1308,16 +1399,16 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, einzelpreis: Number(e.target.value) }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Brutto-Preis:</Label>
-              <Input value={currentPos.bruttoPreis.toFixed(2)} readOnly className="h-8" />
+              <Input value={currentPos.bruttoPreis.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Brutto-Betrag:</Label>
-              <Input value={currentPos.bruttoBetrag.toFixed(2)} readOnly className="h-8" />
+              <Input value={currentPos.bruttoBetrag.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Rabatt %:</Label>
@@ -1327,7 +1418,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, prozent: Number(e.target.value) }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
@@ -1338,7 +1429,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, mwstProzent: Number(e.target.value) }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
@@ -1348,7 +1439,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, kostenstelle: e.target.value }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
             <div className="space-y-1">
@@ -1358,25 +1449,25 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 onChange={(e) =>
                   setCurrentPos((p) => ({ ...p, kontraktNr: e.target.value }))
                 }
-                className="h-8"
+                className="min-h-touch"
               />
             </div>
 
             {/* Zeile-OK-Leiste */}
-            <div className="col-span-6 flex items-center gap-2 pt-1 flex-wrap">
-              <Button variant="outline" size="sm" className="h-8" onClick={() => setShowPopUpDialog(true)} title="Zusatzinfos">
+            <div className="col-span-1 flex flex-wrap items-center gap-2 pt-1 sm:col-span-2 lg:col-span-6">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowPopUpDialog(true)} title="Zusatzinfos">
                 PopUp
               </Button>
               <Button
                 variant="outline"
-                size="sm"
-                className="h-8"
+                className="min-h-touch touch-manipulation"
                 onClick={() => push('Preis aktualisiert')}
               >
                 Aktualisieren
               </Button>
               <div className="flex items-center gap-1">
                 <Checkbox
+                  className="min-h-11 min-w-11"
                   checked={currentPos.skontierf}
                   onCheckedChange={(v) =>
                     setCurrentPos((p) => ({ ...p, skontierf: v === true }))
@@ -1384,14 +1475,14 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 />
                 <Label className="text-xs">skontierfähig</Label>
               </div>
-              <Button variant="outline" size="sm" className="h-8" onClick={() => setShowNiederlassungDialog(true)} title="Niederlassung">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowNiederlassungDialog(true)} title="Niederlassung">
                 Niederlassung...
               </Button>
-              <Button variant="outline" size="sm" className="h-8" onClick={() => setShowChargenSerienDialog(true)} title="Chargen/Serien">
+              <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowChargenSerienDialog(true)} title="Chargen/Serien">
                 Chargen-/Serien-Nr.
               </Button>
               <ShortcutHintButton shortcut="Strg+F3">
-                <Button onClick={handlePositionOK} className="h-8 gap-1">
+                <Button onClick={handlePositionOK} className="min-h-touch min-w-[136px] gap-1 touch-manipulation">
                   <Check className="h-4 w-4" />
                   Zeile OK
                 </Button>
@@ -1402,47 +1493,45 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
 
         {/* Summen */}
         <Card className="mb-4 p-4">
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div className="space-y-1">
               <Label className="text-xs">Netto:</Label>
-              <Input value={summen.netto.toFixed(2)} readOnly className="h-8" />
+              <Input value={summen.netto.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">MWSt.:</Label>
-              <Input value={summen.mwst.toFixed(2)} readOnly className="h-8" />
+              <Input value={summen.mwst.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Brutto:</Label>
-              <Input value={summen.brutto.toFixed(2)} readOnly className="h-8" />
+              <Input value={summen.brutto.toFixed(2)} readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Summe Gewicht:</Label>
-              <Input value="0.00 kg" readOnly className="h-8" />
+              <Input value="0.00 kg" readOnly className="min-h-touch" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Währung:</Label>
-              <Input value="EUR" readOnly className="h-8" />
+              <Input value="EUR" readOnly className="min-h-touch" />
             </div>
           </div>
         </Card>
       </div>
 
       {/* Bottom-Toolbar */}
-      <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
-        <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t bg-background px-3 py-2 md:px-4">
+        <div className="flex flex-wrap gap-2">
           <Button
             onClick={() => setShowPrintDialog(true)}
             variant="outline"
-            size="sm"
-            className="gap-2"
+            className="min-h-touch gap-2 touch-manipulation"
           >
             <Printer className="h-4 w-4" />
             LS drucken
           </Button>
           <Button
             variant="outline"
-            size="sm"
-            className="gap-2"
+            className="min-h-touch gap-2 touch-manipulation"
             onClick={() => setShowAttachmentDialog(true)}
           >
             <FileText className="h-4 w-4" />
@@ -1450,8 +1539,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
           </Button>
           <Button
             variant="outline"
-            size="sm"
-            className="gap-2"
+            className="min-h-touch gap-2 touch-manipulation"
             onClick={() => setShowAttachmentDialog(true)}
           >
             <Folder className="h-4 w-4" />
@@ -1459,33 +1547,48 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
           </Button>
           <Button
             variant="outline"
-            size="sm"
-            className="gap-2 text-red-600"
+            className="min-h-touch gap-2 touch-manipulation text-status-error"
             onClick={() => setShowDeleteDialog(true)}
           >
             <Trash2 className="h-4 w-4" />
             LS löschen
           </Button>
         </div>
-        <div className="flex gap-2">
-          <ShortcutHintButton shortcut="Strg+F4">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={isSaving}>
+        <div className="flex flex-wrap gap-2">
+          {isTouch ? (
+            <Button onClick={() => void handleSave()} className="min-h-touch min-w-[136px] gap-2 touch-manipulation" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>
-          </ShortcutHintButton>
-          <ShortcutHintButton shortcut="Strg+F7">
-            <Button variant="outline" onClick={() => navigate('/einkauf')} size="sm">
+          ) : (
+            <ShortcutHintButton shortcut="Strg+F4">
+              <Button onClick={() => void handleSave()} className="min-h-touch min-w-[136px] gap-2" disabled={isSaving}>
+                <Save className="h-4 w-4" />
+                Speichern
+              </Button>
+            </ShortcutHintButton>
+          )}
+          {isTouch ? (
+            <Button variant="outline" onClick={() => navigate('/einkauf')} className="min-h-touch touch-manipulation">
               Schließen
             </Button>
-          </ShortcutHintButton>
+          ) : (
+            <ShortcutHintButton shortcut="Strg+F7">
+              <Button variant="outline" onClick={() => navigate('/einkauf')} className="min-h-touch">
+                Schließen
+              </Button>
+            </ShortcutHintButton>
+          )}
         </div>
       </div>
 
       {/* Dialoge */}
       <LieferantSuchDialog
         open={showLieferantDialog}
-        onClose={() => setShowLieferantDialog(false)}
+        onClose={() => {
+          setShowLieferantDialog(false)
+          setLieferantPickMode('lieferant')
+        }}
         onSelect={handleLieferantSelect}
       />
       <ArtikelSuchDialog
@@ -1503,8 +1606,47 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
         onClose={() => setShowAttachmentDialog(false)}
         businessObjectType="einkauf_lieferschein"
         businessObjectId={state.id}
-        title="UNTERLAGEN / DATEIEN — EINKAUFS-LIEFERSCHEIN"
+        title="UNTERLAGEN / DATEIEN — WARENEINGANG"
       />
+
+      <Dialog open={showLsSearchDialog} onOpenChange={setShowLsSearchDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Wareneingang suchen</DialogTitle>
+          </DialogHeader>
+          {lsSearchItems.length === 0 ? (
+            <p className="py-4 text-sm text-muted-foreground">Keine gespeicherten Wareneingänge.</p>
+          ) : (
+            <div className="max-h-64 space-y-1 overflow-y-auto py-2">
+              {lsSearchItems.map((item) => (
+                <Button
+                  key={item.id}
+                  variant="outline"
+                  className="min-h-11 w-full justify-start touch-manipulation"
+                  onClick={() => {
+                    void loadEinkaufLsById(item.id).then((ok) => {
+                      if (ok) {
+                        setShowLsSearchDialog(false)
+                        push('Lieferschein geladen')
+                      }
+                    })
+                  }}
+                >
+                  <span className="font-mono">{item.lieferschein_nr || item.id}</span>
+                  {item.lieferant_name ? (
+                    <span className="ml-2 truncate text-muted-foreground">{item.lieferant_name}</span>
+                  ) : null}
+                </Button>
+              ))}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" className="min-h-11" onClick={() => setShowLsSearchDialog(false)}>
+              Abbrechen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showImportBestellungDialog} onOpenChange={setShowImportBestellungDialog}>
         <DialogContent className="sm:max-w-xl">
@@ -1602,7 +1744,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
           <div className="max-h-64 overflow-y-auto space-y-1 py-2">
             {branchesList.length === 0 && <p className="text-sm text-muted-foreground">Keine Niederlassungen geladen.</p>}
             {branchesList.map((b) => (
-              <Button key={b.id} variant="outline" className="w-full justify-start" onClick={() => { setState((p) => ({ ...p, niederlassung: b.name || String(b.branch_number) })); setShowNiederlassungDialog(false); push('Niederlassung übernommen.'); }}>
+              <Button key={b.id} variant="outline" className="min-h-11 w-full justify-start touch-manipulation" onClick={() => { setState((p) => ({ ...p, niederlassung: b.name || String(b.branch_number) })); setShowNiederlassungDialog(false); push('Niederlassung übernommen.'); }}>
                 {b.name || `Nr. ${b.branch_number}`}
               </Button>
             ))}

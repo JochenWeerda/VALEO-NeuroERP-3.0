@@ -18,9 +18,10 @@ def test_energy_maintenance_650kg():
 
 
 def test_ecm_and_total_me():
-    # 35 kg Milch, 3,8 % Fett, 3,2 % Eiweiß
+    # DLG 01|2025: ECM = Milch*(38,5*Fett + 24,2*Protein + 16,5*Laktose)/3,15/100
+    # 35 kg Milch, 3,8 % Fett, 3,2 % Eiweiß, Laktose default 4,8 %
     ecm = gfe2023.energy_corrected_milk_kg(35, 3.8, 3.2)
-    factor = 0.337 + 0.116 * 3.8 + 0.06 * 3.2
+    factor = (38.5 * 3.8 + 24.2 * 3.2 + 16.5 * 4.8) / 3.15 / 100.0
     assert abs(ecm - 35 * factor) < 1e-6
     total, maint, lact = gfe2023.total_me_requirement_mj(650, 35, 3.8, 3.2)
     assert total == pytest.approx(maint + lact)

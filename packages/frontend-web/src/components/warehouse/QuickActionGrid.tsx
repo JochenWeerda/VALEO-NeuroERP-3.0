@@ -155,7 +155,7 @@ export function QuickActionGrid({
           'min-h-[140px] p-4 rounded-xl',
           'text-white text-center',
           'active:scale-95 transition-transform',
-          'focus:outline-none focus:ring-4 focus:ring-white/50',
+          'focus:outline-hidden focus:ring-4 focus:ring-white/50',
           action.color
         )
 
@@ -202,7 +202,7 @@ export function QuickActionStrip({
         )
 
         const baseStyles = clsx(
-          'flex-shrink-0 flex flex-col items-center justify-center gap-1',
+          'shrink-0 flex flex-col items-center justify-center gap-1',
           'min-h-[80px] min-w-[90px] p-3 rounded-lg',
           'text-white',
           'active:scale-95 transition-transform',

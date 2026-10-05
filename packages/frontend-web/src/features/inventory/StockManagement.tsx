@@ -252,16 +252,15 @@ export function StockManagement() {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
-                            size="sm"
                             variant="outline"
                             onClick={() => {
                               setSelectedArticle(article);
                               setMovementDialogOpen(true);
                             }}
-                          >
+                           className="min-h-touch">
                             <ArrowUpDown className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button variant="outline" className="min-h-touch">
                             <Edit className="h-4 w-4" />
                           </Button>
                         </div>

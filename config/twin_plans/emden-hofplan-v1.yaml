@@ -1,0 +1,13 @@
+plan_id: emden-hofplan-v1
+canvas: { width: 1200, height: 800 }
+# background: assets/hofplan-emden.svg   # optional, sobald Asset vorliegt
+cells:
+  - id: S1-Z01
+    label: "Silo 1 / Zelle 1"
+    shape: { kind: rect, x: 80, y: 120, w: 60, h: 140 }
+  - id: S1-Z02
+    label: "Silo 1 / Zelle 2"
+    shape: { kind: polygon, points: [[150,120],[210,120],[210,260],[150,260]] }
+  - id: S2-Z01
+    label: "Silo 2 / Zelle 1"
+    shape: { kind: rect, x: 300, y: 120, w: 60, h: 140 }

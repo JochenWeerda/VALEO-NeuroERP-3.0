@@ -10,10 +10,12 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { Calendar, FileDown, Plus, Search } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function ErnteListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useErnten()
 
@@ -37,7 +39,7 @@ export default function ErnteListePage(): JSX.Element {
       key: 'schlag' as const,
       label: 'Schlag',
       render: (e: Ernte) => (
-        <button onClick={() => navigate(`/agrar/ernte/${e.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/agrar/ernte/${e.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {e.schlag}
         </button>
       ),
@@ -84,18 +86,19 @@ export default function ErnteListePage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Ernte-Uebersicht</h1>
-          <p className="text-muted-foreground">Erntesaison 2025</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Ernte-Übersicht</h1>
+          <p className="text-muted-foreground">Ernten suchen und öffnen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/ernte/neu')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/ernte/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Ernte
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -103,7 +106,7 @@ export default function ErnteListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600" />
+              <Calendar className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{ernten.length}</span>
             </div>
           </CardContent>
@@ -123,7 +126,7 @@ export default function ErnteListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{ernten.filter((e) => e.status === 'abgeschlossen').length}</span>
+            <span className="text-2xl font-bold text-status-success">{ernten.filter((e) => e.status === 'abgeschlossen').length}</span>
           </CardContent>
         </Card>
 
@@ -136,18 +139,19 @@ export default function ErnteListePage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Ernten" placeholder="Schlag, Kultur oder Status suchen" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

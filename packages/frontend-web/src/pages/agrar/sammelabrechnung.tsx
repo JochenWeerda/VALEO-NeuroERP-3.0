@@ -74,7 +74,7 @@ export default function SammelabrechnungPage(): JSX.Element {
     return (
       <div className="flex flex-col">
         <div className="p-6 flex flex-col items-center gap-4">
-          <CheckCircle className="h-16 w-16 text-green-600" />
+          <CheckCircle className="h-16 w-16 text-status-success" />
           <h2 className="text-2xl font-bold">Sammelabrechnung erstellt</h2>
           <p className="text-muted-foreground">{selectedIds.length} Ernteerfassung(en) abgerechnet.</p>
           <Button onClick={() => navigate('/agrar')}>Zurück</Button>

@@ -4,31 +4,56 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-10-05
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (26 Masken).
+> Generiert aus `app/core/screen_definitions.py` (89 Masken).
 
 ## Übersicht
 
 | mask_id | Titel | Domäne | Risiko | Prozessketten | Agent-Contract |
 |---|---|---|---|---|---|
+| `abrechnung/eb-lieferschein-kontrolle` | EB-Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
+| `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
+| `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
+| `agrar/feed-readiness` | Futterversorgung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
+| `agrar/feeding-actuals` | Komponentenbezogene Ist-Fuetterung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-actuals/agent-contract` |
+| `agrar/feeding-business` | Fuetterungsbetrieb | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
+| `agrar/feeding-businesses` | Fuetterungsbetriebe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
+| `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
+| `agrar/feeding-plan` | Fuetterungsplan | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-plan/agent-contract` |
+| `agrar/feeding-reference-data` | Naehrstoffe und Einheiten | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
+| `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
+| `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
-| `crm/customer-360` | Kundenstamm | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
-| `crm/lead` | Lead | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
+| `auswertungen/abfrage-center` | Abfrage-Center | reporting | mittel | — | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
+| `auswertungen/aenderungshistorie` | Aenderungshistorie | audit | niedrig | — | `GET /api/v1/masks/auswertungen/aenderungshistorie/agent-contract` |
+| `auswertungen/auftrags-kontrolle` | Auftrags-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/auftrags-kontrolle/agent-contract` |
+| `auswertungen/beleg-kontrolle` | Beleg-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/beleg-kontrolle/agent-contract` |
+| `auswertungen/bonus-berechnung` | Bonus-Berechnung | reporting | mittel | — | `GET /api/v1/masks/auswertungen/bonus-berechnung/agent-contract` |
+| `auswertungen/dms-volltext` | Volltextsuche Dokumentenverwaltung | documents | niedrig | — | `GET /api/v1/masks/auswertungen/dms-volltext/agent-contract` |
+| `auswertungen/duengemittelmengen` | Duengemittelmengen | agrar | niedrig | — | `GET /api/v1/masks/auswertungen/duengemittelmengen/agent-contract` |
+| `auswertungen/l3-berichtskatalog` | L3-Berichtskatalog | reporting | niedrig | — | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/agent-contract` |
+| `auswertungen/lieferschein-kontrolle` | Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/lieferschein-kontrolle/agent-contract` |
+| `auswertungen/sanktionspruefung-kunden` | Terrorschutzpruefung Kunden | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract` |
+| `auswertungen/sanktionspruefung-personal` | Terrorschutzpruefung Personal | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract` |
+| `crm/customer-360` | Kundenakte | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
+| `crm/lead` | Kundenakte | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
+| `crm/mail-arbeitsplatz` | Mail-Arbeitsplatz | crm | niedrig | — | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
+| `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
 | `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
 | `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
-| `einkauf/purchase-order` | Bestellung | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
+| `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
@@ -36,13 +61,51 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/debitor` | Debitor | finance | niedrig | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | niedrig | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
+| `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
+| `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
+| `fuhrpark/uebersicht` | Fuhrpark | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/uebersicht/agent-contract` |
+| `futtermittel/analyse` | Futteranalyse | futtermittel | hoch | — | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
+| `futtermittel/analysen` | Futteranalysen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
 | `futtermittel/einzelfuttermittel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/agent-contract` |
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
+| `lager/fremdware` | Fremdware und Fremdbestand | inventory | niedrig | — | `GET /api/v1/masks/lager/fremdware/agent-contract` |
+| `lager/inventur-nebenlaeufe` | Inventur-Nebenlaeufe | inventory | hoch | — | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
+| `lager/leitstand` | Lager-Leitstand | lager | niedrig | — | `GET /api/v1/masks/lager/leitstand/agent-contract` |
 | `lager/stock-movement` | Lagerbewegung | lager | hoch | `inventory-to-settlement` | `GET /api/v1/masks/lager/stock-movement/agent-contract` |
+| `logistik/frachtbrief` | Frachtbriefe | logistics | niedrig | — | `GET /api/v1/masks/logistik/frachtbrief/agent-contract` |
+| `logistik/frachttabellen` | Frachttabellen | logistics | niedrig | — | `GET /api/v1/masks/logistik/frachttabellen/agent-contract` |
+| `logistik/tour-fracht-arbeitsraum` | Tour & Fracht | logistics | niedrig | — | `GET /api/v1/masks/logistik/tour-fracht-arbeitsraum/agent-contract` |
+| `logistik/tourenplanung` | Tourenplanung | logistics | niedrig | — | `GET /api/v1/masks/logistik/tourenplanung/agent-contract` |
+| `logistik/verladung` | Verladung | logistics | niedrig | — | `GET /api/v1/masks/logistik/verladung/agent-contract` |
+| `logistik/versandprofile` | Versandprofile | logistics | niedrig | — | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
+| `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
+| `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
+| `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
+| `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
+| `sales/invoices` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/sales/invoices/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
+| `schnittstelle/legacy-adapter-monitor` | Standard-/Unimet-Adapter | integration | niedrig | — | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
+| `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
+| `strecke/disposition` | Strecken-Disposition | logistics | niedrig | — | `GET /api/v1/masks/strecke/disposition/agent-contract` |
+| `strecke/dokumente-drucken` | Strecken-Dokumente drucken | logistics | niedrig | — | `GET /api/v1/masks/strecke/dokumente-drucken/agent-contract` |
+| `strecke/nawaro-ernterklaerung-drucken` | NaWaRo-Ernterklärung drucken | agrar | niedrig | — | `GET /api/v1/masks/strecke/nawaro-ernterklaerung-drucken/agent-contract` |
+| `strecke/nawaro-lieferungen` | NaWaRo-Lieferungen | agrar | niedrig | — | `GET /api/v1/masks/strecke/nawaro-lieferungen/agent-contract` |
+| `strecke/qualitaets-abweichung` | Qualitätsabweichung | qualitaet | niedrig | — | `GET /api/v1/masks/strecke/qualitaets-abweichung/agent-contract` |
+| `strecke/streckengeschaeft` | Streckengeschäft | logistics | niedrig | — | `GET /api/v1/masks/strecke/streckengeschaeft/agent-contract` |
+| `strecke/vorlaeufig` | Vorläufige Streckengeschäfte | logistics | niedrig | — | `GET /api/v1/masks/strecke/vorlaeufig/agent-contract` |
+| `tankstelle/adapter-inbox` | Tankanlagen-Eingang | agrar | niedrig | — | `GET /api/v1/masks/tankstelle/adapter-inbox/agent-contract` |
+| `transporte/fahrer` | Fahrer | logistics | niedrig | — | `GET /api/v1/masks/transporte/fahrer/agent-contract` |
+| `verkauf/betriebsauftrag` | Betriebsauftrag drucken | sales | niedrig | — | `GET /api/v1/masks/verkauf/betriebsauftrag/agent-contract` |
+| `versand/versand-avis` | Versand-Avis | logistics | niedrig | — | `GET /api/v1/masks/versand/versand-avis/agent-contract` |
+| `workspace/einkauf` | Einkauf-Cockpit | einkauf | niedrig | — | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
+| `workspace/fibu` | FIBU-Cockpit | finance | niedrig | — | `GET /api/v1/masks/workspace/fibu/agent-contract` |
+| `workspace/lager` | Lager-Cockpit | lager | niedrig | — | `GET /api/v1/masks/workspace/lager/agent-contract` |
+| `workspace/leitung` | Leitungs-Cockpit | management | niedrig | — | `GET /api/v1/masks/workspace/leitung/agent-contract` |
+| `workspace/letzte-dokumente` | Letzte Dokumente | workspace | niedrig | — | `GET /api/v1/masks/workspace/letzte-dokumente/agent-contract` |
+| `workspace/verkauf` | Verkauf-Cockpit | sales | niedrig | — | `GET /api/v1/masks/workspace/verkauf/agent-contract` |
 
 ---
 
@@ -60,11 +123,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/agrar__duenger/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/agrar/duenger/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/agrar/duenger/entity/{entity_id}`
+- `entity` → `/api/v1/agrar/duenger/{entity_id}`
 - `verwendung` → `/api/v1/masks/agrar/duenger/entity/{entity_id}/tabs/verwendung`
 - `preise` → `/api/v1/masks/agrar/duenger/entity/{entity_id}/tabs/preise`
 
@@ -78,13 +139,337 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche Naehrstoffgehalte hat Duenger {entity_id}?
 - Zeige die Preisentwicklung von Duenger {entity_id}.
 
-**Sensible Felder:** `preis`
+**Sensible Felder:** `vk_preis`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/feed-advice` — Fuetterungsberatung
+
+**Zweck:** Aufgabenorientierter Einstieg in Planung, Freigabe, Stallausfuehrung und Controlling der Fuetterung.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feed-advice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feed-advice/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feed-advice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Ration braucht heute Aufmerksamkeit?
+- Wo fehlen aktuelle Analysen oder ausreichend Bestand?
+- Zeige mir den schnellsten Weg zur heutigen Fuetterung.
+
+**Sensible Felder:** `futterkosten, milchleistung`
+
+---
+
+### `agrar/feed-controlling` — Fuetterungscontrolling
+
+**Zweck:** Aufnahme, Kosten, Milch/ECM, Stickstoff und Methan je Tiergruppe im Zeitverlauf vergleichen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feed-controlling/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feed-controlling/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feed-controlling/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `series` → `/api/v1/agrar/rations-optimization/controlling/series`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Gruppe weicht bei der Aufnahme ab?
+- Wie entwickeln sich ECM und Futterkosten?
+
+**Sensible Felder:** `actual_cost_eur_cow`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `record_observation` | Tageswerte erfassen | safe | nein | `—` |
+
+---
+
+### `agrar/feed-readiness` — Futterversorgung
+
+**Zweck:** Planbedarf, Sicherheitsreserve und Bestandsreichweite erklaerbar vergleichen und Unterdeckungen kontrolliert an den Einkauf geben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feed-readiness/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feed-readiness/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feed-readiness/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `materials` → `/api/v1/agrar/rations-optimization/feeding/supply`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Futtermittel reichen weniger als 14 Tage?
+- Welche Unterdeckungen sind wegen unbekannter Handelseinheiten noch nicht uebergabefaehig?
+
+**Sensible Felder:** `stock_kg`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create_handoff` | An Einkauf uebergeben | confirm | nein | `—` |
+| `open_inventory` | Bestaende pflegen | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-actuals` — Komponentenbezogene Ist-Fuetterung
+
+**Zweck:** Komponentenabweichungen und ihre Kosten-/Naehrstofffolgen planversionsgebunden erklaeren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-actuals/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-actuals/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-actuals/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-actuals/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `actuals` → `/api/v1/agrar/rations-optimization/feeding/actuals/components`
+- `findings` → `/api/v1/agrar/rations-optimization/feeding/actuals/findings`
+- `measures` → `/api/v1/agrar/rations-optimization/feeding/actuals/measures`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Komponenten wurden heute ueberdosiert?
+- Bei welchen Ist-Fuetterungen fehlen Preise oder Naehrstoffwerte?
+
+**Sensible Felder:** `comment, value_consequences`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export_csv` | CSV exportieren | safe | nein | `—` |
+| `create_measure` | Massnahme aus Abweichung | confirm | nein | `—` |
+| `configure_threshold` | Schwellen konfigurieren | confirm | nein | `—` |
+| `open_mobile` | Ist-Fuetterung erfassen | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-business` — Fuetterungsbetrieb
+
+**Zweck:** Die naechste fachliche Fuetterungsentscheidung aus belastbarer Datenlage ableiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-business/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-business/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-business/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-business/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/overview`
+- `groups` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/groups`
+- `rations` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/rations`
+- `findings` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/findings`
+- `templates` → `/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}/ration-templates`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Ration ist blockiert?
+- Wo fehlt eine belastbare Analyse?
+- Welche Befunde sind kritisch?
+
+**Sensible Felder:** `business_partner_id, preferences, snapshot_checksum`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create_template` | Vorlage anlegen | safe | nein | `—` |
+| `apply_template` | Vorlage anwenden | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-businesses` — Fuetterungsbetriebe
+
+**Zweck:** Autorisierte Fuetterungsbetriebe und ihre Beratungsreife steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-businesses/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-businesses/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-businesses/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-businesses/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `businesses` → `/api/v1/agrar/rations-optimization/feeding/businesses`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Betriebe betreue ich?
+- Wo fehlen Herden oder Tiergruppen?
+
+**Sensible Felder:** `business_partner_id, preferences`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create_business` | Betrieb anlegen | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-group` — Tiergruppe
+
+**Zweck:** Tiergruppenparameter und ihre zeitliche Herkunft sicher pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-group/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-group/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-group/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}`
+- `history` → `/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}/history`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige die aktuelle Leistung der Tiergruppe.
+- Welche Parameter wurden zuletzt geaendert?
+
+**Sensible Felder:** `business_id, herd_id, external_ref`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit_group` | Tiergruppe bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-plan` — Fuetterungsplan
+
+**Zweck:** Eine publizierte Mischanweisung sicher ausfuehren und ihre Herkunft nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-plan/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-plan/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-plan/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-plan/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/feeding/plans/{entity_id}`
+- `instructions` → `/api/v1/agrar/rations-optimization/feeding/plans/{entity_id}/instructions`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Menge kommt als Naechstes?
+- Ist dieser Plan noch aktuell?
+- Warum wurde gerundet?
+
+**Sensible Felder:** `source_ration_version_id, published_by`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `print_plan` | Drucken / als PDF speichern | safe | nein | `—` |
+| `open_mobile` | Mobile Stallansicht | safe | nein | `—` |
+
+---
+
+### `agrar/feeding-reference-data` — Naehrstoffe und Einheiten
+
+**Zweck:** Einheiten, Bezugsbasen und Naehrstoffherkunft fuer Berechnung und Beratung erklaerbar machen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/feeding-reference-data/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/feeding-reference-data/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__feeding-reference-data/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `nutrients` → `/api/v1/agrar/rations-optimization/reference-data/nutrients`
+- `units` → `/api/v1/agrar/rations-optimization/reference-data/units`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- In welcher Einheit wird Rohprotein bewertet?
+- Welche Naehrstoffe sind auf TM bezogen?
 
 ---
 
@@ -100,11 +485,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/agrar__harvest-settlement/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/agrar/settlements/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/agrar/settlements/{entity_id}`
+- `entity` → `/api/v1/agrar/settlements/{entity_id}`
 - `positionen` → `/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/positionen`
 - `abzuege` → `/api/v1/mask-rollouts/agrar/harvest-settlement/{entity_id}/tabs/abzuege`
 
@@ -124,7 +509,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `drucken` | Abrechnung drucken | safe | nein | `PDF-Druck commandEndpoint folgt` |
+| `drucken` | Abrechnung drucken | safe | nein | `/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken` |
 
 ---
 
@@ -169,6 +554,87 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agrar/ration` — Rationsfreigabe
+
+**Zweck:** Eine Rationsversion pruefen, freigeben, terminieren, aktivieren oder revisionssicher beenden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/ration/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/ration/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/ration/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__ration/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}`
+- `versions` → `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/versions`
+- `audit` → `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/audit`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Warum wurde diese Ration freigegeben?
+- Wann beginnt die Fuetterung dieser Version?
+
+**Sensible Felder:** `snapshot, snapshot_checksum`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `submit_review` | Zur Pruefung | safe | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/submit_review` |
+| `approve` | Freigeben | moderate | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/approve` |
+| `schedule` | Fuetterungsbeginn planen | moderate | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/schedule` |
+| `activate` | Jetzt aktivieren | moderate | ja | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/activate` |
+| `retire` | Fuetterung beenden | high | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire` |
+| `archive` | Archivieren | high | nein | `/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive` |
+
+---
+
+### `agrar/rations-lifecycle` — Rationen und Freigaben
+
+**Zweck:** Rationsversionen nach Tiergruppe, Status und Fuetterungsbeginn steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/rations-lifecycle/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/rations-lifecycle/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__rations-lifecycle/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `rations` → `/api/v1/agrar/rations-optimization/lifecycle/rations`
+- `groups` → `/api/v1/agrar/rations-optimization/lifecycle/groups`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Rationen warten auf Freigabe?
+- Welche Ration ist je Tiergruppe aktiv?
+
+**Sensible Felder:** `snapshot_checksum`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `plan_ration` | Neue Ration planen | safe | nein | `—` |
+| `create_group` | Tiergruppe anlegen | safe | nein | `—` |
+
+---
+
 ### `agrar/saatgut` — Saatgut
 
 **Zweck:** Saatgut-Stammdaten: Sorteninfo, Lagerbestaende und Anbauvertraege fuer Saatgutplanung.
@@ -181,11 +647,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/agrar__saatgut/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/agrar/saatgut/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/agrar/saatgut/entity/{entity_id}`
+- `entity` → `/api/v1/agrar/saatgut/{entity_id}`
 - `lagerbestaende` → `/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/lagerbestaende`
 - `vertraege` → `/api/v1/masks/agrar/saatgut/entity/{entity_id}/tabs/vertraege`
 
@@ -207,11 +671,259 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `auswertungen/duengemittelmengen` — Duengemittelmengen
+
+**Zweck:** Duengemittelmengen aus kanonischen Feldbuchdaten L3-vertraut auswerten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/duengemittelmengen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/duengemittelmengen/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/duengemittelmengen/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__duengemittelmengen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/feldbuch/duengemittelmengen`
+- `amounts` → `/api/v1/agrar/feldbuch/duengemittelmengen`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige Duengemittelmengen dieses Jahres.
+- Summiere N, P2O5 und K2O je Schlag.
+
+**Sensible Felder:** `customer_id, schlag_name, lieferschein_id`
+
+---
+
+### `produktion/produktionsleitstand` — Produktionsleitstand
+
+**Zweck:** Produktionsvorgaenge aus kanonischen Auftraegen und Bewegungen steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/produktion/produktionsleitstand/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
+| Readiness | `GET /api/v1/masks/produktion/produktionsleitstand/readiness` |
+| Rollout-Route | `/mask-rollout/produktion__produktionsleitstand/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/production-control/summary`
+- `operations` → `/api/v1/production-control/operations`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige laufende Muehlenauftraege.
+- Welche Vorgaenge brauchen Nachbearbeitung?
+
+**Sensible Felder:** `assigned_user, notes`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `sync` | Auftraege synchronisieren | moderate | nein | `/api/v1/production-control/sync` |
+
+---
+
+### `strecke/nawaro-ernterklaerung-drucken` — NaWaRo-Ernterklärung drucken
+
+**Zweck:** Die Ernterklaerung ueber den NaWaRo-Mitteilungsdruck ausgeben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/strecke/nawaro-ernterklaerung-drucken/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/strecke/nawaro-ernterklaerung-drucken/agent-contract` |
+| Readiness | `GET /api/v1/masks/strecke/nawaro-ernterklaerung-drucken/readiness` |
+| Rollout-Route | `/mask-rollout/strecke__nawaro-ernterklaerung-drucken/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Oeffne NaWaRo-Ernterklärung drucken.
+
+---
+
+### `strecke/nawaro-lieferungen` — NaWaRo-Lieferungen
+
+**Zweck:** NaWaRo-Lieferungen nach Streckennummer, Datum, Typ und Status suchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/strecke/nawaro-lieferungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/strecke/nawaro-lieferungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/strecke/nawaro-lieferungen/readiness` |
+| Rollout-Route | `/mask-rollout/strecke__nawaro-lieferungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/tours`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche NaWaRo-Lieferungen sind noch geplant?
+
+---
+
+### `tankstelle/adapter-inbox` — Tankanlagen-Eingang
+
+**Zweck:** Tankanlagen-Eingaenge genau einmal und nachvollziehbar uebernehmen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/tankstelle/adapter-inbox/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/tankstelle/adapter-inbox/agent-contract` |
+| Readiness | `GET /api/v1/masks/tankstelle/adapter-inbox/readiness` |
+| Rollout-Route | `/mask-rollout/tankstelle__adapter-inbox/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/tank-adapter/summary`
+- `intake` → `/api/v1/tank-adapter/intake`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige Fehler im Tankadapter.
+- Welche Zapfungen erzeugen einen Lieferschein-Handover?
+
+**Sensible Felder:** `external_id, payload_hash, validation_errors`
+
+---
+
+## Domäne: audit
+
+### `auswertungen/aenderungshistorie` — Aenderungshistorie
+
+**Zweck:** Aenderungen an Stammdaten und Belegen bereichsuebergreifend nachvollziehen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/aenderungshistorie/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/aenderungshistorie/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/aenderungshistorie/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__aenderungshistorie/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `trail` → `/api/v1/audit/trail`
+
+**Beispiel-Prompts:**
+
+- Wer hat dieses Feld geaendert?
+- Zeige Aenderungen an diesem Beleg.
+
+**Sensible Felder:** `user_email, changes, entity_id`
+
+---
+
+## Domäne: compliance
+
+### `auswertungen/sanktionspruefung-kunden` — Terrorschutzpruefung Kunden
+
+**Zweck:** Terrorschutzpruefungen fuer Kunden getrennt und mandantensicher nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__sanktionspruefung-kunden/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `checks` → `/api/v1/compliance/sanctions/pruefprotokoll?scope=customers`
+
+**MCP-Tools (Domäne):**
+
+- `compliance.gate.status` — scope `compliance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Pruefe Kunden gegen die Sanktionsliste.
+- Zeige verdaechtige Treffer.
+
+**Sensible Felder:** `geprueft_name, entity_ref, checked_by`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `check` | Kunden pruefen | moderate | nein | `—` |
+
+---
+
+### `auswertungen/sanktionspruefung-personal` — Terrorschutzpruefung Personal
+
+**Zweck:** Terrorschutzpruefungen fuer Personal getrennt und mandantensicher nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__sanktionspruefung-personal/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `checks` → `/api/v1/compliance/sanctions/pruefprotokoll?scope=personal`
+
+**MCP-Tools (Domäne):**
+
+- `compliance.gate.status` — scope `compliance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Pruefe Personal gegen die Sanktionsliste.
+- Zeige verdaechtige Treffer.
+
+**Sensible Felder:** `geprueft_name, entity_ref, checked_by`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `check` | Personal pruefen | moderate | nein | `—` |
+
+---
+
 ## Domäne: crm
 
-### `crm/customer-360` — Kundenstamm
+### `crm/customer-360` — Kundenakte
 
-**Zweck:** 360-Grad-Kundenstamm-Cockpit fuer Vertrieb und CRM — Stammdaten, Aktivitaeten, offene Auftraege und Dokumente in einer Ansicht.
+**Zweck:** 360-Grad-Kundenakte fuer Vertrieb und CRM — Stammdaten, Aktivitaeten, Belege und Dokumente in einer Ansicht.
 
 | | |
 |---|---|
@@ -230,6 +942,16 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `auftraege` → `/api/v1/crm/customers/{entity_id}/tabs/auftraege`
 - `aktivitaeten` → `/api/v1/crm/customers/{entity_id}/tabs/aktivitaeten`
 - `dokumente` → `/api/v1/crm/customers/{entity_id}/tabs/dokumente`
+- `aufgaben` → `/api/v1/crm/customers/{entity_id}/tabs/aufgaben`
+- `kontrakte` → `/api/v1/crm/customers/{entity_id}/tabs/kontrakte`
+- `angebote` → `/api/v1/crm/customers/{entity_id}/tabs/angebote`
+- `historie` → `/api/v1/crm/customers/{entity_id}/tabs/historie`
+- `praesente` → `/api/v1/crm/customers/{entity_id}/tabs/praesente`
+- `chefanweisungen` → `/api/v1/crm/customers/{entity_id}/tabs/chefanweisungen`
+- `anschriften` → `/api/v1/crm/customers/{entity_id}/tabs/anschriften`
+- `cpd` → `/api/v1/crm/customers/{entity_id}/tabs/cpd`
+- `rabatte` → `/api/v1/crm/customers/{entity_id}/tabs/rabatte`
+- `preise` → `/api/v1/crm/customers/{entity_id}/tabs/preise`
 
 **MCP-Tools (Domäne):**
 
@@ -243,7 +965,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.
 - Zeige alle offenen Auftraege von Kunde {entity_id} mit Status 'offen'.
 
-**Sensible Felder:** `kreditlimit, zahlungsbedingungen, notizen`
+**Sensible Felder:** `iban, bic, kreditlimit, zahlungsbedingungen, notizen`
 
 **Actions:**
 
@@ -254,9 +976,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `crm/lead` — Lead
+### `crm/lead` — Kundenakte
 
-**Zweck:** Lead-Cockpit: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.
+**Zweck:** Lead-Akte: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.
 
 | | |
 |---|---|
@@ -266,11 +988,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/crm__lead/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/crm/leads/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/crm/lead/entity/{entity_id}`
+- `entity` → `/api/v1/crm/leads/{entity_id}`
 - `aktivitaeten` → `/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aktivitaeten`
 - `aufgaben` → `/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aufgaben`
 
@@ -297,6 +1017,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `crm/mail-arbeitsplatz` — Mail-Arbeitsplatz
+
+**Zweck:** Rollenpostfaecher revisionssicher mit Kontakten und Belegen verbinden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/mail-arbeitsplatz/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/mail-arbeitsplatz/readiness` |
+| Rollout-Route | `/mask-rollout/crm__mail-arbeitsplatz/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `messages` → `/api/v1/mail-workspace`
+- `attachments` → `/api/v1/mail-workspace/attachments`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Zeige unzugeordnete CRM-Mails.
+- Welche Anlagen warten auf DMS-Uebernahme?
+
+**Sensible Felder:** `from_address, to_addresses, subject, body_text, contact_id`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `draft` | Neue Mail | low | nein | `—` |
+
+---
+
 ### `crm/opportunity` — Opportunity
 
 **Zweck:** CRM-Verkaufschance: Phase, Wert, Wahrscheinlichkeit, Aktivitaeten und Angebote in einer Ansicht fuer Vertriebssteuerung.
@@ -309,7 +1067,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/crm__opportunity/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/crm/opportunities/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/crm/opportunity/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -336,7 +1094,63 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `create_activity` | Aktivitaet anlegen | safe | nein | `commandEndpoint ueber crm_360 bei Bedarf` |
+| `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
+
+---
+
+## Domäne: dms-compliance
+
+### `docflow/dokumenten-ruecklauf` — Dokumentenruecklauf
+
+**Zweck:** Dokumentenversand und erwartete Ruecklaeufe mandantensicher bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
+| Readiness | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/readiness` |
+| Rollout-Route | `/mask-rollout/docflow__dokumenten-ruecklauf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/docflow/returns/summary`
+- `returns` → `/api/v1/docflow/returns`
+
+**Beispiel-Prompts:**
+
+- Zeige ueberfaellige Ruecklaeufe.
+- Welche Dokumente wurden noch nicht versendet?
+
+**Sensible Felder:** `contact_ref, subject_ref, storage_key`
+
+---
+
+## Domäne: documents
+
+### `auswertungen/dms-volltext` — Volltextsuche Dokumentenverwaltung
+
+**Zweck:** Tenant-sicher Dokumente wiederfinden und zum Quellobjekt springen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/dms-volltext/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/dms-volltext/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/dms-volltext/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__dms-volltext/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/dms/search`
+- `documents` → `/api/v1/dms/search`
+
+**Beispiel-Prompts:**
+
+- Suche Dokumente mit dieser Belegnummer.
+- Zeige Zertifikate zu diesem Artikel.
+
+**Sensible Felder:** `description, document_name, article_name`
 
 ---
 
@@ -354,11 +1168,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__anfrage/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/anfragen/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/anfrage/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/anfragen/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/anfragen/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -390,11 +1202,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__angebot/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/angebote/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/angebot/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/angebote/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/angebote/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -428,11 +1238,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__anlieferavis/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/anlieferavise/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/anlieferavis/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/anlieferavis/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -464,11 +1272,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__auftragsbestaetigung/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/auftragsbestaetigungen/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/auftragsbestaetigung/entity/{entity_id}`
+- `entity` → `/api/v1/einkauf/auftragsbestaetigungen/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/auftragsbestaetigungen/entity/{entity_id}/tabs/positionen`
 
 **MCP-Tools (Domäne):**
@@ -492,7 +1298,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `einkauf/purchase-order` — Bestellung
 
-**Zweck:** Einkaufs-Bestellung: Kopfdaten, Positionen und Kommunikation fuer Beschaffungssteuerung.
+**Zweck:** Fuehrende Einkaufsbestellung: Bestellfall, L3-Kopf, Positionen mit Kontrakt und Ladetermin, Skontostaffel, Bedarf und Direktlieferung.
 
 | | |
 |---|---|
@@ -502,11 +1308,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__purchase-order/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/bestellungen/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/bestellungen/{entity_id}`
+- `entity` → `/api/v1/einkauf/bestellungen/{entity_id}`
 - `positionen` → `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/positionen`
 - `kommunikation` → `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/kommunikation`
 
@@ -516,16 +1322,20 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Was ist der Status von Bestellung {entity_id} und wann ist der Liefertermin?
-- Zeige alle Positionen und bestellten Mengen von Bestellung {entity_id}.
+- Welcher Bestellfall gilt fuer Bestellung {entity_id}?
+- Wann ist Ladetermin und Liefertermin von Bestellung {entity_id}?
+- Welche Positionen haben noch offene Restmenge?
+- Ist Bestellung {entity_id} eine Direktlieferung mit Ueberschlag am Lager?
 
-**Sensible Felder:** `zahlungsbedingungen, betrag`
+**Sensible Felder:** `zahlungsbedingung, skonto1_prozent, skonto2_prozent, betrag`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+| `speichern` | Speichern | safe | nein | `—` |
+| `versenden` | Versenden | moderate | nein | `/api/v1/einkauf/bestellungen/{entity_id}/versenden` |
 
 ---
 
@@ -541,11 +1351,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/einkauf__supplier/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/einkauf/lieferanten/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/einkauf/lieferanten/{entity_id}`
+- `entity` → `/api/v1/einkauf/lieferanten/{entity_id}`
 - `bestellungen` → `/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/bestellungen`
 - `kontakte` → `/api/v1/mask-rollouts/einkauf/supplier/{entity_id}/tabs/kontakte`
 
@@ -570,7 +1380,158 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `workspace/einkauf` — Einkauf-Cockpit
+
+**Zweck:** Rollen-Startseite Einkauf — offene Bestellungen, Avis und Preisabweichungen mit direktem Sprung in die Prozessmasken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/einkauf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/einkauf/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__einkauf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Einkauf-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
 ## Domäne: finance
+
+### `abrechnung/eb-lieferschein-kontrolle` — EB-Lieferschein-Kontrolle
+
+**Zweck:** Fehlende Eingangsbelege und Warenzugaenge kontrollieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
+| Readiness | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/readiness` |
+| Rollout-Route | `/mask-rollout/abrechnung__eb-lieferschein-kontrolle/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/document-control/summary`
+- `exceptions` → `/api/v1/document-control/exceptions?exception_type=missing_inbound_document`
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige nicht fakturierte Lieferscheine.
+- Welche Bestellungen sind unerledigt?
+- Welche Belegausnahmen sind ueberfaellig?
+
+**Sensible Felder:** `partner_name, partner_ref, notes`
+
+---
+
+### `auswertungen/auftrags-kontrolle` — Auftrags-Kontrolle
+
+**Zweck:** Unerledigte Bestellungen priorisieren und bis zum Quellbeleg verfolgen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/auftrags-kontrolle/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/auftrags-kontrolle/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/auftrags-kontrolle/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__auftrags-kontrolle/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/document-control/summary`
+- `exceptions` → `/api/v1/document-control/exceptions?exception_type=open_purchase_order`
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige nicht fakturierte Lieferscheine.
+- Welche Bestellungen sind unerledigt?
+- Welche Belegausnahmen sind ueberfaellig?
+
+**Sensible Felder:** `partner_name, partner_ref, notes`
+
+---
+
+### `auswertungen/beleg-kontrolle` — Beleg-Kontrolle
+
+**Zweck:** Belegausnahmen mandantensicher priorisieren und zum Ursprungsbeleg springen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/beleg-kontrolle/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/beleg-kontrolle/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/beleg-kontrolle/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__beleg-kontrolle/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/document-control/summary`
+- `exceptions` → `/api/v1/document-control/exceptions`
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige nicht fakturierte Lieferscheine.
+- Welche Bestellungen sind unerledigt?
+- Welche Belegausnahmen sind ueberfaellig?
+
+**Sensible Felder:** `partner_name, partner_ref, notes`
+
+---
+
+### `auswertungen/lieferschein-kontrolle` — Lieferschein-Kontrolle
+
+**Zweck:** Nicht fakturierte Lieferscheine priorisieren und klaeren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/lieferschein-kontrolle/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/lieferschein-kontrolle/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/lieferschein-kontrolle/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__lieferschein-kontrolle/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/document-control/summary`
+- `exceptions` → `/api/v1/document-control/exceptions?exception_type=uninvoiced_delivery_note`
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige nicht fakturierte Lieferscheine.
+- Welche Bestellungen sind unerledigt?
+- Welche Belegausnahmen sind ueberfaellig?
+
+**Sensible Felder:** `partner_name, partner_ref, notes`
+
+---
 
 ### `finance/ap-invoice` — Eingangsrechnung
 
@@ -584,11 +1545,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__ap-invoice/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/ap/invoices/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/ap/invoices/{entity_id}`
+- `entity` → `/api/v1/finance/ap/invoices/{entity_id}`
 - `positionen` → `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/positionen`
 - `freigabe` → `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/freigabe`
 
@@ -624,11 +1585,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__ar-open-item/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/open-items/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/finance/ar-open-item/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/open-items/{entity_id}`
+- `entity` → `/api/v1/finance/open-items/{entity_id}`
 - `ausgleich` → `/api/v1/mask-rollouts/finance/ar-open-item/{entity_id}/tabs/ausgleich`
 
 **MCP-Tools (Domäne):**
@@ -663,11 +1624,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__bankkonto/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/bankkonten/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/bankkonto/entity/{entity_id}`
+- `entity` → `/api/v1/banken/konten/{entity_id}`
 - `buchungen` → `/api/v1/masks/finance/bankkonten/entity/{entity_id}/tabs/buchungen`
 
 **MCP-Tools (Domäne):**
@@ -680,7 +1639,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Was ist der aktuelle Saldo von Bankkonto {entity_id}?
 - Zeige die letzten Buchungen auf Bankkonto {entity_id}.
 
-**Sensible Felder:** `konto_nr, iban, bic, saldo`
+**Sensible Felder:** `iban, bic, saldo`
 
 **Actions:**
 
@@ -702,11 +1661,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__debitor/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/debitoren/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/debitor/entity/{entity_id}`
+- `entity` → `/api/v1/finance/debitoren/{entity_id}`
 - `offene_posten` → `/api/v1/masks/finance/debitoren/entity/{entity_id}/tabs/offene-posten`
 - `umsaetze` → `/api/v1/masks/finance/debitoren/entity/{entity_id}/tabs/umsaetze`
 
@@ -742,11 +1699,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__kreditor/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/kreditoren/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/kreditor/entity/{entity_id}`
+- `entity` → `/api/v1/finance/kreditoren/{entity_id}`
 - `offene_posten` → `/api/v1/masks/finance/kreditoren/entity/{entity_id}/tabs/offene-posten`
 - `bestellungen` → `/api/v1/masks/finance/kreditoren/entity/{entity_id}/tabs/bestellungen`
 
@@ -760,7 +1715,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche offenen Posten hat Kreditor {entity_id}?
 - Zeige alle Bestellungen bei Kreditor {entity_id}.
 
-**Sensible Felder:** `iban, steuernummer, ust_id`
+**Sensible Felder:** `steuernummer, ust_id`
 
 **Actions:**
 
@@ -782,11 +1737,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/finance__payment-run/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/finance/payment-runs/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/finance/payment-run/{entity_id}/screen-summary`
 
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/finance/payment-runs/{entity_id}`
+- `entity` → `/api/v1/finance/payment-runs/{entity_id}`
 - `zahlungen` → `/api/v1/mask-rollouts/finance/payment-run/{entity_id}/tabs/zahlungen`
 
 **MCP-Tools (Domäne):**
@@ -799,17 +1754,138 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Was ist der Status von Zahlungslauf {entity_id} und wie hoch ist der Gesamtbetrag?
 - Zeige alle Einzelzahlungen von Zahlungslauf {entity_id} mit Status 'fehler'.
 
-**Sensible Felder:** `gesamtbetrag, bank`
+**Sensible Felder:** `initiator_iban, gesamtbetrag, bank`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `freigeben` | Zahlungslauf freigeben | critical | ja | `commandEndpoint nur nach vollstaendiger AP+AR-Parity und 4-Augen-Freigabe` |
+| `freigeben` | Zahlungslauf freigeben | critical | ja | `/api/v1/finance/payment-runs/{entity_id}/actions/freigeben` |
+
+---
+
+### `finance/rechnungstapel` — Rechnungstapel
+
+**Zweck:** Rechnungs- und Selbstabrechnungsstapel nachvollziehbar abarbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/rechnungstapel/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/rechnungstapel/readiness` |
+| Rollout-Route | `/mask-rollout/finance__rechnungstapel/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/billing-batches/summary`
+- `batches` → `/api/v1/billing-batches`
+- `errors` → `/api/v1/billing-batches/lines?status=failed`
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige Fehlerzeilen im Rechnungstapel.
+- Welche Selbstabrechner warten auf Freigabe?
+
+**Sensible Felder:** `validation_error, source_ref, maker, checker`
+
+---
+
+### `workspace/fibu` — FIBU-Cockpit
+
+**Zweck:** Rollen-Startseite FIBU — offene Posten, faellige Zahlungen und Mahnstufen mit Sprung in Zahlungslauf und OP-Masken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/fibu/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/fibu/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/fibu/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__fibu/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Was steht heute in FIBU-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
 
 ---
 
 ## Domäne: futtermittel
+
+### `futtermittel/analyse` — Futteranalyse
+
+**Zweck:** Laborbefund nachvollziehbar pruefen und genau eine Analyseversion bewusst aktivieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/futtermittel/analyse/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
+| Readiness | `GET /api/v1/masks/futtermittel/analyse/readiness` |
+| Rollout-Route | `/mask-rollout/futtermittel__analyse/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}`
+- `values` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/values`
+- `findings` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/findings`
+- `history` → `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/history`
+
+**Beispiel-Prompts:**
+
+- Welche Blocker verhindern die Freigabe?
+- Zeige Original- und Rechenwerte dieser Analyse.
+
+**Sensible Felder:** `original_document_id, original_sha256`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `validate` | Plausibilitaet pruefen | safe | nein | `—` |
+| `release` | Analyse freigeben | high | ja | `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release` |
+| `reject` | Zurueckweisen | moderate | nein | `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject` |
+
+---
+
+### `futtermittel/analysen` — Futteranalysen
+
+**Zweck:** Futteranalysen nach Plausibilitaet, Freigabe und Aktualitaet priorisieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/futtermittel/analysen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
+| Readiness | `GET /api/v1/masks/futtermittel/analysen/readiness` |
+| Rollout-Route | `/mask-rollout/futtermittel__analysen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/rations-optimization/feed-analyses`
+
+**Beispiel-Prompts:**
+
+- Welche Analysen warten auf Pruefung?
+- Welche aktiven Analysen sind veraltet?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `import_analysis` | Analyse erfassen | safe | nein | `—` |
+
+---
 
 ### `futtermittel/einzelfuttermittel` — Einzelfuttermittel
 
@@ -823,13 +1899,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/futtermittel__einzelfuttermittel/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/futtermittel/einzelfuttermittel/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}`
-- `naehrstoffe` → `/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}/tabs/naehrstoffe`
-- `preise` → `/api/v1/masks/futtermittel/einzelfuttermittel/entity/{entity_id}/tabs/preise`
+- `entity` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}`
+- `naehrstoffe` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/reference-values`
+- `preise` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/products`
+- `history` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/history`
 
 **Beispiel-Prompts:**
 
@@ -858,11 +1933,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/futtermittel__mischfuttermittel/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/futtermittel/mischfuttermittel/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}`
+- `entity` → `/api/v1/futter/mischfuttermittel/{entity_id}`
 - `rezeptur` → `/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/rezeptur`
 - `naehrstoffe` → `/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/naehrstoffe`
 
@@ -871,13 +1944,143 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche Komponenten hat Mischfutter {entity_id}?
 - Zeige die berechneten Naehrstoffgehalte von Mischfutter {entity_id}.
 
-**Sensible Felder:** `preis_je_t`
-
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+## Domäne: integration
+
+### `schnittstelle/legacy-adapter-monitor` — Standard-/Unimet-Adapter
+
+**Zweck:** L3 Standard- und Unimet-Dateien idempotent pruefen, mappen und abstimmen, ohne produktiv zu buchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
+| Readiness | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/readiness` |
+| Rollout-Route | `/mask-rollout/schnittstelle__legacy-adapter-monitor/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/legacy-interface-adapters/batches`
+- `batches` → `/api/v1/legacy-interface-adapters/batches`
+
+**Beispiel-Prompts:**
+
+- Zeige quarantinierte Unimet-Batches.
+- Stimme diesen L3-Standard-Batch ab.
+
+**Sensible Felder:** `external_id, payload_hash, error_message`
+
+---
+
+## Domäne: inventory
+
+### `lager/fremdware` — Fremdware und Fremdbestand
+
+**Zweck:** Fremde Ware eigentuemer- und mandantensicher im Lager steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/lager/fremdware/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/lager/fremdware/agent-contract` |
+| Readiness | `GET /api/v1/masks/lager/fremdware/readiness` |
+| Rollout-Route | `/mask-rollout/lager__fremdware/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/foreign-goods/summary`
+- `items` → `/api/v1/foreign-goods`
+
+**MCP-Tools (Domäne):**
+
+- `wms.lot.trace` — scope `inventory:read`, Risiko niedrig
+- `wms.cell.status` — scope `inventory:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige Fremdbestand nach Eigentuemer.
+- Welche Einlagerungen sind ueberfaellig?
+
+**Sensible Felder:** `tenant_id, eigentuemer_id, eigentuemer_name, lagerort, notiz`
+
+---
+
+### `lager/inventur-nebenlaeufe` — Inventur-Nebenlaeufe
+
+**Zweck:** Inventur-Nebenlaeufe hashgebunden und im Vier-Augen-Prinzip steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/lager/inventur-nebenlaeufe/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
+| Readiness | `GET /api/v1/masks/lager/inventur-nebenlaeufe/readiness` |
+| Rollout-Route | `/mask-rollout/lager__inventur-nebenlaeufe/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/inventory/auxiliary/summary`
+- `batches` → `/api/v1/inventory/auxiliary/batches`
+
+**MCP-Tools (Domäne):**
+
+- `wms.lot.trace` — scope `inventory:read`, Risiko niedrig
+- `wms.cell.status` — scope `inventory:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Erzeuge einen Kontrolllauf.
+- Welche Bestandsvortraege warten auf Freigabe?
+
+**Sensible Felder:** `maker, checker, source_hash`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create_count_sheet` | Zaehlliste | low | nein | `—` |
+| `create_control` | Kontrolllauf | low | nein | `—` |
+| `create_valuation` | Vorlaeufig bewerten | low | nein | `—` |
+| `create_opening` | Bestandsvortrag | high | nein | `—` |
+
+---
+
+### `produktion/chargen-bearbeiten` — Chargen-Nummern bearbeiten
+
+**Zweck:** Chargenkennzeichen pflegen und qualitaetsgepruefte Chargen nachvollziehbar freigeben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/produktion/chargen-bearbeiten/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
+| Readiness | `GET /api/v1/masks/produktion/chargen-bearbeiten/readiness` |
+| Rollout-Route | `/mask-rollout/produktion__chargen-bearbeiten/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/chargen/stats/summary`
+- `charges` → `/api/v1/chargen`
+
+**MCP-Tools (Domäne):**
+
+- `wms.lot.trace` — scope `inventory:read`, Risiko niedrig
+- `wms.cell.status` — scope `inventory:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeige nicht freigegebene Chargen.
+- Pflege die Anerkennungsnummer.
+
+**Sensible Felder:** `lieferanten_charge, anerkennungs_nr, herkunft`
 
 ---
 
@@ -895,7 +2098,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/lager__article-stock/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/articles/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/lager/article-stock/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -924,6 +2127,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `lager/leitstand` — Lager-Leitstand
+
+**Zweck:** Physische Silozellen-Belegung, Fuellstand und QS-Sperren als klickbares Werkzeug im Lager-Leitstand anzeigen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/lager/leitstand/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/lager/leitstand/agent-contract` |
+| Readiness | `GET /api/v1/masks/lager/leitstand/readiness` |
+| Rollout-Route | `/mask-rollout/lager__leitstand/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Silozellen sind gesperrt?
+- Zeige den Fuellstand im Lager-Leitstand.
+- Welche Zelle ist ueber 90 Prozent belegt?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
 ### `lager/stock-movement` — Lagerbewegung
 
 **Zweck:** Lagerbewegung: Einzelne Warenbewegung mit Belegpositionen fuer Lager-Audit und Traceability.
@@ -936,7 +2170,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/lager__stock-movement/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/inventory/stock-movements/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/lager/stock-movement/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -961,6 +2195,490 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `workspace/lager` — Lager-Cockpit
+
+**Zweck:** Rollen-Startseite Lager — Annahmen, Wartezeiten und Trocknerauslastung mit Sprung in Bestands- und Qualitaetsmasken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/lager/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/lager/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/lager/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__lager/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Lager-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
+## Domäne: logistics
+
+### `fuhrpark/fahrzeuge` — Fahrzeuge
+
+**Zweck:** Fahrzeuge nach Kennzeichen, Typ und Status suchen und in die Erfassung oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fuhrpark/fahrzeuge/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
+| Readiness | `GET /api/v1/masks/fuhrpark/fahrzeuge/readiness` |
+| Rollout-Route | `/mask-rollout/fuhrpark__fahrzeuge/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/fuhrpark/fahrzeuge`
+
+**Beispiel-Prompts:**
+
+- Welche Fahrzeuge sind verfuegbar?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Fahrzeug | safe | nein | `Oeffnet die bestehende Fahrzeug-Erfassung.` |
+
+---
+
+### `fuhrpark/uebersicht` — Fuhrpark
+
+**Zweck:** Vom Fuhrpark in Stammdaten, Rechnungen, Kosten und Belege springen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fuhrpark/uebersicht/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fuhrpark/uebersicht/agent-contract` |
+| Readiness | `GET /api/v1/masks/fuhrpark/uebersicht/readiness` |
+| Rollout-Route | `/mask-rollout/fuhrpark__uebersicht/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Oeffne Fuhrpark.
+
+---
+
+### `logistik/frachtbrief` — Frachtbriefe
+
+**Zweck:** Transportbelege nach Nummer, Empfaenger und Kennzeichen sichten. Der Lieferschein bleibt der Warenbeleg.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/logistik/frachtbrief/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/logistik/frachtbrief/agent-contract` |
+| Readiness | `GET /api/v1/masks/logistik/frachtbrief/readiness` |
+| Rollout-Route | `/mask-rollout/logistik__frachtbrief/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/logistik/frachtbriefe`
+
+**Beispiel-Prompts:**
+
+- Welche Frachtbriefe sind noch erstellt?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `verladung` | Zur Verladung | safe | nein | `Oeffnet die Verladung. Dort entsteht der Frachtbrief.` |
+
+---
+
+### `logistik/frachttabellen` — Frachttabellen
+
+**Zweck:** Frachttabellen und ihre Mengenstaffel anlegen. Der Stand folgt den Positionen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/logistik/frachttabellen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/logistik/frachttabellen/agent-contract` |
+| Readiness | `GET /api/v1/masks/logistik/frachttabellen/readiness` |
+| Rollout-Route | `/mask-rollout/logistik__frachttabellen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `tabellen` → `/api/v1/logistik/frachttabellen`
+
+**Beispiel-Prompts:**
+
+- Welche Frachttabelle hat noch keine Staffel?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Tabelle speichern | safe | nein | `Legt die Frachttabelle an.` |
+| `position` | Position anlegen | safe | nein | `Haengt eine Staffelposition an die gewaehlte Tabelle.` |
+
+---
+
+### `logistik/tour-fracht-arbeitsraum` — Tour & Fracht
+
+**Zweck:** Touren, Frachtbriefe und Tarife gemeinsam sichten. Die Ampel folgt Bestand und Chargensperre.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/logistik/tour-fracht-arbeitsraum/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/logistik/tour-fracht-arbeitsraum/agent-contract` |
+| Readiness | `GET /api/v1/masks/logistik/tour-fracht-arbeitsraum/readiness` |
+| Rollout-Route | `/mask-rollout/logistik__tour-fracht-arbeitsraum/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `touren` → `/api/v1/logistik/tours`
+- `fracht` → `/api/v1/logistik/frachtbriefe`
+- `tarife` → `/api/v1/logistik/freight-tariffs`
+
+**Beispiel-Prompts:**
+
+- Welche Frachtbriefe sind noch nicht versendet?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `touren` | Zur Tourenplanung | safe | nein | `Wechselt in die Tourenplanung.` |
+| `fracht` | Zu Frachtbriefen | safe | nein | `Wechselt zu den Frachtbriefen.` |
+| `tabellen` | Frachttabellen | safe | nein | `Oeffnet die Frachttabellen.` |
+| `probe` | Probe berechnen | safe | nein | `Simuliert die Frachtkosten des ersten aktiven Tarifs.` |
+
+---
+
+### `logistik/tourenplanung` — Tourenplanung
+
+**Zweck:** Eine Tour aus Lieferschein, Fahrzeug und Fahrer disponieren. Die Ampel folgt der Besetzung.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/logistik/tourenplanung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/logistik/tourenplanung/agent-contract` |
+| Readiness | `GET /api/v1/masks/logistik/tourenplanung/readiness` |
+| Rollout-Route | `/mask-rollout/logistik__tourenplanung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `touren` → `/api/v1/logistik/tours`
+- `fahrzeuge` → `/api/v1/fuhrpark/fahrzeuge`
+- `fahrer` → `/api/v1/transporte/fahrer`
+
+**Beispiel-Prompts:**
+
+- Welche Touren haben heute noch keinen Fahrer?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `dispo` | Dispo-Arbeitsraum | safe | nein | `Oeffnet den bestehenden Dispo-Arbeitsraum.` |
+| `aufloesen` | Auflösen | safe | nein | `Liest den Lieferschein und setzt das Ziel.` |
+| `anlegen` | Tour anlegen | safe | nein | `Legt die Tour aus dem aufgeloesten Lieferschein an.` |
+
+---
+
+### `logistik/verladung` — Verladung
+
+**Zweck:** Beladungen nach Kennzeichen, Ware und Lieferschein sichten und eine neue Beladung öffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/logistik/verladung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/logistik/verladung/agent-contract` |
+| Readiness | `GET /api/v1/masks/logistik/verladung/readiness` |
+| Rollout-Route | `/mask-rollout/logistik__verladung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/verladung`
+
+**Beispiel-Prompts:**
+
+- Welche Verladungen sind noch geplant?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue Beladung | safe | nein | `Oeffnet die bestehende LKW-Beladung.` |
+
+---
+
+### `logistik/versandprofile` — Versandprofile
+
+**Zweck:** Versandprofile und Lieferavise anlegen. Der Stand folgt den Profilen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/logistik/versandprofile/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
+| Readiness | `GET /api/v1/masks/logistik/versandprofile/readiness` |
+| Rollout-Route | `/mask-rollout/logistik__versandprofile/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `profile` → `/api/v1/logistik/versand/profile`
+- `avise` → `/api/v1/logistik/versand/avise`
+
+**Beispiel-Prompts:**
+
+- Welches Versandprofil fehlt noch?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `profil` | Profil speichern | safe | nein | `Legt das Versandprofil an.` |
+| `avis` | Avis speichern | safe | nein | `Legt ein Lieferavis an.` |
+
+---
+
+### `strecke/disposition` — Strecken-Disposition
+
+**Zweck:** Strecken disponieren: eine Tour fuer heute anlegen, bestehende Touren sehen und loeschen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/strecke/disposition/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/strecke/disposition/agent-contract` |
+| Readiness | `GET /api/v1/masks/strecke/disposition/readiness` |
+| Rollout-Route | `/mask-rollout/strecke__disposition/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/tours`
+
+**Beispiel-Prompts:**
+
+- Lege eine neue Strecke fuer heute an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue Strecke | safe | nein | `—` |
+
+---
+
+### `strecke/dokumente-drucken` — Strecken-Dokumente drucken
+
+**Zweck:** Fracht, Paket, Versand-Avis und Produktion zum Druck oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/strecke/dokumente-drucken/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/strecke/dokumente-drucken/agent-contract` |
+| Readiness | `GET /api/v1/masks/strecke/dokumente-drucken/readiness` |
+| Rollout-Route | `/mask-rollout/strecke__dokumente-drucken/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Oeffne Strecken-Dokumente drucken.
+
+---
+
+### `strecke/streckengeschaeft` — Streckengeschäft
+
+**Zweck:** Streckengeschaeft erfassen und den Bestand nach Nummer, Lieferant und Artikel suchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/strecke/streckengeschaeft/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/strecke/streckengeschaeft/agent-contract` |
+| Readiness | `GET /api/v1/masks/strecke/streckengeschaeft/readiness` |
+| Rollout-Route | `/mask-rollout/strecke__streckengeschaeft/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/strecke/streckengeschaefte`
+
+**Beispiel-Prompts:**
+
+- Welche Streckengeschaefte sind noch nicht erledigt?
+- Zeige die Strecke mit der Partie von heute.
+
+---
+
+### `strecke/vorlaeufig` — Vorläufige Streckengeschäfte
+
+**Zweck:** Vorlaeufige Streckengeschaefte als Touren nach Nummer, Datum und Status suchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/strecke/vorlaeufig/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/strecke/vorlaeufig/agent-contract` |
+| Readiness | `GET /api/v1/masks/strecke/vorlaeufig/readiness` |
+| Rollout-Route | `/mask-rollout/strecke__vorlaeufig/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/tours`
+
+**Beispiel-Prompts:**
+
+- Welche Touren sind noch geplant?
+
+---
+
+### `transporte/fahrer` — Fahrer
+
+**Zweck:** Fahrer nach Name und Status suchen. Touren heute ist die Zahl der heutigen Touren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/transporte/fahrer/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/transporte/fahrer/agent-contract` |
+| Readiness | `GET /api/v1/masks/transporte/fahrer/readiness` |
+| Rollout-Route | `/mask-rollout/transporte__fahrer/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/transporte/fahrer`
+- `touren` → `/api/v1/logistik/tours`
+
+**Beispiel-Prompts:**
+
+- Welche Fahrer sind heute unterwegs?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neuer Fahrer | safe | nein | `Oeffnet das bestehende Fahrerformular.` |
+| `verfuegbar` | Verfügbaren Fahrer öffnen | safe | nein | `Oeffnet den ersten verfuegbaren Fahrer.` |
+| `touren` | Tourenplanung | safe | nein | `Wechselt in die Tourenplanung.` |
+| `dokumente` | Dokumente | safe | nein | `Oeffnet die Dokumentenablage.` |
+| `export` | Export | safe | nein | `Exportiert die sichtbare Fahrerliste.` |
+
+---
+
+### `versand/versand-avis` — Versand-Avis
+
+**Zweck:** Versand-Avise zur Auswahl stellen und den Empfaenger fuer den Versand nennen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/versand/versand-avis/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/versand/versand-avis/agent-contract` |
+| Readiness | `GET /api/v1/masks/versand/versand-avis/readiness` |
+| Rollout-Route | `/mask-rollout/versand__versand-avis/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/logistik/versand/avise`
+
+**Beispiel-Prompts:**
+
+- Welche Avise stehen zum Drucken an?
+
+---
+
+## Domäne: management
+
+### `workspace/leitung` — Leitungs-Cockpit
+
+**Zweck:** Rollen-Startseite Leitung — Umsatz, Rohertrag und Top-Ausnahmen mit Sprung in Eskalations- und Audit-Ansichten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/leitung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/leitung/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/leitung/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__leitung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Leitungs-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
+## Domäne: platform
+
+### `planung/kalender` — Planungskalender
+
+**Zweck:** Zeitbezogene Fristen, Wiedervorlagen und Laeufe ohne Doppelpflege als Planungscockpit sichtbar machen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/planung/kalender/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/planung/kalender/agent-contract` |
+| Readiness | `GET /api/v1/masks/planung/kalender/readiness` |
+| Rollout-Route | `/mask-rollout/planung__kalender/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Was steht naechste Woche an?
+- Zeige Fristen der naechsten 14 Tage.
+- Welche OP-Faelligkeiten kommen diese Woche?
+- Zeige die Frei/Belegt-Sicht meines Teams.
+- Blende abgelehnte Termine ein.
+
+**Sensible Felder:** `owner_id, team_id, title, payload, object_route`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `reproject` | Neu projizieren | moderate | nein | `/api/v1/planung/kalender/reproject` |
+
+---
+
+### `schnittstelle/mde-inbox` — MDE-Eingangskorb
+
+**Zweck:** MDE-Ereignisse mandantenbezogen ueberwachen und fehlgeschlagene Verarbeitung nachvollziehbar behandeln.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/schnittstelle/mde-inbox/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
+| Readiness | `GET /api/v1/masks/schnittstelle/mde-inbox/readiness` |
+| Rollout-Route | `/mask-rollout/schnittstelle__mde-inbox/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/mobile/sync-summary`
+- `queue` → `/api/v1/mobile/sync-queue`
+
+**Beispiel-Prompts:**
+
+- Zeige MDE-Ereignisse in Quarantaene.
+- Welche Inventurzaehlungen sind fehlgeschlagen?
+- Welche Geraete liefern aktuell Fehler?
+
+**Sensible Felder:** `error_message, idempotency_key`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `process_pending` | Ausstehende verarbeiten | moderate | nein | `/api/v1/mobile/sync-process` |
+
+---
+
 ## Domäne: qualitaet
 
 ### `qualitaet/reklamation` — Reklamation
@@ -975,11 +2693,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/qualitaet__reklamation/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/masks/qualitaet/reklamationen/{entity_id}/screen-summary`
-
 **Data Sources:**
 
-- `entity` → `/api/v1/masks/qualitaet/reklamation/entity/{entity_id}`
+- `entity` → `/api/v1/reklamationen/{entity_id}`
 - `massnahmen` → `/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/massnahmen`
 - `dokumente` → `/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/dokumente`
 
@@ -997,11 +2713,126 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `strecke/qualitaets-abweichung` — Qualitätsabweichung
+
+**Zweck:** Qualitaetsabweichungen nach Nummer, Kunde, Artikel und Status sichten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/strecke/qualitaets-abweichung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/strecke/qualitaets-abweichung/agent-contract` |
+| Readiness | `GET /api/v1/masks/strecke/qualitaets-abweichung/readiness` |
+| Rollout-Route | `/mask-rollout/strecke__qualitaets-abweichung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/qualitaet/reklamationen`
+
+**Beispiel-Prompts:**
+
+- Welche Reklamationen sind noch neu?
+
+---
+
+## Domäne: reporting
+
+### `auswertungen/abfrage-center` — Abfrage-Center
+
+**Zweck:** Freigegebene Read Models ohne beliebiges SQL anwendergerecht abfragen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/abfrage-center/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/abfrage-center/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__abfrage-center/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/query-center/catalog`
+- `definitions` → `/api/v1/query-center`
+
+**Beispiel-Prompts:**
+
+- Zeige meine favorisierten Abfragen.
+- Erstelle eine begrenzte Vorschau offener Rechnungen.
+
+**Sensible Felder:** `filter_spec, selected_fields`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `create` | Neue Abfrage | low | nein | `—` |
+| `import` | Signiert importieren | moderate | nein | `—` |
+
+---
+
+### `auswertungen/bonus-berechnung` — Bonus-Berechnung
+
+**Zweck:** Bonusfaehige Umsaetze reproduzierbar berechnen und Korrekturen unveraenderbar nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/bonus-berechnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/bonus-berechnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/bonus-berechnung/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__bonus-berechnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/l3-report-catalog/bonus-runs`
+- `runs` → `/api/v1/l3-report-catalog/bonus-runs`
+
+**Beispiel-Prompts:**
+
+- Berechne den Kundenbonus fuer dieses Jahr.
+- Exportiere diesen Bonuslauf.
+
+**Sensible Felder:** `total_basis, total_bonus, dimension_id, actor`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `calculate` | Bonuslauf berechnen | moderate | nein | `—` |
+
+---
+
+### `auswertungen/l3-berichtskatalog` — L3-Berichtskatalog
+
+**Zweck:** Priorisierte L3-Berichte mit identischen Summen in Ansicht und Export bereitstellen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/agent-contract` |
+| Readiness | `GET /api/v1/masks/auswertungen/l3-berichtskatalog/readiness` |
+| Rollout-Route | `/mask-rollout/auswertungen__l3-berichtskatalog/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/l3-report-catalog`
+- `reports` → `/api/v1/l3-report-catalog`
+
+**Beispiel-Prompts:**
+
+- Zeige Umsatz nach Vertreter.
+- Drille die Chargensumme auf Belege herunter.
+
+**Sensible Felder:** `customer_id, representative_id, source_ref`
+
+---
+
 ## Domäne: sales
 
 ### `sales/delivery-note` — Lieferschein
 
-**Zweck:** Lieferschein-Cockpit: Kopfdaten, Positionen und Dokumente fuer Warenausgang und Lieferverfolgung.
+**Zweck:** Warenbeleg: Kunde, Auftrag, Artikel, Menge und Charge. Fahrzeug und Beförderung stehen am Frachtbrief.
 
 | | |
 |---|---|
@@ -1011,7 +2842,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/sales__delivery-note/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Summary:** `/api/v1/sales/delivery-notes/{entity_id}/screen-summary`
+**Summary:** `/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/screen-summary`
 
 **Data Sources:**
 
@@ -1034,7 +2865,76 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `drucken` | Lieferschein drucken | safe | nein | `PDF-Druck commandEndpoint folgt` |
+| `drucken` | Lieferschein drucken | safe | nein | `/api/v1/sales/delivery-notes/{entity_id}/actions/drucken` |
+
+---
+
+### `sales/invoice` — Ausgangsrechnung
+
+**Zweck:** Ausgangsrechnung mit Positionen und dem Nachweis, aus welcher Lieferscheinposition welche berechnete Teilmenge stammt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/sales/invoice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/sales/invoice/agent-contract` |
+| Readiness | `GET /api/v1/masks/sales/invoice/readiness` |
+| Rollout-Route | `/mask-rollout/sales__invoice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Summary:** `/api/v1/sales/invoices/{entity_id}/screen-summary`
+
+**Data Sources:**
+
+- `entity` → `/api/v1/sales/invoices/{entity_id}`
+- `positionen` → `/api/v1/sales/invoices/{entity_id}/tabs/positionen`
+- `herkunft` → `/api/v1/sales/invoices/{entity_id}/tabs/herkunft`
+- `steuer` → `/api/v1/sales/invoices/{entity_id}/tabs/steuer`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Woher stammt die berechnete Menge von Position 2 der Rechnung {entity_id}?
+- Welche Positionen der Rechnung {entity_id} sind nicht vollstaendig durch Zuordnungen belegt?
+- Aus welchen Lieferscheinen ist Rechnung {entity_id} entstanden?
+
+---
+
+### `sales/invoices` — Ausgangsrechnungen
+
+**Zweck:** Ausgangsrechnungen suchen, nach Faelligkeit und Status priorisieren und den Beleg oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/sales/invoices/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/sales/invoices/agent-contract` |
+| Readiness | `GET /api/v1/masks/sales/invoices/readiness` |
+| Rollout-Route | `/mask-rollout/sales__invoices/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/sales/invoices`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Rechnungen sind noch im Entwurf?
+- Zeige die Rechnungen des Kunden K-100 aus diesem Monat.
+- Gibt es Rechnungen ohne Positionen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | Liste exportieren | safe | nein | `—` |
 
 ---
 
@@ -1077,5 +2977,84 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `verkauf/betriebsauftrag` — Betriebsauftrag drucken
+
+**Zweck:** Betriebsauftraege zum Drucken aus den Verkaufsauftraegen heraussuchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/verkauf/betriebsauftrag/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/verkauf/betriebsauftrag/agent-contract` |
+| Readiness | `GET /api/v1/masks/verkauf/betriebsauftrag/readiness` |
+| Rollout-Route | `/mask-rollout/verkauf__betriebsauftrag/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/sales/orders/`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Auftraege haben ein Lieferdatum?
+
+---
+
+### `workspace/verkauf` — Verkauf-Cockpit
+
+**Zweck:** Rollen-Startseite Verkauf — Auftragsbestand, Ueberfaellige und Kreditlimit-Warnungen mit Sprung in Auftrags- und CRM-Masken.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/verkauf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/verkauf/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/verkauf/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__verkauf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Was steht heute in Verkauf-Cockpit an?
+- Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
+## Domäne: workspace
+
+### `workspace/letzte-dokumente` — Letzte Dokumente
+
+**Zweck:** Die eigenen zuletzt geoeffneten und weiterhin berechtigten ERP-Dokumente wiederfinden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workspace/letzte-dokumente/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workspace/letzte-dokumente/agent-contract` |
+| Readiness | `GET /api/v1/masks/workspace/letzte-dokumente/readiness` |
+| Rollout-Route | `/mask-rollout/workspace__letzte-dokumente/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/recent-documents`
+- `documents` → `/api/v1/recent-documents`
+
+**Beispiel-Prompts:**
+
+- Oeffne meinen letzten Lieferschein.
+- Zeige meine zuletzt geoeffneten Rechnungen.
+
+**Sensible Felder:** `partner_name, document_number, route`
 
 ---

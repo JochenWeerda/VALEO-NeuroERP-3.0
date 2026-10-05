@@ -116,8 +116,8 @@ test.describe('Fachliche Vertiefung Gate: Versandprofile & Lieferavise', () => {
     await page.goto('/logistik/versandprofile', { waitUntil: 'domcontentloaded' })
     await waitForDashboardShell(page)
 
-    // Page uses span elements, not table cells
-    await expect(page.locator('span.font-mono', { hasText: 'EMAIL-STD' }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Versandprofile' })).toBeVisible()
+    await expect(page.getByText('EMAIL-STD').first()).toBeVisible()
     await expect(page.getByText('Standard E-Mail-Versand').first()).toBeVisible()
 
     expect(requests.some((r) => r.startsWith('GET /api/v1/logistik/versand/profile'))).toBe(true)
@@ -186,8 +186,7 @@ test.describe('Fachliche Vertiefung Gate: Versandprofile & Lieferavise', () => {
     await page.goto('/logistik/versandprofile', { waitUntil: 'domcontentloaded' })
     await waitForDashboardShell(page)
 
-    // aria-label is "{profil_nr} löschen"
-    const deleteBtn = page.getByRole('button', { name: 'EMAIL-STD löschen' })
+    const deleteBtn = page.getByRole('button', { name: 'Löschen' })
     await deleteBtn.click()
 
     await expect(async () => {

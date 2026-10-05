@@ -1,0 +1,60 @@
+slice_id: RATION-WB-07-SENSITIVITAET
+id: RATION-WB-07-SENSITIVITAET
+title: Rationswerkbank – Sensitivität (parametrischer Sweep) TDD
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+completed_at: "2026-07-20"
+goal: >-
+  Skill §8 umsetzen: eine Größe (Milchleistungsziel, Preis, Max-/Min-Menge eines
+  Futtermittels) schrittweise variieren und je Schritt Kosten, erreichbare
+  Leistung, ME-/sidP-Dichte und bindende Grenzen ausgeben. Backend-Endpoint
+  /agrar/rations-optimization/sensitivity (ein Solve je Schritt, max. 20) plus
+  Sensitivitäts-Panel im Werkbank-Center.
+scope:
+  - Backend _SensitivitySweep/_SensitivityBody + _sensitivity_steps/_sensitivity_row/_run_sensitivity
+  - Endpoint POST /sensitivity (interner Solver + Proxy-Fallback)
+  - Frontend runSensitivity + SensitivityResult/SensitivityStep + SensitivityPanel
+  - Panel-Mount im Workbench-Center; wizardToCowProfile-Helfer
+non_scope:
+  - Exaktes Shadow-Price/Slack aus dem LP (Skill §5.2 erweiterte Sensitivität) – Folge-Ausbau
+  - Sweep über mehrere Größen gleichzeitig
+  - Chart-Visualisierung der Kurve (zunächst Tabelle wie im Zielbild)
+file_ownership:
+  - docs/agent-ops/slices/RATION-WB-07-SENSITIVITAET.yaml
+  - app/api/v1/endpoints/rations_optimization.py
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+  - tests/test_rations_sensitivity.py
+acceptance:
+  - "pytest tests/test_rations_sensitivity.py gruen (8 Faelle)"
+  - "milk_target-Sweep: Kosten steigen nicht bei niedrigerem Ziel; Achse korrekt"
+  - "feed_*/price ohne feed_id -> HTTPException 422"
+  - "Schrittzahl auf 20 gedeckelt"
+  - "tsc --noEmit und eslint gruen"
+tests:
+  - "pytest tests/test_rations_sensitivity.py --noconftest -p no:cacheprovider --no-cov -o addopts=''"
+  - "npx tsc --noEmit -p tsconfig.json"
+risks:
+  - "Ein Solve je Schritt -> mehrere Sekunden Laufzeit pro Analyse; Schrittzahl bewusst auf 20 begrenzt."
+  - "Panel-Berechnen ist ein serverseitiger Lauf; mit loading-Guard + disabled + finally + Fehlermeldung abgesichert."
+ai_harness:
+  fachlicher_vertrag: >-
+    Je Schritt werden autoritative Solver-Kennzahlen (Kosten, erreichbare
+    Leistung aus attainability, ME/sidP-Dichte, bindende Grenzen) ausgegeben;
+    keine Interpolation, jeder Punkt ist ein echter Solve.
+  test_vertrag: >-
+    TDD: Backend-Unit-Tests (Achse, Monotonie der Kosten, Validierung, Deckelung)
+    gegen den echten Solver.
+  daten_vertrag: >-
+    Fehlende Dichten bleiben null; unerreichbare Schritte zeigen technical_max
+    statt erfundener Leistung.
+  api_vertrag: >-
+    Neuer additiver Endpoint POST /sensitivity; response_model offen (extra
+    erlaubt), Proxy-Fallback analog optimize.
+  ui_vertrag: >-
+    SensitivityPanel mit Größen-/Futter-/Bereichsauswahl und Ergebnistabelle
+    (Zielbild unten links); Mutation-Guard eingehalten.
+  persistenz_vertrag: >-
+    Reine Analyse; keine Persistenzänderung.

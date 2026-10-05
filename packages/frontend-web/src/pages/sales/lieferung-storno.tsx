@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Undo2, Loader2, RefreshCw, Search, Ban, ReceiptText } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,8 +18,8 @@ import { useStornoStatus, useStornoDelivery } from '@/lib/api/sales-storno'
  * Lieferungen sind storno-gesperrt (zuerst Gutschrift). Gutschrift-Übersicht.
  */
 
-const STATUS_BADGE: Record<string, string> = {
-  storniert: 'bg-red-100 text-red-800', geliefert: 'bg-emerald-100 text-emerald-800',
+const STATUS_BADGE: Record<string, BadgeVariant> = {
+  storniert: 'error', geliefert: 'success',
 }
 
 export default function LieferungStornoPage() {
@@ -55,7 +55,7 @@ export default function LieferungStornoPage() {
       <div className="flex items-center gap-2">
         <Undo2 size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Lieferung-Storno / Gutschrift</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
           {orders.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -121,13 +121,13 @@ export default function LieferungStornoPage() {
                         {(d.lieferscheine ?? []).map((ls) => (
                           <tr key={ls.lieferschein} className="border-b last:border-0">
                             <td className="px-3 py-1.5">{ls.lieferschein}</td>
-                            <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[(ls.status ?? '').toLowerCase()] ?? ''}`}>{ls.status}</Badge></td>
+                            <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[(ls.status ?? 'muted').toLowerCase()] ?? 'muted'} className="text-[10px]">{ls.status}</Badge></td>
                             <td className="px-3 py-1.5 text-muted-foreground">{ls.rechnung ?? '—'}</td>
                             <td className="px-3 py-1.5 text-muted-foreground">{ls.storno_grund ?? '—'}</td>
                             <td className="px-3 py-1.5 text-right">
                               {ls.storno_moeglich ? (
-                                <Button size="sm" variant="ghost" onClick={() => { setStorno(ls.lieferschein); setGrund('') }}>
-                                  <Ban size={13} className="text-red-600 mr-1" />Storno
+                                <Button variant="ghost" onClick={() => { setStorno(ls.lieferschein); setGrund('') }} className="min-h-touch">
+                                  <Ban size={13} className="text-status-error mr-1" />Storno
                                 </Button>
                               ) : (
                                 <span className="text-[11px] text-muted-foreground" title={ls.storno_sperrgrund ?? ''}>gesperrt</span>

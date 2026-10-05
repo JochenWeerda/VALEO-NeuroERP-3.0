@@ -46,11 +46,14 @@ def test_crm_kontakte_list_by_kunde(monkeypatch: pytest.MonkeyPatch) -> None:
 
     class _FakeSvc:
         def __init__(self, db, tid): pass  # noqa: ANN001
-        def list_by_kunde(self, kunden_nr): return {"items": [], "kunden_nr": kunden_nr}  # noqa: ANN001
+        def list_by_kunde(self, kunden_nr):  # noqa: ANN001
+            # Vertrag ist list[KontaktOut] — kein Umschlag mit "items".
+            return [{"id": "KT-001", "kunden_nr": kunden_nr, "art": "telefon"}]
 
     monkeypatch.setattr(ep_mod, "CrmKontaktService", _FakeSvc)
     resp = _client.get("/api/v1/crm/kunden-kontakte/KN-001", headers=_HEADERS)
-    assert resp.status_code == 200
+    assert resp.status_code == 200, resp.text
+    assert [row["id"] for row in resp.json()] == ["KT-001"]
 
 
 @pytest.mark.unit
@@ -59,13 +62,16 @@ def test_crm_kontakt_create_returns_200(monkeypatch: pytest.MonkeyPatch) -> None
 
     class _FakeSvc:
         def __init__(self, db, tid): pass  # noqa: ANN001
-        def create(self, data): return {"kontakt_id": "KT-001", "status": "ok"}  # noqa: ANN001
+        def create(self, data):  # noqa: ANN001
+            # Vertrag ist KontaktOut; "kontakt_id"/"status" gab es nie.
+            return {"id": "KT-001", **data}
 
     monkeypatch.setattr(ep_mod, "CrmKontaktService", _FakeSvc)
     payload = {"kunden_nr": "KN-001", "richtung": "aus", "art": "telefon"}
     resp = _client.post("/api/v1/crm/kunden-kontakte", json=payload, headers=_HEADERS)
     assert resp.status_code == 200
-    assert resp.json()["kontakt_id"] == "KT-001"
+    assert resp.json()["id"] == "KT-001"
+    assert resp.json()["kunden_nr"] == "KN-001"
 
 
 @pytest.mark.unit
@@ -150,7 +156,8 @@ def test_crm_gifts_list_returns_ok(monkeypatch: pytest.MonkeyPatch) -> None:
     class _GiftSvc:
         def __init__(self, db, tid): pass  # noqa: ANN001
         def list(self, kunden_nr, year=None, contact_id=None):  # noqa: ANN001
-            return {"items": [], "kunden_nr": kunden_nr}
+            # Vertrag ist list[GiftOut].
+            return []
 
     monkeypatch.setattr(gifts_ep, "CrmGiftService", _GiftSvc)
 

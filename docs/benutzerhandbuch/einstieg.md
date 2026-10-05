@@ -42,6 +42,11 @@ Wenn Sie Zugriff auf mehrere Mandanten haben:
 - **Seitenleiste:** Fachbereiche (Annahme, Verkauf, Einkauf, Lager, FiBu, CRM …).
 - **Kopfzeile:** Mandant, Benutzer, Benachrichtigungen, Hilfe.
 - **Globale Suche:** schnell zu Belegen, Kunden oder Masken springen.
+- **Omnibox / Kommandoleiste (Strg+K):** natuerlichsprachig „sagen statt suchen"
+  (z. B. `offene posten folkerts`) und in einem Schritt zur gefilterten Liste
+  springen. Ausfuehrlich in [Moderne Bedienung](moderne-bedienung.md).
+- **Rollen-Workspaces:** aufgabenbezogene Startseiten (Einkauf/Verkauf/Lager/
+  FIBU/Leitung) mit Kacheln in die wichtigsten Arbeitsvorraete.
 
 ## Tastatur & Shortcuts
 

@@ -24,6 +24,8 @@ import {
   useSchedulerJobs,
 } from '@/lib/api/admin'
 import { toast } from '@/hooks/use-toast'
+import { NativeSelect } from '@/components/ui/native-select'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 function splitCsv(value: string): string[] {
   return value
@@ -58,6 +60,7 @@ const monitoringRulesRoles = [
 ] satisfies Array<{ id: MonitoringRulesRole; label: string; description: string }>
 
 export default function MonitoringRegelnPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const { data: rules = [] } = useMonitoringRules()
   const { data: channels = [] } = useMonitoringChannels()
   const { data: jobs = [] } = useSchedulerJobs()
@@ -88,6 +91,7 @@ export default function MonitoringRegelnPage(): JSX.Element {
   const [jobCron, setJobCron] = useState('0 2 * * *')
   const [jobProcess, setJobProcess] = useState('nightly-report')
   const [jobChannels, setJobChannels] = useState('')
+  const [pendingDeleteKey, setPendingDeleteKey] = useState<string | null>(null)
 
   const channelCodeList = useMemo(() => channels.map((item) => item.code), [channels])
   const hasRule = rules.length > 0
@@ -186,6 +190,8 @@ export default function MonitoringRegelnPage(): JSX.Element {
         <p className="text-muted-foreground">Alert-Regeln, Alarmkanaele und Scheduler-Jobs nachvollziehbar administrieren.</p>
       </div>
 
+      {!isTouch ? (
+        <>
       <RoleFocusBar
         roles={monitoringRulesRoles}
         value={roleFocus}
@@ -256,6 +262,8 @@ export default function MonitoringRegelnPage(): JSX.Element {
           />
         </div>
       </div>
+        </>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card>
@@ -270,33 +278,33 @@ export default function MonitoringRegelnPage(): JSX.Element {
             <Label htmlFor="rule-metric">Metric</Label>
             <Input id="rule-metric" value={ruleMetric} onChange={(e) => setRuleMetric(e.target.value)} placeholder="inventory.low_stock_count" />
             <div className="grid grid-cols-2 gap-2">
-              <select
-                aria-label="Alert-Level"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              <NativeSelect
+                ariaLabel="Alert-Level"
                 value={ruleLevel}
-                onChange={(e) => setRuleLevel(e.target.value as 'critical' | 'warning' | 'info')}
-              >
-                <option value="critical">Kritisch</option>
-                <option value="warning">Warnung</option>
-                <option value="info">Info</option>
-              </select>
-              <select
-                aria-label="Vergleich"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                onValueChange={(value) => setRuleLevel(value as 'critical' | 'warning' | 'info')}
+                options={[
+                  { value: 'critical', label: 'Kritisch' },
+                  { value: 'warning', label: 'Warnung' },
+                  { value: 'info', label: 'Info' },
+                ]}
+              />
+              <NativeSelect
+                ariaLabel="Vergleich"
                 value={ruleOperator}
-                onChange={(e) => setRuleOperator(e.target.value as 'gt' | 'gte' | 'lt' | 'lte' | 'eq' | 'neq')}
-              >
-                <option value="gt">groesser als</option>
-                <option value="gte">groesser/gleich</option>
-                <option value="lt">kleiner als</option>
-                <option value="lte">kleiner/gleich</option>
-                <option value="eq">gleich</option>
-                <option value="neq">ungleich</option>
-              </select>
+                onValueChange={(value) => setRuleOperator(value as 'gt' | 'gte' | 'lt' | 'lte' | 'eq' | 'neq')}
+                options={[
+                  { value: 'gt', label: 'groesser als' },
+                  { value: 'gte', label: 'groesser/gleich' },
+                  { value: 'lt', label: 'kleiner als' },
+                  { value: 'lte', label: 'kleiner/gleich' },
+                  { value: 'eq', label: 'gleich' },
+                  { value: 'neq', label: 'ungleich' },
+                ]}
+              />
             </div>
             <Input value={ruleThreshold} onChange={(e) => setRuleThreshold(e.target.value)} placeholder="Threshold (z.B. 1)" />
             <Input value={ruleChannels} onChange={(e) => setRuleChannels(e.target.value)} placeholder="Channel-IDs CSV" />
-            <Button className="w-full" onClick={onCreateRule} disabled={createRule.isPending}>
+            <Button className="min-h-touch w-full" onClick={onCreateRule} disabled={createRule.isPending}>
               Regel anlegen
             </Button>
             <div className="space-y-2 pt-2">
@@ -306,7 +314,18 @@ export default function MonitoringRegelnPage(): JSX.Element {
                     <div className="font-medium">{item.name}</div>
                     <div className="text-xs text-muted-foreground">{item.code} · {item.metric}</div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => deleteRule.mutate(item.id)}>Loeschen</Button>
+                  <Button
+                    variant="ghost"
+                    className="min-h-touch"
+                    disabled={pendingDeleteKey !== null}
+                    onClick={() => {
+                      if (pendingDeleteKey) return
+                      setPendingDeleteKey(`rule:${item.id}`)
+                      deleteRule.mutate(item.id, { onSettled: () => setPendingDeleteKey(null) })
+                    }}
+                  >
+                    {pendingDeleteKey === `rule:${item.id}` ? 'Wird geloescht…' : 'Loeschen'}
+                  </Button>
                 </div>
               ))}
             </div>
@@ -320,19 +339,19 @@ export default function MonitoringRegelnPage(): JSX.Element {
           <CardContent className="space-y-3">
             <Input value={channelCode} onChange={(e) => setChannelCode(e.target.value)} placeholder="ops-email" />
             <Input value={channelName} onChange={(e) => setChannelName(e.target.value)} placeholder="Ops E-Mail" />
-            <select
-              aria-label="Kanaltyp"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <NativeSelect
+              ariaLabel="Kanaltyp"
               value={channelType}
-              onChange={(e) => setChannelType(e.target.value as 'email' | 'sms' | 'webhook' | 'chatops')}
-            >
-              <option value="email">E-Mail</option>
-              <option value="sms">SMS</option>
-              <option value="webhook">Webhook</option>
-              <option value="chatops">ChatOps</option>
-            </select>
+              onValueChange={(value) => setChannelType(value as 'email' | 'sms' | 'webhook' | 'chatops')}
+              options={[
+                { value: 'email', label: 'E-Mail' },
+                { value: 'sms', label: 'SMS' },
+                { value: 'webhook', label: 'Webhook' },
+                { value: 'chatops', label: 'ChatOps' },
+              ]}
+            />
             <Input value={channelTarget} onChange={(e) => setChannelTarget(e.target.value)} placeholder="ops@example.org / webhook-url" />
-            <Button className="w-full" onClick={onCreateChannel} disabled={createChannel.isPending}>
+            <Button className="min-h-touch w-full" onClick={onCreateChannel} disabled={createChannel.isPending}>
               Kanal anlegen
             </Button>
             <div className="space-y-2 pt-2">
@@ -342,7 +361,18 @@ export default function MonitoringRegelnPage(): JSX.Element {
                     <div className="font-medium">{item.name}</div>
                     <div className="text-xs text-muted-foreground">{item.code} · {item.channel_type}</div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => deleteChannel.mutate(item.id)}>Loeschen</Button>
+                  <Button
+                    variant="ghost"
+                    className="min-h-touch"
+                    disabled={pendingDeleteKey !== null}
+                    onClick={() => {
+                      if (pendingDeleteKey) return
+                      setPendingDeleteKey(`channel:${item.id}`)
+                      deleteChannel.mutate(item.id, { onSettled: () => setPendingDeleteKey(null) })
+                    }}
+                  >
+                    {pendingDeleteKey === `channel:${item.id}` ? 'Wird geloescht…' : 'Loeschen'}
+                  </Button>
                 </div>
               ))}
             </div>
@@ -359,7 +389,7 @@ export default function MonitoringRegelnPage(): JSX.Element {
             <Input value={jobCron} onChange={(e) => setJobCron(e.target.value)} placeholder="0 2 * * *" />
             <Input value={jobProcess} onChange={(e) => setJobProcess(e.target.value)} placeholder="nightly-report" />
             <Input value={jobChannels} onChange={(e) => setJobChannels(e.target.value)} placeholder={`Kanaele CSV (${channelCodeList.join(', ')})`} />
-            <Button className="w-full" onClick={onCreateJob} disabled={createJob.isPending}>
+            <Button className="min-h-touch w-full" onClick={onCreateJob} disabled={createJob.isPending}>
               Job anlegen
             </Button>
             <div className="space-y-2 pt-2">
@@ -371,7 +401,18 @@ export default function MonitoringRegelnPage(): JSX.Element {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">{item.active ? 'aktiv' : 'inaktiv'}</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => deleteJob.mutate(item.id)}>Loeschen</Button>
+                    <Button
+                      variant="ghost"
+                      className="min-h-touch"
+                      disabled={pendingDeleteKey !== null}
+                      onClick={() => {
+                        if (pendingDeleteKey) return
+                        setPendingDeleteKey(`job:${item.id}`)
+                        deleteJob.mutate(item.id, { onSettled: () => setPendingDeleteKey(null) })
+                      }}
+                    >
+                      {pendingDeleteKey === `job:${item.id}` ? 'Wird geloescht…' : 'Loeschen'}
+                    </Button>
                   </div>
                 </div>
               ))}

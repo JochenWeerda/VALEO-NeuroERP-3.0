@@ -14,6 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.personal_service import PersonalService
@@ -583,7 +584,7 @@ _LONG_DAY_WARNING_HOURS = 10.0
 
 def _to_iso(d: date | datetime | None) -> str:
     if d is None:
-        return datetime.utcnow().date().isoformat()
+        return business_today().isoformat()
     if isinstance(d, datetime):
         return d.date().isoformat()
     return d.isoformat()
@@ -1928,7 +1929,7 @@ async def list_time_profiles(
                 FROM domain_hr.employee_time_profiles
                 WHERE {' AND '.join(where)}
                 ORDER BY location_code ASC, department ASC, display_name ASC
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -2494,7 +2495,7 @@ async def get_driver_time_summary(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    target_date = datum or datetime.utcnow().date().isoformat()
+    target_date = datum or business_today().isoformat()
     try:
         data = PersonalService(db, tenant_id).get_driver_time_data(target_date)
         timesheet_rows = data["timesheet_rows"]
@@ -2522,7 +2523,7 @@ async def get_time_cockpit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    target_date = datum or datetime.utcnow().date().isoformat()
+    target_date = datum or business_today().isoformat()
     driver_time = await get_driver_time_summary(datum=target_date, tenant_id=tenant_id, db=db)
     try:
         rows = PersonalService(db, tenant_id).get_time_cockpit_entries(target_date)
@@ -2730,7 +2731,7 @@ async def list_driver_time_events(
         params["date_to"] = date_to
     where = " AND ".join(filters)
     rows = db.execute(
-        text(f"SELECT * FROM domain_hr.driver_time_events WHERE {where} ORDER BY event_ts DESC LIMIT :limit"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"SELECT * FROM domain_hr.driver_time_events WHERE {where} ORDER BY event_ts DESC LIMIT :limit"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return {"data": [dict(r._mapping) for r in rows], "total": len(rows)}
@@ -2757,7 +2758,6 @@ async def get_driver_time_absence_collisions(
         params["date_to"] = date_to
     where = " AND ".join(filters)
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT e.id as event_id, e.employee_ref, e.event_ts::text, e.absence_ref,
                    CASE WHEN a.id IS NULL THEN 'absence_not_found'
@@ -2767,7 +2767,7 @@ async def get_driver_time_absence_collisions(
             LEFT JOIN domain_hr.time_entries a ON a.id::text = e.absence_ref AND a.tenant_id = e.tenant_id
             WHERE {where}
             ORDER BY e.event_ts DESC
-        """),
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [DriverTimeCollisionOut(**dict(r._mapping)) for r in rows]
@@ -2805,7 +2805,7 @@ async def update_driver_time_event(
     set_clause = ", ".join(f"{k} = :{k}" for k in updates)
     updates.update({"id": event_id, "tenant_id": tenant_id})
     result = db.execute(
-        text(f"UPDATE domain_hr.driver_time_events SET {set_clause}, row_version = row_version + 1 WHERE id = :id AND tenant_id = :tenant_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_hr.driver_time_events SET {set_clause}, row_version = row_version + 1 WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         updates,
     )
     if result.rowcount == 0:
@@ -2986,7 +2986,7 @@ async def patch_org_unit(
     updates.update({"id": unit_id, "tenant_id": tenant_id})
     try:
         result = db.execute(
-            text(f"UPDATE domain_hr.org_units SET {set_clause} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_hr.org_units SET {set_clause} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             updates,
         )
         if result.rowcount == 0:
@@ -3085,7 +3085,7 @@ async def adjust_time_account(
 ):
     """Manuelle Saldo-Korrektur (Urlaubsabgeltung, Übertrag etc.)."""
     adj_id = str(uuid4())
-    adj_date = payload.adjustment_date or date.today().isoformat()
+    adj_date = payload.adjustment_date or business_today().isoformat()
     try:
         db.execute(
             text("""
@@ -3149,7 +3149,7 @@ async def list_applications(
     where_sql = " AND ".join(where)
     try:
         rows = db.execute(
-            text(f"SELECT * FROM domain_hr.applications WHERE {where_sql} ORDER BY applied_at DESC"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM domain_hr.applications WHERE {where_sql} ORDER BY applied_at DESC"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
     except Exception:

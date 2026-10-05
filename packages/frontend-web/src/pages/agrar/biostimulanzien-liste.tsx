@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle, Edit, Eye } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
 interface BiostimulanzienItem {
@@ -70,14 +70,14 @@ const buildColumns = (
       const item = row.original;
       if (item.eu_zulassung) {
         return (
-          <Badge variant="secondary" className="bg-green-100 text-green-800">
+          <Badge variant="success">
             <CheckCircle className="w-3 h-3 mr-1" />
             {item.eu_zulassung}
           </Badge>
         );
       }
       return (
-        <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+        <Badge variant="secondary">
           <XCircle className="w-3 h-3 mr-1" />
           Keine
         </Badge>
@@ -105,13 +105,13 @@ const buildColumns = (
       const available = item.verfuegbar || 0;
 
       if (!item.ist_aktiv) {
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Inaktiv</Badge>;
+        return <Badge variant="secondary">Inaktiv</Badge>;
       } else if (available <= 0) {
         return <Badge variant="destructive">Nicht verfügbar</Badge>;
       } else if (available < 50) {
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Niedrig</Badge>;
+        return <Badge variant="warning">Niedrig</Badge>;
       } else {
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Verfügbar</Badge>;
+        return <Badge variant="success">Verfügbar</Badge>;
       }
     },
   },
@@ -130,22 +130,20 @@ const buildColumns = (
       const item = row.original;
 
       return (
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             variant="outline"
-            size="sm"
+            className="min-h-touch touch-manipulation"
             onClick={() => onView(item.id)}
-            title="Anzeigen"
           >
-            <Eye className="w-4 h-4" />
+            Anzeigen
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            className="min-h-touch touch-manipulation"
             onClick={() => onEdit(item.id)}
-            title="Bearbeiten"
           >
-            <Edit className="w-4 h-4" />
+            Bearbeiten
           </Button>
         </div>
       );

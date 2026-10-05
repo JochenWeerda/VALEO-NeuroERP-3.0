@@ -4,19 +4,47 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-06-30
-version: 2.0.0
-description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Agent Safety auf alle 26 SDs ausgeweitet.
+last_reviewed: 2026-09-17
+version: 2.5.0
+description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. ActionRuntime produktiv. Alle nativen commandEndpoints verdrahtet (SPEC-P1-04).
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+> **Nachtrag 2026-09-17 (`MASK-L3-HABIT-DECLARE`):** L3-Gewohnheit Zeilenklick
+> ohne Pixelkopie: Registertabellen feuern `rowActions` ueber `FastTabRenderer`,
+> Artikelstamm-Bewegungen springen nach `/lager/stock-movement/{movement_id}`,
+> Beleg-Kontrolle oeffnet `{source_route}` aus der Worklist-Vorschau. L3-PNGs
+> bleiben lokal und unversioniert.
+
+> **Nachtrag 2026-08-23 (`L3-VISUAL-PARITY-AUDIT-031`):** Alle 69
+> produktiven nativen ScreenDefinitions sind generator-ready und werden auf
+> das renderbare Meridian-Vokabular normalisiert. `expertDense` wirkt zentral
+> auf Root- und Registertabellen (36 px); alte Floorplan-, Rail-, Profil- und
+> Gefahrenstufen-Aliasse koennen nicht mehr am Frontend-Vertrag vorbeilaufen.
+> Der gehaertete Visual-Audit prueft sichtbare Datenzeilen und effektive Dichte:
+> 12/12 bei 1366x768, 1440x900 und 1920x1080.
+
+> **Nachtrag 2026-08-22 (`L3-RUNTIME-HARDENING-021`):** Jede Tabelle mit
+> aufgeloester DataSource wird geladen, unabhaengig von server- oder
+> clientseitigem Paging. Runtime-Paging erhaelt feste Endpoint-Queryparameter.
+> Deklarative Bulk-Auswahl ist seitengebunden, ignoriert Zeilen ohne ID und
+> bleibt nach einer fehlgeschlagenen Aktion fuer den Retry erhalten.
+
+> **Nachtrag 2026-08-19 (`L3-HABIT-BRIDGE-001`):** Der Single Mask Builder
+> transportiert herstellerneutrale ERP-Gewohnheitsvertraege fuer Aktionszonen,
+> Summary-Position, Sticky-Regionen, deklarative Shortcuts und Enter-Fokus.
+> Aktiviert fuer CRM Customer 360, Lager Artikelbestand und Sales
+> Lieferschein; L3-Originalbilder mit Echtdaten bleiben ausserhalb von Git.
+
+> **Kurzfassung (2026-07-06):** **SPEC-P1-04/08 abgeschlossen** — alle nativen ScreenDefinitions ohne `stubReason`; gemeinsamer `MaskActionRuntime` (validate/dryRun/propose/execute → Audit + Outbox); Inventur `scripts/check_mask_command_endpoint_inventory.py` Exit 0. Chargen-FEFO sortiert nach MHD. Siehe Handshake [`cursor-claude-spec-p1-04-08-2026-07-06.md`](../../agent-ops/handshakes/cursor-claude-spec-p1-04-08-2026-07-06.md).
 
 > **Kurzfassung (2026-07-01):** Migration vollständig abgeschlossen (UIX-021…043). **26 native SDs** im Registry — alle `generatorReady=True`, `advisoryScore=1.00`, `temporary=False`. ActionRuntime produktiv verdrahtet (UIX-045). Erste CommandEndpoints aktiv: `create_activity`, `neue_bestellung`, `mahnen`, `freigeben`, `stornieren`, `bestellen`, `wareneingang`, `abschliessen`, `qualifizieren` (UIX-046/053). Multi-Stage Dialog Flow (Confirm→dryRun→AuditReason→Execute) mit menschenlesbarer proposedChanges-Anzeige und Toast-Feedback (UIX-047). Agent Safety auf alle 26 SDs ausgeweitet (UIX-048). CI-Workflow mit BFF-Build-Stage ergänzt (UIX-049).
 
 
 > **Nachtrag 2026-07-05:** Meridian ist als Builder-Capability im Single Mask Builder verankert. `ScreenDefinition.layout` liefert `floorplan`, `density`, `contextRail` und `tableProfile`; `RenderPlan.shell` uebernimmt diese Felder zentral; Frontend- und Backend-Readiness blockieren fehlende Meridian-Metadaten.
 
-> **Visual-Audit 2026-07-05:** `tests/e2e/meridian-visual-audit.spec.ts` nutzt die Benutzerhandbuch-Screenshot-Helfer (`waitUntilRenderable`, Content-QC, Capture-Locator) fuer Finance, CRM 360 und Lager bei 1366x768, 1440x900 und 1920x1080. Lokal gruen: `pnpm --dir packages/frontend-web exec playwright test tests/e2e/meridian-visual-audit.spec.ts --project=chromium` (9 passed). Der Playwright-Global-Teardown meldet bestehende Repo-weite Visual-Tour-Console-Issues, nicht den fokussierten Meridian-Audit.
+> **Visual-Audit 2026-08-23:** `tests/e2e/meridian-visual-audit.spec.ts` nutzt die Benutzerhandbuch-Screenshot-Helfer (`waitUntilRenderable`, Content-QC, Capture-Locator) fuer Finance, CRM 360, Lager und Sales bei 1366x768, 1440x900 und 1920x1080. Der Audit prueft Container, sichtbare Datenzeilen, effektive Zeilenhoehe und Viewport-Ueberlauf. Lokal gruen: 12/12.
 
 ## Lieferstand
 
@@ -50,11 +78,34 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 | UIX-048 | Agent Safety auf alle 26 nativen SDs ausgeweitet (dynamisch aus Registry) | ✅ 219/219 | `test_uix046_048_command_endpoints_safety.py` |
 | UIX-049 | CI-Workflow: BFF-Build-Stage + UIX-050/053-Tests + `--no-cov` überall | ✅ | `.github/workflows/universal-mask-ci.yml` |
 | UIX-050/053 | 5 weitere CommandEndpoints (stornieren, bestellen, wareneingang, abschliessen, qualifizieren) + AuditReasonDialog + dryRun-Preview + BFF MCP-Tool | ✅ | `mask_actions.py`, `maskActions.ts` |
-| UIX-051 | Alle 26 nativen SDs mit `/:id`-Routen + native Wrapper (sales-order, kontrakte) | ✅ | `d87de90a5`, `test_uix051_legacy_route_migration.py` |
+| UIX-051 | Alle 26 migrierten Detail-SDs mit `/:id`-Routen + native Wrapper (sales-order, kontrakte); am 2026-09-27 mit 49/49 Tests revalidiert | ✅ | `d87de90a5`, `test_uix051_legacy_route_migration.py` |
 | UIX-054 | Finale Route-Wahrheit: `route-inventory.gen.json` + `route-tree.gen.tsx` | ✅ lokal | `test_uix054_route_inventory_verification.py` |
 | UIX-055 | GitHub Actions `universal-mask-ci` + `workflow_dispatch` | ✅ | Run `28540744515` — backend/frontend/bff/e2e grün |
 | UIX-056 | Browser-Smoke native `/:id`-Routen (5 repräsentative Masken) | ✅ lokal | `uix-056-native-route-smoke.spec.ts` |
 | UIX-057 | Rollback-/Fallback-Matrix | ✅ | [`uix-057-native-route-rollback-matrix.md`](uix-057-native-route-rollback-matrix.md) |
+| SPEC-P1-04 | Alle nativen commandEndpoints — `MaskActionRuntime`, Inventur 0 stubReason | ✅ | `mask_action_runtime_service.py`, `check_mask_command_endpoint_inventory.py` |
+| SPEC-P1-08 | Chargen-Tiefenmodell + FEFO über MHD | ✅ | `inventory_lot_trace_service.py`, `inv_lot_depth_spec_p1_08` |
+| UIX-060 | Omnibox-Shell + Backend-Katalog/Telemetry | ✅ | Workboard 2026-07-07 |
+| UIX-061 | Rollen-Workspaces + Tiles-Primitive + Rollen-Redirect | ✅ | 27 pytest, 6 Vitest, Workspace Playwright grün |
+| UIX-062 | Collab-Rail v1: `contextRailSections`, datensatzgebundene Notizen, Mentions, Inbox/Outbox | ✅ lokal | 4 pytest, 7 Vitest, TypeScript 0, Playwright 1/1 |
+| UIX-063 | Planungskalender v1: `calendar`-Contract, Projektionsservice, ICS-Feed, CalendarRenderer | ✅ lokal | 33 pytest, 3 Vitest, TypeScript 0, Playwright 1/1 |
+| UIX-091-PIPELINE | `processChain` → `shell.processRibbon` zentral im UniversalMaskRenderer | ✅ | 27 Vitest (schema-compiler, process-ribbon, UniversalMaskRenderer) |
+| UIX-091-CONTRACT | Katalog+Mitgliedschaft in `get_screen_definition`, Readiness-Advisory, Quality-Gate | ✅ | pytest `test_uix091_process_chain_contract.py`; `check_process_chains.py` |
+| UIX-091-ROLLOUT | 22/22 Domain-SDs klassifiziert; `noProcessChainReason`; k3 Auftragsbestaetigung | ✅ | Inventur-Test; `check_process_chains.py` |
+| UIX-091-GATE | `missing_process_chain` mandatory; Roh-SD ohne Kette/Reason blockiert | ✅ | pytest Block-Fall + Registry-Gate |
+| MERIDIAN-FRAMEWORK-SYSTEMWIDE | Floorplans + adaptive 1/2/3-Spalten; Tabellenfehler ≠ leer | ✅ | Vitest `framework-navigation.test.tsx`; pytest `test_meridian_column_navigation_inventory.py` |
+| MERIDIAN-SCREEN-STUDIO | No-Code/Agent-Editor für ScreenDefinitions + Live-Vorschau | ✅ | `/admin/screen-studio`; pytest `test_meridian_screen_studio_api.py`; Vitest `screen-studio` |
+| MERIDIAN-SCREEN-STUDIO-E2E | Playwright-Abnahme Lieferanten-Bewertung + Confirmation-Gate | ✅ | `tests/e2e/meridian-screen-studio.spec.ts`; pytest Confirmation-Gate |
+| MERIDIAN-SCREEN-STUDIO-GATES | tsc AgentMaskContract + OpenAPI-Summaries der 9 Studio-Routen | ✅ | `tsc --noEmit` Exit 0; `check_openapi_docs.py` 3468/3468 |
+| MERIDIAN-BELEG-ONEPAGE | `layout.sectionNavigation=anchors`: durchgehende Belegseite mit Sprungmarken (Scroll-Spy, Alt+1..9, Lazy-Mount), schrumpfender Kopf (96/48 px), Belegfluss als letzter Abschnitt, Verwerfen-Rückfrage bei ungespeicherten Änderungen; Pilot `sales/delivery-note`; Rollout Auftrag, Rechnung, Bestellung. Dazu `table.rowDetail` (Positions-Detailband), Steuerausweis je Satz (Rechnung), `fitToContent`-Tabellenhöhe, gemessene Touch-Karten, Sticky-Versatz am AppShell-Padding, formatierte Nur-Lese-Felder; `identityField` (h1 = Belegnummer, Titel als Kicker), zentrales `statusLabel()` (gegen Dev-DB vollständig), Kunde/Kunden-Nr. über `resolve_customer` in allen Verkaufsköpfen, Boolean Ja/Nein, Scrollleisten-Rinne statt doppelter Leiste | ✅ inkl. Browser-Abnahme 1440/1920/390 px (Rechnung, Auftrag, Bestellung) | Vitest ui + Mask-Builder 184/184 (`row-detail-band`, `field-renderer-readonly`, `section-page`, `VirtualDataTable`); pytest 48/48 Postgres; Feldvertrag 591/0; `tsc` 0 Fehler |
+| MERIDIAN-PARTY-OBJECTPAGE | Eine Kundenakte fuer Lead und Bestandskunde: `objectPage`, Header-Facets, Anker, Prozessband; KIM ist Redirect inkl. `?tab=`; Listen-IDs (`kunden_nr`/BP) oeffnen den Stamm; Chef/Praesente/Postfach/Geo/Angebote/Historie in der SD | ✅ 2026-09-30 | pytest `test_meridian_party_objectpage.py`, `test_crm360_kunde_wird_gefunden.py`; Vitest Party-Deep-Link; Playwright `crm-kim-redirect.spec.ts` |
+| MERIDIAN-BELEG-SYSTEMWEIT | Beleg-Look als zentrale Voreinstellung: Sprungmarken für alle nativen `objectPage`/`transaction` (Opt-out `tabs`), abgeleitete Belegidentität (`infer_identity_field`, Snapshot über 31 Masken), Positionsdetail ab sechs Spalten (Opt-out `rowDetail: false`), Readiness `resolvedLayout`, Kopf-Gate gegen rohe `_id`-Felder; lesbare Köpfe über `resolve_reference` für Lieferschein, Lagerbewegung, Reklamation, Ernteabrechnung, Verkaufschance, Bestellung, Futteranalyse. Pilotseiten auf `useUniversalMaskRuntime` umgezogen (`usePilotRenderPlan` entfernt) | ✅ inkl. Browser-Abnahme 1440/390 px (Reklamation, Ernteabrechnung, Lagerbewegung, Kreditor, Futteranalyse) | pytest `test_meridian_beleg_systemweit.py` gegen Postgres; Feldvertrag 604/0; `tsc` 0 Fehler |
+| MASK-GEN-STUB-BACKENDS | 10 native Entity-Stubs auf Fachendpunkte; Studio-Katalog + CRM-Consents | ✅ | pytest Inventar 0 Stubs; `test_mask_entity_backends.py` |
+| L3-HABIT-BRIDGE-001 | Herstellerneutrale Desktop-Gewohnheitsvertraege + 3 Referenzmasken | ✅ technisch abgeschlossen, Human Review vor Rollout | 125 Mask-Builder/RenderPlan-Tests, 4 Backend-Tests, 12 Visual-Audits; ADR-056 + Paritaetsmatrix |
+
+| L3-MDE-INBOX-003 | Native MDE-Worklist + zentrale statusabhaengige Tabellenzeilen-Aktionen | technisch abgeschlossen, Provider-Pilot extern | `schnittstelle/mde-inbox`, Quarantaene/Retry-Audit, ADR-057 |
+
+| L3-DOCRET-INBOX-004 | Dokumentenruecklauf mit Versandstatus, Audit und Ursprungsbeleg | technisch abgeschlossen, Provider-Pilot extern | `docflow/dokumenten-ruecklauf`, ADR-058 |
 
 ## Architektur (Single Source of Truth)
 
@@ -101,26 +152,33 @@ Referenz-Code: `packages/frontend-web/src/components/mask-builder/runtime/`
 Frontend: `checkGeneratorReadiness()` in `runtime/generatorReadiness.ts`
 Backend: `_check_readiness()` in `app/api/v1/endpoints/mask_screen_definition.py`
 
-## Aktive CommandEndpoints (Stand 2026-07-01)
+## Aktive CommandEndpoints (Stand 2026-07-06)
 
-| Action | Screen | Status | Endpoint |
-|--------|--------|--------|----------|
-| `create_activity` | crm/customer-360 | ✅ aktiv | `/api/v1/crm/customers/{entity_id}/actions/create_activity` |
-| `neue_bestellung` | einkauf/supplier | ✅ aktiv | `/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung` |
-| `mahnen` | finance/ar-open-item | ✅ aktiv | `/api/v1/finance/open-items/{entity_id}/actions/mahnen` |
-| `freigeben` | finance/ap-invoice | ✅ aktiv | `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` |
-| `stornieren` | lager/stock-movement | ✅ aktiv (humanApproval) | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
-| `bestellen` | einkauf/angebot | ✅ aktiv | `/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen` |
-| `wareneingang` | einkauf/anlieferavis | ✅ aktiv | `/api/v1/lager/artikel/{entity_id}/actions/wareneingang` |
-| `abschliessen` | qualitaet/reklamation | ✅ aktiv | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
-| `qualifizieren` | crm/lead | ✅ aktiv | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
+Alle **26 nativen ScreenDefinitions** (`temporary=False`) haben für Mutations-Actions einen `commandEndpoint` — **kein `stubReason` mehr** (Inventur-Skript + `test_spec_p1_04_mask_commands.py`).
 
-**Noch gestubbt** (stubReason gesetzt): alle übrigen Actions außer den oben genannten. Reihenfolge der Aktivierung: CRM/Einkauf-safe → Finance-moderate → Druck/Dokumente → Freigaben → payment-run zuletzt.
+Gemeinsame Runtime: `app/services/mask_action_runtime_service.py` — Modi `validate` / `dryRun` / `propose` / `execute`; bei `execute`: Audit (`crm_action_audit_log`) + Outbox (`outbox_events`).
+
+| Action | Screen | Endpoint |
+|--------|--------|----------|
+| `create_activity` | crm/customer-360, crm/opportunity | `/api/v1/crm/customers|…/actions/create_activity` |
+| `neue_bestellung` | einkauf/supplier | `/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung` |
+| `mahnen` | finance/ar-open-item | `/api/v1/finance/open-items/{entity_id}/actions/mahnen` |
+| `freigeben` | finance/ap-invoice, finance/payment-run | AP + Zahlungslauf (auditReasonRequired) |
+| `stornieren` | lager/stock-movement | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
+| `bestellen` | einkauf/angebot | `/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen` |
+| `wareneingang` | einkauf/anlieferavis, lager/article-stock | `/api/v1/lager/artikel/{entity_id}/actions/wareneingang` |
+| `abschliessen` | qualitaet/reklamation | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
+| `qualifizieren` | crm/lead | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
+| `drucken` | sales/delivery-note, agrar/harvest-settlement | `/api/v1/.../actions/drucken` |
+
+Vollständige Liste: `python scripts/check_mask_command_endpoint_inventory.py` (Exit 0 = OK).
+
+**Hinweis:** `execute` simuliert derzeit Status-Mutation + Outbox/Audit; volle Domain-Persistenz (PDF-Druck, echte Buchungen) folgt bei Bedarf pro Action.
 
 ## Governance für Agenten
 
 1. **Migration abgeschlossen** — alle entity-detail Masken sind native SDs.
-2. **ActionRuntime produktiv** — 9 CommandEndpoints aktiv; Dialog-Flow Confirm→dryRun→AuditReason→Execute.
+2. **ActionRuntime produktiv** — alle nativen Mutations-Actions mit `commandEndpoint`; Dialog-Flow Confirm→dryRun→AuditReason→Execute.
 3. **Agent Safety** — alle 26 SDs geprüft (dynamisch, nicht hart kodiert); `sensitiveFields`, `dangerousActions`, `forbiddenForAgents`, `humanApprovalRequired` validiert.
 4. **CRM 360** ist produktiver Referenzfall mit vollständiger Action-Runtime.
 5. **finance/payment-run** bleibt `forbiddenForAgents=True` — human approval required.
@@ -174,7 +232,7 @@ pytest tests/test_agent_mask_contract.py
 Ergebnis wird nach jedem Lauf hier aktualisiert:
 
 | pytest rollout batch | 2026-06-29 | ✅ 24/24 | `--no-cov` |
-| pytest agent/readiness | 2026-06-29 | ✅ 22/22 | `test_agent_mask_contract.py` |
+| pytest agent/readiness | 2026-09-27 | ✅ 25/25 | Registry-Gate ueber alle 71 nativen ScreenDefinitions |
 | pytest UIX-046/048 Safety | 2026-07-01 | ✅ 219/219 | alle 26 SDs, dynamisch aus Registry |
 | pytest UIX-050/053 Advanced | 2026-07-01 | ✅ 15/16 | BFF-File-Checks + dryRun-Stubs |
 | pytest UIX-044 FilterPlan | 2026-06-30 | ✅ 3/3 | `test_uix044_filter_plan_contract.py` |
@@ -188,6 +246,14 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 | pytest UIX-054 Route Inventory | 2026-07-01 | ✅ 46/46 | `route-inventory.gen.json` + native Priorität |
 | UIX-056 Native Route Playwright | 2026-07-01 | ✅ 6/6 lokal | `uix-056-native-route-smoke.spec.ts` |
 | GitHub Actions universal-mask-ci | 2026-07-01 | ✅ | Run `28540744515` — UIX-051/054 + routes:generate-Drift + E2E-Smoke |
+| UIX-062 Collab-Rail Backend | 2026-07-07 | ✅ 4/4 | `pytest tests/test_uix062_collab_notes.py -q --no-cov` |
+| UIX-062 Collab-Rail Vitest | 2026-07-07 | ✅ 7/7 | `schema-compiler.test.ts`, `WorkflowPanelRenderer.test.tsx` |
+| UIX-062 Frontend type-check | 2026-07-07 | ✅ | `pnpm exec tsc --noEmit` |
+| UIX-062 Playwright Collab-Smoke | 2026-07-07 | ✅ 1/1 | `collab-rail-smoke.spec.ts`; globaler Visual-Tour-Teardown meldet bestehende Fremdseiten-Console-Issues |
+| UIX-063 Planungskalender Backend | 2026-07-07 | ✅ 33/33 | `pytest tests/test_uix063_planning_calendar.py tests/test_workspace_cockpits_uix061.py -q --no-cov` |
+| UIX-063 CalendarRenderer Vitest | 2026-07-07 | ✅ 3/3 | `calendar-renderer.test.tsx` |
+| UIX-063 Frontend type-check | 2026-07-07 | ✅ | `pnpm --dir packages/frontend-web type-check` |
+| UIX-063 Playwright Kalender-Smoke | 2026-07-07 | ✅ 1/1 | `planung-kalender-smoke.spec.ts`; globaler Visual-Tour-Teardown meldet bestehende Fremdseiten-Console-Issues |
 
 ## Bewertung (Stakeholder-Audit 2026-06-29)
 
@@ -201,6 +267,106 @@ Ergebnis wird nach jedem Lauf hier aktualisiert:
 | CI-/Release-Nachweis | fehlt |
 | Doku-Konsistenz | nach UIX-031 synchron |
 | Produktionsreife | noch nicht bewiesen |
+
+## FEED-ADVICE-UX-011 - Cockpits ueber den UniversalMaskRuntime
+
+Seit 2026-07-14 kompiliert `UniversalNativeCockpitPage` nicht mehr direkt am
+Runtime-Vertrag vorbei. Cockpits durchlaufen nun dieselbe Kette wie native
+Objektmasken:
+
+`ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer`.
+
+Erster produktiver Agrar-Anwendungsfall ist `agrar/feed-advice`: ein nativer,
+rollenorientierter Einstieg, der die spezialisierte Solver-Workbench nur fuer eine
+konkrete Planungsaufgabe lazy laedt. Architekturentscheid und Variantenbewertung:
+ADR-041 sowie `docs/design/feed-advice-experience-architecture-2026-07-14.md`.
+
+## Feeding-Kernausbau 2026-07-15
+
+FEED-CORE-015 bis 017 ergaenzen drei weitere native Agrar-Screens ueber dieselbe
+Runtime-Kette: `agrar/feeding-businesses`, `agrar/feeding-group` und den
+read-only ListReport `agrar/feeding-reference-data`. Das generierte Agent-
+Handbuch inventarisiert damit 41 Masken. Alle drei Screens sind
+`temporary=False` und generator-ready; fachliche Dialoge bleiben schmale
+Domain-Overlays. Das globale Command-Inventar hat unabhaengig davon fuenf offene
+High-Risk-Aktionen auf `agrar/ration`, dokumentiert unter Open Gaps.
+
+## L3-PRODUCTION-CONTROL-006
+
+`produktion/produktionsleitstand` fuehrt Produktionsliste, Muehlenlauf,
+Umbuchung, Stapelbuchung und Nachbearbeitung als native, generatorfaehige
+Meridian-Worklist zusammen. Die Maske bleibt ein duennes Cockpit ueber der
+zentralen Runtime; Quellfachlogik fuer Bestand, Charge und FIBU wird nicht
+dupliziert.
+
+## L3-INVENTORY-AUX-007
+
+`lager/inventur-nebenlaeufe` nutzt dieselbe zentrale Runtime fuer
+hashgebundene Zaehllisten-/Import-/Kontroll-/Bewertungs-/Vortragsbatches mit
+Vier-Augen-Freigabe und append-only Audit.
+
+## L3-BILLING-BATCH-008
+
+`finance/rechnungstapel` verbindet Ausgangs-/Eingangsrechnung und beide
+Selbstabrechnerarten als native, generatorfaehige Worklist mit Vier-Augen-
+Freigabe, Fehlerzeilen, Retry und Belegnachweis.
+
+## L3-ROHWARE-OPERATOR-009
+
+`lager/fremdware` stellt die vorhandene Fremdwaren-Einlagerung als native,
+generatorfaehige Operator-Worklist bereit. Mandant/Eigentuemer, Lager und
+Restbestand sind sichtbar; Umbuchung sowie Teil-/Vollauslagerung laufen
+statusvalidiert, begruendet und append-only auditiert.
+
+## L3-QUERY-CENTER-010
+
+`auswertungen/abfrage-center` ist eine native, generatorfaehige Worklist fuer
+allowlistgebundene Read-Model-Abfragen. Vorschau, Favoriten, Druck und
+signierter Import/Export werden zentral gerendert; beliebiges SQL bleibt
+ausgeschlossen.
+
+## L3-TEAM-CALENDAR-011
+
+`planung/kalender` nutzt seine vorhandene native Kalender-Primitive nun fuer
+autorisierte Benutzer-/Teamansichten. Private Fremdtermine werden auf
+Frei/Belegt redigiert; Teamdetails sind berechtigt und Ablehnungen optional.
+
+## L3-MAIL-WORKSPACE-012
+
+`crm/mail-arbeitsplatz` ist eine native, rollenbasierte Worklist fuer Eingang,
+Zuordnung, hashgebundene Anlagen, Entwurf und Provider-Queue. Alle fachlichen
+Statuswechsel laufen begruendet und auditiert.
+
+## L3-TANK-ADAPTER-013
+
+`tankstelle/adapter-inbox` ist eine native Fehler- und Verarbeitungsworklist
+fuer hashgebundene Anlagenmeldungen, kanonische Zapfungen und den
+regelbasierten Lieferschein-Outbox-Handover.
+
+## L3-REPORT-CATALOG-014
+
+`auswertungen/l3-berichtskatalog` ist eine native, generatorfaehige Worklist
+fuer sieben feste L3-Berichte. Eine tenantgebundene Fact-Projektion liefert
+einheitliche Zeit-/Dimensionsfilter, serverseitige Summen, auditierte
+CSV-Exporte und interne Quellenbeleg-Drilldowns; freie SQL-Ausfuehrung ist
+ausgeschlossen.
+
+## L3-RECENT-DOCUMENTS-015
+
+`workspace/letzte-dokumente` ist eine native, serverseitig paginierte
+Meridian-Worklist. Native Detailmasken melden erfolgreiche Oeffnungen zentral;
+die Projektion bleibt auf Tenant und Benutzer begrenzt, prueft die aktuelle
+Dokumentfamilienrolle erneut und entfernt abgelaufene oder ueberzaehlige
+Eintraege automatisch.
+
+## L3-LEGACY-INTERFACES-017
+
+`schnittstelle/legacy-adapter-monitor` ist eine native Meridian-Worklist fuer
+die festen, standardmaessig inaktiven Profile `l3_standard` und `unimet`.
+Hashgebundener Intake, versionierte Format-/Mappingvertraege, Quarantaene,
+deterministisches Dry-run-Staging, Reconciliation und Pilotfreigabe werden
+zentral gerendert. Eine produktive Domaenenbuchung bleibt bis zum realen
+Kundenformat und Zieladapter technisch gesperrt.
 
 ## Verweise
 

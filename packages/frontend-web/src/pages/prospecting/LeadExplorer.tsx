@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { toast } from '@/hooks/use-toast'
 import { LeadCandidate, LeadSegment, LeadSourceSystem } from '@/types/prospecting'
@@ -395,13 +395,12 @@ export default function LeadExplorer(): JSX.Element {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => setShowPipelineControls(!showPipelineControls)}
-          >
+           className="min-h-touch">
             {showPipelineControls ? 'Pipeline ausblenden' : 'Pipeline anzeigen'}
           </Button>
           {leadCandidates.length > 0 && (
-            <Button variant="outline" size="sm" onClick={handleExportToCSV}>
+            <Button variant="outline" onClick={handleExportToCSV} className="min-h-touch">
               <Download className="mr-2 h-4 w-4" />
               CSV exportieren
             </Button>
@@ -436,8 +435,7 @@ export default function LeadExplorer(): JSX.Element {
                       </a>
                       <Button 
                         variant="ghost" 
-                        size="sm" 
-                        className="h-6 text-xs"
+                        className="min-h-touch"
                         onClick={handleFetchExternal}
                         disabled={pipelineBusy}
                         title="Direkt auf Server laden"
@@ -490,9 +488,8 @@ export default function LeadExplorer(): JSX.Element {
                       <Button
                         onClick={handleRunFullPipeline}
                         disabled={pipelineBusy}
-                        size="sm"
                         variant="default"
-                      >
+                       className="min-h-touch">
                         {pipelineBusy ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -510,13 +507,12 @@ export default function LeadExplorer(): JSX.Element {
                         onClick={handleRunImport}
                         disabled={pipelineBusy || !csvPath}
                         variant="outline"
-                        size="sm"
-                      >
+                       className="min-h-touch">
                         <FileUp className="mr-2 h-4 w-4" />
                         Nur Import
                       </Button>
 
-                      <Button onClick={refreshPipelineStatus} variant="outline" size="sm" disabled={pipelineBusy}>
+                      <Button onClick={refreshPipelineStatus} variant="outline" disabled={pipelineBusy} className="min-h-touch">
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Status aktualisieren
                       </Button>
@@ -524,10 +520,9 @@ export default function LeadExplorer(): JSX.Element {
                       <Button 
                         onClick={() => handleResetGapData(false)} 
                         variant="destructive" 
-                        size="sm" 
                         disabled={pipelineBusy}
                         title="Alle GAP-Daten für das Jahr zurücksetzen"
-                      >
+                       className="min-h-touch">
                         <Trash2 className="mr-2 h-4 w-4" />
                         Daten zurücksetzen
                       </Button>
@@ -535,10 +530,9 @@ export default function LeadExplorer(): JSX.Element {
                       <Button 
                         onClick={() => handleResetGapData(true)} 
                         variant="outline" 
-                        size="sm" 
                         disabled={pipelineBusy}
                         title="DEBUG: Alle GAP-Daten aller Jahre zurücksetzen"
-                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        className="min-h-touch border-red-300 text-status-error hover:bg-red-50"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Debug: Alle Jahre
@@ -567,7 +561,7 @@ export default function LeadExplorer(): JSX.Element {
                         {/* Schritt-Details */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                           {Object.entries(pipelineProgress.steps).map(([key, step]) => (
-                            <div key={key} className={`flex items-center gap-1 ${step.completed ? 'text-green-600' : 'text-muted-foreground'}`}>
+                            <div key={key} className={`flex items-center gap-1 ${step.completed ? 'text-status-success' : 'text-muted-foreground'}`}>
                               <div className={`w-2 h-2 rounded-full ${step.completed ? 'bg-green-500' : 'bg-muted-foreground/30'}`} />
                               <span>{step.name}</span>
                             </div>
@@ -775,7 +769,7 @@ export default function LeadExplorer(): JSX.Element {
                     <td className="py-2 pl-4">
                       <div className="flex items-center gap-2">
                         {(candidate.is_core_customer || candidate.is_locked_by_sales) && (
-                          <Badge variant="outline" className="border-red-400 text-xs text-red-600">
+                          <Badge variant="error" className="text-xs text-status-error">
                             Geschützt
                           </Badge>
                         )}
@@ -825,15 +819,15 @@ export default function LeadExplorer(): JSX.Element {
                     </td>
                     <td className="py-2 pr-4">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleAddTask(candidate)}>
+                        <Button variant="outline" onClick={() => handleAddTask(candidate)} className="min-h-touch">
                           Aufgabe
                         </Button>
                         {candidate.is_existing_customer ? (
-                          <Button variant="ghost" size="sm" onClick={() => handleOpenCustomer(candidate)}>
+                          <Button variant="ghost" onClick={() => handleOpenCustomer(candidate)} className="min-h-touch">
                             Kunde öffnen
                           </Button>
                         ) : (
-                          <Button size="sm" onClick={() => handleCreateLead(candidate)}>
+                          <Button onClick={() => handleCreateLead(candidate)} className="min-h-touch">
                             Lead anlegen
                           </Button>
                         )}
@@ -851,10 +845,9 @@ export default function LeadExplorer(): JSX.Element {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  size="sm"
                   disabled={page === 1}
                   onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                >
+                 className="min-h-touch">
                   Zurück
                 </Button>
                 <span>
@@ -862,10 +855,9 @@ export default function LeadExplorer(): JSX.Element {
                 </span>
                 <Button
                   variant="ghost"
-                  size="sm"
                   disabled={page === totalPages}
                   onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-                >
+                 className="min-h-touch">
                   Weiter
                 </Button>
               </div>

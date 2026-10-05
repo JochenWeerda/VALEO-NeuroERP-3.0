@@ -24,6 +24,7 @@ type PosForm = { artikel_nr: string; lagerplatz: string; buchbestand: string; be
 export default function PermanenteInventurPage() {
   const [aktiv, setAktiv] = useState('')
   const [zaehl, setZaehl] = useState<Record<string, string>>({})
+  const [pendingZaehlId, setPendingZaehlId] = useState<string | null>(null)
 
   const abschluesse = usePIVAbschluesse()
   const createAbschluss = useCreatePIVAbschluss()
@@ -66,7 +67,7 @@ export default function PermanenteInventurPage() {
     <div className="container mx-auto space-y-6 py-8">
       <div>
         <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <ClipboardCheck className="h-7 w-7 text-emerald-700" /> Permanente Inventur (PIV)
+          <ClipboardCheck className="h-7 w-7 text-status-success" /> Permanente Inventur (PIV)
         </h1>
         <p className="mt-2 text-muted-foreground">
           Stichtagsunabhängige Bestandszählung je Inventurgruppe/Lager mit Differenzbewertung.
@@ -81,7 +82,7 @@ export default function PermanenteInventurPage() {
               <div className="space-y-1">
                 {(abschluesse.data ?? []).map((a) => (
                   <button key={a.id} onClick={() => setAktiv(a.id)}
-                    className={`w-full rounded border p-2 text-left text-sm ${aktiv === a.id ? 'border-emerald-400 bg-emerald-50' : 'hover:bg-muted'}`}>
+                    className={`min-h-touch w-full rounded border p-2 text-left text-sm ${aktiv === a.id ? 'border-status-success bg-status-success/10' : 'hover:bg-muted'}`}>
                     <div className="flex justify-between">
                       <span className="font-medium">{a.abschluss_datum}</span>
                       <Badge variant={a.status === 'abgeschlossen' ? 'secondary' : 'outline'}>{a.status}</Badge>
@@ -101,7 +102,7 @@ export default function PermanenteInventurPage() {
                 <div className="space-y-1"><Label>Lager</Label><Input {...aForm.register('lager_nr')} /></div>
               </div>
               <div className="space-y-1"><Label>Bemerkung</Label><Input {...aForm.register('bemerkung')} /></div>
-              <Button type="submit" disabled={createAbschluss.isPending} className="w-full"><Plus className="mr-2 h-4 w-4" />Abschluss anlegen</Button>
+              <Button type="submit" disabled={createAbschluss.isPending} className="min-h-touch w-full"><Plus className="mr-2 h-4 w-4" />Abschluss anlegen</Button>
             </form>
           </CardContent>
         </Card>
@@ -110,7 +111,7 @@ export default function PermanenteInventurPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Positionen {aktiverAbschluss ? `· ${aktiverAbschluss.abschluss_datum}` : ''}</CardTitle>
             {offen && (
-              <Button size="sm" variant="secondary" disabled={abschliessen.isPending}
+              <Button className="min-h-touch" variant="secondary" disabled={abschliessen.isPending}
                 onClick={async () => {
                   try { await abschliessen.mutateAsync(aktiv); toast.success('Inventur abgeschlossen.') }
                   catch (e) { toast.error(e instanceof Error ? e.message : 'Abschluss fehlgeschlagen') }
@@ -135,20 +136,23 @@ export default function PermanenteInventurPage() {
                       <TableCell>{p.lagerplatz ?? '—'}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.buchbestand)}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.zaehlmenge)}</TableCell>
-                      <TableCell className={`text-right font-mono ${(p.differenz ?? 0) < 0 ? 'text-red-600' : (p.differenz ?? 0) > 0 ? 'text-emerald-700' : ''}`}>{num(p.differenz)}</TableCell>
+                      <TableCell className={`text-right font-mono ${(p.differenz ?? 0) < 0 ? 'text-status-error' : (p.differenz ?? 0) > 0 ? 'text-status-success' : ''}`}>{num(p.differenz)}</TableCell>
                       <TableCell className="text-right font-mono">{num(p.differenzwert_eur)}</TableCell>
                       {offen && (
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Input className="h-8 w-24" type="number" step="0.001" placeholder="zählen"
-                              value={zaehl[p.id] ?? ''} onChange={(e) => setZaehl((s) => ({ ...s, [p.id]: e.target.value }))} />
-                            <Button size="sm" variant="ghost" disabled={zaehlen.isPending || !zaehl[p.id]}
+                            <Input className="min-h-touch w-24" type="number" step="0.001" placeholder="zählen"
+                              value={zaehl[p.id] ?? ''} onChange={(e) => setZaehl((s) => ({ ...s, [p.id]: e.target.value }))} aria-label={`Zählmenge ${p.artikel_nr}`} />
+                            <Button className="min-h-touch" variant="ghost" disabled={pendingZaehlId === p.id || !zaehl[p.id]}
                               onClick={async () => {
+                                if (pendingZaehlId) return
+                                setPendingZaehlId(p.id)
                                 try {
                                   await zaehlen.mutateAsync({ abschlussId: aktiv, posId: p.id, zaehlmenge: Number(zaehl[p.id]) })
                                   setZaehl((s) => ({ ...s, [p.id]: '' }))
                                   toast.success('Zählmenge erfasst.')
                                 } catch (e) { toast.error(e instanceof Error ? e.message : 'Zählen fehlgeschlagen') }
+                                finally { setPendingZaehlId(null) }
                               }}>OK</Button>
                           </div>
                         </TableCell>
@@ -168,7 +172,7 @@ export default function PermanenteInventurPage() {
                 <div className="space-y-1"><Label>Lagerplatz</Label><Input {...pForm.register('lagerplatz')} /></div>
                 <div className="space-y-1"><Label>Buchbestand</Label><Input type="number" step="0.001" {...pForm.register('buchbestand', { required: true })} /></div>
                 <div className="space-y-1"><Label>Bew.-Preis €</Label><Input type="number" step="0.01" {...pForm.register('bewertungspreis_eur')} /></div>
-                <div className="col-span-4"><Button type="submit" disabled={createPos.isPending}><Plus className="mr-2 h-4 w-4" />Position erfassen</Button></div>
+                <div className="col-span-4"><Button type="submit" disabled={createPos.isPending} className="min-h-touch"><Plus className="mr-2 h-4 w-4" />Position erfassen</Button></div>
               </form>
             )}
           </CardContent>

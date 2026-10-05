@@ -45,6 +45,14 @@
       "path": "admin/control-center/agent-ops"
     },
     {
+      "module": "@/pages/admin/screen-studio",
+      "path": "admin/screen-studio"
+    },
+    {
+      "module": "@/pages/admin/studio-run",
+      "path": "studio/run/:screenId"
+    },
+    {
       "module": "@/pages/admin/compliance-dashboard",
       "path": "admin/compliance"
     },
@@ -431,6 +439,10 @@
     {
       "module": "@/pages/produktion/mischfutter-produktion",
       "path": "produktion"
+    },
+    {
+      "module": "@/pages/produktion/rezepturgruppen",
+      "path": "produktion/rezepturgruppen"
     },
     {
       "module": "@/pages/produktion/produktions-dokumente-drucken",
@@ -1397,6 +1409,10 @@
       "path": "crm/dubletten"
     },
     {
+      "module": "@/pages/crm/klaerfall-inbox",
+      "path": "crm/klaerfall-inbox"
+    },
+    {
       "module": "@/pages/crm/kunden-zuordnung",
       "path": "crm/kunden-zuordnung"
     },
@@ -1769,7 +1785,7 @@
       "path": "sales/orders-modern"
     },
     {
-      "module": "@/pages/sales/rechnungen-liste",
+      "module": "@/pages/verkauf/rechnungen-worklist",
       "path": "sales/rechnungen"
     },
     {
@@ -2213,7 +2229,7 @@
       "path": "verkauf/auftraege/neu"
     },
     {
-      "module": "@/pages/sales/rechnungen-liste",
+      "module": "@/pages/verkauf/rechnungen-worklist",
       "path": "verkauf/rechnungen"
     },
     {
@@ -2425,6 +2441,10 @@
       "path": "sales/delivery-note/:id"
     },
     {
+      "module": "@/pages/verkauf/rechnung",
+      "path": "verkauf/rechnung/:id"
+    },
+    {
       "module": "@/pages/einkauf/bestellung-native",
       "path": "einkauf/bestellung/:id"
     },
@@ -2493,6 +2513,30 @@
       "path": "futtermittel/einzelfuttermittel/:id"
     },
     {
+      "module": "@/pages/futtermittel/rationseditor",
+      "path": "futtermittel/rationseditor"
+    },
+    {
+      "module": "@/pages/futtermittel/rationsvergleich",
+      "path": "futtermittel/rationsvergleich"
+    },
+    {
+      "module": "@/pages/futtermittel/beratung",
+      "path": "futtermittel/beratung"
+    },
+    {
+      "module": "@/pages/futtermittel/integrationsmonitor",
+      "path": "futtermittel/integrationsmonitor"
+    },
+    {
+      "module": "@/pages/futtermittel/grundfutteranalysen-native",
+      "path": "futtermittel/grundfutteranalysen"
+    },
+    {
+      "module": "@/pages/futtermittel/grundfutteranalyse-native",
+      "path": "futtermittel/grundfutteranalysen/:id"
+    },
+    {
       "module": "@/pages/futtermittel/mischfuttermittel-native",
       "path": "futtermittel/mischfuttermittel/:id"
     },
@@ -2543,6 +2587,70 @@
     {
       "module": "@/pages/admin/vordruck-editor",
       "path": "admin/vordruck-editor"
+    },
+    {
+      "module": "@/pages/workspace/einkauf",
+      "path": "workspace/einkauf"
+    },
+    {
+      "module": "@/pages/workspace/verkauf",
+      "path": "workspace/verkauf"
+    },
+    {
+      "module": "@/pages/workspace/lager",
+      "path": "workspace/lager"
+    },
+    {
+      "module": "@/pages/workspace/fibu",
+      "path": "workspace/fibu"
+    },
+    {
+      "module": "@/pages/workspace/leitung",
+      "path": "workspace/leitung"
+    },
+    {
+      "module": "@/pages/planung/kalender",
+      "path": "planung/kalender"
+    },
+    {
+      "module": "@/pages/futtermittel/rations-schnittstellen-import",
+      "path": "futtermittel/rations-schnittstellen-import"
+    },
+    {
+      "module": "@/pages/futtermittel/fuetterungsplan-native",
+      "path": "futtermittel/fuetterungsplan/:id"
+    },
+    {
+      "module": "@/pages/futtermittel/fuetterungsbetrieb-native",
+      "path": "futtermittel/fuetterungsbetrieb/:id"
+    },
+    {
+      "module": "@/pages/portal/feldbuch-auswertungen",
+      "path": "portal/feldbuch-auswertungen"
+    },
+    {
+      "module": "@/pages/portal/empfehlungen",
+      "path": "portal/empfehlungen"
+    },
+    {
+      "module": "@/pages/portal/lohndienste",
+      "path": "portal/lohndienste"
+    },
+    {
+      "module": "@/pages/portal/onboarding",
+      "path": "portal/onboarding"
+    },
+    {
+      "module": "@/pages/portal/preisspiegel",
+      "path": "portal/preisspiegel"
+    },
+    {
+      "module": "@/pages/portal/whatsapp-simulator",
+      "path": "portal/whatsapp-simulator"
+    },
+    {
+      "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil",
+      "path": "futtermittel/fuetterungsdokumentation-mobil"
     }
   ]
 }

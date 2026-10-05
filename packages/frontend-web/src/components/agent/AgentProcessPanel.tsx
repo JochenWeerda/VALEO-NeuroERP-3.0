@@ -90,10 +90,7 @@ export function AgentProcessPanel({
           />
           <span className="text-xs font-medium text-violet-800">Agent-Aktivität</span>
           {activeCount > 0 && (
-            <Badge
-              variant="outline"
-              className="text-xs text-violet-700 border-violet-300 h-5 px-1.5"
-            >
+            <Badge variant="info" className="text-xs h-5 px-1.5">
               {activeCount} aktiv
             </Badge>
           )}
@@ -118,9 +115,9 @@ export function AgentProcessPanel({
           {activities.map((a) => (
             <li key={a.id} className="flex items-center gap-2 text-xs text-slate-700">
               {a.status === 'done' ? (
-                <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
+                <CheckCircle className="h-3 w-3 text-status-success shrink-0" />
               ) : a.status === 'error' ? (
-                <AlertCircle className="h-3 w-3 text-red-500 shrink-0" />
+                <AlertCircle className="h-3 w-3 text-status-error shrink-0" />
               ) : a.status === 'running' || a.status === 'starting' ? (
                 <Sparkles className="h-3 w-3 text-violet-500 shrink-0 animate-pulse" />
               ) : (

@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.bulk_journal_import_schemas import BulkJournalImportOut
+from app.core import finance_periods
 
 
 router = APIRouter(prefix="/bulk-journal-import", tags=["finance", "import"])
@@ -230,21 +231,11 @@ async def import_journal_entries_csv(
                 successful_entries.append(entry)
 
         if not dry_run:
-            period_status = db.execute(
-                text(
-                    """
-                    SELECT status
-                    FROM finance_accounting_periods
-                    WHERE tenant_id = :tenant_id AND period = :period
-                    LIMIT 1
-                    """
-                ),
-                {"tenant_id": tenant_id, "period": period},
-            ).fetchone()
-            if period_status and str(period_status[0]) != "OPEN":
+            gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period)
+            if gesperrt:
                 raise HTTPException(
                     status_code=403,
-                    detail=f"Period {period} is {period_status[0]}. Import is blocked."
+                    detail=finance_periods.meldung(period, gesperrt),
                 )
 
             # Create journal entries

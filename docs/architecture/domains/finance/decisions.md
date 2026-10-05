@@ -10,9 +10,23 @@ version: 1.0.0
 
 # Finance — Entscheidungen
 
+- [ADR-061](../../../adr/adr-061-billing-batch-orchestration.md) - Rechnungstapel als Orchestrierung kanonischer Belege
+
 | ADR | Titel |
 |---|---|
 | [ADR-001](../../../adr/adr-001-fibu-domain-reuse-vs-rewrite.md) | FiBu Reuse vs Rewrite |
 | [ADR-002](../../../adr/adr-002-fibu-frontend-api-layer.md) | FiBu Frontend API |
 | [ADR-003](../../../adr/adr-003-canonical-domain-model.md) | Canonical Domain Model |
 | [ADR-036](../../../adr/adr-036-architecture-documentation-stack.md) | Doku-Stack |
+| [ADR-067](../../../adr/adr-067-governed-l3-report-catalog.md) | Fester L3-Berichtskatalog und Bonuslaeufe |
+| [ADR-070](../../../adr/adr-070-l3-deep-mask-parity.md) | Zentrale L3-Leaf-Masken |
+
+- [ADR-073](../../../adr/adr-073-bank-model-retirement.md): ein aktives
+  Bankauszugsmodell; unsicheren zweiten API-Weg loeschen, Entwicklungs-Altbestand
+  nach expliziter User-Freigabe entfernen, kein Archiv/Adapter.
+
+- [ADR-074](../../../adr/adr-074-bank-directbook-retirement.md): konkurrierende Direktbuchung entfernen; Abgleich ohne Buchungsfreigabe.
+
+- [ADR-075](../../../adr/adr-075-bank-ledger-evidence.md): explizite GL-ID und typisierter Saldennachweis; gemeinsame Integration noch offen.
+
+- [ADR-076](../../../adr/adr-076-cash-close-retirement.md): unbewertete Kassen-Direktbuchung entfernen; Tagesabschluss ohne Bestand/Gegenkontierung mit 409 sperren.

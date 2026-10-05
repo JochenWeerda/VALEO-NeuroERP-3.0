@@ -1,3 +1,18 @@
+"""Auth-freie Test-Kompatibilitaetsschicht fuer ``api_router``.
+
+Diese App ist **nicht** die Produktionsanwendung. Der Container faehrt
+``uvicorn main:app`` aus der Wurzel-``main.py``; dort haengen 251 weitere
+Routen und unter anderem ``BearerAuthMiddleware``. Hier fehlt die
+Auth-Middleware bewusst, damit Tests ``api_router`` direkt ansprechen koennen
+(Prozesskern-Welle 9, Paket A).
+
+Deshalb: **nicht als Quelle fuer Vertraege, Specs oder Laufzeit-Gates
+verwenden.** Bis 2026-09-10 erzeugte ``scripts/generate_openapi.py`` die
+veroeffentlichte OpenAPI-Spec aus dieser App; sie trug daher den Titel
+"VALEO-NeuroERP Test App" und war um 193 Pfade zu klein
+(SPEC-SOURCE-REALAPP-20260910). Verbleibender Nutzer ist ``tests/conftest.py``.
+"""
+
 from __future__ import annotations
 
 from contextlib import asynccontextmanager

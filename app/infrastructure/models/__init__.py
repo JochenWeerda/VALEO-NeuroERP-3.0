@@ -951,6 +951,7 @@ class ArticleDocument(Base):
     __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, nullable=False, index=True)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False, index=True)
     document_id = Column(String, nullable=False, index=True)
     document_name = Column(String(255), nullable=False)

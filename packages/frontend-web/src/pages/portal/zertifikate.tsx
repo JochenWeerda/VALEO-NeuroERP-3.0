@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { usePortalZertifikate } from '@/lib/api/portal'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -37,22 +37,22 @@ interface Zertifikat {
 }
 
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode; bgColor: string }> = {
+const statusConfig: Record<string, { label: string; variant: BadgeVariant; icon: React.ReactNode; bgColor: string }> = {
   'gueltig': { 
     label: 'Gültig', 
-    color: 'bg-emerald-100 text-emerald-800', 
+    variant: 'success',
     icon: <CheckCircle2 className="h-4 w-4" />,
     bgColor: 'border-l-emerald-500',
   },
   'auslaufend': { 
     label: 'Läuft bald aus', 
-    color: 'bg-amber-100 text-amber-800', 
+    variant: 'warning',
     icon: <AlertCircle className="h-4 w-4" />,
     bgColor: 'border-l-amber-500',
   },
   'abgelaufen': { 
     label: 'Abgelaufen', 
-    color: 'bg-red-100 text-red-800', 
+    variant: 'error',
     icon: <Clock className="h-4 w-4" />,
     bgColor: 'border-l-red-500',
   },
@@ -111,10 +111,10 @@ export default function PortalZertifikate() {
 
       {/* Warnung bei auslaufenden Zertifikaten */}
       {auslaufendeZertifikate > 0 && (
-        <Alert className="border-amber-200 bg-amber-50">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertTitle className="text-amber-800">Zertifikate laufen bald aus</AlertTitle>
-          <AlertDescription className="text-amber-700">
+        <Alert variant="warning">
+          <AlertCircle className="h-4 w-4 text-status-warning" />
+          <AlertTitle className="text-status-warning">Zertifikate laufen bald aus</AlertTitle>
+          <AlertDescription className="text-status-warning">
             {auslaufendeZertifikate} Zertifikat(e) laufen in den nächsten Wochen aus.
             Bitte kontaktieren Sie uns für eine Verlängerung.
           </AlertDescription>
@@ -126,7 +126,7 @@ export default function PortalZertifikate() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -139,7 +139,7 @@ export default function PortalZertifikate() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
                 <AlertCircle className="h-5 w-5" />
               </div>
               <div>
@@ -210,7 +210,7 @@ export default function PortalZertifikate() {
                       {zertifikat.gueltigVon} - {zertifikat.gueltigBis}
                     </span>
                   </div>
-                  <Badge className={`${status.color} gap-1`}>
+                  <Badge variant={status.variant} className="gap-1">
                     {status.icon}
                     {status.label}
                   </Badge>

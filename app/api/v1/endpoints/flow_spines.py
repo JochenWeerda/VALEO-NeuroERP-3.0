@@ -20,7 +20,12 @@ from app.core.flow_spine_registry import (
     merge_instance_statuses,
 )
 from sqlalchemy import or_
-from app.domains.operations.models import FlowSpineInstance, FlowSpineInstanceEvent
+from sqlalchemy.exc import IntegrityError
+from app.domains.operations.models import (
+    FlowSpineInstance,
+    FlowSpineInstanceDocument,
+    FlowSpineInstanceEvent,
+)
 from app.infrastructure.models import BusinessPartner, Customer
 from app.domains.shared.events import get_event_publisher
 from app.domains.shared.process_events import (
@@ -43,7 +48,72 @@ class FlowSpineOut(BaseSchema):
 
 
 router = APIRouter(prefix="/process/flow-spines", tags=["process", "flow-spines"])
+
+
+# FSX-011: Lebenszyklus-Zustaende, die einen Vorgang als abgeschlossen gelten
+# lassen. Ein solcher Fall blockiert keinen neuen Vorgang zum selben Beleg —
+# eine Reklamation nach abgeschlossenem Erstfall muss moeglich bleiben.
+#
+# Muss mit dem partiellen Unique-Index aus
+# alembic/versions/flow_spine_document_link_unique_20260915.py uebereinstimmen.
+# Weicht eines ab, greift der Index an anderer Stelle als diese Logik; ein Test
+# haelt beide Listen zusammen.
+CLOSED_LIFECYCLE_STATUSES: tuple[str, ...] = ("completed", "cancelled", "failed")
 LIFECYCLE_STATUSES = {"draft", "in_progress", "on_hold", "completed", "cancelled", "failed"}
+
+
+def _normalize_document_ref(value: str | None) -> str | None:
+    """Leerstring und Whitespace sind keine Belegreferenz — sonst greift der Unique-Index am falschen Ende."""
+    if value is None:
+        return None
+    stripped = value.strip()
+    return stripped or None
+
+
+def _reject_rebind_to_other_document(
+    inst: FlowSpineInstance,
+    *,
+    new_document_id: str | None,
+    new_document_type: str | None,
+    id_provided: bool,
+    type_provided: bool,
+) -> None:
+    """FSX-012: Eine URL-Fall-ID darf eine gesetzte Belegzuordnung nicht umbiegen.
+
+    Unverknuepfte Faelle (NULL) duerfen sich an den aktuellen Beleg haengen.
+    Dieselbe Zuordnung erneut zu schreiben ist idempotent. 404 fuer fremden
+    Mandanten/Prozess bleibt bei ``_get_instance_or_404`` — hier nur 409.
+    """
+    if not id_provided and not type_provided:
+        return
+    current_id = _normalize_document_ref(inst.linked_document_id)
+    current_type = _normalize_document_ref(inst.linked_document_type)
+    if current_id is None:
+        return
+    target_id = _normalize_document_ref(new_document_id) if id_provided else current_id
+    target_type = _normalize_document_ref(new_document_type) if type_provided else current_type
+    if target_id == current_id and target_type == current_type:
+        return
+    raise HTTPException(
+        status_code=409,
+        detail=(
+            "Dieser Vorgang ist bereits an einen anderen Beleg gebunden. "
+            "Die Zuordnung wird nicht umgebogen."
+        ),
+    )
+
+
+def _require_complete_document_ref(doc_id: str | None, doc_type: str | None) -> None:
+    if bool(doc_id) != bool(doc_type):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "linked_document_id und linked_document_type sind nur gemeinsam "
+                "gueltig — eine Belegreferenz besteht aus Art und Nummer."
+            ),
+        )
+
+
 REASON_CATEGORIES = {
     "customer",
     "supplier",
@@ -144,6 +214,28 @@ def _get_instance_or_404(db: Session, process_key: str, instance_id: str) -> Flo
             detail=f"Instance '{instance_id}' not found for process '{process_key}'",
         )
     return inst
+
+
+def _latest_events_by_node(
+    db: Session, instance_id: str, tenant_id: str
+) -> dict[str, dict[str, Any]]:
+    """Eine Abfrage je Instanz: juengstes Ereignis je node_id (Herkunftskarte FSX-001)."""
+    rows = (
+        db.query(FlowSpineInstanceEvent)
+        .filter(
+            FlowSpineInstanceEvent.instance_id == instance_id,
+            FlowSpineInstanceEvent.tenant_id == tenant_id,
+            FlowSpineInstanceEvent.node_id.isnot(None),
+            FlowSpineInstanceEvent.node_id != "",
+        )
+        .order_by(FlowSpineInstanceEvent.created_at.desc())
+        .all()
+    )
+    latest: dict[str, dict[str, Any]] = {}
+    for event in rows:
+        if event.node_id not in latest:
+            latest[event.node_id] = _event_to_dict(event)
+    return latest
 
 
 def _parse_datetime(value: str | None, field_name: str) -> datetime | None:
@@ -348,12 +440,20 @@ def get_workspace(
 
     if instance_id:
         inst = db.get(FlowSpineInstance, instance_id)
-        if inst and inst.process_key == process_key and inst.tenant_id == tenant_id:
-            workspace = merge_instance_statuses(workspace, _instance_to_dict(inst))
-            if inst.customer_id:
-                customer_data = _resolve_customer_data(db, inst.tenant_id, inst.customer_id)
-                if customer_data:
-                    workspace["customer_data"] = customer_data
+        if not inst or inst.process_key != process_key or inst.tenant_id != tenant_id:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Instance '{instance_id}' not found for process '{process_key}'",
+            )
+        workspace = merge_instance_statuses(
+            workspace,
+            _instance_to_dict(inst),
+            node_events=_latest_events_by_node(db, inst.id, tenant_id),
+        )
+        if inst.customer_id:
+            customer_data = _resolve_customer_data(db, inst.tenant_id, inst.customer_id)
+            if customer_data:
+                workspace["customer_data"] = customer_data
         return JSONResponse(content=workspace)
 
     etag = _flow_spine_etag(workspace)
@@ -368,17 +468,69 @@ def get_workspace(
 
 # ── Instance CRUD ─────────────────────────────────────────────────────────────
 
-@router.post("/{process_key}/instances", status_code=201, response_model=FlowSpineOut, summary="Instance anlegen")
+def _find_open_instance_for_document(
+    db: Session,
+    tenant_id: str,
+    process_key: str,
+    linked_document_type: str,
+    linked_document_id: str,
+) -> Optional[FlowSpineInstance]:
+    """FSX-011: offenen Vorgang zu genau diesem Beleg finden (oder None)."""
+    return (
+        db.query(FlowSpineInstance)
+        .filter(
+            FlowSpineInstance.tenant_id == tenant_id,
+            FlowSpineInstance.process_key == process_key,
+            FlowSpineInstance.linked_document_type == linked_document_type,
+            FlowSpineInstance.linked_document_id == linked_document_id,
+            FlowSpineInstance.lifecycle_status.notin_(CLOSED_LIFECYCLE_STATUSES),
+        )
+        .order_by(FlowSpineInstance.created_at.asc())
+        .first()
+    )
+
+
+@router.post("/{process_key}/instances", response_model=FlowSpineOut, summary="Instance anlegen")
 async def create_instance(
     process_key: str,
     body: InstanceCreateRequest,
+    response: Response,
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """Create a new flow spine instance for tracking a specific document/case through a process."""
+    """Create a new flow spine instance for tracking a specific document/case through a process.
+
+    FSX-011: Traegt der Aufruf eine Belegreferenz und existiert dazu bereits ein
+    **offener** Vorgang, wird dieser zurueckgegeben (200) statt ein zweiter
+    angelegt (201). Der Aufrufer erhaelt in beiden Faellen dieselbe Fall-ID und
+    darf den Aufruf deshalb beliebig oft wiederholen — genau das braucht
+    FSX-012, wenn die Bestellung gespeichert ist und nur die Verknuepfung
+    fehlgeschlagen war.
+
+    Das Nachschlagen allein genuegt nicht: zwei gleichzeitige Aufrufe sehen
+    beide "kein Fall vorhanden". Die Eindeutigkeit erzwingt der partielle
+    Unique-Index; die Kollision wird hier aufgefangen und aufgeloest.
+    """
     try:
         get_flow_spine_workspace(process_key)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Unknown flow spine process '{process_key}'") from exc
+
+    tenant_id_early = get_current_tenant_id()
+    linked_document_id = _normalize_document_ref(body.linked_document_id)
+    linked_document_type = _normalize_document_ref(body.linked_document_type)
+    _require_complete_document_ref(linked_document_id, linked_document_type)
+    has_document_ref = bool(linked_document_id and linked_document_type)
+    if has_document_ref:
+        existing = _find_open_instance_for_document(
+            db,
+            tenant_id_early,
+            process_key,
+            linked_document_type,
+            linked_document_id,
+        )
+        if existing is not None:
+            response.status_code = 200
+            return _instance_to_dict(existing)
 
     instance_id = str(uuid.uuid4())
     case_number = get_numbering().next_number("workflow_case")
@@ -399,8 +551,8 @@ async def create_instance(
         customer_name=persisted_partner_name,
         subject=body.subject,
         entry_mode=body.entry_mode,
-        linked_document_id=body.linked_document_id,
-        linked_document_type=body.linked_document_type,
+        linked_document_id=linked_document_id,
+        linked_document_type=linked_document_type,
         lifecycle_status="draft",
         node_statuses={},
         resume_payload={},
@@ -416,7 +568,7 @@ async def create_instance(
         payload={
             "case_number": case_number,
             "entry_mode": body.entry_mode,
-            "linked_document_type": body.linked_document_type,
+            "linked_document_type": linked_document_type,
         },
     )
 
@@ -429,14 +581,43 @@ async def create_instance(
             case_number=case_number,
             label=label,
             entry_mode=body.entry_mode,
-            linked_document_type=body.linked_document_type,
+            linked_document_type=linked_document_type,
         )
         await OutboxPublisher(db, get_event_publisher()).store_event(event, tenant_id)
     except Exception:
         logger.warning("Outbox unavailable — FlowSpineInstanceCreated not stored", exc_info=True)
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # FSX-011: Ein paralleler Aufruf war schneller. Der partielle
+        # Unique-Index hat die zweite Anlage verhindert — genau dafuer ist er da.
+        # Aufloesung: zuruecksetzen, den bestehenden offenen Fall lesen und ihn
+        # zurueckgeben. Der Aufrufer merkt vom Wettlauf nichts ausser dem 200.
+        db.rollback()
+        if not has_document_ref:
+            raise
+        existing = _find_open_instance_for_document(
+            db,
+            tenant_id_early,
+            process_key,
+            linked_document_type,
+            linked_document_id,
+        )
+        if existing is None:
+            # Der Index hat ausgeloest, aber es findet sich kein offener Fall.
+            # Das ist kein Wettlauf, sondern eine andere Verletzung — sie darf
+            # nicht als Erfolg durchgehen.
+            raise
+        logger.info(
+            "FSX-011: parallele Anlage abgefangen, bestehender Vorgang %s zurueckgegeben",
+            existing.id,
+        )
+        response.status_code = 200
+        return _instance_to_dict(existing)
+
     db.refresh(inst)
+    response.status_code = 201
     return _instance_to_dict(inst)
 
 
@@ -446,10 +627,28 @@ def list_instances(
     skip: int = Query(default=0, ge=0, description="Anzahl übersprungener Einträge"),
     limit: int = Query(default=50, ge=1, le=200, description="Maximale Anzahl Einträge"),
     search: Optional[str] = Query(None, description="Suche in Vorgangsnummer, Kundenname, Bezeichnung"),
+    linked_document_id: Optional[str] = Query(
+        None, description="FSX-010: nur Vorgaenge zu diesem Beleg"
+    ),
+    linked_document_type: Optional[str] = Query(
+        None, description="FSX-010: Belegart, zusammen mit linked_document_id anzugeben"
+    ),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """List instances for a given process_key, tenant-isolated, with pagination and search."""
+    """List instances for a given process_key, tenant-isolated, with pagination and search.
+
+    FSX-010: Mit ``linked_document_id`` und ``linked_document_type`` fragt eine
+    Belegmaske, ob zu *diesem* Beleg bereits ein Vorgang existiert. Abgeschlossene
+    Vorgaenge kommen dabei mit und sind ueber ``lifecycle_status`` erkennbar — die
+    Maske verknuepft nur mit offenen und bietet fuer abgeschlossene ausdruecklich
+    die Neuanlage an, statt einen alten Fall stillschweigend wiederzubeleben.
+    """
     tenant_id = get_current_tenant_id()
+
+    linked_document_id = _normalize_document_ref(linked_document_id)
+    linked_document_type = _normalize_document_ref(linked_document_type)
+    _require_complete_document_ref(linked_document_id, linked_document_type)
+
     base_q = (
         db.query(FlowSpineInstance)
         .filter(
@@ -458,6 +657,11 @@ def list_instances(
         )
         .order_by(FlowSpineInstance.created_at.desc())
     )
+    if linked_document_id and linked_document_type:
+        base_q = base_q.filter(
+            FlowSpineInstance.linked_document_id == linked_document_id,
+            FlowSpineInstance.linked_document_type == linked_document_type,
+        )
     if search:
         s = f"%{search}%"
         base_q = base_q.filter(
@@ -513,10 +717,18 @@ def update_instance(
         inst.subject = body.subject
     if body.entry_mode is not None:
         inst.entry_mode = body.entry_mode
+    _reject_rebind_to_other_document(
+        inst,
+        new_document_id=body.linked_document_id,
+        new_document_type=body.linked_document_type,
+        id_provided=body.linked_document_id is not None,
+        type_provided=body.linked_document_type is not None,
+    )
     if body.linked_document_id is not None:
-        inst.linked_document_id = body.linked_document_id
+        inst.linked_document_id = _normalize_document_ref(body.linked_document_id)
     if body.linked_document_type is not None:
-        inst.linked_document_type = body.linked_document_type
+        inst.linked_document_type = _normalize_document_ref(body.linked_document_type)
+    _require_complete_document_ref(inst.linked_document_id, inst.linked_document_type)
     if body.business_status is not None:
         inst.business_status = body.business_status
     if body.assigned_owner is not None:
@@ -544,7 +756,24 @@ def update_instance(
         },
     )
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        # FSX-011 / V14: Beim Aktualisieren ist eine Kollision **kein**
+        # Idempotenzfall. Wer einen Beleg an einen Vorgang haengt, zu dem schon
+        # ein anderer offener Vorgang gehoert, meint etwas anderes als der
+        # Anleger — stillschweigend den fremden Fall zurueckzugeben waere hier
+        # falsch. Also Konflikt melden und den Aufrufer entscheiden lassen.
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Zu diesem Beleg existiert in diesem Prozess bereits ein offener "
+                "Vorgang. Verknuepfe mit dem bestehenden Vorgang oder schliesse "
+                "ihn ab, bevor der Beleg einem anderen Vorgang zugeordnet wird."
+            ),
+        ) from exc
+
     db.refresh(inst)
     return _instance_to_dict(inst)
 
@@ -993,3 +1222,278 @@ async def execute_agent_action(
         len(rag_hits),
     )
     return response
+
+
+# -- FSX-DOC-LINKS: beteiligte Belege je Vorgang --------------------------------
+#
+# Der fuehrende Einstiegsbeleg bleibt, wo er ist: auf der Instanz. An ihm haengt
+# der partielle Unique-Index (FSX-011), und er wird weiterhin nicht umgebogen
+# (FSX-012). Diese Endpunkte betreffen ausschliesslich die *weiteren* Belege.
+
+
+class InstanceDocumentRequest(BaseModel):
+    document_type: str = Field(min_length=1, max_length=80)
+    document_id: str = Field(min_length=1, max_length=120)
+    #: Fachliche Rolle im Vorgang ("rechnung", "wareneingang"), kein Status.
+    relation: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+def _document_link_to_dict(link: FlowSpineInstanceDocument) -> dict[str, Any]:
+    return {
+        "id": link.id,
+        "instance_id": link.instance_id,
+        "process_key": link.process_key,
+        "document_type": link.document_type,
+        "document_id": link.document_id,
+        "relation": link.relation,
+        "linked_by": link.linked_by,
+        "created_at": link.created_at.isoformat() if link.created_at else None,
+    }
+
+
+@router.get(
+    "/{process_key}/instances/{instance_id}/documents",
+    response_model=FlowSpineOut,
+    summary="Beteiligte Belege eines Vorgangs auflisten",
+)
+def list_instance_documents(
+    process_key: str,
+    instance_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Fuehrenden Einstiegsbeleg und beteiligte Belege getrennt ausweisen.
+
+    Die Trennung ist keine Formsache: der fuehrende Beleg ist unveraenderlich und
+    traegt die Eindeutigkeit des Vorgangs, die beteiligten sind beliebig viele.
+    Wer beides in eine Liste wirft, verliert genau die Unterscheidung, an der
+    FSX-011 und FSX-012 haengen.
+    """
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    links = (
+        db.query(FlowSpineInstanceDocument)
+        .filter(
+            FlowSpineInstanceDocument.instance_id == instance_id,
+            FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+        )
+        .order_by(FlowSpineInstanceDocument.created_at.asc())
+        .all()
+    )
+    leading = None
+    if inst.linked_document_id and inst.linked_document_type:
+        leading = {
+            "document_type": inst.linked_document_type,
+            "document_id": inst.linked_document_id,
+        }
+    return {
+        "instance_id": instance_id,
+        "process_key": process_key,
+        "leading_document": leading,
+        "documents": [_document_link_to_dict(link) for link in links],
+        "total": len(links),
+    }
+
+
+@router.post(
+    "/{process_key}/instances/{instance_id}/documents",
+    response_model=FlowSpineOut,
+    summary="Beleg an einen Vorgang anhaengen",
+)
+def attach_instance_document(
+    process_key: str,
+    instance_id: str,
+    body: InstanceDocumentRequest,
+    response: Response,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Einen weiteren Beleg an den Vorgang haengen — ohne den fuehrenden anzufassen.
+
+    Das ist der Fall, den FSX-012 bisher als Umbiegen abgewiesen hat: die
+    Rechnung zum Lieferschein gehoert in denselben Vorgang, ist aber nicht der
+    Einstiegsbeleg. Ohne diesen Endpunkt muesste sie den fuehrenden verdraengen.
+
+    **Idempotent**: haengt der Beleg bereits, kommt derselbe Eintrag mit 200
+    zurueck statt eines zweiten mit 201. Damit ist der Aufruf beliebig oft
+    wiederholbar — dieselbe Eigenschaft, die FSX-011 fuer die Fallanlage
+    hergestellt hat, und aus demselben Grund: ein Wiederholungsversuch nach einem
+    Teilfehler darf nichts verdoppeln.
+    """
+    inst = _get_instance_or_404(db, process_key, instance_id)
+
+    document_type = _normalize_document_ref(body.document_type)
+    document_id = _normalize_document_ref(body.document_id)
+    if not document_type or not document_id:
+        raise HTTPException(
+            status_code=422,
+            detail="document_type und document_id duerfen nicht leer sein.",
+        )
+
+    existing = (
+        db.query(FlowSpineInstanceDocument)
+        .filter(
+            FlowSpineInstanceDocument.instance_id == instance_id,
+            FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+            FlowSpineInstanceDocument.document_type == document_type,
+            FlowSpineInstanceDocument.document_id == document_id,
+        )
+        .first()
+    )
+    if existing is not None:
+        response.status_code = 200
+        return _document_link_to_dict(existing)
+
+    link = FlowSpineInstanceDocument(
+        instance_id=instance_id,
+        tenant_id=inst.tenant_id,
+        process_key=process_key,
+        document_type=document_type,
+        document_id=document_id,
+        relation=body.relation,
+        linked_by=body.user_id,
+    )
+    db.add(link)
+    try:
+        db.commit()
+    except IntegrityError:
+        # Ein paralleler Aufruf war schneller. Der Unique-Index hat die zweite
+        # Zeile verhindert; aufgeloest wird sie wie bei FSX-011 — bestehenden
+        # Eintrag lesen und zurueckgeben.
+        db.rollback()
+        existing = (
+            db.query(FlowSpineInstanceDocument)
+            .filter(
+                FlowSpineInstanceDocument.instance_id == instance_id,
+                FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+                FlowSpineInstanceDocument.document_type == document_type,
+                FlowSpineInstanceDocument.document_id == document_id,
+            )
+            .first()
+        )
+        if existing is None:
+            raise
+        response.status_code = 200
+        return _document_link_to_dict(existing)
+
+    db.refresh(link)
+    response.status_code = 201
+    return _document_link_to_dict(link)
+
+
+@router.delete(
+    "/{process_key}/instances/{instance_id}/documents/{link_id}",
+    status_code=204,
+    response_class=Response,
+    response_model=None,
+    summary="Beleg vom Vorgang loesen",
+)
+def detach_instance_document(
+    process_key: str,
+    instance_id: str,
+    link_id: str,
+    db: Session = Depends(get_db),
+) -> Response:
+    """Eine Beteiligung loesen. Der fuehrende Beleg ist davon nicht betroffen."""
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    link = (
+        db.query(FlowSpineInstanceDocument)
+        .filter(
+            FlowSpineInstanceDocument.id == link_id,
+            FlowSpineInstanceDocument.instance_id == instance_id,
+            FlowSpineInstanceDocument.tenant_id == inst.tenant_id,
+        )
+        .first()
+    )
+    if link is None:
+        raise HTTPException(status_code=404, detail="Belegverknuepfung nicht gefunden")
+    db.delete(link)
+    db.commit()
+    return Response(status_code=204)
+
+
+@router.get(
+    "/documents/{document_type}/{document_id}/instances",
+    response_model=FlowSpineOut,
+    summary="Vorgaenge zu einem Beleg finden",
+)
+def find_instances_for_document(
+    document_type: str,
+    document_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Rueckwaertssuche ueber **alle** Prozesse: wo kommt dieser Beleg vor?
+
+    Der Endpunkt liegt bewusst nicht unter ``/{process_key}/``: eine
+    Sammelrechnung ueber drei Lieferscheine gehoert zu drei Vorgaengen, und die
+    muessen auffindbar sein, ohne dass der Aufrufer den Prozess vorher kennt.
+
+    Gefunden wird in beiden Rollen — als fuehrender Einstiegsbeleg und als
+    beteiligter Beleg. ``role`` sagt, welche von beiden es war; das ist der
+    Unterschied zwischen "dieser Vorgang wurde hiermit eroeffnet" und "dieser
+    Beleg gehoert auch dazu".
+    """
+    tenant_id = get_current_tenant_id()
+    doc_type = _normalize_document_ref(document_type)
+    doc_id = _normalize_document_ref(document_id)
+    if not doc_type or not doc_id:
+        raise HTTPException(
+            status_code=422,
+            detail="document_type und document_id duerfen nicht leer sein.",
+        )
+
+    hits: list[dict[str, Any]] = []
+
+    leading_instances = (
+        db.query(FlowSpineInstance)
+        .filter(
+            FlowSpineInstance.tenant_id == tenant_id,
+            FlowSpineInstance.linked_document_type == doc_type,
+            FlowSpineInstance.linked_document_id == doc_id,
+        )
+        .all()
+    )
+    for inst in leading_instances:
+        hits.append(
+            {
+                "instance_id": inst.id,
+                "process_key": inst.process_key,
+                "case_number": inst.case_number,
+                "label": inst.label,
+                "lifecycle_status": inst.lifecycle_status,
+                "role": "leading",
+                "relation": None,
+            }
+        )
+
+    seen = {(hit["instance_id"]) for hit in hits}
+    links = (
+        db.query(FlowSpineInstanceDocument, FlowSpineInstance)
+        .join(FlowSpineInstance, FlowSpineInstance.id == FlowSpineInstanceDocument.instance_id)
+        .filter(
+            FlowSpineInstanceDocument.tenant_id == tenant_id,
+            FlowSpineInstanceDocument.document_type == doc_type,
+            FlowSpineInstanceDocument.document_id == doc_id,
+        )
+        .all()
+    )
+    for link, inst in links:
+        if inst.id in seen:
+            continue
+        hits.append(
+            {
+                "instance_id": inst.id,
+                "process_key": inst.process_key,
+                "case_number": inst.case_number,
+                "label": inst.label,
+                "lifecycle_status": inst.lifecycle_status,
+                "role": "participant",
+                "relation": link.relation,
+            }
+        )
+
+    return {
+        "document_type": doc_type,
+        "document_id": doc_id,
+        "tenant_id": tenant_id,
+        "instances": hits,
+        "total": len(hits),
+    }

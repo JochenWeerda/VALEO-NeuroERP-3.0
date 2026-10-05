@@ -5,6 +5,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
+import { streckeKm, type Punkt } from '../logistik/strecke'
 
 export type PlanIstWert = { plan: number; ist: number; abweichung: number }
 export type PlanIstBereich = { bereich: string; plan: number; ist: number; abweichung: number }
@@ -122,8 +123,11 @@ export type Tour = {
   vehicleLabel: string | null
   fahrer: string
   stopps: number
-  km: number
+  km: number | null
+  zieladresse: string | null
+  lieferscheinRef: string | null
   status: 'geplant' | 'unterwegs' | 'abgeschlossen' | 'storniert'
+  datum: string | null
 }
 export type TourenData = {
   heute: number
@@ -180,8 +184,11 @@ function mapToursApiToTourenData(rows: TourApiRow[]): TourenData {
       vehicleLabel: r.vehicle_id ?? null,
       fahrer: r.driver_id || '—',
       stopps: Number(r.stop_count) || 0,
-      km: 0,
+      km: null,
+      zieladresse: null,
+      lieferscheinRef: null,
       status: st,
+      datum: d || null,
     })
   }
   return { heute, offen, unterwegs, abgeschlossen, tourenListe }
@@ -193,9 +200,36 @@ export function useTouren() {
     queryFn: async () => {
       const { data } = await apiClient.get<TourApiRow[]>('/api/v1/logistik/tours')
       const rows = Array.isArray(data) ? data : []
-      return mapToursApiToTourenData(rows)
+      const basis = mapToursApiToTourenData(rows)
+      const tourenListe = await Promise.all(basis.tourenListe.map(async (tour) => {
+        try {
+          const detail = await apiClient.get<{ stops?: Array<{ address?: string | null; lat?: number | null; lng?: number | null; delivery_note_ref?: string | null }> }>(
+            `/api/v1/logistik/tours/${encodeURIComponent(tour.id)}`,
+          )
+          const stops = Array.isArray(detail.data.stops) ? detail.data.stops : []
+          const punkte: Punkt[] = stops.flatMap((stopp) => (
+            typeof stopp.lat === 'number' && typeof stopp.lng === 'number' ? [[stopp.lat, stopp.lng] as Punkt] : []
+          ))
+          const adresse = stops.find((stopp) => {
+            const text = String(stopp.address ?? '').trim()
+            return text.length > 0 && !text.toLowerCase().startsWith('lieferschein')
+          })?.address ?? stops[0]?.address ?? null
+          const ref = stops.find((stopp) => String(stopp.delivery_note_ref ?? '').trim())?.delivery_note_ref
+          return {
+            ...tour,
+            km: streckeKm(punkte),
+            zieladresse: adresse ? String(adresse) : null,
+            lieferscheinRef: ref ? String(ref) : null,
+          }
+        } catch {
+          // Die Strecke ist Beiwerk. Die Tour bleibt in der Liste.
+          return tour
+        }
+      }))
+      return { ...basis, tourenListe }
     },
     initialData: EMPTY_TOUREN,
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -217,6 +251,7 @@ export function useFrachtbriefe() {
     queryKey: ['logistik', 'frachtbriefe'],
     queryFn: async () => (await apiClient.get<Frachtbrief[]>('/api/v1/logistik/frachtbriefe')).data,
     initialData: [],
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }

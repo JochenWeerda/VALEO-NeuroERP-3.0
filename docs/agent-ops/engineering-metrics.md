@@ -4,31 +4,31 @@ type: reference
 audience: [entwickler, ki-agent, product]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-07-05
+last_reviewed: 2026-09-11
 version: 3.0.0
-generated: 2026-07-05
+generated: 2026-09-11
 ---
 
 # AI Engineering Metrics
 
-> **Automatisch generiert** · Daten seit: `2026-04-06` · Stand: `2026-07-05`
+> **Automatisch generiert** · Daten seit: `2026-06-13` · Stand: `2026-09-11`
 
 ## Überblick
 
 | Kennzahl | Wert |
 |---|---|
-| Slices gesamt | **28** |
-| Slices abgeschlossen | **20** (71 %) |
-| Mit externen Gates | 12 |
-| Ohne Doku-Dateien | 14 |
-| Slices ohne Cycle-Time (kein Claim-Commit) | 28 |
+| Slices gesamt | **177** |
+| Slices abgeschlossen | **153** (86 %) |
+| Mit externen Gates | 100 |
+| Ohne Doku-Dateien | 48 |
+| Slices ohne Cycle-Time (kein Claim-Commit) | 130 |
 
 ## Cycle Time
 
 | Metrik | Wert |
 |---|---|
-| Median | **n/a** |
-| P90 | **n/a** |
+| Median | **0.2 h** |
+| P90 | **1.6 h** |
 
 !!! info "Interpretation"
     Cycle Time = Zeit zwischen `chore: claim <SLICE-ID>` und dem ersten `feat(…): <SLICE-ID>`-Commit.
@@ -36,28 +36,41 @@ generated: 2026-07-05
 
 ## Rework-Rate
 
-**64.7 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
+**72.9 %** der Feature-Commits werden von mindestens einem `fix`/`revert`-Commit gefolgt.
 
 ### Top Rework-Slices
 
 | Slice | fix-Commits | Owner |
 |---|---|---|
-| — | — | — |
+| `DESIGN-GAPS-SWEEP-002` | 1 | Claude |
+| `DESIGN-STATUS-COLORS-015` | 1 | Claude Code |
+| `DESIGN-STATUS-COLORS-016` | 1 | Claude Code |
+| `DESIGN-STATUS-COLORS-017` | 1 | Claude Code |
 
 ## Langläufer (≥ P90)
 
 | Slice | Cycle Time | Owner |
 |---|---|---|
-| — | — | — |
+| `FEED-EDITOR-023` | 13.4 h | Claude |
+| `FEED-AI-046` | 3.9 h | claude-feed-chain |
+| `FEED-INT-036` | 2.2 h | Codex |
+| `FEED-ADVICE-ROLES-013` | 2.1 h | Claude |
+| `FEED-ACT-030` | 1.6 h | Codex |
 
 ## Agent-Produktivität (Slices je Owner)
 
 | Owner | Slices | Anteil |
 |---|---|---|
-| Cursor | 15 | `████████████████████` |
-| Codex | 6 | `████████░░░░░░░░░░░░` |
-| offen | 6 | `████████░░░░░░░░░░░░` |
-| Claude Code | 1 | `█░░░░░░░░░░░░░░░░░░░` |
+| Codex | 78 | `████████████████████` |
+| Claude | 42 | `███████████░░░░░░░░░` |
+| Claude Code | 26 | `███████░░░░░░░░░░░░░` |
+| Cursor | 15 | `████░░░░░░░░░░░░░░░░` |
+| Cursor Agent | 6 | `██░░░░░░░░░░░░░░░░░░` |
+| offen | 6 | `██░░░░░░░░░░░░░░░░░░` |
+| claude-feed-chain | 1 | `░░░░░░░░░░░░░░░░░░░░` |
+| Codex -> Claude (Uebernahme nach Codex-Token-Stopp auf ausdruecklichen Auftrag) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
+| Claude (Fortfuehrung der Kette nach Codex-Token-Stopp) | 1 | `░░░░░░░░░░░░░░░░░░░░` |
+| unclaimed | 1 | `░░░░░░░░░░░░░░░░░░░░` |
 
 ---
 

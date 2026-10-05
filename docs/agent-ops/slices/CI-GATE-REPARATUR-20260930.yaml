@@ -1,0 +1,84 @@
+---
+slice_id: CI-GATE-REPARATUR
+id: CI-GATE-REPARATUR
+title: Die roten Laeufe auf eine frische Datenbank zurueckfuehren und die Gates schliessen
+status: abgeschlossen
+owner: Claude Code
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+coordination: >
+  Cursors MERIDIAN-BELEG-Arbeit und Codex' MCP-/Maskenkatalog-Strang bleiben
+  unangetastet. Die zwei Einzeiler in customer_reference.py und
+  schema-compiler.ts sind erst angefasst worden, nachdem beide Dateien
+  committet und im Arbeitsbaum sauber waren.
+goal: >
+  Kein Workflow ist mehr rot, ohne dass die Ursache benannt ist. Die Tests
+  laufen gegen eine frisch migrierte Datenbank, nicht gegen eine gewachsene.
+file_ownership:
+  - alembic/versions/lieferschein_status_bedingung_20260929.py
+  - alembic/versions/verkauf_fehlende_spalten_20260929.py
+  - app/api/v1/endpoints/compliance_dsgvo.py
+  - app/services/customer_reference.py
+  - packages/frontend-web/src/components/mask-builder/render-plan/schema-compiler.ts
+  - requirements.txt
+  - scripts/check_table_references.py
+  - docs/project-context/lieferschein-statuswerte-2026-09-29.md
+  - docs/quality-assurance/ci-rotlauf-ursachen-2026-09-29.md
+acceptance:
+  - Pytest (PostgreSQL / require_db) gruen
+  - CI/CD Pipeline gruen
+  - Docs Build und Docs Governance gruen
+  - OpenAPI Drift Check gruen
+  - python scripts/check_sql_fstrings.py Exit 0
+  - pip-audit -r requirements.txt ohne Befund
+tests:
+  - tests/test_sales_invoices_api.py
+  - tests/test_sales_sammelrechnung.py
+  - tests/test_xrechnung_echter_beleg.py
+  - tests/test_sales_beleg_druck_buchung.py
+  - tests/test_lieferschein_nachdruck_attestierung.py
+  - tests/test_einkauf_bedarf_abverkauf.py
+  - tests/test_dsgvo_loeschung_loescht_wirklich.py
+  - tests/test_table_reference_inventory.py
+risks:
+  - Eine gewachsene Entwicklungsdatenbank verdeckt Fehler in beide Richtungen
+  - Eine Statusbedingung darf keine Bestandszeile abweisen (GoBD Rz. 107 ff.)
+  - Ein Generatorlauf im geteilten Arbeitsbaum veroeffentlicht fremden Code
+ai_harness:
+  fachlicher_vertrag: >
+    Buchen, Versenden, Sammelrechnung und Storno eines Lieferscheins gelingen
+    auf einer frischen Installation. Ein Loeschantrag nach Art. 17 DSGVO
+    loescht wirklich und sagt je Tabelle, was geschah. Gebuchte Werte werden
+    nicht umgeschrieben.
+  architektur_vertrag: >
+    Jede Spalte und jede Bedingung, die der Code braucht, steht in einer
+    Migration — nicht nur in einer gewachsenen Datenbank. Generatorlaeufe
+    geschehen in einem sauberen Arbeitsbaum auf origin/main.
+  daten_vertrag: >
+    Keine UPDATE- oder DELETE-Anweisung auf gebuchten Saetzen. Die
+    Statusbedingung laesst den Altbestandswert `geliefert` zu, statt ihn
+    wegzuschreiben. Neue Spalten sind nullable, damit Bestandszeilen bleiben.
+  test_vertrag: >
+    Nachweis gegen eine frisch angelegte und migrierte Datenbank: 79 Tests der
+    betroffenen Dateien gruen, Gesamtlauf 14 289 gruen. Die Migrationen
+    zusaetzlich gegen den gewachsenen Bestand geprueft.
+  security_vertrag: >
+    PyJWT auf 2.14.0 (CVE-2026-102274). Der SQL-f-String in
+    customer_reference.py setzt nur Bezeichner aus _REFERENCE_TABLES ein, die
+    Werte sind gebunden; das nosec steht auf der schliessenden Zeile.
+  betriebs_vertrag: >
+    Rollback = die beiden Commits reverten. Die Migrationen sind
+    rueckbaufaehig: die Statusbedingung wird beim downgrade entfernt, nicht
+    verengt; die Spalten bleiben stehen, weil der Code sie schreibt.
+  dokumentations_vertrag: >
+    docs/quality-assurance/ci-rotlauf-ursachen-2026-09-29.md (Ursache 5),
+    docs/project-context/lieferschein-statuswerte-2026-09-29.md.
+# Der Doku-Code-Abgleich verlangt fuer jede Aenderung unter app/ zusaetzlich
+# eine Aenderung unter docs/schnittstellen/. Fuer eine Lint-Anmerkung ohne
+# Verhaltensaenderung (das nosec in customer_reference.py) waere das
+# Dokumentationstheater. Die Sache selbst ist in den beiden oben genannten
+# Dokumenten festgehalten.
+docs_sync_exception: true
+external_gates:
+  - not_applicable

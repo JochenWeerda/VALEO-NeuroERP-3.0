@@ -277,20 +277,20 @@ export default function LohnConnectorPage(): JSX.Element {
               )}
               <div className="flex flex-wrap gap-2 pt-2">
                 {canValidate && (
-                  <Button variant="outline" size="sm" onClick={() => validateMutation.mutate()} disabled={validateMutation.isPending} className="gap-1">
+                  <Button variant="outline" onClick={() => validateMutation.mutate()} disabled={validateMutation.isPending} className="min-h-touch gap-1">
                     <CheckCircle2 className="h-3 w-3" /> Validieren
                   </Button>
                 )}
                 {canPost && (
-                  <Button size="sm" onClick={() => postMutation.mutate()} disabled={postMutation.isPending} className="gap-1">
+                  <Button onClick={() => postMutation.mutate()} disabled={postMutation.isPending} className="min-h-touch gap-1">
                     <BookOpen className="h-3 w-3" /> Buchen
                   </Button>
                 )}
                 {canCancel && (
-                  <Button variant="outline" size="sm" onClick={() => cancelMutation.mutate()} disabled={cancelMutation.isPending}>Abbrechen</Button>
+                  <Button variant="outline" onClick={() => cancelMutation.mutate()} disabled={cancelMutation.isPending} className="min-h-touch">Abbrechen</Button>
                 )}
                 {canReverse && (
-                  <Button variant="outline" size="sm" onClick={() => reverseMutation.mutate()} disabled={reverseMutation.isPending} className="gap-1">
+                  <Button variant="outline" onClick={() => reverseMutation.mutate()} disabled={reverseMutation.isPending} className="min-h-touch gap-1">
                     <Undo2 className="h-3 w-3" /> Stornieren
                   </Button>
                 )}
@@ -328,7 +328,7 @@ export default function LohnConnectorPage(): JSX.Element {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Import-Läufe</CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isLoading} className="gap-1">
+          <Button variant="ghost" onClick={() => refetch()} disabled={isLoading} className="min-h-touch gap-1">
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} /> Aktualisieren
           </Button>
         </CardHeader>
@@ -364,8 +364,9 @@ export default function LohnConnectorPage(): JSX.Element {
                       </td>
                       <td className="p-2">
                         {r.status === 'pending' && (
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(r.id)} disabled={deleteRun.isPending}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                          <Button variant="ghost" onClick={() => handleDelete(r.id)} disabled={deleteRun.isPending} className="min-h-touch">
+                            <Trash2 className="h-4 w-4" />
+                            Löschen
                           </Button>
                         )}
                       </td>

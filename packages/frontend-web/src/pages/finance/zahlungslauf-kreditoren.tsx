@@ -18,6 +18,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig, type Field } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
@@ -544,6 +545,7 @@ function ZahlungenTable({ data: _data, onChange }: { data: Record<string, unknow
 export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
   const [roleFocus, setRoleFocus] = useState<FinanceRoleFocus>('all')
@@ -814,6 +816,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     <>
       <ModuleToolbar backTarget="/finance/zahlungslauf-kreditoren" closeTarget="/finance/zahlungslauf-kreditoren" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(formData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      {!isTouch ? (
       <div className="mx-4 mt-4 space-y-4">
         <OperationalCaseHeader
           title="Zahlungslauf Kreditoren"
@@ -857,6 +860,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         </div>
         <CrudCapabilityChecklist capabilities={crudCapabilities} />
       </div>
+      ) : null}
       {effectiveData?.id && approvalDecisionView !== null ? (
         <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">

@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.services.inventory_stock_balance import current_stock
 
 router = APIRouter(prefix="/scan", tags=["scan", "mobile"])
 
@@ -137,23 +138,14 @@ async def scan_barcode(
     # Bestand im angegebenen Lager (vereinfacht: alle gebuchten Mengen)
     lagerbestand: Optional[float] = None
     if payload.warehouse_id:
-        lagerbestand = db.execute(
-            text("""
-                SELECT COALESCE(SUM(CASE
-                    WHEN movement_type IN ('wareneingang','inventur') THEN quantity
-                    WHEN movement_type IN ('warenausgang') THEN -quantity
-                    ELSE quantity END), 0)
-                FROM domain_inventory.inventory_stock_movements
-                WHERE tenant_id = :tenant_id
-                  AND article_id = :article_id
-                  AND warehouse_id = :warehouse_id
-            """),
-            {
-                "tenant_id": t_id,
-                "article_id": artikel_row["id"],
-                "warehouse_id": payload.warehouse_id,
-            },
-        ).scalar()
+        # DOM-INV-005: derselbe Saldo wie in GET /lager/bestaende. Vorher hat
+        # der ELSE-Zweig hier jeden nicht aufgezaehlten Typ positiv gezaehlt.
+        lagerbestand = current_stock(
+            db,
+            tenant_id=t_id,
+            article_id=artikel_row["id"],
+            warehouse_id=payload.warehouse_id,
+        )
 
     hinweis = None
     if lagerbestand is not None and lagerbestand <= 0 and payload.action in ("warenausgang",):

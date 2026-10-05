@@ -1,0 +1,606 @@
+"""Der Bedarf kommt aus dem Abverkauf, nicht aus einem gepflegten Sollbestand.
+
+``engine_lager`` vergleicht den Bestand mit Melde- und Sollbestand. Das ist
+eine Annahme aus dem Stammsatz: Sie weiss nicht, ob ein Artikel gerade laeuft
+oder steht. ``engine_bedarf`` rechnet aus den Bewegungen — was rausgegangen
+ist, auf den Horizont hochgerechnet, plus Wiederbeschaffungszeit, minus dem,
+was da ist.
+
+Geprueft wird an einem Artikel mit bekanntem Abverkauf: 2 t am Tag, 90 Tage
+lang. Damit ist jede Zahl im Ergebnis nachrechenbar, statt nur plausibel.
+
+Ohne erreichbare Datenbank wird uebersprungen, nicht als gruen gewertet.
+"""
+
+from __future__ import annotations
+
+import os
+import uuid
+from datetime import date, timedelta
+
+import pytest
+
+pytestmark = pytest.mark.integration
+
+DB_URL = os.environ.get(
+    "DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp"
+)
+os.environ.setdefault("DATABASE_URL", DB_URL)
+
+#: Der Artikel geht mit zwei Tonnen am Tag raus — 180 t in 90 Tagen.
+ABVERKAUF_PRO_TAG = 2.0
+TAGE_MIT_ABVERKAUF = 90
+
+
+@pytest.fixture(scope="module")
+def engine():
+    from sqlalchemy import create_engine, text
+
+    try:
+        e = create_engine(DB_URL)
+        with e.connect() as c:
+            c.execute(text("SELECT 1"))
+    except Exception as fehler:  # noqa: BLE001
+        pytest.skip(f"Datenbank nicht erreichbar: {fehler}")
+    return e
+
+
+@pytest.fixture()
+def artikel_mit_abverkauf(engine):
+    """Ein Artikel, ein Lagerparameter, 90 Tage taeglicher Abgang."""
+    from sqlalchemy import text
+
+    mandant = f"test-{uuid.uuid4().hex[:8]}"
+    artikel_id = str(uuid.uuid4())
+    lager_id = str(uuid.uuid4())
+    heute = date.today()
+
+    with engine.begin() as v:
+        v.execute(
+            text(
+                "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
+                "VALUES (:id, :id, :d, true) ON CONFLICT (id) DO NOTHING"
+            ),
+            {"id": mandant, "d": f"{mandant}.test"},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_inventory.warehouses "
+                "(id, tenant_id, warehouse_code, name, address, city, postal_code) "
+                "VALUES (:id, :t, :code, 'Testlager', 'Teststrasse 1', 'Testdorf', '00000')"
+            ),
+            {"id": lager_id, "t": mandant, "code": f"L-{uuid.uuid4().hex[:5].upper()}"},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_inventory.articles "
+                "(id, tenant_id, article_number, name, mhd_erforderlich, lagerartikel, "
+                " lagerorte, chargenpflicht, qs_pruefung_erforderlich, bio_kennzeichnung, "
+                " gmp_plus_relevanz, unit, category, sales_price, warengruppe) "
+                "VALUES (:id, :t, :nr, :name, false, true, '[]'::jsonb, false, false, "
+                "        false, false, 't', 'Futtermittel', 0, 'Futtermittel')"
+            ),
+            {
+                "id": artikel_id,
+                "t": mandant,
+                "nr": f"ART-{uuid.uuid4().hex[:6].upper()}",
+                "name": "Testweizen",
+            },
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_einkauf.artikel_lager_parameter "
+                "(id, tenant_id, article_id, mindestbestand, maximalbestand, meldebestand, "
+                " wiederbeschaffungs_tage, std_einheit, aktiv) "
+                "VALUES (:id, :t, :a, 100, 100000, 150, 10, 't', true)"
+            ),
+            {"id": str(uuid.uuid4()), "t": mandant, "a": artikel_id},
+        )
+
+        # Erst ein Zugang, damit ein Bestand dasteht, dann der taegliche Abgang.
+        v.execute(
+            text(
+                "INSERT INTO domain_inventory.inventory_stock_movements "
+                "(id, tenant_id, article_id, warehouse_id, movement_type, quantity, "
+                " previous_stock, new_stock, auto_created, ownership_type, "
+                " storage_fee_relevant, movement_date, created_at) "
+                # Nur 250 t Anfangsbestand: Nach 180 t Abverkauf bleiben 70 t,
+                # und damit liegt der Artikel unter dem Mindestbestand — sonst
+                # gibt es keine Fehlmenge und nichts zu optimieren.
+                "VALUES (:id, :t, :a, :w, 'in', 250, 0, 250, false, 'owned', false, "
+                "        :d, :d)"
+            ),
+            {
+                "id": str(uuid.uuid4()),
+                "t": mandant,
+                "a": artikel_id,
+                "w": lager_id,
+                "d": heute - timedelta(days=TAGE_MIT_ABVERKAUF + 1),
+            },
+        )
+        for tag in range(TAGE_MIT_ABVERKAUF):
+            datum = heute - timedelta(days=TAGE_MIT_ABVERKAUF - tag)
+            v.execute(
+                text(
+                    "INSERT INTO domain_inventory.inventory_stock_movements "
+                    "(id, tenant_id, article_id, warehouse_id, movement_type, quantity, "
+                    " previous_stock, new_stock, auto_created, ownership_type, "
+                    " storage_fee_relevant, movement_date, created_at) "
+                    "VALUES (:id, :t, :a, :w, 'out', :menge, :vor, :nach, false, 'owned', "
+                    "        false, :d, :d)"
+                ),
+                {
+                    "id": str(uuid.uuid4()),
+                    "t": mandant,
+                    "a": artikel_id,
+                    "w": lager_id,
+                    "menge": ABVERKAUF_PRO_TAG,
+                    "vor": 250 - tag * ABVERKAUF_PRO_TAG,
+                    "nach": 250 - (tag + 1) * ABVERKAUF_PRO_TAG,
+                    "d": datum,
+                },
+            )
+
+    try:
+        yield {"mandant": mandant, "artikel_id": artikel_id, "lager_id": lager_id}
+    finally:
+        with engine.begin() as v:
+            for sql in (
+                "DELETE FROM domain_inventory.inventory_stock_movements WHERE tenant_id = :t",
+                "DELETE FROM domain_einkauf.artikel_lager_parameter WHERE tenant_id = :t",
+                "DELETE FROM domain_inventory.articles WHERE tenant_id = :t",
+                "DELETE FROM domain_inventory.warehouses WHERE tenant_id = :t",
+                # Die Kunden der Auftragsfaelle zeigen auf den Mandanten und
+                # muessen vor ihm weg — die Auftraege raeumen ihre eigenen
+                # Fixtures schon ab.
+                "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
+                "DELETE FROM domain_shared.tenants WHERE id = :t",
+            ):
+                v.execute(text(sql), {"t": mandant})
+
+
+@pytest.fixture()
+def db(engine):
+    from sqlalchemy.orm import sessionmaker
+
+    sitzung = sessionmaker(bind=engine)()
+    try:
+        yield sitzung
+    finally:
+        sitzung.close()
+
+
+def rechne(db, mandant: str, **kwargs) -> list[dict]:
+    from modules.einkauf.services.bestellvorschlag_service import engine_bedarf
+
+    return engine_bedarf(db, tenant_id=mandant, nur_mit_bedarf=False, **kwargs)
+
+
+def test_der_abverkauf_wird_aus_den_bewegungen_gelesen(db, artikel_mit_abverkauf) -> None:
+    zeilen = rechne(db, artikel_mit_abverkauf["mandant"], horizont="monatlich")
+    assert len(zeilen) == 1
+    zeile = zeilen[0]
+
+    # Rueckschau 90 Tage, 2 t am Tag.
+    assert zeile["abverkauf_menge"] == pytest.approx(180.0, abs=0.01)
+    assert zeile["abverkauf_pro_tag"] == pytest.approx(2.0, abs=0.01)
+
+
+def test_der_horizont_aendert_den_bedarf(db, artikel_mit_abverkauf) -> None:
+    """Taeglich, woechentlich, monatlich — derselbe Abverkauf, andere Deckung."""
+    mandant = artikel_mit_abverkauf["mandant"]
+    bedarf = {
+        h: rechne(db, mandant, horizont=h)[0]["bedarf"]
+        for h in ("taeglich", "woechentlich", "monatlich")
+    }
+
+    # Deckung ist Horizont plus Wiederbeschaffungszeit (10 Tage), mal 2 t.
+    # Taeglich rechnet ueber 28 Tage Rueckschau, dort ist der Schnitt anders.
+    assert bedarf["monatlich"] > bedarf["woechentlich"] > bedarf["taeglich"], bedarf
+    assert bedarf["monatlich"] == pytest.approx((30 + 10) * 2.0, rel=0.05)
+
+
+def test_saisonal_schaut_ins_vorjahr_nicht_auf_den_letzten_monat(db, artikel_mit_abverkauf) -> None:
+    """Im Duengergeschaeft sagt der November nichts ueber den Maerz.
+
+    Der Testartikel hat **kein** Vorjahr — saisonal muss deshalb 0 Abverkauf
+    sehen, waehrend monatlich 180 t sieht. Genau daran zeigt sich, dass das
+    Fenster wirklich verschoben wird und nicht nur anders skaliert.
+    """
+    mandant = artikel_mit_abverkauf["mandant"]
+    saisonal = rechne(db, mandant, horizont="saisonal")[0]
+    monatlich = rechne(db, mandant, horizont="monatlich")[0]
+
+    assert monatlich["abverkauf_menge"] > 0
+    assert saisonal["abverkauf_menge"] == 0.0
+    assert saisonal["abverkauf_fenster_von"] < monatlich["abverkauf_fenster_von"]
+
+
+def test_ohne_kostensaetze_wird_nicht_optimiert(db, artikel_mit_abverkauf) -> None:
+    """Eine erfundene Losgroesse waere schlimmer als keine."""
+    zeile = rechne(db, artikel_mit_abverkauf["mandant"], horizont="monatlich")[0]
+    assert zeile["lagerkosten"] == 0.0
+    assert zeile["frachtkosten"] == 0.0
+    assert "keine Optimierung" in zeile["begruendung"]
+
+
+def test_mit_kostensaetzen_kommt_die_losgroesse(db, artikel_mit_abverkauf) -> None:
+    """sqrt(2 · Bedarf · Fracht / Lagerkosten) — nachgerechnet."""
+    zeile = rechne(
+        db,
+        artikel_mit_abverkauf["mandant"],
+        horizont="monatlich",
+        lagerkosten_satz=0.05,
+        frachtkosten_fix=200.0,
+    )[0]
+
+    fehlmenge = zeile["bedarf"] + zeile["mindestbestand"] - zeile["ist_bestand"] + zeile["offene_auftraege"]
+    erwartet = (2 * fehlmenge * 200.0 / 0.05) ** 0.5
+    assert zeile["vorschlag_menge"] == pytest.approx(erwartet, rel=0.01), zeile["begruendung"]
+    assert zeile["lagerkosten"] > 0 and zeile["frachtkosten"] > 0
+
+
+def test_ein_artikel_ohne_abverkauf_bekommt_keine_losgroesse(db, engine) -> None:
+    """Sonst raet die Formel zu einem Lager, das niemand leert."""
+    from sqlalchemy import text
+    from modules.einkauf.services.bestellvorschlag_service import engine_bedarf
+
+    mandant = f"test-{uuid.uuid4().hex[:8]}"
+    artikel_id = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(
+            text(
+                "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
+                "VALUES (:id, :id, :d, true) ON CONFLICT (id) DO NOTHING"
+            ),
+            {"id": mandant, "d": f"{mandant}.test"},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_inventory.articles "
+                "(id, tenant_id, article_number, name, mhd_erforderlich, lagerartikel, "
+                " lagerorte, chargenpflicht, qs_pruefung_erforderlich, bio_kennzeichnung, "
+                " gmp_plus_relevanz, unit, category, sales_price) "
+                "VALUES (:id, :t, :nr, 'Ladenhueter', false, true, '[]'::jsonb, false, "
+                "        false, false, false, 't', 'Futtermittel', 0)"
+            ),
+            {"id": artikel_id, "t": mandant, "nr": f"ART-{uuid.uuid4().hex[:6].upper()}"},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_einkauf.artikel_lager_parameter "
+                "(id, tenant_id, article_id, mindestbestand, maximalbestand, aktiv) "
+                "VALUES (:id, :t, :a, 1000, 5000, true)"
+            ),
+            {"id": str(uuid.uuid4()), "t": mandant, "a": artikel_id},
+        )
+
+    from sqlalchemy.orm import sessionmaker
+
+    sitzung = sessionmaker(bind=engine)()
+    try:
+        zeilen = engine_bedarf(
+            sitzung, tenant_id=mandant, horizont="monatlich", nur_mit_bedarf=False,
+            lagerkosten_satz=0.02, frachtkosten_fix=250.0,
+        )
+        assert len(zeilen) == 1
+        # Nur die Fehlmenge zum Mindestbestand, nicht das Ergebnis der Formel.
+        assert zeilen[0]["vorschlag_menge"] == pytest.approx(1000.0, abs=0.01)
+        assert "Kein Abverkauf" in zeilen[0]["begruendung"]
+    finally:
+        sitzung.close()
+        with engine.begin() as v:
+            for sql in (
+                "DELETE FROM domain_einkauf.artikel_lager_parameter WHERE tenant_id = :t",
+                "DELETE FROM domain_inventory.articles WHERE tenant_id = :t",
+                "DELETE FROM domain_shared.tenants WHERE id = :t",
+            ):
+                v.execute(text(sql), {"t": mandant})
+
+
+def test_die_offene_auftragsmenge_vergiftet_die_sitzung_nicht(db, artikel_mit_abverkauf) -> None:
+    """Der Helfer las ein Schema, das es nicht gibt — und riss alles mit.
+
+    Eine gescheiterte Anweisung macht die Transaktion unbrauchbar; jede
+    folgende Abfrage derselben Sitzung scheitert an einem Fehler, den sie nicht
+    verursacht hat. Das ``except`` verschluckte beides. Hier wird geprueft,
+    dass nach dem Aufruf noch gearbeitet werden kann.
+    """
+    from sqlalchemy import text
+    from modules.einkauf.services.bestellvorschlag_service import _open_sales_quantity
+
+    menge = _open_sales_quantity(db, artikel_mit_abverkauf["artikel_id"], artikel_mit_abverkauf["mandant"])
+    assert menge >= 0
+    # Die Sitzung muss danach noch brauchbar sein.
+    assert db.execute(text("SELECT 1")).scalar() == 1
+
+
+def test_der_vorschlag_aus_dem_verkauf_findet_seine_auftraege(db, engine, artikel_mit_abverkauf) -> None:
+    """Der Weg fuer die Direktlieferung: offener Auftrag, zu wenig Bestand.
+
+    Gelesen wurde ``domain_sales.sales_order_items`` — ein Schema, das es nicht
+    gibt. Der Fehler lief in ein ``except``, die Zeilenliste blieb leer, und
+    der Vorschlag meldete "nichts zu bestellen", waehrend die Auftraege offen
+    dastanden. Eine leere Liste sieht aus wie ein Ergebnis, nicht wie ein
+    Fehler — deshalb ist das jahrelang niemandem aufgefallen.
+    """
+    from sqlalchemy import text
+    from modules.einkauf.services.bestellvorschlag_service import engine_verkauf
+
+    mandant = artikel_mit_abverkauf["mandant"]
+    auftrag_id = str(uuid.uuid4())
+
+    # Die Artikelnummer des Testartikels holen — die Position verweist ueber
+    # sie, nicht ueber eine Id.
+    with engine.begin() as v:
+        artikel_nr = v.execute(
+            text("SELECT article_number FROM domain_inventory.articles WHERE id = :a"),
+            {"a": artikel_mit_abverkauf["artikel_id"]},
+        ).scalar()
+        # Kunde, Betreff, Beschreibung, Betrag, Waehrung und Version sind
+        # NOT NULL (519e0d90cd66). Eine gewachsene Entwicklungsdatenbank hat
+        # die Bedingungen nicht mehr, eine frische schon.
+        kunden_id = str(uuid.uuid4())
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.customers "
+                "(id, tenant_id, customer_number, company_name) "
+                "VALUES (:k, :t, :nr, 'Testkunde')"
+            ),
+            {"k": kunden_id, "t": mandant, "nr": f"K-{uuid.uuid4().hex[:6].upper()}"},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_orders "
+                "(id, tenant_id, order_number, customer_id, customer_name, subject, "
+                " description, total_amount, currency, status, version, delivery_date) "
+                "VALUES (:id, :t, :nr, :k, 'Testkunde', 'Bedarf aus Verkauf', '', 0, "
+                "        'EUR', 'open', 1, CURRENT_DATE + 7)"
+            ),
+            {
+                "id": auftrag_id,
+                "t": mandant,
+                "nr": f"AU-{uuid.uuid4().hex[:6].upper()}",
+                "k": kunden_id,
+            },
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_order_items "
+                "(id, tenant_id, order_id, line_number, article_number, description, "
+                " quantity, unit, unit_price, line_total) "
+                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 210, 105000)"
+            ),
+            {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
+        )
+
+    try:
+        zeilen = engine_verkauf(db, tenant_id=mandant)
+        assert zeilen, "Der Vorschlag aus dem Verkauf findet den offenen Auftrag nicht"
+        zeile = next(z for z in zeilen if z["artikel_nr"] == artikel_nr)
+
+        # 500 t bestellt, 70 t am Lager — 430 t fehlen, plus 20 % Puffer.
+        assert zeile["offene_auftraege"] == pytest.approx(500.0, abs=0.01)
+        assert zeile["ist_bestand"] == pytest.approx(70.0, abs=0.01)
+        assert zeile["bedarf"] == pytest.approx(430.0, abs=0.01)
+        assert zeile["vorschlag_menge"] == pytest.approx(430.0 * 1.2, rel=0.01)
+    finally:
+        with engine.begin() as v:
+            v.execute(
+                text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :o"),
+                {"o": auftrag_id},
+            )
+            v.execute(
+                text("DELETE FROM domain_crm.sales_orders WHERE id = :o"), {"o": auftrag_id}
+            )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Direktlieferung: aus dem Auftrag wird eine Bestellung
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.fixture()
+def auftrag_mit_position(engine, artikel_mit_abverkauf):
+    """Ein offener Auftrag ueber 500 t des Testartikels.
+
+    Am Lager liegen 70 t. Der Unterschied zwischen den beiden Wegen haengt
+    genau daran: Mit Ueberschlag decken die 70 t einen Teil, ohne Ueberschlag
+    liegen sie am falschen Ort.
+    """
+    from sqlalchemy import text
+
+    mandant = artikel_mit_abverkauf["mandant"]
+    auftrag_id = str(uuid.uuid4())
+    kunden_id = str(uuid.uuid4())
+    lieferant_id = str(uuid.uuid4())
+    nummer = f"AU-{uuid.uuid4().hex[:6].upper()}"
+
+    with engine.begin() as v:
+        # Ohne Lieferant gibt es keine Bestellung — die Spalte ist NOT NULL,
+        # und das ist richtig so.
+        v.execute(
+            text(
+                "INSERT INTO domain_einkauf.lieferanten "
+                "(id, tenant_id, lieferantennummer, firmenname) "
+                "VALUES (:id, :t, :nr, 'Testlieferant eG')"
+            ),
+            {"id": lieferant_id, "t": mandant, "nr": f"LF-{uuid.uuid4().hex[:5].upper()}"},
+        )
+        # Den Kunden gibt es auch wirklich: sales_orders.customer_id ist ein
+        # Fremdschluessel auf domain_crm.customers.
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.customers "
+                "(id, tenant_id, customer_number, company_name) "
+                "VALUES (:k, :t, :nr, 'Hof Sonnenacker')"
+            ),
+            {"k": kunden_id, "t": mandant, "nr": f"K-{uuid.uuid4().hex[:6].upper()}"},
+        )
+        artikel_nr = v.execute(
+            text("SELECT article_number FROM domain_inventory.articles WHERE id = :a"),
+            {"a": artikel_mit_abverkauf["artikel_id"]},
+        ).scalar()
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_orders "
+                "(id, tenant_id, order_number, customer_id, customer_name, subject, "
+                " description, total_amount, currency, status, version, "
+                " delivery_date, delivery_address) "
+                "VALUES (:id, :t, :nr, :k, 'Hof Sonnenacker', 'Direktlieferung', '', 0, "
+                "        'EUR', 'open', 1, "
+                "        CURRENT_DATE + 14, 'Sonnenweg 3, 26123 Testdorf')"
+            ),
+            {"id": auftrag_id, "t": mandant, "nr": nummer, "k": kunden_id},
+        )
+        v.execute(
+            text(
+                "INSERT INTO domain_crm.sales_order_items "
+                "(id, tenant_id, order_id, line_number, article_number, description, "
+                " quantity, unit, unit_price, line_total, ek_price) "
+                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 230, 115000, 210)"
+            ),
+            {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
+        )
+
+    try:
+        yield {
+            "mandant": mandant,
+            "auftrag_id": auftrag_id,
+            "kunden_id": kunden_id,
+            "lieferant_id": lieferant_id,
+            "nummer": nummer,
+            "artikel_nr": artikel_nr,
+        }
+    finally:
+        with engine.begin() as v:
+            # Die Position fuehrt keinen Mandanten — sie haengt am Kopf.
+            v.execute(
+                text(
+                    "DELETE FROM domain_einkauf.bestellung_positionen WHERE bestellung_id IN "
+                    "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = :t)"
+                ),
+                {"t": mandant},
+            )
+            v.execute(
+                text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = :t"),
+                {"t": mandant},
+            )
+            v.execute(
+                text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :o"),
+                {"o": auftrag_id},
+            )
+            v.execute(text("DELETE FROM domain_crm.sales_orders WHERE id = :o"), {"o": auftrag_id})
+            v.execute(
+                text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = :t"),
+                {"t": mandant},
+            )
+
+
+def dienst(db, mandant: str):
+    from app.services.procurement_service import ProcurementService
+
+    return ProcurementService(db, mandant)
+
+
+def test_ohne_ueberschlag_geht_die_volle_menge_zum_kunden(db, auftrag_mit_position) -> None:
+    """Der eigene Bestand hilft nicht — er liegt am falschen Ort."""
+    from sqlalchemy import text
+
+    ergebnis = dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(
+        auftrag_mit_position["auftrag_id"],
+        ueberschlag_lager=False,
+        lieferant_id=auftrag_mit_position["lieferant_id"],
+    )
+    db.commit()
+
+    kopf = db.execute(
+        text(
+            "SELECT bestellfall, direktlieferung, ueberschlag_lager, verkaufsbeleg_id, "
+            "       kunden_id, kommission, lieferadresse "
+            "FROM domain_einkauf.bestellungen WHERE id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).mappings().first()
+
+    assert kopf["bestellfall"] == "direktlieferung"
+    assert kopf["direktlieferung"] is True
+    assert kopf["ueberschlag_lager"] is False
+    assert kopf["verkaufsbeleg_id"] == auftrag_mit_position["auftrag_id"]
+    assert kopf["kunden_id"] == auftrag_mit_position["kunden_id"]
+    # Ohne Adresse faehrt der Lieferant zu uns statt zum Kunden.
+    assert "Sonnenweg" in (kopf["lieferadresse"] or "")
+    # Die Kommission traegt die Auftragsnummer — daran erkennt der
+    # Wareneingang, wofuer die Ware kam.
+    assert kopf["kommission"] == auftrag_mit_position["nummer"]
+
+    menge = db.execute(
+        text(
+            "SELECT menge FROM domain_einkauf.bestellung_positionen "
+            "WHERE bestellung_id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).scalar()
+    assert float(menge) == pytest.approx(500.0, abs=0.01)
+
+
+def test_mit_ueberschlag_deckt_der_bestand_einen_teil(db, auftrag_mit_position) -> None:
+    """Ueber den eigenen Hof: 70 t liegen da, 430 t fehlen."""
+    from sqlalchemy import text
+
+    ergebnis = dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(
+        auftrag_mit_position["auftrag_id"],
+        ueberschlag_lager=True,
+        lieferant_id=auftrag_mit_position["lieferant_id"],
+    )
+    db.commit()
+
+    kopf = db.execute(
+        text(
+            "SELECT direktlieferung, ueberschlag_lager, lieferadresse "
+            "FROM domain_einkauf.bestellungen WHERE id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).mappings().first()
+    assert kopf["ueberschlag_lager"] is True
+    assert kopf["direktlieferung"] is False
+    # Die Ware kommt zu uns — die Kundenadresse waere hier falsch.
+    assert not (kopf["lieferadresse"] or "").strip()
+
+    zeile = db.execute(
+        text(
+            "SELECT menge, notiz FROM domain_einkauf.bestellung_positionen "
+            "WHERE bestellung_id::text = :id"
+        ),
+        {"id": ergebnis["id"]},
+    ).mappings().first()
+    assert float(zeile["menge"]) == pytest.approx(430.0, abs=0.01)
+    assert "aus Bestand" in (zeile["notiz"] or "")
+
+
+def test_ein_auftrag_den_es_nicht_gibt_bleibt_ein_fehler(db, auftrag_mit_position) -> None:
+    from app.core.exceptions import EntityNotFoundError
+
+    with pytest.raises(EntityNotFoundError):
+        dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(str(uuid.uuid4()))
+
+
+def test_deckt_der_bestand_alles_entsteht_keine_bestellung(db, engine, auftrag_mit_position) -> None:
+    """Eine Bestellung ueber null Tonnen waere schlimmer als keine."""
+    from sqlalchemy import text
+    from app.core.exceptions import ValidationFailedError
+
+    # Die Auftragsmenge unter den Bestand druecken.
+    with engine.begin() as v:
+        v.execute(
+            text("UPDATE domain_crm.sales_order_items SET quantity = 50 WHERE order_id = :o"),
+            {"o": auftrag_mit_position["auftrag_id"]},
+        )
+
+    with pytest.raises(ValidationFailedError) as fehler:
+        dienst(db, auftrag_mit_position["mandant"]).bestellung_aus_auftrag(
+            auftrag_mit_position["auftrag_id"],
+            ueberschlag_lager=True,
+            lieferant_id=auftrag_mit_position["lieferant_id"],
+        )
+    assert "Bestand deckt" in str(fehler.value)

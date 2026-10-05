@@ -67,7 +67,7 @@ export function TicketForm({ defaultValues, onSubmit, submitting }: {
       <div>
         <Label>Fahrzeug</Label>
         <Input value={formData.vehicle} onChange={(event) => updateField("vehicle", event.target.value)} />
-        {errors.vehicle ? <p className="text-sm text-red-600">{errors.vehicle}</p> : null}
+        {errors.vehicle ? <p className="text-sm text-status-error">{errors.vehicle}</p> : null}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
@@ -77,7 +77,7 @@ export function TicketForm({ defaultValues, onSubmit, submitting }: {
             onChange={(event) => updateField("gross", parseDE(event.target.value) || 0)}
             onBlur={(event) => updateField("gross", parseDE(event.target.value) || 0)}
           />
-          {errors.gross ? <p className="text-sm text-red-600">{errors.gross}</p> : null}
+          {errors.gross ? <p className="text-sm text-status-error">{errors.gross}</p> : null}
         </div>
         <div>
           <Label>Tara</Label>
@@ -86,7 +86,7 @@ export function TicketForm({ defaultValues, onSubmit, submitting }: {
             onChange={(event) => updateField("tare", parseDE(event.target.value) || 0)}
             onBlur={(event) => updateField("tare", parseDE(event.target.value) || 0)}
           />
-          {errors.tare ? <p className="text-sm text-red-600">{errors.tare}</p> : null}
+          {errors.tare ? <p className="text-sm text-status-error">{errors.tare}</p> : null}
         </div>
         <div>
           <Label>Netto</Label>
@@ -96,12 +96,12 @@ export function TicketForm({ defaultValues, onSubmit, submitting }: {
       <div>
         <Label>Material</Label>
         <Input value={formData.material} onChange={(event) => updateField("material", event.target.value)} />
-        {errors.material ? <p className="text-sm text-red-600">{errors.material}</p> : null}
+        {errors.material ? <p className="text-sm text-status-error">{errors.material}</p> : null}
       </div>
       <div>
         <Label>Zeitpunkt (ISO)</Label>
         <Input value={formData.ts} onChange={(event) => updateField("ts", event.target.value)} />
-        {errors.ts ? <p className="text-sm text-red-600">{errors.ts}</p> : null}
+        {errors.ts ? <p className="text-sm text-status-error">{errors.ts}</p> : null}
       </div>
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={submitting}>Speichern</Button>

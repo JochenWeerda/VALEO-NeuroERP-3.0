@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -91,13 +92,13 @@ export function ChangeCalculator({ total, onTenderedChange }: ChangeCalculatorPr
             </Label>
             <div
               className={`text-5xl font-bold ${
-                change >= 0 ? 'text-green-600' : 'text-red-600'
+                change >= 0 ? 'text-status-success' : 'text-status-error'
               }`}
             >
               {Math.abs(change).toFixed(2)} €
             </div>
             {change < 0 && (
-              <p className="text-sm text-red-600 mt-2">
+              <p className="text-sm text-status-error mt-2">
                 Noch {Math.abs(change).toFixed(2)} € fehlen
               </p>
             )}
@@ -106,9 +107,9 @@ export function ChangeCalculator({ total, onTenderedChange }: ChangeCalculatorPr
 
         {/* Info: Exact change */}
         {change === 0 && tendered > 0 && (
-          <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 text-center">
+          <Callout variant="info" className="p-4 rounded-lg border-2 text-center">
             <p className="text-blue-700 font-semibold">✅ Passend bezahlt</p>
-          </div>
+          </Callout>
         )}
       </CardContent>
     </Card>

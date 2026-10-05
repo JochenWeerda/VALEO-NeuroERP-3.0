@@ -1,6 +1,6 @@
 /**
  * Kunden-Stamm Modern
- * Nutzt die L3 Mask-Builder Konfiguration mit responsive UI und AI-Features
+ * Schalter: native Maske (UniversalMaskRuntime) vor Mask-Builder-Formular vor Legacy.
  */
 
 import { lazy, Suspense } from 'react'
@@ -11,11 +11,11 @@ import {
 
 const CustomerMaskEditPage = lazy(() => import('./kunden-stamm-modern/CustomerMaskEditPage'))
 const LegacyKundenStammModern = lazy(() => import('./kunden-stamm-modern/LegacyKundenStammModern'))
-const UniversalCustomerMaskPilotPage = lazy(() => import('./kunden-stamm-modern/UniversalCustomerMaskPilotPage'))
+const Customer360NativePage = lazy(() => import('./customer-360-native'))
 
 export default function KundenStammModern(): JSX.Element {
   const PageComponent = ENABLE_UNIVERSAL_MASK_CUSTOMER
-    ? UniversalCustomerMaskPilotPage
+    ? Customer360NativePage
     : ENABLE_CUSTOMER_MASK_BUILDER_FORM
     ? CustomerMaskEditPage
     : LegacyKundenStammModern

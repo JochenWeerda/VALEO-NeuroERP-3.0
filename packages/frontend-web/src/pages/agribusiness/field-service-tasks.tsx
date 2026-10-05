@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
+import { useTouchDevice } from '@/hooks/useTouchDevice';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -69,6 +70,7 @@ const fieldServiceRoles = [
 export default function FieldServiceTasksPage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isTouch = useTouchDevice();
   const [searchParams] = useSearchParams();
   const workflowInstanceId = searchParams.get('workflowInstanceId') || '';
   const workflowCase = searchParams.get('workflowCase') || '';
@@ -95,7 +97,11 @@ export default function FieldServiceTasksPage(): JSX.Element {
   // Fetch tasks
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: listQueryKey,
-    queryFn: async () => (await apiClient.get<FieldServiceTask[]>('/api/v1/agribusiness/field-service-tasks')).data,
+    queryFn: async () => {
+      const response = await apiClient.get<FieldServiceTask[] | { items?: FieldServiceTask[] }>('/api/v1/agribusiness/field-service-tasks')
+      const payload = response.data
+      return Array.isArray(payload) ? payload : Array.isArray(payload?.items) ? payload.items : []
+    },
   });
 
   const deleteMutation = useMutation({
@@ -178,20 +184,20 @@ export default function FieldServiceTasksPage(): JSX.Element {
     const q = query.toLowerCase();
     return tasks.filter(
       t =>
-        t.title.toLowerCase().includes(q) ||
-        t.taskNumber.includes(q) ||
-        t.assignedToName.toLowerCase().includes(q)
+        String(t.title ?? '').toLowerCase().includes(q) ||
+        String(t.taskNumber ?? '').includes(q) ||
+        String(t.assignedToName ?? '').toLowerCase().includes(q)
     );
   }, [tasks, query]);
 
-  const activeTasks = tasks.filter((task) => !['COMPLETED', 'CANCELLED'].includes(task.status)).length;
-  const urgentTasks = tasks.filter((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status)).length;
+  const activeTasks = tasks.filter((task) => !['COMPLETED', 'CANCELLED'].includes(task.status ?? '')).length;
+  const urgentTasks = tasks.filter((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status ?? '')).length;
   const inProgressTasks = tasks.filter((task) => task.status === 'IN_PROGRESS').length;
   const completedTasks = tasks.filter((task) => task.status === 'COMPLETED').length;
   const averageCompletion = tasks.length > 0
     ? Math.round(tasks.reduce((sum, task) => sum + (task.completionPercentage || 0), 0) / tasks.length)
     : 0;
-  const focusTask = filtered.find((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status)) ?? filtered[0];
+  const focusTask = filtered.find((task) => task.priority === 'URGENT' && !['COMPLETED', 'CANCELLED'].includes(task.status ?? '')) ?? filtered[0];
   const fieldServiceReady = urgentTasks === 0 && activeTasks === 0;
   const nextFieldServiceAction = focusTask
     ? focusTask.status === 'SCHEDULED'
@@ -208,28 +214,28 @@ export default function FieldServiceTasksPage(): JSX.Element {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
+        return 'success';
       case 'IN_PROGRESS':
-        return 'bg-blue-100 text-blue-800';
+        return 'info';
       case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
+        return 'error';
       case 'SCHEDULED':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'warning';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'muted';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'URGENT':
-        return 'bg-red-100 text-red-800';
+        return 'error';
       case 'HIGH':
-        return 'bg-orange-100 text-orange-800';
+        return 'warning';
       case 'MEDIUM':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'warning';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'muted';
     }
   };
 
@@ -242,10 +248,10 @@ export default function FieldServiceTasksPage(): JSX.Element {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">{entityTypeLabel}</h2>
-        <div className="flex gap-2">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <h1 className="text-2xl font-bold md:text-3xl">{entityTypeLabel}</h1>
+        <div className="flex flex-col gap-2 sm:flex-row">
           <CrudPrintButton
             listData={filtered}
             listColumns={[
@@ -259,19 +265,21 @@ export default function FieldServiceTasksPage(): JSX.Element {
             entityType={entityTypeLabel}
             printTitle={getListTitle(t, entityTypeLabel)}
           />
-          <Button onClick={() => navigate(`/agribusiness/field-service-tasks/neu${workflowQuery}`)}>
+          <Button className="min-h-touch touch-manipulation" onClick={() => navigate(`/agribusiness/field-service-tasks/neu${workflowQuery}`)}>
             {t('crud.actions.new')} {t('crud.entities.task')}
           </Button>
         </div>
       </div>
 
       {isWorkflowEntry && (
-        <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+        <div className='info'>
           {workflowCase ? `Workflow-Vorgang ${workflowCase}` : 'Workflow-Einstieg'}
           {workflowInstanceId ? ` · Instanz ${workflowInstanceId}` : ''}
         </div>
       )}
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={fieldServiceRoles}
         value={roleFocus}
@@ -352,17 +360,19 @@ export default function FieldServiceTasksPage(): JSX.Element {
         </Card>
         <Card className="p-4">
           <div className="text-xs font-semibold uppercase text-muted-foreground">Dringend</div>
-          <div className="mt-2 text-2xl font-bold text-red-600">{urgentTasks}</div>
+          <div className="mt-2 text-2xl font-bold text-status-error">{urgentTasks}</div>
         </Card>
         <Card className="p-4">
           <div className="text-xs font-semibold uppercase text-muted-foreground">In Bearbeitung</div>
-          <div className="mt-2 text-2xl font-bold text-blue-700">{inProgressTasks}</div>
+          <div className="mt-2 text-2xl font-bold">{inProgressTasks}</div>
         </Card>
         <Card className="p-4">
           <div className="text-xs font-semibold uppercase text-muted-foreground">Fortschritt im Schnitt</div>
           <div className="mt-2 text-2xl font-bold">{averageCompletion}%</div>
         </Card>
       </div>
+      </>
+      ) : null}
 
       <Toolbar
         onSearch={setQuery}
@@ -391,32 +401,32 @@ export default function FieldServiceTasksPage(): JSX.Element {
             <TableBody>
               {filtered.map((task) => (
                 <TableRow key={task.id}>
-                  <TableCell className="font-mono">{task.taskNumber}</TableCell>
-                  <TableCell>{task.title}</TableCell>
-                  <TableCell>{task.taskType}</TableCell>
+                  <TableCell className="font-mono">{task.taskNumber || '-'}</TableCell>
+                  <TableCell>{task.title || '-'}</TableCell>
+                  <TableCell>{task.taskType || '-'}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(task.status)}>
-                      {getStatusLabel(t, task.status, task.status)}
+                    <Badge variant={getStatusColor(task.status ?? 'muted')}>
+                      {getStatusLabel(t, task.status ?? 'UNKNOWN', task.status ?? '-')}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getPriorityColor(task.priority)}>
-                      {task.priority}
+                    <Badge variant={getPriorityColor(task.priority ?? 'muted')}>
+                      {task.priority || '-'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{task.assignedToName}</TableCell>
-                  <TableCell>{task.completionPercentage}%</TableCell>
+                  <TableCell>{task.assignedToName || '-'}</TableCell>
+                  <TableCell>{task.completionPercentage ?? 0}%</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex flex-wrap justify-end gap-2">
                       <Button
-                        size="sm"
+                        className="min-h-touch touch-manipulation"
                         variant="outline"
                         onClick={() => setSelectedTask(task)}
                       >
                         {t('crud.actions.details')}
                       </Button>
                       <Button
-                        size="sm"
+                        className="min-h-touch touch-manipulation"
                         variant="outline"
                         onClick={() =>
                           navigate(`/agribusiness/field-service-tasks/${encodeURIComponent(task.id)}/bearbeiten${workflowQuery}`)
@@ -426,7 +436,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
                       </Button>
                       {task.status !== 'CANCELLED' && task.status !== 'COMPLETED' && (
                         <Button
-                          size="sm"
+                          className="min-h-touch touch-manipulation"
                           variant="outline"
                           onClick={() => handleCancelClick(task.id, task.title)}
                         >
@@ -434,7 +444,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
                         </Button>
                       )}
                       <Button
-                        size="sm"
+                        className="min-h-touch touch-manipulation"
                         variant="destructive"
                         onClick={() => handleDeleteClick(task.id, task.title)}
                       >

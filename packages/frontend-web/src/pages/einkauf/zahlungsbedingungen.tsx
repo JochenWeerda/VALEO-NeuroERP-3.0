@@ -203,21 +203,23 @@ export default function ZahlungsbedingungenPage(): JSX.Element {
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            className="min-h-touch"
             onClick={() => startEdit(row)}
             aria-label={`${row.zabd_nr} bearbeiten`}
           >
             <Edit3 className="h-4 w-4" aria-hidden="true" />
+            Bearbeiten
           </Button>
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            className="min-h-touch"
             disabled={deletingNr === row.zabd_nr}
             onClick={() => void handleDelete(row.zabd_nr)}
             aria-label={`${row.zabd_nr} deaktivieren`}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
+            Löschen
           </Button>
         </div>
       ),

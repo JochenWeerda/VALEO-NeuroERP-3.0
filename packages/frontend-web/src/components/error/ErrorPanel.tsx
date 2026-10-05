@@ -85,13 +85,13 @@ const _categoryIcon: Record<ErrorCategory, React.ReactNode> = {
 
 const _categoryColor: Record<ErrorCategory, string> = {
   NETWORK:       'text-slate-500 bg-slate-50 border-slate-200',
-  VALIDATION:    'text-amber-600 bg-amber-50 border-amber-200',
-  AUTHORIZATION: 'text-red-600 bg-red-50 border-red-200',
+  VALIDATION:    'text-status-warning bg-[hsl(var(--color-semantic-warning-50-hsl))] border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)]',
+  AUTHORIZATION: 'text-status-error bg-[hsl(var(--color-semantic-error-50-hsl))] border-[hsl(var(--color-semantic-error-500-hsl)/0.35)]',
   NOT_FOUND:     'text-slate-500 bg-slate-50 border-slate-200',
-  SERVER:        'text-red-600 bg-red-50 border-red-200',
-  CONFLICT:      'text-orange-600 bg-orange-50 border-orange-200',
-  TIMEOUT:       'text-amber-600 bg-amber-50 border-amber-200',
-  BUSINESS_RULE: 'text-blue-600 bg-blue-50 border-blue-200',
+  SERVER:        'text-status-error bg-[hsl(var(--color-semantic-error-50-hsl))] border-[hsl(var(--color-semantic-error-500-hsl)/0.35)]',
+  CONFLICT:      'text-status-warning bg-[hsl(var(--color-semantic-warning-50-hsl))] border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)]',
+  TIMEOUT:       'text-status-warning bg-[hsl(var(--color-semantic-warning-50-hsl))] border-[hsl(var(--color-semantic-warning-500-hsl)/0.35)]',
+  BUSINESS_RULE: 'text-status-info bg-[hsl(var(--color-semantic-info-50-hsl))] border-[hsl(var(--color-semantic-info-500-hsl)/0.35)]',
   UNKNOWN:       'text-slate-600 bg-slate-50 border-slate-200',
 }
 
@@ -128,7 +128,7 @@ export function ErrorPanel({
       {/* Header */}
       <div className="flex items-start gap-3">
         {!compact && (
-          <div className="flex-shrink-0 opacity-70">{icon}</div>
+          <div className="shrink-0 opacity-70">{icon}</div>
         )}
         <div className="flex flex-col gap-1">
           <h3 className={cn('font-semibold', compact ? 'text-sm' : 'text-base')}>
@@ -143,7 +143,7 @@ export function ErrorPanel({
       {/* Datenverlust-Warnung */}
       {error.data_loss_risk && (
         <div className="flex items-center gap-2 rounded-md bg-white/60 px-3 py-2 text-xs font-medium">
-          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           Möglicherweise gehen ungespeicherte Daten verloren.
         </div>
       )}

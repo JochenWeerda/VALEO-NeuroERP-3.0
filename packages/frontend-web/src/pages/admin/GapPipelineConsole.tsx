@@ -299,32 +299,28 @@ export default function GapPipelineConsole() {
                 onClick={() => handleRunCommand('aggregate')}
                 disabled={busy}
                 variant="outline"
-                size="sm"
-              >
+               className="min-h-touch">
                 Aggregate
               </Button>
               <Button
                 onClick={() => handleRunCommand('match')}
                 disabled={busy}
                 variant="outline"
-                size="sm"
-              >
+               className="min-h-touch">
                 Match
               </Button>
               <Button
                 onClick={() => handleRunCommand('snapshot')}
                 disabled={busy}
                 variant="outline"
-                size="sm"
-              >
+               className="min-h-touch">
                 Snapshot
               </Button>
               <Button
                 onClick={() => handleRunCommand('hydrate-customers')}
                 disabled={busy}
                 variant="outline"
-                size="sm"
-              >
+               className="min-h-touch">
                 Hydrate Customers
               </Button>
             </div>

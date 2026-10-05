@@ -1,7 +1,15 @@
-import { useParams } from '@/app/routing/typed-router'
-import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
+import { useParams, useSearchParams } from '@/app/routing/typed-router'
+import PartyNativePage, { readQueryParam, resolvePartyKind, resolvePartySectionKey } from '@/pages/crm/party-native'
 
 export default function Customer360NativePage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>()
-  return <UniversalNativeDetailPage screenId="crm/customer-360" entityId={id} testId="crm-customer-360" />
+  const { id: routeId } = useParams<{ id?: string }>()
+  const [searchParams] = useSearchParams()
+  const id = routeId ?? readQueryParam(searchParams, 'id') ?? undefined
+  return (
+    <PartyNativePage
+      kind={resolvePartyKind(readQueryParam(searchParams, 'kind'))}
+      entityId={id}
+      requestedSectionKey={resolvePartySectionKey(readQueryParam(searchParams, 'tab'))}
+    />
+  )
 }

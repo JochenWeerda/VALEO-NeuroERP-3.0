@@ -199,9 +199,9 @@ async def list_approval_rules(
         params = {"tenant_id": tenant_id}
         
         if active_only:
-            query = text(str(query) + " AND active = true")
+            query = text(str(query) + " AND active = true")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
-        query = text(str(query) + " ORDER BY priority DESC, name")
+        query = text(str(query) + " ORDER BY priority DESC, name")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         

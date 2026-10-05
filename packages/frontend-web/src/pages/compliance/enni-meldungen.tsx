@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,9 +37,9 @@ export default function ENNIMeldungenPage(): JSX.Element {
       label: 'N-P-K (kg/ha)',
       render: (m: ENNIMeldung) => (
         <div className="flex gap-2 font-mono text-xs">
-          <span className="text-blue-600">{m.naehrstoffe.n}</span> -
-          <span className="text-orange-600">{m.naehrstoffe.p}</span> -
-          <span className="text-green-600">{m.naehrstoffe.k}</span>
+          <span className="text-status-info">{m.naehrstoffe.n}</span> -
+          <span className="text-status-warning">{m.naehrstoffe.p}</span> -
+          <span className="text-status-success">{m.naehrstoffe.k}</span>
         </div>
       ),
     },
@@ -93,7 +94,7 @@ export default function ENNIMeldungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Bestaetigt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{meldungen.filter((m) => m.status === 'bestaetigt').length}</span>
+            <span className="text-2xl font-bold text-status-success">{meldungen.filter((m) => m.status === 'bestaetigt').length}</span>
           </CardContent>
         </Card>
 
@@ -102,7 +103,7 @@ export default function ENNIMeldungenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gesendet</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{meldungen.filter((m) => m.status === 'gesendet').length}</span>
+            <span className="text-2xl font-bold text-status-warning">{meldungen.filter((m) => m.status === 'gesendet').length}</span>
           </CardContent>
         </Card>
 
@@ -116,11 +117,11 @@ export default function ENNIMeldungenPage(): JSX.Element {
         </Card>
       </div>
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <p className="font-semibold">ENNI-Portal Niedersachsen</p>
         <p className="mt-1">Elektronische Erfassung von Naehrstoffstroemen, Meldepflicht fuer Haendler und Betriebe.</p>
         <p className="mt-1">Fristen: DBE (30.04.), DdD (31.05.), 170-N (31.12.)</p>
-      </div>
+      </Callout>
 
       <Card>
         <CardContent className="pt-6">

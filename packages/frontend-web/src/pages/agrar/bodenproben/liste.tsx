@@ -10,11 +10,14 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { Beaker, FileDown, Plus, Search } from 'lucide-react'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function BodenprobenPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
+  const [exporting, setExporting] = useState(false)
   const { data, isLoading, isError, error, refetch } = useBodenproben()
 
   if (isLoading) {
@@ -39,7 +42,7 @@ export default function BodenprobenPage(): JSX.Element {
   const offeneProben = filteredProben.filter((p) => p.status === 'beauftragt')
   const analysierteProben = filteredProben.filter((p) => p.status === 'analysiert')
 
-  const handleExport = () => {
+  function persistExport(): void {
     const header = 'Schlag;Datum;Labor;N;P;K;pH;Status\n'
     const rows = filteredProben.map((p) =>
       [p.schlag, p.datum, p.labor ?? '', p.n, p.p, p.k, p.ph, p.status].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
@@ -51,7 +54,19 @@ export default function BodenprobenPage(): JSX.Element {
     a.download = `Bodenproben_${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
-    toast({ title: 'Export', description: `${filteredProben.length} Bodenproben exportiert.` })
+  }
+
+  function handleExport(): void {
+    if (exporting) return
+    setExporting(true)
+    try {
+      persistExport()
+      toast({ title: 'Export', description: `${filteredProben.length} Bodenproben exportiert.` })
+    } catch {
+      toast({ variant: 'destructive', title: 'Export fehlgeschlagen' })
+    } finally {
+      setExporting(false)
+    }
   }
 
   const columns = [
@@ -59,7 +74,11 @@ export default function BodenprobenPage(): JSX.Element {
       key: 'schlag' as const,
       label: 'Schlag',
       render: (b: Bodenprobe) => (
-        <button onClick={() => navigate(`/agrar/bodenprobe/${b.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button
+          type="button"
+          onClick={() => navigate(`/agrar/bodenprobe/${b.id}`)}
+          className="min-h-11 font-medium text-primary touch-manipulation"
+        >
           {b.schlag}
         </button>
       ),
@@ -86,18 +105,19 @@ export default function BodenprobenPage(): JSX.Element {
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Bodenproben</h1>
-          <p className="text-muted-foreground">Naehrstoff-Analysen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Bodenproben</h1>
+          <p className="text-muted-foreground">Nährstoff-Analysen suchen und öffnen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/bodenprobe/neu')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/bodenprobe/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neue Bodenprobe
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -105,7 +125,7 @@ export default function BodenprobenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Beaker className="h-5 w-5 text-blue-600" />
+              <Beaker className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{proben.length}</span>
             </div>
           </CardContent>
@@ -116,7 +136,7 @@ export default function BodenprobenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Analysiert</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{analysierteProben.length}</span>
+            <span className="text-2xl font-bold text-status-success">{analysierteProben.length}</span>
           </CardContent>
         </Card>
 
@@ -129,18 +149,30 @@ export default function BodenprobenPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                aria-label="Suche Bodenproben"
+                placeholder="Schlag, Labor oder Status suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+              />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button
+              variant="outline"
+              className="min-h-touch gap-2 touch-manipulation"
+              onClick={handleExport}
+              disabled={exporting}
+            >
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -148,18 +180,25 @@ export default function BodenprobenPage(): JSX.Element {
         </CardContent>
       </Card>
 
+      {!isTouch ? (
       <Card>
         <CardHeader>
           <CardTitle>Labor- und Beratungsfolge</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => offeneProben[0] && navigate(`/agrar/bodenprobe/${offeneProben[0].id}`)} disabled={offeneProben.length === 0}>
-            Offene Probe oeffnen
+          <Button
+            variant="outline"
+            className="min-h-touch touch-manipulation"
+            onClick={() => offeneProben[0] && navigate(`/agrar/bodenprobe/${offeneProben[0].id}`)}
+            disabled={offeneProben.length === 0}
+          >
+            Offene Probe öffnen
           </Button>
-          <Button variant="outline" onClick={() => navigate('/agrar/psm/beratung')}>Beratung</Button>
-          <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumente</Button>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/agrar/psm/beratung')}>Beratung</Button>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate('/dokumente/ablage')}>Dokumente</Button>
         </CardContent>
       </Card>
+      ) : null}
 
       <Card>
         <CardContent className="pt-6">

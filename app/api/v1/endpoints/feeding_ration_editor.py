@@ -1,0 +1,266 @@
+"""Ration draft evaluation API for the ration editor (FEED-EDITOR-021)."""
+from __future__ import annotations
+
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy.orm import Session
+
+from datetime import datetime
+
+from app.agrar.rations.authz import READ_ROLES, WRITE_ROLES, require_roles
+from app.auth.deps import User, get_current_user
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.services.feeding_ration_editor_service import (
+    EmptyRationVersionError,
+    FeedingRationEditorService,
+    IncomparableVersionsError,
+)
+
+router = APIRouter(prefix="/feeding", tags=["feeding-ration-editor"])
+
+
+class DraftComponentIn(BaseModel):
+    feed_id: str = Field(min_length=1, max_length=80)
+    kg_fm: float = Field(gt=0)
+    min_kg_fm: float | None = Field(default=None, ge=0)
+    max_kg_fm: float | None = Field(default=None, ge=0)
+
+
+class RationDraftEvaluateIn(BaseModel):
+    group_id: str = Field(min_length=1, max_length=80)
+    requirement_profile_id: str | None = Field(default=None, max_length=80)
+    components: list[DraftComponentIn] = Field(min_length=1)
+
+
+class DraftPositionOut(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    feed_id: str
+    name: str
+    kg_fm: float
+    kg_tm: float
+    cost_eur: float
+    min_kg_fm: float | None = None
+    max_kg_fm: float | None = None
+
+
+class DraftDeltaOut(BaseModel):
+    metric: str
+    actual: float
+    target: float
+    delta: float
+
+
+class DraftFindingOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    code: str
+    severity: str
+    metric: str
+    actual: float
+    target: float | None = None
+    message: str
+    feed_id: str | None = None
+    remediation: str | None = None
+
+
+class RationDraftEvaluationOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    group_id: str
+    requirement_profile_id: str
+    positions: list[DraftPositionOut]
+    totals: dict[str, float]
+    coverage: dict[str, dict[str, Any]]
+    deltas: list[DraftDeltaOut]
+    findings: list[DraftFindingOut]
+
+
+class RationEvaluationOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    tenant_id: str
+    ration_id: str
+    ration_version_id: str
+    requirement_profile_id: str
+    totals: dict[str, float]
+    deltas: list[DraftDeltaOut]
+    findings: list[DraftFindingOut]
+    coverage: dict[str, dict[str, Any]]
+    evaluated_by: str
+    evaluated_at: datetime
+
+
+class VersionEvaluateIn(BaseModel):
+    """Bewusst leer: die Komponenten kommen ausschliesslich aus dem
+    unveraenderlichen Versions-Snapshot (keine Client-Payload)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+@router.post("/ration-versions/{version_id}/evaluate", response_model=RationEvaluationOut,
+             status_code=201,
+             summary="Rationsversion aus ihrem Snapshot bewerten und append-only persistieren")
+async def evaluate_ration_version(version_id: str, body: VersionEvaluateIn,
+                                  db: Session = Depends(get_db),
+                                  tenant_id: str = Depends(get_tenant_id),
+                                  user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer die Versionsbewertung.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        return service.evaluate_version(version_id)
+    except EmptyRationVersionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/ration-versions/{version_id}/evaluation", response_model=RationEvaluationOut,
+            summary="Juengste persistierte Bewertung einer Rationsversion")
+async def get_ration_version_evaluation(version_id: str, db: Session = Depends(get_db),
+                                        tenant_id: str = Depends(get_tenant_id),
+                                        user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer die Versionsbewertung.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        return service.latest_evaluation(version_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+class VersionCompareIn(BaseModel):
+    base_version_id: str = Field(min_length=1, max_length=80)
+    variant_version_id: str = Field(min_length=1, max_length=80)
+
+
+class ComponentDiffOut(BaseModel):
+    feed_id: str
+    name: str
+    base_kg_fm: float | None = None
+    variant_kg_fm: float | None = None
+    delta_kg_fm: float | None = None
+    change: str
+
+
+class MetricDiffOut(BaseModel):
+    metric: str
+    label: str
+    base: float
+    variant: float
+    delta: float
+
+
+class VersionCompareSideOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    version_id: str
+    ration_id: str
+    totals: dict[str, float]
+
+
+class VersionComparisonOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    group_id: str
+    requirement_profile_id: str
+    base: VersionCompareSideOut
+    variant: VersionCompareSideOut
+    component_diff: list[ComponentDiffOut]
+    metric_diff: list[MetricDiffOut]
+    base_findings: list[DraftFindingOut]
+    variant_findings: list[DraftFindingOut]
+
+
+@router.post("/ration-versions/compare", response_model=VersionComparisonOut,
+             summary="Zwei Rationsversionen derselben Gruppe deterministisch vergleichen")
+async def compare_ration_versions(body: VersionCompareIn, db: Session = Depends(get_db),
+                                  tenant_id: str = Depends(get_tenant_id),
+                                  user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer den Variantenvergleich.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        return service.compare_versions(body.base_version_id, body.variant_version_id)
+    except IncomparableVersionsError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except EmptyRationVersionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+# ── Optimieren im Editor (FEED-OPT-042) ─────────────────────────────────────
+
+class VersionOptimizeIn(BaseModel):
+    expected_latest_version_no: int = Field(ge=0)
+
+
+class CandidateVersionOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    version_no: int
+    source: str
+    status: str
+
+
+class OptimizationRunRefOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    ration_id: str
+    ration_version_id: str
+    solver_version: str
+    objective: str
+    status: str
+    duration_ms: int | None = None
+
+
+class VersionOptimizeOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    status: str
+    candidate_version: CandidateVersionOut | None = None
+    optimization_run: OptimizationRunRefOut
+    explanation: dict[str, Any] | None = None
+
+
+@router.post("/ration-versions/{version_id}/optimize", response_model=VersionOptimizeOut,
+             summary="Optimieren erzeugt eine Candidate-Version (nie Aktivierung) mit atomarem Solverlauf-Protokoll")
+async def optimize_ration_version(version_id: str, body: VersionOptimizeIn,
+                                  db: Session = Depends(get_db),
+                                  tenant_id: str = Depends(get_tenant_id),
+                                  user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, WRITE_ROLES, detail="Keine Berechtigung fuer die Rationsoptimierung.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    from app.services.rations_lifecycle_service import RationLifecycleConflict
+    try:
+        return service.optimize_version(
+            version_id, expected_latest_version_no=body.expected_latest_version_no)
+    except RationLifecycleConflict as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except EmptyRationVersionError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.post("/ration-drafts/evaluate", response_model=RationDraftEvaluationOut,
+             summary="Rationsentwurf deterministisch bewerten (ohne Persistenz, ohne Solverlauf)")
+async def evaluate_ration_draft(body: RationDraftEvaluateIn, db: Session = Depends(get_db),
+                                tenant_id: str = Depends(get_tenant_id),
+                                user: User = Depends(get_current_user)) -> dict[str, Any]:
+    require_roles(user, READ_ROLES, detail="Keine Berechtigung fuer die Rationsbewertung.")
+    service = FeedingRationEditorService(db, tenant_id, str(user.get("sub") or "unknown"))
+    try:
+        return service.evaluate(
+            group_id=body.group_id,
+            requirement_profile_id=body.requirement_profile_id,
+            components=[component.model_dump() for component in body.components],
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

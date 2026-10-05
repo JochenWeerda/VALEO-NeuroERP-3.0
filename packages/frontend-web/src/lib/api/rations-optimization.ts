@@ -166,6 +166,19 @@ export interface FanCalibrationPayload {
   feeds_mapped?: number
   feeds_fallback?: number
   fallback_warning?: string | null
+  precision_summary?: {
+    method: string
+    dmi_covered_kg: number
+    passage_rate_pct_h: number | null
+    omd_fan1_pct: number | null
+    omd_fani_pct: number | null
+    me_fan1_mj_kgdm: number | null
+    me_fani_mj_kgdm: number | null
+    edg_fan1_pct: number | null
+    edg_fani_pct: number | null
+    udp_fani_pct: number | null
+    fallback_items: number
+  }
 }
 
 export interface ConstraintStatusItem {
@@ -181,6 +194,15 @@ export interface ConstraintStatusItem {
   penalty_cost: number
   status: 'ok' | 'violated' | 'hard_violated'
   source?: string
+  // RATION-CANON-02: Constraint-Meta-Modell (Haerteklasse + Quelle, Skill §5).
+  /** Haerteklasse: safety_hard/business_hard werden nie automatisch relaxiert. */
+  hardness?: 'safety_hard' | 'business_hard' | 'advisory' | 'solver_working' | 'observation' | null
+  /** Herkunft der Grenze (Norm/Praxis/Betrieb/Default). */
+  source_type?: 'law' | 'gfe' | 'dlg' | 'farm_policy' | 'advisor' | 'solver_default' | 'ui_default' | null
+  /** Darf der Solver diese Grenze automatisch relaxieren? */
+  relaxable?: boolean
+  /** Prioritaet (hoeher = wichtiger; safety_hard > business_hard > advisory …). */
+  priority?: number | null
 }
 
 export interface PenaltySummary {
@@ -208,6 +230,12 @@ export interface FeedIngredient {
   min_kgdm: number
   max_kgdm: number
   active: boolean
+  /** DLG-FUTTERART (Bereichszuordnung im Wizard, FEED-WIZ-051) */
+  futterart?: string | null
+  /** 8-stellige DLG-PRIMARYID als fachliche Nummer */
+  dlg_primaryid?: string | null
+  /** DLG-Nomenklatur der Druckform */
+  nomenklatur?: string | null
 }
 
 export interface RationItem {
@@ -217,6 +245,10 @@ export interface RationItem {
   kgfm: number
   unit_cost: number
   total_cost: number
+  /** Beiträge (Backend liefert). */
+  me_mj?: number
+  sidp_g?: number
+  cp_g?: number
   fan_slope_source?: 'exact' | 'mapped' | 'fallback'
   // Slice 1f (2026-04-23): Block-Zuordnung je Fuetterungssystem.
   block?: 'tmr_block' | 'pasture_block' | 'concentrate_staged_block' | string
@@ -234,11 +266,62 @@ export function rationItemsToBaselineKgDm(items: RationItem[]): Record<string, n
   return out
 }
 
+/**
+ * RATION-WB-20: Vorlaeufige Live-Vorschau fuer die Spielwiese.
+ *
+ * Skaliert die vom Backend gelieferten Beitraege einer Position linear auf eine
+ * neue Frischmasse-Menge. Das ist bewusst KEIN Evaluator (Skill §10.2): es wird
+ * keine Bedarfs-, Struktur- oder Zielbereichsaussage abgeleitet, sondern nur die
+ * Arithmetik vorweggenommen, die bei fixierter Menge ohnehin linear ist. Die
+ * autoritative Bewertung liefert weiterhin der Server.
+ *
+ * Fehlende Beitragsfelder bleiben undefined (keine stillen 0-Defaults, Skill §10.3).
+ */
+export function scaleRationItems(
+  items: RationItem[],
+  overridesKgFm: Record<string, number>,
+): RationItem[] {
+  if (!items.length) return items
+  const ids = Object.keys(overridesKgFm)
+  if (!ids.length) return items
+
+  return items.map((item) => {
+    const next = overridesKgFm[item.feed_id]
+    if (!Number.isFinite(next) || next < 0) return item
+    // Ohne Ausgangsmenge ist keine Dichte ableitbar — dann bleibt die Position
+    // unveraendert stehen, bis der Server den echten Wert liefert.
+    if (!Number.isFinite(item.kgfm) || item.kgfm <= 1e-9) return item
+    if (Math.abs(next - item.kgfm) < 1e-9) return item
+
+    const factor = next / item.kgfm
+    const scale = (v: number | undefined): number | undefined =>
+      typeof v === 'number' && Number.isFinite(v) ? v * factor : undefined
+
+    return {
+      ...item,
+      kgfm: next,
+      kgdm: item.kgdm * factor,
+      total_cost: item.total_cost * factor,
+      me_mj: scale(item.me_mj),
+      sidp_g: scale(item.sidp_g),
+      cp_g: scale(item.cp_g),
+    }
+  })
+}
+
 export interface NutrientSupply {
   dmi_kg: number
   me_mj: number
+  /** ME-Dichte MJ/kg TM (Backend liefert). */
+  me_kgdm?: number | null
   sidp_g: number
+  /** sidP-Dichte g/kg TM. */
+  sidp_kgdm?: number | null
+  /** Rohprotein (CP) Dichte g/kg TM. */
+  cp_kgdm?: number | null
+  cp_g?: number | null
   andfom_g: number
+  andfom_kgdm?: number | null
   starch_g: number
   staerke_g?: number
   sugar_g: number
@@ -247,6 +330,15 @@ export interface NutrientSupply {
   p_g: number
   na_g: number
   forage_share_pct: number
+  // GfE 2023 / DLG 2025: sid-Aminosäuren (Proteinqualität), vom Backend geliefert
+  sidlys_g?: number
+  sidmet_g?: number
+  sidlys_sidmet_ratio?: number
+  // F3 (DLG 01|2025, Kap. 9.2.2): DCAB der Ration + K-Dichte + S/Cl
+  s_g?: number | null
+  cl_g?: number | null
+  dcab_meq_kgdm?: number
+  k_g_kgdm?: number
 }
 
 export interface ConstraintReportItem {
@@ -561,6 +653,16 @@ export interface RationAdjustmentApplyPatch {
   relaxation_policy?: RelaxationPolicy
   policy_profile?: PolicyProfile | null
   add_feed_ids?: string[]
+  /** Zeilen-CRUD Workbench: Menge je feed_id auf kg FM/Tag fixieren (Min=Max-Constraint). */
+  fix_feed_fm?: Record<string, number>
+  /** Zeilen-CRUD Workbench: Fixierung lösen (Min-/Max-Grenzen der feed_ids entfernen). */
+  unfix_feed_ids?: string[]
+  /** Zeilen-CRUD Workbench: Futtermittel aus dem Korb entfernen. */
+  remove_feed_ids?: string[]
+  /** Spielwiese (RATION-WB-06): Untergrenze je feed_id in kg FM/Tag setzen (Grenzen öffnen/verdichten). */
+  set_feed_min_fm?: Record<string, number>
+  /** Spielwiese (RATION-WB-06): Obergrenze je feed_id in kg FM/Tag setzen (Grenzen öffnen/verdichten). */
+  set_feed_max_fm?: Record<string, number>
 }
 
 export interface RationAdjustmentSuggestion {
@@ -611,9 +713,87 @@ export interface RationFeedSuggestion {
   cp?: string
 }
 
+/** Fachlicher Ergebnisstatus (RATION-CANON-01, Skill §4.4) – additiv zum technischen `status`. */
+export type RationResultStatus =
+  | 'FEASIBLE_OPTIMAL'
+  | 'FEASIBLE_NON_OPTIMAL'
+  | 'BEST_ATTAINABLE'
+  | 'RELAXED_ACCEPTABLE'
+  | 'TARGET_NOT_ATTAINABLE'
+  | 'CONSTRAINT_CONFLICT'
+  | 'DATA_INCOMPLETE'
+  | 'UNSAFE_REJECTED'
+  | 'SOLVER_ERROR'
+
+/** Erreichbarkeitsanalyse (RATION-CANON-01, Skill §3/Phase 2). `null` = nicht bestimmt, nie „0 Leistung“. */
+export interface AttainabilityReport {
+  /** Mit der Ausgangsration versorgte Leistung; im Optimierlauf null. */
+  baseline_supported: number | null
+  /** Unter allen harten Grenzen sicher erreichbare Leistung. */
+  safe_attainable: number | null
+  /** Technisch maximale Leistung; null bis zum dedizierten Maximalleistungslauf. */
+  technical_max: number | null
+  /** Gewuenschte Herdenleistung (Planungsziel). */
+  target: number | null
+  /** Ziellücke = target − safe_attainable (positiv = unterversorgt). */
+  target_gap: number | null
+  /** Limitierende Naehrstoffachse ('energy' | 'protein' | null). */
+  limiting_axis: 'energy' | 'protein' | null
+  meets_target: boolean
+  tolerance_kg: number
+  unit: 'kg_milk_day'
+}
+
+/** Preflight-Finding (RATION-CANON-03, Skill §3/Phase 0). */
+export interface PreflightFinding {
+  code: string
+  severity: 'info' | 'warning' | 'blocker'
+  metric: string
+  actual: number | null
+  limit: number | null
+  unit: string
+  cause: string
+  remediation: string
+  feed_id?: string | null
+  feed_name?: string | null
+}
+
+/** Preflight-Report (RATION-CANON-03) – strukturierte Eingabe-/Modellpruefung vor der Bewertung. */
+export interface PreflightReport {
+  ok: boolean
+  has_blocker: boolean
+  blocker_count?: number
+  warning_count?: number
+  info_count?: number
+  findings: PreflightFinding[]
+}
+
 export interface OptimizationResult {
   status: 'optimal' | 'infeasible' | 'unbounded' | 'error'
+  /** RATION-CANON-01: fachlicher Ergebnisstatus (Zielbereich-Tacho, Best-Attainable-Panel). */
+  result_status?: RationResultStatus
+  /** RATION-CANON-01: Erreichbarkeits-Fuenfling fuer Cockpit „Erreichbare Leistung“. */
+  attainability?: AttainabilityReport
+  /** RATION-CANON-03: Preflight-Findings (Hinweise & Warnungen im linken Rail). */
+  preflight?: PreflightReport
+  /** RATION-CANON-04: Best-Attainable-Recovery (bei unerreichbarem Ziel, Skill §4.2). */
+  best_attainable_recovery?: {
+    triggered: boolean
+    original_target_kg: number
+    technical_max_kg: number
+    limiting_axis?: 'energy' | 'protein' | null
+    original_infeasibility?: { reason?: string | null; gaps?: string[]; suggestions?: unknown[] }
+  }
   objective_value?: number
+  // F2 (DLG 01|2025, Kap. 10): Effizienz-Kennzahlen
+  efficiency?: {
+    ecm_kg_day?: number
+    feed_efficiency_kg_ecm_per_kg_dm?: number | null
+    energy_efficiency_mj_per_mj?: number | null
+    energy_efficiency_kg_ecm_per_10mj?: number | null
+    protein_efficiency_pct?: number | null
+    bodymass_efficiency_kg_ecm_per_kg?: number | null
+  }
   total_cost_eur_day?: number
   total_cost_eur_100kg_milk?: number
   /** Feedkosten je kg ECM (Milch-Fett/-Protein-% aus Profil; ECM linearisiert NRC-artig). */
@@ -793,6 +973,8 @@ export interface OptimizeFromProfileExtras {
   /** Slice 1h: explizites Fuetterungssystem (snake_case wie FastAPI-Body). */
   feeding_system_config?: FeedingSystemConfig
   feed_block_overrides?: FeedBlockAssignment[]
+  /** WB-12: technical_max (Aufwaerts-Suche) berechnen; Live-Sheet-Edit setzt false für schnelle Neuberechnung. */
+  compute_technical_max?: boolean
 }
 
 export async function optimizeFromProfile(
@@ -821,6 +1003,155 @@ export async function optimizeDemo(): Promise<OptimizationResult> {
   return data
 }
 
+// RATION-WB-07: Parametrische Sensitivitätsanalyse (Skill §8)
+export type SensitivityParameter = 'milk_target' | 'price' | 'feed_max_kg' | 'feed_min_kg'
+
+export interface SensitivityStep {
+  value: number
+  status?: string
+  result_status?: RationResultStatus
+  me_density_mj_kgdm: number | null
+  sidp_density_g_kgdm: number | null
+  cost_eur_cow_day: number | null
+  attainable_output_kg: number | null
+  technical_max_kg: number | null
+  ecm_supply_kg_day?: number | null
+  binding_constraints: string[]
+}
+
+export interface SensitivityResult {
+  parameter: SensitivityParameter
+  feed_id?: string | null
+  unit: string
+  steps: SensitivityStep[]
+}
+
+export async function runSensitivity(
+  cowProfile: CowProfile,
+  sweep: { parameter: SensitivityParameter; feed_id?: string; start: number; stop: number; step: number },
+  feedIds?: string[],
+): Promise<SensitivityResult> {
+  const { data } = await apiClient.post<SensitivityResult>(`${BASE}/sensitivity`, {
+    cow_profile: cowProfile,
+    feeds: feedIds,
+    sweep,
+  })
+  return data
+}
+
+// F1 (DLG 01|2025, Kap. 11/12): Fütterungscontrolling — SOLL/IST-Kontrolle
+export interface FeedingControlComponentIn {
+  feed_id: string
+  name: string
+  soll_kg: number
+  ist_kg: number
+}
+
+export interface FeedingControlIn {
+  komponenten: FeedingControlComponentIn[]
+  restfutter_kg?: number
+  tierzahl: number
+  tm_pct: number
+  milch_kg_kuh?: number | null
+  milchpreis_eur_kg?: number | null
+  futterkosten_eur_kuh?: number | null
+  group_id?: string
+  feeding_date?: string
+  ration_ref?: string | null
+  futtertisch_temp_c?: number | null
+  umgebung_temp_c?: number | null
+  schuettelbox?: { oben_pct: number; mitte_pct: number; unten_pct: number; fein_pct?: number; pendf_soll_g_kgdm?: number | null; ndf_g_kgdm?: number | null } | null
+}
+
+export interface FeedingControlResult {
+  tm_verzehr_kg_kuh: number | null
+  vorgelegt_kg: number
+  restfutter_kg: number
+  aufgenommen_fm_kg: number
+  tierzahl: number
+  tm_pct: number
+  mischgenauigkeit_pct: number | null
+  mischgenauigkeit_ok: boolean
+  komponenten: Array<{
+    feed_id: string
+    name: string
+    soll_kg: number
+    ist_kg: number
+    abweichung_kg: number
+    abweichung_pct: number | null
+    innerhalb_toleranz: boolean
+  }>
+  iofc_eur_kuh: number | null
+  futterkosten_eur_kuh: number | null
+  warnungen: string[]
+  anpassungsvorschlaege: string[]
+  futtertisch_temp_c: number | null
+  umgebung_temp_c: number | null
+  schuettelbox: { struktur_gt_8mm_pct: number; pendf_soll_g_kgdm: number | null; pendf_ist_g_kgdm: number | null; pendf_delta_g_kgdm: number | null; status: string; selektionsrisiko: boolean } | null
+}
+
+export async function evaluateFeedingControl(payload: FeedingControlIn): Promise<FeedingControlResult> {
+  const { data } = await apiClient.post<FeedingControlResult>(`${BASE}/feeding-control/evaluate`, payload)
+  return data
+}
+
+export interface FeedingControlLog { id: string; group_id: string; feeding_date: string; ration_ref: string | null; control_result: FeedingControlResult; created_at: string }
+
+export async function saveFeedingControlLog(payload: FeedingControlIn): Promise<FeedingControlLog> {
+  const { data } = await apiClient.post<FeedingControlLog>(`${BASE}/feeding-control/logs`, payload)
+  return data
+}
+
+export async function fetchFeedingControlLogs(groupId: string, limit = 30): Promise<FeedingControlLog[]> {
+  const { data } = await apiClient.get<FeedingControlLog[]>(`${BASE}/feeding-control/logs`, { params: { group_id: groupId, limit } })
+  return data
+}
+
+// F5-UI (RATIONS-INT-UI-018): Import-Schnittstellen agrirouter/ICAR-ADE/Labor
+export type RationsIntegrationAdapter = 'agrirouter' | 'icar-ade' | 'laboratory'
+
+export interface RationsImportResult {
+  id?: string
+  adapter?: string
+  external_id?: string
+  source?: string
+  source_version?: string | null
+  target_model?: string
+  target?: Record<string, unknown>
+  result?: Record<string, unknown>
+  feeding_control?: Record<string, unknown>
+  duplicate: boolean
+  imported_at?: string
+  [key: string]: unknown
+}
+
+export interface RationsImportJournalEntry {
+  id: string
+  adapter: string
+  external_id: string
+  source_version: string | null
+  target_model: string
+  result: Record<string, unknown>
+  imported_at: string
+}
+
+export async function importRationsData(
+  adapter: RationsIntegrationAdapter,
+  payload: Record<string, unknown>,
+): Promise<RationsImportResult> {
+  const { data } = await apiClient.post<RationsImportResult>(`${BASE}/integrations/${adapter}/import`, { payload })
+  return data
+}
+
+export async function fetchRationsImports(
+  adapter?: RationsIntegrationAdapter,
+  limit = 50,
+): Promise<RationsImportJournalEntry[]> {
+  const params: Record<string, unknown> = { limit }
+  if (adapter) params.adapter = adapter
+  const { data } = await apiClient.get<RationsImportJournalEntry[]>(`${BASE}/integrations/imports`, { params })
+  return data
+}
 export async function uploadCompoundFeedDocument(file: File): Promise<CompoundFeedUploadResult> {
   const form = new FormData()
   form.append('file', file)

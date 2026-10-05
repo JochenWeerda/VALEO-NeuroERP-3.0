@@ -7,9 +7,10 @@
   */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Label } from '@/components/ui/label'
@@ -496,9 +497,8 @@ export default function PortalShop() {
             <Button
               key={kat.value}
               variant={selectedKategorie === kat.value ? 'default' : 'outline'}
-              size="sm"
               onClick={() => setSelectedKategorie(kat.value)}
-              className="gap-2 whitespace-nowrap"
+              className="min-h-touch gap-2 whitespace-nowrap"
             >
               {kat.icon}
               {kat.label}
@@ -546,8 +546,8 @@ export default function PortalShop() {
 
           {orderSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                <Check className="h-8 w-8 text-emerald-600" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--color-semantic-success-50-hsl))]">
+                <Check className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">Bestellung erfolgreich!</h3>
@@ -586,7 +586,7 @@ export default function PortalShop() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="h-8 w-8 text-status-error hover:text-red-700 hover:bg-red-50"
                           onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -640,7 +640,7 @@ export default function PortalShop() {
                             </Button>
                           </div>
                           {item.lastOrderSilo && (
-                            <p className="text-xs text-blue-600">
+                            <p className="text-xs text-status-info">
                               Letzte Bestellung: {item.letzteBestellung?.menge} {item.einheit}
                             </p>
                           )}
@@ -671,7 +671,7 @@ export default function PortalShop() {
                               className="h-9"
                             />
                             {item.lastOrderSilo && (
-                              <p className="text-xs text-blue-600">
+                              <p className="text-xs text-status-info">
                                 Zuletzt: {item.lastOrderSilo}
                               </p>
                             )}
@@ -696,13 +696,13 @@ export default function PortalShop() {
                           <div className="mt-3 pt-3 border-t border-dashed space-y-3">
                             {/* Kaufanreiz: Nächste günstigere Staffel */}
                             {staffelInfo.naechsteStaffel && (
-                              <Alert className="py-2 border-emerald-200 bg-emerald-50">
-                                <Info className="h-4 w-4 text-emerald-600" />
-                                <AlertDescription className="text-emerald-800 text-sm">
+                              <Alert variant="success" className="py-2">
+                                <Info className="h-4 w-4 text-status-success" />
+                                <AlertDescription className="text-status-success text-sm">
                                   <strong>Tipp:</strong> Sie erreichen die nächst günstigere Preisstaffel ab{' '}
                                   <span className="font-bold">{staffelInfo.naechsteStaffel.abMenge} {item.einheit}</span>.
                                   <br />
-                                  <span className="text-emerald-600">
+                                  <span className="text-status-success">
                                     Ersparnis: € {formatPrice(staffelInfo.naechsteStaffel.ersparnis)}/{item.einheit}
                                   </span>
                                 </AlertDescription>
@@ -711,9 +711,9 @@ export default function PortalShop() {
 
                             {/* Staffel erreicht */}
                             {!staffelInfo.naechsteStaffel && staffelInfo.zuschlag === 0 && (
-                              <Alert className="py-2 border-emerald-200 bg-emerald-50">
-                                <Check className="h-4 w-4 text-emerald-600" />
-                                <AlertDescription className="text-emerald-800 text-sm">
+                              <Alert variant="success" className="py-2">
+                                <Check className="h-4 w-4 text-status-success" />
+                                <AlertDescription className="text-status-success text-sm">
                                   <strong>Beste Staffel erreicht!</strong> Kein Mengenzuschlag.
                                 </AlertDescription>
                               </Alert>
@@ -724,12 +724,12 @@ export default function PortalShop() {
                               {staffelInfo.zuschlag > 0 && (
                                 <div className="space-y-1.5">
                                   <Label className="text-xs text-muted-foreground">Mengenzuschlag</Label>
-                                  <div className="h-9 flex items-center text-sm text-amber-700 bg-amber-50 rounded-md px-3">
+                                  <Callout variant="warning" className="h-9 flex items-center text-sm rounded-md px-3">
                                     € {formatPrice(staffelInfo.zuschlag)}/{item.einheit}
                                     <span className="ml-1 text-xs text-muted-foreground">
                                       (= € {formatPrice(staffelKosten)})
                                     </span>
-                                  </div>
+                                  </Callout>
                                 </div>
                               )}
 
@@ -759,7 +759,7 @@ export default function PortalShop() {
                                   {staffelInfo.zuschlag > 0 && (
                                     <>
                                       <span className="text-muted-foreground">+</span>
-                                      <span className="text-amber-700">€ {formatPrice(staffelKosten)} Staffel</span>
+                                      <span className="text-status-warning">€ {formatPrice(staffelKosten)} Staffel</span>
                                     </>
                                   )}
                                   {item.frachtkosten && item.deliveryParity !== 'ab_lager' && (
@@ -857,8 +857,8 @@ export default function PortalShop() {
 
           {anfrageSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                <Check className="h-8 w-8 text-emerald-600" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--color-semantic-success-50-hsl))]">
+                <Check className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">Anfrage gesendet!</h3>
@@ -921,11 +921,11 @@ function formatPrice(price: number): string {
 
 
 // Kontrakt-Status Badge Konfiguration
-const contractStatusConfig: Record<ContractStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  NONE: { label: '', color: '', icon: null },
-  ACTIVE: { label: 'Kontrakt aktiv', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', icon: <FileText className="h-3 w-3" /> },
-  LOW: { label: 'Kontrakt fast ausgeschöpft', color: 'bg-orange-100 text-orange-800 border-orange-200', icon: <AlertTriangle className="h-3 w-3" /> },
-  EXHAUSTED: { label: 'Kontrakt ausgeschöpft', color: 'bg-gray-100 text-gray-600 border-gray-200', icon: <FileText className="h-3 w-3" /> },
+const contractStatusConfig: Record<ContractStatus, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  NONE: { label: '', color: 'muted', icon: null },
+  ACTIVE: { label: 'Kontrakt aktiv', color: 'success', icon: <FileText className="h-3 w-3" /> },
+  LOW: { label: 'Kontrakt fast ausgeschöpft', color: 'warning', icon: <AlertTriangle className="h-3 w-3" /> },
+  EXHAUSTED: { label: 'Kontrakt ausgeschöpft', color: 'muted', icon: <FileText className="h-3 w-3" /> },
 }
 
 function ProductCard({
@@ -1006,7 +1006,7 @@ function ProductCard({
               {!hasPrePurchase && hasContract && (
                 <Tooltip>
                   <TooltipTrigger>
-                    <Badge className={cn('text-xs gap-1 border', contractStatusConfig[contractStatusKey].color)}>
+                    <Badge variant={contractStatusConfig[contractStatusKey].color} className="text-xs gap-1 border">
                       {contractStatusConfig[contractStatusKey].icon}
                       {contractStatusConfig[contractStatusKey].label}
                     </Badge>
@@ -1020,7 +1020,7 @@ function ProductCard({
 
               {/* Erneut bestellen Badge */}
               {recentlyOrdered && (
-                <Badge className="bg-blue-600 text-xs hover:bg-blue-700 gap-1">
+                <Badge variant="info" className="text-xs gap-1">
                   <RotateCcw className="h-3 w-3" />
                   Erneut bestellen
                 </Badge>
@@ -1037,13 +1037,13 @@ function ProductCard({
           <CardTitle className="mt-2 text-base">{product.name}</CardTitle>
           <CardDescription className="text-xs">{product.artikelnummer}</CardDescription>
           {recentlyOrdered && daysSinceOrder !== null && (
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-status-info">
               Zuletzt bestellt: vor {daysSinceOrder} Tag{daysSinceOrder !== 1 ? 'en' : ''} ({(product.letzteBestellung?.menge ?? 0)} {product.einheit})
             </p>
           )}
         </CardHeader>
         
-        <CardContent className="pb-2 flex-grow">
+        <CardContent className="pb-2 grow">
           <p className="line-clamp-2 text-sm text-muted-foreground">{product.beschreibung}</p>
           {product.zertifikate.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
@@ -1072,7 +1072,7 @@ function ProductCard({
                 className={cn('h-2', prePurchaseLow ? '[&>div]:bg-orange-500' : '[&>div]:bg-purple-500')} 
               />
               {prePurchaseLow && (
-                <p className="text-xs text-orange-600">Nur noch {Math.round(prePurchasePercent)}% übrig</p>
+                <p className="text-xs text-status-warning">Nur noch {Math.round(prePurchasePercent)}% übrig</p>
               )}
               <div className="space-y-1">
                 <div className="flex justify-between">
@@ -1084,8 +1084,8 @@ function ProductCard({
                   <span className="text-xs text-muted-foreground line-through">€ {formatPrice(product.preis)}</span>
                 </div>
                 <div className="flex justify-between pt-1 border-t">
-                  <span className="text-xs font-medium text-emerald-700">Jetzt fällig</span>
-                  <span className="text-lg font-bold text-emerald-600">€ 0,00</span>
+                  <span className="text-xs font-medium text-status-success">Jetzt fällig</span>
+                  <span className="text-lg font-bold text-status-success">€ 0,00</span>
                 </div>
                 <p className="text-xs text-muted-foreground">(bei Abruf bis {prePurchaseRemaining} {product.einheit})</p>
               </div>
@@ -1106,12 +1106,12 @@ function ProductCard({
                 className={cn('h-2', contractPercent < 20 ? '[&>div]:bg-orange-500' : '[&>div]:bg-emerald-500')} 
               />
               {contractPercent < 20 && (
-                <p className="text-xs text-orange-600">Nur noch {Math.round(contractPercent)}% übrig</p>
+                <p className="text-xs text-status-warning">Nur noch {Math.round(contractPercent)}% übrig</p>
               )}
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Kontraktpreis</span>
-                  <span className="text-lg font-bold text-emerald-600">€ {formatPrice((product.contractPrice ?? product.preis))}</span>
+                  <span className="text-lg font-bold text-status-success">€ {formatPrice((product.contractPrice ?? product.preis))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs text-muted-foreground">Listenpreis</span>
@@ -1144,7 +1144,7 @@ function ProductCard({
                 <div className="space-y-1">
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs text-muted-foreground">Aktionspreis</span>
-                    <span className="text-lg font-bold text-emerald-600">€ {formatPrice(product.rabattPreis)}</span>
+                    <span className="text-lg font-bold text-status-success">€ {formatPrice(product.rabattPreis)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-xs text-muted-foreground">Listenpreis</span>
@@ -1163,11 +1163,10 @@ function ProductCard({
 
           {/* Hinzufügen Button */}
           <Button
-            size="sm"
             variant={inCart ? 'secondary' : 'default'}
             disabled={!product.verfuegbar}
             onClick={onAddToCart}
-            className="w-full gap-1"
+            className="min-h-touch w-full gap-1"
           >
             {!product.verfuegbar ? (
               'Ausverkauft'

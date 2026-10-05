@@ -196,13 +196,12 @@ export function IntentBar({
         {primaryActions.map((action) => (
           <Button
             key={action.id}
-            size="sm"
-            className={clsx('gap-1', action.color, 'text-white')}
+            className={clsx('min-h-touch', 'gap-1', action.color, 'text-white')}
             onClick={action.action}
             title={action.shortcut ? `${action.label} (${action.shortcut})` : action.label}
           >
             {action.icon}
-            <span className="hidden sm:inline">{action.label}</span>
+            <span>{action.label}</span>
           </Button>
         ))}
       </div>
@@ -213,14 +212,14 @@ export function IntentBar({
           <Button
             key={action.id}
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            className="min-h-touch min-w-touch"
             onClick={action.action}
             disabled={
               (action.id === 'email' && !customerEmail) ||
               (action.id === 'call' && !customerPhone)
             }
             title={action.label}
+            aria-label={action.label}
           >
             {action.icon}
           </Button>
@@ -230,9 +229,9 @@ export function IntentBar({
       {/* More Actions */}
       <Popover open={showMore} onOpenChange={setShowMore}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button variant="outline" className="min-h-touch gap-1">
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Mehr</span>
+            <span>Mehr</span>
             <ChevronRight
               className={clsx('h-4 w-4 transition-transform', showMore && 'rotate-90')}
             />

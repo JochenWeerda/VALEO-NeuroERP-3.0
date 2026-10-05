@@ -44,7 +44,10 @@ def broken_db_client():
 
 def _metric_value(endpoint: str) -> float:
     from app.core.metrics import critical_data_path_errors_total
-    return critical_data_path_errors_total.labels(endpoint=endpoint, error_type="db_error")._value.get()
+
+    return critical_data_path_errors_total.labels(
+        endpoint=endpoint, error_type="db_error"
+    )._value.get()
 
 
 def test_journal_entries_db_error_returns_problem_details_not_empty_list(broken_db_client):
@@ -52,7 +55,6 @@ def test_journal_entries_db_error_returns_problem_details_not_empty_list(broken_
     resp = broken_db_client.get("/api/v1/journal-entries/", headers=HEADERS)
     assert resp.status_code == 503, resp.text
     body = resp.json()
-    # RFC-7807-Problem-Details statt stiller leerer Liste
     assert "items" not in body
     assert "nicht verfuegbar" in str(body.get("detail", ""))
     assert _metric_value("journal_entries_list") == before + 1
@@ -66,3 +68,48 @@ def test_inventory_bestand_db_error_returns_problem_details_not_empty_list(broke
     assert body != []
     assert "nicht verfuegbar" in str(body.get("detail", ""))
     assert _metric_value("inventory_bestand") == before + 1
+
+
+@pytest.mark.parametrize(
+    "path,endpoint_label,metric_key",
+    [
+        (
+            "/api/v1/finance/open-items/OP-1/settlements",
+            "OP-Ausgleichshistorie",
+            "open_items_settlements",
+        ),
+        (
+            "/api/v1/finance/payments/unmatched",
+            "Unmatched-Zahlungen",
+            "payments_unmatched",
+        ),
+        (
+            "/api/v1/finance/payments/open-items/CUST-1",
+            "Offene Posten fuer Matching",
+            "payments_open_items_match",
+        ),
+        (
+            "/api/v1/finance/payments/match-suggestions/PAY-1",
+            "Matching-Vorschlaege",
+            "payments_match_suggestions",
+        ),
+        (
+            "/api/v1/finance/bank-statements/STMT-1/lines",
+            "Kontoauszugszeilen",
+            "bank_statement_lines",
+        ),
+    ],
+)
+def test_finance_list_db_error_returns_503_not_empty_list(
+    broken_db_client, path, endpoint_label, metric_key
+):
+    before = _metric_value(metric_key)
+    resp = broken_db_client.get(path, headers=HEADERS)
+    assert resp.status_code == 503, resp.text
+    body = resp.json()
+    assert body != []
+    assert "items" not in body or body.get("items") is None
+    detail = str(body.get("detail", ""))
+    assert "nicht verfuegbar" in detail
+    assert endpoint_label.split()[0] in detail or "nicht verfuegbar" in detail
+    assert _metric_value(metric_key) == before + 1

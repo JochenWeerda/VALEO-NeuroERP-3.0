@@ -118,7 +118,7 @@ export function LinesEditorWithLookup<ColumnName extends string>({
           {columns.map((column) => (
             <div key={column.name}>{renderCell(row, rowIndex, column)}</div>
           ))}
-          <Button type="button" variant="ghost" size="sm" onClick={() => handleDeleteRow(rowIndex)}>
+          <Button type="button" variant="ghost" onClick={() => handleDeleteRow(rowIndex)} className="min-h-touch">
             Loeschen
           </Button>
         </Fragment>

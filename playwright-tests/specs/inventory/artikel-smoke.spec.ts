@@ -4,25 +4,26 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Inventory - Artikel @smoke', () => {
   test('Artikel-Liste lädt', async ({ adminPage }) => {
     await adminPage.goto('/artikel/liste');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Artikel-Stamm lädt', async ({ adminPage }) => {
     await adminPage.goto('/artikel/stamm');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Export funktioniert', async ({ adminPage, fallbackDetector }) => {
     await adminPage.goto('/artikel/liste');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     const exportButton = adminPage.locator('button:has-text("Export"), button:has-text("export")').first();
     

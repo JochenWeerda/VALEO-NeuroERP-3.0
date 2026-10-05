@@ -14,6 +14,7 @@ import { apiClient } from '@/lib/api-client'
 import { exportToCSV } from '@/lib/export-utils'
 import { useToast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type Konto = {
@@ -44,13 +45,14 @@ function mapApiAccount(a: { id: string; account_number: string; name: string; ca
 export default function KontenplanPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
 
   const { data: konten = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['fibu', 'chart-of-accounts'],
     queryFn: async () => {
       const res = await apiClient.get<{ items: Array<{ id: string; account_number: string; name: string; category?: string }> }>(
-        '/api/v1/chart-of-accounts'
+        '/api/v1/finance/chart-of-accounts/'
       )
       if (!res.data?.items) {
         throw new Error('Ungültige Antwort für Kontenplan')
@@ -94,7 +96,7 @@ export default function KontenplanPage(): JSX.Element {
       key: 'kontonummer' as const,
       label: 'Konto',
       render: (k: Konto) => (
-        <button onClick={() => navigate(`/fibu/sachkonto/${k.id}`)} className="font-medium text-blue-600 hover:underline font-mono text-lg">
+        <button type="button" onClick={() => navigate(`/fibu/sachkonto/${k.id}`)} className="min-h-11 font-medium font-mono text-primary touch-manipulation">
           {k.kontonummer}
         </button>
       ),
@@ -114,7 +116,7 @@ export default function KontenplanPage(): JSX.Element {
       key: 'saldo' as const,
       label: 'Saldo',
       render: (k: Konto) => (
-        <span className={`font-bold ${k.saldo < 0 ? 'text-red-600' : 'text-green-600'}`}>
+        <span className={`font-bold ${k.saldo < 0 ? 'text-status-error' : 'text-status-success'}`}>
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.abs(k.saldo))}
           {k.saldo < 0 ? ' H' : ' S'}
         </span>
@@ -155,7 +157,9 @@ export default function KontenplanPage(): JSX.Element {
   ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Kontenplan"
         description="Steuerungsraum fuer Kontenstruktur, Nutzung und Folgepfade ins Sachkonto."
@@ -170,17 +174,20 @@ export default function KontenplanPage(): JSX.Element {
         <OperationalTimeline title="Kontenverlauf" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
       </div>
-      <div className="flex items-center justify-between">
+      </>
+      ) : null}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Kontenplan</h1>
-          <p className="text-muted-foreground">SKR03 Standardkontenrahmen</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Kontenplan</h1>
+          <p className="text-muted-foreground">Konten suchen und oeffnen</p>
         </div>
-        <Button onClick={() => navigate('/fibu/sachkonto/neu')} className="gap-2">
+        <Button onClick={() => navigate('/fibu/sachkonto/neu')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neues Konto
         </Button>
       </div>
 
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -188,7 +195,7 @@ export default function KontenplanPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <BookMarked className="h-5 w-5 text-blue-600" />
+              <BookMarked className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{konten.length}</span>
             </div>
           </CardContent>
@@ -217,22 +224,23 @@ export default function KontenplanPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ertrag</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{konten.filter((k) => k.typ === 'ertrag').length}</span>
+            <span className="text-2xl font-bold text-status-success">{konten.filter((k) => k.typ === 'ertrag').length}</span>
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <Card>
         <CardHeader>
           <CardTitle>Suche</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Suche Kontonummer oder Bezeichnung..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input aria-label="Suche Kontenplan" placeholder="Kontonummer oder Bezeichnung" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

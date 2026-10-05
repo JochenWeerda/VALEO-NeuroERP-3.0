@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-26
+last_reviewed: 2026-09-17
 version: 3.1.0
 ---
 
@@ -22,6 +22,10 @@ version: 3.1.0
 | `scripts/maybe_regenerate_agent_handbuch.py` | Pre-Commit: Agent-Handbuch bei Aenderung an Flow Spine / SDs / MCP |
 | `scripts/generate_adr_nav.py` | MkDocs ADR-Navigation patchen |
 | `scripts/generate_code_inventories.py` | Endpoint-/Service-/Migrations-Inventare |
+| `scripts/generate_table_catalog.py` | Physischer domain_*-Tabellenkatalog (`information_schema` + Verbraucher) |
+| `scripts/table_ownership.py` | Schema→Domain, Praefixregeln, benannte Legacy-Lagen |
+| `scripts/table_lineage.py` | Verbraucher Tabelle → Code unter app/ → ScreenDefinition |
+| `scripts/check_domain_table_ownership.py` | Only-up-Besitz jeder domain_*-Tabelle (nach Alembic) |
 | `scripts/generate_container_inventory.py` | Docker-Compose-Container-Inventar → C4-Drift-Check |
 | `scripts/doc_drift_report.py` | Code↔Doku-Drift-Report → `artifacts/` |
 | `scripts/docs-legacy-migrate.py` | Alt-Doku inventarisieren/archivieren |
@@ -39,7 +43,7 @@ version: 3.1.0
 | Skript | Zweck |
 |--------|-------|
 | `pytest` | Backend-Tests |
-| `scripts/check_sql_fstrings.py` | SQL-f-string CI-Gate |
+| `scripts/check_field_contracts.py` | Kopf- und Tabellenfelder der Maske gegen deklariertes Antwortschema |
 | `scripts/check_critical_backend_coverage.py` | Coverage-Ratchet |
 | `scripts/check_toolchain_pins.py` | Toolchain-Pins |
 | `scripts/valeo_slice.py` | Slice claim/verify/close (Agent-Ops) |

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -95,7 +96,7 @@ export default function FoerderantragPage(): JSX.Element {
             <div className="flex justify-between items-center">
               <div>
                 <div className="text-sm text-muted-foreground">Voraussichtliche Förderung</div>
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-3xl font-bold text-status-success">
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(foerderung.betrag)}
                 </div>
               </div>
@@ -132,7 +133,7 @@ export default function FoerderantragPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Antrag bereit</h3>
             <dl className="grid gap-3">
@@ -150,15 +151,15 @@ export default function FoerderantragPage(): JSX.Element {
               </div>
               <div className="flex justify-between pt-2">
                 <dt className="font-bold">Förderbetrag</dt>
-                <dd className="font-bold text-green-600">
+                <dd className="font-bold text-status-success">
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(foerderung.betrag)}
                 </dd>
               </div>
             </dl>
-            <div className="mt-6 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+            <Callout variant="info" className="mt-6 rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">Antrag wird an Behörde übermittelt</p>
               <p className="mt-1">Bearbeitungszeit: ca. 6-8 Wochen</p>
-            </div>
+            </Callout>
           </CardContent>
         </Card>
       ),

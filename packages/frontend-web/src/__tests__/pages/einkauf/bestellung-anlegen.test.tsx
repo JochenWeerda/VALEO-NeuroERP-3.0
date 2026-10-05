@@ -5,7 +5,9 @@ import BestellungAnlegenPage from '@/pages/einkauf/bestellung-anlegen'
 
 const postMock = vi.hoisted(() => vi.fn())
 const getMock = vi.hoisted(() => vi.fn())
+const patchMock = vi.hoisted(() => vi.fn())
 const toastMock = vi.hoisted(() => vi.fn())
+const navigateMock = vi.hoisted(() => vi.fn())
 
 const translations: Record<string, string> = {
   'crud.entities.supplier': 'Lieferant',
@@ -105,8 +107,19 @@ vi.mock('@/lib/api-client', () => ({
   apiClient: {
     post: postMock,
     get: getMock,
+    patch: patchMock,
   },
 }))
+
+vi.mock('@/app/routing/typed-router', async () => {
+  const actual = await vi.importActual<typeof import('@/app/routing/typed-router')>(
+    '@/app/routing/typed-router',
+  )
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  }
+})
 
 vi.mock('@/hooks/use-toast', () => ({
   toast: toastMock,
@@ -122,8 +135,27 @@ describe('BestellungAnlegenPage', () => {
   beforeEach(() => {
     postMock.mockReset()
     getMock.mockReset()
+    patchMock.mockReset()
     toastMock.mockReset()
-    getMock.mockResolvedValue({ data: null })
+    navigateMock.mockReset()
+    getMock.mockImplementation((url: unknown) => {
+      const path = String(url)
+      if (path.includes('/flow-spines/') && path.includes('/instances')) {
+        return Promise.resolve({ instances: [], data: { instances: [] } })
+      }
+      return Promise.resolve({ data: null })
+    })
+    postMock.mockImplementation((url: unknown) => {
+      const path = String(url)
+      if (path.includes('/purchase-orders')) {
+        return Promise.resolve({ id: 'PO-TEST-1' })
+      }
+      if (path.endsWith('/instances')) {
+        return Promise.resolve({ instance_id: 'wf-new' })
+      }
+      return Promise.resolve({})
+    })
+    patchMock.mockResolvedValue({})
   })
 
   it('uebernimmt den Procure-to-Pay-Handover in die Standardmaske', async () => {
@@ -137,7 +169,12 @@ describe('BestellungAnlegenPage', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Workflow-Handover aus Procure-to-Pay')).toBeInTheDocument()
+    // FSX-013: Der Hinweiskasten "Workflow-Handover aus Procure-to-Pay" ist dem
+    // Prozessband gewichen. Der Handover zeigt sich jetzt an dem, was er
+    // bewirkt — vorbefuellter Lieferant und Vorgangsnotizen —, nicht an einem
+    // Erklaertext. Das Band selbst laedt seine Phasen vom Server und ist in
+    // diesem Test ohne Mock bewusst leer; geprueft wird es in
+    // src/__tests__/components/workflow/workflow-process-band.test.tsx.
     await waitFor(() => {
       expect(screen.getByLabelText('Lieferant *')).toHaveValue('Agrarhandel Nord')
     })
@@ -197,18 +234,16 @@ describe('BestellungAnlegenPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Abschliessen' }))
 
     await waitFor(() => {
-      expect(postMock).toHaveBeenCalledTimes(1)
+      expect(postMock).toHaveBeenCalledWith(
+        '/api/v1/purchase-orders',
+        expect.objectContaining({
+          supplierId: 'Agrarhandel Nord',
+          subject: 'Rahmenabruf',
+          shippingAddress: 'Werk Nord, Tor 3',
+          deliveryAddress: 'Werk Nord, Tor 3',
+        }),
+      )
     })
-
-    expect(postMock).toHaveBeenCalledWith(
-      '/api/v1/purchase-orders',
-      expect.objectContaining({
-        supplierId: 'Agrarhandel Nord',
-        subject: 'Rahmenabruf',
-        shippingAddress: 'Werk Nord, Tor 3',
-        deliveryAddress: 'Werk Nord, Tor 3',
-      }),
-    )
   })
 
   it('laedt Bedarfsmeldungen ueber den realen Einkaufsanfrage-Contract vor', async () => {
@@ -330,6 +365,19 @@ describe('BestellungAnlegenPage', () => {
     expect(notesField.value).toContain('Vertragsbezug K-2026-004')
   })
 
+  it('bietet die drei Bestellfaelle im ersten Schritt', async () => {
+    render(
+      <MemoryRouter initialEntries={['/einkauf/bestellungen/neu']}>
+        <BestellungAnlegenPage />
+      </MemoryRouter>,
+    )
+    await goToStep('Lieferant')
+    expect(screen.getByTestId('bestellfall-bestand_abgleich')).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByTestId('bestellfall-direktlieferung'))
+    expect(screen.getByTestId('bestellfall-direktlieferung')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Neuer Artikel / Innovation')).toBeInTheDocument()
+  })
+
   it('zeigt einen Fehler-Toast, wenn die Bedarfsmeldungs-Vorbelegung fehlschlaegt', async () => {
     getMock.mockRejectedValueOnce(new Error('Backend offline'))
 
@@ -370,5 +418,86 @@ describe('BestellungAnlegenPage', () => {
       )
     })
     expect(screen.getByText('Aktiver Schritt: Lieferant')).toBeInTheDocument()
+  })
+
+  async function fillAndFinishDirectOrder(): Promise<void> {
+    fireEvent.change(screen.getByLabelText('Lieferant *'), { target: { value: 'Agrarhandel Nord' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
+    fireEvent.change(screen.getByPlaceholderText('Artikel'), { target: { value: 'Sojaschrot' } })
+    fireEvent.change(screen.getAllByRole('spinbutton')[1], { target: { value: '10' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Lieferung')
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Zusammenfassung')
+    fireEvent.click(screen.getByRole('button', { name: 'Abschliessen' }))
+  }
+
+  it('legt den Prozessfall erst nach dem Speichern der Bestellung an', async () => {
+    render(
+      <MemoryRouter initialEntries={['/einkauf/bestellungen/neu']}>
+        <BestellungAnlegenPage />
+      </MemoryRouter>,
+    )
+    await fillAndFinishDirectOrder()
+
+    await waitFor(() => {
+      expect(postMock).toHaveBeenCalledWith(
+        '/api/v1/process/flow-spines/procure-to-pay/instances',
+        expect.objectContaining({
+          linked_document_id: 'PO-TEST-1',
+          linked_document_type: 'purchase_order',
+        }),
+      )
+    })
+    const purchaseOrderCallIndex = postMock.mock.calls.findIndex((call) =>
+      String(call[0]).includes('/purchase-orders'),
+    )
+    const caseCreateCallIndex = postMock.mock.calls.findIndex((call) => String(call[0]).endsWith('/instances'))
+    expect(purchaseOrderCallIndex).toBeGreaterThanOrEqual(0)
+    expect(caseCreateCallIndex).toBeGreaterThan(purchaseOrderCallIndex)
+  })
+
+  it.each(['Vorgang erneut verknuepfen', 'Abschliessen'])('wiederholt bei Teilfehler ueber %s nur die Fallanlage', async (buttonName) => {
+    postMock.mockImplementation((url: unknown) => {
+      const path = String(url)
+      if (path.includes('/purchase-orders')) {
+        return Promise.resolve({ id: 'PO-TEST-1' })
+      }
+      if (path.endsWith('/instances')) {
+        return Promise.reject(new Error('Flow Spine nicht erreichbar'))
+      }
+      return Promise.resolve({})
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/einkauf/bestellungen/neu']}>
+        <BestellungAnlegenPage />
+      </MemoryRouter>,
+    )
+    await fillAndFinishDirectOrder()
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Vorgang erneut verknuepfen' })).toBeInTheDocument()
+    })
+    expect(navigateMock).not.toHaveBeenCalled()
+    expect(postMock.mock.calls.filter((call) => String(call[0]).includes('/purchase-orders'))).toHaveLength(1)
+
+    postMock.mockImplementation((url: unknown) => {
+      const path = String(url)
+      if (path.includes('/purchase-orders')) {
+        return Promise.resolve({ id: 'PO-SHOULD-NOT' })
+      }
+      if (path.endsWith('/instances')) {
+        return Promise.resolve({ instance_id: 'wf-retry' })
+      }
+      return Promise.resolve({})
+    })
+    fireEvent.click(screen.getByRole('button', { name: buttonName }))
+
+    await waitFor(() => {
+      expect(postMock.mock.calls.filter((call) => String(call[0]).endsWith('/instances')).length).toBeGreaterThan(1)
+    })
+    expect(postMock.mock.calls.filter((call) => String(call[0]).includes('/purchase-orders'))).toHaveLength(1)
   })
 })

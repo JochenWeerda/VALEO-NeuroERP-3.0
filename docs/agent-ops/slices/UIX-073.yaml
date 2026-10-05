@@ -1,0 +1,67 @@
+slice_id: UIX-073
+title: Termin-Extraktion aus E-Mails (Kalender x Capture-Inbox)
+owner: Claude
+status: in_arbeit
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m2-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  crm_capture extrahiert Termine (deterministisch + optionaler LLM-Fallback) als editierbare Kalender-Vorschlaege mit Quellen-Nachweis und Konflikt-Hinweis.
+file_ownership:
+  - "app/services/crm_capture/**"
+  - "app/services/calendar_projection_service.py"
+  - "tests/fixtures/mails/**"
+acceptance:
+  - "Vorschlag nie Auto-Confirm (auch bei confidence 1.0)."
+  - "Re-Ingest derselben Mail erzeugt keine Dubletten (source_key mail_id:n)."
+  - "Konflikt-Hinweis bei Slot-Ueberschneidung (+-2h je Lieferant/Rampe)."
+  - "Bestaetigen verlinkt Objekt + Audit; Verwerfen bleibt fuer Telemetrie."
+tests:
+  - "pytest 10 Mail-Fixtures + Idempotenz + Safety"
+  - "Playwright Mail->Vorschlag->Bestaetigen"
+progress: >-
+  2026-07-07 Deterministischer Extraktor-Kern geliefert (isoliert, kollisionsfrei):
+  app/services/crm_capture/termin_extraction.py — deutsche Datums-/Zeitmuster
+  (12.07., Montag 14 Uhr, KW 29, morgen frueh, zwischen 8 und 10, HH:MM),
+  Anker=received_at (relative Angaben), Zeitzone Europe/Berlin fix, Jahr-Rollover
+  bei Vergangenheit; Bezugsobjekt-Heuristik (Bestell-/Kontrakt-/Lieferschein-Nr
+  per Regex, Absender-Domain→supplier, confidence 0.86); Slot-Dedup je Mail;
+  build_source_key(mail_id, n) fuer Idempotenz. Reine Funktionen, KEIN Auto-
+  Confirm (Kandidaten sind Datenstrukturen ohne status). 15 pytest + 2 Mail-
+  Fixtures. OFFEN (braucht Koordination mit Codex' calendar_projection_service
+  aus 063): Pipeline-Stufe termin_extraction -> calendar_items(status=proposed,
+  source=email_capture, layer=logistik) + Konflikt-Check (±2h gleiche Ressource)
+  + confirm/dismiss-API + LLM-Fallback-Flag + Playwright.
+  2026-07-08 Codex-Tail UIX-073-PIPELINE: Pipeline-Stufe geliefert.
+  CalendarProjectionService.propose_email_terms schreibt Kandidaten idempotent als
+  calendar_items(source=email_capture,status=proposed,layer=logistik,
+  source_key=mail_id:n) mit Quellen-Payload und conflicts[]; CrmAutoCaptureService
+  ruft die Pipeline fuer channel=email defensiv auf. Confirm/Dismiss nutzt die
+  bestehende UIX-063-Kalender-API. OFFEN danach: LLM-Fallback-Flag und
+  Playwright Mail->Vorschlag->Bestaetigen.
+  2026-07-08 Codex-Closeout: Service-Smoke Mail->Vorschlag->Bestaetigen
+  geliefert; propose_email_terms erzeugt status=proposed und transition_proposed
+  bestaetigt den Vorschlag ohne Auto-Confirm. LLM-Fallback bleibt extern offen,
+  da im Repo kein lokaler Provider-/Feature-Flag-Vertrag vorhanden ist.
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Lieferantentermine wandern ohne Abtippen aus dem Postfach in den Logistik-Layer.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    calendar_items status=proposed, source=email_capture, payload mit mail_id/extracted_text/matched_object/conflicts.
+  test_vertrag: >-
+    LLM-Fallback wird gegen deterministische Kandidaten validiert (kein erfundenes Datum).
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

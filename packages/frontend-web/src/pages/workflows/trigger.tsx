@@ -40,7 +40,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
         {fromCoverage && (
           <Card className="border-amber-200 bg-amber-50">
             <CardContent className="pt-4 pb-4">
-              <p className="text-sm text-amber-800">
+              <p className="text-sm text-status-warning">
                 Sie wurden vom <strong>Coverage Monitor</strong> weitergeleitet ({count} Position(en) ausgewählt).
                 Starten Sie einen Workflow, um eine Aufgabe oder Freigabe für diese Positionen anzulegen.
               </p>
@@ -54,7 +54,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingDown className="h-5 w-5 text-orange-600" />
+                <TrendingDown className="h-5 w-5 text-status-warning" />
                 Bestellvorschlag
                 <Badge variant="default" className="ml-auto">KI-Agent</Badge>
               </CardTitle>
@@ -67,19 +67,19 @@ export default function WorkflowTriggerPage(): JSX.Element {
               
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Niedrige Bestände erkennen</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Verkaufstrends analysieren</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Optimale Bestellmenge berechnen</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <CheckCircle className="h-4 w-4 text-status-success" />
                   <span>Human-in-the-Loop Freigabe</span>
                 </div>
               </div>
@@ -136,7 +136,7 @@ export default function WorkflowTriggerPage(): JSX.Element {
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-6">
             <div className="flex gap-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-semibold text-blue-900 mb-1">
                   Human-in-the-Loop-Prinzip

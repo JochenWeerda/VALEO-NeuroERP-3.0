@@ -1,0 +1,47 @@
+slice_id: FEED-AI-046
+title: Assistenzfunktionen (deterministische Stufe nach Agentenvertrag)
+status: done
+owner: claude-feed-chain
+date: 2026-07-17
+spec_refs:
+  - docs/specs/feeding/11-agenten.md (Proposal-Schema §3.1, Leitplanken FEED-AI-001..012)
+  - docs/specs/feeding/implementation-plan.md (Inkrement 7, FEED-AI-046)
+requirements:
+  - FEED-AI-002 (Erklaerungen/Ursachen/Massnahmenvorschlaege — deterministische Stufe)
+contracts:
+  api:
+    - POST /feeding/assist/explain-findings (READ, 201) — Proposal mit facts (Befunde),
+      assumptions (Coverage-Luecken, duenne Historie), recommendations (remediation +
+      deterministisches Playbook je Befund-Code, keine Zahlenerfindung), evidence_refs
+      (Bedarfsprofil, Historien-n), confidence aus Datenlage, requires_human_approval
+    - POST /feeding/assist/propose-measures (READ, 201) — bestaetigungspflichtige
+      proposed_commands (create_actual_measure) aus grant-gefilterten offenen
+      Abweichungsbefunden ohne bestehende Massnahme; NICHTS wird committed —
+      Uebernahme laeuft ueber den bestehenden idempotenten Massnahmen-Endpoint
+    - GET /feeding/assist/substitutes?feed_id= (READ) — Kandidaten gleicher feed_kind
+      (approved), nach Preis sortiert, price_provenance; fehlende Energie-Analyse =
+      benannte Unsicherheit statt Schaetzung (FEED-AI-009)
+    - GET /feeding/assist/proposals (READ) — Audit-Sicht (FEED-AI-010)
+  db:
+    - domain_agrar.feeding_assist_proposals — append-only (Trigger), Zeilen-id =
+      proposal_id; Migration alembic/versions/feed_assist_20260717.py
+  domain:
+    - app/agrar/rations/assist.py — reine Proposal-Builder ohne Persistenz/Modell;
+      _PLAYBOOK mit fachlichen Handlungsrichtungen je Befund-Code (Richtung, nie Menge)
+  services:
+    - feeding_assist_service.py — orchestriert Draft-Bewertung (Editor-Service),
+      Controlling-Historie und Katalog; kein zweiter Datenpfad
+guardrails:
+  - kein LLM-Aufruf in diesem Slice — FEED-AI-003-konform ueber versionierte
+    Rechendienste; Modellpfad (LLM-Gateway, Kill Switch, Injection-Suite,
+    Releasegate §15) = expliziter Folgeausbau
+  - requires_human_approval immer True; High-Impact-Aktionen nicht erreichbar
+tdd:
+  red: "7 failed (ImportError feeding_assist) — tests/test_feeding_assist_api.py vor Implementierung"
+  green: "7/7; Regression Assist+Actual+Editor 16 gruen"
+  refactor: "Playbook/Builder rein in assist.py; Fehlklassifizierte Spalte (price_eur_t) auf preis_pro_t korrigiert"
+gates:
+  - python -m alembic upgrade head + heads: single head feed_assist_20260717
+  - python scripts/generate_architecture_index.py: routes 905/905; pnpm arch:drift OK
+notes:
+  - Assist-UI (Vorschlag neben deterministischer Fachsicht, Uebernahme-Buttons) = FE-Rest

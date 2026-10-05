@@ -5,6 +5,7 @@
  */
 
 import { test, expect } from '../fixtures/testSetup';
+import { waitForAppReady } from '../helpers/ui';
 import { CoverageReporter } from '../helpers/reporters';
 
 const coverageReporter = new CoverageReporter();
@@ -12,7 +13,7 @@ const coverageReporter = new CoverageReporter();
 test.describe('Fallback-System Verifikation @fallback', () => {
   test('Sales: Angebote Export-Fallback-Level', async ({ adminPage, fallbackDetector }) => {
     await adminPage.goto('/sales/angebote');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
 
     const exportButton = adminPage.locator('button:has-text("Export")').first();
     
@@ -49,7 +50,7 @@ test.describe('Fallback-System Verifikation @fallback', () => {
 
   test('CRM: Kontakte Export-Fallback-Level', async ({ adminPage, fallbackDetector }) => {
     await adminPage.goto('/crm/kontakte-liste');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
 
     const exportButton = adminPage.locator('button:has-text("Export")').first();
     
@@ -82,7 +83,7 @@ test.describe('Fallback-System Verifikation @fallback', () => {
 
   test('Agrar: PSM Print-Fallback-Level', async ({ adminPage, fallbackDetector }) => {
     await adminPage.goto('/agrar/psm');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
 
     const printButton = adminPage.locator('button:has-text("Drucken"), button:has-text("drucken")').first();
     

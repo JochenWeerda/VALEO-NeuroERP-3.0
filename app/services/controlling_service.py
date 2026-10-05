@@ -51,7 +51,7 @@ class ControllingService:
 
     def _fetch_one(self, table: str, item_id: str) -> dict[str, Any]:
         row = self.db.execute(
-            text(f"SELECT * FROM {table} WHERE tenant_id=:tenant_id AND id=:id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"SELECT * FROM {table} WHERE tenant_id=:tenant_id AND id=:id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             {"tenant_id": self.tenant_id, "id": item_id},
         ).mappings().first()
         return _clean(dict(row)) if row else {}
@@ -275,7 +275,7 @@ class ControllingService:
             where.append("kpi_id=:kpi_id")
             params["kpi_id"] = kpi_id
         return self._list(
-            f"SELECT * FROM domain_controlling.kpi_timeseries WHERE {' AND '.join(where)} ORDER BY period_start DESC",
+            f"SELECT * FROM domain_controlling.kpi_timeseries WHERE {' AND '.join(where)} ORDER BY period_start DESC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params,
         )
 
@@ -323,7 +323,7 @@ class ControllingService:
             where.append("status=:status")
             params["status"] = status
         return self._list(
-            f"SELECT * FROM domain_controlling.controlling_actions WHERE {' AND '.join(where)} ORDER BY created_at DESC",
+            f"SELECT * FROM domain_controlling.controlling_actions WHERE {' AND '.join(where)} ORDER BY created_at DESC",  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params,
         )
 

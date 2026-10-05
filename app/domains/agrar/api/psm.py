@@ -14,6 +14,7 @@ import time
 import math
 
 from ....core.config import settings
+from ....core.business_time import business_today
 from ....core.database import get_db
 from ....infrastructure.models import PSM as PSMModel
 from ....api.v1.schemas.base import PaginatedResponse
@@ -318,7 +319,7 @@ async def create_psm(
         )
 
     # Validate business rules
-    if psm_data.zulassung_ablauf and psm_data.zulassung_ablauf < datetime.utcnow().date():
+    if psm_data.zulassung_ablauf and psm_data.zulassung_ablauf.date() < business_today():
         raise HTTPException(
             status_code=400,
             detail="Approval expiry date cannot be in the past"
@@ -386,7 +387,7 @@ async def update_psm(
 
     # Validate approval expiry
     if "zulassung_ablauf" in update_data and update_data["zulassung_ablauf"]:
-        if update_data["zulassung_ablauf"] < datetime.utcnow().date():
+        if update_data["zulassung_ablauf"].date() < business_today():
             raise HTTPException(
                 status_code=400,
                 detail="Approval expiry date cannot be in the past"
@@ -610,19 +611,20 @@ async def get_psm_stats(
         safety_stats[safety_type or "Standard"] = count
 
     # Approval expiry warnings (next 90 days)
-    expiry_cutoff = datetime.utcnow().date() + timedelta(days=90)
+    today = business_today()
+    expiry_cutoff = today + timedelta(days=90)
 
     expiring_count = db.query(PSMModel).filter(
         PSMModel.tenant_id == effective_tenant,
         PSMModel.ist_aktiv == True,
         PSMModel.zulassung_ablauf <= expiry_cutoff,
-        PSMModel.zulassung_ablauf >= datetime.utcnow().date()
+        PSMModel.zulassung_ablauf >= today
     ).count()
 
     expired_count = db.query(PSMModel).filter(
         PSMModel.tenant_id == effective_tenant,
         PSMModel.ist_aktiv == True,
-        PSMModel.zulassung_ablauf < datetime.utcnow().date()
+        PSMModel.zulassung_ablauf < today
     ).count()
 
     # Stock stats

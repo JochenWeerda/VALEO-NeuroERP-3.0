@@ -10,8 +10,8 @@ vi.mock('@/pages/sales/OrderEditorLegacyPage', () => ({
   default: () => <div data-testid="legacy-order-editor">Legacy</div>,
 }))
 
-vi.mock('@/pages/sales/UniversalSalesOrderPilotPage', () => ({
-  default: () => <div data-testid="universal-sales-order-pilot">Pilot</div>,
+vi.mock('@/pages/sales/sales-order-native', () => ({
+  default: () => <div data-testid="sales-sales-order">Native</div>,
 }))
 
 vi.mock('@/app/routing/typed-router', () => ({
@@ -20,7 +20,7 @@ vi.mock('@/app/routing/typed-router', () => ({
 }))
 
 describe('SalesOrderEditorPage route switch', () => {
-  it('uses legacy editor when pilot flag is disabled', async () => {
+  it('uses legacy editor when the native flag is disabled', async () => {
     render(<SalesOrderEditorPage />)
     expect(await screen.findByTestId('legacy-order-editor')).toBeInTheDocument()
   })

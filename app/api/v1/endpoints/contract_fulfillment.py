@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.contract_fulfillment_service import ContractFulfillmentService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
 
-@router.get("/fulfillment/list", response_model=dict, summary="Kontrakte mit Erfüllungsgrad (Picker)")
+@router.get("/fulfillment/list", response_model=TypedObjectOut, summary="Kontrakte mit Erfüllungsgrad (Picker)")
 def list_contracts(
     typ: str = Query("alle", description="EINKAUF | VERKAUF | alle"),
     limit: int = Query(100, ge=1, le=500),
@@ -24,7 +25,7 @@ def list_contracts(
     return {"items": ContractFulfillmentService(db, tenant_id).list_contracts(typ=typ, limit=limit)}
 
 
-@router.get("/fulfillment", response_model=dict, summary="Erfüllungsstand je Kontrakt (Kontrahiert vs. abgerufen)")
+@router.get("/fulfillment", response_model=TypedObjectOut, summary="Erfüllungsstand je Kontrakt (Kontrahiert vs. abgerufen)")
 def fulfillment(
     kontrakt: str = Query(..., description="Kontraktnummer oder -ID"),
     db: Session = Depends(get_db),

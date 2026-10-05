@@ -1,5 +1,6 @@
-import { Calculator, Euro, LayoutDashboard, MapPin, Plus, Search, Tractor } from 'lucide-react'
+import { Calculator, Euro, FileText, LayoutDashboard, MapPin, PackageCheck, Plus, Receipt, Search, Tractor, Truck } from 'lucide-react'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
+import { getDocumentEntryPolicy } from '@/lib/workflow/document-entry-policy'
 
 export type ActionShortcut = {
   id: string
@@ -35,6 +36,14 @@ const ACTION_SHORTCUTS_CONFIG: Array<{
     preferredPath: 'sales/invoice',
     keywords: ['rechnung'],
     shortcut: 'Ctrl+Alt+R',
+  },
+  {
+    id: 'action-new-article',
+    label: 'Neuen Artikel anlegen',
+    icon: Plus,
+    module: '@/pages/artikel/stamm',
+    preferredPath: 'artikel/neu',
+    keywords: ['artikel', 'artikelstamm', 'neu', 'anlegen', 'stammdaten'],
   },
   {
     id: 'action-bestellvorschlag',
@@ -79,11 +88,46 @@ const ACTION_SHORTCUTS_CONFIG: Array<{
   },
 ]
 
-export const ACTION_SHORTCUTS: ActionShortcut[] = ACTION_SHORTCUTS_CONFIG.map((shortcut) => ({
+const DOCUMENT_ENTRY_SHORTCUTS: ActionShortcut[] = [
+  {
+    id: 'action-outgoing-delivery-note',
+    label: 'Sofort-Lieferschein erfassen',
+    icon: Truck,
+    path: getDocumentEntryPolicy('outgoing-delivery-note').targetRoute,
+    keywords: ['sofort-lieferschein', 'lieferschein-erfassung', 'ausgehender lieferschein', 'lieferung'],
+    shortcut: 'Ctrl+Alt+L',
+  },
+  {
+    id: 'action-incoming-documents',
+    label: 'Eingehende Belege erfassen',
+    icon: PackageCheck,
+    path: getDocumentEntryPolicy('incoming-delivery-note').targetRoute,
+    keywords: ['eingehende belege', 'wareneingang', 'rechnungseingang', 'lieferschein eingang', 'anlieferavis'],
+  },
+  {
+    id: 'action-outgoing-documents',
+    label: 'Ausgehende Belege erfassen',
+    icon: Receipt,
+    path: getDocumentEntryPolicy('outgoing-offer').targetRoute,
+    keywords: ['ausgehende belege', 'angebot', 'auftrag', 'lieferschein', 'rechnung', 'gutschrift'],
+  },
+  {
+    id: 'action-incoming-invoice',
+    label: 'Rechnungseingang erfassen',
+    icon: FileText,
+    path: getDocumentEntryPolicy('incoming-supplier-invoice').targetRoute,
+    keywords: ['rechnungseingang', 'eingangsrechnung', 'kreditorenrechnung', 'eingehende belege'],
+  },
+]
+
+export const ACTION_SHORTCUTS: ActionShortcut[] = [
+  ...ACTION_SHORTCUTS_CONFIG.map((shortcut) => ({
   id: shortcut.id,
   label: shortcut.label,
   icon: shortcut.icon,
   path: resolveRoutePathFromModule(shortcut.module, shortcut.preferredPath),
   keywords: shortcut.keywords,
   shortcut: shortcut.shortcut,
-}))
+  })),
+  ...DOCUMENT_ENTRY_SHORTCUTS,
+]

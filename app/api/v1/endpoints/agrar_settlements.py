@@ -15,6 +15,7 @@ from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.tenant import get_tenant_id
 from app.services.agrar_settlement_service import AgrarSettlementService
+from app.services.customer_reference import resolve_reference
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from app.services.admin_core_service import AdminCoreService
 
@@ -170,6 +171,12 @@ class SettlementOut(BaseModel):
     note: Optional[str] = None
     deductions: list[DeductionOut] = Field(default_factory=list)
     row_version: int = 1
+    #: Nur in der Einzelabfrage gefuellt (Maskenkopf).
+    supplier_name: Optional[str] = None
+    supplier_number: Optional[str] = None
+    campaign_name: Optional[str] = None
+    article_name: Optional[str] = None
+    contract_number: Optional[str] = None
 
 
 class SettlementCampaignBackfillRequest(BaseModel):
@@ -347,7 +354,18 @@ async def get_settlement(
         settlement, deductions = _svc(db, tenant_id).get_settlement(settlement_id)
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
-    return _to_out(settlement, deductions)
+    out = _to_out(settlement, deductions)
+    erzeuger = resolve_reference(db, tenant_id, "business_partner", out.supplier_id)
+    kampagne = resolve_reference(db, tenant_id, "harvest_campaign", out.campaign_id)
+    artikel = resolve_reference(db, tenant_id, "article", out.article_id)
+    kontrakt = resolve_reference(db, tenant_id, "agrar_contract", out.contract_id)
+    return out.model_copy(update={
+        "supplier_name": erzeuger.name,
+        "supplier_number": erzeuger.number,
+        "campaign_name": kampagne.name or kampagne.number,
+        "article_name": artikel.name or artikel.number,
+        "contract_number": kontrakt.number,
+    })
 
 
 @router.post("/{settlement_id}/post-fibu", response_model=AgrarSettlementOut, summary="Settlement to fibu erstellen")

@@ -28,9 +28,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
-import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
 import {
   errorMessage,
   recordArrayFromResponse,
@@ -1152,25 +1153,21 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         title="Ernte-Annahme-Erfassung"
       />
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Harvest-to-Settlement"
-          description="Wiegeschein, Qualitaet, Trocknung, Kontraktbezug und Settlement werden jetzt in der Annahme-Maske gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Ernte-Annahme-Erfassung</h1>
           <p className="text-sm text-muted-foreground">Erfassung und Abrechnung von Ernte-Anlieferungen</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <ShortcutHintButton shortcut="Strg+S">
-            <Button onClick={() => void handleSave()} size="sm" className="gap-2" disabled={isSaving}>
+            <Button onClick={() => void handleSave()} className="min-h-touch gap-2 touch-manipulation" disabled={isSaving}>
               <Save className="h-4 w-4" />
               Speichern
             </Button>
           </ShortcutHintButton>
-          <Button variant="outline" onClick={() => navigate('/agrar/ernte')} size="sm">
+          <Button variant="outline" onClick={() => navigate('/agrar/ernte')} className="min-h-touch touch-manipulation">
             Schließen
           </Button>
         </div>
@@ -1182,20 +1179,20 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           {/* Header-Bereich */}
           <Card className="p-4">
             <h2 className="mb-4 font-semibold text-sm">Ernte-Abrechnung</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
               <div className="space-y-1">
                 <Label className="text-xs">Annahmesch.-Nr.:</Label>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button variant="ghost" className="min-h-touch min-h-11 min-w-11 p-0 touch-manipulation" aria-label="Vorherige Annahme">
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Input
                     value={state.acceptanceNumber}
                     onChange={(e) => setState((prev) => ({ ...prev, acceptanceNumber: e.target.value }))}
-                    className="h-8 flex-1"
+                    className="min-h-touch flex-1"
                     placeholder="Auto-generiert"
                   />
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button variant="ghost" className="min-h-touch min-h-11 min-w-11 p-0 touch-manipulation" aria-label="Nächste Annahme">
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1205,7 +1202,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.branchId || ''}
                   onChange={(e) => setState((prev) => ({ ...prev, branchId: e.target.value || null }))}
-                  className="h-8"
+                  className="min-h-touch"
                 />
               </div>
               <div className="space-y-1">
@@ -1213,7 +1210,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.warehouseId || ''}
                   onChange={(e) => setState((prev) => ({ ...prev, warehouseId: e.target.value || null }))}
-                  className="h-8"
+                  className="min-h-touch"
                 />
               </div>
               <div className="space-y-1">
@@ -1223,13 +1220,13 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     type="date"
                     value={state.deliveryDate}
                     onChange={(e) => setState((prev) => ({ ...prev, deliveryDate: e.target.value }))}
-                    className="h-8 flex-1"
+                    className="min-h-touch flex-1"
                   />
                   <Input
                     type="time"
                     value={state.deliveryTime}
                     onChange={(e) => setState((prev) => ({ ...prev, deliveryTime: e.target.value }))}
-                    className="h-8 w-20"
+                    className="min-h-touch w-20"
                   />
                 </div>
               </div>
@@ -1238,7 +1235,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.salesRepId || ''}
                   onChange={(e) => setState((prev) => ({ ...prev, salesRepId: e.target.value || null }))}
-                  className="h-8"
+                  className="min-h-touch"
                 />
               </div>
               <div className="space-y-1">
@@ -1246,7 +1243,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.operatorId}
                   readOnly
-                  className="h-8"
+                  className="min-h-touch"
                 />
               </div>
               <div className="space-y-1">
@@ -1255,16 +1252,15 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                   <Input
                     value={state.weighingTicketId || ''}
                     onChange={(e) => setState((prev) => ({ ...prev, weighingTicketId: e.target.value || null }))}
-                    className="h-8 flex-1"
+                    className="min-h-touch flex-1"
                   />
                   <ShortcutHintButton shortcut="Strg+F3">
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
+                      className="min-h-touch px-3 touch-manipulation"
                       onClick={() => setShowWeighingTicketDialog(true)}
                     >
-                      <MoreHorizontal className="h-4 w-4" />
+                      Suchen
                     </Button>
                   </ShortcutHintButton>
                 </div>
@@ -1274,7 +1270,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.costCenterId || ''}
                   onChange={(e) => setState((prev) => ({ ...prev, costCenterId: e.target.value || null }))}
-                  className="h-8"
+                  className="min-h-touch"
                 />
               </div>
             </div>
@@ -1283,13 +1279,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           {/* Tabs: KUNDE, RECHNUNG, KONTRAKT, etc. */}
           <Card className="p-4">
             <Tabs value={customerTab} onValueChange={(v) => setCustomerTab(v as typeof customerTab)}>
-              <TabsList className="grid w-full grid-cols-6 h-auto">
-                <TabsTrigger value="kunde" className="text-xs py-1">KUNDE</TabsTrigger>
-                <TabsTrigger value="rechnung" className="text-xs py-1">RECHNUNG</TabsTrigger>
-                <TabsTrigger value="kontrakt" className="text-xs py-1">KONTRAKT</TabsTrigger>
-                <TabsTrigger value="spediteur" className="text-xs py-1">SPEDITEUR</TabsTrigger>
-                <TabsTrigger value="nawaro" className="text-xs py-1">NAWARO</TabsTrigger>
-                <TabsTrigger value="zw-haendler" className="text-xs py-1">ZW-HÄNDLER</TabsTrigger>
+              {/* Belegkopf-Register wie in Verkauf/Einkauf (Gewohnheits-Prinzip) */}
+              <TabsList variant="register" className="flex-wrap overflow-x-visible" aria-label="Annahmebeleg-Register">
+                <TabsTrigger value="kunde" className="min-h-11 text-xs">KUNDE</TabsTrigger>
+                <TabsTrigger value="rechnung" className="min-h-11 text-xs">RECHNUNG</TabsTrigger>
+                <TabsTrigger value="kontrakt" className="min-h-11 text-xs">KONTRAKT</TabsTrigger>
+                <TabsTrigger value="spediteur" className="min-h-11 text-xs">SPEDITEUR</TabsTrigger>
+                <TabsTrigger value="nawaro" className="min-h-11 text-xs">NAWARO</TabsTrigger>
+                <TabsTrigger value="zw-haendler" className="min-h-11 text-xs">ZW-HÄNDLER</TabsTrigger>
               </TabsList>
 
               <TabsContent value="kunde" className="mt-4 space-y-2">
@@ -1298,16 +1295,15 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                   <Input
                     value={state.customer?.debitorAccount || ''}
                     readOnly
-                    className="flex-1 h-8"
+                    className="min-h-touch flex-1"
                   />
                   <ShortcutHintButton shortcut="Strg+F1">
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
+                      className="min-h-touch px-3 touch-manipulation"
                       onClick={() => setShowCustomerDialog(true)}
                     >
-                      <MoreHorizontal className="h-4 w-4" />
+                      Suchen
                     </Button>
                   </ShortcutHintButton>
                 </div>
@@ -1376,7 +1372,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         { value: 'exchange_fix_later', label: 'Börse / später festlegen' },
                       ]}
                       placeholder="Preismodell wählen"
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -1384,7 +1380,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Input
                       value={state.priceSourceId || ''}
                       onChange={(e) => setState((prev) => ({ ...prev, priceSourceId: e.target.value || null }))}
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                       placeholder="ID der Preisquelle"
                     />
                   </div>
@@ -1399,7 +1395,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         { value: 'ADVANCE_ON_STORAGE', label: 'Einlagerung + Anzahlung' },
                       ]}
                       placeholder="Geschäftsmodell wählen"
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -1412,7 +1408,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         { value: 'OWN_STOCK', label: 'Eigene Ware' },
                       ]}
                       placeholder="Eigentumsverhältnis wählen"
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -1427,7 +1423,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         { value: 'CORRECTION_ISSUED', label: 'Korrektur erstellt' },
                       ]}
                       placeholder="USt-Ereignis wählen"
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -1441,7 +1437,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         ...prev,
                         advancePaymentAmountEur: e.target.value ? parseFloat(e.target.value) : null,
                       }))}
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                       placeholder="Für Einlagerung + Anzahlung"
                     />
                   </div>
@@ -1451,7 +1447,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                       type="date"
                       value={state.advancePaymentDate}
                       onChange={(e) => setState((prev) => ({ ...prev, advancePaymentDate: e.target.value }))}
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -1459,7 +1455,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Input
                       value={state.provisionalInvoiceNumber}
                       onChange={(e) => setState((prev) => ({ ...prev, provisionalInvoiceNumber: e.target.value }))}
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -1467,7 +1463,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Input
                       value={state.invoiceNumber}
                       readOnly
-                      className="flex-1 h-8"
+                      className="min-h-touch flex-1"
                     />
                   </div>
                 </div>
@@ -1479,15 +1475,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                   <Input
                     value={state.contractId || ''}
                     onChange={(e) => setState((prev) => ({ ...prev, contractId: e.target.value || null }))}
-                    className="flex-1 h-8"
+                    className="min-h-touch flex-1"
                   />
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    className="min-h-touch px-3 touch-manipulation"
                     onClick={() => setShowContractDialog(true)}
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+Suchen
                   </Button>
                 </div>
               </TabsContent>
@@ -1498,15 +1493,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                   <Input
                     value={state.forwarderId || ''}
                     onChange={(e) => setState((prev) => ({ ...prev, forwarderId: e.target.value || null }))}
-                    className="flex-1 h-8"
+                    className="min-h-touch flex-1"
                   />
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    className="min-h-touch px-3 touch-manipulation"
                     onClick={() => setShowForwarderDialog(true)}
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+Suchen
                   </Button>
                 </div>
                 {forwarderName && (
@@ -1526,14 +1520,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         value={state.nawaroNr || ''}
                         onChange={(e) => setState((prev) => ({ ...prev, nawaroNr: e.target.value }))}
                         placeholder="z.B. NAW-2026-001"
-                        className="flex-1 h-8" />
+                        className="min-h-touch flex-1" />
                     </div>
                     <div className="flex items-center gap-2">
                       <Label className="w-40 text-sm shrink-0">Verwendungszweck:</Label>
                       <select
                         value={state.nawaroZweck || ''}
                         onChange={(e) => setState((prev) => ({ ...prev, nawaroZweck: e.target.value }))}
-                        className="flex-1 h-8 border rounded px-2">
+                        className="min-h-touch flex-1 rounded border px-2">
                         <option value="">-- bitte wählen --</option>
                         <option value="biogas">Biogas</option>
                         <option value="bioethanol">Bioethanol</option>
@@ -1548,7 +1542,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         value={state.biogasanlage || ''}
                         onChange={(e) => setState((prev) => ({ ...prev, biogasanlage: e.target.value }))}
                         placeholder="Name / Betreiber"
-                        className="flex-1 h-8" />
+                        className="min-h-touch flex-1" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -1558,7 +1552,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         type="number" min={0} step={0.001}
                         value={state.eegMenge ?? ''}
                         onChange={(e) => setState((prev) => ({ ...prev, eegMenge: parseFloat(e.target.value) || 0 }))}
-                        className="flex-1 h-8" />
+                        className="min-h-touch flex-1" />
                     </div>
                     <div className="flex items-center gap-2">
                       <Label className="w-40 text-sm shrink-0">Nachhaltigkeitsnachweis:</Label>
@@ -1566,7 +1560,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         value={state.nachhaltigkeitsNachweis || ''}
                         onChange={(e) => setState((prev) => ({ ...prev, nachhaltigkeitsNachweis: e.target.value }))}
                         placeholder="REDcert / ISCC Zertifikat-Nr."
-                        className="flex-1 h-8" />
+                        className="min-h-touch flex-1" />
                     </div>
                   </div>
                 </div>
@@ -1578,15 +1572,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                   <Input
                     value={state.intermediateDealerId || ''}
                     onChange={(e) => setState((prev) => ({ ...prev, intermediateDealerId: e.target.value || null }))}
-                    className="flex-1 h-8"
+                    className="min-h-touch flex-1"
                   />
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
+                    className="min-h-touch px-3 touch-manipulation"
                     onClick={() => setShowIntermediateDealerDialog(true)}
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+Suchen
                   </Button>
                 </div>
                 {intermediateDealerName && (
@@ -1603,8 +1596,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           <Card className="p-4">
             <Tabs value={deliveryTab} onValueChange={(v) => setDeliveryTab(v as typeof deliveryTab)}>
               <TabsList className="grid w-full grid-cols-2 h-auto">
-                <TabsTrigger value="anlieferung" className="text-xs py-1">ANLIEFERUNG</TabsTrigger>
-                <TabsTrigger value="abrechnung" className="text-xs py-1">ABRECHNUNG</TabsTrigger>
+                <TabsTrigger value="anlieferung" className="min-h-11 text-xs">ANLIEFERUNG</TabsTrigger>
+                <TabsTrigger value="abrechnung" className="min-h-11 text-xs">ABRECHNUNG</TabsTrigger>
               </TabsList>
 
               <TabsContent value="anlieferung" className="mt-4 space-y-4">
@@ -1615,16 +1608,15 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                       <Input
                         value={state.articleId || ''}
                         readOnly
-                        className="flex-1 h-8"
+                        className="min-h-touch flex-1"
                       />
                       <ShortcutHintButton shortcut="Strg+F2">
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
+                          className="min-h-touch px-3 touch-manipulation"
                           onClick={() => setShowArticleDialog(true)}
                         >
-                          <MoreHorizontal className="h-4 w-4" />
+      Suchen
                         </Button>
                       </ShortcutHintButton>
                     </div>
@@ -1634,7 +1626,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Input
                       value={state.vehiclePlate}
                       onChange={(e) => setState((prev) => ({ ...prev, vehiclePlate: e.target.value }))}
-                      className="h-8"
+                      className="min-h-touch"
                       placeholder="AUR-TK-515"
                     />
                   </div>
@@ -1643,7 +1635,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Input
                       value={state.articleName}
                       readOnly
-                      className="h-8"
+                      className="min-h-touch"
                       placeholder="Wird aus Artikel geladen"
                     />
                   </div>
@@ -1653,15 +1645,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                       <Input
                         value={state.varietyId || ''}
                         onChange={(e) => setState((prev) => ({ ...prev, varietyId: e.target.value || null }))}
-                        className="flex-1 h-8"
+                        className="min-h-touch flex-1"
                       />
                       <Button
                         variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
+                        className="min-h-touch px-3 touch-manipulation"
                         onClick={() => setShowVarietyDialog(true)}
                       >
-                        <MoreHorizontal className="h-4 w-4" />
+    Suchen
                       </Button>
                     </div>
                   </div>
@@ -1669,7 +1660,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Label className="text-xs">Menge:</Label>
                     <Input
                       readOnly
-                      className="h-8"
+                      className="min-h-touch"
                       placeholder="Wird aus Wiegeschein geladen"
                     />
                   </div>
@@ -1678,7 +1669,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Input
                       value={state.vatRatePercent?.toFixed(2) || '7,00'}
                       readOnly
-                      className="h-8"
+                      className="min-h-touch"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1686,7 +1677,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Input
                       value={state.originNuts2Code}
                       onChange={(e) => setState((prev) => ({ ...prev, originNuts2Code: e.target.value }))}
-                      className="h-8"
+                      className="min-h-touch"
                     />
                   </div>
                   <div className="space-y-1 flex items-center">
@@ -1753,7 +1744,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                                 newPositions[idx].labValuePct = e.target.value ? parseFloat(e.target.value) : null
                                 setState((prev) => ({ ...prev, positions: newPositions }))
                               }}
-                              className="h-8 w-full"
+                              className="min-h-touch w-full"
                             />
                           </TableCell>
                           <TableCell>{pos.unit}</TableCell>
@@ -1767,7 +1758,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                                 newPositions[idx].quantityKg = e.target.value ? parseFloat(e.target.value) : null
                                 setState((prev) => ({ ...prev, positions: newPositions }))
                               }}
-                              className="h-8 w-full"
+                              className="min-h-touch w-full"
                             />
                           </TableCell>
                           <TableCell>
@@ -1780,7 +1771,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                                 newPositions[idx].pricePerUnitEur = e.target.value ? parseFloat(e.target.value) : null
                                 setState((prev) => ({ ...prev, positions: newPositions }))
                               }}
-                              className="h-8 w-full"
+                              className="min-h-touch w-full"
                             />
                           </TableCell>
                           <TableCell>
@@ -1789,7 +1780,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                               step="0.01"
                               value={pos.amountEur?.toFixed(2) || ''}
                               readOnly
-                              className="h-8 w-full"
+                              className="min-h-touch w-full"
                             />
                           </TableCell>
                         </TableRow>
@@ -1803,25 +1794,25 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
           {/* Footer - Action Buttons */}
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap gap-2">
                 <ShortcutHintButton shortcut="Strg+F5">
-                  <Button variant="outline" onClick={() => void handleCalculate()} size="sm" className="gap-2">
+                  <Button variant="outline" onClick={() => void handleCalculate()} className="min-h-touch gap-2 touch-manipulation">
                     <Calculator className="h-4 w-4" />
                     → Berechnung neu
                   </Button>
                 </ShortcutHintButton>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleAbschlagrechnung()} title="Abschlagrechnung">
+                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void handleAbschlagrechnung()} title="Abschlagrechnung">
                   Abschlagrechnung
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleEndabrechnung()} title="Endabrechnung">
+                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void handleEndabrechnung()} title="Endabrechnung">
                   Endabrechnung
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowVarietyDialog(true)} title="Sorte bearbeiten">
+                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowVarietyDialog(true)} title="Sorte bearbeiten">
                   Sorte bearbeiten
                 </Button>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <input
@@ -1860,20 +1851,19 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Label htmlFor="release-final" className="text-sm cursor-pointer">endgültig</Label>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation">
                   <Printer className="h-4 w-4" />
                   Annahmeschein drucken
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleRelease('provisional')} disabled={isSaving}>
+                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void handleRelease('provisional')} disabled={isSaving}>
                   Berechnung und Freigabe
                 </Button>
               </div>
             </div>
-            <div className="flex gap-2 mt-4">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="gap-2 text-red-600"
+                className="min-h-touch gap-2 touch-manipulation text-status-error"
                 onClick={() => {
                   if (!state.id) {
                     push('Keine Ernte-Annahme zum Löschen vorhanden')
@@ -1890,19 +1880,19 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Trash2 className="h-4 w-4" />
                 Annahmeschein löschen
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation">
                 <FileText className="h-4 w-4" />
                 Aufteilungs-Buchung
               </Button>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowAttachmentDialog(true)}>
                 <Folder className="h-4 w-4" />
                 Unterlagen
               </Button>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowAttachmentDialog(true)}>
                 <Folder className="h-4 w-4" />
                 Dateien
               </Button>
-              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowZusFelderDialog(true)} title="Zus. Felder">
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowZusFelderDialog(true)} title="Zus. Felder">
                 Zus. Felder
               </Button>
             </div>
@@ -1922,11 +1912,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             <CardContent className="space-y-4">
               <div className="flex flex-col gap-2">
                 <input type="file" accept=".csv,.txt" className="hidden" ref={importAnalyseInputRef} onChange={handleImportAnalyse} />
-                <Button variant="outline" size="sm" className="w-full" onClick={() => importAnalyseInputRef?.current?.click()} title="CSV/Text mit Parametern (z. B. Parameter;Wert) von Geräten mit Datenexport oder Analyse-Bon">
+                <Button variant="outline" className="min-h-touch w-full touch-manipulation" onClick={() => importAnalyseInputRef?.current?.click()} title="CSV/Text mit Parametern (z. B. Parameter;Wert) von Geräten mit Datenexport oder Analyse-Bon">
                   <Download className="h-4 w-4 mr-2" />
                   Import CSV (Analyse-Bon / Gerät-Export)
                 </Button>
-                <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowAttachmentDialog(true); push('Raps-Analyse-PDF (Ölgehalte) unter Unterlagen anhängen. Automatische Auswertung ist in Vorbereitung.'); }} title="Raps: Analyse-Ergebnisse als PDF (z. B. aus E-Mail) anhängen">
+                <Button variant="outline" className="min-h-touch w-full touch-manipulation" onClick={() => { setShowAttachmentDialog(true); push('Raps-Analyse-PDF (Ölgehalte) unter Unterlagen anhängen. Automatische Auswertung ist in Vorbereitung.'); }} title="Raps: Analyse-Ergebnisse als PDF (z. B. aus E-Mail) anhängen">
                   <FileText className="h-4 w-4 mr-2" />
                   PDF anhängen (Raps Ölgehalte)
                 </Button>
@@ -1952,7 +1942,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                           ...prev,
                           labValues: { ...prev.labValues, windabgang: e.target.value ? parseFloat(e.target.value) : null },
                         }))}
-                        className="h-8 w-full"
+                        className="min-h-touch w-full"
                       />
                     </TableCell>
                     <TableCell>%</TableCell>
@@ -1968,7 +1958,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                           ...prev,
                           labValues: { ...prev.labValues, besatz: e.target.value ? parseFloat(e.target.value) : null },
                         }))}
-                        className="h-8 w-full"
+                        className="min-h-touch w-full"
                       />
                     </TableCell>
                     <TableCell>%</TableCell>
@@ -1984,7 +1974,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                           ...prev,
                           labValues: { ...prev.labValues, feuchte: e.target.value ? parseFloat(e.target.value) : null },
                         }))}
-                        className="h-8 w-full"
+                        className="min-h-touch w-full"
                       />
                     </TableCell>
                     <TableCell>%</TableCell>
@@ -2000,7 +1990,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                           ...prev,
                           labValues: { ...prev.labValues, hektolitergewicht: e.target.value ? parseFloat(e.target.value) : null },
                         }))}
-                        className="h-8 w-full"
+                        className="min-h-touch w-full"
                       />
                     </TableCell>
                     <TableCell>kg/hl</TableCell>
@@ -2016,7 +2006,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                           ...prev,
                           labValues: { ...prev.labValues, lagerschwund: e.target.value ? parseFloat(e.target.value) : null },
                         }))}
-                        className="h-8 w-full"
+                        className="min-h-touch w-full"
                       />
                     </TableCell>
                     <TableCell>%</TableCell>
@@ -2032,7 +2022,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                           ...prev,
                           labValues: { ...prev.labValues, lagergeld: e.target.value ? parseFloat(e.target.value) : null },
                         }))}
-                        className="h-8 w-full"
+                        className="min-h-touch w-full"
                       />
                     </TableCell>
                     <TableCell>Mon.</TableCell>
@@ -2048,7 +2038,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                           ...prev,
                           labValues: { ...prev.labValues, wiegegebuehren: e.target.value ? parseFloat(e.target.value) : null },
                         }))}
-                        className="h-8 w-full"
+                        className="min-h-touch w-full"
                       />
                     </TableCell>
                     <TableCell>Euro/...</TableCell>
@@ -2108,7 +2098,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.totalNetAmountEur?.toFixed(2) || ''}
                   readOnly
-                  className="h-8"
+                  className="min-h-touch"
                 />
                 <span className="text-xs text-muted-foreground">EUR</span>
               </div>
@@ -2119,7 +2109,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.totalVatAmountEur?.toFixed(2) || ''}
                   readOnly
-                  className="h-8"
+                  className="min-h-touch"
                 />
                 <span className="text-xs text-muted-foreground">EUR</span>
               </div>
@@ -2128,7 +2118,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Input
                   value={state.totalGrossAmountEur?.toFixed(2) || ''}
                   readOnly
-                  className="h-8"
+                  className="min-h-touch"
                 />
                 <span className="text-xs text-muted-foreground">EUR</span>
               </div>

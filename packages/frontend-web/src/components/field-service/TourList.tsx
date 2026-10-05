@@ -24,6 +24,7 @@ import {
   useGeolocation,
   calculateDistance,
 } from '@/hooks/useGeolocation'
+import { Callout } from '@/components/ui/callout'
 
 type SortMode = 'distance' | 'time' | 'priority' | 'name'
 type FilterStatus = 'all' | 'pending' | 'completed'
@@ -238,14 +239,14 @@ export function TourList({
             <span className="font-medium">{stats.total}</span>
             <span className="text-sm text-muted-foreground">Gesamt</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg">
+          <Callout variant="success" className="flex items-center gap-2 px-3 py-1.5 rounded-lg">
             <CheckCircle2 className="h-4 w-4" />
             <span className="font-medium">{stats.completed}</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg">
+          </Callout>
+          <Callout variant="warning" className="flex items-center gap-2 px-3 py-1.5 rounded-lg">
             <Clock className="h-4 w-4" />
             <span className="font-medium">{stats.pending}</span>
-          </div>
+          </Callout>
         </div>
       </div>
 

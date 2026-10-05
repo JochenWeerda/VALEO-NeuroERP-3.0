@@ -7,13 +7,16 @@ import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { AlertTriangle, Plus, Filter, Eye, Edit, Trash2 } from 'lucide-react'
+import { AlertTriangle, Plus, Filter } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useDuenger, useDeleteDuenger, type Duenger } from '@/lib/api/agrar'
 
 export default function DuengerListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
+  const [deletePendingId, setDeletePendingId] = useState<string | null>(null)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [typFilter, setTypFilter] = useState('')
@@ -42,13 +45,16 @@ export default function DuengerListePage(): JSX.Element {
   }, [duenger, erklaerungFilter])
 
   const handleDelete = async (id: string) => {
+    if (deletePendingId) return
     if (!confirm('Dünger wirklich löschen?')) return
-
+    setDeletePendingId(id)
     try {
       await deleteMutation.mutateAsync(id)
       toast({ title: "Gelöscht", description: "Dünger wurde erfolgreich gelöscht." })
     } catch {
       toast({ title: "Fehler", description: "Fehler beim Löschen des Düngers.", variant: "destructive" })
+    } finally {
+      setDeletePendingId(null)
     }
   }
 
@@ -97,13 +103,13 @@ export default function DuengerListePage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Düngemittel</h1>
-          <p className="text-muted-foreground">Übersicht aller Düngemittel</p>
+          <h1 className="text-2xl font-bold md:text-3xl">Düngemittel</h1>
+          <p className="text-muted-foreground">Dünger suchen, öffnen und prüfen</p>
         </div>
-        <Button onClick={() => navigate('/agrar/duenger/stamm')} className="gap-2">
+        <Button onClick={() => navigate('/agrar/duenger/stamm')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />
           Neu
         </Button>
@@ -121,14 +127,16 @@ export default function DuengerListePage(): JSX.Element {
           <div className="grid gap-4 md:grid-cols-5">
             <div>
               <Input
-                placeholder="Suchen..."
+                aria-label="Suche Dünger"
+                placeholder="Suchen"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
+                className="min-h-touch w-full"
               />
             </div>
             <div>
               <NativeSelect
+                ariaLabel="Typ"
                 value={typFilter || 'all'}
                 onValueChange={(value) => setTypFilter(value === 'all' ? '' : value)}
                 options={[
@@ -139,6 +147,7 @@ export default function DuengerListePage(): JSX.Element {
             </div>
             <div>
               <NativeSelect
+                ariaLabel="Hersteller"
                 value={herstellerFilter || 'all'}
                 onValueChange={(value) => setHerstellerFilter(value === 'all' ? '' : value)}
                 options={[
@@ -149,6 +158,7 @@ export default function DuengerListePage(): JSX.Element {
             </div>
             <div>
               <NativeSelect
+                ariaLabel="Erklaerung"
                 value={erklaerungFilter || 'all'}
                 onValueChange={(value) => setErklaerungFilter(value === 'all' ? '' : value)}
                 options={[
@@ -160,7 +170,10 @@ export default function DuengerListePage(): JSX.Element {
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => {
+              <Button
+                variant="outline"
+                className="min-h-touch touch-manipulation"
+                onClick={() => {
                 setSearchTerm('')
                 setTypFilter('')
                 setHerstellerFilter('')
@@ -199,7 +212,13 @@ export default function DuengerListePage(): JSX.Element {
                   <TableCell className="font-mono text-sm">{d.artikelnummer}</TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{d.name}</div>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/agrar/duenger/stamm/${d.id}`)}
+                        className="min-h-11 font-medium text-primary touch-manipulation"
+                      >
+                        {d.name}
+                      </button>
                       {d.ausgangsstoff_explosivstoffe && (
                         <Badge variant="destructive" className="text-xs mt-1">
                           Ausgangsstoff für Explosivstoffe
@@ -218,11 +237,11 @@ export default function DuengerListePage(): JSX.Element {
                   <TableCell>{d.hersteller}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className={isZulassungAblaufend(d.ablauf_zulassung) ? 'text-red-600 font-medium' : ''}>
+                      <span className={isZulassungAblaufend(d.ablauf_zulassung) ? 'text-status-error font-medium' : ''}>
                         {new Date(d.ablauf_zulassung).toLocaleDateString('de-DE')}
                       </span>
                       {isZulassungAblaufend(d.ablauf_zulassung) && (
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <AlertTriangle className="h-4 w-4 text-status-error" />
                       )}
                     </div>
                   </TableCell>
@@ -244,28 +263,28 @@ export default function DuengerListePage(): JSX.Element {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
                         onClick={() => navigate(`/agrar/duenger/stamm/${d.id}`)}
                       >
-                        <Eye className="h-4 w-4" />
+                        Anzeigen
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
                         onClick={() => navigate(`/agrar/duenger/stamm/${d.id}/edit`)}
                       >
-                        <Edit className="h-4 w-4" />
+                        Bearbeiten
                       </Button>
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(d.id)}
-                        disabled={deleteMutation.isPending}
+                        variant="outline"
+                        className="min-h-touch touch-manipulation"
+                        onClick={() => void handleDelete(d.id)}
+                        disabled={deletePendingId === d.id}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        {deletePendingId === d.id ? 'Löschen...' : 'Löschen'}
                       </Button>
                     </div>
                   </TableCell>
@@ -277,6 +296,7 @@ export default function DuengerListePage(): JSX.Element {
       </Card>
 
       {/* Summary */}
+      {!isTouch ? (
       <Card>
         <CardHeader>
           <CardTitle>Zusammenfassung</CardTitle>
@@ -284,23 +304,23 @@ export default function DuengerListePage(): JSX.Element {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{filteredDuenger.length}</div>
+              <div className="text-2xl font-bold">{filteredDuenger.length}</div>
               <div className="text-sm text-muted-foreground">Düngemittel</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-status-success">
                 {filteredDuenger.filter(d => d.ist_aktiv).length}
               </div>
               <div className="text-sm text-muted-foreground">Aktiv</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-status-warning">
                 {filteredDuenger.filter(d => d.erklaerung_landwirt_erforderlich && d.erklaerung_landwirt_status === 'ausstehend').length}
               </div>
               <div className="text-sm text-muted-foreground">Erklärungen ausstehend</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-status-error">
                 {filteredDuenger.filter(d => isZulassungAblaufend(d.ablauf_zulassung)).length}
               </div>
               <div className="text-sm text-muted-foreground">Zulassungen ablaufend</div>
@@ -308,6 +328,7 @@ export default function DuengerListePage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      ) : null}
     </div>
   )
 }

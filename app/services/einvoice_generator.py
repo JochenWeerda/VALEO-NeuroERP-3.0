@@ -517,12 +517,15 @@ def build_zugferd_pdf(data: EInvoiceInput, *, base_pdf: Optional[bytes] = None) 
         ) from e
 
     out_buf = BytesIO()
-    generate_facturx_from_file(
-        BytesIO(base_pdf),
-        cii_xml.encode("utf-8"),
-        "EN 16931",
-        out_buf,
-    )
+    try:
+        generate_facturx_from_file(
+            BytesIO(base_pdf),
+            cii_xml.encode("utf-8"),
+            facturx_level="en16931",
+            output_pdf_file=out_buf,
+        )
+    except Exception as e:  # noqa: BLE001 — Library-/API-Fehler → klarer RuntimeError
+        raise RuntimeError(f"ZUGFeRD-PDF-Erzeugung fehlgeschlagen: {e}") from e
     return out_buf.getvalue()
 
 

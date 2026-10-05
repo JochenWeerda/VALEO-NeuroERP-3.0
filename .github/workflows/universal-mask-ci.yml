@@ -13,6 +13,7 @@ on:
       - 'packages/frontend-web/src/components/mask-builder/**'
       - 'packages/bff/bff-web/src/**'
       - 'tests/test_mask_*.py'
+      - 'tests/test_agent_mask_contract.py'
       - 'tests/test_uix04*.py'
       - 'tests/test_uix05*.py'
       - 'packages/frontend-web/src/app/route-aliases.json'
@@ -31,6 +32,7 @@ on:
       - 'packages/frontend-web/src/components/mask-builder/**'
       - 'packages/bff/bff-web/src/**'
       - 'tests/test_mask_*.py'
+      - 'tests/test_agent_mask_contract.py'
       - 'tests/test_uix04*.py'
       - 'tests/test_uix05*.py'
       - 'packages/frontend-web/src/app/route-aliases.json'
@@ -64,6 +66,12 @@ jobs:
         run: |
           pytest \
             tests/test_mask_screen_definition.py \
+            -v --tb=short --no-cov -m unit
+
+      - name: Run registry-wide AgentMaskContract and readiness gate
+        run: |
+          pytest \
+            tests/test_agent_mask_contract.py \
             -v --tb=short --no-cov -m unit
 
       - name: Run UIX-046/048 CommandEndpoints + Agent Safety (alle 26 SDs)
@@ -115,27 +123,41 @@ jobs:
         with:
           node-version: '22'
 
+      # pnpm statt npm — wie in jedem anderen Workflow dieses Hauses.
+      #
+      # `packages/*` gehoert laut pnpm-workspace.yaml zum pnpm-Arbeitsbereich.
+      # `npm install` hat dort einen zweiten Abhaengigkeitsbaum aufgebaut und
+      # ist an der eigenen, sieben Monate alten package-lock.json zerbrochen:
+      # "Cannot read properties of null (reading 'edgesOut')". Die
+      # package.json wurde am 14.09. von der Security-Welle angehoben, die
+      # Sperrdatei stammt vom 10. Februar — npm kam mit dem Widerspruch nicht
+      # zurecht. Eine neu erzeugte npm-Sperrdatei waere keine Loesung: Sie
+      # erfasst im pnpm-Baum nur einen Bruchteil der Pakete.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Install frontend dependencies
-        working-directory: packages/frontend-web
-        run: npm install --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Route inventory drift check (generate-tanstack-routes)
         working-directory: packages/frontend-web
         run: |
-          npm run routes:generate
+          pnpm run routes:generate
           git diff --exit-code src/app/routing/route-inventory.gen.json src/app/routing/route-tree.gen.tsx
 
       - name: TypeScript type-check
         working-directory: packages/frontend-web
-        run: npx tsc --noEmit --skipLibCheck
+        run: pnpm exec tsc --noEmit --skipLibCheck
 
       - name: Build frontend
         working-directory: packages/frontend-web
-        run: npm run build
+        run: pnpm run build
 
       - name: Run Vitest unit tests
         working-directory: packages/frontend-web
-        run: npx vitest run
+        run: pnpm exec vitest run
         continue-on-error: true
 
   bff-build:
@@ -177,18 +199,24 @@ jobs:
         with:
           node-version: '22'
 
+      # Auch hier pnpm: Derselbe npm-Fehler hat diesen Job gerissen, nachdem
+      # der Frontend-Job schon gruen war.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Install frontend dependencies
-        working-directory: packages/frontend-web
-        run: npm install --no-audit
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         working-directory: packages/frontend-web
-        run: npx playwright install chromium --with-deps
+        run: pnpm exec playwright install chromium --with-deps
 
       - name: Run Playwright smoke tests
         working-directory: packages/frontend-web
         run: |
-          npx playwright test \
+          pnpm exec playwright test \
             tests/e2e/universal-mask-filter-plan.spec.ts \
             tests/e2e/uix-056-native-route-smoke.spec.ts \
             --project=chromium

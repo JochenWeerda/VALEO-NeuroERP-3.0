@@ -13,11 +13,12 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.finance_clearing_service import ClearingError, FinanceClearingService
 from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
 
 
-@router.get("/zahlungseingang/clearings", response_model=dict, summary="Auszifferungen je OP")
+@router.get("/zahlungseingang/clearings", response_model=TypedObjectOut, summary="Auszifferungen je OP")
 def clearings(
     rechnungsnr: str = Query(..., description="Rechnungsnummer des OP"),
     db: Session = Depends(get_db),
@@ -35,7 +36,7 @@ class PaymentIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/zahlungseingang", response_model=dict, summary="Zahlungseingang erfassen (OP ausziffern)")
+@router.post("/zahlungseingang", response_model=TypedObjectOut, summary="Zahlungseingang erfassen (OP ausziffern)")
 def record_payment(
     body: PaymentIn,
     db: Session = Depends(get_db),

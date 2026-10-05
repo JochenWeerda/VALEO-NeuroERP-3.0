@@ -1,0 +1,81 @@
+slice_id: UIX-060
+title: Omnibox-Shell + Intent-Vorschau (read-only)
+owner: Claude
+status: abgeschlossen
+created_at: 2026-07-07
+spec: docs/design/specs/uix-m1-spec.md
+coordination: >-
+  Teil des UIX-Zukunft-Programms (UIX-ZUKUNFT-VISION-001). Vor Umsetzung Owner
+  eintragen, Claim sofort committen; Abhaengigkeiten laut Roadmap beachten.
+goal: >-
+  Zentrales ⌘K-Eingabefeld: natuerliche Sprache wird deterministisch zu Navigations-/Filter-Plaenen kompiliert und als Vorschau angezeigt; Enter navigiert nur.
+file_ownership:
+  - "packages/frontend-web/src/lib/omnibox/**"
+  - "packages/frontend-web/src/components/navigation/**"
+  - "app/api/v1/endpoints/mask_registry.py"
+  - "app/core/screen_definitions.py"
+  - "packages/frontend-web/tests/e2e/omnibox-smoke.spec.ts"
+acceptance:
+  - "20 Kern-Intents treffen Maske+Filter exakt; 5 Negativfaelle ergeben none."
+  - "Keine Mutation ueber die Omnibox moeglich (read-only Pfade)."
+  - "omnibox-catalog-Endpoint typisiert, ETag-cachebar, Tenant-isoliert."
+  - "a11y: combobox-Pattern, Fokusfalle, Screenreader-Ansage der Vorschau."
+tests:
+  - "Vitest intent-compiler.test.ts (20+5 Faelle)"
+  - "pytest Catalog-Endpoint Coverage>=60"
+  - "Playwright omnibox-smoke.spec.ts"
+progress: >-
+  2026-07-07 Kern umgesetzt: intent-compiler.ts (Mehrwort-Matching mit
+  Stamm-Heuristik, Datums-/Vergleichs-Filter ueberfaellig/heute/naechste
+  Woche/>N Tage, q-Restfilter, Konfidenz+none-Fallback) + Verstanden-als-
+  Vorschau in der CommandPalette (Evolution, kein Parallel-Overlay);
+  42 Tests gruen (31 Compiler-Fixture inkl. 20 Kern-Intents, Palette-
+  Vorschau-Komponententest), tsc gruen. Offen: Backend omnibox-catalog +
+  agentContract.synonyms-Backfill, Telemetrie-Endpoint, Playwright-Smoke,
+  axe-a11y-Check.
+  2026-07-07 Backend geliefert: GET /ui/mask-registry/omnibox-catalog
+  (typisiert, 26 Eintraege) + zentrales _AGENT_SYNONYMS-Mapping in
+  screen_definitions (alle 26 SDs kuratiert, Test erzwingt Vollstaendigkeit)
+  + filterable_fields aus Tabellen-Spalten. 5 neue Endpoint-Tests;
+  Safety-Suite 246 gruen; OpenAPI 2538 Pfade. Offen: Frontend-Konsum des
+  Katalogs (braucht screenId->Route-Mapping), Telemetrie, Playwright, axe.
+  2026-07-07 Routen-Bruecke geklaert+geliefert: Join-Analyse zeigte, dass die
+  MaskRegistry als Routenquelle untauglich ist (nur 7/26 mask_ids joinen, davon
+  4 nur Detail-:id). Loesung: kuratiertes _SCREEN_LIST_ROUTE (screen_id ->
+  reale Listen-Route) in screen_definitions als eine Wartungsstelle; Katalog
+  emittiert jetzt route je Eintrag (OmniboxCatalogEntryOut.route). Alle 26
+  Routen gegen die Frontend-Routen-Registry validiert (bestand->
+  bestandsuebersicht korrigiert). 2 neue Gate-Tests (Route-Vollstaendigkeit +
+  ar-open-item->op-debitoren); OpenAPI regeneriert. Offen: Frontend-Consumer
+  (Katalog-Fetch + Synonym/Route-Merge in den Compiler), Telemetrie, Playwright,
+  axe.
+  2026-07-07 Rest abgeschlossen: (a) Frontend-Consumer — fetchOmniboxCatalog +
+  enrichCommandsWithOmniboxCatalog (Merge ueber route==actionParams.path:
+  Synonyme->keywords; Katalog-Routen ohne Command werden synthetisiert, damit
+  bisher nur per Menue erreichbare Masken findbar werden); in CommandPalette
+  verdrahtet; 8 neue Vitest (Model). (b) Telemetrie — POST /ux-telemetry/omnibox
+  (SHA-256-Hash, kein Klartext; 422 bei Klartext) + GET .../aggregate
+  (tenant-isoliert, in-memory); Client feuert fire-and-forget beim Annehmen;
+  6 pytest. (c) Playwright omnibox-smoke.spec.ts: Ctrl+K -> tippen -> Verstanden-
+  als -> Enter -> URL /finance/op-debitoren?q=folkerts; + axe-Check auf das
+  Overlay (keine serious/critical). tsc 0 Fehler; OpenAPI 2540 Pfade.
+risks:
+  - Geteilter Working Tree mit Parallel-Agenten — Branch vor Commit pruefen.
+  - Scope-Kriechen: ein Slice = ein Push-Zyklus; Folgearbeit als neuer Slice.
+ai_harness:
+  fachlicher_vertrag: >-
+    Nutzer erreichen jede Kernaufgabe ueber ein Eingabefeld; Menue bleibt Fallback.
+  architektur_vertrag: >-
+    Single Source of Truth bleibt ScreenDefinition -> RenderPlan -> useUniversalMaskRuntime -> UniversalMaskRenderer. Neue Faehigkeiten sind Contract-Felder + Compiler-Ableitungen + Renderer-Primitive + Gates — kein Parallelsystem, keine Seiten-Kopien.
+  daten_vertrag: >-
+    Neues optionales SD-Feld agentContract.synonyms; Katalog ist Projektion der Registry, keine DB-Migration.
+  test_vertrag: >-
+    Intent-Fixtures sind die Abnahme; Telemetrie ohne Klartext (Hash).
+  security_vertrag: >-
+    Keine neuen Secrets, Tenant-Isolation in jedem neuen Endpoint (Pflichttest), dangerLevel/Confirmation/AuditReason unveraendert; NL-/Voice-/Agent-Pfade duerfen Gates nie verkuerzen.
+  betriebs_vertrag: >-
+    quality-gate, universal-mask-ci, runtime-sweep und Performance-Gates bleiben gruen; neue GETs 0x5xx; Rollback ueber Feature-Flags bzw. native Route-Rollback-Matrix.
+  dokumentations_vertrag: >-
+    Workboard + Slice-YAML + betroffene Statusdoku (universal-mask-runtime-status, Agent-Handbuch-Generatoren) im selben Push synchronisieren.
+external_gates:
+  - not_applicable

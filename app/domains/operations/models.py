@@ -5,7 +5,7 @@ Models für Waagen, Wiegungen, Fahrzeuge und Fahrer
 
 from uuid import uuid4
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Boolean, Index, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -20,6 +20,10 @@ def _new_flow_spine_instance_id() -> str:
 
 
 def _new_flow_spine_event_id() -> str:
+    return str(uuid4())
+
+
+def _new_flow_spine_document_link_id() -> str:
     return str(uuid4())
 
 
@@ -495,11 +499,17 @@ class Charge(Base):
     Charge/Lot model for lot tracking and release workflows.
     """
     __tablename__ = "ops_chargen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "chargen_id", name="uq_ops_chargen_tenant_charge"),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("CH"))
-    chargen_id = Column(String(50), nullable=False, unique=True)
+    tenant_id = Column(String, nullable=False, server_default=text("'legacy-unassigned'"), index=True)
+    chargen_id = Column(String(50), nullable=False)
     losnummer = Column(String(50), nullable=True)
+    lieferanten_charge = Column(String(80), nullable=True)
+    anerkennungs_nr = Column(String(100), nullable=True)
     artikel = Column(String(100), nullable=False)
     artikel_id = Column(String(100), nullable=False)
     produktbezeichnung = Column(String(255), nullable=True)
@@ -1057,6 +1067,63 @@ class FlowSpineInstanceEvent(Base):
     payload = Column(JSONB, nullable=False, default=dict)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
+class FlowSpineInstanceDocument(Base):
+    """FSX-DOC-LINKS: beteiligte Belege eines Flow-Spine-Vorgangs.
+
+    Der **fuehrende Einstiegsbeleg** bleibt unveraendert auf der Instanz
+    (``linked_document_id``/``linked_document_type``). Er ist es, an dem der
+    partielle Unique-Index aus FSX-011 haengt, und er wird weiterhin nicht
+    umgebogen (``_reject_rebind_to_other_document``).
+
+    Diese Tabelle traegt die **weiteren** Belege, die zum selben Vorgang
+    gehoeren — die Rechnung zum Lieferschein, der Wareneingang zur Bestellung.
+    Ohne sie muesste ein zweiter Beleg den fuehrenden verdraengen, und genau das
+    ist verboten; der Widerspruch ist in
+    ``docs/design/flow-spine-nm-bindungskonflikt.md`` beschrieben.
+
+    Zwei Kardinalitaeten, die bewusst so gewaehlt sind:
+
+    * **Ein Beleg darf in mehreren Vorgaengen beteiligt sein.** Eine
+      Sammelrechnung ueber drei Lieferscheine gehoert zu drei Vorgaengen. Es gibt
+      deshalb *keine* globale Eindeutigkeit auf (Mandant, Belegart, Beleg-ID).
+    * **Derselbe Beleg nicht zweimal im selben Vorgang.** Dafuer die
+      Eindeutigkeit auf (Mandant, Instanz, Belegart, Beleg-ID) — sie macht das
+      Anhaengen idempotent.
+
+    Ausdruecklich **nicht** hier: Mengen. Welche Teilmenge einer Lieferposition
+    auf welche Rechnungsposition laeuft, ist das positionsbezogene n:m-Modell und
+    gehoert in den Belegfluss, nicht an den Vorgang.
+    """
+
+    __tablename__ = "ops_flow_spine_instance_documents"
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id",
+            "instance_id",
+            "document_type",
+            "document_id",
+            name="uq_flow_spine_instance_document",
+        ),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
+
+    id = Column(String, primary_key=True, default=_new_flow_spine_document_link_id)
+    instance_id = Column(
+        String(36),
+        ForeignKey("domain_ops.ops_flow_spine_instances.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    process_key = Column(String(120), nullable=False, index=True)
+    document_type = Column(String(80), nullable=False)
+    document_id = Column(String(120), nullable=False)
+    #: Wofuer der Beleg in diesem Vorgang steht — fachliche Rolle, kein Status.
+    relation = Column(String(60), nullable=True)
+    linked_by = Column(String(120), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 
 # ── VERSICHERUNGEN ────────────────────────────────────────────────────────────
 
@@ -1429,10 +1496,15 @@ class ErnteKampagneDB(Base):
 class ReklamationDB(Base):
     """Reklamation (Lieferantenbeschwerde) — ersetzt ReklamationStore"""
     __tablename__ = "reklamationen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        Index("uq_reklamationen_tenant_nr", "tenant_id", "reklamation_nr", unique=True),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("REK"))
     reklamation_id = Column(String(120), nullable=False, unique=True, index=True)
+    #: Fachliche Nummer REK-JJJJ-NNNNN, fortlaufend je Mandant und Geschaeftsjahr.
+    reklamation_nr = Column(String(40), nullable=False)
     tenant_id = Column(String(120), nullable=False, index=True)
     lieferant_id = Column(String(120), nullable=False, index=True)
     typ = Column(String(60), nullable=False)

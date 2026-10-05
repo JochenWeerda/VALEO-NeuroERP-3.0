@@ -12,15 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Callout } from '@/components/ui/callout'
 
 const TASK_TYPES = ['FIELD_SERVICE', 'INSPECTION', 'MAINTENANCE', 'EMERGENCY'] as const;
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'] as const;
@@ -83,7 +78,7 @@ export default function FieldServiceTaskNeuPage(): JSX.Element {
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
       <div className="flex items-center gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={() => navigate(backHref)}>
+        <Button type="button" variant="ghost" className="min-h-touch" onClick={() => navigate(backHref)}>
           <ArrowLeft className="h-4 w-4 mr-1" />
           {t('crud.actions.back', { defaultValue: 'Zurück' })}
         </Button>
@@ -94,16 +89,16 @@ export default function FieldServiceTaskNeuPage(): JSX.Element {
       </h1>
 
       {(workflowInstanceId || workflowCase) && (
-        <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+        <Callout variant="info" className="rounded-md border px-3 py-2 text-xs">
           {workflowCase ? `Workflow ${workflowCase}` : 'Workflow'}
           {workflowInstanceId ? ` · ${workflowInstanceId}` : ''}
-        </div>
+        </Callout>
       )}
 
       {serviceRequestId && (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+        <Callout variant="success" className="rounded-md border px-3 py-2 text-xs">
           Service-Vorgang {serviceRequestId} · Einsatz wird direkt aus der Anfrage geplant.
-        </div>
+        </Callout>
       )}
 
       <Card className="p-4">
@@ -120,40 +115,30 @@ export default function FieldServiceTaskNeuPage(): JSX.Element {
           </div>
           <div className="space-y-2">
             <Label>{t('crud.fields.type', { defaultValue: 'Typ' })}</Label>
-            <Select value={taskType} onValueChange={setTaskType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TASK_TYPES.map((tt) => (
-                  <SelectItem key={tt} value={tt}>
-                    {tt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect ariaLabel="Typ" value={taskType} onValueChange={setTaskType}>
+              {TASK_TYPES.map((tt) => (
+                <option key={tt} value={tt}>
+                  {tt}
+                </option>
+              ))}
+            </NativeSelect>
           </div>
           <div className="space-y-2">
             <Label>{t('crud.fields.priority', { defaultValue: 'Priorität' })}</Label>
-            <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PRIORITIES.map((pr) => (
-                  <SelectItem key={pr} value={pr}>
-                    {pr}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect ariaLabel="Priorität" value={priority} onValueChange={setPriority}>
+              {PRIORITIES.map((pr) => (
+                <option key={pr} value={pr}>
+                  {pr}
+                </option>
+              ))}
+            </NativeSelect>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button type="submit" className="min-h-touch" disabled={createMutation.isPending}>
               {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('crud.actions.save', { defaultValue: 'Speichern' })}
             </Button>
-            <Button type="button" variant="outline" onClick={() => navigate(backHref)}>
+            <Button type="button" variant="outline" className="min-h-touch" onClick={() => navigate(backHref)}>
               {t('crud.actions.cancel', { defaultValue: 'Abbrechen' })}
             </Button>
           </div>

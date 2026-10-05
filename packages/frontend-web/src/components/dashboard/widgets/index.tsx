@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { queryKeys } from '@/lib/query'
 import { apiClient } from '@/lib/api-client'
@@ -211,7 +212,7 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
           <div
             className={clsx(
               'flex items-center text-xs mt-1',
-              isPositive ? 'text-green-600' : 'text-red-600'
+              isPositive ? 'text-status-success' : 'text-status-error'
             )}
           >
             {isPositive ? (
@@ -258,7 +259,7 @@ function ChartWidget({ widget }: { widget: WidgetLayout }) {
         {bars.map((height, i) => (
           <div
             key={i}
-            className="flex-1 bg-primary/80 rounded-t transition-all hover:bg-primary"
+            className="flex-1 bg-primary/80 rounded-t-lg transition-all hover:bg-primary"
             style={{ height: `${height}%` }}
           />
         ))}
@@ -299,11 +300,6 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
     items: [],
   }
 
-  const statusColors = {
-    success: 'text-green-600 bg-green-100',
-    warning: 'text-amber-600 bg-amber-100',
-    error: 'text-red-600 bg-red-100',
-  }
 
   return (
     <div className="p-4 h-full flex flex-col">
@@ -318,14 +314,9 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
             className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm"
           >
             <span className="truncate flex-1">{item.label}</span>
-            <span
-              className={clsx(
-                'ml-2 px-2 py-0.5 rounded text-xs font-medium',
-                item.status && statusColors[item.status]
-              )}
-            >
+            <Badge variant={item.status ?? 'secondary'} className="ml-2">
               {item.value}
-            </span>
+            </Badge>
           </div>
         ))}
       </div>

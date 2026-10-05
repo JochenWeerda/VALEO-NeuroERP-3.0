@@ -11,7 +11,7 @@
 
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, AlertCircle, AlertTriangle, ShieldAlert } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -34,8 +34,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
+import { nativeDetailLoadState } from '@/components/mask-builder/native-detail-load-state'
+import { resolveNavigationRoute } from '@/components/mask-builder/runtime/navigation-route'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
-import { getAxiosErrorMessage } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
 import { useToast } from '@/hooks/use-toast'
 import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
@@ -44,6 +46,7 @@ interface UniversalNativeDetailPageProps {
   screenId: string
   entityId: string | undefined
   testId?: string
+  requestedSectionKey?: string
 }
 
 interface PendingAction {
@@ -89,6 +92,7 @@ export function UniversalNativeDetailPage({
   screenId,
   entityId,
   testId,
+  requestedSectionKey,
 }: UniversalNativeDetailPageProps): JSX.Element {
   const { onTabChange } = useMaskPilotState()
   const navigate = useNavigate()
@@ -109,6 +113,31 @@ export function UniversalNativeDetailPage({
     schema: schemaQuery.data,
     enabled: Boolean(entityId) && schemaQuery.data?.adapter?.temporary === false,
   })
+  const trackedRecentKey = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!entityId || !schemaQuery.data || !runtime.entityData) return
+    const key = `${screenId}:${entityId}`
+    if (trackedRecentKey.current === key) return
+    const entity = runtime.entityData as Record<string, unknown>
+    const documentNumber = String(
+      entity.document_number ?? entity.number ?? entity.nr ?? entity.belegnummer ?? entityId,
+    )
+    const partnerName = entity.partner_name ?? entity.customer_name ?? entity.supplier_name ?? entity.name
+    trackedRecentKey.current = key
+    void apiClient.post('/api/v1/recent-documents/touch', {
+      screen_id: screenId,
+      document_id: entityId,
+      document_type: schemaQuery.data.title,
+      document_number: documentNumber,
+      partner_id: entity.partner_id ?? entity.customer_id ?? entity.supplier_id,
+      partner_name: partnerName == null ? undefined : String(partnerName),
+      title: `${schemaQuery.data.title} ${documentNumber}`,
+      route: `${window.location.pathname}${window.location.search}`,
+    }).catch(() => {
+      trackedRecentKey.current = null
+    })
+  }, [entityId, runtime.entityData, schemaQuery.data, screenId])
   const actionRuntime = useHumanActionDispatch(schemaQuery.data?.actions ?? [], {
     screenId,
     entityId,
@@ -146,7 +175,26 @@ export function UniversalNativeDetailPage({
   async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
     setActionError(null)
     setValidationErrors([])
-    const actionDef = schemaQuery.data?.actions?.find((a: { key: string }) => a.key === actionKey)
+    const actionDef = schemaQuery.data?.actions?.find((a) => a.key === actionKey)
+    const routeTemplate = actionDef?.navigationRoute
+    if (routeTemplate) {
+      const entity = (runtime.entityData ?? {}) as Record<string, unknown>
+      const partnerText = (value: unknown) => {
+        if (value == null) return undefined
+        const text = String(value).trim()
+        return text || undefined
+      }
+      const route = resolveNavigationRoute(routeTemplate, {
+        entityId,
+        businessPartnerId: partnerText(payload.business_partner_id) ?? partnerText(entity.business_partner_id),
+      })
+      if (!route) {
+        setActionError('Zur Pflege fehlt die Partnerkennung.')
+        return
+      }
+      void navigate({ to: route as never })
+      return
+    }
     const hasDryRun = Boolean(
       actionDef?.commandEndpoint &&
       !actionDef?.stubReason &&
@@ -217,8 +265,16 @@ export function UniversalNativeDetailPage({
     setValidationErrors([])
   }
 
-  // --- Empty entity guard ---
-  if (!entityId) {
+  const loadState = nativeDetailLoadState({
+    entityId,
+    schemaError: schemaQuery.error,
+    entityError: runtime.entityError,
+    hasPlan: Boolean(runtime.plan),
+    schemaFetching: schemaQuery.isFetching,
+    hasSchema: Boolean(schemaQuery.data),
+  })
+
+  if (loadState === 'empty') {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-12 text-center">
         <AlertCircle className="h-10 w-10 text-muted-foreground" />
@@ -236,8 +292,7 @@ export function UniversalNativeDetailPage({
     )
   }
 
-  // --- Error state ---
-  if (schemaQuery.error || runtime.entityError) {
+  if (loadState === 'error') {
     const errMsg = getAxiosErrorMessage(schemaQuery.error ?? runtime.entityError)
     const isNotFound =
       errMsg?.includes('404') ||
@@ -252,18 +307,31 @@ export function UniversalNativeDetailPage({
             {isNotFound ? 'Datensatz nicht gefunden' : 'Fehler beim Laden'}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isNotFound ? 'Der angeforderte Datensatz existiert nicht oder wurde gelöscht.' : errMsg}
+            {isNotFound
+              ? 'Der angeforderte Datensatz existiert nicht oder wurde gelöscht.'
+              : (errMsg || 'Die Maske konnte nicht geladen werden. Prüfen Sie, ob das Backend läuft.')}
           </p>
         </div>
-        <Button variant="outline" onClick={() => void navigate({ to: -1 as never })}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Zurück
-        </Button>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              void schemaQuery.refetch()
+              void runtime.refetch()
+            }}
+          >
+            Erneut versuchen
+          </Button>
+          <Button variant="outline" onClick={() => void navigate({ to: -1 as never })}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Zurück
+          </Button>
+        </div>
       </div>
     )
   }
 
-  if (!runtime.plan) {
+  if (loadState === 'loading' || !runtime.plan) {
     return (
       <div className="border-b bg-muted/30 px-4 py-2 text-sm text-muted-foreground md:px-8">
         Wird geladen…
@@ -284,35 +352,27 @@ export function UniversalNativeDetailPage({
             Aktion wird ausgefuehrt...
           </div>
         )}
-        {actionError && (
-          <div className="flex items-start gap-2 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{actionError}</span>
-          </div>
-        )}
-        {validationErrors.length > 0 && (
-          <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-8" role="alert">
-            <div className="flex items-center gap-2 font-medium">
-              <AlertCircle className="h-4 w-4" />
-              Validierungsfehler:
-            </div>
-            <ul className="mt-1 list-inside list-disc space-y-0.5">
-              {validationErrors.map((e, i) => (
-                <li key={i}>{e.field ? <strong>{e.field}:</strong> : null} {e.message}</li>
-              ))}
-            </ul>
-          </div>
-        )}
         <UniversalMaskRenderer
           plan={runtime.plan}
           data={runtime.entityData}
+          entityId={entityId}
           tables={runtime.tableRows}
+          messages={[
+            ...(runtime.messages ?? []),
+            ...validationErrors.map((error, index) => ({ key: `action-field-${index}`, severity: 'error' as const, message: error.message, fieldKey: error.field })),
+            ...(actionError ? [{ key: 'action-error', severity: 'error' as const, message: actionError }] : []),
+          ]}
+          onRetry={() => { void runtime.refetch() }}
           tableQueryStates={runtime.tableQueryStates}
           tableTotals={runtime.tableTotals}
           lookupBindings={runtime.lookupBindings}
           onTabChange={onTabChange}
           onTableQueryChange={runtime.setTableQuery}
+          overlay={runtime.userOverlay}
+          onOverlayChange={runtime.updateUserOverlay}
+          onOverlayReset={runtime.resetUserOverlay}
           onAction={handleAction}
+          requestedSectionKey={requestedSectionKey}
         />
       </div>
 
@@ -327,7 +387,7 @@ export function UniversalNativeDetailPage({
               {pendingAction?.dangerLevel === 'critical' || pendingAction?.dangerLevel === 'high' ? (
                 <ShieldAlert className="h-5 w-5 text-destructive" />
               ) : pendingAction?.dangerLevel === 'moderate' ? (
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                <AlertTriangle className="h-5 w-5 text-status-warning" />
               ) : null}
               Aktion bestätigen
             </AlertDialogTitle>
@@ -342,7 +402,7 @@ export function UniversalNativeDetailPage({
                   </p>
                 )}
                 {pendingAction?.dangerLevel === 'moderate' && (
-                  <p className="mt-2 text-sm text-amber-700">
+                  <p className="mt-2 text-sm text-status-warning">
                     Diese Aktion kann nicht ohne weiteres rückgängig gemacht werden.
                   </p>
                 )}

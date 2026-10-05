@@ -6,6 +6,11 @@
       "source": "system"
     },
     {
+      "module": "@/pages/abrechnung/eb-lieferschein-kontrolle",
+      "path": "abrechnung/eb-lieferschein-kontrolle",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/admin-suite/index",
       "path": "admin-suite",
       "source": "auto"
@@ -194,6 +199,11 @@
       "module": "@/pages/admin/rollen-verwaltung",
       "path": "admin/rollen-verwaltung",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/admin/screen-studio",
+      "path": "admin/screen-studio",
+      "source": "alias"
     },
     {
       "module": "@/pages/admin/setup/index",
@@ -786,6 +796,61 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/auswertungen/abfrage-center",
+      "path": "auswertungen/abfrage-center",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/aenderungshistorie",
+      "path": "auswertungen/aenderungshistorie",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/auftrags-kontrolle",
+      "path": "auswertungen/auftrags-kontrolle",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/beleg-kontrolle",
+      "path": "auswertungen/beleg-kontrolle",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/bonus-berechnung",
+      "path": "auswertungen/bonus-berechnung",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/dms-volltext",
+      "path": "auswertungen/dms-volltext",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/duengemittelmengen",
+      "path": "auswertungen/duengemittelmengen",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/l3-berichtskatalog",
+      "path": "auswertungen/l3-berichtskatalog",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/lieferschein-kontrolle",
+      "path": "auswertungen/lieferschein-kontrolle",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/sanktionspruefung-kunden",
+      "path": "auswertungen/sanktionspruefung-kunden",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/auswertungen/sanktionspruefung-personal",
+      "path": "auswertungen/sanktionspruefung-personal",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/auth/Callback",
       "path": "auth/callback",
       "source": "system"
@@ -1241,6 +1306,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/crm/klaerfall-inbox",
+      "path": "crm/klaerfall-inbox",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/kontakt-detail",
       "path": "crm/kontakt-detail",
       "source": "auto"
@@ -1378,6 +1448,11 @@
     {
       "module": "@/pages/crm/lieferanten-stamm",
       "path": "crm/lieferanten/stamm/new",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/crm/mail-arbeitsplatz",
+      "path": "crm/mail-arbeitsplatz",
       "source": "navigation"
     },
     {
@@ -1534,6 +1609,11 @@
       "module": "@/pages/docflow/artefakt-freigabe",
       "path": "docflow/artefakt-freigabe",
       "source": "alias"
+    },
+    {
+      "module": "@/pages/docflow/dokumenten-ruecklauf",
+      "path": "docflow/dokumenten-ruecklauf",
+      "source": "navigation"
     },
     {
       "module": "@/pages/docflow/gobd-export",
@@ -2501,6 +2581,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/finance/rechnungstapel",
+      "path": "finance/rechnungstapel",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/finance/reports",
       "path": "finance/reports",
       "source": "auto"
@@ -2691,6 +2776,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/futtermittel/beratung",
+      "path": "futtermittel/beratung",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/futtermittel-bestellung",
       "path": "futtermittel/bestellungen",
       "source": "alias"
@@ -2741,6 +2831,21 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/futtermittel/fuetterungsbetrieb-native",
+      "path": "futtermittel/fuetterungsbetrieb/:id",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/futtermittel/fuetterungsdokumentation-mobil",
+      "path": "futtermittel/fuetterungsdokumentation-mobil",
+      "source": "auto"
+    },
+    {
+      "module": "@/pages/futtermittel/fuetterungsplan-native",
+      "path": "futtermittel/fuetterungsplan/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/futtermittel-bestellung",
       "path": "futtermittel/futtermittel-bestellung",
       "source": "auto"
@@ -2761,9 +2866,19 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/futtermittel/grundfutteranalysen",
+      "module": "@/pages/futtermittel/grundfutteranalysen-native",
       "path": "futtermittel/grundfutteranalysen",
-      "source": "auto"
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/futtermittel/grundfutteranalyse-native",
+      "path": "futtermittel/grundfutteranalysen/:id",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/futtermittel/integrationsmonitor",
+      "path": "futtermittel/integrationsmonitor",
+      "source": "alias"
     },
     {
       "module": "@/pages/futtermittel/mischfuttermittel-liste",
@@ -2796,14 +2911,29 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/futtermittel/rations-schnittstellen-import",
+      "path": "futtermittel/rations-schnittstellen-import",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/rations-zugang",
       "path": "futtermittel/rations-zugang",
       "source": "auto"
     },
     {
+      "module": "@/pages/futtermittel/rationseditor",
+      "path": "futtermittel/rationseditor",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/futtermittel/rationsoptimierung",
       "path": "futtermittel/rationsoptimierung",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/futtermittel/rationsvergleich",
+      "path": "futtermittel/rationsvergleich",
+      "source": "alias"
     },
     {
       "module": "@/pages/futtermittel/futtermittel-wareneingang",
@@ -3001,6 +3131,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/lager/fremdware",
+      "path": "lager/fremdware",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/lager/gs1-scanner",
       "path": "lager/gs1-scanner",
       "source": "auto"
@@ -3009,6 +3144,11 @@
       "module": "@/pages/lager/inventur",
       "path": "lager/inventur",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/lager/inventur-nebenlaeufe",
+      "path": "lager/inventur-nebenlaeufe",
+      "source": "navigation"
     },
     {
       "module": "@/pages/lager/kommissionierung",
@@ -3301,6 +3441,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/planung/kalender",
+      "path": "planung/kalender",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/policy-manager",
       "path": "policies",
       "source": "alias"
@@ -3333,7 +3478,7 @@
     {
       "module": "@/pages/portal/empfehlungen",
       "path": "portal/empfehlungen",
-      "source": "navigation"
+      "source": "alias"
     },
     {
       "module": "@/pages/portal/feldbuch",
@@ -3341,9 +3486,14 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/portal/feldbuch-auswertungen",
+      "path": "portal/feldbuch-auswertungen",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/portal/lohndienste",
       "path": "portal/lohndienste",
-      "source": "navigation"
+      "source": "alias"
     },
     {
       "module": "@/pages/portal/lohndienste",
@@ -3358,7 +3508,7 @@
     {
       "module": "@/pages/portal/onboarding",
       "path": "portal/onboarding",
-      "source": "navigation"
+      "source": "alias"
     },
     {
       "module": "@/pages/portal/index",
@@ -3368,12 +3518,7 @@
     {
       "module": "@/pages/portal/preisspiegel",
       "path": "portal/preisspiegel",
-      "source": "navigation"
-    },
-    {
-      "module": "@/pages/portal/index",
-      "path": "portal/profil",
-      "source": "navigation"
+      "source": "alias"
     },
     {
       "module": "@/pages/portal/rationsoptimierung",
@@ -3398,7 +3543,7 @@
     {
       "module": "@/pages/portal/whatsapp-simulator",
       "path": "portal/whatsapp-simulator",
-      "source": "navigation"
+      "source": "alias"
     },
     {
       "module": "@/pages/portal/zertifikate",
@@ -3521,6 +3666,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/produktion/chargen-bearbeiten",
+      "path": "produktion/chargen-bearbeiten",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/produktion/produktions-dokumente-drucken",
       "path": "produktion/dokumente",
       "source": "alias"
@@ -3539,6 +3689,16 @@
       "module": "@/pages/produktion/produktions-dokumente-drucken",
       "path": "produktion/produktions-dokumente-drucken",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/produktion/produktionsleitstand",
+      "path": "produktion/produktionsleitstand",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/produktion/rezepturgruppen",
+      "path": "produktion/rezepturgruppen",
+      "source": "alias"
     },
     {
       "module": "@/pages/projekte/liste",
@@ -3821,7 +3981,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/sales/rechnungen-liste",
+      "module": "@/pages/verkauf/rechnungen-worklist",
       "path": "sales/rechnungen",
       "source": "alias"
     },
@@ -3864,6 +4024,16 @@
       "module": "@/pages/schichtplan/liste",
       "path": "schichtplan/liste",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/schnittstelle/legacy-adapter-monitor",
+      "path": "schnittstelle/legacy-adapter-monitor",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/schnittstelle/mde-inbox",
+      "path": "schnittstelle/mde-inbox",
+      "source": "navigation"
     },
     {
       "module": "@/pages/service/abschluss",
@@ -4026,6 +4196,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/studio-run",
+      "path": "studio/run/:screenId",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/subventionen/dashboard",
       "path": "subventionen/dashboard",
       "source": "auto"
@@ -4039,6 +4214,11 @@
       "module": "@/pages/tankstelle/zapfungen",
       "path": "tankstelle",
       "source": "alias"
+    },
+    {
+      "module": "@/pages/tankstelle/adapter-inbox",
+      "path": "tankstelle/adapter-inbox",
+      "source": "navigation"
     },
     {
       "module": "@/pages/tankstelle/zapfungen",
@@ -4161,7 +4341,12 @@
       "source": "navigation"
     },
     {
-      "module": "@/pages/sales/rechnungen-liste",
+      "module": "@/pages/verkauf/rechnung",
+      "path": "verkauf/rechnung/:id",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/verkauf/rechnungen-worklist",
       "path": "verkauf/rechnungen",
       "source": "alias"
     },
@@ -4424,6 +4609,36 @@
       "module": "@/pages/workflows/trigger",
       "path": "workflows/trigger",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/workspace/einkauf",
+      "path": "workspace/einkauf",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/fibu",
+      "path": "workspace/fibu",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/lager",
+      "path": "workspace/lager",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/leitung",
+      "path": "workspace/leitung",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/workspace/letzte-dokumente",
+      "path": "workspace/letzte-dokumente",
+      "source": "navigation"
+    },
+    {
+      "module": "@/pages/workspace/verkauf",
+      "path": "workspace/verkauf",
+      "source": "alias"
     },
     {
       "module": "@/pages/zertifikate/liste",

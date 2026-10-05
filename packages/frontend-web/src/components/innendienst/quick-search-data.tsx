@@ -57,9 +57,9 @@ const TYPE_ICON_COMPONENTS: Record<SearchResult['type'], LucideIcon> = {
 
 export const typeColors: Record<SearchResult['type'], string> = {
   customer: 'text-blue-600 bg-blue-100',
-  order: 'text-emerald-600 bg-emerald-100',
+  order: 'text-status-success bg-emerald-100',
   article: 'text-purple-600 bg-purple-100',
-  invoice: 'text-amber-600 bg-amber-100',
+  invoice: 'text-status-warning bg-amber-100',
   delivery: 'text-cyan-600 bg-cyan-100',
 }
 

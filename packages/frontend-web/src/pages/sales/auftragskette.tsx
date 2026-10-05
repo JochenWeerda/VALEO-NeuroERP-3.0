@@ -43,7 +43,7 @@ export default function AuftragskettePage() {
         <Workflow size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Auftragskette</h1>
         <span className="text-sm text-muted-foreground">Angebot → Auftrag → Lieferschein → Rechnung</span>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void ordersQuery.refetch()} disabled={ordersQuery.isFetching}>
+        <Button variant="outline" className="ml-auto" onClick={() => void ordersQuery.refetch()} disabled={ordersQuery.isFetching}>
           {ordersQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -55,7 +55,7 @@ export default function AuftragskettePage() {
             <CardTitle className="text-sm">Aufträge</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="min-h-touch pl-7" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
@@ -94,7 +94,7 @@ export default function AuftragskettePage() {
                 {chain.data.kunde && <span className="text-sm text-muted-foreground">· {chain.data.kunde}</span>}
                 <Badge variant="outline" className="capitalize">Status: {STATUS_LABEL[chain.data.summary?.status ?? ''] ?? chain.data.summary?.status}</Badge>
                 {chain.data.summary?.vollstaendig
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />vollständig</Badge>
                   : <Badge variant="secondary">offen</Badge>}
               </div>
 
@@ -122,7 +122,7 @@ export default function AuftragskettePage() {
                   <CardContent className="space-y-1.5">
                     {chain.data.luecken.map((l, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm">
-                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-amber-600 shrink-0" /> : <Info size={15} className="mt-0.5 text-sky-600 shrink-0" />}
+                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-status-warning shrink-0" /> : <Info size={15} className="mt-0.5 text-muted-foreground shrink-0" />}
                         <span><span className="opacity-60">[{l.stufe}]</span> {l.text}</span>
                       </div>
                     ))}

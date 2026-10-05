@@ -1,0 +1,8 @@
+{
+  "sse": true,
+  "commandPalette": true,
+  "agrar": true,
+  "voiceControl": true,
+  "telephony": false,
+  "roleWorkspaces": false
+}

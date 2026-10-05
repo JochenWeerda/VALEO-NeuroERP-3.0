@@ -1,0 +1,62 @@
+slice_id: SPEC-P1-06-W7-DOCFLOW-INVENTORY
+id: SPEC-P1-06-W7-DOCFLOW-INVENTORY
+title: Legacy-Routen response_model typisieren — Welle 7 (Dokumentenkette + Inventur/PLC)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-08-25"
+started_at: "2026-08-25"
+completed_at: "2026-08-25"
+goal: >-
+  Siebte Welle von SPEC-P1-06, weiter fachlich geschnitten: die Dokumentenkette
+  DOM-DOC-004 (Belegkontrolle -> Ruecklauf -> Wiedervorlage -> Nachweisraum/GoBD)
+  und der driftfreie Teil des Inventur-/PLC-Bereichs.
+file_ownership:
+  - docs/agent-ops/slices/SPEC-P1-06-W7-DOCFLOW-INVENTORY.yaml
+  - app/api/v1/schemas/docflow_bundle_schemas.py
+  - app/api/v1/schemas/inventory_bundle_schemas.py
+  - app/api/v1/endpoints/document_control.py
+  - app/api/v1/endpoints/docflow_return.py
+  - app/api/v1/endpoints/docflow_followup.py
+  - app/api/v1/endpoints/doc_nachweisraum_actions.py
+  - app/api/v1/endpoints/inventory_auxiliary.py
+  - app/api/v1/endpoints/agri_plc_stub.py
+  - tests/test_welle7_response_models.py
+acceptance:
+  - 27 Endpunkte tragen ein echtes response_model
+  - Kein Feldverlust gegenueber Service-Rueckgaben bzw. Tabellen-DDL
+  - Bestandstests der Dokumentenkette und des PLC-Stubs bleiben gruen
+  - Mismatch-Sweep ueber alle 3580 Routen bleibt bei 0
+result: >-
+  Schwache response_model-Typen repo-weit 282 -> 255, betroffene Dateien
+  92 -> 86. Nach sieben Wellen: 447 -> 255 (192 Endpunkte, 43 Prozent).
+bewusst_zurueckgestellt:
+  dateien:
+    - app/api/v1/endpoints/inventory_operations.py
+    - app/api/v1/endpoints/agri_silo_material_flow.py
+  grund: >-
+    Beide lesen SELECT * ueber Tabellen mit starker DDL-Drift. Allein
+    inventory_stock_movements wird von elf Migrationen mit 23
+    ALTER/ADD-COLUMN-Statements fortgeschrieben; inventory_lots von zwei
+    Migrationen mit acht. Eine aus Migrationen rekonstruierte Spaltenliste
+    waere dort nicht belastbar — genau die stille Feldverlust-Falle, die diese
+    Wellen sonst vermeiden.
+  vorgehen_welle_8: >-
+    Spaltenliste aus information_schema.columns einer migrierten Datenbank
+    ziehen statt aus den Migrationen rekonstruieren, dann typisieren und die
+    Ableitung als Test gegen die laufende DB verankern.
+befunde:
+  - >-
+    docflow_return.transition setzt je nach kind entweder shipping_status oder
+    return_status — der Antwortschluessel ist dynamisch. Beide Felder sind
+    optional und beide Zweige im Test verklammert.
+  - >-
+    Die Followup-Felder ueberfaellig sowie die Zaehlungen in summary werden
+    gegen das Tagesdatum berechnet und stehen in keiner Spalte.
+  - >-
+    PlcInfoOut.stub bleibt Pflichtaussage: der Endpunkt erklaert, dass die
+    OPC-UA-Anbindung noch nicht produktiv ist.
+verification:
+  - "python -m pytest tests/test_welle7_response_models.py -q --no-cov"
+  - "python -m pytest tests/test_document_control.py tests/test_docflow_returns.py tests/test_docflow_followup.py tests/test_docflow_gobd.py tests/test_docflow_evidence.py tests/test_agri_plc_stub.py -q --no-cov"
+  - "python scripts/check_response_models.py --threshold 20"
+  - "python scripts/check_weak_response_models.py"

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useRabatte, type Rabatt as ApiRabatt } from '@/lib/api/pos'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -58,7 +59,7 @@ export default function RabattePage(): JSX.Element {
       key: 'name' as const,
       label: 'Rabatt-Name',
       render: (r: Rabatt) => (
-        <button onClick={() => navigate(`/pos/rabatt/${r.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/pos/rabatt/${r.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {r.name}
         </button>
       ),
@@ -129,7 +130,7 @@ export default function RabattePage(): JSX.Element {
         </Button>
       </div>
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <Percent className="h-4 w-4" />
           <p className="font-semibold">Automatische Rabatt-Anwendung</p>
@@ -140,7 +141,7 @@ export default function RabattePage(): JSX.Element {
         </p>
         <p className="mt-1 text-xs">Rabatte werden im POS automatisch angewendet wenn Bedingungen erfüllt sind.</p>
         <p className="mt-1 text-xs font-medium">Alle Endverbraucherpreise an der Kasse werden inkl. gesetzl. MwSt. ausgewiesen.</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -157,7 +158,7 @@ export default function RabattePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{aktiv}</span>
+            <span className="text-2xl font-bold text-status-success">{aktiv}</span>
           </CardContent>
         </Card>
 

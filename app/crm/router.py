@@ -774,14 +774,13 @@ async def list_consents(
         where.append("channel = :ch")
         params["ch"] = channel
     rows = db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             SELECT id, tenant_id, partner_id, channel, purpose, granted, source,
                    ip_address, notes, granted_at, revoked_at, created_at
             FROM domain_crm.crm_consents
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
-        """),
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     ).fetchall()
     return [
@@ -912,7 +911,7 @@ async def create_segment(
         text("""
             INSERT INTO domain_crm.crm_segments
             (id, tenant_id, name, description, criteria, segment_type, member_count, created_at, updated_at)
-            VALUES (:id, :tid, :name, :desc, :criteria::jsonb, :stype, 0, :now, :now)
+            VALUES (:id, :tid, :name, :desc, CAST(:criteria AS jsonb), :stype, 0, :now, :now)
         """),
         {
             "id": seg_id, "tid": tenant_id, "name": seg.name,
@@ -1028,14 +1027,14 @@ async def update_segment(
         set_parts.append("description = :desc")
         params["desc"] = update.description
     if update.criteria is not None:
-        set_parts.append("criteria = :criteria::jsonb")
+        set_parts.append("criteria = CAST(:criteria AS jsonb)")
         params["criteria"] = __import__("json").dumps(update.criteria)
     if update.segment_type is not None:
         set_parts.append("segment_type = :stype")
         params["stype"] = update.segment_type
 
     db.execute(
-        text(f"UPDATE domain_crm.crm_segments SET {', '.join(set_parts)} WHERE id = :id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        text(f"UPDATE domain_crm.crm_segments SET {', '.join(set_parts)} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         params,
     )
     db.commit()

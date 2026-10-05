@@ -1,0 +1,98 @@
+slice_id: FEED-INT-034
+id: FEED-INT-034
+title: Integrationsmonitor mit Importvorschau, Quarantaene und kontrollierter Uebernahme
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+requirements: [FEED-INT-001, FEED-LAB-002]
+work_packages: [FEED-WP-211, FEED-WP-212]
+decision_level: significant
+dependencies: [FEED-CORE-019, FEED-ADVICE-CONNECTORS-010]
+goal: >-
+  Start Inkrement 6 gemaess Slice-Spec 049: Kein Provider-Import wird ohne
+  bestandene Validierung fachlich wirksam; fehlerhafte Payloads landen mit
+  verstaendlichem Befund in der Quarantaene statt verworfen zu werden;
+  Uebernahme und Verwerfen sind auditierte Entscheidungen.
+scope:
+  - "Migration feed_import_jobs_20260716: feeding_import_jobs (Statusautomat
+    validated|quarantined|accepted|rejected per CHECK, findings/mapped_excerpt
+    JSONB, decision_reason/decided_by/at, payload_hash)."
+  - "feeding_import_monitor_service.py: preview ruft die bestehenden Adapter
+    (Validierungs-SSOT) OHNE Persistenz; create_job legt validated/quarantined
+    an; accept nur aus validated (sonst 409) und uebernimmt ueber den
+    bestehenden idempotenten Importpfad (external_id-Dublette -> bestehender
+    Datensatz als result_ref); reject verlangt Begruendung und ist nach
+    Entscheidung endgueltig (409)."
+  - "API /feeding/imports{,/preview,/{id}/accept,/{id}/reject} (READ fuer
+    Vorschau/Liste, WRITE fuer Job/Entscheidungen; 403/404/409/422-Pfade)."
+  - "Frontend ImportMonitor (Worklist mit Status-Badges, Befundliste,
+    Uebernehmen mit Per-Job-Pending-Guard, Verwerfen-Dialog mit Pflicht-
+    Begruendung >=3 Zeichen, Lade-/Leer-/Fehlerzustaende) + Route
+    futtermittel/integrationsmonitor (Maskenvertrag FEED-MASK-014-Kern)."
+file_ownership:
+  - alembic/versions/feed_import_jobs_20260716.py
+  - app/services/feeding_import_monitor_service.py
+  - app/api/v1/endpoints/feeding_import_monitor.py
+  - app/api/v1/endpoints/rations_optimization.py (nur Router-Include)
+  - tests/test_feeding_import_monitor_api.py
+  - packages/frontend-web/src/features/feed-advice/ImportMonitor.tsx
+  - packages/frontend-web/src/lib/api/feeding-import-monitor.ts
+  - packages/frontend-web/src/pages/futtermittel/integrationsmonitor.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/import-monitor.test.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-INT-034.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    Backend: 7 failed (ImportError app.api.v1.endpoints.feeding_import_monitor).
+    Frontend: Modulaufloesung ImportMonitor fehlgeschlagen. Dabei Vertragsfund:
+    Labor-Adapter verlangt sample_id+material+dry_matter_pct — Test-Payload an
+    den Adapter-SSOT angepasst statt Parallel-Validierung zu erfinden.
+  green: >-
+    Backend 7/7 (RBAC-Matrix, Vorschau ohne Persistenz, Quarantaene mit
+    Befund, kontrollierte Uebernahme mit result_ref, Doppel-Accept 409,
+    Reject-Pflichtbegruendung 422, Tenant-404); Frontend 3/3 (ein Testfix:
+    mehrdeutiger Verwerfen-Matcher praezisiert).
+  refactor: >-
+    withPending-Guard je Job (Per-Entity-Pending-Invariante) statt globalem
+    Boolean; Status-Label/Badge-Maps zentral.
+acceptance:
+  - "Vorschau persistiert nichts und zeigt Zuordnung bzw. benannten Fehler."
+  - "Quarantaene traegt den Validierungsbefund; Uebernahme nur aus validated;
+    Entscheidungen endgueltig und auditiert (Akteur, Zeit, Begruendung)."
+  - "Uebernahme bleibt idempotent zum Direktimportpfad (payload_hash/
+    external_id-Vertrag unveraendert)."
+tests:
+  - "pytest test_feeding_import_monitor_api.py -> 7/7 (nach Red-Welle)."
+  - "Vitest import-monitor.test.tsx -> 3/3; tsc 0; eslint 0."
+  - "Routen 905; Architecture Validate/Drift 905/905; Alembic Single-Head
+    feed_import_jobs_20260716."
+risks:
+  - "Interaktive Material-Mapping-Worklist (offene Zuordnungen aufloesen)
+    folgt als 034-Rest/035; Herd-Data-Sync-Auftraege laufen weiterhin ueber
+    den Connector-Pfad aus Slice 010."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Kein Import wird ohne bestandene Validierung wirksam; jede Entscheidung
+    ist begruendet und nachvollziehbar; nichts geht verloren (Quarantaene
+    statt Wegwerfen).
+  architektur_vertrag: >-
+    Adapter bleiben die einzige Validierungswahrheit; Uebernahme delegiert an
+    den bestehenden idempotenten Importpfad statt ihn zu duplizieren.
+  daten_vertrag: >-
+    Additive Migration; Entscheidungen unumkehrbar per Statusautomat;
+    payload_hash-Vertrag unveraendert.
+  security_vertrag: >-
+    WRITE fuer Jobs/Entscheidungen, READ fuer Vorschau/Monitor; Tenant-Scope
+    ueberall; keine neuen Egress-Pfade.
+  betriebs_vertrag: >-
+    Rollback = Revert + downgrade(); keine neuen Abhaengigkeiten.
+  dokumentations_vertrag: >-
+    Traceability FEED-INT-001 auf Monitor-Stand; Workboard; dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz im YAML; alle Statusuebergaenge, Idempotenz- und
+    Berechtigungspfade getestet.

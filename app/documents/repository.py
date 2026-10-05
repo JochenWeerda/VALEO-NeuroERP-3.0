@@ -20,8 +20,8 @@ class DocumentRepository:
     def __init__(self, db: Session):
         self.db = db
     
-    def save_document(self, doc_type: str, doc_number: str, data: dict) -> dict:
-        """Speichert oder aktualisiert ein Dokument"""
+    def save_document(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True) -> dict:
+        """Speichert ein Dokument; commit=False belässt die Transaktion beim Aufrufer."""
         try:
             # Prüfe ob Dokument existiert
             existing = self.db.execute(
@@ -43,7 +43,7 @@ class DocumentRepository:
                 self.db.execute(
                     text("""
                         UPDATE documents 
-                        SET data = :data::jsonb, updated_at = :updated_at
+                        SET data = CAST(:data AS jsonb), updated_at = :updated_at
                         WHERE id = :id
                     """),
                     {"id": existing.id, "data": json.dumps(data), "updated_at": now}
@@ -54,7 +54,7 @@ class DocumentRepository:
                 self.db.execute(
                     text("""
                         INSERT INTO documents (id, doc_type, doc_number, data, created_at, updated_at)
-                        VALUES (:id, :doc_type, :doc_number, :data::jsonb, :created_at, :updated_at)
+                        VALUES (:id, :doc_type, :doc_number, CAST(:data AS jsonb), :created_at, :updated_at)
                     """),
                     {
                         "id": doc_id,
@@ -66,11 +66,13 @@ class DocumentRepository:
                     }
                 )
             
-            self.db.commit()
+            if commit:
+                self.db.commit()
             logger.info(f"Saved document: {doc_type}/{doc_number}")
             return {"ok": True, "number": doc_number}
         except Exception as e:
-            self.db.rollback()
+            if commit:
+                self.db.rollback()
             logger.error(f"Failed to save document: {e}")
             raise
     
@@ -92,6 +94,7 @@ class DocumentRepository:
                 return json.loads(result.data) if isinstance(result.data, str) else result.data
             return None
         except Exception as e:
+            self.db.rollback()
             logger.error(f"Failed to get document: {e}")
             raise
     
@@ -137,6 +140,7 @@ class DocumentRepository:
                 for row in results
             ]
         except Exception:
+            self.db.rollback()
             raise
     
     def delete_document(self, doc_type: str, doc_number: str) -> bool:
@@ -175,5 +179,6 @@ class DocumentRepository:
             result = self.db.execute(text(query), params).scalar()
             return result or 0
         except Exception:
+            self.db.rollback()
             raise
 

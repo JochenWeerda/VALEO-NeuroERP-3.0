@@ -284,10 +284,10 @@ export function FeldblockfinderIntegration({
 
             {/* Info für Niedersachsen Schlaginfo */}
             {selectedBundesland === 'niedersachsen' && (
-              <Alert className="bg-green-50 border-green-200">
-                <MapPin className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800">Niedersachsen Schlaginfo</AlertTitle>
-                <AlertDescription className="text-green-700">
+              <Alert variant="success">
+                <MapPin className="h-4 w-4 text-status-success" />
+                <AlertTitle className="text-status-success">Niedersachsen Schlaginfo</AlertTitle>
+                <AlertDescription className="text-status-success">
                   <p>Öffnen Sie das Portal im neuen Tab und nutzen Sie folgende Funktionen:</p>
                   <ul className="list-disc list-inside mt-2 text-sm">
                     <li><strong>Suche Agrarförderung</strong>: Feldblock nach FLIK oder LE nach FLEK suchen</li>
@@ -336,11 +336,11 @@ export function FeldblockfinderIntegration({
               <div className="space-y-4">
                 {/* Vorschau-Bild / Placeholder */}
                 <div 
-                  className="border rounded-lg bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 flex items-center justify-center"
+                  className="border rounded-lg bg-linear-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 flex items-center justify-center"
                   style={{ height: '300px' }}
                 >
                   <div className="text-center space-y-4">
-                    <MapPin className="h-16 w-16 mx-auto text-green-600 dark:text-green-400" />
+                    <MapPin className="h-16 w-16 mx-auto text-status-success" />
                     <div>
                       <h3 className="text-lg font-semibold">Feldblockfinder {bundeslandInfo.name}</h3>
                       <p className="text-sm text-muted-foreground mt-1">

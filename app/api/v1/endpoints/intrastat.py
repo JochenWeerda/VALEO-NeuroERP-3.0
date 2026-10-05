@@ -71,6 +71,20 @@ class IntrastatMeldungOut(BaseModel):
     status: str  # ENTWURF | GEMELDET | KORRIGIERT
 
 
+class IntrastatMeldungCreateOut(BaseModel):
+    """Was das Anlegen zurueckgibt.
+
+    Vorher stand hier ``IDResponse`` (``id`` und ``message``) — die
+    **Meldenummer** fiel aus der Antwort heraus, also genau die Kennung, unter
+    der die Meldung abgegeben wird. Sichtbar wurde das nicht, weil die fehlende
+    Tabelle vorher 503 ergab.
+    """
+
+    id: str
+    meldenummer: str
+    status: str
+
+
 class IntrastatMeldungUpdate(BaseModel):
     cn8_warennummer: Optional[str] = Field(None, min_length=8, max_length=8)
     ursprungsland: Optional[str] = Field(None, min_length=2, max_length=2)
@@ -92,21 +106,26 @@ def _row_to_dict(row: Any) -> dict:
     return dict(row._mapping)
 
 
-def _gen_meldenummer(db: Session, meldezeitraum: str, meldungsart: str) -> str:
+def _gen_meldenummer(db: Session, tenant_id: str, meldezeitraum: str, meldungsart: str) -> str:
     """Generate INTRASTAT-DE meldenummer: INT-{YYYYMM}-{E|V}-{seq:05d}"""
     ym = meldezeitraum.replace("-", "")
     art_code = "E" if meldungsart == "EINGANG" else "V"
-    try:
-        row = db.execute(
-            text(
-                "SELECT COUNT(*) AS cnt FROM domain_compliance.intrastat_meldungen "
-                "WHERE meldezeitraum = :meldezeitraum AND meldungsart = :meldungsart"
-            ),
-            {"meldezeitraum": meldezeitraum, "meldungsart": meldungsart},
-        ).fetchone()
-        seq = (row.cnt if row else 0) + 1
-    except Exception:
-        seq = 1
+    # Der Nummernkreis laeuft je Haus. Vorher zaehlte er ueber alle Haeuser:
+    # Das zweite Haus begann dort, wo das erste stand, und die Nummern eines
+    # Hauses hatten Luecken, die kein Pruefer erklaeren kann.
+    #
+    # Und kein "except: seq = 1": Eine Meldenummer zu raten, die es schon gibt,
+    # ist schlechter als keine Meldung anzulegen. Die Eindeutigkeit je Haus und
+    # Zeitraum haelt die Datenbank.
+    row = db.execute(
+        text(
+            "SELECT COUNT(*) AS cnt FROM domain_compliance.intrastat_meldungen "
+            "WHERE tenant_id = :tenant_id AND meldezeitraum = :meldezeitraum "
+            "  AND meldungsart = :meldungsart"
+        ),
+        {"tenant_id": tenant_id, "meldezeitraum": meldezeitraum, "meldungsart": meldungsart},
+    ).fetchone()
+    seq = (row.cnt if row else 0) + 1
     return f"INT-{ym}-{art_code}-{seq:05d}"
 
 
@@ -124,8 +143,8 @@ def list_meldungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
-    where_clauses = []
-    params: dict = {}
+    where_clauses = ["tenant_id = :tenant_id"]
+    params: dict = {"tenant_id": tenant_id}
     if meldezeitraum:
         where_clauses.append("meldezeitraum = :meldezeitraum")
         params["meldezeitraum"] = meldezeitraum
@@ -133,7 +152,7 @@ def list_meldungen(
         where_clauses.append("meldungsart = :meldungsart")
         params["meldungsart"] = meldungsart
 
-    where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+    where_sql = "WHERE " + " AND ".join(where_clauses)
 
     try:
         rows = db.execute(
@@ -143,18 +162,24 @@ def list_meldungen(
                 f"menge, mengeneinheit, geschaeftsvorgang_code, status "
                 f"FROM domain_compliance.intrastat_meldungen "
                 f"{where_sql} "
-                f"ORDER BY meldezeitraum DESC, meldenummer"
+                f"ORDER BY meldezeitraum DESC, meldenummer"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
         ).fetchall()
         return [_row_to_dict(r) for r in rows]
     except Exception as exc:
-        logger.warning("intrastat_meldungen table not accessible: %s", exc)
-        return []
+        # Keine leere Liste: Eine Meldung, die im System steht und nicht
+        # angezeigt wird, wird nicht abgegeben.
+        db.rollback()
+        logger.exception("Intrastat-Meldungen nicht lesbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=503,
+            detail={"error": str(exc), "migration_hint": MIGRATION_HINT},
+        ) from exc
 
 
 @router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen",
-    response_model=IDResponse
+    response_model=IntrastatMeldungCreateOut
 )
 def create_meldung(
     payload: IntrastatMeldungCreate,
@@ -162,21 +187,22 @@ def create_meldung(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     entry_id = str(uuid4())
-    meldenummer = _gen_meldenummer(db, payload.meldezeitraum, payload.meldungsart)
+    meldenummer = _gen_meldenummer(db, tenant_id, payload.meldezeitraum, payload.meldungsart)
 
     try:
         db.execute(
             text(
                 "INSERT INTO domain_compliance.intrastat_meldungen "
-                "(id, meldenummer, meldezeitraum, meldungsart, cn8_warennummer, "
+                "(id, tenant_id, meldenummer, meldezeitraum, meldungsart, cn8_warennummer, "
                 "ursprungsland, bestimmungsland, statistischer_wert_eur, nettomasse_kg, "
                 "menge, mengeneinheit, geschaeftsvorgang_code, status, created_at) "
-                "VALUES (:id, :meldenummer, :meldezeitraum, :meldungsart, :cn8, "
+                "VALUES (:id, :tenant_id, :meldenummer, :meldezeitraum, :meldungsart, :cn8, "
                 ":ursprungsland, :bestimmungsland, :wert, :masse, "
                 ":menge, :einheit, :gv_code, 'ENTWURF', NOW())"
             ),
             {
                 "id": entry_id,
+                "tenant_id": tenant_id,
                 "meldenummer": meldenummer,
                 "meldezeitraum": payload.meldezeitraum,
                 "meldungsart": payload.meldungsart,
@@ -225,13 +251,13 @@ def update_meldung(
         "status": "status",
     }
     set_clauses = ", ".join(f"{db_col_map[k]} = :{k}" for k in updates)
-    params = {**updates, "id": meldung_id}
+    params = {**updates, "id": meldung_id, "tenant_id": tenant_id}
 
     try:
         db.execute(
             text(
                 f"UPDATE domain_compliance.intrastat_meldungen "
-                f"SET {set_clauses} WHERE id = :id"
+                f"SET {set_clauses} WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: Bezeichner stammen aus einer Allowlist im Code, Werte sind gebunden
             ),
             params,
         )
@@ -255,9 +281,10 @@ def delete_meldung(
         # Only ENTWURF may be deleted
         row = db.execute(
             text(
-                "SELECT status FROM domain_compliance.intrastat_meldungen WHERE id = :id"
+                "SELECT status FROM domain_compliance.intrastat_meldungen "
+                "WHERE id = :id AND tenant_id = :tenant_id"
             ),
-            {"id": meldung_id},
+            {"id": meldung_id, "tenant_id": tenant_id},
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Meldung nicht gefunden")
@@ -267,8 +294,11 @@ def delete_meldung(
                 detail=f"Nur Entwürfe können gelöscht werden. Aktueller Status: {row.status}",
             )
         db.execute(
-            text("DELETE FROM domain_compliance.intrastat_meldungen WHERE id = :id"),
-            {"id": meldung_id},
+            text(
+                "DELETE FROM domain_compliance.intrastat_meldungen "
+                "WHERE id = :id AND tenant_id = :tenant_id"
+            ),
+            {"id": meldung_id, "tenant_id": tenant_id},
         )
         db.commit()
     except HTTPException:
@@ -298,11 +328,11 @@ def zusammenfassung(
                 "SUM(nettomasse_kg) AS gesamtmasse_kg, "
                 "SUM(menge) AS gesamtmenge "
                 "FROM domain_compliance.intrastat_meldungen "
-                "WHERE meldezeitraum = :meldezeitraum "
+                "WHERE tenant_id = :tenant_id AND meldezeitraum = :meldezeitraum "
                 "GROUP BY cn8_warennummer, meldungsart "
                 "ORDER BY cn8_warennummer"
             ),
-            {"meldezeitraum": meldezeitraum},
+            {"tenant_id": tenant_id, "meldezeitraum": meldezeitraum},
         ).fetchall()
 
         total_wert = sum(float(r.gesamtwert_eur or 0) for r in rows)
@@ -312,14 +342,19 @@ def zusammenfassung(
             "total_wert_eur": total_wert,
         }
     except Exception as exc:
-        logger.warning("intrastat zusammenfassung not accessible: %s", exc)
-        return {"meldezeitraum": meldezeitraum, "positionen": [], "total_wert_eur": 0.0}
+        # Keine Nullzusammenfassung: Sie ist die Grundlage der Meldung.
+        db.rollback()
+        logger.exception("Intrastat-Zusammenfassung nicht lesbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=503,
+            detail={"error": str(exc), "migration_hint": MIGRATION_HINT},
+        ) from exc
 
 
 @router.post(
     "/meldungen/{meldezeitraum}/export-csv",
-    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
     response_model=IntrastatOut,
+    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
 )
 def export_csv(
     meldezeitraum: str,
@@ -333,10 +368,13 @@ def export_csv(
                 "statistischer_wert_eur, nettomasse_kg, menge, mengeneinheit, "
                 "meldungsart, geschaeftsvorgang_code "
                 "FROM domain_compliance.intrastat_meldungen "
-                "WHERE meldezeitraum = :meldezeitraum "
+                "WHERE tenant_id = :tenant_id AND meldezeitraum = :meldezeitraum "
                 "ORDER BY meldenummer"
             ),
-            {"meldezeitraum": meldezeitraum},
+            # Ohne diesen Filter enthielt der Export eines Hauses die Zeilen
+            # aller Haeuser — eine falsche Meldung an das Statistische
+            # Bundesamt.
+            {"tenant_id": tenant_id, "meldezeitraum": meldezeitraum},
         ).fetchall()
     except Exception as exc:
         raise HTTPException(

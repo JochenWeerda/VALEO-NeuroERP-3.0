@@ -283,6 +283,8 @@ Akzeptanz: Kein commandEndpoint mehr als Stub (Inventur-Skript beweist es);
 FEFO-Pick berücksichtigt MHD in Unit-Tests.
 ```
 
+**Stand 2026-07-06:** ✅ Umgesetzt — Workboard `SPEC-P1-04-08-A8`; Inventur Exit 0; Tests `test_spec_p1_04_mask_commands.py`, `test_spec_p1_08_lot_fefo_pick.py`.
+
 ### Prompt A9 — Architektur-Konsolidierung (ARCH-F1, SPEC-P1-07)
 
 ```
@@ -307,6 +309,8 @@ release_evidence_report.py --fail-on-red ausführen und Report committen;
 doc_drift_report.py --fail-over 0 grün.
 Akzeptanz: Drift 0; artifacts/release_evidence.{json,md} aktuell (<24 h).
 ```
+
+**Stand 2026-07-06:** ⚠️ Teilstand — Drift 0 ✅; `release_evidence` regeneriert (overall **WARN**, kein FAIL); OpenAPI/Open-Gaps/README/Process-Kernel nachgezogen. Vollständig nach A9 + CI-Assessment-Artefakt.
 
 ---
 

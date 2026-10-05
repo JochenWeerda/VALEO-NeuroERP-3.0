@@ -48,8 +48,8 @@ export default function WorkflowRegelnPage(): JSX.Element {
       label: 'Aktionen',
       render: (rule: WorkflowRule) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={() => handleEdit(rule)}>Bearbeiten</Button>
-          <Button size="sm" variant="outline" onClick={() => handleToggleActive(rule)}>{rule.active ? 'Deaktivieren' : 'Aktivieren'}</Button>
+          <Button variant="outline" onClick={() => handleEdit(rule)} className="min-h-touch">Bearbeiten</Button>
+          <Button variant="outline" onClick={() => handleToggleActive(rule)} className="min-h-touch">{rule.active ? 'Deaktivieren' : 'Aktivieren'}</Button>
         </div>
       ),
     },

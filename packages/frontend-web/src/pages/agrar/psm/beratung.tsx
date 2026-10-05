@@ -236,7 +236,7 @@ export default function PSMBeratungPage(): JSX.Element {
           <Button
             onClick={analysiereSchadbild}
             disabled={!kultur || !schadbildBeschreibung || isAnalyseLoading}
-            className="gap-2"
+            className="min-h-touch gap-2"
           >
             <Brain className="h-4 w-4" />
             {isAnalyseLoading ? 'Analysiere...' : 'Schadbild analysieren'}
@@ -258,9 +258,9 @@ export default function PSMBeratungPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           {ausgewaehltesSchadbild && (
-            <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-blue-900">{ausgewaehltesSchadbild.name}</h3>
+                <h3 className="font-medium text-foreground">{ausgewaehltesSchadbild.name}</h3>
                 <Badge variant={
                   ausgewaehltesSchadbild.schwere === 'leicht' || ausgewaehltesSchadbild.schwere === 'gering' ? 'secondary' :
                   ausgewaehltesSchadbild.schwere === 'mittel' ? 'default' : 'destructive'
@@ -268,8 +268,8 @@ export default function PSMBeratungPage(): JSX.Element {
                   {ausgewaehltesSchadbild.schwere}
                 </Badge>
               </div>
-              <p className="text-sm text-blue-700">{ausgewaehltesSchadbild.beschreibung}</p>
-              <div className="mt-2 text-xs text-blue-600">
+              <p className="text-sm text-muted-foreground">{ausgewaehltesSchadbild.beschreibung}</p>
+              <div className="mt-2 text-xs text-status-info">
                 Kultur: {ausgewaehltesSchadbild.kultur} | Saison: {ausgewaehltesSchadbild.saison}
               </div>
             </div>
@@ -322,7 +322,7 @@ export default function PSMBeratungPage(): JSX.Element {
                   </div>
                   <div>
                     <div className="text-sm font-medium">Effektivität</div>
-                    <div className="text-lg font-bold text-green-600">{psm.effektivitaet}%</div>
+                    <div className="text-lg font-bold text-status-success">{psm.effektivitaet}%</div>
                   </div>
                   <div>
                     <div className="text-sm font-medium">Kosten</div>
@@ -332,9 +332,9 @@ export default function PSMBeratungPage(): JSX.Element {
 
                 <div className="mb-3">
                   <div className="text-sm font-medium mb-1">Umwelt-Score</div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-green-600 h-2 rounded-full"
+                      className="bg-status-success h-2 rounded-full"
                       style={{ width: `${psm.umweltscore}%` }}
                     ></div>
                   </div>
@@ -344,9 +344,9 @@ export default function PSMBeratungPage(): JSX.Element {
                 <p className="text-sm text-muted-foreground">{psm.begruendung}</p>
 
                 {index === 0 && (
-                  <div className="mt-3 flex items-center gap-2 p-2 bg-green-50 rounded">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">Top-Empfehlung</span>
+                  <div className="mt-3 flex items-center gap-2 p-2 bg-[hsl(var(--color-semantic-success-50-hsl))] rounded">
+                    <CheckCircle className="h-4 w-4 text-status-success" />
+                    <span className="text-sm font-medium text-status-success">Top-Empfehlung</span>
                   </div>
                 )}
               </div>
@@ -367,7 +367,7 @@ export default function PSMBeratungPage(): JSX.Element {
           <div className="grid gap-2 md:grid-cols-2">
             {beratungsErgebnis?.alternativeMethoden.map((methode, index) => (
               <div key={index} className="flex items-center gap-2 p-2 border rounded">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
                 <span className="text-sm">{methode}</span>
               </div>
             ))}
@@ -379,7 +379,7 @@ export default function PSMBeratungPage(): JSX.Element {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-900">
+            <CardTitle className="flex items-center gap-2 text-status-error">
               <AlertTriangle className="h-5 w-5" />
               Risiken beachten
             </CardTitle>
@@ -388,7 +388,7 @@ export default function PSMBeratungPage(): JSX.Element {
             <ul className="space-y-2">
               {beratungsErgebnis?.risiken.map((risiko, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2"></div>
+                  <div className="w-1.5 h-1.5 bg-status-error rounded-full mt-2"></div>
                   <span>{risiko}</span>
                 </li>
               ))}
@@ -398,7 +398,7 @@ export default function PSMBeratungPage(): JSX.Element {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-900">
+            <CardTitle className="flex items-center gap-2 text-primary">
               <CheckCircle className="h-5 w-5" />
               Nachsorge
             </CardTitle>
@@ -407,7 +407,7 @@ export default function PSMBeratungPage(): JSX.Element {
             <ul className="space-y-2">
               {beratungsErgebnis?.nachsorge.map((nachsorge, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2"></div>
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2"></div>
                   <span>{nachsorge}</span>
                 </li>
               ))}
@@ -436,7 +436,7 @@ export default function PSMBeratungPage(): JSX.Element {
           <h1 className="text-3xl font-bold">PSM-Beratungs-Tool</h1>
           <p className="text-muted-foreground">KI-gestützte PSM-Empfehlungen für optimale Bekämpfung</p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/agrar/psm/liste')}>
+        <Button variant="outline" className="min-h-touch" onClick={() => navigate('/agrar/psm/liste')}>
           Zurück zur Liste
         </Button>
       </div>
@@ -448,9 +448,9 @@ export default function PSMBeratungPage(): JSX.Element {
             <span className="text-sm font-medium">Beratungsschritte</span>
             <span className="text-sm text-muted-foreground">Schritt {schritt} von 2</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-muted rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${(schritt / 2) * 100}%` }}
             ></div>
           </div>
@@ -486,10 +486,10 @@ export default function PSMBeratungPage(): JSX.Element {
       {/* Navigation */}
       {schritt === 2 && (
         <div className="flex justify-between">
-          <Button variant="outline" onClick={() => setSchritt(1)}>
+          <Button variant="outline" className="min-h-touch" onClick={() => setSchritt(1)}>
             Zurück
           </Button>
-          <Button onClick={() => navigate('/agrar/psm/abgabedokumentation')} className="gap-2">
+          <Button onClick={() => navigate('/agrar/psm/abgabedokumentation')} className="min-h-touch gap-2">
             <Zap className="h-4 w-4" />
             PSM bestellen
           </Button>

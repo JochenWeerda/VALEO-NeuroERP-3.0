@@ -21,20 +21,20 @@ const STATUS_CONFIG: Record<
 > = {
   connected: {
     icon: Wifi,
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
+    color: 'text-status-success',
+    bgColor: 'bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)]',
     label: 'Connected',
   },
   reconnecting: {
     icon: AlertCircle,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-100',
+    color: 'text-status-warning',
+    bgColor: 'bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)]',
     label: 'Reconnecting',
   },
   error: {
     icon: WifiOff,
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
+    color: 'text-status-error',
+    bgColor: 'bg-[hsl(var(--color-semantic-error-500-hsl)/0.18)]',
     label: 'Error',
   },
   disconnected: {

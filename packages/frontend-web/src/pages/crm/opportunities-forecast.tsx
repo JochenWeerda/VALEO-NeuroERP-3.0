@@ -39,7 +39,6 @@ type ForecastGrouped = {
   total_expected_revenue: number
 }
 type StageDistItem = { name: string; value: number }
-const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300']
 
 export default function OpportunitiesForecastPage(): JSX.Element {
   const { t } = useTranslation()
@@ -65,10 +64,16 @@ export default function OpportunitiesForecastPage(): JSX.Element {
       if (filterOwner) params.owner_id = filterOwner
       if (filterStage !== 'all') params.stage = filterStage
 
-      const response = await apiClient.get<ForecastData[]>('/api/v1/crm/opportunities/forecast', { params })
-      if (response.data) {
-        setForecastData(response.data || [])
-      }
+      const response = await apiClient.get<ForecastData[] | { items?: ForecastData[]; data?: ForecastData[] }>('/api/v1/crm/opportunities/forecast', { params })
+      const payload = response.data
+      const items = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.items)
+          ? payload.items
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : []
+      setForecastData(items)
     } catch (error) {
       toast({ variant: 'destructive', title: t('crud.messages.loadError') })
     } finally {
@@ -232,7 +237,7 @@ export default function OpportunitiesForecastPage(): JSX.Element {
 
       <div className="grid grid-cols-2 gap-4">
         <Suspense fallback={<><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card><Card><CardContent className="p-6"><div className="h-[300px] animate-pulse rounded bg-muted" /></CardContent></Card></>}>
-          <OpportunitiesForecastCharts chartData={chartData} stageDistributionData={stageDistributionData} viewMode={viewMode} colors={CHART_COLORS} />
+          <OpportunitiesForecastCharts chartData={chartData} stageDistributionData={stageDistributionData} viewMode={viewMode} />
         </Suspense>
       </div>
 

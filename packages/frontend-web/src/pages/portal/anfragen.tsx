@@ -6,9 +6,10 @@
 
 import { useState } from 'react'
 import { usePortalAnfragen } from '@/lib/api/portal'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
@@ -58,12 +59,12 @@ interface Anfrage {
   antwortDatum?: string
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  'offen': { label: 'Offen', color: 'bg-gray-100 text-gray-800', icon: <Clock className="h-4 w-4" /> },
-  'in_bearbeitung': { label: 'In Bearbeitung', color: 'bg-amber-100 text-amber-800', icon: <Clock className="h-4 w-4" /> },
-  'beantwortet': { label: 'Beantwortet', color: 'bg-blue-100 text-blue-800', icon: <MessageSquare className="h-4 w-4" /> },
-  'abgeschlossen': { label: 'Abgeschlossen', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
-  'abgelehnt': { label: 'Abgelehnt', color: 'bg-red-100 text-red-800', icon: <XCircle className="h-4 w-4" /> },
+const statusConfig: Record<string, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  'offen': { label: 'Offen', color: 'muted', icon: <Clock className="h-4 w-4" /> },
+  'in_bearbeitung': { label: 'In Bearbeitung', color: 'warning', icon: <Clock className="h-4 w-4" /> },
+  'beantwortet': { label: 'Beantwortet', color: 'info', icon: <MessageSquare className="h-4 w-4" /> },
+  'abgeschlossen': { label: 'Abgeschlossen', color: 'success', icon: <CheckCircle2 className="h-4 w-4" /> },
+  'abgelehnt': { label: 'Abgelehnt', color: 'error', icon: <XCircle className="h-4 w-4" /> },
 }
 
 const typConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
@@ -145,7 +146,7 @@ export default function PortalAnfragen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
                 <Clock className="h-5 w-5" />
               </div>
               <div>
@@ -160,9 +161,9 @@ export default function PortalAnfragen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-100 p-2 text-blue-600">
+              <Callout variant="info" className="rounded-lg p-2">
                 <MessageSquare className="h-5 w-5" />
-              </div>
+              </Callout>
               <div>
                 <p className="text-2xl font-bold">
                   {anfragen.filter(a => a.status === 'beantwortet').length}
@@ -175,7 +176,7 @@ export default function PortalAnfragen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -267,10 +268,11 @@ export default function PortalAnfragen() {
                         <TableCell>
                           <Button
                             variant="ghost"
-                            size="sm"
                             onClick={() => setSelectedAnfrage(anfrage)}
+                            className="min-h-touch"
                           >
                             <Eye className="h-4 w-4" />
+                            Details
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -298,7 +300,7 @@ export default function PortalAnfragen() {
               <div className="space-y-4">
                 {/* Status & Typ */}
                 <div className="flex gap-2">
-                  <Badge className={`${statusConfig[selectedAnfrage.status].color} gap-1`}>
+                  <Badge variant={statusConfig[selectedAnfrage.status].color} className="gap-1">
                     {statusConfig[selectedAnfrage.status].icon}
                     {statusConfig[selectedAnfrage.status].label}
                   </Badge>
@@ -315,12 +317,12 @@ export default function PortalAnfragen() {
 
                 {/* Antwort */}
                 {selectedAnfrage.antwort && (
-                  <div className="rounded-lg border-2 border-emerald-200 bg-emerald-50 p-4">
-                    <p className="text-sm font-medium text-emerald-800 mb-1">
+                  <Callout variant="success" className="rounded-lg border-2 p-4">
+                    <p className="text-sm font-medium text-status-success mb-1">
                       Unsere Antwort ({selectedAnfrage.antwortDatum}):
                     </p>
-                    <p className="text-emerald-900">{selectedAnfrage.antwort}</p>
-                  </div>
+                    <p className="text-status-success">{selectedAnfrage.antwort}</p>
+                  </Callout>
                 )}
               </div>
             </>
@@ -343,8 +345,8 @@ export default function PortalAnfragen() {
 
           {submitSuccess ? (
             <div className="flex flex-col items-center gap-4 py-8">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--color-semantic-success-50-hsl))]">
+                <CheckCircle2 className="h-8 w-8 text-status-success" />
               </div>
               <div className="text-center">
                 <h3 className="text-lg font-semibold">Anfrage gesendet!</h3>

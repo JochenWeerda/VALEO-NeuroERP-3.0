@@ -26,6 +26,7 @@ import {
 } from "lucide-react"
 import { dmsService, type Document as DmsDocument } from "@/lib/services/dms-service"
 import { useTenant } from "@/hooks/useTenant"
+import { useTouchDevice } from "@/hooks/useTouchDevice"
 import {
   CrudCapabilityChecklist,
   EvidenceTemplateLink,
@@ -49,18 +50,18 @@ const documentRoleProfiles = [
 function getFileIcon(type: string) {
   switch (type.toLowerCase()) {
     case 'pdf':
-      return <FileText className="h-5 w-5 text-red-500" />
+      return <FileText className="h-5 w-5 text-status-error" />
     case 'xlsx':
     case 'xls':
     case 'csv':
-      return <FileSpreadsheet className="h-5 w-5 text-green-600" />
+      return <FileSpreadsheet className="h-5 w-5 text-status-success" />
     case 'jpg':
     case 'jpeg':
     case 'png':
     case 'gif':
-      return <FileImage className="h-5 w-5 text-blue-500" />
+      return <FileImage className="h-5 w-5 text-muted-foreground" />
     default:
-      return <File className="h-5 w-5 text-gray-500" />
+      return <File className="h-5 w-5 text-muted-foreground" />
   }
 }
 
@@ -162,6 +163,7 @@ function DocumentSkeleton() {
 }
 
 export default function DocumentPanel(): JSX.Element {
+  const isTouch = useTouchDevice()
   const { data, isLoading: mcpLoading } = useMcpQuery<{ data: Doc[] }>('document', 'list', [])
     const [dmsConnected, setDmsConnected] = React.useState(false)
   const [dmsDocuments, setDmsDocuments] = React.useState<DmsDocument[]>([])
@@ -191,6 +193,7 @@ export default function DocumentPanel(): JSX.Element {
   
   const [q, setQ] = React.useState<string>("")
   const [roleFocus, setRoleFocus] = React.useState<DocumentRoleFocus>('fachbereich')
+  const [pendingDocKey, setPendingDocKey] = React.useState<string | null>(null)
   const { push } = useToast()
   const qc = useQueryClient()
   const key = ['mcp', 'document', 'list'] as const
@@ -306,34 +309,45 @@ export default function DocumentPanel(): JSX.Element {
   }
 
   const handleScan = (id: string): void => {
+    if (pendingDocKey) return
+    setPendingDocKey(`scan:${id}`)
     scan.mutate({ id }, {
       onSuccess: (): void => push("✔ Scan gestartet"),
-      onError: (): void => push("❌ Scan fehlgeschlagen")
+      onError: (): void => push("❌ Scan fehlgeschlagen"),
+      onSettled: (): void => setPendingDocKey(null),
     })
   }
 
   const handleDelete = async (id: string): Promise<void> => {
+    if (pendingDocKey) return
+    setPendingDocKey(`delete:${id}`)
     try {
       if (dmsConnected) {
-        // Löschen über DMS-Adapter
         await dmsService.deleteDocument(parseInt(id), tenantId)
         push("✔ Gelöscht")
-        
-        // Dokumente neu laden
         const result = await dmsService.listDocuments(tenantId, {
           businessObjectType: 'QM_DOCUMENT',
         })
         setDmsDocuments(result.data)
       } else {
-        // Fallback auf MCP-Delete
-        remove.mutate({ id }, {
-          onSuccess: (): void => push("✔ Gelöscht"),
-          onError: (): void => push("❌ Löschen fehlgeschlagen"),
-          onSettled: (): Promise<void> => qc.invalidateQueries({ queryKey: key })
-        })
+        await new Promise<void>((resolve, reject) => {
+          remove.mutate({ id }, {
+            onSuccess: (): void => {
+              push("✔ Gelöscht")
+              resolve()
+            },
+            onError: (): void => {
+              push("❌ Löschen fehlgeschlagen")
+              reject(new Error('delete failed'))
+            },
+            onSettled: (): Promise<void> => qc.invalidateQueries({ queryKey: key })
+          })
+        }).catch(() => undefined)
       }
     } catch {
       push("❌ Löschen fehlgeschlagen")
+    } finally {
+      setPendingDocKey(null)
     }
   }
 
@@ -364,69 +378,72 @@ export default function DocumentPanel(): JSX.Element {
         </p>
       </div>
 
-      <RoleFocusBar
-        roles={documentRoleProfiles}
-        value={roleFocus}
-        onChange={setRoleFocus}
-        visibleCount={filtered.length}
-        totalCount={rows.length}
-        title="Wer arbeitet gerade mit den Dokumenten?"
-      />
+      {!isTouch ? (
+        <>
+          <RoleFocusBar
+            roles={documentRoleProfiles}
+            value={roleFocus}
+            onChange={setRoleFocus}
+            visibleCount={filtered.length}
+            totalCount={rows.length}
+            title="Wer arbeitet gerade mit den Dokumenten?"
+          />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <ManagementDecisionPanel
-          decision={{
-            allowed: releaseReady,
-            allowedLabel: 'Nachweise arbeitsfaehig',
-            blockedLabel: 'Nachweis offen',
-            summary: releaseReady
-              ? `${rows.length} Dokument(e) sind im DMS verfuegbar und nach Dokumenttyp auffindbar. QM kann mit Scan, Freigabe und Nachweispruefung weiterarbeiten.`
-              : `Vor einer belastbaren Dokumentenfreigabe fehlen noch: ${dmsBlockers.join(', ')}.`,
-            blockerCount: dmsBlockers.length,
-            nextFocus: dmsBlockers[0] ?? 'Naechstes Dokument freigeben',
-            template: { label: 'Dokumentenklasse und Aufbewahrung', href: '/docs/dms/dokumentenklasse-retention.md' },
-          }}
-        />
-        <div className="space-y-4">
-          <NextActionPanel action={nextDocumentAction} tone={releaseReady ? 'emerald' : 'amber'} />
-          <EvidenceTemplateLink link={{ label: 'Dokumentenfreigabe dokumentieren', href: '/docs/dms/dokumentenfreigabe.md' }} />
-        </div>
-      </div>
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <ManagementDecisionPanel
+              decision={{
+                allowed: releaseReady,
+                allowedLabel: 'Nachweise arbeitsfaehig',
+                blockedLabel: 'Nachweis offen',
+                summary: releaseReady
+                  ? `${rows.length} Dokument(e) sind im DMS verfuegbar und nach Dokumenttyp auffindbar. QM kann mit Scan, Freigabe und Nachweispruefung weiterarbeiten.`
+                  : `Vor einer belastbaren Dokumentenfreigabe fehlen noch: ${dmsBlockers.join(', ')}.`,
+                blockerCount: dmsBlockers.length,
+                nextFocus: dmsBlockers[0] ?? 'Naechstes Dokument freigeben',
+                template: { label: 'Dokumentenklasse und Aufbewahrung', href: '/docs/dms/dokumentenklasse-retention.md' },
+              }}
+            />
+            <div className="space-y-4">
+              <NextActionPanel action={nextDocumentAction} tone={releaseReady ? 'emerald' : 'amber'} />
+              <EvidenceTemplateLink link={{ label: 'Dokumentenfreigabe dokumentieren', href: '/docs/dms/dokumentenfreigabe.md' }} />
+            </div>
+          </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <OperationalTaskPlan
-          title="Arbeitsplan fuer Dokumente"
-          items={[
-            { label: 'Dokument hochladen', done: rows.length > 0, hint: rows.length > 0 ? `${rows.length} Dokument(e) im aktuellen Raum.` : 'Noch kein Dokument vorhanden.' },
-            { label: 'Dokumenttyp klaeren', done: classificationReady, hint: `${documentsWithType.length} von ${rows.length} Dokument(en) haben einen Typ.` },
-            { label: 'Aufbewahrung absichern', done: retentionReady, hint: dmsConnected ? 'DMS-Anbindung ist Grundlage fuer Aufbewahrung und Wiederfinden.' : 'DMS-Verbindung ist noch nicht aktiv.' },
-            { label: 'Scan/Freigabe nachhalten', done: releaseReady, hint: releaseReady ? 'Scan und Folgepruefung sind auf DMS-Basis moeglich.' : 'Erst Verbindung, Dokumente und Typen klaeren.' },
-          ]}
-        />
-        <CrudCapabilityChecklist
-          capabilities={[
-            { key: 'create', label: 'Hochladen', available: true, hint: 'Dokumente koennen per Upload abgelegt werden.' },
-            { key: 'read', label: 'Suchen und lesen', available: true, hint: 'Titel und Dokumenttyp sind durchsuchbar.' },
-            { key: 'update', label: 'Scan starten', available: true, hint: 'Scan/OCR kann je Dokument angestossen werden.' },
-            { key: 'delete', label: 'Loeschen', available: true, hint: 'Loeschen ist vorhanden; fachlich braucht es Aufbewahrungspruefung.' },
-            { key: 'evidence', label: 'Nachweisvorlage', available: true, hint: 'Vorlage fuer Dokumentenklasse und Freigabe ist verlinkt.' },
-            { key: 'audit', label: 'Version/Freigabe', available: false, hint: 'Eigene Versionstimeline ist in dieser Seite noch nicht angebunden.' },
-          ]}
-        />
-      </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <OperationalTaskPlan
+              title="Arbeitsplan fuer Dokumente"
+              items={[
+                { label: 'Dokument hochladen', done: rows.length > 0, hint: rows.length > 0 ? `${rows.length} Dokument(e) im aktuellen Raum.` : 'Noch kein Dokument vorhanden.' },
+                { label: 'Dokumenttyp klaeren', done: classificationReady, hint: `${documentsWithType.length} von ${rows.length} Dokument(en) haben einen Typ.` },
+                { label: 'Aufbewahrung absichern', done: retentionReady, hint: dmsConnected ? 'DMS-Anbindung ist Grundlage fuer Aufbewahrung und Wiederfinden.' : 'DMS-Verbindung ist noch nicht aktiv.' },
+                { label: 'Scan/Freigabe nachhalten', done: releaseReady, hint: releaseReady ? 'Scan und Folgepruefung sind auf DMS-Basis moeglich.' : 'Erst Verbindung, Dokumente und Typen klaeren.' },
+              ]}
+            />
+            <CrudCapabilityChecklist
+              capabilities={[
+                { key: 'create', label: 'Hochladen', available: true, hint: 'Dokumente koennen per Upload abgelegt werden.' },
+                { key: 'read', label: 'Suchen und lesen', available: true, hint: 'Titel und Dokumenttyp sind durchsuchbar.' },
+                { key: 'update', label: 'Scan starten', available: true, hint: 'Scan/OCR kann je Dokument angestossen werden.' },
+                { key: 'delete', label: 'Loeschen', available: true, hint: 'Loeschen ist vorhanden; fachlich braucht es Aufbewahrungspruefung.' },
+                { key: 'evidence', label: 'Nachweisvorlage', available: true, hint: 'Vorlage fuer Dokumentenklasse und Freigabe ist verlinkt.' },
+                { key: 'audit', label: 'Version/Freigabe', available: false, hint: 'Eigene Versionstimeline ist in dieser Seite noch nicht angebunden.' },
+              ]}
+            />
+          </div>
+        </>
+      ) : null}
 
       {/* DMS Status Alert */}
       {dmsConnected && (
-        <Alert className="bg-green-50 border-green-200">
-          <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <AlertTitle className="text-green-800">DMS verbunden</AlertTitle>
-          <AlertDescription className="text-green-700">
+        <Alert variant="success">
+          <CheckCircle2 className="h-4 w-4 text-status-success" />
+          <AlertTitle className="text-status-success">DMS verbunden</AlertTitle>
+          <AlertDescription className="text-status-success">
             Paperless-ngx Dokumentenmanagement ist aktiv. Dokumente werden automatisch per OCR verarbeitet.
           </AlertDescription>
         </Alert>
       )}
-      {/* KPI Cards */}
-      <QMKpiCards documentCount={rows.length} categories={categories} />
+      {!isTouch ? <QMKpiCards documentCount={rows.length} categories={categories} /> : null}
 
       {/* Document Upload & List */}
       <Card>
@@ -448,8 +465,9 @@ export default function DocumentPanel(): JSX.Element {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                className="pl-9"
+                className="min-h-touch pl-9"
                 placeholder="Suche nach Titel oder Dokumenttyp…"
+                aria-label="Suche QM-Dokumente"
                 value={q}
                 onChange={handleSearchChange}
               />
@@ -490,25 +508,25 @@ export default function DocumentPanel(): JSX.Element {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
+                    <Button
                       variant="outline"
+                      className="min-h-touch"
                       onClick={(): void => handleScan(d.id)}
-                      disabled={scan.isPending}
+                      disabled={pendingDocKey !== null}
                     >
                       <ScanLine className="h-4 w-4 mr-1" />
-                      Scan
+                      {pendingDocKey === `scan:${d.id}` ? 'Scan läuft…' : 'Scan'}
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
                       variant="destructive"
+                      className="min-h-touch"
                       onClick={(): void => {
                         void handleDelete(d.id)
                       }}
-                      disabled={remove.isPending}
+                      disabled={pendingDocKey !== null}
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
-                      Löschen
+                      {pendingDocKey === `delete:${d.id}` ? 'Wird gelöscht…' : 'Löschen'}
                     </Button>
                   </div>
                 </div>
@@ -528,7 +546,7 @@ export default function DocumentPanel(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Shield className="h-4 w-4 text-green-600" />
+              <Shield className="h-4 w-4 text-status-success" />
               Zertifikate
             </CardTitle>
           </CardHeader>
@@ -536,15 +554,15 @@ export default function DocumentPanel(): JSX.Element {
             <ul className="space-y-2 text-sm">
               <li className="flex justify-between">
                 <span>ISO 9001:2015</span>
-                <Badge variant="outline" className="text-green-600">Gültig</Badge>
+                <Badge variant="outline" className="text-status-success">Gültig</Badge>
               </li>
               <li className="flex justify-between">
                 <span>GMP+ B1</span>
-                <Badge variant="outline" className="text-green-600">Gültig</Badge>
+                <Badge variant="outline" className="text-status-success">Gültig</Badge>
               </li>
               <li className="flex justify-between">
                 <span>QS-Zertifikat</span>
-                <Badge variant="outline" className="text-green-600">Gültig</Badge>
+                <Badge variant="outline" className="text-status-success">Gültig</Badge>
               </li>
             </ul>
           </CardContent>
@@ -553,7 +571,7 @@ export default function DocumentPanel(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <FileText className="h-4 w-4 text-blue-600" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
               Verfahrensanweisungen
             </CardTitle>
           </CardHeader>
@@ -578,7 +596,7 @@ export default function DocumentPanel(): JSX.Element {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-amber-600" />
+              <CheckCircle2 className="h-4 w-4 text-status-warning" />
               Prüfberichte
             </CardTitle>
           </CardHeader>
@@ -586,15 +604,15 @@ export default function DocumentPanel(): JSX.Element {
             <ul className="space-y-2 text-sm">
               <li className="flex justify-between">
                 <span>Internes Audit Q4/2024</span>
-                <Badge variant="outline" className="text-green-600">Bestanden</Badge>
+                <Badge variant="outline" className="text-status-success">Bestanden</Badge>
               </li>
               <li className="flex justify-between">
                 <span>Lieferantenaudit</span>
-                <Badge variant="outline" className="text-green-600">Bestanden</Badge>
+                <Badge variant="outline" className="text-status-success">Bestanden</Badge>
               </li>
               <li className="flex justify-between">
                 <span>Kundenaudit</span>
-                <Badge variant="outline" className="text-amber-600">Offen</Badge>
+                <Badge variant="outline" className="text-status-warning">Offen</Badge>
               </li>
             </ul>
           </CardContent>

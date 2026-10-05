@@ -149,6 +149,10 @@ nul
 # CI-generated release evidence (regenerate via quality-gate / release-gates)
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/release_evidence.json
+!artifacts/release_evidence.md
+!artifacts/production-readiness-assessment.json
+!artifacts/production-readiness-assessment.md
 
 # Local analysis artifacts
 service_erp_endpoints.txt
@@ -183,3 +187,5 @@ evidence/screenshots/
 playwright-results.json
 playwright-results.json/
 ostfriesland_*.json
+
+.claude/settings.local.json

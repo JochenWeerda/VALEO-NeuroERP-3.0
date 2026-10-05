@@ -1,60 +1,182 @@
-@import './styles/design-tokens-meridian.css';
-@import './styles/design-tokens-terra.css';
+/* Theme-invariante strukturelle Primitive (einmal an :root) vor den Theme-Dateien —
+   loest 38 der frueher identischen Doppel-Definitionen in Meridian/Terra auf. */
+@import './styles/tokens/primitives.css' layer(base);
+@import './styles/tokens/palette.css' layer(base);
+@import './styles/design-tokens-meridian.css' layer(base);
+@import './styles/design-tokens-terra.css' layer(base);
+@import './styles/density.css' layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= --theme(--breakpoint-sm)) {
+    max-width: none;
+  }
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/* @theme inline: Tailwind referenziert die Runtime-CSS-Tokens (index.css :root,
+   Meridian/Terra), statt sie in :root zu überschreiben. Verhindert Zirkularität bei
+   gleichnamigen Tokens (--text-2xs, --font-sans, --shadow-*) und hält die Utilities
+   theme-reaktiv (data-theme wechselt --primary usw. zur Laufzeit). */
+@theme inline {
+  --font-sans:
+    var(--font-sans), -apple-system, BlinkMacSystemFont, Segoe UI Variable,
+    system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  --text-2xs: var(--text-2xs);
+  --text-2xs--line-height: 1rem;
+  --text-xs: var(--text-xs);
+  --text-xs--line-height: 1rem;
+  --text-sm: var(--text-sm);
+  --text-sm--line-height: 1.25rem;
+  --text-base: var(--text-base);
+  --text-base--line-height: 1.5rem;
+  --text-lg: var(--text-lg);
+  --text-lg--line-height: 1.75rem;
+  --text-xl: var(--text-xl);
+  --text-xl--line-height: 2rem;
+  --text-2xl: var(--text-2xl);
+  --text-2xl--line-height: 2.5rem;
+  --text-3xl: var(--text-3xl);
+  --text-3xl--line-height: 3rem;
+
+  --tracking-tight: var(--tracking-tight);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: var(--tracking-wide);
+  --tracking-widest: var(--tracking-widest);
+
+  --leading-tight: var(--leading-tight);
+  --leading-snug: var(--leading-snug);
+  --leading-normal: var(--leading-normal);
+  --leading-relaxed: var(--leading-relaxed);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow-md);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  --transition-duration-instant: var(--duration-instant);
+  --transition-duration-fast: var(--duration-fast);
+  --transition-duration-normal: var(--duration-normal);
+  --transition-duration-slow: var(--duration-slow);
+
+  --ease-spring: var(--ease-spring);
+  --ease-ease-out: var(--ease-out);
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  /* Status-Textfarben (WCAG-AA-sicher auf --background): text-status-success usw.
+     Theme-bewusst über --status-*-hsl (:root=700er, .dark/.theme-warehouse=500er).
+     Eigener Namensraum "status-*" — KEINE Kollision mit Meridian/Terra
+     --color-success (TW4-Zirkularitätsfalle, vgl. 8a6f6b945). */
+  --color-status-success: hsl(var(--status-success-hsl));
+  --color-status-warning: hsl(var(--status-warning-hsl));
+  --color-status-error: hsl(var(--status-error-hsl));
+  --color-status-info: hsl(var(--status-info-hsl));
+
+  /* Chart-Serienfarben (kategorial, feste Slot-Reihenfolge 1..6, nie zyklisch).
+     Theme-bewusst über --chart-*-hsl (:root=hell, .dark/.theme-warehouse=dunkel).
+     Beide Modi mit dataviz-Sechs-Checks validiert (Lightness-Band, Chroma-Floor,
+     CVD-Adjazenz ΔE≥12, Kontrast ≥3:1 auf Systemfläche). Eigener Namensraum
+     "chart-*" — keine Kollision mit Meridian/Terra (vgl. status-*). */
+  --color-chart-1: hsl(var(--chart-1-hsl));
+  --color-chart-2: hsl(var(--chart-2-hsl));
+  --color-chart-3: hsl(var(--chart-3-hsl));
+  --color-chart-4: hsl(var(--chart-4-hsl));
+  --color-chart-5: hsl(var(--chart-5-hsl));
+  --color-chart-6: hsl(var(--chart-6-hsl));
+  --color-chart-other: hsl(var(--chart-other-hsl));
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius: var(--radius-lg);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  --min-height-touch: var(--touch-target, 44px);
+
+  --min-width-touch: var(--touch-target, 44px);
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 @layer base {
   :root {
-    /* Brand palette (HSL without wrapping hsl()) */
-    --color-brand-primary-50-hsl: 215 85% 95%;
-    --color-brand-primary-100-hsl: 215 85% 88%;
-    --color-brand-primary-200-hsl: 215 85% 78%;
-    --color-brand-primary-300-hsl: 215 85% 65%;
-    --color-brand-primary-400-hsl: 215 85% 54%;
-    --color-brand-primary-500-hsl: 215 85% 46%;
-    --color-brand-primary-600-hsl: 215 85% 42%;
-    --color-brand-primary-700-hsl: 215 85% 36%;
-    --color-brand-primary-800-hsl: 215 85% 28%;
-    --color-brand-primary-900-hsl: 215 85% 18%;
-    --color-brand-primary-950-hsl: 215 85% 12%;
-
-    --color-brand-accent-50-hsl: 38 95% 94%;
-    --color-brand-accent-100-hsl: 38 95% 86%;
-    --color-brand-accent-200-hsl: 38 95% 74%;
-    --color-brand-accent-300-hsl: 38 95% 62%;
-    --color-brand-accent-400-hsl: 38 95% 52%;
-    --color-brand-accent-500-hsl: 38 95% 44%;
-    --color-brand-accent-600-hsl: 38 90% 36%;
-    --color-brand-accent-700-hsl: 38 85% 28%;
-
-    /* Neutral scale */
-    --color-neutral-50-hsl: 210 20% 98%;
-    --color-neutral-100-hsl: 210 18% 95%;
-    --color-neutral-200-hsl: 210 16% 90%;
-    --color-neutral-300-hsl: 210 14% 82%;
-    --color-neutral-400-hsl: 210 12% 68%;
-    --color-neutral-500-hsl: 210 10% 50%;
-    --color-neutral-600-hsl: 210 10% 38%;
-    --color-neutral-700-hsl: 210 12% 26%;
-    --color-neutral-800-hsl: 210 14% 16%;
-    --color-neutral-900-hsl: 210 18% 10%;
-    --color-neutral-950-hsl: 210 18% 6%;
-
-    /* Semantic colors */
-    --color-semantic-success-50-hsl: 138.5 76.5% 96.7%;
-    --color-semantic-success-500-hsl: 142.1 70.6% 45.3%;
-    --color-semantic-success-700-hsl: 142.4 71.8% 29.2%;
-    --color-semantic-warning-50-hsl: 48 100% 96.1%;
-    --color-semantic-warning-500-hsl: 37.7 92.1% 50.2%;
-    --color-semantic-warning-700-hsl: 26 90.5% 37.1%;
-    --color-semantic-error-50-hsl: 0 85.7% 97.3%;
-    --color-semantic-error-500-hsl: 0 84.2% 60.2%;
-    --color-semantic-error-700-hsl: 0 73.7% 41.8%;
-    --color-semantic-info-50-hsl: 213.8 100% 96.9%;
-    --color-semantic-info-500-hsl: 217.2 91.2% 59.8%;
-    --color-semantic-info-700-hsl: 224.3 76.3% 48%;
+    /* Farb-Rohwerte (Brand/Neutral/Semantik/Status/Chart) liegen in
+       styles/tokens/palette.css — einzige Quelle (DESIGN-TOKEN-SOURCES-014). */
 
     /* ── Typography ─────────────────────────────────────────────────────────── */
     /* Primary: Plus Jakarta Sans — humanist grotesque, warm, excellent screen readability */
@@ -190,6 +312,7 @@
     --border: var(--color-neutral-700-hsl);
     --input: var(--color-neutral-700-hsl);
     --ring: var(--color-brand-primary-400-hsl);
+    /* Status-/Chart-Tokens für .dark: styles/tokens/palette.css */
   }
 
   /* Warehouse High-Contrast Theme - Optimiert für Lager-Terminals */
@@ -214,15 +337,7 @@
     --input: 0 0% 20%;
     --ring: 43 96% 56%;
     --radius: 0.375rem;
-
-    /* Warehouse-spezifische Farben */
-    --warehouse-eingang: 142 71% 45%;
-    --warehouse-ausgang: 25 95% 53%;
-    --warehouse-inventur: 263 70% 50%;
-    --warehouse-umlagerung: 187 94% 43%;
-    --warehouse-success: 142 71% 45%;
-    --warehouse-warning: 43 96% 56%;
-    --warehouse-error: 0 84% 60%;
+    /* Status-/Chart-/Warehouse-Farbtokens: styles/tokens/palette.css */
   }
 }
 
@@ -292,6 +407,28 @@
   ::selection {
     background-color: hsl(var(--primary) / 0.15);
     color: hsl(var(--foreground));
+  }
+
+  /*
+    WCAG 2.5.5: h-6/h-7/h-8 setzen height, nicht min-height.
+    Die Untergrenze bleibt 44 px, auch bei nativen Schaltflächen außerhalb
+    der Button-Komponente. sr-only und versteckte Felder bleiben ausgenommen.
+  */
+  button:not(.sr-only),
+  [role="checkbox"]:not(.sr-only),
+  [role="radio"]:not(.sr-only),
+  [role="switch"]:not(.sr-only),
+  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.sr-only),
+  select:not(.sr-only),
+  textarea:not(.sr-only) {
+    min-height: var(--touch-target, 44px);
+  }
+
+  button:not(.sr-only),
+  [role="checkbox"]:not(.sr-only),
+  [role="radio"]:not(.sr-only),
+  [role="switch"]:not(.sr-only) {
+    min-width: var(--touch-target, 44px);
   }
 
   /* Forms — Label-Gap, Error-States */

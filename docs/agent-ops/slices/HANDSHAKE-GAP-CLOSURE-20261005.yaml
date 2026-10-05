@@ -1,0 +1,37 @@
+slice_id: HANDSHAKE-GAP-CLOSURE-20261005
+title: Vier benannte Handshake-Luecken schliessen
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-05
+updated_at: 2026-10-05
+coordination: User-Auftrag und Claims c57fd297a, c595c6174; fremde WIP geschuetzt.
+goal: Bank-Proof-Fixture, Paginierung, Tenant-Journalidentitaet und Wiegemodell-ADR.
+file_ownership:
+  - bank_accounts.py nur list_ledger_options
+  - tests/test_bank_reconciliation_proof.py
+  - journal.py nur tenant_id und unique constraint
+  - journal_number_tenant_20261005.py und test_journal_number_tenant.py
+  - ADR-077 und Inventory-Entscheidungsindex
+  - scripts/check_journal_identity.py lesendes Betriebs-Gate
+  - eigene QA/Slice/Workboard/Open-Gaps
+acceptance:
+  - Bankvertraege und Paginierungsratsche gruen.
+  - Nummer innerhalb Tenant unique, zwischen Tenants erlaubt; Tenant erforderlich.
+  - Migration ohne DML/erfundene Zuordnung; fehlende Tenantdaten stoppen atomar.
+  - Fuehrendes Wiegemodell entschieden; technischer Folge-Slice klar benannt.
+test_evidence:
+  - 525 Regressionen und danach 40 gezielte Bank-/Journal-/Runtime-Checks bestanden.
+  - Architektur strict gruen; fremder Masken-Handbuchdrift offen.
+  - Probe integriert auf zusammenfuehrung_20261005_preis_journal, Runtime-Gate PASS.
+  - Single-Head-Gate und 40 gezielte Tests nach Integration gruen.
+risks:
+  - Technischer Wiege-Altverbraucher-Rueckbau bleibt eigener Folge-Slice.
+  - Wiege-Altverbraucher-Rueckbau bleibt Folge-Slice.
+ai_harness:
+  fachlicher_vertrag: Mandantengebundene Belegidentitaet und kanonischer Wiegeschein.
+  architektur_vertrag: Bestehende Domain-Grenzen, ADR-077 und Domain Pack.
+  daten_vertrag: Kein Datenloeschen, keine Nummern- oder Mandantenerfindung.
+  test_vertrag: Echte PG-Vertraege und stabile begrenzte Kontoauswahl.
+  security_vertrag: Fremdtenant-Konten ausgeschlossen; Journal ohne Tenant abgewiesen.
+  betriebs_vertrag: Gemeinsamer Probe, kein neuer Docker/DB/Reset; enges Wartungsfenster.
+  dokumentations_vertrag: QA/Workboard/Gaps/ADR und ausdrueckliche Folgearbeiten.

@@ -24,7 +24,7 @@
     "express": "^4.19.2",
     "helmet": "^7.1.0",
     "kafkajs": "^2.2.4",
-    "morgan": "^1.10.0",
+    "morgan": "^1.11.0",
     "nanoid": "^5.0.7",
     "prom-client": "^15.1.2",
     "reflect-metadata": "^0.1.13",

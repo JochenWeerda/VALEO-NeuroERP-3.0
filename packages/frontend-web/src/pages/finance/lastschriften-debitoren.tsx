@@ -17,6 +17,8 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
@@ -255,14 +257,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{t('crud.fields.directDebits')}</h3>
-        <button onClick={addLastschrift} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <Button type="button" className="min-h-touch touch-manipulation" onClick={addLastschrift}>
           + {t('crud.actions.addDirectDebit')}
-        </button>
+        </Button>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300">
-          <thead className="bg-gray-50">
+        <table className="min-w-full border">
+          <thead className="bg-muted">
             <tr>
               <th className="px-4 py-2 border">{t('crud.entities.debtor')}</th>
               <th className="px-4 py-2 border">{t('crud.fields.iban')}</th>
@@ -283,14 +285,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                       type="text"
                       value={inputValue(lastschrift.debitorId)}
                       onChange={(e) => updateLastschrift(index, 'debitorId', e.target.value)}
-                      className="w-full p-1 border rounded text-sm mb-1"
+                      className="min-h-touch w-full rounded border p-2 text-sm"
                       placeholder={t('crud.tooltips.placeholders.debtorNumber')}
                     />
                     <input
                       type="text"
                       value={inputValue(lastschrift.debitorName)}
                       onChange={(e) => updateLastschrift(index, 'debitorName', e.target.value)}
-                      className="w-full p-1 border rounded text-sm"
+                      className="min-h-touch w-full rounded border p-2 text-sm"
                       placeholder={t('crud.fields.name')}
                     />
                   </div>
@@ -301,14 +303,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                       type="text"
                       value={inputValue(lastschrift.iban)}
                       onChange={(e) => updateLastschrift(index, 'iban', e.target.value)}
-                      className="w-full p-1 border rounded text-sm mb-1"
+                      className="min-h-touch w-full rounded border p-2 text-sm"
                       placeholder={t('crud.fields.iban')}
                     />
                     <input
                       type="text"
                       value={inputValue(lastschrift.bic)}
                       onChange={(e) => updateLastschrift(index, 'bic', e.target.value)}
-                      className="w-full p-1 border rounded text-sm"
+                      className="min-h-touch w-full rounded border p-2 text-sm"
                       placeholder={t('crud.tooltips.placeholders.bicOptional')}
                     />
                   </div>
@@ -319,7 +321,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                     step="0.01"
                     value={inputValue(lastschrift.betrag)}
                     onChange={(e) => updateLastschrift(index, 'betrag', parseFloat(e.target.value) || 0)}
-                    className="w-full p-1 border rounded"
+                    className="min-h-touch w-full rounded border p-2"
                   />
                 </td>
                 <td className="px-4 py-2 border">
@@ -328,14 +330,14 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                       type="text"
                       value={inputValue(lastschrift.mandatReferenz)}
                       onChange={(e) => updateLastschrift(index, 'mandatReferenz', e.target.value)}
-                      className="w-full p-1 border rounded text-sm mb-1"
+                      className="min-h-touch w-full rounded border p-2 text-sm"
                       placeholder={t('crud.tooltips.placeholders.mandateReference')}
                     />
                     <input
                       type="date"
                       value={inputValue(lastschrift.mandatDatum)}
                       onChange={(e) => updateLastschrift(index, 'mandatDatum', e.target.value)}
-                      className="w-full p-1 border rounded text-sm"
+                      className="min-h-touch w-full rounded border p-2 text-sm"
                     />
                   </div>
                 </td>
@@ -343,7 +345,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                   <select
                     value={inputValue(lastschrift.sequenzTyp)}
                     onChange={(e) => updateLastschrift(index, 'sequenzTyp', e.target.value)}
-                    className="w-full p-1 border rounded"
+                    className="min-h-touch w-full rounded border p-2"
                   >
                     <option value="FRST">{t('crud.fields.sequenceFRST')}</option>
                     <option value="RCUR">{t('crud.fields.sequenceRCUR')}</option>
@@ -356,7 +358,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                     type="text"
                     value={inputValue(lastschrift.verwendungszweck)}
                     onChange={(e) => updateLastschrift(index, 'verwendungszweck', e.target.value)}
-                    className="w-full p-1 border rounded"
+                    className="min-h-touch w-full rounded border p-2"
                     placeholder={t('crud.tooltips.placeholders.invoiceNumber')}
                   />
                 </td>
@@ -365,14 +367,19 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
                     type="text"
                     value={inputValue(lastschrift.opReferenz)}
                     onChange={(e) => updateLastschrift(index, 'opReferenz', e.target.value)}
-                    className="w-full p-1 border rounded text-sm"
+                    className="min-h-touch w-full rounded border p-2 text-sm"
                     placeholder={t('crud.tooltips.placeholders.opReference')}
                   />
                 </td>
                 <td className="px-4 py-2 border">
-                  <button onClick={() => removeLastschrift(index)} className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">
-                    x
-                  </button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="min-h-touch touch-manipulation"
+                    onClick={() => removeLastschrift(index)}
+                  >
+                    {t('crud.actions.delete')}
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -386,6 +393,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: Record<string, un
 export default function LastschriftenDebitorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<Record<string, unknown>>({})
   const entityType = 'directDebit'
@@ -676,22 +684,6 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     <>
       <ModuleToolbar backTarget="/finance/lastschriften-debitoren" closeTarget="/finance/lastschriften-debitoren" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(safeFormData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Aenderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Moechten Sie speichern, verwerfen oder hier bleiben?' })} />
-      <div className="mx-4 mt-4 space-y-4">
-        <OperationalCaseHeader
-          title="Lastschriften Debitoren"
-          description="Der Debitorenlauf wird als Mandats-, Freigabe- und Ausfuehrungsfall komprimiert dargestellt."
-          status={operationalStatus}
-          owner="Debitorenbuchhaltung"
-          blocker={missingMandates > 0 ? `${missingMandates} Lastschriften haben unvollstaendige Mandatsdaten.` : null}
-          nextAction={missingMandates > 0 ? 'Mandatsdaten vervollstaendigen und erneut pruefen' : safeFormData.approval_can_execute ? 'SEPA-Datei exportieren oder Lastschriften ausfuehren' : 'Freigabe vorbereiten'}
-          caseLabel="Vorgang: Debitorenlauf"
-          tags={['FIBU', 'SEPA', 'Mandat']}
-        />
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
-          <OperationalTimeline title="Lastschriftverlauf" items={timelineItems} />
-          <OperationalContextPanel title="Lastschrift-Kontext" sections={contextSections} />
-        </div>
-      </div>
       {approvalDecisionView !== null ? (
         <ProcessStatusPanel view={approvalDecisionView} className="mx-4 mt-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
@@ -720,6 +712,24 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         onAction={(key, fd) => handleAction(key, fd ?? safeFormData)}
         loadingActionKey={loadingActionKey}
       />
+      {!isTouch ? (
+      <div className="mx-4 mt-4 space-y-4">
+        <OperationalCaseHeader
+          title="Lastschriften Debitoren"
+          description="Der Debitorenlauf wird als Mandats-, Freigabe- und Ausfuehrungsfall komprimiert dargestellt."
+          status={operationalStatus}
+          owner="Debitorenbuchhaltung"
+          blocker={missingMandates > 0 ? `${missingMandates} Lastschriften haben unvollstaendige Mandatsdaten.` : null}
+          nextAction={missingMandates > 0 ? 'Mandatsdaten vervollstaendigen und erneut pruefen' : safeFormData.approval_can_execute ? 'SEPA-Datei exportieren oder Lastschriften ausfuehren' : 'Freigabe vorbereiten'}
+          caseLabel="Vorgang: Debitorenlauf"
+          tags={['FIBU', 'SEPA', 'Mandat']}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Lastschriftverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Lastschrift-Kontext" sections={contextSections} />
+        </div>
+      </div>
+      ) : null}
     </>
   )
 }

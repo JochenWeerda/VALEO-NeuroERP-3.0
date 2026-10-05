@@ -5,32 +5,33 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Sales - Order Flow @smoke', () => {
   test('Order-Editor lädt', async ({ adminPage }) => {
     await adminPage.goto('/sales/order');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Delivery-Editor lädt', async ({ adminPage }) => {
     await adminPage.goto('/sales/delivery');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Invoice-Editor lädt', async ({ adminPage }) => {
     await adminPage.goto('/sales/invoice');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     await expect(adminPage.locator('h1, h2').first()).toBeVisible();
   });
 
   test('Folgebeleg-Buttons vorhanden (BelegFlowPanel)', async ({ adminPage }) => {
     await adminPage.goto('/sales/order');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
     
     // Suche nach Workflow/Folgebeleg-Buttons
     const workflowButtons = adminPage.locator('button:has-text("Lieferschein"), button:has-text("Rechnung")');

@@ -47,17 +47,19 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.api.v1.schemas.base import BaseSchema
 from app.services.procurement_service import ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.einkauf_bestellvorschlag_schemas import EinkaufBestellvorschlagOut
+from app.api.v1.schemas.mask_entity_contracts import EinkaufBestellungOut, EinkaufLieferantOut
 from pydantic import ConfigDict as _ConfigDict
 
 
@@ -165,6 +167,7 @@ class BestellungCreate(BaseModel):
     bestelldatum: date
     niederlassung_id: Optional[str] = None
     lieferdatum_wunsch: Optional[date] = None
+    lieferdatum_zugesagt: Optional[date] = None
     versand_art: str = "email"
     kontrakt_id: Optional[str] = None
     unsere_referenz: Optional[str] = None
@@ -172,6 +175,44 @@ class BestellungCreate(BaseModel):
     freitext_kopf: Optional[str] = None
     freitext_fuss: Optional[str] = None
     notiz: Optional[str] = None
+    bestellfall: Optional[str] = "bestand_abgleich"
+    ansprechpartner: Optional[str] = None
+    kreditor_konto: Optional[str] = None
+    lieferant_nr: Optional[str] = None
+    kostenstelle: Optional[str] = None
+    kommission: Optional[str] = None
+    ladetermin: Optional[date] = None
+    ladetermin_ab: Optional[date] = None
+    lade_datum: Optional[date] = None
+    incoterms: Optional[str] = None
+    lieferadresse: Optional[str] = None
+    zahlungsbedingung: Optional[str] = None
+    skonto1_tage: Optional[int] = None
+    skonto1_prozent: Optional[float] = None
+    skonto2_tage: Optional[int] = None
+    skonto2_prozent: Optional[float] = None
+    netto_tage: Optional[int] = None
+    fremdwaehrung: Optional[str] = None
+    umrechnungsfaktor: Optional[float] = None
+    anfrage_nr: Optional[str] = None
+    angebot_nr: Optional[str] = None
+    auftrag_nr: Optional[str] = None
+    abverkauf_horizont: Optional[str] = None
+    bedarfsmenge: Optional[float] = None
+    mindestbestellmenge: Optional[float] = None
+    maximalbestellmenge: Optional[float] = None
+    artikelgruppe: Optional[str] = None
+    lagerplatz_opt: Optional[bool] = None
+    fracht_opt: Optional[bool] = None
+    opportunitaetskostensatz: Optional[float] = None
+    palettenstellplatz_kosten: Optional[float] = None
+    lagerkosten_satz: Optional[float] = None
+    verkaufsbeleg_id: Optional[str] = None
+    kunden_id: Optional[str] = None
+    direktlieferung: Optional[bool] = None
+    ueberschlag_lager: Optional[bool] = None
+    neuer_artikel: Optional[bool] = None
+    innovationshinweis: Optional[str] = None
     positionen: list[dict[str, Any]] = []
 
 
@@ -251,6 +292,188 @@ def _not_found(exc: EntityNotFoundError, label: str) -> HTTPException:
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bestell-Vorschlag Engines
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+class InnovationsStandOut(BaseSchema):
+    """Wie eine Artikelprobe laeuft — mit dem Grund fuer die Empfehlung."""
+
+    model_config = ConfigDict(extra="allow")
+
+    bestellung_id: str
+    bestellnummer: Optional[str] = None
+    artikel_nr: Optional[str] = None
+    artikel_bezeichnung: Optional[str] = None
+    einheit: Optional[str] = None
+    hinweis: Optional[str] = None
+    bestelldatum: Optional[str] = None
+    erste_lieferung: Optional[str] = None
+    tage_im_regal: int = 0
+    testmenge: float = 0.0
+    verkauft: float = 0.0
+    abverkaufsquote: float = 0.0
+    abverkauf_pro_tag: float = 0.0
+    stand: str
+    empfehlung: str
+
+
+@router.get(
+    "/einkauf/innovationen",
+    summary="Laufende Artikelproben",
+    response_model=list[InnovationsStandOut],
+)
+async def innovationen(
+    fenster_tage: Optional[int] = Query(
+        None, ge=7, le=730, description="Bewertungsfenster in Tagen (Vorgabe 90)"
+    ),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """Was wurde zur Probe bestellt, und was ist daraus geworden?
+
+    Gerechnet wird ab der ersten Lieferung, nicht ab der Bestellung: Solange
+    die Ware nicht da ist, kann sie sich nicht verkaufen. Die Empfehlung ist
+    ein Vorschlag mit Begruendung, keine Buchung — ob ein Artikel ins Sortiment
+    kommt, entscheidet der Vertrieb.
+    """
+    return _svc(db, tenant_id).innovationen_bewerten(fenster_tage)
+
+
+class BestellungAusAuftragIn(BaseModel):
+    """Was die Direktlieferung wissen muss."""
+
+    auftrag_id: str = Field(..., description="Verkaufsauftrag, aus dem bestellt wird")
+    ueberschlag_lager: bool = Field(
+        False,
+        description=(
+            "Laeuft die Ware ueber den eigenen Hof? Dann deckt der Bestand einen Teil "
+            "und die Lieferadresse bleibt die eigene. Ohne Ueberschlag geht die volle "
+            "Menge direkt zum Kunden."
+        ),
+    )
+    lieferant_id: Optional[str] = None
+    lieferdatum: Optional[date] = None
+
+
+class BestellungAusAuftragOut(BaseSchema):
+    """Was dabei herauskam."""
+
+    model_config = ConfigDict(extra="allow")
+
+    id: str
+    bestellnummer: Optional[str] = None
+    status: Optional[str] = None
+    aus_auftrag: Optional[str] = None
+    uebersprungen: list[str] = Field(
+        default_factory=list,
+        description="Positionen, die der Bestand bereits deckt — sie entstehen nicht.",
+    )
+
+
+@router.post(
+    "/einkauf/bestellungen/aus-auftrag",
+    status_code=201,
+    summary="Bestellung aus Verkaufsauftrag",
+    response_model=BestellungAusAuftragOut,
+)
+async def bestellung_aus_auftrag(
+    payload: BestellungAusAuftragIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Aus einem Verkaufsauftrag eine Bestellung machen.
+
+    Ohne Ueberschlag geht die Ware vom Lieferanten direkt zum Kunden: bestellt
+    wird die volle Auftragsmenge, Lieferadresse ist die des Kunden. Mit
+    Ueberschlag laeuft sie ueber den eigenen Hof, der Bestand deckt einen Teil,
+    und bestellt wird nur die Fehlmenge.
+
+    Der Auftrag bleibt am Beleg stehen. Ohne diesen Rueckverweis weiss spaeter
+    niemand mehr, fuer wen die Ware kam — und bei einer Direktlieferung steht
+    sie nie im eigenen Lager, wo man nachsehen koennte.
+    """
+    try:
+        return _svc(db, tenant_id).bestellung_aus_auftrag(
+            payload.auftrag_id,
+            ueberschlag_lager=payload.ueberschlag_lager,
+            lieferant_id=payload.lieferant_id,
+            lieferdatum=payload.lieferdatum,
+        )
+    except EntityNotFoundError as exc:
+        raise _not_found(exc, "Verkaufsauftrag") from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+class BedarfsVorschlagOut(BaseSchema):
+    """Eine Zeile der Bedarfsrechnung — mit der Herkunft der Zahl.
+
+    Die Begruendung gehoert in die Antwort, nicht ins Log: Wer eine
+    Bestellmenge vorgeschlagen bekommt, muss sehen koennen, woraus sie
+    entstanden ist — sonst ist sie ein Orakel, dem niemand folgt.
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    article_id: str
+    artikel_nr: Optional[str] = None
+    artikel_bezeichnung: Optional[str] = None
+    artikel_gruppe: Optional[str] = None
+    einheit: Optional[str] = None
+    horizont: str
+    abverkauf_fenster_von: Optional[str] = None
+    abverkauf_fenster_bis: Optional[str] = None
+    abverkauf_menge: float = 0.0
+    abverkauf_pro_tag: float = 0.0
+    ist_bestand: float = 0.0
+    offene_auftraege: float = 0.0
+    mindestbestand: float = 0.0
+    maximalbestand: float = 0.0
+    wiederbeschaffungs_tage: int = 0
+    bedarf: float = 0.0
+    reichweite_tage: Optional[float] = None
+    vorschlag_menge: float = 0.0
+    lagerkosten: float = 0.0
+    frachtkosten: float = 0.0
+    begruendung: Optional[str] = None
+    lieferant_id: Optional[str] = None
+    lieferant_name: Optional[str] = None
+    letzter_preis: Optional[float] = None
+    preis_einheit: Optional[str] = None
+
+
+@router.get(
+    "/einkauf/bestellvorschlaege/bedarf",
+    summary="Bedarf aus Bestand und Abverkauf",
+    response_model=list[BedarfsVorschlagOut],
+)
+async def vorschlag_bedarf(
+    horizont: str = Query("monatlich", pattern="^(taeglich|woechentlich|monatlich|saisonal)$"),
+    stichtag: Optional[date] = Query(None),
+    niederlassung_id: Optional[str] = Query(None),
+    artikelgruppe: Optional[str] = Query(None),
+    artikel_nr: Optional[str] = Query(None, alias="artikelNr"),
+    warehouse_id: Optional[str] = Query(None),
+    lagerkosten_satz: Optional[float] = Query(
+        None, description="EUR je Einheit und Tag — Halle, Silozelle, Palettenstellplatz, Kapital"
+    ),
+    frachtkosten_fix: Optional[float] = Query(None, description="EUR je Anlieferung"),
+    nur_mit_bedarf: bool = Query(True),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """Was wird im gewaehlten Horizont wirklich gebraucht?
+
+    Anders als `/lager` vergleicht dieser Weg den Bestand nicht mit einem
+    gepflegten Sollbestand, sondern mit dem, was tatsaechlich rausgegangen ist.
+    Mit Lagerkosten- und Frachtkostensatz kommt zusaetzlich die Losgroesse
+    heraus, bei der beides zusammen am kleinsten ist.
+    """
+    return _svc(db, tenant_id).compute_vorschlag_bedarf(
+        horizont=horizont, stichtag=stichtag, niederlassung_id=niederlassung_id,
+        artikelgruppe=artikelgruppe, artikel_nr=artikel_nr, warehouse_id=warehouse_id,
+        lagerkosten_satz=lagerkosten_satz, frachtkosten_fix=frachtkosten_fix,
+        nur_mit_bedarf=nur_mit_bedarf,
+    )
+
 
 @router.get("/einkauf/bestellvorschlaege/lager", summary="Lager vorschlag",
     response_model=list[BestellvorschlagOut]
@@ -469,7 +692,7 @@ async def create_lieferant(
 
 
 @router.get("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant abrufen",
-    response_model=BestellvorschlagOut
+    response_model=EinkaufLieferantOut
 )
 async def get_lieferant(
     lieferant_id: str,
@@ -613,7 +836,7 @@ async def create_bestellung(
 
 
 @router.get("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung abrufen",
-    response_model=BestellvorschlagOut
+    response_model=EinkaufBestellungOut
 )
 async def get_bestellung(
     bestellung_id: str,
@@ -820,11 +1043,14 @@ async def bestellung_freigeben(
 )
 async def bestellung_stornieren(
     bestellung_id: str,
+    grund: Optional[str] = Query(
+        None, description="Warum storniert wird — bleibt am Beleg stehen"
+    ),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     try:
-        return _svc(db, tenant_id).storniere_bestellung(bestellung_id)
+        return _svc(db, tenant_id).storniere_bestellung(bestellung_id, grund)
     except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
     except ValidationFailedError as exc:

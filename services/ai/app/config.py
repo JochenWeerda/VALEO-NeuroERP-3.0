@@ -3,15 +3,27 @@ AI Service Configuration
 """
 
 from typing import List
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, PostgresDsn
 from pydantic_settings import BaseSettings
+
+
+def _default_database_url() -> str:
+    return str(
+        PostgresDsn.build(
+            scheme="postgresql",
+            username="valeo_dev",
+            host="postgres",
+            port=5432,
+            path="/valeo_neuro_erp",
+        )
+    )
 
 
 class Settings(BaseSettings):
     """AI Service settings"""
     
     # Server Configuration
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 5000
     DEBUG: bool = True
     
@@ -23,7 +35,7 @@ class Settings(BaseSettings):
     ]
     
     # Database (read-only access to main ERP DB)
-    DATABASE_URL: str = "postgresql://valeo_dev:REDACTED_PASSWORD@postgres:5432/valeo_neuro_erp"
+    DATABASE_URL: str = _default_database_url()
     
     # OpenAI Configuration
     OPENAI_API_KEY: str = ""
@@ -40,7 +52,7 @@ class Settings(BaseSettings):
     
     # MCP Configuration
     MCP_SERVER_PORT: int = 5001
-    MCP_SERVER_HOST: str = "0.0.0.0"
+    MCP_SERVER_HOST: str = "127.0.0.1"
     
     # Backend API Configuration
     BACKEND_API_URL: str = "http://backend:8000/api/v1"

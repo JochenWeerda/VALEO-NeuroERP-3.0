@@ -28,17 +28,17 @@ function Bar({ pct }: { pct: number }) {
   const w = Math.min(100, Math.max(0, pct))
   return (
     <div className="h-2 w-full rounded bg-muted overflow-hidden">
-      <div className="h-full bg-sky-500" style={{ width: `${w}%` }} />
+      <div className="h-full bg-primary" style={{ width: `${w}%` }} />
     </div>
   )
 }
 
 function Row({ c, active, onClick }: { c: ContractRow; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`w-full text-left px-3 py-2 hover:bg-muted/50 ${active ? 'bg-muted' : ''}`}>
+    <button onClick={onClick} className={`min-h-touch w-full text-left px-3 py-2 ${active ? 'bg-muted' : ''}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium text-sm truncate">{c.contract_no}</span>
-        <Badge variant="outline" className="text-[10px]">{c.typ}</Badge>
+        <Badge variant="outline" className="text-2xs">{c.typ}</Badge>
       </div>
       <div className="text-xs text-muted-foreground mt-0.5">{c.party_id ?? '—'} · {c.menge_kontrakt} {c.einheit}</div>
     </button>
@@ -98,27 +98,27 @@ function FixingForm({ kontrakt, position, einheit, defaultPraemie }: {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <label className="text-xs text-muted-foreground space-y-1">
             <span>Menge ({einheit}) · offen {offen}</span>
-            <Input type="number" value={menge} onChange={(e) => setMenge(e.target.value)} placeholder="0" className="h-8" />
+            <Input type="number" value={menge} onChange={(e) => setMenge(e.target.value)} placeholder="0" className="min-h-touch" />
           </label>
           <label className="text-xs text-muted-foreground space-y-1">
             <span>MATIF-Preis</span>
-            <Input type="number" value={preis} onChange={(e) => setPreis(e.target.value)} placeholder="0,00" className="h-8" />
+            <Input type="number" value={preis} onChange={(e) => setPreis(e.target.value)} placeholder="0,00" className="min-h-touch" />
           </label>
           <label className="text-xs text-muted-foreground space-y-1">
             <span>Prämie/Basis</span>
-            <Input type="number" value={praemie} onChange={(e) => setPraemie(e.target.value)} placeholder="0,00" className="h-8" />
+            <Input type="number" value={praemie} onChange={(e) => setPraemie(e.target.value)} placeholder="0,00" className="min-h-touch" />
           </label>
           <label className="text-xs text-muted-foreground space-y-1">
             <span>Notiz</span>
-            <Input value={notiz} onChange={(e) => setNotiz(e.target.value)} placeholder="optional" className="h-8" />
+            <Input value={notiz} onChange={(e) => setNotiz(e.target.value)} placeholder="optional" className="min-h-touch" />
           </label>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {menge && preis ? `Effektiv ≈ ${(preisNum + (praemie === '' ? 0 : Number(praemie))).toFixed(2)} / ${einheit}` : 'Menge + MATIF-Preis eingeben'}
-            {mengeNum > offen && <span className="text-red-600 ml-2">Menge übersteigt offene {offen} {einheit}</span>}
+            {mengeNum > offen && <span className="text-status-error ml-2">Menge übersteigt offene {offen} {einheit}</span>}
           </span>
-          <Button size="sm" onClick={submit} disabled={!valid || create.isPending}>
+          <Button className="min-h-touch" onClick={submit} disabled={!valid || create.isPending}>
             {create.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Lock size={14} className="mr-1" />}
             Fixieren
           </Button>
@@ -147,12 +147,12 @@ export default function KontraktFixierungPage() {
       <div className="flex items-center gap-2">
         <LineChart size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Kontrakt-Fixierung</h1>
-        <NativeSelect value={typ} onChange={(e) => setTyp(e.target.value)} className="h-8 w-32">
+        <NativeSelect ariaLabel="Kontrakttyp" value={typ} onChange={(e) => setTyp(e.target.value)} className="w-32">
           <option value="alle">Alle</option>
           <option value="EINKAUF">Einkauf</option>
           <option value="VERKAUF">Verkauf</option>
         </NativeSelect>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void listQuery.refetch()} disabled={listQuery.isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void listQuery.refetch()} disabled={listQuery.isFetching}>
           {listQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -164,7 +164,7 @@ export default function KontraktFixierungPage() {
             <CardTitle className="text-sm">Kontrakte</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" aria-label="Kontraktnummer suchen" className="min-h-touch pl-7" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
@@ -204,7 +204,7 @@ export default function KontraktFixierungPage() {
                   <div>
                     <div className="text-xs text-muted-foreground">Bewertung fixiert</div>
                     {ws.data.summary?.bewertbar ? (
-                      <div className={`font-semibold tabular-nums flex items-center gap-1 ${(ws.data.summary.bewertung_fixiert_eur ?? 0) >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                      <div className={`font-semibold tabular-nums flex items-center gap-1 ${(ws.data.summary.bewertung_fixiert_eur ?? 0) >= 0 ? 'text-status-success' : 'text-status-error'}`}>
                         {(ws.data.summary.bewertung_fixiert_eur ?? 0) >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                         {fmtEur(ws.data.summary.bewertung_fixiert_eur)}
                       </div>
@@ -238,14 +238,14 @@ export default function KontraktFixierungPage() {
                             <tr
                               key={p.position_no}
                               onClick={selectable ? () => setActivePos(p.position_no) : undefined}
-                              className={`border-b last:border-0 ${selectable ? 'cursor-pointer hover:bg-muted/40' : 'opacity-60'} ${isActive ? 'bg-sky-50' : ''}`}
+                              className={`border-b last:border-0 ${selectable ? 'cursor-pointer' : 'opacity-60'} ${isActive ? 'bg-primary/10' : ''}`}
                             >
                               <td className="px-3 py-1.5">{p.position_no}</td>
-                              <td className="px-3 py-1.5">{p.artikel}{p.is_matif && <Badge variant="outline" className="ml-1 text-[10px]">MATIF</Badge>}</td>
+                              <td className="px-3 py-1.5">{p.artikel}{p.is_matif && <Badge variant="outline" className="ml-1 text-2xs">MATIF</Badge>}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{p.menge_kontrakt}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{p.fixiert}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{p.offen_zu_fixieren}</td>
-                              <td className="px-3 py-1.5"><Bar pct={p.fixierungsgrad_pct} /><span className="text-[10px] text-muted-foreground">{p.fixierungsgrad_pct}%</span></td>
+                              <td className="px-3 py-1.5"><Bar pct={p.fixierungsgrad_pct} /><span className="text-2xs text-muted-foreground">{p.fixierungsgrad_pct}%</span></td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{p.avg_fixpreis_effektiv ?? '—'}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{p.notierung?.markt_effektiv ?? '—'}</td>
                             </tr>
@@ -305,7 +305,7 @@ export default function KontraktFixierungPage() {
               )}
 
               {!ws.data.summary?.bewertbar && matifPositions.length > 0 && (
-                <div className="flex items-start gap-2 text-sm text-amber-700">
+                <div className="flex items-start gap-2 text-sm text-status-warning">
                   <AlertTriangle size={15} className="mt-0.5 shrink-0" />
                   <span>Keine Marktnotierung für das Kontrakt-Symbol hinterlegt — Mark-to-Market-Bewertung nicht möglich.</span>
                 </div>

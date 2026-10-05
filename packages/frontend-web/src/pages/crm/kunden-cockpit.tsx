@@ -1,34 +1,40 @@
 import { useEffect } from 'react'
-import { useNavigate } from '@/app/routing/typed-router'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { Loader2 } from 'lucide-react'
+import { readQueryParam } from '@/pages/crm/party-native'
 
 /**
- * DEPRECATED (KIM-DEPRECATE-COCKPIT-001):
- * Das klassische „Verkauf Kunden-Cockpit" ist durch das führende KIM-360°-Cockpit
- * unter `/crm` („Kunde im Mittelpunkt") funktional vollständig abgelöst
- * (Stammdaten, Ansprechpartner inkl. Werbe-Matrix/DSGVO, Kontakt-Journal,
- * Information-Module, Belege, Präsente, TAPI, NeuroAI, konfigurierbare Toolbar).
- *
- * Diese Seite bleibt nur als Redirect bestehen, damit alte Links/Lesezeichen auf
- * `/crm/kunden-cockpit` kein 404 erzeugen, sondern auf das KIM-Cockpit führen.
+ * Alte Links auf `/crm/kunden-cockpit` landen in der nativen Kundenakte
+ * bzw. in der Kundenliste, wenn keine Id mitkommt.
  */
-export default function KundenCockpitRedirect() {
+export default function KundenCockpitRedirect(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const customerId = readQueryParam(searchParams, 'id')
+    ?? readQueryParam(searchParams, 'customer')
+    ?? readQueryParam(searchParams, 'customerId')
+    ?? readQueryParam(searchParams, 'customer_id')
+    ?? readQueryParam(searchParams, 'kunden_nr')
+  const tab = readQueryParam(searchParams, 'tab')
+  const tabQuery = tab ? `?tab=${encodeURIComponent(tab)}` : ''
+  const target = customerId
+    ? `/crm/kunden/${encodeURIComponent(customerId)}${tabQuery}`
+    : '/verkauf/kunden-liste'
 
   useEffect(() => {
-    navigate('/crm', { replace: true })
-  }, [navigate])
+    navigate(target, { replace: true })
+  }, [navigate, target])
 
   return (
     <div className="flex h-full min-h-[40vh] flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
       <Loader2 className="h-6 w-6 animate-spin text-primary" />
       <h2 className="text-base font-semibold text-foreground">Kunden-Cockpit wurde abgelöst</h2>
       <p className="max-w-md text-sm">
-        Das klassische Kunden-Cockpit wurde durch das KIM-360°-Cockpit ersetzt. Du wirst
+        Das klassische Kunden-Cockpit wurde durch die native Kundenakte ersetzt. Du wirst
         automatisch weitergeleitet.
       </p>
-      <a href="/crm" className="text-sm font-medium text-primary underline underline-offset-2">
-        Weiter zu „Kunde im Mittelpunkt" (/crm)
+      <a href={target} className="text-sm font-medium text-primary underline underline-offset-2">
+        Weiter zur Kundenakte
       </a>
     </div>
   )

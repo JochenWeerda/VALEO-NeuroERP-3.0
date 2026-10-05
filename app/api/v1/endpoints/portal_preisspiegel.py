@@ -1,4 +1,4 @@
-﻿"""PORTAL-PREISSPIEGEL-001 — Getreidekurs-API fuer Kundenportal und Innendienst."""
+"""PORTAL-PREISSPIEGEL-001 — Getreidekurs-API fuer Kundenportal und Innendienst."""
 from __future__ import annotations
 
 from datetime import date
@@ -12,6 +12,7 @@ from app.services.portal_preisspiegel_service import (
     PreisVariante,
     get_preisspiegel_service,
 )
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/portal/preisspiegel", tags=["portal", "preisspiegel"])
 
@@ -22,7 +23,7 @@ def _tid(x_tenant_id: Annotated[str | None, Header()] = None) -> str:
     return x_tenant_id
 
 
-@router.get("", response_model=dict[str, Any], summary="Alle aktuellen Preise")
+@router.get("", response_model=TypedObjectOut, summary="Alle aktuellen Preise")
 def preise_alle(
     frucht_gruppe: str | None = Query(None),
     variante: str | None = Query(None),
@@ -40,7 +41,7 @@ def preise_alle(
     return {"preise": preise, "count": len(preise), "stand": date.today().isoformat()}
 
 
-@router.get("/kunde", response_model=dict[str, Any], summary="Preisspiegel gefiltert nach Kundenfrüchten")
+@router.get("/kunde", response_model=TypedObjectOut, summary="Preisspiegel gefiltert nach Kundenfrüchten")
 def preisspiegel_kunde(
     artikel_ids: str = Query(..., description="Kommagetrennte Artikel-IDs"),
     x_tenant_id: Annotated[str | None, Header()] = None,
@@ -66,7 +67,7 @@ class PreisSetzenBody(BaseModel):
     hinweis: str | None = None
 
 
-@router.post("", response_model=dict[str, Any], status_code=201, summary="Preis pflegen (Innendienst)")
+@router.post("", response_model=TypedObjectOut, status_code=201, summary="Preis pflegen (Innendienst)")
 def preis_setzen(body: PreisSetzenBody, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     tid = _tid(x_tenant_id)
     svc = get_preisspiegel_service(tid)

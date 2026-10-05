@@ -17,12 +17,150 @@ from ....core.mask_classification import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.mask_registry_schemas import MaskRegistryOut
+from app.api.v1.schemas.mask_registry_schemas import (
+    MaskRegistryOut,
+    OmniboxCatalogEntryOut,
+    WorkspaceStartpageOut,
+)
+from ....core.workspace_roles import resolve_workspace_startpage
 
 
 router = APIRouter(prefix="/ui/mask-registry", tags=["ui", "masks"])
 
 _REGISTRY: MaskRegistry = build_mask_registry()
+
+
+# ── Omnibox-Katalog (UIX-060) ────────────────────────────────────────────────
+
+_FILTER_TYPE_BY_RENDER_KIND = {
+    "status": "enum",
+    "date": "date",
+    "datetime": "date",
+    "currency": "number",
+    "number": "number",
+    "percentage": "number",
+}
+
+
+def _collect_filterable_fields(sd: dict) -> list[dict]:
+    """Sammelt filterbare Tabellenspalten (top-level und je Tab) einer SD."""
+    fields: dict[str, dict] = {}
+    tables = list(sd.get("tables") or [])
+    for tab in sd.get("tabs") or []:
+        tables.extend(tab.get("tables") or [])
+    for table in tables:
+        for col in table.get("columns") or []:
+            if not col.get("filterable"):
+                continue
+            key = col.get("key", "")
+            if not key or key in fields:
+                continue
+            render_kind = col.get("renderKind", "")
+            col_type = _FILTER_TYPE_BY_RENDER_KIND.get(render_kind)
+            if col_type is None:
+                col_type = "number" if col.get("numeric") else "text"
+            fields[key] = {"key": key, "label": col.get("label", key), "type": col_type}
+    return list(fields.values())
+
+
+def _normalize_verb(text: str) -> str:
+    return text.lower().replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
+
+
+def _collect_command_actions(sd: dict) -> list[dict]:
+    """Draftbare Aktionen (mit commandEndpoint) fuer den NL-Command-Pfad (UIX-070).
+
+    Nur die Sicherheits-relevanten Felder + Suchbegriffe + Formularfelder —
+    die Sicherheitsmatrix entscheidet frontend-seitig (classifyOmniboxAction)."""
+    actions: list[dict] = []
+    for action in sd.get("actions") or []:
+        if not action.get("commandEndpoint"):
+            continue  # nur echte Mutations-Commands sind draftbar
+        key = action.get("key", "")
+        label = action.get("label", key)
+        verbs = sorted({_normalize_verb(t) for t in (key.replace("_", " ") + " " + label).split() if len(t) > 2})
+        actions.append({
+            "key": key,
+            "label": label,
+            "dangerLevel": action.get("dangerLevel", "safe"),
+            "requiresConfirmation": bool(action.get("requiresConfirmation")),
+            "forbiddenForAgents": bool(action.get("forbiddenForAgents")),
+            "verbs": verbs,
+            "fields": [
+                {"key": f.get("key"), "type": f.get("type", "text"), "required": bool(f.get("required"))}
+                for f in (action.get("fields") or [])
+                if f.get("key")
+            ],
+        })
+    return actions
+
+
+def _omnibox_entry(screen_id: str, sd: dict) -> dict:
+    from app.core.screen_definitions import get_screen_list_route
+
+    contract = sd.get("agentContract") or {}
+    layout = sd.get("layout") or {}
+    synonyms = list(contract.get("synonyms") or [])
+    if not synonyms:
+        title = str(sd.get("title") or screen_id)
+        synonyms = [title.lower()]
+    return {
+        "screen_id": screen_id,
+        "title": sd.get("title", screen_id),
+        "domain": sd.get("domain", ""),
+        "floorplan": layout.get("floorplan", ""),
+        "route": get_screen_list_route(screen_id) or "",
+        "synonyms": synonyms,
+        "example_prompts": list(contract.get("examplePrompts") or []),
+        "filterable_fields": _collect_filterable_fields(sd),
+        "actions": _collect_command_actions(sd),
+    }
+
+
+def _build_omnibox_catalog(tenant_id: str | None = None) -> list[dict]:
+    from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
+    from app.services.studio_draft_store import list_published_definitions
+
+    entries: list[dict] = []
+    native_ids = set(_SCREEN_DEFINITIONS.keys())
+    for screen_id in sorted(native_ids):
+        sd = get_screen_definition(screen_id)
+        if not sd:
+            continue
+        entries.append(_omnibox_entry(screen_id, sd))
+    if tenant_id:
+        for sd in list_published_definitions(tenant_id):
+            screen_id = str(sd.get("id") or "")
+            if not screen_id or screen_id in native_ids:
+                continue
+            hydrated = get_screen_definition(screen_id, tenant_id=tenant_id) or sd
+            entries.append(_omnibox_entry(screen_id, hydrated))
+    return entries
+
+
+@router.get(
+    "/omnibox-catalog",
+    response_model=list[OmniboxCatalogEntryOut],
+    summary="Omnibox catalog abrufen",
+)
+async def get_omnibox_catalog(tenant_id: str = Depends(get_tenant_id)):
+    """Kompakter Masken-Katalog fuer den Omnibox-Intent-Compiler (UIX-060):
+    Titel, Synonyme, Beispiel-Prompts und filterbare Felder je ScreenDefinition."""
+    return _build_omnibox_catalog(tenant_id)
+
+
+@router.get(
+    "/workspace-startpage",
+    response_model=WorkspaceStartpageOut,
+    summary="Rollen-Startseite (Workspace) aufloesen",
+)
+async def get_workspace_startpage(
+    role: str | None = None,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Loest die rollenbasierte cockpit-Startseite auf (UIX-061). Ohne Zuordnung
+    bleiben screenId/route null → Frontend faellt auf die bisherige Startseite zurueck."""
+    return resolve_workspace_startpage(role, tenant_id)
 
 
 @router.get("", response_model=MaskRegistryOut, summary="Mask registry abrufen")

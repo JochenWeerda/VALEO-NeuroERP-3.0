@@ -47,17 +47,17 @@ export default function DatevExportPage() {
         <CardHeader className="py-3"><CardTitle className="text-sm">Buchungsstapel offener Posten</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-2">
-            <NativeSelect value={typ} onChange={(e) => setTyp(e.target.value as 'alle' | 'debitor' | 'kreditor')} className="h-8 w-40">
+            <NativeSelect value={typ} onChange={(e) => setTyp(e.target.value as 'alle' | 'debitor' | 'kreditor')} className="min-h-touch w-40" aria-label="Buchungsstapel-Typ">
               <option value="alle">Alle</option>
               <option value="debitor">Debitoren</option>
               <option value="kreditor">Kreditoren</option>
             </NativeSelect>
-            <Button size="sm" onClick={run} disabled={exp.isPending}>
+            <Button className="min-h-touch" onClick={run} disabled={exp.isPending}>
               {exp.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <FileDown size={14} className="mr-1" />}
               Export erstellen
             </Button>
             {data && (
-              <Button size="sm" variant="outline" onClick={download}>
+              <Button className="min-h-touch" variant="outline" onClick={download}>
                 <Download size={14} className="mr-1" />{data.filename} ({data.zeilen})
               </Button>
             )}
@@ -67,7 +67,7 @@ export default function DatevExportPage() {
             Kein zertifizierter EXTF — finale Steuerberater-/DATEV-Abnahme ist ein externes Gate.
           </p>
           {data && (
-            <pre className="text-[11px] bg-muted/50 rounded p-3 overflow-x-auto max-h-72 overflow-y-auto">{data.csv}</pre>
+            <pre className="text-2xs bg-muted/50 rounded p-3 overflow-x-auto max-h-72 overflow-y-auto">{data.csv}</pre>
           )}
         </CardContent>
       </Card>

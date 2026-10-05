@@ -1,21 +1,55 @@
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Callout } from '@/components/ui/callout'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
-import { AlertTriangle, CheckCircle, Globe, MapPin } from 'lucide-react'
+import { AlertTriangle, CheckCircle, FileText, Globe, MapPin } from 'lucide-react'
 
+/**
+ * EUDR-Stand aus dem Sorgfaltserklärungsregister.
+ *
+ * Bis zum 01.10.2026 zeigte diese Maske Chargenzahlen aus
+ * `domain_inventory.lots` — einer Tabelle, die kein Migrationsstand anlegt. Der
+ * Endpunkt fing den Lesefehler und meldete `status: "KONFORM"` mit
+ * `deforestation_risk: "NIEDRIG"`; die Maske zeigte daraufhin eine
+ * Compliance-Rate von 0,0 % **und** den Status „KONFORM". Nach Art. 3/4 der
+ * Verordnung (EU) 2023/1115 ist das Inverkehrbringen ohne Sorgfaltserklärung
+ * verboten — eine grüne Anzeige ist hier die gefährlichste Antwort.
+ *
+ * Jetzt zeigt die Maske, was das Register weiß, und sagt es, wenn sie nichts
+ * weiß.
+ */
 type EUDRStatus = {
   status: string
-  last_check: string
-  batches_total: number
-  batches_compliant: number
-  batches_flagged: number
+  last_check: string | null
   due_diligence_statements: number
+  statements_submitted: number
+  statements_draft: number
+  statements_unassessed: number
   origin_countries: string[]
+  commodities: string[]
   deforestation_risk: string
-  next_report_due: string
+  /** Art. 4: relevante Chargen ohne Nachweis dürfen nicht in Verkehr. */
+  lots_relevant: number
+  lots_covered: number
+  lots_open: number
+  open_quantity_kg: number
+  next_report_due: string | null
+}
+
+const STAND_TEXT: Record<string, string> = {
+  OHNE_ERKLAERUNG: 'Keine Sorgfaltserklärung erfasst — ohne sie darf nichts in Verkehr gebracht werden.',
+  UNVOLLSTAENDIG: 'Erklärungen im Entwurf: noch nicht eingereicht.',
+  KRITISCH: 'Mindestens eine Erklärung trägt ein nicht vernachlässigbares Risiko.',
+  KONFORM: 'Alle Erklärungen sind eingereicht und tragen vernachlässigbares Risiko.',
+}
+
+function standVariante(stand: string): 'success' | 'warning' | 'error' {
+  if (stand === 'KONFORM') return 'success'
+  if (stand === 'KRITISCH') return 'error'
+  return 'warning'
 }
 
 export default function EUDRCompliancePage(): JSX.Element {
@@ -41,85 +75,110 @@ export default function EUDRCompliancePage(): JSX.Element {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
-  const eudr = data ?? {
-    status: '-',
-    batches_total: 0,
-    batches_compliant: 0,
-    batches_flagged: 0,
+  const eudr: EUDRStatus = data ?? {
+    status: 'UNBEKANNT',
+    last_check: null,
     due_diligence_statements: 0,
+    statements_submitted: 0,
+    statements_draft: 0,
+    statements_unassessed: 0,
     origin_countries: [],
-    deforestation_risk: '-',
-    next_report_due: '-',
-    last_check: '-',
+    commodities: [],
+    deforestation_risk: 'UNBEKANNT',
+    lots_relevant: 0,
+    lots_covered: 0,
+    lots_open: 0,
+    open_quantity_kg: 0,
+    next_report_due: null,
   }
 
-  const complianceRate = eudr.batches_total > 0
-    ? ((eudr.batches_compliant / eudr.batches_total) * 100).toFixed(1)
-    : '0.0'
+  const variante = standVariante(eudr.status)
 
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold">EUDR-Compliance</h1>
-        <p className="text-muted-foreground">Entwaldungsfreie Lieferketten</p>
+        <h1 className="text-xl font-semibold tracking-tight">EUDR-Compliance</h1>
+        <p className="text-muted-foreground">
+          Entwaldungsfreie Lieferketten — Sorgfaltserklärungen nach Verordnung (EU) 2023/1115
+        </p>
       </div>
+
+      <Callout variant={variante}>
+        <span className="font-semibold">{eudr.status}</span>
+        {' — '}
+        {STAND_TEXT[eudr.status] ?? 'Der Stand ist derzeit nicht feststellbar.'}
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Chargen Gesamt</CardTitle>
+            <CardTitle className="text-sm font-medium">Erklärungen gesamt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{eudr.batches_total}</span>
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <span className="text-2xl font-bold">{eudr.due_diligence_statements}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Konform</CardTitle>
+            <CardTitle className="text-sm font-medium">Eingereicht</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{eudr.batches_compliant}</span>
+              <CheckCircle className="h-5 w-5 text-status-success" />
+              <span className="text-2xl font-bold text-status-success">
+                {eudr.statements_submitted}
+              </span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Markiert</CardTitle>
+            <CardTitle className="text-sm font-medium">Im Entwurf</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{eudr.batches_flagged}</span>
+            <span className="text-2xl font-bold text-status-warning">
+              {eudr.statements_draft}
+            </span>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Compliance-Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Ohne Risikobewertung</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">{complianceRate}%</span>
-            </div>
+            <span
+              className={
+                eudr.statements_unassessed > 0
+                  ? 'text-2xl font-bold text-status-error'
+                  : 'text-2xl font-bold text-muted-foreground'
+              }
+            >
+              {eudr.statements_unassessed}
+            </span>
           </CardContent>
         </Card>
       </div>
 
-      {eudr.batches_flagged > 0 && (
-        <Card className="border-red-500 bg-red-50">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
-              <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{eudr.batches_flagged} Charge(n) sind NICHT EUDR-konform!</span>
-            </div>
-          </CardContent>
-        </Card>
+      {eudr.lots_open > 0 && (
+        <Callout variant="error">
+          <AlertTriangle className="mr-2 inline h-4 w-4" />
+          {eudr.lots_open} Charge(n) mit {eudr.open_quantity_kg.toLocaleString('de-DE')} kg ohne
+          Nachweis. Nach Art. 4 darf diese Ware nicht in Verkehr gebracht werden.
+        </Callout>
+      )}
+
+      {eudr.statements_unassessed > 0 && (
+        <Callout variant="warning">
+          <AlertTriangle className="mr-2 inline h-4 w-4" />
+          {eudr.statements_unassessed} Erklärung(en) ohne Risikobewertung. Art. 10 verlangt die
+          Bewertung, bevor eingereicht werden darf.
+        </Callout>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -127,12 +186,12 @@ export default function EUDRCompliancePage(): JSX.Element {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              Herkunftsländer
+              Produktionsländer
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             {eudr.origin_countries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Keine Herkunftsländer erfasst.</p>
+              <p className="text-sm text-muted-foreground">Keine Produktionsländer erfasst.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {eudr.origin_countries.map((land) => (
@@ -140,6 +199,19 @@ export default function EUDRCompliancePage(): JSX.Element {
                 ))}
               </div>
             )}
+            <div className="flex items-center gap-2 pt-2">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Rohstoffe:</span>
+              {eudr.commodities.length === 0 ? (
+                <span className="text-sm text-muted-foreground">–</span>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {eudr.commodities.map((rohstoff) => (
+                    <Badge key={rohstoff} variant="outline">{rohstoff}</Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -149,24 +221,32 @@ export default function EUDRCompliancePage(): JSX.Element {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between border-b pb-2">
-              <span className="text-muted-foreground">Status</span>
-              <Badge variant={eudr.status === 'KONFORM' ? 'outline' : 'destructive'}>{eudr.status}</Badge>
-            </div>
-            <div className="flex justify-between border-b pb-2">
               <span className="text-muted-foreground">Entwaldungsrisiko</span>
               <span className="font-semibold">{eudr.deforestation_risk}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="text-muted-foreground">Due-Diligence-Erklärungen</span>
-              <span className="font-semibold">{eudr.due_diligence_statements}</span>
+              <span className="text-muted-foreground">Chargen mit Nachweis</span>
+              <span className="font-semibold">
+                {eudr.lots_covered} von {eudr.lots_relevant}
+              </span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-muted-foreground">Ohne Nachweis</span>
+              <span
+                className={eudr.lots_open > 0 ? 'font-semibold text-status-error' : 'font-semibold'}
+              >
+                {eudr.lots_open} ({eudr.open_quantity_kg.toLocaleString('de-DE')} kg)
+              </span>
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="text-muted-foreground">Nächste Meldung</span>
-              <span className="font-semibold">{eudr.next_report_due}</span>
+              <span className="font-semibold">{eudr.next_report_due ?? '–'}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Letzte Prüfung</span>
-              <span className="font-semibold">{eudr.last_check ? new Date(eudr.last_check).toLocaleString('de-DE') : '-'}</span>
+              <span className="text-muted-foreground">Stand</span>
+              <span className="font-semibold">
+                {eudr.last_check ? new Date(eudr.last_check).toLocaleString('de-DE') : '–'}
+              </span>
             </div>
           </CardContent>
         </Card>

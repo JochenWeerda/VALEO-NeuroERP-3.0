@@ -67,9 +67,6 @@ async def get_kpis(
             # Customers: public.kunden (SoR) bevorzugt, sonst crm-core-Summary
             "customers": real_customers if real_customers is not None else summary.activeCustomers,
 
-            # Stock (Placeholder - would need actual inventory data)
-            "inventory": 97,  # Percentage
-
             # Agrar-specific KPIs
             "contract_long_tons": 0,
             "contract_short_tons": 0,
@@ -122,7 +119,6 @@ async def get_kpis(
             "revenue": 0,
             "orders": 0,
             "customers": real_customers or 0,
-            "inventory": 0,
             "contract_long_tons": 0,
             "contract_short_tons": 0,
             "weighing_today_tons": 0,

@@ -1,4 +1,5 @@
 import { Suspense, lazy, type JSX } from 'react'
+import { chartSeriesColor } from '@/components/charts/chart-palette'
 import styles from '../reports.module.css'
 
 interface CashflowPoint {
@@ -24,7 +25,9 @@ const currencyFormatter = new Intl.NumberFormat('de-DE', {
   maximumFractionDigits: 0,
 })
 
-const donutColors = ['#005599', '#0EA870', '#D94A66']
+/* Bilanz-Verteilung: Aktiva/Fremdkapital/Eigenkapital = Identität, keine Wertung —
+   kategoriale Slots statt Grün/Rot (Grün/Rot bleiben Statusbedeutung vorbehalten). */
+const donutColors = [chartSeriesColor(0), chartSeriesColor(1), chartSeriesColor(2)]
 
 const AnalyticsCashflowChart = lazy(() => import('./charts/AnalyticsCashflowChart'))
 const AnalyticsBalanceShareChart = lazy(() => import('./charts/AnalyticsBalanceShareChart'))

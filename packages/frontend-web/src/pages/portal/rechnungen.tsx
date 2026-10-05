@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { usePortalRechnungen } from '@/lib/api/portal'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
@@ -56,11 +56,11 @@ interface Rechnung {
   dokument: string
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  'bezahlt': { label: 'Bezahlt', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-4 w-4" /> },
-  'offen': { label: 'Offen', color: 'bg-amber-100 text-amber-800', icon: <Clock className="h-4 w-4" /> },
-  'ueberfaellig': { label: 'Überfällig', color: 'bg-red-100 text-red-800', icon: <AlertTriangle className="h-4 w-4" /> },
-  'teilzahlung': { label: 'Teilzahlung', color: 'bg-blue-100 text-blue-800', icon: <CreditCard className="h-4 w-4" /> },
+const statusConfig: Record<string, { label: string; color: BadgeVariant; icon: React.ReactNode }> = {
+  'bezahlt': { label: 'Bezahlt', color: 'success', icon: <CheckCircle2 className="h-4 w-4" /> },
+  'offen': { label: 'Offen', color: 'warning', icon: <Clock className="h-4 w-4" /> },
+  'ueberfaellig': { label: 'Überfällig', color: 'error', icon: <AlertTriangle className="h-4 w-4" /> },
+  'teilzahlung': { label: 'Teilzahlung', color: 'info', icon: <CreditCard className="h-4 w-4" /> },
 }
 
 export default function PortalRechnungen() {
@@ -135,7 +135,7 @@ export default function PortalRechnungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-amber-100 p-2 text-amber-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-warning-500-hsl)/0.18)] p-2 text-status-warning">
                 <Euro className="h-5 w-5" />
               </div>
               <div>
@@ -150,7 +150,7 @@ export default function PortalRechnungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-red-100 p-2 text-red-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-error-500-hsl)/0.18)] p-2 text-status-error">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
@@ -165,7 +165,7 @@ export default function PortalRechnungen() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-lg bg-[hsl(var(--color-semantic-success-500-hsl)/0.18)] p-2 text-status-success">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
@@ -261,13 +261,15 @@ export default function PortalRechnungen() {
                           <div className="flex gap-1">
                             <Button
                               variant="ghost"
-                              size="sm"
                               onClick={() => setSelectedRechnung(rechnung)}
+                              className="min-h-touch"
                             >
                               <Eye className="h-4 w-4" />
+                              Details
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" className="min-h-touch">
                               <Download className="h-4 w-4" />
+                              Download
                             </Button>
                           </div>
                         </TableCell>
@@ -300,7 +302,7 @@ export default function PortalRechnungen() {
                 {/* Status */}
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground">Status:</span>
-                  <Badge className={`${statusConfig[selectedRechnung.status].color} gap-1`}>
+                  <Badge variant={statusConfig[selectedRechnung.status].color} className="gap-1">
                     {statusConfig[selectedRechnung.status].icon}
                     {statusConfig[selectedRechnung.status].label}
                   </Badge>
@@ -322,11 +324,11 @@ export default function PortalRechnungen() {
                   </div>
                   {selectedRechnung.bezahltBetrag > 0 && (
                     <>
-                      <div className="flex justify-between text-emerald-600">
+                      <div className="flex justify-between text-status-success">
                         <span>Bezahlt</span>
                         <span>- € {selectedRechnung.bezahltBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                       </div>
-                      <div className="flex justify-between border-t pt-2 font-semibold text-amber-600">
+                      <div className="flex justify-between border-t pt-2 font-semibold text-status-warning">
                         <span>Noch offen</span>
                         <span>€ {(selectedRechnung.bruttobetrag - selectedRechnung.bezahltBetrag).toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                       </div>

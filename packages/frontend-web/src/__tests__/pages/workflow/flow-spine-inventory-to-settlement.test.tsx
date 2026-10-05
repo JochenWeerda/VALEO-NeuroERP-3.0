@@ -55,6 +55,9 @@ describe('FlowSpineInventoryToSettlementPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Inventory-to-Settlement', level: 1 })).toBeInTheDocument()
     expect(screen.getByText('85% erledigt')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Welle 2 benoetigt Eingriff' })).toBeInTheDocument()
+        // FSX-023: Die Agentenaussage steht weiterhin auf dem Schirm (Agent-Karte in
+    // der Mitte), aber nicht mehr als Ueberschrift der Copilot-Spalte — die ist
+    // jetzt eingeklappt. Geprueft wird deshalb die Aussage, nicht ihre Rolle.
+    expect(screen.getAllByText('Welle 2 benoetigt Eingriff').length).toBeGreaterThan(0)
   })
 })

@@ -117,9 +117,8 @@ export function KundenBankverbindungenPanel({ kundenNr }: KundenBankverbindungen
           </CardTitle>
           <Button
             type="button"
-            size="sm"
             variant="outline"
-            className="gap-1"
+            className="min-h-touch gap-1"
             onClick={() => setShowForm((v) => !v)}
             aria-label="Neue Bankverbindung anlegen"
           >

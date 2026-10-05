@@ -69,7 +69,7 @@ def settle_epod(
             INSERT INTO domain_logistics.epod_settlements
                 (id, tour_id, stop_id, recipient_name, delivered_at, notes, tenant_id)
             VALUES (:id, :tour_id, :stop_id, :recipient_name,
-                    :delivered_at::timestamptz, :notes, :tenant_id)
+                    CAST(:delivered_at AS timestamptz), :notes, :tenant_id)
         """),
         {
             "id": settlement_id,

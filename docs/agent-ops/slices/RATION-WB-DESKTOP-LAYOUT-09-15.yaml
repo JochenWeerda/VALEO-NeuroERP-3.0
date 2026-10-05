@@ -1,0 +1,45 @@
+slice_id: RATION-WB-DESKTOP-LAYOUT-09-15
+id: RATION-WB-DESKTOP-LAYOUT-09-15
+title: Rationswerkbank Desktop-Layout 1:1 – Action-Bar, Rahmenbedingungen-Rail, Cockpit, Varianten, Live-Response
+owner: Claude
+status: in_arbeit
+created_at: "2026-07-20"
+started_at: "2026-07-20"
+goal: >-
+  Die Desktop-Werkbank an das Zielbild angleichen: Top-Action-Bar (Bewerten/
+  Optimieren/Best Attainable/Variante speichern), linkes Rahmenbedingungen-Rail
+  (Herde, Leistungsniveau, Fütterungssystem, Modus-Toggle, Limitierende
+  Faktoren, Hinweise), Cockpit um Rationskosten + Maßnahmenvorschläge ergänzt,
+  Bottom-Variantenvergleich, und schnelle Live-Neuberechnung bei Sheet-Edits.
+scope:
+  - WB-09 Top-Action-Bar (Bewerten setzt Bewertungsmodus; Best Attainable; Variante speichern → savedVariants)
+  - WB-10 Rahmenbedingungen-Rail + Modus-Toggle + Limitierende Faktoren + Hinweise; handleFrameworkChange (Leistung/System live)
+  - WB-13 RationCostPanel + MassnahmenPanel im Cockpit
+  - WB-14 VariantComparisonPanel (Baseline + gespeicherte Varianten, echte Kennzahlen)
+  - WB-15 editMutation (compute_technical_max=false) → schnelle Live-Reaktion der Tachos
+non_scope:
+  - WB-11 Aktiv-Checkbox/Roth/Ersetzen-Spalten + volle CRUD-Toolbar (Folge)
+  - Bewertungsmodus als echtes Pin-all-Evaluate (derzeit schnelle Reoptimierung)
+  - technical_max im Demo-Pfad (separater Fix)
+file_ownership:
+  - docs/agent-ops/slices/RATION-WB-DESKTOP-LAYOUT-09-15.yaml
+  - packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx
+  - packages/frontend-web/src/lib/api/rations-optimization.ts
+acceptance:
+  - "tsc --noEmit gruen; eslint gruen"
+  - "Live im Portal: Rahmenbedingungen-Rail + Action-Bar + Cockpit-Kosten sichtbar"
+  - "Sheet-Edit löst schnelle Neuberechnung aus (Tachos aktualisieren)"
+tests:
+  - "npx tsc --noEmit; npx eslint src/pages/futtermittel/rationsoptimierung.tsx"
+  - "Manuelle Sichtprüfung Demo-Ration"
+risks:
+  - "Leistungsniveau-Feld im Demo leer (wizardData null); im 'Neue Ration'-Flow gefüllt."
+ai_harness:
+  fachlicher_vertrag: >-
+    Rahmenbedingungen ändern Leistungsziel/System und lösen echte Neuberechnung
+    aus; Limitierende Faktoren/Hinweise stammen aus constraint_status/warnings.
+  test_vertrag: "tsc+eslint grün; Live-Sichtprüfung."
+  daten_vertrag: "Kosten/Kennzahlen aus Response; keine Mock-Werte."
+  api_vertrag: "compute_technical_max additiv; keine Bruch."
+  ui_vertrag: "Desktop-Layout nähert sich dem Zielbild; Wizard bleibt erhalten."
+  persistenz_vertrag: "savedVariants clientseitig (Snapshot); keine Server-Persistenz in diesem Slice."

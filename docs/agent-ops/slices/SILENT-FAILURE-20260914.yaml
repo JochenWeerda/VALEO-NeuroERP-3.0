@@ -1,0 +1,168 @@
+slice_id: SILENT-FAILURE-20260914
+id: SILENT-FAILURE-20260914
+title: Zwei Ausfaelle, die sich als Erfolg tarnen, sichtbar machen
+owner: Claude Code
+status: abgeschlossen
+completed_at: "2026-09-14"
+created_at: "2026-09-14"
+started_at: "2026-09-14"
+goal: >-
+  Zwei Stellen beheben, an denen ein Fehlschlag als Erfolg gemeldet wird: der
+  In-Memory-Fallback der Dokumentablage und die stillschweigend weggelassene
+  Authentifizierung in sechs Diensten. Beide haben je einen echten Fehler
+  monatelang verdeckt.
+coordination: >-
+  Die sechs main.py unter services/ beruehren die Dependency-Welle
+  SERVICE-CVE-PINS-20260914 (Cursor Auto) nur am Rand: dort wurden
+  requirements.txt und crm-ai angefasst, nicht die Auth-Einbindung. Cursor hat
+  den Befund gemeldet und ausdruecklich nicht selbst behoben, weil er
+  Betriebsentscheidungen beruehrt. Diese Entscheidung ist am 2026-09-14 vom
+  User getroffen worden: beheben.
+befund:
+  dokumentablage:
+    datei: app/documents/router_helpers.py
+    befund: >-
+      save_to_store faengt jeden Fehler des Repositories ab, schreibt in einen
+      Prozessspeicher und gibt {"ok": True} zurueck. Der Aufrufer erfaehrt
+      nicht, dass nichts persistiert wurde. Genau das hat den kaputten
+      SQL-Cast aus SQL-BIND-CAST-20260914 verdeckt: der INSERT schlug fehl,
+      die Anlage meldete Erfolg, und erst der spaetere Lesezugriff lief in 404.
+    zusatz: >-
+      get_from_store und list_from_store haben dieselbe Form: bei einem
+      DB-Fehler liefern sie still den Inhalt des Prozessspeichers, also ein
+      unvollstaendiges Ergebnis, das wie ein vollstaendiges aussieht.
+  authentifizierung:
+    dateien:
+      - services/ai/main.py
+      - services/crm/main.py
+      - services/finance/main.py
+      - services/finance/fibu-gateway/main.py
+      - services/inventory/main.py
+      - services/workflow/main.py
+    befund: >-
+      Alle sechs importieren AuthMiddleware in einem try/except ImportError und
+      setzen sie im Fehlerfall auf None. Eingehaengt wird sie nur unter
+      "if AuthMiddleware is not None", protokolliert ausschliesslich der
+      Erfolgsfall. Faellt der Import aus, beantwortet der Dienst Anfragen ohne
+      Authentifizierung und schweigt darueber.
+    belegt_von_cursor: >-
+      Im gebauten valeo-ai-Image: "auth_shared vorhanden: False", Middleware-
+      Stack ['CORSMiddleware']. Der Ausfall ist nachgewiesen, nicht vermutet.
+    ursache: >-
+      packages/auth-shared ist in keinem Service-Manifest eingebunden, und die
+      Dockerfiles kopieren nur app/ und main.py. Das Paket liegt nie im Image,
+      der Importfehler ist also der Normalfall und nicht die Ausnahme.
+file_ownership:
+  - docs/agent-ops/slices/SILENT-FAILURE-20260914.yaml
+  - "docs/agent-ops/active-workboard.md: nur der eigene Abschnitt"
+  - app/documents/router_helpers.py
+  - tests/test_silent_failures.py
+  - "tests/test_process_kernel_wave1_contracts.py: nur der Test, der auf dem verschluckten Fehler stand"
+  - "services/{ai,crm,finance,finance/fibu-gateway,inventory,workflow}/main.py"
+  - "services/{ai,crm,inventory}/Dockerfile und die zugehoerigen Compose-Eintraege"
+acceptance:
+  - Ein fehlgeschlagener Schreibvorgang wird dem Aufrufer nicht als Erfolg gemeldet.
+  - Ein Lesezugriff auf einer ausgefallenen Datenbank liefert kein scheinbar vollstaendiges Ergebnis.
+  - Kein Dienst laeuft ohne Authentifizierung, ohne dass das ausdruecklich erlaubt wurde.
+  - Ist es ausdruecklich erlaubt, steht es bei jedem Start im Protokoll.
+  - auth_shared liegt in den Images, damit der Normalfall der abgesicherte ist.
+risks:
+  - >-
+    Dienste, die bisher stillschweigend ohne Authentifizierung liefen, starten
+    ohne Zutun nicht mehr. Das ist die beabsichtigte Wirkung; der Ausweg ist
+    eine ausdrueckliche Umgebungsvariable und kein Zufall.
+  - >-
+    Der In-Memory-Pfad bleibt fuer den Fall ohne konfigurierte Datenbank
+    erhalten. Faellt eine konfigurierte Datenbank aus, wird der Fehler
+    weitergereicht statt verdeckt - Aufrufer sehen dann einen Fehler, wo sie
+    vorher einen falschen Erfolg sahen.
+umsetzung:
+  dokumentablage: >-
+    save_to_store, get_from_store und list_from_store reichen den Fehler weiter,
+    sobald ein Repository uebergeben ist. Der Prozessspeicher bleibt fuer den
+    Fall ohne Repository und meldet das mit persisted: False ausdruecklich.
+  authentifizierung: >-
+    In allen sechs Diensten haelt der Importzweig den Grund in
+    AUTH_IMPORT_ERROR fest. Ist die Middleware nicht verfuegbar, startet der
+    Dienst nicht mehr - es sei denn, ALLOW_UNAUTHENTICATED_SERVICE ist
+    ausdruecklich gesetzt; dann steht bei jedem Start eine
+    CRITICAL-Zeile im Protokoll.
+  images: >-
+    packages/auth-shared wird in services/crm, services/finance und
+    services/inventory installiert (Wurzelkontext war dort bereits gegeben).
+    services/ai wurde dafuer von ./services/ai auf den Wurzelkontext umgestellt
+    und seine COPY-Pfade entsprechend qualifiziert.
+nebenbefund_dev_datenbank: >-
+  Beim Nachweis zeigte sich, dass die Tabelle documents in der lokalen
+  Entwicklungsdatenbank gar nicht existierte: to_regclass lieferte None, obwohl
+  alembic/versions/add_documents_json_table.py sie anlegt. Der Fallback hat
+  auch das verdeckt - saemtliche Dokumentzugriffe liefen still gegen den
+  Prozessspeicher. Fuer den Testlauf wurde die Tabelle nach der Vorlage der
+  Migration angelegt; der Zustand der Entwicklungsdatenbank selbst ist damit
+  nicht saniert.
+nicht_umgesetzt:
+  - >-
+    services/workflow und services/finance/fibu-gateway bekommen auth-shared
+    nicht ins Image: beide stehen in keiner Compose-Datei, und der Dockerfile
+    von fibu-gateway ist 0 Byte gross. Ein Image zu erfinden waere Produktarbeit
+    ohne Vorgabe.
+  - >-
+    services/crm und services/inventory kopieren im Wurzelkontext das
+    Wurzelmanifest und das Wurzel-app-Verzeichnis. Ob das so gewollt ist oder
+    ein Altstand, ist eine eigene Frage und wurde hier nicht entschieden.
+tests:
+  - >-
+    tests/test_silent_failures.py - 16 Vertraege: Schreib-, Lese- und
+    Listenfehler werden weitergereicht statt als Erfolg gemeldet; der Pfad ohne
+    Datenbank bleibt erhalten und weist sich mit persisted: False aus; je
+    Dienst wird geprueft, dass der Importfehler festgehalten, der Start
+    verweigert und der ausdrueckliche Ausweg protokolliert wird.
+  - >-
+    Auswahl "document or invoice or beleg or sales or store" ueber tests/:
+    602 passed, 2 skipped.
+  - >-
+    Alle Tests, die den Dokumentspeicher beruehren (8 Dateien): 18 passed.
+  - >-
+    tests/test_process_kernel_wave1_contracts.py: 36 passed, nachdem der Test
+    den Schreibvorgang selbst stellt statt sich auf ein verschlucktes
+    Scheitern zu verlassen.
+external_gates:
+  - >-
+    Betriebsentscheidung, ob Authentifizierung in laufenden Umgebungen scharf
+    geschaltet wird. Der Ausweg ALLOW_UNAUTHENTICATED_SERVICE erlaubt einen
+    stufenweisen Rollout; er ist laut, nicht still.
+  - >-
+    Docker-Bau der vier geaenderten Images wurde hier nicht ausgefuehrt. Die
+    COPY-Quellpfade sind einzeln auf Existenz geprueft, der Compose-Eintrag
+    parst; der Bau selbst gehoert in die Pipeline.
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Fehlschlag wird als Fehlschlag gemeldet. Eine Anlage, die nicht
+    persistiert, gilt nicht als erfolgreich, und ein Dienst ohne
+    Authentifizierung laeuft nicht unbemerkt.
+  architektur_vertrag: >-
+    Ausweichpfade sind erlaubt, wenn sie erkennbar sind: der Prozessspeicher
+    nur ohne konfigurierte Datenbank und mit persisted: False, der Betrieb ohne
+    Authentifizierung nur mit ausdruecklicher Umgebungsvariable und
+    CRITICAL-Protokollzeile.
+  daten_vertrag: >-
+    Keine Migration und keine Datenmutation im Produktcode. Die Tabelle
+    documents wurde ausschliesslich in der lokalen Entwicklungsdatenbank nach
+    der Vorlage der vorhandenen Migration angelegt.
+  test_vertrag: >-
+    Die Vertraege pruefen das Verhalten gegen ein absichtlich fehlschlagendes
+    Repository, nicht die Abwesenheit von Zeichenketten; die Auth-Pruefung
+    liest die Quelle, weil die sechs Dienste nicht importierbar sind.
+  security_vertrag: >-
+    Der Normalfall ist ab jetzt der abgesicherte: ohne auth_shared kein Start.
+    Der Ausweg muss ausdruecklich gesetzt werden und protokolliert sich selbst.
+  betriebs_vertrag: >-
+    Die vier geaenderten Images muessen neu gebaut werden. Wer die Dienste
+    vorher ohne Authentifizierung betrieben hat, braucht entweder das neue
+    Image oder ALLOW_UNAUTHENTICATED_SERVICE.
+  dokumentations_vertrag: >-
+    Was nicht umgesetzt wurde, ist benannt: zwei Dienste ohne Image und die
+    offene Frage zu den Wurzel-COPYs in crm und inventory.
+verification:
+  - "python -m pytest tests/test_silent_failures.py"
+  - "python -m pytest tests/ -k 'document or invoice or beleg or sales or store'"

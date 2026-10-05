@@ -6,6 +6,7 @@ that was previously inline in the finance_read_models endpoint file.
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime, timezone, timedelta
 from typing import Any, Callable
 
@@ -37,6 +38,9 @@ from app.api.v1.schemas.finance_read_models_schemas import (
     WorkflowSlaProfile,
     WorkflowStepSlaSummary,
 )
+
+logger = logging.getLogger(__name__)
+
 
 # ── In-memory projection store ─────────────────────────────────────────────────
 
@@ -165,71 +169,6 @@ def _count_projection_payload_items(payload: dict[str, Any]) -> int:
     return 1
 
 
-# ── DB table bootstrap helpers ─────────────────────────────────────────────────
-
-def _ensure_projection_registry_table(db: Session) -> None:
-    try:
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_shared.process_projection_registry (
-                tenant_id TEXT NOT NULL,
-                projection_key TEXT NOT NULL,
-                item_count INTEGER NOT NULL DEFAULT 0,
-                last_rebuilt_at TEXT NULL,
-                last_accessed_at TEXT NULL,
-                updated_at TEXT NOT NULL,
-                PRIMARY KEY (tenant_id, projection_key)
-            )
-        """))
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-
-
-def _ensure_projection_snapshot_table(db: Session) -> None:
-    try:
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_shared.process_projection_snapshots (
-                tenant_id TEXT NOT NULL,
-                projection_key TEXT NOT NULL,
-                schema_version INTEGER NOT NULL DEFAULT 1,
-                item_count INTEGER NOT NULL DEFAULT 0,
-                payload TEXT NOT NULL,
-                rebuilt_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                PRIMARY KEY (tenant_id, projection_key)
-            )
-        """))
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-
-
-def _ensure_projection_cursor_table(db: Session) -> None:
-    try:
-        db.execute(text("""
-            CREATE TABLE IF NOT EXISTS domain_shared.process_projection_cursors (
-                tenant_id TEXT NOT NULL,
-                consumer_id TEXT NOT NULL,
-                projection_key TEXT NOT NULL,
-                schema_version INTEGER NOT NULL DEFAULT 1,
-                cursor_token TEXT NULL,
-                last_event_id TEXT NULL,
-                source_rebuilt_at TEXT NULL,
-                replay_from_event_id TEXT NULL,
-                replay_to_event_id TEXT NULL,
-                status TEXT NOT NULL DEFAULT 'active',
-                updated_at TEXT NOT NULL,
-                PRIMARY KEY (tenant_id, consumer_id, projection_key)
-            )
-        """))
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-
-
 # ── DB persistence helpers ─────────────────────────────────────────────────────
 
 def persist_projection_registry_entry(
@@ -245,7 +184,6 @@ def persist_projection_registry_entry(
         return
     now = datetime.now(tz=timezone.utc).isoformat()
     try:
-        _ensure_projection_registry_table(db)
         db.execute(
             text("""
                 INSERT INTO domain_shared.process_projection_registry (
@@ -289,7 +227,6 @@ def persist_projection_snapshot(
     item_count = _count_projection_items(payload)
     now = datetime.now(tz=timezone.utc).isoformat()
     try:
-        _ensure_projection_snapshot_table(db)
         db.execute(
             text("""
                 INSERT INTO domain_shared.process_projection_snapshots (
@@ -339,7 +276,6 @@ def persist_projection_cursor(
         return
     now = datetime.now(tz=timezone.utc).isoformat()
     try:
-        _ensure_projection_cursor_table(db)
         db.execute(
             text("""
                 INSERT INTO domain_shared.process_projection_cursors (
@@ -383,6 +319,22 @@ def persist_projection_cursor(
             pass
 
 
+def _rollback_quietly(db: Session | None) -> None:
+    """Gibt eine abgebrochene Transaktion frei.
+
+    Postgres bricht nach einem Fehler die ganze Transaktion ab. Ohne Rollback
+    scheitert jede weitere Abfrage derselben Anfrage an der abgebrochenen
+    Transaktion — der Lesefehler einer Statusquelle wuerde den ganzen
+    Statusabruf mitnehmen.
+    """
+    if db is None:
+        return
+    try:
+        db.rollback()
+    except Exception:  # noqa: BLE001 — Verbindung bereits geschlossen
+        pass
+
+
 # ── DB read helpers ────────────────────────────────────────────────────────────
 
 def _load_persisted_projection_registry(
@@ -392,7 +344,6 @@ def _load_persisted_projection_registry(
     if db is None:
         return {}, None
     try:
-        _ensure_projection_registry_table(db)
         rows = db.execute(
             text("""
                 SELECT projection_key, item_count, last_rebuilt_at
@@ -403,6 +354,12 @@ def _load_persisted_projection_registry(
             {"tenant_id": tenant_id},
         ).mappings().all()
     except Exception:
+        # Der Projektionsstand ist Betriebsauskunft, kein Beleg. Ein Lesefehler
+        # einer Quelle darf den Statusabruf nicht abbrechen, muss aber im
+        # Protokoll stehen: Die Antwort zeigt dann einen stehenden Stand, und
+        # das ist auffaellig, nicht beruhigend.
+        logger.exception("Projektionsregister nicht lesbar (Mandant %s)", tenant_id)
+        _rollback_quietly(db)
         return {}, None
 
     entries: dict[str, ProjectionStatusEntry] = {}
@@ -428,7 +385,6 @@ def _load_persisted_projection_snapshot_meta(
     if db is None:
         return 0, None
     try:
-        _ensure_projection_snapshot_table(db)
         rows = db.execute(
             text("""
                 SELECT projection_key, rebuilt_at
@@ -439,6 +395,8 @@ def _load_persisted_projection_snapshot_meta(
             {"tenant_id": tenant_id},
         ).mappings().all()
     except Exception:
+        logger.exception("Projektionsabbilder nicht lesbar (Mandant %s)", tenant_id)
+        _rollback_quietly(db)
         return 0, None
 
     last_snapshot_at: str | None = None
@@ -458,7 +416,6 @@ def _load_persisted_projection_cursor_meta(
     if db is None:
         return 0, None, None
     try:
-        _ensure_projection_cursor_table(db)
         statement = """
             SELECT consumer_id, projection_key, updated_at, last_event_id
             FROM domain_shared.process_projection_cursors
@@ -471,6 +428,8 @@ def _load_persisted_projection_cursor_meta(
         statement += " ORDER BY consumer_id, projection_key"
         rows = db.execute(text(statement), params).mappings().all()
     except Exception:
+        logger.exception("Projektions-Cursor nicht lesbar (Mandant %s)", tenant_id)
+        _rollback_quietly(db)
         return 0, None, None
 
     last_cursor_advanced_at: str | None = None
@@ -509,7 +468,6 @@ def _load_persisted_projection_cursor_entries(
     if db is None:
         return {}
     try:
-        _ensure_projection_cursor_table(db)
         statement = """
             SELECT consumer_id, projection_key, status, updated_at, last_event_id,
                    replay_from_event_id, replay_to_event_id
@@ -523,6 +481,8 @@ def _load_persisted_projection_cursor_entries(
         statement += " ORDER BY consumer_id, projection_key"
         rows = db.execute(text(statement), params).mappings().all()
     except Exception:
+        logger.exception("Projektions-Cursor nicht lesbar (Mandant %s)", tenant_id)
+        _rollback_quietly(db)
         return {}
 
     entries: dict[str, ProjectionStatusEntry] = {}
@@ -597,7 +557,7 @@ def _latest_outbox_event_id(
                   AND ({' OR '.join(conditions)})
                 ORDER BY timestamp DESC
                 LIMIT 1
-            """),
+            """),  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params,
         ).mappings().first()
     except Exception:

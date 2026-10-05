@@ -75,12 +75,12 @@ export function PricingForm({
         <div>
           <Label>SKU</Label>
           <Input value={values.sku} readOnly />
-          {errors.sku !== undefined ? <p className="text-sm text-red-600">{errors.sku}</p> : null}
+          {errors.sku !== undefined ? <p className="text-sm text-status-error">{errors.sku}</p> : null}
         </div>
         <div>
           <Label>Artikel</Label>
           <Input value={values.name} onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))} />
-          {errors.name !== undefined ? <p className="text-sm text-red-600">{errors.name}</p> : null}
+          {errors.name !== undefined ? <p className="text-sm text-status-error">{errors.name}</p> : null}
         </div>
       </div>
 
@@ -88,24 +88,24 @@ export function PricingForm({
         <div>
           <Label>Währung</Label>
           <Input value={values.currency} onChange={(event) => setValues((current) => ({ ...current, currency: event.target.value }))} />
-          {errors.currency !== undefined ? <p className="text-sm text-red-600">{errors.currency}</p> : null}
+          {errors.currency !== undefined ? <p className="text-sm text-status-error">{errors.currency}</p> : null}
         </div>
         <div>
           <Label>Einheit</Label>
           <Input value={values.unit} onChange={(event) => setValues((current) => ({ ...current, unit: event.target.value }))} />
-          {errors.unit !== undefined ? <p className="text-sm text-red-600">{errors.unit}</p> : null}
+          {errors.unit !== undefined ? <p className="text-sm text-status-error">{errors.unit}</p> : null}
         </div>
         <div>
           <Label>Basis-Netto</Label>
           <Input value={values.baseNet} onChange={(event) => setValues((current) => ({ ...current, baseNet: event.target.value }))} />
-          {errors.baseNet !== undefined ? <p className="text-sm text-red-600">{errors.baseNet}</p> : null}
+          {errors.baseNet !== undefined ? <p className="text-sm text-status-error">{errors.baseNet}</p> : null}
         </div>
       </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h4 className="font-semibold">Staffelpreise</h4>
-          <Button type="button" size="sm" onClick={addTier}>
+          <Button type="button" onClick={addTier} className="min-h-touch">
             Tier hinzufügen
           </Button>
         </div>

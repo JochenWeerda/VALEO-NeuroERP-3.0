@@ -1,0 +1,36 @@
+slice_id: PAYMENT-CSV-IMPORT-INTEGRITY-20260930
+title: Atomarer und wahrheitsgemäßer CSV-Zahlungsimport
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-09-30
+completed_at: 2026-10-01
+coordination: Claim 2b5f9704f; nur CSV-Import-Hunk und numerische Transaktionsratsche.
+goal: Gültige CSV-Daten vollständig speichern und falsche Erfolge verhindern.
+file_ownership:
+  - app/api/v1/endpoints/payment_matching.py
+  - tests/test_payment_csv_import_integrity.py
+  - scripts/check_dead_transactions.py
+  - docs/quality-assurance/payment-csv-import-integrity-20260930.md
+acceptance:
+  - Gültige Zeilen sind keine Selbstduplikate; echte Duplikate bleiben blockiert.
+  - Ein Schreibfehler verhindert jeden Teilimport.
+  - Antwort und Datenbank behalten die Eingabewährung und den exakten Betrag.
+  - Zeitgleiche Importe verwenden verschiedene Kennungen.
+  - Tatsächlicher Befundabbau wird in der Transaktionsratsche nachgezogen.
+tests:
+  - python -m pytest tests/test_payment_csv_import_integrity.py --noconftest --no-cov -q -o addopts=
+  - python -m pytest tests/test_process_kernel_wave31_dq_finance_import_paths.py tests/test_process_kernel_wave84_bulk_dq_batch.py --noconftest --no-cov -q -o addopts=
+  - python scripts/check_dead_transactions.py
+risks:
+  - PostgreSQL-Verträge brauchen eine explizite migrierte Testdatenbank.
+  - Andere Bankimport- und Matchingwege bleiben separate Fachgaps.
+ai_harness:
+  fachlicher_vertrag: Erfolg bedeutet persistierter Kopf und alle validierten Zeilen.
+  architektur_vertrag: Bestehende API und Tabellen; keine neue Importschicht.
+  daten_vertrag: Ein Commit, vollständiger Rollback, unveränderte Währung.
+  test_vertrag: Positive Imports plus echte PostgreSQL-Fehler im HTTP-Vertrag.
+  security_vertrag: Generischer Speicherfehler ohne SQL- oder Secret-Ausgabe.
+  betriebs_vertrag: Eindeutige Kennungen und nachgezogene Transaktionsratsche.
+  dokumentations_vertrag: Workboard, eigener Open-Gaps-Abschnitt und QA-Bericht.
+external_gates:
+  - Frischer CI-PostgreSQL-Prüfstand für die echten Speicherverträge.

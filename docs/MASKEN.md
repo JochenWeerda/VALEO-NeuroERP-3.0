@@ -1,7 +1,13 @@
 # VALEO NeuroERP - Eingabemasken Standard
 
-**Version:** 1.0.0  
-**Datum:** 2025-01-16  
+**Nachtrag 2026-08-21:** Native Listenmasken koennen statusabhaengige
+`tables[].rowActions` zentral ueber den Single Mask Builder deklarieren. Die
+Referenz `schnittstelle/mde-inbox` nutzt dies fuer begruendete Retry-Aktionen
+auf fehlgeschlagenen oder quarantinierten MDE-Ereignissen; Einzelmasken bauen
+keine eigene Aktionsspalte.
+
+**Version:** 1.0.0
+**Datum:** 2025-01-16
 **Status:** ✅ Aktiv
 
 ## 📋 Übersicht
@@ -13,6 +19,8 @@ Dieses Dokument definiert die **Pflicht-Funktionalitäten** und **Design-Prinzip
 ### Grundsatz
 
 **Ähnliche Belege in einer Belegfolge müssen sich im Design, Layout und in den grundsätzlichen Funktionalitäten möglichst ähneln**, damit sich Benutzer schnell zurechtfinden können.
+
+Die **Objekte** der Belegkette (Auftrag, Lieferung, Rechnung, Kontrakt, Charge) stehen im [Canonical ERD](architecture/views/erd-canonical-domain.md). Dieses Dokument regelt das **Layout**, nicht die Objektmenge.
 
 ### Belegfolgen
 
@@ -29,6 +37,14 @@ Dieses Dokument definiert die **Pflicht-Funktionalitäten** und **Design-Prinzip
 #### Einkauf (Procurement)
 1. **Angebot** → 2. **Bestellung** → 3. **Wareneingang** → 4. **Rechnung**
    - Ähnliche Struktur wie Verkauf, aber mit Lieferanten statt Kunden
+   - **Führende Bestellmaske** ist native `einkauf/purchase-order`
+     (`/einkauf/bestellung/:id`). Register: Bestell-Kopf, Positionen,
+     Anfrage/Angebot/Auftrag, Zahlungsbedingungen, Bedarf und Fall,
+     Kommunikation. Der Bestellfall steht im Kopf (Bestand/Abverkauf,
+     Direktlieferung, Innovation). Ladetermin ist vom Liefertermin getrennt.
+   - Anlage über `/einkauf/bestellungen/neu` wählt zuerst den Bestellfall.
+     Die Liste liegt noch auf Compat-`purchase-orders`; das ist ein bekannter
+     zweiter Speicher, keine zweite führende Maske.
 
 #### Lager (Inventory)
 1. **Lagerbuchung** → 2. **Inventur** → 3. **Umlagerung**
@@ -132,9 +148,17 @@ Alle Belege in einer Belegfolge müssen folgende **gemeinsame Funktionalitäten*
 
 ### Implementierungs-Regeln
 
-1. **Layout-Template verwenden:**
-   - Kopiere Layout-Struktur von `lieferschein-erfassung.tsx`
-   - Passe nur beleg-spezifische Felder an
+1. **Zentralen Layout-Vertrag verwenden:**
+   - Neue und migrierte Standardmasken deklarieren die Struktur in der
+     `ScreenDefinition`; keine Seitenkopie von `lieferschein-erfassung.tsx`.
+   - `RenderPlan` und `UniversalMaskRenderer` setzen Floorplan, Dichte,
+     Register, Summary-Position, Sticky-Regionen und Aktionszonen zentral um.
+   - Spezialisierte Prozessmasken bleiben nur gemaess ADR-031 zulaessig.
+   - Metadatengetriebene Object Page (Fiori-Elements-Methode, ohne SAP-Chrome):
+     CDS-Fachmodell → `ScreenDefinition`; `@UI.facet` → `tabs[]`;
+     `@UI.identification` → `fields[]`; `@Consumption.valueHelpDefinition` →
+     LookupField `type: lookup`; List Report → `worklist`; Object Page →
+     `objectPage`. Generator ist der Schema-Compiler, nicht Fiori Tools.
 
 2. **Gleiche Komponenten verwenden:**
    - `CustomerSelectionDialog` für Kunden-Auswahl
@@ -145,6 +169,8 @@ Alle Belege in einer Belegfolge müssen folgende **gemeinsame Funktionalitäten*
 3. **Gleiche Shortcuts:**
    - Alle Belege verwenden die gleichen Shortcuts (Strg+F1-F12)
    - Keine beleg-spezifischen Shortcuts ohne Dokumentation
+   - Native Masken deklarieren Shortcuts an `ScreenDefinition.actions[]`;
+     doppelte Shortcuts innerhalb einer Maske sind ungueltig.
 
 4. **Gleiche State-Struktur:**
    ```typescript
@@ -282,7 +308,7 @@ Alle Masken müssen die folgenden **globalen Shortcuts** unterstützen:
 - [ ] **Shortcut-Handler registrieren:**
   ```typescript
   import { useGlobalShortcuts } from '@/lib/shortcuts/global-shortcuts'
-  
+
   function MyMaskPage() {
     useGlobalShortcuts({
       'open-customer-selection': () => setShowCustomerDialog(true),
@@ -296,7 +322,7 @@ Alle Masken müssen die folgenden **globalen Shortcuts** unterstützen:
 - [ ] **Buttons mit ShortcutHintButton wrappen:**
   ```typescript
   import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
-  
+
   <ShortcutHintButton action="save-document" onClick={handleSave}>
     <Save className="h-4 w-4" />
     Speichern
@@ -405,4 +431,3 @@ Bei Erstellung neuer Masken:
 - ✅ Vollautomatische UAT-Tests möglich
 - ✅ Einheitliche Navigation und Bedienung
 - ✅ Barrierefreiheit und Accessibility
-

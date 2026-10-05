@@ -11,13 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -139,7 +133,7 @@ export default function FieldServiceTaskEditPage(): JSX.Element {
   return (
     <div className="mx-auto max-w-lg space-y-4 p-4">
       <div className="flex items-center gap-2">
-        <Button type="button" variant="ghost" size="sm" onClick={() => navigate(backHref)}>
+        <Button type="button" variant="ghost" className="min-h-touch" onClick={() => navigate(backHref)}>
           <ArrowLeft className="h-4 w-4 mr-1" />
           {t('crud.actions.back', { defaultValue: 'Zurück' })}
         </Button>
@@ -162,55 +156,40 @@ export default function FieldServiceTaskEditPage(): JSX.Element {
           </div>
           <div className="space-y-2">
             <Label>{t('crud.fields.type', { defaultValue: 'Typ' })}</Label>
-            <Select value={taskType} onValueChange={setTaskType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TASK_TYPES.map((tt) => (
-                  <SelectItem key={tt} value={tt}>
-                    {tt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect ariaLabel="Typ" value={taskType} onValueChange={setTaskType}>
+              {TASK_TYPES.map((tt) => (
+                <option key={tt} value={tt}>
+                  {tt}
+                </option>
+              ))}
+            </NativeSelect>
           </div>
           <div className="space-y-2">
             <Label>{t('crud.fields.priority', { defaultValue: 'Priorität' })}</Label>
-            <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PRIORITIES.map((pr) => (
-                  <SelectItem key={pr} value={pr}>
-                    {pr}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect ariaLabel="Priorität" value={priority} onValueChange={setPriority}>
+              {PRIORITIES.map((pr) => (
+                <option key={pr} value={pr}>
+                  {pr}
+                </option>
+              ))}
+            </NativeSelect>
           </div>
           <div className="space-y-2">
             <Label>{t('crud.fields.status', { defaultValue: 'Status' })}</Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((st) => (
-                  <SelectItem key={st} value={st}>
-                    {st}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect ariaLabel="Status" value={status} onValueChange={setStatus}>
+              {STATUSES.map((st) => (
+                <option key={st} value={st}>
+                  {st}
+                </option>
+              ))}
+            </NativeSelect>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={updateMutation.isPending}>
+            <Button type="submit" className="min-h-touch" disabled={updateMutation.isPending}>
               {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('crud.actions.save', { defaultValue: 'Speichern' })}
             </Button>
-            <Button type="button" variant="outline" onClick={() => navigate(backHref)}>
+            <Button type="button" variant="outline" className="min-h-touch" onClick={() => navigate(backHref)}>
               {t('crud.actions.cancel', { defaultValue: 'Abbrechen' })}
             </Button>
           </div>

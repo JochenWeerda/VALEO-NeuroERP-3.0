@@ -170,13 +170,16 @@ class ISO27001EncryptionService:
 
     def _generate_master_key(self) -> bytes:
         """Generate or retrieve master key"""
-        # In production, this would be stored in HSM
-        # For development, generate a consistent key
-        seed = "VALEO-NeuroERP-ISO27001-Master-Key-2025"
+        seed = os.environ.get("VALEO_ENCRYPTION_MASTER_KEY")
+        if not seed:
+            logger.warning(
+                "VALEO_ENCRYPTION_MASTER_KEY is not configured; using ephemeral development key material."
+            )
+            return os.urandom(32)
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=b"VALEO-ISO27001-Salt",
+            salt=hashes.Hash(hashes.SHA256(), backend=self.backend).finalize(),
             iterations=50000,
             backend=self.backend
         )

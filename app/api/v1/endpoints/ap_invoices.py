@@ -3,7 +3,7 @@ Accounts Payable (AP) Invoices API
 FIBU-AP-02: Eingangsrechnungen
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional, Any
@@ -28,8 +28,10 @@ from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
 
 logger = logging.getLogger(__name__)
-from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.base import BaseSchema, StatusResponse, TypedObjectOut
 from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
+from app.api.v1.schemas.mask_entity_contracts import FinanceApInvoiceOut, ap_invoice_mask_aliases
+from app.core import finance_periods
 
 
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
@@ -90,7 +92,7 @@ async def _enrich_invoice_with_approval(invoice: dict[str, Any], db: Session) ->
     response = await _load_invoice_approval_status(enriched, db)
     enriched.update(_serialize_approval_snapshot(response))
     enriched["semantic_status"] = _compute_ap_invoice_semantic_status(enriched)
-    return enriched
+    return ap_invoice_mask_aliases(enriched)
 
 
 async def _store_ap_invoice_posted_event_in_outbox(
@@ -156,7 +158,7 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
 
 
 @router.get("/{invoice_id}", summary="Ap invoice abrufen",
-    response_model=ApInvoicesOut
+    response_model=FinanceApInvoiceOut
 )
 async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
     """Ruft eine Eingangsrechnung anhand ihrer ID ab."""
@@ -320,21 +322,13 @@ async def post_ap_invoice(
     # FIBU-GL-05: block posting in closed periods
     invoice_date = invoice.get("date", datetime.now().isoformat()[:10])
     period = str(invoice_date)[:7]
-    period_status = db.execute(
-        text(
-            """
-            SELECT status
-            FROM finance_accounting_periods
-            WHERE tenant_id = :tenant_id AND period = :period
-            LIMIT 1
-            """
-        ),
-        {"tenant_id": invoice.get("tenantId", "system"), "period": period},
-    ).fetchone()
-    if period_status and str(period_status[0]) != "OPEN":
+    gesperrt = finance_periods.gesperrter_zustand(
+        db, invoice.get("tenantId", "system"), period
+    )
+    if gesperrt:
         raise HTTPException(
             status_code=403,
-            detail=f"Period {period} is {period_status[0]}. Posting is blocked."
+            detail=finance_periods.meldung(period, gesperrt),
         )
 
     # Update status to posted
@@ -494,17 +488,30 @@ async def post_ap_invoice(
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 
 
-@router.post("/{entity_id}/actions/freigeben", response_model=dict, summary="Eingangsrechnung freigeben (UIX-047)")
+@router.post("/{entity_id}/actions/freigeben", response_model=TypedObjectOut, summary="Eingangsrechnung freigeben (SPEC-P1-04)")
 async def action_freigeben(
     entity_id: str,
+    body: dict = Body(default_factory=dict),
+    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Stub: Freigabe für Eingangsrechnung — requiresConfirmation, execute folgt."""
-    return {
-        "success": True,
-        "actionKey": "freigeben",
-        "entityId": entity_id,
-        "tenantId": tenant_id,
-        "message": "Freigabe wird verarbeitet.",
-        "proposedChanges": {"approval_status": "approved", "invoice_id": entity_id},
-    }
+    from app.services.mask_action_runtime_service import run_mask_action
+
+    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
+        return {
+            "summary": "Eingangsrechnung freigegeben.",
+            "affectedIds": [eid],
+            "mutation": {"approval_status": "approved", "invoice_id": eid},
+        }
+
+    result = run_mask_action(
+        db,
+        action_key="freigeben",
+        entity_type="ap_invoice",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        execute_fn=execute,
+        outbox_event_type="finance.ap_invoice.approved",
+    )
+    return result.model_dump()

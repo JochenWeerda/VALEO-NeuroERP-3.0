@@ -12,8 +12,8 @@ import { useSalesMatchOrders, useSalesMatch, type SalesMatchOrderRow } from '@/l
  */
 
 const STATUS_STYLE: Record<string, string> = {
-  vollstaendig: 'text-emerald-700', teilgeliefert: 'text-amber-700',
-  ueberliefert: 'text-red-700', offen: 'text-muted-foreground',
+  vollstaendig: 'text-status-success', teilgeliefert: 'text-status-warning',
+  ueberliefert: 'text-status-error', offen: 'text-muted-foreground',
 }
 
 function Row({ o, active, onClick }: { o: SalesMatchOrderRow; active: boolean; onClick: () => void }) {
@@ -42,7 +42,7 @@ export default function AuftragLieferscheinAbgleichPage() {
       <div className="flex items-center gap-2">
         <PackageCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Auftrag-Lieferschein-Abgleich</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
+        <Button variant="outline" className="ml-auto" onClick={() => void orders.refetch()} disabled={orders.isFetching}>
           {orders.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -54,7 +54,7 @@ export default function AuftragLieferscheinAbgleichPage() {
             <CardTitle className="text-sm">Aufträge</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="min-h-touch pl-7" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
@@ -83,7 +83,7 @@ export default function AuftragLieferscheinAbgleichPage() {
                 <span className="font-medium">{d.order_number}</span>
                 <span className="text-sm text-muted-foreground">{d.kunde}</span>
                 {d.summary?.vollstaendig_geliefert
-                  ? <Badge className="bg-emerald-600">vollständig geliefert</Badge>
+                  ? <Badge variant="success">vollständig geliefert</Badge>
                   : <Badge variant="secondary">{d.summary?.offen_positionen} Position(en) offen</Badge>}
                 {d.summary?.hat_abweichung && <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />Abweichung</Badge>}
               </div>
@@ -158,7 +158,7 @@ export default function AuftragLieferscheinAbgleichPage() {
                   <CardContent className="space-y-1.5">
                     {d.luecken.map((l, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm">
-                        <AlertTriangle size={15} className="mt-0.5 text-amber-600 shrink-0" />
+                        <AlertTriangle size={15} className="mt-0.5 text-status-warning shrink-0" />
                         <span>{l.text}</span>
                       </div>
                     ))}

@@ -235,7 +235,7 @@ export function CustomerSelectionDialog({
             ) : isLoading ? (
               <div className="p-4 text-center text-muted-foreground">Lade Kunden...</div>
             ) : fetchError ? (
-              <div className="p-4 text-center text-red-600">
+              <div className="p-4 text-center text-status-error">
                 <p>Fehler beim Laden: {fetchError instanceof Error ? fetchError.message : 'Unbekannter Fehler'}</p>
               </div>
             ) : (
@@ -282,7 +282,7 @@ export function CustomerSelectionDialog({
               <Label htmlFor="search-delivery-address" className="text-sm font-normal cursor-pointer">
                 Suche nach Lief.-Adresse
               </Label>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" className="min-h-touch">
                 Neu
               </Button>
             </div>

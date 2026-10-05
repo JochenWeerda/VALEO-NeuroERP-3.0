@@ -95,6 +95,27 @@ def _count_compat_flex(path: str) -> int:
     return count
 
 
+def count_all(
+    include_compat_flex: bool = False,
+) -> tuple[int, dict[str, int], int]:
+    """Return (weak_total, {filename: weak_count}, compat_flex_total)."""
+    total_weak = 0
+    total_flex = 0
+    by_file: dict[str, int] = {}
+    for fname in sorted(os.listdir(ENDPOINTS_DIR)):
+        if not fname.endswith(".py"):
+            continue
+        path = os.path.join(ENDPOINTS_DIR, fname)
+        count, _findings = _count_weak(path, include_compat_flex=False)
+        if count > 0:
+            by_file[fname] = count
+            total_weak += count
+        total_flex += _count_compat_flex(path)
+    if include_compat_flex:
+        return total_weak, by_file, total_flex
+    return total_weak, by_file, total_flex
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Check for weak response_model types (dict/list/Any)."

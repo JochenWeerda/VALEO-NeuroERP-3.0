@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw, CheckCircle2, AlertTriangle, XCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Callout } from '@/components/ui/callout'
 
 interface GateStatus {
   system_id: string;
@@ -30,25 +31,25 @@ const STATUS_CONFIG = {
     label: "OK",
     variant: "default" as const,
     icon: CheckCircle2,
-    className: "text-green-600",
+    className: "text-status-success",
   },
   warning: {
     label: "Warnung",
     variant: "secondary" as const,
     icon: AlertTriangle,
-    className: "text-yellow-600",
+    className: "text-status-warning",
   },
   faellig: {
     label: "Fällig",
     variant: "destructive" as const,
     icon: Clock,
-    className: "text-orange-600",
+    className: "text-status-warning",
   },
   fehler: {
     label: "Fehler",
     variant: "destructive" as const,
     icon: XCircle,
-    className: "text-red-600",
+    className: "text-status-error",
   },
   unbekannt: {
     label: "Unbekannt",
@@ -87,9 +88,9 @@ function GateCard({ gate }: { gate: GateStatus }) {
       </CardHeader>
       <CardContent className="space-y-2">
         {gate.hinweis && (
-          <div className="rounded-md bg-yellow-50 border border-yellow-200 px-3 py-2 text-sm text-yellow-800">
+          <Callout variant="warning" className="rounded-md border px-3 py-2 text-sm">
             {gate.hinweis}
-          </div>
+          </Callout>
         )}
         <dl className="grid grid-cols-1 gap-1 text-xs text-muted-foreground">
           {detailKeys.map(([k, v]) => (
@@ -129,7 +130,7 @@ export default function ExterneGatesPage() {
             Integrationsstatus: DATEV · ELSTER · TSE · DMS · Bank/SEPA
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+        <Button variant="outline" onClick={() => refetch()} disabled={isFetching} className="min-h-touch">
           <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
           Aktualisieren
         </Button>
@@ -143,11 +144,11 @@ export default function ExterneGatesPage() {
             <div className="text-xs text-muted-foreground">Systeme gesamt</div>
           </Card>
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-green-600">{summary["ok"] ?? 0}</div>
+            <div className="text-2xl font-bold text-status-success">{summary["ok"] ?? 0}</div>
             <div className="text-xs text-muted-foreground">OK</div>
           </Card>
           <Card className="text-center p-4">
-            <div className={`text-2xl font-bold ${problemCount > 0 ? "text-orange-600" : "text-muted-foreground"}`}>
+            <div className={`text-2xl font-bold ${problemCount > 0 ? "text-status-warning" : "text-muted-foreground"}`}>
               {problemCount}
             </div>
             <div className="text-xs text-muted-foreground">Handlungsbedarf</div>
@@ -166,9 +167,9 @@ export default function ExterneGatesPage() {
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-red-800 text-sm">
+        <Callout variant="error" className="rounded-md border px-4 py-3 text-sm">
           Fehler beim Laden: {String(error)}
-        </div>
+        </Callout>
       )}
 
       {data && (

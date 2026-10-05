@@ -44,7 +44,7 @@ export default function KreditlimitPruefungPage() {
       <div className="flex items-center gap-2">
         <ShieldCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Kreditlimit-Prüfung</h1>
-        <Button variant="outline" size="sm" className="ml-auto"
+        <Button variant="outline" className="min-h-touch ml-auto"
           onClick={() => { void customers.refetch(); void orders.refetch() }}
           disabled={customers.isFetching || orders.isFetching}>
           {customers.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
@@ -134,7 +134,7 @@ export default function KreditlimitPruefungPage() {
                   <div><div className="text-xs text-muted-foreground">Exposure (andere)</div><div className="font-semibold tabular-nums">{eur(d.kredit?.exposure)}</div></div>
                   <div><div className="text-xs text-muted-foreground">Verfügbar</div><div className="font-semibold tabular-nums">{eur(d.kredit?.verfuegbar)}</div></div>
                   <div><div className="text-xs text-muted-foreground">Auftragswert</div><div className="font-semibold tabular-nums">{eur(d.auftrag_betrag)}</div></div>
-                  <div><div className="text-xs text-muted-foreground">Auslastung mit Auftrag</div><div className={`font-semibold tabular-nums ${(d.kredit?.auslastung_neu_pct ?? 0) >= 100 ? 'text-red-700' : (d.kredit?.auslastung_neu_pct ?? 0) >= 80 ? 'text-amber-700' : 'text-emerald-700'}`}>{d.kredit?.limit ? `${d.kredit?.auslastung_neu_pct}%` : '—'}</div></div>
+                  <div><div className="text-xs text-muted-foreground">Auslastung mit Auftrag</div><div className={`font-semibold tabular-nums ${(d.kredit?.auslastung_neu_pct ?? 0) >= 100 ? 'text-status-error' : (d.kredit?.auslastung_neu_pct ?? 0) >= 80 ? 'text-status-warning' : 'text-status-success'}`}>{d.kredit?.limit ? `${d.kredit?.auslastung_neu_pct}%` : '—'}</div></div>
                   <div><div className="text-xs text-muted-foreground">Offen unberechnet</div><div className="font-semibold tabular-nums">{d.summary?.offen_unberechnet} / {d.summary?.lieferscheine} LS</div></div>
                 </CardContent>
               </Card>

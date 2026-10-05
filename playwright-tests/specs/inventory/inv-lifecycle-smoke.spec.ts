@@ -29,7 +29,8 @@ test.describe('@smoke Inventory Lot Lifecycle', () => {
     expect(res.status()).toBe(201)
     const body = await res.json()
     expect(body).toHaveProperty('id')
-    expect(body.current_qty).toBe(1000)
+    // Decimal quantities are JSON strings; compare their exact decimal value.
+    expect(body.current_qty).toMatch(/^1000(?:\.0+)?$/)
     expect(body.status).toBe('AKTIV')
     lotId = body.id
     await ctx.dispose()

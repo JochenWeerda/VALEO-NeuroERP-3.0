@@ -7,7 +7,8 @@ describe('dashboard-catalog', () => {
     const sections = await loadNavSections()
     const byId = new Map(sections.map((section) => [section.id, section]))
 
-    expect(getSectionPresentation(byId.get('workflow')!, 'de').landingPath).toBe('/workflow/flow-spine-studio')
+    expect(getSectionPresentation(byId.get('workflow')!, 'de').landingPath).toBe('/workflow/leitstand')
+    expect(getSectionPresentation(byId.get('workflow')!, 'de').landingLabel).toBe('Leitstand')
     expect(getSectionPresentation(byId.get('annahme')!, 'de').landingPath).toBe('/annahme/warteschlange')
     expect(getSectionPresentation(byId.get('verkauf')!, 'de').landingPath).toBe('/dashboard/sales')
     expect(getSectionPresentation(byId.get('compliance')!, 'de').landingPath).toBe('/policies')

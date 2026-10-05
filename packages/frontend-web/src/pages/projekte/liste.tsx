@@ -8,9 +8,11 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, FolderKanban, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 export default function ProjekteListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: projekte = [], isError, error, refetch } = useProjekte()
 
@@ -44,25 +46,29 @@ export default function ProjekteListePage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'name' as const, label: 'Projekt', render: (p: Projekt) => <button onClick={() => navigate(`/projekte/${p.id}`)} className="font-medium text-blue-600 hover:underline">{p.name}</button> },
+    { key: 'name' as const, label: 'Projekt', render: (p: Projekt) => <button type="button" onClick={() => navigate(`/projekte/${p.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">{p.name}</button> },
     { key: 'kunde' as const, label: 'Auftraggeber' },
     { key: 'startdatum' as const, label: 'Zeitraum', render: (p: Projekt) => <span className="text-sm">{new Date(p.startdatum).toLocaleDateString('de-DE')} - {new Date(p.enddatum).toLocaleDateString('de-DE')}</span> },
-    { key: 'fortschritt' as const, label: 'Fortschritt', render: (p: Projekt) => <div className="flex items-center gap-2"><div className="flex-1 h-2 bg-muted rounded-full overflow-hidden max-w-24"><div className="h-full bg-blue-600" style={{ width: `${p.fortschritt}%` }} /></div><span className="text-sm font-semibold">{p.fortschritt}%</span></div> },
+    { key: 'fortschritt' as const, label: 'Fortschritt', render: (p: Projekt) => <div className="flex items-center gap-2"><div className="flex-1 h-2 bg-muted rounded-full overflow-hidden max-w-24"><div className="h-full bg-primary" style={{ width: `${p.fortschritt}%` }} /></div><span className="text-sm font-semibold">{p.fortschritt}%</span></div> },
     { key: 'budget' as const, label: 'Budget', render: (p: Projekt) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(p.budget) },
     { key: 'status' as const, label: 'Status', render: (p: Projekt) => <Badge variant={p.status === 'aktiv' ? 'default' : p.status === 'abgeschlossen' ? 'outline' : 'secondary'}>{p.status === 'aktiv' ? 'Aktiv' : p.status === 'pausiert' ? 'Pausiert' : 'Abgeschlossen'}</Badge> },
   ]
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Projekte</h1><p className="text-muted-foreground">Projektmanagement</p></div><Button onClick={() => navigate('/controlling/massnahmen')} className="gap-2"><Plus className="h-4 w-4" />Massnahme anlegen</Button></div>
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h1 className="text-2xl font-bold md:text-3xl">Projekte</h1><p className="text-muted-foreground">Projekte suchen und oeffnen</p></div><Button onClick={() => navigate('/controlling/massnahmen')} className="min-h-touch gap-2 touch-manipulation"><Plus className="h-4 w-4" />Massnahme anlegen</Button></div>
+      {!isTouch ? (
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Projekte Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><FolderKanban className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{gefilterteProjekte.length}</span></div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{gefilterteProjekte.filter((p) => p.status === 'aktiv').length}</span></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Stockend/Pausiert</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{stockendeProjekte.length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Projekte Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><FolderKanban className="h-5 w-5 text-muted-foreground" /><span className="text-2xl font-bold">{gefilterteProjekte.length}</span></div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{gefilterteProjekte.filter((p) => p.status === 'aktiv').length}</span></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Stockend/Pausiert</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-warning">{stockendeProjekte.length}</span></CardContent></Card>
       </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2" onClick={handleExport}><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
-        <Card><CardHeader><CardTitle>Projekt-Folgeaktionen</CardTitle></CardHeader><CardContent className="space-y-3 text-sm"><div className="rounded-lg border p-3"><div className="font-medium">Stockende Projekte</div><div className="text-muted-foreground">{stockendeProjekte.length} Projekt(e) mit Pausen- oder Fortschrittsdruck.</div></div><Button className="w-full justify-start" variant="outline" onClick={() => { const target = stockendeProjekte[0] ?? gefilterteProjekte[0]; if (target) setSearchTerm(target.name) }}>Wichtigstes Projekt fokussieren</Button><Button className="w-full justify-start" variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumentenablage oeffnen</Button><Button className="w-full justify-start" variant="outline" onClick={() => navigate('/controlling/massnahmen')}>Massnahmenraum oeffnen</Button></CardContent></Card>
+      ) : null}
+      <div className={`grid gap-4 ${isTouch ? '' : 'xl:grid-cols-[minmax(0,1fr)_320px]'}`}>
+        <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex flex-col gap-3 sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label="Suche Projekte" placeholder="Projekt, Auftraggeber, Status" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" /></div><Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
+        {!isTouch ? (
+        <Card><CardHeader><CardTitle>Projekt-Folgeaktionen</CardTitle></CardHeader><CardContent className="space-y-3 text-sm"><div className="rounded-lg border p-3"><div className="font-medium">Stockende Projekte</div><div className="text-muted-foreground">{stockendeProjekte.length} Projekt(e) mit Pausen- oder Fortschrittsdruck.</div></div><Button className="w-full min-h-touch justify-start" variant="outline" onClick={() => { const target = stockendeProjekte[0] ?? gefilterteProjekte[0]; if (target) setSearchTerm(target.name) }}>Wichtigstes Projekt fokussieren</Button><Button className="w-full min-h-touch justify-start" variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumentenablage oeffnen</Button><Button className="w-full min-h-touch justify-start" variant="outline" onClick={() => navigate('/controlling/massnahmen')}>Massnahmenraum oeffnen</Button></CardContent></Card>
+        ) : null}
       </div>
       <Card><CardContent className="pt-6"><DataTable data={gefilterteProjekte} columns={columns} /></CardContent></Card>
     </div>

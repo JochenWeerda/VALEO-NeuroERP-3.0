@@ -149,12 +149,12 @@ function LegacyLeadDetailPage(): JSX.Element {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate('/crm/leads')}>
+          <Button variant="outline" onClick={() => navigate('/crm/leads')} className="min-h-touch">
             <ArrowLeft className="h-4 w-4 mr-2" />
             {t('common.back')}
           </Button>
           <div className="flex items-center gap-3">
-            <Target className="h-8 w-8 text-blue-600" />
+            <Target className="h-8 w-8 text-muted-foreground" />
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 {pageTitle}
@@ -175,7 +175,7 @@ function LegacyLeadDetailPage(): JSX.Element {
               variant="outline"
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="text-red-600 hover:text-red-700"
+              className="text-status-error hover:text-status-error"
             >
               {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               <Trash2 className="h-4 w-4 mr-2" />

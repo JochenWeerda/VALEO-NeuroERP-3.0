@@ -90,13 +90,12 @@ def load_mcp_tools() -> list[dict[str, Any]]:
 
 def load_events() -> list[dict[str, Any]]:
     events_file = REPO / "events_raw.json"
-    if not events_file.is_file():
-        subprocess.run(
-            [sys.executable, str(REPO / "scripts" / "extract_events.py")],
-            cwd=REPO,
-            check=True,
-            capture_output=True,
-        )
+    subprocess.run(
+        [sys.executable, str(REPO / "scripts" / "extract_events.py")],
+        cwd=REPO,
+        check=True,
+        capture_output=True,
+    )
     return json.loads(events_file.read_text(encoding="utf-8"))
 
 

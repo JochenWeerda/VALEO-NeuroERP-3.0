@@ -1,6 +1,9 @@
+import { chartSeriesColor } from './chart-palette'
+
 interface DonutDatum {
   name: string
   value: number
+  /** Ohne Angabe: kategorialer Slot nach Position; ab dem 7. Segment neutraler Sonstige-Slot. */
   color?: string
 }
 
@@ -10,8 +13,6 @@ interface SimpleDonutChartProps {
   strokeWidth?: number
   valueFormatter?: (value: number) => string
 }
-
-const DEFAULT_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d']
 
 export function SimpleDonutChart({
   data,
@@ -24,15 +25,17 @@ export function SimpleDonutChart({
   const circumference = 2 * Math.PI * radius
   let offset = 0
 
+  const segmentColor = (item: DonutDatum, index: number): string => item.color ?? chartSeriesColor(index)
+
   return (
     <div className="flex flex-col items-center gap-4">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible" role="img">
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#E2E8F0"
+          stroke="hsl(var(--muted))"
           strokeWidth={strokeWidth}
         />
         {data.map((item, index) => {
@@ -47,16 +50,18 @@ export function SimpleDonutChart({
               cy={size / 2}
               r={radius}
               fill="none"
-              stroke={item.color ?? DEFAULT_COLORS[index % DEFAULT_COLORS.length]}
+              style={{ stroke: segmentColor(item, index) }}
               strokeWidth={strokeWidth}
               strokeDasharray={dashArray}
               strokeDashoffset={dashOffset}
               strokeLinecap="butt"
               transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            />
+            >
+              <title>{`${item.name}: ${valueFormatter(item.value)}`}</title>
+            </circle>
           )
         })}
-        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-slate-900 text-2xl font-semibold">
+        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-2xl font-semibold">
           {total.toLocaleString('de-DE')}
         </text>
       </svg>
@@ -64,10 +69,10 @@ export function SimpleDonutChart({
         {data.map((item, index) => (
           <div key={item.name} className="flex items-center justify-between gap-3 text-sm">
             <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color ?? DEFAULT_COLORS[index % DEFAULT_COLORS.length] }} />
-              <span className="text-slate-700">{item.name}</span>
+              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: segmentColor(item, index) }} aria-hidden />
+              <span className="text-muted-foreground">{item.name}</span>
             </div>
-            <span className="font-medium text-slate-900">{valueFormatter(item.value)}</span>
+            <span className="font-medium tabular-nums text-foreground">{valueFormatter(item.value)}</span>
           </div>
         ))}
       </div>

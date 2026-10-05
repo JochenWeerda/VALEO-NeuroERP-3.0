@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_capture_inbox_service import CrmCaptureInboxService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -29,7 +30,7 @@ class DismissIn(BaseModel):
     resolvedBy: Optional[str] = None
 
 
-@router.get("/capture-inbox", response_model=dict[str, Any], summary="Klärfälle (nicht zugeordnete Auto-Captures) listen")
+@router.get("/capture-inbox", response_model=TypedObjectOut, summary="Klärfälle (nicht zugeordnete Auto-Captures) listen")
 def list_inbox(
     status: str = Query("offen", description="offen | zugeordnet | verworfen | alle"),
     limit: int = Query(200, ge=1, le=1000),
@@ -40,7 +41,7 @@ def list_inbox(
     return {"items": svc.list(status=status, limit=limit), "open": svc.count_open()}
 
 
-@router.post("/capture-inbox/{inbox_id}/assign", response_model=dict[str, Any], summary="Klärfall einem Kunden zuordnen")
+@router.post("/capture-inbox/{inbox_id}/assign", response_model=TypedObjectOut, summary="Klärfall einem Kunden zuordnen")
 def assign_inbox(
     inbox_id: str,
     body: AssignIn,
@@ -52,7 +53,7 @@ def assign_inbox(
     )
 
 
-@router.post("/capture-inbox/{inbox_id}/dismiss", response_model=dict[str, Any], summary="Klärfall verwerfen")
+@router.post("/capture-inbox/{inbox_id}/dismiss", response_model=TypedObjectOut, summary="Klärfall verwerfen")
 def dismiss_inbox(
     inbox_id: str,
     body: DismissIn,

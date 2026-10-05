@@ -256,8 +256,8 @@ def _serialize(obj: Any) -> Any:
 
 @router.get(
     "/activities/export/json",
-    summary="RoPA-Export als JSON (Datenschutzbehörde)",
     response_model=GdprArt30RopaOut,
+    summary="RoPA-Export als JSON (Datenschutzbehörde)",
 )
 def export_activities_json(
     db: Session = Depends(get_db),

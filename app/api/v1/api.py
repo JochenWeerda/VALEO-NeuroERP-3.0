@@ -128,6 +128,7 @@ from app.api.v1.endpoints import (
     agrar_drying_rules,
     harvest_acceptance,
     rations_optimization,
+    feeding_measures,
     grundfutter_analysen,
     rations_zugang,
     quality_protocols,
@@ -153,7 +154,6 @@ from app.api.v1.endpoints import (
     job_runner,
     controlling,
     controlling_actions,
-    kontrakt_actions,
     feed_produktion_actions,
     pos_tagesabschluss_actions,
     doc_nachweisraum_actions,
@@ -336,7 +336,7 @@ from app.api.v1.endpoints import (
 from app.api.v1.endpoints import kostenrechnung
 
 # Import domain routers
-from app.domains.agrar.api import psm, psm_proplanta
+from app.domains.agrar.api import biostimulanzien, duenger, psm, psm_proplanta, saatgut
 from app.domains.inventory.api import router as inventory_domain_router
 from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
@@ -501,6 +501,14 @@ api_router.include_router(
     tags=["sales", "offers"]
 )
 
+# Die Angebotsmaske spricht /sales/quotations — der Beleg heisst intern offer.
+api_router.include_router(
+    sales_offers.router,
+    prefix="/sales/quotations",
+    tags=["sales", "quotations"],
+    include_in_schema=False,
+)
+
 from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
 from .endpoints import scan as scan_module
 
@@ -549,6 +557,24 @@ api_router.include_router(
     docflow.router,
     prefix="/docflow",
     tags=["docflow"]
+)
+
+# FSX-MENGENMODELL: positionsbezogene Mengenzuordnung (K5).
+from app.api.v1.endpoints import document_allocations  # noqa: E402
+
+api_router.include_router(
+    document_allocations.router,
+    prefix="/docflow",
+    tags=["docflow", "allocations"]
+)
+
+# Rechnungsposition als eigenes Objekt: Ziel der Mengenzuordnung.
+from app.api.v1.endpoints import sales_invoices  # noqa: E402
+
+api_router.include_router(
+    sales_invoices.router,
+    prefix="/sales",
+    tags=["sales", "invoices"]
 )
 
 api_router.include_router(
@@ -1024,6 +1050,54 @@ api_router.include_router(
     tags=["docflow", "dms", "gobd"]
 )
 
+from app.api.v1.endpoints import docflow_return  # noqa: E402
+
+api_router.include_router(docflow_return.router)
+
+from app.api.v1.endpoints import document_control  # noqa: E402
+
+api_router.include_router(document_control.router)
+
+from app.api.v1.endpoints import production_control  # noqa: E402
+
+api_router.include_router(production_control.router)
+
+from app.api.v1.endpoints import inventory_auxiliary  # noqa: E402
+
+api_router.include_router(inventory_auxiliary.router)
+
+from app.api.v1.endpoints import billing_batch  # noqa: E402
+
+api_router.include_router(billing_batch.router)
+
+from app.api.v1.endpoints import foreign_goods_worklist  # noqa: E402
+
+api_router.include_router(foreign_goods_worklist.router)
+
+from app.api.v1.endpoints import query_center  # noqa: E402
+
+api_router.include_router(query_center.router)
+
+from app.api.v1.endpoints import mail_workspace  # noqa: E402
+
+api_router.include_router(mail_workspace.router)
+
+from app.api.v1.endpoints import tank_adapter  # noqa: E402
+
+api_router.include_router(tank_adapter.router)
+
+from app.api.v1.endpoints import l3_report_catalog  # noqa: E402
+
+api_router.include_router(l3_report_catalog.router)
+
+from app.api.v1.endpoints import recent_documents  # noqa: E402
+
+api_router.include_router(recent_documents.router)
+
+from app.api.v1.endpoints import legacy_interface_adapters  # noqa: E402
+
+api_router.include_router(legacy_interface_adapters.router)
+
 from app.api.v1.endpoints import docflow_gobd  # noqa: E402
 
 api_router.include_router(
@@ -1162,6 +1236,21 @@ api_router.include_router(
 
 # Agrar domain routers
 api_router.include_router(
+    duenger.router,
+    prefix="/agrar/duenger",
+    tags=["agrar", "duenger"],
+)
+api_router.include_router(
+    saatgut.router,
+    prefix="/agrar/saatgut",
+    tags=["agrar", "saatgut"],
+)
+api_router.include_router(
+    biostimulanzien.router,
+    prefix="/agrar/biostimulanzien",
+    tags=["agrar", "biostimulanzien"],
+)
+api_router.include_router(
     psm.router,
     prefix="/agrar/psm",
     tags=["agrar", "psm"]
@@ -1278,6 +1367,17 @@ api_router.include_router(
     rations_optimization.router,
     prefix="/agrar/rations-optimization",
     tags=["agrar", "futtermittel", "rations-optimization"]
+)
+api_router.include_router(
+    feeding_measures.router,
+    prefix="/agrar/rations-optimization",
+    tags=[
+        "agrar",
+        "futtermittel",
+        "rations-optimization",
+        "agrar",
+        "rations-optimization",
+    ],
 )
 
 # Grundfutter-Laboranalysen (LUFA / VDLUFA-Import)
@@ -1622,10 +1722,6 @@ api_router.include_router(
     tags=["controlling"]
 )
 
-api_router.include_router(
-    kontrakt_actions.router,
-    tags=["kontrakte-lifecycle"]
-)
 
 api_router.include_router(
     feed_produktion_actions.router,
@@ -1654,6 +1750,7 @@ api_router.include_router(
 
 api_router.include_router(
     central_contracts.router,
+    prefix="/vertraege",
     tags=["contracts", "obligations", "renewal"]
 )
 
@@ -1741,6 +1838,7 @@ from app.api.v1.endpoints import (
     benchmark_cockpit,
     blockchain_runtime,
     command_catalog,
+    collab_notes,
     e2e_chain,
     external_agent_integrations,
     idempotency_monitoring,
@@ -1750,18 +1848,27 @@ from app.api.v1.endpoints import (
     mask_actions,
     mask_rollout_summaries,
     mask_screen_definition,
+    studio_drafts,
+    finance_stammdaten,
+    crm_consents,
+    mask_frontend_bridges,
     operational_governance,
+    planung_kalender,
     pricing_governance,
+    esg_footprint,
     process_mining_api,
     process_mining_observation,
     process_sla,
     projection_consumer,
     quality_lot_binding,
     runtime_operations,
+    silo_cells_readmodel,
     sla_escalation_api,
     tenant_governance,
     tenant_limits,
     terminology,
+    ux_overlays,
+    ux_telemetry,
     workflow_cockpit,
     workflow_runtime,
     workflow_simulation,
@@ -1774,6 +1881,7 @@ api_router.include_router(benchmark_api.router)
 api_router.include_router(benchmark_cockpit.router)
 api_router.include_router(blockchain_runtime.router)
 api_router.include_router(command_catalog.router)
+api_router.include_router(collab_notes.router)
 api_router.include_router(e2e_chain.router)
 api_router.include_router(external_agent_integrations.router)
 api_router.include_router(idempotency_monitoring.router)
@@ -1783,18 +1891,27 @@ api_router.include_router(mask_registry.router)
 api_router.include_router(mask_actions.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
+api_router.include_router(studio_drafts.router)
+api_router.include_router(finance_stammdaten.router)
+api_router.include_router(crm_consents.router)
+api_router.include_router(mask_frontend_bridges.router)
 api_router.include_router(operational_governance.router)
+api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)
+api_router.include_router(esg_footprint.router)
 api_router.include_router(process_mining_api.router)
 api_router.include_router(process_mining_observation.router)
 api_router.include_router(process_sla.router)
 api_router.include_router(projection_consumer.router)
 api_router.include_router(quality_lot_binding.router)
 api_router.include_router(runtime_operations.router)
+api_router.include_router(silo_cells_readmodel.router)
 api_router.include_router(sla_escalation_api.router)
 api_router.include_router(tenant_governance.router)
 api_router.include_router(tenant_limits.router)
 api_router.include_router(terminology.router)
+api_router.include_router(ux_overlays.router)
+api_router.include_router(ux_telemetry.router)
 api_router.include_router(workflow_cockpit.router)
 api_router.include_router(workflow_runtime.router)
 api_router.include_router(workflow_simulation.router)
@@ -1955,6 +2072,16 @@ api_router.include_router(genossenschaft.router)
 # Gelangensbestätigung §17a UStDV
 from app.api.v1.endpoints import gelangensbestaetigung  # noqa: E402
 api_router.include_router(gelangensbestaetigung.router)
+
+# EUDR — Sorgfaltserklaerungen nach Verordnung (EU) 2023/1115.
+# Drei Router unter einem Prefix: das Register, die Chargenkennzeichnung und
+# die Anbindung an das EU-Informationssystem. Die Reihenfolge ist wichtig —
+# die festen Pfade (/status, /chargen/..., /vorgelagerte/...) muessen vor
+# ``/{erklaerung_id}`` stehen, sonst verschluckt der Platzhalter sie.
+from app.api.v1.endpoints import eudr_anbindung, eudr_chargen, eudr_register  # noqa: E402
+api_router.include_router(eudr_chargen.router)
+api_router.include_router(eudr_anbindung.router)
+api_router.include_router(eudr_register.router)
 
 # Intrastat — EU-Handelsstatistik
 from app.api.v1.endpoints import intrastat  # noqa: E402
@@ -2138,8 +2265,6 @@ from app.api.v1.endpoints import xrechnung  # noqa: E402
 api_router.include_router(xrechnung.router, tags=["schnittstellen", "e-rechnung"])
 
 # INT-BANK-001: Bank-API / SEPA-Import (MT940 + CAMT.053)
-from app.api.v1.endpoints import bank_import  # noqa: E402
-api_router.include_router(bank_import.router, tags=["schnittstellen", "bank"])
 
 # WGE-MOB-001: Mobile-Sync für Waagenbelege
 from app.api.v1.endpoints import waage_mobile  # noqa: E402

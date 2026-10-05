@@ -42,6 +42,9 @@ import {
   useRecordHrmOperationsGateProbe,
   type HrmOperationsGate,
 } from '@/lib/api/personal'
+import { Callout } from '@/components/ui/callout'
+import { NativeSelect } from '@/components/ui/native-select'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type GateFormState = {
   evidenceType: string
@@ -236,10 +239,10 @@ function auditEntries(gate: HrmOperationsGate): AuditTimelineEntry[] {
 
 function StatusPill({ status }: { status: ReturnType<typeof checkpointStatus> }): JSX.Element {
   const config = {
-    offen: { label: 'Nachweis offen', className: 'border-amber-200 bg-amber-50 text-amber-700', icon: AlertTriangle },
-    stopper: { label: 'Stopper', className: 'border-red-200 bg-red-50 text-red-700', icon: ShieldAlert },
-    erledigt: { label: 'Erledigt', className: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: CheckCircle2 },
-    teilweise: { label: 'Teilweise', className: 'border-blue-200 bg-blue-50 text-blue-700', icon: FileCheck2 },
+    offen: { label: 'Nachweis offen', className: 'border-status-warning/40 bg-status-warning/10 text-status-warning', icon: AlertTriangle },
+    stopper: { label: 'Stopper', className: 'border-status-error/40 bg-status-error/10 text-status-error', icon: ShieldAlert },
+    erledigt: { label: 'Erledigt', className: 'border-status-success/40 bg-status-success/10 text-status-success', icon: CheckCircle2 },
+    teilweise: { label: 'Teilweise', className: 'border-status-info/40 bg-status-info/10 text-status-info', icon: FileCheck2 },
   }[status]
   const Icon = config.icon
   return (
@@ -254,7 +257,7 @@ function KpiItem({ label, value, icon: Icon, colorClass }: { label: string; valu
   return (
     <div className="flex flex-col gap-2 rounded border border-gray-200 border-b-gray-100 border-b-4 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-500">{label}</span>
+        <span className="text-2xs font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
         <Icon className={`h-4 w-4 ${colorClass}`} />
       </div>
       <span className="text-2xl font-bold leading-none text-gray-900">{value}</span>
@@ -362,32 +365,31 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
         <h4 className="mb-4 border-b pb-2 text-xs font-bold uppercase text-gray-800">1. Nachweis ablegen</h4>
         <div className="space-y-4">
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-evidence-type`}>Art des Nachweises</Label>
-            <select
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-evidence-type`}>Art des Nachweises</Label>
+            <NativeSelect
               id={`${gate.id}-evidence-type`}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              ariaLabel="Art des Nachweises"
               value={form.evidenceType}
-              onChange={(event) => update('evidenceType', event.target.value)}
-            >
-              {preset.evidenceTypes.map((item) => <option key={item} value={item}>{item}</option>)}
-            </select>
+              onValueChange={(value) => update('evidenceType', value)}
+              options={preset.evidenceTypes.map((item) => ({ value: item, label: item }))}
+            />
           </div>
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-title`}>Titel / Bezeichnung</Label>
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-title`}>Titel / Bezeichnung</Label>
             <Input id={`${gate.id}-title`} value={form.title} onChange={(event) => update('title', event.target.value)} />
           </div>
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-artifact`}>Ablageort / Link</Label>
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-artifact`}>Ablageort / Link</Label>
             <div className="relative">
               <Input id={`${gate.id}-artifact`} value={form.artifactRef} onChange={(event) => update('artifactRef', event.target.value)} placeholder="dms://..." className="pr-8 font-mono text-xs" />
-              <ExternalLink className="absolute right-2 top-2.5 h-3.5 w-3.5 text-gray-300" />
+              <ExternalLink className="absolute right-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             </div>
           </div>
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-submitted-by`}>Eingetragen von</Label>
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-submitted-by`}>Eingetragen von</Label>
             <Input id={`${gate.id}-submitted-by`} value={form.submittedBy} onChange={(event) => update('submittedBy', event.target.value)} />
           </div>
-          <Button onClick={createEvidence} disabled={busy} className="w-full gap-2 bg-blue-700 hover:bg-blue-800">
+          <Button onClick={createEvidence} disabled={busy} className="min-h-touch w-full gap-2">
             <FilePlus className="h-4 w-4" />
             Nachweis speichern
           </Button>
@@ -399,40 +401,40 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-provider`}>System</Label>
+              <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-provider`}>System</Label>
               <Input id={`${gate.id}-provider`} value={form.provider} onChange={(event) => update('provider', event.target.value)} />
             </div>
             <div>
-              <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-probe-type`}>Was pruefen?</Label>
-              <select
+              <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-probe-type`}>Was pruefen?</Label>
+              <NativeSelect
                 id={`${gate.id}-probe-type`}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                ariaLabel="Was pruefen?"
                 value={form.probeType}
-                onChange={(event) => update('probeType', event.target.value)}
-              >
-                {preset.probeTypes.map((item) => <option key={item} value={item}>{item}</option>)}
-              </select>
+                onValueChange={(value) => update('probeType', value)}
+                options={preset.probeTypes.map((item) => ({ value: item, label: item }))}
+              />
             </div>
           </div>
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-probe-result`}>Ergebnis</Label>
-            <select
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-probe-result`}>Ergebnis</Label>
+            <NativeSelect
               id={`${gate.id}-probe-result`}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              ariaLabel="Pruefergebnis"
               value={form.probeResult}
-              onChange={(event) => update('probeResult', event.target.value as GateFormState['probeResult'])}
-            >
-              <option value="passed">bestanden</option>
-              <option value="failed">fehlgeschlagen</option>
-              <option value="manual">manuell geprueft</option>
-              <option value="not_configured">nicht konfiguriert</option>
-            </select>
+              onValueChange={(value) => update('probeResult', value as GateFormState['probeResult'])}
+              options={[
+                { value: 'passed', label: 'bestanden' },
+                { value: 'failed', label: 'fehlgeschlagen' },
+                { value: 'manual', label: 'manuell geprueft' },
+                { value: 'not_configured', label: 'nicht konfiguriert' },
+              ]}
+            />
           </div>
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-performed-by`}>Getestet von</Label>
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-performed-by`}>Getestet von</Label>
             <Input id={`${gate.id}-performed-by`} value={form.performedBy} onChange={(event) => update('performedBy', event.target.value)} />
           </div>
-          <Button onClick={recordProbe} disabled={busy} className="w-full gap-2 bg-gray-900 hover:bg-black">
+          <Button onClick={recordProbe} disabled={busy} className="min-h-touch w-full gap-2">
             <Plug className="h-4 w-4" />
             Test speichern
           </Button>
@@ -443,19 +445,19 @@ function GateActions({ gate }: { gate: HrmOperationsGate }): JSX.Element {
         <h4 className="mb-4 border-b pb-2 text-xs font-bold uppercase text-gray-800">3. Freigabe</h4>
         <div className="space-y-4">
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-decided-by`}>Verantwortliche Person</Label>
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-decided-by`}>Verantwortliche Person</Label>
             <Input id={`${gate.id}-decided-by`} value={form.decidedBy} onChange={(event) => update('decidedBy', event.target.value)} />
           </div>
           <div>
-            <Label className="mb-1 block text-[10px] font-bold uppercase text-gray-400" htmlFor={`${gate.id}-reason`}>Kommentar</Label>
+            <Label className="mb-1 block text-2xs font-bold uppercase tracking-wide text-muted-foreground" htmlFor={`${gate.id}-reason`}>Kommentar</Label>
             <Textarea id={`${gate.id}-reason`} value={form.decisionReason} onChange={(event) => update('decisionReason', event.target.value)} rows={3} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Button onClick={() => decide('approve')} disabled={busy || gate.evidenceCount < 1} className="gap-2 bg-emerald-700 hover:bg-emerald-800">
+            <Button onClick={() => decide('approve')} disabled={busy || gate.evidenceCount < 1} className="min-h-touch gap-2">
               <Check className="h-4 w-4" />
               Freigeben
             </Button>
-            <Button onClick={() => decide('reject')} disabled={busy} variant="destructive" className="gap-2">
+            <Button onClick={() => decide('reject')} disabled={busy} variant="destructive" className="min-h-touch gap-2">
               <X className="h-4 w-4" />
               Zurueckweisen
             </Button>
@@ -477,7 +479,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
           <div className="flex flex-wrap items-center gap-3">
             <h3 className="text-[15px] font-bold tracking-tight text-gray-900">{simpleGateTitle(gate)}</h3>
             <StatusPill status={status} />
-            {isStopper ? <span className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">Stopper</span> : null}
+            {isStopper ? <span className="rounded bg-status-error px-2 py-0.5 text-2xs font-bold uppercase tracking-wide text-white">Stopper</span> : null}
           </div>
           <p className="mt-2 truncate text-xs italic text-gray-500">{gatePurpose(gate)}</p>
 
@@ -485,40 +487,40 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Zustaendig</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <User className="h-3 w-3 text-gray-400" />
+                <User className="h-3 w-3 text-muted-foreground" />
                 {gate.ownerRole}
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Risiko / Prio</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <AlertTriangle className={`h-3 w-3 ${gate.riskLevel === 'hoch' ? 'text-red-500' : 'text-amber-500'}`} />
+                <AlertTriangle className={`h-3 w-3 ${gate.riskLevel === 'hoch' ? 'text-status-error' : 'text-status-warning'}`} />
                 {gate.riskLevel.toUpperCase()} / {gate.priority}
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Faellig bis</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <Calendar className="h-3 w-3 text-gray-400" />
+                <Calendar className="h-3 w-3 text-muted-foreground" />
                 {formatDateOnly(gate.dueDate)}
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Letzter Test</span>
-              <span className={`text-[13px] font-bold ${gate.lastProbeStatus === 'passed' ? 'text-emerald-600' : gate.lastProbeStatus === 'failed' ? 'text-red-600' : 'text-gray-700'}`}>
+              <span className={`text-[13px] font-bold ${gate.lastProbeStatus === 'passed' ? 'text-status-success' : gate.lastProbeStatus === 'failed' ? 'text-status-error' : 'text-gray-700'}`}>
                 {gate.lastProbeStatus ? probeLabel[gate.lastProbeStatus] ?? gate.lastProbeStatus : '-'}
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Nachweise</span>
               <span className="flex items-center gap-1.5 text-[13px] font-medium text-gray-700">
-                <FileText className="h-3 w-3 text-blue-500" />
+                <FileText className="h-3 w-3 text-muted-foreground" />
                 {gate.evidenceCount}
               </span>
             </div>
             <div className="flex min-w-0 flex-col">
               <span className="text-[9px] font-bold uppercase text-gray-400">Naechste Aktion</span>
-              <span className="truncate text-[13px] font-bold text-blue-700">{nextAction(gate)}</span>
+              <span className="truncate text-[13px] font-bold text-primary">{nextAction(gate)}</span>
             </div>
           </div>
         </div>
@@ -527,10 +529,10 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
           {gate.approvedAt ? (
             <div className="hidden text-right sm:block">
               <p className="text-[9px] font-bold uppercase text-gray-400">Freigegeben</p>
-              <p className="text-[13px] font-bold text-emerald-700">{formatDateOnly(gate.approvedAt)}</p>
+              <p className="text-[13px] font-bold text-status-success">{formatDateOnly(gate.approvedAt)}</p>
             </div>
           ) : null}
-          {expanded ? <ChevronUp className="h-5 w-5 text-gray-400" /> : <ChevronDown className="h-5 w-5 text-gray-400" />}
+          {expanded ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
         </div>
       </button>
 
@@ -549,7 +551,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
                   <ul className="space-y-3">
                     {gate.evidenceRequired.map((item) => (
                       <li key={item} className="flex items-start gap-2.5 text-[13px] text-gray-600">
-                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-blue-600" />
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
                         {item}
                       </li>
                     ))}
@@ -561,7 +563,7 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
                   <ul className="space-y-3">
                     {gate.acceptanceCriteria.map((item) => (
                       <li key={item} className="flex items-start gap-2.5 text-[13px] text-gray-600">
-                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-status-success" />
                         {item}
                       </li>
                     ))}
@@ -580,15 +582,15 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
                 </div>
                 <div className="space-y-2 text-[12px] text-gray-500">
                   <p className="flex items-center gap-2">
-                    <History className="h-3 w-3 text-gray-400" />
+                    <History className="h-3 w-3 text-muted-foreground" />
                     Letzte Aenderung: {formatDate(gate.lastChangedAt)}
                   </p>
                   <p className="flex items-center gap-2">
-                    <History className="h-3 w-3 text-gray-400" />
+                    <History className="h-3 w-3 text-muted-foreground" />
                     Rollen mit Schreibrecht: {gate.allowedRoles.join(', ')}
                   </p>
                   <p className="flex items-center gap-2">
-                    <History className="h-3 w-3 text-gray-400" />
+                    <History className="h-3 w-3 text-muted-foreground" />
                     Nur lesend: {gate.readOnlyRoles.join(', ')}
                   </p>
                 </div>
@@ -608,6 +610,8 @@ function GateRow({ gate, expanded, onToggle }: { gate: HrmOperationsGate; expand
 }
 
 export default function HrmOperationsGatesPage(): JSX.Element {
+  const isTouch = useTouchDevice()
+  const { push } = useToast()
   const gatesQuery = useHrmOperationsGates()
   const policyQuery = useHrmOperationsGoLivePolicy()
   const gates = useMemo(() => gatesQuery.data?.gates ?? [], [gatesQuery.data?.gates])
@@ -638,7 +642,7 @@ export default function HrmOperationsGatesPage(): JSX.Element {
         <div className="mx-auto flex min-h-[72px] max-w-[1440px] items-center justify-between gap-4 px-4 py-3 lg:px-8">
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-[#005ca5] text-xs font-black text-white">V</div>
+              <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-primary text-xs font-black text-primary-foreground">V</div>
               <h1 className="text-xl font-bold tracking-tight text-gray-900">HRM-Betriebsfreigaben</h1>
             </div>
             <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">
@@ -653,50 +657,63 @@ export default function HrmOperationsGatesPage(): JSX.Element {
                 Nur fuer autorisierte Admins. Mitarbeitende nutzen diese Ansicht nicht.
               </span>
             </div>
-            <div className={`flex items-center gap-2.5 rounded-sm border-2 px-4 py-2.5 shadow-sm ${isGoLiveAllowed ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-red-500 bg-red-50 text-red-700'}`}>
-              <div className={`h-3 w-3 rounded-full ${isGoLiveAllowed ? 'bg-emerald-600' : 'bg-red-600'}`} />
-              <span className="text-sm font-black uppercase tracking-[0.05em]">{isGoLiveAllowed ? 'Produktivstart erlaubt' : 'Produktivstart gestoppt'}</span>
-            </div>
+            <Callout variant={isGoLiveAllowed ? 'success' : 'error'} className="flex items-center gap-2.5 rounded-sm border-2 px-4 py-2.5 shadow-sm">
+              <div className={`h-3 w-3 rounded-full ${isGoLiveAllowed ? 'bg-[hsl(var(--color-semantic-success-500-hsl))]' : 'bg-[hsl(var(--color-semantic-error-500-hsl))]'}`} />
+              <span className="text-sm font-black uppercase tracking-wider">{isGoLiveAllowed ? 'Produktivstart erlaubt' : 'Produktivstart gestoppt'}</span>
+            </Callout>
           </div>
         </div>
       </header>
 
       <main className="mx-auto mt-8 max-w-[1440px] space-y-6 px-4 lg:px-8">
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <KpiItem label="Pruefpunkte Gesamt" value={gates.length} icon={Shield} colorClass="text-blue-700" />
-          <KpiItem label="Erledigt" value={approvedCount} icon={CheckCircle2} colorClass="text-emerald-600" />
-          <KpiItem label="Aktive Stopper" value={blockerCount} icon={ShieldAlert} colorClass="text-red-600" />
-          <KpiItem label="Nachweise Gesamt" value={evidenceCount} icon={FileText} colorClass="text-blue-500" />
-        </section>
+        {!isTouch ? (
+          <>
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <KpiItem label="Pruefpunkte Gesamt" value={gates.length} icon={Shield} colorClass="text-primary" />
+              <KpiItem label="Erledigt" value={approvedCount} icon={CheckCircle2} colorClass="text-status-success" />
+              <KpiItem label="Aktive Stopper" value={blockerCount} icon={ShieldAlert} colorClass="text-status-error" />
+              <KpiItem label="Nachweise Gesamt" value={evidenceCount} icon={FileText} colorClass="text-muted-foreground" />
+            </section>
 
-        <RoleFocusBar
-          roles={roleProfiles}
-          value={roleFocus}
-          visibleCount={visibleGates.length}
-          totalCount={gates.length}
-          onChange={(value) => {
-            setRoleFocus(value)
-            setExpandedGateId(null)
-          }}
-        />
+            <RoleFocusBar
+              roles={roleProfiles}
+              value={roleFocus}
+              visibleCount={visibleGates.length}
+              totalCount={gates.length}
+              onChange={(value) => {
+                setRoleFocus(value)
+                setExpandedGateId(null)
+              }}
+            />
 
-        <ManagementDecisionPanel
-          decision={{
-            allowed: isGoLiveAllowed,
-            allowedLabel: 'Freigabe erteilt',
-            blockedLabel: 'Keine Freigabe',
-            summary: `${policyQuery.data?.summary ?? gatesQuery.data?.summary ?? 'Der Produktivstart wird aus offenen Stoppern und Freigaben berechnet.'} Normale Mitarbeitende nutzen diese Admin-Seite nicht.`,
-            blockerCount,
-            nextFocus: blockers[0] ? simpleGateTitle(blockers[0]) : 'Regelpruefung terminieren',
-            template: { label: 'Geschaeftsfuehrungsfreigabe oeffnen', href: '/docs/hrm-go-live-templates/16_geschaeftsfuehrungsfreigabe.md' },
-          }}
-        />
+            <ManagementDecisionPanel
+              decision={{
+                allowed: isGoLiveAllowed,
+                allowedLabel: 'Freigabe erteilt',
+                blockedLabel: 'Keine Freigabe',
+                summary: `${policyQuery.data?.summary ?? gatesQuery.data?.summary ?? 'Der Produktivstart wird aus offenen Stoppern und Freigaben berechnet.'} Normale Mitarbeitende nutzen diese Admin-Seite nicht.`,
+                blockerCount,
+                nextFocus: blockers[0] ? simpleGateTitle(blockers[0]) : 'Regelpruefung terminieren',
+                template: { label: 'Geschaeftsfuehrungsfreigabe oeffnen', href: '/docs/hrm-go-live-templates/16_geschaeftsfuehrungsfreigabe.md' },
+              }}
+            />
+          </>
+        ) : null}
 
         <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="w-fit border-b-2 border-b-[#005ca5] pb-1 text-lg font-bold text-gray-900">Pruefliste Betriebsbereitschaft</h2>
+          <h2 className="w-fit border-b-2 border-b-primary pb-1 text-lg font-bold text-gray-900">Pruefliste Betriebsbereitschaft</h2>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="text-xs font-bold">PDF Export</Button>
-            <Button size="sm" className="gap-2 bg-[#005ca5] text-xs font-bold hover:bg-[#004a85]">
+            <Button
+              variant="outline"
+              className="min-h-touch text-xs font-bold"
+              onClick={() => window.print()}
+            >
+              PDF Export
+            </Button>
+            <Button
+              className="min-h-touch gap-2 text-xs font-bold"
+              onClick={() => push('Neue Pruefpunkte kommen aus dem HRM-Katalog, nicht frei anlegen.')}
+            >
               <FilePlus className="h-4 w-4" />
               Neuen Pruefpunkt anlegen
             </Button>
@@ -715,11 +732,15 @@ export default function HrmOperationsGatesPage(): JSX.Element {
         </div>
 
         <footer className="mt-16 flex items-center justify-between border-t border-gray-300 pt-8 opacity-60">
-          <div className="flex gap-8 text-[10px] font-bold uppercase tracking-[0.2em]">
+          <div className="flex gap-8 text-2xs font-bold uppercase tracking-[0.2em]">
             <span>Valeo NeuroERP</span>
             <span className="hidden sm:inline">System: HR-OPS</span>
           </div>
-          <button className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-600">
+          <button
+            type="button"
+            className="flex min-h-touch items-center gap-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground"
+            onClick={() => push('System-Logbuch ist in dieser Maske nicht angebunden.')}
+          >
             <History className="h-3 w-3" />
             System-Logbuch einsehen
           </button>

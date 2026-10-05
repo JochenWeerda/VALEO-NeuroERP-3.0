@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,7 +44,7 @@ export default function KreditlinienPage(): JSX.Element {
       label: 'Kunde',
       render: (k: Kreditlinie) => (
         <div>
-          <button onClick={() => navigate(`/verkauf/kunden-stamm/${k.id}`)} className="font-medium text-blue-600 hover:underline">
+          <button type="button" onClick={() => navigate(`/crm/kunden/${encodeURIComponent(k.kundennr || k.id)}`)} className="min-h-11 font-medium text-primary touch-manipulation">
             {k.kunde}
           </button>
           <div className="text-xs text-muted-foreground font-mono">{k.kundennr}</div>
@@ -54,7 +55,7 @@ export default function KreditlinienPage(): JSX.Element {
       key: 'bonitaet' as const,
       label: 'Bonität',
       render: (k: Kreditlinie) => {
-        const colors = { A: 'text-green-600', B: 'text-blue-600', C: 'text-orange-600', D: 'text-red-600' }
+        const colors = { A: 'text-status-success', B: 'text-status-info', C: 'text-status-warning', D: 'text-status-error' }
         return <span className={`text-2xl font-bold ${colors[k.bonitaet]}`}>{k.bonitaet}</span>
       },
     },
@@ -83,7 +84,7 @@ export default function KreditlinienPage(): JSX.Element {
       key: 'verfuegbar' as const,
       label: 'Verfügbar',
       render: (k: Kreditlinie) => (
-        <span className={k.verfuegbar < 10000 ? 'font-semibold text-red-600' : 'font-semibold text-green-600'}>
+        <span className={k.verfuegbar < 10000 ? 'font-semibold text-status-error' : 'font-semibold text-status-success'}>
           {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(k.verfuegbar)}
         </span>
       ),
@@ -93,7 +94,7 @@ export default function KreditlinienPage(): JSX.Element {
       label: 'Überfällig',
       render: (k: Kreditlinie) =>
         k.ueberfaellig > 0 ? (
-          <span className="font-semibold text-red-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(k.ueberfaellig)}</span>
+          <span className="font-semibold text-status-error">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(k.ueberfaellig)}</span>
         ) : (
           <span className="text-muted-foreground">–</span>
         ),
@@ -185,7 +186,7 @@ export default function KreditlinienPage(): JSX.Element {
       {ueberzogen > 0 && (
         <Card className="border-red-500 bg-red-50">
           <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-red-900">
+            <div className="flex items-center gap-2 text-status-error">
               <TrendingDown className="h-5 w-5" />
               <span className="font-semibold">{ueberzogen} Kreditlinie(n) überzogen!</span>
             </div>
@@ -193,7 +194,7 @@ export default function KreditlinienPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-orange-50 p-4 text-sm text-orange-900">
+      <Callout variant="warning" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4" />
           <p className="font-semibold">Automatische Kreditprüfung</p>
@@ -202,7 +203,7 @@ export default function KreditlinienPage(): JSX.Element {
           Bonität: <strong>A</strong> = sehr gut (Limit bis 500k) • <strong>B</strong> = gut (bis 200k) • <strong>C</strong> = befriedigend (bis 50k) • <strong>D</strong> = mangelhaft (nur Vorkasse)
         </p>
         <p className="mt-1 text-xs">Automatische Sperrung bei Überschreitung oder überfälligen Rechnungen &gt; 30 Tage</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -228,7 +229,7 @@ export default function KreditlinienPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ausgenutzt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtAusgenutzt)}</span>
+            <span className="text-2xl font-bold text-status-warning">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtAusgenutzt)}</span>
           </CardContent>
         </Card>
 
@@ -237,7 +238,7 @@ export default function KreditlinienPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Verfügbar</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtVerfuegbar)}</span>
+            <span className="text-2xl font-bold text-status-success">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtVerfuegbar)}</span>
           </CardContent>
         </Card>
       </div>

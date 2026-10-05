@@ -10,9 +10,19 @@ version: 1.0.0
 
 # Inventory — Entscheidungen
 
+Fuehrender Wiegeschein: `domain_inventory.weighing_tickets`, entschieden in
+[ADR-077](../../../adr/adr-077-leading-weighing-ticket.md). Die technische
+Umstellung der Mobile-/Operations-Altverbraucher ist der benannte Folge-Slice.
+
+Der MDE-Eingang auf dem Mobile-Sync-Kern ist in
+[ADR-057](../../../adr/adr-057-mde-inbox-on-mobile-sync-core.md) entschieden.
+
 | ADR | Titel |
 |---|---|
 | [ADR-003](../../../adr/adr-003-canonical-domain-model.md) | Canonical Model |
 | [ADR-014](../../../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md) | Integrationen |
+| [ADR-056](../../../adr/adr-056-vendor-neutral-erp-habit-contract.md) | Herstellerneutraler ERP-Gewohnheitsvertrag |
+| [ADR-060](../../../adr/adr-060-governed-inventory-auxiliary-batches.md) | Kontrollierte Inventur-Nebenlaeufe |
+| [ADR-070](../../../adr/adr-070-l3-deep-mask-parity.md) | Tenant-sichere Chargen-Operator-Maske |
 
 Microservice vs Monolith: `inventory-service` als separater Container — siehe [c4-02-containers.md](../../views/c4-02-containers.md).

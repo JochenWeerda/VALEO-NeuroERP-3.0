@@ -67,7 +67,7 @@ export function TouchCard({
       aria-pressed={selected}
     >
       {icon && (
-        <span className="flex-shrink-0 text-slate-500">{icon}</span>
+        <span className="shrink-0 text-slate-500">{icon}</span>
       )}
       <span className="flex-1">
         <span className="block text-base font-semibold leading-tight">{children}</span>
@@ -76,7 +76,7 @@ export function TouchCard({
         )}
       </span>
       {selected && (
-        <Check className="h-5 w-5 flex-shrink-0 text-blue-500" aria-hidden />
+        <Check className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
       )}
     </button>
   )
@@ -97,7 +97,7 @@ export function TouchCardGroup({ label, children, required }: TouchCardGroupProp
     <div className="space-y-2">
       <p className="text-base font-medium text-slate-700">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ml-1 text-status-error">*</span>}
       </p>
       <div className="space-y-2">{children}</div>
     </div>
@@ -139,7 +139,7 @@ export function TouchNumericInput({
     <div className={cn('space-y-1', className)}>
       <label htmlFor={inputId} className="block text-base font-medium text-slate-700">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ml-1 text-status-error">*</span>}
       </label>
       <div className="relative flex items-center">
         <input
@@ -158,7 +158,7 @@ export function TouchNumericInput({
             'flex w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-3',
             'min-h-[54px] text-2xl font-bold tabular-nums text-slate-900',
             'placeholder:text-base placeholder:font-normal placeholder:text-slate-400',
-            'focus:border-blue-500 focus:outline-none focus:ring-0',
+            'focus:border-blue-500 focus:outline-hidden focus:ring-0',
             unit && 'pr-16',
           )}
         />
@@ -198,7 +198,7 @@ export function TouchToggle({
       {label && (
         <p className="text-base font-medium text-slate-700">
           {label}
-          {required && <span className="ml-1 text-red-500">*</span>}
+          {required && <span className="ml-1 text-status-error">*</span>}
         </p>
       )}
       <div className="grid grid-cols-2 gap-3">
@@ -254,10 +254,13 @@ export function TouchSubmitButton({
   className,
   type = 'button',
 }: TouchSubmitButtonProps): JSX.Element {
+  // Grossflaechige Touch-Schaltflaeche: eigene Flaechen auf den semantischen
+  // Tokens, damit sie mit Button-Varianten farbgleich bleibt.
   const colors = {
-    primary: 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white',
-    success: 'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white',
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
+    danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80',
+    success:
+      'bg-[hsl(var(--color-semantic-success-500-hsl))] text-white hover:bg-[hsl(var(--color-semantic-success-500-hsl)/0.9)] active:bg-[hsl(var(--color-semantic-success-700-hsl))]',
   }
 
   return (
@@ -322,7 +325,7 @@ export function TouchTextInput({
     <div className={cn('space-y-1', className)}>
       <label htmlFor={inputId} className="block text-base font-medium text-slate-700">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ml-1 text-status-error">*</span>}
       </label>
       <input
         id={inputId}
@@ -336,7 +339,7 @@ export function TouchTextInput({
           'flex w-full rounded-lg border-2 border-slate-200 bg-white px-4 py-3',
           'min-h-[54px] text-lg text-slate-900',
           'placeholder:text-base placeholder:text-slate-400',
-          'focus:border-blue-500 focus:outline-none focus:ring-0',
+          'focus:border-blue-500 focus:outline-hidden focus:ring-0',
         )}
       />
       {hint && <p className="text-sm text-slate-500">{hint}</p>}

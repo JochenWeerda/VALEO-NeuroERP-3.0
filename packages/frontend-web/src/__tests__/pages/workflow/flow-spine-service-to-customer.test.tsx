@@ -49,6 +49,9 @@ describe('FlowSpineServiceToCustomerPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Service-to-Customer', level: 1 })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /einsatz/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Kunde informiert' })).toBeInTheDocument()
+        // FSX-023: Die Agentenaussage steht weiterhin auf dem Schirm (Agent-Karte in
+    // der Mitte), aber nicht mehr als Ueberschrift der Copilot-Spalte — die ist
+    // jetzt eingeklappt. Geprueft wird deshalb die Aussage, nicht ihre Rolle.
+    expect(screen.getAllByText('Kunde informiert').length).toBeGreaterThan(0)
   })
 })

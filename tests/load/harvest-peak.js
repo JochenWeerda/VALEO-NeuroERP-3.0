@@ -1,12 +1,18 @@
 /**
- * k6 Lasttest — Erntepeak-Szenario (Gap 037)
+ * k6 Lasttest — Erntepeak-Szenario (Gap 037 / SPEC-P1-10)
  *
- * Ziel: 500 gleichzeitige Nutzer, Antwortzeit P95 < 800ms
+ * Ziel (full): 500 gleichzeitige Nutzer, Antwortzeit P95 < 800ms
  * Kernprozesse: Annahme, Waage, Qualitätsprüfung, Einlagerung
+ *
+ * Profile (ENV PROFILE):
+ *   full  — Staging-/Peak-Profil (Default), 500 VU + Spike
+ *   local — gegen docker-compose / localhost (50 VU, ~2.5 min)
+ *   smoke — schneller Smoke (5 VU, 30 s)
  *
  * Ausführen:
  *   k6 run tests/load/harvest-peak.js
- *   k6 run --env BASE_URL=https://staging.valeo-erp.de tests/load/harvest-peak.js
+ *   k6 run -e PROFILE=local -e BASE_URL=http://127.0.0.1:8000 tests/load/harvest-peak.js
+ *   pwsh scripts/loadtest/run_harvest_peak_local.ps1
  */
 
 import http from 'k6/http'
@@ -17,7 +23,8 @@ import { Trend, Rate, Counter } from 'k6/metrics'
 
 const BASE_URL = __ENV.BASE_URL || 'http://127.0.0.1:8000'
 const API_TOKEN = __ENV.API_DEV_TOKEN || 'dev-token'
-const TENANT_ID = __ENV.TENANT_ID || 'tenant-001'
+const TENANT_ID = __ENV.TENANT_ID || '00000000-0000-0000-0000-000000000001'
+const PROFILE = (__ENV.PROFILE || 'full').toLowerCase()
 
 const HEADERS = {
   'Content-Type': 'application/json',
@@ -34,59 +41,93 @@ const warteschlangeDuration = new Trend('warteschlange_duration_ms')
 const errorRate          = new Rate('api_errors')
 const annahmeCount       = new Counter('annahme_vorgaenge')
 
-// ─── Last-Stufen (VU = Virtual Users) ────────────────────────────────────────
-
-export const options = {
-  scenarios: {
-    // Stufe 1: Normalbetrieb (50 VU, 5 min)
-    normalbetrieb: {
-      executor: 'ramping-vus',
-      startVUs: 0,
-      stages: [
-        { duration: '1m', target: 50 },
-        { duration: '3m', target: 50 },
-        { duration: '1m', target: 0 },
-      ],
-      gracefulRampDown: '30s',
-    },
-    // Stufe 2: Erntepeak (500 VU, 10 min) — Kernziel Gap 037
-    erntepeak: {
-      executor: 'ramping-vus',
-      startVUs: 0,
-      startTime: '5m30s',
-      stages: [
-        { duration: '2m', target: 200 },
-        { duration: '2m', target: 500 },
-        { duration: '5m', target: 500 },
-        { duration: '1m', target: 0 },
-      ],
-      gracefulRampDown: '30s',
-    },
-    // Stufe 3: Spike (800 VU, 2 min) — Robustheitsnachweis
-    spike: {
-      executor: 'ramping-vus',
-      startVUs: 0,
-      startTime: '16m',
-      stages: [
-        { duration: '30s', target: 800 },
-        { duration: '1m', target: 800 },
-        { duration: '30s', target: 0 },
-      ],
-      gracefulRampDown: '30s',
-    },
-  },
-  thresholds: {
-    // Globale SLA-Grenzen
-    http_req_duration:           ['p(95)<800', 'p(99)<2000'],
-    http_req_failed:             ['rate<0.02'],     // < 2% Fehler
-    // Fachliche Kernprozesse
-    annahme_duration_ms:         ['p(95)<600'],
-    qualitaet_duration_ms:       ['p(95)<700'],
-    einlagerung_duration_ms:     ['p(95)<600'],
-    warteschlange_duration_ms:   ['p(95)<400'],
-    api_errors:                  ['rate<0.02'],
-  },
+const SHARED_THRESHOLDS = {
+  http_req_duration:           ['p(95)<800', 'p(99)<2000'],
+  http_req_failed:             ['rate<0.05'],
+  annahme_duration_ms:         ['p(95)<600'],
+  qualitaet_duration_ms:       ['p(95)<700'],
+  einlagerung_duration_ms:     ['p(95)<600'],
+  warteschlange_duration_ms:   ['p(95)<400'],
+  api_errors:                  ['rate<0.05'],
 }
+
+const FULL_THRESHOLDS = {
+  ...SHARED_THRESHOLDS,
+  http_req_failed: ['rate<0.02'],
+  api_errors: ['rate<0.02'],
+}
+
+function buildOptions(profile) {
+  if (profile === 'smoke') {
+    return {
+      scenarios: {
+        smoke: {
+          executor: 'constant-vus',
+          vus: 5,
+          duration: '30s',
+        },
+      },
+      thresholds: SHARED_THRESHOLDS,
+    }
+  }
+  if (profile === 'local') {
+    return {
+      scenarios: {
+        local_peak: {
+          executor: 'ramping-vus',
+          startVUs: 0,
+          stages: [
+            { duration: '30s', target: 20 },
+            { duration: '90s', target: 50 },
+            { duration: '30s', target: 0 },
+          ],
+          gracefulRampDown: '15s',
+        },
+      },
+      thresholds: SHARED_THRESHOLDS,
+    }
+  }
+  return {
+    scenarios: {
+      normalbetrieb: {
+        executor: 'ramping-vus',
+        startVUs: 0,
+        stages: [
+          { duration: '1m', target: 50 },
+          { duration: '3m', target: 50 },
+          { duration: '1m', target: 0 },
+        ],
+        gracefulRampDown: '30s',
+      },
+      erntepeak: {
+        executor: 'ramping-vus',
+        startVUs: 0,
+        startTime: '5m30s',
+        stages: [
+          { duration: '2m', target: 200 },
+          { duration: '2m', target: 500 },
+          { duration: '5m', target: 500 },
+          { duration: '1m', target: 0 },
+        ],
+        gracefulRampDown: '30s',
+      },
+      spike: {
+        executor: 'ramping-vus',
+        startVUs: 0,
+        startTime: '16m',
+        stages: [
+          { duration: '30s', target: 800 },
+          { duration: '1m', target: 800 },
+          { duration: '30s', target: 0 },
+        ],
+        gracefulRampDown: '30s',
+      },
+    },
+    thresholds: FULL_THRESHOLDS,
+  }
+}
+
+export const options = buildOptions(PROFILE)
 
 // ─── Hilfsfunktionen ──────────────────────────────────────────────────────────
 

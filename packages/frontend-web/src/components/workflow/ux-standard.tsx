@@ -11,6 +11,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 
 type Tone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'red'
@@ -18,9 +19,9 @@ type Tone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'red'
 const toneClasses: Record<Tone, { border: string; bg: string; text: string; dot: string }> = {
   neutral: { border: 'border-gray-200', bg: 'bg-white', text: 'text-gray-700', dot: 'bg-gray-400' },
   blue: { border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-800', dot: 'bg-blue-600' },
-  emerald: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-emerald-800', dot: 'bg-emerald-600' },
-  amber: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-800', dot: 'bg-amber-500' },
-  red: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-800', dot: 'bg-red-600' },
+  emerald: { border: 'border-emerald-200', bg: 'bg-emerald-50', text: 'text-status-success', dot: 'bg-emerald-600' },
+  amber: { border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-status-warning', dot: 'bg-amber-500' },
+  red: { border: 'border-red-200', bg: 'bg-red-50', text: 'text-status-error', dot: 'bg-red-600' },
 }
 
 export type UxRoleOption<T extends string = string> = {
@@ -69,7 +70,7 @@ export function RoleFocusBar<T extends string = string>({
             key={role.id}
             type="button"
             onClick={() => onChange(role.id)}
-            className={`rounded border px-3 py-1.5 text-xs font-bold transition ${
+            className={`min-h-11 min-w-11 touch-manipulation rounded border px-3 text-sm font-bold transition ${
               value === role.id ? 'border-[#005ca5] bg-blue-50 text-[#005ca5]' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
             }`}
             title={role.description}
@@ -98,7 +99,7 @@ export function OperationalTaskPlan({ title = 'Arbeitsplan', items }: { title?: 
       <div className="space-y-3">
         {items.map((item, index) => (
           <div key={item.label} className="flex items-start gap-3">
-            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${item.done ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-300 bg-gray-50 text-gray-500'}`}>
+            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${item.done ? 'border-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-50-hsl))] text-status-success' : 'border-border bg-muted text-muted-foreground'}`}>
               {item.done ? <Check className="h-3.5 w-3.5" /> : index + 1}
             </div>
             <div className="min-w-0">
@@ -169,7 +170,7 @@ export function AuditTimeline({ title = 'Audit-Zeitleiste', entries }: { title?:
                 <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${toneClasses[tone].dot}`} />
                 <div className="min-w-0">
                   <p className="text-[13px] font-bold text-gray-800">{entry.label}</p>
-                  <p className="break-words text-[12px] text-gray-500">{entry.detail}</p>
+                  <p className="wrap-break-word text-[12px] text-gray-500">{entry.detail}</p>
                 </div>
               </div>
             )
@@ -200,7 +201,7 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
     <section className="overflow-hidden rounded border border-gray-300 border-t-4 border-t-[#005ca5] bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/50 px-6 py-4">
         <div className="flex items-center gap-2.5">
-          {decision.allowed ? <CheckCircle2 className="h-5 w-5 text-emerald-700" /> : <ShieldAlert className="h-5 w-5 text-red-700" />}
+          {decision.allowed ? <CheckCircle2 className="h-5 w-5 text-status-success" /> : <ShieldAlert className="h-5 w-5 text-status-error" />}
           <h2 className="text-base font-bold text-gray-900">Darf der Prozess abgeschlossen werden?</h2>
         </div>
         <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Entscheidung</span>
@@ -209,10 +210,10 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
         <div className="flex-1 space-y-4">
           <p className="max-w-3xl text-sm leading-relaxed text-gray-600">{decision.summary}</p>
           {typeof decision.blockerCount === 'number' && decision.blockerCount > 0 ? (
-            <div className="inline-flex items-center gap-2 rounded border border-red-200 bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-red-700">
+            <Callout variant="error" className="inline-flex items-center gap-2 rounded border px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide">
               <AlertTriangle className="h-3.5 w-3.5" />
               {decision.blockerCount} aktive Stopper
-            </div>
+            </Callout>
           ) : null}
         </div>
         <div className={`flex min-w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8 text-center sm:min-w-[320px] ${classes.border} ${classes.bg}`}>
@@ -264,13 +265,13 @@ export function CrudCapabilityChecklist({ capabilities }: { capabilities: CrudCa
         {capabilities.map((capability) => {
           const Icon = capability.icon
           return (
-            <div key={capability.key} className={`rounded border px-3 py-2 ${capability.available ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+            <Callout key={capability.key} variant={capability.available ? 'success' : 'warning'} className="rounded px-3 py-2">
               <div className="flex items-center gap-2">
-                {Icon ? <Icon className={`h-3.5 w-3.5 ${capability.available ? 'text-emerald-700' : 'text-amber-700'}`} /> : null}
-                <span className={`text-[12px] font-bold ${capability.available ? 'text-emerald-800' : 'text-amber-800'}`}>{capability.label}</span>
+                {Icon ? <Icon className={`h-3.5 w-3.5 ${capability.available ? 'text-status-success' : 'text-status-warning'}`} /> : null}
+                <span className={`text-[12px] font-bold ${capability.available ? 'text-status-success' : 'text-status-warning'}`}>{capability.label}</span>
               </div>
               <p className="mt-1 text-[11px] text-gray-600">{capability.hint}</p>
-            </div>
+            </Callout>
           )
         })}
       </div>

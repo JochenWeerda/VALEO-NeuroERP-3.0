@@ -10,6 +10,7 @@ import httpx
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import hashlib
+import re
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -19,6 +20,7 @@ router = APIRouter(prefix="/iban-lookup", tags=["finance", "iban"])
 # In-memory cache for IBAN lookups (in production, use Redis or similar)
 _iban_cache: dict[str, tuple[dict, datetime]] = {}
 CACHE_TTL_HOURS = 24  # Cache for 24 hours
+IBAN_PATTERN = re.compile(r"^[A-Z0-9]{15,34}$")
 
 
 def _get_cache_key(iban: str) -> str:
@@ -86,10 +88,10 @@ async def lookup_iban(
     normalized_iban = iban.replace(" ", "").replace("-", "").upper()
     
     # Basic format validation
-    if not normalized_iban or len(normalized_iban) < 15 or len(normalized_iban) > 34:
+    if not IBAN_PATTERN.fullmatch(normalized_iban):
         raise HTTPException(
             status_code=400,
-            detail="Invalid IBAN format: must be between 15 and 34 characters"
+            detail="Invalid IBAN format: must be 15 to 34 alphanumeric characters"
         )
     
     # Check cache first
@@ -98,17 +100,17 @@ async def lookup_iban(
         return IBANLookupResponse(**cached_result)
     
     # Build openiban.com URL
-    base_url = "https://openiban.com/validate"
+    base_url = httpx.URL("https://openiban.com/validate")
     params = {
         "getBIC": "true" if get_bic else "false",
         "validateBankCode": "true" if validate_bank_code else "false"
     }
-    url = f"{base_url}/{normalized_iban}"
+    url = base_url.copy_with(path=f"{base_url.path}/{normalized_iban}")
     
     try:
         # Make request to openiban.com
         async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params)
+            response = await client.get(url, params=params)  # NOSONAR - IBAN path segment is regex validated.
             response.raise_for_status()
             data = response.json()
         

@@ -67,13 +67,13 @@ def _resolve_customer_party(db: Session, tenant_id: str, customer_id: str) -> Pa
 
 
 def _resolve_supplier_party(db: Session, tenant_id: str) -> PartyAddress:
-    """Lädt Mandanten-Lieferantenstammdaten aus tenants/branches (Fallback: leeres Dict)."""
+    """Lädt Mandanten-Lieferantenstammdaten aus tenants (Fallback: leeres Dict)."""
     party: PartyAddress = {"name": tenant_id, "country_code": "DE"}
     try:
         row = db.execute(
             text(
                 """
-                SELECT name, street, postal_code, city, country_code, vat_id, email
+                SELECT name
                 FROM domain_shared.tenants
                 WHERE id = :tenant_id
                 LIMIT 1
@@ -81,17 +81,18 @@ def _resolve_supplier_party(db: Session, tenant_id: str) -> PartyAddress:
             ),
             {"tenant_id": tenant_id},
         ).fetchone()
-        if row:
+        if row and row[0]:
             party = {
-                "name": row[0] or tenant_id,
-                "street": row[1] or "",
-                "postal_code": row[2] or "",
-                "city": row[3] or "",
-                "country_code": row[4] or "DE",
-                "vat_id": row[5] or "",
-                "email": row[6] or "",
+                "name": row[0],
+                "street": "",
+                "postal_code": "",
+                "city": "",
+                "country_code": "DE",
+                "vat_id": "",
+                "email": "",
             }
     except Exception as e:  # noqa: BLE001 — best-effort enrichment, fallback uses tenant_id
+        db.rollback()
         logger.debug("Tenant lookup failed (using fallback): %s", e)
     return party
 
@@ -145,7 +146,11 @@ def _invoice_to_einvoice_input(
 
 def _load_sales_invoice(db: Session, invoice_number: str) -> dict:
     repo = get_repository(db)
-    invoice_dict = get_from_store("salesInvoice", invoice_number, repo=repo)
+    # Kanonischer Store-Key ist snake_case (siehe documents.router upsert_sales_invoice).
+    invoice_dict = get_from_store("sales_invoice", invoice_number, repo=repo)
+    if not invoice_dict:
+        # Legacy-Alias absichern (ältere Aufrufer/Testdaten).
+        invoice_dict = get_from_store("salesInvoice", invoice_number, repo=repo)
     if not invoice_dict:
         raise HTTPException(status_code=404, detail=f"SalesInvoice {invoice_number} not found")
     return invoice_dict

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -153,26 +154,26 @@ export default function EtikettenDruckenPage(): JSX.Element {
             </CardContent>
           </Card>
           {druckMutation.isPending ? (
-            <div className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+            <Callout variant="info" className="flex items-center justify-center gap-2 rounded-lg p-4 text-sm">
               <Loader2 className="h-4 w-4 animate-spin" />
               <span>Druckauftrag wird gesendet...</span>
-            </div>
+            </Callout>
           ) : druckMutation.isSuccess ? (
-            <div className="rounded-lg bg-green-50 p-4 text-center text-sm text-green-900">
+            <Callout variant="success" className="rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">Druckauftrag {druckMutation.data.auftrags_nr} erstellt</p>
               <p className="mt-1">Drucker: {druckMutation.data.drucker_name}</p>
-            </div>
+            </Callout>
           ) : (
-            <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+            <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">{etiketten.anzahlEtiketten} Etikett(en) werden gedruckt</p>
               <p className="mt-1">Drucker: {selectedDrucker?.name ?? 'Nicht ausgewählt'}</p>
-            </div>
+            </Callout>
           )}
           {druckMutation.isError && (
-            <div className="rounded-lg bg-red-50 p-4 text-center text-sm text-red-900">
+            <Callout variant="error" className="rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">Fehler beim Druckauftrag</p>
               <p className="mt-1">{String(druckMutation.error)}</p>
-            </div>
+            </Callout>
           )}
         </div>
       ),

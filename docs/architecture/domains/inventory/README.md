@@ -33,3 +33,36 @@ Tabellen hier besonders gross werden. Neue generatorfaehige Listen muessen
 serverseitige Pagination, Sortierung, Filterung und `VirtualDataTable`-Eignung
 dokumentieren. Bestehende Lager- und Artikelmasken bleiben bis zur Paritaet auf
 ihrem aktuellen Renderer.
+
+## MDE-Eingang
+
+## Inventur-Nebenlaeufe
+
+`lager/inventur-nebenlaeufe` fuehrt Zaehlliste, kontrollierten Import,
+Kontrolllauf, vorlaeufige Bewertung und Bestandsvortrag als hashgebundene,
+auditierte Batches ueber der kanonischen Inventur.
+
+## Fremdware und Fremdbestand
+
+`lager/fremdware` projiziert die kanonische Fremdwaren-Einlagerung als
+serverseitig paginierte Meridian-Worklist. Mandant und Eigentuemer bleiben
+sichtbar; Umbuchung und Teil-/Vollauslagerung sind statusvalidiert und mit
+Benutzer, Pflichtgrund sowie Vorher-/Nachherwerten append-only auditiert.
+
+`L3-MDE-INBOX-003` nutzt den plattformseitigen Mobile-Sync-Kern als kanonische
+Eingangsqueue. Inventurzaehlungen werden erst nach Vorvalidierung und
+idempotenter Queue-Verarbeitung in die Inventory-Domaene delegiert. Die
+Operator-Maske `schnittstelle/mde-inbox` ist eine native, serverseitig
+paginierte Meridian-Worklist; die Queue selbst bleibt in `domain_ops`.
+
+## Chargen-Operator
+
+`produktion/chargen-bearbeiten` ist die tenantgebundene Operator-Sicht fuer
+Lieferantencharge und Anerkennungsnummer. Mehrfachfreigaben sind zentral
+selektiert, qualitaetsgegated und append-only auditiert.
+
+## L3-Berichtskatalog
+
+Chargen- und Artikelbewegungen koennen idempotent in die tenantgebundene
+Reporting-Projektion uebergeben werden. Die Quellroute bleibt fuer den
+Beleg-Drilldown erhalten; der Katalog schreibt nicht in Inventory-Aggregate.

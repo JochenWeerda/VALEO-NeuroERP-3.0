@@ -211,7 +211,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
   }
 
   const handleEdit = (item: Record<string, unknown>) => {
-    if (item?.id) navigate(`/futtermittel/einzelfuttermittel/stamm/${String(item.id ?? '')}`)
+    if (item?.id) navigate(`/futtermittel/einzelfuttermittel/${String(item.id ?? '')}`)
   }
 
   const handleDelete = async (item: Record<string, unknown>) => {

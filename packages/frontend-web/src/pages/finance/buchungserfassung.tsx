@@ -14,7 +14,8 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { financeService } from '@/lib/services/finance-service'
 import { toast } from '@/hooks/use-toast'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -538,11 +539,7 @@ export default function BuchungserfassungPage(): JSX.Element {
         title={entityTypeLabel}
       />
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover in die Buchungserfassung"
-          description="Der Flow-Fall bleibt sichtbar, die fachliche Arbeit passiert hier in der Buchungsmaske."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div className="space-y-4 px-4 pb-4">
         <OperationalCaseHeader

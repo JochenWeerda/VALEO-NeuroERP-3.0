@@ -1,0 +1,53 @@
+slice_id: SLICE-YAML-INTEGRITY-20260930
+title: Eindeutige YAML-Vertraege fuer die Governance-CLI
+owner: Codex-01a0f3fc
+status: completed
+completed_at: 2026-09-30
+created_at: 2026-09-30
+coordination: >-
+  Claim 093c0a248. CLI, eigene Tests und syntaktische Normalisierung von 19
+  abgeschlossenen historischen YAMLs; keine Uebernahme der Fachslices.
+goal: Historische leere Schlussdokumente lesen und echte Widersprueche explizit ablehnen.
+file_ownership:
+  - scripts/valeo_slice.py
+  - tests/test_valeo_slice_cli.py
+  - scripts/ai-slice-readiness-check.cjs
+  - tests/test_slice_readiness_legacy.py
+  - docs/quality-assurance/slice-yaml-integrity-20260930.md
+  - docs/agent-ops/slices/DESIGN-ROLLOUT-REGISTER-003.yaml
+  - docs/agent-ops/slices/E2E-SMOKE-REPAIR-001.yaml
+  - docs/agent-ops/slices/FEED-CORE-017.yaml
+  - docs/agent-ops/slices/FEED-EDITOR-041.yaml
+  - docs/agent-ops/slices/FEED-HERD-043.yaml
+  - docs/agent-ops/slices/FEED-MOB-045.yaml
+  - docs/agent-ops/slices/FEED-OPT-042.yaml
+  - docs/agent-ops/slices/FEED-PERF-044.yaml
+  - docs/agent-ops/slices/FEED-RBAC-048.yaml
+  - docs/agent-ops/slices/FEED-RECIPE-052.yaml
+  - docs/agent-ops/slices/FEED-REL-047.yaml
+  - docs/agent-ops/slices/FEED-REP-039.yaml
+  - docs/agent-ops/slices/FEED-REP-040.yaml
+  - docs/agent-ops/slices/FSX-003-GATE-CI.yaml
+  - docs/agent-ops/slices/MASK-GEN-FRONTEND-BRIDGES-20260917.yaml
+  - docs/agent-ops/slices/MASK-GEN-STUB-BACKENDS-20260917.yaml
+  - docs/agent-ops/slices/SECURITY-REMAINDER-20260910.yaml
+  - docs/agent-ops/slices/SPEC-P1-06-W1-PROCUREMENT.yaml
+  - docs/agent-ops/slices/SPEC-P1-06-W2-MOCK-QS-POS.yaml
+acceptance:
+  - Leere Schlussmarke verhindert nicht das Auffinden eines Slice.
+  - Mehrere befuellte Dokumente und doppelte Schluessel werden abgelehnt.
+  - Formfehler im angefragten Slice werden als Formfehler angezeigt.
+tests:
+  - python -m pytest tests/test_valeo_slice_cli.py --noconftest --no-cov -q -o addopts=
+risks:
+  - Unvollstaendige Harness-Vertraege bleiben offen und werden nicht erfunden.
+ai_harness:
+  fachlicher_vertrag: Ein Slice hat genau einen eindeutigen YAML-Vertrag.
+  architektur_vertrag: Bestehende Governance-CLI, kein zweiter Parser im Produkt.
+  daten_vertrag: Lesender Loader, keine Mutation historischer Slices.
+  test_vertrag: Loader- und CLI-Tests fuer gueltige und widerspruechliche YAMLs.
+  security_vertrag: SafeLoader und keine Ausfuehrung von YAML-Tags.
+  betriebs_vertrag: Konkrete Fehler mit Pfad und Zeile, Exitcode ungleich null.
+  dokumentations_vertrag: Workboard, eigener QA-Bericht, Open-Gaps aktualisieren.
+external_gates:
+  - not_applicable

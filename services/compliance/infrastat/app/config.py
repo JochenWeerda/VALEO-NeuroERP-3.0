@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_prefix="INFRASTAT_", case_sensitive=True)
 
     # Server
-    HOST: str = "0.0.0.0"
+    HOST: str = "127.0.0.1"
     PORT: int = 5200
     DEBUG: bool = False
 
@@ -30,9 +30,8 @@ class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn = PostgresDsn.build(
         scheme="postgresql+asyncpg",
         username="valeo_compliance",
-        password="REDACTED_PASSWORD",
         host="postgres-events",
-        port="5432",
+        port=5432,
         path="/valeo_compliance",
     )
     DB_ECHO: bool = False

@@ -285,6 +285,21 @@ class FeldbuchSchlag(Base):
     ackerzahl = Column(Float, nullable=True)        # Bodenpunktzahl
     status = Column(String(20), default='aktiv')    # aktiv/stillgelegt/brache
     geometry_geojson = Column(Text, nullable=True)  # GeoJSON Polygon/MultiPolygon für GIS-Karte
+    # ASK Inkrement-1: Wirtschaftsjahr für Anbauplan/Jahreswechsel
+    wirtschaftsjahr = Column(Integer, nullable=True, index=True)
+
+    # AS-W2 (DüV): N-Düngebedarf-Grundlagen je Schlag (aktuelles Jahr)
+    n_sollwert_kg_ha = Column(Float, nullable=True)     # Kultur-Sollwert N [kg/ha]
+    ertragsniveau_dt_ha = Column(Float, nullable=True)  # angestrebtes Ertragsniveau
+    # AS-W5 (DüV): Nmin + Bodenuntersuchung
+    nmin_fruehjahr_kg_ha = Column(Float, nullable=True)
+    nmin_in_bedarf = Column(Boolean, default=True)      # Frühjahrs-Nmin in Bedarf einbeziehen
+    boden_p2o5_mg = Column(Float, nullable=True)        # P2O5 mg/100g Boden
+    boden_k2o_mg = Column(Float, nullable=True)
+    boden_mgo_mg = Column(Float, nullable=True)
+    boden_ph = Column(Float, nullable=True)
+    boden_datum = Column(DateTime(timezone=True), nullable=True)
+    versorgungsstufe = Column(String(1), nullable=True)  # A..E
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -336,6 +351,36 @@ class FeldbuchMassnahme(Base):
     exportiert_am = Column(DateTime(timezone=True), nullable=True)
 
     bemerkung = Column(Text, nullable=True)
+
+    # AS-W1 (DüV): Reinnährstoffe + Düngerform + Kosten je Maßnahme
+    n_kg = Column(Float, nullable=True)
+    p2o5_kg = Column(Float, nullable=True)
+    k2o_kg = Column(Float, nullable=True)
+    mgo_kg = Column(Float, nullable=True)
+    s_kg = Column(Float, nullable=True)
+    duenger_form = Column(String(1), nullable=True)      # 'M' mineralisch / 'O' organisch
+    kosten_eur = Column(Float, nullable=True)            # Maßnahmenkosten gesamt
+
+    # AS-W4 (PflSchG/CC): Pflanzenschutz-Wirkungsbereich + Begründung
+    wirkungsbereich = Column(String(30), nullable=True)  # Herbizid/Fungizid/Insektizid/Wachstumsregler/Sonstiges
+    begruendung = Column(String(300), nullable=True)     # Notwendigkeit/Schadschwelle
+    # ASK-PPP-002: Sachkundenachweis des Anwenders
+    sachkunde_nummer = Column(String(80), nullable=True)
+    sachkunde_gueltig_bis = Column(DateTime(timezone=True), nullable=True)
+
+    # AS-W6: Ernte-Kennzahlen
+    ertrag_dt_ha = Column(Float, nullable=True)
+    qualitaet = Column(String(100), nullable=True)
+    erloes_eur = Column(Float, nullable=True)
+    nebenleistung_eur = Column(Float, nullable=True)
+
+    # Open-Gaps: typ-spezifische Register, AUM, Lager, Offline
+    register_daten = Column(JSONB, nullable=True)
+    aum_code = Column(String(40), nullable=True)
+    lager_artikel_id = Column(String, nullable=True)
+    lager_charge = Column(String(80), nullable=True)
+    lager_verbrauch = Column(Float, nullable=True)
+    client_ref = Column(String(120), nullable=True, index=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

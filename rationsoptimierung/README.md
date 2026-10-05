@@ -30,6 +30,7 @@ This tool implements a least-cost ration formulation system for dairy cows using
 
 ### Nutritional Framework (GfE-2023-aligned)
 - **Energy**: Metabolizable Energy (ME) basis – Erhaltung **0,64 MJ/kg LM^0,75**; Milch über **ECM** und **ME/ECM ≈ 3,15/0,66** (siehe Code `app/nutrition/gfe2023.py`). **NEL ≠ ME** (keine 1:1-Substitution; Futtermittel-ME aus eigener ME-Bewertung).
+- **ECM (DLG 01|2025, Kap. 10)**: `ECM[kg] = Milch • (38,5•Fett% + 24,2•Protein% + 16,5•Laktose%) ÷ 3,15 ÷ 100`; Laktose-Default **4,8 %** (DLG-ECM-Referenz), `CowProfile.milk_lactose_pct` überschreibbar. Formel-Audit-Regression: `tests/test_formula_audit_dlg2025.py`.
 - **Protein**: Small Intestine Digestible Protein (SIDP) basis (Näherung Erhaltung + Milchprotein)
 - **Fiber**: Ash-Neutral Detergent Fiber Organic Matter (aNDFom)
 - **Expandable**: Designed for future addition of SIDAA, OMD, RMD

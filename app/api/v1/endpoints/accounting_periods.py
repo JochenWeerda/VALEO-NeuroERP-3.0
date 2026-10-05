@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.accounting_periods_schemas import AccountingPeriodsOut
+from app.core import finance_periods
 
 
 router = APIRouter()
@@ -77,6 +78,7 @@ async def create_period(
             )
 
         # Check if period already exists
+        finance_periods.sperre_periode(db, tenant_id, period_data.period, exklusiv=True)
         existing = db.execute(
             text("""
                 SELECT id FROM finance_accounting_periods
@@ -270,12 +272,13 @@ async def update_period(
             raise HTTPException(status_code=404, detail="Period not found")
 
         # Update status
+        finance_periods.sperre_periode(db, tenant_id, existing[2], exklusiv=True)
         update_query = "UPDATE finance_accounting_periods SET"
         params = {"id": period_id, "tenant_id": tenant_id}
         updates = []
 
         if period_update.status:
-            if period_update.status not in ["OPEN", "CLOSED", "ADJUSTING"]:
+            if period_update.status not in finance_periods.ZUSTAENDE:
                 raise HTTPException(
                     status_code=400,
                     detail="Status must be OPEN, CLOSED, or ADJUSTING"

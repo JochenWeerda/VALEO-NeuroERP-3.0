@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { FileCheck2, Loader2, RefreshCw, Search, Upload, CheckCircle2, Archive } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'
@@ -14,9 +14,9 @@ import { useArtifacts, useUploadArtifact, useSetFreigabe, type ArtifactItem } fr
  * (entwurf→freigegeben→archiviert).
  */
 
-const STATUS_BADGE: Record<string, string> = {
-  entwurf: 'bg-amber-100 text-amber-800', freigegeben: 'bg-emerald-100 text-emerald-800',
-  archiviert: 'bg-muted text-muted-foreground',
+const STATUS_BADGE: Record<string, BadgeVariant> = {
+  entwurf: 'warning', freigegeben: 'success',
+  archiviert: 'muted',
 }
 
 function errDetail(err: unknown) {
@@ -33,12 +33,12 @@ function ArtifactActions({ doc, a }: { doc: string; a: ArtifactItem }) {
     })
   }
   if (a.freigabe_status === 'entwurf') {
-    return <Button size="sm" variant="ghost" onClick={() => act('freigegeben')} disabled={setFreigabe.isPending}>
-      {setFreigabe.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <CheckCircle2 size={13} className="mr-1 text-emerald-600" />}Freigeben
+    return <Button variant="ghost" onClick={() => act('freigegeben')} disabled={setFreigabe.isPending} className="min-h-touch">
+      {setFreigabe.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <CheckCircle2 size={13} className="mr-1 text-status-success" />}Freigeben
     </Button>
   }
   if (a.freigabe_status === 'freigegeben') {
-    return <Button size="sm" variant="ghost" onClick={() => act('archiviert')} disabled={setFreigabe.isPending}>
+    return <Button variant="ghost" onClick={() => act('archiviert')} disabled={setFreigabe.isPending} className="min-h-touch">
       {setFreigabe.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <Archive size={13} className="mr-1" />}Archivieren
     </Button>
   }
@@ -72,7 +72,7 @@ function UploadForm({ doc }: { doc: string }) {
           </label>
         </div>
         <div className="flex justify-end">
-          <Button size="sm" onClick={submit} disabled={!valid || upload.isPending}>
+          <Button onClick={submit} disabled={!valid || upload.isPending} className="min-h-touch">
             {upload.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Upload size={14} className="mr-1" />}
             Hochladen
           </Button>
@@ -96,7 +96,7 @@ export default function ArtefaktFreigabePage() {
       <div className="flex items-center gap-2">
         <FileCheck2 size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Artefakt-Upload & Freigabe</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void docs.refetch()} disabled={docs.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => void docs.refetch()} disabled={docs.isFetching}>
           {docs.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -166,7 +166,7 @@ export default function ArtefaktFreigabePage() {
                               <td className="px-3 py-1.5 text-right tabular-nums">v{a.version}{a.aktuell && <Badge variant="outline" className="ml-1 text-[10px]">aktuell</Badge>}</td>
                               <td className="px-3 py-1.5">{a.file_name ?? '—'}</td>
                               <td className="px-3 py-1.5 font-mono text-[11px] text-muted-foreground">{a.sha256 ? `${a.sha256.slice(0, 12)}…` : '—'}</td>
-                              <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[a.freigabe_status] ?? ''}`}>{a.freigabe_status}</Badge></td>
+                              <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[a.freigabe_status] ?? 'muted'} className="text-[10px]">{a.freigabe_status}</Badge></td>
                               <td className="px-3 py-1.5 text-right"><ArtifactActions doc={selected} a={a} /></td>
                             </tr>
                           ))}

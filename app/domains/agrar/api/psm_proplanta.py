@@ -3,6 +3,7 @@ Proplanta PSM Integration API
 API endpoints for Proplanta PSM data synchronization and queries
 """
 
+from datetime import datetime
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from sqlalchemy import func
@@ -280,6 +281,16 @@ async def import_proplanta_psm_to_local(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def _parse_expiry(expiry_date: str) -> Optional[datetime]:
+    """Proplanta liefert ISO-Strings (teils mit 'Z') — agrar_psm braucht DateTime."""
+    if not expiry_date:
+        return None
+    try:
+        return datetime.fromisoformat(expiry_date.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
 def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
     """Background task to import PSM data into local database."""
     try:
@@ -296,6 +307,8 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
 
         for psm_data in psm_data_list:
             try:
+                zulassung_ablauf = _parse_expiry(psm_data.expiry_date)
+
                 # Check if PSM already exists (by approval number)
                 existing = db.query(PSMModel).filter(
                     PSMModel.bvl_nummer == psm_data.approval_number,
@@ -307,10 +320,8 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
                         # Update existing record
                         existing.name = psm_data.name
                         existing.wirkstoff = psm_data.active_ingredient
-                        existing.hersteller = psm_data.manufacturer
-                        existing.zulassung_datum = psm_data.approval_date
-                        existing.zulassung_ablauf = psm_data.expiry_date
-                        existing.gefahrenklasse = psm_data.hazard_class
+                        if zulassung_ablauf:
+                            existing.zulassung_ablauf = zulassung_ablauf
                         existing.kulturen = psm_data.application_areas
                         existing.ist_aktiv = psm_data.status == "approved" and not psm_data.is_expired()
                         existing.updated_at = func.now()
@@ -320,15 +331,20 @@ def _perform_psm_import(tenant_id: str, update_existing: bool, db: Session):
                     else:
                         skipped_count += 1
                 else:
-                    # Create new record
+                    if not zulassung_ablauf:
+                        # zulassung_ablauf ist NOT NULL — ohne Ablaufdatum keine Neuanlage
+                        skipped_count += 1
+                        logger.warning(f"PSM {psm_data.id} ohne Zulassungsablauf — Neuanlage uebersprungen")
+                        continue
+
+                    # Create new record (nur Felder, die agrar_psm tatsaechlich hat)
                     new_psm = PSMModel(
+                        artikelnummer=psm_data.approval_number or psm_data.id,
                         name=psm_data.name,
                         wirkstoff=psm_data.active_ingredient,
+                        mittel_typ="unbekannt",  # Proplanta liefert keinen Mitteltyp
                         bvl_nummer=psm_data.approval_number,
-                        hersteller=psm_data.manufacturer,
-                        zulassung_datum=psm_data.approval_date,
-                        zulassung_ablauf=psm_data.expiry_date,
-                        gefahrenklasse=psm_data.hazard_class,
+                        zulassung_ablauf=zulassung_ablauf,
                         kulturen=psm_data.application_areas,
                         ist_aktiv=psm_data.status == "approved" and not psm_data.is_expired(),
                         tenant_id=tenant_id

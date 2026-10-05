@@ -50,7 +50,9 @@ export function compileDataBindingPlan(
     tableBindings[tableKey] = {
       tableKey,
       endpoint: endpoint ?? '',
-      requiresServerQuery: tablePlan.serverPagination && Boolean(endpoint),
+      // Every explicit table data source must be loaded. serverPagination
+      // controls paging semantics, not whether the runtime fetches the table.
+      requiresServerQuery: Boolean(endpoint),
       staleTimeMs: ds?.staleTimeMs,
     }
   }

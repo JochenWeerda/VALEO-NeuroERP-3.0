@@ -1,0 +1,67 @@
+slice_id: FEED-EDITOR-024
+id: FEED-EDITOR-024
+title: Min Max Grenzen und benannte Rationskonflikte
+owner: Codex
+status: abgeschlossen
+created_at: "2026-07-16"
+started_at: "2026-07-16"
+completed_at: "2026-07-16"
+goal: >-
+  Positionsbezogene Mindest- und Hoechstmengen in Entwurf und unveraenderlicher
+  Rationsversion erhalten, strukturelle Unloesbarkeit vor Solverstart erklaeren
+  und die verursachenden Futtermittel im Editor direkt fokussierbar machen.
+requirements: [FEED-RAT-001, FEED-OPT-004]
+work_packages: [FEED-WP-072, FEED-WP-092]
+decision_level: minor
+dependencies: [FEED-EDITOR-021, FEED-EDITOR-022, FEED-EDITOR-023]
+file_ownership:
+  - app/agrar/rations/ration_draft.py
+  - app/api/v1/endpoints/feeding_ration_editor.py
+  - app/services/feeding_ration_editor_service.py
+  - tests/test_feeding_ration_editor.py
+  - tests/test_feeding_ration_editor_api.py
+  - packages/frontend-web/src/features/feed-advice/RationEditor.tsx
+  - packages/frontend-web/src/lib/api/feeding-ration-editor.ts
+  - packages/frontend-web/src/__tests__/features/feed-advice/ration-editor.test.tsx
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/specs/feeding/07-maskenkatalog.md
+  - docs/specs/feeding/09-berechnungsregeln.md
+  - docs/architecture/domains/agrar/tests.md
+  - docs/agent-ops/slices/FEED-EDITOR-024.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - DraftComponent und Versionssnapshot bewahren optionale nichtnegative min_kg_fm und max_kg_fm.
+  - Min groesser Max wird critical mit stabilem Code und verursachender Feed-ID erklaert.
+  - Eine Menge ausserhalb ihrer Grenze wird high und positionsbezogen erklaert.
+  - Die Summe der TM-Minima gegen das DMI-Maximum nennt alle verursachenden Futtermittel.
+  - Entwuerfe ohne Grenzen bleiben golden-kompatibel.
+  - Editor zeigt Min/Max in dichten Tabellenspalten und fokussiert vom Befund die verursachende Grenze.
+  - API ist typisiert; negative Grenzen werden als 422 abgewiesen.
+tdd:
+  red:
+    - Domainvertrag fuer Positions- und Summenkonflikte wurde vor Implementierung rot angelegt.
+    - API-/Frontend-Vertraege fuer Bounds-Payload, Snapshot und Fokus werden vor Green erweitert.
+  green: kleinste additive Bound-Auswertung im bestehenden deterministischen Draft-Pfad
+  refactor: eine Bound-Semantik fuer Domain, API, Snapshot und Editor ohne Solverduplikat
+tests:
+  - tests/test_feeding_ration_editor.py
+  - tests/test_feeding_ration_editor_api.py
+  - packages/frontend-web/src/__tests__/features/feed-advice/ration-editor.test.tsx
+risks:
+  - Grenzwerte duerfen beim Laden oder Speichern eines Versionssnapshots nicht verloren gehen.
+  - Fehlertexte duerfen keine vermeintliche Solver-IIS vortaeuschen; geliefert werden deterministische Vorpruefungen.
+evidence:
+  red:
+    - Uebernommene Domain-Red-Welle reproduzierte fehlende Min/Max-Auswertung fuer Positions- und Summenkonflikte.
+    - API- und Component-Vertraege wurden vor der vollstaendigen Payload-/UI-Weitergabe erweitert.
+  green:
+    - Fokussierte Backend-Suite 12/12 gruen.
+    - Feeding-/Rations-Regression 672 bestanden und 1 bewusst uebersprungen.
+    - Frontend-Gesamtsuite 97 Dateien, 399 Tests gruen und 1 bewusst uebersprungen.
+    - TypeScript und fokussiertes ESLint ohne Fehler oder Warnungen.
+    - Markdown 127 und Governance 128 Dateien gruen.
+    - Architecture Validate und Strict Drift 901/901 Routen gruen; Agent-Handbuch driftfrei.
+    - Python-Compile sowie Alembic Single-Head/current auf feed_editor_evaluations_20260715 gruen.
+  refactor:
+    - Grenzen werden in einem durchgaengigen DraftComponent-Vertrag durch Domain, API, Versionssnapshot und UI getragen.
+    - Befunde besitzen stabile Codes, vierstufige Prioritaet, Feed-Ursache und strukturierte remediation.

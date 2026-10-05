@@ -102,8 +102,8 @@ class TestCountCloseService:
         from app.services.inventory_count_close_service import differenz_buchen
         count_data = {"id": "cnt-1", "tenant_id": "t1", "status": "posted", "warehouse_id": "wh-1"}
         lines = [
-            {"id": "line-1", "article_id": "art-1", "expected_quantity": 100.0, "counted_quantity": 90.0},
-            {"id": "line-2", "article_id": "art-2", "expected_quantity": 50.0, "counted_quantity": 50.0},
+            {"id": "line-1", "article_id": "art-1", "expected_qty": 100.0, "counted_qty": 90.0},
+            {"id": "line-2", "article_id": "art-2", "expected_qty": 50.0, "counted_qty": 50.0},
         ]
         db = _mock_db({"inventory_counts": count_data, "inventory_count_lines": lines})
         result = differenz_buchen(db, "cnt-1", "t1")
@@ -135,7 +135,7 @@ class TestCorrectionStornoService:
             "id": "corr-1", "tenant_id": "t1",
             "article_id": "art-1", "warehouse_id": "wh-1",
             "movement_type": "ABGANG", "quantity": 100.0, "unit": "kg",
-            "reference_type": "KORREKTUR",
+            "source_document_type": "KORREKTUR",
         }
         # differentiate SELECT by id vs SELECT by storno_ref
         db = MagicMock()
@@ -153,7 +153,7 @@ class TestCorrectionStornoService:
         result = storno_korrektur(db, "corr-1", "t1")
         assert result["movement_type"] == "ZUGANG"
         assert result["quantity"] == 100.0
-        assert result["reference_type"] == "STORNO"
+        assert result["source_document_type"] == "STORNO"
         assert result["idempotent"] is False
 
     def test_storno_idempotent(self):
@@ -162,12 +162,12 @@ class TestCorrectionStornoService:
             "id": "corr-1", "tenant_id": "t1",
             "article_id": "art-1", "warehouse_id": "wh-1",
             "movement_type": "ABGANG", "quantity": 100.0, "unit": "kg",
-            "reference_type": "KORREKTUR",
+            "source_document_type": "KORREKTUR",
         }
         existing_storno = {
             "id": "storno-1", "storno_ref": "corr-1",
             "movement_type": "ZUGANG", "quantity": 100.0,
-            "reference_type": "STORNO",
+            "source_document_type": "STORNO",
         }
         # First call returns orig, second (storno check) returns existing_storno
         call_count = [0]
@@ -197,7 +197,7 @@ class TestCorrectionStornoService:
             "id": "storno-1", "tenant_id": "t1",
             "article_id": "art-1", "warehouse_id": "wh-1",
             "movement_type": "ZUGANG", "quantity": 100.0, "unit": "kg",
-            "reference_type": "STORNO",
+            "source_document_type": "STORNO",
         }
         db = _mock_db({"inventory_stock_movements": storno_data})
         with pytest.raises(CorrectionError, match="selbst ein Storno"):

@@ -13,7 +13,6 @@ import {
   Leaf,
   Menu,
   LogOut,
-  User,
   Bell,
   ChevronRight,
   Package,
@@ -99,7 +98,7 @@ function PortalNavLink({
             {item.badge}
           </Badge>
         )}
-        {!compact && <ChevronRight className="h-4 w-4 text-gray-400" />}
+        {!compact && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
       </span>
     </Link>
   )
@@ -158,7 +157,7 @@ export default function CustomerPortalLayout() {
         'min-h-screen',
         isTerraAgrar
           ? 'theme-terra bg-background text-foreground'
-          : 'bg-gradient-to-br from-emerald-50 via-white to-amber-50',
+          : 'bg-linear-to-br from-emerald-50 via-white to-amber-50',
       )}
     >
       <header
@@ -184,14 +183,14 @@ export default function CustomerPortalLayout() {
                   'flex h-10 w-10 items-center justify-center rounded-lg shadow-lg',
                   isTerraAgrar
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-gradient-to-br from-emerald-500 to-emerald-700',
+                    : 'bg-linear-to-br from-emerald-500 to-emerald-700',
                 )}
               >
                 <Leaf className="h-6 w-6 text-white" />
               </div>
               <span className="hidden text-xl font-bold sm:block">
                 VALEO{' '}
-                <span className={isTerraAgrar ? 'text-primary' : 'text-emerald-600'}>
+                <span className={isTerraAgrar ? 'text-primary' : 'text-status-success'}>
                   Portal
                 </span>
               </span>
@@ -200,7 +199,7 @@ export default function CustomerPortalLayout() {
             {isAnwender && (
               <Link
                 to="/"
-                className="ml-2 flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-emerald-700"
+                className="ml-2 flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-status-success"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Zur Startseite</span>
@@ -233,8 +232,7 @@ export default function CustomerPortalLayout() {
             <div className="relative" ref={moreMenuRef}>
               <Button
                 variant="ghost"
-                size="sm"
-                className="gap-2"
+                className="min-h-touch gap-2"
                 onClick={() => setMoreMenuOpen((open) => !open)}
               >
                 <FileSpreadsheet className="h-4 w-4" />
@@ -291,18 +289,25 @@ export default function CustomerPortalLayout() {
                     <div className="font-medium">{mockCustomer.name}</div>
                     <div className="text-xs text-muted-foreground">{mockCustomer.kundennummer}</div>
                   </div>
-                  <Link
-                    to="/portal/profil"
-                    className="mt-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <User className="h-4 w-4" />
-                    Mein Profil
-                  </Link>
+                  {/*
+                    „Mein Profil" führte auf `/portal/profil` — und diese Route
+                    zeigte auf `@/pages/portal/index`, also auf die Übersicht.
+                    Der Kunde klickte sein Profil an und bekam die Startseite;
+                    eine `profil.tsx` gibt es nicht.
+
+                    Eine echte Profilseite zu bauen ist keine Verdrahtungsfrage:
+                    Das Portal kennt seinen Kunden bisher nur als Konstante im
+                    Quelltext, und zwar in zwei Fassungen (hier `K-2024-001`,
+                    in der Übersicht `K-10001`). Solange nicht entschieden ist,
+                    woher das Portal seine Kundenidentität nimmt, wäre jede
+                    Profilseite eine erfundene Seite — schlimmer als der Fehler.
+                    Deshalb steht hier kein Link, statt einer, der woanders
+                    hinführt.
+                  */}
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                    className="mt-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-status-error hover:bg-red-50"
                   >
                     <LogOut className="h-4 w-4" />
                     Abmelden
@@ -315,7 +320,7 @@ export default function CustomerPortalLayout() {
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
+        <div className="fixed inset-0 z-60 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-black/40"
@@ -325,7 +330,7 @@ export default function CustomerPortalLayout() {
           <aside className="relative h-full w-80 max-w-[85vw] overflow-y-auto border-r bg-white p-4 shadow-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-lg font-semibold">
-                <Leaf className={clsx('h-6 w-6', isTerraAgrar ? 'text-primary' : 'text-emerald-600')} />
+                <Leaf className={clsx('h-6 w-6', isTerraAgrar ? 'text-primary' : 'text-status-success')} />
                 Kundenportal
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
@@ -343,7 +348,7 @@ export default function CustomerPortalLayout() {
                     <ArrowLeft className="h-5 w-5" />
                     Zur Startseite
                   </span>
-                  <ChevronRight className="h-4 w-4 text-emerald-600" />
+                  <ChevronRight className="h-4 w-4 text-status-success" />
                 </Link>
               )}
               {customerNavItems.map((item) => (
@@ -382,7 +387,7 @@ export default function CustomerPortalLayout() {
                   isActivePath(item.path)
                     ? isTerraAgrar
                       ? 'text-primary'
-                      : 'text-emerald-600'
+                      : 'text-status-success'
                     : isTerraAgrar
                       ? 'text-muted-foreground'
                       : 'text-gray-500',

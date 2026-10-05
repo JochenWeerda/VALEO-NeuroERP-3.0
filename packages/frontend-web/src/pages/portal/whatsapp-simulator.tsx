@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
@@ -178,7 +178,7 @@ export default function WhatsAppSimulator() {
                 {DEMO_PHONES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+49..." className="text-sm font-mono" />
-              <Button variant="outline" size="sm" className="w-full" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>Verlauf zurücksetzen</Button>
+              <Button variant="outline" className="min-h-touch w-full" onClick={() => resetMutation.mutate()} disabled={resetMutation.isPending}>Verlauf zurücksetzen</Button>
             </div>
             <div className="border rounded-lg p-3 space-y-2 bg-card">
               <h2 className="text-sm font-medium">Beispiel-Nachrichten</h2>
@@ -195,7 +195,7 @@ export default function WhatsAppSimulator() {
                   <Row label="Lieferdatum" value={partialOrder.lieferdatum} />
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Konfidenz</span>
-                    <span className={partialOrder.konfidenz >= 0.8 ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>{Math.round(partialOrder.konfidenz * 100)} %</span>
+                    <span className={partialOrder.konfidenz >= 0.8 ? 'text-status-success font-medium' : 'text-status-warning font-medium'}>{Math.round(partialOrder.konfidenz * 100)} %</span>
                   </div>
                   {partialOrder.fehlende_felder.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
@@ -211,7 +211,7 @@ export default function WhatsAppSimulator() {
             <div className="border rounded-lg bg-card flex flex-col h-96">
               <div className="flex items-center gap-2 px-3 py-2 border-b bg-green-600 rounded-t-lg">
                 <span className="text-white text-sm font-medium">💬 WhatsApp Chat</span>
-                <span className="text-green-200 text-xs ml-auto font-mono">{phone}</span>
+                <span className="text-status-success text-xs ml-auto font-mono">{phone}</span>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
                 {chatHistory.length === 0 && <p className="text-center text-xs text-muted-foreground pt-8">Wähle eine Beispiel-Nachricht oder schreibe direkt.</p>}
@@ -294,7 +294,7 @@ export default function WhatsAppSimulator() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium">Ausgehende Nachrichten (Outbox)</h2>
-            <Button variant="outline" size="sm" onClick={() => outboxRefetch()}>Aktualisieren</Button>
+            <Button variant="outline" onClick={() => outboxRefetch()} className="min-h-touch">Aktualisieren</Button>
           </div>
           {!outboxData || outboxData.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">Noch keine ausgehenden Nachrichten.</p>

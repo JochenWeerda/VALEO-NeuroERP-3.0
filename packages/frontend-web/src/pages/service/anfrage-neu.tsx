@@ -13,10 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import {
-  WorkflowEntryBanner,
-  readWorkflowEntryContext,
-} from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { ArrowLeft, Loader2, Plus } from 'lucide-react'
 
 type AnfrageForm = {
@@ -61,11 +59,7 @@ export default function AnfrageNeuPage(): JSX.Element {
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
       {workflowContext && (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Service-to-Customer"
-          description="Neue Anfrage wird aus dem Flow-Spine-Vorgang heraus erstellt."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       )}
 
       {/* Header */}
@@ -88,7 +82,7 @@ export default function AnfrageNeuPage(): JSX.Element {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="kunde">
-                Kunde <span className="text-red-500">*</span>
+                Kunde <span className="text-status-error">*</span>
               </Label>
               <Input
                 id="kunde"
@@ -112,7 +106,7 @@ export default function AnfrageNeuPage(): JSX.Element {
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="betreff">
-                Betreff <span className="text-red-500">*</span>
+                Betreff <span className="text-status-error">*</span>
               </Label>
               <Input
                 id="betreff"

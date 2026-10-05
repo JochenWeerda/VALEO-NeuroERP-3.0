@@ -1,0 +1,91 @@
+slice_id: DESIGN-GAPS-SWEEP-002
+id: DESIGN-GAPS-SWEEP-002
+title: Vorbestehende Frontend-Luecken schliessen (axe-Kontrast, Portal-Aliase, Vitest-Harness, Alt-AppShell)
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-14"
+started_at: "2026-07-14"
+completed_at: "2026-07-14"
+goal: >-
+  Alle im Audit DESIGN-AUDIT-KIM-001 dokumentierten vorbestehenden Rot-Staende
+  schliessen, auch die fremder Workstreams: WCAG-AA-Kontrastfehler der axe-
+  Kernrouten ueber theme-bewusste Status-Utilities + Sweep, fehlende Portal-
+  Route-Aliase, kaputter QueryClient-Testharness der Universal-Pilot-Tests,
+  ungenutzte Alt-AppShell.
+scope:
+  - Status-Utilities text-status-success|warning|error|info in index.css
+    (@theme inline -> --status-*-hsl; :root=700er hell, .dark und
+    .theme-warehouse=500er dunkel; eigener Namensraum ohne Kollision mit
+    Meridian/Terra --color-success).
+  - Mechanischer Sweep text-(green|emerald|red|amber|yellow|orange)-(500|600)
+    -> Status-Utilities ueber src/ (298 Dateien; .gen./generated ausgenommen).
+  - 5 Portal-Alias-Eintraege in route-aliases.json (empfehlungen, lohndienste,
+    onboarding, preisspiegel, whatsapp-simulator).
+  - renderPage()-Wrapper mit QueryClientProvider in beiden Universal-Pilot-Tests.
+  - Loeschung der referenzlosen components/layout/AppShell.tsx.
+file_ownership:
+  - "docs/agent-ops/active-workboard.md"
+  - "docs/agent-ops/slices/DESIGN-GAPS-SWEEP-002.yaml"
+  - "docs/design/frontend-design-skill-audit.md"
+  - "CLAUDE.md"
+  - "packages/frontend-web/src/index.css"
+  - "packages/frontend-web/src/app/route-aliases.json"
+  - "packages/frontend-web/src/__tests__/pages/sales/universal-sales-order-pilot.test.tsx"
+  - "packages/frontend-web/src/__tests__/pages/crm/universal-customer-mask-pilot.test.tsx"
+  - "packages/frontend-web/src/components/layout/AppShell.tsx"
+  - "packages/frontend-web/src/** (mechanischer Klassen-Sweep, 298 Dateien)"
+dateibesitz:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/DESIGN-GAPS-SWEEP-002.yaml
+  - docs/design/frontend-design-skill-audit.md
+  - CLAUDE.md
+  - packages/frontend-web/src/index.css
+  - packages/frontend-web/src/app/route-aliases.json
+  - packages/frontend-web/src/__tests__/pages/sales/universal-sales-order-pilot.test.tsx
+  - packages/frontend-web/src/__tests__/pages/crm/universal-customer-mask-pilot.test.tsx
+  - packages/frontend-web/src/components/layout/AppShell.tsx (geloescht)
+  - packages/frontend-web/src (mechanischer Klassen-Sweep, 298 Dateien)
+progress: >-
+  2026-07-14 umgesetzt: Status-Utilities verankert (WCAG-AA-sicher auf hellem
+  und dunklem Grund inkl. Warehouse-High-Contrast); Sweep ueber 298 Dateien,
+  0 Rest-Treffer der gefegten Klassen; Portal-Aliase ergaenzt (17 Portal-,
+  649 Gesamt-Aliase); QueryClient-Harness repariert; Alt-AppShell entfernt.
+  Untracked Handbuch2017.pdf auf User-Wunsch aus dem Repo-Root geloescht.
+acceptance:
+  - "axe-E2E: 8/8 Kernrouten ohne Verstoesse (vorher 5/8; /agrar /finance /lager color-contrast)."
+  - "check:routing-integrity gruen (0 Portal-Alias-Luecken)."
+  - "Vitest komplett gruen inkl. der zwei vormals roten Universal-Pilot-Testdateien."
+  - "Keine Kollision mit Meridian/Terra-Tokens; Dark Mode und Warehouse-Theme lesbar."
+  - "Keine Geschaeftslogik-/API-/Routen-Aenderung (nur Klassen, Aliase, Testharness, tote Datei)."
+tests:
+  - "npx playwright test tests/e2e/accessibility.spec.ts --grep @accessibility -> 8 passed."
+  - "vitest run (voll) -> 88/88 Dateien, 371 passed, 1 skipped."
+  - "tsc --noEmit -> 0; eslint -> 0 Fehler (8 vorbestehende fremde Warnungen)."
+  - "vite build -> gruen (45.8s); check:routing-integrity -> passed; check:navigation-targets -> 898 gruen."
+risks:
+  - "Sweep ist rein mechanisch: text-red-500 u. ae. auf lokal dunklen Flaechen im Light-Mode wird minimal dunkler; dark:-Overrides blieben erhalten."
+  - "text-*-400-Klassen bewusst nicht gefegt (haeufig auf dunklen Spezialflaechen); bei Bedarf gezielt nachziehen."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Statusfarben (Erfolg/Warnung/Fehler/Info) bleiben fachlich identisch codiert,
+    werden aber auf jedem Grund AA-lesbar; Portal-Seiten der fremden Workstreams
+    sind regulaer per Alias erreichbar; keine sichtbare Funktionsaenderung.
+  architektur_vertrag: >-
+    Token-Erweiterung nur in index.css (eigener status-*-Namensraum); Sweep
+    aendert ausschliesslich Klassennamen in src/; keine neuen Abhaengigkeiten,
+    keine API-/Routing-Logik-Aenderung; generierte Dateien ausgenommen.
+  daten_vertrag: >-
+    Keine Daten-/Schemaaenderung; route-aliases.json additiv erweitert.
+  security_vertrag: >-
+    Keine Auth-/Tenant-/Eingabepfad-Beruehrung.
+  betriebs_vertrag: >-
+    Kein Deploy-/Konfig-Impact; Rollback = Revert des Commits; Warehouse-
+    Terminal-Theme explizit mitversorgt.
+  dokumentations_vertrag: >-
+    Audit-Doku um Abschnitt 7a (Lueckenschluss) ergaenzt; CLAUDE.md-Regel um
+    text-status-*-Utilities praezisiert; Workboard + dieses YAML.
+  test_vertrag: >-
+    Volle Batterie vor Push: axe-E2E 8/8, Vitest 371/371, tsc, eslint, Build,
+    Routing-/Navigation-Checks; keine Tests unterdrueckt oder gelockert
+    (Harness-Fix stellt fehlenden Provider bereit, aendert keine Assertions).

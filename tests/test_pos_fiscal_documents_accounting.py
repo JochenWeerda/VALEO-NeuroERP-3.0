@@ -83,9 +83,11 @@ def test_closing_pdf_and_accounting_cover_all_requested_pos_transactions(tmp_pat
     assert {(line.account_number, line.debit, line.credit) for line in lines} == {
         ("1000", Decimal("219.00"), Decimal("0.00")),
         ("1200", Decimal("238.00"), Decimal("0.00")),
-        ("1600", Decimal("50.00"), Decimal("0.00")),
+        # Gutscheine stehen auf 1700, getrennt von den Lieferanten-
+        # verbindlichkeiten auf 1600 (GoBD Rz. 30 ff., Klarheit).
+        ("1700", Decimal("50.00"), Decimal("0.00")),
         ("8400", Decimal("0.00"), Decimal("407.00")),
-        ("1600", Decimal("0.00"), Decimal("100.00")),
+        ("1700", Decimal("0.00"), Decimal("100.00")),
         ("1800", Decimal("80.00"), Decimal("0.00")),
         ("1000", Decimal("0.00"), Decimal("80.00")),
     }
@@ -121,7 +123,7 @@ def test_closing_pdf_and_accounting_cover_all_requested_pos_transactions(tmp_pat
         "Gutscheinannahmen: 50.00 EUR",
         "1000 Kasseneinnahmen Bar: Soll 219.00 EUR",
         "1200 EC- und Kartenzahlungen: Soll 238.00 EUR",
-        "1600 Ausgegebene Gutscheine: Soll 0.00 EUR / Haben 100.00 EUR",
+        "1700 Ausgegebene Gutscheine: Soll 0.00 EUR / Haben 100.00 EUR",
         "8400 Umsatzerloese POS: Soll 0.00 EUR / Haben 407.00 EUR",
         "MOCK-TSE-DE-0004711",
     ):

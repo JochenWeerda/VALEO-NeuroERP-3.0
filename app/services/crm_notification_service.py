@@ -66,7 +66,7 @@ class CrmNotificationService:
         self.db.commit()
         # reviewed-safe: _COLS is a module-owned constant; the identifier is bound.
         r = self.db.execute(
-            text(f"SELECT {_COLS} FROM public.crm_notifications WHERE id = :id"), {"id": new_id}
+            text(f"SELECT {_COLS} FROM public.crm_notifications WHERE id = :id"), {"id": new_id}  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         ).mappings().first()
         return self._row(r)
 
@@ -116,7 +116,7 @@ class CrmNotificationService:
     def inbox(self, recipient: str, only_unread: bool = False, limit: int = 50) -> list[dict]:
         sql = (
             f"SELECT {_COLS} FROM public.crm_notifications "
-            "WHERE tenant_id = :t AND recipient = :r"
+            "WHERE tenant_id = :t AND recipient = :r"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
         if only_unread:
             sql += " AND status = 'unread'"
@@ -135,6 +135,6 @@ class CrmNotificationService:
         self.db.commit()
         # reviewed-safe: _COLS is a module-owned constant; the identifier is bound.
         r = self.db.execute(
-            text(f"SELECT {_COLS} FROM public.crm_notifications WHERE id = :id"), {"id": notification_id}
+            text(f"SELECT {_COLS} FROM public.crm_notifications WHERE id = :id"), {"id": notification_id}  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
         ).mappings().first()
         return self._row(r) if r else {}

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Dünger-Stammdaten Maske
  * ObjectPage für Dünger-Verwaltung mit vollständiger CRUD-Funktionalität
  */
@@ -330,7 +330,7 @@ const DuengerStammPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={handleCancel}>
+          <Button variant="outline" className="min-h-touch" onClick={handleCancel}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Zurück
           </Button>
@@ -344,10 +344,10 @@ const DuengerStammPage: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant="outline" className="min-h-touch" onClick={handleCancel}>
             Abbrechen
           </Button>
-          <Button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
+          <Button className="min-h-touch" onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
             <Save className="w-4 h-4 mr-2" />
             {createMutation.isPending || updateMutation.isPending ? 'Speichern...' : 'Speichern'}
           </Button>
@@ -385,7 +385,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.artikelnummer ? 'border-red-500' : ''}
                   />
                   {errors.artikelnummer && (
-                    <p className="text-sm text-red-500">{errors.artikelnummer}</p>
+                    <p className="text-sm text-status-error">{errors.artikelnummer}</p>
                   )}
                 </div>
 
@@ -398,7 +398,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.name ? 'border-red-500' : ''}
                   />
                   {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
+                    <p className="text-sm text-status-error">{errors.name}</p>
                   )}
                 </div>
 
@@ -413,7 +413,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.typ ? 'border-red-500' : ''}
                   />
                   {errors.typ && (
-                    <p className="text-sm text-red-500">{errors.typ}</p>
+                    <p className="text-sm text-status-error">{errors.typ}</p>
                   )}
                 </div>
 
@@ -444,7 +444,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.n_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.n_gehalt && (
-                    <p className="text-sm text-red-500">{errors.n_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.n_gehalt}</p>
                   )}
                 </div>
 
@@ -461,7 +461,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.p_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.p_gehalt && (
-                    <p className="text-sm text-red-500">{errors.p_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.p_gehalt}</p>
                   )}
                 </div>
 
@@ -478,7 +478,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.k_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.k_gehalt && (
-                    <p className="text-sm text-red-500">{errors.k_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.k_gehalt}</p>
                   )}
                 </div>
 
@@ -495,7 +495,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.s_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.s_gehalt && (
-                    <p className="text-sm text-red-500">{errors.s_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.s_gehalt}</p>
                   )}
                 </div>
 
@@ -512,7 +512,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.mg_gehalt ? 'border-red-500' : ''}
                   />
                   {errors.mg_gehalt && (
-                    <p className="text-sm text-red-500">{errors.mg_gehalt}</p>
+                    <p className="text-sm text-status-error">{errors.mg_gehalt}</p>
                   )}
                 </div>
               </div>
@@ -564,7 +564,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.ablauf_zulassung ? 'border-red-500' : ''}
                   />
                   {errors.ablauf_zulassung && (
-                    <p className="text-sm text-red-500">{errors.ablauf_zulassung}</p>
+                    <p className="text-sm text-status-error">{errors.ablauf_zulassung}</p>
                   )}
                 </div>
               </div>
@@ -604,9 +604,9 @@ const DuengerStammPage: React.FC = () => {
                   />
                   <Label htmlFor="wassergefaehrdend" className="flex items-center gap-2">
                     {formData.wassergefaehrdend ? (
-                      <Droplets className="w-4 h-4 text-blue-500" />
+                      <Droplets className="w-4 h-4 text-muted-foreground" />
                     ) : (
-                      <Droplets className="w-4 h-4 text-gray-400" />
+                      <Droplets className="w-4 h-4 text-muted-foreground" />
                     )}
                     Wassergefährdend
                   </Label>
@@ -622,7 +622,7 @@ const DuengerStammPage: React.FC = () => {
                  </Badge>
                )}
                {formData.wassergefaehrdend && (
-                 <Badge variant="secondary" className="bg-blue-100 text-blue-800 flex items-center gap-1">
+                 <Badge variant="info" className="flex items-center gap-1">
                    <Droplets className="w-3 h-3" />
                    Wassergefährdend
                  </Badge>
@@ -648,9 +648,9 @@ const DuengerStammPage: React.FC = () => {
                    />
                    <Label htmlFor="ausgangsstoff_explosivstoffe" className="flex items-center gap-2">
                      {formData.ausgangsstoff_explosivstoffe ? (
-                       <AlertTriangle className="w-4 h-4 text-orange-500" />
+                       <AlertTriangle className="w-4 h-4 text-status-warning" />
                      ) : (
-                       <AlertTriangle className="w-4 h-4 text-gray-400" />
+                       <AlertTriangle className="w-4 h-4 text-muted-foreground" />
                      )}
                      Enthält Ausgangsstoffe für Explosivstoffe
                    </Label>
@@ -668,9 +668,9 @@ const DuengerStammPage: React.FC = () => {
                        />
                        <Label htmlFor="erklaerung_landwirt_erforderlich" className="flex items-center gap-2">
                          {formData.erklaerung_landwirt_erforderlich ? (
-                           <CheckCircle className="w-4 h-4 text-green-500" />
+                           <CheckCircle className="w-4 h-4 text-status-success" />
                          ) : (
-                           <XCircle className="w-4 h-4 text-gray-400" />
+                           <XCircle className="w-4 h-4 text-muted-foreground" />
                          )}
                          Erklärung des Landwirts erforderlich
                        </Label>
@@ -759,7 +759,7 @@ const DuengerStammPage: React.FC = () => {
                     className={errors.dosierung_min ? 'border-red-500' : ''}
                   />
                   {errors.dosierung_min && (
-                    <p className="text-sm text-red-500">{errors.dosierung_min}</p>
+                    <p className="text-sm text-status-error">{errors.dosierung_min}</p>
                   )}
                 </div>
 

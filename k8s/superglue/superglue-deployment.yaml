@@ -28,6 +28,14 @@ spec:
       containers:
         - name: superglue
           image: superglueai/superglue:latest
+          # KSV-0014: Zustand liegt im PVC unter /var/lib/superglue; die Wurzel
+          # bleibt schreibgeschuetzt, /tmp kommt als emptyDir dazu.
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: 3001
               name: web
@@ -107,7 +115,11 @@ spec:
           volumeMounts:
             - name: runtime
               mountPath: /var/lib/superglue
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: runtime
           persistentVolumeClaim:
             claimName: superglue-runtime-data
+        - name: tmp
+          emptyDir: {}

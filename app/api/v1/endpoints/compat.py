@@ -42,6 +42,11 @@ from app.integrations.crm_core_client import (
 from app.routers.contracts_router import get_contract as get_contract_via_router
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.einkauf_compat_service import EinkaufCompatService
+from app.services.inventory_movement_direction import (
+    direction_sql,
+    inbound_sql,
+    outbound_sql,
+)
 from app.services.pos_compat_service import PosCompatService
 from app.services.inventory_compat_service import InventoryCompatService, FutterCompatService
 from app.services.annahme_service import AnnahmeService
@@ -50,6 +55,12 @@ from app.services.portal_compat_service import PortalCompatService
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import CompatBridgeOut
+from app.api.v1.schemas.mask_entity_contracts import (
+    EinkaufAnfrageOut,
+    EinkaufAngebotOut,
+    EinkaufAnlieferavisOut,
+    EinkaufAuftragsbestaetigungOut,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -276,6 +287,70 @@ async def crm_suppliers(
 # Purchase orders -----------------------------------------------------------
 
 
+def _bestellungen_als_compat(db: Session, tenant_id: str) -> list[dict[str, Any]]:
+    """Die Bestellungen aus ``domain_einkauf`` in der Form der Compat-Liste.
+
+    Es gibt zwei Bestellwelten: Diese Compat-Schnittstelle legt Dokumente in
+    einem generischen Dokumentenspeicher ab, die fuehrende Maske
+    (``einkauf/purchase-order``) schreibt nach ``domain_einkauf.bestellungen``.
+    Wer die Liste aufrief, sah deshalb nur die eine Haelfte — und gerade die
+    Bestellungen, die aus einem Verkaufsauftrag entstanden sind, fehlten
+    vollstaendig.
+
+    Zusammengelegt sind die beiden Speicher damit nicht; das ist ein eigener
+    Schritt mit Migration und einem Nummernkreis. Was hier passiert, ist das
+    Noetige: **Lesen zeigt beides.** Doppelt kann nichts erscheinen, weil ein
+    Beleg immer nur in einem der beiden Speicher entsteht.
+    """
+    zeilen = db.execute(
+        text(
+            """
+            SELECT b.id::text AS id, b.bestellnummer, b.status, b.bestelldatum,
+                   b.lieferdatum_wunsch, b.lieferant_id::text AS lieferant_id,
+                   b.netto_summe, b.brutto_summe, b.waehrung, b.incoterms,
+                   b.lieferadresse, b.notiz, b.bestellfall, b.kommission,
+                   b.created_at, b.updated_at,
+                   l.firmenname AS lieferant_name
+            FROM domain_einkauf.bestellungen b
+            LEFT JOIN domain_einkauf.lieferanten l ON l.id = b.lieferant_id
+            WHERE b.tenant_id = :tid
+            ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC
+            LIMIT 5000
+            """
+        ),
+        {"tid": tenant_id},
+    ).mappings().all()
+
+    ergebnis: list[dict[str, Any]] = []
+    for z in zeilen:
+        ergebnis.append({
+            "id": z["id"],
+            "purchaseOrderNumber": z["bestellnummer"],
+            "supplierId": z["lieferant_id"],
+            "supplierName": z["lieferant_name"],
+            "subject": z["kommission"] or z["bestellfall"] or "",
+            "description": z["notiz"] or "",
+            "status": (z["status"] or "").upper(),
+            "orderDate": z["bestelldatum"].isoformat() if z["bestelldatum"] else None,
+            "deliveryDate": (
+                z["lieferdatum_wunsch"].isoformat() if z["lieferdatum_wunsch"] else None
+            ),
+            "currency": z["waehrung"] or "EUR",
+            "incoterms": z["incoterms"],
+            "shippingAddress": z["lieferadresse"],
+            "subtotal": float(z["netto_summe"] or 0),
+            "totalAmount": float(z["brutto_summe"] or 0),
+            "createdAt": z["created_at"].isoformat() if z["created_at"] else None,
+            "updatedAt": z["updated_at"].isoformat() if z["updated_at"] else None,
+            "tenantId": tenant_id,
+            # Damit sichtbar bleibt, woher der Beleg kommt, solange es zwei
+            # Speicher gibt.
+            "herkunft": "einkauf",
+            "bestellfall": z["bestellfall"],
+        })
+    return ergebnis
+
+
 @router.get("/purchase-orders", response_model=PurchaseOrderListOut, summary="List po")
 async def po_list(
     status: Optional[str] = Query(None),
@@ -286,9 +361,11 @@ async def po_list(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
+    # Der Rueckfall auf *alle* Mandanten ist raus: Er sprang ein, sobald der
+    # eigene Mandant nichts hatte, und zeigte dann fremde Bestellungen — mit
+    # Lieferant, Betrag und Adresse.
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
-    if not docs:
-        docs = _list_docs(db, "purchase_order", limit=5000)
+    docs = [*docs, *_bestellungen_als_compat(db, tenant_id)]
 
     def _match(d: dict[str, Any]) -> bool:
         if status and str(d.get("status")) != status:
@@ -302,6 +379,8 @@ async def po_list(
         return True
 
     filtered = [d for d in docs if _match(d)]
+    # Zwei Quellen, eine Liste: ohne Sortierung stuenden die einen immer oben.
+    filtered.sort(key=lambda d: str(d.get("orderDate") or d.get("createdAt") or ""), reverse=True)
     total = len(filtered)
     start = (page - 1) * pageSize
     items = filtered[start : start + pageSize]
@@ -312,11 +391,55 @@ async def po_list(
 @router.get("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Get po")
 async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
-    if not docs:
-        docs = _list_docs(db, "purchase_order", limit=5000)
+    docs = [*docs, *_bestellungen_als_compat(db, tenant_id)]
     for d in docs:
         if str(d.get("id")) == po_id or str(d.get("purchaseOrderNumber")) == po_id:
             return d
+    raise HTTPException(status_code=404, detail="Purchase order not found")
+
+
+def _lieferant_aufloesen(db: Session, tenant_id: str, roh: Any) -> str | None:
+    """Den Lieferanten finden — ueber Id, Nummer oder Namen.
+
+    Der Dokumentenspeicher nahm als ``supplierId`` alles entgegen, auch einen
+    blossen Namen ("Stroetmann"). Der fuehrende Beleg verlangt einen echten
+    Stammsatz, und das zu Recht: Ohne ihn gibt es keine Anschrift, keine
+    Zahlungsbedingung und keine Auswertung je Lieferant.
+
+    Erfunden wird hier nichts. Wer nicht gefunden wird, fuehrt zu einer klaren
+    Absage statt zu einem Stammsatz, den niemand gepflegt hat.
+    """
+    wert = str(roh or "").strip()
+    if not wert:
+        return None
+    return db.execute(
+        text(
+            "SELECT id::text FROM domain_einkauf.lieferanten "
+            "WHERE tenant_id = :t AND (id::text = :s OR lieferantennummer = :s "
+            "      OR lower(firmenname) = lower(:s)) LIMIT 1"
+        ),
+        {"t": tenant_id, "s": wert},
+    ).scalar()
+
+
+def _bestellung_finden(db: Session, tenant_id: str, kennung: str) -> dict[str, Any] | None:
+    """Einen Beleg ueber Id **oder** Bestellnummer finden."""
+    zeile = db.execute(
+        text(
+            "SELECT id::text AS id, bestellnummer, status "
+            "FROM domain_einkauf.bestellungen "
+            "WHERE tenant_id = :t AND (id::text = :k OR bestellnummer = :k) LIMIT 1"
+        ),
+        {"t": tenant_id, "k": str(kennung)},
+    ).mappings().first()
+    return dict(zeile) if zeile else None
+
+
+def _compat_zeile(db: Session, tenant_id: str, bestell_id: str) -> dict[str, Any]:
+    """Einen Beleg in der Form zurueckgeben, die die Compat-Aufrufer kennen."""
+    for zeile in _bestellungen_als_compat(db, tenant_id):
+        if zeile["id"] == bestell_id:
+            return zeile
     raise HTTPException(status_code=404, detail="Purchase order not found")
 
 
@@ -326,6 +449,73 @@ async def _create_compat_purchase_order(
     tenant_id: str,
     payload: dict[str, Any],
 ) -> dict[str, Any]:
+    # Angelegt wird jetzt im fuehrenden Bestand (domain_einkauf.bestellungen,
+    # Nummernkreis EK-), nicht mehr als Dokument. Sonst waechst die alte Welt
+    # weiter, waehrend beide Masken schon richtig lesen.
+    from app.services.procurement_service import ProcurementService
+
+    lieferant_id = _lieferant_aufloesen(db, tenant_id, payload.get("supplierId"))
+    if not lieferant_id:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Lieferant '{payload.get('supplierId')}' ist im Lieferantenstamm nicht "
+                f"zu finden — weder als Id noch als Nummer noch als Name. "
+                f"Ohne Stammsatz keine Bestellung."
+            ),
+        )
+
+    positionen = []
+    for nr, position in enumerate(payload.get("items", []) or [], start=1):
+        bezeichnung = position.get("description") or f"Position {nr}"
+        positionen.append({
+            "artikel_nr": position.get("articleNumber") or bezeichnung[:50],
+            "artikel_bezeichnung": bezeichnung,
+            "menge": float(position.get("quantity") or 0),
+            "einheit": position.get("unit") or "Stk",
+            "einzelpreis": float(position.get("unitPrice") or 0),
+            "rabatt_prozent": float(position.get("discountPercent") or 0),
+        })
+
+    dienst = ProcurementService(db, tenant_id)
+    angelegt = dienst.create_bestellung({
+        "lieferant_id": lieferant_id,
+        "bestelldatum": payload.get("orderDate"),
+        "lieferdatum_wunsch": payload.get("deliveryDate"),
+        "waehrung": payload.get("currency") or "EUR",
+        "incoterms": payload.get("incoterms"),
+        "lieferadresse": payload.get("shippingAddress"),
+        "zahlungsbedingung": payload.get("paymentTerms"),
+        "ansprechpartner": payload.get("contactPerson"),
+        "unsere_referenz": payload.get("externalReference"),
+        "notiz": payload.get("notes") or payload.get("description"),
+        "kommission": payload.get("subject"),
+        "positionen": positionen,
+    })
+
+    await _enqueue_event(
+        db,
+        event_type="purchase_order.created",
+        aggregate_id=angelegt["id"],
+        payload={
+            "purchaseOrderNumber": angelegt.get("bestellnummer"),
+            "supplierId": lieferant_id,
+            "status": angelegt.get("status"),
+            "createdAt": _now_iso(),
+        },
+        tenant_id=tenant_id,
+    )
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    return _compat_zeile(db, tenant_id, angelegt["id"])
+
+
+async def _create_compat_purchase_order_dokument(
+    db: Session,
+    *,
+    tenant_id: str,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Der alte Weg — bleibt lesbar, wird aber nicht mehr gerufen."""
     now = _now_iso()
     po_number = payload.get("purchaseOrderNumber") or f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid4())[:6].upper()}"
     item_list = payload.get("items", [])
@@ -388,6 +578,27 @@ async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant
 
 @router.patch("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Patch po")
 async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    from app.services.procurement_service import ProcurementService
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if beleg:
+        felder = {
+            "deliveryDate": "lieferdatum_wunsch",
+            "shippingAddress": "lieferadresse",
+            "paymentTerms": "zahlungsbedingung",
+            "contactPerson": "ansprechpartner",
+            "incoterms": "incoterms",
+            "currency": "waehrung",
+            "notes": "notiz",
+            "externalReference": "unsere_referenz",
+            "subject": "kommission",
+        }
+        daten = {ziel: payload[quelle] for quelle, ziel in felder.items() if quelle in payload}
+        if daten:
+            ProcurementService(db, tenant_id).update_bestellung(beleg["id"], daten)
+        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+        return _compat_zeile(db, tenant_id, beleg["id"])
+
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
     changes = []
@@ -412,6 +623,18 @@ async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends
 
 @router.post("/purchase-orders/{po_id}/approve", response_model=PurchaseOrderOut, summary="Approve po")
 async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    from app.core.exceptions import ValidationFailedError
+    from app.services.procurement_service import ProcurementService
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if beleg:
+        try:
+            ProcurementService(db, tenant_id).freigebe_bestellung(beleg["id"])
+        except ValidationFailedError as fehler:
+            raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+        return _compat_zeile(db, tenant_id, beleg["id"])
+
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
     doc["status"] = "FREIGEGEBEN"
@@ -442,6 +665,20 @@ async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Se
 
 @router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=PurchaseOrderOut, summary="Cancel po")
 async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    from app.core.exceptions import ValidationFailedError
+    from app.services.procurement_service import ProcurementService
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if beleg:
+        try:
+            ProcurementService(db, tenant_id).storniere_bestellung(
+                beleg["id"], payload.get("reason")
+            )
+        except ValidationFailedError as fehler:
+            raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+        return _compat_zeile(db, tenant_id, beleg["id"])
+
     doc = await po_get(po_id, tenant_id, db)
     now = _now_iso()
     reason = payload.get("reason") or ""
@@ -540,8 +777,10 @@ async def einkauf_goods_receipts_create(
 
 
 @router.get("/einkauf/bestellvorschlaege", response_model=list[CompatBridgeOut], summary="Bestellvorschlaege einkauf")
-async def einkauf_bestellvorschlaege(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    rows = db.query(Charge).order_by(Charge.eingang.desc()).limit(200).all()
+async def einkauf_bestellvorschlaege(
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> list[dict[str, Any]]:
+    rows = db.query(Charge).filter(Charge.tenant_id == tenant_id).order_by(Charge.eingang.desc()).limit(200).all()
     return [
         {
             "id": r.id,
@@ -587,7 +826,7 @@ def _load_einkauf_anfrage(db: Session, anfrage_id: str):
         return None
 
 
-@router.get("/einkauf/anfragen/{anfrage_id}", response_model=EinkaufDocOut, summary="Anfrage get einkauf")
+@router.get("/einkauf/anfragen/{anfrage_id}", response_model=EinkaufAnfrageOut, summary="Anfrage get einkauf")
 async def einkauf_anfrage_get(
     anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -623,6 +862,24 @@ async def einkauf_angebote_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_angebote()
+
+
+def _load_einkauf_angebot(db: Session, angebot_id: str):
+    from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
+    try:
+        return _Svc(db, "default").get_angebot(angebot_id)
+    except EntityNotFoundError:
+        return None
+
+
+@router.get("/einkauf/angebote/{angebot_id}", response_model=EinkaufAngebotOut, summary="Angebot get einkauf")
+async def einkauf_angebot_get(
+    angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    result = _load_einkauf_angebot(db, angebot_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Angebot not found")
+    return result
 
 
 @router.post("/einkauf/angebote/{angebot_id}/review", response_model=EinkaufDocOut, summary="Angebot review einkauf")
@@ -672,6 +929,24 @@ async def einkauf_anlieferavis_list(
     return EinkaufCompatService(db, tenant_id).list_anlieferavis()
 
 
+def _load_einkauf_anlieferavis(db: Session, avis_id: str):
+    from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
+    try:
+        return _Svc(db, "default").get_anlieferavis(avis_id)
+    except EntityNotFoundError:
+        return None
+
+
+@router.get("/einkauf/anlieferavis/{avis_id}", response_model=EinkaufAnlieferavisOut, summary="Anlieferavis get einkauf")
+async def einkauf_anlieferavis_get(
+    avis_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    result = _load_einkauf_anlieferavis(db, avis_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Anlieferavis not found")
+    return result
+
+
 @router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=EinkaufDocOut, summary="Anlieferavis transition einkauf")
 async def einkauf_anlieferavis_transition(
     avis_id: str, action: str,
@@ -690,6 +965,28 @@ async def einkauf_auftragsbestaetigungen_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_auftragsbestaetigungen()
+
+
+def _load_einkauf_auftragsbestaetigung(db: Session, bestaetigung_id: str):
+    from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
+    try:
+        return _Svc(db, "default").get_auftragsbestaetigung(bestaetigung_id)
+    except EntityNotFoundError:
+        return None
+
+
+@router.get(
+    "/einkauf/auftragsbestaetigungen/{bestaetigung_id}",
+    response_model=EinkaufAuftragsbestaetigungOut,
+    summary="Auftragsbestaetigung get einkauf",
+)
+async def einkauf_auftragsbestaetigung_get(
+    bestaetigung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    result = _load_einkauf_auftragsbestaetigung(db, bestaetigung_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Auftragsbestaetigung not found")
+    return result
 
 
 @router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=EinkaufDocOut, summary="Auftragsbestaetigung transition einkauf")
@@ -2457,18 +2754,24 @@ async def lager_dashboard(
     db: Session = Depends(get_db),
 ) -> dict:
     """Echte Bestands-KPIs aus StockMovements aggregiert."""
+    # DOM-INV-005: Zu- und Abgang zentral bestimmt. Vorher zaehlten hier nur
+    # 'in' und 'out' - jede deutsche Buchung, jedes ZUGANG/ABGANG und jede
+    # Retoure fiel aus den KPIs heraus.
+    zugang = inbound_sql()
+    abgang = outbound_sql()
+    zugang_wert = inbound_sql(quantity="quantity * COALESCE(unit_cost, 0)")
+    abgang_wert = outbound_sql(quantity="quantity * COALESCE(unit_cost, 0)")
     row = db.execute(
-        text("""
+        text(f"""
             SELECT
                 COUNT(DISTINCT article_id) AS total_articles,
-                COALESCE(SUM(CASE WHEN movement_type = 'in' THEN quantity ELSE 0 END), 0) AS total_in,
-                COALESCE(SUM(CASE WHEN movement_type = 'out' THEN quantity ELSE 0 END), 0) AS total_out,
-                COALESCE(SUM(CASE WHEN movement_type = 'in' THEN quantity * COALESCE(unit_cost, 0) ELSE 0 END)
-                       - SUM(CASE WHEN movement_type = 'out' THEN quantity * COALESCE(unit_cost, 0) ELSE 0 END), 0) AS total_value,
+                COALESCE(SUM({zugang}), 0) AS total_in,
+                COALESCE(SUM({abgang}), 0) AS total_out,
+                COALESCE(SUM({zugang_wert}) - SUM({abgang_wert}), 0) AS total_value,
                 COUNT(CASE WHEN movement_date = CURRENT_DATE THEN 1 END) AS movements_today
             FROM domain_inventory.inventory_stock_movements
             WHERE tenant_id = :tid
-        """),
+        """),  # nosec B608 - Fragmente aus Modulkonstanten, Werte via Bind-Params
         {"tid": tenant_id},
     ).first()
 
@@ -2479,19 +2782,20 @@ async def lager_dashboard(
     total_value = float(row[3]) if row else 0
     movements_today = row[4] if row else 0
 
+    richtung = direction_sql()
     low_stock_row = db.execute(
-        text("""
+        text(f"""
             SELECT COUNT(DISTINCT sm.article_id)
             FROM (
                 SELECT article_id,
-                       SUM(CASE WHEN movement_type = 'in' THEN quantity ELSE -quantity END) AS bestand
+                       SUM({richtung}) AS bestand
                 FROM domain_inventory.inventory_stock_movements
                 WHERE tenant_id = :tid
                 GROUP BY article_id
             ) sm
             JOIN domain_inventory.articles a ON a.id = sm.article_id
             WHERE sm.bestand > 0 AND sm.bestand < COALESCE(a.min_stock, 10)
-        """),
+        """),  # nosec B608 - Fragment aus Modulkonstanten, Werte via Bind-Params
         {"tid": tenant_id},
     ).scalar() or 0
 
@@ -2645,12 +2949,11 @@ async def create_auslagerung(
     elif payload.strategie in ("fifo", "fefo"):
         order_col = "created_at ASC" if payload.strategie == "fifo" else "created_at ASC"
         row = db.execute(
-            # nosec S608 â€” reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT batch_number, warehouse_id FROM domain_inventory.article_batches
                 WHERE tenant_id = :tid AND article_id = :art AND quantity > 0
                 ORDER BY {order_col} LIMIT 1
-            """),
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             {"tid": tenant_id, "art": payload.artikel},
         ).first()
         if row:
@@ -3091,17 +3394,23 @@ async def management_dashboard(
         auftraege = int(sales_row.cnt) if sales_row else 0
 
         oi_row = db.execute(text("""
-            SELECT COALESCE(SUM(amount), 0) AS total
-            FROM domain_shared.open_items
-            WHERE tenant_id = :tid AND status = 'open'
+            -- Die offenen Posten stehen in domain_erp.offene_posten; die hier
+            -- gelesene Tabelle ist leer.
+            SELECT COALESCE(SUM(offen), 0) AS total
+            FROM domain_erp.offene_posten
+            WHERE tenant_id = :tid AND op_status = 'offen'
         """), {"tid": tenant_id}).fetchone()
         offene_posten = float(oi_row.total) if oi_row else 0
 
         top_products = db.execute(text("""
-            SELECT a.name, COALESCE(SUM(sol.total), 0) AS umsatz
-            FROM domain_crm.sales_order_lines sol
-            JOIN domain_inventory.articles a ON a.id = sol.article_id
-            JOIN domain_crm.sales_orders so ON so.id = sol.order_id AND so.tenant_id = :tid
+            -- Die Auftragsposition heisst `sales_order_items`, ihr Betrag
+            -- `line_total`, und sie fuehrt die **Artikelnummer**, keine
+            -- Artikel-ID. Der Join ging deshalb dreifach ins Leere; die
+            -- Auswertung blieb leer und sah aus wie „kein Umsatz".
+            SELECT a.name, COALESCE(SUM(soi.line_total), 0) AS umsatz
+            FROM domain_crm.sales_order_items soi
+            JOIN domain_inventory.articles a ON a.article_number = soi.article_number
+            JOIN domain_crm.sales_orders so ON so.id = soi.order_id AND so.tenant_id = :tid
             GROUP BY a.name ORDER BY umsatz DESC LIMIT 5
         """), {"tid": tenant_id}).fetchall()
 

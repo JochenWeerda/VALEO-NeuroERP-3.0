@@ -126,11 +126,11 @@ export function SemanticSearch() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'customer':
-        return <User className="h-5 w-5 text-blue-600" />
+        return <User className="h-5 w-5 text-muted-foreground" />
       case 'article':
-        return <Package className="h-5 w-5 text-green-600" />
+        return <Package className="h-5 w-5 text-status-success" />
       case 'document':
-        return <FileText className="h-5 w-5 text-orange-600" />
+        return <FileText className="h-5 w-5 text-status-warning" />
       default:
         return <Search className="h-5 w-5" />
     }
@@ -222,7 +222,7 @@ export function SemanticSearch() {
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-2 shrink-0">
                           <Badge variant="secondary">
                             {getTypeBadge(result.type)}
                           </Badge>

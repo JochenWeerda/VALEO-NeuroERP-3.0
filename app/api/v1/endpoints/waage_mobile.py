@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/waage/mobile", tags=["waage", "mobile", "logistik"])
 
@@ -44,7 +45,7 @@ class WaagenQuittungBatch(BaseModel):
     quittungen: list[WaagenQuittungIn]
 
 
-@router.post("/quittung", response_model=dict, status_code=201,
+@router.post("/quittung", response_model=TypedObjectOut, status_code=201,
              summary="Fahrer-Quittung für Wiegeticket erfassen (WGE-MOB-001)")
 def create_quittung(
     body: WaagenQuittungIn,
@@ -118,7 +119,7 @@ def create_quittung(
     }
 
 
-@router.post("/sync", response_model=dict, status_code=200,
+@router.post("/sync", response_model=TypedObjectOut, status_code=200,
              summary="Offline-Batch-Sync: mehrere Quittungen auf einmal (WGE-MOB-001)")
 def batch_sync(
     body: WaagenQuittungBatch,
@@ -181,7 +182,7 @@ def batch_sync(
             "synced": synced, "results": results}
 
 
-@router.get("/pending", response_model=dict[str, Any], summary="Ausstehende Quittungen eines Geräts")
+@router.get("/pending", response_model=TypedObjectOut, summary="Ausstehende Quittungen eines Geräts")
 def get_pending(
     device_id: str = Query(...),
     limit: int = Query(50, ge=1, le=200),
@@ -215,7 +216,7 @@ def get_pending(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
-@router.get("/tickets/{ticket_id}", response_model=dict[str, Any], summary="Wiegeticket + Quittungsstatus")
+@router.get("/tickets/{ticket_id}", response_model=TypedObjectOut, summary="Wiegeticket + Quittungsstatus")
 def get_ticket_with_quittung(
     ticket_id: str,
     tenant_id: str = Depends(get_tenant_id),

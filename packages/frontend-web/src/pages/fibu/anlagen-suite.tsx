@@ -400,20 +400,18 @@ export default function AnlagenSuitePage(): JSX.Element {
                 {canValidate && (
                   <Button
                     variant="outline"
-                    size="sm"
+                    className="min-h-touch gap-1"
                     onClick={() => validateMutation.mutate()}
                     disabled={validateMutation.isPending}
-                    className="gap-1"
                   >
                     <CheckCircle2 className="h-3 w-3" /> Validieren
                   </Button>
                 )}
                 {canPost && (
                   <Button
-                    size="sm"
+                    className="min-h-touch gap-1"
                     onClick={() => postMutation.mutate()}
                     disabled={postMutation.isPending}
-                    className="gap-1"
                   >
                     <BookOpen className="h-3 w-3" /> Buchen
                   </Button>
@@ -421,10 +419,9 @@ export default function AnlagenSuitePage(): JSX.Element {
                 {canCancel && (
                   <Button
                     variant="outline"
-                    size="sm"
+                    className="min-h-touch gap-1"
                     onClick={() => cancelMutation.mutate()}
                     disabled={cancelMutation.isPending}
-                    className="gap-1"
                   >
                     Abbrechen
                   </Button>
@@ -432,10 +429,9 @@ export default function AnlagenSuitePage(): JSX.Element {
                 {canReverse && (
                   <Button
                     variant="outline"
-                    size="sm"
+                    className="min-h-touch gap-1"
                     onClick={() => reverseMutation.mutate()}
                     disabled={reverseMutation.isPending}
-                    className="gap-1"
                   >
                     <Undo2 className="h-3 w-3" /> Stornieren
                   </Button>

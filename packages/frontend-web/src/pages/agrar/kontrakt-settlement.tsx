@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Receipt, Loader2, RefreshCw, Search, Ban, FileCheck2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,19 +20,19 @@ import {
  * abgerechnete Bewegungen sind storno-gesperrt.
  */
 
-const STATUS_BADGE: Record<string, string> = {
-  offen: 'bg-amber-100 text-amber-800', abgerechnet: 'bg-emerald-100 text-emerald-800',
-  storniert: 'bg-red-100 text-red-800', aktiv: 'bg-sky-100 text-sky-800',
+const STATUS_BADGE: Record<string, BadgeVariant> = {
+  offen: 'warning', abgerechnet: 'success',
+  storniert: 'error', aktiv: 'info',
 }
 
 type StornoTarget = { kind: 'movement' | 'fixing'; id: string; label: string } | null
 
 function Row({ c, active, onClick }: { c: ContractRow; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`w-full text-left px-3 py-2 hover:bg-muted/50 ${active ? 'bg-muted' : ''}`}>
+    <button onClick={onClick} className={`min-h-touch w-full text-left px-3 py-2 ${active ? 'bg-muted' : ''}`}>
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium text-sm truncate">{c.contract_no}</span>
-        <Badge variant="outline" className="text-[10px]">{c.typ}</Badge>
+        <Badge variant="outline" className="text-2xs">{c.typ}</Badge>
       </div>
       <div className="text-xs text-muted-foreground mt-0.5">{c.party_id ?? '—'} · {c.menge_kontrakt} {c.einheit}</div>
     </button>
@@ -81,7 +81,7 @@ export default function KontraktSettlementPage() {
       <div className="flex items-center gap-2">
         <Receipt size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Kontrakt-Settlement</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void listQuery.refetch()} disabled={listQuery.isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void listQuery.refetch()} disabled={listQuery.isFetching}>
           {listQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -93,7 +93,7 @@ export default function KontraktSettlementPage() {
             <CardTitle className="text-sm">Kontrakte</CardTitle>
             <div className="relative">
               <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" className="h-8 pl-7" />
+              <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Nr. suchen…" aria-label="Kontraktnummer suchen" className="min-h-touch pl-7" />
             </div>
           </CardHeader>
           <CardContent className="p-0 max-h-[70vh] overflow-y-auto">
@@ -121,8 +121,8 @@ export default function KontraktSettlementPage() {
               <Card>
                 <CardContent className="p-3 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
                   <div><div className="text-xs text-muted-foreground">Abgerufen</div><div className="font-semibold tabular-nums">{data.summary?.abgerufen} {einheit}</div></div>
-                  <div><div className="text-xs text-muted-foreground">Abgerechnet</div><div className="font-semibold tabular-nums text-emerald-700">{data.summary?.abgerechnet} {einheit}</div></div>
-                  <div><div className="text-xs text-muted-foreground">Offen (Abruf)</div><div className="font-semibold tabular-nums text-amber-700">{data.summary?.offen_abruf} {einheit}</div></div>
+                  <div><div className="text-xs text-muted-foreground">Abgerechnet</div><div className="font-semibold tabular-nums text-status-success">{data.summary?.abgerechnet} {einheit}</div></div>
+                  <div><div className="text-xs text-muted-foreground">Offen (Abruf)</div><div className="font-semibold tabular-nums text-status-warning">{data.summary?.offen_abruf} {einheit}</div></div>
                   <div><div className="text-xs text-muted-foreground">Fixiert aktiv</div><div className="font-semibold tabular-nums">{data.summary?.fixiert_aktiv} {einheit}</div></div>
                 </CardContent>
               </Card>
@@ -131,7 +131,7 @@ export default function KontraktSettlementPage() {
                 <CardHeader className="py-3 flex-row items-center justify-between">
                   <CardTitle className="text-sm">Abruf-Bewegungen</CardTitle>
                   {(data.summary?.offen_abruf ?? 0) > 0 && (
-                    <Button size="sm" variant="outline" onClick={() => doHandover()} disabled={handover.isPending}>
+                    <Button className="min-h-touch" variant="outline" onClick={() => doHandover()} disabled={handover.isPending}>
                       {handover.isPending ? <Loader2 size={13} className="animate-spin mr-1" /> : <FileCheck2 size={13} className="mr-1" />}
                       Alle offenen abrechnen
                     </Button>
@@ -154,13 +154,26 @@ export default function KontraktSettlementPage() {
                           <tr key={m.movement_id} className="border-b last:border-0">
                             <td className="px-3 py-1.5 text-right tabular-nums">{m.menge}</td>
                             <td className="px-3 py-1.5">{m.datum ? new Date(m.datum).toLocaleDateString('de-DE') : '—'}</td>
-                            <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[m.status] ?? ''}`}>{m.status}</Badge></td>
+                            <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[m.status] ?? 'muted'} className="text-2xs">{m.status}</Badge></td>
                             <td className="px-3 py-1.5 text-muted-foreground">{m.invoice_no ?? m.storno_grund ?? '—'}</td>
                             <td className="px-3 py-1.5 text-right">
                               {m.status === 'offen' && (
-                                <span className="inline-flex gap-1">
-                                  <Button size="sm" variant="ghost" onClick={() => doHandover(m.movement_id)} disabled={handover.isPending}><FileCheck2 size={13} /></Button>
-                                  <Button size="sm" variant="ghost" onClick={() => { setStorno({ kind: 'movement', id: m.movement_id, label: `Bewegung ${m.menge} ${einheit}` }); setGrund('') }}><Ban size={13} className="text-red-600" /></Button>
+                                <span className="inline-flex flex-wrap justify-end gap-1">
+                                  <Button
+                                    className="min-h-touch"
+                                    variant="outline"
+                                    onClick={() => doHandover(m.movement_id)}
+                                    disabled={handover.isPending && (handover.variables?.movementId === m.movement_id || handover.variables?.movementId == null)}
+                                  >
+                                    Abrechnen
+                                  </Button>
+                                  <Button
+                                    className="min-h-touch"
+                                    variant="outline"
+                                    onClick={() => { setStorno({ kind: 'movement', id: m.movement_id, label: `Bewegung ${m.menge} ${einheit}` }); setGrund('') }}
+                                  >
+                                    Storno
+                                  </Button>
                                 </span>
                               )}
                             </td>
@@ -196,10 +209,16 @@ export default function KontraktSettlementPage() {
                               <td className="px-3 py-1.5">{f.fixing_no}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{f.menge}</td>
                               <td className="px-3 py-1.5 text-right tabular-nums">{f.effektiv_preis}</td>
-                              <td className="px-3 py-1.5"><Badge className={`text-[10px] ${STATUS_BADGE[f.status] ?? ''}`}>{f.status}</Badge></td>
+                              <td className="px-3 py-1.5"><Badge variant={STATUS_BADGE[f.status] ?? 'muted'} className="text-2xs">{f.status}</Badge></td>
                               <td className="px-3 py-1.5 text-right">
                                 {f.status === 'aktiv' && (
-                                  <Button size="sm" variant="ghost" onClick={() => { setStorno({ kind: 'fixing', id: f.fixing_id, label: `Fixierung #${f.fixing_no} (${f.menge} ${einheit})` }); setGrund('') }}><Ban size={13} className="text-red-600" /></Button>
+                                  <Button
+                                    className="min-h-touch"
+                                    variant="outline"
+                                    onClick={() => { setStorno({ kind: 'fixing', id: f.fixing_id, label: `Fixierung #${f.fixing_no} (${f.menge} ${einheit})` }); setGrund('') }}
+                                  >
+                                    Storno
+                                  </Button>
                                 )}
                               </td>
                             </tr>
@@ -223,8 +242,8 @@ export default function KontraktSettlementPage() {
           </DialogHeader>
           <Textarea value={grund} onChange={(e) => setGrund(e.target.value)} placeholder="Grund des Stornos …" rows={3} />
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setStorno(null); setGrund('') }} disabled={stornoPending}>Abbrechen</Button>
-            <Button variant="destructive" onClick={confirmStorno} disabled={!grund.trim() || stornoPending}>
+            <Button variant="outline" className="min-h-touch" onClick={() => { setStorno(null); setGrund('') }} disabled={stornoPending}>Abbrechen</Button>
+            <Button variant="destructive" className="min-h-touch" onClick={confirmStorno} disabled={!grund.trim() || stornoPending}>
               {stornoPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Ban size={14} className="mr-1" />}
               Stornieren
             </Button>

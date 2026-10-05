@@ -18,14 +18,14 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.einkauf_kpis_schemas import EinkaufKpisOut
 
 
@@ -62,7 +62,7 @@ def get_kpis(
                         / NULLIF(COUNT(*), 0)
                 FROM domain_einkauf.bestellungen
                 WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                   AND actual_delivery_date IS NOT NULL
             """),
             date_params,
@@ -81,7 +81,7 @@ def get_kpis(
                 FROM domain_einkauf.bestellung_positionen bp
                 JOIN domain_einkauf.bestellungen b ON b.id = bp.bestellung_id
                 WHERE b.tenant_id = :tid
-                  AND b.bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND b.bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
             """),
             date_params,
         ).scalar()
@@ -97,7 +97,7 @@ def get_kpis(
                 SELECT AVG((invoice_amount - po_amount) / NULLIF(po_amount, 0))
                 FROM domain_einkauf.invoice_verification
                 WHERE tenant_id = :tid
-                  AND created_at BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND created_at BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                   AND po_amount IS NOT NULL AND invoice_amount IS NOT NULL
             """),
             date_params,
@@ -115,7 +115,7 @@ def get_kpis(
                            - bestelldatum::TIMESTAMPTZ)) / 86400)
                 FROM domain_einkauf.bestellungen
                 WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                   AND actual_delivery_date IS NOT NULL
             """),
             date_params,
@@ -132,7 +132,7 @@ def get_kpis(
                 SELECT lieferant_id, SUM(gesamtbetrag) AS total_spend
                 FROM domain_einkauf.bestellungen
                 WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                 GROUP BY lieferant_id
                 ORDER BY total_spend DESC
                 LIMIT 5
@@ -154,7 +154,7 @@ def get_kpis(
                     SELECT lieferant_id, SUM(gesamtbetrag) AS spend
                     FROM domain_einkauf.bestellungen
                     WHERE tenant_id = :tid
-                      AND bestelldatum BETWEEN :date_from::DATE AND :date_to::DATE
+                      AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
                     GROUP BY lieferant_id
                 ),
                 totals AS (SELECT SUM(spend) AS grand_total FROM supplier_spend),
@@ -207,7 +207,7 @@ def get_kpis(
     }
 
 
-@router.get("/audit-trail/{doc_type}/{doc_id}", response_model=dict, summary="Einkauf Audit-Trail abrufen")
+@router.get("/audit-trail/{doc_type}/{doc_id}", response_model=TypedObjectOut, summary="Einkauf Audit-Trail abrufen")
 async def get_einkauf_audit_trail(
     doc_type: str,
     doc_id: str,
@@ -222,17 +222,30 @@ async def get_einkauf_audit_trail(
     }
 
 
-@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", response_model=dict, summary="Bestellung anlegen (UIX-046)")
+@router.post("/lieferanten/{entity_id}/actions/neue_bestellung", response_model=TypedObjectOut, summary="Bestellung anlegen (SPEC-P1-04)")
 async def action_neue_bestellung(
     entity_id: str,
+    body: dict = Body(default_factory=dict),
+    db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Stub: Neue Bestellung für Lieferant anlegen — dryRun-Phase, execute folgt in UIX-046+."""
-    return {
-        "success": True,
-        "actionKey": "neue_bestellung",
-        "entityId": entity_id,
-        "tenantId": tenant_id,
-        "message": "Bestellvorgang wird vorbereitet.",
-        "proposedChanges": {"status": "draft", "lieferant_id": entity_id},
-    }
+    from app.services.mask_action_runtime_service import run_mask_action
+
+    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
+        return {
+            "summary": "Bestellvorgang für Lieferant angelegt.",
+            "affectedIds": [eid],
+            "mutation": {"status": "draft", "lieferant_id": eid, **payload},
+        }
+
+    result = run_mask_action(
+        db,
+        action_key="neue_bestellung",
+        entity_type="supplier",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        execute_fn=execute,
+        outbox_event_type="einkauf.bestellung.created_from_supplier",
+    )
+    return result.model_dump()

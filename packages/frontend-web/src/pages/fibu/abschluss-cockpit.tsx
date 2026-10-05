@@ -152,7 +152,7 @@ export default function AbschlussCockpitPage(): JSX.Element {
   }
 
   if (error) {
-    return <div className="p-6 text-sm text-red-600">Abschluss-Cockpit konnte nicht geladen werden.</div>
+    return <div className="p-6 text-sm text-status-error">Abschluss-Cockpit konnte nicht geladen werden.</div>
   }
 
   return (
@@ -198,7 +198,7 @@ export default function AbschlussCockpitPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Blocker</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold text-red-600">{blockers.length}</div></CardContent>
+          <CardContent><div className="text-2xl font-bold text-status-error">{blockers.length}</div></CardContent>
         </Card>
       </div>
 
@@ -249,7 +249,7 @@ export default function AbschlussCockpitPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant={item.status === 'blocked' ? 'destructive' : 'outline'}>{item.status}</Badge>
-                <Button variant="outline" size="sm" onClick={() => { void openChecklistDetail(item.id) }}>
+                <Button variant="outline" onClick={() => { void openChecklistDetail(item.id) }} className="min-h-touch">
                   Details
                 </Button>
               </div>

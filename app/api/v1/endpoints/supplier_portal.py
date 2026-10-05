@@ -79,7 +79,7 @@ def get_lieferant_lieferungen(
             WHERE {where_clause}
             ORDER BY ha.acceptance_date DESC
             LIMIT 100
-        """.format(where_clause=" AND ".join(where_clauses))), params).fetchall()
+        """.format(where_clause=" AND ".join(where_clauses))), params).fetchall()  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
         return [
             SupplierLieferungView(

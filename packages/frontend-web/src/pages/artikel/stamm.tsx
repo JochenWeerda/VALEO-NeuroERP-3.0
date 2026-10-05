@@ -37,6 +37,7 @@ import {
   Download,
   Edit,
 } from 'lucide-react'
+import { Callout } from '@/components/ui/callout'
 import { useToast } from '@/components/ui/toast-provider'
 import { ErrorState } from '@/components/ErrorState'
 import { Badge } from '@/components/ui/badge'
@@ -813,7 +814,7 @@ export default function ArtikelStammPage(): JSX.Element {
                   </div>
                   <div>
                     <Label>Lagerwert</Label>
-                    <div className="mt-1 text-xl font-bold text-blue-600">
+                    <div className="mt-1 text-xl font-bold text-primary">
                       {new Intl.NumberFormat('de-DE', {
                         style: 'currency',
                         currency: 'EUR',
@@ -894,7 +895,7 @@ export default function ArtikelStammPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <AlertTriangle className="h-5 w-5 text-status-warning" />
                 Gefahrgutdaten
               </CardTitle>
             </CardHeader>
@@ -938,17 +939,17 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
               </div>
               {artikel.gefahrgutklasse && (
-                <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
+                <Callout variant="warning" className="rounded-lg border p-4">
                   <div className="flex items-center gap-2 text-orange-700">
                     <AlertTriangle className="h-5 w-5" />
                     <span className="font-medium">
                       Achtung: Dieser Artikel ist als Gefahrgut klassifiziert
                     </span>
                   </div>
-                  <p className="mt-2 text-sm text-orange-600">
+                  <p className="mt-2 text-sm text-status-warning">
                     Bitte beachten Sie die gesetzlichen Vorschriften fuer Lagerung und Transport.
                   </p>
-                </div>
+                </Callout>
               )}
             </CardContent>
           </Card>
@@ -961,7 +962,7 @@ export default function ArtikelStammPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-green-500" />
+                <Leaf className="h-5 w-5 text-status-success" />
                 Kennzeichnung
               </CardTitle>
             </CardHeader>
@@ -1054,7 +1055,7 @@ export default function ArtikelStammPage(): JSX.Element {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Warehouse className="h-5 w-5 text-blue-500" />
+                <Warehouse className="h-5 w-5 text-muted-foreground" />
                 Lagerhaltung
               </CardTitle>
             </CardHeader>
@@ -1235,7 +1236,7 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" className="min-h-touch" onClick={() => push('Dokument-Upload ist in dieser Maske nicht angebunden.')}>
                   <Upload className="h-4 w-4 mr-2" />
                   Dokument hochladen
                 </Button>
@@ -1257,11 +1258,11 @@ export default function ArtikelStammPage(): JSX.Element {
                         <TableCell>{doc.document_type}</TableCell>
                         <TableCell>{new Date(doc.created_at).toLocaleDateString('de-DE')}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            <Download className="h-4 w-4" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Download ist in dieser Maske nicht angebunden.')}>
+                            Herunterladen
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Löschen ist in dieser Maske nicht angebunden.')}>
+                            Löschen
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1292,7 +1293,7 @@ export default function ArtikelStammPage(): JSX.Element {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-end">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" className="min-h-touch" onClick={() => push('Lieferant hinzufügen ist in dieser Maske nicht angebunden.')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Lieferant hinzufuegen
                 </Button>
@@ -1330,11 +1331,11 @@ export default function ArtikelStammPage(): JSX.Element {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Bearbeiten ist in dieser Maske nicht angebunden.')}>
+                            Bearbeiten
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Löschen ist in dieser Maske nicht angebunden.')}>
+                            Löschen
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1383,7 +1384,7 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" className="min-h-touch" onClick={() => push('Preisvereinbarung ist in dieser Maske nicht angebunden.')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Preisvereinbarung hinzufuegen
                 </Button>
@@ -1444,11 +1445,11 @@ export default function ArtikelStammPage(): JSX.Element {
                         <TableCell>{price.valid_from ? new Date(price.valid_from).toLocaleDateString('de-DE') : '-'}</TableCell>
                         <TableCell>{price.valid_to ? new Date(price.valid_to).toLocaleDateString('de-DE') : '-'}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Bearbeiten ist in dieser Maske nicht angebunden.')}>
+                            Bearbeiten
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Löschen ist in dieser Maske nicht angebunden.')}>
+                            Löschen
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1479,7 +1480,7 @@ export default function ArtikelStammPage(): JSX.Element {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-end">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" className="min-h-touch" onClick={() => push('Rabatt hinzufügen ist in dieser Maske nicht angebunden.')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Rabatt hinzufuegen
                 </Button>
@@ -1513,11 +1514,11 @@ export default function ArtikelStammPage(): JSX.Element {
                           {discount.valid_to ? new Date(discount.valid_to).toLocaleDateString('de-DE') : '-'}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Bearbeiten ist in dieser Maske nicht angebunden.')}>
+                            Bearbeiten
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                          <Button variant="outline" className="min-h-touch" onClick={() => push('Löschen ist in dieser Maske nicht angebunden.')}>
+                            Löschen
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -1698,7 +1699,7 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
               </div>
               <div className="rounded-lg border border-red-200 p-4">
-                <h4 className="font-medium text-red-600 mb-4">Gefahr</h4>
+                <h4 className="font-medium text-status-error mb-4">Gefahr</h4>
                 <div className="space-y-2">
                   <Button variant="destructive">Artikel loeschen</Button>
                   <p className="text-sm text-muted-foreground">

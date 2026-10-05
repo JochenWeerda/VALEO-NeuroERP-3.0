@@ -44,10 +44,10 @@ function belegUrl(belegTyp: string, item: InboxItem): string {
 }
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  neu: { label: 'Neu', cls: 'bg-blue-100 text-blue-700' },
-  geparst: { label: 'Geparst', cls: 'bg-amber-100 text-amber-700' },
-  bestaetigt: { label: 'Bestätigt', cls: 'bg-green-100 text-green-700' },
-  verworfen: { label: 'Verworfen', cls: 'bg-slate-100 text-slate-500' },
+  neu: { label: 'Neu', cls: 'bg-primary/10 text-primary' },
+  geparst: { label: 'Geparst', cls: 'bg-status-warning/10 text-status-warning' },
+  bestaetigt: { label: 'Bestätigt', cls: 'bg-status-success/10 text-status-success' },
+  verworfen: { label: 'Verworfen', cls: 'bg-muted text-muted-foreground' },
 }
 
 function InboxCard({ item, onConfirm, onReject, busy }: {
@@ -67,12 +67,12 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
       <CardContent className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4 text-green-600" />
+            <MessageCircle className="h-4 w-4 text-status-success" />
             <span className="text-xs text-muted-foreground">{item.absender ?? 'unbekannt'} · {new Date(item.eingegangen_am).toLocaleString('de-DE')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${badge.cls}`}>{badge.label}</span>
-            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <span className={`rounded px-1.5 py-0.5 text-2xs font-medium ${badge.cls}`}>{badge.label}</span>
+            <span className="flex items-center gap-1 text-2xs text-muted-foreground">
               <Sparkles className="h-3 w-3" />{item.engine ?? '—'}{item.confidence != null ? ` ${Math.round(item.confidence * 100)}%` : ''}
             </span>
           </div>
@@ -85,11 +85,11 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
             <div className="flex items-center gap-2">
               <User2 className="h-4 w-4 text-muted-foreground" />
               {match ? (
-                <button onClick={() => navigate(`/crm/kunden-cockpit`)} className="font-medium text-blue-600 hover:underline">
+                <button type="button" onClick={() => navigate(`/crm/kunden/${encodeURIComponent(match.kunden_nr)}`)} className="min-h-11 font-medium text-primary touch-manipulation">
                   {match.name} <span className="text-xs text-muted-foreground">({match.kunden_nr}{match.ort ? ` · ${match.ort}` : ''})</span>
                 </button>
               ) : (
-                <span className="flex items-center gap-1 text-amber-600">
+                <span className="flex items-center gap-1 text-status-warning">
                   <AlertTriangle className="h-3.5 w-3.5" />Kunde „{p.kunde ?? '?'}" nicht eindeutig zugeordnet
                 </span>
               )}
@@ -117,25 +117,25 @@ function InboxCard({ item, onConfirm, onReject, busy }: {
         {item.status !== 'bestaetigt' && item.status !== 'verworfen' && (
           <div className="flex flex-wrap items-center gap-2 border-t pt-3">
             <Label className="text-xs text-muted-foreground">Beleg</Label>
-            <NativeSelect value={belegTyp} onValueChange={setBelegTyp} className="w-40">
+            <NativeSelect ariaLabel="Belegtyp" value={belegTyp} onValueChange={setBelegTyp} className="w-40">
               <option value="angebot">Angebot</option>
               <option value="auftrag">Auftrag</option>
               <option value="lieferschein">Lieferschein</option>
               <option value="rechnung">Sofortrechnung</option>
             </NativeSelect>
-            <Button size="sm" className="gap-2" disabled={busy} onClick={() => onConfirm(item.id, belegTyp)}>
+            <Button className="min-h-touch gap-2" disabled={busy} onClick={() => onConfirm(item.id, belegTyp)}>
               <CheckCircle2 className="h-4 w-4" />Bestätigen & Beleg
             </Button>
-            <Button size="sm" variant="ghost" className="gap-2 text-muted-foreground" disabled={busy} onClick={() => onReject(item.id)}>
+            <Button className="min-h-touch gap-2" variant="outline" disabled={busy} onClick={() => onReject(item.id)}>
               <XCircle className="h-4 w-4" />Verwerfen
             </Button>
           </div>
         )}
         {item.status === 'bestaetigt' && (
-          <div className="flex items-center gap-2 border-t pt-3 text-sm text-green-700">
+          <div className="flex items-center gap-2 border-t pt-3 text-sm text-status-success">
             <CheckCircle2 className="h-4 w-4" />Bestätigt als {item.beleg_typ}
             {item.kunden_nr && (
-              <Button size="sm" variant="outline" className="ml-auto gap-2"
+              <Button className="ml-auto min-h-touch gap-2" variant="outline"
                 onClick={() => navigate(belegUrl(item.beleg_typ ?? 'auftrag', item))}>
                 <FileText className="h-4 w-4" />Beleg öffnen
               </Button>
@@ -190,12 +190,10 @@ export default function BestellInboxPage(): JSX.Element {
     }
   }
 
-  const busy = bestaetigen.isPending || verwerfen.isPending
-
   return (
     <div className="space-y-4 p-6">
       <div>
-        <h1 className="flex items-center gap-2 text-3xl font-bold"><MessageCircle className="h-7 w-7 text-green-600" />Bestell-Inbox</h1>
+        <h1 className="flex items-center gap-2 text-3xl font-bold"><MessageCircle className="h-7 w-7 text-status-success" />Bestell-Inbox</h1>
         <p className="text-muted-foreground">Eingehende WhatsApp-/Freitext-Bestellungen einfügen — die AI erkennt Kunde, Artikel, Menge, Termin und Silo und legt Kontakt + Beleg an.</p>
       </div>
 
@@ -211,7 +209,7 @@ export default function BestellInboxPage(): JSX.Element {
           />
           <div className="flex flex-wrap items-center gap-2">
             <Input value={absender} onChange={(e) => setAbsender(e.target.value)} placeholder="Absender (optional)" className="w-56" />
-            <Button onClick={handleParse} disabled={create.isPending || !raw.trim()} className="gap-2">
+            <Button onClick={handleParse} disabled={create.isPending || !raw.trim()} className="min-h-touch gap-2">
               {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}Analysieren
             </Button>
           </div>
@@ -221,7 +219,7 @@ export default function BestellInboxPage(): JSX.Element {
       {/* Filter */}
       <div className="flex items-center gap-2">
         <Label className="text-sm text-muted-foreground">Filter</Label>
-        <NativeSelect value={filter} onValueChange={setFilter} className="w-44">
+        <NativeSelect ariaLabel="Inbox-Filter" value={filter} onValueChange={setFilter} className="w-44">
           <option value="">Alle</option>
           <option value="geparst">Offen (geparst)</option>
           <option value="bestaetigt">Bestätigt</option>
@@ -238,7 +236,13 @@ export default function BestellInboxPage(): JSX.Element {
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {items.map((it) => (
-            <InboxCard key={it.id} item={it} onConfirm={handleConfirm} onReject={handleReject} busy={busy} />
+            <InboxCard
+              key={it.id}
+              item={it}
+              onConfirm={handleConfirm}
+              onReject={handleReject}
+              busy={(bestaetigen.isPending && bestaetigen.variables?.id === it.id) || (verwerfen.isPending && verwerfen.variables === it.id)}
+            />
           ))}
         </div>
       )}

@@ -100,6 +100,24 @@ describe('compileDataBindingPlan', () => {
     )
   })
 
+  it('loads endpoint-backed client-paged tables as well', () => {
+    const plan = makeMockPlan({
+      rootTableKeys: ['trail'],
+      tablesByKey: {
+        trail: {
+          key: 'trail', label: 'Historie', columns: [], dataSourceKey: 'trail',
+          pageSize: 100, virtualized: true, rowHeight: 44, serverPagination: false,
+        },
+      },
+    })
+    const result = compileDataBindingPlan(
+      plan,
+      [{ key: 'trail', endpoint: '/api/v1/audit/trail' }],
+      undefined,
+    )
+    expect(result.tableBindings['trail'].requiresServerQuery).toBe(true)
+  })
+
   it('marks table as non-server-queried when no endpoint found', () => {
     const plan = makeMockPlan({
       rootTableKeys: ['orphan'],

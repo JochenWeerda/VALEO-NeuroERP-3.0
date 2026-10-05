@@ -57,7 +57,9 @@ export default function SalesDocumentsPanel({
 
   return (
     <div className="space-y-4" id="sales-documents-panel-component" data-customer-id={customer.id}>
-      <div className="flex flex-wrap items-end border-b border-border gap-1">
+      {/* Kategorie-Filter über einer gemeinsamen Tabelle — bewusst Toggle-Gruppe
+          (aria-pressed), kein Register: es wechselt kein Panel, nur der Filter. */}
+      <div className="flex flex-wrap items-end border-b border-border gap-1" role="group" aria-label="Belegkategorie filtern">
         {categories.map((category) => (
           <button
             key={category.key}
@@ -65,7 +67,8 @@ export default function SalesDocumentsPanel({
               onCategoryChange(category.key);
               setSelectedDocumentId('');
             }}
-            className={`px-3 py-1.5 text-xs font-medium transition rounded-t-md border-b-2 ${
+            aria-pressed={activeCategory === category.key}
+            className={`min-h-touch touch-manipulation px-3 py-1.5 text-xs font-medium transition rounded-t-md border-b-2 ${
               activeCategory === category.key
                 ? 'border-primary text-primary bg-primary/5 font-semibold'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -78,7 +81,6 @@ export default function SalesDocumentsPanel({
         ))}
         <Button
           variant="outline"
-          size="sm"
           disabled={!selectedDocument}
           onClick={() => selectedDocument && onOpenDocument(selectedDocument)}
           className="ml-auto gap-1 mb-1"
@@ -87,7 +89,6 @@ export default function SalesDocumentsPanel({
           <FolderOpen size={13} /> Öffnen
         </Button>
         <Button
-          size="sm"
           disabled={activeCategory === 'ALL'}
           onClick={() => onCreateDocument(activeCategory)}
           className="gap-1 mb-1"

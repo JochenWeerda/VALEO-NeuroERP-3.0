@@ -9,6 +9,27 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ....core.screen_definitions import get_screen_definition
 from ....core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
+from app.api.v1.schemas.mask_entity_contracts import (
+    DuengerPreisTabOut,
+    DuengerVerwendungTabOut,
+    EinkaufAbPositionTabOut,
+    EinkaufAnfragePositionTabOut,
+    EinkaufAngebotPositionTabOut,
+    EinkaufAnlieferavisPositionTabOut,
+    FinanceBankkontoBuchungTabOut,
+    FinanceDebitorUmsatzTabOut,
+    FinanceKreditorBestellungTabOut,
+    FinanceOffenePostenTabOut,
+    LeadAktivitaetTabOut,
+    LeadAufgabeTabOut,
+    MischfuttermittelNaehrstoffTabOut,
+    MischfuttermittelRezepturTabOut,
+    ReklamationDokumentTabOut,
+    ReklamationMassnahmeTabOut,
+    SaatgutLagerbestandTabOut,
+    SaatgutVertragTabOut,
+)
 
 
 router = APIRouter(prefix="/masks", tags=["ui", "masks", "screen-definition"])
@@ -91,22 +112,21 @@ def _generate_agent_contract(definition: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/{mask_id:path}/screen-definition", response_model=dict[str, Any], summary="Native ScreenDefinition abrufen")
+@router.get("/{mask_id:path}/screen-definition", response_model=TypedObjectOut, summary="Native ScreenDefinition abrufen")
 async def get_mask_screen_definition(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Liefert die native ScreenDefinition fuer Generator-faehige Masken."""
 
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return definition
 
 
-@router.get("/{mask_id:path}/agent-contract", response_model=dict[str, Any], summary="AgentMaskContract abrufen")
+@router.get("/{mask_id:path}/agent-contract", response_model=TypedObjectOut, summary="AgentMaskContract abrufen")
 async def get_agent_mask_contract(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -116,9 +136,8 @@ async def get_agent_mask_contract(
     Wird deterministisch aus der ScreenDefinition abgeleitet — kein separates Speichern
     noetig. Explizite agentContract-Felder im Screen ueberschreiben die generierten Werte.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return _generate_agent_contract(definition)
@@ -164,6 +183,53 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
             schema_errors.append(f"{req} is required")
     if definition.get("schemaVersion") != 1:
         schema_errors.append("schemaVersion must be 1")
+    layout = definition.get("layout") or {}
+    if layout.get("summaryPlacement") not in (None, "header", "footer"):
+        schema_errors.append(f"layout.summaryPlacement is invalid: {layout.get('summaryPlacement')}")
+    section_navigation = layout.get("sectionNavigation")
+    if section_navigation not in (None, "tabs", "anchors"):
+        schema_errors.append(f"layout.sectionNavigation is invalid: {section_navigation}")
+    elif section_navigation == "anchors":
+        if layout.get("floorplan") not in (None, "objectPage", "transaction"):
+            schema_errors.append("layout.sectionNavigation=anchors is only supported for objectPage and transaction")
+        if layout.get("columnNavigation") not in (None, "single"):
+            schema_errors.append("layout.sectionNavigation=anchors requires columnNavigation=single")
+    for table in all_tables:
+        row_detail = table.get("rowDetail")
+        if row_detail is None or row_detail is False:
+            continue
+        if not isinstance(row_detail, dict):
+            schema_errors.append(f"table {table.get('key')} rowDetail must be an object or false")
+            continue
+        detail_keys: set[str] = set()
+        for field in row_detail.get("fields") or []:
+            key = str(field.get("key") or "").strip() if isinstance(field, dict) else ""
+            label = str(field.get("label") or "").strip() if isinstance(field, dict) else ""
+            if not key or not label:
+                schema_errors.append(f"table {table.get('key')} rowDetail field requires key and label")
+            elif key in detail_keys:
+                schema_errors.append(f"table {table.get('key')} rowDetail field is duplicated: {key}")
+            else:
+                detail_keys.add(key)
+    identity_field = definition.get("identityField")
+    declared_field_keys = {f.get("key") for f in definition.get("fields") or []} | {
+        f.get("key") for tab in definition.get("tabs") or [] for f in tab.get("fields") or []
+    }
+    if identity_field is not None and identity_field not in declared_field_keys:
+        schema_errors.append(f"identityField {identity_field} is not a declared field")
+    shortcuts: set[str] = set()
+    for action in definition.get("actions") or []:
+        if action.get("zone") not in (None, "header", "footer", "commit"):
+            schema_errors.append(f"action {action.get('key')} has invalid zone: {action.get('zone')}")
+        raw_shortcut = action.get("keyboardShortcut")
+        if raw_shortcut is not None:
+            shortcut = str(raw_shortcut).strip().lower()
+            if not shortcut:
+                schema_errors.append(f"action {action.get('key')} has an empty keyboardShortcut")
+            elif shortcut in shortcuts:
+                schema_errors.append(f"keyboardShortcut is duplicated: {raw_shortcut}")
+            else:
+                shortcuts.add(shortcut)
     m("schema_valid", len(schema_errors) == 0, "; ".join(schema_errors) or "OK")
 
     # 2. non_temporary
@@ -222,7 +288,9 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
         else None
     )
     has_table_profile = not all_tables or bool(layout.get("tableProfile"))
-    profile_matches = not expected_profile or layout.get("tableProfile") == expected_profile
+    # Tabellenlose Screens (z.B. cockpit-Workspaces, UIX-061) brauchen kein
+    # Tabellen-Profil — die Domain-Erwartung gilt nur fuer echte Tabellen-Screens.
+    profile_matches = not all_tables or not expected_profile or layout.get("tableProfile") == expected_profile
     # 8. table_profile - table screens require a Meridian profile
     m("table_profile",
       has_table_profile and profile_matches,
@@ -263,6 +331,30 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     ]
     a("table_query_contract", not generic_cols, f"generic unstable column keys: {', '.join(generic_cols)}" if generic_cols else "OK")
 
+    # 15. cockpit_content (UIX-061) — cockpit-Workspaces brauchen Inhalt:
+    # entweder Kacheln (tiles) oder Tabellen. Advisory, damit leere Cockpits
+    # als Warnung auffallen statt still generatorReady zu sein.
+    is_cockpit = definition.get("mode") == "cockpit" or layout.get("floorplan") == "cockpit"
+    has_cockpit_content = bool(definition.get("tiles")) or bool(definition.get("calendar")) or bool(all_tables)
+    a("cockpit_content", not is_cockpit or has_cockpit_content,
+      "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles or tables"))
+
+    # 16. missing_process_chain (UIX-091-GATE) — Belegmasken ohne Kette oder
+    # noProcessChainReason blockieren generatorReady. Stammdaten und Fuetterung
+    # bleiben mit begruendeter Ausnahme generatorReady.
+    from app.core.process_chains import needs_process_chain
+
+    needs_pc = needs_process_chain(definition)
+    has_pc = bool((definition.get("processChain") or {}).get("chainId"))
+    has_reason = bool(str(definition.get("noProcessChainReason") or "").strip())
+    m(
+        "missing_process_chain",
+        not needs_pc or has_pc or has_reason,
+        "OK" if has_pc or has_reason else (
+            "gate skipped" if not needs_pc else "detail/transaction document screen missing processChain"
+        ),
+    )
+
     # ── Summary ───────────────────────────────────────────────────────────────
     all_gates = mandatory + advisory
     failed_m = [g for g in mandatory if not g["passed"]]
@@ -273,13 +365,18 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
         "screenId": definition.get("id"),
         "generatorReady": len(failed_m) == 0,
         "advisoryScore": advisory_score,
+        "resolvedLayout": {
+            "floorplan": layout.get("floorplan"),
+            "sectionNavigation": layout.get("sectionNavigation") or "tabs",
+            "identityField": definition.get("identityField"),
+        },
         "gates": all_gates,
         "errors": [f"[{g['gate']}] {g['detail']}" for g in failed_m],
         "warnings": [f"[{g['gate']}] {g['detail']}" for g in failed_a],
     }
 
 
-@router.get("/{mask_id:path}/readiness", response_model=dict[str, Any], summary="Generator-Readiness pruefen")
+@router.get("/{mask_id:path}/readiness", response_model=TypedObjectOut, summary="Generator-Readiness pruefen")
 async def get_mask_readiness(
     mask_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -288,15 +385,14 @@ async def get_mask_readiness(
 
     Mandatory gates (blockieren generatorReady):
     schema_valid, non_temporary, data_sources, table_data_source_bound,
-    table_columns_complete, actions_classified.
+    table_columns_complete, actions_classified, missing_process_chain.
 
     Advisory gates (nur Warnungen, kein Block):
     sort_whitelist, filter_columns, agent_contract, workflow_declared,
-    stable_test_selectors, table_query_contract.
+    stable_test_selectors, table_query_contract, cockpit_content.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return _check_readiness(definition)
@@ -304,7 +400,7 @@ async def get_mask_readiness(
 
 @router.get(
     "/{mask_id:path}/entity/{entity_id}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Generischer Entity-Stub fuer native SDs ohne dedizierten Backend-Endpunkt",
 )
 async def get_mask_entity_stub(
@@ -317,9 +413,8 @@ async def get_mask_entity_stub(
     Liefert Platzhalter-Daten damit das Frontend kein 404 erhaelt.
     Wird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     # Collect all field keys from kopf tab to build a minimal stub payload
@@ -334,9 +429,225 @@ async def get_mask_entity_stub(
     return stub
 
 
+def _leere_registerseite(
+    screen_id: str,
+    tab_key: str,
+    *,
+    page: int,
+    page_size: int,
+    tenant_id: str,
+) -> dict[str, Any]:
+    """Leere Seite mit zugesagter Zeilenform — die Maske darf die Spalten kennen."""
+    definition = get_screen_definition(screen_id, tenant_id=tenant_id)
+    if definition is None:
+        raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {screen_id}")
+    return {
+        "tab_key": tab_key,
+        "table_key": tab_key,
+        "page": page,
+        "limit": page_size,
+        "total": 0,
+        "items": [],
+    }
+
+
+#: Kanonische Screen-ID, nicht der Plural im URL-Pfad.
+_LEERE_BRUECKEN_TABS: tuple[tuple[str, type, str, str, str, str], ...] = (
+    (
+        "/einkauf/anfragen/entity/{entity_id}/tabs/positionen",
+        EinkaufAnfragePositionTabOut,
+        "Einkaufsanfrage: Positionen (leerer Stub)",
+        "einkauf/anfrage",
+        "positionen",
+        "get_einkauf_anfrage_positionen_tab",
+    ),
+    (
+        "/einkauf/angebote/entity/{entity_id}/tabs/positionen",
+        EinkaufAngebotPositionTabOut,
+        "Lieferantenangebot: Positionen (leerer Stub)",
+        "einkauf/angebot",
+        "positionen",
+        "get_einkauf_angebot_positionen_tab",
+    ),
+    (
+        "/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen",
+        EinkaufAnlieferavisPositionTabOut,
+        "Anlieferavis: Positionen (leerer Stub)",
+        "einkauf/anlieferavis",
+        "positionen",
+        "get_einkauf_anlieferavis_positionen_tab",
+    ),
+    (
+        "/einkauf/auftragsbestaetigungen/entity/{entity_id}/tabs/positionen",
+        EinkaufAbPositionTabOut,
+        "Auftragsbestaetigung: Positionen (leerer Stub)",
+        "einkauf/auftragsbestaetigung",
+        "positionen",
+        "get_einkauf_auftragsbestaetigung_positionen_tab",
+    ),
+    (
+        "/finance/bankkonten/entity/{entity_id}/tabs/buchungen",
+        FinanceBankkontoBuchungTabOut,
+        "Bankkonto: Buchungen (leerer Stub)",
+        "finance/bankkonto",
+        "buchungen",
+        "get_finance_bankkonto_buchungen_tab",
+    ),
+    (
+        "/finance/debitoren/entity/{entity_id}/tabs/offene-posten",
+        FinanceOffenePostenTabOut,
+        "Debitor: Offene Posten (leerer Stub)",
+        "finance/debitor",
+        "offene_posten",
+        "get_finance_debitor_offene_posten_tab",
+    ),
+    (
+        "/finance/debitoren/entity/{entity_id}/tabs/umsaetze",
+        FinanceDebitorUmsatzTabOut,
+        "Debitor: Umsaetze (leerer Stub)",
+        "finance/debitor",
+        "umsaetze",
+        "get_finance_debitor_umsaetze_tab",
+    ),
+    (
+        "/finance/kreditoren/entity/{entity_id}/tabs/offene-posten",
+        FinanceOffenePostenTabOut,
+        "Kreditor: Offene Posten (leerer Stub)",
+        "finance/kreditor",
+        "offene_posten",
+        "get_finance_kreditor_offene_posten_tab",
+    ),
+    (
+        "/finance/kreditoren/entity/{entity_id}/tabs/bestellungen",
+        FinanceKreditorBestellungTabOut,
+        "Kreditor: Bestellungen (leerer Stub)",
+        "finance/kreditor",
+        "bestellungen",
+        "get_finance_kreditor_bestellungen_tab",
+    ),
+    (
+        "/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/rezeptur",
+        MischfuttermittelRezepturTabOut,
+        "Mischfuttermittel: Rezeptur (leerer Stub)",
+        "futtermittel/mischfuttermittel",
+        "rezeptur",
+        "get_mischfuttermittel_rezeptur_tab",
+    ),
+    (
+        "/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/naehrstoffe",
+        MischfuttermittelNaehrstoffTabOut,
+        "Mischfuttermittel: Naehrstoffe (leerer Stub)",
+        "futtermittel/mischfuttermittel",
+        "naehrstoffe",
+        "get_mischfuttermittel_naehrstoffe_tab",
+    ),
+    (
+        "/qualitaet/reklamationen/entity/{entity_id}/tabs/massnahmen",
+        ReklamationMassnahmeTabOut,
+        "Reklamation: Massnahmen (leerer Stub)",
+        "qualitaet/reklamation",
+        "massnahmen",
+        "get_reklamation_massnahmen_tab",
+    ),
+    (
+        "/qualitaet/reklamationen/entity/{entity_id}/tabs/dokumente",
+        ReklamationDokumentTabOut,
+        "Reklamation: Dokumente (leerer Stub)",
+        "qualitaet/reklamation",
+        "dokumente",
+        "get_reklamation_dokumente_tab",
+    ),
+    (
+        "/agrar/duenger/entity/{entity_id}/tabs/verwendung",
+        DuengerVerwendungTabOut,
+        "Duenger: Verwendung (leerer Stub)",
+        "agrar/duenger",
+        "verwendung",
+        "get_agrar_duenger_verwendung_tab",
+    ),
+    (
+        "/agrar/duenger/entity/{entity_id}/tabs/preise",
+        DuengerPreisTabOut,
+        "Duenger: Preise (leerer Stub)",
+        "agrar/duenger",
+        "preise",
+        "get_agrar_duenger_preise_tab",
+    ),
+    (
+        "/agrar/saatgut/entity/{entity_id}/tabs/lagerbestaende",
+        SaatgutLagerbestandTabOut,
+        "Saatgut: Lagerbestaende (leerer Stub)",
+        "agrar/saatgut",
+        "lagerbestaende",
+        "get_agrar_saatgut_lagerbestaende_tab",
+    ),
+    (
+        "/agrar/saatgut/entity/{entity_id}/tabs/vertraege",
+        SaatgutVertragTabOut,
+        "Saatgut: Vertraege (leerer Stub)",
+        "agrar/saatgut",
+        "vertraege",
+        "get_agrar_saatgut_vertraege_tab",
+    ),
+    (
+        "/crm/leads/entity/{entity_id}/tabs/aktivitaeten",
+        LeadAktivitaetTabOut,
+        "Lead: Aktivitaeten (leerer Stub)",
+        "crm/lead",
+        "aktivitaeten",
+        "get_crm_lead_aktivitaeten_tab",
+    ),
+    (
+        "/crm/leads/entity/{entity_id}/tabs/aufgaben",
+        LeadAufgabeTabOut,
+        "Lead: Aufgaben (leerer Stub)",
+        "crm/lead",
+        "aufgaben",
+        "get_crm_lead_aufgaben_tab",
+    ),
+)
+
+
+def _register_leere_bruecken_tabs() -> None:
+    """Eigene Route je Register, bevor der Catch-all die Zeilenform verschluckt."""
+    for path, model, summary, screen_id, tab_key, op_id in _LEERE_BRUECKEN_TABS:
+        def _make(bound_screen: str, bound_tab: str):
+            async def get_empty_tab(
+                entity_id: str,
+                page: int = 1,
+                page_size: int = 25,
+                tenant_id: str = Depends(get_tenant_id),
+            ) -> dict[str, Any]:
+                _ = entity_id
+                return _leere_registerseite(
+                    bound_screen,
+                    bound_tab,
+                    page=page,
+                    page_size=page_size,
+                    tenant_id=tenant_id,
+                )
+
+            return get_empty_tab
+
+        handler = _make(screen_id, tab_key)
+        handler.__name__ = op_id
+        handler.__qualname__ = op_id
+        router.add_api_route(
+            path,
+            handler,
+            methods=["GET"],
+            response_model=model,
+            summary=summary,
+            name=op_id,
+        )
+
+
+_register_leere_bruecken_tabs()
+
+
 @router.get(
     "/{mask_id:path}/entity/{entity_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     summary="Generischer Tab-Stub fuer native SDs ohne dedizierten Tab-Endpunkt",
 )
 async def get_mask_tab_stub(
@@ -352,9 +663,8 @@ async def get_mask_tab_stub(
     Liefert leere Ergebnisliste damit das Frontend kein 404 erhaelt.
     Wird durch den realen Domain-Endpunkt ersetzt, sobald die API verfuegbar ist.
     """
-    _ = tenant_id
     normalized = _normalize_mask_id(mask_id)
-    definition = get_screen_definition(normalized)
+    definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
     return {

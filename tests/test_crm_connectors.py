@@ -89,6 +89,19 @@ def test_imap_config_requires_host_user():
     assert ImapConfig(enabled=False, host="imap.x.de", user="a@x.de").configured is False
 
 
+def test_imap_config_rejects_command_control_chars():
+    cfg = ImapConfig(
+        enabled=True,
+        host="imap.x.de",
+        user="a@x.de",
+        password="secret",
+        inbox="INBOX\r\nNOOP",
+    )
+
+    with pytest.raises(ValueError, match="Steuerzeichen"):
+        cfg.validate_command_values()
+
+
 def test_load_config_without_db_returns_defaults(monkeypatch):
     monkeypatch.delenv("STT_BASE_URL", raising=False)
     monkeypatch.delenv("IMAP_HOST", raising=False)

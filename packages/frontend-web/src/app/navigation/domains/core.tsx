@@ -49,6 +49,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     mcp: { businessDomain: 'core', scope: 'core:read' },
   },
   {
+    id: 'letzte-dokumente',
+    label: 'Letzte Dokumente',
+    icon: FileText,
+    module: '@/pages/workspace/letzte-dokumente',
+    preferredPath: 'workspace/letzte-dokumente',
+    keywords: ['letzte dokumente', 'zuletzt geoeffnet', 'beleg', 'historie'],
+    mcp: { businessDomain: 'core', scope: 'core:read' },
+  },
+  {
     id: 'workflow',
     label: 'Workflows',
     icon: Zap,
@@ -350,6 +359,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'admin/control-center/agent-ops',
         keywords: ['agent ops', 'tickets', 'chain of command', 'kontrolle', 'review'],
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
+        id: 'screen-studio',
+        label: 'Masken-Studio',
+        icon: LayoutGrid,
+        module: '@/pages/admin/screen-studio',
+        preferredPath: 'admin/screen-studio',
+        keywords: ['studio', 'screen definition', 'maske erzeugen', 'no-code', 'tabellen'],
+        mcp: { businessDomain: 'admin', scope: 'admin:write' },
       },
       {
         id: 'superglue-control-center',

@@ -42,6 +42,7 @@ class RequirementService:
             cow_profile.milk_kg_day,
             cow_profile.milk_fat_pct,
             cow_profile.milk_protein_pct,
+            getattr(cow_profile, "milk_lactose_pct", gfe2023.ECM_REFERENCE_LACTOSE_PCT),
         )
         sidp_total, _, _ = gfe2023.sidp_requirement_g(
             cow_profile.body_weight_kg,

@@ -11,11 +11,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.docflow_gobd_service import DocflowGobdService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/docflow/evidence", tags=["docflow", "dms", "gobd"])
 
 
-@router.get("/paperless-probe", response_model=dict, summary="DMS-/Paperless-Liveprobe (ehrlich gegated)")
+@router.get("/paperless-probe", response_model=TypedObjectOut, summary="DMS-/Paperless-Liveprobe (ehrlich gegated)")
 def paperless_probe(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -28,7 +29,7 @@ class GobdExportIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/gobd-export", response_model=dict, summary="GoBD-Exportpaket je Vorgang erzeugen (+ Export vermerken)")
+@router.post("/gobd-export", response_model=TypedObjectOut, summary="GoBD-Exportpaket je Vorgang erzeugen (+ Export vermerken)")
 def gobd_export(
     body: GobdExportIn,
     db: Session = Depends(get_db),

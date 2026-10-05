@@ -317,20 +317,22 @@ export default function HausbankenstammPage() {
                       <div className="flex gap-1">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          className="min-h-touch"
                           onClick={() => setEditTarget(b)}
                           aria-label={`Hausbank ${b.bank_nr} bearbeiten`}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" aria-hidden="true" />
+                          Bearbeiten
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          className="min-h-touch"
                           onClick={() => handleDelete(b.bank_nr)}
                           disabled={deleteHausbank.isPending}
                           aria-label={`Hausbank ${b.bank_nr} deaktivieren`}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
+                          Löschen
                         </Button>
                       </div>
                     </TableCell>

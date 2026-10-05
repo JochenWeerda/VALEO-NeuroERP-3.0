@@ -11,11 +11,12 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, Path, Body
 
 from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/annahme", tags=["annahme", "warteschlange"])
 
 
-@router.get("/warteschlange", response_model=list[dict], summary="Annahme-Warteschlange abrufen")
+@router.get("/warteschlange", response_model=list[TypedObjectOut], summary="Annahme-Warteschlange abrufen")
 async def list_warteschlange(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict[str, Any]]:
@@ -23,7 +24,7 @@ async def list_warteschlange(
     return []
 
 
-@router.post("/warteschlange", response_model=dict, status_code=201, summary="Anlieferung in Warteschlange aufnehmen")
+@router.post("/warteschlange", response_model=TypedObjectOut, status_code=201, summary="Anlieferung in Warteschlange aufnehmen")
 async def create_warteschlange_entry(
     body: dict[str, Any] = Body(default={}),
     tenant_id: str = Depends(get_tenant_id),
@@ -32,7 +33,7 @@ async def create_warteschlange_entry(
     return {"id": "stub", "status": "wartend", **body}
 
 
-@router.post("/warteschlange/{entry_id}/repair-article", response_model=dict, summary="Artikel-Nummer reparieren")
+@router.post("/warteschlange/{entry_id}/repair-article", response_model=TypedObjectOut, summary="Artikel-Nummer reparieren")
 async def repair_article(
     entry_id: str = Path(...),
     body: dict[str, Any] = Body(default={}),

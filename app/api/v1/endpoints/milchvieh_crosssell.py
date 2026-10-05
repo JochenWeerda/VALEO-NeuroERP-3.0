@@ -10,7 +10,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.core.database import get_db
 from app.services.milchvieh_crosssell_service import MilchviehCrossSellService
 
@@ -55,12 +55,12 @@ def list_crosssell(
     )
 
 
-@router.get("/summary", response_model=dict, summary="Cross-Sell-Summen (Potenziale gesamt)")
+@router.get("/summary", response_model=TypedObjectOut, summary="Cross-Sell-Summen (Potenziale gesamt)")
 def crosssell_summary(db: Session = Depends(get_db)) -> dict[str, Any]:
     return MilchviehCrossSellService(db).summary()
 
 
-@router.get("/map", response_model=dict, summary="Betriebe als GeoJSON (Karte + Kennzahlen-Flyover)")
+@router.get("/map", response_model=TypedObjectOut, summary="Betriebe als GeoJSON (Karte + Kennzahlen-Flyover)")
 def crosssell_map(
     hygiene_bedarf: Optional[str] = Query(None),
     min_kuehe: Optional[int] = Query(None, ge=0),

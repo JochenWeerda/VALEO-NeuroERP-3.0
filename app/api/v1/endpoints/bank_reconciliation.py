@@ -1,467 +1,188 @@
-"""
-Bank Reconciliation API
-FIBU-BNK-04: Bankabstimmung Saldoabgleich
-"""
-
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import text
+"""Read-only bank balance evidence from one PostgreSQL statement snapshot."""
+from datetime import date
 from decimal import Decimal
-from datetime import date, datetime
-from pydantic import BaseModel
 import logging
+from typing import Annotated
 
-from ....core.database import get_db
-from ....core.fibu_audit import log_fibu_audit
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from app.core.business_time import business_today
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.api.v1.schemas.bank_reconciliation_schemas import (
+    BalanceComparison, DifferenceItem, LineCounts, ReconciliationResult,
+)
 
 logger = logging.getLogger(__name__)
-
-from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.bank_reconciliation_schemas import BankReconciliationOut
-
-
 router = APIRouter(prefix="/bank-reconciliation", tags=["finance", "bank-reconciliation"])
 
+# All evidence (including the bounded page) is read in one MVCC snapshot.
+_EVIDENCE = text("""
+WITH statement AS (
+    SELECT bs.*, ba.currency, ba.gl_account_id, ba.iban AS current_iban,
+           coa.id AS ledger_id, coa.is_active AS ledger_active,
+           coa.account_type AS ledger_type, coa.category AS ledger_category, coa.is_summary AS ledger_summary,
+           coa.deleted_at AS ledger_deleted
+    FROM domain_erp.bank_statements bs
+    JOIN domain_erp.bank_accounts ba ON ba.id=bs.bank_account_id AND ba.tenant_id=bs.tenant_id
+    LEFT JOIN domain_erp.chart_of_accounts coa ON coa.id=ba.gl_account_id AND coa.tenant_id=ba.tenant_id
+    WHERE bs.id=:statement_id AND bs.tenant_id=:tenant_id
+      AND ba.id=:bank_account_id AND ba.is_active=TRUE
+), line_stats AS (
+    SELECT count(l.id) AS actual_total,
+           count(l.id) FILTER (WHERE l.status='MATCHED') AS matched,
+           count(l.id) FILTER (WHERE l.status='UNMATCHED') AS unmatched,
+           count(l.id) FILTER (WHERE l.status='PARTIAL') AS partial,
+           count(l.id) FILTER (WHERE l.status IS NULL OR l.status NOT IN ('MATCHED','UNMATCHED','PARTIAL')) AS unknown,
+           coalesce(sum(l.amount),0) AS amount_sum,
+           bool_and(CASE WHEN l.id IS NULL THEN TRUE ELSE coalesce(
+               l.tenant_id=s.tenant_id AND l.currency=s.currency
+               AND l.booking_date IS NOT NULL AND l.booking_date<=s.statement_date
+               AND (l.status IS DISTINCT FROM 'MATCHED' OR
+                    (l.matched_op_id IS NOT NULL AND op.tenant_id=s.tenant_id AND op.waehrung=s.currency)),FALSE) END) AS lines_valid
+    FROM statement s LEFT JOIN domain_erp.bank_statement_lines l ON l.statement_id=s.id
+    LEFT JOIN domain_erp.offene_posten op ON op.id=l.matched_op_id
+), ledger_entries AS (
+    SELECT je.id, je.total_debit, je.total_credit, je.currency, s.currency AS bank_currency,
+           count(*) AS legs, sum(l.debit_amount) AS debit_sum, sum(l.credit_amount) AS credit_sum,
+           sum(CASE WHEN l.account_id=s.gl_account_id THEN l.debit_amount-l.credit_amount ELSE 0 END) AS bank_net,
+           bool_and(coalesce(l.tenant_id=s.tenant_id AND ca.tenant_id=s.tenant_id
+               AND l.debit IS NOT DISTINCT FROM l.debit_amount
+               AND l.credit IS NOT DISTINCT FROM l.credit_amount
+               AND l.debit_amount::text NOT IN ('NaN','Infinity','-Infinity')
+               AND l.credit_amount::text NOT IN ('NaN','Infinity','-Infinity')
+               AND ((l.debit_amount>0 AND l.credit_amount=0) OR (l.credit_amount>0 AND l.debit_amount=0)),FALSE)) AS valid_legs
+    FROM statement s
+    JOIN domain_erp.journal_entries je ON je.tenant_id=s.tenant_id AND je.status='posted'
+         AND je.entry_date < s.statement_date + 1
+    JOIN domain_erp.journal_entry_lines l ON l.journal_entry_id=je.id
+    LEFT JOIN domain_erp.chart_of_accounts ca ON ca.id=l.account_id
+    WHERE EXISTS (SELECT 1 FROM domain_erp.journal_entry_lines target
+                  WHERE target.journal_entry_id=je.id AND target.account_id=s.gl_account_id)
+    GROUP BY je.id, je.total_debit, je.total_credit, je.currency, s.currency
+), ledger_stats AS (
+    SELECT count(*) AS journal_count, sum(bank_net) AS ledger_balance,
+           coalesce(bool_and(valid_legs AND legs>=2 AND debit_sum=credit_sum
+             AND debit_sum=total_debit AND credit_sum=total_credit AND total_debit>0
+             AND currency=bank_currency AND total_debit::text NOT IN ('NaN','Infinity','-Infinity')
+             AND total_credit::text NOT IN ('NaN','Infinity','-Infinity')),TRUE) AS ledger_valid
+    FROM ledger_entries
+), bad_ledger_refs AS (
+    SELECT count(*) AS bad_refs FROM statement s
+    JOIN domain_erp.journal_entry_lines l ON l.account_id=s.gl_account_id
+    LEFT JOIN domain_erp.journal_entries je ON je.id=l.journal_entry_id
+    WHERE l.tenant_id IS DISTINCT FROM s.tenant_id OR je.tenant_id IS DISTINCT FROM s.tenant_id
+), difference_page AS (
+    SELECT l.id, l.booking_date, l.amount, l.reference, l.remittance_info, l.status, l.line_number
+    FROM statement s JOIN domain_erp.bank_statement_lines l ON l.statement_id=s.id AND l.tenant_id=s.tenant_id
+    WHERE l.status IS DISTINCT FROM 'MATCHED'
+    ORDER BY l.booking_date,l.line_number,l.id LIMIT :limit OFFSET :offset
+)
+SELECT s.*, ls.*, js.*, bad.bad_refs,
+       coalesce((SELECT jsonb_agg(jsonb_build_object(
+           'id',p.id,'date',p.booking_date,'amount',p.amount::text,
+           'reference',p.reference,'description',p.remittance_info,'status',p.status)
+           ORDER BY p.booking_date,p.line_number,p.id) FROM difference_page p),'[]'::jsonb) AS difference_rows
+FROM statement s CROSS JOIN line_stats ls CROSS JOIN ledger_stats js CROSS JOIN bad_ledger_refs bad
+""")
 
-class BalanceComparison(BaseModel):
-    """Balance comparison between bank statement and accounting"""
-    bank_statement_balance: Decimal
-    accounting_balance: Decimal
-    difference: Decimal
-    is_balanced: bool
-    statement_date: date
-    comparison_date: date
+
+def _money(value):
+    if value is None:
+        raise HTTPException(409, "Gespeicherter Geldbetrag fehlt")
+    amount = Decimal(str(value))
+    if not amount.is_finite() or amount != amount.quantize(Decimal("0.01")):
+        raise HTTPException(409, "Gespeicherter Geldbetrag ist ungueltig")
+    return amount
 
 
-class DifferenceItem(BaseModel):
-    """Single difference between bank and accounting"""
-    item_type: str  # UNMATCHED_STATEMENT, UNMATCHED_ACCOUNTING, AMOUNT_MISMATCH
-    statement_line_id: Optional[str] = None
-    journal_entry_id: Optional[str] = None
-    date: date
-    amount: Decimal
-    bank_amount: Optional[Decimal] = None
-    accounting_amount: Optional[Decimal] = None
-    reference: Optional[str] = None
-    description: str
-    suggested_account: Optional[str] = None
-    suggested_action: Optional[str] = None  # CREATE_ENTRY, ADJUST_ENTRY, INVESTIGATE
-
-
-class ReconciliationResult(BaseModel):
-    """Result of bank reconciliation"""
-    statement_id: str
-    bank_account_id: str
-    balance_comparison: BalanceComparison
-    differences: List[DifferenceItem]
-    total_differences: int
-    line_counts: dict
-    can_be_booked: bool
-    booking_suggestions: Optional[List[dict]] = None
-
-
-@router.get("/{statement_id}/balance-comparison", response_model=BalanceComparison, summary="Balance comparison abrufen")
-async def get_balance_comparison(
-    statement_id: str,
-    bank_account_id: str = Query(..., description="Bank account ID"),
-    tenant_id: str = Query("system", description="Tenant ID"),
-    db: Session = Depends(get_db)
-):
-    """
-    Compare bank statement balance with accounting balance.
-    """
+def _comparison(statement_id: str, bank_account_id: str, tenant_id: str, db: Session,
+                *, offset: int = 0, limit: int = 100) -> ReconciliationResult:
     try:
-        # Get bank statement balance
-        statement_query = text("""
-            SELECT opening_balance, closing_balance, statement_date
-            FROM domain_erp.bank_statements
-            WHERE id = :statement_id AND tenant_id = :tenant_id
-        """)
-        
-        statement_row = db.execute(statement_query, {
-            "statement_id": statement_id,
-            "tenant_id": tenant_id
-        }).fetchone()
-        
-        if not statement_row:
-            raise HTTPException(status_code=404, detail="Bank statement not found")
-        
-        bank_statement_balance = Decimal(str(statement_row[1])) if statement_row[1] else Decimal("0.00")
-        statement_date = statement_row[2] if statement_row[2] else date.today()
-        
-        # Get accounting balance for bank account
-        # Sum all journal entries for this bank account
-        accounting_query = text("""
-            SELECT 
-                COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit,
-                COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) as total_credit
-            FROM domain_erp.journal_entry_lines jel
-            JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
-            JOIN domain_erp.chart_of_accounts coa ON jel.account_id = coa.id
-            JOIN domain_erp.bank_accounts ba ON coa.account_number = ba.account_number
-            WHERE ba.id = :bank_account_id 
-            AND ba.tenant_id = :tenant_id
-            AND je.status = 'posted'
-            AND je.entry_date <= :statement_date
-        """)
-        
-        accounting_row = db.execute(accounting_query, {
-            "bank_account_id": bank_account_id,
-            "tenant_id": tenant_id,
-            "statement_date": statement_date
-        }).fetchone()
-        
-        if not accounting_row:
-            # If no journal entries, try to get balance from bank_accounts table
-            bank_account_query = text("""
-                SELECT balance FROM domain_erp.bank_accounts
-                WHERE id = :bank_account_id AND tenant_id = :tenant_id
-            """)
-            bank_account_row = db.execute(bank_account_query, {
-                "bank_account_id": bank_account_id,
-                "tenant_id": tenant_id
-            }).fetchone()
-            
-            if bank_account_row:
-                accounting_balance = Decimal(str(bank_account_row[0])) if bank_account_row[0] else Decimal("0.00")
-            else:
-                accounting_balance = Decimal("0.00")
-        else:
-            total_debit = Decimal(str(accounting_row[0])) if accounting_row[0] else Decimal("0.00")
-            total_credit = Decimal(str(accounting_row[1])) if accounting_row[1] else Decimal("0.00")
-            # For asset accounts (bank), balance = debit - credit
-            accounting_balance = total_debit - total_credit
-        
-        difference = bank_statement_balance - accounting_balance
-        is_balanced = abs(difference) < Decimal("0.01")
-        
-        return BalanceComparison(
-            bank_statement_balance=bank_statement_balance,
-            accounting_balance=accounting_balance,
-            difference=difference,
-            is_balanced=is_balanced,
-            statement_date=statement_date,
-            comparison_date=date.today()
+        row = db.execute(_EVIDENCE, {"statement_id": statement_id, "bank_account_id": bank_account_id,
+                                  "tenant_id": tenant_id, "offset": offset, "limit": limit}).mappings().one_or_none()
+        if row is None:
+            raise HTTPException(404, "Kontoauszug fuer dieses Bankkonto nicht gefunden")
+        if not row["statement_date"] or not isinstance(row["statement_date"], date):
+            raise HTTPException(409, "Kontoauszug hat keinen belegten Stichtag")
+        def normalize(value):
+            return str(value or "").replace(" ", "").upper()
+        if not row["account_iban"] or normalize(row["account_iban"]) != normalize(row["current_iban"]):
+            raise HTTPException(409, "Gespeicherter Auszug widerspricht der Konto-IBAN")
+        if not row["lines_valid"] or row["total_lines"] != row["actual_total"] or row["imported_lines"] != row["actual_total"]:
+            raise HTTPException(409, "Kontoauszug ist unvollstaendig oder enthaelt widerspruechliche Zeilen")
+        if row["format"] not in ("CAMT", "MT940", "CSV"):
+            raise HTTPException(409, "Unbekannter Auszugsvertrag")
+        opening, closing, movements = (_money(row[key]) for key in ("opening_balance", "closing_balance", "amount_sum"))
+        if opening + movements != closing:
+            raise HTTPException(409, "Auszugssalden widersprechen den gespeicherten Umsaetzen")
+        ledger = row["gl_account_id"]
+        if ledger and (not row["ledger_id"] or not row["ledger_active"] or row["ledger_deleted"]
+                       or row["ledger_summary"] or str(row["ledger_type"]).upper() != "ASSET"
+                       or str(row["ledger_category"]).upper() != "BANK"):
+            raise HTTPException(409, "Hauptbuchverbindung ist nicht buchbar")
+        if row["bad_refs"] or not row["ledger_valid"]:
+            raise HTTPException(409, "Hauptbuchnachweis enthaelt widerspruechliche Mandanten, Betraege oder Buchungen")
+        accounting_state = "MAPPING_REQUIRED" if not ledger else "AVAILABLE" if row["journal_count"] else "NO_POSTED_ENTRIES"
+        balance = BalanceComparison(
+            bank_statement_balance=closing if row["format"] != "CSV" else None,
+            accounting_balance=_money(row["ledger_balance"]) if accounting_state == "AVAILABLE" else None,
+            statement_date=row["statement_date"], comparison_date=business_today(),
+            currency=row["currency"], ledger_account_id=ledger,
+            bank_balance_state="CSV_SYNTHETIC" if row["format"] == "CSV" else "BANK_PROVIDED",
+            accounting_state=accounting_state,
         )
-        
+        counts = LineCounts(total=row["actual_total"], matched=row["matched"], unmatched=row["unmatched"],
+                            partial=row["partial"], unknown=row["unknown"])
+        differences = [DifferenceItem(
+            item_type="UNMATCHED_STATEMENT" if item["status"] == "UNMATCHED" else "PARTIAL_STATEMENT" if item["status"] == "PARTIAL" else "UNKNOWN_STATEMENT_STATUS",
+            statement_line_id=item["id"], date=item["date"], amount=_money(item["amount"]),
+            bank_amount=_money(item["amount"]), reference=item["reference"],
+            description=item["description"] or item["reference"] or "Ungeklaerte Bankzeile",
+        ) for item in row["difference_rows"]]
+        unresolved_count = counts.unmatched+counts.partial+counts.unknown
+        balance_mismatch = balance.difference is not None and balance.difference != 0
+        if balance_mismatch and offset <= unresolved_count <= offset+len(differences) and len(differences)<limit:
+            differences.append(DifferenceItem(item_type="BALANCE_MISMATCH", date=balance.statement_date,
+                amount=balance.difference, bank_amount=balance.bank_statement_balance,
+                accounting_amount=balance.accounting_balance, description="Bank- und Hauptbuchsaldo weichen ab"))
+        return ReconciliationResult(statement_id=statement_id, bank_account_id=bank_account_id,
+            balance_comparison=balance, differences=differences,
+            total_differences=unresolved_count+int(balance_mismatch),
+            line_counts=counts, differences_offset=offset, differences_limit=limit)
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error comparing balances: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to compare balances: {str(e)}")
+    except Exception:
+        logger.exception("Bank comparison evidence could not be read")
+        raise HTTPException(500, "Bankvergleich konnte nicht verlaesslich ermittelt werden") from None
 
 
-@router.get("/{statement_id}/differences", response_model=List[DifferenceItem], summary="Reconciliation differences abrufen")
-async def get_reconciliation_differences(
-    statement_id: str,
-    bank_account_id: str = Query(..., description="Bank account ID"),
-    tenant_id: str = Query("system", description="Tenant ID"),
-    db: Session = Depends(get_db)
-):
-    """
-    Get list of differences between bank statement and accounting records.
-    """
-    try:
-        differences = []
-        
-        # Get unmatched statement lines
-        unmatched_statement_query = text("""
-            SELECT id, booking_date, amount, reference, remittance_info
-            FROM domain_erp.bank_statement_lines
-            WHERE statement_id = :statement_id 
-            AND tenant_id = :tenant_id
-            AND status = 'UNMATCHED'
-            ORDER BY booking_date
-        """)
-        
-        unmatched_statement_rows = db.execute(unmatched_statement_query, {
-            "statement_id": statement_id,
-            "tenant_id": tenant_id
-        }).fetchall()
-        
-        for row in unmatched_statement_rows:
-            differences.append(DifferenceItem(
-                item_type="UNMATCHED_STATEMENT",
-                statement_line_id=str(row[0]),
-                date=row[1],
-                amount=Decimal(str(row[2])),
-                bank_amount=Decimal(str(row[2])),
-                reference=row[3],
-                description=row[4] or row[3] or "Unmatched bank transaction",
-                suggested_account="1200",  # Default: Accounts Receivable
-                suggested_action="CREATE_ENTRY"
-            ))
-        
-        # Get accounting entries that might not be in bank statement
-        # This is more complex - we'd need to match by date/amount
-        # For now, we'll focus on unmatched statement lines
-        
-        return differences
-        
-    except Exception as e:
-        logger.error(f"Error getting differences: {e}")
-        return []
+@router.get("/{statement_id}/balance-comparison", response_model=BalanceComparison, summary="Bank balance evidence")
+async def get_balance_comparison(statement_id: str, bank_account_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _comparison(statement_id, bank_account_id, tenant_id, db).balance_comparison
 
 
-@router.post("/{statement_id}/reconcile", response_model=ReconciliationResult, summary="Bank statement reconcile")
-async def reconcile_bank_statement(
-    statement_id: str,
-    bank_account_id: str = Query(..., description="Bank account ID"),
-    tenant_id: str = Query("system", description="Tenant ID"),
-    auto_book: bool = Query(False, description="Automatically book differences"),
-    db: Session = Depends(get_db)
-):
-    """
-    Perform bank reconciliation and generate booking suggestions.
-    """
-    try:
-        # Get balance comparison
-        balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
-        
-        # Get differences
-        differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
-        
-        # Current statement line stats
-        line_counts_query = text("""
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN status = 'MATCHED' THEN 1 ELSE 0 END) as matched,
-                SUM(CASE WHEN status = 'UNMATCHED' THEN 1 ELSE 0 END) as unmatched
-            FROM domain_erp.bank_statement_lines
-            WHERE statement_id = :statement_id AND tenant_id = :tenant_id
-        """)
-        line_counts_row = db.execute(
-            line_counts_query,
-            {"statement_id": statement_id, "tenant_id": tenant_id},
-        ).fetchone()
-        line_counts = {
-            "total": int(line_counts_row[0] or 0) if line_counts_row else 0,
-            "matched": int(line_counts_row[1] or 0) if line_counts_row else 0,
-            "unmatched": int(line_counts_row[2] or 0) if line_counts_row else 0,
-        }
-
-        # Generate booking suggestions for unmatched items
-        booking_suggestions = []
-        
-        for diff in differences:
-            if diff.item_type == "UNMATCHED_STATEMENT" and diff.suggested_action == "CREATE_ENTRY":
-                # Suggest journal entry for unmatched bank transaction
-                suggestion = {
-                    "type": "journal_entry",
-                    "description": diff.description,
-                    "date": diff.date.isoformat(),
-                    "account_debit": "1000",  # Bank account
-                    "account_credit": diff.suggested_account or "1200",  # Default AR
-                    "amount": float(diff.amount),
-                    "reference": diff.reference,
-                    "statement_line_id": diff.statement_line_id
-                }
-                booking_suggestions.append(suggestion)
-        
-        can_be_booked = len(booking_suggestions) > 0
-        
-        # Auto-book if requested and balanced
-        if auto_book and booking_suggestions:
-            for suggestion in booking_suggestions:
-                try:
-                    # Create journal entry
-                    journal_entry_id = f"JE-RECON-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{suggestion['statement_line_id'][:8]}"
-                    
-                    journal_insert = text("""
-                        INSERT INTO domain_erp.journal_entries
-                        (id, tenant_id, entry_number, entry_date, posting_date, description,
-                         source, status, total_debit, total_credit, created_at, updated_at)
-                        VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :description,
-                                :source, :status, :total_debit, :total_credit, NOW(), NOW())
-                        RETURNING id
-                    """)
-                    
-                    entry_date = datetime.strptime(suggestion["date"], '%Y-%m-%d').date()
-                    entry_number = f"BANK-RECON-{entry_date.strftime('%Y%m%d')}"
-                    
-                    db.execute(journal_insert, {
-                        "id": journal_entry_id,
-                        "tenant_id": tenant_id,
-                        "entry_number": entry_number,
-                        "entry_date": entry_date,
-                        "posting_date": entry_date,
-                        "description": suggestion["description"],
-                        "source": "bank_reconciliation",
-                        "status": "posted",
-                        "total_debit": Decimal(str(suggestion["amount"])),
-                        "total_credit": Decimal(str(suggestion["amount"]))
-                    })
-                    
-                    # Create journal entry lines
-                    # Debit: Bank account
-                    bank_account_query = text("""
-                        SELECT id FROM domain_erp.chart_of_accounts
-                        WHERE account_number = :account_number AND tenant_id = :tenant_id
-                        LIMIT 1
-                    """)
-                    bank_account_row = db.execute(bank_account_query, {
-                        "account_number": suggestion["account_debit"],
-                        "tenant_id": tenant_id
-                    }).fetchone()
-                    
-                    if bank_account_row:
-                        journal_line1 = text("""
-                            INSERT INTO domain_erp.journal_entry_lines
-                            (id, tenant_id, journal_entry_id, account_id, debit, credit,
-                             line_number, description, created_at)
-                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
-                                    :line_number, :description, NOW())
-                        """)
-                        
-                        db.execute(journal_line1, {
-                            "id": f"{journal_entry_id}-L1",
-                            "tenant_id": tenant_id,
-                            "journal_entry_id": journal_entry_id,
-                            "account_id": str(bank_account_row[0]),
-                            "debit": Decimal(str(suggestion["amount"])),
-                            "credit": Decimal("0.00"),
-                            "line_number": 1,
-                            "description": suggestion["description"]
-                        })
-                    
-                    # Credit: Suggested account
-                    credit_account_row = db.execute(bank_account_query, {
-                        "account_number": suggestion["account_credit"],
-                        "tenant_id": tenant_id
-                    }).fetchone()
-                    
-                    if credit_account_row:
-                        journal_line2 = text("""
-                            INSERT INTO domain_erp.journal_entry_lines
-                            (id, tenant_id, journal_entry_id, account_id, debit, credit,
-                             line_number, description, created_at)
-                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
-                                    :line_number, :description, NOW())
-                        """)
-                        
-                        db.execute(journal_line2, {
-                            "id": f"{journal_entry_id}-L2",
-                            "tenant_id": tenant_id,
-                            "journal_entry_id": journal_entry_id,
-                            "account_id": str(credit_account_row[0]),
-                            "debit": Decimal("0.00"),
-                            "credit": Decimal(str(suggestion["amount"])),
-                            "line_number": 2,
-                            "description": suggestion["description"]
-                        })
-                    
-                    # Mark statement line as matched
-                    if suggestion.get("statement_line_id"):
-                        update_line = text("""
-                            UPDATE domain_erp.bank_statement_lines
-                            SET status = 'MATCHED', updated_at = NOW()
-                            WHERE id = :line_id AND tenant_id = :tenant_id
-                        """)
-                        
-                        db.execute(update_line, {
-                            "line_id": suggestion["statement_line_id"],
-                            "tenant_id": tenant_id
-                        })
-                    log_fibu_audit(
-                        db, tenant_id, "create", "journal_entry", journal_entry_id,
-                        {"source": "bank_reconciliation", "entry_number": entry_number},
-                        request=None,
-                    )
-                except Exception as e:
-                    logger.error(f"Error creating journal entry for suggestion: {e}")
-                    continue
-            
-            db.commit()
-
-            # Refresh stats and comparison after auto-book
-            balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
-            line_counts_row = db.execute(
-                line_counts_query,
-                {"statement_id": statement_id, "tenant_id": tenant_id},
-            ).fetchone()
-            line_counts = {
-                "total": int(line_counts_row[0] or 0) if line_counts_row else 0,
-                "matched": int(line_counts_row[1] or 0) if line_counts_row else 0,
-                "unmatched": int(line_counts_row[2] or 0) if line_counts_row else 0,
-            }
-            differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
-            can_be_booked = len(differences) > 0
-        
-        return ReconciliationResult(
-            statement_id=statement_id,
-            bank_account_id=bank_account_id,
-            balance_comparison=balance_comp,
-            differences=differences,
-            total_differences=len(differences),
-            line_counts=line_counts,
-            can_be_booked=can_be_booked,
-            booking_suggestions=booking_suggestions if not auto_book else None
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error reconciling bank statement: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to reconcile: {str(e)}")
+@router.get("/{statement_id}/differences", response_model=list[DifferenceItem], summary="Unresolved bank lines")
+async def get_reconciliation_differences(statement_id: str, bank_account_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    offset: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int, Query(ge=1, le=100)] = 100):
+    return _comparison(statement_id, bank_account_id, tenant_id, db, offset=offset, limit=limit).differences
 
 
-@router.get("/{statement_id}/summary", response_model=BankReconciliationOut, summary="Reconciliation summary abrufen")
-async def get_reconciliation_summary(
-    statement_id: str,
-    bank_account_id: str = Query(..., description="Bank account ID"),
-    tenant_id: str = Query("system", description="Tenant ID"),
-    db: Session = Depends(get_db)
-):
-    """
-    Get summary of bank reconciliation status.
-    """
-    try:
-        # Get balance comparison
-        balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
-        
-        # Get differences count
-        differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
-        
-        # Get statement line counts
-        line_counts_query = text("""
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN status = 'MATCHED' THEN 1 ELSE 0 END) as matched,
-                SUM(CASE WHEN status = 'UNMATCHED' THEN 1 ELSE 0 END) as unmatched
-            FROM domain_erp.bank_statement_lines
-            WHERE statement_id = :statement_id AND tenant_id = :tenant_id
-        """)
-        
-        line_counts_row = db.execute(line_counts_query, {
-            "statement_id": statement_id,
-            "tenant_id": tenant_id
-        }).fetchone()
-        
-        total_lines = line_counts_row[0] if line_counts_row else 0
-        matched_lines = line_counts_row[1] if line_counts_row else 0
-        unmatched_lines = line_counts_row[2] if line_counts_row else 0
-        
-        return {
-            "statement_id": statement_id,
-            "bank_account_id": bank_account_id,
-            "balance_comparison": {
-                "bank_balance": float(balance_comp.bank_statement_balance),
-                "accounting_balance": float(balance_comp.accounting_balance),
-                "difference": float(balance_comp.difference),
-                "is_balanced": balance_comp.is_balanced
-            },
-            "line_counts": {
-                "total": total_lines,
-                "matched": matched_lines,
-                "unmatched": unmatched_lines
-            },
-            "differences_count": len(differences),
-            "can_be_booked": balance_comp.is_balanced and unmatched_lines == 0
-        }
-        
-    except Exception as e:
-        logger.error(f"Error getting reconciliation summary: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get summary: {str(e)}")
+@router.post("/{statement_id}/reconcile", response_model=ReconciliationResult, summary="Read-only bank comparison")
+async def reconcile_bank_statement(statement_id: str, bank_account_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
+    auto_book: Annotated[bool, Query(description="Retired: direct booking is not supported")] = False,
+    db: Session = Depends(get_db)):
+    if auto_book is not False:
+        raise HTTPException(409, "Direct bank reconciliation booking has been retired; use the journal posting workflow")
+    return _comparison(statement_id, bank_account_id, tenant_id, db)
 
+
+@router.get("/{statement_id}/summary", response_model=ReconciliationResult, summary="Canonical bank comparison summary")
+async def get_reconciliation_summary(statement_id: str, bank_account_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    return _comparison(statement_id, bank_account_id, tenant_id, db)

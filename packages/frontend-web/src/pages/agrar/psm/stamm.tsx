@@ -318,7 +318,7 @@ export default function PSMStammPage(): JSX.Element {
                 )}
               </div>
               {psm.ausgangsstoffExplosivstoffe && psm.erklaerungLandwirtErforderlich && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <div className="mt-4 p-4 bg-[hsl(var(--color-semantic-info-50-hsl))] rounded-lg">
                   <p className="text-sm text-blue-900">
                     <strong>Hinweis:</strong> Bei Abgabe dieses PSM-Mittels muss der Landwirt eine Erklärung
                     über die beabsichtigte Verwendung abgeben. Die Erklärung wird im DMS-System gespeichert

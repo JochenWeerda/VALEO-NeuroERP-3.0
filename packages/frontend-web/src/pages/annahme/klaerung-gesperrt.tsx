@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { usePatchWarteschlangeStatus, useWarteschlangeEintrag } from '@/lib/api/inventory'
 import {
   CrudCapabilityChecklist,
@@ -57,6 +58,7 @@ function buildHarvestAcceptanceHandoverQuery(input: {
 
 export default function KlaerungGesperrtPage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const location = useLocation()
   const { toast } = useToast()
   const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search])
@@ -171,6 +173,8 @@ export default function KlaerungGesperrtPage(): JSX.Element {
         }
       />
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar roles={qualityHoldRoles} value={roleFocus} onChange={setRoleFocus} title="Wer klaert die gesperrte Ware?" />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -214,6 +218,8 @@ export default function KlaerungGesperrtPage(): JSX.Element {
           ]}
         />
       </div>
+      </>
+      ) : null}
 
       <PageSection
         title="Queue-Kontext"

@@ -339,12 +339,28 @@ def test_pricing_find_negative_unknown_article_returns_404(client):
 
 @pytest.mark.needs_live_db
 def test_pricing_find_tenant_isolation(client, seeded_article):
+    """Der Mandant kommt aus dem Kopf, nicht aus einem Query-Parameter.
+
+    Bis zum 05.10.2026 stand er als `tenant_id: str = Query(DEFAULT_TENANT)` im
+    Weg: Wer den Parameter setzte, fragte fremde Preislisten ab; wer ihn wegliess,
+    bekam stillschweigend die des Vorgabemandanten. Ein Aufrufer, der seinen
+    eigenen Mandanten waehlen kann, ist keine Trennung.
+
+    Der mitgegebene Parameter darf den Kopf deshalb **nicht** aushebeln.
+    """
     resp = client.get(
         "/api/v1/pricing/find",
-        headers=HEADERS,
-        params={"article_id": seeded_article["article_id"], "tenant_id": TENANT_B},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_B},
+        params={"article_id": seeded_article["article_id"]},
     )
     assert resp.status_code == 404, resp.text
+
+    ausgehebelt = client.get(
+        "/api/v1/pricing/find",
+        headers={**HEADERS, "X-Tenant-ID": TENANT_B},
+        params={"article_id": seeded_article["article_id"], "tenant_id": TENANT_A},
+    )
+    assert ausgehebelt.status_code == 404, ausgehebelt.text
 
 
 # ---------------------------------------------------------------------------
@@ -417,8 +433,7 @@ def test_staffelrabatte_negative_missing_artikel_and_gruppe(client):
 def test_staffelrabatte_tenant_isolation(client, seeded_article, cleanup_staffelrabatt):
     create_resp = client.post(
         "/api/v1/pricing/staffelrabatte",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={
             "artikel_id": seeded_article["article_id"],
             "stufen": [{"ab_menge": 1, "rabatt_prozent": 1}],
@@ -429,8 +444,16 @@ def test_staffelrabatte_tenant_isolation(client, seeded_article, cleanup_staffel
 
     list_resp = client.get(
         "/api/v1/pricing/staffelrabatte",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_B, "artikel_id": seeded_article["article_id"]},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_B},
+        params={"artikel_id": seeded_article["article_id"]},
     )
     assert list_resp.status_code == 200, list_resp.text
     assert list_resp.json() == []
+
+    eigene = client.get(
+        "/api/v1/pricing/staffelrabatte",
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
+        params={"artikel_id": seeded_article["article_id"]},
+    )
+    assert eigene.status_code == 200, eigene.text
+    assert [s["id"] for s in eigene.json()] == cleanup_staffelrabatt

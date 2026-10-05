@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Callout } from '@/components/ui/callout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -38,7 +39,9 @@ import { errorMessage } from '@/lib/record-utils'
 import { useTenant } from '@/hooks/useTenant'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -175,6 +178,7 @@ function createEmptyState(): FormState {
 export default function FrmKontraktDetail(): JSX.Element {
   const { id } = useParams()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const { hasRole } = useAuth()
@@ -500,12 +504,10 @@ export default function FrmKontraktDetail(): JSX.Element {
     <div className="flex flex-col" data-testid="legacy-kontrakt-detail">
     <div className="space-y-4 p-6">
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Contract-to-Settlement"
-          description="Kontraktstammdaten, Mengen, Preise, Staffeln und Bedingungen werden jetzt in der Kontraktmaske gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
+      {!isTouch ? (
+      <>
       <OperationalCaseHeader
         title="Kontrakt steuern"
         description="Fixierung, Marktbewertung, Mahnung und Restmengenlage bleiben ueber dem Detailarbeitsplatz verdichtet sichtbar."
@@ -520,42 +522,50 @@ export default function FrmKontraktDetail(): JSX.Element {
         <OperationalTimeline title="Kontraktverlauf" items={timelineItems} />
         <OperationalContextPanel title="Kontraktkontext" sections={contextSections} />
       </div>
+      </>
+      ) : null}
       <Card>
         <CardHeader>
-          <CardTitle>FrmKontraktDetail</CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight md:text-3xl">
+            {isEdit ? (state.contract_no || 'Kontrakt') : 'Neuer Kontrakt'}
+          </h1>
+          <p className="text-sm text-muted-foreground">Partner, Laufzeit, Mengen und Preise</p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Button disabled={!isDraftEditable || saveMutation.isPending} onClick={() => saveMutation.mutate()}>Speichern</Button>
-            <Button variant="outline" disabled={!canDelete || !isEdit || deleteMutation.isPending || !isDraftEditable} onClick={() => setShowDeleteConfirm(true)}>Loeschen</Button>
-            <Button variant="outline" disabled={!isEdit} onClick={() => window.print()}>Drucken</Button>
-            <Button variant="outline" disabled={!isEdit} onClick={() => setShowUmsaetze(true)}>Umsaetze</Button>
-            <Button variant="outline" onClick={() => setShowLookupDlg(true)}>Lookup/Matchcode</Button>
-            <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Unterlagen/Dateien</Button>
+            <Button className="min-h-touch touch-manipulation" disabled={!isDraftEditable || saveMutation.isPending} onClick={() => saveMutation.mutate()}>Speichern</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" disabled={!canDelete || !isEdit || deleteMutation.isPending || !isDraftEditable} onClick={() => setShowDeleteConfirm(true)}>Löschen</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" disabled={!isEdit} onClick={() => window.print()}>Drucken</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" disabled={!isEdit} onClick={() => setShowUmsaetze(true)}>Umsätze</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => setShowLookupDlg(true)}>Lookup/Matchcode</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => navigate('/dokumente/ablage')}>Unterlagen/Dateien</Button>
             {state.pricing_model === 'matif' && isEdit && (
-              <Button variant="outline" onClick={() => setShowMatifDialog(true)}>MATIF-Preisfixierung</Button>
+              <Button className="min-h-touch touch-manipulation" variant="outline" onClick={() => setShowMatifDialog(true)}>MATIF-Preisfixierung</Button>
             )}
             <Button
+              className="min-h-touch touch-manipulation"
               variant="outline"
               disabled={!isEdit || hedgeMutation.isPending || !steering.hedge_market || !steering.hedge_quantity_t}
               onClick={() => hedgeMutation.mutate()}
             >
               Hedge anlegen
             </Button>
-            <Button variant="outline" disabled={!isEdit} onClick={() => navigate('/finance/mahnwesen')}>
+            <Button className="min-h-touch touch-manipulation" variant="outline" disabled={!isEdit} onClick={() => navigate('/finance/mahnwesen')}>
               Mahnwesen
             </Button>
-            <Button variant="outline" disabled={!isEdit || !canEdit || cancelMutation.isPending} onClick={() => cancelMutation.mutate()}>Workflow erledigt/stornieren</Button>
+            <Button className="min-h-touch touch-manipulation" variant="outline" disabled={!isEdit || !canEdit || cancelMutation.isPending} onClick={() => cancelMutation.mutate()}>Erledigt / stornieren</Button>
           </div>
 
           {isEdit && kontraktStatusView ? (
             <ProcessStatusPanel view={kontraktStatusView} title="Prozessstatus" />
           ) : null}
 
+          {!isTouch ? (
+          <>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <Card>
               <CardContent className="py-4">
-                <div className="text-xs uppercase tracking-wide text-muted-foreground">Kontrakt-Steuerung</div>
+                <div className="text-2xs uppercase tracking-wide text-muted-foreground">Kontrakt-Steuerung</div>
                 <div className="mt-2 text-sm font-medium">
                   {[steering.contract_class, steering.contract_group, steering.contract_variant].filter(Boolean).join(' / ') || 'Noch nicht klassifiziert'}
                 </div>
@@ -642,6 +652,8 @@ export default function FrmKontraktDetail(): JSX.Element {
               </CardContent>
             </Card>
           </div>
+          </>
+          ) : null}
 
           {steeringHighlights.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -654,11 +666,11 @@ export default function FrmKontraktDetail(): JSX.Element {
           ) : null}
 
           {isEdit && shortArticles.length > 0 && (
-            <Alert variant="destructive" className="border-red-300 bg-red-50">
+            <Alert variant="destructive" className="border-status-error/40 bg-status-error/10">
               <ShieldAlert className="h-4 w-4" />
               <AlertTitle className="flex items-center gap-2">
                 Unterdeckung (Short-Position)
-                <Badge className="bg-red-600 text-white">{shortArticles.length} Artikel</Badge>
+                <Badge variant="error">{shortArticles.length} Artikel</Badge>
               </AlertTitle>
               <AlertDescription className="mt-1 space-y-1">
                 {shortArticles.map((a) => (
@@ -671,8 +683,7 @@ export default function FrmKontraktDetail(): JSX.Element {
                 ))}
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="mt-2 border-red-300 text-red-700 hover:bg-red-100"
+                  className="mt-2 min-h-touch touch-manipulation"
                   onClick={() => navigate('/kontrakte/positionen')}
                 >
                   Zum Positionsmonitor
@@ -682,14 +693,14 @@ export default function FrmKontraktDetail(): JSX.Element {
           )}
 
           {isEdit && positionQuery.data && shortArticles.length === 0 && articleIdsForPosition.length > 0 && (
-            <div className="flex items-center gap-2 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+            <Callout variant="success" className="flex items-center gap-2 rounded border px-3 py-2 text-sm">
               <ShieldCheck className="h-4 w-4" />
               Alle Artikel dieses Kontrakts sind gedeckt (Long oder Balanced).
-            </div>
+            </Callout>
           )}
 
           {!isEdit ? (
-            <Card className="border-dashed border-slate-300/60 bg-slate-50/40 dark:bg-slate-900/20">
+            <Card className="border-dashed border-border bg-muted/40">
               <CardContent className="py-3 text-sm text-muted-foreground">
                 <div className="font-medium text-foreground">Kontraktnummer</div>
                 <div>Wird beim Speichern standardmäßig serverseitig aus dem Nummernkreis vergeben. Partner, Laufzeit, Mengenstaffel, Preise und Konditionen pflegst du in dieser Kontraktmaske.</div>
@@ -732,7 +743,7 @@ export default function FrmKontraktDetail(): JSX.Element {
               <Label>Kunde/Lieferant</Label>
               <div className="flex gap-2">
                 <Input value={state.party_id} onChange={(e) => setState((s) => ({ ...s, party_id: e.target.value }))} disabled={!isDraftEditable} />
-                <Button type="button" variant="outline" disabled={!isDraftEditable} onClick={() => setShowCustomerDlg(true)}>Suchen</Button>
+                <Button className="min-h-touch touch-manipulation" type="button" variant="outline" disabled={!isDraftEditable} onClick={() => setShowCustomerDlg(true)}>Suchen</Button>
               </div>
               {selectedCustomerName ? <p className="text-xs text-muted-foreground">{selectedCustomerName}</p> : null}
             </div>
@@ -779,16 +790,16 @@ export default function FrmKontraktDetail(): JSX.Element {
           </div>
 
           <Tabs defaultValue={state.contract_type === 'VERKAUF' ? 'partner' : 'partner'}>
-            <TabsList className="flex flex-wrap">
-              <TabsTrigger value="partner">PARTNER</TabsTrigger>
-              <TabsTrigger value="lieferanschrift">LIEFERANSCHR.</TabsTrigger>
-              <TabsTrigger value="zahlungsbed">ZAHLUNGSBED.</TabsTrigger>
-              <TabsTrigger value="preismodell">PREISMODELL</TabsTrigger>
-              <TabsTrigger value="steuerung">STEUERUNG</TabsTrigger>
-              <TabsTrigger value="bedingungen">BEDINGUNGEN</TabsTrigger>
-              <TabsTrigger value="notizen">NOTIZEN</TabsTrigger>
-              <TabsTrigger value="unterlagen">UNTERLAGEN</TabsTrigger>
-              <TabsTrigger value="protokoll">PROTOKOLL</TabsTrigger>
+            <TabsList variant="register" className="flex flex-wrap overflow-x-auto" aria-label="Kontraktakte">
+              <TabsTrigger value="partner" className="min-h-11">Partner</TabsTrigger>
+              <TabsTrigger value="lieferanschrift" className="min-h-11">Lieferanschrift</TabsTrigger>
+              <TabsTrigger value="zahlungsbed" className="min-h-11">Zahlungsbedingungen</TabsTrigger>
+              <TabsTrigger value="preismodell" className="min-h-11">Preismodell</TabsTrigger>
+              <TabsTrigger value="steuerung" className="min-h-11">Steuerung</TabsTrigger>
+              <TabsTrigger value="bedingungen" className="min-h-11">Bedingungen</TabsTrigger>
+              <TabsTrigger value="notizen" className="min-h-11">Notizen</TabsTrigger>
+              <TabsTrigger value="unterlagen" className="min-h-11">Unterlagen</TabsTrigger>
+              <TabsTrigger value="protokoll" className="min-h-11">Protokoll</TabsTrigger>
             </TabsList>
 
             <TabsContent value="partner">
@@ -798,7 +809,7 @@ export default function FrmKontraktDetail(): JSX.Element {
                     <Label>{state.contract_type === 'VERKAUF' ? 'Kunde (Party-ID)' : 'Lieferant (Party-ID)'}</Label>
                     <div className="flex gap-2">
                       <Input value={state.party_id} onChange={(e) => setState((s) => ({ ...s, party_id: e.target.value }))} disabled={!isDraftEditable} />
-                      <Button type="button" variant="outline" disabled={!isDraftEditable} onClick={() => setShowCustomerDlg(true)}>Suchen</Button>
+                      <Button className="min-h-touch touch-manipulation" type="button" variant="outline" disabled={!isDraftEditable} onClick={() => setShowCustomerDlg(true)}>Suchen</Button>
                     </div>
                     {selectedCustomerName ? <p className="text-xs text-muted-foreground">{selectedCustomerName}</p> : null}
                   </div>
@@ -1486,15 +1497,15 @@ export default function FrmKontraktDetail(): JSX.Element {
             {isAdmin && ' Als Admin kannst du mit force=true auch physisch loeschen.'}
           </p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Abbrechen</Button>
-            <Button variant="destructive" onClick={() => { setShowDeleteConfirm(false); deleteMutation.mutate() }}>
-              Loeschen bestaetigen
+            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setShowDeleteConfirm(false)}>Abbrechen</Button>
+            <Button variant="destructive" className="min-h-touch touch-manipulation" onClick={() => { setShowDeleteConfirm(false); deleteMutation.mutate() }}>
+              Löschen bestätigen
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-      <KeyboardShortcutBar shortcuts={shortcuts} />
+      {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

@@ -86,7 +86,9 @@ class FakeDb:
         if "COALESCE(SUM(amount), 0) AS total_amount" in sql:
             return _FakeResult(fetchone=SimpleNamespace(total_amount=980.0, debitor_count=2))
 
-        if "COUNT(*) FILTER (WHERE mandate_valid = true)" in sql:
+        if "FROM domain_shared.sepa_mandates" in sql:
+            # Zwei Debitoren, beide mit gueltigem Mandat — deshalb sepa_ready.
+            # Gezaehlt werden Debitoren, nicht Mandatszeilen.
             return _FakeResult(fetchone=SimpleNamespace(valid_count=2, expired_count=0))
 
         if "SELECT COUNT(*) AS cnt FROM domain_shared.direct_debit_items" in sql:

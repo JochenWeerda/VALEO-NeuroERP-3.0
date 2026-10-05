@@ -13,8 +13,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/components/ui/toast-provider'
 import { apiClient } from '@/lib/api-client'
 import { apiErrorDetail, errorMessage, numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
-import { MoreHorizontal, RefreshCw, Plus, Trash2, Calculator } from 'lucide-react'
+import { RefreshCw, Plus, Trash2, Calculator } from 'lucide-react'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { AgentProcessPanel, AgentSuggestionBadge } from '@/components/agent'
 
 type ArtikelZeile = {
@@ -81,6 +82,7 @@ type BestellVorschlag = {
 export default function BestellvorschlagLagerPage(): JSX.Element {
   const navigate = useNavigate()
   const { push } = useToast()
+  const isTouch = useTouchDevice()
 
   const [filterNiederlassung, setFilterNiederlassung] = useState('')
   const [filterArtikelGruppe, setFilterArtikelGruppe] = useState('')
@@ -102,6 +104,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
   const [bestellWert, setBestellWert] = useState('')
 
   const [loading, setLoading] = useState(false)
+  const [pendingAction, setPendingAction] = useState<string | null>(null)
   const filterRef = useRef<HTMLInputElement | null>(null)
 
   const shortcuts = buildCoreMaskShortcuts({
@@ -214,6 +217,8 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
 
   const handleBestellungErstellen = async (): Promise<void> => {
     if (vorschlaege.length === 0) { push('Keine Vorschläge vorhanden'); return }
+    if (pendingAction) return
+    setPendingAction('order')
     // Vorschläge nach Lieferant gruppieren → eine Bestellung pro Lieferant
     const byLieferant = vorschlaege.reduce<Record<string, BestellVorschlag[]>>((acc, v) => {
       const key = v.liefNr || 'unbekannt'
@@ -243,6 +248,8 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
     } catch (_rawErr: unknown) {
       const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       push(`Fehler beim Erstellen: ${e.response?.data?.detail ?? e.message}`)
+    } finally {
+      setPendingAction(null)
     }
   }
 
@@ -253,41 +260,41 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
   const gesamtBestWert = filteredVorschlaege.reduce((s, v) => s + v.betrag, 0)
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <div className="bg-gray-700 text-white px-4 py-2">
-        <h1 className="text-lg font-bold">BESTELL-VORSCHLÄGE AUS LAGER</h1>
+    <div className="flex h-screen flex-col bg-background">
+      <div className="border-b bg-card px-4 py-3">
+        <h1 className="text-lg font-bold">Bestell-Vorschläge aus Lager</h1>
       </div>
 
       <div className="flex-1 overflow-auto p-3 space-y-3">
-        <AgentProcessPanel domain="einkauf" />
+        {!isTouch ? <AgentProcessPanel domain="einkauf" /> : null}
         {/* Filter-Bereich */}
         <Card className="p-3">
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex items-center gap-2">
               <Label className="w-28 text-sm shrink-0">Niederlassung:</Label>
               <Input value={filterNiederlassung} onChange={(e) => setFilterNiederlassung(e.target.value)}
-                className="w-32 h-8" placeholder="Alle" />
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
+                className="min-h-touch w-32" placeholder="Alle" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
               </Button>
             </div>
             <div className="flex items-center gap-2">
               <Label className="w-28 text-sm shrink-0">Artikel-Gruppe:</Label>
               <Input value={filterArtikelGruppe} onChange={(e) => setFilterArtikelGruppe(e.target.value)}
-                className="w-28 h-8" placeholder="Alle" />
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
+                className="min-h-touch w-28" placeholder="Alle" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
               </Button>
             </div>
             <div className="flex items-center gap-2">
               <Label className="w-24 text-sm shrink-0">Artikel-Nr.:</Label>
               <Input ref={filterRef} value={filterArtikelNr} onChange={(e) => setFilterArtikelNr(e.target.value)}
-                className="w-28 h-8" />
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
+                className="min-h-touch w-28" />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
               </Button>
             </div>
-            <Button onClick={() => void loadData()} disabled={loading} size="sm" className="gap-2">
+            <Button onClick={() => void loadData()} disabled={loading} className="min-h-touch gap-2">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Aufbereiten
             </Button>
@@ -325,7 +332,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
                 )}
                 {artikel.map((a) => (
                   <TableRow key={a.id}
-                    className={`cursor-pointer ${selectedArtikel === a.id ? 'bg-blue-100' : 'hover:bg-muted/50'}`}
+                    className={`cursor-pointer ${selectedArtikel === a.id ? 'bg-primary/10' : 'hover:bg-muted/50'}`}
                     onClick={() => setSelectedArtikel(a.id)}>
                     <TableCell className="font-mono text-xs">{a.artikelNr}</TableCell>
                     <TableCell>{a.bezeichnung}</TableCell>
@@ -469,34 +476,34 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
             <div className="flex items-center gap-2">
               <Label className="text-sm shrink-0">Lieferant:</Label>
               <Input value={lieferantText} onChange={(e) => setLieferantText(e.target.value)}
-                className="w-28 h-8" placeholder="Lief.-Nr." />
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
+                className="min-h-touch w-28" placeholder="Lief.-Nr." />
+              <Button variant="outline" className="min-h-touch" onClick={() => push('Suche ist in dieser Maske nicht angebunden.')}>
+                Suchen
               </Button>
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-sm shrink-0">Gebinde-Menge:</Label>
               <Input value={gebindeMenge} onChange={(e) => setGebindeMenge(e.target.value)}
-                className="w-24 h-8 text-right" />
+                className="min-h-touch w-24 text-right" />
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-sm shrink-0">Preis je 1:</Label>
               <Input value={preisJe1} onChange={(e) => setPreisJe1(e.target.value)}
-                className="w-24 h-8 text-right" />
+                className="min-h-touch w-24 text-right" />
               <span className="text-sm text-muted-foreground">EUR</span>
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-sm shrink-0">Bestell-Menge:</Label>
               <Input value={bestellMenge} onChange={(e) => setBestellMenge(e.target.value)}
-                className="w-24 h-8 text-right" />
+                className="min-h-touch w-24 text-right" />
             </div>
             <div className="flex items-center gap-2">
               <Label className="text-sm shrink-0">Bestell-Wert:</Label>
               <Input value={bestellWert} onChange={(e) => setBestellWert(e.target.value)}
-                className="w-24 h-8 text-right" readOnly />
+                className="min-h-touch w-24 text-right" readOnly />
               <span className="text-sm text-muted-foreground">EUR</span>
             </div>
-            <Button onClick={handleVorschlagUebernehmen} size="sm" className="gap-2">
+            <Button onClick={handleVorschlagUebernehmen} className="min-h-touch gap-2">
               ↓ Vorschlag übernehmen
             </Button>
           </div>
@@ -556,7 +563,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
                 )}
                 {filteredVorschlaege.map((v) => (
                   <TableRow key={v.id}
-                    className={`cursor-pointer ${selectedVorschlag === v.id ? 'bg-blue-100' : 'hover:bg-muted/50'}`}
+                    className={`cursor-pointer ${selectedVorschlag === v.id ? 'bg-primary/10' : 'hover:bg-muted/50'}`}
                     onClick={() => setSelectedVorschlag(v.id)}>
                     <TableCell className="font-mono text-xs">{v.liefNr}</TableCell>
                     <TableCell>{v.name}</TableCell>
@@ -590,13 +597,13 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       </div>
 
       {/* Bottom Toolbar */}
-      <div className="border-t bg-white px-4 py-2 flex items-center gap-3">
-        <Button variant="outline" size="sm" className="gap-2"
+      <div className="flex items-center gap-3 border-t bg-card px-4 py-2">
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => void loadData()} disabled={loading}>
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Aufbereiten
         </Button>
-        <Button variant="outline" size="sm" className="gap-2"
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => {
             if (!selectedVorschlag) { push('Bitte einen Vorschlag auswählen'); return }
             setVorschlaege((prev) => prev.filter((v) => v.id !== selectedVorschlag))
@@ -605,7 +612,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
           <Trash2 className="h-4 w-4" />
           Pos. löschen
         </Button>
-        <Button variant="outline" size="sm" className="gap-2"
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => {
             const artNr = prompt('Artikelnummer:')
             if (!artNr) return
@@ -621,7 +628,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
           <Plus className="h-4 w-4" />
           Manuelle Pos.
         </Button>
-        <Button variant="outline" size="sm" className="gap-2"
+        <Button variant="outline" className="min-h-touch gap-2"
           onClick={() => {
             const sel = vorschlaege.find((v) => v.id === selectedVorschlag)
             if (!sel) { push('Bitte Position auswählen'); return }
@@ -633,13 +640,17 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
           <Calculator className="h-4 w-4" />
           Calc
         </Button>
-        <Button variant="default" size="sm" className="gap-2"
+        <Button variant="default" className="min-h-touch gap-2"
+          disabled={pendingAction !== null}
           onClick={handleBestellungErstellen}>
           Bestellung erstellen
         </Button>
-        <Button variant="outline" size="sm"
+        <Button variant="outline" className="min-h-touch"
+          disabled={pendingAction !== null}
           onClick={async () => {
             if (vorschlaege.length === 0) { push('Keine Vorschläge vorhanden'); return }
+            if (pendingAction) return
+            setPendingAction('inquiry')
             try {
               await apiClient.post('/api/v1/einkauf/anfragen', {
                 positionen: vorschlaege.map((v) => ({ artikel_nr: v.artikelNr, menge: v.menge, einheit: v.einheit })),
@@ -648,12 +659,14 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
               push('Anfrage erstellt und an Lieferanten weitergeleitet.')
             } catch (e: unknown) {
               push(`Fehler: ${apiErrorDetail(e) ?? errorMessage(e)}`)
+            } finally {
+              setPendingAction(null)
             }
           }}>
           Anfrage erstellen
         </Button>
         <div className="ml-auto">
-          <Button variant="outline" onClick={() => navigate('/einkauf')} size="sm">
+          <Button variant="outline" className="min-h-touch" onClick={() => navigate('/einkauf')}>
             Schließen
           </Button>
         </div>

@@ -157,7 +157,7 @@ async def reconcile_ar(
                 WHERE tenant_id = :tenant_id
                   AND konto_typ = 'debitoren'
                   AND TO_CHAR(COALESCE(rechnungsdatum, datum)::date, 'YYYY-MM') <= :period
-                """
+                """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
             ),
             {"tenant_id": tenant_id, "period": period},
         ).fetchone()
@@ -248,7 +248,7 @@ async def reconcile_ap(
                 WHERE tenant_id = :tenant_id
                   AND konto_typ = 'kreditoren'
                   AND TO_CHAR(COALESCE(rechnungsdatum, datum)::date, 'YYYY-MM') <= :period
-                """
+                """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
             ),
             {"tenant_id": tenant_id, "period": period},
         ).fetchone()
@@ -408,7 +408,7 @@ async def get_reconciliation_details(
                       AND konto_typ = 'debitoren'
                       AND TO_CHAR(COALESCE(rechnungsdatum, datum)::date, 'YYYY-MM') <= :period
                     ORDER BY COALESCE(rechnungsdatum, datum) DESC
-                    """
+                    """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
                 ),
                 {"tenant_id": tenant_id, "period": period},
             ).fetchall()
@@ -438,7 +438,7 @@ async def get_reconciliation_details(
                       AND konto_typ = 'kreditoren'
                       AND TO_CHAR(COALESCE(rechnungsdatum, datum)::date, 'YYYY-MM') <= :period
                     ORDER BY COALESCE(rechnungsdatum, datum) DESC
-                    """
+                    """  # nosec B608  # reviewed-safe: Tabellenname stammt aus einer festen Kandidatenliste, Werte sind gebunden
                 ),
                 {"tenant_id": tenant_id, "period": period},
             ).fetchall()

@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import json
 import re
+import time
 from typing import Callable, Dict, List, Optional
 
 from fastapi import HTTPException, Request, Response, status
@@ -18,6 +19,8 @@ from ..config.settings import settings
 class SecurityMiddleware(BaseHTTPMiddleware):
     """Middleware for security controls and threat protection."""
 
+    PUBLIC_PATHS = {"/health", "/docs", "/openapi.json", "/redoc"}
+
     def __init__(self, app):
         super().__init__(app)
         self.rate_limits: Dict[str, List[float]] = {}
@@ -25,6 +28,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         try:
+            if self._is_public_path(request.url.path):
+                response = await call_next(request)
+                return await self._add_security_headers(response)
+
             # Pre-request security checks
             await self._check_ip_blocklist(request)
             await self._check_rate_limits(request)
@@ -74,7 +81,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             return
 
         client_ip = self._get_client_ip(request)
-        current_time = request.app.state.request_time if hasattr(request.app.state, 'request_time') else 0
+        current_time = time.time()
 
         # Clean old entries
         cutoff_time = current_time - settings.THREAT_DETECTION_RATE_LIMIT_WINDOW
@@ -90,8 +97,6 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         self.rate_limits[client_ip].append(current_time)
 
         if len(self.rate_limits[client_ip]) > settings.THREAT_DETECTION_RATE_LIMIT_REQUESTS:
-            # Block IP temporarily
-            self.blocked_ips.add(client_ip)
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Rate limit exceeded"
@@ -213,6 +218,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             return real_ip
 
         return request.client.host if request.client else "unknown"
+
+    def _is_public_path(self, path: str) -> bool:
+        """Allow probes and docs without threat checks or auth."""
+        return path in self.PUBLIC_PATHS or path.startswith("/docs/")
 
     def _validate_api_key(self, api_key: str) -> bool:
         """Validate API key."""

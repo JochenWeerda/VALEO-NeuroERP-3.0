@@ -54,7 +54,7 @@ DOMAIN_META: dict[str, dict[str, object]] = {
             "docs/architecture/domains/crm/README.md",
             "docs/architecture/views/components/c4-crm.md",
         ],
-        "database_schemas": ["domain_crm", "domain_shared"],
+        "database_schemas": ["domain_crm", "domain_sales", "domain_portal", "domain_shared"],
     },
     "finance": {
         "owner": "domain/finance",
@@ -65,7 +65,16 @@ DOMAIN_META: dict[str, dict[str, object]] = {
             "docs/architecture/domains/finance/README.md",
             "docs/architecture/views/components/c4-finance.md",
         ],
-        "database_schemas": ["domain_finance", "domain_shared"],
+        "database_schemas": [
+            "domain_finance",
+            "domain_erp",
+            "domain_controlling",
+            "domain_pos",
+            "domain_pricing",
+            "domain_meldewesen",
+            "domain_reporting",
+            "domain_shared",
+        ],
     },
     "agrar": {
         "owner": "domain/agrar",
@@ -76,7 +85,7 @@ DOMAIN_META: dict[str, dict[str, object]] = {
             "docs/architecture/domains/agrar/README.md",
             "docs/architecture/views/components/c4-agrar.md",
         ],
-        "database_schemas": ["domain_agrar", "domain_shared"],
+        "database_schemas": ["domain_agrar", "domain_futtermittel", "domain_kontrakte", "domain_shared"],
     },
     "inventory": {
         "owner": "domain/inventory",
@@ -87,7 +96,7 @@ DOMAIN_META: dict[str, dict[str, object]] = {
             "docs/architecture/domains/inventory/README.md",
             "docs/architecture/views/components/c4-procurement-inventory.md",
         ],
-        "database_schemas": ["domain_inventory", "domain_shared"],
+        "database_schemas": ["domain_inventory", "domain_ops", "domain_shared"],
     },
     "procurement": {
         "owner": "domain/procurement",
@@ -97,7 +106,7 @@ DOMAIN_META: dict[str, dict[str, object]] = {
         "architecture_docs": [
             "docs/architecture/views/components/c4-procurement-inventory.md",
         ],
-        "database_schemas": ["domain_procurement", "domain_shared"],
+        "database_schemas": ["domain_procurement", "domain_einkauf", "domain_shared"],
     },
     "logistics": {
         "owner": "domain/logistics",
@@ -107,7 +116,7 @@ DOMAIN_META: dict[str, dict[str, object]] = {
         "architecture_docs": [
             "docs/architecture/views/components/c4-procurement-inventory.md",
         ],
-        "database_schemas": ["domain_shared"],
+        "database_schemas": ["domain_logistics", "domain_shared"],
     },
     "dms-compliance": {
         "owner": "domain/dms-compliance",
@@ -118,7 +127,7 @@ DOMAIN_META: dict[str, dict[str, object]] = {
             "docs/architecture/domains/dms-compliance/README.md",
             "docs/architecture/views/components/c4-dms-compliance.md",
         ],
-        "database_schemas": ["domain_compliance", "domain_shared"],
+        "database_schemas": ["domain_compliance", "domain_docflow", "domain_nachweisraum", "domain_shared"],
     },
     "hr": {
         "owner": "domain/hr",
@@ -126,7 +135,7 @@ DOMAIN_META: dict[str, dict[str, object]] = {
         "service_prefixes": ["hrm_", "personal_", "lohn_"],
         "containers": ["backend"],
         "architecture_docs": [],
-        "database_schemas": ["domain_shared"],
+        "database_schemas": ["domain_hr", "domain_hrm", "domain_shared"],
     },
     "platform": {
         "owner": "platform",
@@ -134,7 +143,14 @@ DOMAIN_META: dict[str, dict[str, object]] = {
         "service_prefixes": ["admin_", "ai_", "mcp_", "workflow_"],
         "containers": ["backend", "keycloak", "bff-web", "ki-usability"],
         "architecture_docs": [],
-        "database_schemas": ["domain_shared"],
+        "database_schemas": [
+            "domain_shared",
+            "domain_docs",
+            "domain_log",
+            "domain_workflow",
+            "domain_integration",
+            "domain_dev_mock",
+        ],
     },
 }
 

@@ -332,7 +332,7 @@ def _export_docflow_headers_csv(db: Session, tenant_id: str, from_date: Optional
             FROM domain_docflow.document_headers
             WHERE {" AND ".join(conditions)}
             ORDER BY document_date, created_at
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()
@@ -371,7 +371,7 @@ def _export_audit_log_csv(
                 WHERE {" AND ".join(conditions)}
                 ORDER BY created_at
                 LIMIT 50000
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -422,7 +422,7 @@ def _export_journal_entries_csv(
                 WHERE {" AND ".join(conditions)}
                 ORDER BY entry_date, created_at
                 LIMIT 100000
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -464,7 +464,7 @@ def _export_docflow_items_csv(
                 WHERE {" AND ".join(conditions)} AND dh.deleted_at IS NULL
                 ORDER BY di.header_id, di.line_number
                 LIMIT 200000
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()
@@ -503,7 +503,7 @@ def _export_artifact_hashes_csv(
                 WHERE {" AND ".join(conditions)} AND dh.deleted_at IS NULL
                 ORDER BY a.created_at
                 LIMIT 100000
-                """
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             ),
             params,
         ).mappings().all()

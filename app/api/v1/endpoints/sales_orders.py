@@ -9,19 +9,20 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....services.customer_reference import resolve_customer
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_delivery
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ....services.numbering_service import get_numbering
 from ..schemas.base import PaginatedResponse
 from .credit_management import get_credit_status_data
 
-from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.base import BaseSchema, IDResponse, TypedObjectOut
 from app.api.v1.schemas.agrar_schemas import DeliveryNoteCreatedOut
 
 
@@ -80,6 +81,55 @@ class SalesOrderItemOut(SalesOrderItemInput):
     line_total: float
 
 
+class SalesOrderTabOut(BaseSchema):
+    """Eine Registerseite des Builders."""
+
+    tab_key: str
+    table_key: str
+    page: int
+    limit: int
+    total: int
+    items: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class SalesOrderDeliveryRowOut(BaseSchema):
+    """Ein Lieferschein zum Auftrag.
+
+    **Keine Menge:** Der Lieferschein fuehrt seine Mengen an den Positionen, der
+    Kopf hat keine. Eine Spalte `menge` stand vorher in der Maske und blieb
+    leer — das sah aus wie „nichts geliefert".
+    """
+
+    id: str
+    delivery_note_number: Optional[str] = None
+    status: Optional[str] = None
+    delivery_date: Optional[str] = None
+    invoice_number: Optional[str] = None
+    is_delivered: Optional[bool] = None
+
+
+class SalesOrderDocumentRowOut(BaseSchema):
+    """Ein Beleg zum Auftrag — abgeleitet aus den berechneten Lieferscheinen."""
+
+    id: str
+    beleg_nr: Optional[str] = None
+    beleg_datum: Optional[str] = None
+    status: Optional[str] = None
+    invoice_number: Optional[str] = None
+
+
+class SalesOrderPositionTabOut(SalesOrderTabOut):
+    items: list[SalesOrderItemOut] = Field(default_factory=list)
+
+
+class SalesOrderDeliveryTabOut(SalesOrderTabOut):
+    items: list[SalesOrderDeliveryRowOut] = Field(default_factory=list)
+
+
+class SalesOrderDocumentTabOut(SalesOrderTabOut):
+    items: list[SalesOrderDocumentRowOut] = Field(default_factory=list)
+
+
 class SalesOrder(SalesOrderBase):
     order_number: str
     id: str
@@ -90,6 +140,9 @@ class SalesOrder(SalesOrderBase):
     deleted_at: Optional[datetime] = None
     version: int = 1
     items: list[SalesOrderItemOut] = Field(default_factory=list)
+    #: Nur in der Einzelabfrage gefuellt; die Liste spart sich die Abfrage je Zeile.
+    customer_name: Optional[str] = None
+    customer_number: Optional[str] = None
 
 
 def _line_total(quantity: float, unit_price: float, discount_percent: float) -> Decimal:
@@ -212,7 +265,7 @@ async def list_sales_orders(
         params["status"] = status_filter
 
     where_sql = " AND ".join(where)
-    total = db.execute(text(f"SELECT COUNT(*) FROM domain_crm.sales_orders WHERE {where_sql}"), params).scalar() or 0  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+    total = db.execute(text(f"SELECT COUNT(*) FROM domain_crm.sales_orders WHERE {where_sql}"), params).scalar() or 0  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
     rows = db.execute(
         text(
             f"""
@@ -221,7 +274,7 @@ async def list_sales_orders(
             WHERE {where_sql}
             ORDER BY created_at DESC
             OFFSET :skip LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: Spalten stammen aus deklarierten Pydantic-Feldnamen, Werte sind gebunden
         ),
         params,
     ).mappings()
@@ -251,7 +304,11 @@ async def get_sales_order(
     db: Session = Depends(get_db),
 ):
     row = _get_sales_order_row(db, order_id, tenant_id)
-    return _row_to_order(row, _fetch_items(db, order_id, tenant_id))
+    order = _row_to_order(row, _fetch_items(db, order_id, tenant_id))
+    kunde = resolve_customer(db, tenant_id, order.customer_id)
+    order.customer_name = kunde.name
+    order.customer_number = kunde.number
+    return order
 
 
 def _sales_order_tab_endpoint(order_id: str, tab_key: str) -> str:
@@ -303,24 +360,7 @@ def build_sales_order_screen_summary(
 
 
 def _fetch_customer_name(db: Session, customer_id: str | None, tenant_id: str) -> str | None:
-    if not customer_id:
-        return None
-    try:
-        row = db.execute(
-            text(
-                """
-                SELECT name
-                FROM domain_erp.business_partners
-                WHERE id = :cid AND tenant_id::text = :tid
-                LIMIT 1
-                """
-            ),
-            {"cid": customer_id, "tid": tenant_id},
-        ).mappings().first()
-        return str(row["name"]) if row and row.get("name") else None
-    except Exception:
-        db.rollback()
-        return None
+    return resolve_customer(db, tenant_id, customer_id).name
 
 
 def _fetch_delivery_notes_for_order(db: Session, order_id: str, tenant_id: str) -> list[dict[str, Any]]:
@@ -399,7 +439,7 @@ def _fetch_order_documents(db: Session, order_id: str, tenant_id: str) -> list[d
 
 @router.get(
     "/{order_id}/screen-summary",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["sales", "orders", "screen-summary"],
     summary="Sales order screen summary abrufen",
 )
@@ -421,8 +461,71 @@ async def get_sales_order_screen_summary(
 
 
 @router.get(
+    "/{order_id}/tabs/positionen",
+    response_model=SalesOrderPositionTabOut,
+    summary="Sales order: Positionen",
+)
+async def get_sales_order_positions_tab(
+    order_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Die Auftragspositionen."""
+    return await get_sales_order_tab_data(
+        order_id=order_id, tab_key="positionen", page=page, limit=limit,
+        q=q, tenant_id=tenant_id, db=db,
+    )
+
+
+@router.get(
+    "/{order_id}/tabs/lieferung",
+    response_model=SalesOrderDeliveryTabOut,
+    summary="Sales order: Lieferscheine",
+)
+async def get_sales_order_delivery_tab(
+    order_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Die Lieferscheine zum Auftrag."""
+    return await get_sales_order_tab_data(
+        order_id=order_id, tab_key="lieferung", page=page, limit=limit,
+        q=q, tenant_id=tenant_id, db=db,
+    )
+
+
+@router.get(
+    "/{order_id}/tabs/dokumente",
+    response_model=SalesOrderDocumentTabOut,
+    summary="Sales order: Belege",
+)
+async def get_sales_order_documents_tab(
+    order_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: str | None = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Die Belege zum Auftrag."""
+    return await get_sales_order_tab_data(
+        order_id=order_id, tab_key="dokumente", page=page, limit=limit,
+        q=q, tenant_id=tenant_id, db=db,
+    )
+
+
+# Die Sammelroute steht **hinter** den benannten: Sonst faengt ihr
+# Pfadparameter sie ab, und jedes Register haette wieder dieselbe, nichts
+# sagende Antwortform.
+@router.get(
     "/{order_id}/tabs/{tab_key}",
-    response_model=dict[str, Any],
+    response_model=TypedObjectOut,
     tags=["sales", "orders", "screen-summary"],
     summary="Sales order tab list data abrufen",
 )
@@ -652,7 +755,7 @@ async def update_sales_order(
             UPDATE domain_crm.sales_orders
             SET {", ".join(set_fields)}
             WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
+            """  # nosec B608  # reviewed-safe: Spalten stammen aus deklarierten Pydantic-Feldnamen, Werte sind gebunden
         ),
         params,
     )
@@ -861,6 +964,130 @@ async def cancel_sales_order(
 
 
 # ---------------------------------------------------------------------------
+# Drucken und Buchen
+#
+# Die Auftragsmaske ruft seit jeher `POST /{id}/print` und `POST /{id}/post` —
+# beide Endpunkte gab es nicht. Der 404 landete im `catch` und wurde als
+# "Fehler beim Drucken" gemeldet, ohne zu sagen, dass der Weg selbst fehlt.
+# Der Lieferschein fuehrt denselben Ablauf schon vor; hier ist er fuer den
+# Auftrag nachgezogen.
+# ---------------------------------------------------------------------------
+
+
+class SalesOrderPrintOut(BaseSchema):
+    """Was der Druck hinterlassen hat — nicht der Beleg selbst."""
+
+    model_config = ConfigDict(extra="allow")
+
+
+@router.post(
+    "/{order_id}/print",
+    response_model=SalesOrderPrintOut,
+    summary="Sales order drucken",
+)
+async def print_sales_order(
+    order_id: str,
+    template: Optional[str] = Query(default=None, max_length=60, description="Formatvorlage"),
+    copies: int = Query(default=1, ge=1, le=20, description="Anzahl Ausdrucke"),
+    attestation: Optional[str] = Query(
+        default=None, max_length=500, description="Begruendung fuer den Wiederholungsdruck"
+    ),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Haelt fest, dass der Auftrag gedruckt wurde.
+
+    **Gezaehlt, nicht ueberschrieben:** Der zweite Druck ist ein eigener
+    Vorgang — der Kunde hat den ersten nicht bekommen, der Fahrer braucht ein
+    weiteres Exemplar. Deshalb `print_count` und nicht `is_printed`.
+
+    Ein Wiederholungsdruck verlangt eine **Begruendung**, wie beim
+    Lieferschein: Wer einen bereits gedruckten Beleg erneut ausgibt, soll
+    sagen warum. Ohne sie antwortet der Endpunkt mit 400 und aendert nichts.
+    """
+    order = _get_sales_order_row(db, order_id, tenant_id)
+    bisher = int(order.get("print_count") or 0)
+    if bisher > 0 and not attestation:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Auftrag wurde bereits {bisher}x gedruckt — fuer den "
+                "Wiederholungsdruck wird eine Begruendung verlangt."
+            ),
+        )
+
+    db.execute(
+        text(
+            """
+            UPDATE domain_crm.sales_orders
+            SET print_count = COALESCE(print_count, 0) + :copies,
+                printed_at = NOW(),
+                updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tid
+            """
+        ),
+        {"id": order_id, "tid": tenant_id, "copies": copies},
+    )
+    db.commit()
+
+    aktuell = _get_sales_order_row(db, order_id, tenant_id)
+    return {
+        "id": order_id,
+        "order_number": aktuell.get("order_number"),
+        "print_count": int(aktuell.get("print_count") or 0),
+        "printed_at": aktuell.get("printed_at").isoformat() if aktuell.get("printed_at") else None,
+        "template": template,
+        "copies": copies,
+        "attestation": attestation,
+    }
+
+
+@router.post(
+    "/{order_id}/post",
+    response_model=SalesOrder,
+    summary="Sales order buchen",
+)
+async def post_sales_order(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Bucht den Auftrag — aus dem Entwurf wird ein verbindlicher Beleg.
+
+    **Zweimal buchen ist kein Fehler.** Die Maske druckt und bucht in einem
+    Zug; wer ein zweites Exemplar druckt, bucht dabei erneut. Ein bereits
+    gebuchter Auftrag bleibt deshalb unveraendert und antwortet mit 200 statt
+    mit einem Fehler, der nichts zu bedeuten haette.
+
+    Ein stornierter Auftrag laesst sich nicht buchen — das waere eine
+    Wiederbelebung durch die Hintertuer.
+    """
+    order = _get_sales_order_row(db, order_id, tenant_id)
+    status_jetzt = str(order.get("status") or "")
+
+    if status_jetzt == "cancelled":
+        raise HTTPException(
+            status_code=400,
+            detail="Ein stornierter Auftrag kann nicht gebucht werden.",
+        )
+
+    if status_jetzt == "open":
+        db.execute(
+            text(
+                """
+                UPDATE domain_crm.sales_orders
+                SET status = 'confirmed', posted_at = NOW(), updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tid
+                """
+            ),
+            {"id": order_id, "tid": tenant_id},
+        )
+        db.commit()
+
+    return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
+
+
+# ---------------------------------------------------------------------------
 # DOM-SALES-004: AB-Lifecycle / Lieferschein-Close / Preisabweichung
 # ---------------------------------------------------------------------------
 
@@ -893,7 +1120,7 @@ class PreisabweichungFreigabeIn(_BM):
     grund: _Opt[str] = None
 
 
-@router.post("/orders/{auftrag_id}/ab-transition", response_model=dict, summary="Auftragsbestätigung Status wechseln")
+@router.post("/orders/{auftrag_id}/ab-transition", response_model=TypedObjectOut, summary="Auftragsbestätigung Status wechseln")
 def ab_transition_endpoint(
     auftrag_id: str,
     body: ABTransitionIn,
@@ -909,7 +1136,7 @@ def ab_transition_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/delivery-notes/{ls_id}/advance", response_model=dict, summary="Lieferschein-Status vorwärts")
+@router.post("/delivery-notes/{ls_id}/advance", response_model=TypedObjectOut, summary="Lieferschein-Status vorwärts")
 def ls_advance_endpoint(
     ls_id: str,
     body: LSAdvanceIn,
@@ -925,7 +1152,7 @@ def ls_advance_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/orders/{auftrag_id}/preisabweichung", response_model=dict, status_code=201, summary="Preisabweichung prüfen")
+@router.post("/orders/{auftrag_id}/preisabweichung", response_model=TypedObjectOut, status_code=201, summary="Preisabweichung prüfen")
 def pruefe_preisabweichung_endpoint(
     auftrag_id: str,
     body: PreisabweichungIn,
@@ -942,7 +1169,7 @@ def pruefe_preisabweichung_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/preisabweichungen/{abweichung_id}/freigabe", response_model=dict, summary="Preisabweichung freigeben/ablehnen")
+@router.post("/preisabweichungen/{abweichung_id}/freigabe", response_model=TypedObjectOut, summary="Preisabweichung freigeben/ablehnen")
 def freigabe_preisabweichung_endpoint(
     abweichung_id: str,
     body: PreisabweichungFreigabeIn,

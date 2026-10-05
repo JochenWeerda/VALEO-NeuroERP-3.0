@@ -1,0 +1,95 @@
+slice_id: DESIGN-STATUS-COLORS-017
+id: DESIGN-STATUS-COLORS-017
+title: Status-zu-Klassen-Tabellen auf Badge-Varianten umstellen (Welle 3)
+owner: Claude Code
+status: abgeschlossen
+created_at: "2026-09-11"
+started_at: "2026-09-11"
+completed_at: "2026-09-11"
+vorgaenger: DESIGN-STATUS-COLORS-016
+goal: >-
+  Den groessten Restblock aus Welle 2 schliessen: Tabellen und Helfer, die
+  einen Fachstatus auf Palette-Klassen abbilden, bilden ihn stattdessen auf
+  Badge-Varianten ab.
+befund: >-
+  Von den Tabellen haengen 223 Palette-Klassen an Helfern, die ausschliesslich
+  von Badge konsumiert werden - verteilt auf 29 Helfer. Fuenf davon faerben
+  keine Statuswerte, sondern Kategorien (typConfig, DOMAIN_COLORS, typColors
+  mit purple/violet). Sie auf Statusvarianten zu zwingen waere semantisch
+  falsch; sie bleiben ausgenommen und gehoeren zur Kategorienpalette.
+umsetzung:
+  helfer: 23
+  tabelleneintraege: 117
+  badge_verbraucher: 25
+  typ_export: >-
+    badge.tsx exportiert nun BadgeVariant als Zielwert fuer solche Tabellen.
+    Damit pruefte TypeScript jede Umstellung, statt sie nur zu glauben.
+  transform: >-
+    Klassen-Strings innerhalb der Helferdefinition durch Variantennamen
+    ersetzt; am Verbraucher className={...} zu variant={...} gedreht und
+    statische Restklassen aus Template-Literals in ein eigenes className
+    ueberfuehrt. Selbsttest ueber acht Musterfaelle vorab.
+typpruefung_als_netz:
+  befund: >-
+    Der erste Durchlauf erzeugte zwoelf Typfehler. Sie waren kein Rauschen,
+    sondern genau die Faelle, die der Transform nicht entscheiden konnte.
+  behoben:
+    - >-
+      Vier Helfer mit Rueckgabetyp string und drei Objektliterale ohne
+      Annotation: auf BadgeVariant bzw. as const gezogen.
+    - >-
+      Drei Eintraege trugen keine Palette-, sondern semantische Klassen
+      (bg-muted text-muted-foreground) und blieben deshalb stehen: auf muted
+      abgebildet.
+    - >-
+      LstKontraktUebersicht fuehrte zusaetzlich line-through - eine
+      Textauszeichnung, keine Farbe. Sie bleibt als bedingtes className am
+      Verbraucher erhalten, statt mit der Farbe wegzufallen.
+    - >-
+      KontraktAlarmDashboard faerbte hedge_gap in fuchsia, also ausserhalb der
+      Statusskala: auf die neutrale Variante secondary gesetzt.
+    - >-
+      Echter Fehler im Transform: in shop.tsx steckte die Klasse in einem
+      cn()-Aufruf, der faelschlich als Variante uebernommen wurde. Korrigiert
+      zu variant plus eigenem className. Ohne die Typpruefung waere das
+      unbemerkt geblieben.
+acceptance:
+  - TypeScript und Vitest gruen, unveraendert zur Baseline.
+  - Keine Datei ausserhalb packages/frontend-web/src angefasst.
+  - Kategoriale Faerbungen unangetastet und begruendet ausgenommen.
+tests:
+  - "npx tsc --noEmit: exit 0"
+  - "vitest: 126 Dateien, 495 Tests, 1 bekannter Skip - identisch zur Baseline"
+verlauf:
+  - "vor Welle 1: 571 Palette-Statusklassen"
+  - "nach Welle 1: 343 Tripel (303 Einzelklassen ersetzt)"
+  - "nach Welle 2: 343 (63 Badges auf Varianten)"
+  - "nach Welle 3: 276 in 106 Dateien"
+offen_welle_4:
+  verbleibend: 276
+  aufschluesselung:
+    - "119 in Tabellen, die nicht an Badge haengen oder kategorial faerben"
+    - "82 an div-Panels und Hinweisboxen"
+    - "16 an span, 12 an Badge (Ausdruck oder uneindeutige Familie), 9 an Button"
+  naechster_schritt: >-
+    Die div-Panels sind der naechste sinnvolle Block, brauchen aber zuerst eine
+    Entscheidung: eigene Hinweisbox-Komponente oder Erweiterung der
+    Alert-Varianten. Das ist Entwurfsarbeit und sollte nicht nebenbei
+    entschieden werden. Die kategorialen Faerbungen gehoeren separat auf die
+    Kategorienpalette, nicht auf Statusvarianten.
+ai_harness:
+  fachlicher_vertrag: >-
+    Ein Fachstatus wird auf eine Designsystem-Variante abgebildet, nicht auf
+    Farbklassen an der Verwendungsstelle.
+  architektur_vertrag: >-
+    BadgeVariant ist der typisierte Vertrag zwischen Fachstatus und Darstellung.
+  daten_vertrag: "Keine Migration, keine Datenmutation."
+  test_vertrag: "Typpruefung und Vitest vor und nach der Aenderung."
+  security_vertrag: "Ohne Bezug zu Auth, Rechten oder Daten."
+  betriebs_vertrag: "Kein Deployment, kein Container-Neustart."
+  dokumentations_vertrag: >-
+    Restbestand und die bewusst ausgenommenen kategorialen Faerbungen sind mit
+    Zahl und Begruendung benannt.
+verification:
+  - npx tsc --noEmit
+  - npm run test

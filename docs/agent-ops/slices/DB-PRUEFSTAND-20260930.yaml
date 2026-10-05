@@ -1,0 +1,75 @@
+---
+slice_id: DB-PRUEFSTAND
+id: DB-PRUEFSTAND
+title: Eine frische Datenbank ist der Pruefstand fuer das Schema
+status: abgeschlossen
+owner: Claude Code
+date: 2026-09-30
+created_at: 2026-09-30
+closed_at: 2026-09-30
+coordination: >
+  Beruehrt keine fremden Slices. Nur neue Dateien plus je ein Absatz in
+  CLAUDE.md und .env.example. Die 22 Dateien von Codex und Cursor im
+  Arbeitsbaum bleiben unangetastet.
+goal: >
+  Der Befund vom 29.09. wird zur Regel, die ohne das Gedaechtnis eines Agenten
+  haelt: Schema- und Vertragstests laufen gegen eine frisch migrierte
+  Datenbank, die gewachsene bleibt Pruefstand fuer Daten.
+file_ownership:
+  - scripts/pruefstand_db.py
+  - docs/quality-assurance/pruefstand-datenbank.md
+  - CLAUDE.md
+  - .env.example
+acceptance:
+  - python scripts/pruefstand_db.py setzt die Datenbank idempotent neu auf
+  - Die elf in CI roten Testdateien laufen gegen den frischen Pruefstand durch
+  - Das Skript bricht ab, wenn der Name nicht wie ein Pruefstand aussieht
+  - Kein Passwort und keine Zugangsdatei im Code
+tests:
+  - tests/test_sales_invoices_api.py
+  - tests/test_sales_sammelrechnung.py
+  - tests/test_xrechnung_echter_beleg.py
+  - tests/test_sales_beleg_druck_buchung.py
+  - tests/test_sales_orders_api.py
+  - tests/test_lieferschein_nachdruck_attestierung.py
+  - tests/test_einkauf_bedarf_abverkauf.py
+  - tests/test_einkauf_innovation.py
+  - tests/test_dsgvo_loeschung_loescht_wirklich.py
+  - tests/test_table_reference_inventory.py
+  - tests/test_gobd_kontentrennung.py
+risks:
+  - Ein zweiter Pruefstand darf nicht zur zweiten Wahrheit werden — die
+    Zuordnung Schema/Daten muss eindeutig dokumentiert sein
+  - Ein Loeschskript in Reichweite der Entwicklungsdatenbank
+  - Zugangsdaten in Protokollausgaben
+ai_harness:
+  fachlicher_vertrag: >
+    Ein Agent, der eine Migration oder ein Testfixture mit rohem SQL anfasst,
+    findet die Regel in CLAUDE.md und das Vorgehen im Runbook — ohne dass
+    jemand ihn darauf hinweist.
+  architektur_vertrag: >
+    Die Verbindung kommt aus TEST_DATABASE_URL oder wird aus DATABASE_URL
+    abgeleitet (Datenbankname -> valeo_probe). Keine zweite Konfigurationsquelle,
+    keine Aenderung an pytest.ini oder conftest: die Tests lesen weiterhin nur
+    DATABASE_URL, der Pruefstand wird davorgesetzt.
+  daten_vertrag: >
+    Das Skript loescht ausschliesslich Datenbanken, deren Name 'probe', 'test'
+    oder 'pruefstand' enthaelt, und bricht sonst ab. Die Entwicklungsdatenbank
+    wird nie angefasst. Der Neuaufbau ist idempotent.
+  test_vertrag: >
+    Nachweis 30.09.2026: Pruefstand von null aufgebaut, danach 87 Tests der
+    elf zuvor roten Dateien gruen. Die Sicherung ist mit einem absichtlichen
+    Zeigefehler auf valeo_neuro_erp geprueft — sie bricht ab.
+  security_vertrag: >
+    Kein Passwort im Code. Die Ausgabe nennt die Verbindung nur mit
+    maskiertem Passwort (render_as_string(hide_password=True)); die Zeile zum
+    Kopieren benutzt die Umgebungsvariable statt der ausgeschriebenen URL.
+    .env.example fuehrt REDACTED_PASSWORD wie die uebrigen Eintraege.
+  betriebs_vertrag: >
+    Rollback = Commit reverten; es gibt keinen Datenstand, der
+    zurueckzudrehen waere. Der Pruefstand ist eine Wegwerfdatenbank.
+  dokumentations_vertrag: >
+    docs/quality-assurance/pruefstand-datenbank.md (Runbook), Abschnitt
+    Testing in CLAUDE.md, .env.example, Workboard, Open-Gaps.
+external_gates:
+  - not_applicable

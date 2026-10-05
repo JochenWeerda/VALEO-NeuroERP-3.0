@@ -16,19 +16,25 @@ describe('useTouchDeviceHook', () => {
     expect(typeof window.matchMedia).toBe('function')
   })
 
-  it('useTouchDevice() gibt false zurueck wenn matchMedia stub matches=false', async () => {
-    const { useTouchDevice } = await import('@/hooks/useTouchDevice')
-    expect(useTouchDevice()).toBe(false)
+  it('readTouchDevice() gibt false zurueck wenn matchMedia stub matches=false', async () => {
+    const { readTouchDevice } = await import('@/hooks/useTouchDevice')
+    expect(readTouchDevice()).toBe(false)
   })
 
-  it('useTouchDevice() gibt false zurueck wenn matchMedia wirft', async () => {
+  it('readTouchDevice() gibt false zurueck wenn matchMedia wirft', async () => {
     const original = window.matchMedia
     ;(window as any).matchMedia = () => { throw new Error('matchMedia not supported') }
-    // Re-import forces re-evaluation of the module
     vi.resetModules()
-    const { useTouchDevice } = await import('@/hooks/useTouchDevice')
-    expect(useTouchDevice()).toBe(false)
+    const { readTouchDevice } = await import('@/hooks/useTouchDevice')
+    expect(readTouchDevice()).toBe(false)
     ;(window as any).matchMedia = original
+  })
+
+  it('readTouchDevice() gibt true bei schmalem Viewport ohne coarse-pointer', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
+    const { readTouchDevice } = await import('@/hooks/useTouchDevice')
+    expect(readTouchDevice()).toBe(true)
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 })
   })
 })
 
@@ -80,8 +86,13 @@ describe('TouchFieldLayoutReexport', () => {
   })
 
   it('useTouchDevice re-export gibt false zurueck im JSDOM', async () => {
-    const mod = await import('@/components/touch/TouchFieldLayout')
-    expect(mod.useTouchDevice()).toBe(false)
+    const { useTouchDevice } = await import('@/components/touch/TouchFieldLayout')
+    const Probe = () => {
+      const value = useTouchDevice()
+      return <div>{String(value)}</div>
+    }
+    render(<Probe />)
+    expect(screen.getByText('false')).toBeInTheDocument()
   })
 })
 

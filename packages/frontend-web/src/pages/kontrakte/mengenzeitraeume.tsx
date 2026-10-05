@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { NativeSelect } from '@/components/ui/native-select'
 import {
   useMengenzeitraeume, useCreateMengenzeitraum, useDeleteMengenzeitraum, useGenerateMengenzeitraeume,
   useZuAbschlagsgruppen, useCreateZuAbschlagsgruppe, useZuAbschlaege, useCreateZuAbschlag,
@@ -27,6 +28,7 @@ type AbschlagForm = { bezeichnung: string; betrag_eur: string; prozent: string; 
 export default function KontraktMengenzeitraeumePage() {
   const [kontraktNr, setKontraktNr] = useState('')
   const [aktiverKontrakt, setAktiverKontrakt] = useState('')
+  const [deletePendingId, setDeletePendingId] = useState<string | null>(null)
   const [gruppeId, setGruppeId] = useState('')
 
   const zeitraeume = useMengenzeitraeume(aktiverKontrakt)
@@ -87,33 +89,50 @@ export default function KontraktMengenzeitraeumePage() {
     } catch (e) { toast.error(e instanceof Error ? e.message : 'Anlegen fehlgeschlagen') }
   })
 
+  async function persistDeleteZeitraum(id: string): Promise<void> {
+    await deleteZeitraum.mutateAsync({ kontraktNr: aktiverKontrakt, id })
+  }
+
+  async function handleDeleteZeitraum(id: string): Promise<void> {
+    if (deletePendingId) return
+    setDeletePendingId(id)
+    try {
+      await persistDeleteZeitraum(id)
+      toast.success('Gelöscht.')
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Löschen fehlgeschlagen')
+    } finally {
+      setDeletePendingId(null)
+    }
+  }
+
   return (
-    <div className="container mx-auto space-y-6 py-8">
+    <div className="container mx-auto space-y-6 p-3 py-4 md:p-6 md:py-8">
       <div>
-        <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <CalendarRange className="h-7 w-7 text-emerald-700" /> Kontrakt-Mengenzeiträume &amp; Zu-/Abschläge
+        <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold md:text-3xl">
+          <CalendarRange className="h-7 w-7 text-status-success" /> Kontrakt-Mengenzeiträume und Zu-/Abschläge
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Abnahme-Staffeln (Mengenzeiträume) je Kontrakt und kontraktbezogene Zu-/Abschläge.
+          Abnahme-Staffeln je Kontrakt und kontraktbezogene Zu-/Abschläge.
         </p>
       </div>
 
       <Tabs defaultValue="zeitraeume">
-        <TabsList>
-          <TabsTrigger value="zeitraeume">Mengenzeiträume</TabsTrigger>
-          <TabsTrigger value="abschlaege">Zu-/Abschläge</TabsTrigger>
+        <TabsList className="flex min-h-touch w-full flex-wrap justify-start" aria-label="Kontrakt-Staffeln">
+          <TabsTrigger value="zeitraeume" className="min-h-11 touch-manipulation">Mengenzeiträume</TabsTrigger>
+          <TabsTrigger value="abschlaege" className="min-h-11 touch-manipulation">Zu-/Abschläge</TabsTrigger>
         </TabsList>
 
         {/* ── Mengenzeiträume ───────────────────────────────────── */}
         <TabsContent value="zeitraeume" className="space-y-4">
           <Card>
             <CardHeader><CardTitle>Kontrakt wählen</CardTitle></CardHeader>
-            <CardContent className="flex items-end gap-2">
-              <div className="space-y-1.5">
+            <CardContent className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-end">
+              <div className="space-y-1.5 flex-1">
                 <Label htmlFor="knr">Kontrakt-Nr.</Label>
-                <Input id="knr" value={kontraktNr} onChange={(e) => setKontraktNr(e.target.value)} placeholder="z.B. K-2026-0001" />
+                <Input id="knr" className="min-h-touch" value={kontraktNr} onChange={(e) => setKontraktNr(e.target.value)} placeholder="z.B. K-2026-0001" />
               </div>
-              <Button onClick={() => setAktiverKontrakt(kontraktNr.trim())} disabled={!kontraktNr.trim()}>Laden</Button>
+              <Button className="min-h-touch touch-manipulation" onClick={() => setAktiverKontrakt(kontraktNr.trim())} disabled={!kontraktNr.trim()}>Laden</Button>
             </CardContent>
           </Card>
 
@@ -139,13 +158,15 @@ export default function KontraktMengenzeitraeumePage() {
                             <TableCell>{z.variante ?? '—'}</TableCell>
                             <TableCell><Badge variant="outline">{z.status}</Badge></TableCell>
                             <TableCell>
-                              <Button variant="ghost" size="icon" aria-label="Löschen"
-                                disabled={deleteZeitraum.isPending}
-                                onClick={async () => {
-                                  try { await deleteZeitraum.mutateAsync({ kontraktNr: aktiverKontrakt, id: z.id }); toast.success('Gelöscht.') }
-                                  catch (e) { toast.error(e instanceof Error ? e.message : 'Löschen fehlgeschlagen') }
-                                }}>
-                                <Trash2 className="h-4 w-4 text-red-600" />
+                              <Button
+                                variant="outline"
+                                className="min-h-touch touch-manipulation"
+                                aria-label={`Zeitraum ${z.zeitraum_von} löschen`}
+                                disabled={deletePendingId === z.id || deleteZeitraum.isPending}
+                                onClick={() => { void handleDeleteZeitraum(z.id) }}
+                              >
+                                <Trash2 className="h-4 w-4 text-status-error" />
+                                Löschen
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -165,15 +186,15 @@ export default function KontraktMengenzeitraeumePage() {
                   <CardContent>
                     <form onSubmit={onCreateZeitraum} className="space-y-3">
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1"><Label>Von</Label><Input type="date" {...zForm.register('zeitraum_von', { required: true })} /></div>
-                        <div className="space-y-1"><Label>Bis</Label><Input type="date" {...zForm.register('zeitraum_bis', { required: true })} /></div>
+                        <div className="space-y-1"><Label>Von</Label><Input className="min-h-touch" type="date" {...zForm.register('zeitraum_von', { required: true })} /></div>
+                        <div className="space-y-1"><Label>Bis</Label><Input className="min-h-touch" type="date" {...zForm.register('zeitraum_bis', { required: true })} /></div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1"><Label>Menge (t)</Label><Input type="number" step="0.001" {...zForm.register('menge_t', { required: true })} /></div>
-                        <div className="space-y-1"><Label>Variante</Label><Input {...zForm.register('variante')} /></div>
+                        <div className="space-y-1"><Label>Menge (t)</Label><Input className="min-h-touch" type="number" step="0.001" {...zForm.register('menge_t', { required: true })} /></div>
+                        <div className="space-y-1"><Label>Variante</Label><Input className="min-h-touch" {...zForm.register('variante')} /></div>
                       </div>
-                      <div className="space-y-1"><Label>Bemerkung</Label><Input {...zForm.register('bemerkung')} /></div>
-                      <Button type="submit" disabled={createZeitraum.isPending}><Plus className="mr-2 h-4 w-4" />Anlegen</Button>
+                      <div className="space-y-1"><Label>Bemerkung</Label><Input className="min-h-touch" {...zForm.register('bemerkung')} /></div>
+                      <Button type="submit" className="min-h-touch touch-manipulation" disabled={createZeitraum.isPending}><Plus className="mr-2 h-4 w-4" />Anlegen</Button>
                     </form>
                   </CardContent>
                 </Card>
@@ -183,14 +204,14 @@ export default function KontraktMengenzeitraeumePage() {
                   <CardContent>
                     <form onSubmit={onGenerieren} className="space-y-3">
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1"><Label>Von</Label><Input type="date" {...gForm.register('von_datum', { required: true })} /></div>
-                        <div className="space-y-1"><Label>Bis</Label><Input type="date" {...gForm.register('bis_datum', { required: true })} /></div>
+                        <div className="space-y-1"><Label>Von</Label><Input className="min-h-touch" type="date" {...gForm.register('von_datum', { required: true })} /></div>
+                        <div className="space-y-1"><Label>Bis</Label><Input className="min-h-touch" type="date" {...gForm.register('bis_datum', { required: true })} /></div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1"><Label>Gesamtmenge (t)</Label><Input type="number" step="0.001" {...gForm.register('gesamt_menge_t', { required: true })} /></div>
-                        <div className="space-y-1"><Label>Variante</Label><Input {...gForm.register('variante')} /></div>
+                        <div className="space-y-1"><Label>Gesamtmenge (t)</Label><Input className="min-h-touch" type="number" step="0.001" {...gForm.register('gesamt_menge_t', { required: true })} /></div>
+                        <div className="space-y-1"><Label>Variante</Label><Input className="min-h-touch" {...gForm.register('variante')} /></div>
                       </div>
-                      <Button type="submit" variant="secondary" disabled={generieren.isPending}><Wand2 className="mr-2 h-4 w-4" />Generieren</Button>
+                      <Button type="submit" variant="secondary" className="min-h-touch touch-manipulation" disabled={generieren.isPending}><Wand2 className="mr-2 h-4 w-4" />Generieren</Button>
                     </form>
                   </CardContent>
                 </Card>
@@ -214,22 +235,30 @@ export default function KontraktMengenzeitraeumePage() {
                           <TableCell className="font-mono">{g.gruppe_nr}</TableCell>
                           <TableCell>{g.bezeichnung}</TableCell>
                           <TableCell><Badge variant="outline">{g.typ}</Badge></TableCell>
-                          <TableCell><Button variant="ghost" size="sm" onClick={() => setGruppeId(g.id)}>Positionen</Button></TableCell>
+                          <TableCell>
+                            <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => setGruppeId(g.id)}>
+                              Positionen
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                       {(gruppen.data ?? []).length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Keine Gruppen.</TableCell></TableRow>}
                     </TableBody>
                   </Table>
                 )}
-                <form onSubmit={onCreateGruppe} className="flex items-end gap-2 border-t pt-3">
-                  <div className="space-y-1"><Label>Gruppe-Nr.</Label><Input className="w-28" {...grpForm.register('gruppe_nr', { required: true })} /></div>
-                  <div className="space-y-1 flex-1"><Label>Bezeichnung</Label><Input {...grpForm.register('bezeichnung', { required: true })} /></div>
-                  <div className="space-y-1"><Label>Typ</Label>
-                    <select className="h-10 rounded-md border px-2" {...grpForm.register('typ')}>
-                      <option value="zuschlag">Zuschlag</option><option value="abschlag">Abschlag</option>
-                    </select>
+                <form onSubmit={onCreateGruppe} className="flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-end">
+                  <div className="space-y-1"><Label>Gruppe-Nr.</Label><Input className="min-h-touch w-full sm:w-28" {...grpForm.register('gruppe_nr', { required: true })} /></div>
+                  <div className="space-y-1 flex-1"><Label>Bezeichnung</Label><Input className="min-h-touch" {...grpForm.register('bezeichnung', { required: true })} /></div>
+                  <div className="space-y-1">
+                    <Label htmlFor="gruppe-typ">Typ</Label>
+                    <NativeSelect id="gruppe-typ" className="min-h-touch" {...grpForm.register('typ')}>
+                      <option value="zuschlag">Zuschlag</option>
+                      <option value="abschlag">Abschlag</option>
+                    </NativeSelect>
                   </div>
-                  <Button type="submit" disabled={createGruppe.isPending}><Plus className="h-4 w-4" /></Button>
+                  <Button type="submit" className="min-h-touch touch-manipulation" disabled={createGruppe.isPending} aria-label="Gruppe anlegen">
+                    <Plus className="h-4 w-4" />Anlegen
+                  </Button>
                 </form>
               </CardContent>
             </Card>
@@ -237,7 +266,7 @@ export default function KontraktMengenzeitraeumePage() {
             <Card>
               <CardHeader><CardTitle className="text-base">Positionen {gruppeId ? '' : '(Gruppe wählen)'}</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                {!gruppeId ? <p className="text-sm text-muted-foreground">Links eine Gruppe wählen.</p> : abschlaege.isLoading ? <Skeleton className="h-24 w-full" /> : (
+                {!gruppeId ? <p className="text-sm text-muted-foreground">Gruppe wählen.</p> : abschlaege.isLoading ? <Skeleton className="h-24 w-full" /> : (
                   <Table>
                     <TableHeader><TableRow><TableHead>Bezeichnung</TableHead><TableHead className="text-right">€/Einheit</TableHead><TableHead className="text-right">%</TableHead><TableHead>Einheit</TableHead></TableRow></TableHeader>
                     <TableBody>
@@ -254,12 +283,12 @@ export default function KontraktMengenzeitraeumePage() {
                   </Table>
                 )}
                 {gruppeId && (
-                  <form onSubmit={onCreateAbschlag} className="grid grid-cols-2 gap-2 border-t pt-3">
-                    <div className="space-y-1 col-span-2"><Label>Bezeichnung</Label><Input {...abForm.register('bezeichnung', { required: true })} /></div>
-                    <div className="space-y-1"><Label>Betrag (€/Einh.)</Label><Input type="number" step="0.01" {...abForm.register('betrag_eur')} /></div>
-                    <div className="space-y-1"><Label>Prozent</Label><Input type="number" step="0.01" {...abForm.register('prozent')} /></div>
-                    <div className="space-y-1"><Label>Einheit</Label><Input {...abForm.register('einheit')} /></div>
-                    <div className="flex items-end"><Button type="submit" disabled={createAbschlag.isPending}><Plus className="mr-2 h-4 w-4" />Position</Button></div>
+                  <form onSubmit={onCreateAbschlag} className="grid grid-cols-1 gap-2 border-t pt-3 sm:grid-cols-2">
+                    <div className="space-y-1 sm:col-span-2"><Label>Bezeichnung</Label><Input className="min-h-touch" {...abForm.register('bezeichnung', { required: true })} /></div>
+                    <div className="space-y-1"><Label>Betrag (€/Einh.)</Label><Input className="min-h-touch" type="number" step="0.01" {...abForm.register('betrag_eur')} /></div>
+                    <div className="space-y-1"><Label>Prozent</Label><Input className="min-h-touch" type="number" step="0.01" {...abForm.register('prozent')} /></div>
+                    <div className="space-y-1"><Label>Einheit</Label><Input className="min-h-touch" {...abForm.register('einheit')} /></div>
+                    <div className="flex items-end"><Button type="submit" className="min-h-touch w-full touch-manipulation" disabled={createAbschlag.isPending}><Plus className="mr-2 h-4 w-4" />Position</Button></div>
                   </form>
                 )}
               </CardContent>

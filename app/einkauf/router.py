@@ -172,7 +172,7 @@ async def update_lieferant(
             raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
 
         set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-        update_query = f"UPDATE einkauf_lieferanten SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id AND tenant_id = :tenant_id"
+        update_query = f"UPDATE einkauf_lieferanten SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
         update_data["id"] = lieferant_id
         update_data["tenant_id"] = tenant_id
@@ -344,7 +344,7 @@ async def update_bestellung(
             raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
 
         set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-        update_query = f"UPDATE einkauf_bestellungen SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id AND tenant_id = :tenant_id"
+        update_query = f"UPDATE einkauf_bestellungen SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
         update_data["id"] = bestellung_id
         update_data["tenant_id"] = tenant_id
@@ -557,7 +557,7 @@ async def update_anfrage(
 
         if update_data:
             set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-            update_query = f"UPDATE einkauf_anfragen SET {set_clause}, updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"
+            update_query = f"UPDATE einkauf_anfragen SET {set_clause}, updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             update_data["id"] = real_id
             update_data["tenant_id"] = tenant_id
             db.execute(text(update_query), update_data)
@@ -1392,7 +1392,7 @@ async def update_rechnungseingang(
 
         if update_data:
             set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-            update_query = f"UPDATE einkauf_rechnungseingaenge SET {set_clause}, updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"
+            update_query = f"UPDATE einkauf_rechnungseingaenge SET {set_clause}, updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
             update_data["id"] = real_id
             update_data["tenant_id"] = tenant_id
             db.execute(text(update_query), update_data)

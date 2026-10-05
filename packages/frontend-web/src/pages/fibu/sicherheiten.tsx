@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -51,7 +52,7 @@ export default function SicherheitenPage(): JSX.Element {
       key: 'kunde' as const,
       label: 'Kunde',
       render: (s: Sicherheit) => (
-        <button onClick={() => navigate(`/verkauf/kunden-stamm/${s.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button type="button" onClick={() => navigate(`/crm/kunden/${encodeURIComponent(s.kundennr || s.id)}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {s.kunde}
         </button>
       ),
@@ -129,7 +130,7 @@ export default function SicherheitenPage(): JSX.Element {
         </Card>
       )}
 
-      <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <Callout variant="info" className="rounded-lg p-4 text-sm">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           <p className="font-semibold">Rechtliche Sicherheiten bei Warenkrediten</p>
@@ -138,7 +139,7 @@ export default function SicherheitenPage(): JSX.Element {
           <strong>Abtretung:</strong> Forderungsabtretung (§§ 398 ff. BGB) • <strong>Sicherungsübereignung:</strong> Eigentum an Sache (§ 930 BGB) • <strong>Bürgschaft:</strong> §§ 765 ff. BGB
         </p>
         <p className="mt-1 text-xs">Automatische Bonitätsprüfung bei Überschreitung 80% der Kreditlinie</p>
-      </div>
+      </Callout>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -174,7 +175,7 @@ export default function SicherheitenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <span className={`text-2xl font-bold ${auslastung > 80 ? 'text-red-600' : auslastung > 60 ? 'text-orange-600' : 'text-green-600'}`}>
+              <span className={`text-2xl font-bold ${auslastung > 80 ? 'text-status-error' : auslastung > 60 ? 'text-status-warning' : 'text-status-success'}`}>
                 {auslastung.toFixed(0)}%
               </span>
             </div>

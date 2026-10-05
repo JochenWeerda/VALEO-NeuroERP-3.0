@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react'
+import { FLOORPLAN_RULES } from './floorplans'
+
+export { FLOORPLAN_IDS, FLOORPLAN_RULES, defaultColumnNavigation, resolveSectionNavigation } from './floorplans'
 
 export type ScreenDomain =
   | 'crm'
@@ -17,10 +20,17 @@ export type ScreenDomain =
 
 export type ScreenMode = 'list' | 'detail' | 'cockpit' | 'workflow' | 'wizard'
 export type ScreenLayoutMode = 'desktopDense' | 'tabletTouch' | 'mobileStack'
-export type ScreenFloorplan = 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard'
+export type ScreenFloorplan = 'worklist' | 'objectPage' | 'transaction' | 'cockpit' | 'wizard' | 'analyticalList'
+export type ScreenColumnNavigation = 'single' | 'listDetail' | 'listDetailDetail'
+/** `tabs`: Register, eines sichtbar. `anchors`: alle Abschnitte untereinander, Register als Sprungmarken. */
+export type ScreenSectionNavigation = 'tabs' | 'anchors'
 export type ScreenDensity = 'comfortable' | 'compact' | 'expertDense'
 export type ScreenContextRail = 'none' | 'audit' | 'copilot' | 'workflow' | 'combined'
+export type ScreenContextRailSection = 'audit' | 'workflow' | 'copilot' | 'collab'
 export type ScreenTableProfile = 'standard' | 'financial' | 'inventory' | 'audit'
+export type ScreenSummaryPlacement = 'header' | 'footer'
+export type ScreenActionZone = 'header' | 'footer' | 'commit'
+export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 export type ScreenFieldType =
   | 'text'
@@ -40,6 +50,8 @@ export type ScreenFieldType =
 export interface ScreenDataSource {
   key: string
   endpoint: string
+  /** Qualifizierte Katalog-Tabelle (`domain_crm.customers`), wenn die Quelle an Persistenz bindet. */
+  table?: string
   method?: 'GET' | 'POST'
   staleTimeMs?: number
   pageSize?: number
@@ -70,6 +82,9 @@ export type ScreenColumnRenderKind =
   | 'status'
   | 'boolean'
 
+/** Schmälere Fenster blenden von hinten aus: tertiary zuerst, primary bleibt. */
+export type ScreenColumnPriority = 'primary' | 'secondary' | 'tertiary'
+
 export interface ScreenTableColumn {
   key: string
   label: string
@@ -79,6 +94,7 @@ export interface ScreenTableColumn {
   filterable?: boolean
   renderKind?: ScreenColumnRenderKind
   defaultSort?: 'asc' | 'desc'
+  priority?: ScreenColumnPriority
   render?: (_value: unknown, _row: Record<string, unknown>) => ReactNode
 }
 
@@ -91,18 +107,66 @@ export interface ScreenTableDefinition {
   virtualized?: boolean
   rowHeight?: number
   serverPagination?: boolean
+  /** Declarative row navigation; placeholders such as {id} resolve from row data. */
+  rowRouteTemplate?: string
+  /** Central, data-driven row actions; rendered by FastTableRenderer. */
+  rowActions?: Array<{
+    key: string
+    label: string
+    command?: string
+    dangerLevel?: ActionDangerLevel
+    requiresConfirmation?: boolean
+    enabledWhen?: ScreenCondition
+    visibleWhen?: { field: string; values: Array<string | number | boolean> }
+    disabledWhen?: { field: string; values: Array<string | number | boolean> }
+  }>
+  /** Selection-based actions; payload contains selectedRows and selectedIds. */
+  bulkActions?: Array<{
+    key: string
+    label: string
+    dangerLevel?: ActionDangerLevel
+  }>
+  /**
+   * Details der gewaehlten Zeile als Band direkt unter der Tabelle — statt Dialog
+   * oder Vollansicht. Ohne `fields` zeigt das Band alle Spalten der Tabelle.
+   * Auf durchgehenden Belegseiten ist das Band ab sechs Spalten Voreinstellung;
+   * `false` schaltet es ab.
+   */
+  rowDetail?: { fields?: ScreenRowDetailField[] } | false
+}
+
+export interface ScreenRowDetailField {
+  key: string
+  label: string
+  renderKind?: ScreenColumnRenderKind
 }
 
 export type ActionDangerLevel = 'safe' | 'moderate' | 'high' | 'critical' | 'destructive'
+
+/** Deklarative UI-Bedingung. Ein String ist ein Domänen-Policy-Pfad, den die Anwendung setzt. */
+export type ScreenCondition =
+  | string
+  | { path: string; exists?: boolean; equals?: string | number | boolean | null; notEquals?: string | number | boolean | null }
+  | { all: ScreenCondition[] }
+  | { any: ScreenCondition[] }
+  | { not: ScreenCondition }
 
 export interface ScreenActionDefinition {
   key: string
   label: string
   kind?: 'primary' | 'secondary' | 'danger' | 'workflow'
+  /** Name im Action Registry der Anwendung, zum Beispiel `tour.create`. */
+  command?: string
+  /** UI-Bedingung oder Policy-Pfad. Fachregeln bleiben in der Anwendung. */
+  enabledWhen?: ScreenCondition
   permission?: string
   disabled?: boolean
   // Action Runtime (Phase 026)
   commandEndpoint?: string
+  /** Navigates instead of mutating. Placeholders: {entity_id}, {business_partner_id}. */
+  navigationRoute?: string
+  /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
+  inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
@@ -111,6 +175,10 @@ export interface ScreenActionDefinition {
   auditReasonRequired?: boolean
   humanApprovalRequired?: boolean
   forbiddenForAgents?: boolean
+  /** Visual work zone. Defaults to the header for backwards compatibility. */
+  zone?: ScreenActionZone
+  /** Declarative, screen-local shortcut such as Ctrl+S, Ctrl+P, Escape or F4. */
+  keyboardShortcut?: string
 }
 
 /** Agent-readable contract for a single screen.
@@ -165,11 +233,25 @@ export interface ScreenTabDefinition {
   dataSourceKeys?: string[]
 }
 
+export type ScreenSummaryFacetKind = 'identity' | 'status' | 'kpi' | 'contact'
+
 export interface ScreenSummaryItem {
   key: string
   label: string
   value: string | number | boolean | null
+  /** Fiori-artige Header-Facet; ohne kind bleibt die Karten-Summary. */
+  kind?: ScreenSummaryFacetKind
   tone?: 'neutral' | 'success' | 'warning' | 'danger'
+  details?: {
+    components?: Array<{
+      key: string
+      label?: string
+      value?: string | number | boolean | null
+      co2e_kg?: number
+      source_ref?: string
+      source?: string
+    }>
+  }
 }
 
 export interface ScreenWorkflowDefinition {
@@ -178,6 +260,134 @@ export interface ScreenWorkflowDefinition {
   nextActionKey?: string
   auditRequired?: boolean
   evidenceRequired?: boolean
+  /**
+   * FSX-030 — Prozessband (Ebene 1).
+   *
+   * Die geordneten Phasen des Prozesses, wie sie in der Belegmaske als
+   * kompakte Leiste erscheinen. Reine Prozessdefinition (FSX-003 Fall 1):
+   * Bezeichner sind statisch, der *aktuelle* Stand kommt aus dem
+   * WorkflowState, nie von hier.
+   *
+   * Fehlt die Angabe, rendert die Maske kein Band — und zwar sichtbar
+   * nichts statt eines Platzhalters mit internem Schluessel.
+   */
+  phases?: Array<{
+    /** Stabiler Schluessel, passend zu WorkflowStatusInfo.currentStatus. */
+    key: string
+    /** Fachliche Bezeichnung. Deutsch, ohne interne Kuerzel. */
+    label: string
+  }>
+  /**
+   * FSX-030/FSX-010 — Belegbindung.
+   *
+   * Belegart, unter der diese Maske ihren Vorgang sucht und anlegt. Erst
+   * damit kann eine Maske fragen "gibt es zu diesem Beleg schon einen Fall?",
+   * ohne dass jede Maske den Prozessschluessel selbst verdrahtet.
+   */
+  documentType?: string
+}
+
+/** Worklist-Kachel eines cockpit-Workspaces (UIX-061). */
+export interface ScreenTileDefinition {
+  key: string
+  label: string
+  /** Ziel-Maske; das Backend loest targetRoute daraus auf. */
+  targetScreenId: string
+  /** Vom Backend aufgeloeste Listen-Route (Omnibox-Routen-Bruecke). */
+  targetRoute?: string
+  /** Query-Filter, die beim Navigieren angehaengt werden. */
+  targetFilters?: Record<string, string>
+  /** Optionaler Zaehler-Endpoint (count_only); fehlt → reine Navigations-Kachel. */
+  countEndpoint?: string
+  tone?: 'neutral' | 'warning' | 'danger'
+}
+
+/** Saison-Profil: sortiert Kacheln im aktiven Fenster um (kein Inhaltswechsel). */
+export interface ScreenSeasonProfile {
+  activeFrom?: string
+  activeTo?: string
+  tileOrderOverride?: string[]
+}
+
+export type ScreenCalendarView = 'month' | 'week' | 'agenda'
+
+export interface ScreenCalendarLayerDefinition {
+  key: 'finanzen' | 'fristen' | 'crm' | 'logistik' | 'personal' | 'saison'
+  label: string
+  defaultVisible?: boolean
+}
+
+/** Planungskalender-Primitive (UIX-063): Zeitprojektion aus Read-Models. */
+export interface ScreenCalendarDefinition {
+  endpoint: string
+  reprojectEndpoint?: string
+  icsTokenEndpoint?: string
+  defaultView?: ScreenCalendarView
+  deadlineBandDays?: number
+  layers: ScreenCalendarLayerDefinition[]
+}
+
+export type ScreenTwinMetricKind = 'percent' | 'number' | 'flag' | 'status'
+
+export interface ScreenTwinMetricDefinition {
+  key: string
+  label: string
+  kind: ScreenTwinMetricKind
+  warnAbove?: number
+}
+
+/** Twin-Panel-Primitive (UIX-081): physische Belegungsansicht aus Read-Model. */
+export interface ScreenTwinDefinition {
+  endpoint: string
+  planId?: string
+  cacheTtlSeconds?: number
+  activateRouteTemplate?: string
+  activateScreenId?: string
+  metrics?: ScreenTwinMetricDefinition[]
+}
+
+const CONTEXT_RAIL_SECTIONS: ScreenContextRailSection[] = ['audit', 'workflow', 'copilot', 'collab']
+
+export function resolveContextRailSections(
+  contextRail: ScreenContextRail = 'combined',
+  explicitSections?: ScreenContextRailSection[],
+): ScreenContextRailSection[] {
+  if (explicitSections && explicitSections.length > 0) {
+    const seen = new Set<ScreenContextRailSection>()
+    return explicitSections.filter((section) => {
+      if (!CONTEXT_RAIL_SECTIONS.includes(section) || seen.has(section)) return false
+      seen.add(section)
+      return true
+    })
+  }
+  if (contextRail === 'none') return []
+  if (contextRail === 'audit') return ['audit']
+  if (contextRail === 'workflow') return ['workflow']
+  if (contextRail === 'copilot') return ['copilot']
+  return ['workflow', 'audit', 'copilot']
+}
+
+export interface ScreenSourceProposals {
+  /** Key in the current form payload containing the typed draft context. */
+  contextKey: string
+}
+
+/** UIX-091: Verweis auf eine deklarative Prozesskette, ohne Instanzfortschritt. */
+export interface ScreenProcessChainRef {
+  chainId: string
+  stepKey: string
+}
+
+export interface ScreenProcessChainStep {
+  key: string
+  label: string
+  screenId: string
+  routePath?: string
+}
+
+export interface ScreenProcessChainCatalogEntry {
+  label: string
+  steps: ScreenProcessChainStep[]
 }
 
 export interface ScreenDefinition {
@@ -187,6 +397,11 @@ export interface ScreenDefinition {
   mode: ScreenMode
   title: string
   subtitle?: string
+  /**
+   * Feld, dessen Wert den Beleg benennt (z. B. `invoice_number`). Hat der Beleg
+   * einen Wert, wird er zum `h1` und `title` zur Kennzeile darüber.
+   */
+  identityField?: string
   permissions?: string[]
   adapter?: {
     type: ScreenAdapterType
@@ -200,16 +415,40 @@ export interface ScreenDefinition {
   fields?: ScreenFieldDefinition[]
   tabs?: ScreenTabDefinition[]
   tables?: ScreenTableDefinition[]
+  tiles?: ScreenTileDefinition[]
+  calendar?: ScreenCalendarDefinition
+  sourceProposals?: ScreenSourceProposals
+  twin?: ScreenTwinDefinition
+  processChain?: ScreenProcessChainRef
+  processChains?: Record<string, ScreenProcessChainCatalogEntry>
+  voice?: {
+    enabled?: boolean
+    provider?: ScreenVoiceProvider
+  }
+  seasonProfile?: ScreenSeasonProfile
   actions?: ScreenActionDefinition[]
+  interaction?: {
+    /** ERP desktop flow: Enter advances to the next eligible form control. */
+    enterMovesFocus?: boolean
+  }
   workflow?: ScreenWorkflowDefinition
+  noWorkflowReason?: string
   layout?: {
     preferredMode?: ScreenLayoutMode
     mobileMode?: ScreenLayoutMode
     touchTargetPx?: number
     floorplan?: ScreenFloorplan
+    columnNavigation?: ScreenColumnNavigation
+    sectionNavigation?: ScreenSectionNavigation
     density?: ScreenDensity
     contextRail?: ScreenContextRail
+    contextRailSections?: ScreenContextRailSection[]
     tableProfile?: ScreenTableProfile
+    summaryPlacement?: ScreenSummaryPlacement
+    /** `afterFields`: Status folgt den Eingaben. Voreinstellung bleibt vor den Feldern. */
+    statusPlacement?: 'beforeFields' | 'afterFields'
+    stickyHeader?: boolean
+    stickyFooter?: boolean
   }
   performance?: {
     initialPayloadBudgetKb?: number
@@ -230,7 +469,26 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (!screen.mode) errors.push('mode is required')
   if (!screen.title) errors.push('title is required')
 
-  if (screen.layout?.floorplan && !['worklist', 'objectPage', 'transaction', 'cockpit', 'wizard'].includes(screen.layout.floorplan)) {
+  if (screen.layout?.columnNavigation && screen.layout.columnNavigation !== 'single'
+      && screen.layout.floorplan && FLOORPLAN_RULES[screen.layout.floorplan]?.allowsColumns === false) {
+    errors.push('layout.columnNavigation is not supported for this floorplan')
+  }
+  if (screen.layout?.columnNavigation && !['single', 'listDetail', 'listDetailDetail'].includes(screen.layout.columnNavigation)) {
+    errors.push('layout.columnNavigation is invalid')
+  }
+  const sectionNavigation = screen.layout?.sectionNavigation
+  if (sectionNavigation && !['tabs', 'anchors'].includes(sectionNavigation)) {
+    errors.push(`layout.sectionNavigation is invalid: ${sectionNavigation}`)
+  }
+  if (sectionNavigation === 'anchors') {
+    if (screen.layout?.floorplan && !FLOORPLAN_RULES[screen.layout.floorplan]?.allowsSectionAnchors) {
+      errors.push('layout.sectionNavigation=anchors is only supported for objectPage and transaction')
+    }
+    if (screen.layout?.columnNavigation && screen.layout.columnNavigation !== 'single') {
+      errors.push('layout.sectionNavigation=anchors requires columnNavigation=single')
+    }
+  }
+  if (screen.layout?.floorplan && !(screen.layout.floorplan in FLOORPLAN_RULES)) {
     errors.push(`layout.floorplan is invalid: ${screen.layout.floorplan}`)
   }
   if (screen.layout?.density && !['comfortable', 'compact', 'expertDense'].includes(screen.layout.density)) {
@@ -239,8 +497,49 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (screen.layout?.contextRail && !['none', 'audit', 'copilot', 'workflow', 'combined'].includes(screen.layout.contextRail)) {
     errors.push(`layout.contextRail is invalid: ${screen.layout.contextRail}`)
   }
+  for (const section of screen.layout?.contextRailSections ?? []) {
+    if (!CONTEXT_RAIL_SECTIONS.includes(section)) {
+      errors.push(`layout.contextRailSections contains invalid section: ${section}`)
+    }
+  }
   if (screen.layout?.tableProfile && !['standard', 'financial', 'inventory', 'audit'].includes(screen.layout.tableProfile)) {
     errors.push(`layout.tableProfile is invalid: ${screen.layout.tableProfile}`)
+  }
+  if (screen.layout?.summaryPlacement && !['header', 'footer'].includes(screen.layout.summaryPlacement)) {
+    errors.push(`layout.summaryPlacement is invalid: ${screen.layout.summaryPlacement}`)
+  }
+  for (const item of screen.summary ?? []) {
+    if (item.kind && !['identity', 'status', 'kpi', 'contact'].includes(item.kind)) {
+      errors.push(`summary ${item.key} has invalid kind: ${item.kind}`)
+    }
+  }
+  const shortcuts = new Set<string>()
+  for (const action of screen.actions ?? []) {
+    if (action.zone && !['header', 'footer', 'commit'].includes(action.zone)) {
+      errors.push(`action ${action.key} has invalid zone: ${action.zone}`)
+    }
+    const shortcut = action.keyboardShortcut?.trim().toLowerCase()
+    if (action.keyboardShortcut !== undefined && !shortcut) {
+      errors.push(`action ${action.key} has an empty keyboardShortcut`)
+    } else if (shortcut && shortcuts.has(shortcut)) {
+      errors.push(`keyboardShortcut is duplicated: ${action.keyboardShortcut}`)
+    } else if (shortcut) {
+      shortcuts.add(shortcut)
+    }
+  }
+  if (screen.twin && !screen.twin.endpoint) {
+    errors.push('twin.endpoint is required')
+  }
+  if (screen.processChain) {
+    if (!screen.processChain.chainId?.trim()) errors.push('processChain.chainId is required')
+    if (!screen.processChain.stepKey?.trim()) errors.push('processChain.stepKey is required')
+  }
+  for (const metric of screen.twin?.metrics ?? []) {
+    if (!metric.key) errors.push('twin.metrics.key is required')
+    if (!metric.label) errors.push(`twin metric ${metric.key || '<unknown>'} requires label`)
+    if (!['percent', 'number', 'flag', 'status'].includes(metric.kind)) {
+      errors.push(`twin metric ${metric.key || '<unknown>'} has invalid kind: ${metric.kind}`)
+    }
   }
 
   for (const tab of screen.tabs ?? []) {
@@ -251,6 +550,30 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   for (const table of screen.tables ?? []) {
     if (table.virtualized === true && (table.pageSize ?? 0) > 100) {
       errors.push(`table ${table.key} pageSize must stay <= 100 for generator v1`)
+    }
+  }
+
+  const allTables = [...(screen.tables ?? []), ...(screen.tabs ?? []).flatMap((tab) => tab.tables ?? [])]
+  for (const table of allTables) {
+    const detailKeys = new Set<string>()
+    for (const field of (table.rowDetail || undefined)?.fields ?? []) {
+      if (!field.key?.trim() || !field.label?.trim()) {
+        errors.push(`table ${table.key} rowDetail field requires key and label`)
+      } else if (detailKeys.has(field.key)) {
+        errors.push(`table ${table.key} rowDetail field is duplicated: ${field.key}`)
+      } else {
+        detailKeys.add(field.key)
+      }
+    }
+  }
+
+  if (screen.identityField !== undefined) {
+    const fieldKeys = new Set([
+      ...(screen.fields ?? []).map((field) => field.key),
+      ...(screen.tabs ?? []).flatMap((tab) => (tab.fields ?? []).map((field) => field.key)),
+    ])
+    if (!fieldKeys.has(screen.identityField)) {
+      errors.push(`identityField ${screen.identityField} is not a declared field`)
     }
   }
 

@@ -129,9 +129,9 @@ async def list_booking_templates(
             conditions.append("active = true")
         
         if conditions:
-            query = text(str(query) + " AND " + " AND ".join(conditions))
+            query = text(str(query) + " AND " + " AND ".join(conditions))  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
-        query = text(str(query) + " ORDER BY name")
+        query = text(str(query) + " ORDER BY name")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
         
         rows = db.execute(query, params).fetchall()
         
@@ -524,14 +524,13 @@ async def update_booking_template(
         
         update_fields.append("updated_at = NOW()")
         
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         update_query = text(f"""
             UPDATE domain_erp.booking_templates
             SET {', '.join(update_fields)}
             WHERE id = :template_id AND tenant_id = :tenant_id
             RETURNING id, name, description, category, trigger_type, trigger_config, lines,
                       default_amount, currency, active, created_at, updated_at
-        """)
+        """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
         

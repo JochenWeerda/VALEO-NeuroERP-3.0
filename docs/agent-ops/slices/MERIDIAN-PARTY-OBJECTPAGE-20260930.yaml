@@ -1,0 +1,79 @@
+slice_id: MERIDIAN-PARTY-OBJECTPAGE
+id: MERIDIAN-PARTY-OBJECTPAGE
+title: Eine Meridian-Kundenakte fuer Lead und Bestandskunde
+status: abgeschlossen
+owner: Cursor
+date: 2026-09-30
+created_at: 2026-09-30
+coordination: >
+  Folgt MERIDIAN-BELEG-SYSTEMWEIT. Kein Pixel-Fiori. Keine FSX-Dateien.
+  KIM wird Redirect, nicht parallel umgebaut.
+progress: >
+  Alle fuenf Wellen plus Restluecken: Identitaetsbruecke fuer Listen-IDs,
+  KIM-`?tab=` auf Anker, Chef/Praesente/Postfach/Geo in der ScreenDefinition,
+  Stamm-/Cockpit-Links auf `/crm/kunden/{id}`, Geo aus `public.kunden_geo`.
+  Angebote aus `crm_opportunities`, Historie aus CRM-Aktivitaeten.
+  Potenzial aus dem juengsten `public.customer_potential_snapshot`.
+  Pflege-Register Chef, Anschriften, Kontoauszug und CPD sind lesbar.
+  Rabatte, Preise und das SEPA-Mandat kommen vom Partner.
+  Ansprechpartner aus `business_partner_contacts`, nicht aus `domain_crm.contacts`.
+  Angebote ohne Unterabfrage auf `crm_customers`.
+  Jahresumsatz zaehlt `completed`, `geliefert` und `invoiced`.
+  Wareneingang ohne Annahmeschein haengt an `owner_partner_id`.
+  Agrarkontrakte haengen an der Partner-ID oder der Partnernummer.
+  Bearbeiten navigiert nach `/verkauf/kunden-stamm/{business_partner_id}?pflege=1`.
+closed_at: 2026-09-30
+result: >
+  Eine Object-Page-Akte fuer Interessent und Kunde. KIM-Route leitet um,
+  inklusive Deep-Link-Tab. Listen-IDs oeffnen denselben Stamm. Verkaufs-Stamm
+  mit Id und Cockpit-Links folgen. Meine Kunden zeigt Liste, Akte und Karte.
+goal: >
+  Eine Object-Page-Akte fuer Interessent und Kunde. KIM und die parallelen
+  CRM-Pfade zeigen dieselbe native Maske. Lieferant, Artikel und Kontrakt
+  bekommen denselben Kopfvertrag. Launchpad Meine Kunden hat drei Einstiege.
+file_ownership:
+  - app/core/screen_definitions.py
+  - app/api/v1/endpoints/crm_360.py
+  - app/services/customer_service.py
+  - packages/frontend-web/src/pages/crm/party-native.tsx
+  - packages/frontend-web/src/pages/crm/kim/index.tsx
+  - packages/frontend-web/src/pages/crm/kunden-cockpit.tsx
+  - packages/frontend-web/src/pages/crm/customer-360-native.tsx
+  - packages/frontend-web/src/pages/crm/lead-native.tsx
+  - packages/frontend-web/src/pages/verkauf/kunden-stamm.tsx
+  - packages/frontend-web/src/app/navigation/domains/commercial.tsx
+  - packages/frontend-web/src/app/navigation/launchpad-spaces.ts
+acceptance:
+  - crm/customer-360 und crm/lead sind objectPage mit identityField und Ankern
+  - Header-Facets kommen aus Summary-kind, nicht aus einer KIM-Kopfkomponente
+  - /crm und /crm/kim leiten auf die Akte oder die Kundenliste
+  - /verkauf/kunden-stamm/:id und /crm/kunden-cockpit?id= leiten auf die Akte
+  - Meine Kunden hat hoechstens Liste, Akte, Karte
+tests:
+  - tests/test_meridian_party_objectpage.py
+  - tests/test_crm360_kunde_wird_gefunden.py
+  - packages/frontend-web/src/__tests__/pages/crm/party-native.test.ts
+  - packages/frontend-web/tests/e2e/crm-kim-redirect.spec.ts
+  - packages/frontend-web/src/__tests__/app/navigation/launchpad-spaces.test.ts
+risks:
+  - Lead- und Kunden-API bleiben getrennt; die Maske waehlt nur die SD
+  - KIM-Fachinhalt Chef/Praesente/Postfach liegt in der SD; Geo sind Koordinaten, keine Mini-Karte
+  - Listen-IDs ohne Stamm-UUID bleiben 404, wenn auch public.kunden den Satz nicht kennt
+  - Ohne erreichbares Backend zeigt die Akte einen Ladefehler mit Neuversuch, nicht endlos Wird geladen
+ai_harness:
+  fachlicher_vertrag: >
+    Eine Totalsicht auf die Partei, egal ob Interessent oder Kunde.
+  architektur_vertrag: >
+    ScreenDefinition zu RenderPlan zu UniversalMaskRenderer. Keine zweite UI.
+  daten_vertrag: >
+    Bestehende CRM- und Kontrakt-Endpunkte; leere Listen bei fehlender Tabelle.
+  test_vertrag: >
+    SD-Vertraege und Compiler-Tests ohne MagicMock-DB.
+  security_vertrag: >
+    Tenant-Filter der bestehenden CRM-360-Endpunkte bleibt.
+  betriebs_vertrag: >
+    Alte KIM-URLs leiten um, kein 404.
+  dokumentations_vertrag: >
+    Workboard, Slice, Open-Gaps, Paritaetsmatrix, Launchpad-Hierarchie.
+external_gates:
+  - not_applicable

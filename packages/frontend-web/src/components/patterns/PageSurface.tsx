@@ -24,7 +24,7 @@ export function PageSurface({
   return (
     <div
       className={cn(
-        'flex h-full flex-col bg-[radial-gradient(circle_at_top_left,_hsl(var(--primary)/0.09),_transparent_34%),linear-gradient(180deg,_hsl(var(--background)),_hsl(var(--muted)/0.45))]',
+        'flex h-full flex-col bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.09),transparent_34%),linear-gradient(180deg,hsl(var(--background)),hsl(var(--muted)/0.45))]',
         className,
       )}
       data-page-surface={dataPageSurface}
@@ -44,7 +44,7 @@ export function PageSection({
   return (
     <section
       className={cn(
-        'rounded-3xl border border-border/70 bg-card/95 p-5 shadow-sm shadow-primary/5 backdrop-blur sm:p-6',
+        'rounded-3xl border border-border/70 bg-card/95 p-5 shadow-sm shadow-primary/5 backdrop-blur-sm sm:p-6',
         className,
       )}
     >

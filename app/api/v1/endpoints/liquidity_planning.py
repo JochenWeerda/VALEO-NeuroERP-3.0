@@ -25,6 +25,7 @@ from app.api.v1.schemas.liquidity_planning_schemas import LiquidityPlanningOut
 router = APIRouter(prefix="/finance/liquidity", tags=["finance", "liquidity"])
 
 _TABLE_SCENARIOS = "domain_finance.liquidity_scenarios"
+MAX_LIQUIDITY_FORECAST_WEEKS = 52
 
 
 def _503(hint: str = "alembic upgrade head") -> HTTPException:
@@ -51,6 +52,8 @@ def _query_open_items_for_week(
     week_end: date,
     item_type: str,  # "debitor" | "kreditor"
 ) -> float:
+    # Der Aufrufer spricht Einzahl, die Tabelle Mehrzahl. Die Uebersetzung
+    # gehoert hierher und nicht in jeden Aufruf.
     """
     Sum open items due within [week_start, week_end].
     Falls back to 0.0 if table not available.
@@ -58,14 +61,27 @@ def _query_open_items_for_week(
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(open_amount), 0)
-                FROM domain_finance.open_items
+                # Die offenen Posten stehen in `domain_erp.offene_posten` —
+                # dort schreibt der Belegfluss hinein. `domain_finance.open_items`
+                # gibt es nicht; das `except` machte daraus stillschweigend 0,00
+                # und die Planung meldete „nichts faellig", egal wie viel offen
+                # war.
+                #
+                # Auch die Werte sind deutsch: konto_typ 'debitoren'/'kreditoren',
+                # op_status 'offen'.
+                """SELECT COALESCE(SUM(offen), 0)
+                FROM domain_erp.offene_posten
                 WHERE tenant_id = :tid
-                AND type = :typ
-                AND due_date BETWEEN :ws AND :we
-                AND status = 'OPEN'"""
+                AND konto_typ = :typ
+                AND COALESCE(faelligkeit, due_date) BETWEEN :ws AND :we
+                AND op_status = 'offen'"""
             ),
-            {"tid": tenant_id, "typ": item_type, "ws": week_start, "we": week_end},
+            {
+                "tid": tenant_id,
+                "typ": {"debitor": "debitoren", "kreditor": "kreditoren"}.get(item_type, item_type),
+                "ws": week_start,
+                "we": week_end,
+            },
         ).scalar()
         return float(row or 0)
     except Exception:
@@ -76,8 +92,9 @@ def _get_cash_at_bank(db: Session, tenant_id: str) -> float:
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(current_balance), 0)
-                FROM domain_finance.bank_accounts
+                # `domain_erp.bank_accounts`, und der Saldo heisst `balance`.
+                """SELECT COALESCE(SUM(balance), 0)
+                FROM domain_erp.bank_accounts
                 WHERE tenant_id = :tid AND is_active = true"""
             ),
             {"tid": tenant_id},
@@ -91,9 +108,9 @@ def _get_open_receivables(db: Session, tenant_id: str) -> float:
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(open_amount), 0)
-                FROM domain_finance.open_items
-                WHERE tenant_id = :tid AND type = 'debitor' AND status = 'OPEN'"""
+                """SELECT COALESCE(SUM(offen), 0)
+                FROM domain_erp.offene_posten
+                WHERE tenant_id = :tid AND konto_typ = 'debitoren' AND op_status = 'offen'"""
             ),
             {"tid": tenant_id},
         ).scalar()
@@ -106,9 +123,9 @@ def _get_open_payables(db: Session, tenant_id: str) -> float:
     try:
         row = db.execute(
             text(
-                """SELECT COALESCE(SUM(open_amount), 0)
-                FROM domain_finance.open_items
-                WHERE tenant_id = :tid AND type = 'kreditor' AND status = 'OPEN'"""
+                """SELECT COALESCE(SUM(offen), 0)
+                FROM domain_erp.offene_posten
+                WHERE tenant_id = :tid AND konto_typ = 'kreditoren' AND op_status = 'offen'"""
             ),
             {"tid": tenant_id},
         ).scalar()
@@ -148,8 +165,11 @@ def liquidity_forecast(
     cash_start = _get_cash_at_bank(db, tenant_id)
     cumulative = cash_start
 
+    bounded_weeks = max(1, min(weeks, MAX_LIQUIDITY_FORECAST_WEEKS))
     result = []
-    for i in range(weeks):
+    for i in range(MAX_LIQUIDITY_FORECAST_WEEKS):
+        if i >= bounded_weeks:
+            break
         ws = _week_start(today, i)
         we = ws + timedelta(days=6)
 
@@ -220,7 +240,7 @@ def create_liquidity_scenario(
 ):
     # Ensure scenario table exists; create inline if missing (graceful fallback)
     try:
-        db.execute(text(f"SELECT 1 FROM {_TABLE_SCENARIOS} LIMIT 0"))  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+        db.execute(text(f"SELECT 1 FROM {_TABLE_SCENARIOS} LIMIT 0"))  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
     except Exception:
         # Table doesn't exist — return forecast with adjustments applied without persisting
         logger.warning("liquidity_scenarios table missing; returning computed scenario without persistence")
@@ -233,7 +253,7 @@ def create_liquidity_scenario(
         db.execute(
             text(
                 f"""INSERT INTO {_TABLE_SCENARIOS} (id, name, adjustments, tenant_id, created_at)
-                VALUES (:id, :name, :adj::jsonb, :tid, now())"""
+                VALUES (:id, :name, CAST(:adj AS jsonb), :tid, now())"""  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
             ),
             {
                 "id": sid,
@@ -267,7 +287,8 @@ def _compute_scenario(
     cash_start = _get_cash_at_bank(db, tenant_id)
     cumulative = cash_start
     weeks_out = []
-    for i in range(13):
+    scenario_weeks = 13
+    for i in range(scenario_weeks):
         ws = _week_start(today, i)
         we = ws + timedelta(days=6)
         week_num = i + 1

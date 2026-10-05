@@ -1,4 +1,5 @@
 import { SimpleLineChart } from '@/components/charts/SimpleLineChart'
+import { chartSeriesColor } from '@/components/charts/chart-palette'
 import type { ReactElement } from 'react'
 
 interface TrendPoint {
@@ -21,8 +22,8 @@ export default function DashboardTrendLineChart({ trend, dateFormatter }: Dashbo
         short: item.contract_short_tons,
       }))}
       series={[
-        { key: 'long', color: '#2563eb' },
-        { key: 'short', color: '#f97316' },
+        { key: 'long', color: chartSeriesColor(0), label: 'Long' },
+        { key: 'short', color: chartSeriesColor(1), label: 'Short' },
       ]}
       height={300}
     />

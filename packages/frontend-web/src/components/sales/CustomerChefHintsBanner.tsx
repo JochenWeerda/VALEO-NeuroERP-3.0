@@ -1,7 +1,7 @@
 import { Link } from '@/app/routing/typed-router'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { useCustomerChefHints } from '@/hooks/useCustomerChefHints'
 import type { Instruction } from '@/lib/services/business-partner-service'
 
@@ -18,16 +18,16 @@ function priorityLabel(p: Instruction['instruction_priority']): string {
   }
 }
 
-function priorityBadgeClass(p: Instruction['instruction_priority']): string {
+function priorityBadgeClass(p: Instruction['instruction_priority']): BadgeVariant {
   switch (p) {
     case 'critical':
-      return 'bg-red-700 text-white border-transparent'
+      return 'error'
     case 'high':
-      return 'bg-amber-600 text-white border-transparent'
+      return 'warning'
     case 'low':
-      return 'bg-slate-500 text-white border-transparent'
+      return 'muted'
     default:
-      return 'bg-slate-600 text-white border-transparent'
+      return 'muted'
   }
 }
 
@@ -54,10 +54,10 @@ export function CustomerChefHintsBanner({
 
   if (isLoading && !data) {
     return (
-      <Alert className="mb-4 border-amber-200 bg-amber-50/90">
-        <AlertCircle className="h-4 w-4 text-amber-800" />
-        <AlertTitle className="text-amber-950">Chef-Hinweise</AlertTitle>
-        <AlertDescription className="text-amber-900 text-sm">Lade Hinweise…</AlertDescription>
+      <Alert variant="warning" className="mb-4">
+        <AlertCircle className="h-4 w-4 text-status-warning" />
+        <AlertTitle className="text-status-warning">Chef-Hinweise</AlertTitle>
+        <AlertDescription className="text-status-warning text-sm">Lade Hinweise…</AlertDescription>
       </Alert>
     )
   }
@@ -69,25 +69,25 @@ export function CustomerChefHintsBanner({
   if (!hasCrm && !hasInstr) return null
 
   return (
-    <Alert className="mb-4 border-amber-300 bg-amber-50/95">
-      <AlertCircle className="h-4 w-4 text-amber-900" />
-      <AlertTitle className="text-amber-950 flex flex-wrap items-center gap-2">
+    <Alert variant="warning" className="mb-4">
+      <AlertCircle className="h-4 w-4 text-status-warning" />
+      <AlertTitle className="text-status-warning flex flex-wrap items-center gap-2">
         Chef-Hinweise
         {data.partnerId ? (
           <Link
-            to={`/verkauf/kunden-stamm/${data.partnerId}`}
-            className="text-xs font-normal text-amber-900 underline-offset-2 hover:underline"
+            to={`/crm/kunden/${encodeURIComponent(data.partnerId)}`}
+            className="text-xs font-normal text-status-warning underline-offset-2 hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Kundenstamm öffnen
+            Kundenakte öffnen
           </Link>
         ) : null}
       </AlertTitle>
-      <AlertDescription className="space-y-3 text-amber-950">
+      <AlertDescription className="space-y-3 text-status-warning">
         {hasCrm ? (
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-amber-900/90 mb-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-status-warning/90 mb-1">
               CRM-Chefanweisung
             </div>
             <p className="whitespace-pre-wrap text-sm">{data.crmChefanweisung}</p>
@@ -95,14 +95,14 @@ export function CustomerChefHintsBanner({
         ) : null}
         {hasInstr ? (
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-amber-900/90 mb-1">
+            <div className="text-xs font-semibold uppercase tracking-wide text-status-warning/90 mb-1">
               Chef-Anweisungen (Stammdaten)
             </div>
             <ul className="list-none space-y-2 pl-0">
               {data.instructions.map((row) => (
                 <li key={row.id} className="rounded-md border border-amber-200/80 bg-white/60 px-3 py-2 text-sm">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <Badge className={priorityBadgeClass(row.instruction_priority)} variant="secondary">
+                    <Badge variant={priorityBadgeClass(row.instruction_priority)}>
                       {priorityLabel(row.instruction_priority)}
                     </Badge>
                   </div>

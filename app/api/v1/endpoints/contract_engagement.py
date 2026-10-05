@@ -12,6 +12,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.api.v1.schemas.contract_spine_schemas import (
+    DunningCandidateListOut,
+    EngagementOut,
+    ReminderCreatedOut,
+    ReminderListOut,
+)
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.contract_engagement_service import ContractEngagementService, ReminderError
@@ -19,7 +25,7 @@ from app.services.contract_engagement_service import ContractEngagementService, 
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
 
-@router.get("/engagement", response_model=dict[str, Any], summary="Engagement: offene Menge je Artikel (Netto) und je Partei")
+@router.get("/engagement", response_model=EngagementOut, summary="Engagement: offene Menge je Artikel (Netto) und je Partei")
 def engagement(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -27,7 +33,7 @@ def engagement(
     return ContractEngagementService(db, tenant_id).engagement()
 
 
-@router.get("/dunning/candidates", response_model=dict[str, Any], summary="Mahnkandidaten: überfällige, untererfüllte Kontrakte")
+@router.get("/dunning/candidates", response_model=DunningCandidateListOut, summary="Mahnkandidaten: überfällige, untererfüllte Kontrakte")
 def dunning_candidates(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -35,7 +41,7 @@ def dunning_candidates(
     return {"items": ContractEngagementService(db, tenant_id).dunning_candidates()}
 
 
-@router.get("/dunning/list", response_model=dict[str, Any], summary="Mahnungen eines Kontrakts")
+@router.get("/dunning/list", response_model=ReminderListOut, summary="Mahnungen eines Kontrakts")
 def list_reminders(
     kontrakt: str = Query(..., description="Kontraktnummer oder -ID"),
     db: Session = Depends(get_db),
@@ -51,7 +57,7 @@ class ReminderIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/dunning", response_model=dict[str, Any], summary="Kontraktmahnung erfassen (append-only)")
+@router.post("/dunning", response_model=ReminderCreatedOut, summary="Kontraktmahnung erfassen (append-only)")
 def create_reminder(
     body: ReminderIn,
     db: Session = Depends(get_db),

@@ -2,7 +2,28 @@
 import { v4 as uuidv4 } from "uuid"
 import { clearAuthSession, getAccessToken, handleUnauthorized } from "@/lib/auth"
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ""
+function normalizeApiBaseUrl(value: string | undefined): string {
+  const raw = value?.trim() ?? ""
+  if (raw.length === 0 || typeof window === "undefined") return raw
+
+  try {
+    const configured = new URL(raw)
+    const current = new URL(window.location.href)
+    const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"])
+    const sameLoopback = loopbackHosts.has(configured.hostname) && loopbackHosts.has(current.hostname)
+    const sameBrowserOrigin =
+      configured.protocol === current.protocol
+      && (configured.hostname === current.hostname || sameLoopback)
+      && configured.port === ""
+      && current.port !== ""
+
+    return sameBrowserOrigin ? "" : raw
+  } catch {
+    return raw
+  }
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL)
 const TENANT_ID = import.meta.env.VITE_TENANT_ID ?? ""
 const REQUEST_TIMEOUT_MS = 30_000
 const HTTP_STATUS_UNAUTHORIZED = 401

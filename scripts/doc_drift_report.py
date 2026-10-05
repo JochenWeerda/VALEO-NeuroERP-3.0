@@ -8,7 +8,7 @@ Prueft:
 4. Frontend-Seiten ohne Route (route-inventory) und ohne Nav-Treffer (Heuristik)
 
 Ausgabe: JSON-Report in artifacts/doc_drift_report.json + Markdown-Summary auf stdout.
-CI: .github/workflows/doc-drift-report.yml (informativ, nicht blockierend).
+CI: doc-drift-report.yml liefert Snapshots; quality-gate.yml blockiert mit --fail-over 0.
 """
 
 from __future__ import annotations
@@ -50,6 +50,9 @@ SKIP_PAGE_NAMES_INDIRECT = frozenset({
     "CustomerMaskEditPage",
     "LeadMaskDetailPage",
     "KundeNeuMaskBuilderPage",
+    # Shared wrappers imported by the routed auswertungen pages.
+    "DocumentControlScopePage",
+    "SanktionsScopePage",
 })
 
 

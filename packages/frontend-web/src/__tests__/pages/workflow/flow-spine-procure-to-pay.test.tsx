@@ -55,6 +55,9 @@ describe('FlowSpineProcureToPayPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Beschaffungsprozess Uebersicht', level: 1 })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /procure-to-pay/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'ETA bedroht Skonto-Fenster' })).toBeInTheDocument()
+        // FSX-023: Die Agentenaussage steht weiterhin auf dem Schirm (Agent-Karte in
+    // der Mitte), aber nicht mehr als Ueberschrift der Copilot-Spalte — die ist
+    // jetzt eingeklappt. Geprueft wird deshalb die Aussage, nicht ihre Rolle.
+    expect(screen.getAllByText('ETA bedroht Skonto-Fenster').length).toBeGreaterThan(0)
   })
 })

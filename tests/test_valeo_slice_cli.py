@@ -13,6 +13,7 @@ from scripts.valeo_slice import (
     _find_slice_yaml,
     _load_yaml,
     _validate_yaml,
+    SliceYamlError,
     cmd_list,
     cmd_status,
 )
@@ -88,6 +89,55 @@ def test_load_yaml(tmp_path: Path) -> None:
     f.write_text(yaml.dump(FIXTURE_GOOD), encoding="utf-8")
     data = _load_yaml(f)
     assert data["slice_id"] == "TEST-CLI-001"
+
+
+def test_leere_schlussmarke_bleibt_lesbar(tmp_path: Path) -> None:
+    path = tmp_path / "slice.yaml"
+    path.write_text(yaml.dump(FIXTURE_GOOD) + "\n---\n", encoding="utf-8")
+    assert _load_yaml(path)["slice_id"] == FIXTURE_GOOD["slice_id"]
+
+
+@pytest.mark.parametrize("source", [
+    "slice_id: A\n---\nslice_id: B\n",
+    "slice_id: A\nslice_id: B\n",
+    "slice_id: A\nai_harness:\n  test_vertrag: first\n  test_vertrag: second\n",
+    "- A\n- B\n",
+    "x: !!python/object/apply:os.system ['echo unexpected']\n",
+    "? [a, b]\n: value\n",
+])
+def test_widerspruechliche_oder_unsichere_yaml_ist_keine_gueltige_slice(source, tmp_path: Path):
+    path = tmp_path / "slice.yaml"
+    path.write_text(source, encoding="utf-8")
+    with pytest.raises(SliceYamlError):
+        _load_yaml(path)
+
+
+def test_formfehler_des_angefragten_slice_wird_nicht_verschluckt(tmp_path: Path, monkeypatch):
+    from scripts import valeo_slice
+    monkeypatch.setattr(valeo_slice, "SLICES_DIR", tmp_path)
+    (tmp_path / "BROKEN.yaml").write_text("slice_id: [", encoding="utf-8")
+    with pytest.raises(SliceYamlError, match="BROKEN.yaml"):
+        _find_slice_yaml("BROKEN")
+
+
+def test_mehrfach_definierte_slice_id_ist_ein_widerspruch(tmp_path: Path, monkeypatch):
+    from scripts import valeo_slice
+    monkeypatch.setattr(valeo_slice, "SLICES_DIR", tmp_path)
+    for name in ("A.yaml", "B.yaml"):
+        (tmp_path / name).write_text("slice_id: A\n", encoding="utf-8")
+    with pytest.raises(SliceYamlError, match="mehrfach"):
+        _find_slice_yaml("A")
+
+
+def test_alle_eingecheckten_slice_yaml_sind_eindeutig_lesbar():
+    from scripts.valeo_slice import SLICES_DIR
+    failures = []
+    for path in sorted(SLICES_DIR.glob("*.yaml")):
+        try:
+            _load_yaml(path)
+        except SliceYamlError as exc:
+            failures.append(str(exc))
+    assert not failures, "\n".join(failures)
 
 
 def test_find_slice_yaml_finds_real_slices() -> None:

@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_date_after, business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import AuditLog
@@ -271,9 +272,9 @@ class EinkaufCompatService:
                 description=f"Wareneingang {receipt_id[:8]}",
                 entry_date=entry_date,
                 lines=[
-                    {"account_id": "2000", "debit_amount": float(total_cost), "credit_amount": 0,
+                    {"account_id": fin.account_id_for_number("2000"), "debit_amount": float(total_cost), "credit_amount": 0,
                      "description": "Warenbestand Zugang"},
-                    {"account_id": "1600", "debit_amount": 0, "credit_amount": float(total_cost),
+                    {"account_id": fin.account_id_for_number("1600"), "debit_amount": 0, "credit_amount": float(total_cost),
                      "description": "Verbindlichkeiten Lieferant"},
                 ],
                 reference=receipt_id[:8],
@@ -429,6 +430,12 @@ class EinkaufCompatService:
             return []
         return [self._angebot_row_to_dict(r._mapping) for r in rows]
 
+    def get_angebot(self, angebot_id: str) -> dict:
+        row = self._load_angebot_raw_row(angebot_id)
+        if row is None:
+            raise EntityNotFoundError(f"Angebot {angebot_id} not found")
+        return self._angebot_row_to_dict(row._mapping)
+
     def _load_angebot_raw_row(self, angebot_id: str) -> Any:
         from sqlalchemy import text
         try:
@@ -504,6 +511,22 @@ class EinkaufCompatService:
             return []
         return [self._anlieferavis_row_to_dict(r._mapping) for r in rows]
 
+    def get_anlieferavis(self, avis_id: str) -> dict:
+        from sqlalchemy import text
+        try:
+            row = self.db.execute(text(
+                "SELECT id, avis_nummer, bestellung_id, lieferant_name, status, "
+                "geplantes_anliefer_datum, kennzeichen, created_at "
+                "FROM einkauf_anlieferavis "
+                "WHERE (id = :aid OR avis_nummer = :aid) AND tenant_id = :tid "
+                "ORDER BY created_at DESC LIMIT 1"
+            ), {"aid": avis_id, "tid": self.tenant_id}).fetchone()
+        except Exception:
+            row = None
+        if row is None:
+            raise EntityNotFoundError(f"Anlieferavis {avis_id} not found")
+        return self._anlieferavis_row_to_dict(row._mapping)
+
     def transition_anlieferavis(self, avis_id: str, action: str) -> dict:
         from sqlalchemy import text
         status_map = {"send": "GESENDET", "confirm": "BESTAETIGT", "cancel": "STORNIERT"}
@@ -542,6 +565,21 @@ class EinkaufCompatService:
         except Exception:
             return []
         return [self._auftragsbestaetigung_row_to_dict(r._mapping) for r in rows]
+
+    def get_auftragsbestaetigung(self, bestaetigung_id: str) -> dict:
+        from sqlalchemy import text
+        try:
+            row = self.db.execute(text(
+                "SELECT id, bestaetigungs_nummer, bestellung_id, lieferant_name, status, created_at "
+                "FROM einkauf_auftragsbestaetigungen "
+                "WHERE (id = :aid OR bestaetigungs_nummer = :aid) AND tenant_id = :tid "
+                "ORDER BY created_at DESC LIMIT 1"
+            ), {"aid": bestaetigung_id, "tid": self.tenant_id}).fetchone()
+        except Exception:
+            row = None
+        if row is None:
+            raise EntityNotFoundError(f"Auftragsbestaetigung {bestaetigung_id} not found")
+        return self._auftragsbestaetigung_row_to_dict(row._mapping)
 
     def transition_auftragsbestaetigung(self, bestaetigung_id: str, action: str) -> dict:
         from sqlalchemy import text
@@ -653,13 +691,13 @@ class EinkaufCompatService:
         if action == "verbuchen":
             try:
                 import uuid as _uuid
-                from datetime import date as _date
                 rech_row = self.db.execute(text(
                     "SELECT rechnungs_nummer, brutto_betrag, rechnungs_datum FROM einkauf_rechnungseingaenge WHERE id = :id"
                 ), {"id": rid}).fetchone()
                 if rech_row and rech_row[1]:
-                    today = _date.today().isoformat()
-                    due_in_30 = (_date.today().replace(day=min(_date.today().day + 30, 28))).isoformat()
+                    business_day = business_today()
+                    today = business_day.isoformat()
+                    due_in_30 = business_date_after(30, from_date=business_day).isoformat()
                     self.db.execute(text("""
                         INSERT INTO domain_erp.offene_posten
                             (id, tenant_id, konto_typ, rechnungsnr, rechnungsdatum, datum, faelligkeit,

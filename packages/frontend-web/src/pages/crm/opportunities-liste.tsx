@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { isRecord, numberValue, recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 import {
   CrudCapabilityChecklist,
@@ -258,6 +259,7 @@ const createOpportunitiesConfig = (
 export default function OpportunitiesListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [data, setData] = useState<Record<string, unknown>[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -579,6 +581,8 @@ export default function OpportunitiesListePage(): JSX.Element {
   return (
     <div className="space-y-6">
       <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={crmRoleProfiles}
         value={roleFocus}
@@ -610,6 +614,8 @@ export default function OpportunitiesListePage(): JSX.Element {
         />
       </div>
       <CrudCapabilityChecklist capabilities={pipelineCrudCapabilities} />
+      </>
+      ) : null}
       <ListReport
         config={opportunitiesConfig}
         data={data}

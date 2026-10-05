@@ -1,0 +1,42 @@
+/*
+ * Density-Modi (verbindlich) — VALEO NeuroERP
+ * data-density wird von der Universal Mask Runtime am Masken-Shell gesetzt
+ * (UniversalMaskRenderer). Drei Stufen steuern zentrale Bedienelement-Metriken,
+ * statt in jeder Maske h-8/h-9/gap-2 einzeln zu setzen.
+ *
+ *   comfortable  CRM, Dashboards, Touch
+ *   compact      normale ERP-Stammdaten (Default der Mask Runtime)
+ *   dense        Disposition, Buchhaltung, Operator-Masken
+ *
+ * --table-row-height wird nur innerhalb eines data-density-Scopes gesetzt und
+ * überschreibt damit gezielt den globalen Theme-Wert (Meridian/Terra) im Masken-
+ * Teilbaum; ausserhalb bleibt der Theme-Wert unangetastet.
+ */
+
+:root {
+  /* Basiswerte = comfortable, verfügbar auch ohne data-density-Scope. */
+  --control-height: 40px;
+  --control-height-sm: 34px;
+  --field-gap: 12px;
+}
+
+[data-density="comfortable"] {
+  --control-height: 40px;
+  --control-height-sm: 34px;
+  --table-row-height: 44px;
+  --field-gap: 12px;
+}
+
+[data-density="compact"] {
+  --control-height: 34px;
+  --control-height-sm: 30px;
+  --table-row-height: 36px;
+  --field-gap: 8px;
+}
+
+[data-density="dense"] {
+  --control-height: 30px;
+  --control-height-sm: 26px;
+  --table-row-height: 32px;
+  --field-gap: 6px;
+}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Wizard } from '@/components/patterns/Wizard'
+import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -62,7 +63,7 @@ export default function TagesabschlussPage(): JSX.Element {
               </div>
               <div className="flex justify-between border-t pt-2">
                 <span className="font-medium">Differenz:</span>
-                <span className={`font-bold ${abschluss.differenz === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className={`font-bold ${abschluss.differenz === 0 ? 'text-status-success' : 'text-status-error'}`}>
                   {abschluss.differenz > 0 ? '+' : ''}
                   {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(abschluss.differenz)}
                 </span>
@@ -87,10 +88,10 @@ export default function TagesabschlussPage(): JSX.Element {
               className="text-2xl font-bold text-center bg-muted"
             />
           </div>
-          <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+          <Callout variant="info" className="rounded-lg p-4 text-center text-sm">
             <p className="font-semibold">Automatisch aus Terminal ausgelesen</p>
             <p className="mt-1">Keine manuelle Eingabe erforderlich</p>
-          </div>
+          </Callout>
         </div>
       ),
     },
@@ -101,7 +102,7 @@ export default function TagesabschlussPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              <CheckCircle className="h-20 w-20 text-status-success" />
             </div>
             <h3 className="text-center text-2xl font-bold mb-6">Tagesabschluss bereit</h3>
             <dl className="grid gap-3">
@@ -133,10 +134,10 @@ export default function TagesabschlussPage(): JSX.Element {
                 </dd>
               </div>
             </dl>
-            <div className="mt-6 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+            <Callout variant="info" className="mt-6 rounded-lg p-4 text-center text-sm">
               <p className="font-semibold">Tagesabschluss wird gebucht</p>
               <p className="mt-1">Daten werden an Finanzbuchhaltung übertragen</p>
-            </div>
+            </Callout>
           </CardContent>
         </Card>
       ),

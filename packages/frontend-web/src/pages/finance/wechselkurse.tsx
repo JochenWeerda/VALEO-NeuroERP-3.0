@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Plus, Trash2, Globe } from 'lucide-react'
+import { Plus, Globe } from 'lucide-react'
 
 type ExchangeRate = {
   id: string
@@ -45,7 +45,7 @@ const EMPTY_FORM: NewRate = {
 function useExchangeRates() {
   return useQuery({
     queryKey: ['finance', 'exchange-rates'],
-    queryFn: async () => (await apiClient.get<ExchangeRate[]>('/api/v1/exchange-rates')).data,
+    queryFn: async () => (await apiClient.get<ExchangeRate[]>('/api/v1/finance/exchange-rates')).data,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -54,7 +54,7 @@ function useCreateRate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (data: NewRate) => {
-      await apiClient.post('/api/v1/exchange-rates', {
+      await apiClient.post('/api/v1/finance/exchange-rates', {
         ...data,
         rate: parseFloat(data.rate),
         active: true,
@@ -68,7 +68,7 @@ function useDeleteRate() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (id: string) => {
-      await apiClient.delete(`/api/v1/exchange-rates/${id}`)
+      await apiClient.delete(`/api/v1/finance/exchange-rates/${id}`)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['finance', 'exchange-rates'] }),
   })
@@ -247,11 +247,11 @@ export default function WechselkursePage(): JSX.Element {
                       <td className="py-2">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          className="min-h-touch"
                           onClick={() => deleteRate.mutate(r.id)}
                           disabled={deleteRate.isPending}
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          Löschen
                         </Button>
                       </td>
                     </tr>

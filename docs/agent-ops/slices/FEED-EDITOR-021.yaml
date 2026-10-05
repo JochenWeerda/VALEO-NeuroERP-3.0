@@ -1,0 +1,111 @@
+slice_id: FEED-EDITOR-021
+id: FEED-EDITOR-021
+title: Rationseditor — deterministische Draft-Bewertung und erste Editier-Journey
+owner: Claude
+status: abgeschlossen
+created_at: "2026-07-15"
+started_at: "2026-07-15"
+completed_at: "2026-07-15"
+requirements: [FEED-RAT-004, FEED-UI-002, FEED-EVAL-001]
+work_packages: [FEED-WP-071]
+decision_level: significant
+dependencies: [FEED-CORE-018, FEED-CORE-020]
+goal: >-
+  Start von Inkrement 2 (Maskenvertrag FEED-MASK-009): Berater laden eine
+  Ration, bearbeiten Positionen mit sofort sichtbarer fachlicher Wirkung
+  (deterministische serverseitige Bewertung statt Client-Doppelrechnung) und
+  speichern append-only als neue Version — die kleinste reale
+  Editor-Journey Ende-zu-Ende.
+scope:
+  - "app/agrar/rations/ration_draft.py: reine Funktion evaluate_draft —
+    Positions-/Gesamtwerte (TM, Kosten, ME, CP, sidP, NDF, Staerke, Zucker)
+    aus kanonischen Solver-Feed-Daten; Deltas gegen Bedarfsprofil; Befunde mit
+    Code/Schweregrad/Ist/Ziel/Text (nie nur Farbe); fehlende Naehrstoffwerte
+    als Abdeckungsluecke je Kennzahl statt stiller 0-Summe; LookupError bei
+    unbekanntem Futter."
+  - "feeding_ration_editor_service.py: Aufloesung ueber FeedingFeedCatalog-
+    Service (FEED-CORE-018-Adapter), Bedarf aus persistiertem
+    RequirementProfile (FEED-CORE-020, explizit oder juengstes der Gruppe);
+    reine Lese-/Rechenoperation ohne Persistenz."
+  - "POST /feeding/ration-drafts/evaluate (READ-Rollen, typisierte Verträge,
+    404 statt stiller Nullpositionen, Tenant-Isolation)."
+  - "Frontend: features/feed-advice/RationEditor.tsx (Split-Layout Positionen +
+    sticky Bewertungsleiste, Zeilen-CRUD, entprellte Live-Bewertung, Speichern
+    via bestehendem Lifecycle-POST versions mit expected_latest_version_no,
+    Guard/finally/sichtbare Erfolgs-/Fehlerzustaende, Herkunft = Bedarfsprofil
+    sichtbar); lib/api/feeding-ration-editor.ts; Route
+    futtermittel/rationseditor (route-aliases + 900 generierte Routen)."
+file_ownership:
+  - app/agrar/rations/ration_draft.py
+  - app/services/feeding_ration_editor_service.py
+  - app/api/v1/endpoints/feeding_ration_editor.py
+  - app/api/v1/endpoints/rations_optimization.py (nur Router-Include)
+  - tests/test_feeding_ration_editor.py
+  - tests/test_feeding_ration_editor_api.py
+  - packages/frontend-web/src/features/feed-advice/RationEditor.tsx
+  - packages/frontend-web/src/lib/api/feeding-ration-editor.ts
+  - packages/frontend-web/src/pages/futtermittel/rationseditor.tsx
+  - packages/frontend-web/src/__tests__/features/feed-advice/ration-editor.test.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - docs/specs/feeding/requirements-traceability.md
+  - docs/agent-ops/slices/FEED-EDITOR-021.yaml
+  - docs/agent-ops/active-workboard.md
+tdd:
+  red: >-
+    Backend: "python -m pytest tests/test_feeding_ration_editor.py
+    tests/test_feeding_ration_editor_api.py --noconftest ..." -> 6 failed
+    (ModuleNotFoundError app.agrar.rations.ration_draft bzw.
+    app.api.v1.endpoints.feeding_ration_editor). Frontend:
+    ration-editor.test.tsx -> "no tests" / Modulaufloesung fehlgeschlagen.
+  green: >-
+    Backend 6/6 (ein Vertragsfix dokumentiert: Katalog-Route liegt unter
+    /feed-catalog/feeds, FeedCreateIn verlangt artikel_nummer+feed_kind);
+    Frontend 3/3 im ersten Lauf nach Implementierung.
+  refactor: >-
+    Kennzahl-Schluessel und Toleranzen als benannte Konstanten
+    (NUTRIENT_KEYS, DEFICIT_TOLERANCE/SURPLUS_FACTOR) am Domainmodell
+    ausgerichtet; keine spekulativen Endpunkte.
+acceptance:
+  - "Gleiche Eingaben liefern exakt dieselbe Bewertung (Determinismus-Test)."
+  - "Unter-/Ueberdeckung und TM-Band erzeugen benannte Befunde mit Text;
+    Schaetz-/Fehlwerte erscheinen als unvollstaendige Abdeckung, nie als 0."
+  - "Editor: Mengenaenderung fuehrt zu Neu-Bewertung mit denselben Komponenten;
+    Speichern nutzt expected_latest_version_no und zeigt die neue Version;
+    Lade-Fehler ist handlungsorientiert mit erneutem Versuch."
+  - "RBAC 403 ohne Domaenenrolle; fremder Tenant erhaelt 404 auf fremde
+    Profile."
+tests:
+  - "pytest test_feeding_ration_editor{,_api}.py -> 6/6 (nach Red-Welle)."
+  - "Backend-Fokusregression (Editor+Requirements+Lifecycle+Authz) -> 44 passed."
+  - "Vitest ration-editor.test.tsx -> 3/3 (nach Red-Welle); tsc 0; eslint 0."
+  - "Routen 900 generiert; routing-integrity gruen; Architecture Validate/
+    Drift 900/900; Frontend-Gesamtsuite im Abschlusscommit protokolliert."
+risks:
+  - "Editor bewertet Kernkennzahlen; Mineralstoff-/Strukturbefunde und
+    persistente RationEvaluation folgen in FEED-EDITOR-022."
+  - "Undo/Redo, Tastatur-Mischreihenfolge und Variantenvergleich sind bewusst
+    Folgepakete (WP-072ff); Traceability haelt FEED-RAT-004 auf PARTIAL."
+external_gates: not_applicable
+ai_harness:
+  fachlicher_vertrag: >-
+    Jede Mengenaenderung zeigt sofort die fachliche Wirkung gegen das
+    regelversionierte Bedarfsprofil; keine versteckten Aenderungen; Speichern
+    erzeugt eine neue unveraenderliche Version.
+  architektur_vertrag: >-
+    Bewertung ist Code-SSOT im Backend (keine zweite Rechenwahrheit im
+    Client); Editor als freie Prozessmaske gemaess Schichtenregel; bestehende
+    Lifecycle-/Katalog-Vertraege wiederverwendet statt dupliziert.
+  daten_vertrag: >-
+    Keine neue Persistenz; Speichern ausschliesslich ueber den append-only
+    Versionspfad mit optimistischer Revision.
+  security_vertrag: >-
+    READ-Rollen fuer Bewertung; Tenant-Isolation ueber Profile-/Katalog-
+    Aufloesung; keine neuen Secret-Pfade.
+  betriebs_vertrag: >-
+    Reiner Rechen-Endpoint ohne Migration; Rollback = Revert.
+  dokumentations_vertrag: >-
+    Traceability FEED-RAT-004/FEED-EVAL-001/FEED-UI-002 fortgeschrieben;
+    Workboard; dieses YAML.
+  test_vertrag: >-
+    TDD-Evidenz im YAML; Determinismus-, Abdeckungs-, RBAC- und
+    Journey-Tests; fokussierte Regression gruen.

@@ -9,7 +9,8 @@ import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
 import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
-import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 
 type PsmArtikel = {
   name: string
@@ -79,7 +80,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
     const engpass = lowStock > 0
     return {
       status: engpass ? 'Engpaesse vorhanden' : 'Verfuegbarkeit stabil',
-      statusColor: engpass ? 'text-orange-700 bg-orange-50 border-orange-300' : 'text-green-700 bg-green-50 border-green-300',
+      statusColor: engpass ? 'border-status-warning bg-status-warning/10' : 'border-status-success bg-status-success/10',
       engpaesse: `${lowStock} von ${total} Artikeln unter Mindestbestand`,
       mhd: mhdCount > 0 ? `${mhdCount} Artikel mit MHD-Ablauf in 90 Tagen` : 'Keine MHD-kritischen Artikel',
       naechsteAktion: lowStock > 0 ? 'Bestellvorschlaege pruefen' : mhdCount > 0 ? 'MHD-Ware priorisiert auslagern' : 'Keine dringende Aktion',
@@ -87,22 +88,18 @@ export default function BestandsuebersichtPage(): JSX.Element {
   }, [bestand, hasData, mhdItems])
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6" data-density="dense">
       {workflowInstanceId && !workflowContext && (
         <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
         </div>
       )}
       {workflowContext ? (
-        <WorkflowEntryBanner
-          context={workflowContext}
-          title="Workflow-Handover aus Inventory-to-Settlement"
-          description="Bestand, Rampen, Chargen und Versandbewegungen werden jetzt in den Lager- und Verlade-Masken gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
-        />
+        <WorkflowProcessBand context={workflowContext} />
       ) : null}
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Warehouse className="h-8 w-8 text-blue-600" />
+          <Warehouse className="h-8 w-8 text-muted-foreground" />
           Bestandsübersicht
         </h1>
         <p className="text-muted-foreground">Lagerbestände & Kennzahlen</p>
@@ -135,7 +132,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Package className="h-4 w-4 text-blue-600" />
+              <Package className="h-4 w-4 text-muted-foreground" />
               Artikel Gesamt
             </CardTitle>
           </CardHeader>
@@ -144,7 +141,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-20" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-blue-600">
+                <span className="text-2xl font-bold text-primary">
                   {hasData ? bestand.totalArticles : 0}
                 </span>              </div>
             )}
@@ -154,7 +151,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-status-success" />
               Gesamtwert
             </CardTitle>
           </CardHeader>
@@ -163,7 +160,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-28" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-green-600">
+                <span className="text-2xl font-bold text-status-success">
                   {hasData 
                     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(bestand.totalValue)
                     : '0 €'}
@@ -194,7 +191,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4 text-orange-600" />
+              <Clock className="h-4 w-4 text-status-warning" />
               Ø Reichweite
             </CardTitle>
           </CardHeader>
@@ -203,7 +200,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-20" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-orange-600">
+                <span className="text-2xl font-bold text-status-warning">
                   {hasData ? `${bestand.totalArticles} Tage` : '0 Tage'}
                 </span>              </div>
             )}
@@ -213,9 +210,9 @@ export default function BestandsuebersichtPage(): JSX.Element {
 
       {/* Zusätzliche KPI-Reihe */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-red-200 bg-red-50/50">
+        <Card className="border-status-error/40">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">
+            <CardTitle className="text-sm font-medium text-status-error">
               <TrendingDown className="h-4 w-4 inline mr-2" />
               Unterbestand
             </CardTitle>
@@ -225,10 +222,10 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-red-600">
+                <span className="text-2xl font-bold text-status-error">
                   {hasData ? bestand.lowStockCount : 0}
                 </span>
-                <span className="text-sm text-red-600">Artikel unter Mindestbestand</span>
+                <span className="text-sm text-status-error">Artikel unter Mindestbestand</span>
               </div>
             )}
           </CardContent>
@@ -236,7 +233,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
 
         <Card className="border-yellow-200 bg-yellow-50/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-700">
+            <CardTitle className="text-sm font-medium text-status-warning">
               ⚠️ Bald nachbestellen
             </CardTitle>
           </CardHeader>
@@ -245,18 +242,18 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-yellow-600">
+                <span className="text-2xl font-bold text-status-warning">
                   {hasData ? Math.round(bestand.lowStockCount * 1.5) : 0}
                 </span>
-                <span className="text-sm text-yellow-800">Artikel in 7 Tagen kritisch</span>
+                <span className="text-sm text-status-warning">Artikel in 7 Tagen kritisch</span>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-green-200 bg-green-50/50">
+        <Card className="border-status-success/40">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">
+            <CardTitle className="text-sm font-medium text-status-success">
               ✓ Optimal bevorratet
             </CardTitle>
           </CardHeader>
@@ -265,10 +262,10 @@ export default function BestandsuebersichtPage(): JSX.Element {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-green-600">
+                <span className="text-2xl font-bold text-status-success">
                   {hasData ? bestand.totalArticles - bestand.lowStockCount : 0}
                 </span>
-                <span className="text-sm text-green-800">Artikel im Sollbereich</span>
+                <span className="text-sm text-status-success">Artikel im Sollbereich</span>
               </div>
             )}
           </CardContent>
@@ -278,17 +275,16 @@ export default function BestandsuebersichtPage(): JSX.Element {
       {/* Kritische Fristen: MHD & PSM Abverkauf */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* MHD-Ware */}
-        <Card className="border-orange-300 bg-orange-50/50">
+        <Card className="border-status-warning/40">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700 flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-sm font-medium text-status-warning">
               <span className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 MHD-Ware (ablaufend)
               </span>
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                className="min-h-touch touch-manipulation"
                 onClick={() => { void navigateWithWorkflowResume('/lager/mhd-uebersicht', 'quality') }}
               >
                 Zur Übersicht <ChevronRight className="h-4 w-4 ml-1" />
@@ -305,17 +301,17 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl font-bold text-orange-600">
+                  <span className="text-2xl font-bold text-status-warning">
                     {(mhdItems ?? []).length}
                   </span>
-                  <span className="text-sm text-orange-600">Artikel mit MHD in den nächsten 90 Tagen</span>
+                  <span className="text-sm text-status-warning">Artikel mit MHD in den nächsten 90 Tagen</span>
                 </div>
                 {(mhdItems ?? []).slice(0, 3).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-orange-200 p-2 bg-white/50 text-sm">
                     <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{item.quantity} Stk</span>
-                      <Badge variant="outline" className="text-orange-700 border-orange-400">
+                      <Badge variant="warning">
                         {new Date(item.expiryDate).toLocaleDateString('de-DE')}
                       </Badge>
                     </div>
@@ -326,17 +322,16 @@ export default function BestandsuebersichtPage(): JSX.Element {
         </Card>
 
         {/* PSM Abverkaufsfristen */}
-        <Card className="border-red-300 bg-red-50/50">
+        <Card className="border-status-error/40">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-700 flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-sm font-medium text-status-error">
               <span className="flex items-center gap-2">
                 <ShieldAlert className="h-4 w-4" />
                 PSM Abverkaufsfristen
               </span>
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="text-red-700 border-red-300 hover:bg-red-100"
+                className="min-h-touch touch-manipulation"
                 onClick={() => { void navigateWithWorkflowResume('/lager/psm-abverkauf', 'quality') }}
               >
                 Zur Übersicht <ChevronRight className="h-4 w-4 ml-1" />
@@ -353,10 +348,10 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl font-bold text-red-600">
+                  <span className="text-2xl font-bold text-status-error">
                     {0}
                   </span>
-                  <span className="text-sm text-red-600">PSM mit endender Abverkaufsfrist</span>
+                  <span className="text-sm text-status-error">PSM mit endender Abverkaufsfrist</span>
                 </div>
                 {EMPTY_PSM_ARTIKEL.map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-red-200 p-2 bg-white/50 text-sm">
@@ -377,17 +372,16 @@ export default function BestandsuebersichtPage(): JSX.Element {
       {/* Renner & Penner Analyse */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Renner - Schnelldreher */}
-        <Card className="border-green-300 bg-green-50/50">
+        <Card className="border-status-success/40">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-700 flex items-center justify-between">
+            <CardTitle className="text-sm font-medium text-status-success flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <Zap className="h-4 w-4" />
                 Renner (Top-Seller)
               </span>
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="text-green-700 border-green-300 hover:bg-green-100"
+                className="min-h-touch touch-manipulation"
                 onClick={() => { void navigateWithWorkflowResume('/lager/renner-liste', 'inventory') }}
               >
                 Vollständige Liste <ChevronRight className="h-4 w-4 ml-1" />
@@ -403,16 +397,16 @@ export default function BestandsuebersichtPage(): JSX.Element {
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-sm text-green-600 mb-3">Artikel mit höchstem Absatz (letzte 30 Tage)</p>
+                <p className="text-sm text-status-success mb-3">Artikel mit höchstem Absatz (letzte 30 Tage)</p>
                 {(rennerItems ?? []).map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-green-200 p-2 bg-white/50 text-sm">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-400">#{i + 1}</Badge>
+                      <Badge variant="success">#{i + 1}</Badge>
                       <span className="font-medium truncate max-w-[180px]">{item.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{item.absatz} Stk</span>
-                      <Badge className="bg-green-600">{item.trend}</Badge>
+                      <Badge variant="success">{item.trend}</Badge>
                     </div>
                   </div>
                 ))}              </div>
@@ -430,8 +424,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
               </span>
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="text-slate-700 border-slate-300 hover:bg-slate-100"
+                className="min-h-touch touch-manipulation"
                 onClick={() => { void navigateWithWorkflowResume('/lager/penner-liste', 'inventory') }}
               >
                 Vollständige Liste <ChevronRight className="h-4 w-4 ml-1" />
@@ -456,7 +449,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{item.absatz} Stk</span>
-                      <Badge variant="secondary" className="text-red-600">{item.trend}</Badge>
+                      <Badge variant="secondary" className="text-status-error">{item.trend}</Badge>
                     </div>
                   </div>
                 ))}              </div>

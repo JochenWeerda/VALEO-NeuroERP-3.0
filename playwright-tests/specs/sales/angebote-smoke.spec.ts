@@ -5,11 +5,12 @@
  */
 
 import { test, expect } from '../../fixtures/testSetup';
+import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Sales - Angebote @smoke', () => {
   test.beforeEach(async ({ adminPage }) => {
     await adminPage.goto('/sales/angebote');
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
   });
 
   test('Angebote-Liste laedt ohne Fehler', async ({ adminPage }) => {
@@ -85,7 +86,7 @@ test.describe('Sales - Angebote @smoke', () => {
     test.skip((await neuButton.count()) === 0, 'Kein Neu-Button gefunden');
 
     await neuButton.click();
-    await adminPage.waitForLoadState('networkidle');
+    await waitForAppReady(adminPage);
 
     const urlAfterClick = adminPage.url();
     const routeLooksCreate = /angebot.*neu|erstellen|new/i.test(urlAfterClick);

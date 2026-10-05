@@ -41,11 +41,11 @@ export default function MahnlaufPage() {
       <div className="flex items-center gap-2">
         <MailWarning size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Mahnlauf</h1>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => { void candidates.refetch(); void notices.refetch() }} disabled={candidates.isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => { void candidates.refetch(); void notices.refetch() }} disabled={candidates.isFetching}>
           {candidates.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
-        <Button size="sm" onClick={doRun} disabled={run.isPending || cand.length === 0}>
+        <Button className="min-h-touch" onClick={doRun} disabled={run.isPending || cand.length === 0}>
           {run.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
           Mahnlauf ausführen ({cand.length})
         </Button>
@@ -78,9 +78,9 @@ export default function MahnlaufPage() {
                     <tr key={c.op_id} className="border-b last:border-0">
                       <td className="px-3 py-1.5 font-medium">{c.rechnungsnr}</td>
                       <td className="px-3 py-1.5">{c.partner ?? '—'}</td>
-                      <td className="px-3 py-1.5 text-right text-red-600">{c.tage_ueberfaellig} Tage</td>
+                      <td className="px-3 py-1.5 text-right text-status-error">{c.tage_ueberfaellig} Tage</td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(c.offen)}</td>
-                      <td className="px-3 py-1.5 text-center"><Badge variant="outline" className="text-[10px]">{c.aktuelle_stufe} → {c.naechste_stufe}</Badge></td>
+                      <td className="px-3 py-1.5 text-center"><Badge variant="outline" className="text-2xs">{c.aktuelle_stufe} → {c.naechste_stufe}</Badge></td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(c.dunning_fee)}</td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(c.interest)}</td>
                       <td className="px-3 py-1.5 text-right tabular-nums font-medium">{eur(c.total_amount)}</td>
@@ -119,7 +119,7 @@ export default function MahnlaufPage() {
                     <tr key={i} className="border-b last:border-0">
                       <td className="px-3 py-1.5">{n.rechnungsnr ?? '—'}</td>
                       <td className="px-3 py-1.5">{n.partner ?? '—'}</td>
-                      <td className="px-3 py-1.5 text-center"><Badge variant="secondary" className="text-[10px]">{n.stufe}</Badge></td>
+                      <td className="px-3 py-1.5 text-center"><Badge variant="secondary" className="text-2xs">{n.stufe}</Badge></td>
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(n.gesamt)}</td>
                       <td className="px-3 py-1.5">{n.frist ? new Date(n.frist).toLocaleDateString('de-DE') : '—'}</td>
                       <td className="px-3 py-1.5">{n.datum ? new Date(n.datum).toLocaleDateString('de-DE') : '—'}</td>

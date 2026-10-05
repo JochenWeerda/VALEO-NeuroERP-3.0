@@ -25,6 +25,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_auto_capture_service import CrmAutoCaptureService
 from app.services.stt_client import SttClient
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -41,7 +42,7 @@ class CallTranscriptIn(BaseModel):
     audioContentType: str = "audio/wav"
 
 
-@router.post("/call-transcript", response_model=dict, summary="Anruf-Transkript als Kontakt erfassen (Text oder Audio→STT)")
+@router.post("/call-transcript", response_model=TypedObjectOut, summary="Anruf-Transkript als Kontakt erfassen (Text oder Audio→STT)")
 def call_transcript(
     body: CallTranscriptIn,
     db: Session = Depends(get_db),

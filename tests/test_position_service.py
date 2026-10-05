@@ -81,6 +81,10 @@ class TestPeriodHelpers:
         out = _periods_between("2026-04", "2026-06", PERIOD_MODE_MONTH)
         assert out == ["2026-04", "2026-05", "2026-06"]
 
+    def test_periods_between_month_rejects_too_large_range(self):
+        with pytest.raises(ValueError, match="Period range is too large"):
+            _periods_between("2026-01", "2050-12", PERIOD_MODE_MONTH)
+
 
 class TestPositionCalculationService:
     def test_calculate_matrix_empty(self, db: Session):

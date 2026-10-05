@@ -129,7 +129,7 @@ def test_primary_entity_derived_from_screen_id():
 # ─── Readiness gate tests ────────────────────────────────────────────────────
 
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness  # noqa: E402
-from app.core.screen_definitions import get_screen_definition  # noqa: E402
+from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition  # noqa: E402
 
 READY_SCREEN = {
     "schemaVersion": 1,
@@ -334,6 +334,39 @@ def test_promoted_rollout_masks_resolve_to_native_screen_definitions(screen_id):
     report = _check_readiness(screen)
     assert screen["adapter"]["temporary"] is False
     assert report["generatorReady"] is True
-    assert report["advisoryScore"] == 1.0
     assert report["errors"] == []
+    assert report["advisoryScore"] == 1.0
     assert report["warnings"] == []
+
+
+@pytest.mark.unit
+def test_every_native_screen_has_complete_agent_contract_and_readiness():
+    """Registry-wide ratchet: every native screen is agent-readable and generator-ready."""
+    native_screen_ids = [
+        screen_id
+        for screen_id in sorted(SCREEN_DEFINITION_BUILDERS)
+        if not (get_screen_definition(screen_id) or {})
+        .get("adapter", {})
+        .get("temporary", True)
+    ]
+    failures: list[str] = []
+
+    for screen_id in native_screen_ids:
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        contract = _generate_agent_contract(screen)
+        readiness = _check_readiness(screen)
+
+        if contract.get("screenId") != screen_id:
+            failures.append(f"{screen_id}: falsche screenId im AgentMaskContract")
+        if not str(contract.get("businessPurpose") or "").strip():
+            failures.append(f"{screen_id}: businessPurpose fehlt")
+        if not isinstance(contract.get("availableActions"), list):
+            failures.append(f"{screen_id}: availableActions fehlt")
+        if not str((contract.get("testSelectors") or {}).get("screenRoot") or "").strip():
+            failures.append(f"{screen_id}: stabiler screenRoot-Selektor fehlt")
+        if not readiness.get("generatorReady"):
+            failures.append(f"{screen_id}: {readiness.get('errors', [])}")
+
+    assert len(native_screen_ids) >= 71, "Native ScreenDefinition-Ratchet ist geschrumpft."
+    assert failures == []

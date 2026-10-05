@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.finance_op_service import FinanceOpService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
 
 
-@router.get("/offene-posten", response_model=dict, summary="Offene Posten mit Aging/Mahnstufe/Skonto")
+@router.get("/offene-posten", response_model=TypedObjectOut, summary="Offene Posten mit Aging/Mahnstufe/Skonto")
 def offene_posten(
     typ: str = Query("alle", description="debitor | kreditor | alle"),
     limit: int = Query(500, ge=1, le=2000),

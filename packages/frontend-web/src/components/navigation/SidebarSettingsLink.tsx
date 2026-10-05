@@ -14,8 +14,8 @@ export default function SidebarSettingsLink({ collapsed, path }: SidebarSettings
       className={({ isActive }) =>
         clsx(
           'flex min-h-11 items-center gap-3 rounded-[8px] px-3 py-2 text-sm font-medium transition-colors',
-          'hover:bg-[var(--sidebar-item-hover-bg)] hover:text-white',
-          isActive ? 'bg-[var(--sidebar-item-active-bg)] text-white' : 'text-[hsl(210,20%,75%)]',
+          'hover:bg-(--sidebar-item-hover-bg) hover:text-white',
+          isActive ? 'bg-(--sidebar-item-active-bg) text-white' : 'text-[hsl(210,20%,75%)]',
         )
       }
       title={collapsed ? 'Einstellungen' : undefined}

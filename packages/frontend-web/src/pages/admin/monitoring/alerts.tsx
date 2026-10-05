@@ -11,6 +11,7 @@ import {
   OperationalTaskPlan,
   RoleFocusBar,
 } from '@/components/workflow'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useMonitoringAlerts } from '@/lib/api/admin'
 import { AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react'
 
@@ -41,6 +42,7 @@ const monitoringRoles = [
 
 export default function MonitoringAlertsPage(): JSX.Element {
   const [roleFocus, setRoleFocus] = useState<MonitoringRole>('betrieb')
+  const isTouch = useTouchDevice()
   const { data, isLoading } = useMonitoringAlerts()
   const alerts = data?.items ?? []
   const active = data?.active ?? 0
@@ -73,12 +75,14 @@ export default function MonitoringAlertsPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-3 md:p-6">
       <div>
-        <h1 className="text-3xl font-bold">System-Alerts</h1>
-        <p className="text-muted-foreground">Betriebsstatus, Eskalation und Nachweise fuer Admins.</p>
+        <h1 className="text-2xl font-bold md:text-3xl">System-Alerts</h1>
+        <p className="text-muted-foreground">Aktive Stoerungen pruefen und dokumentieren</p>
       </div>
 
+      {!isTouch ? (
+      <>
       <RoleFocusBar
         roles={monitoringRoles}
         value={roleFocus}
@@ -209,6 +213,8 @@ export default function MonitoringAlertsPage(): JSX.Element {
           />
         </div>
       </div>
+      </>
+      ) : null}
 
       <Card>
         <CardHeader>

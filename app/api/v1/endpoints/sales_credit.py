@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.sales_credit_service import SalesCreditService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/sales", tags=["sales", "o2c", "credit"])
 
 
-@router.get("/credit-check/customers", response_model=dict, summary="Kunden mit Kreditlimit-Ampel (offene Exposure)")
+@router.get("/credit-check/customers", response_model=TypedObjectOut, summary="Kunden mit Kreditlimit-Ampel (offene Exposure)")
 def list_customers(
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -23,7 +24,7 @@ def list_customers(
     return {"items": SalesCreditService(db, tenant_id).list_customers(limit=limit)}
 
 
-@router.get("/credit-check", response_model=dict, summary="Kreditlimit-Prüfung + Billing-Status je Auftrag")
+@router.get("/credit-check", response_model=TypedObjectOut, summary="Kreditlimit-Prüfung + Billing-Status je Auftrag")
 def credit_check(
     auftrag: str = Query(..., description="Auftragsnummer oder -ID"),
     db: Session = Depends(get_db),

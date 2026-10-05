@@ -107,7 +107,7 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
   }
 
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Lade Checkliste...</div>
-  if (error) return <div className="p-6 text-sm text-red-600">Checkliste konnte nicht geladen werden.</div>
+  if (error) return <div className="p-6 text-sm text-status-error">Checkliste konnte nicht geladen werden.</div>
 
   const openRequiredItems = checklist.required_items - checklist.completed_required_items
   const openItems = checklist.total_items - checklist.completed_items
@@ -142,7 +142,7 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
     {
       label: workflowInstanceId ? 'Flow-Spine-Verknuepfung aktiv' : 'Checkliste lokal geoeffnet',
       detail: workflowInstanceId
-        ? `Instanz ${workflowInstanceId.slice(0, 8)} ist mit dem Abschlussfall verknuepft.`
+        ? 'Der Abschlussfall ist mit dem Prozessvorgang verknuepft.'
         : 'Die Checkliste laeuft ohne explizite Flow-Spine-Instanz.',
       timestamp: checklist.updated_at ?? null,
     },
@@ -157,13 +157,13 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/fibu/abschluss-cockpit')}>
+        <Button variant="ghost" onClick={() => navigate('/fibu/abschluss-cockpit')} className="min-h-touch">
           <ArrowLeft className="mr-1 h-4 w-4" /> Cockpit
         </Button>
       </div>
-      {workflowInstanceId ? (
-        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+      {workflowCase ? (
+        <div className="mb-4 rounded-md border px-4 py-2 text-sm text-muted-foreground">
+          Vorgang {workflowCase}
         </div>
       ) : null}
       <div>
@@ -200,7 +200,7 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
             >
               <div className="flex items-center gap-3">
                 {item.status === 'completed' ? (
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600" />
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-status-success" />
                 ) : (
                   <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />
                 )}
@@ -217,9 +217,9 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
               </div>
               {item.status !== 'completed' ? (
                 <Button
-                  size="sm"
                   onClick={() => completeMutation.mutate({ itemCode: item.item_code })}
                   disabled={completeMutation.isPending}
+                  className="min-h-touch"
                 >
                   Erledigen
                 </Button>

@@ -194,7 +194,7 @@ def _set_status(nr: str, new_status: str, allowed_from: list[str], db: Session, 
         extra = ", verarbeitet_am = :verarbeitet_am"
     try:
         db.execute(
-            text(f"UPDATE domain_inventory.ruestlisten SET status = :status{extra} WHERE ruestlisten_nr = :nr"),  # noqa: S608  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_inventory.ruestlisten SET status = :status{extra} WHERE ruestlisten_nr = :nr"),  # noqa: S608  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         )
         db.commit()

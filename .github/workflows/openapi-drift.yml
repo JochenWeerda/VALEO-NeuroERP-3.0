@@ -1,8 +1,8 @@
-name: OpenAPI Drift — Auto-Update (DOC-OPENAPI-CI-001)
+name: OpenAPI Drift Check (DOC-OPENAPI-CI-001)
 
-# Läuft nach jedem Push auf main/develop wenn App-Code geändert wurde.
-# Generiert openapi.json neu und committet bei Drift automatisch.
-# PRs werden durch den --check-Step in quality-gate.yml geblockt.
+# Läuft nach jedem Push auf main/develop, wenn App-Code geändert wurde.
+# Drift schlägt fehl. Die Spec wird mit der verursachenden API-Änderung
+# im normalen Review- und Merge-Weg eingecheckt.
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: openapi-drift-${{ github.ref }}
@@ -23,8 +23,8 @@ env:
   PYTHON_VERSION: "3.11"
 
 jobs:
-  openapi-refresh:
-    name: OpenAPI Spec aktualisieren
+  openapi-check:
+    name: OpenAPI Spec prüfen
     runs-on: ubuntu-latest
 
     services:
@@ -49,9 +49,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Fetch mit Token damit der Auto-Commit gepusht werden kann
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
         with:
@@ -67,35 +64,4 @@ jobs:
         run: python scripts/init_db.py
 
       - name: OpenAPI-Spec prüfen
-        id: check
-        run: |
-          if python scripts/generate_openapi.py --check; then
-            echo "drift=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "drift=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: OpenAPI-Spec neu generieren (bei Drift)
-        if: steps.check.outputs.drift == 'true'
-        run: python scripts/generate_openapi.py
-
-      - name: Drift-Diff anzeigen
-        if: steps.check.outputs.drift == 'true'
-        run: |
-          git diff --stat docs/schnittstellen/openapi.json || true
-
-      - name: Auto-Commit aktualisierte Spec
-        if: steps.check.outputs.drift == 'true'
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/schnittstellen/openapi.json
-          git commit -m "chore(docs): OpenAPI-Spec automatisch aktualisiert [DOC-OPENAPI-CI-001]
-
-          Ausgelöst durch API-Änderung in ${{ github.sha }}.
-          Generiert via scripts/generate_openapi.py."
-          git push
-
-      - name: Kein Drift — Spec ist aktuell
-        if: steps.check.outputs.drift == 'false'
-        run: echo "openapi.json ist aktuell — kein Commit nötig."
+        run: python scripts/generate_openapi.py --check

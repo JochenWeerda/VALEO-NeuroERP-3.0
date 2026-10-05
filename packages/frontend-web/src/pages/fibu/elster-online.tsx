@@ -4,7 +4,7 @@
  * Referenz: JuryOberst/Elster (GitHub), offizielle ELSTER-Doku (elster.de)
  */
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from '@/app/routing/typed-router'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -13,12 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  FileText,
   ArrowLeft,
   Calculator,
   Download,
   ExternalLink,
-  CheckCircle,
   AlertCircle,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -30,6 +28,7 @@ import {
   type VATReturn,
 } from '@/lib/api/fibu'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 const MEIN_ELSTER_URL = 'https://www.elster.de/eportal/login'
 const MONATE = [
@@ -64,7 +63,10 @@ function StatusBadge({ status }: { status: VATReturn['status'] }) {
 
 export default function ElsterOnlinePage(): JSX.Element {
   const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const [period, setPeriod] = useState('2025-01')
+  const downloadPendingRef = useRef(new Set<string>())
+  const [downloadPending, setDownloadPending] = useState<Set<string>>(() => new Set())
 
   const { data: fibuCockpit } = useFibuCockpit()
   const { data: returns = [], isLoading: listLoading, refetch } = useVATReturns()
@@ -123,6 +125,9 @@ export default function ElsterOnlinePage(): JSX.Element {
   }
 
   const handleDownload = async (r: VATReturn) => {
+    if (downloadPendingRef.current.has(r.id)) return
+    downloadPendingRef.current.add(r.id)
+    setDownloadPending(new Set(downloadPendingRef.current))
     try {
       await downloadELSTERXml(r.id, r.period)
       toast({ title: 'ELSTER-XML heruntergeladen', description: `UStVA_${r.period}_ELSTER.xml` })
@@ -133,59 +138,24 @@ export default function ElsterOnlinePage(): JSX.Element {
         title: 'Export fehlgeschlagen',
         description: e?.message ?? 'ELSTER-XML konnte nicht erstellt werden',
       })
+    } finally {
+      downloadPendingRef.current.delete(r.id)
+      setDownloadPending(new Set(downloadPendingRef.current))
     }
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <OperationalCaseHeader
-        title="ELSTER Online"
-        description="Der Online-Meldepfad zeigt Berechnungsstand, Freigabedruck und Rueckkopplung vor dem XML-Export."
-        status={operationalStatus}
-        owner="Steuer / FIBU"
-        blocker={returns.length === 0 ? 'Es liegt noch kein berechneter UStVA-Lauf fuer den Export vor.' : null}
-        nextAction={returns.length === 0 ? 'Periode berechnen' : returns.some((item) => item.status === 'validated') ? 'Freigegebene UStVA exportieren und einreichen' : 'Aktuelle Periode pruefen'}
-        caseLabel="Vorgang: ELSTER-Einreichung"
-        tags={['FIBU', 'Meldewesen']}
-      />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
-        <OperationalTimeline title="Meldepfad" items={timelineItems} />
-        <OperationalContextPanel title="ELSTER-Kontext" sections={contextSections} />
+    <div className="mx-auto max-w-4xl space-y-4 p-3 md:p-6">
+      <div>
+        <h1 className="text-2xl font-bold md:text-3xl">ELSTER (Online)</h1>
+        <p className="text-muted-foreground">USt-Voranmeldung berechnen, ELSTER-konform exportieren und bei Mein ELSTER einreichen</p>
       </div>
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <span className="rounded-lg border bg-muted/40 p-2">
-              <FileText className="h-5 w-5" />
-            </span>
-            <div>
-              <CardTitle>ELSTER (Online)</CardTitle>
-              <CardDescription>
-                USt-Voranmeldung berechnen, ELSTER-konform exportieren und bei Mein ELSTER einreichen
-              </CardDescription>
-            </div>
-          </div>
+          <CardTitle>UStVA-Lauf</CardTitle>
+          <CardDescription>Periode berechnen, XML exportieren, bei Mein ELSTER einreichen</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">UStVA-Läufe</CardTitle></CardHeader>
-              <CardContent><div className="text-2xl font-semibold">{fibuCockpit.tax.vat_return_count}</div></CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">eBilanz</CardTitle></CardHeader>
-              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'Kontext ergänzen'}</div></CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">E-Clearing</CardTitle></CardHeader>
-              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'Rückmeldung offen'}</div></CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">Letzte Einreichung</CardTitle></CardHeader>
-              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.latest_submission_at ? new Date(fibuCockpit.tax.latest_submission_at).toLocaleDateString('de-DE') : 'noch nicht'}</div></CardContent>
-            </Card>
-          </div>
-
           {/* Schritt 1: Berechnen */}
           <section>
             <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
@@ -196,7 +166,8 @@ export default function ElsterOnlinePage(): JSX.Element {
               <select
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                aria-label="UStVA-Periode"
+                className="min-h-touch touch-manipulation rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 {MONATE.map((m) => (
                   <option key={m.value} value={m.value}>{m.label}</option>
@@ -205,6 +176,7 @@ export default function ElsterOnlinePage(): JSX.Element {
               <Button
                 onClick={handleCalculate}
                 disabled={calculateMutation.isPending}
+                className="min-h-touch touch-manipulation"
               >
                 <Calculator className="h-4 w-4 mr-2" />
                 {calculateMutation.isPending ? 'Berechne…' : 'Berechnen'}
@@ -233,7 +205,7 @@ export default function ElsterOnlinePage(): JSX.Element {
                 {returns.map((r) => (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between rounded-lg border p-3"
+                    className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex items-center gap-3">
                       <div>
@@ -246,11 +218,12 @@ export default function ElsterOnlinePage(): JSX.Element {
                     </div>
                     <Button
                       variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(r)}
+                      className="min-h-touch touch-manipulation"
+                      disabled={downloadPending.has(r.id)}
+                      onClick={() => void handleDownload(r)}
                     >
                       <Download className="h-4 w-4 mr-2" />
-                      ELSTER-XML
+                      {downloadPending.has(r.id) ? 'Lädt…' : 'ELSTER-XML'}
                     </Button>
                   </div>
                 ))}
@@ -272,7 +245,7 @@ export default function ElsterOnlinePage(): JSX.Element {
                     href={MEIN_ELSTER_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline inline-flex items-center gap-1"
+                    className="inline-flex min-h-touch items-center gap-1 text-primary hover:underline"
                   >
                     Mein ELSTER <ExternalLink className="h-3 w-3" />
                   </a>{' '}
@@ -290,13 +263,13 @@ export default function ElsterOnlinePage(): JSX.Element {
           {/* Weitere Links */}
           <div className="flex flex-wrap gap-2 pt-2 border-t">
             <Link to="/export/umsatzsteuervoranmeldung">
-              <Button variant="outline" size="sm">UStVA-Assistent (manuell)</Button>
+              <Button variant="outline" className="min-h-touch">UStVA-Assistent (manuell)</Button>
             </Link>
             <Link to="/finance/ustva">
-              <Button variant="outline" size="sm">UStVA-Verwaltung</Button>
+              <Button variant="outline" className="min-h-touch">UStVA-Verwaltung</Button>
             </Link>
             <Link to="/fibu/schnittstellen-center">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" className="min-h-touch">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Schnittstellen-Center
               </Button>
@@ -304,6 +277,42 @@ export default function ElsterOnlinePage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      {!isTouch ? (
+        <>
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">UStVA-Läufe</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-semibold">{fibuCockpit.tax.vat_return_count}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">eBilanz</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'Kontext ergänzen'}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">E-Clearing</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'Rückmeldung offen'}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Letzte Einreichung</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.latest_submission_at ? new Date(fibuCockpit.tax.latest_submission_at).toLocaleDateString('de-DE') : 'noch nicht'}</div></CardContent>
+            </Card>
+          </div>
+          <OperationalCaseHeader
+            title="ELSTER Online"
+            description="Der Online-Meldepfad zeigt Berechnungsstand, Freigabedruck und Rueckkopplung vor dem XML-Export."
+            status={operationalStatus}
+            owner="Steuer / FIBU"
+            blocker={returns.length === 0 ? 'Es liegt noch kein berechneter UStVA-Lauf fuer den Export vor.' : null}
+            nextAction={returns.length === 0 ? 'Periode berechnen' : returns.some((item) => item.status === 'validated') ? 'Freigegebene UStVA exportieren und einreichen' : 'Aktuelle Periode pruefen'}
+            caseLabel="Vorgang: ELSTER-Einreichung"
+            tags={['FIBU', 'Meldewesen']}
+          />
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+            <OperationalTimeline title="Meldepfad" items={timelineItems} />
+            <OperationalContextPanel title="ELSTER-Kontext" sections={contextSections} />
+          </div>
+        </>
+      ) : null}
     </div>
   )
 }

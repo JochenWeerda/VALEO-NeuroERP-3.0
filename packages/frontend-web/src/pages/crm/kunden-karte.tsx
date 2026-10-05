@@ -56,7 +56,7 @@ export default function KundenKartePage(): JSX.Element {
     if (!mapContainer.current || mapRef.current) return
     let map: MapLike | null = null
     void import('maplibre-gl').then((ml) => {
-      const ML = (ml.default ?? ml) as unknown as { Map: new (o: unknown) => MapLike; Popup: new (o: unknown) => PopupLike }
+      const ML = ml as unknown as { Map: new (o: unknown) => MapLike; Popup: new (o: unknown) => PopupLike }
       if (!mapContainer.current) return
       map = new ML.Map({
         container: mapContainer.current,

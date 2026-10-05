@@ -371,7 +371,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
         {stageColumns.map((column) => (
           <div
             key={column.key}
-            className="flex-shrink-0 w-80"
+            className="shrink-0 w-80"
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, column.key)}
           >

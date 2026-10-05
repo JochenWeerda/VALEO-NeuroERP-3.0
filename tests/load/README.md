@@ -16,7 +16,17 @@ apt install k6          # Debian/Ubuntu
 | Script | Zweck | Dauer | Max VU |
 |--------|-------|-------|--------|
 | `health-check.js` | Pre-deploy-Gate | < 60s | 1 |
-| `harvest-peak.js` | Erntepeak-Volltest | ~20 min | 800 |
+| `harvest-peak.js` | Erntepeak (`PROFILE=full`) | ~20 min | 800 |
+| `harvest-peak.js` | Lokal (`PROFILE=local`) | ~2,5 min | 50 |
+| `harvest-peak.js` | Smoke (`PROFILE=smoke`) | 30 s | 5 |
+
+## Profile (SPEC-P1-10)
+
+| PROFILE | Wann |
+|---------|------|
+| `full` | Staging / Peak (Default, CI Schedule) |
+| `local` | Gegen docker-compose / `localhost:8000` |
+| `smoke` | Schneller Smoke nach Deploy lokal |
 
 ## Ausführen
 
@@ -24,17 +34,22 @@ apt install k6          # Debian/Ubuntu
 # Health-Check (CI/CD-Gate)
 k6 run tests/load/health-check.js
 
-# Erntepeak gegen lokales Backend
-k6 run tests/load/harvest-peak.js
+# Lokal reproduzierbar (wartet auf Health, schreibt Summary)
+pwsh scripts/loadtest/run_harvest_peak_local.ps1
+# oder: ./scripts/loadtest/run_harvest_peak_local.sh [local|smoke]
 
-# Gegen Staging-Umgebung
+# Manuell mit Profil
+k6 run -e PROFILE=local -e BASE_URL=http://127.0.0.1:8000 tests/load/harvest-peak.js
+
+# Gegen Staging-Umgebung (Vollprofil)
 k6 run \
+  --env PROFILE=full \
   --env BASE_URL=https://staging.valeo-erp.de \
   --env API_DEV_TOKEN=<token> \
   --env TENANT_ID=tenant-staging \
   tests/load/harvest-peak.js
 
-# Mit HTML-Report
+# Mit JSON-Report
 k6 run --out json=results/harvest-peak.json tests/load/harvest-peak.js
 ```
 

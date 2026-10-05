@@ -1,0 +1,47 @@
+slice_id: UIX-091-CONTRACT
+title: Prozessketten-Katalog, Readiness und CI-Gate
+owner: Cursor
+status: abgeschlossen
+created_at: 2026-09-15
+closed_at: 2026-09-15
+spec: docs/design/specs/uix-m4-spec.md
+coordination: >-
+  Tail zu UIX-091 nach abgeschlossenem UIX-091-PIPELINE. Claude bleibt Owner
+  des Kern-Slices und von config/process_chains.yaml. Dieser Tail haengt den
+  Katalog an get_screen_definition, setzt die Readiness-Warnung und das
+  Quality-Gate. Keine YAML-Aenderung, keine SD-Massenpflege per Hand.
+goal: >-
+  Native ScreenDefinitions liefern processChains plus processChain fuer
+  Kettenmitglieder; Belegmasken ohne Kette bekommen eine Advisory-Warnung;
+  check_process_chains.py laeuft im Quality-Gate; Playwright belegt Navigation
+  ueber Verkauf und Einkauf.
+file_ownership:
+  - docs/agent-ops/slices/UIX-091-CONTRACT.yaml
+  - docs/agent-ops/active-workboard.md
+  - app/core/process_chains.py
+  - app/core/screen_definitions.py
+  - app/api/v1/endpoints/mask_screen_definition.py
+  - .github/workflows/quality-gate.yml
+  - tests/test_uix091_process_chain_contract.py
+  - packages/frontend-web/tests/e2e/uix-091-process-ribbon.spec.ts
+acceptance:
+  - get_screen_definition haengt processChains an; Kettenmitglieder haben processChain.
+  - Readiness-Gate missing_process_chain ist advisory fuer sales/einkauf/finance/agrar in detail/transaction.
+  - python scripts/check_process_chains.py ist ein Quality-Gate-Step.
+  - Playwright navigiert in zwei Ketten ueber das Band.
+tests:
+  - pytest tests/test_uix091_process_chain_contract.py --noconftest -p no:cacheprovider --no-cov
+  - python scripts/check_process_chains.py
+risks:
+  - Advisory senkt den Score von Stammdatenmasken wie einkauf/supplier bewusst.
+  - Playwright mockt die ScreenDefinition; der Live-Katalog wird per pytest belegt.
+ai_harness:
+  fachlicher_vertrag: Jede Belegmaske in einer deklarativen Kette zeigt Woher/Wo/Wohin.
+  architektur_vertrag: ScreenDefinition bleibt Quelle; Katalog wird in get_screen_definition additiv angehaengt.
+  daten_vertrag: Keine Migration; YAML unveraendert; kein Instanzfortschritt.
+  test_vertrag: Pytest gegen echte Registry-SDs; Playwright gegen gemockte SDs mit zwei Ketten.
+  security_vertrag: Keine neuen Secrets; Tenant-Header der bestehenden Mask-API unveraendert.
+  betriebs_vertrag: Quality-Gate-Step; Advisory blockiert generatorReady nicht.
+  dokumentations_vertrag: Workboard, Slice-YAML, UIX-091-Fortschritt im selben Push.
+external_gates:
+  - not_applicable

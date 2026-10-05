@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { Callout } from '@/components/ui/callout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -86,14 +87,14 @@ export default function UebernahmeKassePage(): JSX.Element {
         <CardContent className="pt-4 space-y-4">
 
           {/* Untertitel */}
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+          <Callout variant="info" className="border rounded p-3 text-sm">
             <p className="font-semibold text-blue-800 uppercase text-xs mb-1">
               Übernahme von ServiceERP Kasse (SQLite)
             </p>
             <p className="text-blue-700 text-xs">
               Wählen Sie die Datentypen, die aus den SQLite-Kassendateien übernommen werden sollen.
             </p>
-          </div>
+          </Callout>
 
           {/* Checkboxen */}
           <div className="space-y-1">
@@ -123,7 +124,7 @@ export default function UebernahmeKassePage(): JSX.Element {
           {/* Buttons */}
           <div className="flex items-center gap-2 justify-end">
             <Button
-              size="sm"
+              className="min-h-touch"
               onClick={handleOk}
               disabled={mutation.isPending || !anySelected}
             >
@@ -138,7 +139,7 @@ export default function UebernahmeKassePage(): JSX.Element {
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              className="min-h-touch"
               onClick={handleReset}
               disabled={mutation.isPending}
             >
@@ -148,16 +149,16 @@ export default function UebernahmeKassePage(): JSX.Element {
 
           {/* Fehler */}
           {mutation.isError && (
-            <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded p-3">
-              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <Callout variant="error" className="flex items-start gap-2 text-status-error text-sm border rounded p-3">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{(mutation.error as Error).message}</span>
-            </div>
+            </Callout>
           )}
 
           {/* Ergebnis */}
           {result && (
-            <div className={`border rounded p-3 space-y-3 ${result.success ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
-              <div className={`flex items-center gap-2 font-semibold text-sm ${result.success ? 'text-green-700' : 'text-yellow-700'}`}>
+            <Callout variant={result.success ? 'success' : 'warning'} className="rounded p-3 space-y-3">
+              <div className={`flex items-center gap-2 font-semibold text-sm ${result.success ? 'text-status-success' : 'text-status-warning'}`}>
                 {result.success
                   ? <CheckCircle2 className="h-4 w-4" />
                   : <AlertCircle className="h-4 w-4" />
@@ -187,17 +188,17 @@ export default function UebernahmeKassePage(): JSX.Element {
 
               {result.errors.length > 0 && (
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-red-600">Warnungen:</p>
+                  <p className="text-xs font-semibold text-status-error">Warnungen:</p>
                   {result.errors.map((e, i) => (
-                    <p key={i} className="text-xs text-red-600">{e}</p>
+                    <p key={i} className="text-xs text-status-error">{e}</p>
                   ))}
                 </div>
               )}
 
-              <Button size="sm" variant="outline" onClick={handleReset}>
+              <Button className="min-h-touch" variant="outline" onClick={handleReset}>
                 Weitere Übernahme
               </Button>
-            </div>
+            </Callout>
           )}
 
         </CardContent>

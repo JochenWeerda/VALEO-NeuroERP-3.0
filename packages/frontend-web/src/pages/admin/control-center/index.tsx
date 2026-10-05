@@ -64,6 +64,20 @@ type ControlCenterIncidents = {
 type IncidentFilter = 'all' | 'agent_ops' | 'superglue' | 'high'
 type PlanningFilter = 'all' | 'planned' | 'blocked' | 'heartbeat'
 
+const PLANNING_FILTER_LABELS: Record<PlanningFilter, string> = {
+  all: 'Alle',
+  blocked: 'Blockiert',
+  heartbeat: 'Heartbeat',
+  planned: 'Geplant',
+}
+
+const INCIDENT_FILTER_LABELS: Record<IncidentFilter, string> = {
+  all: 'Alle',
+  high: 'Hoch',
+  agent_ops: 'Agent Ops',
+  superglue: 'Superglue',
+}
+
 function formatDateTime(value: string): string {
   const parsed = new Date(value)
   if (Number.isNaN(parsed.getTime())) {
@@ -317,11 +331,11 @@ export default function AdminControlCenterPage(): JSX.Element {
                   <Button
                     key={filter}
                     type="button"
-                    size="sm"
                     variant={planningFilter === filter ? 'default' : 'outline'}
                     onClick={() => setPlanningFilter(filter)}
+                    className="min-h-touch"
                   >
-                    {filter}
+                    {PLANNING_FILTER_LABELS[filter]}
                   </Button>
                 ))}
               </div>
@@ -389,11 +403,11 @@ export default function AdminControlCenterPage(): JSX.Element {
                   <Button
                     key={filter}
                     type="button"
-                    size="sm"
                     variant={incidentFilter === filter ? 'default' : 'outline'}
                     onClick={() => setIncidentFilter(filter)}
+                    className="min-h-touch"
                   >
-                    {filter}
+                    {INCIDENT_FILTER_LABELS[filter]}
                   </Button>
                 ))}
               </div>
@@ -430,12 +444,12 @@ export default function AdminControlCenterPage(): JSX.Element {
                 <p className="mt-1 text-muted-foreground">{incident.recommended_action}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {incident.source === 'agent_ops' ? (
-                    <Button type="button" size="sm" variant="outline" onClick={() => void actOnIncident(incident.incident_id, 'escalate')}>Eskalieren</Button>
+                    <Button type="button" variant="outline" onClick={() => void actOnIncident(incident.incident_id, 'escalate')} className="min-h-touch">Eskalieren</Button>
                   ) : null}
                   {incident.source === 'superglue_quarantine' ? (
                     <>
-                      <Button type="button" size="sm" onClick={() => void actOnIncident(incident.incident_id, 'resolve')}>Resolve</Button>
-                      <Button type="button" size="sm" variant="outline" onClick={() => void actOnIncident(incident.incident_id, 'retry')}>Retry</Button>
+                      <Button type="button" onClick={() => void actOnIncident(incident.incident_id, 'resolve')} className="min-h-touch">Erledigen</Button>
+                      <Button type="button" variant="outline" onClick={() => void actOnIncident(incident.incident_id, 'retry')} className="min-h-touch">Erneut versuchen</Button>
                     </>
                   ) : null}
                 </div>

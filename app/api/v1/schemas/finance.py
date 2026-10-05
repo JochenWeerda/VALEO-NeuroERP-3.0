@@ -126,6 +126,37 @@ class JournalEntryLine(JournalEntryLineBase):
     updated_at: Optional[datetime] = None
 
 
+# Buchungsherkunft (Spalte ``domain_erp.journal_entries.source``).
+#
+# Belegter Schreibvertrag: jeder Wert ist im Code als realer Schreiber
+# nachgewiesen (Fundstelle dahinter). Neue Herkunft nur zusammen mit ihrem
+# Schreiber eintragen. Der Vertrag gilt fuer den *Schreibweg*; der Leseweg
+# gibt gespeicherte Herkunft unveraendert zurueck (siehe ``JournalEntry``),
+# damit vorhandene Buchungen nie aus dem Journal verschwinden.
+JOURNAL_ENTRY_WRITE_SOURCES: frozenset[str] = frozenset({
+    # Bestandsvertrag ohne eigenen Schreiber im Code, aber als Eingabewert
+    # zulaessig und in Daten vorhanden (``manual``: 362 Buchungen).
+    "manual",                  # services/finance_transaction_service.py (Default)
+    "system",
+    "integration",
+    "import",
+    # Nachgewiesene fachliche Schreiber.
+    "accrual_provision",       # api/v1/endpoints/accruals_provisions.py
+    "ap_invoice_kernel",       # services/ap_invoice_kernel_posting.py
+    "bank_reconciliation",     # api/v1/endpoints/bank_reconciliation.py
+    "booking_template",        # api/v1/endpoints/booking_templates.py
+    "bulk_import",             # api/v1/endpoints/bulk_journal_import.py
+    "cash_close",              # api/v1/endpoints/finance_actions.py
+    "connector",               # core/connectors/workflow.py
+    "op_settlement",           # api/v1/endpoints/open_items.py
+    "POS",                     # api/v1/endpoints/compat.py
+    "produktion_mischfutter",  # api/v1/endpoints/produktion_mischfutter.py
+    "reversal",                # services/finance_transaction_service.py
+    "sales_credit_note",       # api/v1/endpoints/sales_credit_notes.py
+    "sales_invoice",           # api/v1/endpoints/sales_delivery_notes.py
+})
+
+
 # Journal Entry Schemas
 class JournalEntryBase(BaseModel):
     """Base journal entry schema"""
@@ -137,14 +168,6 @@ class JournalEntryBase(BaseModel):
     source: str = Field(default="manual", description="Entry source (manual, system, integration)")
     currency: str = Field(default="EUR", min_length=3, max_length=3, description="Currency code")
     lines: List[JournalEntryLineCreate] = Field(..., min_length=2, description="Journal entry lines")
-
-    @field_validator('source')
-    @classmethod
-    def validate_source(cls, v):
-        valid_sources = ['manual', 'system', 'integration', 'import', 'cash_close']
-        if v not in valid_sources:
-            raise ValueError(f'Source must be one of: {valid_sources}')
-        return v
 
     @field_validator('posting_date')
     @classmethod
@@ -160,6 +183,15 @@ class JournalEntryCreate(JournalEntryBase):
     tenant_id: Optional[str] = Field(default=None, description="Tenant ID")
     entry_number: Optional[str] = Field(default=None, min_length=1, max_length=50, description="Entry number")
     posting_date: Optional[datetime] = Field(default=None, description="Posting date")
+
+    @field_validator("source")
+    @classmethod
+    def validate_source(cls, v):
+        """Schreibweg: nur belegte Buchungsherkunft annehmen."""
+        if v not in JOURNAL_ENTRY_WRITE_SOURCES:
+            valid_sources = sorted(JOURNAL_ENTRY_WRITE_SOURCES)
+            raise ValueError(f'Source must be one of: {valid_sources}')
+        return v
 
     @model_validator(mode="after")
     def fill_manual_entry_defaults(self):
@@ -186,6 +218,14 @@ class JournalEntry(JournalEntryBase):
 
     id: str
     tenant_id: str
+    # Leseweg: gespeicherte Herkunft wird unveraendert durchgereicht und nicht
+    # gegen den Schreibvertrag geprueft. Die Spalte ist nullable und wird von
+    # storage_fees, finance_closing_service und inventory_operations gar nicht
+    # geschrieben. Eine Validierung hier wuerde vorhandene Buchungen aus dem
+    # Journal entfernen statt einen Datenfehler zu melden.
+    source: Optional[str] = Field(
+        default=None, description="Gespeicherte Buchungsherkunft (unveraendert)"
+    )
     status: str = Field(default="draft", description="Entry status")
     total_debit: Decimal = Field(default=Decimal('0.00'), description="Total debit amount")
     total_credit: Decimal = Field(default=Decimal('0.00'), description="Total credit amount")

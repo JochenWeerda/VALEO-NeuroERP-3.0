@@ -38,7 +38,7 @@ export default function NachweisraumPage() {
         <ShieldCheck size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Nachweisraum</h1>
         <span className="text-sm text-muted-foreground">GoBD: Artefakte · Vorgangskette · Buchungen</span>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void docsQuery.refetch()} disabled={docsQuery.isFetching}>
+        <Button variant="outline" className="min-h-touch ml-auto" onClick={() => void docsQuery.refetch()} disabled={docsQuery.isFetching}>
           {docsQuery.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
@@ -89,7 +89,7 @@ export default function NachweisraumPage() {
                 <Badge variant="outline">{detail.data.doc_type}</Badge>
                 <Badge variant="outline">{detail.data.status}</Badge>
                 {detail.data.summary?.revisionssicher
-                  ? <Badge className="bg-emerald-600"><CheckCircle2 className="mr-1 h-3 w-3" />revisionssicher</Badge>
+                  ? <Badge variant="success"><CheckCircle2 className="mr-1 h-3 w-3" />revisionssicher</Badge>
                   : <Badge variant="destructive"><AlertTriangle className="mr-1 h-3 w-3" />nicht revisionssicher</Badge>}
                 {detail.data.summary?.gebucht && <Badge variant="secondary">gebucht</Badge>}
               </div>
@@ -104,7 +104,7 @@ export default function NachweisraumPage() {
                       <Badge variant="outline">{a.typ}</Badge>
                       <span className="truncate">{a.datei || a.storage_key || '—'}</span>
                       {a.hash
-                        ? <span className="ml-auto inline-flex items-center gap-1 text-xs text-emerald-700" title={a.hash}><Fingerprint size={12} />{a.hash.slice(0, 12)}…</span>
+                        ? <span className="ml-auto inline-flex items-center gap-1 text-xs text-status-success" title={a.hash}><Fingerprint size={12} />{a.hash.slice(0, 12)}…</span>
                         : <Badge variant="destructive" className="ml-auto">kein Hash</Badge>}
                     </div>
                   ))}
@@ -147,7 +147,7 @@ export default function NachweisraumPage() {
                   <CardContent className="space-y-1.5">
                     {detail.data.luecken.map((l, i) => (
                       <div key={i} className="flex items-start gap-2 text-sm">
-                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-amber-600 shrink-0" /> : <Info size={15} className="mt-0.5 text-sky-600 shrink-0" />}
+                        {l.schwere === 'warnung' ? <AlertTriangle size={15} className="mt-0.5 text-status-warning shrink-0" /> : <Info size={15} className="mt-0.5 text-muted-foreground shrink-0" />}
                         <span>{l.text}</span>
                       </div>
                     ))}

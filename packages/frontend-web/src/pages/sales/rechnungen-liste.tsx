@@ -31,11 +31,34 @@ import { useRechnungen, type Rechnung, type RechnungStatus } from '@/lib/api/sal
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const statusVariantMap: Record<RechnungStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
+  entwurf: 'secondary',
+  gebucht: 'default',
   offen: 'default',
   teilbezahlt: 'secondary',
   bezahlt: 'outline',
   ueberfaellig: 'destructive',
   storniert: 'destructive',
+}
+
+const statusLabelMap: Partial<Record<RechnungStatus, string>> = {
+  entwurf: 'Entwurf',
+  gebucht: 'Gebucht',
+}
+
+/** ISO-Tag eines Datums, oder null — ein leeres Datum ist kein 1970. */
+function isoTag(wert: string): string | null {
+  if (!wert) return null
+  const datum = new Date(wert)
+  if (Number.isNaN(datum.getTime())) return null
+  return datum.toISOString().split('T')[0]
+}
+
+/** `TT.MM.JJJJ`, und bei fehlendem Datum ein Strich statt "Invalid Date". */
+function deutschesDatum(wert: string): string {
+  if (!wert) return '—'
+  const datum = new Date(wert)
+  if (Number.isNaN(datum.getTime())) return wert
+  return datum.toLocaleDateString('de-DE')
 }
 
 type InvoiceListRoleFocus = 'all' | 'billing' | 'sales' | 'finance' | 'management'
@@ -70,6 +93,7 @@ export default function RechnungenListePage(): JSX.Element {
       label: t('crud.fields.status'),
       type: 'select',
       options: [
+        { value: 'entwurf', label: 'Entwurf' },
         { value: 'offen', label: t('status.pending') },
         { value: 'teilbezahlt', label: t('status.partial') },
         { value: 'bezahlt', label: t('status.paid') },
@@ -106,12 +130,13 @@ export default function RechnungenListePage(): JSX.Element {
     const filterKunde = typeof filterValues.kunde === 'string' ? filterValues.kunde : ''
     if (filterKunde && !rechnung.kunde.toLowerCase().includes(filterKunde.toLowerCase())) return false
     if (filterValues.datum) {
-      const rechnungDate = new Date(rechnung.datum).toISOString().split('T')[0]
-      if (rechnungDate !== filterValues.datum) return false
+      if (isoTag(rechnung.datum) !== filterValues.datum) return false
     }
     if (filterValues.faelligAm) {
-      const faelligDate = new Date(rechnung.faelligAm).toISOString().split('T')[0]
-      if (faelligDate !== filterValues.faelligAm) return false
+      // Ohne Faelligkeit faellt der Beleg aus dem Faelligkeitsfilter heraus —
+      // frueher warf `new Date('').toISOString()` hier eine Ausnahme und die
+      // ganze Liste blieb leer.
+      if (isoTag(rechnung.faelligAm) !== filterValues.faelligAm) return false
     }
     
     return matchesSearch && matchesStatus
@@ -231,7 +256,9 @@ export default function RechnungenListePage(): JSX.Element {
       label: t('crud.fields.invoiceNumber'),
       render: (rechnung: Rechnung) => (
         <button
-          onClick={() => navigate(`/sales/invoice-editor?id=${rechnung.id}`)}
+          // Ziel ist die Belegmaske: Sie zeigt die Positionen und je Position,
+          // aus welcher Lieferscheinposition die berechnete Menge stammt.
+          onClick={() => navigate(`/verkauf/rechnung/${rechnung.id}`)}
           className="font-medium text-blue-600 hover:underline"
         >
           {rechnung.nummer}
@@ -241,7 +268,7 @@ export default function RechnungenListePage(): JSX.Element {
     {
       key: 'datum' as const,
       label: t('crud.fields.invoiceDate'),
-      render: (rechnung: Rechnung) => new Date(rechnung.datum).toLocaleDateString('de-DE'),
+      render: (rechnung: Rechnung) => deutschesDatum(rechnung.datum),
     },
     {
       key: 'kunde' as const,
@@ -250,14 +277,33 @@ export default function RechnungenListePage(): JSX.Element {
     {
       key: 'auftragsNr' as const,
       label: t('crud.entities.salesOrder'),
-      render: (rechnung: Rechnung) => (
-        <button
-          onClick={() => navigate(`/sales/order-editor?id=${rechnung.auftragsNr}`)}
-          className="text-sm text-blue-600 hover:underline"
-        >
-          {rechnung.auftragsNr}
-        </button>
-      ),
+      // Ohne Auftragsnummer kein Knopf: Ein leerer Link, der ins Nichts fuehrt,
+      // ist schlechter als ein sichtbares "keine Angabe".
+      render: (rechnung: Rechnung) =>
+        rechnung.auftragsNr ? (
+          <button
+            onClick={() => navigate(`/sales/order-editor?id=${rechnung.auftragsNr}`)}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            {rechnung.auftragsNr}
+          </button>
+        ) : (
+          <span className="text-sm text-muted-foreground">—</span>
+        ),
+    },
+    {
+      key: 'positionen' as const,
+      label: 'Positionen',
+      // Null Positionen ist ein Befund: Eine Rechnung entsteht regulaer nur mit
+      // mindestens einer. Unbekannt (aelterer Beleg) ist nicht dasselbe wie null.
+      render: (rechnung: Rechnung) =>
+        rechnung.positionen === undefined ? (
+          <span className="text-sm text-muted-foreground">—</span>
+        ) : rechnung.positionen === 0 ? (
+          <span className="tabular-nums text-status-warning">0</span>
+        ) : (
+          <span className="tabular-nums">{rechnung.positionen}</span>
+        ),
     },
     {
       key: 'betrag' as const,
@@ -270,13 +316,15 @@ export default function RechnungenListePage(): JSX.Element {
     {
       key: 'faelligAm' as const,
       label: t('crud.fields.paymentDue'),
-      render: (rechnung: Rechnung) => new Date(rechnung.faelligAm).toLocaleDateString('de-DE'),
+      render: (rechnung: Rechnung) => deutschesDatum(rechnung.faelligAm),
     },
     {
       key: 'status' as const,
       label: t('crud.fields.status'),
       render: (rechnung: Rechnung) => (
-        <Badge variant={statusVariantMap[rechnung.status]}>{getStatusLabel(t, rechnung.status, rechnung.status)}</Badge>
+        <Badge variant={statusVariantMap[rechnung.status]}>
+          {statusLabelMap[rechnung.status] ?? getStatusLabel(t, rechnung.status, rechnung.status)}
+        </Badge>
       ),
     },
   ]

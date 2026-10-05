@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
 import { useOffenePosten } from '@/lib/api/finance-op'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 /**
  * Offene-Posten-Cockpit (DOM-FIN-004) — OP-Aging mit Buckets (nicht fällig /
@@ -22,31 +23,32 @@ export default function OffenePostenCockpitPage() {
   const [typ, setTyp] = useState('alle')
   const { data, isLoading, isFetching, refetch } = useOffenePosten(typ)
   const s = data?.summary
+  const isTouch = useTouchDevice()
 
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center gap-2">
         <Euro size={20} className="text-primary" />
         <h1 className="text-lg font-semibold">Offene Posten</h1>
-        <NativeSelect value={typ} onChange={(e) => setTyp(e.target.value)} className="h-8 w-40">
+        <NativeSelect value={typ} onChange={(e) => setTyp(e.target.value)} className="min-h-touch w-40" ariaLabel="Kontotyp">
           <option value="alle">Alle</option>
           <option value="debitor">Debitoren</option>
           <option value="kreditor">Kreditoren</option>
         </NativeSelect>
-        <Button variant="outline" size="sm" className="ml-auto" onClick={() => void refetch()} disabled={isFetching}>
+        <Button variant="outline" className="ml-auto min-h-touch" onClick={() => void refetch()} disabled={isFetching}>
           {isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
       </div>
 
-      {/* Aging-Summen */}
+      {!isTouch ? (
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <Card><CardContent className="p-3">
           <div className="text-xs text-muted-foreground">Summe offen</div>
           <div className="text-lg font-semibold tabular-nums">{eur(s?.summe_offen)}</div>
         </CardContent></Card>
         {(s?.buckets ?? []).map((b) => (
-          <Card key={b.bucket} className={b.bucket === '60+' && b.summe > 0 ? 'border-red-300' : ''}>
+          <Card key={b.bucket} className={b.bucket === '60+' && b.summe > 0 ? 'border-status-error' : ''}>
             <CardContent className="p-3">
               <div className="text-xs text-muted-foreground">{BUCKET_LABEL[b.bucket] ?? b.bucket}</div>
               <div className="text-lg font-semibold tabular-nums">{eur(b.summe)}</div>
@@ -55,8 +57,9 @@ export default function OffenePostenCockpitPage() {
           </Card>
         ))}
       </div>
+      ) : null}
       {!!s?.summe_ueberfaellig && (
-        <div className="text-sm text-red-700 inline-flex items-center gap-1">
+        <div className="text-sm text-status-error inline-flex items-center gap-1">
           <AlertTriangle size={14} /> Überfällig gesamt: {eur(s.summe_ueberfaellig)}
         </div>
       )}
@@ -92,7 +95,7 @@ export default function OffenePostenCockpitPage() {
                       <td className="px-3 py-1.5 text-right tabular-nums">{eur(i.offen)}</td>
                       <td className="px-3 py-1.5">
                         {i.ueberfaellig
-                          ? <span className="text-red-700">{i.tage_ueberfaellig} T überfällig</span>
+                          ? <span className="text-status-error">{i.tage_ueberfaellig} T überfällig</span>
                           : <span className="text-muted-foreground">nicht fällig</span>}
                       </td>
                       <td className="px-3 py-1.5">

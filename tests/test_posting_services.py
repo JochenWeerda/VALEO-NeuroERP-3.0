@@ -12,10 +12,12 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
 
 import pytest
 
+from app.core.business_time import business_today
 from app.core.exceptions import ValidationFailedError
 from app.services.sales_posting_service import SalesPostingService, _coerce_date
 from app.services.finance_transaction_service import FinanceTransactionService
@@ -24,12 +26,19 @@ from app.services.finance_transaction_service import FinanceTransactionService
 TENANT = "tenant-test"
 
 
+@pytest.fixture(autouse=True)
+def explicit_account_identity(monkeypatch):
+    monkeypatch.setattr(FinanceTransactionService, "check_period_open", lambda self, period: None)
+    monkeypatch.setattr(FinanceTransactionService, "account_id_for_number", lambda self, number: "id-" + number)
+
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _make_fin_mock():
     """Return a mock FinanceTransactionService whose create() records args."""
     fin = MagicMock(spec=FinanceTransactionService)
     fin.create.return_value = MagicMock(id="je-001", entry_number="WA-LS-001")
+    fin.account_id_for_number.side_effect = lambda number: "id-" + number
     return fin
 
 
@@ -102,10 +111,10 @@ def test_warenabgang_creates_entry_with_correct_accounts():
     assert kwargs["period"] == "2026-03"
     lines = kwargs["lines"]
     assert len(lines) == 2
-    debit_line = next(l for l in lines if l["debit_amount"] > 0)
-    credit_line = next(l for l in lines if l["credit_amount"] > 0)
-    assert debit_line["account_id"] == SalesPostingService.ACCOUNT_COGS   # 7000
-    assert credit_line["account_id"] == SalesPostingService.ACCOUNT_INVENTORY  # 2000
+    debit_line = next(line for line in lines if line["debit_amount"] > 0)
+    credit_line = next(line for line in lines if line["credit_amount"] > 0)
+    assert debit_line["account_id"] == "id-" + SalesPostingService.ACCOUNT_COGS   # 7000
+    assert credit_line["account_id"] == "id-" + SalesPostingService.ACCOUNT_INVENTORY  # 2000
     assert debit_line["debit_amount"] == pytest.approx(500.0)
     assert credit_line["credit_amount"] == pytest.approx(500.0)
 
@@ -120,7 +129,7 @@ def test_warenabgang_aggregates_multiple_positions():
     svc.book_warenabgang("dn-1", "LS-002", positions, delivery_date="2026-03-15")
     kwargs = fin.create.call_args.kwargs
     lines = kwargs["lines"]
-    total = next(l for l in lines if l["debit_amount"] > 0)["debit_amount"]
+    total = next(line for line in lines if line["debit_amount"] > 0)["debit_amount"]
     assert total == pytest.approx(80.0)  # 3*10 + 2*25
 
 
@@ -132,16 +141,22 @@ def test_warenabgang_uses_fallback_field_names():
                          [{"quantity": 4, "cost_price": 50}],
                          delivery_date="2026-01-10")
     kwargs = fin.create.call_args.kwargs
-    total = next(l for l in kwargs["lines"] if l["debit_amount"] > 0)["debit_amount"]
+    total = next(line for line in kwargs["lines"] if line["debit_amount"] > 0)["debit_amount"]
     assert total == pytest.approx(200.0)
 
 
-def test_warenabgang_falls_back_to_today_when_no_date():
+def test_warenabgang_falls_back_to_business_day_when_no_date():
+    """Fallback ist der Geschaeftstag in Betriebszeitzone, nicht das UTC-Datum.
+
+    Mit UTC landete jede Buchung zwischen 00:00 und 02:00 Ortszeit auf dem
+    Vortag — am Monatsersten in der Vorperiode.
+    """
     fin = _make_fin_mock()
     svc = _make_svc(fin)
     svc.book_warenabgang("dn-1", "LS-004", [{"qty": 1, "unit_price": 50}])
     kwargs = fin.create.call_args.kwargs
-    assert kwargs["entry_date"] == date.today()
+    assert kwargs["entry_date"] == business_today()
+    assert kwargs["period"] == business_today().strftime("%Y-%m")
 
 
 # ── book_ausgangsrechnung ─────────────────────────────────────────────────────
@@ -170,10 +185,10 @@ def test_ausgangsrechnung_with_tax_creates_three_lines():
     kwargs = fin.create.call_args.kwargs
     lines = kwargs["lines"]
     assert len(lines) == 3
-    accounts = {l["account_id"] for l in lines}
-    assert SalesPostingService.ACCOUNT_RECEIVABLES in accounts  # 1200
-    assert SalesPostingService.ACCOUNT_REVENUE in accounts      # 8400
-    assert SalesPostingService.ACCOUNT_TAX in accounts          # 1776
+    accounts = {line["account_id"] for line in lines}
+    assert "id-" + SalesPostingService.ACCOUNT_RECEIVABLES in accounts  # 1200
+    assert "id-" + SalesPostingService.ACCOUNT_REVENUE in accounts      # 8400
+    assert "id-" + SalesPostingService.ACCOUNT_TAX in accounts          # 1776
 
 
 def test_ausgangsrechnung_correct_amounts():
@@ -182,7 +197,7 @@ def test_ausgangsrechnung_correct_amounts():
     svc.book_ausgangsrechnung("RE-003", date(2026, 4, 1), 500, 95, 595)
     kwargs = fin.create.call_args.kwargs
     lines = kwargs["lines"]
-    debit = next(l for l in lines if l.get("debit_amount", 0) > 0)
+    debit = next(line for line in lines if line.get("debit_amount", 0) > 0)
     assert debit["debit_amount"] == pytest.approx(595.0)
     assert kwargs["period"] == "2026-04"
 
@@ -221,10 +236,13 @@ def test_obligo_creates_entry_correct_accounts():
         assert kwargs["entry_number"] == "OBLIGO-BE-042"
         assert kwargs["source"] == "procurement"
         lines = kwargs["lines"]
-        debit = next(l for l in lines if l["debit_amount"] > 0)
-        credit = next(l for l in lines if l["credit_amount"] > 0)
-        assert debit["account_id"] == "6000"
-        assert credit["account_id"] == "1600"
+        debit = next(line for line in lines if line["debit_amount"] > 0)
+        credit = next(line for line in lines if line["credit_amount"] > 0)
+        # Einkauf Handelswaren, nicht 6000: Das ist Loehne und Gehaelter, und
+        # Wareneinkauf darauf vermischt Personal- mit Materialaufwand. Die
+        # GoBD verlangen Klarheit (Rz. 30 ff.) — ein Konto, eine Sache.
+        assert debit["account_id"] == "id-5100"
+        assert credit["account_id"] == "id-1600"
         assert debit["debit_amount"] == pytest.approx(1500.0)
         assert credit["credit_amount"] == pytest.approx(1500.0)
 
@@ -277,10 +295,10 @@ def test_wareneingang_creates_entry_correct_accounts():
         assert kwargs["source"] == "goods_receipt"
         assert kwargs["period"] == "2026-03"
         lines = kwargs["lines"]
-        debit = next(l for l in lines if l["debit_amount"] > 0)
-        credit = next(l for l in lines if l["credit_amount"] > 0)
-        assert debit["account_id"] == "2000"
-        assert credit["account_id"] == "1600"
+        debit = next(line for line in lines if line["debit_amount"] > 0)
+        credit = next(line for line in lines if line["credit_amount"] > 0)
+        assert debit["account_id"] == "id-2000"
+        assert credit["account_id"] == "id-1600"
         assert debit["debit_amount"] == pytest.approx(200.0)
 
 
@@ -292,7 +310,7 @@ def test_wareneingang_accepts_alternative_field_names():
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j4")) as mock_create:
         svc._book_wareneingang("r-002", "2026-04-01", items)
         kwargs = mock_create.call_args.kwargs
-        total = next(l for l in kwargs["lines"] if l["debit_amount"] > 0)["debit_amount"]
+        total = next(line for line in kwargs["lines"] if line["debit_amount"] > 0)["debit_amount"]
         assert total == pytest.approx(150.0)
 
 
@@ -358,10 +376,10 @@ def test_self_billing_creates_three_lines_with_vat():
         assert kwargs["period"] == "2026-03"
         lines = kwargs["lines"]
         assert len(lines) == 3
-        accounts = {l["account_id"] for l in lines}
-        assert "3100" in accounts   # Verbindlichkeit Lieferant
-        assert "4000" in accounts   # Wareneinkauf
-        assert "1576" in accounts   # Vorsteuer
+        accounts = {line["account_id"] for line in lines}
+        assert "id-3100" in accounts   # Verbindlichkeit Lieferant
+        assert "id-4000" in accounts   # Wareneinkauf
+        assert "id-1576" in accounts   # Vorsteuer
 
 
 def test_self_billing_debit_equals_gross():
@@ -370,8 +388,8 @@ def test_self_billing_debit_equals_gross():
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb2")) as mock_create:
         svc._book_self_billing_credit_note(inv, date(2026, 4, 1))
         lines = mock_create.call_args.kwargs["lines"]
-        debit = next(l for l in lines if l["debit_amount"] > 0)
-        assert debit["account_id"] == "3100"
+        debit = next(line for line in lines if line["debit_amount"] > 0)
+        assert debit["account_id"] == "id-3100"
         assert debit["debit_amount"] == pytest.approx(595.0)
 
 
@@ -382,16 +400,17 @@ def test_self_billing_two_lines_without_vat():
         svc._book_self_billing_credit_note(inv, date(2026, 5, 1))
         lines = mock_create.call_args.kwargs["lines"]
         assert len(lines) == 2
-        assert not any(l["account_id"] == "1576" for l in lines)
+        assert not any(line["account_id"] == "id-1576" for line in lines)
 
 
-def test_self_billing_uses_today_when_no_delivery_date():
+def test_self_billing_uses_business_day_when_no_delivery_date():
     svc = _make_harvest_svc()
     inv = _make_invoice(net=100, vat=0, gross=100)
     with patch.object(FinanceTransactionService, "create", return_value=MagicMock(id="j-sb4")) as mock_create:
         svc._book_self_billing_credit_note(inv, None)
         kwargs = mock_create.call_args.kwargs
-        assert kwargs["entry_date"] == date.today()
+        assert kwargs["entry_date"] == business_today()
+        assert kwargs["period"] == business_today().strftime("%Y-%m")
 
 
 def test_self_billing_is_nonblocking_on_error():
@@ -435,8 +454,16 @@ def test_storno_reverse_sets_original_to_reversed():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = original
-    db.query.return_value.filter.return_value.all.return_value = [line]
-    db.execute.return_value.fetchone.return_value = (6,)
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = original
+    original.total_debit = original.total_credit = line.debit
+    line.tenant_id = TENANT
+    line.debit_amount, line.credit_amount = line.debit, line.credit
+    counter = SimpleNamespace(tenant_id=TENANT, account_id="contra", debit=Decimal("0"),
+        debit_amount=Decimal("0"), credit=line.debit, credit_amount=line.debit, description="Counter")
+    db.query.return_value.filter.return_value.all.return_value = [line,counter]
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = [line,counter]
+    db.execute.return_value.all.return_value = [("1200",),("contra",)]
+    db.execute.return_value.fetchone.side_effect = [("read committed",),(5,5,5,0,"a"*64)]
 
     added = []
     db.add.side_effect = lambda obj: added.append(obj)
@@ -446,6 +473,8 @@ def test_storno_reverse_sets_original_to_reversed():
          patch("app.services.finance_transaction_service.JournalEntryLine"):
         mock_reversal = MagicMock()
         mock_reversal.id = "e-rev"
+        mock_reversal.tenant_id = TENANT
+        mock_reversal.hash_prev = None
         mock_reversal.sequence_number = None
         mock_reversal.hash_current = None
         MockEntry.return_value = mock_reversal
@@ -464,6 +493,7 @@ def test_storno_reverse_raises_on_draft():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = entry
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = entry
     db.execute.return_value.fetchone.return_value = (1,)
 
     svc = FinanceTransactionService(db, TENANT)
@@ -483,8 +513,16 @@ def test_storno_reversal_lines_are_swapped():
 
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = original
-    db.query.return_value.filter.return_value.all.return_value = [line]
-    db.execute.return_value.fetchone.return_value = (7,)
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.first.return_value = original
+    original.total_debit = original.total_credit = line.debit
+    line.tenant_id = TENANT
+    line.debit_amount, line.credit_amount = line.debit, line.credit
+    counter = SimpleNamespace(tenant_id=TENANT, account_id="contra", debit=Decimal("0"),
+        debit_amount=Decimal("0"), credit=line.debit, credit_amount=line.debit, description="Counter")
+    db.query.return_value.filter.return_value.all.return_value = [line,counter]
+    db.query.return_value.filter.return_value.populate_existing.return_value.with_for_update.return_value.all.return_value = [line,counter]
+    db.execute.return_value.all.return_value = [("1200",),("contra",)]
+    db.execute.return_value.fetchone.side_effect = [("read committed",),(6,6,6,0,"a"*64)]
 
     line_kwargs_captured = []
 
@@ -499,6 +537,8 @@ def test_storno_reversal_lines_are_swapped():
          patch("app.services.finance_transaction_service.JournalEntryLine") as MockLine:
         mock_rev = MagicMock()
         mock_rev.id = "e-rev"
+        mock_rev.tenant_id = TENANT
+        mock_rev.hash_prev = None
         mock_rev.sequence_number = None
         mock_rev.hash_current = None
         MockEntry.return_value = mock_rev
@@ -506,7 +546,7 @@ def test_storno_reversal_lines_are_swapped():
 
         svc.reverse("e-swap", reason="test")
 
-    assert len(line_kwargs_captured) == 1
+    assert len(line_kwargs_captured) == 2
     rev_line = line_kwargs_captured[0]
     # Debit and credit are swapped
     assert rev_line["debit"] == line.credit    # 0

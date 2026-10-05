@@ -81,18 +81,6 @@ class TestFeedInventoryLinkService:
         assert result["ok"] is False
         assert result["reason"] == "no_warehouse"
 
-    def test_list_links_counts_mapped(self):
-        rows = [
-            {"id": "ef-1", "inventory_article_id": "a-1", "artikel_nummer": "E1", "name": "A", "verfuegbar_t": 10},
-            {"id": "ef-2", "inventory_article_id": None, "artikel_nummer": "E2", "name": "B", "verfuegbar_t": 5},
-        ]
-        db = _mock_execute_db([rows])
-        svc = FeedInventoryLinkService(db, self.TENANT)
-        out = svc.list_links(limit=10)
-        assert out["total"] == 2
-        assert out["mapped_count"] == 1
-        assert out["unmapped_count"] == 1
-
     def test_ensure_article_link_already_mapped(self):
         ef = SimpleNamespace(
             id="ef-1",

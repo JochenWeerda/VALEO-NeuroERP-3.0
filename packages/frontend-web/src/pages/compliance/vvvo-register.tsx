@@ -56,7 +56,7 @@ export default function VVVORegisterPage(): JSX.Element {
   }
 
   const columns = [
-    { key: 'betriebsname' as const, label: 'Betrieb', render: (v: VVVOBetrieb) => <button onClick={() => navigate(`/crm/betrieb/${v.id}`)} className="font-medium text-blue-600 hover:underline">{v.betriebsname}</button> },
+    { key: 'betriebsname' as const, label: 'Betrieb', render: (v: VVVOBetrieb) => <button type="button" onClick={() => navigate(`/crm/betrieb/${v.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">{v.betriebsname}</button> },
     { key: 'vvvo' as const, label: 'VVVO-Betriebsnummer', render: (v: VVVOBetrieb) => <span className="font-mono font-bold text-lg">{v.vvvo}</span> },
     { key: 'bundesland' as const, label: 'Bundesland' },
     { key: 'tierart' as const, label: 'Tierart', render: (v: VVVOBetrieb) => <Badge variant="outline">{v.tierart}</Badge> },
@@ -70,7 +70,7 @@ export default function VVVORegisterPage(): JSX.Element {
         <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">VVVO-Register</h1><p className="text-muted-foreground">Viehverkehrsverordnung - Betriebsnummern</p></div><Button onClick={() => navigate('/crm/betriebsprofil/neu')} className="gap-2"><Plus className="h-4 w-4" />Betrieb erfassen</Button></div>
         <div className="grid gap-4 md:grid-cols-3">
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Betriebe Gesamt</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{gefilterteBetriebe.length}</span></CardContent></Card>
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{aktiveBetriebe.length}</span></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-status-success">{aktiveBetriebe.length}</span></CardContent></Card>
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bundeslaender</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold">{new Set(gefilterteBetriebe.map((v) => v.bundesland)).size}</span></CardContent></Card>
         </div>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">

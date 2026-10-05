@@ -44,8 +44,12 @@ async def call_tool(request: ToolCallRequest) -> ToolCallResponse:
             result=result,
             status="success"
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except NotImplementedError as exc:
+        raise HTTPException(status_code=501, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="MCP tool execution failed") from exc
 
 
 @router.get("/resources")

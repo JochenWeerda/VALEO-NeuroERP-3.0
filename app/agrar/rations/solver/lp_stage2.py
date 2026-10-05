@@ -258,6 +258,77 @@ def build_policy_band_lp_extension(
     return out
 
 
+# DLG 01|2025 / GfE 2023 Kohlenhydrat- und Ca:P-Zielkorridore (nur Anzeige-Tachos,
+# NICHT penalty-/LP-bindend). Quellen:
+#   - Staerke/Zucker: DLG-Information 01|2025 (Kohlenhydratversorgung Milchkuh)
+#   - Ca:P-Verhaeltnis: GfE 2023 (Mengenelement-Verhaeltnis)
+# Tupel: (Anzeigename, value_key, lo, hi, unit, min_halfwidth)
+DISPLAY_GAUGE_SPECS: Tuple[Tuple[str, str, Optional[float], Optional[float], str, float], ...] = (
+    ("Stärke", "staerke_kgdm", 150.0, 250.0, "g/kg TM", 20.0),
+    ("Zucker", "zucker_kgdm", 30.0, 70.0, "g/kg TM", 10.0),
+    ("Fett (XL)", "xl_kgdm", 25.0, 50.0, "g/kg TM", 5.0),
+    ("Ca:P-Verhältnis", "ca_p_ratio", 1.5, 2.0, "", 0.2),
+)
+
+
+def display_gauge_bands(values: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Zusaetzliche Anzeige-Tachos (Staerke/Zucker/Fett/Ca:P) aus den Ist-Dichten.
+
+    Diese Baender werden ausschliesslich fuer die Cockpit-Tacho-Reihe erzeugt und
+    fliessen NICHT in constraint_status oder penalty_summary ein (kein LP-Bezug,
+    keine Strafkosten). Fehlt ein Ist-Wert, wird der Tacho ausgelassen.
+    """
+    dmi = float(values.get("dmi_kg") or 0.0)
+    ca = values.get("ca_g")
+    p = values.get("p_g")
+    derived: Dict[str, Optional[float]] = {
+        "staerke_kgdm": (float(values["staerke_g"]) / dmi) if (values.get("staerke_g") is not None and dmi > 0) else None,
+        "zucker_kgdm": (float(values["zucker_g"]) / dmi) if (values.get("zucker_g") is not None and dmi > 0) else None,
+        "xl_kgdm": values.get("xl_kgdm"),
+        "ca_p_ratio": (float(ca) / float(p)) if (ca is not None and p not in (None, 0)) else None,
+    }
+    out: List[Dict[str, Any]] = []
+    for name, key, lo, hi, unit, min_hw in DISPLAY_GAUGE_SPECS:
+        actual = derived.get(key)
+        if actual is None:
+            continue
+        halfwidth = max(min_hw, 0.5 * ((hi or 0) - (lo or 0))) if (lo is not None and hi is not None) else min_hw
+        if lo is not None and actual < lo:
+            violation = lo - actual
+            direction = "min"
+            target_display = lo
+            status = "violated"
+        elif hi is not None and actual > hi:
+            violation = actual - hi
+            direction = "max"
+            target_display = hi
+            status = "violated"
+        else:
+            violation = 0.0
+            target_display = 0.5 * ((lo or 0) + (hi or 0)) if (lo is not None and hi is not None) else (lo if lo is not None else hi)
+            direction = "target"
+            status = "ok"
+        deviation_norm = violation / halfwidth if halfwidth > 0 else 0.0
+        out.append({
+            "name": name,
+            "kind": "weich",
+            "class": "C",
+            "unit": unit,
+            "target": round(float(target_display or 0.0), 3),
+            "target_min": lo,
+            "target_max": hi,
+            "direction": direction,
+            "actual": round(float(actual), 3),
+            "difference": round(float(actual) - float(target_display or 0.0), 3),
+            "fulfilled": deviation_norm < 1e-6,
+            "deviation_norm": round(deviation_norm, 3),
+            "penalty_cost": 0.0,
+            "status": status,
+            "source": "display_only",
+        })
+    return out
+
+
 def build_policy_profile_evaluation(
     profile_key: Optional[str],
     targets: Optional[Dict[str, Any]],

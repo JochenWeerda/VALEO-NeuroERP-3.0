@@ -97,7 +97,7 @@ export default function ContractsPanel({ customer, documents, onAddContract }: C
           <Landmark size={15} className="text-primary" />
           <h3 className="font-semibold text-sm">Getreidekontrakte &amp; Silo-Abnahmeverträge</h3>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setShowAddForm(!showAddForm)} className="gap-1">
+        <Button variant="outline" onClick={() => setShowAddForm(!showAddForm)} className="gap-1">
           {showAddForm ? <X size={13} /> : <Plus size={13} />}
           {showAddForm ? 'Schließen' : 'Silokontrakt registrieren'}
         </Button>
@@ -135,7 +135,7 @@ export default function ContractsPanel({ customer, documents, onAddContract }: C
           </div>
           <div className="col-span-12 border-t border-dashed border-border pt-2 flex items-center gap-3 justify-between">
             <Input className="w-2/3" value={cSpecs} onChange={e => setCSpecs(e.target.value)} placeholder="Qualitätsspezifikationen (z.B. Fallzahl >220s)" />
-            <Button type="submit" size="sm" className="gap-1.5">
+            <Button type="submit" className="gap-1.5">
               <Check size={13} />
               Silo-Abschluss sichern
             </Button>

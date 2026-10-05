@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export interface LazyTabItem {
@@ -10,16 +10,24 @@ export interface LazyTabItem {
 }
 
 interface LazyTabsProps {
+  value?: string
   tabs: LazyTabItem[]
   defaultValue?: string
   onValueChange?: (_value: string) => void
   className?: string
+  /** "register" = Belegregister-Optik (Akten/Belege); "default" = Segmented-Control. */
+  variant?: 'default' | 'register'
 }
 
-export function LazyTabs({ tabs, defaultValue, onValueChange, className }: LazyTabsProps): JSX.Element {
+export function LazyTabs({ value, tabs, defaultValue, onValueChange, className, variant = 'default' }: LazyTabsProps): JSX.Element {
   const firstKey = tabs[0]?.key ?? ''
-  const [activeTab, setActiveTab] = useState(defaultValue ?? firstKey)
+  const [internalTab, setActiveTab] = useState(defaultValue ?? firstKey)
+  const activeTab = value ?? internalTab
   const [visited, setVisited] = useState<Set<string>>(() => new Set(activeTab ? [activeTab] : []))
+
+  useEffect(() => {
+    setVisited(previous => previous.has(activeTab) ? previous : new Set([...previous, activeTab]))
+  }, [activeTab])
 
   const columnsClass = useMemo(() => {
     const count = Math.min(Math.max(tabs.length, 1), 6)
@@ -39,7 +47,11 @@ export function LazyTabs({ tabs, defaultValue, onValueChange, className }: LazyT
 
   return (
     <Tabs value={activeTab} onValueChange={handleChange} className={className}>
-      <TabsList className="grid w-full" style={{ gridTemplateColumns: columnsClass }}>
+      <TabsList
+        variant={variant}
+        className={variant === 'register' ? undefined : 'grid w-full'}
+        style={variant === 'register' ? undefined : { gridTemplateColumns: columnsClass }}
+      >
         {tabs.map((tab) => (
           <TabsTrigger key={tab.key} value={tab.key}>
             {tab.label}
@@ -49,7 +61,7 @@ export function LazyTabs({ tabs, defaultValue, onValueChange, className }: LazyT
       {tabs.map((tab) => {
         const shouldRender = tab.lazy === false || tab.key === activeTab || (tab.keepAlive === true && visited.has(tab.key))
         return (
-          <TabsContent key={tab.key} value={tab.key} className="mt-4">
+          <TabsContent key={tab.key} value={tab.key} forceMount={tab.keepAlive && shouldRender ? true : undefined} hidden={tab.key !== activeTab} className="mt-4">
             {shouldRender ? (typeof tab.content === 'function' ? tab.content() : tab.content) : null}
           </TabsContent>
         )

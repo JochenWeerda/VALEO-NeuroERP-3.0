@@ -5,10 +5,9 @@ import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
-import { Badge } from '@/components/ui/badge'
+import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
-import { resolveBusinessPartnerIdForCrmCustomer } from '@/lib/crm/fetch-customer-chef-hints'
 import { recordArrayFromResponse, renderValue, stringValue } from '@/lib/record-utils'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -68,7 +67,7 @@ const createKundenListConfig = (t: TFunction, entityTypeLabel: string): ListConf
       key: 'email',
       label: t('crud.fields.email'),
       labelKey: 'crud.fields.email',
-      render: (value) => value ? <a href={`mailto:${value}`} className="text-blue-600 hover:underline">{value}</a> : '-'
+      render: (value) => value ? <a href={`mailto:${value}`} className="min-h-11 inline-flex items-center text-primary touch-manipulation">{value}</a> : '-'
     },
     {
       key: 'umsatzGesamt',
@@ -91,14 +90,14 @@ const createKundenListConfig = (t: TFunction, entityTypeLabel: string): ListConf
       sortable: true,
       filterable: true,
       render: (value) => {
-        const colors = {
-          'ausgezeichnet': 'bg-green-100 text-green-800',
-          'gut': 'bg-blue-100 text-blue-800',
-          'mittel': 'bg-yellow-100 text-yellow-800',
-          'schlecht': 'bg-red-100 text-red-800',
-          'unklar': 'bg-gray-100 text-gray-800'
+        const colors: Record<string, BadgeVariant> = {
+          'ausgezeichnet': 'success',
+          'gut': 'info',
+          'mittel': 'warning',
+          'schlecht': 'error',
+          'unklar': 'muted'
         }
-        return <Badge className={colors[value as keyof typeof colors] || colors.unklar}>{value}</Badge>
+        return <Badge variant={colors[value as keyof typeof colors] || colors.unklar}>{value}</Badge>
       }
     },
     {
@@ -368,28 +367,8 @@ export default function KundenListePage(): JSX.Element {
   }
 
   const handleEdit = (item: KundenListItem) => {
-    void (async () => {
-      // Verbrückte Kunden -> BP-Kundenstamm; sonst Schnellauswahl-Detail (echter Stamm).
-      const bp = item.business_partner_id ?? null
-      if (bp) {
-        navigate(`/verkauf/kunden-stamm/${bp}`)
-        return
-      }
-      try {
-        const partnerId = await resolveBusinessPartnerIdForCrmCustomer({
-          crmCustomerId: item.id,
-          customerNumber: item.customer_number || stringValue(item.customerNumber) || null,
-          businessPartnerIdHint: null,
-        })
-        if (partnerId) {
-          navigate(`/verkauf/kunden-stamm/${partnerId}`)
-          return
-        }
-      } catch {
-        /* Fallback unten */
-      }
-      navigate('/crm/kunden-schnellauswahl')
-    })()
+    const target = item.kunden_nr || item.customer_number || item.id
+    navigate(`/crm/kunden/${encodeURIComponent(String(target))}`)
   }
 
   const handleDelete = async (item: KundenListItem) => {

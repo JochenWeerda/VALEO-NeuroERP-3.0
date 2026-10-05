@@ -13,6 +13,7 @@ import { useListActions } from '@/hooks/useListActions'
 import { businessPartnerService, type BusinessPartnerEnvelope } from '@/lib/services/business-partner-service'
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 
 type CustomerRow = {
   id: string
@@ -52,6 +53,7 @@ function mapLookupToRow(k: Record<string, unknown>): CustomerRow {
 
 export default function KundenListePage(): JSX.Element {
   const navigate = useNavigate()
+  const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const searchFromUrl = searchParams.get('search') ?? ''
   const [searchTerm, setSearchTerm] = useState(searchFromUrl)
@@ -117,8 +119,9 @@ export default function KundenListePage(): JSX.Element {
       label: 'Kunde',
       render: (customer: CustomerRow) => (
         <button
-          onClick={() => navigate(customer.id.includes('-') ? `/verkauf/kunden-stamm/${customer.id}` : '/crm/kunden-schnellauswahl')}
-          className="font-medium text-blue-600 hover:underline"
+          type="button"
+          onClick={() => navigate(`/crm/kunden/${encodeURIComponent(customer.id)}`)}
+          className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline"
         >
           {customer.name}
         </button>
@@ -153,23 +156,60 @@ export default function KundenListePage(): JSX.Element {
 
   return (
     <div className="flex flex-col">
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 p-3 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">Kunden</h1>
-          <p className="text-muted-foreground">Konsolidierter Kundenstamm — Business Partner (Rolle Kunde) + operativer Stamm</p>
+          <p className="text-muted-foreground">Suchen, öffnen, unterwegs anlegen. Die Lage steht unter der Liste.</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/crm/kunden-karte')} className="gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => navigate('/crm/kunden-karte')} className="min-h-touch gap-2 touch-manipulation">
             <MapPin className="h-4 w-4" />
             Karte
           </Button>
-          <Button onClick={() => navigate('/verkauf/kunde/neu')} className="gap-2">
+          <Button onClick={() => navigate('/verkauf/kunde/neu')} className="min-h-touch gap-2 touch-manipulation">
             <Plus className="h-4 w-4" />
             Neuer Kunde
           </Button>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Suche</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                ref={searchRef}
+                placeholder="Suche nach Kundennummer oder Name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
+                aria-label="Kunden suchen"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
+                <FileDown className="h-4 w-4" />
+                Export
+              </Button>
+              <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handlePrint}>
+                <FileText className="h-4 w-4" />
+                Drucken
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="overflow-x-auto pt-6">
+          <DataTable data={customers} columns={columns} />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -178,7 +218,7 @@ export default function KundenListePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
+              <Users className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{customers.length}</span>
             </div>
           </CardContent>
@@ -189,7 +229,7 @@ export default function KundenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Aktive Kunden</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{customers.filter((c) => c.status === 'active').length}</span>
+            <span className="text-2xl font-bold text-status-success">{customers.filter((c) => c.status === 'active').length}</span>
           </CardContent>
         </Card>
 
@@ -198,46 +238,12 @@ export default function KundenListePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gesperrt/Inaktiv</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{customers.filter((c) => c.status !== 'active').length}</span>
+            <span className="text-2xl font-bold text-status-warning">{customers.filter((c) => c.status !== 'active').length}</span>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Suche</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                ref={searchRef}
-                placeholder="Suche nach Kundennummer oder Name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
-              <FileDown className="h-4 w-4" />
-              Export
-            </Button>
-            <Button variant="outline" className="gap-2" onClick={handlePrint}>
-              <FileText className="h-4 w-4" />
-              Drucken
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={customers} columns={columns} />
-        </CardContent>
-      </Card>
     </div>
-    <KeyboardShortcutBar shortcuts={shortcuts} />
+    {!isTouch ? <KeyboardShortcutBar shortcuts={shortcuts} /> : null}
     </div>
   )
 }

@@ -3,7 +3,7 @@ Journal entry ORM models in a dedicated module to avoid registry name clashes
 with Pydantic/schema classes named JournalEntry/JournalEntryLine.
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, DECIMAL
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, DECIMAL, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -38,7 +38,10 @@ class JournalEntryLine(Base):
 class JournalEntry(Base):
     """Journal entry model – nutzt domain_erp.journal_entries (eine Tabelle für List + Connector)."""
     __tablename__ = "journal_entries"
-    __table_args__ = {"schema": "domain_erp", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "entry_number", name="uq_journal_tenant_number"),
+        {"schema": "domain_erp", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=uuid7)
     entry_number = Column(String(20), nullable=False)
@@ -47,6 +50,7 @@ class JournalEntry(Base):
     description = Column(String(200), nullable=False)
     reference = Column(String(50), nullable=True)
     source = Column(String(50), nullable=True)
+    currency = Column(String(3).evaluates_none(), nullable=True, default="EUR")
     document_type = Column(String(30), nullable=True)  # RE, GU, AB etc. (GoBD Belegart)
     status = Column(String(20), default="draft")
     total_debit = Column(DECIMAL(15, 2), default=0)

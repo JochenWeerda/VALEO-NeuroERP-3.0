@@ -91,7 +91,7 @@ async def create_branch(
             INSERT INTO domain_shared.branches (
                 id, tenant_id, branch_number, name, address, is_active, created_at, updated_at
             ) VALUES (
-                :id, :tenant_id, :branch_number, :name, :address::jsonb, :is_active, NOW(), NOW()
+                :id, :tenant_id, :branch_number, :name, CAST(:address AS jsonb), :is_active, NOW(), NOW()
             )
         """),
         {
@@ -166,12 +166,11 @@ async def update_branch(
     updates["tenant_id"] = tenant_id
     
     db.execute(
-        # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
         text(f"""
             UPDATE domain_shared.branches 
             SET {set_clause}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
-        """),
+        """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         updates
     )
     db.commit()

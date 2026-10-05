@@ -108,12 +108,11 @@ class DocflowService:
             where.append("doc_type = :doc_type")
             params["doc_type"] = doc_type
         rows = self.db.execute(
-            # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
             text(f"""
                 SELECT id FROM domain_docflow.document_headers
                 WHERE {" AND ".join(where)}
                 ORDER BY created_at DESC LIMIT :limit
-            """),
+            """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).mappings().all()
         return [str(r["id"]) for r in rows]
@@ -590,7 +589,7 @@ class DocflowService:
                 set_parts.append(f"{field} = :{field}")
                 updates[field] = val
         self.db.execute(
-            text(f"UPDATE domain_docflow.document_headers SET {', '.join(set_parts)} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec S608 — reviewed-safe: column names code-controlled, values parameterized
+            text(f"UPDATE domain_docflow.document_headers SET {', '.join(set_parts)} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             updates,
         )
         if payload.items is not None:

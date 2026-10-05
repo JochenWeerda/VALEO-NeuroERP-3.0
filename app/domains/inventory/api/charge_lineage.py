@@ -121,7 +121,7 @@ async def list_charge_lineage(
             WHERE {" AND ".join(where)}
             ORDER BY created_at DESC
             LIMIT :limit
-            """
+            """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         ),
         params,
     ).mappings().all()

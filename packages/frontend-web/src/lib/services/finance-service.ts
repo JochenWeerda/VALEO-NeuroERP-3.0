@@ -215,7 +215,7 @@ export const financeService = {
       pages: number
       has_next: boolean
       has_prev: boolean
-    }>('/api/v1/chart-of-accounts/', { params })
+    }>('/api/v1/finance/chart-of-accounts/', { params })
     return response.data
   },
 
@@ -228,22 +228,22 @@ export const financeService = {
   },
 
   async getAccount(id: string) {
-    const response = await apiClient.get<{ data: Account }>(`/api/v1/chart-of-accounts/${id}`)
+    const response = await apiClient.get<{ data: Account }>(`/api/v1/finance/chart-of-accounts/${id}`)
     return response.data.data
   },
 
   async createAccount(data: AccountCreate) {
-    const response = await apiClient.post<{ data: Account }>('/api/v1/chart-of-accounts/', data)
+    const response = await apiClient.post<{ data: Account }>('/api/v1/finance/chart-of-accounts/', data)
     return response.data.data
   },
 
   async updateAccount(id: string, data: AccountUpdate) {
-    const response = await apiClient.put<{ data: Account }>(`/api/v1/chart-of-accounts/${id}`, data)
+    const response = await apiClient.put<{ data: Account }>(`/api/v1/finance/chart-of-accounts/${id}`, data)
     return response.data.data
   },
 
   async deleteAccount(id: string) {
-    await apiClient.delete(`/api/v1/chart-of-accounts/${id}`)
+    await apiClient.delete(`/api/v1/finance/chart-of-accounts/${id}`)
   },
 
   // Journal Entries

@@ -33,7 +33,7 @@ export default function AnlagenPage(): JSX.Element {
       key: 'anlagennr' as const,
       label: 'Anlagen-Nr',
       render: (a: AnlageDetail) => (
-        <button onClick={() => navigate(`/fibu/anlage/${a.id}`)} className="font-medium text-blue-600 hover:underline font-mono">
+        <button type="button" onClick={() => navigate(`/fibu/anlage/${a.id}`)} className="min-h-11 font-mono font-medium text-primary touch-manipulation">
           {a.anlagennr}
         </button>
       ),
@@ -90,7 +90,7 @@ export default function AnlagenPage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-blue-600" />
+              <Building2 className="h-5 w-5 text-muted-foreground" />
               <span className="text-2xl font-bold">{list.length}</span>
             </div>
           </CardContent>
@@ -112,7 +112,7 @@ export default function AnlagenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Kumulierte AfA</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">
+            <span className="text-2xl font-bold text-status-warning">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtAfa)}
             </span>
           </CardContent>
@@ -123,7 +123,7 @@ export default function AnlagenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Buchwert Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
+            <span className="text-2xl font-bold text-status-success">
               {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtBuchwert)}
             </span>
           </CardContent>
