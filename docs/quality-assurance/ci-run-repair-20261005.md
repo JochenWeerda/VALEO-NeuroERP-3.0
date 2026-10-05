@@ -55,6 +55,26 @@ Der lokale Chromium-Lauf scheiterte bereits beim page.goto der Startseite
 an 90 Sekunden Timeout, obwohl der Vite-Server HTTP 200 liefert. Er wurde
 beendet; dieses lokale Ergebnis ist keine WCAG-Freigabe.
 
+Nachtrag: Der Timeout ist auf die unbegrenzte automatische Tailwind-Quellensuche
+zurueckgefuehrt. Die Browserdiagnose zeigte ausschliesslich `src/index.css` als
+offene Anfrage. Identischer PostCSS-Eingang mit expliziten Quellen kompiliert
+in 755 ms (279363 Zeichen). Der Minimalhunk verwendet `source(none)` und
+registriert `src/` sowie `index.html` relativ zur zentralen CSS-Datei;
+Layout-/Token-WIP im gemeinsamen Arbeitsbaum wird nicht uebernommen.
+Alle acht bestehenden WCAG-2.2-AA-Routen bestehen auf diesem isolierten Stand
+in 21,5 Sekunden, ohne erhoehte Timeouts oder ausgeschlossene axe-Regeln.
+Der vollstaendige Produktionsbuild transformiert 4184 Module und besteht
+in 58,44 Sekunden. Die generierte zentrale CSS-Datei enthaelt weiterhin
+die Renderer-Utilities (unter anderem grid, px-4 und text-status-error).
+
+Die GitHub-Jobs des ersten Versuchs auf 4da6c2f03 liefern fuer Docs, OpenAPI,
+Governance sowie zwei Quality-Gate-Jobs die Annotation
+`The job was not acquired by Runner of type hosted even after multiple attempts`.
+Service Security hat nicht gestartete Teiljobs (`abandoned`); das Sammelgate
+blockiert korrekt. Nur fehlgeschlagene Jobs wurden erneut gestartet.
+Docs Build und OpenAPI bestehen inzwischen im zweiten Versuch; PostgreSQL
+und kritische E2E bestanden bereits. Andere ausstehende Jobs bleiben offen.
+
 `@fastify/busboy` ist auf 3.2.1 gesperrt. Der unveraenderte Produktionsaudit
 meldet danach zwei statt vier hohe Befunde. Node-forge
 [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) und braces
