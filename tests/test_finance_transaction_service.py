@@ -13,6 +13,13 @@ from app.core.exceptions import EntityNotFoundError, ValidationFailedError
 from app.services.finance_transaction_service import FinanceTransactionService
 
 
+@pytest.fixture(autouse=True)
+def isolate_period_contract(monkeypatch, request):
+    # Lifecycle/amount units isolate their subject; real period checks have their own PG suite.
+    if not request.node.name.startswith("test_period_"):
+        monkeypatch.setattr(FinanceTransactionService, "check_period_open", lambda self, period: None)
+
+
 # ── fixtures ──────────────────────────────────────────────────────────────────
 
 TENANT = "tenant-test"
@@ -46,6 +53,7 @@ def _make_entry(status="draft", entry_id="e-001"):
     entry.description = "Test"
     entry.reference = "REF-001"
     entry.entry_date = NOW
+    entry.posting_date = NOW
     entry.total_debit = Decimal("100")
     entry.total_credit = Decimal("100")
     entry.sequence_number = 1
@@ -104,6 +112,7 @@ def test_invalid_transitions(current, target):
 
 def test_period_open_no_row():
     db = MagicMock()
+    db.execute.return_value.scalar_one.return_value = "read committed"
     db.execute.return_value.fetchone.return_value = None
     svc = FinanceTransactionService(db, TENANT)
     svc.check_period_open("2026-01")  # no exception — no row means allow through
@@ -111,6 +120,7 @@ def test_period_open_no_row():
 
 def test_period_open_open():
     db = MagicMock()
+    db.execute.return_value.scalar_one.return_value = "read committed"
     db.execute.return_value.fetchone.return_value = ("OPEN",)
     svc = FinanceTransactionService(db, TENANT)
     svc.check_period_open("2026-01")  # no exception
@@ -118,15 +128,17 @@ def test_period_open_open():
 
 def test_period_closed_raises():
     db = MagicMock()
+    db.execute.return_value.scalar_one.return_value = "read committed"
     db.execute.return_value.fetchone.return_value = ("CLOSED",)
     svc = FinanceTransactionService(db, TENANT)
     with pytest.raises(ValidationFailedError, match="CLOSED"):
         svc.check_period_open("2026-01")
 
 
-def test_period_none_skipped():
+def test_period_none_rejected():
     svc = _make_service()
-    svc.check_period_open(None)  # no exception
+    with pytest.raises(ValidationFailedError, match="period is required"):
+        svc.check_period_open(None)
 
 
 # ── get_by_id ─────────────────────────────────────────────────────────────────
