@@ -64,10 +64,11 @@ export function resolvePartyKind(kind: string | null | undefined, pathname?: str
 }
 
 export function readQueryParam(
-  searchParams: { get: (key: string) => string | null },
+  searchParams: Pick<URLSearchParams, 'toString'>,
   key: string,
 ): string | null {
-  const fromRouter = searchParams.get(key)
+  // Normalize legacy CRM deep-link keys at the adapter; keep the router contract typed.
+  const fromRouter = new URLSearchParams(searchParams.toString()).get(key)
   if (fromRouter) return fromRouter
   if (typeof window === 'undefined') return null
   return new URLSearchParams(window.location.search).get(key)

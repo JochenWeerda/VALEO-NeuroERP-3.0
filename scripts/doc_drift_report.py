@@ -53,6 +53,8 @@ SKIP_PAGE_NAMES_INDIRECT = frozenset({
     # Shared wrappers imported by the routed auswertungen pages.
     "DocumentControlScopePage",
     "SanktionsScopePage",
+    # Shared wrapper imported by customer-360-native, lead-native and lead-detail.
+    "party-native",
 })
 
 

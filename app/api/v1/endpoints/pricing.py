@@ -45,6 +45,11 @@ class PriceCalculationResponse(BaseModel):
     #: Gesetzt, wenn eine Mengenstaffel den Preis bestimmt hat.
     staffelrabatt_id: Optional[str] = None
     staffel_ab_menge: Optional[Decimal] = None
+    #: Gesetzt, wenn ein Rabatt ausgeschlossen ist — mit dem Grund. Ein
+    #: stillschweigender Rabatt von null waere nicht unterscheidbar von
+    #: "kein Rabatt gefunden".
+    rabatt_gesperrt: bool = False
+    rabatt_sperrgrund: Optional[str] = None
 
 
 @router.get("/calculate", response_model=PriceCalculationResponse, summary="Preis finden")
@@ -115,6 +120,9 @@ async def calculate_price(
             contract_id_result = contract_id
 
     # 3. Mengenstaffel — haengt an der tatsaechlich bestellten Menge.
+    #    Ein vereinbarter Kundenpreis wird erst danach gelesen (Stufe 4), weil er
+    #    die Staffel verdraengt und nicht umgekehrt: Eine Zusage schlaegt eine
+    #    allgemeine Mengenregel.
     if source in ("base", "price_list"):
         try:
             stufe = preis.staffel_stufe(db, tenant_id, artikel, quantity, customer_id)
@@ -132,21 +140,45 @@ async def calculate_price(
             staffelrabatt_id = stufe["staffel_id"]
             staffel_ab_menge = Decimal(str(stufe["ab_menge"]))
 
-    # 4. Kundenrabatt aus den Stammdaten.
-    if source in ("base", "price_list") and customer_id:
-        try:
-            from app.services.business_partner_service import BusinessPartnerService
+    # 4. Kundenpreis und Kundenrabatt — vom Besonderen zum Allgemeinen.
+    zusage = None
+    if customer_id:
+        from app.services.business_partner_service import BusinessPartnerService
 
-            kundenrabatt = BusinessPartnerService(db, tenant_id).get_customer_discount(
-                customer_id
-            )
+        partner = BusinessPartnerService(db, tenant_id)
+        artikelnummer = artikel.get("article_number")
+        try:
+            zusage = partner.get_customer_price_agreement(customer_id, artikelnummer)
         except Exception as fehler:  # noqa: BLE001
-            raise preis.stufe_nicht_lesbar(
-                db, fehler, "customer_discount", tenant_id
-            ) from fehler
-        if kundenrabatt is not None:
-            discount = preis.pruefe_rabatt(Decimal(str(kundenrabatt)), "customer_discount")
-            source = "customer_discount"
+            raise preis.stufe_nicht_lesbar(db, fehler, "customer_price", tenant_id) from fehler
+        if zusage and zusage.get("price_net") is not None and source != "contract":
+            list_price = Decimal(str(zusage["price_net"]))
+            discount = Decimal("0")
+            source = "customer_price"
+
+        if source in ("base", "price_list", "customer_price"):
+            try:
+                artikelrabatt = partner.get_customer_article_discount(
+                    customer_id, artikelnummer
+                )
+            except Exception as fehler:  # noqa: BLE001
+                raise preis.stufe_nicht_lesbar(
+                    db, fehler, "customer_article_discount", tenant_id
+                ) from fehler
+            if artikelrabatt is not None:
+                discount = preis.pruefe_rabatt(artikelrabatt, "customer_article_discount")
+                source = "customer_article_discount"
+
+        if source in ("base", "price_list"):
+            try:
+                kundenrabatt = partner.get_customer_discount(customer_id)
+            except Exception as fehler:  # noqa: BLE001
+                raise preis.stufe_nicht_lesbar(
+                    db, fehler, "customer_discount", tenant_id
+                ) from fehler
+            if kundenrabatt is not None:
+                discount = preis.pruefe_rabatt(kundenrabatt, "customer_discount")
+                source = "customer_discount"
 
     # 5. Rollenrabatt.
     if source in ("base", "price_list") and user_role:
@@ -160,6 +192,12 @@ async def calculate_price(
             discount = preis.pruefe_rabatt(rollenrabatt, "employee_discount")
             source = "employee_discount"
 
+    # Die Sperren des Bestands, die die Kaskade nie gelesen hat.
+    erlaubt, sperrgrund = preis.rabatt_erlaubt(artikel, zusage)
+    if not erlaubt and discount > 0:
+        discount = Decimal("0")
+        source = "customer_price" if source == "customer_price" else source
+
     net_price = (list_price * (Decimal("1") - discount / Decimal("100"))).quantize(
         Decimal("0.0001")
     )
@@ -172,6 +210,8 @@ async def calculate_price(
         contract_id=contract_id_result,
         staffelrabatt_id=staffelrabatt_id,
         staffel_ab_menge=staffel_ab_menge,
+        rabatt_gesperrt=not erlaubt,
+        rabatt_sperrgrund=sperrgrund,
     )
 
 

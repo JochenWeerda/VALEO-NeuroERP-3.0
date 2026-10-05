@@ -40,12 +40,21 @@ KONTRAKTZEILEN = "domain_ops.kon_contract_line"
 #: Die Stufen der Kaskade in ihrer Reihenfolge. Es gilt **eine** — die erste, die
 #: greift. Nicht additiv.
 #:
-#: Die Staffel steht ueber dem Kundenrabatt, weil sie an der tatsaechlich
-#: bestellten Menge haengt und damit die spezifischere Aussage ist; der Kontrakt
-#: steht darueber, weil er eine Zusage ist.
+#: Die Reihenfolge geht vom Besonderen zum Allgemeinen:
+#:
+#: * ``contract`` — eine Zusage fuer diesen Vorgang.
+#: * ``customer_price`` — ein mit **diesem Kunden** fuer **diesen Artikel**
+#:   vereinbarter Preis (`business_partner_price_agreements`). Ebenfalls eine
+#:   Zusage, nur dauerhaft statt vorgangsbezogen.
+#: * ``staffelrabatt`` — haengt an der tatsaechlich bestellten Menge.
+#: * ``customer_article_discount`` — Rabatt fuer diesen Kunden und diesen Artikel.
+#: * ``customer_discount`` — pauschaler Rabatt des Kunden.
+#: * ``employee_discount`` — Rabatt einer Rolle.
 STUFEN = (
     "contract",
+    "customer_price",
     "staffelrabatt",
+    "customer_article_discount",
     "customer_discount",
     "employee_discount",
 )
@@ -85,7 +94,10 @@ def stufe_nicht_lesbar(db: Session, fehler: Exception, stufe: str, tenant_id: st
 def artikel_holen(db: Session, tenant_id: str, article_id: str) -> dict:
     zeile = db.execute(
         text(
-            "SELECT id, article_number, sales_price, warengruppe, category "
+            "SELECT id, article_number, sales_price, warengruppe, category, "
+            # Der Artikelstamm sagt, ob der Artikel ueberhaupt rabattfaehig ist.
+            # Die Kaskade hat das nie gelesen.
+            "       COALESCE(rabattfaehig, TRUE) AS rabattfaehig "
             f"FROM {ARTIKEL} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
             "WHERE id = :id AND tenant_id = :tid AND is_active = TRUE"
         ),
@@ -271,3 +283,28 @@ def pruefe_rabatt(rabatt: Decimal, stufe: str) -> Decimal:
             ),
         )
     return rabatt
+
+
+def rabatt_erlaubt(artikel: dict, zusage: Optional[dict]) -> tuple[bool, Optional[str]]:
+    """Darf auf diesen Preis ueberhaupt ein Rabatt?
+
+    Zwei Sperren, die der Bestand kennt und die Kaskade nie gelesen hat:
+
+    * ``articles.rabattfaehig`` — der Artikelstamm sagt je Artikel, ob er
+      rabattfaehig ist. Ein nicht rabattfaehiger Artikel bekam Rabatt, und das
+      ist eine Preiszusage, die das Haus nicht geben wollte.
+    * ``business_partner_price_agreements.discount_allowed`` — ist ein Preis
+      vereinbart und weiterer Rabatt ausgeschlossen, darf keine spaetere Stufe
+      ihn noch senken.
+
+    Zurueck kommt der Grund, damit die Antwort ihn nennen kann statt den Rabatt
+    stillschweigend auf null zu setzen.
+    """
+    if not artikel.get("rabattfaehig", True):
+        return False, "Der Artikel ist nicht rabattfaehig (Artikelstamm)."
+    if zusage is not None and not zusage.get("discount_allowed", True):
+        return False, (
+            "Die Preisvereinbarung mit diesem Kunden schliesst weiteren Rabatt aus "
+            "(discount_allowed)."
+        )
+    return True, None

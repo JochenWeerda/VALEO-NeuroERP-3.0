@@ -2776,6 +2776,43 @@
       ]
     },
     {
+      "mask_id": "fuhrpark/ausgehende-dokumente",
+      "title": "Ausgehende Belege",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fuhrpark__ausgehende-dokumente/:entityId",
+      "agent_contract_url": "/api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fuhrpark/ausgehende-dokumente/screen-definition",
+      "readiness_url": "/api/v1/masks/fuhrpark/ausgehende-dokumente/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt einen Belegtyp an oder aktualisiert den gewaehlten."
+        },
+        {
+          "key": "neu",
+          "label": "Neu",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer einen neuen Belegtyp."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "fuhrpark/fahrzeuge",
       "title": "Fahrzeuge",
       "domain": "logistics",
@@ -2796,6 +2833,80 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Oeffnet die bestehende Fahrzeug-Erfassung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "fuhrpark/rechnungen",
+      "title": "Fuhrpark-Rechnungen",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fuhrpark__rechnungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/fuhrpark/rechnungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fuhrpark/rechnungen/screen-definition",
+      "readiness_url": "/api/v1/masks/fuhrpark/rechnungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt eine Rechnung an oder aktualisiert die gewaehlte."
+        },
+        {
+          "key": "neu",
+          "label": "Neu",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer eine neue Rechnung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "fuhrpark/terminarten",
+      "title": "Terminarten",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fuhrpark__terminarten/:entityId",
+      "agent_contract_url": "/api/v1/masks/fuhrpark/terminarten/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fuhrpark/terminarten/screen-definition",
+      "readiness_url": "/api/v1/masks/fuhrpark/terminarten/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt eine Terminart an oder aktualisiert die gewaehlte."
+        },
+        {
+          "key": "neu",
+          "label": "Neu",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer eine neue Terminart."
         }
       ],
       "sensitive_fields": [],

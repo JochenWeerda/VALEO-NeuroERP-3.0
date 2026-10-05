@@ -1,7 +1,7 @@
 import type { ScreenFieldDefinition, ScreenTableDefinition } from '../schema'
 import { FieldRenderer } from './FieldRenderer'
 import { TableRenderer } from './TableRenderer'
-import { getValue } from './render-utils'
+import { getValue, repeatsCaption } from './render-utils'
 
 export function TabContentRenderer({
   fields,
@@ -9,9 +9,11 @@ export function TabContentRenderer({
   fieldsClassName,
   payload,
   tableRows,
+  screenTitle,
 }: {
   fields?: ScreenFieldDefinition[]
   tables?: ScreenTableDefinition[]
+  screenTitle?: string
   fieldsClassName: string
   payload: Record<string, unknown>
   tableRows: Record<string, Record<string, unknown>[]>
@@ -26,7 +28,7 @@ export function TabContentRenderer({
         </div>
       ) : null}
       {(tables ?? []).map((table) => (
-        <TableRenderer key={table.key} table={table} rows={tableRows[table.key] ?? []} />
+        <TableRenderer key={table.key} table={table} rows={tableRows[table.key] ?? []} suppressHeading={repeatsCaption(table.label, screenTitle)} />
       ))}
     </div>
   )

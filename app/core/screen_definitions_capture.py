@@ -1381,3 +1381,325 @@ def build_logistik_versandprofile_screen_definition() -> dict[str, Any]:
             "bundleGroup": "logistics",
         },
     }
+
+
+def build_fuhrpark_terminarten_screen_definition() -> dict[str, Any]:
+    """Terminarten des Fuhrparks. Die Seite speichert, der Builder zeichnet die Liste."""
+    return {
+        "schemaVersion": 1,
+        "id": "fuhrpark/terminarten",
+        "domain": "logistics",
+        "mode": "list",
+        "title": "Terminarten",
+        "subtitle": "Wartungsintervalle nach Monaten und Kilometern",
+        "adapter": {"type": "native", "sourceId": "fuhrpark/terminarten", "temporary": False},
+        "dataSources": [
+            {"key": "terminarten", "endpoint": "/api/v1/fuhrpark/terminarten", "pageSize": 100},
+        ],
+        "summary": [
+            {"key": "terminarten", "label": "Terminarten", "value": "0"},
+        ],
+        "fields": [
+            {"key": "terminart", "label": "Terminart", "type": "text", "placeholder": "Bezeichnung"},
+            {"key": "intervall_monate", "label": "Intervall Monate", "type": "number"},
+            {"key": "intervall_km", "label": "Intervall km", "type": "number"},
+        ],
+        "workflow": {"processKey": "fuhrpark.terminarten"},
+        "actions": [
+            {
+                "key": "speichern",
+                "label": "Speichern",
+                "command": "fuhrpark.saveTerminart",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "zone": "header",
+                "stubReason": "Legt eine Terminart an oder aktualisiert die gewaehlte.",
+            },
+            {
+                "key": "neu",
+                "label": "Neu",
+                "command": "fuhrpark.newTerminart",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "zone": "footer",
+                "stubReason": "Leert die Eingabe fuer eine neue Terminart.",
+            },
+        ],
+        "tables": [
+            {
+                "key": "terminarten",
+                "label": "Terminarten",
+                "dataSourceKey": "terminarten",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": True,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "rowActions": [
+                    {
+                        "key": "loeschen",
+                        "label": "Löschen",
+                        "command": "fuhrpark.deleteTerminart",
+                        "dangerLevel": "moderate",
+                        "disabledWhen": {"field": "gesperrt", "values": [True]},
+                    },
+                ],
+                "columns": [
+                    {"key": "terminart", "label": "Terminart", "sortable": True, "filterable": True, "priority": "primary"},
+                    {"key": "intervall_monate", "label": "Monate", "numeric": True, "priority": "secondary"},
+                    {"key": "intervall_km", "label": "Kilometer", "numeric": True, "priority": "tertiary"},
+                ],
+            },
+        ],
+        "noWorkflowReason": "Der Stand folgt den hinterlegten Terminarten.",
+        "agentContract": {
+            "businessPurpose": "Wartungsintervalle der Terminarten anlegen und aendern.",
+            "examplePrompts": ["Welche Terminart hat noch kein Kilometerintervall?"],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-fuhrpark/terminarten']",
+                "primaryAction": "[data-testid='action-speichern']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            "contextRail": "none",
+            "tableProfile": "standard",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 32,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "logistics",
+        },
+    }
+
+
+def build_fuhrpark_rechnungen_screen_definition() -> dict[str, Any]:
+    """Fuhrpark-Rechnungen. Die Seite speichert, der Builder zeichnet die Liste."""
+    return {
+        "schemaVersion": 1,
+        "id": "fuhrpark/rechnungen",
+        "domain": "logistics",
+        "mode": "list",
+        "title": "Fuhrpark-Rechnungen",
+        "subtitle": "Kostenbelege zu Fahrzeugen",
+        "adapter": {"type": "native", "sourceId": "fuhrpark/rechnungen", "temporary": False},
+        "dataSources": [
+            {"key": "rechnungen", "endpoint": "/api/v1/fuhrpark/rechnungen", "pageSize": 100},
+        ],
+        "summary": [
+            {"key": "rechnungen", "label": "Rechnungen", "value": "0"},
+            {"key": "betrag", "label": "Betrag EUR", "value": "0"},
+        ],
+        "fields": [
+            {"key": "rechnungs_nr", "label": "Rechnungs-Nr", "type": "text", "placeholder": "Nummer"},
+            {"key": "datum", "label": "Datum", "type": "date"},
+            {"key": "fahrzeug_kennzeichen", "label": "Fahrzeug", "type": "text"},
+            {"key": "sachkonto", "label": "Sachkonto", "type": "text"},
+            {"key": "kostenart", "label": "Kostenart", "type": "text"},
+            {"key": "betrag_eur", "label": "Betrag EUR", "type": "number"},
+            {"key": "notiz", "label": "Notiz", "type": "text"},
+        ],
+        "workflow": {"processKey": "fuhrpark.rechnungen"},
+        "actions": [
+            {
+                "key": "speichern",
+                "label": "Speichern",
+                "command": "fuhrpark.saveRechnung",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "zone": "header",
+                "stubReason": "Legt eine Rechnung an oder aktualisiert die gewaehlte.",
+            },
+            {
+                "key": "neu",
+                "label": "Neu",
+                "command": "fuhrpark.newRechnung",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "zone": "footer",
+                "stubReason": "Leert die Eingabe fuer eine neue Rechnung.",
+            },
+        ],
+        "tables": [
+            {
+                "key": "rechnungen",
+                "label": "Rechnungen",
+                "dataSourceKey": "rechnungen",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": True,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "rowActions": [
+                    {
+                        "key": "loeschen",
+                        "label": "Löschen",
+                        "command": "fuhrpark.deleteRechnung",
+                        "dangerLevel": "moderate",
+                        "disabledWhen": {"field": "gesperrt", "values": [True]},
+                    },
+                ],
+                "columns": [
+                    {"key": "rechnungs_nr", "label": "Nummer", "sortable": True, "filterable": True, "priority": "primary"},
+                    {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "primary"},
+                    {"key": "fahrzeug_kennzeichen", "label": "Fahrzeug", "priority": "secondary"},
+                    {"key": "betrag_eur", "label": "Betrag EUR", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+                    {"key": "sachkonto", "label": "Sachkonto", "priority": "tertiary"},
+                    {"key": "kostenart", "label": "Kostenart", "priority": "tertiary"},
+                    {"key": "notiz", "label": "Notiz", "priority": "tertiary"},
+                ],
+            },
+        ],
+        "noWorkflowReason": "Der Stand folgt den hinterlegten Rechnungen.",
+        "agentContract": {
+            "businessPurpose": "Fuhrpark-Rechnungen anlegen und aendern. Der Betrag folgt den Belegen.",
+            "examplePrompts": ["Welche Fuhrpark-Rechnung hat noch kein Fahrzeug?"],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-fuhrpark/rechnungen']",
+                "primaryAction": "[data-testid='action-speichern']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            "contextRail": "none",
+            "tableProfile": "financial",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 32,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "logistics",
+        },
+    }
+
+
+def build_fuhrpark_ausgehende_dokumente_screen_definition() -> dict[str, Any]:
+    """Belegtypen fuer ausgehende Dokumente. Die Seite speichert, der Builder zeichnet die Liste."""
+    return {
+        "schemaVersion": 1,
+        "id": "fuhrpark/ausgehende-dokumente",
+        "domain": "logistics",
+        "mode": "list",
+        "title": "Ausgehende Belege",
+        "subtitle": "Belegtypen, Formulare und Zielmodule",
+        "adapter": {"type": "native", "sourceId": "fuhrpark/ausgehende-dokumente", "temporary": False},
+        "dataSources": [
+            {"key": "dokumente", "endpoint": "/api/v1/fuhrpark/ausgehende-dokumente", "pageSize": 100},
+        ],
+        "summary": [
+            {"key": "belege", "label": "Belege", "value": "0"},
+            {"key": "ohne_formular", "label": "Ohne Formular", "value": "0"},
+        ],
+        "fields": [
+            {"key": "beleg_typ", "label": "Beleg-Typ", "type": "text", "placeholder": "Bezeichnung"},
+            {"key": "formular", "label": "Formular", "type": "text"},
+            {"key": "ziel_modul", "label": "Ziel-Modul", "type": "text"},
+            {"key": "beschreibung", "label": "Beschreibung", "type": "text"},
+            {"key": "aktiv", "label": "Aktiv", "type": "boolean"},
+        ],
+        "workflow": {"processKey": "fuhrpark.ausgehende-dokumente"},
+        "actions": [
+            {
+                "key": "speichern",
+                "label": "Speichern",
+                "command": "fuhrpark.saveDokument",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "zone": "header",
+                "stubReason": "Legt einen Belegtyp an oder aktualisiert den gewaehlten.",
+            },
+            {
+                "key": "neu",
+                "label": "Neu",
+                "command": "fuhrpark.newDokument",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "zone": "footer",
+                "stubReason": "Leert die Eingabe fuer einen neuen Belegtyp.",
+            },
+        ],
+        "tables": [
+            {
+                "key": "dokumente",
+                "label": "Belegtypen",
+                "dataSourceKey": "dokumente",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": True,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "rowActions": [
+                    {
+                        "key": "loeschen",
+                        "label": "Löschen",
+                        "command": "fuhrpark.deleteDokument",
+                        "dangerLevel": "moderate",
+                        "disabledWhen": {"field": "gesperrt", "values": [True]},
+                    },
+                ],
+                "columns": [
+                    {"key": "beleg_typ", "label": "Beleg-Typ", "sortable": True, "filterable": True, "priority": "primary"},
+                    {"key": "formular", "label": "Formular", "priority": "secondary"},
+                    {"key": "ziel_modul", "label": "Ziel-Modul", "priority": "secondary"},
+                    {"key": "beschreibung", "label": "Beschreibung", "priority": "tertiary"},
+                    {"key": "aktiv", "label": "Aktiv", "priority": "tertiary"},
+                ],
+            },
+        ],
+        "tiles": [
+            {"key": "frachtdokumente", "label": "Frachtdokumente", "targetScreenId": "versand/frachtdokumente", "targetRoute": "/versand/frachtdokumente"},
+            {"key": "paket", "label": "Paket-Etikett", "targetScreenId": "versand/paket-etikett", "targetRoute": "/versand/paket-etikett"},
+            {"key": "avis", "label": "Versand-Avis", "targetScreenId": "versand/versand-avis", "targetRoute": "/versand/versand-avis"},
+            {"key": "produktion", "label": "Produktions-Dokumente", "targetScreenId": "produktion/dokumente-drucken", "targetRoute": "/produktion/produktions-dokumente-drucken"},
+            {"key": "kommission", "label": "Kommissions-Aufträge", "targetScreenId": "verkauf/kommissions-auftraege", "targetRoute": "/verkauf/kommissions-auftraege"},
+            {"key": "betrieb", "label": "Betriebs-Aufträge", "targetScreenId": "verkauf/betriebsauftrag", "targetRoute": "/verkauf/betriebs-auftraege"},
+        ],
+        "noWorkflowReason": "Der Stand folgt den Belegtypen und ihren Formularen.",
+        "agentContract": {
+            "businessPurpose": "Belegtypen fuer ausgehende Dokumente anlegen. Der Stand folgt dem Formular.",
+            "examplePrompts": ["Welcher Belegtyp hat noch kein Formular?"],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-fuhrpark/ausgehende-dokumente']",
+                "primaryAction": "[data-testid='action-speichern']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            "contextRail": "none",
+            "tableProfile": "standard",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 32,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "logistics",
+        },
+    }

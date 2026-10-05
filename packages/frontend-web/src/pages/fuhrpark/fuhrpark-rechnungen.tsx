@@ -1,208 +1,262 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
+import { toast } from 'sonner'
+import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createFuhrparkRechnung,
   deleteFuhrparkRechnung,
   listFuhrparkRechnungen,
-  type FuhrparkRechnung,
+  updateFuhrparkRechnung,
+  type FuhrparkRechnungPayload,
 } from '@/lib/api/fuhrpark'
+import { fuhrparkRechnungenScreen } from '@/masks/capture-screens'
 
-type RechnungForm = {
-  rechnungs_nr: string
-  datum: string
-  fahrzeug_kennzeichen: string
-  sachkonto: string
-  kostenart: string
-  betrag_eur: number
-  notiz: string
+function text(value: unknown): string {
+  return String(value ?? '').trim()
 }
 
-const EMPTY_FORM: RechnungForm = {
-  rechnungs_nr: '',
-  datum: new Date().toISOString().slice(0, 10),
-  fahrzeug_kennzeichen: '',
-  sachkonto: '',
-  kostenart: '',
-  betrag_eur: 0,
-  notiz: '',
+function optional(value: unknown): string | null {
+  const raw = text(value)
+  return raw || null
 }
 
-function toApiDate(inputDate: string): string {
-  return `${inputDate}T00:00:00.000Z`
+function betrag(value: unknown): number {
+  if (value == null || value === '') return Number.NaN
+  return Number(value)
+}
+
+const today = new Date().toISOString().slice(0, 10)
+
+function leerwerte(datum = today): Record<string, string> {
+  return {
+    rechnungs_nr: '',
+    datum,
+    fahrzeug_kennzeichen: '',
+    sachkonto: '',
+    kostenart: '',
+    betrag_eur: '',
+    notiz: '',
+  }
 }
 
 export default function FuhrparkRechnungenPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
-  const [form, setForm] = useState<RechnungForm>(EMPTY_FORM)
-  const [selected, setSelected] = useState<FuhrparkRechnung | null>(null)
-
-  const { data: rows = [] } = useQuery({
+  const liste = useQuery({
     queryKey: ['fuhrpark', 'rechnungen'],
     queryFn: listFuhrparkRechnungen,
   })
-
-  const createMutation = useMutation({
-    mutationFn: async () =>
-      createFuhrparkRechnung({
-        rechnungs_nr: form.rechnungs_nr,
-        datum: toApiDate(form.datum),
-        fahrzeug_kennzeichen: form.fahrzeug_kennzeichen || undefined,
-        sachkonto: form.sachkonto || undefined,
-        kostenart: form.kostenart || undefined,
-        betrag_eur: form.betrag_eur,
-        notiz: form.notiz || undefined,
-      }),
-    onSuccess: () => {
-      setForm(EMPTY_FORM)
-      setSelected(null)
-      void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'rechnungen'] })
-    },
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => deleteFuhrparkRechnung(id),
-    onSuccess: () => {
-      setSelected(null)
-      void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'rechnungen'] })
-    },
-  })
-
-  const visibleRows = useMemo(
-    () => [...rows].sort((a, b) => String(b.datum).localeCompare(String(a.datum))),
-    [rows],
+  const rows = useMemo(
+    () => [...(liste.data ?? [])].sort((a, b) => String(b.datum).localeCompare(String(a.datum))),
+    [liste.data],
   )
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const [saving, setSaving] = useState(false)
+  const createMutation = useMutation({ mutationFn: createFuhrparkRechnung })
+  const updateMutation = useMutation({
+    mutationFn: (input: { id: string; payload: FuhrparkRechnungPayload }) =>
+      updateFuhrparkRechnung(input.id, input.payload),
+  })
+  const deleteMutation = useMutation({ mutationFn: deleteFuhrparkRechnung })
+  const summe = rows.reduce((acc, row) => acc + Number(row.betrag_eur || 0), 0)
+
+  useEffect(() => {
+    if (!liste.isError) return
+    toast.error('Rechnungen nicht geladen', { description: getAxiosErrorMessage(liste.error) })
+  }, [liste.error, liste.isError])
+
+  const schema = useMemo<ScreenDefinition>(() => ({
+    ...fuhrparkRechnungenScreen,
+    layout: {
+      ...fuhrparkRechnungenScreen.layout,
+      density: isTouch ? 'comfortable' : 'compact',
+    },
+    summary: (fuhrparkRechnungenScreen.summary ?? []).map((item) => ({
+      ...item,
+      value: item.key === 'betrag'
+        ? summe.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : String(rows.length),
+    })),
+    actions: (fuhrparkRechnungenScreen.actions ?? []).map((action) => ({
+      ...action,
+      disabled: action.key === 'speichern' ? saving : false,
+    })),
+  }), [isTouch, rows.length, saving, summe])
+
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const form = useUniversalFormState({
+    screen: schema,
+    initialValues: leerwerte(),
+  })
+
+  const workflow = useMemo<WorkflowState>(() => {
+    const leer = rows.length === 0
+    const gewaehlt = Boolean(selectedId)
+    const label = leer ? 'Keine Rechnung' : gewaehlt ? 'Rechnung gewählt' : 'Rechnungen hinterlegt'
+    const naechste = leer
+      ? 'Rechnungs-Nr, Datum und Betrag eintragen.'
+      : gewaehlt
+        ? 'Beleg ändern und speichern, oder Neu für eine weitere Rechnung.'
+        : 'Eine Rechnung wählen oder eine neue anlegen.'
+    return {
+      status: {
+        currentStatus: leer ? 'leer' : gewaehlt ? 'gewaehlt' : 'hinterlegt',
+        statusLabel: label,
+        tone: leer ? 'warning' : 'success',
+      },
+      nextAllowedActions: [{ actionKey: 'speichern', label: naechste, dangerLevel: 'safe', requiresConfirmation: false }],
+      blockingReasons: leer ? [{ code: label, message: naechste, blocking: true }] : [],
+      auditTrail: [],
+      policyHints: [],
+      isBlocked: false,
+      isTerminal: false,
+    }
+  }, [rows.length, selectedId])
+
+  const leeren = useCallback(() => {
+    setSelectedId(null)
+    const werte = leerwerte()
+    for (const [key, value] of Object.entries(werte)) form.setValue(key, value)
+  }, [form])
+
+  const speichern = useCallback(async () => {
+    if (saving) return
+    const nummer = text(form.values.rechnungs_nr)
+    const datum = text(form.values.datum)
+    const wert = betrag(form.values.betrag_eur)
+    if (nummer.length < 3 || !datum) {
+      toast.error('Pflichtfelder fehlen', { description: 'Rechnungs-Nr mit mindestens drei Zeichen und ein Datum.' })
+      return
+    }
+    if (!Number.isFinite(wert) || wert <= 0) {
+      toast.error('Betrag fehlt', { description: 'Der Betrag muss größer als 0 sein.' })
+      return
+    }
+    const payload: FuhrparkRechnungPayload = {
+      rechnungs_nr: nummer,
+      datum: `${datum}T00:00:00.000Z`,
+      fahrzeug_kennzeichen: optional(form.values.fahrzeug_kennzeichen),
+      sachkonto: optional(form.values.sachkonto),
+      kostenart: optional(form.values.kostenart),
+      betrag_eur: wert,
+      notiz: optional(form.values.notiz),
+    }
+    setSaving(true)
+    try {
+      if (selectedId) {
+        await updateMutation.mutateAsync({ id: selectedId, payload })
+        toast.success('Rechnung gespeichert', { description: `${nummer} wurde aktualisiert.` })
+      } else {
+        await createMutation.mutateAsync(payload)
+        toast.success('Rechnung angelegt', { description: `${nummer} wurde erstellt.` })
+      }
+      await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'rechnungen'] })
+      leeren()
+    } catch (error) {
+      toast.error('Rechnung nicht gespeichert', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setSaving(false)
+    }
+  }, [createMutation, form.values, leeren, queryClient, saving, selectedId, updateMutation])
+
+  const loeschen = useCallback(async (id: string, nummer: string) => {
+    if (!id || pendingDeletes.has(id)) return
+    setPendingDeletes((prev) => new Set(prev).add(id))
+    try {
+      await deleteMutation.mutateAsync(id)
+      toast.success('Rechnung gelöscht', { description: `${nummer} wurde entfernt.` })
+      if (selectedId === id) leeren()
+      await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'rechnungen'] })
+    } catch (error) {
+      toast.error('Rechnung nicht gelöscht', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setPendingDeletes((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }
+  }, [deleteMutation, leeren, pendingDeletes, queryClient, selectedId])
+
+  const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
+    if (key === 'speichern') {
+      await speichern()
+      return
+    }
+    if (key === 'neu') {
+      leeren()
+      return
+    }
+    if (key === 'loeschen') {
+      await loeschen(text(payload.id), text(payload.rechnungs_nr))
+    }
+  }, [leeren, loeschen, speichern])
+
+  const selectRow = useCallback((row: Record<string, unknown>) => {
+    setSelectedId(text(row.id))
+    form.setValue('rechnungs_nr', text(row.rechnungs_nr))
+    form.setValue('datum', text(row.datum).slice(0, 10))
+    form.setValue('fahrzeug_kennzeichen', text(row.fahrzeug_kennzeichen))
+    form.setValue('sachkonto', text(row.sachkonto))
+    form.setValue('kostenart', text(row.kostenart))
+    form.setValue('betrag_eur', String(row.betrag_eur ?? ''))
+    form.setValue('notiz', text(row.notiz))
+  }, [form])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { rechnungen: rows },
+    permissions: { granted: [] },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'fuhrpark.saveRechnung': () => handleAction('speichern', {}),
+      'fuhrpark.newRechnung': () => handleAction('neu', {}),
+      'fuhrpark.deleteRechnung': (payload) => handleAction('loeschen', payload),
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, handleAction, rows])
+
+  if (liste.isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-full bg-[#ececec] p-4 text-[11px] text-black">
-      <div className="border border-[#bdbdbd] bg-[#efefef] p-2">
-        <div className="mb-2 text-[12px] font-semibold uppercase">Fuhrpark - Rechnungen</div>
-
-        <div className="mb-2 grid grid-cols-[90px_120px_90px_120px_80px_120px_80px_120px] items-center gap-1">
-          <label>Rechnungs-Nr:</label>
-          <input
-            value={form.rechnungs_nr}
-            onChange={(e) => setForm((prev) => ({ ...prev, rechnungs_nr: e.target.value }))}
-            className="h-5 border border-[#a8a8a8] bg-white px-1"
-          />
-          <label>Datum:</label>
-          <input
-            type="date"
-            value={form.datum}
-            onChange={(e) => setForm((prev) => ({ ...prev, datum: e.target.value }))}
-            className="h-5 border border-[#a8a8a8] bg-white px-1"
-          />
-          <label>Fahrzeug:</label>
-          <input
-            value={form.fahrzeug_kennzeichen}
-            onChange={(e) => setForm((prev) => ({ ...prev, fahrzeug_kennzeichen: e.target.value }))}
-            className="h-5 border border-[#a8a8a8] bg-white px-1"
-          />
-          <label>Sachkonto:</label>
-          <input
-            value={form.sachkonto}
-            onChange={(e) => setForm((prev) => ({ ...prev, sachkonto: e.target.value }))}
-            className="h-5 border border-[#a8a8a8] bg-white px-1"
-          />
-          <label>Kostenart:</label>
-          <input
-            value={form.kostenart}
-            onChange={(e) => setForm((prev) => ({ ...prev, kostenart: e.target.value }))}
-            className="h-5 border border-[#a8a8a8] bg-white px-1"
-          />
-          <label>Betrag EUR:</label>
-          <input
-            type="number"
-            value={form.betrag_eur}
-            onChange={(e) => setForm((prev) => ({ ...prev, betrag_eur: Number(e.target.value) || 0 }))}
-            className="h-5 border border-[#a8a8a8] bg-white px-1"
-          />
-        </div>
-
-        <div className="mb-2 grid grid-cols-[90px_1fr] items-center gap-1">
-          <label>Notiz:</label>
-          <input
-            value={form.notiz}
-            onChange={(e) => setForm((prev) => ({ ...prev, notiz: e.target.value }))}
-            className="h-5 border border-[#a8a8a8] bg-white px-1"
-          />
-        </div>
-
-        <div className="border border-[#bdbdbd] bg-white">
-          <div className="grid grid-cols-[120px_90px_100px_90px_120px_100px_1fr] border-b border-[#d0d0d0] bg-[#f3f3f3] px-1 py-[2px]">
-            <span>Rechnungs-Nr.</span>
-            <span>Datum</span>
-            <span>Fahrzeug</span>
-            <span>Sachkonto</span>
-            <span>Kostenart</span>
-            <span>Betrag EUR</span>
-            <span>Notiz</span>
-          </div>
-
-          {visibleRows.map((row) => (
-            <button
-              key={row.id}
-              type="button"
-              onClick={() => {
-                setSelected(row)
-                setForm({
-                  rechnungs_nr: row.rechnungs_nr,
-                  datum: String(row.datum).slice(0, 10),
-                  fahrzeug_kennzeichen: row.fahrzeug_kennzeichen ?? '',
-                  sachkonto: row.sachkonto ?? '',
-                  kostenart: row.kostenart ?? '',
-                  betrag_eur: Number(row.betrag_eur ?? 0),
-                  notiz: row.notiz ?? '',
-                })
-              }}
-              className={`grid w-full grid-cols-[120px_90px_100px_90px_120px_100px_1fr] px-1 py-[2px] text-left ${selected?.id === row.id ? 'bg-[#0078d7] text-white' : 'bg-white hover:bg-[#edf5ff]'}`}
-            >
-              <span>{row.rechnungs_nr}</span>
-              <span>{String(row.datum).slice(0, 10)}</span>
-              <span>{row.fahrzeug_kennzeichen}</span>
-              <span>{row.sachkonto}</span>
-              <span>{row.kostenart}</span>
-              <span className="text-right">{Number(row.betrag_eur).toFixed(2)}</span>
-              <span>{row.notiz}</span>
-            </button>
-          ))}
-
-          <div className="h-[360px] bg-white" />
-        </div>
-
-        <div className="mt-2 flex justify-between">
-          <div className="flex gap-1">
-            <button
-              onClick={() => {
-                setSelected(null)
-                setForm(EMPTY_FORM)
-              }}
-              className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2"
-            >
-              Neu
-            </button>
-            <button
-              onClick={() => createMutation.mutate()}
-              disabled={!form.rechnungs_nr.trim() || form.betrag_eur <= 0}
-              className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 disabled:opacity-50"
-            >
-              Speichern
-            </button>
-            <button
-              onClick={() => {
-                if (selected) deleteMutation.mutate(selected.id)
-              }}
-              disabled={!selected}
-              className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 disabled:opacity-50"
-            >
-              Löschen
-            </button>
-          </div>
-          <div className="flex gap-1">
-            <button className="h-5 border border-[#9b9b9b] bg-[#ececec] px-3">Drucken</button>
-            <button className="h-5 border border-[#9b9b9b] bg-[#ececec] px-3">Schließen</button>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        workflowState={workflow}
+        tables={{
+          rechnungen: rows.map((row) => ({
+            id: row.id,
+            rechnungs_nr: row.rechnungs_nr,
+            datum: String(row.datum).slice(0, 10),
+            fahrzeug_kennzeichen: row.fahrzeug_kennzeichen ?? '',
+            sachkonto: row.sachkonto ?? '',
+            kostenart: row.kostenart ?? '',
+            betrag_eur: row.betrag_eur,
+            notiz: row.notiz ?? '',
+            gesperrt: pendingDeletes.has(row.id),
+          })),
+        }}
+        onAction={handleAction}
+        onRowSelect={selectRow}
+      />
     </div>
   )
 }

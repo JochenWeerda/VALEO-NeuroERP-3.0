@@ -5,15 +5,17 @@ import type { ScreenTableDefinition } from '../schema'
 export function TableRenderer({
   table,
   rows,
+  suppressHeading = false,
 }: {
   table: ScreenTableDefinition
   rows: Record<string, unknown>[]
+  suppressHeading?: boolean
 }): JSX.Element {
   return (
     <Card>
-      <CardHeader>
+      {suppressHeading ? null : (<CardHeader>
         <CardTitle className="text-base">{table.label}</CardTitle>
-      </CardHeader>
+      </CardHeader>)}
       <CardContent>
         <VirtualDataTable
           data={rows}

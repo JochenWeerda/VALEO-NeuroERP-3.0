@@ -24,7 +24,7 @@ const defaultForm: BankAccountPayload = {
   gl_account_id: null,
 }
 
-const fmt = (n: string | null | undefined, currency = 'EUR') =>
+const fmt = (n: string | number | null | undefined, currency = 'EUR') =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(Number(n || 0))
 
 export default function BankStammPage(): JSX.Element {
@@ -221,13 +221,13 @@ export default function BankStammPage(): JSX.Element {
             />
             <Label>IBAN</Label>
             <Input
-              value={formData.iban}
+              value={formData.iban ?? ''}
               onChange={(e) => setFormData((p) => ({ ...p, iban: e.target.value }))}
               placeholder="DE89 3704 0044 …"
             />
             <Label>BIC</Label>
             <Input
-              value={formData.bic}
+              value={formData.bic ?? ''}
               onChange={(e) => setFormData((p) => ({ ...p, bic: e.target.value }))}
               placeholder="COBADEFFXXX"
             />
@@ -264,12 +264,12 @@ export default function BankStammPage(): JSX.Element {
             />
             <Label>IBAN</Label>
             <Input
-              value={formData.iban}
+              value={formData.iban ?? ''}
               onChange={(e) => setFormData((p) => ({ ...p, iban: e.target.value }))}
             />
             <Label>BIC</Label>
             <Input
-              value={formData.bic}
+              value={formData.bic ?? ''}
               onChange={(e) => setFormData((p) => ({ ...p, bic: e.target.value }))}
             />
             <Label>Währung</Label>

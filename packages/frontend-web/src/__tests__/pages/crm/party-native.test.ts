@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { resolvePartyKind, resolvePartySectionKey } from '@/pages/crm/party-native'
+import { readQueryParam, resolvePartyKind, resolvePartySectionKey } from '@/pages/crm/party-native'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 describe('Party native entry', () => {
+  it('reads typed router keys and keeps the window fallback', () => {
+    const previous = window.location.href
+    window.history.replaceState(null, '', '/?tab=chef')
+    expect(readQueryParam(new URLSearchParams('tab=finance'), 'tab')).toBe('finance')
+    expect(readQueryParam(new URLSearchParams(), 'tab')).toBe('chef')
+    window.history.replaceState(null, '', previous)
+  })
   it('resolves lead from query or path', () => {
     expect(resolvePartyKind('lead')).toBe('lead')
     expect(resolvePartyKind(null, '/crm/lead/abc')).toBe('lead')

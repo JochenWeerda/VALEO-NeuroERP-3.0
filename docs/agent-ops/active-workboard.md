@@ -11,6 +11,53 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
+beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
+**Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
+mkdocs.yml, table_ownership.py Zuordnung domain_contracts und Tests;
+Baseline-Integritaetspruefer/Workflow-Mergevergleich mit Regressionen;
+eigene QA/Slice/Workboard/Gaps. Weitere nachgewiesene CI-Befunde separat
+claimen, fremde Preis-/Masken-WIP bleiben geschuetzt.
+**OpenAPI-Integration:** Ueberlappung mit OPENAPI-DRIFT-REFRESH: ausschliesslich
+Artefakt aus committed HEAD generieren und indexseitig integrieren; fremde
+Arbeitsbaumfassung der globalen Spec nicht ueberschreiben. Neue Router-WIP
+nicht importieren/veroeffentlichen. Kein API-Gate abschwaechen.
+**Erweiterter Claim (2026-10-05):** Nachgewiesene neue SQL-Ratschenbefunde
+in finance_transaction_service.py nur Kontohelfer und webhook_service.py;
+neue Kalenderquellen in frachtbrief_service.py und kontrakt_disposition_service.py.
+Keine Baseline-Erhoehung. Doku-Drift: eigener Logistik-Runbook-Nachtrag und
+doc_drift_report.py nur eingebettete party-native-Komponente; passende Tests.
+**Frontend-Teilclaim:** Unveraenderte Dateien CallWidget.tsx (Callback-Narrowing),
+party-native.tsx (typisierte Query-Schluessel), bank-stamm.tsx (Null-/Betragstypen)
+und eigener Query-Vertragstest. Fremde Renderer-/Farb-WIP nicht uebernommen.
+**Security-Teilclaim:** package.json nur @fastify/busboy-Override und zugehoeriges
+pnpm-lock.yaml. Zwei Multipart-Advisories verlangen 3.2.1. Node-forge/braces
+ohne gepatchtes Release bleiben offen; keine Audit-Ausnahme oder Abschaltung.
+**Index-only CI-Vertraege:** Verifizierte fehlende Exporte repeatsCaption und
+mapFahrerZeile, screenTitle-Typvertrag im TabContentRenderer sowie ErrorState
+Recovery-Kontrast werden als minimale Aenderung auf committed Dateien
+integriert. Laufende Layout-/Farbumbauten bleiben im Arbeitsbaum erhalten;
+keine vollstaendige Uebernahme fremder Masken-WIP.
+Der screenTitle-Vertrag wird im gemeinsamen TableRenderer tatsaechlich
+beruecksichtigt (nur Caption-Unterdrueckung, keine Layoutaenderung);
+dieser Hunk und Meridian-Doku sind ebenfalls reserviert.
+**Inventar-Nachtrag:** Drei Code-Inventare und Router-Inventare ausschliesslich
+aus committed Quellen plus eigenen CI-Hunks regenerieren; keine fremden
+Routen oder laufende Masken-WIP aus dem Arbeitsbaum uebernehmen.
+**Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
+bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
+rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
+**Risiken:** Weitere Jobs queued; externe Security-/Provider-/Runner-Fehler
+nach Logs unterscheiden. Bestehender Probe, keine neue DB/Docker/Reset.
+**Evidenz:** c50379d2e auf main; 114 Backend-/Scanner-Vertraege und neun
+isolierte UI-Vertraege bestanden. Isolierte Typpruefung, OpenAPI (3092 Pfade),
+Code-Inventare und Architektur strict (932 Routen) gruen. Zweiter Meilenstein
+schliesst Inventar-/Preis-Spec-Drift und UI-Exporte. Audit 4 -> 2 hohe Befunde;
+node-forge/braces ohne gepatchtes Release offen. Chromium-Startseiten-Timeout
+lokal; neue Actions-Abnahme bleibt erforderlich. Kein vollstaendig gruener CI-Stand.
+
 ## HANDSHAKE-GAP-CLOSURE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** User-Auftrag: vier gemeldete Handshake-Luecken
@@ -912,6 +959,142 @@ committet.
 **Ratsche:** Tabellenverweise an lebenden Wegen **8 -> 7**.
 
 **Doku:** `docs/quality-assurance/preisfindung-kaskade-20261005.md`.
+
+## PREISMODELL-KUNDENSTUFE-20261005 — abgeschlossen, Claude Code
+
+**Auftrag:** Die beiden offenen Punkte aus `PREISFINDUNG-KASKADE-20261005`
+schliessen — den wirkungslosen Kundenrabatt und das fehlende ADR zum fuehrenden
+Preismodell.
+
+**Befund 1 — der Kundenrabatt las die falsche Tabelle.**
+`BusinessPartnerService.get_customer_discount` liest
+`domain_crm.customers.discount` / `.discount_percent`. Diese Spalten gibt es
+nicht; die Methode faengt den Fehler und liefert `None`. Sie sagt das im
+Docstring, also lugt sie nicht — aber die Stufe wirkt nie.
+
+Die Rabattinformation liegt an anderer Stelle, und zwar vollstaendig:
+
+| Quelle | Aussage | Zeilen (Dev) |
+| --- | --- | --- |
+| `domain_crm.business_partner_price_agreements` | Kunde + Artikel -> **Preis** (`price_net`, `discount_allowed`, `price_incl_freight`) | 0 |
+| `domain_crm.business_partner_discount_items` | Kunde + Artikel -> **Rabatt** | 0 |
+| `domain_crm.business_partners.discount_percent` | Kunde -> pauschaler Rabatt | vorhanden |
+
+`domain_crm.customers.business_partner_id` ist die Bruecke. Die beiden
+Satellitentabellen fuehren **kein** `tenant_id` — die Mandantengrenze kommt aus
+dem Verbund mit `business_partners`. Das ist richtig so: Eine zweite
+Mandantenspalte neben der des Vaters waere eine zweite Wahrheit.
+
+**Befund 2 — `articles.rabattfaehig` wird nie geprueft.** Der Artikelstamm sagt
+je Artikel, ob er rabattfaehig ist (und kennt daneben
+`rabatt_auftrag_rechnung`, `rabatt_selbstabholer`, `rabatt_lose`). Die Kaskade
+liest nichts davon. Ein nicht rabattfaehiger Artikel bekam Rabatt — und das ist
+eine Preiszusage, die das Haus nicht geben wollte.
+
+**Befund 3 — die Rabattmatrix ist nicht anschliessbar.**
+`domain_shared.preis_rabattsaetze` schluesselt auf `rabattgruppe_nr` (Kundenseite)
+und `rabattklasse_nr` (Artikelseite). Die Kundenseite gibt es
+(`business_partners.price_group`), die **Artikelseite nicht**: `articles` fuehrt
+keine Rabattklasse. Die Matrix kann heute nicht ausgewertet werden, egal wie
+sorgfaeltig sie gepflegt wird. Das gehoert ins ADR als benannte Luecke mit der
+genauen fehlenden Spalte — nicht als stille Nichtbenutzung.
+
+**Ziel:**
+1. Die Kundenstufe der Kaskade liest die fuehrenden Quellen, vom Besonderen zum
+   Allgemeinen: Kundenpreis (Artikel) -> Kundenrabatt (Artikel) -> pauschaler
+   Kundenrabatt. `discount_allowed = false` an einer Preisvereinbarung schliesst
+   weitere Rabatte aus; `rabattfaehig = false` am Artikel schliesst **jeden**
+   Rabatt aus.
+2. Ein ADR `docs/architecture/domains/preise/fuehrendes-modell.md` ordnet **alle
+   zwanzig** Preis- und Rabatttabellen: fuehrend, eigener Zweck, oder abzuloesen —
+   je mit Begruendung und, wo noetig, der genauen fehlenden Voraussetzung.
+
+**Dateibesitz:** `app/services/business_partner_service.py` (nur
+`get_customer_discount` und die neuen Leser),
+`app/services/preisfindung_service.py`, `app/api/v1/endpoints/pricing.py` (nur die
+Kundenstufe und `QUELLEN`),
+`docs/architecture/domains/preise/fuehrendes-modell.md` (neu),
+`tests/test_preismodell_kundenstufe_vertrag.py` (neu),
+`tests/test_preisfindung_kaskade_vertrag.py` (Erweiterung um die Kundenstufe),
+`packages/frontend-web/src/pages/preise/individualpreise.tsx` (nur der Hinweis,
+dass dieser Weg nicht preisbestimmend ist),
+`packages/frontend-web/src/pages/konditionen/konditionssystem.tsx` (nur die
+Quellenbezeichnungen), eigene QA-Doku und dieser Abschnitt.
+**Keine Migration:** Alle benoetigten Spalten sind vorhanden. Es wird keine
+Tabelle angelegt und keine geloescht — die Abloesung von
+`domain_shared.individualpreise` wird im ADR entschieden und terminiert, aber
+nicht hier ausgefuehrt (Maske, Routen, API-Modul, Navigationseintrag).
+
+**Abnahme:** Eine Preisvereinbarung bestimmt den Preis; ein artikelbezogener
+Kundenrabatt den Rabatt; ohne beides greift der pauschale Rabatt des Partners;
+alles mandantengebunden ueber den Verbund mit `business_partners`;
+`discount_allowed = false` verhindert weitere Rabatte; `rabattfaehig = false`
+verhindert jeden Rabatt; `domain_crm.customers.discount` wird nicht mehr gelesen;
+das ADR nennt alle zwanzig Tabellen; Vertraege und alle Ratschen gruen.
+
+**Risiken:** Die Reihenfolge innerhalb der Kundenstufe ist eine fachliche
+Entscheidung (Abnahme Vertriebs-Owner). Dass `rabattfaehig` jetzt greift, kann
+Preise aendern, die bisher stillschweigend rabattiert wurden — das ist der Zweck
+und gehoert vor der Inbetriebnahme kommuniziert.
+
+**Ergebnis (2026-10-05):** Beide offenen Punkte aus
+`PREISFINDUNG-KASKADE-20261005` sind geschlossen.
+
+**Kundenstufe:** `get_customer_discount` liest den Partnerstamm
+(`business_partners.discount_percent`) statt `customers.discount` — zwei Spalten,
+die es nicht gibt. Dazu zwei neue Leser: `get_customer_price_agreement`
+(Kunde + Artikel -> Preis, `discount_allowed`) und
+`get_customer_article_discount`. Die Satelliten fuehren **kein** `tenant_id`; die
+Grenze kommt aus dem Verbund mit `business_partners`, und ein Vertrag prueft das
+strukturell. `partner_id_fuer_kunden` nimmt Kunden- **und** Partnerkennung, weil
+die Aufrufer je nach Maske das eine oder andere geben.
+
+**Zwei Sperren, die der Bestand kannte und die Kaskade nie las:**
+`articles.rabattfaehig` (ein nicht rabattfaehiger Artikel bekam Rabatt) und
+`price_agreements.discount_allowed`. Beide stehen **ueber** den Stufen und werden
+in der Antwort benannt (`rabatt_gesperrt`, `rabatt_sperrgrund`) — ein stiller
+Rabatt von null waere nicht unterscheidbar von "keiner gefunden".
+
+**Kaskade jetzt achtstufig:** base, price_list, contract, **customer_price**,
+staffelrabatt, **customer_article_discount**, customer_discount,
+employee_discount. `customer_price` vor der Staffel, weil eine Zusage eine
+allgemeine Hausregel schlaegt.
+
+**ADR** `docs/architecture/domains/preise/fuehrendes-modell.md` ordnet **alle
+zwanzig** Preis- und Rabatttabellen: 8 fuehrend, 7 eigener Zweck (Tagespreise,
+qualitaetsbezogene Rohware-Zu-/Abschlaege, MATIF, Abweichungsprotokoll,
+Provisionen, Partnerparameter), 2 abzuloesen (`individualpreise`,
+`article_price_thresholds`). Die Rabattmatrix
+(`preis_rabattgruppen/_klassen/_saetze`) ist **keine** Doppelung, sondern die
+Gruppenebene — aber nicht anschliessbar: `articles` fuehrt keine
+`rabattklasse_nr`. Die fehlende Voraussetzung und der Platz der Stufe
+`group_discount` stehen im ADR, damit sie spaeter nicht erfunden werden.
+
+**Maske `individualpreise`** sagt jetzt, dass sie den Preis nicht bestimmt. Eine
+Maske, in der man einen Preis erfasst, der nie gilt, ist dieselbe Taeuschung wie
+ein verschluckter Fehler. Die Abloesung ist entschieden, aber ein eigener Slice
+(Maske, Routen, API-Modul, Endpunkt, Navigation).
+
+**Keine Migration** — alle Spalten waren vorhanden. Das war der eigentliche
+Befund: Die Information lag da, sie wurde nur nicht gelesen.
+
+**20 neue Vertraege, 67 im Preisumfeld gruen**; alle vier Ratschen gruen.
+
+**Handshakes:**
+1. Abnahme der Stufenreihenfolge beim Vertriebs-Owner.
+2. `rabattfaehig` greift jetzt — kann Preise aendern, die bisher stillschweigend
+   rabattiert wurden. Vor Inbetriebnahme kommunizieren.
+3. Rabattmatrix braucht `articles.rabattklasse_nr` — eigener Slice.
+4. Abloesung `individualpreise` — eigener Slice.
+5. `business_partner_pricing_rules` (Selbstabholerrabatt) als moegliche weitere
+   Stufe — benannte Luecke.
+6. **Fremder Rotstand:** `tests/test_crm_customer_business_partner_link.py` zwei
+   Fehler — `_FakeResult` ohne `mappings()`, `_CapturingDb` ohne `rollback()`,
+   seit `customer_service._attach_partner_mask_fields` (`c4a206f04`) so liest.
+   Kette vollstaendig in `customer_service.py`; nicht angefasst — CRM-Agent.
+
+**Doku:** `docs/quality-assurance/preismodell-kundenstufe-20261005.md`,
+ADR `docs/architecture/domains/preise/fuehrendes-modell.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

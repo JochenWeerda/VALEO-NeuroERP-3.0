@@ -51,7 +51,9 @@ export function CallWidget(): JSX.Element | null {
             <Button
               variant="outline"
               className="min-h-touch w-full mb-3"
-              onClick={() => navigate(`/crm/kunden/${encodeURIComponent(activeCall.customerId)}`)}
+              onClick={() => {
+                if (activeCall.customerId) navigate(`/crm/kunden/${encodeURIComponent(activeCall.customerId)}`)
+              }}
             >
               🔗 Kunde öffnen
             </Button>

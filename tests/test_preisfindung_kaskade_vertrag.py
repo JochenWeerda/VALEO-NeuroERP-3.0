@@ -452,7 +452,12 @@ class TestFehlerIstKeinPreis:
         from app.services import preisfindung_service as dienst
 
         assert dienst.STUFEN == (
-            "contract", "staffelrabatt", "customer_discount", "employee_discount",
+            "contract",
+            "customer_price",
+            "staffelrabatt",
+            "customer_article_discount",
+            "customer_discount",
+            "employee_discount",
         )
         assert set(dienst.QUELLEN) == {"base", "price_list", *dienst.STUFEN}
 

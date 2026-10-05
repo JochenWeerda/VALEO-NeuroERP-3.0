@@ -54,7 +54,8 @@ jobs:
               BEFORE="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
             fi
             echo "range=$BEFORE...${{ github.sha }}" >> "$GITHUB_OUTPUT"
-            echo "base=$BEFORE" >> "$GITHUB_OUTPUT"
+            BASELINE_BASE="$(python scripts/resolve_quality_baseline_base.py --base "$BEFORE" --head "${{ github.sha }}" --event "${{ github.event_name }}" --branch "${{ github.ref_name }}")"
+            echo "base=$BASELINE_BASE" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run forbidden path guard
@@ -83,7 +84,7 @@ jobs:
         run: pip install pytest==9.0.3 PyYAML==6.0.3
       - name: Improvement regression contracts
         run: >-
-          pytest tests/test_pagination_gate.py tests/test_baseline_integrity.py
+          pytest tests/test_pagination_gate.py tests/test_baseline_integrity.py tests/test_quality_baseline_lineage.py
           tests/test_improvement_pipeline.py tests/test_improvement_workflow_contract.py
           tests/test_file_size_gate.py tests/test_business_time_usage_gate.py tests/test_valeo_slice_cli.py
           tests/test_slice_readiness_legacy.py

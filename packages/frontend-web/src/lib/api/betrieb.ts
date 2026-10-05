@@ -254,6 +254,29 @@ export const useLaborAuftraege = makeHook<LaborAuftrag[]>(['qualitaet', 'labor']
 export const useServiceAnfragen = makeHook<ServiceAnfrage[]>(['service', 'anfragen'], '/api/v1/service/anfragen', fb.serviceAnfragen)
 export const useSchaeden = makeHook<Schaden[]>(['schaeden'], '/api/v1/schaeden', fb.schaeden)
 export const useZapfungen = makeHook<Zapfung[]>(['tankstelle', 'zapfungen'], '/api/v1/tankstelle/zapfungen', fb.zapfungen)
+type FahrerApi = {
+  id: string
+  name?: string
+  vorname?: string | null
+  fuehrerschein?: string | null
+  fahrzeug?: string | null
+  status?: string | null
+  touren_heute?: number | null
+  tourenHeute?: number | null
+}
+
+export function mapFahrerZeile(row: FahrerApi): Fahrer {
+  const status = row.status === 'unterwegs' || row.status === 'pause' ? row.status : 'verfuegbar'
+  return {
+    id: row.id,
+    name: [row.vorname, row.name].filter(Boolean).join(' '),
+    fuehrerschein: row.fuehrerschein || '',
+    fahrzeug: row.fahrzeug || '',
+    status,
+    tourenHeute: Number(row.tourenHeute ?? row.touren_heute ?? 0),
+  }
+}
+
 export const useFahrerListe = makeHook<Fahrer[]>(['transporte', 'fahrer'], '/api/v1/transporte/fahrer', fb.fahrer)
 export const useVerladungen = makeHook<VerladungItem[]>(['verladung'], '/api/v1/verladung', fb.verladungen)
 export const useVersicherungen = makeHook<Versicherung[]>(['versicherungen'], '/api/v1/versicherungen', fb.versicherungen)

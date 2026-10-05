@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-05
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -68,7 +68,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `auto_matching` | Automatic Matching API |
 | `background_jobs` | Queue-backed background job API for heavy process operations. |
 | `bank_accounts` | Bankkontenstamm API |
-| `bank_reconciliation` | Bank Reconciliation API |
+| `bank_reconciliation` | Read-only bank balance evidence from one PostgreSQL statement snapshot. |
 | `bank_statement_import` | Bank Statement Import API |
 | `banken` | Bank Accounts API - Bankkonto Management (SQLAlchemy) |
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
@@ -170,6 +170,9 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `ers_settlement` | Einkauf — ERS (Evaluated Receipt Settlement) |
 | `esg_footprint` | UIX-082 ESG charge footprint API. |
 | `etiketten` | Etiketten (Label Printing) API |
+| `eudr_anbindung` | EUDR — die zwei Richtungen zum EU-Informationssystem (Art. 33). |
+| `eudr_chargen` | EUDR-Chargenkennzeichnung — welche Erklaerung deckt diese Charge? |
+| `eudr_register` | EUDR-Sorgfaltserklaerungen — das Register. |
 | `exchange_rates` | Exchange Rates API |
 | `export_service` | Central Export Mikroservice |
 | `external_agent_integrations` | — |
@@ -226,7 +229,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `gdpr_art33_breach` | DSGVO Art. 33 — Datenpannen-Meldeprozess (Personal Data Breach Notification). |
 | `gdpr_requests` | GDPR Data-Subject Requests API |
 | `gelangensbestaetigung` | Gelangensbestätigung API — §17a UStDV |
-| `genossenschaft` | Genossenschaft API — Aktionärs- und Gesellschafterverwaltung |
+| `genossenschaft` | Genossenschaft API — Mitgliederregister und Anteilsbewegungen einer eG. |
 | `geo` | Geo-Endpoints für den Außendienst-Kartenviewer. |
 | `gobd_archiv` | GoBD: Archiv (document_artifacts), E-Rechnung XML, Audit-Package Export (Z1/Z2/Z3). |
 | `grundfutter_analysen` | Grundfutter-Analysen API |

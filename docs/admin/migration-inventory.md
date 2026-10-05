@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-05
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -107,6 +107,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
 | `audit_attestations_20260917` | Die Attestierung bekommt ihre Tabelle. |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
+| `bank_gl_binding_20261001` | Persist an explicit tenant-bound bank-to-ledger link; no inferred backfill. |
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
 | `billing_batch_20260821` | Billing batch orchestration and audit. |
@@ -181,6 +182,9 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `erp_gutscheinkonto_20260928` | Gutscheine bekommen ein eigenes Konto. |
 | `erp_kontenrahmen_skr03_20260927` | Der Kontenrahmen bekommt die Konten, gegen die gebucht wird. |
 | `esg_charge_footprint_uix082` | UIX-082 ESG charge footprint read-model. |
+| `eudr_chargenkennzeichnung_20261001` | Eine Charge sagt, welche Sorgfaltserklaerung sie deckt. |
+| `eudr_sorgfaltserklaerung_20261001` | Die EUDR-Sorgfaltserklaerung bekommt die Form, die die Verordnung vorgibt. |
+| `eudr_uebermittlung_20261001` | Die Erklaerung weiss, ob sie uebermittelt ist — und der Zukauf, ob er geprueft ist. |
 | `exchange_rates_compat_20260413` | Align exchange rate table with API contract |
 | `external_mock_sessions_20260623` | EXTERNAL-MOCK-HARNESS-001: Mock-Session-Log fuer Dev/Test. |
 | `f49745206879_add_zahlungslauf_kreditoren_table` | add zahlungslauf kreditoren table |
@@ -251,6 +255,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `fuhrpark_tables_speditionen_20260225` | Add Fuhrpark sub-tables and Speditionen Frachttarife |
 | `fuhrpark_vertiefung_20260616` | Fuhrpark Vertiefung: Statushistorie, Schaeden, Bussgeld |
 | `futtermittel_sorten_produktion_20260410` | Futtermittel-Stammdaten, Rezepte, Produktionsaufträge und Sortenregister |
+| `genossenschaft_mitgliederregister_20261005` | Das Mitgliederregister einer eingetragenen Genossenschaft. |
 | `gis_geojson_schlag_20260527` | GIS: geometry_geojson column on feldbuch_schlaege for polygon capture. |
 | `gobd_archiv_erechnung_20260301` | GoBD: Archiv (document_artifacts) + E-Rechnung XML-Speicher |
 | `gobd_aufbewahrungsfristen_20260301` | GoBD: domain_finance.aufbewahrungsfristen (operative Fristentabelle) |
@@ -273,6 +278,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `job_runner_tables_repair_20260625` | Repair job runner tables for runtime sweep category A. |
 | `journal_entries_document_type_20260408` | domain_erp.journal_entries: document_type ergaenzen (GoBD Belegart) |
 | `journal_entries_unify_20260301` | Journal: Eine Tabelle für List + Connector (domain_erp.journal_entries) |
+| `journal_number_tenant_20261005` | Journal numbers identify entries within a tenant, never across tenants. |
+| `kontrakt_disposition_20261005` | Der Abruf einer kontrahierten Menge — als Tabelle, nicht als Laufzeit-DDL. |
 | `kontrakt_lifecycle_fixing_20260623` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement Tabellen |
 | `kontrakt_ordnung_20261001` | Der Kontrakt-Overlay ohne Vertragsbezug wird stillgelegt. |
 | `kontraktregister_20261001` | Das zentrale Kontraktregister bekommt eine Migration. |
@@ -347,6 +354,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
 | `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
+| `preisfindung_rabattregeln_20261005` | Rollenrabatte als Tabelle — und ein Rabatt bleibt unter hundert Prozent. |
 | `pricing_staffelrabatt_artikel_m2m_20260702` | pricing: staffelrabatte <-> artikel als many-to-many |
 | `pricing_staffelrabatte_20260701` | pricing: staffelrabatte Tabelle anlegen |
 | `proc_bestellung_wareneingang_20260623` | DOM-PROC-004: proc_bestellung_status_log, proc_wareneingaenge, proc_rechnungspruefungen |
@@ -399,5 +407,8 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `wf_cockpit_persist_20260625` | WF-COCKPIT-PERSIST-001: Persistente Workflow-Cockpit-Tabellen. |
 | `whatsapp_bestell_inbox_20260603` | WhatsApp Bestell-Inbox — eingehende Freitext-Bestellungen + AI-Extraktion. |
 | `whistleblower_eine_tabelle_20260930` | Hinweisgebermeldungen bekommen eine Migration, eine Form und einen Mandanten. |
+| `wiegung_kanonisch_20261005` | Ein Wiegeergebnis, eine Tabelle — und das Netto stimmt. |
 | `wms_material_flow_stock_link_20260619` | WMS-FLOW-001: silo_cells current_stock_kg + BAB-Umlagen-Tabelle |
 | `wms_warehouse_aisles_20260612` | WMS: Lager-Gang (warehouse_aisles) + optionale Zuordnung auf warehouse_bins. |
+| `zusammenfuehrung_20261005_eudr_uebermittlung_trifft_bank_gl_` | Fuehrt die beiden Koepfe zusammen: EUDR-Uebermittlung und Bank-GL-Bindung. |
+| `zusammenfuehrung_20261005_preis_journal` | Fuehrt die beiden Koepfe zusammen: Preisfindung und Journalnummer. |

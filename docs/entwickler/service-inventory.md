@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-05
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -100,6 +100,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `einvoice_generator` | E-Rechnung XRechnung/ZUGFeRD Generator (EN 16931). |
 | `eric_submission_service` | ELSTER ERiC Submission Service für eBilanz-Übertragung. |
 | `esg_footprint_service` | ESG-CO2e-Fussabdruck je Charge (UIX-082) — auditierbarer Berechnungskern. |
+| `eudr_register_service` | EUDR-Register — die gemeinsame Mitte der drei Wege. |
 | `event_schema_registry` | Event Schema Registry — NC-G1 |
 | `external_mock_harness_service` | EXTERNAL-MOCK-HARNESS-001 — Simulierte Responses fuer externe Systeme. |
 | `fast_track` | Fast Track Classifier + Router — NC-E1/E2 |
@@ -139,10 +140,12 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `finance_transaction_service` | Service layer for finance journal entry and posting operations. |
 | `fints_connector` | FinTS/HBCI Bank-API Connector (§ 25a KWG, PSD2). |
 | `foreign_goods_worklist_service` | Governed operator projection over canonical foreign-goods storage records. |
+| `frachtbrief_service` | Frachtbrief als Transportbeleg der Sendung, nicht als Lieferschein. |
 | `gap_analytics` | GAP-Analytik: Trend-/Wachstumsabschätzung aus mehreren Jahrgängen. |
 | `gap_pipeline` | GAP (Gemeinsame Agrarpolitik) ETL-Engine. |
 | `gap_pipeline_service` | Service layer for the GAP (Gemeinsame Agrarpolitik) ETL pipeline endpoints. |
 | `gap_progress` | In-process job- and progress-tracking for the GAP ETL pipeline. |
+| `genossenschaft_service` | Mitgliederregister einer eG — eine Wahrheit uber den Anteilsbestand. |
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |
 | `harvest_acceptance_service` | Service layer for Harvest Acceptance (Ernte-Annahme) CRUD operations. |
@@ -164,6 +167,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `kaeufer_signal_service` | Aggregiert echte Verhaltenssignale je Betrieb (und je Produktgruppe) aus den |
 | `kaeufergruppe` | Käufergruppen-Modell + realistisch gewinnbare Bedarfslücke (Durchdringungs-CRM). |
 | `knowledge_store` | Knowledge Store — NC-06 |
+| `kontrakt_disposition_service` | Abruf kontrahierter Mengen — eine Wahrheit uber Freigabe und Menge. |
 | `kontrakt_movement_sync` | Automatic Kontrakt-Movement synchronization. |
 | `kontrakt_position_service` | Rohwaren-Positionsmonitor: Long/Short-Berechnung pro Artikel. |
 | `kontrakte_adapters` | — |
@@ -218,6 +222,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `position_guard_service` | No-Speculation Guard Service for Commodity Positions. |
 | `position_service` | Commodity Position Calculation Service. |
 | `position_snapshot_service` | Commodity Position Snapshot Service (optional cache for matrix performance). |
+| `preisfindung_service` | Die Preiskaskade — jede Stufe wird ausgewertet, jeder Fehlschlag gemeldet. |
 | `proc_bestellung_lifecycle_service` | DOM-PROC-004.2 — Bestellung Lifecycle Service (Statusmaschine). |
 | `proc_rechnungspruefung_service` | DOM-PROC-004.4 — Rechnungsprüfung + ERS (Evaluated Receipt Settlement) Service. |
 | `proc_wareneingang_service` | DOM-PROC-004.3 — Wareneingangs-Buchung + QS Service. |
@@ -267,6 +272,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
 | `warehouse_service` | — |
+| `webfleet_connect` | Aktuelle Fahrzeugpositionen über WEBFLEET.connect. |
 | `webhook_service` | Ausgehende Webhooks — die einzige Stelle, die die Anbindungen anfasst. |
 | `webshop_integration_service` | Service layer for B2B webshop order imports. |
 | `wf_cockpit_nats_projector` | WF-COCKPIT-PERSIST-001 — NATS-JetStream-Projector fuer Workflow-Cockpit. |
@@ -275,6 +281,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `whatsapp_agent_service` | WA-AGENT-001 — WhatsApp Bestellagent |
 | `whatsapp_intake_service` | WhatsApp Bestell-Inbox: Freitext-Bestellungen → strukturierter Beleg-Entwurf. |
 | `whatsapp_notify_service` | WA-NOTIFY-001 — Ausgehende WhatsApp-Benachrichtigungen |
+| `wiegung_service` | Doppelwiegung auf dem kanonischen Wiegeschein. |
 | `workflow_cockpit_service` | Workflow cockpit service for operational process visibility. |
 | `workflow_guards` | Workflow Guards |
 | `workflow_service` | Workflow Service (Gap 011: versionierte Definitionen). |

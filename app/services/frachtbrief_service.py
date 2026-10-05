@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
+from app.core.business_time import business_today
 from decimal import Decimal
 from typing import Any
 
@@ -52,7 +53,7 @@ def _datum(value: Any) -> date:
         return value.date()
     if isinstance(value, date):
         return value
-    return date.today()
+    return business_today()
 
 
 def generate_from_verladung(db: Session, verladung: Any, tenant_id: str) -> str | None:

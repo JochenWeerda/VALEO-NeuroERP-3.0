@@ -10,6 +10,9 @@ from app.core.screen_definitions_capture import (
     build_logistik_frachttabellen_screen_definition,
     build_logistik_tour_fracht_arbeitsraum_screen_definition,
     build_logistik_tourenplanung_screen_definition,
+    build_fuhrpark_ausgehende_dokumente_screen_definition,
+    build_fuhrpark_rechnungen_screen_definition,
+    build_fuhrpark_terminarten_screen_definition,
     build_logistik_versandprofile_screen_definition,
     build_transporte_fahrer_screen_definition,
 )
@@ -160,3 +163,77 @@ def test_versandprofile_register_folgen_den_eingaben() -> None:
     assert "DEMO" not in block
     assert governance_errors(definition) == []
     assert get_screen_definition("logistik/versandprofile")["id"] == "logistik/versandprofile"
+
+
+def test_terminarten_folgen_der_bezeichnung() -> None:
+    definition = build_fuhrpark_terminarten_screen_definition()
+    block = _block("fuhrparkTerminartenScreen")
+    felder = ["terminart", "intervall_monate", "intervall_km"]
+    assert definition["id"] == "fuhrpark/terminarten"
+    assert definition["title"] == "Terminarten"
+    assert [field["key"] for field in definition["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert definition["layout"]["columnNavigation"] == "single"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert "statusPlacement: 'afterFields'" in block
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/fuhrpark/terminarten"
+    assert "/api/v1/fuhrpark/terminarten" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    assert definition["tables"][0]["columns"][0]["priority"] == "primary"
+    assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("fuhrpark/terminarten")["id"] == "fuhrpark/terminarten"
+
+
+def test_fuhrpark_rechnungen_folgen_dem_beleg() -> None:
+    definition = build_fuhrpark_rechnungen_screen_definition()
+    block = _block("fuhrparkRechnungenScreen")
+    felder = [
+        "rechnungs_nr",
+        "datum",
+        "fahrzeug_kennzeichen",
+        "sachkonto",
+        "kostenart",
+        "betrag_eur",
+        "notiz",
+    ]
+    assert definition["id"] == "fuhrpark/rechnungen"
+    assert definition["title"] == "Fuhrpark-Rechnungen"
+    assert [field["key"] for field in definition["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert definition["layout"]["tableProfile"] == "financial"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert "statusPlacement: 'afterFields'" in block
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/fuhrpark/rechnungen"
+    assert "/api/v1/fuhrpark/rechnungen" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    assert definition["tables"][0]["columns"][0]["priority"] == "primary"
+    assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("fuhrpark/rechnungen")["id"] == "fuhrpark/rechnungen"
+
+
+def test_ausgehende_belege_folgen_dem_formular() -> None:
+    definition = build_fuhrpark_ausgehende_dokumente_screen_definition()
+    block = _block("fuhrparkAusgehendeDokumenteScreen")
+    felder = ["beleg_typ", "formular", "ziel_modul", "beschreibung", "aktiv"]
+    assert definition["id"] == "fuhrpark/ausgehende-dokumente"
+    assert definition["title"] == "Ausgehende Belege"
+    assert [field["key"] for field in definition["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert "statusPlacement: 'afterFields'" in block
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/fuhrpark/ausgehende-dokumente"
+    assert "/api/v1/fuhrpark/ausgehende-dokumente" in block
+    assert "/versand/versand-avis" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    assert definition["tables"][0]["columns"][0]["priority"] == "primary"
+    assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("fuhrpark/ausgehende-dokumente")["id"] == "fuhrpark/ausgehende-dokumente"

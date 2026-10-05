@@ -209,12 +209,19 @@ class FinanceTransactionService:
         # field is selected exclusively by the two fixed methods above.
         if field not in {"id", "account_number"}:
             raise ValidationFailedError("Unsupported account reference")
-        row = self.db.execute(text(f"""
-            SELECT id FROM domain_erp.chart_of_accounts
-            WHERE tenant_id = :tenant_id AND {field} = :value
-              AND is_active = TRUE AND deleted_at IS NULL
-              AND COALESCE(is_summary, FALSE) = FALSE
-        """), {"tenant_id": self.tenant_id, "value": value}).first()
+        queries = {
+            "id": "SELECT id FROM domain_erp.chart_of_accounts "
+                  "WHERE tenant_id = :tenant_id AND id = :value "
+                  "AND is_active = TRUE AND deleted_at IS NULL "
+                  "AND COALESCE(is_summary, FALSE) = FALSE",
+            "account_number": "SELECT id FROM domain_erp.chart_of_accounts "
+                              "WHERE tenant_id = :tenant_id AND account_number = :value "
+                              "AND is_active = TRUE AND deleted_at IS NULL "
+                              "AND COALESCE(is_summary, FALSE) = FALSE",
+        }
+        row = self.db.execute(text(queries[field]), {
+            "tenant_id": self.tenant_id, "value": value,
+        }).first()
         if row is None:
             raise ValidationFailedError("Own active bookable account not found")
         return str(row[0])

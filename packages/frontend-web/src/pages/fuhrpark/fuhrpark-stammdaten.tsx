@@ -1,160 +1,231 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
+import { toast } from 'sonner'
+import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createFuhrparkTerminart,
   deleteFuhrparkTerminart,
   listFuhrparkTerminarten,
   updateFuhrparkTerminart,
-  type FuhrparkTerminart,
 } from '@/lib/api/fuhrpark'
+import { fuhrparkTerminartenScreen } from '@/masks/capture-screens'
 
-const EMPTY_FORM = {
-  terminart: '',
-  intervall_monate: 0,
-  intervall_km: 0,
+function text(value: unknown): string {
+  return String(value ?? '').trim()
+}
+
+function ganzzahl(value: unknown): number {
+  if (value == null || value === '') return 0
+  return Number(value)
 }
 
 export default function FuhrparkStammdatenPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
-  const [selected, setSelected] = useState<FuhrparkTerminart | null>(null)
-  const [form, setForm] = useState(EMPTY_FORM)
-
-  const { data: rows = [] } = useQuery({
+  const liste = useQuery({
     queryKey: ['fuhrpark', 'terminarten'],
     queryFn: listFuhrparkTerminarten,
   })
+  const rows = liste.data ?? []
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+  const [saving, setSaving] = useState(false)
 
-  const isEdit = Boolean(selected)
+  const createMutation = useMutation({ mutationFn: createFuhrparkTerminart })
+  const updateMutation = useMutation({
+    mutationFn: (payload: { id: string; terminart: string; intervall_monate: number; intervall_km: number }) =>
+      updateFuhrparkTerminart(payload.id, {
+        terminart: payload.terminart,
+        intervall_monate: payload.intervall_monate,
+        intervall_km: payload.intervall_km,
+      }),
+  })
+  const deleteMutation = useMutation({ mutationFn: deleteFuhrparkTerminart })
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      if (isEdit && selected) {
-        return updateFuhrparkTerminart(selected.id, form)
+  useEffect(() => {
+    if (!liste.isError) return
+    toast.error('Terminarten nicht geladen', { description: getAxiosErrorMessage(liste.error) })
+  }, [liste.error, liste.isError])
+
+  const schema = useMemo<ScreenDefinition>(() => ({
+    ...fuhrparkTerminartenScreen,
+    layout: {
+      ...fuhrparkTerminartenScreen.layout,
+      density: isTouch ? 'comfortable' : 'compact',
+    },
+    summary: (fuhrparkTerminartenScreen.summary ?? []).map((item) => ({
+      ...item,
+      value: String(rows.length),
+    })),
+    actions: (fuhrparkTerminartenScreen.actions ?? []).map((action) => ({
+      ...action,
+      disabled: action.key === 'speichern' ? saving : false,
+    })),
+  }), [isTouch, rows.length, saving])
+
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const form = useUniversalFormState({
+    screen: schema,
+    initialValues: {
+      terminart: '',
+      intervall_monate: '',
+      intervall_km: '',
+    },
+  })
+
+  const workflow = useMemo<WorkflowState>(() => {
+    const leer = rows.length === 0
+    const gewaehlt = Boolean(selectedId)
+    const label = leer ? 'Keine Terminart' : gewaehlt ? 'Terminart gewählt' : 'Terminarten hinterlegt'
+    const naechste = leer
+      ? 'Bezeichnung eintragen.'
+      : gewaehlt
+        ? 'Intervall ändern und speichern, oder Neu für eine weitere Art.'
+        : 'Eine Terminart wählen oder eine neue anlegen.'
+    return {
+      status: {
+        currentStatus: leer ? 'leer' : gewaehlt ? 'gewaehlt' : 'hinterlegt',
+        statusLabel: label,
+        tone: leer ? 'warning' : 'success',
+      },
+      nextAllowedActions: [{ actionKey: 'speichern', label: naechste, dangerLevel: 'safe', requiresConfirmation: false }],
+      blockingReasons: leer ? [{ code: label, message: naechste, blocking: true }] : [],
+      auditTrail: [],
+      policyHints: [],
+      isBlocked: false,
+      isTerminal: false,
+    }
+  }, [rows.length, selectedId])
+
+  const leeren = useCallback(() => {
+    setSelectedId(null)
+    form.setValue('terminart', '')
+    form.setValue('intervall_monate', '')
+    form.setValue('intervall_km', '')
+  }, [form])
+
+  const speichern = useCallback(async () => {
+    if (saving) return
+    const terminart = text(form.values.terminart)
+    const monate = ganzzahl(form.values.intervall_monate)
+    const km = ganzzahl(form.values.intervall_km)
+    if (terminart.length < 2) {
+      toast.error('Bezeichnung fehlt', { description: 'Die Terminart braucht mindestens zwei Zeichen.' })
+      return
+    }
+    if (!Number.isInteger(monate) || monate < 0 || !Number.isInteger(km) || km < 0) {
+      toast.error('Ungültiges Intervall', { description: 'Monate und Kilometer sind ganze Zahlen ab 0.' })
+      return
+    }
+    setSaving(true)
+    try {
+      const payload = { terminart, intervall_monate: monate, intervall_km: km }
+      if (selectedId) {
+        await updateMutation.mutateAsync({ id: selectedId, ...payload })
+        toast.success('Terminart gespeichert', { description: `${terminart} wurde aktualisiert.` })
+      } else {
+        await createMutation.mutateAsync(payload)
+        toast.success('Terminart angelegt', { description: `${terminart} wurde erstellt.` })
       }
-      return createFuhrparkTerminart(form)
-    },
-    onSuccess: () => {
-      setForm(EMPTY_FORM)
-      setSelected(null)
-      void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'terminarten'] })
-    },
-  })
+      await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'terminarten'] })
+      leeren()
+    } catch (error) {
+      toast.error('Terminart nicht gespeichert', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setSaving(false)
+    }
+  }, [createMutation, form.values, leeren, queryClient, saving, selectedId, updateMutation])
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => deleteFuhrparkTerminart(id),
-    onSuccess: () => {
-      setForm(EMPTY_FORM)
-      setSelected(null)
-      void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'terminarten'] })
-    },
-  })
+  const loeschen = useCallback(async (id: string, name: string) => {
+    if (!id || pendingDeletes.has(id)) return
+    setPendingDeletes((prev) => new Set(prev).add(id))
+    try {
+      await deleteMutation.mutateAsync(id)
+      toast.success('Terminart gelöscht', { description: `${name} wurde entfernt.` })
+      if (selectedId === id) leeren()
+      await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'terminarten'] })
+    } catch (error) {
+      toast.error('Terminart nicht gelöscht', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setPendingDeletes((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }
+  }, [deleteMutation, leeren, pendingDeletes, queryClient, selectedId])
 
-  const sortedRows = useMemo(
-    () => [...rows].sort((a, b) => a.terminart.localeCompare(b.terminart, 'de')),
-    [rows],
-  )
+  const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
+    if (key === 'speichern') {
+      await speichern()
+      return
+    }
+    if (key === 'neu') {
+      leeren()
+      return
+    }
+    if (key === 'loeschen') {
+      await loeschen(text(payload.id), text(payload.terminart))
+    }
+  }, [leeren, loeschen, speichern])
+
+  const selectRow = useCallback((row: Record<string, unknown>) => {
+    const id = text(row.id)
+    setSelectedId(id)
+    form.setValue('terminart', text(row.terminart))
+    form.setValue('intervall_monate', String(row.intervall_monate ?? ''))
+    form.setValue('intervall_km', String(row.intervall_km ?? ''))
+  }, [form])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { terminarten: rows },
+    permissions: { granted: [] },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'fuhrpark.saveTerminart': () => handleAction('speichern', {}),
+      'fuhrpark.newTerminart': () => handleAction('neu', {}),
+      'fuhrpark.deleteTerminart': (payload) => handleAction('loeschen', payload),
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, handleAction, rows])
+
+  if (liste.isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-full bg-[#ececec] p-6 text-[11px] text-black">
-      <div className="mx-auto w-[660px] border border-[#2b77c5] bg-[#efefef] shadow-[0_10px_24px_rgba(0,0,0,0.2)]">
-        <div className="flex items-center justify-between bg-[#0078d7] px-2 py-1 text-white">
-          <span>Stammdaten</span>
-          <button className="h-5 w-5 text-center leading-none">x</button>
-        </div>
-
-        <div className="border-b border-[#d0d0d0] bg-[#efefef] px-1 py-1 text-[18px] leading-none">TERMINARTEN (FUHRPARK)</div>
-
-        <div className="space-y-1 border-b border-[#d0d0d0] p-2">
-          <div className="grid grid-cols-[90px_1fr_112px_112px_90px] items-center gap-1">
-            <label>Terminart:</label>
-            <input
-              value={form.terminart}
-              onChange={(e) => setForm((prev) => ({ ...prev, terminart: e.target.value }))}
-              className="h-5 border border-[#a8a8a8] bg-white px-1"
-            />
-            <label className="text-right">Intervall (Mon):</label>
-            <input
-              type="number"
-              value={form.intervall_monate}
-              onChange={(e) => setForm((prev) => ({ ...prev, intervall_monate: Number(e.target.value) || 0 }))}
-              className="h-5 border border-[#a8a8a8] bg-white px-1 text-right"
-            />
-            <input
-              type="number"
-              value={form.intervall_km}
-              onChange={(e) => setForm((prev) => ({ ...prev, intervall_km: Number(e.target.value) || 0 }))}
-              className="h-5 border border-[#a8a8a8] bg-white px-1 text-right"
-              title="Intervall (km)"
-            />
-          </div>
-        </div>
-
-        <div className="border-t border-[#d8d8d8] px-1 py-1">
-          <div className="border border-[#c9c9c9] bg-white">
-            <div className="grid grid-cols-[1fr_95px_95px] border-b border-[#d2d2d2] bg-[#f2f2f2] px-1 py-[2px]">
-              <span>TERMINART</span>
-              <span>Intervall (Monate)</span>
-              <span>Intervall (km)</span>
-            </div>
-
-            {sortedRows.map((row) => (
-              <button
-                type="button"
-                key={row.id}
-                onClick={() => {
-                  setSelected(row)
-                  setForm({
-                    terminart: row.terminart,
-                    intervall_monate: row.intervall_monate,
-                    intervall_km: row.intervall_km,
-                  })
-                }}
-                className={`grid w-full grid-cols-[1fr_95px_95px] px-1 py-[2px] text-left ${selected?.id === row.id ? 'bg-[#0078d7] text-white' : 'bg-white hover:bg-[#edf5ff]'}`}
-              >
-                <span>{row.terminart}</span>
-                <span className="text-right">{row.intervall_monate}</span>
-                <span className="text-right">{row.intervall_km}</span>
-              </button>
-            ))}
-
-            <div className="h-[340px] bg-white" />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-[#d0d0d0] bg-[#efefef] px-3 py-2">
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                setSelected(null)
-                setForm(EMPTY_FORM)
-              }}
-              className="h-6 border border-[#9b9b9b] bg-[#ececec] px-2"
-            >
-              Neu
-            </button>
-            <button
-              onClick={() => {
-                if (selected) deleteMutation.mutate(selected.id)
-              }}
-              disabled={!selected}
-              className="h-6 border border-[#9b9b9b] bg-[#ececec] px-2 disabled:opacity-50"
-            >
-              Löschen
-            </button>
-            <button
-              onClick={() => saveMutation.mutate()}
-              disabled={!form.terminart.trim()}
-              className="h-6 border border-[#9b9b9b] bg-[#ececec] px-3 disabled:opacity-50"
-            >
-              Speichern
-            </button>
-          </div>
-          <div className="flex gap-1">
-            <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-6">OK</button>
-            <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4">Abbrechen</button>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        workflowState={workflow}
+        tables={{
+          terminarten: rows.map((row) => ({
+            id: row.id,
+            terminart: row.terminart,
+            intervall_monate: row.intervall_monate,
+            intervall_km: row.intervall_km,
+            gesperrt: pendingDeletes.has(row.id),
+          })),
+        }}
+        onAction={handleAction}
+        onRowSelect={selectRow}
+      />
     </div>
   )
 }
