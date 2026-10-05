@@ -771,7 +771,7 @@ sind durch acht Tests auf Woerterbuch, Uebergaenge und Mengenregel ersetzt.
 
 **Doku:** `docs/quality-assurance/kontrakt-disposition-20261005.md`.
 
-## PREISFINDUNG-KASKADE-20261005 — in Arbeit, Claude Code
+## PREISFINDUNG-KASKADE-20261005 — abgeschlossen, Claude Code
 
 **Befund:** `/pricing/calculate` ist **der** Preisfindungsweg (die Maske
 Lieferscheinerfassung und `lib/api/konditionen.ts` rufen ihn). Er hat fuenf
@@ -855,6 +855,57 @@ Vertraege gegen die frische DB und alle Ratschen gruen.
 Kaskade jetzt 503 statt des Listenpreises liefert, macht bisher unsichtbare
 Stoerungen sichtbar — das ist beabsichtigt, kann aber in Masken auffallen, die
 den Fehler bisher verschluckt haben.
+
+**Ergebnis (2026-10-05):** Der Mandant kommt aus dem Kopf (`get_tenant_id`) —
+auch in den beiden Staffelrabatt-Wegen; ein mitgegebener Query-Parameter hebelt
+ihn nicht aus. Migration `preisfindung_rabattregeln_20261005` legt
+`domain_pricing.discount_rules` an (Bereichspruefung 0..100 %,
+Gueltigkeitszeitraum, partieller Unique auf `(tenant_id, role)` bei `is_active` —
+sonst haette `LIMIT 1` ohne Sortierung den Preis bestimmt). Der Kontraktpreis
+kommt aus `kon_contract_line` (`unit_price`, `discount_pct` je Artikel) statt aus
+zwei Spalten, die es nicht gibt. Die Mengenstaffel ist Teil der Kaskade: aktive,
+heute gueltige Staffel, Artikel direkt/ueber Zuordnung/ueber Warengruppe,
+kundenbezogen vor allgemein, hoechste erreichte Stufe, Festpreis ersetzt den
+Listenpreis — und eine wirkungslose Nullstufe (`ab_menge 1, rabatt 0`, im Bestand
+vorhanden) zaehlt nicht als Treffer, sonst verdraengte sie die Folgestufen mit
+null Rabatt. Jeder Stufenfehlschlag ist ein 503 mit der Stufe im Text statt des
+vollen Listenpreises. **29 neue Vertraege, 47 mit dem Gap-Scan, 65 im Umfeld
+gruen**; Migration auf beiden Datenbanken.
+
+**Altlasttests:** `test_pricing_find_tenant_isolation` und
+`test_staffelrabatte_tenant_isolation` (in `tests/test_api_gap_lager_pricing_scan.py`,
+nicht im urspruenglichen Dateibesitz) prueften die Mandantentrennung **ueber den
+Query-Parameter** — ein Aufrufer, der seinen Mandanten selbst waehlt, ist keine
+Trennung. Beide auf den Kopf umgestellt, plus die Pruefung, dass der Parameter
+nichts aushebelt.
+
+**Masken:** `lieferschein-erfassung.tsx` verschluckt den Preisfehler nicht mehr
+(leerer `catch` -> Toast) und liest Geldbetraege mit `Number()`;
+`konditionssystem.tsx` kennt `Mengenstaffel`, nennt die Kaskade richtig und zeigt
+die getroffene Stufe; `lib/api/konditionen.ts` sagt `number | string`, weil
+`Decimal` als Zeichenkette kommt.
+
+**Alembic:** Zwei Koepfe, weil ein anderer Agent an
+`journal_number_tenant_20261005` arbeitet — dem Handshake aus dem
+Genossenschafts-Slice. Dessen Revisionsdatei ist **unversioniert**, deshalb
+**nicht** darauf gechaint und nicht zusammengefuehrt (CI bricht mit `KeyError`).
+Hochgezogen mit explizitem Revisionsziel. Die Zusammenfuehrung macht, wer zuletzt
+committet.
+
+**Handshakes:**
+1. Reihenfolge Kontrakt > Staffel > Kundenrabatt — fachliche Entscheidung, Abnahme
+   beim Vertriebs-Owner.
+2. **Der Kundenrabatt ist weiter wirkungslos:** `domain_crm.customers` fuehrt keine
+   Rabattspalten, `get_customer_discount` liefert `None` (dort dokumentiert).
+   Zielquelle sind die BP-Rabatt-Satelliten. Eigener Slice.
+3. **Sechzehn weitere Preis- und Rabatttabellen** stehen neben den benutzten; ein
+   ADR zum fuehrenden Preismodell fehlt.
+4. Der Bank-Eintrag in der Paginierungsratsche ist inzwischen von dort behoben —
+   alle vier Ratschen sind gruen.
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **8 -> 7**.
+
+**Doku:** `docs/quality-assurance/preisfindung-kaskade-20261005.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

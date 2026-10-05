@@ -12,7 +12,8 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.config import settings
+from app.core.tenant import get_tenant_id
+from app.services import preisfindung_service as preis
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -21,7 +22,6 @@ router = APIRouter(prefix="/pricing", tags=["pricing"])
 
 # Alias-Prefix für Frontend-Konvention /preise/* — wird in api.py parallel eingebunden.
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class PriceCalculationRequest(BaseModel):
@@ -33,162 +33,136 @@ class PriceCalculationRequest(BaseModel):
 
 
 class PriceCalculationResponse(BaseModel):
+    """Der gefundene Preis und die Stufe, die ihn bestimmt hat."""
+
     list_price: Decimal
     discount: Decimal
     net_price: Decimal
-    source: str  # 'base', 'price_list', 'contract', 'customer_discount', 'employee_discount'
+    #: Eine der Stufen aus ``preisfindung_service.QUELLEN``.
+    source: str
     price_list_id: Optional[str] = None
     contract_id: Optional[str] = None
+    #: Gesetzt, wenn eine Mengenstaffel den Preis bestimmt hat.
+    staffelrabatt_id: Optional[str] = None
+    staffel_ab_menge: Optional[Decimal] = None
 
 
-@router.get("/calculate", response_model=PriceCalculationResponse, summary="Price berechnen")
+@router.get("/calculate", response_model=PriceCalculationResponse, summary="Preis finden")
 async def calculate_price(
-    article_id: str = Query(..., description="Article ID"),
-    customer_id: Optional[str] = Query(None, description="Customer ID"),
-    quantity: Decimal = Query(Decimal("1"), ge=Decimal("0"), description="Quantity"),
-    contract_id: Optional[str] = Query(None, description="Contract ID"),
-    user_role: Optional[str] = Query(None, description="User role for employee discounts"),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    article_id: str = Query(..., description="Artikelkennung"),
+    customer_id: Optional[str] = Query(None, description="Kundenkennung"),
+    quantity: Decimal = Query(Decimal("1"), ge=Decimal("0"), description="Menge"),
+    contract_id: Optional[str] = Query(None, description="Kontraktkennung"),
+    user_role: Optional[str] = Query(None, description="Rolle fuer Mitarbeiterrabatte"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
+) -> PriceCalculationResponse:
+    """Preisfindung in einer Kaskade — es gilt **eine** Stufe, nicht die Summe.
+
+    Reihenfolge: Preisliste (ersetzt den Basispreis), dann Kontrakt, Mengenstaffel,
+    Kundenrabatt, Rollenrabatt; sonst der Basispreis des Artikels.
+
+    Bis zum 05.10.2026 kam der Mandant aus einem **Query-Parameter** mit
+    Vorgabewert — wer ihn setzte, fragte fremde Preislisten ab; wer ihn wegliess,
+    bekam stillschweigend die des Vorgabemandanten. Und drei der fuenf Stufen
+    funktionierten nie: Der Kontraktrabatt las zwei Spalten, die es nicht gibt,
+    der Rollenrabatt eine Tabelle, die es nicht gibt, und die gepflegten
+    Mengenstaffeln wurden nicht gelesen. Jeder Fehlschlag lief in
+    ``except: db.rollback()``, und heraus kam der volle Listenpreis mit
+    ``source: "base"``.
+
+    Jetzt ist ein Fehlschlag ein 503 mit der Stufe im Text: Wer einen Preis nicht
+    vollstaendig ermitteln kann, darf keinen nennen.
     """
-    Calculate price with hierarchical cascade logic (like zvoove/Landhandel):
-    
-    Priority:
-    1. Price list (highest priority, replaces base price)
-    2. Contract discount (if contract_id provided)
-    3. Customer discount (from customer master data)
-    4. Employee role discount (if user_role provided)
-    5. Base price (fallback)
-    
-    Only ONE discount is applied (not additive).
-    """
-    # 1. Get base price from article
-    article = db.execute(
-        text("""
-            SELECT sales_price, warengruppe, category 
-            FROM domain_inventory.articles 
-            WHERE id = :id AND tenant_id = :tenant_id AND is_active = TRUE
-        """),
-        {"id": article_id, "tenant_id": tenant_id}
-    ).mappings().first()
-    
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-    
-    base_price = Decimal(str(article["sales_price"] or 0))
-    article_group = article["warengruppe"] or article["category"]
-    
-    list_price = base_price
+    artikel = preis.artikel_holen(db, tenant_id, article_id)
+
+    list_price = Decimal(str(artikel["sales_price"] or 0))
     discount = Decimal("0")
     source = "base"
-    price_list_id = None
-    contract_id_result = None
-    
-    # 2. Check for price list (highest priority - replaces base price)
-    # Suche nach Preisliste für Artikel-ID, Artikelnummer oder Artikelgruppe
-    article_number = db.execute(
-        text("""
-            SELECT article_number 
-            FROM domain_inventory.articles 
-            WHERE id = :id AND tenant_id = :tenant_id
-        """),
-        {"id": article_id, "tenant_id": tenant_id}
-    ).scalar()
-    
-    if article_number or article_group:
-        # Suche Preislisten-Item für diesen Artikel (echtes Schema: price_list_items)
-        price_item = db.execute(
-            text("""
-                SELECT pli.id, pli.price_list_id, pli.unit_price, pli.discount_percent,
-                       pl.name AS pl_name
-                FROM domain_pricing.price_list_items pli
-                JOIN domain_pricing.price_lists pl ON pl.id = pli.price_list_id
-                WHERE pl.tenant_id = :tenant_id
-                  AND pl.is_active = TRUE
-                  AND (pl.valid_from IS NULL OR pl.valid_from <= CURRENT_DATE)
-                  AND (pl.valid_until IS NULL OR pl.valid_until >= CURRENT_DATE)
-                  AND (pli.article_id = :article_id OR pli.article_number = :article_number)
-                  AND (pli.valid_from IS NULL OR pli.valid_from <= CURRENT_DATE)
-                  AND (pli.valid_until IS NULL OR pli.valid_until >= CURRENT_DATE)
-                  AND (pli.min_quantity IS NULL OR pli.min_quantity <= :quantity)
-                ORDER BY pli.min_quantity DESC NULLS LAST
-                LIMIT 1
-            """),
-            {
-                "tenant_id": tenant_id,
-                "article_id": article_id,
-                "article_number": article_number or "",
-                "quantity": float(quantity),
-            }
-        ).mappings().first()
+    price_list_id: Optional[str] = None
+    contract_id_result: Optional[str] = None
+    staffelrabatt_id: Optional[str] = None
+    staffel_ab_menge: Optional[Decimal] = None
 
-        if price_item:
-            if price_item["unit_price"] is not None:
-                list_price = Decimal(str(price_item["unit_price"]))
-            if price_item["discount_percent"] is not None:
-                discount = Decimal(str(price_item["discount_percent"]))
-            source = "price_list"
-            price_list_id = price_item["price_list_id"]
-    
-    # 3. Check for contract discount (if contract_id provided)
-    # domain_contracts schema may not exist — skip gracefully
+    # 1. Preisliste — ersetzt den Basispreis.
+    try:
+        position = preis.preisliste(db, tenant_id, artikel, quantity)
+    except Exception as fehler:  # noqa: BLE001
+        raise preis.stufe_nicht_lesbar(db, fehler, "price_list", tenant_id) from fehler
+    if position:
+        if position["unit_price"] is not None:
+            list_price = Decimal(str(position["unit_price"]))
+        if position["discount_percent"] is not None:
+            discount = preis.pruefe_rabatt(
+                Decimal(str(position["discount_percent"])), "price_list"
+            )
+        source = "price_list"
+        price_list_id = position["price_list_id"]
+
+    # 2. Kontrakt — eine Zusage geht jeder allgemeinen Regel vor.
     if contract_id:
         try:
-            contract = db.execute(
-                text("""
-                    SELECT discount_percent, discount_amount
-                    FROM domain_contracts.contracts
-                    WHERE id = :id AND tenant_id = :tenant_id AND status = 'active'
-                """),
-                {"id": contract_id, "tenant_id": tenant_id}
-            ).mappings().first()
-            if contract:
-                if contract["discount_percent"]:
-                    discount = Decimal(str(contract["discount_percent"]))
-                    source = "contract"
-                    contract_id_result = contract_id
-                elif contract["discount_amount"] and list_price > 0:
-                    discount = (Decimal(str(contract["discount_amount"])) / list_price) * 100
-                    source = "contract"
-                    contract_id_result = contract_id
-        except Exception:
-            db.rollback()
+            zeile = preis.kontraktpreis(db, tenant_id, contract_id, article_id)
+        except Exception as fehler:  # noqa: BLE001
+            raise preis.stufe_nicht_lesbar(db, fehler, "contract", tenant_id) from fehler
+        if zeile:
+            if zeile["unit_price"] is not None:
+                list_price = Decimal(str(zeile["unit_price"]))
+            discount = preis.pruefe_rabatt(
+                Decimal(str(zeile["discount_pct"] or 0)), "contract"
+            )
+            source = "contract"
+            contract_id_result = contract_id
 
-    # 4. Check for customer discount (only if no contract discount)
+    # 3. Mengenstaffel — haengt an der tatsaechlich bestellten Menge.
+    if source in ("base", "price_list"):
+        try:
+            stufe = preis.staffel_stufe(db, tenant_id, artikel, quantity, customer_id)
+        except Exception as fehler:  # noqa: BLE001
+            raise preis.stufe_nicht_lesbar(db, fehler, "staffelrabatt", tenant_id) from fehler
+        if stufe:
+            if stufe["festpreis"] is not None:
+                list_price = Decimal(str(stufe["festpreis"]))
+                discount = Decimal("0")
+            else:
+                discount = preis.pruefe_rabatt(
+                    Decimal(str(stufe["rabatt_prozent"] or 0)), "staffelrabatt"
+                )
+            source = "staffelrabatt"
+            staffelrabatt_id = stufe["staffel_id"]
+            staffel_ab_menge = Decimal(str(stufe["ab_menge"]))
+
+    # 4. Kundenrabatt aus den Stammdaten.
     if source in ("base", "price_list") and customer_id:
         try:
             from app.services.business_partner_service import BusinessPartnerService
-            cust_discount = BusinessPartnerService(db, tenant_id).get_customer_discount(customer_id)
-            if cust_discount is not None:
-                discount = cust_discount
-                source = "customer_discount"
-        except Exception:
-            db.rollback()
 
-    # 5. Check for employee role discount — domain_pricing.discount_rules may not exist
+            kundenrabatt = BusinessPartnerService(db, tenant_id).get_customer_discount(
+                customer_id
+            )
+        except Exception as fehler:  # noqa: BLE001
+            raise preis.stufe_nicht_lesbar(
+                db, fehler, "customer_discount", tenant_id
+            ) from fehler
+        if kundenrabatt is not None:
+            discount = preis.pruefe_rabatt(Decimal(str(kundenrabatt)), "customer_discount")
+            source = "customer_discount"
+
+    # 5. Rollenrabatt.
     if source in ("base", "price_list") and user_role:
         try:
-            role_discount = db.execute(
-                text("""
-                    SELECT discount_percent
-                    FROM domain_pricing.discount_rules
-                    WHERE tenant_id = :tenant_id
-                    AND role = :role
-                    AND is_active = TRUE
-                    LIMIT 1
-                """),
-                {"tenant_id": tenant_id, "role": user_role}
-            ).scalar()
-            if role_discount:
-                discount = Decimal(str(role_discount))
-                source = "employee_discount"
-        except Exception:
-            db.rollback()
-    
-    # Calculate net price
-    net_price = list_price * (1 - discount / 100)
-    
+            rollenrabatt = preis.rollenrabatt(db, tenant_id, user_role)
+        except Exception as fehler:  # noqa: BLE001
+            raise preis.stufe_nicht_lesbar(
+                db, fehler, "employee_discount", tenant_id
+            ) from fehler
+        if rollenrabatt is not None:
+            discount = preis.pruefe_rabatt(rollenrabatt, "employee_discount")
+            source = "employee_discount"
+
+    net_price = (list_price * (Decimal("1") - discount / Decimal("100"))).quantize(
+        Decimal("0.0001")
+    )
     return PriceCalculationResponse(
         list_price=list_price,
         discount=discount,
@@ -196,13 +170,15 @@ async def calculate_price(
         source=source,
         price_list_id=price_list_id,
         contract_id=contract_id_result,
+        staffelrabatt_id=staffelrabatt_id,
+        staffel_ab_menge=staffel_ab_menge,
     )
 
 
 @router.get(
     "/find",
     response_model=PriceCalculationResponse,
-    summary="Preisfindung (Frontend-Alias für /calculate)",
+    summary="Preisfindung (Frontend-Alias fuer /calculate)",
 )
 async def find_price(
     article_id: str = Query(...),
@@ -210,10 +186,10 @@ async def find_price(
     quantity: Decimal = Query(Decimal("1"), ge=Decimal("0")),
     contract_id: Optional[str] = Query(None),
     user_role: Optional[str] = Query(None),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-):
-    """Frontend-Alias für /pricing/calculate — identische Logik."""
+) -> PriceCalculationResponse:
+    """Frontend-Alias fuer /pricing/calculate — dieselbe Kaskade."""
     return await calculate_price(
         article_id=article_id,
         customer_id=customer_id,
@@ -270,7 +246,7 @@ class StaffelrabattOut(BaseModel):
 async def list_staffelrabatte(
     artikel_id: Optional[str] = Query(None),
     kunden_id: Optional[str] = Query(None),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[StaffelrabattOut]:
     """Staffelrabatte abfragen — filterbar nach Artikel und Kunde."""
@@ -336,7 +312,7 @@ async def list_staffelrabatte(
 )
 async def create_staffelrabatt(
     payload: StaffelrabattIn,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> StaffelrabattOut:
     """Staffelrabatt anlegen (Mengen-/Preisstufen für Artikel oder Artikelgruppe)."""

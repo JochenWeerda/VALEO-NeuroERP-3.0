@@ -941,9 +941,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       void (async () => {
         try {
           const pricingResponse = await apiClient.get<{
-            list_price: number
-            discount: number
-            net_price: number
+            list_price: number | string
+            discount: number | string
+            net_price: number | string
             source: string
           }>('/api/v1/pricing/calculate', {
             params: {
@@ -952,16 +952,26 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               quantity: currentPosition.mengeGebinde || 1, // Verwende aktuelle Menge oder 1
             },
           })
-          
-          if (pricingResponse.list_price) {
+
+          // Geldbeträge kommen als Dezimalzeichenkette — `Number` statt Zufall.
+          const listenpreis = Number(pricingResponse.list_price)
+          if (Number.isFinite(listenpreis) && listenpreis > 0) {
             setCurrentPosition((prev) => ({
               ...prev,
-              listenpreis: pricingResponse.list_price,
-              einhPreis: pricingResponse.list_price * (1 - (currentPosition.rabatt / 100)),
+              listenpreis,
+              einhPreis: listenpreis * (1 - (currentPosition.rabatt / 100)),
             }))
           }
         } catch (error) {
-          // Fallback: Verwende bereits gesetzten sales_price
+          // Die Preisfindung ist keine Nebensache: Bleibt der Verkaufspreis des
+          // Artikels stehen, obwohl eine Staffel oder ein Kontrakt gilt, wird zu
+          // teuer fakturiert — und niemand sieht es. Seit 05.10.2026 meldet der
+          // Endpunkt einen Fehlschlag mit 503 statt ihn zu verschlucken.
+          push(
+            'Preisfindung fehlgeschlagen — es gilt vorläufig der Verkaufspreis des '
+            + 'Artikels. Preisliste, Kontraktpreis und Mengenstaffel sind nicht '
+            + 'berücksichtigt.',
+          )
         }
       })()
     }
@@ -1423,11 +1433,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       }
       await executePrint(opts, reason)
     } else if (action === 'modify') {
-      // Korrektur: setzt Status zurück auf 'offen' damit der LS editierbar wird
+      // Korrektur: zurueck auf Entwurf. 'offen' verletzt ck_delivery_notes_status.
       if (!state.id) { push('Kein Lieferschein geöffnet'); return }
       try {
-        await apiClient.patch(`/api/v1/sales/delivery-notes/${state.id}`, { status: 'offen', is_printed: false })
-        setState((prev) => ({ ...prev, statusGedruckt: false }))
+        await apiClient.put(`/api/v1/sales/delivery-notes/${state.id}`, { status: 'draft', is_printed: false })
+        setState((prev) => ({ ...prev, status: 'draft', statusGedruckt: false }))
         push('Lieferschein zur Korrektur geöffnet — Änderungen vornehmen und erneut speichern.')
       } catch (_rawErr: unknown) {
         const e = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
@@ -2711,7 +2721,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             {isPositionContextLoading && (
               <div className="mt-3 grid gap-3 md:grid-cols-4">
                 {Array.from({ length: 4 }).map((_, idx) => (
-                  <div key={idx} className="h-20 animate-pulse rounded border bg-white" />
+                  <div key={idx} className="h-20 animate-pulse rounded border bg-card" />
                 ))}
               </div>
             )}
@@ -2725,7 +2735,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             {!isPositionContextLoading && positionContext && (
               <div className="mt-3 space-y-4">
                 <div className="grid gap-3 md:grid-cols-4">
-                  <div className="rounded border bg-white p-3">
+                  <div className="rounded border bg-card p-3">
                     <div className="text-xs text-muted-foreground">Verfuegbar</div>
                     <div className="text-lg font-semibold">
                       {formatQuantity(positionContext.stock.total_available)} {currentPosition.einheit}
@@ -2734,7 +2744,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                       reserviert {formatQuantity(positionContext.stock.total_reserved)}
                     </div>
                   </div>
-                  <div className="rounded border bg-white p-3">
+                  <div className="rounded border bg-card p-3">
                     <div className="text-xs text-muted-foreground">Frei verkaeuflich</div>
                     <div className="text-lg font-semibold">
                       {formatQuantity(positionContext.freely_available)} {currentPosition.einheit}
@@ -2743,7 +2753,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                       physisch {formatQuantity(positionContext.stock.total_physical)}
                     </div>
                   </div>
-                  <div className="rounded border bg-white p-3">
+                  <div className="rounded border bg-card p-3">
                     <div className="text-xs text-muted-foreground">Letzter VK beim Kunden</div>
                     <div className="text-lg font-semibold">
                       {positionContext.customer_pricing.last_sale_price !== null
@@ -2754,7 +2764,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                       {formatOptionalDate(positionContext.customer_pricing.last_sale_date)}
                     </div>
                   </div>
-                  <div className="rounded border bg-white p-3">
+                  <div className="rounded border bg-card p-3">
                     <div className="text-xs text-muted-foreground">Einkauf / Liste</div>
                     <div className="text-lg font-semibold">
                       {formatCurrency(positionContext.purchase_pricing.avg_purchase_price_90d)} / {formatCurrency(positionContext.current_price.list_price)} EUR
@@ -2766,7 +2776,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-3">
-                  <div className="rounded border bg-white p-3">
+                  <div className="rounded border bg-card p-3">
                     <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Lagerorte</div>
                     <div className="space-y-2 text-xs">
                       {positionContext.stock.by_warehouse.length > 0 ? positionContext.stock.by_warehouse.map((warehouse) => (
@@ -2780,7 +2790,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                     </div>
                   </div>
 
-                  <div className="rounded border bg-white p-3">
+                  <div className="rounded border bg-card p-3">
                     <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Zufuhr / offene Bestellungen</div>
                     <div className="space-y-2 text-xs">
                       <div className="font-medium">
@@ -2797,7 +2807,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                     </div>
                   </div>
 
-                  <div className="rounded border bg-white p-3">
+                  <div className="rounded border bg-card p-3">
                     <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Chargen</div>
                     <div className="space-y-2 text-xs">
                       {positionContext.batches.length > 0 ? positionContext.batches.slice(0, 5).map((batch) => (
@@ -2817,7 +2827,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         )}
 
         {schlaege.length > 0 && (
-          <Card className="mb-4 p-4 border-amber-200 bg-amber-50">
+          <Card className="mb-4 p-4 border-status-warning/40 bg-status-warning/10">
             <h2 className="mb-2 font-semibold text-sm text-status-warning">PSM-Dienstleistung → Feldbuch</h2>
             <div className="grid grid-cols-4 gap-4">
               <div className="space-y-1 col-span-2">

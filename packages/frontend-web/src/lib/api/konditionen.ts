@@ -57,13 +57,31 @@ export async function deletePreisliste(id: string): Promise<void> {
 
 // ── Preisfindung ──────────────────────────────────────────────────────────────
 
+/**
+ * Ergebnis der Preiskaskade.
+ *
+ * Geldbeträge kommen als Dezimalzeichenkette aus dem Backend (`Decimal`), nicht
+ * als Gleitkommazahl — für Geld ist das richtig, und der Typ sagt es jetzt, statt
+ * `number` zu behaupten. Aufrufer wandeln mit `Number()` um.
+ *
+ * `staffelrabatt` ist seit 05.10.2026 eine mögliche Quelle: Die gepflegten
+ * Mengenstaffeln wirkten vorher nicht auf den Preis.
+ */
 export type PreisfindungResult = {
-  list_price: number
-  discount: number
-  net_price: number
-  source: 'base' | 'price_list' | 'contract' | 'customer_discount' | 'employee_discount'
+  list_price: number | string
+  discount: number | string
+  net_price: number | string
+  source:
+    | 'base'
+    | 'price_list'
+    | 'contract'
+    | 'staffelrabatt'
+    | 'customer_discount'
+    | 'employee_discount'
   price_list_id?: string | null
   contract_id?: string | null
+  staffelrabatt_id?: string | null
+  staffel_ab_menge?: number | string | null
 }
 
 export async function calculatePrice(params: {

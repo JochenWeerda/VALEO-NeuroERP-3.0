@@ -714,6 +714,7 @@ const SOURCE_LABELS: Record<string, string> = {
   base: 'Artikelstamm',
   price_list: 'Preisliste',
   contract: 'Kontrakt',
+  staffelrabatt: 'Mengenstaffel',
   customer_discount: 'Kundenrabatt',
   employee_discount: 'Mitarbeiterrabatt',
 }
@@ -752,8 +753,10 @@ function PreisfindungTab() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2"><Calculator className="h-4 w-4" /> Preisfindung (Live-Kalkulator)</CardTitle>
           <CardDescription>
-            Hierarchische Preisfindung: Preisliste → Kontrakt → Kundenrabatt → Basispreis.
-            Nur eine Rabattstufe wird angewendet (nicht additiv).
+            Hierarchische Preisfindung: Preisliste → Kontrakt → Mengenstaffel →
+            Kundenrabatt → Mitarbeiterrabatt → Basispreis. Nur eine Stufe wird
+            angewendet (nicht additiv). Die Mengenstaffel steht über dem Kundenrabatt,
+            weil sie an der tatsächlich bestellten Menge hängt.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -782,7 +785,7 @@ function PreisfindungTab() {
       </Card>
 
       {result && (
-        <Card className="border-green-200 bg-green-50/40 dark:bg-green-950/20">
+        <Card className="border-status-success/40 bg-status-success/10">
           <CardHeader>
             <CardTitle className="text-base text-status-success">Ergebnis Preisfindung</CardTitle>
           </CardHeader>
@@ -812,6 +815,12 @@ function PreisfindungTab() {
               {result.contract_id && (
                 <div><span className="text-muted-foreground">Kontrakt: </span><span className="font-mono text-xs">{result.contract_id}</span></div>
               )}
+              {result.staffel_ab_menge != null && (
+                <div>
+                  <span className="text-muted-foreground">Staffelstufe ab: </span>
+                  <span className="font-mono text-xs">{fmt(Number(result.staffel_ab_menge))}</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -828,7 +837,7 @@ export default function KonditionssystemPage(): JSX.Element {
   return (
     <div className="p-6 space-y-4 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold">Konditionssystem / Preisfindung</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Konditionssystem / Preisfindung</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Preislisten · Rabattgruppen/-klassen · Individualpreise · Hierarchische Preisfindung
         </p>

@@ -121,7 +121,13 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: `domain_agrar.kontrakt_dispositionen` an. Vorher legte der
 #: Anwendungscode die Tabelle zur Laufzeit selbst an; vor dem ersten POST
 #: antwortete das Auflisten `[]`.
-BASELINE_LEBEND = 8
+#:
+#: 2026-10-05, lebend 8 -> 7: `preisfindung_rabattregeln_20261005` legt
+#: `domain_pricing.discount_rules` an, und die Preiskaskade liest den
+#: Kontraktpreis aus dem fuehrenden Kontraktmodell statt aus
+#: `domain_contracts.contracts.discount_percent` — zwei Spalten, die es nicht
+#: gibt.
+BASELINE_LEBEND = 7
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")
