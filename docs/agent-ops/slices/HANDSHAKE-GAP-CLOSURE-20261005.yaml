@@ -35,3 +35,8 @@ ai_harness:
   security_vertrag: Fremdtenant-Konten ausgeschlossen; Journal ohne Tenant abgewiesen.
   betriebs_vertrag: Gemeinsamer Probe, kein neuer Docker/DB/Reset; enges Wartungsfenster.
   dokumentations_vertrag: QA/Workboard/Gaps/ADR und ausdrueckliche Folgearbeiten.
+
+tests:
+  - Gezielte PostgreSQL-/API-Vertraege und dokumentierte QA-Abnahme.
+external_gates:
+  - Gemeinsamer PostgreSQL-Pruefstand und reale Journal-Vertragsabnahme; keine vollstaendige GoBD-Freigabe.

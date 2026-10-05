@@ -14,6 +14,15 @@ from app.domains.logistik.sendung import (
 from app.services.frachtbrief_service import fehlende_angaben
 
 
+def test_missing_delivery_date_uses_business_calendar(monkeypatch):
+    from datetime import date
+    from app.services import frachtbrief_service as service
+    expected = date(2026, 10, 1)
+    monkeypatch.setattr(service, 'business_today', lambda: expected)
+    assert service._datum(None) == expected
+    assert service._datum(date(2026, 9, 30)) == date(2026, 9, 30)
+
+
 def _verladung(**overrides):
     daten = dict(
         status="verladen",

@@ -73,9 +73,6 @@
     "app/api/v1/endpoints/fibu_geschaeftsjahre.py": {
       "date.today": 1
     },
-    "app/api/v1/endpoints/finance_actions.py": {
-      "date.today": 1
-    },
     "app/api/v1/endpoints/futtermittel_qs.py": {
       "date.today": 2
     },

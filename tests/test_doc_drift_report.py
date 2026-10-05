@@ -17,6 +17,22 @@ REPO = Path(__file__).resolve().parents[1]
 PAGES = REPO / "packages" / "frontend-web" / "src" / "pages"
 
 
+def test_party_wrapper_is_embedded_without_hiding_unrouted_crm_pages(tmp_path, monkeypatch):
+    import scripts.doc_drift_report as mod
+    pages = tmp_path / 'pages'
+    crm = pages / 'crm'
+    crm.mkdir(parents=True)
+    for name in ('party-native', 'unrouted-customer'):
+        (crm / (name + '.tsx')).write_text('export default function Page() {}')
+    monkeypatch.setattr(mod, 'REPO_ROOT', tmp_path)
+    monkeypatch.setattr(mod, 'PAGES_DIR', pages)
+    issues = mod.check_pages_without_route_or_nav('', set(), set())
+    assert len(issues) == 1
+    assert issues[0]['path_hint'] == 'crm/unrouted-customer'
+    for consumer in ('customer-360-native', 'lead-native', 'lead-detail'):
+        assert "from '@/pages/crm/party-native'" in (PAGES / 'crm' / (consumer + '.tsx')).read_text(encoding='utf-8')
+
+
 @pytest.mark.unit
 def test_build_report_returns_structure() -> None:
     report = build_report()

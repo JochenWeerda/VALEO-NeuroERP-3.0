@@ -388,7 +388,7 @@ def zustand_wechseln(
     lieferdatum: Any = None,
 ) -> dict:
     """Ein Zustandswechsel, eine Stelle — mit Zeilensperre und Uebergangspruefung."""
-    from datetime import date as _date
+    from app.core.business_time import business_today
 
     try:
         vorher = disposition_sperren(db, tenant_id, kontrakt_id, disp_id)
@@ -396,7 +396,7 @@ def zustand_wechseln(
         schein_id = None
         if nach == "GELIEFERT":
             schein_id = wiegeschein_aufloesen(db, tenant_id, wiegeschein_nr)
-            lieferdatum = lieferdatum or _date.today()
+            lieferdatum = lieferdatum or business_today()
         ergebnis = zustand_setzen(
             db, tenant_id, kontrakt_id, disp_id, nach,
             lieferdatum=lieferdatum, wiegeschein_id=schein_id,

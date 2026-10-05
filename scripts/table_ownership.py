@@ -18,6 +18,8 @@ SCHEMA_TO_DOMAIN: dict[str, str] = {
     "domain_audit": "platform",
     "domain_compliance": "dms-compliance",
     "domain_controlling": "finance",
+    # Vertragsregister und Pflichten, gemaess central_contracts im Agrar-Pack.
+    "domain_contracts": "agrar",
     "domain_crm": "crm",
     "domain_dev_mock": "platform",
     "domain_docflow": "dms-compliance",

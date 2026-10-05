@@ -141,7 +141,7 @@ class NichtGefunden(LookupError):
 #: eigenen Haus**. Vorher kam sie aus ``MAX(nr) + 1`` ueber alle Haeuser.
 #: ``letzte_auslosung_am`` und ``fehler_count`` kommen aus dem Zustellprotokoll
 #: und sind damit belegt statt behauptet.
-_ANBINDUNGEN = f"""
+_ANBINDUNGEN = """
     SELECT r.id,
            r.url,
            r.event_area,
@@ -149,11 +149,11 @@ _ANBINDUNGEN = f"""
            r.created_at,
            (r.secret IS NOT NULL)                       AS signiert,
            ROW_NUMBER() OVER (ORDER BY r.created_at, r.id) AS nr,
-           (SELECT MAX(z.versucht_am) FROM {ZUSTELLUNGEN} z
+           (SELECT MAX(z.versucht_am) FROM domain_shared.webhook_deliveries z
               WHERE z.webhook_id = r.id)                AS letzte_auslosung_am,
-           (SELECT COUNT(*) FROM {ZUSTELLUNGEN} z
+           (SELECT COUNT(*) FROM domain_shared.webhook_deliveries z
               WHERE z.webhook_id = r.id AND NOT z.erfolgreich) AS fehler_count
-    FROM {REGISTRIERUNGEN} r
+    FROM domain_shared.webhook_registrations r
     WHERE r.tenant_id = :tid
 """
 
@@ -178,7 +178,7 @@ def auflisten(db: Session, tenant_id: str) -> list[Anbindung]:
     """Die Anbindungen des eigenen Hauses, nach laufender Nummer."""
     try:
         rows = db.execute(
-            text(_ANBINDUNGEN + " ORDER BY nr"), {"tid": tenant_id}
+            text(_ANBINDUNGEN + " ORDER BY nr"), {"tid": tenant_id}  # nosec B608  # reviewed-safe: zwei feste SQL-Literale; Tenant ausschliesslich gebunden
         ).mappings().all()
     except Exception as fehler:
         # Keine leere Liste: "keine Anbindung eingerichtet" und "die Tabelle ist
@@ -213,7 +213,7 @@ def registrieren(
     jetzt = datetime.now(timezone.utc)
     db.execute(
         text(
-            f"INSERT INTO {REGISTRIERUNGEN} "
+            "INSERT INTO domain_shared.webhook_registrations "
             "(id, tenant_id, url, event_area, secret, is_active, created_at, updated_at) "
             "VALUES (:id, :tid, :url, :bereich, :secret, :is_active, :jetzt, :jetzt)"
         ),
@@ -264,7 +264,7 @@ def abmelden_nach_nummer(db: Session, tenant_id: str, nr: int) -> None:
 def abmelden_nach_kennung(db: Session, tenant_id: str, webhook_id: str) -> None:
     """Meldet die Anbindung mit dieser Kennung **im eigenen Haus** ab."""
     vorhanden = db.execute(
-        text(f"SELECT 1 FROM {REGISTRIERUNGEN} WHERE id = :id AND tenant_id = :tid"),
+        text("SELECT 1 FROM domain_shared.webhook_registrations WHERE id = :id AND tenant_id = :tid"),
         {"id": webhook_id, "tid": tenant_id},
     ).scalar()
     if not vorhanden:
@@ -274,7 +274,7 @@ def abmelden_nach_kennung(db: Session, tenant_id: str, webhook_id: str) -> None:
 
 def _loeschen(db: Session, tenant_id: str, webhook_id: str) -> None:
     db.execute(
-        text(f"DELETE FROM {REGISTRIERUNGEN} WHERE id = :id AND tenant_id = :tid"),
+        text("DELETE FROM domain_shared.webhook_registrations WHERE id = :id AND tenant_id = :tid"),
         {"id": webhook_id, "tid": tenant_id},
     )
     db.commit()
@@ -301,7 +301,7 @@ def _protokollieren(
 
     db.execute(
         text(
-            f"INSERT INTO {ZUSTELLUNGEN} "
+            "INSERT INTO domain_shared.webhook_deliveries "
             "(id, tenant_id, webhook_id, event_area, versucht_am, erfolgreich, "
             " status_code, dauer_ms, fehler, signiert) "
             "VALUES (:id, :tid, :wid, :bereich, NOW(), :ok, :code, :dauer, :fehler, :signiert)"
@@ -347,7 +347,7 @@ async def trigger(
     try:
         rows = db.execute(
             text(
-                f"SELECT id, url, secret FROM {REGISTRIERUNGEN} "
+                "SELECT id, url, secret FROM domain_shared.webhook_registrations "
                 "WHERE tenant_id = :tid AND event_area = :b "
                 "  AND COALESCE(is_active, TRUE) = TRUE"
             ),
@@ -413,9 +413,9 @@ def zustellversuche(
     """Die letzten Zustellversuche einer Anbindung des eigenen Hauses."""
     rows = db.execute(
         text(
-            f"SELECT z.versucht_am, z.erfolgreich, z.status_code, z.dauer_ms, z.fehler "
-            f"FROM {ZUSTELLUNGEN} z "
-            f"JOIN {REGISTRIERUNGEN} r ON r.id = z.webhook_id AND r.tenant_id = :tid "
+            "SELECT z.versucht_am, z.erfolgreich, z.status_code, z.dauer_ms, z.fehler "
+            "FROM domain_shared.webhook_deliveries z "
+            "JOIN domain_shared.webhook_registrations r ON r.id = z.webhook_id AND r.tenant_id = :tid "
             "WHERE z.webhook_id = :wid "
             "ORDER BY z.versucht_am DESC LIMIT :grenze"
         ),

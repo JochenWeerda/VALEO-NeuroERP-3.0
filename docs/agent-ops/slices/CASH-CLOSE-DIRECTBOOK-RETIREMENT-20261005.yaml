@@ -32,3 +32,8 @@ ai_harness:
   security_vertrag: Kein geratenes Konto 1000 als Tenant-Kontoidentitaet.
   betriebs_vertrag: Bestehender valeo_probe ohne neue DB/Container/Migration/Reset.
   dokumentations_vertrag: QA/Slice/Workboard/Gaps trennen Retirement und Fachfunktion.
+
+tests:
+  - Gezielte PostgreSQL-/API-Vertraege und dokumentierte QA-Abnahme.
+external_gates:
+  - Gemeinsamer PostgreSQL-Pruefstand und reale Journal-Vertragsabnahme; keine vollstaendige GoBD-Freigabe.

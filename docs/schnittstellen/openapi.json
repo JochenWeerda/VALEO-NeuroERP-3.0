@@ -319,6 +319,50 @@
         "title": "AbrechnungsschemaOut",
         "type": "object"
       },
+      "AbrufstandOut": {
+        "description": "Was von einer Kontraktposition noch abrufbar ist.",
+        "properties": {
+          "kontrakt_id": {
+            "title": "Kontrakt Id",
+            "type": "string"
+          },
+          "kontrakt_nr": {
+            "title": "Kontrakt Nr",
+            "type": "string"
+          },
+          "kontrakt_pos_nr": {
+            "title": "Kontrakt Pos Nr",
+            "type": "integer"
+          },
+          "menge_abgerufen": {
+            "title": "Menge Abgerufen",
+            "type": "number"
+          },
+          "menge_kontrahiert": {
+            "title": "Menge Kontrahiert",
+            "type": "number"
+          },
+          "menge_offen": {
+            "title": "Menge Offen",
+            "type": "number"
+          },
+          "ueberlieferung_erlaubt": {
+            "title": "Ueberlieferung Erlaubt",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kontrakt_id",
+          "kontrakt_nr",
+          "kontrakt_pos_nr",
+          "menge_kontrahiert",
+          "menge_abgerufen",
+          "menge_offen",
+          "ueberlieferung_erlaubt"
+        ],
+        "title": "AbrufstandOut",
+        "type": "object"
+      },
       "AbschlussChecklisteCreate": {
         "description": "Checkliste erstellen",
         "properties": {
@@ -10877,8 +10921,10 @@
         "type": "object"
       },
       "AnteilsbewegungCreate": {
+        "additionalProperties": false,
         "properties": {
           "anzahl_anteile": {
+            "description": "Immer positiv; die Richtung steckt im Typ",
             "exclusiveMinimum": 0.0,
             "title": "Anzahl Anteile",
             "type": "integer"
@@ -10895,7 +10941,14 @@
             "title": "Bemerkung"
           },
           "bewegungstyp": {
-            "description": "ZEICHNUNG | ERHOEHUNG | TEILRUECKZAHLUNG | VOLLRUECKZAHLUNG | TRANSFER",
+            "enum": [
+              "ZEICHNUNG",
+              "ERHOEHUNG",
+              "TEILRUECKZAHLUNG",
+              "VOLLRUECKZAHLUNG",
+              "UEBERTRAGUNG_AB",
+              "UEBERTRAGUNG_AN"
+            ],
             "title": "Bewegungstyp",
             "type": "string"
           },
@@ -10903,6 +10956,29 @@
             "format": "date",
             "title": "Datum",
             "type": "string"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "gegen_mitglieds_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Pflicht bei UEBERTRAGUNG_AB / UEBERTRAGUNG_AN",
+            "title": "Gegen Mitglieds Id"
           },
           "wert_eur": {
             "exclusiveMinimum": 0.0,
@@ -10917,6 +10993,155 @@
           "datum"
         ],
         "title": "AnteilsbewegungCreate",
+        "type": "object"
+      },
+      "AnteilsbewegungGebucht": {
+        "properties": {
+          "bestand_anteile": {
+            "title": "Bestand Anteile",
+            "type": "integer"
+          },
+          "bewegungstyp": {
+            "title": "Bewegungstyp",
+            "type": "string"
+          },
+          "gegenbewegung_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gegenbewegung Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "journal_entry_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Entry Id"
+          },
+          "mitglieds_id": {
+            "title": "Mitglieds Id",
+            "type": "string"
+          },
+          "status": {
+            "default": "gebucht",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "mitglieds_id",
+          "bewegungstyp",
+          "bestand_anteile"
+        ],
+        "title": "AnteilsbewegungGebucht",
+        "type": "object"
+      },
+      "AnteilsbewegungOut": {
+        "properties": {
+          "anzahl_anteile": {
+            "title": "Anzahl Anteile",
+            "type": "integer"
+          },
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "bewegungstyp": {
+            "title": "Bewegungstyp",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "gegen_mitglieds_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gegen Mitglieds Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "journal_entry_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Entry Id"
+          },
+          "wert_eur": {
+            "title": "Wert Eur",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "bewegungstyp",
+          "anzahl_anteile",
+          "wert_eur"
+        ],
+        "title": "AnteilsbewegungOut",
         "type": "object"
       },
       "AntragCreate": {
@@ -23201,23 +23426,6 @@
         "title": "Body_create_import_run_api_v1_finance_connectors__connector_type__imports_post",
         "type": "object"
       },
-      "Body_geliefert_disposition_api_v1_kontrakte__kontrakt_id__dispositionen__disp_id__geliefert_patch": {
-        "properties": {
-          "wiegeschein_nr": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Wiegeschein Nr"
-          }
-        },
-        "title": "Body_geliefert_disposition_api_v1_kontrakte__kontrakt_id__dispositionen__disp_id__geliefert_patch",
-        "type": "object"
-      },
       "Body_import_ascii_api_v1_waage_waagen_import_ascii_post": {
         "properties": {
           "fehler_toleranz": {
@@ -29937,6 +30145,67 @@
         "title": "ChargeCreate",
         "type": "object"
       },
+      "ChargeKennzeichnungOut": {
+        "description": "Der abgeleitete Nachweisstand einer Charge.\n\n``NICHT_RELEVANT`` — die Charge traegt keinen relevanten Rohstoff.\n``NACHGEWIESEN`` — die gebundene Menge deckt die Charge.\n``OFFEN``        — relevant, aber nicht (vollstaendig) gedeckt. Solche\nChargen duerfen nach Art. 4 nicht in Verkehr gebracht werden.\n\nDer Stand ist **abgeleitet**, nicht gespeichert: eine zweite Wahrheit\ndarueber waere eine, die von der ersten abweichen kann.",
+        "properties": {
+          "article_id": {
+            "title": "Article Id",
+            "type": "string"
+          },
+          "erklaerungen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Erklaerungen",
+            "type": "array"
+          },
+          "eudr_relevant": {
+            "title": "Eudr Relevant",
+            "type": "boolean"
+          },
+          "gedeckte_menge_kg": {
+            "title": "Gedeckte Menge Kg",
+            "type": "number"
+          },
+          "kennzeichnung": {
+            "title": "Kennzeichnung",
+            "type": "string"
+          },
+          "lot_id": {
+            "title": "Lot Id",
+            "type": "string"
+          },
+          "lot_number": {
+            "title": "Lot Number",
+            "type": "string"
+          },
+          "menge_kg": {
+            "title": "Menge Kg",
+            "type": "number"
+          },
+          "offene_menge_kg": {
+            "title": "Offene Menge Kg",
+            "type": "number"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lot_id",
+          "lot_number",
+          "article_id",
+          "tenant_id",
+          "eudr_relevant",
+          "menge_kg",
+          "gedeckte_menge_kg",
+          "offene_menge_kg",
+          "kennzeichnung"
+        ],
+        "title": "ChargeKennzeichnungOut",
+        "type": "object"
+      },
       "ChargeLineageCreate": {
         "properties": {
           "article_id": {
@@ -30538,6 +30807,99 @@
           }
         },
         "title": "ChargeUpdate",
+        "type": "object"
+      },
+      "ChargenbindungIn": {
+        "description": "Bindet eine Charge mit einer Menge an eine Sorgfaltserklaerung.\n\nIm Landhandel wird verschnitten: Eine Charge kann von mehreren Erklaerungen\ngedeckt sein. Deshalb wird je Bindung die Menge angegeben, fuer die die\nErklaerung gilt.",
+        "properties": {
+          "lot_id": {
+            "minLength": 1,
+            "title": "Lot Id",
+            "type": "string"
+          },
+          "menge_kg": {
+            "exclusiveMinimum": 0.0,
+            "title": "Menge Kg",
+            "type": "number"
+          },
+          "verknuepft_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verknuepft Durch"
+          }
+        },
+        "required": [
+          "lot_id",
+          "menge_kg"
+        ],
+        "title": "ChargenbindungIn",
+        "type": "object"
+      },
+      "ChargenbindungOut": {
+        "properties": {
+          "erklaerung_id": {
+            "title": "Erklaerung Id",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lot_id": {
+            "title": "Lot Id",
+            "type": "string"
+          },
+          "lot_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lot Number"
+          },
+          "menge_kg": {
+            "title": "Menge Kg",
+            "type": "number"
+          },
+          "verknuepft_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verknuepft Am"
+          },
+          "verknuepft_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verknuepft Durch"
+          }
+        },
+        "required": [
+          "id",
+          "lot_id",
+          "erklaerung_id",
+          "menge_kg"
+        ],
+        "title": "ChargenbindungOut",
         "type": "object"
       },
       "ChartOfAccountsOut": {
@@ -48429,6 +48791,63 @@
         "title": "DispatcherOut",
         "type": "object"
       },
+      "DispositionAnlegen": {
+        "additionalProperties": false,
+        "description": "Ein Abruf einer kontrahierten Menge.",
+        "properties": {
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "geplantes_lieferdatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geplantes Lieferdatum"
+          },
+          "kontrakt_pos_nr": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Kontrakt Pos Nr",
+            "type": "integer"
+          },
+          "menge": {
+            "description": "Abgerufene Menge in der Kontrakteinheit",
+            "exclusiveMinimum": 0.0,
+            "title": "Menge",
+            "type": "number"
+          }
+        },
+        "required": [
+          "menge"
+        ],
+        "title": "DispositionAnlegen",
+        "type": "object"
+      },
       "DispositionCheckIn": {
         "properties": {
           "capacity_kg": {
@@ -48446,47 +48865,14 @@
         "title": "DispositionCheckIn",
         "type": "object"
       },
-      "DispositionCreate": {
+      "DispositionGeliefert": {
+        "additionalProperties": false,
+        "description": "Die Lieferung eines Abrufs.\n\nDie Wiegescheinnummer wird gegen das Wiegeregister aufgeloest. Eine Nummer\nohne Schein ist kein Beleg und damit keine Lieferung.",
         "properties": {
-          "bemerkung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bemerkung"
-          },
-          "freigabe": {
-            "default": false,
-            "title": "Freigabe",
-            "type": "boolean"
-          },
-          "geplantes_lieferdatum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Geplantes Lieferdatum"
-          },
-          "kontrakt_nr": {
-            "title": "Kontrakt Nr",
-            "type": "string"
-          },
-          "kontrakt_pos_nr": {
-            "default": 1,
-            "title": "Kontrakt Pos Nr",
-            "type": "integer"
-          },
           "lieferdatum": {
             "anyOf": [
               {
+                "format": "date",
                 "type": "string"
               },
               {
@@ -48494,10 +48880,6 @@
               }
             ],
             "title": "Lieferdatum"
-          },
-          "menge": {
-            "title": "Menge",
-            "type": "number"
           },
           "wiegeschein_nr": {
             "anyOf": [
@@ -48511,18 +48893,7 @@
             "title": "Wiegeschein Nr"
           }
         },
-        "required": [
-          "kontrakt_nr",
-          "menge"
-        ],
-        "title": "DispositionCreate",
-        "type": "object"
-      },
-      "DispositionOut": {
-        "additionalProperties": true,
-        "description": "Response schema for disposition endpoints.",
-        "properties": {},
-        "title": "DispositionOut",
+        "title": "DispositionGeliefert",
         "type": "object"
       },
       "DispositionPositionCreate": {
@@ -56889,6 +57260,44 @@
         "title": "EinlagerungRequest",
         "type": "object"
       },
+      "EinreichungIn": {
+        "description": "Art. 33: Referenz- und Verifizierungsnummer aus dem EU-System.\n\nDazu die Unterzeichnung nach Anhang II Nr. 6 — Name und Funktion der\nPerson, die fuer den Marktteilnehmer erklaert.",
+        "properties": {
+          "erklaerung_durch_funktion": {
+            "minLength": 1,
+            "title": "Erklaerung Durch Funktion",
+            "type": "string"
+          },
+          "erklaerung_durch_name": {
+            "minLength": 1,
+            "title": "Erklaerung Durch Name",
+            "type": "string"
+          },
+          "referenznummer": {
+            "minLength": 1,
+            "title": "Referenznummer",
+            "type": "string"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          }
+        },
+        "required": [
+          "referenznummer",
+          "erklaerung_durch_name",
+          "erklaerung_durch_funktion"
+        ],
+        "title": "EinreichungIn",
+        "type": "object"
+      },
       "EinvoiceGenerateIn": {
         "description": "Input-Model für E-Rechnung-Generierung.",
         "properties": {
@@ -59887,6 +60296,115 @@
           "escalate_to"
         ],
         "title": "EscalateRequest",
+        "type": "object"
+      },
+      "EudrRegisterStatusOut": {
+        "description": "Der Stand des Registers — ohne gruene Behauptung.\n\n``status`` ist ``KONFORM`` nur dann, wenn jede Erklaerung des Hauses\neingereicht ist und vernachlaessigbares Risiko traegt. Ist das Register\nleer, lautet der Stand ``OHNE_ERKLAERUNG`` — nicht ``KONFORM``: Nach\nArt. 3/4 ist das Inverkehrbringen ohne Sorgfaltserklaerung verboten, und\n\"nichts erfasst\" ist kein Nachweis.",
+        "properties": {
+          "chargen_nachgewiesen": {
+            "default": 0,
+            "title": "Chargen Nachgewiesen",
+            "type": "integer"
+          },
+          "chargen_offen": {
+            "default": 0,
+            "title": "Chargen Offen",
+            "type": "integer"
+          },
+          "chargen_relevant": {
+            "default": 0,
+            "title": "Chargen Relevant",
+            "type": "integer"
+          },
+          "erklaerungen_abgewiesen": {
+            "default": 0,
+            "title": "Erklaerungen Abgewiesen",
+            "type": "integer"
+          },
+          "erklaerungen_eingereicht": {
+            "default": 0,
+            "title": "Erklaerungen Eingereicht",
+            "type": "integer"
+          },
+          "erklaerungen_entwurf": {
+            "default": 0,
+            "title": "Erklaerungen Entwurf",
+            "type": "integer"
+          },
+          "erklaerungen_gesamt": {
+            "default": 0,
+            "title": "Erklaerungen Gesamt",
+            "type": "integer"
+          },
+          "erklaerungen_nicht_uebermittelt": {
+            "default": 0,
+            "title": "Erklaerungen Nicht Uebermittelt",
+            "type": "integer"
+          },
+          "erklaerungen_nur_annahmetest": {
+            "default": 0,
+            "title": "Erklaerungen Nur Annahmetest",
+            "type": "integer"
+          },
+          "offene_menge_kg": {
+            "default": 0.0,
+            "title": "Offene Menge Kg",
+            "type": "number"
+          },
+          "ohne_risikobewertung": {
+            "default": 0,
+            "title": "Ohne Risikobewertung",
+            "type": "integer"
+          },
+          "produktionslaender": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Produktionslaender",
+            "type": "array"
+          },
+          "risiko_nicht_vernachlaessigbar": {
+            "default": 0,
+            "title": "Risiko Nicht Vernachlaessigbar",
+            "type": "integer"
+          },
+          "rohstoffe": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rohstoffe",
+            "type": "array"
+          },
+          "stand_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stand Am"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "vorgelagerte_gesamt": {
+            "default": 0,
+            "title": "Vorgelagerte Gesamt",
+            "type": "integer"
+          },
+          "vorgelagerte_ungeprueft": {
+            "default": 0,
+            "title": "Vorgelagerte Ungeprueft",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "EudrRegisterStatusOut",
         "type": "object"
       },
       "EvaluateSLARequest": {
@@ -69242,6 +69760,7 @@
         "type": "object"
       },
       "FrachtbriefOut": {
+        "description": "Transportbeleg. Der Lieferschein bleibt der Warenbeleg und steht nur als Referenz.",
         "properties": {
           "absender": {
             "anyOf": [
@@ -69252,6 +69771,7 @@
                 "type": "null"
               }
             ],
+            "description": "Absender / Übernahmeort",
             "title": "Absender"
           },
           "artikel": {
@@ -69263,6 +69783,7 @@
                 "type": "null"
               }
             ],
+            "description": "Transportgut",
             "title": "Artikel"
           },
           "datum": {
@@ -69279,6 +69800,7 @@
                 "type": "null"
               }
             ],
+            "description": "Empfänger der Beförderung",
             "title": "Empfaenger"
           },
           "id": {
@@ -69294,6 +69816,7 @@
                 "type": "null"
               }
             ],
+            "description": "Kennzeichen der Zugmaschine",
             "title": "Kennzeichen"
           },
           "lieferschein_ref": {
@@ -69305,6 +69828,7 @@
                 "type": "null"
               }
             ],
+            "description": "Referenz auf den Lieferschein, nicht der Frachtbrief selbst",
             "title": "Lieferschein Ref"
           },
           "menge": {
@@ -69316,9 +69840,11 @@
                 "type": "null"
               }
             ],
+            "description": "Transportierte Menge; nach Ausgangswägung das Netto",
             "title": "Menge"
           },
           "nummer": {
+            "description": "Frachtbrief-Nr.",
             "title": "Nummer",
             "type": "string"
           },
@@ -69335,6 +69861,7 @@
                 "type": "null"
               }
             ],
+            "description": "Transportauftrag, sofern eine Tour führt",
             "title": "Tour Id"
           }
         },
@@ -71925,13 +72452,6 @@
         "title": "GenericMessageRequest",
         "type": "object"
       },
-      "GenossenschaftOut": {
-        "additionalProperties": true,
-        "description": "Response schema for genossenschaft endpoints.",
-        "properties": {},
-        "title": "GenossenschaftOut",
-        "type": "object"
-      },
       "GeoFeature": {
         "properties": {
           "geometry": {
@@ -72125,6 +72645,122 @@
           "longitude"
         ],
         "title": "GeoSearchRequest",
+        "type": "object"
+      },
+      "GeolokationIn": {
+        "description": "Ein Flurstueck (Art. 9).\n\nUeber vier Hektar ist ein Polygon anzugeben; ein Punkt genuegt dann nicht.\nDie Datenbank haelt dieselbe Bedingung.",
+        "properties": {
+          "breitengrad": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Breitengrad",
+            "type": "number"
+          },
+          "flaeche_ha": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche Ha"
+          },
+          "flurstueck_kennung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flurstueck Kennung"
+          },
+          "laengengrad": {
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Laengengrad",
+            "type": "number"
+          },
+          "polygon": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "GeoJSON-Polygon; Pflicht ab vier Hektar",
+            "title": "Polygon"
+          }
+        },
+        "required": [
+          "breitengrad",
+          "laengengrad"
+        ],
+        "title": "GeolokationIn",
+        "type": "object"
+      },
+      "GeolokationOut": {
+        "properties": {
+          "breitengrad": {
+            "title": "Breitengrad",
+            "type": "number"
+          },
+          "flaeche_ha": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flaeche Ha"
+          },
+          "flurstueck_kennung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flurstueck Kennung"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "laengengrad": {
+            "title": "Laengengrad",
+            "type": "number"
+          },
+          "polygon": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Polygon"
+          }
+        },
+        "required": [
+          "id",
+          "breitengrad",
+          "laengengrad"
+        ],
+        "title": "GeolokationOut",
         "type": "object"
       },
       "GeometryUpdate": {
@@ -83832,6 +84468,50 @@
           }
         },
         "title": "KanonStatusOut",
+        "type": "object"
+      },
+      "KapitaluebersichtOut": {
+        "description": "Geschaeftsguthaben der Mitglieder — Bilanzposition nach § 337 HGB.",
+        "properties": {
+          "aktiv": {
+            "title": "Aktiv",
+            "type": "integer"
+          },
+          "ausgetreten": {
+            "title": "Ausgetreten",
+            "type": "integer"
+          },
+          "offene_auseinandersetzung_anteile": {
+            "title": "Offene Auseinandersetzung Anteile",
+            "type": "integer"
+          },
+          "ruhend": {
+            "title": "Ruhend",
+            "type": "integer"
+          },
+          "total_anteile": {
+            "title": "Total Anteile",
+            "type": "integer"
+          },
+          "total_kapital_eur": {
+            "title": "Total Kapital Eur",
+            "type": "number"
+          },
+          "total_mitglieder": {
+            "title": "Total Mitglieder",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_mitglieder",
+          "total_anteile",
+          "total_kapital_eur",
+          "aktiv",
+          "ruhend",
+          "ausgetreten",
+          "offene_auseinandersetzung_anteile"
+        ],
+        "title": "KapitaluebersichtOut",
         "type": "object"
       },
       "KasseUebernahmeRequest": {
@@ -101329,19 +102009,52 @@
         "title": "MitarbeiterOut",
         "type": "object"
       },
+      "MitgliedAngelegt": {
+        "properties": {
+          "genossenschaftsanteile": {
+            "title": "Genossenschaftsanteile",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mitglieds_nr": {
+            "title": "Mitglieds Nr",
+            "type": "string"
+          },
+          "status": {
+            "default": "angelegt",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "mitglieds_nr",
+          "genossenschaftsanteile"
+        ],
+        "title": "MitgliedAngelegt",
+        "type": "object"
+      },
       "MitgliedCreate": {
+        "additionalProperties": false,
+        "description": "Beitritt nach § 15 GenG.",
         "properties": {
           "adresse": {
+            "minLength": 1,
             "title": "Adresse",
             "type": "string"
           },
           "anteilswert_eur": {
             "default": 100.0,
+            "description": "Hoehe eines Geschaeftsanteils",
             "exclusiveMinimum": 0.0,
             "title": "Anteilswert Eur",
             "type": "number"
           },
           "bank_name": {
+            "minLength": 1,
             "title": "Bank Name",
             "type": "string"
           },
@@ -101350,13 +102063,27 @@
             "title": "Eintrittsdatum",
             "type": "string"
           },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
           "genossenschaftsanteile": {
             "default": 0,
+            "description": "Erstzeichnung. Wird als Bewegung ZEICHNUNG gebucht, nicht als Zahl gespeichert — der Bestand folgt immer aus den Bewegungen.",
             "minimum": 0.0,
             "title": "Genossenschaftsanteile",
             "type": "integer"
           },
           "iban": {
+            "maxLength": 34,
+            "minLength": 15,
             "title": "Iban",
             "type": "string"
           },
@@ -101369,15 +102096,21 @@
                 "type": "null"
               }
             ],
+            "description": "Wird vergeben, wenn nicht angegeben",
             "title": "Mitglieds Nr"
           },
           "name": {
+            "minLength": 1,
             "title": "Name",
             "type": "string"
           },
           "status": {
             "default": "AKTIV",
-            "description": "AKTIV | RUHEND | AUSGETRETEN",
+            "enum": [
+              "AKTIV",
+              "RUHEND",
+              "AUSGETRETEN"
+            ],
             "title": "Status",
             "type": "string"
           }
@@ -101392,11 +102125,239 @@
         "title": "MitgliedCreate",
         "type": "object"
       },
+      "MitgliedDetailOut": {
+        "properties": {
+          "adresse": {
+            "title": "Adresse",
+            "type": "string"
+          },
+          "anteilsbewegungen": {
+            "items": {
+              "$ref": "#/components/schemas/AnteilsbewegungOut"
+            },
+            "title": "Anteilsbewegungen",
+            "type": "array"
+          },
+          "anteilswert_eur": {
+            "title": "Anteilswert Eur",
+            "type": "number"
+          },
+          "austrittsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Austrittsdatum"
+          },
+          "bank_name": {
+            "title": "Bank Name",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "eintrittsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eintrittsdatum"
+          },
+          "genossenschaftsanteile": {
+            "title": "Genossenschaftsanteile",
+            "type": "integer"
+          },
+          "geschaeftsguthaben_eur": {
+            "title": "Geschaeftsguthaben Eur",
+            "type": "number"
+          },
+          "iban": {
+            "title": "Iban",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mitglieds_nr": {
+            "title": "Mitglieds Nr",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "mitglieds_nr",
+          "name",
+          "adresse",
+          "anteilswert_eur",
+          "status",
+          "iban",
+          "bank_name",
+          "genossenschaftsanteile",
+          "geschaeftsguthaben_eur"
+        ],
+        "title": "MitgliedDetailOut",
+        "type": "object"
+      },
+      "MitgliedGeaendert": {
+        "properties": {
+          "geaenderte_felder": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Geaenderte Felder",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "default": "aktualisiert",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "geaenderte_felder"
+        ],
+        "title": "MitgliedGeaendert",
+        "type": "object"
+      },
+      "MitgliedOut": {
+        "properties": {
+          "adresse": {
+            "title": "Adresse",
+            "type": "string"
+          },
+          "anteilswert_eur": {
+            "title": "Anteilswert Eur",
+            "type": "number"
+          },
+          "austrittsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Austrittsdatum"
+          },
+          "bank_name": {
+            "title": "Bank Name",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "eintrittsdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eintrittsdatum"
+          },
+          "genossenschaftsanteile": {
+            "title": "Genossenschaftsanteile",
+            "type": "integer"
+          },
+          "geschaeftsguthaben_eur": {
+            "title": "Geschaeftsguthaben Eur",
+            "type": "number"
+          },
+          "iban": {
+            "title": "Iban",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mitglieds_nr": {
+            "title": "Mitglieds Nr",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "mitglieds_nr",
+          "name",
+          "adresse",
+          "anteilswert_eur",
+          "status",
+          "iban",
+          "bank_name",
+          "genossenschaftsanteile",
+          "geschaeftsguthaben_eur"
+        ],
+        "title": "MitgliedOut",
+        "type": "object"
+      },
       "MitgliedPatch": {
+        "additionalProperties": false,
+        "description": "Stammdatenpflege.\n\n``genossenschaftsanteile`` fehlt hier mit Absicht: Der Bestand aendert sich\nausschliesslich durch eine Bewegung. Eine stille Korrektur der Zahl waere\ngenau die unbelegte Aenderung, die GoBD Rz. 107 ff. ausschliesst.",
         "properties": {
           "adresse": {
             "anyOf": [
               {
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -101408,6 +102369,7 @@
           "anteilswert_eur": {
             "anyOf": [
               {
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
@@ -101416,9 +102378,22 @@
             ],
             "title": "Anteilswert Eur"
           },
+          "austrittsdatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Austrittsdatum"
+          },
           "bank_name": {
             "anyOf": [
               {
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -101427,20 +102402,11 @@
             ],
             "title": "Bank Name"
           },
-          "genossenschaftsanteile": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Genossenschaftsanteile"
-          },
           "iban": {
             "anyOf": [
               {
+                "maxLength": 34,
+                "minLength": 15,
                 "type": "string"
               },
               {
@@ -101452,6 +102418,7 @@
           "name": {
             "anyOf": [
               {
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -101463,6 +102430,11 @@
           "status": {
             "anyOf": [
               {
+                "enum": [
+                  "AKTIV",
+                  "RUHEND",
+                  "AUSGETRETEN"
+                ],
                 "type": "string"
               },
               {
@@ -119421,6 +120393,7 @@
         "type": "object"
       },
       "PriceCalculationResponse": {
+        "description": "Der gefundene Preis und die Stufe, die ihn bestimmt hat.",
         "properties": {
           "contract_id": {
             "anyOf": [
@@ -119459,6 +120432,28 @@
           "source": {
             "title": "Source",
             "type": "string"
+          },
+          "staffel_ab_menge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staffel Ab Menge"
+          },
+          "staffelrabatt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Staffelrabatt Id"
           }
         },
         "required": [
@@ -124204,6 +125199,47 @@
           "id"
         ],
         "title": "PruefpunktBestaetigtOut",
+        "type": "object"
+      },
+      "PruefungIn": {
+        "description": "Das Ergebnis der Pruefung einer **vorgelagerten** Erklaerung.\n\nEine Bestaetigung aus dem EU-Informationssystem setzt Referenz- **und**\nVerifizierungsnummer voraus: Abgefragt wird eine Erklaerung ueber beide.",
+        "properties": {
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "pruefung_status": {
+            "title": "Pruefung Status",
+            "type": "string"
+          },
+          "quelle": {
+            "title": "Quelle",
+            "type": "string"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          }
+        },
+        "required": [
+          "pruefung_status",
+          "quelle"
+        ],
+        "title": "PruefungIn",
         "type": "object"
       },
       "PsmProtokolleintragRequest": {
@@ -134015,6 +135051,37 @@
         "additionalProperties": true,
         "properties": {},
         "title": "RfqOut",
+        "type": "object"
+      },
+      "RisikobewertungIn": {
+        "description": "Art. 10/11: die Feststellung und, wenn noetig, die Minderung.",
+        "properties": {
+          "bewertet_durch": {
+            "minLength": 1,
+            "title": "Bewertet Durch",
+            "type": "string"
+          },
+          "minderungsmassnahmen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minderungsmassnahmen"
+          },
+          "risikostufe": {
+            "title": "Risikostufe",
+            "type": "string"
+          }
+        },
+        "required": [
+          "risikostufe",
+          "bewertet_durch"
+        ],
+        "title": "RisikobewertungIn",
         "type": "object"
       },
       "RohwareIn": {
@@ -145042,6 +146109,908 @@
         "title": "SnapshotOut",
         "type": "object"
       },
+      "SorgfaltserklaerungDetailOut": {
+        "properties": {
+          "betreiber_adresse": {
+            "title": "Betreiber Adresse",
+            "type": "string"
+          },
+          "betreiber_name": {
+            "title": "Betreiber Name",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "eingereicht_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eingereicht Am"
+          },
+          "eori_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eori Nummer"
+          },
+          "ergaenzende_einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ergaenzende Einheit"
+          },
+          "erklaerung_abgegeben_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Abgegeben Am"
+          },
+          "erklaerung_durch_funktion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Durch Funktion"
+          },
+          "erklaerung_durch_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Durch Name"
+          },
+          "eu_system_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eu System Id"
+          },
+          "geolokationen": {
+            "items": {
+              "$ref": "#/components/schemas/GeolokationOut"
+            },
+            "title": "Geolokationen",
+            "type": "array"
+          },
+          "hs_code": {
+            "title": "Hs Code",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant_adresse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Adresse"
+          },
+          "lieferant_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Email"
+          },
+          "lieferant_name": {
+            "title": "Lieferant Name",
+            "type": "string"
+          },
+          "menge_netto_kg": {
+            "title": "Menge Netto Kg",
+            "type": "number"
+          },
+          "menge_volumen_m3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Volumen M3"
+          },
+          "minderungsmassnahmen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minderungsmassnahmen"
+          },
+          "nachweis_abholzungsfrei": {
+            "default": false,
+            "title": "Nachweis Abholzungsfrei",
+            "type": "boolean"
+          },
+          "nachweis_abholzungsfrei_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachweis Abholzungsfrei Quelle"
+          },
+          "nachweis_rechtskonform": {
+            "default": false,
+            "title": "Nachweis Rechtskonform",
+            "type": "boolean"
+          },
+          "nachweis_rechtskonform_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachweis Rechtskonform Quelle"
+          },
+          "produktion_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Produktion Bis"
+          },
+          "produktion_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Produktion Von"
+          },
+          "produktionsland": {
+            "title": "Produktionsland",
+            "type": "string"
+          },
+          "referenznummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenznummer"
+          },
+          "risikobewertung_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risikobewertung Am"
+          },
+          "risikobewertung_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risikobewertung Durch"
+          },
+          "risikostufe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risikostufe"
+          },
+          "rohstoff": {
+            "title": "Rohstoff",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "uebermittelt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittelt Am"
+          },
+          "uebermittlung_dienst": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittlung Dienst"
+          },
+          "uebermittlung_fehler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittlung Fehler"
+          },
+          "uebermittlung_status": {
+            "default": "NICHT_UEBERMITTELT",
+            "title": "Uebermittlung Status",
+            "type": "string"
+          },
+          "uebermittlung_umgebung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittlung Umgebung"
+          },
+          "uebermittlung_versuche": {
+            "default": 0,
+            "title": "Uebermittlung Versuche",
+            "type": "integer"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          },
+          "vorgelagerte_erklaerungen": {
+            "items": {
+              "$ref": "#/components/schemas/VorgelagerteErklaerungOut"
+            },
+            "title": "Vorgelagerte Erklaerungen",
+            "type": "array"
+          },
+          "warenbeschreibung": {
+            "title": "Warenbeschreibung",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "status",
+          "betreiber_name",
+          "betreiber_adresse",
+          "rohstoff",
+          "hs_code",
+          "warenbeschreibung",
+          "menge_netto_kg",
+          "produktionsland",
+          "lieferant_name"
+        ],
+        "title": "SorgfaltserklaerungDetailOut",
+        "type": "object"
+      },
+      "SorgfaltserklaerungIn": {
+        "description": "Eine neue Sorgfaltserklaerung im Entwurf.",
+        "properties": {
+          "betreiber_adresse": {
+            "minLength": 1,
+            "title": "Betreiber Adresse",
+            "type": "string"
+          },
+          "betreiber_name": {
+            "minLength": 1,
+            "title": "Betreiber Name",
+            "type": "string"
+          },
+          "eori_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eori Nummer"
+          },
+          "ergaenzende_einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ergaenzende Einheit"
+          },
+          "geolokationen": {
+            "items": {
+              "$ref": "#/components/schemas/GeolokationIn"
+            },
+            "title": "Geolokationen",
+            "type": "array"
+          },
+          "hs_code": {
+            "maxLength": 16,
+            "minLength": 4,
+            "title": "Hs Code",
+            "type": "string"
+          },
+          "lieferant_adresse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Adresse"
+          },
+          "lieferant_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Email"
+          },
+          "lieferant_name": {
+            "minLength": 1,
+            "title": "Lieferant Name",
+            "type": "string"
+          },
+          "menge_netto_kg": {
+            "exclusiveMinimum": 0.0,
+            "title": "Menge Netto Kg",
+            "type": "number"
+          },
+          "menge_volumen_m3": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Volumen M3"
+          },
+          "nachweis_abholzungsfrei": {
+            "default": false,
+            "title": "Nachweis Abholzungsfrei",
+            "type": "boolean"
+          },
+          "nachweis_abholzungsfrei_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachweis Abholzungsfrei Quelle"
+          },
+          "nachweis_rechtskonform": {
+            "default": false,
+            "title": "Nachweis Rechtskonform",
+            "type": "boolean"
+          },
+          "nachweis_rechtskonform_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachweis Rechtskonform Quelle"
+          },
+          "produktion_bis": {
+            "format": "date",
+            "title": "Produktion Bis",
+            "type": "string"
+          },
+          "produktion_von": {
+            "format": "date",
+            "title": "Produktion Von",
+            "type": "string"
+          },
+          "produktionsland": {
+            "maxLength": 2,
+            "minLength": 2,
+            "title": "Produktionsland",
+            "type": "string"
+          },
+          "rohstoff": {
+            "title": "Rohstoff",
+            "type": "string"
+          },
+          "vorgelagerte_erklaerungen": {
+            "items": {
+              "$ref": "#/components/schemas/VorgelagerteErklaerungIn"
+            },
+            "title": "Vorgelagerte Erklaerungen",
+            "type": "array"
+          },
+          "warenbeschreibung": {
+            "minLength": 1,
+            "title": "Warenbeschreibung",
+            "type": "string"
+          }
+        },
+        "required": [
+          "betreiber_name",
+          "betreiber_adresse",
+          "rohstoff",
+          "hs_code",
+          "warenbeschreibung",
+          "menge_netto_kg",
+          "produktionsland",
+          "produktion_von",
+          "produktion_bis",
+          "lieferant_name"
+        ],
+        "title": "SorgfaltserklaerungIn",
+        "type": "object"
+      },
+      "SorgfaltserklaerungOut": {
+        "properties": {
+          "betreiber_adresse": {
+            "title": "Betreiber Adresse",
+            "type": "string"
+          },
+          "betreiber_name": {
+            "title": "Betreiber Name",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "eingereicht_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eingereicht Am"
+          },
+          "eori_nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eori Nummer"
+          },
+          "ergaenzende_einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ergaenzende Einheit"
+          },
+          "erklaerung_abgegeben_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Abgegeben Am"
+          },
+          "erklaerung_durch_funktion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Durch Funktion"
+          },
+          "erklaerung_durch_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erklaerung Durch Name"
+          },
+          "eu_system_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eu System Id"
+          },
+          "hs_code": {
+            "title": "Hs Code",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant_adresse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Adresse"
+          },
+          "lieferant_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Email"
+          },
+          "lieferant_name": {
+            "title": "Lieferant Name",
+            "type": "string"
+          },
+          "menge_netto_kg": {
+            "title": "Menge Netto Kg",
+            "type": "number"
+          },
+          "menge_volumen_m3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Volumen M3"
+          },
+          "minderungsmassnahmen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minderungsmassnahmen"
+          },
+          "nachweis_abholzungsfrei": {
+            "default": false,
+            "title": "Nachweis Abholzungsfrei",
+            "type": "boolean"
+          },
+          "nachweis_abholzungsfrei_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachweis Abholzungsfrei Quelle"
+          },
+          "nachweis_rechtskonform": {
+            "default": false,
+            "title": "Nachweis Rechtskonform",
+            "type": "boolean"
+          },
+          "nachweis_rechtskonform_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nachweis Rechtskonform Quelle"
+          },
+          "produktion_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Produktion Bis"
+          },
+          "produktion_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Produktion Von"
+          },
+          "produktionsland": {
+            "title": "Produktionsland",
+            "type": "string"
+          },
+          "referenznummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenznummer"
+          },
+          "risikobewertung_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risikobewertung Am"
+          },
+          "risikobewertung_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risikobewertung Durch"
+          },
+          "risikostufe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risikostufe"
+          },
+          "rohstoff": {
+            "title": "Rohstoff",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "uebermittelt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittelt Am"
+          },
+          "uebermittlung_dienst": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittlung Dienst"
+          },
+          "uebermittlung_fehler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittlung Fehler"
+          },
+          "uebermittlung_status": {
+            "default": "NICHT_UEBERMITTELT",
+            "title": "Uebermittlung Status",
+            "type": "string"
+          },
+          "uebermittlung_umgebung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittlung Umgebung"
+          },
+          "uebermittlung_versuche": {
+            "default": 0,
+            "title": "Uebermittlung Versuche",
+            "type": "integer"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          },
+          "warenbeschreibung": {
+            "title": "Warenbeschreibung",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "status",
+          "betreiber_name",
+          "betreiber_adresse",
+          "rohstoff",
+          "hs_code",
+          "warenbeschreibung",
+          "menge_netto_kg",
+          "produktionsland",
+          "lieferant_name"
+        ],
+        "title": "SorgfaltserklaerungOut",
+        "type": "object"
+      },
       "SourceProposalRequest": {
         "additionalProperties": false,
         "properties": {
@@ -155192,6 +157161,88 @@
         "title": "UStVARequest",
         "type": "object"
       },
+      "UebermittlungIn": {
+        "description": "Das Ergebnis einer Uebermittlung an das EU-Informationssystem.\n\n``UEBERMITTELT`` verlangt eine Referenznummer — ohne sie ist es ein\nVersuch, keine Uebermittlung. ``ABGEWIESEN`` verlangt einen Grund, sonst\nhilft der Eintrag beim naechsten Versuch nicht.",
+        "properties": {
+          "dienst": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bezeichnung des genutzten Dienstes samt Fassung, wie konfiguriert",
+            "title": "Dienst"
+          },
+          "eu_system_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eu System Id"
+          },
+          "fehler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fehler"
+          },
+          "referenznummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referenznummer"
+          },
+          "uebermittlung_status": {
+            "title": "Uebermittlung Status",
+            "type": "string"
+          },
+          "umgebung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "PRODUKTION oder ANNAHMETEST — Pflicht bei UEBERMITTELT",
+            "title": "Umgebung"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          }
+        },
+        "required": [
+          "uebermittlung_status"
+        ],
+        "title": "UebermittlungIn",
+        "type": "object"
+      },
       "UebernehmenBody": {
         "properties": {
           "kandidaten": {
@@ -157621,8 +159672,146 @@
       },
       "VerladungOut": {
         "additionalProperties": true,
-        "description": "Response schema for verladung endpoints.",
-        "properties": {},
+        "description": "Verladung führt Fahrzeug, Ware, Menge und Orte. Der Frachtbrief wird daraus erzeugt.",
+        "properties": {
+          "artikel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "fahrer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fahrer"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "kennzeichen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Zugmaschine",
+            "title": "Kennzeichen"
+          },
+          "kunde": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Empfänger der Beförderung",
+            "title": "Kunde"
+          },
+          "ladeort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Übernahmeort",
+            "title": "Ladeort"
+          },
+          "lieferschein_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Referenz auf den Warenbeleg",
+            "title": "Lieferschein Nr"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "zielort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ablieferstelle",
+            "title": "Zielort"
+          }
+        },
         "title": "VerladungOut",
         "type": "object"
       },
@@ -160009,6 +162198,188 @@
           "id"
         ],
         "title": "VordruckOut",
+        "type": "object"
+      },
+      "VorgelagerteErklaerungIn": {
+        "description": "Anhang II Nr. 4: Referenznummer einer vorgelagerten Erklaerung.",
+        "properties": {
+          "lieferant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Name"
+          },
+          "referenznummer": {
+            "minLength": 1,
+            "title": "Referenznummer",
+            "type": "string"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          }
+        },
+        "required": [
+          "referenznummer"
+        ],
+        "title": "VorgelagerteErklaerungIn",
+        "type": "object"
+      },
+      "VorgelagerteErklaerungOut": {
+        "properties": {
+          "geprueft_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geprueft Am"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Name"
+          },
+          "pruefung_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pruefung Quelle"
+          },
+          "pruefung_status": {
+            "default": "UNGEPRUEFT",
+            "title": "Pruefung Status",
+            "type": "string"
+          },
+          "referenznummer": {
+            "title": "Referenznummer",
+            "type": "string"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          }
+        },
+        "required": [
+          "id",
+          "referenznummer"
+        ],
+        "title": "VorgelagerteErklaerungOut",
+        "type": "object"
+      },
+      "VorgelagertePruefungOut": {
+        "properties": {
+          "geprueft_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geprueft Am"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Name"
+          },
+          "pruefung_hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pruefung Hinweis"
+          },
+          "pruefung_quelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pruefung Quelle"
+          },
+          "pruefung_status": {
+            "title": "Pruefung Status",
+            "type": "string"
+          },
+          "referenznummer": {
+            "title": "Referenznummer",
+            "type": "string"
+          },
+          "verifizierungsnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifizierungsnummer"
+          }
+        },
+        "required": [
+          "id",
+          "referenznummer",
+          "pruefung_status"
+        ],
+        "title": "VorgelagertePruefungOut",
         "type": "object"
       },
       "VorschlagSaveRequest": {
@@ -163102,6 +165473,7 @@
         "type": "object"
       },
       "WiegescheinMitDoppelwiegung": {
+        "additionalProperties": false,
         "properties": {
           "artikel_id": {
             "anyOf": [
@@ -163113,6 +165485,17 @@
               }
             ],
             "title": "Artikel Id"
+          },
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
           },
           "charge_nr": {
             "anyOf": [
@@ -163189,26 +165572,356 @@
                 "type": "null"
               }
             ]
-          },
-          "zielscheinfestgelegt": {
-            "default": false,
-            "title": "Zielscheinfestgelegt",
-            "type": "boolean"
           }
         },
         "title": "WiegescheinMitDoppelwiegung",
         "type": "object"
       },
-      "WiegungErweitert": {
+      "WiegescheinOut": {
         "properties": {
-          "export_flag": {
-            "default": false,
-            "title": "Export Flag",
-            "type": "boolean"
+          "article_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Id"
+          },
+          "charge_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge Nr"
+          },
+          "contract_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direction"
+          },
+          "disposition_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disposition Nr"
+          },
+          "first_weighing_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Weighing At"
           },
           "gosse": {
             "anyOf": [
               {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gosse"
+          },
+          "gross_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gross Weight"
+          },
+          "handwiegung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handwiegung"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ident_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ident Nr"
+          },
+          "muster_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Muster Nr"
+          },
+          "net_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Weight"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "reference_doc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Doc"
+          },
+          "scale_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scale Id"
+          },
+          "second_weighing_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Second Weighing At"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "tare_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tare Weight"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "ticket_number": {
+            "title": "Ticket Number",
+            "type": "string"
+          },
+          "vehicle_plate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vehicle Plate"
+          },
+          "weighing_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighing Date"
+          }
+        },
+        "required": [
+          "id",
+          "ticket_number",
+          "tenant_id"
+        ],
+        "title": "WiegescheinOut",
+        "type": "object"
+      },
+      "WiegungAngelegt": {
+        "properties": {
+          "brutto_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto Kg"
+          },
+          "gosse": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gosse"
+          },
+          "handwiegung": {
+            "title": "Handwiegung",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "netto_kg": {
+            "title": "Netto Kg",
+            "type": "number"
+          },
+          "richtung": {
+            "title": "Richtung",
+            "type": "string"
+          },
+          "status": {
+            "default": "gebucht",
+            "title": "Status",
+            "type": "string"
+          },
+          "tara_kg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tara Kg"
+          },
+          "ticket_number": {
+            "title": "Ticket Number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ticket_number",
+          "netto_kg",
+          "richtung",
+          "handwiegung"
+        ],
+        "title": "WiegungAngelegt",
+        "type": "object"
+      },
+      "WiegungErweitert": {
+        "additionalProperties": false,
+        "description": "Die zwei Waegungen und was die Waage dazu weiss.\n\n``brutto_kg`` und ``tara_kg`` sind benannt, nicht ``wiegung1``/``wiegung2``:\nDer Weg rechnete vorher ``abs(wiegung1 - wiegung2)``, und der Absolutbetrag\nverdeckte, dass die Reihenfolge eine fachliche Bedeutung hat.",
+        "properties": {
+          "brutto_kg": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto Kg"
+          },
+          "gosse": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -163244,46 +165957,49 @@
             ],
             "title": "Muster Nr"
           },
-          "netto": {
+          "netto_kg": {
             "anyOf": [
               {
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Netto"
+            "description": "Nur bei Handwiegung oder Fremdwaage — sonst aus Brutto minus Tara",
+            "title": "Netto Kg"
+          },
+          "tara_kg": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tara Kg"
           },
           "waage_id": {
-            "title": "Waage Id",
-            "type": "string"
-          },
-          "wiegung1": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Wiegung1"
-          },
-          "wiegung2": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Wiegung2"
+            "title": "Waage Id"
           },
           "zielschein_typ": {
             "anyOf": [
               {
+                "enum": [
+                  "EL",
+                  "VL"
+                ],
                 "type": "string"
               },
               {
@@ -163293,9 +166009,6 @@
             "title": "Zielschein Typ"
           }
         },
-        "required": [
-          "waage_id"
-        ],
         "title": "WiegungErweitert",
         "type": "object"
       },
@@ -176347,6 +179060,13 @@
         "title": "OpportunityUpdate",
         "type": "object"
       },
+      "app__api__v1__schemas__disposition_schemas__DispositionOut": {
+        "additionalProperties": true,
+        "description": "Response schema for disposition endpoints.",
+        "properties": {},
+        "title": "DispositionOut",
+        "type": "object"
+      },
       "app__api__v1__schemas__external_mock_harness_schemas__DsfinvkExportOut": {
         "description": "``POST /dev/external-mocks/dsfinvk/export``",
         "properties": {
@@ -176507,6 +179227,136 @@
           }
         },
         "title": "CreditLimitOut",
+        "type": "object"
+      },
+      "app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut": {
+        "properties": {
+          "bemerkung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bemerkung"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "disposition_nr": {
+            "title": "Disposition Nr",
+            "type": "integer"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "freigabe": {
+            "title": "Freigabe",
+            "type": "boolean"
+          },
+          "geplantes_lieferdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geplantes Lieferdatum"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kontrakt_id": {
+            "title": "Kontrakt Id",
+            "type": "string"
+          },
+          "kontrakt_nr": {
+            "title": "Kontrakt Nr",
+            "type": "string"
+          },
+          "kontrakt_pos_nr": {
+            "title": "Kontrakt Pos Nr",
+            "type": "integer"
+          },
+          "lieferdatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum"
+          },
+          "menge": {
+            "title": "Menge",
+            "type": "number"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "wiegeschein_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiegeschein Id"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "kontrakt_id",
+          "kontrakt_nr",
+          "kontrakt_pos_nr",
+          "disposition_nr",
+          "menge",
+          "status",
+          "freigabe"
+        ],
+        "title": "DispositionOut",
         "type": "object"
       },
       "app__api__v1__schemas__kontrakte_schemas__AmendmentCreate": {
@@ -242213,13 +245063,12 @@
     },
     "/api/v1/compliance/eudr": {
       "get": {
-        "description": "EU Deforestation Regulation (EUDR) compliance status — aggregated from charge/lot data.\nFalls back to a zero-state response when no EUDR data exists yet.",
+        "description": "EUDR-Stand aus dem Sorgfaltserklaerungsregister.\n\nBis zum 01.10.2026 las dieser Weg ``domain_inventory.lots`` — eine Tabelle\nohne Migration, deren Spalten ``eudr_compliant``/``origin_country`` es\nnirgends gibt. Jeder Lesefehler lief in ``except: ... = 0``, und daraus\nwurde ``status: \"KONFORM\"`` mit ``deforestation_risk: \"NIEDRIG\"``: behauptete\nKonformitaet, die nie geprueft wurde — bei einem Inverkehrbringungsverbot\nnach Art. 3/4 der Verordnung (EU) 2023/1115 die gefaehrlichste Antwort.\n\nJetzt kommt der Stand aus dem Register, der Mandant aus dem Kopf, und ein\nLesefehler ist ein 503. Ein leeres Register ist ``OHNE_ERKLAERUNG`` — nicht\n``KONFORM``: \"nichts erfasst\" ist kein Nachweis.\n\nChargenbezogene Kennzeichnung aus `lot_eudr_erklaerungen`, siehe\n``docs/quality-assurance/eudr-sorgfaltserklaerung-20261001.md``.",
         "operationId": "get_eudr_status_api_v1_compliance_eudr_get",
         "parameters": [
           {
-            "description": "Tenant context",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -242230,8 +245079,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tenant context",
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -274121,7 +276969,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DispositionOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -274166,7 +277014,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DispositionOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -274202,7 +277050,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DispositionOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -274289,7 +277137,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DispositionOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -290526,6 +293374,983 @@
         ]
       }
     },
+    "/api/v1/eudr/sorgfaltserklaerungen": {
+      "get": {
+        "description": "Die Erklaerungen des eigenen Hauses.",
+        "operationId": "auflisten_api_v1_eudr_sorgfaltserklaerungen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "rohstoff",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rohstoff"
+            }
+          },
+          {
+            "in": "query",
+            "name": "produktionsland",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 2,
+                  "minLength": 2,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Produktionsland"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SorgfaltserklaerungOut"
+                  },
+                  "title": "Response Auflisten Api V1 Eudr Sorgfaltserklaerungen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sorgfaltserklärungen auflisten",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      },
+      "post": {
+        "description": "Legt eine Erklaerung als **Entwurf** an.\n\nEingereicht wird sie erst ueber ``/einreichen`` — und nur, wenn die\nRisikobewertung vernachlaessigbares Risiko ergeben hat.",
+        "operationId": "anlegen_api_v1_eudr_sorgfaltserklaerungen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SorgfaltserklaerungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SorgfaltserklaerungDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sorgfaltserklärung anlegen (Entwurf)",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/chargen/offen": {
+      "get": {
+        "description": "Die Chargen, die nach Art. 4 **nicht** in Verkehr gebracht werden duerfen.\n\nRelevant gekennzeichnet, aber ohne — oder ohne ausreichenden — Nachweis.",
+        "operationId": "offene_chargen_api_v1_eudr_sorgfaltserklaerungen_chargen_offen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChargeKennzeichnungOut"
+                  },
+                  "title": "Response Offene Chargen Api V1 Eudr Sorgfaltserklaerungen Chargen Offen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Chargen ohne Nachweis (nicht verkehrsfähig)",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/chargen/{lot_id}": {
+      "get": {
+        "description": "Der abgeleitete Nachweisstand einer einzelnen Charge.",
+        "operationId": "charge_kennzeichnung_api_v1_eudr_sorgfaltserklaerungen_chargen__lot_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lot_id",
+            "required": true,
+            "schema": {
+              "title": "Lot Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChargeKennzeichnungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Nachweisstand einer Charge",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/status": {
+      "get": {
+        "description": "Der Stand des Registers — ohne gruene Behauptung.\n\n``KONFORM`` nur, wenn jede Erklaerung eingereicht ist und\nvernachlaessigbares Risiko traegt. Ein leeres Register ist\n``OHNE_ERKLAERUNG``, nicht ``KONFORM``: Nach Art. 3/4 ist das\nInverkehrbringen ohne Sorgfaltserklaerung verboten, und \"nichts erfasst\" ist\nkein Nachweis.",
+        "operationId": "registerstand_api_v1_eudr_sorgfaltserklaerungen_status_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EudrRegisterStatusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "EUDR-Registerstand",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/vorgelagerte/ungeprueft": {
+      "get": {
+        "description": "Die fremden Referenznummern, die noch niemand nachgeprueft hat.",
+        "operationId": "ungepruefte_vorgelagerte_api_v1_eudr_sorgfaltserklaerungen_vorgelagerte_ungeprueft_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VorgelagertePruefungOut"
+                  },
+                  "title": "Response Ungepruefte Vorgelagerte Api V1 Eudr Sorgfaltserklaerungen Vorgelagerte Ungeprueft Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zugekaufte Erklärungen ohne Prüfung",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/vorgelagerte/{vorgelagert_id}/pruefung": {
+      "post": {
+        "description": "Haelt fest, ob eine **zugekaufte** Erklaerung nachgeprueft wurde.\n\nDas ist die Richtung, die ein Haendler die meiste Zeit braucht: Er ist\noefter Zwischenhaendler als Erst-Inverkehrbringer und gibt fremde\nReferenznummern weiter. Bis hierhin trug das Register die Nummern, aber\nnichts darueber, ob sie jemand geprueft hat — eine abgeschriebene Nummer\nsah aus wie ein Nachweis.\n\nEine Bestaetigung aus dem EU-Informationssystem setzt Referenz- **und**\nVerifizierungsnummer voraus: Abgefragt wird eine Erklaerung ueber beide.",
+        "operationId": "vorgelagerte_pruefung_api_v1_eudr_sorgfaltserklaerungen_vorgelagerte__vorgelagert_id__pruefung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vorgelagert_id",
+            "required": true,
+            "schema": {
+              "title": "Vorgelagert Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PruefungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VorgelagertePruefungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vorgelagerte Erklärung prüfen (Art. 4/5, herein)",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/{erklaerung_id}": {
+      "get": {
+        "description": "Eine Erklaerung mit ihren Flurstuecken und vorgelagerten Erklaerungen.",
+        "operationId": "abrufen_api_v1_eudr_sorgfaltserklaerungen__erklaerung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "erklaerung_id",
+            "required": true,
+            "schema": {
+              "title": "Erklaerung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SorgfaltserklaerungDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sorgfaltserklärung abrufen",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/{erklaerung_id}/chargen": {
+      "post": {
+        "description": "Bindet eine Charge mit einer Menge an diese Sorgfaltserklaerung.\n\nGebunden wird nur an eine **eingereichte** Erklaerung: Nach Art. 4 darf\nnichts in Verkehr gebracht werden, bevor die Erklaerung abgegeben ist, und\neine Bindung an einen Entwurf waere ein Nachweis, der noch keiner ist.\n\nDie gebundene Menge darf die Chargenmenge nicht uebersteigen — sonst wuerde\nmehr Ware als nachgewiesen gelten.",
+        "operationId": "charge_binden_api_v1_eudr_sorgfaltserklaerungen__erklaerung_id__chargen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "erklaerung_id",
+            "required": true,
+            "schema": {
+              "title": "Erklaerung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChargenbindungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChargenbindungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Charge an die Erklärung binden (Art. 4)",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/{erklaerung_id}/einreichen": {
+      "post": {
+        "description": "Haelt Referenz- und Verifizierungsnummer des EU-Systems fest.\n\nEingereicht wird nur, was die Verordnung erlaubt: vernachlaessigbares\nRisiko, beide Nachweise, Unterzeichnung mit Name und Funktion (Art. 3/4,\nAnhang II Nr. 6). Dieselbe Bedingung haelt die Datenbank.",
+        "operationId": "einreichen_api_v1_eudr_sorgfaltserklaerungen__erklaerung_id__einreichen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "erklaerung_id",
+            "required": true,
+            "schema": {
+              "title": "Erklaerung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EinreichungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SorgfaltserklaerungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sorgfaltserklärung einreichen (Art. 33)",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/{erklaerung_id}/geolokationen": {
+      "post": {
+        "description": "Art. 9: Die Geolokation **aller** Flurstuecke gehoert zur Erklaerung.",
+        "operationId": "geolokation_nachtragen_api_v1_eudr_sorgfaltserklaerungen__erklaerung_id__geolokationen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "erklaerung_id",
+            "required": true,
+            "schema": {
+              "title": "Erklaerung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeolokationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeolokationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Flurstück nachtragen",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/{erklaerung_id}/risikobewertung": {
+      "post": {
+        "description": "Haelt die Feststellung nach Art. 10 fest.\n\nBei mehr als vernachlaessigbarem Risiko verlangt Art. 11\nMinderungsmassnahmen — ohne sie wird die Bewertung nicht angenommen.",
+        "operationId": "risiko_bewerten_api_v1_eudr_sorgfaltserklaerungen__erklaerung_id__risikobewertung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "erklaerung_id",
+            "required": true,
+            "schema": {
+              "title": "Erklaerung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RisikobewertungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SorgfaltserklaerungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Risikobewertung festhalten (Art. 10/11)",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
+    "/api/v1/eudr/sorgfaltserklaerungen/{erklaerung_id}/uebermittlung": {
+      "post": {
+        "description": "Haelt fest, was das EU-Informationssystem zurueckgemeldet hat.\n\n``UEBERMITTELT`` verlangt eine Referenznummer, ``ABGEWIESEN`` einen Grund.\nDieselben Bedingungen haelt die Datenbank.\n\nUebermittelt wird nur, was fachlich abgegeben ist (Art. 4): Ein Entwurf\ngehoert nicht in das EU-System.",
+        "operationId": "uebermittlung_festhalten_api_v1_eudr_sorgfaltserklaerungen__erklaerung_id__uebermittlung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "erklaerung_id",
+            "required": true,
+            "schema": {
+              "title": "Erklaerung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UebermittlungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SorgfaltserklaerungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ergebnis der Übermittlung festhalten (Art. 33, hinaus)",
+        "tags": [
+          "EUDR",
+          "Compliance"
+        ]
+      }
+    },
     "/api/v1/export/entities": {
       "get": {
         "description": "Return supported entity values for export/list.",
@@ -300396,7 +304221,7 @@
     },
     "/api/v1/finance/cash/close-day": {
       "post": {
-        "description": "Kasse Tagesabschluss — erzeugt Abschlussbuchung fuer den aktuellen Tag.",
+        "description": "Reject the retired synthetic closing until cash valuation is defined.",
         "operationId": "cash_close_day_api_v1_finance_cash_close_day_post",
         "parameters": [
           {
@@ -300417,15 +304242,13 @@
           }
         ],
         "responses": {
-          "200": {
+          "409": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActionResponse"
-                }
+                "schema": {}
               }
             },
-            "description": "Successful Response"
+            "description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung."
           },
           "422": {
             "content": {
@@ -300443,7 +304266,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Close day cash",
+        "summary": "Kassenabschluss ohne Bewertungsmodell gesperrt",
         "tags": [
           "finance",
           "actions",
@@ -327149,6 +330972,7 @@
     },
     "/api/v1/genossenschaft/kapitaluebersicht": {
       "get": {
+        "description": "Die Aggregatsicht auf das Geschaeftsguthaben.\n\nSummiert wird ueber die abgeleiteten Bestaende, nicht ueber eine\nfortgeschriebene Spalte. Ein Lesefehler ist ein 503: Ein Kapital von\n0,00 EUR ist eine Bilanzaussage und darf nicht aus einem Fehler entstehen.",
         "operationId": "kapitaluebersicht_api_v1_genossenschaft_kapitaluebersicht_get",
         "parameters": [
           {
@@ -327173,7 +330997,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GenossenschaftOut"
+                  "$ref": "#/components/schemas/KapitaluebersichtOut"
                 }
               }
             },
@@ -327195,7 +331019,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Genossenschaftliches Kapital — Aggregatübersicht",
+        "summary": "Geschaeftsguthaben der Mitglieder (§ 337 HGB)",
         "tags": [
           "Genossenschaft"
         ]
@@ -327203,8 +331027,50 @@
     },
     "/api/v1/genossenschaft/mitglieder": {
       "get": {
+        "description": "Die Mitgliederliste des Mandanten samt abgeleitetem Anteilsbestand.\n\nEin Lesefehler ist ein 503 und keine leere Liste: \"Keine Mitglieder\" ist bei\neiner eG keine moegliche Antwort, sondern ein Befund.",
         "operationId": "list_mitglieder_api_v1_genossenschaft_mitglieder_get",
         "parameters": [
+          {
+            "description": "AKTIV | RUHEND | AUSGETRETEN",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "AKTIV | RUHEND | AUSGETRETEN",
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
           {
             "in": "header",
             "name": "X-Tenant-ID",
@@ -327228,7 +331094,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/GenossenschaftOut"
+                    "$ref": "#/components/schemas/MitgliedOut"
                   },
                   "title": "Response List Mitglieder Api V1 Genossenschaft Mitglieder Get",
                   "type": "array"
@@ -327253,12 +331119,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Mitgliederliste",
+        "summary": "Mitgliederliste (§ 30 GenG)",
         "tags": [
           "Genossenschaft"
         ]
       },
       "post": {
+        "description": "Nimmt ein Mitglied in die Liste auf.\n\nEine Erstzeichnung wird als Bewegung ``ZEICHNUNG`` gebucht, nicht als Zahl\ngespeichert — damit auch der erste Anteil einen Beleg hat. Scheitert diese\nBewegung oder ihre Hauptbuchbuchung, entsteht kein Mitglied: Ein Mitglied\nmit unbelegten Anteilen waere schlimmer als keines.",
         "operationId": "create_mitglied_api_v1_genossenschaft_mitglieder_post",
         "parameters": [
           {
@@ -327293,7 +331160,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IDResponse"
+                  "$ref": "#/components/schemas/MitgliedAngelegt"
                 }
               }
             },
@@ -327315,7 +331182,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Mitglied anlegen",
+        "summary": "Mitglied aufnehmen (§ 15 GenG)",
         "tags": [
           "Genossenschaft"
         ]
@@ -327323,6 +331190,7 @@
     },
     "/api/v1/genossenschaft/mitglieder/{mitglied_id}": {
       "get": {
+        "description": "Ein Mitglied samt Bestand und Bewegungshistorie.\n\nDie Historie wird nicht stillschweigend geleert, wenn sie nicht lesbar ist:\nSie ist der Nachweis des Geschaeftsguthabens.",
         "operationId": "get_mitglied_api_v1_genossenschaft_mitglieder__mitglied_id__get",
         "parameters": [
           {
@@ -327356,7 +331224,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GenossenschaftOut"
+                  "$ref": "#/components/schemas/MitgliedDetailOut"
                 }
               }
             },
@@ -327378,12 +331246,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Mitglied Detailansicht",
+        "summary": "Mitglied mit Anteilsbewegungen",
         "tags": [
           "Genossenschaft"
         ]
       },
       "patch": {
+        "description": "Aendert Stammdaten — nicht den Anteilsbestand.\n\nDer Bestand aendert sich ausschliesslich durch eine Bewegung; das Schema\nkennt das Feld deshalb nicht mehr. Ein Austritt braucht ein Datum und einen\nabgewickelten Bestand: Das Auseinandersetzungsguthaben nach § 73 GenG ist\nzuerst zu buchen, sonst verschwaende der Austritt eine offene Forderung.",
         "operationId": "patch_mitglied_api_v1_genossenschaft_mitglieder__mitglied_id__patch",
         "parameters": [
           {
@@ -327427,7 +331296,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IDResponse"
+                  "$ref": "#/components/schemas/MitgliedGeaendert"
                 }
               }
             },
@@ -327449,7 +331318,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Mitglied aktualisieren",
+        "summary": "Mitgliedsstammdaten aendern",
         "tags": [
           "Genossenschaft"
         ]
@@ -327457,6 +331326,7 @@
     },
     "/api/v1/genossenschaft/mitglieder/{mitglied_id}/anteilsbewegung": {
       "post": {
+        "description": "Buchen einer Anteilsbewegung. Der Bestand folgt daraus.\n\nGeprueft wird gegen den **abgeleiteten** Bestand unter einer Zeilensperre:\nZwei gleichzeitige Rueckzahlungen duerfen nicht denselben Bestand sehen. Eine\nUebertragung schreibt beide Seiten oder keine.",
         "operationId": "create_anteilsbewegung_api_v1_genossenschaft_mitglieder__mitglied_id__anteilsbewegung_post",
         "parameters": [
           {
@@ -327500,7 +331370,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IDResponse"
+                  "$ref": "#/components/schemas/AnteilsbewegungGebucht"
                 }
               }
             },
@@ -339768,9 +343638,10 @@
         ]
       }
     },
-    "/api/v1/kontrakte/{kontrakt_id}/dispositionen": {
+    "/api/v1/kontrakte/{kontrakt_id}/abrufstand": {
       "get": {
-        "operationId": "list_dispositionen_api_v1_kontrakte__kontrakt_id__dispositionen_get",
+        "description": "Kontrahierte, abgerufene und offene Menge je Position.",
+        "operationId": "abrufstand_api_v1_kontrakte__kontrakt_id__abrufstand_get",
         "parameters": [
           {
             "in": "path",
@@ -339804,7 +343675,87 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/KontraktOut"
+                    "$ref": "#/components/schemas/AbrufstandOut"
+                  },
+                  "title": "Response Abrufstand Api V1 Kontrakte  Kontrakt Id  Abrufstand Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Was von jeder Position noch abrufbar ist",
+        "tags": [
+          "kontrakte"
+        ]
+      }
+    },
+    "/api/v1/kontrakte/{kontrakt_id}/dispositionen": {
+      "get": {
+        "description": "Die Abrufe eines Kontrakts. Ein Lesefehler ist ein 503, keine leere Liste.",
+        "operationId": "list_dispositionen_api_v1_kontrakte__kontrakt_id__dispositionen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kontrakt_id",
+            "required": true,
+            "schema": {
+              "title": "Kontrakt Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
                   },
                   "title": "Response List Dispositionen Api V1 Kontrakte  Kontrakt Id  Dispositionen Get",
                   "type": "array"
@@ -339829,12 +343780,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Dispositionen auflisten",
+        "summary": "Abrufe eines Kontrakts auflisten",
         "tags": [
           "kontrakte"
         ]
       },
       "post": {
+        "description": "Ruft eine Menge ab. Mehr als kontrahiert nur mit ``allow_overdelivery``.",
         "operationId": "create_disposition_api_v1_kontrakte__kontrakt_id__dispositionen_post",
         "parameters": [
           {
@@ -339867,7 +343819,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DispositionCreate"
+                "$ref": "#/components/schemas/DispositionAnlegen"
               }
             }
           },
@@ -339878,7 +343830,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KontraktOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -339900,7 +343852,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Disposition anlegen",
+        "summary": "Menge abrufen",
         "tags": [
           "kontrakte"
         ]
@@ -339908,6 +343860,7 @@
     },
     "/api/v1/kontrakte/{kontrakt_id}/dispositionen/{disp_id}": {
       "delete": {
+        "description": "Storniert den Abruf. Eine gelieferte Menge wird nicht storniert.",
         "operationId": "storniere_disposition_api_v1_kontrakte__kontrakt_id__dispositionen__disp_id__delete",
         "parameters": [
           {
@@ -339950,7 +343903,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KontraktOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -339972,7 +343925,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Disposition storniere",
+        "summary": "Abruf stornieren",
         "tags": [
           "kontrakte"
         ]
@@ -339980,6 +343933,7 @@
     },
     "/api/v1/kontrakte/{kontrakt_id}/dispositionen/{disp_id}/freigabe": {
       "patch": {
+        "description": "Gibt den Abruf zur Lieferung frei.",
         "operationId": "freigabe_disposition_api_v1_kontrakte__kontrakt_id__dispositionen__disp_id__freigabe_patch",
         "parameters": [
           {
@@ -340022,7 +343976,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KontraktOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -340044,7 +343998,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Disposition freigabe",
+        "summary": "Abruf freigeben",
         "tags": [
           "kontrakte"
         ]
@@ -340052,6 +344006,7 @@
     },
     "/api/v1/kontrakte/{kontrakt_id}/dispositionen/{disp_id}/geliefert": {
       "patch": {
+        "description": "Meldet die Lieferung gegen einen vorhandenen Wiegeschein — nur aus der Freigabe.",
         "operationId": "geliefert_disposition_api_v1_kontrakte__kontrakt_id__dispositionen__disp_id__geliefert_patch",
         "parameters": [
           {
@@ -340093,7 +344048,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_geliefert_disposition_api_v1_kontrakte__kontrakt_id__dispositionen__disp_id__geliefert_patch"
+                "$ref": "#/components/schemas/DispositionGeliefert"
               }
             }
           }
@@ -340103,7 +344058,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/KontraktOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__kontrakt_disposition_schemas__DispositionOut"
                 }
               }
             },
@@ -340125,7 +344080,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Disposition geliefert",
+        "summary": "Abruf als geliefert melden",
         "tags": [
           "kontrakte"
         ]
@@ -383654,22 +387609,22 @@
     },
     "/api/v1/pricing/calculate": {
       "get": {
-        "description": "Calculate price with hierarchical cascade logic (like zvoove/Landhandel):\n\nPriority:\n1. Price list (highest priority, replaces base price)\n2. Contract discount (if contract_id provided)\n3. Customer discount (from customer master data)\n4. Employee role discount (if user_role provided)\n5. Base price (fallback)\n\nOnly ONE discount is applied (not additive).",
+        "description": "Preisfindung in einer Kaskade — es gilt **eine** Stufe, nicht die Summe.\n\nReihenfolge: Preisliste (ersetzt den Basispreis), dann Kontrakt, Mengenstaffel,\nKundenrabatt, Rollenrabatt; sonst der Basispreis des Artikels.\n\nBis zum 05.10.2026 kam der Mandant aus einem **Query-Parameter** mit\nVorgabewert — wer ihn setzte, fragte fremde Preislisten ab; wer ihn wegliess,\nbekam stillschweigend die des Vorgabemandanten. Und drei der fuenf Stufen\nfunktionierten nie: Der Kontraktrabatt las zwei Spalten, die es nicht gibt,\nder Rollenrabatt eine Tabelle, die es nicht gibt, und die gepflegten\nMengenstaffeln wurden nicht gelesen. Jeder Fehlschlag lief in\n``except: db.rollback()``, und heraus kam der volle Listenpreis mit\n``source: \"base\"``.\n\nJetzt ist ein Fehlschlag ein 503 mit der Stufe im Text: Wer einen Preis nicht\nvollstaendig ermitteln kann, darf keinen nennen.",
         "operationId": "calculate_price_api_v1_pricing_calculate_get",
         "parameters": [
           {
-            "description": "Article ID",
+            "description": "Artikelkennung",
             "in": "query",
             "name": "article_id",
             "required": true,
             "schema": {
-              "description": "Article ID",
+              "description": "Artikelkennung",
               "title": "Article Id",
               "type": "string"
             }
           },
           {
-            "description": "Customer ID",
+            "description": "Kundenkennung",
             "in": "query",
             "name": "customer_id",
             "required": false,
@@ -383682,12 +387637,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Customer ID",
+              "description": "Kundenkennung",
               "title": "Customer Id"
             }
           },
           {
-            "description": "Quantity",
+            "description": "Menge",
             "in": "query",
             "name": "quantity",
             "required": false,
@@ -383702,12 +387657,12 @@
                 }
               ],
               "default": "1",
-              "description": "Quantity",
+              "description": "Menge",
               "title": "Quantity"
             }
           },
           {
-            "description": "Contract ID",
+            "description": "Kontraktkennung",
             "in": "query",
             "name": "contract_id",
             "required": false,
@@ -383720,12 +387675,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Contract ID",
+              "description": "Kontraktkennung",
               "title": "Contract Id"
             }
           },
           {
-            "description": "User role for employee discounts",
+            "description": "Rolle fuer Mitarbeiterrabatte",
             "in": "query",
             "name": "user_role",
             "required": false,
@@ -383738,18 +387693,24 @@
                   "type": "null"
                 }
               ],
-              "description": "User role for employee discounts",
+              "description": "Rolle fuer Mitarbeiterrabatte",
               "title": "User Role"
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -383780,7 +387741,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Price berechnen",
+        "summary": "Preis finden",
         "tags": [
           "pricing",
           "pricing"
@@ -383789,7 +387750,7 @@
     },
     "/api/v1/pricing/find": {
       "get": {
-        "description": "Frontend-Alias für /pricing/calculate — identische Logik.",
+        "description": "Frontend-Alias fuer /pricing/calculate — dieselbe Kaskade.",
         "operationId": "find_price_api_v1_pricing_find_get",
         "parameters": [
           {
@@ -383868,13 +387829,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -383905,7 +387872,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Preisfindung (Frontend-Alias für /calculate)",
+        "summary": "Preisfindung (Frontend-Alias fuer /calculate)",
         "tags": [
           "pricing",
           "pricing"
@@ -384064,13 +388031,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -384116,13 +388089,19 @@
         "operationId": "create_staffelrabatt_api_v1_pricing_staffelrabatte_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "00000000-0000-0000-0000-000000000001",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -428705,6 +432684,24 @@
       },
       "post": {
         "operationId": "create_verladung_api_v1_verladung_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -428848,6 +432845,22 @@
             "schema": {
               "title": "Verladung Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -431847,8 +435860,26 @@
     },
     "/api/v1/waage/wiegungen/dual": {
       "post": {
-        "description": "Doppelwiegung: Nimmt Brutto- und Tara-Wiegung entgegen und berechnet Netto automatisch.",
+        "description": "Nimmt Brutto- und Tarawiegung entgegen und rechnet das Netto.\n\n``netto = brutto - tara`` — ohne Absolutbetrag. Ist die Tara nicht kleiner\nals das Brutto, ist das ein Messfehler oder eine Verwechslung der beiden\nWaegungen; dann entsteht kein Wiegeschein, sondern ein 422. Das\nNettogewicht ist die abgerechnete Menge.",
         "operationId": "create_dual_wiegung_api_v1_waage_wiegungen_dual_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -431864,7 +435895,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WaageOut"
+                  "$ref": "#/components/schemas/WiegungAngelegt"
                 }
               }
             },
@@ -431886,7 +435917,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Dual wiegung anlegen",
+        "summary": "Doppelwiegung buchen (Brutto und Tara)",
         "tags": [
           "Waage"
         ]
@@ -431894,7 +435925,7 @@
     },
     "/api/v1/waage/wiegungen/{wiegeschein_id}/extended": {
       "get": {
-        "description": "Gibt erweiterte Daten einer Wiegung zurÃ¼ck inkl. Doppelwiegungsinformationen.",
+        "description": "Den Wiegeschein des Mandanten lesen.\n\nVorher hatte dieser Weg nicht einmal die Mandantenabhaengigkeit: Jedes Haus\nkonnte jeden Wiegeschein lesen, wenn es die Kennung kannte.",
         "operationId": "get_wiegung_extended_api_v1_waage_wiegungen__wiegeschein_id__extended_get",
         "parameters": [
           {
@@ -431905,6 +435936,22 @@
               "title": "Wiegeschein Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -431912,7 +435959,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/WaageOut"
+                  "$ref": "#/components/schemas/WiegescheinOut"
                 }
               }
             },
@@ -431934,7 +435981,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Wiegung extended abrufen",
+        "summary": "Wiegeschein abrufen",
         "tags": [
           "Waage"
         ]

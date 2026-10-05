@@ -124,3 +124,10 @@ def test_ownership_check_laeuft_gegen_die_db(require_db) -> None:
     assert failures == [], failures
     assert classified >= 600
     assert notes
+
+
+def test_central_contract_register_belongs_to_agrar():
+    for table in ('contracts', 'contract_versions', 'contract_obligations'):
+        verdict = classify_table('domain_contracts', table)
+        assert verdict['ok']
+        assert verdict['owner_domain'] == 'agrar'
