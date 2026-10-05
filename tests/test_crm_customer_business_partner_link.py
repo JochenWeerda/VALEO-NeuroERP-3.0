@@ -13,10 +13,24 @@ customers_endpoint = importlib.import_module("app.api.v1.endpoints.customers")
 customer_service_module = importlib.import_module("app.services.customer_service")
 
 
+class _FakeMappings:
+    """``.mappings().first()`` — der Weg, den `_attach_partner_mask_fields` nimmt."""
+
+    def __init__(self, mapping_value=None):
+        self._mapping_value = mapping_value
+
+    def first(self):
+        return self._mapping_value
+
+    def all(self):
+        return [] if self._mapping_value is None else [self._mapping_value]
+
+
 class _FakeResult:
-    def __init__(self, *, scalar_value=None, fetchone_value=None):
+    def __init__(self, *, scalar_value=None, fetchone_value=None, mapping_value=None):
         self._scalar_value = scalar_value
         self._fetchone_value = fetchone_value
+        self._mapping_value = mapping_value
 
     def scalar(self):
         return self._scalar_value
@@ -24,12 +38,16 @@ class _FakeResult:
     def fetchone(self):
         return self._fetchone_value
 
+    def mappings(self):
+        return _FakeMappings(self._mapping_value)
+
 
 class _CapturingDb:
     def __init__(self, results=None):
         self.results = list(results or [])
         self.calls: list[tuple[str, dict]] = []
         self.commits = 0
+        self.rollbacks = 0
 
     def execute(self, statement, params=None):
         self.calls.append((str(statement), dict(params or {})))
@@ -39,6 +57,12 @@ class _CapturingDb:
 
     def commit(self):
         self.commits += 1
+
+    def rollback(self):
+        # `enrich_mask_satellites` raeumt die Transaktion auf, wenn der
+        # Partnersatz nicht lesbar ist. Ohne diese Methode brach der Test an der
+        # Fehlerbehandlung statt an der Fachlichkeit.
+        self.rollbacks += 1
 
 
 def _core_customer(customer_id: str = "12345678-1234-1234-1234-1234567890ab") -> CRMCoreCustomer:
