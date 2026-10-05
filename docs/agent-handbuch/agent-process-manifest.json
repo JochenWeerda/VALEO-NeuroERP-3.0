@@ -3012,6 +3012,43 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "logistik/versandprofile",
+      "title": "Versandprofile",
+      "domain": "logistics",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/logistik__versandprofile/:entityId",
+      "agent_contract_url": "/api/v1/masks/logistik/versandprofile/agent-contract",
+      "screen_definition_url": "/api/v1/masks/logistik/versandprofile/screen-definition",
+      "readiness_url": "/api/v1/masks/logistik/versandprofile/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "profil",
+          "label": "Profil speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt das Versandprofil an."
+        },
+        {
+          "key": "avis",
+          "label": "Avis speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt ein Lieferavis an."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "strecke/disposition",
       "title": "Strecken-Disposition",
       "domain": "logistics",

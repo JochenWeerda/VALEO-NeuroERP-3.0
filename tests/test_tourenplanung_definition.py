@@ -10,8 +10,10 @@ from app.core.screen_definitions_capture import (
     build_logistik_frachttabellen_screen_definition,
     build_logistik_tour_fracht_arbeitsraum_screen_definition,
     build_logistik_tourenplanung_screen_definition,
+    build_logistik_versandprofile_screen_definition,
     build_transporte_fahrer_screen_definition,
 )
+from app.core.screen_governance import derived_screen_type, governance_errors
 
 ROOT = Path(__file__).resolve().parents[1]
 FALLBACK = (ROOT / "packages/frontend-web/src/masks/capture-screens.ts").read_text(encoding="utf-8")
@@ -121,3 +123,40 @@ def test_frachttabellen_staffel_folgt_der_tabelle() -> None:
     assert definition["tables"][0]["columns"][0]["priority"] == "primary"
     assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
     assert get_screen_definition("logistik/frachttabellen")["id"] == "logistik/frachttabellen"
+
+
+def test_versandprofile_register_folgen_den_eingaben() -> None:
+    definition = build_logistik_versandprofile_screen_definition()
+    block = _block("versandprofileScreen")
+    felder = [
+        "profil_nr",
+        "bezeichnung",
+        "versandart",
+        "absender_email",
+        "absender_name",
+        "betreff_vorlage",
+        "avis_datum",
+        "lieferdatum_erwartet",
+        "lieferant_nr",
+        "kunden_nr",
+        "artikel_nr",
+        "menge",
+        "notiz",
+    ]
+    assert definition["id"] == "logistik/versandprofile"
+    assert definition["title"] == "Versandprofile"
+    assert [field["key"] for tab in definition["tabs"] for field in tab["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert definition["layout"]["columnNavigation"] == "single"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert "statusPlacement: 'afterFields'" in block
+    endpoints = [source["endpoint"] for source in definition["dataSources"]]
+    assert endpoints == ["/api/v1/logistik/versand/profile", "/api/v1/logistik/versand/avise"]
+    for endpoint in endpoints:
+        assert endpoint in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["profil"]
+    assert definition["actions"][1]["zone"] == "footer"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("logistik/versandprofile")["id"] == "logistik/versandprofile"

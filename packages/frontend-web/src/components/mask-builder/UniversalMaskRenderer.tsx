@@ -352,6 +352,25 @@ function RenderFromPlan({
     />
   )
 
+  const registerTabs = !deriveColumns && plan.visibleTabs.length > 0
+    ? plan.visibleTabs.length === 1
+      ? renderTab(plan.visibleTabs[0].key)
+      : (
+        <LazyTabs
+          value={activeTab}
+          variant="register"
+          onValueChange={(key) => { setActiveTab(key); onTabChange?.(key) }}
+          tabs={plan.visibleTabs.map((tab) => ({
+            key: tab.key,
+            label: tab.label,
+            lazy: tab.lazy,
+            keepAlive: tab.keepAlive,
+            content: () => renderTab(tab.key),
+          }))}
+        />
+      )
+    : null
+
   const pageBody = (
     <>
       <MessagePanelRenderer messages={visibleMessages} onRetry={onRetry}
@@ -424,6 +443,7 @@ function RenderFromPlan({
           />
         )
       })}
+      {statusAfterFields && !onePage ? registerTabs : null}
       {statusAfterFields ? <FastSummaryRenderer items={plan.summaryItems} /> : null}
       {statusAfterFields ? workflowNode : null}
 
@@ -464,21 +484,7 @@ function RenderFromPlan({
         <>
           {renderHeader(false, plan.shell.stickyHeader)}
           {pageBody}
-          {!deriveColumns && plan.visibleTabs.length === 1 && renderTab(plan.visibleTabs[0].key)}
-          {!deriveColumns && plan.visibleTabs.length > 1 && (
-            <LazyTabs
-              value={activeTab}
-              variant="register"
-              onValueChange={(key) => { setActiveTab(key); onTabChange?.(key) }}
-              tabs={plan.visibleTabs.map((tab) => ({
-                key: tab.key,
-                label: tab.label,
-                lazy: tab.lazy,
-                keepAlive: tab.keepAlive,
-                content: () => renderTab(tab.key),
-              }))}
-            />
-          )}
+          {statusAfterFields ? null : registerTabs}
         </>
       )}
 

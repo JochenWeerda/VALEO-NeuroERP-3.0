@@ -835,3 +835,137 @@ export const frachttabellenScreen = {
     statusPlacement: 'afterFields',
   },
 } satisfies ScreenDefinition
+
+const versandarten = [
+  { value: 'email', label: 'E-Mail' },
+  { value: 'fax', label: 'Fax' },
+  { value: 'edi', label: 'EDI' },
+  { value: 'post', label: 'Post' },
+  { value: 'api', label: 'API' },
+]
+
+export const versandprofileScreen = {
+  schemaVersion: 1,
+  id: 'logistik/versandprofile',
+  domain: 'logistics',
+  mode: 'list',
+  title: 'Versandprofile',
+  subtitle: 'Versandkonfiguration und Liefervoranmeldungen',
+  adapter: { type: 'native', sourceId: 'logistik/versandprofile', temporary: false },
+  dataSources: [
+    { key: 'profile', endpoint: '/api/v1/logistik/versand/profile', pageSize: 100 },
+    { key: 'avise', endpoint: '/api/v1/logistik/versand/avise', pageSize: 100 },
+  ],
+  summary: [
+    { key: 'profile', label: 'Profile', value: '0' },
+    { key: 'avise', label: 'Avise', value: '0' },
+  ],
+  workflow: { processKey: 'logistik.versandprofile' },
+  actions: [
+    {
+      key: 'profil',
+      label: 'Profil speichern',
+      command: 'versand.saveProfile',
+      kind: 'primary',
+      dangerLevel: 'safe',
+      zone: 'header',
+      stubReason: 'Legt das Versandprofil an.',
+    },
+    {
+      key: 'avis',
+      label: 'Avis speichern',
+      command: 'versand.saveAvis',
+      kind: 'secondary',
+      dangerLevel: 'safe',
+      zone: 'footer',
+      stubReason: 'Legt ein Lieferavis an.',
+    },
+  ],
+  tabs: [
+    {
+      key: 'profile',
+      label: 'Versandprofile',
+      fields: [
+        { key: 'profil_nr', label: 'Profil-Nr', type: 'text', placeholder: 'Nummer' },
+        { key: 'bezeichnung', label: 'Bezeichnung', type: 'text' },
+        { key: 'versandart', label: 'Versandart', type: 'select', options: versandarten },
+        { key: 'absender_email', label: 'Absender E-Mail', type: 'text' },
+        { key: 'absender_name', label: 'Absender Name', type: 'text' },
+        { key: 'betreff_vorlage', label: 'Betreff-Vorlage', type: 'text' },
+      ],
+      tables: [
+        {
+          key: 'profile',
+          label: 'Versandprofile',
+          dataSourceKey: 'profile',
+          serverPagination: false,
+          pageSize: 50,
+          virtualized: true,
+          rowHeight: 44,
+          rowDetail: false,
+          rowActions: [
+            {
+              key: 'loeschen',
+              label: 'Löschen',
+              command: 'versand.deleteProfile',
+              dangerLevel: 'moderate',
+              disabledWhen: { field: 'gesperrt', values: [true] },
+            },
+          ],
+          columns: [
+            { key: 'profil_nr', label: 'Nummer', sortable: true, filterable: true, priority: 'primary' },
+            { key: 'bezeichnung', label: 'Bezeichnung', filterable: true, priority: 'primary' },
+            { key: 'versandart', label: 'Versandart', priority: 'secondary' },
+            { key: 'absender_email', label: 'Absender', priority: 'tertiary' },
+          ],
+        },
+      ],
+    },
+    {
+      key: 'avise',
+      label: 'Lieferavise',
+      fields: [
+        { key: 'avis_datum', label: 'Avis-Datum', type: 'date' },
+        { key: 'lieferdatum_erwartet', label: 'Lieferdatum', type: 'date' },
+        { key: 'lieferant_nr', label: 'Lieferant-Nr', type: 'text' },
+        { key: 'kunden_nr', label: 'Kunden-Nr', type: 'text' },
+        { key: 'artikel_nr', label: 'Artikel-Nr', type: 'text' },
+        { key: 'menge', label: 'Menge', type: 'number' },
+        { key: 'notiz', label: 'Notiz', type: 'text' },
+      ],
+      tables: [
+        {
+          key: 'avise',
+          label: 'Lieferavise',
+          dataSourceKey: 'avise',
+          serverPagination: false,
+          pageSize: 50,
+          virtualized: true,
+          rowHeight: 44,
+          rowDetail: false,
+          columns: [
+            { key: 'avis_datum', label: 'Avis-Datum', renderKind: 'date', sortable: true, filterable: true, priority: 'primary' },
+            { key: 'lieferdatum_erwartet', label: 'Lieferdatum', renderKind: 'date', priority: 'primary' },
+            { key: 'lieferant_nr', label: 'Lieferant', priority: 'secondary' },
+            { key: 'artikel_nr', label: 'Artikel', priority: 'secondary' },
+            { key: 'menge', label: 'Menge', numeric: true, priority: 'tertiary' },
+            { key: 'notiz', label: 'Notiz', priority: 'tertiary' },
+          ],
+        },
+      ],
+    },
+  ],
+  noWorkflowReason: 'Der Stand folgt den hinterlegten Profilen.',
+  layout: {
+    floorplan: 'worklist',
+    density: 'compact',
+    contextRail: 'none',
+    tableProfile: 'standard',
+    columnNavigation: 'single',
+    preferredMode: 'desktopDense',
+    mobileMode: 'mobileStack',
+    touchTargetPx: 44,
+    summaryPlacement: 'footer',
+    statusPlacement: 'afterFields',
+  },
+} satisfies ScreenDefinition

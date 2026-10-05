@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (88 Masken).
+> Generiert aus `app/core/screen_definitions.py` (89 Masken).
 
 ## Übersicht
 
@@ -78,6 +78,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `logistik/tour-fracht-arbeitsraum` | Tour & Fracht | logistics | niedrig | — | `GET /api/v1/masks/logistik/tour-fracht-arbeitsraum/agent-contract` |
 | `logistik/tourenplanung` | Tourenplanung | logistics | niedrig | — | `GET /api/v1/masks/logistik/tourenplanung/agent-contract` |
 | `logistik/verladung` | Verladung | logistics | niedrig | — | `GET /api/v1/masks/logistik/verladung/agent-contract` |
+| `logistik/versandprofile` | Versandprofile | logistics | niedrig | — | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
 | `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
@@ -2413,6 +2414,36 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `neu` | Neue Beladung | safe | nein | `Oeffnet die bestehende LKW-Beladung.` |
+
+---
+
+### `logistik/versandprofile` — Versandprofile
+
+**Zweck:** Versandprofile und Lieferavise anlegen. Der Stand folgt den Profilen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/logistik/versandprofile/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
+| Readiness | `GET /api/v1/masks/logistik/versandprofile/readiness` |
+| Rollout-Route | `/mask-rollout/logistik__versandprofile/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `profile` → `/api/v1/logistik/versand/profile`
+- `avise` → `/api/v1/logistik/versand/avise`
+
+**Beispiel-Prompts:**
+
+- Welches Versandprofil fehlt noch?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `profil` | Profil speichern | safe | nein | `Legt das Versandprofil an.` |
+| `avis` | Avis speichern | safe | nein | `Legt ein Lieferavis an.` |
 
 ---
 
