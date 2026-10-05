@@ -120429,6 +120429,22 @@
             ],
             "title": "Price List Id"
           },
+          "rabatt_gesperrt": {
+            "default": false,
+            "title": "Rabatt Gesperrt",
+            "type": "boolean"
+          },
+          "rabatt_sperrgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rabatt Sperrgrund"
+          },
           "source": {
             "title": "Source",
             "type": "string"

@@ -15,6 +15,13 @@ export function getValue(source: Record<string, unknown>, path: string): unknown
   }, source)
 }
 
+/** Gleiche Beschriftung, unabhängig von Großschreibung und Rand. */
+export function repeatsCaption(a: string | undefined, b: string | undefined): boolean {
+  const left = (a ?? '').trim().toLocaleLowerCase('de-DE')
+  const right = (b ?? '').trim().toLocaleLowerCase('de-DE')
+  return left.length > 0 && left === right
+}
+
 export function layoutClasses(mode: ScreenLayoutMode | undefined, density: ScreenDensity = 'compact'): {
   root: string
   header: string

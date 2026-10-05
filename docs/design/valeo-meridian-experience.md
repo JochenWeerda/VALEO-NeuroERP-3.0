@@ -273,3 +273,11 @@ Gespeichert bleibt Schema-Version 1 mit `layout.floorplan`: `worklist`, `objectP
 Eine Aktion nennt einen Befehl (`tour.create`) und optional `enabledWhen`. Ein String darin ist eine Domänen-Policy. `all` / `any` / `path` bleiben UI-Bedingungen. Destruktive Aktionen ohne Bestätigung, unbekannte Befehle der Referenzmasken und mehr als zwei Primäraktionen meldet `app/core/screen_governance.py` in der CI.
 
 Die erlaubten Bausteine sind die vorhandenen Feldtypen: Text, Zahl, Datum, Auswahl, EntityPicker, Tabelle, Status, Kennzahlen, Aktionsleiste. Dichte, Touch-Höhe und Statustöne kommen aus den bestehenden Tokens. Referenzmasken sind Tourenplanung, Fahrer und Fahrzeuge. Der Vertrag steht in `docs/architecture/uix/screen-governance.md`.
+
+CI-Vertrag 2026-10-05: Der UniversalMaskRenderer reicht den Bildschirmtitel
+an den gemeinsamen TabContentRenderer weiter. Dessen TableRenderer unterdrueckt
+nur eine identische Tabellenbeschriftung (ohne Beachtung von Grossschreibung
+und Randabstand); fachlich verschiedene Tabellenueberschriften bleiben sichtbar.
+Diese Regel gilt zentral in der bestehenden Renderer-Kette. Der wiederverwendete
+ErrorState verwendet fuer kleine Statustexte und Wiederherstellungshinweise
+volle Textdeckkraft. Typpruefung und Verhaltenstests ergaenzen die Browser-WCAG-Abnahme.

@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## CI-RUN-REPAIR-20261005 — reserviert, Codex (Chat 01a0f3fc)
+## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
@@ -51,6 +51,12 @@ bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
 **Risiken:** Weitere Jobs queued; externe Security-/Provider-/Runner-Fehler
 nach Logs unterscheiden. Bestehender Probe, keine neue DB/Docker/Reset.
+**Evidenz:** c50379d2e auf main; 114 Backend-/Scanner-Vertraege und neun
+isolierte UI-Vertraege bestanden. Isolierte Typpruefung, OpenAPI (3092 Pfade),
+Code-Inventare und Architektur strict (932 Routen) gruen. Zweiter Meilenstein
+schliesst Inventar-/Preis-Spec-Drift und UI-Exporte. Audit 4 -> 2 hohe Befunde;
+node-forge/braces ohne gepatchtes Release offen. Chromium-Startseiten-Timeout
+lokal; neue Actions-Abnahme bleibt erforderlich. Kein vollstaendig gruener CI-Stand.
 
 ## HANDSHAKE-GAP-CLOSURE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 

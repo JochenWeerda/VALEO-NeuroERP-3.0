@@ -9,6 +9,7 @@ file_ownership:
   - Tabellenbesitz und CI-Mergevergleich mit Regressionen
   - SQL-Kontohelfer, Webhook-SQL und neue Logistik-Kalenderquellen
   - Eigene QA und committed-source OpenAPI-Artefakt
+  - Minimale UI-Vertraege, Router-/Code-Inventare und busboy-Paketpin
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
@@ -20,6 +21,7 @@ tests:
 risks:
   - Laufende fremde Masken- und Preisarbeit bleibt geschuetzt.
   - Weitere Frontend- und Security-Laufbefunde noch offen.
+  - Lokaler Chromium-Startseiten-Timeout; Actions-Abnahme ausstehend.
 external_gates:
   - Neue GitHub-Actions-Laufe und externer Abhaengigkeitsscan.
 ai_harness:

@@ -46,8 +46,31 @@ des gemeinsamen Pruefstands zur Verifikation.
 
 ## Offene Laufbefunde
 
-Frontend-Typfehler und WCAG-Kontrastfehler sowie vier hohe npm-Auditbefunde
-bleiben bis zur eigenen Korrektur und erneuten Actions-Abnahme offen.
+Die isolierte Frontend-Typpruefung und neun UI-Vertragstests bestehen.
+Fehlende Exporte und der screenTitle-Prop-Vertrag wurden als minimale
+committed-source-Hunks korrigiert, ohne Layout-WIP zu veroeffentlichen.
+ErrorState verwendet volle Textdeckkraft fuer Status und Wiederherstellung;
+die Browser-WCAG-Abnahme und neue Actions-Laufe bleiben erforderlich.
+Der lokale Chromium-Lauf scheiterte bereits beim page.goto der Startseite
+an 90 Sekunden Timeout, obwohl der Vite-Server HTTP 200 liefert. Er wurde
+beendet; dieses lokale Ergebnis ist keine WCAG-Freigabe.
+
+`@fastify/busboy` ist auf 3.2.1 gesperrt. Der unveraenderte Produktionsaudit
+meldet danach zwei statt vier hohe Befunde. Node-forge
+[GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) und braces
+[GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) haben
+laut GitHub-Advisories derzeit kein gepatchtes Release. Diese bleiben offen;
+keine Audit-Ausnahme und keine behauptete Security-Freigabe.
+
+Die drei Code-Inventare und Router-Inventare wurden aus committed Quellen
+plus eigenen UI-Hunks regeneriert. Der Preiscommit d33a59a30 fuegte zwei
+Response-Felder hinzu; die erneute Spec aus b1e891249 enthaelt beide.
+Der isolierte OpenAPI-Check bestaetigt 3092 Pfade; Architekturindex strict
+prueft 932 von 932 Routen. Die drei Code-Inventare sind aktuell.
+
+Der erste Reparaturcommit c50379d2e ist auf main gepusht. Seine Docs- und
+API-Laeufe stoppten an Inventaren bzw. diesen zwei Preisfeldern; beide werden
+im zweiten Meilenstein korrigiert. Eingereihte Runs sind kein Gruennachweis.
 114 gezielte Konto-/Webhook-/Frachtbrief-/Doku-/Ratschen-/Workflow-/Besitztests bestanden;
 Webhooks wurden mit beiden DB-Verbindungen explizit auf dem gemeinsamen Probe
 geprueft. MkDocs (derselbe Buildmodus wie CI), ADR-Nav, Slice-Harness, SQL-,
