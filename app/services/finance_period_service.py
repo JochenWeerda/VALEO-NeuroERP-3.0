@@ -111,6 +111,7 @@ class FinancePeriodService:
         return {"period": period, **metrics, **r}
 
     def close_period(self, period: str, bediener: str = "KIM", force: bool = False) -> dict[str, Any]:
+        finance_periods.sperre_periode(self.db, self.tenant_id, period, exklusiv=True)
         stored = self._stored().get(period)
         if stored and finance_periods.sperrt(stored["status"]):
             raise PeriodError(f"Periode {period} ist bereits abgeschlossen.")
@@ -144,6 +145,7 @@ class FinancePeriodService:
     def reopen_period(self, period: str, grund: str, bediener: str = "KIM") -> dict[str, Any]:
         if not (grund or "").strip():
             raise PeriodError("Grund für die Wiedereröffnung ist erforderlich.")
+        finance_periods.sperre_periode(self.db, self.tenant_id, period, exklusiv=True)
         stored = self._stored().get(period)
         if not stored or not finance_periods.sperrt(stored["status"]):
             raise PeriodError(f"Periode {period} ist nicht abgeschlossen.")

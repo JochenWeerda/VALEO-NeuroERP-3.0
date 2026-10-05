@@ -319,27 +319,5 @@ def test_buchung_in_offene_und_abschlussperiode_ist_erlaubt(engine, zustand):
         FinanceTransactionService(db, HAUS).check_period_open(PERIODE)
 
 
-@pytest.mark.integration
-def test_nicht_lesbarer_zustand_weist_die_buchung_ab(engine):
-    """Die Spalte, nach der gelesen wird, wird kurzzeitig umbenannt.
-
-    Vorher liess `except Exception: pass  # allow through` die Buchung durch —
-    die Periodensperre entfiel bei einem Lesefehler **ganz**.
-    """
-    from sqlalchemy import text
-    from sqlalchemy.orm import Session
-
-    from app.core.exceptions import ValidationFailedError
-    from app.services.finance_transaction_service import FinanceTransactionService
-
-    _periode_setzen(engine, "CLOSED")
-    with engine.begin() as v:
-        v.execute(text(f"ALTER TABLE {TABELLE} RENAME COLUMN status TO status_weg"))
-    try:
-        with Session(engine) as db:
-            with pytest.raises(ValidationFailedError) as fehler:
-                FinanceTransactionService(db, HAUS).check_period_open(PERIODE)
-        assert "nicht feststellbar" in str(fehler.value)
-    finally:
-        with engine.begin() as v:
-            v.execute(text(f"ALTER TABLE {TABELLE} RENAME COLUMN status_weg TO status"))
+# Schemafehler werden in test_journal_period_enforcement.py an der privaten
+# Tabellenfixture pruefbar gemacht. Kein ALTER der gemeinsam genutzten Tabelle.

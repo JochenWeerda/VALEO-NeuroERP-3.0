@@ -37,7 +37,7 @@ log_fibu_audit committet selbst und darf im aeusseren Modus nicht benutzt
 werden. Keine behauptete Consumer-Atomizitaet. Probe Revision
  genossenschaft_mitgliederregister_20261005, kein Reset/Migrationslauf.
 
-## JOURNAL-PERIOD-ENFORCEMENT-20261005 — reserviert
+## JOURNAL-PERIOD-ENFORCEMENT-20261005 — abgeschlossen
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Periodenpruefung aus dem gespeicherten Buchungsdatum
 ableiten und bei Anlage/Post/Storno erzwingen; optionales period darf sie
@@ -45,13 +45,28 @@ nicht umgehen. Sperrvertrag mit Periodenabschluss koordinieren.
 **Dateibesitz:** finance_transaction_service.py Periodenguard, finance_periods.py
 Sperrhelfer, finance_period_service.py Close/Reopen-Sperre, accounting_periods.py
 nur Create/Update-Sperrhunks; neue Periodentests und betroffene Journal-
-Testdoppel/Tabellenfixtures; eigene QA/Slice/Gaps. Bestehende Periodenclaims
+Testdoppel/Tabellenfixtures; test_periode_ein_zustand_vertrag.py nur alten
+globalen DDL-Test entfernen (durch privaten Schematest ersetzt); eigene
+QA/Slice/Gaps. Bestehende Periodenclaims
 sind abgeschlossen, keine fremden UI/Journal-API/DTO/Godfile-Edits.
-**Abnahme geplant:** Geschlossene echte Periode sperrt Mutation, Fremdtenant
+**Abnahme:** Geschlossene echte Periode sperrt Mutation, Fremdtenant
 beeinflusst sie nicht, Datum/Periodenargument widerspruchsfrei; Abschluss-
 Konkurrenz und fehlender Schema-/Statusnachweis verhindern falsche Freigabe.
-**Risiken:** Create prueft bisher nur optionales period; Post/Reverse
-haben keinen Periodenguard. Perioden-API/SQL-Schreiber separat integrieren.
+**Ergebnis 2026-10-05:** Anlage leitet Periode aus Buchungsdatum ab,
+explizite Periode muss dazu passen; Post prueft gespeichertes Buchungsdatum,
+Storno seine neue Zielperiode. Fehlende/malformed Argumente kein Bypass.
+Journal-Shared-/Perioden-Exclusive-Transaktionssperre auch ohne Zeile;
+FOR SHARE fuer vorhandene Zeile und READ COMMITTED gegen alte Snapshots.
+Close/Reopen und Perioden-API Create/Update nehmen dieselbe Sperre.
+**Nachweis:** 371 Journal-/Periodentests plus 25 Statusvertraege bestanden;
+29 neue, davon 19 echte PostgreSQL und vier pg_locks-Wartebelege. Alter
+Test mit globalem Tabellen-ALTER entfernt, privater Schemafehlerbeleg ersetzt ihn.
+Neue Pythonanteile lint-sauber; bestehende Periodenservice/API-Befunde offen.
+QA: journal-period-enforcement-20261005.md. Claim 1238e843a.
+**Risiken:** Andere rohe Journal/OP/Consumer-Schreiber, Audit/Anchor-Atomizitaet,
+Schema/Hash/NULL-Waehrung und Cancel-Grund offen. Keine globale Sperren-/GoBD-
+Abnahme. Probe wiegung_kanonisch_20261005, keine Migration/Reset/neue DB.
+
 
 ## JOURNAL-CREATE-CANONICAL-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 

@@ -24,15 +24,23 @@ muessen die aeussere Steuerung explizit uebernehmen; log_fibu_audit und Anchor
 committen weiterhin selbst. Diese Faehigkeit allein ist keine geschlossene
 Audit-/Consumer-Atomizitaet. API/DTO-Fremdclaim und Schema/Hash-Gaps weiter offen.
 
-## JOURNAL-PERIOD-ENFORCEMENT — Pflichtpruefung noch offen
+## JOURNAL-PERIOD-ENFORCEMENT — Zentraler Guard geschlossen, weitere Schreiber offen
 
-Codebefund 2026-10-05: Service-Create prueft nur das optionale period-Argument;
-check_period_open(None) kehrt ohne Pruefung zurueck. Post/Reverse pruefen
-keine Periode. Dadurch ist die zentrale Periodensperre nicht fuer alle
-Journalmutationen garantiert. Naechster offener Slice im Workboard:
-JOURNAL-PERIOD-ENFORCEMENT-20261005. Aus Buchungsdatum ableiten, explizite
-Periode abgleichen und Abschluss-Konkurrenz unter realen Sperren pruefen.
-Keine neue Periodenfreigabe oder fachliche Ausnahme implizit einfuehren.
+2026-10-05: Anlage/Post/Storno pruefen verpflichtend ihre Zielperiode.
+Anlage/Post verwenden Buchungsdatum, Storno das neue Buchungsdatum. Eine
+explizite Create-Periode muss passen. Shared-Journal-/Exclusive-Periodensperre
+schliesst das Rennen auch ohne Periodenzeile; READ COMMITTED und FOR SHARE
+sichern frischen Zustand. Close/Reopen und Perioden-API Create/Update
+verwenden dieselbe Sperre. Vorhandenes NULL/unknown sperrt, fehlende Zeile
+bleibt nach bestehendem Vertrag offen. ADJUSTING bleibt buchbar.
+371 Journal-/Periodentests plus 25 Statusvertraege bestanden; 29 neue
+(19 PostgreSQL), vier echte Wartebelege. Globalen DDL-Test durch privaten
+Schemafehlerfall ersetzt. QA:
+[Periodenpflicht](../quality-assurance/journal-period-enforcement-20261005.md).
+Offen bleiben andere rohe Journal-/OP-Schreiber und deren gemeinsame
+Abschlussreife-/Perioden-/Transaktionsintegration. Kein globaler Buchungs-
+oder GoBD-Beleg. API-Fehlermapping, Audit/Anchor-Atomizitaet, Schema/Hash,
+NULL-Waehrung und Cancel-Grund bleiben eigene offene Vertraege.
 
 ## JOURNAL-CREATE-CANONICAL — Zweiter Anlageweg entfernt, API/Schema offen
 

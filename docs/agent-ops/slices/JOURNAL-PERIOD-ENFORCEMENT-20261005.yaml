@@ -1,0 +1,35 @@
+slice_id: JOURNAL-PERIOD-ENFORCEMENT-20261005
+title: Verbindliche Journalperiode mit koordiniertem Abschluss
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-05
+updated_at: 2026-10-05
+coordination: Claim 1238e843a; Periodenclaims vorher abgeschlossen.
+goal: Optionale Periode und Abschlussrennen erlauben keine falsche Journalfreigabe.
+file_ownership:
+  - finance_transaction_service.py Periodenguard/Create/Post/Reverse
+  - finance_periods.py Sperrhelfer und NULL-Zustand
+  - finance_period_service.py Close/Reopen-Sperrhunks
+  - accounting_periods.py nur Create/Update-Sperrhunks
+  - test_journal_period_enforcement.py und betroffene Journalfixtures
+  - test_periode_ein_zustand_vertrag.py alter globaler DDL-Test entfernt
+acceptance:
+  - Periode aus Buchungsdatum; explizites period muss passen.
+  - Anlage/Post/Storno verpflichtend pruefen; kein None-Bypass.
+  - Shared/Exclusive-Sperre auch bei fehlender Zeile und READ COMMITTED.
+  - Vier echte wartende Journal/Abschluss/API-Schreiber.
+test_evidence:
+  - 371 Regressionen plus 25 bestehende Periodenstatusvertraege bestanden.
+  - 29 neue Vertraege davon 19 echte PostgreSQL-Faelle.
+  - Neue Pythonanteile lint-sauber; bestehende Importbefunde dokumentiert.
+risks:
+  - Andere rohe Journal/OP-Schreiber und Consumer-Atomizitaet offen.
+  - API-Fehlermapping, Audit/Anchor, Schema/Hash/NULL-Waehrung und Cancel-Grund offen.
+ai_harness:
+  fachlicher_vertrag: Zielperiode und gespeichertes Buchungsdatum widerspruchsfrei.
+  architektur_vertrag: Bestehender Periodenhelper mit gemeinsamen Sperrschluesseln.
+  daten_vertrag: Frischer Status auch nach Warten und bei vorher fehlender Zeile.
+  test_vertrag: Echte pg_locks-Wartebelege und isolierter Schemafehler.
+  security_vertrag: Fremde geschlossene Tenant-Periode beeinflusst eigene nicht.
+  betriebs_vertrag: Bestehender valeo_probe ohne neue DB/Container/Reset/Migration.
+  dokumentations_vertrag: QA/Slice/Workboard/Gaps grenzen globale Abnahme ab.
