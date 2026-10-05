@@ -428,6 +428,76 @@ nachgezogen und begruendet.
 
 **Doku:** `docs/quality-assurance/genossenschaft-mitgliederregister-20261005.md`.
 
+## WIEGUNG-KANONISCH-20261005 — in Arbeit, Claude Code
+
+**Befund:** Vier Tabellen fuer **einen** Begriff, und die, die der
+Doppelwiegungsweg benutzt, existiert in keiner Datenbank:
+
+| Tabelle | Spalten | Zeilen (Dev) | Wer |
+| --- | --- | --- | --- |
+| `domain_inventory.weighing_tickets` | 28 | 49 | kanonisches Rueckgrat, `supply_chain_trace_service` |
+| `domain_agrar.weighing_tickets` | 10 | 0 | nur `waage_mobile.py` (Quittierung) |
+| `domain_ops.ops_wiegungen` | 14 | 0 | niemand an einem lebenden Weg |
+| `domain_agrar.wiegungen` | — | **existiert nicht** | `waage.py` Doppelwiegung |
+
+**Ziel:** Die Doppelwiegung schreibt das kanonische Rueckgrat. `domain_agrar.wiegungen`
+wird **nicht angelegt**, sondern abgeloest — eine fuenfte Wahrheit ueber ein
+Wiegeergebnis waere das Gegenteil von Rueckverfolgbarkeit, und die vorhandene
+Tabelle hat alle Felder, die der Weg braucht (Brutto, Tara, Netto, Kennzeichen,
+Waage, Richtung, erste und zweite Waegung).
+
+**Die Befunde, und was daraus folgt:**
+
+1. **`netto = abs(wiegung1 - wiegung2)`.** Der Absolutbetrag verdeckt den
+   Vorzeichenfehler: Eine Tara schwerer als das Brutto ist ein Messfehler oder
+   eine Verwechslung der Eingaben — und wird zu einem plausiblen positiven
+   Nettogewicht, auf dem die Rechnung aufbaut. Ein bestehender Test fordert das
+   sogar ein („Reihenfolge der Wiegungen darf kein negatives Netto erzeugen").
+   Neu: Brutto und Tara sind benannt, `netto = brutto - tara`, und
+   `tara >= brutto` ist ein 422 mit dem Hinweis auf die wahrscheinliche Ursache.
+   Die Datenbank haelt es ueber `ck_wiegung_netto_stimmt` nach.
+2. **Der JSONB-Rueckfall.** Schlug der erste INSERT fehl, schrieb der Weg die
+   ganze Wiegung als undurchsichtigen Klumpen in `extended_data` — ohne
+   `netto_kg`, ohne `waage_id` — und antwortete `201 created`. Ein Wiegeschein,
+   dessen Gewicht in keiner Spalte steht, ist nicht abrechenbar und nicht
+   pruefbar. Der Rueckfall entfaellt.
+3. **Kein `tenant_id`.** Weder beim Schreiben noch beim Lesen; `get_wiegung_extended`
+   hat nicht einmal die Abhaengigkeit. Jedes Haus konnte jeden Wiegeschein lesen.
+4. **`handwiegung` gehoert in eine Spalte, nicht in einen Klumpen.** Nach MessEG
+   ist eine von Hand eingetragene Masse keine geeichte Messung. Der Beleg muss
+   sagen, was er ist; in einem JSONB-Feld ist das nicht auswertbar.
+5. **Drei Tests sind seit laengerem rot** (`test_dual_weighing_disposition.py`):
+   Sie rufen `create_dual_wiegung(payload, db)` positionell und treffen damit
+   `tenant_id`. Der Weg war kaputt **und** nur scheinbar geprueft.
+
+**Dateibesitz:** `alembic/versions/wiegung_kanonisch_20261005.py`,
+`app/api/v1/endpoints/waage.py` (nur Doppelwiegung und erweitertes Lesen),
+`app/api/v1/schemas/waage_schemas.py` (neu),
+`app/services/wiegung_service.py` (neu),
+`tests/test_wiegung_kanonisch_vertrag.py` (neu),
+`tests/test_dual_weighing_disposition.py` und der Doppelwiegungsteil in
+`tests/test_waage_api.py` (die Tests, die den Fehler festschreiben),
+`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
+dieser Abschnitt.
+**Nicht angefasst:** `waage_mobile.py` und `domain_agrar.weighing_tickets` —
+die Quittierung ist ein eigener Weg und bleibt als benannte Luecke stehen;
+`domain_ops.ops_wiegungen` liegt ruhend und wird hier nicht beruehrt.
+
+**Abnahme:** Die Doppelwiegung schreibt `domain_inventory.weighing_tickets` mit
+`tenant_id`; `netto = brutto - tara` steht in der Datenbank und wird dort
+geprueft; `tara >= brutto` ist ein 422; es gibt keinen Weg, der eine Wiegung ohne
+Gewicht als erfolgreich meldet; `handwiegung` ist eine Spalte; fremde
+Wiegescheine sind nicht lesbar; die Rueckverfolgbarkeit findet die neue Wiegung
+(`supply_chain_trace_service`); `domain_agrar.wiegungen` kommt im Code nicht mehr
+vor; Vertraege gegen die frische DB und alle Ratschen gruen.
+
+**Risiken:** Die Zusammenfuehrung der verbleibenden drei Wiegetabellen ist
+**nicht** Teil dieses Slices — `domain_agrar.weighing_tickets` (Quittierung) und
+`domain_ops.ops_wiegungen` (ruhend) bleiben und gehoeren in einen ADR zum
+fuehrenden Wiegemodell. Die Zuordnung der Ausgangswaegung zum Frachtbrief laeuft
+weiterhin ueber das Kennzeichen und ist damit mehrdeutig, wenn derselbe Lkw
+mehrere offene Frachtbriefe hat; das wird hier benannt, nicht geaendert.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
