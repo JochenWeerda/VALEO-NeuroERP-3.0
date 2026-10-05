@@ -1,0 +1,32 @@
+slice_id: JOURNAL-REPOSITORY-LIFECYCLE-20261005
+title: Repository-Journallifecycle an zentrale Pruefungen binden
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-05
+updated_at: 2026-10-05
+coordination: Claim d66f051bc; keine fremden API/DTO/UI/EUDR-Edits.
+goal: Kein zweiter ungesperrter Journal-Mutationsweg im Repository.
+file_ownership:
+  - implementations.py ausschliesslich Journal-Lifecycle und Leseidentitaet
+  - tests/test_journal_repository_lifecycle.py
+acceptance:
+  - Zentrale Status-, Betrag-, Konto-, Tenant- und Stempelguards.
+  - Reale wartende Repository-Schreiber sehen aktuellen gecachten Status.
+  - Kein fehlendes is_active und keine verschluckten Datenbankfehler.
+test_evidence:
+  - 282 Tests; 35 neue davon 27 echte PostgreSQL-Faelle.
+  - Zwei echte Repository-Wartebelege; fuenf Service-Wartebelege regressiert.
+  - Neue Pythonanteile lint-sauber; bestehende globale Ruff-Befunde offen.
+risks:
+  - Repository-Create eigener Hashweg und verworfene DTO-Felder.
+  - API Domainfehler-HTTP-Mapping, Session, Audit und Anchor nicht atomar.
+  - Fremder API/DTO-Claim weiterhin in arbeit; nicht uebernommen.
+  - Schema/Hash, Cancel-Grund, weitere SQL-Schreiber und Bankintegration offen.
+ai_harness:
+  fachlicher_vertrag: Repository-Lifecycle nutzt kanonische Serviceguards.
+  architektur_vertrag: Bestehendes Repository delegiert ohne neue Servicegrenze.
+  daten_vertrag: Mandantengebundene reale Journalspalten und gesperrte Mutationen.
+  test_vertrag: Echte PostgreSQL-Mutationen und Wartebelege.
+  security_vertrag: Keine Fremdtenant-Mutation oder freie Spaltenupdates.
+  betriebs_vertrag: Vorhandener valeo_probe ohne neue DB oder Container.
+  dokumentations_vertrag: QA/Slice/Workboard/Gaps mit expliziten API-Restluecken.

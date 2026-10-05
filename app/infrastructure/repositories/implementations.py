@@ -493,39 +493,77 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
             raise
 
     async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs):
-        """Get journal entries; optional reference= for exact match (e.g. Importlauf run_id)."""
-        from sqlalchemy.exc import SQLAlchemyError
-        from ..repositories.base_repository import logger
+        """Tenant-scoped reads propagate failures instead of reporting an empty ledger."""
+        query = (
+            self.session.query(JournalEntry)
+            .options(selectinload(JournalEntry.lines))
+            .filter(JournalEntry.tenant_id == tenant_id)
+        )
+        ref = kwargs.pop("reference", None)
+        if ref is not None:
+            query = query.filter(JournalEntry.reference == ref)
+        for key, value in kwargs.items():
+            if value is not None and hasattr(JournalEntry, key):
+                query = query.filter(getattr(JournalEntry, key).ilike(f"%{value}%"))
+        return query.order_by(JournalEntry.entry_date.desc()).offset(skip).limit(limit).all()
+
+    def _transaction_service(self, tenant_id: str):
+        from app.services.finance_transaction_service import FinanceTransactionService
+
+        return FinanceTransactionService(self.session, tenant_id)
+
+    async def get_by_id(self, id: str, tenant_id: str):
+        """Journal heads have no is_active column; scope by tenant and identity."""
+        return (
+            self.session.query(JournalEntry)
+            .options(selectinload(JournalEntry.lines))
+            .filter(JournalEntry.id == id, JournalEntry.tenant_id == tenant_id)
+            .first()
+        )
+
+    async def exists(self, id: str, tenant_id: str) -> bool:
+        return await self.get_by_id(id, tenant_id) is not None
+
+    async def count(self, tenant_id: str, **kwargs) -> int:
+        query = self.session.query(JournalEntry).filter(JournalEntry.tenant_id == tenant_id)
+        for key, value in kwargs.items():
+            if value is not None and hasattr(JournalEntry, key):
+                query = query.filter(getattr(JournalEntry, key) == value)
+        return query.count()
+
+    async def update(self, id: str, data: dict, tenant_id: str):
+        from app.core.exceptions import EntityNotFoundError, ValidationFailedError
+
+        # No silent loss of API date edits or unguarded arbitrary column updates.
+        if set(data) - {"description", "reference", "document_type"}:
+            raise ValidationFailedError("Unsupported journal update fields")
+        for key, maximum in (("description", 200), ("reference", 50), ("document_type", 30)):
+            if key in data and (
+                not isinstance(data[key], str) or not data[key].strip() or len(data[key]) > maximum
+            ):
+                raise ValidationFailedError(f"Invalid journal {key}")
         try:
-            query = (
-                self.session.query(JournalEntry)
-                .options(selectinload(JournalEntry.lines))
-                .filter(JournalEntry.tenant_id == tenant_id)
-            )
-            ref = kwargs.pop("reference", None)
-            if ref is not None:
-                query = query.filter(JournalEntry.reference == ref)
-            for key, value in kwargs.items():
-                if value is not None and hasattr(JournalEntry, key):
-                    query = query.filter(getattr(JournalEntry, key).ilike(f"%{value}%"))
-            return query.order_by(JournalEntry.entry_date.desc()).offset(skip).limit(limit).all()
-        except SQLAlchemyError as e:
-            logger.error("Error getting journal entries: %s", e)
-            return []
+            return self._transaction_service(tenant_id).update(id, data)
+        except EntityNotFoundError:
+            return None
+
+    async def delete(self, id: str, tenant_id: str) -> bool:
+        from app.core.exceptions import EntityNotFoundError
+
+        try:
+            self._transaction_service(tenant_id).delete(id)
+        except EntityNotFoundError:
+            return False
+        return True
 
     async def post_entry(self, entry_id: str, tenant_id: str) -> bool:
-        """Post a journal entry"""
+        from app.core.exceptions import EntityNotFoundError
+
         try:
-            entry = await self.get_by_id(entry_id, tenant_id)
-            if entry and entry.status == 'draft':
-                entry.status = 'posted'
-                entry.posted_at = func.now()
-                self.session.commit()
-                return True
+            self._transaction_service(tenant_id).post(entry_id)
+        except EntityNotFoundError:
             return False
-        except Exception:
-            self.session.rollback()
-            return False
+        return True
 
     async def get_entries_by_date_range(
         self,
@@ -583,65 +621,11 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
         return query.order_by(JournalEntry.entry_date.desc()).all()
 
     async def reverse_entry(self, entry_id: str, reason: str, tenant_id: str):
-        """Create and persist a reversal entry by swapping debit/credit on all lines."""
-        original = await self.get_by_id(entry_id, tenant_id)
-        if not original or original.status != "posted":
-            return None
-
-        # Prevent duplicate reversal entries for the same source entry.
-        existing_reversal = (
-            self.session.query(JournalEntry)
-            .filter(
-                and_(
-                    JournalEntry.tenant_id == tenant_id,
-                    JournalEntry.reversed_entry_id == entry_id,
-                )
-            )
-            .first()
-        )
-        if existing_reversal:
-            return existing_reversal
+        """Use the canonical locked, validated and stamped reversal."""
+        from app.core.exceptions import EntityNotFoundError
 
         try:
-            now = datetime.utcnow()
-            reversal = JournalEntry(
-                entry_number=f"{original.entry_number}-REV",
-                entry_date=now,
-                posting_date=now,
-                description=f"Storno zu {original.entry_number}: {reason}",
-                reference=original.reference,
-                source=original.source or "manual",
-                status="posted",
-                total_debit=original.total_credit,
-                total_credit=original.total_debit,
-                posted_by=original.posted_by,
-                posted_at=now,
-                reversed_entry_id=entry_id,
-                tenant_id=tenant_id,
-            )
-            self.session.add(reversal)
-            self.session.flush()
-
-            lines = (
-                self.session.query(JournalEntryLine)
-                .filter(JournalEntryLine.journal_entry_id == entry_id)
-                .all()
-            )
-            for line in lines:
-                reversal_line = JournalEntryLine(
-                    journal_entry_id=reversal.id,
-                    account_id=line.account_id,
-                    tenant_id=tenant_id,
-                    debit=line.credit,
-                    credit=line.debit,
-                    description=f"Storno: {line.description}" if line.description else "Storno",
-                )
-                self.session.add(reversal_line)
-
-            original.status = "reversed"
-            self.session.commit()
-            self.session.refresh(reversal)
-            return reversal
-        except Exception:
-            self.session.rollback()
+            _, reversal = self._transaction_service(tenant_id).reverse(entry_id, reason)
+        except EntityNotFoundError:
             return None
+        return reversal
