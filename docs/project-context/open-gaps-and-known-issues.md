@@ -11,6 +11,29 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## JOURNAL-TRANSACTION-OWNERSHIP — Service bereit, Consumer-Integration offen
+
+2026-10-05: commit_on_success=False erlaubt aeussere Transaktionen fuer alle
+sechs Journalmutationen. Sie flushen und behalten Sperren bis zum aeusseren
+Commit/Rollback. 337 Regressionen, 16 neue echte PostgreSQL-Faelle belegen
+Peer-Sichtbarkeit und vollstaendiges Rollback auch nach mehreren erfolgreichen
+Schritten und spaeterem Domain-/SQL-Fehler. QA:
+[Transaktionssteuerung](../quality-assurance/journal-transaction-ownership-20261005.md).
+Default-Aufrufer bleiben selbst committend. API/Repository/Posting-Consumer
+muessen die aeussere Steuerung explizit uebernehmen; log_fibu_audit und Anchor
+committen weiterhin selbst. Diese Faehigkeit allein ist keine geschlossene
+Audit-/Consumer-Atomizitaet. API/DTO-Fremdclaim und Schema/Hash-Gaps weiter offen.
+
+## JOURNAL-PERIOD-ENFORCEMENT — Pflichtpruefung noch offen
+
+Codebefund 2026-10-05: Service-Create prueft nur das optionale period-Argument;
+check_period_open(None) kehrt ohne Pruefung zurueck. Post/Reverse pruefen
+keine Periode. Dadurch ist die zentrale Periodensperre nicht fuer alle
+Journalmutationen garantiert. Naechster offener Slice im Workboard:
+JOURNAL-PERIOD-ENFORCEMENT-20261005. Aus Buchungsdatum ableiten, explizite
+Periode abgleichen und Abschluss-Konkurrenz unter realen Sperren pruefen.
+Keine neue Periodenfreigabe oder fachliche Ausnahme implizit einfuehren.
+
 ## JOURNAL-CREATE-CANONICAL — Zweiter Anlageweg entfernt, API/Schema offen
 
 2026-10-05: Repository-Create nutzt FinanceTransactionService statt eigener
