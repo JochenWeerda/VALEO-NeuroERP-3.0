@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-TRANSACTION-OWNERSHIP-20261005 — reserviert, Codex (Chat 01a0f3fc)
+
+**Owner:** Codex-01a0f3fc. **Ziel:** Explizit aeussere Transaktionssteuerung
+fuer den Journal-Service; mehrere Schritte koennen gemeinsam committen/
+rollbacken, ohne vorhandene Aufrufer implizit umzustellen.
+**Dateibesitz:** finance_transaction_service.py Konstruktor/Abschlusshelfer
+und Commitstellen; neuer test_journal_transaction_ownership.py;
+eigene QA/Slice/Workboard/Gaps. Keine API/DTO/Consumer-Edits im fremden Claim.
+**Abnahme:** Alle sechs Mutationen flushen ohne Commit im aeusseren Modus;
+reale Rollbacks und Peer-Sichtbarkeit vor/nach Commit, Guards unveraendert.
+**Risiken:** API/Audit/Anchor-Consumer noch explizit zu integrieren; diese
+Faehigkeit allein beweist keine Consumer-Atomizitaet. Bestehender valeo_probe,
+keine neue DB/Docker/Migration/Reset; fremder Godfile-Verstoss unangetastet.
+
 ## JOURNAL-CREATE-CANONICAL-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Zweiten Repository-Anlage-/Hashweg
