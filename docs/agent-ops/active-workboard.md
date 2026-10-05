@@ -35,6 +35,11 @@ und eigener Query-Vertragstest. Fremde Renderer-/Farb-WIP nicht uebernommen.
 **Security-Teilclaim:** package.json nur @fastify/busboy-Override und zugehoeriges
 pnpm-lock.yaml. Zwei Multipart-Advisories verlangen 3.2.1. Node-forge/braces
 ohne gepatchtes Release bleiben offen; keine Audit-Ausnahme oder Abschaltung.
+**Index-only CI-Vertraege:** Verifizierte fehlende Exporte repeatsCaption und
+mapFahrerZeile, screenTitle-Typvertrag im TabContentRenderer sowie ErrorState
+Recovery-Kontrast werden als minimale Aenderung auf committed Dateien
+integriert. Laufende Layout-/Farbumbauten bleiben im Arbeitsbaum erhalten;
+keine vollstaendige Uebernahme fremder Masken-WIP.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
