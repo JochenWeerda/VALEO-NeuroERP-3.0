@@ -296,7 +296,7 @@ diesem Slice, nicht angefasst — gehoert dem Tourenplanungs-Agenten.
 
 **Doku:** `docs/quality-assurance/eudr-chargenkennzeichnung-20261001.md`.
 
-## GENOSSENSCHAFT-MITGLIEDERREGISTER-20261005 — in Arbeit, Claude Code
+## GENOSSENSCHAFT-MITGLIEDERREGISTER-20261005 — abgeschlossen, Claude Code
 
 **Befund:** `domain_shared.genossenschaft_mitglieder` und
 `genossenschaft_anteilsbewegungen` existieren in **keiner** Datenbank — weder in
@@ -372,6 +372,47 @@ gemacht. Die Satzungsgroessen (Hoehe des Geschaeftsanteils, Mindestbeteiligung,
 Nachschusspflicht nach § 7/§ 7a GenG) sind **nicht** Teil dieses Slices und
 bleiben eine benannte Luecke: `anteilswert_eur` steht weiterhin am Mitglied.
 Die fachjuristische Abnahme gehoert dem Genossenschafts-Owner.
+
+**Ergebnis (2026-10-05):** Migration
+`genossenschaft_mitgliederregister_20261005` legt beide Tabellen an — mit
+`tenant_id`, `ux_geno_mitglied_nr` auf `(tenant_id, mitglieds_nr)`, FK mit
+`ON DELETE RESTRICT` und sieben Pruefbedingungen. Der Bestand ist abgeleitet;
+die Spalte `genossenschaftsanteile` existiert nicht. Vorzeichen und SQL-`CASE`
+werden beide aus der Menge `ZUGANG` erzeugt — eine Richtung, eine Quelle.
+`TRANSFER` ist durch `UEBERTRAGUNG_AB`/`_AN` mit Pflicht-Gegenseite ersetzt; eine
+Uebertragung schreibt beide Seiten oder keine und bucht nicht ins Hauptbuch.
+Abgaenge laufen gegen den abgeleiteten Bestand unter `FOR UPDATE`. Die
+GL-Buchung ist verbindlich; `_is_test_double_session` entfernt. Alle sechs Wege
+haben eigene Antwortmodelle statt eines `extra="allow"`-Modells. Maske neu (tsc +
+eslint sauber). **59 + 24 Vertraege gruen**, Migration auf beiden Datenbanken.
+
+**Querbefund, hier mitkorrigiert:** `chart_of_accounts_account_number_key`
+(aus `001_initial_schema.py:125`) war **systemweit** eindeutig, nicht je
+Mandant. Damit kann genau eine Genossenschaft im System das Konto 1200 besitzen
+— die verbindliche Hauptbuchbuchung dieses Slices haette fuer keinen echten
+Mandanten gelingen koennen. Dass es je Mandant gemeint war, steht daneben:
+`_bookable_account` sucht mit `tenant_id`. Die Migration tauscht die Bedingung
+gegen `uq_coa_mandant_kontonummer UNIQUE (tenant_id, account_number)` und bricht
+vorher ab, wenn eine Nummer je Mandant mehrfach vorkommt.
+`uq_coa_id_tenant_bank_gl` bleibt unberuehrt; `test_chart_of_accounts_api`,
+`test_gobd_kontentrennung`, `test_journal_*` gruen.
+
+**Handshakes (nicht aus diesem Slice):**
+1. `journal_entries_entry_number_key UNIQUE (entry_number)` ist ebenfalls
+   systemweit — zwei Haeuser koennen nicht beide eine Buchung "RE-001" fuehren.
+   Finanz-Owner.
+2. `tests/test_bank_reconciliation_proof.py` ist mit 31 Fehlern rot, seit
+   `bank_gl_binding_20261001` `bank_accounts.gl_account_id` anlegt: Das Fixture
+   kopiert mit `INCLUDING ALL` und fuegt die Spalte danach erneut hinzu
+   (`DuplicateColumn`). Bank-Slice.
+3. `app/api/v1/endpoints/logistics_tours.py` bricht Godfile- und
+   Paginierungs-Ratsche (1033 -> 1059 Zeilen, `list_tours` 2 -> 3 Abfragen),
+   committet in `dec0dfd1b`. Tourenplanungs-Agent.
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **12 -> 10**, Schwelle
+nachgezogen und begruendet.
+
+**Doku:** `docs/quality-assurance/genossenschaft-mitgliederregister-20261005.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

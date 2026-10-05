@@ -116,106 +116,134 @@ class TestSanktionsPruefung:
 # GENOSSENSCHAFT
 # ===========================================================================
 
+from fastapi import HTTPException
+
 from app.api.v1.endpoints import genossenschaft as geno
 
 
 class TestGenossenschaftKapital:
-    @pytest.mark.unit
-    def test_kapitaluebersicht_empty(self):
-        """No members → zero aggregate."""
-        db = _mock_db()
-        db.execute.return_value.fetchone.return_value = None
+    """Die Kapitalübersicht meldete bei jedem Lesefehler 0,00 € Kapital.
 
-        result = geno.kapitaluebersicht(db=db, tenant_id="test-tenant")
-        assert result["total_mitglieder"] == 0
-        assert result["total_anteile"] == 0
-        assert result["total_kapital_eur"] == 0.0
+    Bis zum 05.10.2026 endete sie in ``except: return empty`` — und weil die
+    Tabelle in keiner Datenbank existierte, war das **jeder** Aufruf. Ein Test
+    hieß damals ``test_kapitaluebersicht_db_error_returns_empty`` und schrieb
+    genau das fest. Das Geschäftsguthaben der Mitglieder ist eine
+    Bilanzposition (§ 337 HGB); 0,00 € darf nicht aus einem Fehler entstehen.
 
-    @pytest.mark.unit
-    def test_kapitaluebersicht_with_members(self):
-        """Aggregated row returned correctly."""
-        db = _mock_db()
-        row = _mock_row(
-            total_mitglieder=5,
-            total_anteile=50,
-            total_kapital_eur=5000.0,
-            aktiv=4,
-            ruhend=1,
-            ausgetreten=0,
-        )
-        db.execute.return_value.fetchone.return_value = row
-
-        result = geno.kapitaluebersicht(db=db, tenant_id="test-tenant")
-        assert result["total_mitglieder"] == 5
-        assert result["total_anteile"] == 50
-        assert result["total_kapital_eur"] == 5000.0
-        assert result["aktiv"] == 4
-        assert result["ruhend"] == 1
+    Der fachliche Nachweis gegen eine echte Datenbank steht in
+    ``tests/test_genossenschaft_register_vertrag.py``.
+    """
 
     @pytest.mark.unit
-    def test_kapitaluebersicht_db_error_returns_empty(self):
-        """DB error → returns zero dict, does not raise."""
+    def test_lesefehler_ist_ein_503_und_kein_kapital_von_null(self):
         db = _mock_db()
         db.execute.side_effect = Exception("relation does not exist")
 
-        result = geno.kapitaluebersicht(db=db, tenant_id="test-tenant")
-        assert result["total_mitglieder"] == 0
+        with pytest.raises(HTTPException) as fehler:
+            geno.kapitaluebersicht(db=db, tenant_id="test-tenant")
+        assert fehler.value.status_code == 503
+        assert "migration_hint" in str(fehler.value.detail)
+        db.rollback.assert_called_once()
+
+    @pytest.mark.unit
+    def test_aggregat_ohne_zeile_ist_kein_leerer_stand(self):
+        """Ein Aggregat liefert immer eine Zeile. Fehlt sie, ist etwas kaputt."""
+        db = _mock_db()
+        db.execute.return_value.mappings.return_value.first.return_value = None
+
+        with pytest.raises(HTTPException) as fehler:
+            geno.kapitaluebersicht(db=db, tenant_id="test-tenant")
+        assert fehler.value.status_code == 503
+
+    @pytest.mark.unit
+    def test_summen_kommen_aus_der_abfrage(self):
+        db = _mock_db()
+        db.execute.return_value.mappings.return_value.first.return_value = {
+            "total_mitglieder": 5,
+            "total_anteile": 50,
+            "total_kapital_eur": 5000.0,
+            "aktiv": 4,
+            "ruhend": 1,
+            "ausgetreten": 0,
+            "offene_auseinandersetzung_anteile": 0,
+        }
+
+        ergebnis = geno.kapitaluebersicht(db=db, tenant_id="test-tenant")
+        assert ergebnis["total_mitglieder"] == 5
+        assert ergebnis["total_anteile"] == 50
+        assert ergebnis["total_kapital_eur"] == 5000.0
+        assert ergebnis["aktiv"] == 4
 
 
 class TestGenossenschaftAnteilsbewegung:
-    @pytest.mark.unit
-    def test_anteilsbewegung_zeichnung(self):
-        """ZEICHNUNG booking inserts row and updates balance with positive delta."""
-        db = _mock_db()
+    """Der Bestand wird abgeleitet, nicht fortgeschrieben.
 
-        payload = geno.AnteilsbewegungCreate(
-            bewegungstyp="ZEICHNUNG",
-            anzahl_anteile=10,
-            wert_eur=1000.0,
-            datum=date(2026, 1, 15),
-            bemerkung="Erstzeichnung",
-        )
-        result = geno.create_anteilsbewegung(
-            mitglied_id="m-123",
-            payload=payload,
-            db=db,
-            tenant_id="test-tenant",
-        )
-
-        assert result["delta_anteile"] == 10
-        assert result["status"] == "gebucht"
-        # Two execute calls: INSERT bewegung + UPDATE mitglied
-        assert db.execute.call_count == 2
-        db.commit.assert_called_once()
+    Vorher buchte dieser Weg die Bewegung **und** schrieb
+    ``genossenschaftsanteile = genossenschaftsanteile + :delta`` auf dem
+    Mitglied fort — zwei Wahrheiten über denselben Bestand. Ein Test prüfte
+    damals ``db.execute.call_count == 2`` und hielt damit das Fortschreiben
+    fest.
+    """
 
     @pytest.mark.unit
-    def test_anteilsbewegung_rueckzahlung_negative_delta(self):
-        """TEILRUECKZAHLUNG → negative delta applied."""
-        db = _mock_db()
+    def test_vokabular_und_vorzeichen_stammen_aus_einer_menge(self):
+        from app.services import genossenschaft_service as dienst
 
-        payload = geno.AnteilsbewegungCreate(
-            bewegungstyp="TEILRUECKZAHLUNG",
-            anzahl_anteile=5,
-            wert_eur=500.0,
-            datum=date(2026, 3, 1),
-        )
-        result = geno.create_anteilsbewegung(
-            mitglied_id="m-456",
-            payload=payload,
-            db=db,
-            tenant_id="test-tenant",
-        )
-        assert result["delta_anteile"] == -5
+        assert set(dienst.VORZEICHEN) == set(dienst.BEWEGUNGSTYPEN)
+        assert all(dienst.VORZEICHEN[typ] == 1 for typ in dienst.ZUGANG)
+        assert all(dienst.VORZEICHEN[typ] == -1 for typ in dienst.ABGANG)
+        # ``TRANSFER`` bekam ein Vorzeichen +1 und hätte Anteile aus nichts
+        # geschaffen. Es ist durch zwei gerichtete Typen ersetzt.
+        assert "TRANSFER" not in dienst.BEWEGUNGSTYPEN
 
     @pytest.mark.unit
-    def test_mitglieds_nr_auto_generation(self):
-        """Auto-generated mitglieds_nr follows M-{year}-{seq} pattern."""
-        db = _mock_db()
-        db.execute.return_value.fetchone.return_value = _mock_row(cnt=0)
+    def test_abgang_ueber_den_bestand_wird_abgewiesen(self):
+        from app.services import genossenschaft_service as dienst
 
-        nr = geno._gen_mitglieds_nr(db)
+        with pytest.raises(HTTPException) as fehler:
+            dienst.abgang_pruefen("TEILRUECKZAHLUNG", 5, 3, "M-2026-00001")
+        assert fehler.value.status_code == 409
+        assert "unterschreiten" in str(fehler.value.detail)
+
+    @pytest.mark.unit
+    def test_vollrueckzahlung_muss_den_ganzen_bestand_treffen(self):
+        from app.services import genossenschaft_service as dienst
+
+        with pytest.raises(HTTPException):
+            dienst.abgang_pruefen("VOLLRUECKZAHLUNG", 4, 7, "M-2026-00001")
+        # Genau der Bestand ist erlaubt.
+        dienst.abgang_pruefen("VOLLRUECKZAHLUNG", 7, 7, "M-2026-00001")
+
+    @pytest.mark.unit
+    def test_zugang_wird_nicht_gegen_den_bestand_geprueft(self):
+        from app.services import genossenschaft_service as dienst
+
+        dienst.abgang_pruefen("ZEICHNUNG", 1000, 0, "M-2026-00001")
+
+    @pytest.mark.unit
+    def test_mitglieds_nr_folgt_dem_muster(self):
+        """Gezählt wird die höchste Nummer, nicht die Anzahl der Zeilen."""
         import re
-        assert re.match(r"M-\d{4}-\d{5}", nr), f"Unexpected format: {nr}"
+
+        from app.services import genossenschaft_service as dienst
+
+        db = _mock_db()
+        db.execute.return_value.scalar.side_effect = [2026, 7]
+
+        nummer = dienst.naechste_mitglieds_nr(db, "test-tenant")
+        assert re.match(r"M-\d{4}-\d{5}", nummer), nummer
+        assert nummer.endswith("00008")
+
+    @pytest.mark.unit
+    def test_lesefehler_vergibt_nicht_die_nummer_eins(self):
+        """Vorher: ``except: seq = 1`` — eine Nummer, die es schon gibt."""
+        from app.services import genossenschaft_service as dienst
+
+        db = _mock_db()
+        db.execute.side_effect = Exception("not readable")
+        with pytest.raises(Exception) as fehler:
+            dienst.naechste_mitglieds_nr(db, "test-tenant")
+        assert not isinstance(fehler.value, HTTPException)
 
 
 # ===========================================================================

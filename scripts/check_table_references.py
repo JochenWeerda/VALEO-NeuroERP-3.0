@@ -106,7 +106,13 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: 2026-10-01, lebend 14 -> 12: `eudr_sorgfaltserklaerung_20261001` legt das
 #: EUDR-Register an, und der Statusweg liest nicht mehr `domain_inventory.lots`
 #: — eine Tabelle, die kein Migrationsstand anlegt.
-BASELINE_LEBEND = 12
+#:
+#: 2026-10-05, lebend 12 -> 10: `genossenschaft_mitgliederregister_20261005`
+#: legt `domain_shared.genossenschaft_mitglieder` und
+#: `.genossenschaft_anteilsbewegungen` an. Beide Tabellen existierten in
+#: keiner Datenbank; die Mitgliederliste antwortete `[]` und die
+#: Kapitaluebersicht 0,00 EUR.
+BASELINE_LEBEND = 10
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")
