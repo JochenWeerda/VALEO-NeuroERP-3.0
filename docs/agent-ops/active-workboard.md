@@ -46,6 +46,10 @@ dieser Hunk und Meridian-Doku sind ebenfalls reserviert.
 **Inventar-Nachtrag:** Drei Code-Inventare und Router-Inventare ausschliesslich
 aus committed Quellen plus eigenen CI-Hunks regenerieren; keine fremden
 Routen oder laufende Masken-WIP aus dem Arbeitsbaum uebernehmen.
+**Abnahme-Nachtrag:** Markdown-it-Override/Lock auf gepatchtes 14.3.1;
+OpenAPI-Workflow muss auch Spec-/Generator-Korrekturen selbst abnehmen.
+Nur diese Triggerpfade, keine Gate-Ausnahme. AI-Chroma und ungepatchte
+Cache-/Krypto-Pakete werden nach bestehenden ADRs getrennt bewertet.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
