@@ -281,3 +281,8 @@ und Randabstand); fachlich verschiedene Tabellenueberschriften bleiben sichtbar.
 Diese Regel gilt zentral in der bestehenden Renderer-Kette. Der wiederverwendete
 ErrorState verwendet fuer kleine Statustexte und Wiederherstellungshinweise
 volle Textdeckkraft. Typpruefung und Verhaltenstests ergaenzen die Browser-WCAG-Abnahme.
+
+Die zentrale Tailwind-Kompilation scannt explizit `src/` und `index.html`.
+So bleiben Klassen der Renderer und Seiten vollstaendig erfasst, waehrend
+Workspace-Artefakte und der Startordner den CSS-Build nicht ausweiten.
+Die acht WCAG-Kernrouten bestehen nach dieser Begrenzung (2026-10-05).

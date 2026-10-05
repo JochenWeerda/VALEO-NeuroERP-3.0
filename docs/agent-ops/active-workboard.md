@@ -63,8 +63,10 @@ nach Logs unterscheiden. Bestehender Probe, keine neue DB/Docker/Reset.
 isolierte UI-Vertraege bestanden. Isolierte Typpruefung, OpenAPI (3092 Pfade),
 Code-Inventare und Architektur strict (932 Routen) gruen. Zweiter Meilenstein
 schliesst Inventar-/Preis-Spec-Drift und UI-Exporte. Audit 4 -> 2 hohe Befunde;
-node-forge/braces ohne gepatchtes Release offen. Chromium-Startseiten-Timeout
-lokal; neue Actions-Abnahme bleibt erforderlich. Kein vollstaendig gruener CI-Stand.
+node-forge/braces ohne gepatchtes Release offen. CSS-Quellensuche als
+Browser-Timeout-Ursache behoben: acht WCAG-Routen in 21,5 s bestanden.
+GitHub Docs/OpenAPI im zweiten Versuch gruen; nicht gestartete Jobs wegen
+fehlender Runner erneut angestossen. Kein vollstaendig gruener CI-Stand.
 
 ## HANDSHAKE-GAP-CLOSURE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 

@@ -6,7 +6,10 @@
 @import './styles/design-tokens-terra.css' layer(base);
 @import './styles/density.css' layer(base);
 
-@import 'tailwindcss';
+/* Keep class discovery independent of workspace size and the launch directory. */
+@import 'tailwindcss' source(none);
+@source './';
+@source '../index.html';
 
 @plugin 'tailwindcss-animate';
 
