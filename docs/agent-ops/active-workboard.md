@@ -581,6 +581,83 @@ unvollstaendiger Nachweis, der vollstaendig wirkt. Summe 292 -> 286.
 
 **Doku:** `docs/quality-assurance/wiegung-kanonisch-20261005.md`.
 
+## KONTRAKT-DISPOSITION-20261005 — in Arbeit, Claude Code
+
+**Befund:** `domain_agrar.kontrakt_dispositionen` existiert in keiner Datenbank.
+Angelegt wird sie **zur Laufzeit** vom Anwendungscode:
+
+```python
+def ensure_disposition_table(db):
+    try:
+        db.execute(_sql_text("CREATE TABLE IF NOT EXISTS domain_agrar.kontrakt_dispositionen (...)"))
+        db.commit()
+    except Exception:
+        db.rollback()
+```
+
+Vor dem ersten POST gibt es sie nicht; das Auflisten faengt den Lesefehler und
+antwortet `[]`. Scheitert das DDL, wird der Fehlschlag verschluckt, und der
+darauffolgende INSERT scheitert mit einer Meldung, die nicht sagt, warum.
+Ein Schema gehoert in eine Migration — sonst weiss niemand, was eine
+Neuinstallation hat, und eine Spaltenaenderung erreicht nur die Datenbanken, die
+schon einen POST gesehen haben.
+
+**Die fachlichen Befunde:**
+
+1. **Niemand prueft die Kontraktmenge.** Eine Disposition ist der Abruf einer
+   kontrahierten Menge. Nichts vergleicht die Summe der Dispositionen mit
+   `kon_contract_line.qty_contract` — es liess sich mehr abrufen als kontrahiert
+   ist. Dabei **steht die Regel schon im Modell**: `kon_contract.allow_overdelivery`
+   sagt, ob ueberliefert werden darf. Das Feld wurde nie gelesen.
+2. **Kein `tenant_id`** — nicht in der Tabelle, nicht in einer Abfrage. Gefiltert
+   wird nur nach `kontrakt_id`. Wer eine Kontraktkennung kennt, liest und aendert
+   fremde Dispositionen.
+3. **`freigabe` und `status` sagen dasselbe.** Die Freigabe steht als Boolean
+   **und** als `status = 'FREIGEGEBEN'`; der Freigabeweg setzt beides. Zwei
+   Wahrheiten, die auseinanderlaufen koennen. Der Boolean entfaellt.
+4. **Keine Zustandsregeln.** Eine stornierte Disposition liess sich als geliefert
+   melden, eine gelieferte stornieren, und geliefert werden konnte auch ohne
+   Freigabe — die Freigabe war damit kein Tor, sondern eine Notiz.
+5. **Der Wiegeschein ist freier Text.** `wiegeschein_nr` ohne Bezug zur
+   Wiegetabelle. Eine Lieferung, die sich auf einen Wiegeschein beruft, den es
+   nicht gibt, ist nicht belegt. Mit `wiegung_kanonisch_20261005` gibt es jetzt
+   einen kanonischen Wiegeschein, auf den verwiesen werden kann.
+6. Datumsfelder als `TEXT`, Status ohne Woerterbuch, `uuid4`, `KontraktOut` mit
+   `extra="allow"` an allen fuenf Wegen.
+
+**Ziel:** Die Tabelle per Migration anlegen, die Abrufmenge gegen den Kontrakt
+pruefen (einschliesslich `allow_overdelivery`), den Mandanten durchziehen, die
+Zustaende zu einem Woerterbuch mit erlaubten Uebergaengen machen und die
+Lieferung an den kanonischen Wiegeschein binden.
+
+**Dateibesitz:** `alembic/versions/kontrakt_disposition_20261005.py`,
+`app/services/kontrakt_disposition_service.py` (neu),
+`app/api/v1/endpoints/kontrakte.py` (nur der Dispositionsabschnitt),
+`app/services/kontrakte_service.py` (nur die drei Dispositionshelfer),
+`app/api/v1/schemas/kontrakt_disposition_schemas.py` (neu),
+`tests/test_kontrakt_disposition_vertrag.py` (neu),
+`tests/test_dual_weighing_disposition.py` (nur der Dispositionsteil, der heute
+`[]` bei fehlender Tabelle festschreibt),
+`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und
+dieser Abschnitt.
+**Godfile:** `kontrakte.py` steht mit 1099 Zeilen in der Ratsche; die Logik geht
+in den Dienst, die Datei wird kleiner, nicht groesser.
+
+**Abnahme:** Die Tabelle entsteht durch die Migration, nicht durch einen POST;
+kein `CREATE TABLE` mehr im Anwendungscode; jede Abfrage mandantengebunden; eine
+Disposition ueber die Kontraktmenge wird abgewiesen, ausser der Kontrakt erlaubt
+Ueberlieferung; `freigabe` ist abgeleitet und keine Spalte; verbotene
+Zustandsuebergaenge sind ein 409; eine Lieferung ohne aufloesbaren Wiegeschein
+ist ein 422; ein Lesefehler ist ein 503 und keine leere Liste; Vertraege gegen
+die frische DB und alle Ratschen gruen.
+
+**Risiken:** Dass die Lieferung jetzt eine **Freigabe** voraussetzt, ist eine
+fachliche Verscharfung gegenueber dem Bestand (dort war geliefert aus `OFFEN`
+moeglich). Begruendung: Sonst ist die Freigabe kein Tor. Die Abnahme gehoert dem
+Kontrakt-Owner. Die Bindung an den Wiegeschein setzt voraus, dass die Wiegung im
+System steht; eine Fremdwiegung ohne Schein im System kann nicht als Lieferung
+gemeldet werden — das ist beabsichtigt und benannt.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
