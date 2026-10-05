@@ -29,6 +29,9 @@ in finance_transaction_service.py nur Kontohelfer und webhook_service.py;
 neue Kalenderquellen in frachtbrief_service.py und kontrakt_disposition_service.py.
 Keine Baseline-Erhoehung. Doku-Drift: eigener Logistik-Runbook-Nachtrag und
 doc_drift_report.py nur eingebettete party-native-Komponente; passende Tests.
+**Frontend-Teilclaim:** Unveraenderte Dateien CallWidget.tsx (Callback-Narrowing),
+party-native.tsx (typisierte Query-Schluessel), bank-stamm.tsx (Null-/Betragstypen)
+und eigener Query-Vertragstest. Fremde Renderer-/Farb-WIP nicht uebernommen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
