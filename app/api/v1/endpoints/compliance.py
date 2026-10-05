@@ -605,21 +605,18 @@ async def get_eudr_status(
 ) -> dict:
     """EUDR-Stand aus dem Sorgfaltserklaerungsregister.
 
-    Bis zum 01.10.2026 las dieser Weg ``domain_inventory.lots`` — eine Tabelle,
-    die **kein Migrationsstand anlegt** und deren Spalten ``eudr_compliant`` und
-    ``origin_country`` es nirgends gibt. Jeder Lesefehler lief in
-    ``except: total = compliant = flagged = 0``, und daraus wurde
-    ``status: "KONFORM"`` mit ``deforestation_risk: "NIEDRIG"``. Die Maske
-    behauptete damit Konformitaet, die nie geprueft wurde — bei einem
-    Inverkehrbringungsverbot nach Art. 3/4 der Verordnung (EU) 2023/1115 ist das
-    die gefaehrlichste aller Antworten.
+    Bis zum 01.10.2026 las dieser Weg ``domain_inventory.lots`` — eine Tabelle
+    ohne Migration, deren Spalten ``eudr_compliant``/``origin_country`` es
+    nirgends gibt. Jeder Lesefehler lief in ``except: ... = 0``, und daraus
+    wurde ``status: "KONFORM"`` mit ``deforestation_risk: "NIEDRIG"``: behauptete
+    Konformitaet, die nie geprueft wurde — bei einem Inverkehrbringungsverbot
+    nach Art. 3/4 der Verordnung (EU) 2023/1115 die gefaehrlichste Antwort.
 
-    Jetzt kommt der Stand aus dem Register
-    (``domain_compliance.eudr_due_diligence``), der Mandant aus dem Kopf der
-    Anfrage, und ein Lesefehler ist ein 503. Ein leeres Register ist
-    ``OHNE_ERKLAERUNG`` — nicht ``KONFORM``: "nichts erfasst" ist kein Nachweis.
+    Jetzt kommt der Stand aus dem Register, der Mandant aus dem Kopf, und ein
+    Lesefehler ist ein 503. Ein leeres Register ist ``OHNE_ERKLAERUNG`` — nicht
+    ``KONFORM``: "nichts erfasst" ist kein Nachweis.
 
-    Chargenbezogene Kennzeichnung: benannte Luecke, siehe
+    Chargenbezogene Kennzeichnung aus `lot_eudr_erklaerungen`, siehe
     ``docs/quality-assurance/eudr-sorgfaltserklaerung-20261001.md``."""
     from app.api.v1.endpoints.eudr_register import registerstand
 
@@ -647,7 +644,10 @@ async def get_eudr_status(
                 else "NIEDRIG"
             )
         ),
-        "batch_level_marking": "NICHT_UMGESETZT",
+        # Art. 4: Eine relevante Charge ohne Nachweis darf nicht in Verkehr.
+        "lots_relevant": stand["chargen_relevant"],
+        "lots_covered": stand["chargen_nachgewiesen"],
+        "lots_open": stand["chargen_offen"], "open_quantity_kg": stand["offene_menge_kg"],
         "next_report_due": None,
     }
 

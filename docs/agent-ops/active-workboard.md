@@ -177,7 +177,7 @@ Entwicklungsintegration/Betriebsprobe. Code als Draft-PR sichern.
 unvollstaendiger GoBD-Hash-Payload; globale Kontennummer-UQ, doppelte Journalbetraege,
 Bank/GL-Zeilenlink und Bankstamm-Audit/RBAC. Gesamtziel bleibt offen.
 
-## EUDR-CHARGENKENNZEICHNUNG-20261001 — in Arbeit, Claude Code
+## EUDR-CHARGENKENNZEICHNUNG-20261001 — abgeschlossen, Claude Code
 
 **Ziel:** Die zweite EUDR-Luecke schliessen — die **chargenbezogene
 Kennzeichnung**. Bisher meldet der Stand `batch_level_marking:
@@ -223,6 +223,50 @@ HS-Code) — die automatische Ableitung aus dem Artikelstamm ist **nicht** Teil
 dieses Slices und bleibt eine benannte Luecke; gesetzt wird das Kennzeichen
 vorerst beim Wareneingang bzw. durch die Maske. Die fachjuristische Abnahme
 gehoert weiterhin dem Compliance-Owner.
+
+**Ergebnis (2026-10-05):** Zwei Migrationen —
+`eudr_chargenkennzeichnung_20261001` (Spalte `eudr_relevant`,
+Verbindungstabelle `lot_eudr_erklaerungen` mit Menge, `ux_lot_eudr_paar`) und
+`eudr_uebermittlung_20261001` (Uebermittlung aus, Pruefung ein). Der
+Nachweisstand ist abgeleitet; `batch_level_marking: "NICHT_UMGESETZT"` ist
+verschwunden, `/compliance/eudr` nennt `lots_relevant/_covered/_open` und
+`open_quantity_kg`. 87 Vertraege gegen die frische `valeo_probe` gruen; beide
+Migrationen auch auf der gewachsenen `valeo_neuro_erp` hochgezogen.
+
+**Zur Bidirektionalitaet (Nutzerfrage):** `EUDRDueDiligenceStatementServiceV3`
+fuehrt Einreichung und Abruf zusammen. Beide Abrufwege sind modelliert — nach
+interner Referenz (eigene Rueckmeldung) und nach Referenz- *und*
+Verifizierungsnummer (Pruefung einer vorgelagerten Erklaerung nach Art. 4
+Abs. 9). Ohne den zweiten Weg waere das Haus bei jeder Lieferung erster
+Inverkehrbringer. Das Modell ist transportneutral: kein SOAP, kein WS-Security,
+kein WSDL in einer Spalte. `uebermittlung_umgebung` (`PRODUKTION` /
+`ANNAHMETEST`) ist eine Spalte und kein Konfigurationswert, damit eine
+Testeinreichung niemals als Compliance zaehlt.
+
+**Adapter-Entscheidung:** `mfrntic/eudr-api-client` ist **AGPL-3.0** (nicht MIT)
+— das ist die eigentliche Huerde fuer ein kommerzielles ERP, nicht die Technik.
+Der Weg ist ein eigener Adapter mit `zeep` gegen das offizielle V3-WSDL,
+serverseitig im Python-Stack; der Node-Client bleibt Referenzimplementierung.
+Kein fremder Client wird in Finance/Inventory/Sales importiert: `eudr_anbindung`
+ist der einzige Ort, der von Uebermittlung weiss, und schreibt nur kanonische
+Spalten. Die Grenze `EudrProvider` {TracesV3, LiveEO, Mock} ist damit
+vorgezeichnet, aber noch nicht gebaut.
+
+**Zerlegung:** `eudr_register.py` war nach dem Ausbau 1107 Zeilen — ein neuer
+Godfile. Zerlegt in `app/services/eudr_register_service.py` (200) und drei duenne
+Router: `eudr_register.py` (538), `eudr_chargen.py` (189),
+`eudr_anbindung.py` (281). Montagereihenfolge in `api.py`: chargen → anbindung →
+register, damit `/chargen/offen` nicht als Erklaerungs-ID gelesen wird.
+
+**Revisionsbaum:** `zusammenfuehrung_20261005` fuehrt den fremden Kopf
+`bank_gl_binding_20261001` und `eudr_uebermittlung_20261001` ohne eigenes DDL
+zusammen — Einzelkopf wiederhergestellt.
+
+**Handshake:** `app/api/v1/endpoints/logistics_tours.py` ist im geteilten Baum
+von 1033 auf 1059 Zeilen gewachsen und bricht die Godfile-Ratsche. Nicht aus
+diesem Slice, nicht angefasst — gehoert dem Tourenplanungs-Agenten.
+
+**Doku:** `docs/quality-assurance/eudr-chargenkennzeichnung-20261001.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

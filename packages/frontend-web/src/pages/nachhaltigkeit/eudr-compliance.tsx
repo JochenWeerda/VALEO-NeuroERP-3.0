@@ -31,7 +31,11 @@ type EUDRStatus = {
   origin_countries: string[]
   commodities: string[]
   deforestation_risk: string
-  batch_level_marking: string
+  /** Art. 4: relevante Chargen ohne Nachweis dürfen nicht in Verkehr. */
+  lots_relevant: number
+  lots_covered: number
+  lots_open: number
+  open_quantity_kg: number
   next_report_due: string | null
 }
 
@@ -81,7 +85,10 @@ export default function EUDRCompliancePage(): JSX.Element {
     origin_countries: [],
     commodities: [],
     deforestation_risk: 'UNBEKANNT',
-    batch_level_marking: 'NICHT_UMGESETZT',
+    lots_relevant: 0,
+    lots_covered: 0,
+    lots_open: 0,
+    open_quantity_kg: 0,
     next_report_due: null,
   }
 
@@ -90,7 +97,7 @@ export default function EUDRCompliancePage(): JSX.Element {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold">EUDR-Compliance</h1>
+        <h1 className="text-xl font-semibold tracking-tight">EUDR-Compliance</h1>
         <p className="text-muted-foreground">
           Entwaldungsfreie Lieferketten — Sorgfaltserklärungen nach Verordnung (EU) 2023/1115
         </p>
@@ -158,6 +165,14 @@ export default function EUDRCompliancePage(): JSX.Element {
         </Card>
       </div>
 
+      {eudr.lots_open > 0 && (
+        <Callout variant="error">
+          <AlertTriangle className="mr-2 inline h-4 w-4" />
+          {eudr.lots_open} Charge(n) mit {eudr.open_quantity_kg.toLocaleString('de-DE')} kg ohne
+          Nachweis. Nach Art. 4 darf diese Ware nicht in Verkehr gebracht werden.
+        </Callout>
+      )}
+
       {eudr.statements_unassessed > 0 && (
         <Callout variant="warning">
           <AlertTriangle className="mr-2 inline h-4 w-4" />
@@ -210,9 +225,17 @@ export default function EUDRCompliancePage(): JSX.Element {
               <span className="font-semibold">{eudr.deforestation_risk}</span>
             </div>
             <div className="flex justify-between border-b pb-2">
-              <span className="text-muted-foreground">Chargenbezogene Kennzeichnung</span>
+              <span className="text-muted-foreground">Chargen mit Nachweis</span>
               <span className="font-semibold">
-                {eudr.batch_level_marking === 'NICHT_UMGESETZT' ? 'nicht umgesetzt' : eudr.batch_level_marking}
+                {eudr.lots_covered} von {eudr.lots_relevant}
+              </span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-muted-foreground">Ohne Nachweis</span>
+              <span
+                className={eudr.lots_open > 0 ? 'font-semibold text-status-error' : 'font-semibold'}
+              >
+                {eudr.lots_open} ({eudr.open_quantity_kg.toLocaleString('de-DE')} kg)
               </span>
             </div>
             <div className="flex justify-between border-b pb-2">

@@ -65,6 +65,11 @@ class VorgelagerteErklaerungOut(BaseSchema):
     referenznummer: str
     verifizierungsnummer: Optional[str] = None
     lieferant_name: Optional[str] = None
+    #: Eine abgeschriebene Nummer ist kein Nachweis, solange sie niemand
+    #: geprueft hat.
+    pruefung_status: str = "UNGEPRUEFT"
+    geprueft_am: Optional[str] = None
+    pruefung_quelle: Optional[str] = None
 
 
 class SorgfaltserklaerungIn(BaseModel):
@@ -167,6 +172,16 @@ class SorgfaltserklaerungOut(BaseSchema):
     verifizierungsnummer: Optional[str] = None
     eingereicht_am: Optional[str] = None
 
+    #: Art. 33: der technische Weg hinaus — fachlich eingereicht und technisch
+    #: uebermittelt sind zwei Dinge, die auseinanderfallen koennen.
+    uebermittlung_status: str = "NICHT_UEBERMITTELT"
+    eu_system_id: Optional[str] = None
+    uebermittelt_am: Optional[str] = None
+    uebermittlung_versuche: int = 0
+    uebermittlung_fehler: Optional[str] = None
+    uebermittlung_dienst: Optional[str] = None
+    uebermittlung_umgebung: Optional[str] = None
+
     created_at: Optional[str] = None
 
 
@@ -195,4 +210,145 @@ class EudrRegisterStatusOut(BaseSchema):
     ohne_risikobewertung: int = 0
     produktionslaender: list[str] = Field(default_factory=list)
     rohstoffe: list[str] = Field(default_factory=list)
+    #: Art. 4: Chargen, die keinen Nachweis tragen, duerfen nicht in Verkehr.
+    chargen_relevant: int = 0
+    chargen_nachgewiesen: int = 0
+    chargen_offen: int = 0
+    offene_menge_kg: float = 0.0
+    #: Art. 33, hinaus: fachlich eingereicht, technisch noch nicht draussen.
+    erklaerungen_nicht_uebermittelt: int = 0
+    erklaerungen_abgewiesen: int = 0
+    #: Uebermittlungen in den Annahmetest — eine Probe, keine Abgabe.
+    erklaerungen_nur_annahmetest: int = 0
+    #: Art. 4/5, herein: zugekaufte Nummern ohne Pruefung.
+    vorgelagerte_gesamt: int = 0
+    vorgelagerte_ungeprueft: int = 0
     stand_am: Optional[str] = None
+
+# ── Chargenbezogene Kennzeichnung (Art. 4) ──────────────────────────────────
+
+
+class ChargenbindungIn(BaseModel):
+    """Bindet eine Charge mit einer Menge an eine Sorgfaltserklaerung.
+
+    Im Landhandel wird verschnitten: Eine Charge kann von mehreren Erklaerungen
+    gedeckt sein. Deshalb wird je Bindung die Menge angegeben, fuer die die
+    Erklaerung gilt.
+    """
+
+    lot_id: str = Field(..., min_length=1)
+    menge_kg: float = Field(..., gt=0)
+    verknuepft_durch: Optional[str] = None
+
+
+class ChargenbindungOut(BaseSchema):
+    id: str
+    lot_id: str
+    lot_number: Optional[str] = None
+    erklaerung_id: str
+    menge_kg: float
+    verknuepft_am: Optional[str] = None
+    verknuepft_durch: Optional[str] = None
+
+
+class ChargeKennzeichnungOut(BaseSchema):
+    """Der abgeleitete Nachweisstand einer Charge.
+
+    ``NICHT_RELEVANT`` — die Charge traegt keinen relevanten Rohstoff.
+    ``NACHGEWIESEN`` — die gebundene Menge deckt die Charge.
+    ``OFFEN``        — relevant, aber nicht (vollstaendig) gedeckt. Solche
+    Chargen duerfen nach Art. 4 nicht in Verkehr gebracht werden.
+
+    Der Stand ist **abgeleitet**, nicht gespeichert: eine zweite Wahrheit
+    darueber waere eine, die von der ersten abweichen kann.
+    """
+
+    lot_id: str
+    lot_number: str
+    article_id: str
+    tenant_id: str
+    eudr_relevant: bool
+    menge_kg: float
+    gedeckte_menge_kg: float
+    offene_menge_kg: float
+    kennzeichnung: str
+    erklaerungen: list[str] = Field(default_factory=list)
+
+
+class ChargenkennzeichnungStandOut(BaseSchema):
+    """Was die Kennzeichnung ueber den Bestand sagt."""
+
+    chargen_relevant: int = 0
+    chargen_nachgewiesen: int = 0
+    chargen_offen: int = 0
+    offene_menge_kg: float = 0.0
+
+# ── Anbindung an das EU-Informationssystem (Art. 33) ────────────────────────
+#
+# Zwei Richtungen: die eigene Erklaerung hinaus, die zugekaufte herein. Die
+# Felder sind transportneutral — sie halten das Ergebnis fest, unabhaengig
+# davon, ob ein Dienst oder ein Mensch es eingetragen hat.
+
+UEBERMITTLUNG_STAENDE = (
+    "NICHT_UEBERMITTELT",
+    "UEBERMITTELT",
+    "ABGEWIESEN",
+    "ZURUECKGEZOGEN",
+)
+
+PRUEFUNG_STAENDE = ("UNGEPRUEFT", "BESTAETIGT", "NICHT_GEFUNDEN", "ABGELAUFEN", "FEHLER")
+
+PRUEFQUELLEN = ("EU_INFORMATIONSSYSTEM", "MANUELL")
+
+#: Das EU-Informationssystem hat zwei Umgebungen, unterschieden ueber die
+#: Kennung des Webdienst-Mandanten (``eudr-repository`` gegen ``eudr-test``).
+#: Nur die erste hat rechtliche Wirkung. Eine Uebermittlung in den Annahmetest
+#: ist eine Probe und zaehlt im Stand des Hauses nicht als Abgabe.
+UMGEBUNGEN = ("PRODUKTION", "ANNAHMETEST")
+
+
+class UebermittlungIn(BaseModel):
+    """Das Ergebnis einer Uebermittlung an das EU-Informationssystem.
+
+    ``UEBERMITTELT`` verlangt eine Referenznummer — ohne sie ist es ein
+    Versuch, keine Uebermittlung. ``ABGEWIESEN`` verlangt einen Grund, sonst
+    hilft der Eintrag beim naechsten Versuch nicht.
+    """
+
+    uebermittlung_status: str
+    referenznummer: Optional[str] = None
+    verifizierungsnummer: Optional[str] = None
+    eu_system_id: Optional[str] = None
+    dienst: Optional[str] = Field(
+        default=None,
+        description="Bezeichnung des genutzten Dienstes samt Fassung, wie konfiguriert",
+    )
+    umgebung: Optional[str] = Field(
+        default=None,
+        description="PRODUKTION oder ANNAHMETEST — Pflicht bei UEBERMITTELT",
+    )
+    fehler: Optional[str] = None
+
+
+class PruefungIn(BaseModel):
+    """Das Ergebnis der Pruefung einer **vorgelagerten** Erklaerung.
+
+    Eine Bestaetigung aus dem EU-Informationssystem setzt Referenz- **und**
+    Verifizierungsnummer voraus: Abgefragt wird eine Erklaerung ueber beide.
+    """
+
+    pruefung_status: str
+    quelle: str
+    verifizierungsnummer: Optional[str] = None
+    hinweis: Optional[str] = None
+
+
+class VorgelagertePruefungOut(BaseSchema):
+    id: str
+    referenznummer: str
+    verifizierungsnummer: Optional[str] = None
+    lieferant_name: Optional[str] = None
+    pruefung_status: str
+    geprueft_am: Optional[str] = None
+    pruefung_quelle: Optional[str] = None
+    pruefung_hinweis: Optional[str] = None

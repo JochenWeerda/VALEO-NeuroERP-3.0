@@ -2073,8 +2073,14 @@ api_router.include_router(genossenschaft.router)
 from app.api.v1.endpoints import gelangensbestaetigung  # noqa: E402
 api_router.include_router(gelangensbestaetigung.router)
 
-# EUDR — Sorgfaltserklaerungen nach Verordnung (EU) 2023/1115
-from app.api.v1.endpoints import eudr_register  # noqa: E402
+# EUDR — Sorgfaltserklaerungen nach Verordnung (EU) 2023/1115.
+# Drei Router unter einem Prefix: das Register, die Chargenkennzeichnung und
+# die Anbindung an das EU-Informationssystem. Die Reihenfolge ist wichtig —
+# die festen Pfade (/status, /chargen/..., /vorgelagerte/...) muessen vor
+# ``/{erklaerung_id}`` stehen, sonst verschluckt der Platzhalter sie.
+from app.api.v1.endpoints import eudr_anbindung, eudr_chargen, eudr_register  # noqa: E402
+api_router.include_router(eudr_chargen.router)
+api_router.include_router(eudr_anbindung.router)
 api_router.include_router(eudr_register.router)
 
 # Intrastat — EU-Handelsstatistik

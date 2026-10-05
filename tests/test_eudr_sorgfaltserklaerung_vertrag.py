@@ -552,7 +552,11 @@ def test_compliance_eudr_meldet_kein_konform_ohne_erklaerung(client):
     daten = antwort.json()
     assert daten["status"] == "OHNE_ERKLAERUNG"
     assert daten["deforestation_risk"] != "NIEDRIG"
-    assert daten["batch_level_marking"] == "NICHT_UMGESETZT"
+    # Die chargenbezogene Kennzeichnung ist seit
+    # eudr_chargenkennzeichnung_20261001 umgesetzt: Statt des Platzhalters
+    # stehen hier Zahlen — ohne Charge sind sie null, und das ist wahr.
+    assert daten["lots_relevant"] == 0
+    assert daten["lots_open"] == 0
 
 
 def test_compliance_eudr_unbewertet_ist_kein_niedriges_risiko(client):

@@ -1,13 +1,12 @@
 """EUDR-Sorgfaltserklaerungen — das Register.
 
-Verordnung (EU) 2023/1115. Die Erklaerung entsteht als **Entwurf**, bekommt eine
-**Risikobewertung** (Art. 10/11) und wird erst dann **eingereicht** (Art. 33),
-wenn hoechstens ein vernachlaessigbares Risiko festgestellt, beide Nachweise
-vorliegen und die Erklaerung unterzeichnet ist (Art. 3/4). Die Datenbank haelt
-dieselbe Bedingung — ein Weg, der sie umgeht, kann es nicht geben.
+Die Erklaerung entsteht als **Entwurf**, bekommt eine **Risikobewertung**
+(Art. 10/11) und wird erst dann **eingereicht** (Art. 33), wenn hoechstens ein
+vernachlaessigbares Risiko festgestellt, beide Nachweise vorliegen und die
+Erklaerung unterzeichnet ist (Art. 3/4). Die Datenbank haelt dieselbe
+Bedingung — ein Weg, der sie umgeht, kann es nicht geben.
 
-Der Feldsatz folgt Anhang II und Art. 9; die fachjuristische Abnahme gehoert dem
-Compliance-Owner. Siehe
+Grundlage: Verordnung (EU) 2023/1115. Entscheidung und Beweislage:
 ``docs/quality-assurance/eudr-sorgfaltserklaerung-20261001.md``.
 """
 
@@ -24,13 +23,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
+from app.services import eudr_register_service as dienst
 
 from app.api.v1.schemas.eudr_register_schemas import (
     EinreichungIn,
     EudrRegisterStatusOut,
     GeolokationIn,
     GeolokationOut,
-    POLYGONGRENZE_HA,
     RISIKOSTUFEN,
     ROHSTOFFE,
     RisikobewertungIn,
@@ -43,113 +42,6 @@ from app.api.v1.schemas.eudr_register_schemas import (
 
 router = APIRouter(prefix="/eudr/sorgfaltserklaerungen", tags=["EUDR", "Compliance"])
 logger = logging.getLogger(__name__)
-
-ERKLAERUNGEN = "domain_compliance.eudr_due_diligence"
-GEOLOKATIONEN = "domain_compliance.eudr_geolokationen"
-VORGELAGERT = "domain_compliance.eudr_vorgelagerte_erklaerungen"
-
-MIGRATIONS_HINWEIS = {
-    "X-Migration-Hint": "Run: alembic upgrade head (eudr_sorgfaltserklaerung_20261001)"
-}
-
-_FELDER = (
-    "id, tenant_id, status, betreiber_name, betreiber_adresse, eori_nummer, "
-    "rohstoff, hs_code, warenbeschreibung, menge_netto_kg, menge_volumen_m3, "
-    "ergaenzende_einheit, produktionsland, produktion_von, produktion_bis, "
-    "lieferant_name, lieferant_adresse, lieferant_email, "
-    "nachweis_abholzungsfrei, nachweis_abholzungsfrei_quelle, "
-    "nachweis_rechtskonform, nachweis_rechtskonform_quelle, "
-    "risikostufe, risikobewertung_am, risikobewertung_durch, minderungsmassnahmen, "
-    "erklaerung_abgegeben_am, erklaerung_durch_name, erklaerung_durch_funktion, "
-    "referenznummer, verifizierungsnummer, eingereicht_am, created_at"
-)
-
-_ZEITFELDER = (
-    "produktion_von",
-    "produktion_bis",
-    "risikobewertung_am",
-    "erklaerung_abgegeben_am",
-    "eingereicht_am",
-    "created_at",
-)
-
-
-def _zeile(row: Any) -> dict:
-    d = dict(row)
-    for schluessel in _ZEITFELDER:
-        wert = d.get(schluessel)
-        if wert is not None and hasattr(wert, "isoformat"):
-            d[schluessel] = wert.isoformat()
-    for schluessel in ("menge_netto_kg", "menge_volumen_m3"):
-        if d.get(schluessel) is not None:
-            d[schluessel] = float(d[schluessel])
-    return d
-
-
-def _nicht_lesbar(db: Session, fehler: Exception, was: str, tenant_id: str) -> HTTPException:
-    """Ein Lesefehler ist keine leere Lage.
-
-    Ein EUDR-Register, das bei einer Stoerung "nichts gefunden" antwortet, sagt
-    einem Haus, es habe keine Nachweise zu fuehren. Nach Art. 3/4 ist das
-    Inverkehrbringen ohne Sorgfaltserklaerung verboten.
-    """
-    db.rollback()
-    logger.exception("%s nicht lesbar (Mandant %s)", was, tenant_id)
-    return HTTPException(
-        status_code=503,
-        detail={"error": str(fehler), "migration_hint": MIGRATIONS_HINWEIS["X-Migration-Hint"]},
-        headers=MIGRATIONS_HINWEIS,
-    )
-
-
-def _erklaerung_holen(db: Session, tenant_id: str, erklaerung_id: str) -> dict:
-    zeile = db.execute(
-        text(f"SELECT {_FELDER} FROM {ERKLAERUNGEN} WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # reviewed-safe: _FELDER und Tabellenname sind Code-Literale
-        {"id": erklaerung_id, "tid": tenant_id},
-    ).mappings().first()
-    if not zeile:
-        raise HTTPException(status_code=404, detail="Sorgfaltserklaerung nicht gefunden")
-    return _zeile(zeile)
-
-
-def _geolokation_pruefen(ort: GeolokationIn) -> None:
-    """Art. 9: Ab vier Hektar ist die Geolokation als Polygon anzugeben."""
-    if ort.flaeche_ha is not None and ort.flaeche_ha > POLYGONGRENZE_HA and not ort.polygon:
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                f"Flurstueck mit {ort.flaeche_ha} ha: Ab {POLYGONGRENZE_HA} ha verlangt "
-                "Art. 9 der Verordnung (EU) 2023/1115 ein Polygon, kein Punkt."
-            ),
-        )
-
-
-def _geolokation_schreiben(
-    db: Session, tenant_id: str, erklaerung_id: str, ort: GeolokationIn
-) -> str:
-    import json
-
-    neue_id = str(uuid7())
-    db.execute(
-        text(
-            f"INSERT INTO {GEOLOKATIONEN} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
-            "(id, tenant_id, erklaerung_id, flurstueck_kennung, breitengrad, "
-            " laengengrad, flaeche_ha, polygon) "
-            "VALUES (:id, :tid, :eid, :kennung, :breite, :laenge, :flaeche, "
-            "        CAST(:polygon AS jsonb))"
-        ),
-        {
-            "id": neue_id,
-            "tid": tenant_id,
-            "eid": erklaerung_id,
-            "kennung": ort.flurstueck_kennung,
-            "breite": ort.breitengrad,
-            "laenge": ort.laengengrad,
-            "flaeche": ort.flaeche_ha,
-            "polygon": json.dumps(ort.polygon) if ort.polygon else None,
-        },
-    )
-    return neue_id
 
 
 # ── Anlegen und Lesen ───────────────────────────────────────────────────────
@@ -181,13 +73,13 @@ def anlegen(
             status_code=422, detail="Produktionszeitraum endet vor seinem Beginn"
         )
     for ort in payload.geolokationen:
-        _geolokation_pruefen(ort)
+        dienst.geolokation_pruefen(ort)
 
     neue_id = str(uuid7())
     try:
         db.execute(
             text(
-                f"INSERT INTO {ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                f"INSERT INTO {dienst.ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
                 "(id, tenant_id, betreiber_name, betreiber_adresse, eori_nummer, "
                 " rohstoff, hs_code, warenbeschreibung, menge_netto_kg, menge_volumen_m3, "
                 " ergaenzende_einheit, produktionsland, produktion_von, produktion_bis, "
@@ -226,11 +118,11 @@ def anlegen(
             },
         )
         for ort in payload.geolokationen:
-            _geolokation_schreiben(db, tenant_id, neue_id, ort)
+            dienst.geolokation_schreiben(db, tenant_id, neue_id, ort)
         for vorgelagert in payload.vorgelagerte_erklaerungen:
             db.execute(
                 text(
-                    f"INSERT INTO {VORGELAGERT} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                    f"INSERT INTO {dienst.VORGELAGERT} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
                     "(id, tenant_id, erklaerung_id, referenznummer, "
                     " verifizierungsnummer, lieferant_name) "
                     "VALUES (:id, :tid, :eid, :ref, :verif, :lieferant)"
@@ -252,8 +144,8 @@ def anlegen(
         db.rollback()
         raise HTTPException(
             status_code=503,
-            detail={"error": str(fehler), "migration_hint": MIGRATIONS_HINWEIS["X-Migration-Hint"]},
-            headers=MIGRATIONS_HINWEIS,
+            detail={"error": str(fehler), "migration_hint": dienst.MIGRATIONS_HINWEIS["X-Migration-Hint"]},
+            headers=dienst.MIGRATIONS_HINWEIS,
         ) from fehler
 
     return abrufen(neue_id, tenant_id=tenant_id, db=db)
@@ -285,15 +177,15 @@ def auflisten(
     try:
         zeilen = db.execute(
             text(
-                f"SELECT {_FELDER} FROM {ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+                f"SELECT {dienst.FELDER} FROM {dienst.ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
                 f"WHERE {' AND '.join(bedingungen)} "
                 "ORDER BY created_at DESC OFFSET :skip LIMIT :limit"
             ),
             werte,
         ).mappings().all()
     except Exception as fehler:  # noqa: BLE001
-        raise _nicht_lesbar(db, fehler, "EUDR-Erklaerungen", tenant_id) from fehler
-    return [_zeile(z) for z in zeilen]
+        raise dienst.nicht_lesbar(db, fehler, "EUDR-Erklaerungen", tenant_id) from fehler
+    return [dienst.als_dict(z) for z in zeilen]
 
 
 @router.get("/status", response_model=EudrRegisterStatusOut, summary="EUDR-Registerstand")
@@ -318,24 +210,71 @@ def registerstand(
                 "       COUNT(*) FILTER (WHERE risikostufe = 'NICHT_VERNACHLAESSIGBAR') AS riskant, "
                 "       COUNT(*) FILTER (WHERE risikostufe IS NULL) AS unbewertet, "
                 "       ARRAY_AGG(DISTINCT produktionsland) AS laender, "
+                # Nur eine Uebermittlung in die Produktion zaehlt als Abgabe.
+                # Ein eingerichteter Testzugang darf nicht wie Erfuellung
+                # aussehen.
+                "       COUNT(*) FILTER (WHERE status = 'EINGEREICHT' "
+                "                        AND NOT (uebermittlung_status = 'UEBERMITTELT' "
+                "                                 AND uebermittlung_umgebung = 'PRODUKTION')) "
+                "         AS nicht_uebermittelt, "
+                "       COUNT(*) FILTER (WHERE uebermittlung_status = 'UEBERMITTELT' "
+                "                        AND uebermittlung_umgebung = 'ANNAHMETEST') "
+                "         AS nur_annahmetest, "
+                "       COUNT(*) FILTER (WHERE uebermittlung_status = 'ABGEWIESEN') "
+                "         AS abgewiesen, "
                 "       ARRAY_AGG(DISTINCT rohstoff) AS rohstoffe "
-                f"FROM {ERKLAERUNGEN} WHERE tenant_id = :tid"  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                f"FROM {dienst.ERKLAERUNGEN} WHERE tenant_id = :tid"  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
             ),
             {"tid": tenant_id},
         ).mappings().one()
     except Exception as fehler:  # noqa: BLE001
-        raise _nicht_lesbar(db, fehler, "EUDR-Registerstand", tenant_id) from fehler
+        raise dienst.nicht_lesbar(db, fehler, "EUDR-Registerstand", tenant_id) from fehler
 
     gesamt = int(zahlen["gesamt"] or 0)
     eingereicht = int(zahlen["eingereicht"] or 0)
     riskant = int(zahlen["riskant"] or 0)
     unbewertet = int(zahlen["unbewertet"] or 0)
 
+    # Art. 4/5, herein: zugekaufte Referenznummern ohne Pruefung. Eine
+    # abgeschriebene Nummer ist kein Nachweis.
+    try:
+        vorgelagert = db.execute(
+            text(
+                "SELECT COUNT(*) AS gesamt, "
+                "       COUNT(*) FILTER (WHERE pruefung_status <> 'BESTAETIGT') AS ungeprueft "
+                f"FROM {dienst.VORGELAGERT} WHERE tenant_id = :tid"  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+            ),
+            {"tid": tenant_id},
+        ).mappings().one()
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.nicht_lesbar(db, fehler, "Vorgelagerte EUDR-Erklaerungen", tenant_id) from fehler
+
+    # Art. 4: Eine relevante Charge ohne Nachweis darf nicht in Verkehr. Das
+    # ist die Zahl, die ein Haus wirklich braucht.
+    try:
+        chargen = db.execute(
+            text(
+                "SELECT COUNT(*) FILTER (WHERE eudr_relevant) AS relevant, "
+                "       COUNT(*) FILTER (WHERE kennzeichnung = 'NACHGEWIESEN') AS nachgewiesen, "
+                "       COUNT(*) FILTER (WHERE kennzeichnung = 'OFFEN') AS offen, "
+                "       COALESCE(SUM(menge_kg - gedeckte_menge_kg) "
+                "                FILTER (WHERE kennzeichnung = 'OFFEN'), 0) AS offene_menge "
+                f"FROM ({dienst.KENNZEICHNUNG}) k"  # nosec B608  # reviewed-safe: dienst.KENNZEICHNUNG ist ein Code-Literal, Werte sind gebunden
+            ),
+            {"tid": tenant_id},
+        ).mappings().one()
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.nicht_lesbar(db, fehler, "EUDR-Chargenkennzeichnung", tenant_id) from fehler
+
+    offene_chargen = int(chargen["offen"] or 0)
     if gesamt == 0:
         stand = "OHNE_ERKLAERUNG"
     elif riskant > 0:
         stand = "KRITISCH"
-    elif eingereicht < gesamt:
+    elif eingereicht < gesamt or offene_chargen > 0:
+        # Eine relevante Charge ohne Nachweis macht den Stand unvollstaendig,
+        # auch wenn jede erfasste Erklaerung eingereicht ist: Nach Art. 4 darf
+        # diese Charge nicht in Verkehr gebracht werden.
         stand = "UNVOLLSTAENDIG"
     else:
         stand = "KONFORM"
@@ -349,6 +288,15 @@ def registerstand(
         "ohne_risikobewertung": unbewertet,
         "produktionslaender": sorted(x for x in (zahlen["laender"] or []) if x),
         "rohstoffe": sorted(x for x in (zahlen["rohstoffe"] or []) if x),
+        "chargen_relevant": int(chargen["relevant"] or 0),
+        "chargen_nachgewiesen": int(chargen["nachgewiesen"] or 0),
+        "chargen_offen": int(chargen["offen"] or 0),
+        "offene_menge_kg": float(chargen["offene_menge"] or 0),
+        "erklaerungen_nicht_uebermittelt": int(zahlen["nicht_uebermittelt"] or 0),
+        "erklaerungen_abgewiesen": int(zahlen["abgewiesen"] or 0),
+        "erklaerungen_nur_annahmetest": int(zahlen["nur_annahmetest"] or 0),
+        "vorgelagerte_gesamt": int(vorgelagert["gesamt"] or 0),
+        "vorgelagerte_ungeprueft": int(vorgelagert["ungeprueft"] or 0),
         "stand_am": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -361,19 +309,20 @@ def abrufen(
 ) -> dict:
     """Eine Erklaerung mit ihren Flurstuecken und vorgelagerten Erklaerungen."""
     try:
-        kopf = _erklaerung_holen(db, tenant_id, erklaerung_id)
+        kopf = dienst.erklaerung_holen(db, tenant_id, erklaerung_id)
         orte = db.execute(
             text(
                 "SELECT id, flurstueck_kennung, breitengrad, laengengrad, flaeche_ha, polygon "
-                f"FROM {GEOLOKATIONEN} WHERE erklaerung_id = :eid AND tenant_id = :tid "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                f"FROM {dienst.GEOLOKATIONEN} WHERE erklaerung_id = :eid AND tenant_id = :tid "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
                 "ORDER BY erfasst_am LIMIT 5000"
             ),
             {"eid": erklaerung_id, "tid": tenant_id},
         ).mappings().all()
         vorgelagert = db.execute(
             text(
-                "SELECT id, referenznummer, verifizierungsnummer, lieferant_name "
-                f"FROM {VORGELAGERT} WHERE erklaerung_id = :eid AND tenant_id = :tid "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                "SELECT id, referenznummer, verifizierungsnummer, lieferant_name, "
+                "       pruefung_status, geprueft_am, pruefung_quelle "
+                f"FROM {dienst.VORGELAGERT} WHERE erklaerung_id = :eid AND tenant_id = :tid "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
                 "ORDER BY erfasst_am LIMIT 5000"
             ),
             {"eid": erklaerung_id, "tid": tenant_id},
@@ -381,7 +330,7 @@ def abrufen(
     except HTTPException:
         raise
     except Exception as fehler:  # noqa: BLE001
-        raise _nicht_lesbar(db, fehler, "EUDR-Erklaerung", tenant_id) from fehler
+        raise dienst.nicht_lesbar(db, fehler, "EUDR-Erklaerung", tenant_id) from fehler
 
     kopf["geolokationen"] = [
         {
@@ -394,7 +343,13 @@ def abrufen(
         }
         for o in orte
     ]
-    kopf["vorgelagerte_erklaerungen"] = [dict(v) for v in vorgelagert]
+    kopf["vorgelagerte_erklaerungen"] = [
+        {
+            **dict(v),
+            "geprueft_am": v["geprueft_am"].isoformat() if v["geprueft_am"] else None,
+        }
+        for v in vorgelagert
+    ]
     return kopf
 
 
@@ -414,7 +369,7 @@ def geolokation_nachtragen(
     db: Session = Depends(get_db),
 ) -> dict:
     """Art. 9: Die Geolokation **aller** Flurstuecke gehoert zur Erklaerung."""
-    kopf = _erklaerung_holen(db, tenant_id, erklaerung_id)
+    kopf = dienst.erklaerung_holen(db, tenant_id, erklaerung_id)
     if kopf["status"] != "ENTWURF":
         raise HTTPException(
             status_code=409,
@@ -424,9 +379,9 @@ def geolokation_nachtragen(
                 "veraendert."
             ),
         )
-    _geolokation_pruefen(payload)
+    dienst.geolokation_pruefen(payload)
     try:
-        neue_id = _geolokation_schreiben(db, tenant_id, erklaerung_id, payload)
+        neue_id = dienst.geolokation_schreiben(db, tenant_id, erklaerung_id, payload)
         db.commit()
     except Exception as fehler:  # noqa: BLE001
         db.rollback()
@@ -476,7 +431,7 @@ def risiko_bewerten(
             ),
         )
 
-    kopf = _erklaerung_holen(db, tenant_id, erklaerung_id)
+    kopf = dienst.erklaerung_holen(db, tenant_id, erklaerung_id)
     if kopf["status"] == "EINGEREICHT":
         raise HTTPException(
             status_code=409,
@@ -485,7 +440,7 @@ def risiko_bewerten(
     try:
         db.execute(
             text(
-                f"UPDATE {ERKLAERUNGEN} SET risikostufe = :stufe, "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                f"UPDATE {dienst.ERKLAERUNGEN} SET risikostufe = :stufe, "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
                 "    risikobewertung_am = NOW(), risikobewertung_durch = :durch, "
                 "    minderungsmassnahmen = :massnahmen, updated_at = NOW() "
                 "WHERE id = :id AND tenant_id = :tid"
@@ -502,7 +457,7 @@ def risiko_bewerten(
     except Exception as fehler:  # noqa: BLE001
         db.rollback()
         raise HTTPException(status_code=503, detail=str(fehler)) from fehler
-    return _erklaerung_holen(db, tenant_id, erklaerung_id)
+    return dienst.erklaerung_holen(db, tenant_id, erklaerung_id)
 
 
 @router.post(
@@ -522,7 +477,7 @@ def einreichen(
     Risiko, beide Nachweise, Unterzeichnung mit Name und Funktion (Art. 3/4,
     Anhang II Nr. 6). Dieselbe Bedingung haelt die Datenbank.
     """
-    kopf = _erklaerung_holen(db, tenant_id, erklaerung_id)
+    kopf = dienst.erklaerung_holen(db, tenant_id, erklaerung_id)
     if kopf["status"] == "EINGEREICHT":
         raise HTTPException(status_code=409, detail="Erklaerung ist bereits eingereicht.")
 
@@ -550,7 +505,7 @@ def einreichen(
     try:
         db.execute(
             text(
-                f"UPDATE {ERKLAERUNGEN} SET status = 'EINGEREICHT', "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+                f"UPDATE {dienst.ERKLAERUNGEN} SET status = 'EINGEREICHT', "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
                 "    referenznummer = :ref, verifizierungsnummer = :verif, "
                 "    eingereicht_am = NOW(), erklaerung_abgegeben_am = NOW(), "
                 "    erklaerung_durch_name = :name, erklaerung_durch_funktion = :funktion, "
@@ -579,4 +534,5 @@ def einreichen(
                 "grund": str(fehler),
             },
         ) from fehler
-    return _erklaerung_holen(db, tenant_id, erklaerung_id)
+    return dienst.erklaerung_holen(db, tenant_id, erklaerung_id)
+
