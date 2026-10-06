@@ -80,6 +80,10 @@ nur Stammfixture mit vollstaendigem Verkaufsauftrag und vorher angelegtem
 FK-Kunden; tests/test_crm360_kunde_wird_gefunden.py nur Jahresumsatz-Fixture
 mit allen migrierten Pflichtwerten. 17 Setup-Fehler und ein CI-Failure belegt.
 Gemeinsamer Probe, eigene Tenantdatensaetze; keine Schemaabschwaechung.
+**Fixture-Nachclaim:** In derselben Beleg-Testdatei globale Testnummern
+pro Datensatz isolieren und ungenutzten crm_customers-Doppelstamm entfernen.
+resolve_customer verwendet ausschliesslich domain_crm.customers; die alte
+Tabelle fehlt im migrierten Probe. Assertions bleiben auf echte Verknuepfungen gerichtet.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
