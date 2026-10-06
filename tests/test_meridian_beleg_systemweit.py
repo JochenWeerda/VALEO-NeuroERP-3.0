@@ -113,6 +113,7 @@ def test_aenderbarer_bezug_hat_lesbares_gegenstueck(mask_id: str, definition: di
 
 
 _IDENTITAET = {
+    "fuhrpark/fahrzeug-stamm": "kennzeichen",
     "agrar/duenger": "artikelnummer",
     "agrar/feeding-business": "name",
     "agrar/feeding-group": "name",
@@ -301,7 +302,6 @@ _MANDANTEN_TABELLEN = (
     ("domain_agrar.ernte_kampagnen", "tenant_id"),
     ("domain_crm.sales_orders", "tenant_id"),
     ("domain_crm.crm_opportunities", "tenant_id"),
-    ("domain_crm.crm_customers", "tenant_id"),
     ("domain_crm.business_partners", "tenant_id"),
     ("domain_crm.customers", "tenant_id"),
     ("domain_shared.branches", "tenant_id"),
@@ -328,6 +328,8 @@ def stamm():
         "agrarkontrakt": f"ac-{uuid.uuid4().hex[:8]}",
         # UUID, weil die Opportunity customer_id als UUID fuehrt.
         "kunde": str(uuid.uuid4()),
+        "kunden_nr": f"K-{uuid.uuid4().hex[:12]}",
+        "auftrag_nummer": f"VA-{uuid.uuid4().hex[:12]}",
     }
     bp_spalten = ", ".join(_BP_FLAGS)
     bp_werte = ", ".join("false" for _ in _BP_FLAGS)
@@ -349,18 +351,24 @@ def stamm():
         ), {"id": ids["niederlassung"], "t": mandant})
         v.execute(text(
             "INSERT INTO domain_inventory.warehouses (id, tenant_id, warehouse_code, name, address, city, postal_code) "
-            "VALUES (:id, :t, 'L-03', 'Getreidelager Hafen', 'Kai 3', 'Bremen', '28195')"
-        ), {"id": ids["lager"], "t": mandant})
+            "VALUES (:id, :t, :code, 'Getreidelager Hafen', 'Kai 3', 'Bremen', '28195')"
+        ), {"id": ids["lager"], "t": mandant, "code": ids["lager"]})
         v.execute(text(
             "INSERT INTO domain_inventory.articles (id, tenant_id, article_number, name, mhd_erforderlich, "
             "lagerartikel, lagerorte, chargenpflicht, qs_pruefung_erforderlich, bio_kennzeichnung, "
             "gmp_plus_relevanz, unit, category, sales_price) "
-            "VALUES (:id, :t, '10001', 'Weizen A', false, true, '[]'::jsonb, false, false, false, false, "
+            "VALUES (:id, :t, :nummer, 'Weizen A', false, true, '[]'::jsonb, false, false, false, false, "
             "'t', 'Getreide', 0)"
-        ), {"id": ids["artikel"], "t": mandant})
+        ), {"id": ids["artikel"], "t": mandant, "nummer": ids["artikel"]})
         v.execute(text(
-            "INSERT INTO domain_crm.sales_orders (id, tenant_id, order_number) VALUES (:id, :t, 'VA-2026-0815')"
-        ), {"id": ids["auftrag"], "t": mandant})
+            "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+            "VALUES (:id, :t, :nr, 'Raiffeisen Markt Ost eG')"
+        ), {"id": ids["kunde"], "t": mandant, "nr": ids["kunden_nr"]})
+        v.execute(text(
+            "INSERT INTO domain_crm.sales_orders "
+            "(id, tenant_id, customer_id, order_number, subject, description, total_amount, currency, status, version) "
+            "VALUES (:id, :t, :kunde, :nr, 'Referenzauftrag', 'Belegreferenz', 0, 'EUR', 'ENTWURF', 1)"
+        ), {"id": ids["auftrag"], "t": mandant, "kunde": ids["kunde"], "nr": ids["auftrag_nummer"]})
         v.execute(text(
             "INSERT INTO domain_agrar.ernte_kampagnen (id, kampagne_id, tenant_id, wirtschaftsjahr, ernte_art, bezeichnung) "
             "VALUES (:id, :kid, :t, 2026, 'getreide', 'Getreideernte 2026')"
@@ -374,10 +382,6 @@ def stamm():
             "partner_id, article_id, pricing_model, total_quantity_kg, remaining_quantity_kg) "
             "VALUES (:id, :t, 'AK-2026-031', 'purchase', 2026, :bp, :art, 'fixed', 100000, 100000)"
         ), {"id": ids["agrarkontrakt"], "t": mandant, "bp": ids["erzeuger"], "art": ids["artikel"]})
-        v.execute(text(
-            "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
-            "VALUES (:id, :t, 'K-3300', 'Raiffeisen Markt Ost eG')"
-        ), {"id": ids["kunde"], "t": mandant})
     try:
         yield {"mandant": mandant, "engine": engine, **ids}
     finally:
@@ -411,7 +415,7 @@ def test_resolver_findet_ueber_id_und_ueber_nummer(stamm: dict) -> None:
 @pytest.mark.integration
 def test_resolver_kennt_arten_ohne_namen_oder_ohne_nummer(stamm: dict) -> None:
     auftrag = _resolve(stamm, "sales_order", stamm["auftrag"])
-    assert (auftrag.name, auftrag.number) == (None, "VA-2026-0815")
+    assert (auftrag.name, auftrag.number) == (None, stamm["auftrag_nummer"])
 
     kampagne = _resolve(stamm, "harvest_campaign", stamm["kampagne"])
     assert (kampagne.name, kampagne.number, kampagne.found) == ("Getreideernte 2026", None, True)
@@ -593,7 +597,7 @@ def test_bestellung_nennt_niederlassung_und_belegkette(client, stamm: dict) -> N
         "niederlassung_id": stamm["niederlassung"],
         "kontrakt_id": stamm["kontrakt"],
         "verkaufsbeleg_id": stamm["auftrag"],
-        "kunden_id": "K-3300",
+        "kunden_id": stamm["kunden_nr"],
         "bestellfall": "direktlieferung",
     })
     assert angelegt.status_code == 201, angelegt.text
@@ -603,7 +607,7 @@ def test_bestellung_nennt_niederlassung_und_belegkette(client, stamm: dict) -> N
     body = gelesen.json()
     assert body["niederlassung_name"] == "Niederlassung Suedheide"
     assert body["kontrakt_nummer"] == "EK-K-2026-07"
-    assert body["verkaufsbeleg_nummer"] == "VA-2026-0815"
+    assert body["verkaufsbeleg_nummer"] == stamm["auftrag_nummer"]
     assert body["kunden_name"] == "Raiffeisen Markt Ost eG"
     # Die Bezuege bleiben aenderbar und kommen weiter mit.
     assert body["niederlassung_id"] == stamm["niederlassung"]
@@ -677,7 +681,7 @@ def test_verkaufschance_nennt_den_kunden(client, stamm: dict, monkeypatch) -> No
     assert gelesen.status_code == 200, gelesen.text
     body = gelesen.json()
     assert body["customer_name"] == "Raiffeisen Markt Ost eG"
-    assert body["customer_number"] == "K-3300"
+    assert body["customer_number"] == stamm["kunden_nr"]
     assert {"customer_name", "customer_number"} <= _kopf_keys("crm/opportunity")
 
 
@@ -698,11 +702,6 @@ def test_verkaufschance_liest_die_lokale_pipeline_wenn_crm_sales_fehlt(client, s
     chance_id = str(uuid.uuid4())
     with stamm["engine"].begin() as v:
         v.execute(text(
-            "INSERT INTO domain_crm.crm_customers "
-            "(id, tenant_id, customer_number, company_name, last_name, street, postal_code, city) "
-            "VALUES (:id, :t, 'K-3300', 'Raiffeisen Markt Ost eG', 'Ost', 'Markt 1', '27356', 'Rotenburg')"
-        ), {"id": stamm["kunde"], "t": stamm["mandant"]})
-        v.execute(text(
             "INSERT INTO domain_crm.crm_opportunities "
             "(id, tenant_id, customer_id, title, stage, status, assigned_to, estimated_value) "
             "VALUES (:id, :t, :kunde, 'Frühjahrsdüngung 2027', 'prospecting', 'aktiv', 'system', 12000)"
@@ -718,7 +717,7 @@ def test_verkaufschance_liest_die_lokale_pipeline_wenn_crm_sales_fehlt(client, s
     body = gelesen.json()
     assert body["name"] == "Frühjahrsdüngung 2027"
     assert body["customer_name"] == "Raiffeisen Markt Ost eG"
-    assert body["customer_number"] == "K-3300"
+    assert body["customer_number"] == stamm["kunden_nr"]
 
 
 # ---------------------------------------------------------------------------

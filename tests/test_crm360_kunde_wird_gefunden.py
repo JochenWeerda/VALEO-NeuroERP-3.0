@@ -237,14 +237,6 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
     with engine.begin() as verbindung:
         verbindung.execute(
             text(
-                "INSERT INTO domain_crm.crm_customers "
-                "(id, tenant_id, customer_number, company_name, last_name, street, postal_code, city) "
-                "VALUES (:id, :tid, :nr, 'Testhof Sonnenacker', 'Meyer', 'Hofweg 1', '29525', 'Uelzen')"
-            ),
-            {"id": kunde["id"], "tid": kunde["mandant"], "nr": kunde["kunden_nr"]},
-        )
-        verbindung.execute(
-            text(
                 "INSERT INTO domain_crm.crm_opportunities "
                 "(id, customer_id, title, assigned_to, tenant_id, stage, estimated_value, probability) "
                 "VALUES (:id, :cid, 'Weizen 2026', 'vertrieb', :tid, 'proposal', 12000, 40)"
@@ -282,9 +274,6 @@ def test_angebote_historie_und_aufgaben_liefern_echte_zeilen(client, kunde) -> N
         with engine.begin() as verbindung:
             verbindung.execute(
                 text("DELETE FROM domain_crm.crm_opportunities WHERE id = :id"), {"id": chance}
-            )
-            verbindung.execute(
-                text("DELETE FROM domain_crm.crm_customers WHERE id = :id"), {"id": kunde["id"]}
             )
             verbindung.execute(
                 text("DELETE FROM domain_crm.activities WHERE id = :id"), {"id": aktivitaet}
@@ -831,8 +820,8 @@ def test_jahresumsatz_zaehlt_die_geschriebenen_auftragsstatus(client, kunde) -> 
             verbindung.execute(
                 text(
                     "INSERT INTO domain_crm.sales_orders "
-                    "(id, tenant_id, customer_id, order_number, subject, total_amount, status) "
-                    "VALUES (:id, :tid, :cid, :nr, 'Akte', :betrag, :status)"
+                    "(id, tenant_id, customer_id, order_number, subject, description, total_amount, currency, status, version) "
+                    "VALUES (:id, :tid, :cid, :nr, 'Akte', 'Umsatzvertrag', :betrag, 'EUR', :status, 1)"
                 ),
                 {
                     "id": auftrag,
@@ -944,11 +933,11 @@ def test_adresse_und_branche_kommen_aus_dem_kundenstamm(client, kunde) -> None:
         verbindung.execute(
             text(
                 "UPDATE domain_crm.customers "
-                "SET address = 'Dorfstr. 4', postal_code = '29439', city = 'Luechow', "
+                "SET address = :adresse, postal_code = '29439', city = 'Luechow', "
                 "country = 'DE', industry = 'Ackerbau', phone = '05841-100' "
                 "WHERE id = :id"
             ),
-            {"id": kunde["id"]},
+            {"id": kunde["id"], "adresse": '"Dorfstr. 4"'},
         )
         verbindung.execute(
             text(

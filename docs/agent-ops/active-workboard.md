@@ -75,6 +75,29 @@ Schemahunk regenerieren; keine Migration und keine fremde Spec-WIP.
 default Zeitkontojahr von date.today auf business_today umstellen. Nachgewiesener
 neuer Ratschenbefund aus abgeschlossenem Personal-Slice; bestehende Zeitkonto-
 Vertraege und Kalendergate pruefen. Keine Baseline-Erhoehung.
+**CRM-/Beleg-Fixtureclaim (2026-10-06):** tests/test_meridian_beleg_systemweit.py
+nur Stammfixture mit vollstaendigem Verkaufsauftrag und vorher angelegtem
+FK-Kunden; tests/test_crm360_kunde_wird_gefunden.py nur Jahresumsatz-Fixture
+mit allen migrierten Pflichtwerten. 17 Setup-Fehler und ein CI-Failure belegt.
+Gemeinsamer Probe, eigene Tenantdatensaetze; keine Schemaabschwaechung.
+**Fixture-Nachclaim:** In derselben Beleg-Testdatei globale Testnummern
+pro Datensatz isolieren und ungenutzten crm_customers-Doppelstamm entfernen.
+resolve_customer verwendet ausschliesslich domain_crm.customers; die alte
+Tabelle fehlt im migrierten Probe. Assertions bleiben auf echte Verknuepfungen gerichtet.
+CRM360-Fixture ebenfalls ohne alten crm_customers-Doppelstamm; Adresse
+als gueltiger JSON-String fuer die migrierte JSONB-Spalte binden.
+**Beleg-Vertragsnachclaim:** test_identitaet_je_belegmaske fehlt die bereits
+committete fuhrpark/fahrzeug-stamm-Maske. Isolierter committed-source-Test
+bestaetigt denselben Fehler; Identitaetsmatrix um kennzeichen ergaenzen.
+**Security-Nachclaim (2026-10-06):** Saubere package.json/pnpm-lock.yaml nur
+proxy-addr 2.0.8, seroval 1.6.3, compression 1.8.2 und source-map-js 1.2.2
+zentral pinnen. GitHub-Lauf 37417689053 meldet zwei kritische und drei hohe
+CVE mit Herstellerfix; keine neue Ausnahme. Verbraucher und Lock pruefen.
+**Meilenstein 2026-10-06:** 135 CRM-/Beleg-Vertraege auf Probe plus
+ein nachgezogener Fahrzeug-Identitaetsvertrag gruen. 17 Setupfehler behoben.
+Vier Herstellerpakete adressieren zwei kritische/drei hohe neue CVE;
+Funktionspruefungen einschliesslich Streamabbruch gruen. Docs/OpenAPI/PG/
+kritische E2E auf 4a4104fe1 bestanden. Weitere Security-Befunde bleiben offen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.

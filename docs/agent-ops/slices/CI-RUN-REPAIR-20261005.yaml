@@ -13,6 +13,8 @@ file_ownership:
   - Zentraler CSS-Quellenbereich als indexseitiger Minimalhunk
   - HRM/POS-, Opportunity-, Fehlerantwort- und native CRM-Smoke-Testvertraege
   - InventoryLotOut EUDR-Kennzeichen und committed-source OpenAPI
+  - CRM-/Beleg-Fixtures und Fahrzeug-Identitaetsvertrag
+  - Vier zentrale Herstellerfixes und Paket-Lock
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
@@ -30,7 +32,7 @@ external_gates:
 ai_harness:
   fachlicher_vertrag: Tenantgebundene Kontoauswahl und zentraler Geschaeftstag.
   architektur_vertrag: Bestehende Agrar-Vertragsdomain und zentrale UIX-Kette.
-  daten_vertrag: Keine Fachdatenmutation oder neue Datenbank.
+  daten_vertrag: Eigene isolierte Probe-Testdaten; keine neue Datenbank.
   test_vertrag: Regressionen und lesende Live-Metadatenabnahme.
   security_vertrag: Parameterbindungen und unveraenderte Audit-Schwellen.
   betriebs_vertrag: Gemeinsamer Probe; kein Container, Reset oder Prune.
