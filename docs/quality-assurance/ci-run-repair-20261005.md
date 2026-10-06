@@ -200,3 +200,16 @@ Dockerfile-Rootbefund und weitere Vollsuite-Befunde bleiben offen.
 Am verifizierten GitHub-Stand 4a4104fe1 bestehen Docs Governance, Docs Build,
 OpenAPI Drift, PostgreSQL, kritische E2E und Erntepeak. Security Agent bleibt
 wegen seiner Rohbefunde rot; andere neue Laeufe sind noch nicht abgenommen.
+
+
+Der anschliessende unveraenderte Voll-Audit des neuen Locks meldet
+0 kritische, 3 hohe und 18 moderate Befunde. Die drei hohen Befunde sind
+node-forge GHSA-86w9-cpqp-85rv, braces GHSA-vfj7-8cjw-p6xm und
+http-cache-semantics GHSA-ch52-4w7c-c8xp. Der Audit bleibt deshalb mit
+Exitcode 1 rot. Frozen-Lock-Abnahme fuer alle 36 Workspaces bestand offline
+in 1,1 Sekunden, ohne installierte gemeinsame Pakete zu veraendern.
+
+Meilenstein 71cf8a126 ist auf main verifiziert; develop wurde mit dem echten
+Zwei-Eltern-Merge a0c6376db nachgezogen. Die zwischenzeitlich eingebrachte
+Fahrzeug-/Qualifikationsintegration 93bd71598 bleibt erhalten. Neue Actions
+auf 71cf8a126 sind gestartet bzw. eingereiht; keine Gesamtfreigabe behauptet.
