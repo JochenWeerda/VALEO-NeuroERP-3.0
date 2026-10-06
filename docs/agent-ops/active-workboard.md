@@ -1724,6 +1724,70 @@ einer in einer Notiz.
 
 **Doku:** `docs/quality-assurance/personal-zerlegung-20261006.md`.
 
+## BEWERBERMANAGEMENT-ORDNUNG-20261006 — in Arbeit, Claude Code
+
+**Auftrag:** Die sieben Maengel schliessen, die
+[PERSONAL-ZERLEGUNG-20261006](../quality-assurance/personal-zerlegung-20261006.md)
+benannt und absichtlich **nicht** behoben hat. Die Zerlegung sollte kein Verhalten
+aendern; jetzt wird das Verhalten geaendert, und zwar fuer sich.
+
+| Mangel | Lage |
+| --- | --- |
+| `except Exception: raise HTTPException(503, "applications table not available")` | Jeder Fehler wird zu einer Tabellenaussage — auch ein Rechtefehler, eine verletzte Pruefbedingung oder ein Mandantenfehler. Wer das liest, migriert und sucht an der falschen Stelle |
+| `response_model=PersonalOut` (`extra="allow"`) | Beschreibt nichts; die Liste gibt rohe Zeilen zurueck, das Anlegen `{id, status}` |
+| `list_applications` ohne `limit` | Unbegrenzte Liste |
+| `APPLICATION_STAGES` als `set` | Keine Uebergaenge: Eine **abgelehnte** Bewerbung laesst sich auf `EINGESTELLT` setzen, eine eingestellte wieder auf `EINGANG` |
+| `uuid4` | Projektstandard ist `uuid7` |
+| `domain_hr.applications.status` ist freier Text | Keine Pruefbedingung; die Datenbank nimmt jedes Wort |
+| Lohnwege verwerfen den Mandanten (`noqa: ARG001`) | Fuer eine Preview tragbar, fuer eine DATEV-Uebergabe nicht: Die Antwort nennt nicht, fuer welches Haus gerechnet wurde |
+
+**Der Bestand:** 3 Bewerbungen in der Entwicklungsdatenbank, Staende `EINGANG`
+und `VORAUSWAHL` — beide im Woerterbuch. Es ist also nichts umzuschreiben; die
+Pruefbedingung kann ohne Datenarbeit gelten.
+
+**Die Modellierung, und warum so:**
+* **Das Stufenwoerterbuch bekommt Uebergaenge.** Eine Bewerbungspipeline laeuft
+  vorwaerts; `ABGELEHNT` und `EINGESTELLT` sind endgueltig. Dass eine abgelehnte
+  Bewerbung wieder eingestellt werden kann, ist kein Komfort, sondern ein
+  fehlender Nachweis: Niemand kann spaeter sagen, ob die Ablehnung je galt.
+  Zurueckspringen bleibt moeglich, solange die Pipeline laeuft (eine Vorauswahl
+  kann sich als zu frueh erweisen) — aber nicht aus einem endgueltigen Stand.
+* **Eine Ablehnung braucht einen Grund.** Nicht wegen einer Formvorschrift,
+  sondern weil eine Begruendungspflicht nach § 22 AGG im Streitfall beim
+  Arbeitgeber liegt: Wer nicht sagen kann, warum er abgelehnt hat, traegt die
+  Beweislast ohne Beweis.
+* **Die Pruefbedingung steht in der Datenbank**, nicht nur im Schema: Ein
+  Importweg oder ein Skript umgeht das Schema, die Datenbank nicht.
+* **Der Fehlerweg wird geteilt:** Eine fehlende Tabelle ist ein 503 mit
+  Migrationshinweis, alles andere ein 409 mit dem Grund. Eine
+  Mandantenverletzung ist ein 404.
+
+**Dateibesitz:** `alembic/versions/bewerbung_statuswoerterbuch_20261006.py`,
+`app/services/bewerbung_service.py` (neu),
+`app/api/v1/endpoints/personal_bewerbungen.py`,
+`app/api/v1/endpoints/personal_lohnabrechnung.py` (nur der Mandant in der
+Antwort), `app/api/v1/schemas/personal_bewerbung_schemas.py` (neu),
+`tests/test_bewerbermanagement_ordnung_vertrag.py` (neu),
+`tests/test_personal_zerlegung_vertrag.py` (nur `TestBenannteMaengel` — die
+Vertraege, die den Mangel festhielten, muessen jetzt gehen),
+`docs/quality-assurance/personal-zerlegung-20261006.md` (nur die Mangelliste),
+eigene QA-Doku und dieser Abschnitt.
+
+**Abnahme:** Jeder Bewerbungsweg nennt den Grund eines Fehlschlags und meldet
+keine Tabellenaussage mehr; alle vier Wege haben eigene Antwortmodelle; die Liste
+ist begrenzt; ein verbotener Stufenwechsel ist ein 409 mit den erlaubten Zielen;
+`ABGELEHNT` ohne Grund ist unmoeglich — im Weg **und** in der Datenbank; ein
+unbekannter Stand ist in der Datenbank unmoeglich; `uuid7`; die Lohnantwort nennt
+den Mandanten; die Vertraege aus `TestBenannteMaengel` sind entfernt und die
+QA-Doku der Zerlegung sagt, dass die Maengel behoben sind; Vertraege gegen die
+frische DB und alle Ratschen gruen.
+
+**Risiken:** Dass `ABGELEHNT` endgueltig wird, aendert den Ablauf: Eine
+Fehleingabe ist nicht mehr durch Zuruecksetzen zu heilen, sondern durch eine neue
+Bewerbung. Das ist beabsichtigt (eine Ablehnung ist eine Mitteilung an einen
+Menschen), gehoert aber dem Personal-Owner zur Abnahme. Die Begruendungspflicht
+bei Ablehnung ist eine neue Pflichtangabe in der Maske.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
