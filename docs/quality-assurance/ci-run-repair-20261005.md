@@ -759,3 +759,10 @@ Schemata ebenfalls identisch. 59 Tests insgesamt bestanden. Generierte
 Artefakte werden nur aus dieser Quelle indexseitig integriert; fremde
 Arbeitsbaumversionen bleiben erhalten. Fehlende Einwilligungs-DB-Abnahme
 und Katalog-/Frontend-Modellharmonisierung werden damit nicht geschlossen.
+
+
+## Sharp-Herstellerfix 2026-10-06
+
+Sharp-Herstellerfix 2026-10-06: Root-Override und direkter Procurement-Pin ^0.35.4 -> ^0.35.5; Lock ausschliesslich Sharp-/libvips-Familie (je 54 geaenderte Schluessel in packages/snapshots) und Procurement-Importer. Automatische lightningcss/detect-libc-Nebenaenderung entfernt. Frozen-Lock aller 36 Workspaces offline bestanden. Echter isolierter Windows-Nativtest: Sharp 0.35.5, libvips 8.18.7, librsvg 2.63.2; SVG -> skalierter PNG, Dimensionen, rote RGB-Pixel, JPEG und Ablehnung ungueltiger Bilddaten bestanden. Keine Codeimporte im Procurement-src; tsup external erhalten. Voll-Audit: Sharp-Advisory entfallen, weiterhin 2 high (node-forge/braces), 1 critical (shell-quote), 14 moderate/1 low; Exit 1, keine Ausnahme. Keine lokale Docker-/Linux-Scanfreigabe behauptet. Probe --status lesend erreichbar auf bewerbung_einwilligung_20261006; keine neue DB/Container, Migration, Reset oder Fachschreibtests. Fremde Katalog-/Frontend-WIP erhalten. GitHub 1a77ee718: Docs/OpenAPI/PG/beide E2E/Service Security/Full Security Agent/Erntepeak erfolgreich; Quality/Security Scan/Gesamt-CI fehlgeschlagen. Neue Actions-Abnahme des Fixes ausstehend.
+
+Ausgangslauf: [Security Scan 37502096089](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37502096089). Herstellerfix: [GHSA-wq5f-xc86-pv6w](https://github.com/advisories/GHSA-wq5f-xc86-pv6w).

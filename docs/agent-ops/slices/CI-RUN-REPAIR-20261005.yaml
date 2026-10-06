@@ -36,6 +36,7 @@ file_ownership:
   - Vier Futter-Artikel-Loeschpfade WRITE_ROLES und obligatorischer eigener Tenant; Mischfutter-Fachdelete Guard
   - Unbenutzter Loeschhelfer entfernt; ausschliesslich sinkende Groessen-/Pagination-Ratschen
   - Einwilligungs-Service nur exakte HR-Zuordnung und committed-source Schnittstellenintegration
+  - Sharp-Override und Procurement-Pin nur Herstellerfix 0.35.5 mit nativer Lockfamilie
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
