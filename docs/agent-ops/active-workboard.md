@@ -61,6 +61,11 @@ von erfolgreichen Antworten und bereits gesperrtem 409-Kassenabschluss.
 Keine produktiven DDL-Helfer wieder einfuehren, keine Assertions entfernen;
 aktuelle Tenant-/Fallback-/Sperrvertraege pruefen. Historische Claims abgeschlossen,
 keine geaenderten Arbeitsbaumdateien in diesem Teilclaim.
+**CRM-Smoke-Testclaim (2026-10-06):** kim-performance-smoke.spec.ts auf
+die bereits committed native Weiterleitung statt entferntes KIM-Sidebar-Layout
+umstellen; leads-smoke.spec.ts auf den kanonischen Titel Kundenakte plus
+Lead-Daten/Feldvertrag nachziehen. Budget bleibt bestehen, Redirect-/Entity-/Tab-
+Kontext wird explizit geprueft. Keine Masken-/Renderer-WIP uebernehmen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
