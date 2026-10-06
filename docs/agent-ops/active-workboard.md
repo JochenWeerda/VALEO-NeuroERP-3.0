@@ -120,6 +120,26 @@ Keine produktiven Guards geaendert, gemeinsame Probe ohne Reset verwendet.
 Zwei kanonische API-Vertraege im abschliessenden Lauf gruen (44,53 s),
 zusammen 20 Tests ohne Skip. Register- und Warenkontraktpfade getrennt;
 EUDR prueft reale nichtnegative Register-/Chargenzaehler.
+**Architektur-Mappingclaim (2026-10-06):** Saubere Prefix-Regeln und
+Architekturindex sowie test_generate_architecture_index.py. Committed-source
+meldet sechs unzugeordnete Services und drei EUDR-Endpunkte. Zuordnung gemaess
+bestehenden Grenzen: EUDR dms-compliance, Frachtbrief/WEBFLEET logistics,
+Preis finance, Mitgliederregister platform, Wiegeschein inventory. Minor: keine
+neue Domaenengrenze/Container/API. Index nur aus committeten Inventaren plus
+eigenen Regeln erzeugen; fremde Inventar-WIP nicht veroeffentlichen.
+**Integrationsnachclaim:** Fremder abgeschlossener Commit 8d6eb5afd bleibt
+erhalten. Seine zwei Services etikettendruck_service (inventory, wie der
+Endpoint) und schaden_service (dms-compliance) ebenfalls genau zuordnen.
+Drei Inventare nur aus diesem committed Source erneuern, bestehender Claim.
+**UIX-Testnachclaim:** Saubere test_uix051_legacy_route_migration.py nur
+Customer360-Wrapper-Vertrag: bestehende PartyNativePage-Delegation bis
+UniversalNativeDetailPage pruefen, inklusive Entity/Tab und Screen-ID.
+Kein Masken-/Renderer-WIP und keine Gate-Ausnahme.
+**Architektur-/UIX-Abnahme:** Strict auf committed Source plus eigenen
+Regeln: 932/932 Routen, 269/269 Services, 451/451 Endpoints; --check gruen.
+67 Vertragspruefungen bestanden (0,74 s). Acht Service-/drei Endpoint-
+Zuordnungen explizit abgesichert. Fremde Inventar-WIP bleibt erhalten;
+CRM-Delegation prueft Entity/Tab bis zum zentralen Renderer.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
@@ -1317,7 +1337,7 @@ Datenbanken; alle vier Ratschen gruen.
 
 **Doku:** `docs/quality-assurance/personal-organisation-zeitkonto-20261006.md`.
 
-## QUITTUNG-OHNE-VORGANG-20261006 — in Arbeit, Claude Code
+## QUITTUNG-OHNE-VORGANG-20261006 — abgeschlossen, Claude Code
 
 **Befund:** Drei Wege quittieren einen Vorgang, der **nicht stattfindet**. Das ist
 nicht derselbe Fehler wie eine fehlende Tabelle: Dort antwortet der Weg 503 und
@@ -1393,6 +1413,65 @@ stand dort eine Hagelschadenmeldung, die niemand gemeldet hatte. Dass das Melden
 ein eigener Schritt ist, aendert den Ablauf in der Maske — fachliche Abnahme beim
 Versicherungs-Owner. Es wird **kein** Versandweg gebaut (E-Mail, Fax, Spooler);
 das bleibt eine benannte Luecke.
+
+**Ergebnis (2026-10-06):** Migration `quittung_ohne_vorgang_20261006` legt vier
+Tabellen an (`domain_erp.versicherungen`, `.schaden_meldungen`, `.drucker`,
+`.druckauftraege`) plus drei Erinnerungsspalten an der Gelangensbestaetigung.
+Zehn Pruefbedingungen, darunter `ck_schaden_meldung_datiert`
+(`(status='ENTWURF') = (gemeldet_am IS NULL)`) und
+`ck_druckauftrag_druck_datiert` — damit ist `GEDRUCKT` ohne Zeitpunkt unmoeglich,
+solange kein Spooler angebunden ist.
+
+**Das Erfassen ist kein Melden:** `POST /schaeden/meldungen` erzeugt einen
+`ENTWURF`; `POST .../melden` haelt wann, durch wen und auf welchem Weg fest. Ohne
+zugeordneten Vertrag wird das Melden abgewiesen — ohne ihn ist nicht
+feststellbar, wem gemeldet wurde und welche Frist galt. Die **Meldefrist steht am
+Vertrag**, `melden_bis` ist abgeleitet; ohne Frist am Vertrag gibt es keine
+erfundene.
+
+**Der Druckauftrag behauptet keinen Druck:** Stand `ANGELEGT` und ein eigenes
+Feld `uebermittlung: "NICHT_ANGEBUNDEN"`. Ein unbekannter oder fremder Drucker
+ist ein 422; vorher ging jede Kennung durch.
+
+**Die Erinnerung behauptet keinen Versand:** `erinnerung_vermerkt`,
+`versand: "NICHT_KONFIGURIERT"`, Versuche gezaehlt.
+
+**Fund im Frontend:** `useSchaeden` zeigte auf `/api/v1/schaeden` — eine Route,
+die es nicht gibt — und `makeHook` hielt ueber `initialData` eine erfundene
+Hagelschadenmeldung ueber 12.500 EUR dauerhaft sichtbar. Die Abfrage schlug immer
+fehl, und niemand sah es.
+
+**Altlasttest:** `test_schaeden_and_etiketten_endpoints_work` uebergab den Drucker
+`DR-001`, den es nie gab, und erwartete `201` — er prueffte das Erfundene mit.
+Jetzt legt er erst einen Drucker an und prueft, dass eine unbekannte Kennung ein
+422 ist.
+
+**36 neue Vertraege, 39 mit dem Parallelinstallationstest, 44 im Umfeld gruen**;
+Migration auf beiden Datenbanken; alle vier Ratschen gruen; tsc und eslint sauber.
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **4 -> 2**. Es bleiben
+`domain_crm.interessenten` (customers.py) und `domain_shared.notifications`
+(compat.py).
+
+**Handshakes:**
+1. Die Masken zeigen jetzt **leere Listen** statt Demo-Daten. Das wirkt wie ein
+   Rueckschritt und ist das Gegenteil.
+2. Das Melden ist ein eigener Schritt — fachliche Abnahme beim
+   Versicherungs-Owner; ein Maskenweg dafuer fehlt noch (heute nur ueber die API).
+3. **Kein Versandweg gebaut** (E-Mail/Fax an den Versicherer, Druckspooler). Die
+   Staende `UEBERMITTELT`/`GEDRUCKT` sind dafuer vorgesehen.
+4. **Systemischer Fund, eigener Slice:** `makeHook` in `lib/api/betrieb.ts` setzt
+   bei rund **vierzig** Hooks erfundene `initialData` als Fallback. Schlaegt die
+   Abfrage fehl, bleibt die Attrappe sichtbar und der Fehler unsichtbar. Hier ist
+   nur `useSchaeden` korrigiert.
+5. **Fremder Rotstand:** 7 Vitest-Fehlschlaege zu Touch-Zielen (44 px) und
+   Start-Dashboard; `button.tsx` und `start-dashboard.tsx` sind fremder WIP im
+   geteilten Baum.
+6. `open_items.py` traegt eine "In production"-Notiz zu einer fehlenden
+   `open_item_payments`-Tabelle. Dort **wird** geschrieben, also keine falsche
+   Quittung — aber ein Modellierungsrueckstand.
+
+**Doku:** `docs/quality-assurance/quittung-ohne-vorgang-20261006.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

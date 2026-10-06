@@ -100,6 +100,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `einvoice_generator` | E-Rechnung XRechnung/ZUGFeRD Generator (EN 16931). |
 | `eric_submission_service` | ELSTER ERiC Submission Service für eBilanz-Übertragung. |
 | `esg_footprint_service` | ESG-CO2e-Fussabdruck je Charge (UIX-082) — auditierbarer Berechnungskern. |
+| `etikettendruck_service` | Drucker und Druckauftraege — ein Auftrag, der gespeichert ist. |
 | `eudr_register_service` | EUDR-Register — die gemeinsame Mitte der drei Wege. |
 | `event_schema_registry` | Event Schema Registry — NC-G1 |
 | `external_mock_harness_service` | EXTERNAL-MOCK-HARNESS-001 — Simulierte Responses fuer externe Systeme. |
@@ -252,6 +253,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `sales_posting_service` | Service for creating FIBU journal entries along the Auftrag → Lieferschein → Rechnung chain. |
 | `sales_preisabweichung_service` | DOM-SALES-004.4 — Preisabweichungs-Prüfung + Eskalation/Freigabe Service. |
 | `sales_storno_service` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4) — durchgängig. |
+| `schaden_service` | Schadenmeldungen und Versicherungsvertraege — eine Meldung, die es gibt. |
 | `scheduler_service` | Scheduler Service |
 | `secrets_vault` | Secrets Vault Service — NC-15 |
 | `security_observability` | Central observability for security-relevant block and violation events. |

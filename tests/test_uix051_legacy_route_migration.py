@@ -56,10 +56,24 @@ class TestUIX051NativeWrapperPages:
     ])
     def test_native_page_uses_correct_screen_id(self, rel_path: str, expected_screen_id: str):
         content = (PAGES_DIR / rel_path).read_text(encoding="utf-8")
-        assert "UniversalNativeDetailPage" in content, f"{rel_path}: muss UniversalNativeDetailPage verwenden"
-        assert f'screenId="{expected_screen_id}"' in content, (
-            f"{rel_path}: screenId='{expected_screen_id}' fehlt"
-        )
+        if rel_path == "crm/customer-360-native.tsx":
+            assert "from '@/pages/crm/party-native'" in content
+            assert "<PartyNativePage" in content
+            assert "entityId={id}" in content
+            assert "requestedSectionKey={resolvePartySectionKey(" in content
+            assert "routeId ?? readQueryParam(searchParams, 'id')" in content
+            assert "readQueryParam(searchParams, 'tab')" in content
+            delegated = (PAGES_DIR / "crm/party-native.tsx").read_text(encoding="utf-8")
+            assert "<UniversalNativeDetailPage" in delegated
+            assert f"kind === 'lead' ? 'crm/lead' : '{expected_screen_id}'" in delegated
+            assert "screenId={screenId}" in delegated
+            assert "entityId={entityId}" in delegated
+            assert "requestedSectionKey={requestedSectionKey}" in delegated
+        else:
+            assert "UniversalNativeDetailPage" in content, f"{rel_path}: muss UniversalNativeDetailPage verwenden"
+            assert f'screenId="{expected_screen_id}"' in content, (
+                f"{rel_path}: screenId='{expected_screen_id}' fehlt"
+            )
 
 
 class TestUIX051RouteAliases:

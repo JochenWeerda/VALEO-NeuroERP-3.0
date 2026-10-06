@@ -199,16 +199,21 @@ export default function SchadenMeldungPage(): JSX.Element {
     try {
       await meldungMutation.mutateAsync({
         art: schaden.art,
-        datum: schaden.datum,
+        schadendatum: schaden.datum,
         ort: schaden.ort || undefined,
         beschreibung: schaden.beschreibung,
         schadenhoehe: schaden.schadenhoehe,
         versicherung_id: schaden.versicherung_id || undefined,
         zeuge: schaden.zeuge || undefined,
       })
+      // Nicht „übermittelt": Es gibt keinen Versandweg zum Versicherer, und der
+      // Endpunkt erzeugt seit 06.10.2026 ausdrücklich einen Entwurf. Vorher stand
+      // hier „erfolgreich übermittelt" — während nichts gespeichert wurde.
       toast({
-        title: 'Schadenmeldung erstellt',
-        description: 'Die Meldung wurde erfolgreich übermittelt.',
+        title: 'Schaden erfasst (Entwurf)',
+        description:
+          'Der Schaden ist erfasst, aber noch nicht gemeldet. Unterrichten Sie die '
+          + 'Versicherung und halten Sie die Meldung anschließend im Register fest.',
       })
       navigate('/schaeden/liste')
     } catch {

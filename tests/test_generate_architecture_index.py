@@ -74,3 +74,22 @@ def test_build_index_has_logistics_and_hr_domains() -> None:
     index = build_index()
     assert "logistics" in index["domains"]
     assert "hr" in index["domains"]
+
+
+@pytest.mark.parametrize("stem,domain", [
+    ("etikettendruck_service", "inventory"),
+    ("schaden_service", "dms-compliance"),
+    ("eudr_register_service", "dms-compliance"),
+    ("frachtbrief_service", "logistics"),
+    ("genossenschaft_service", "platform"),
+    ("preisfindung_service", "finance"),
+    ("webfleet_connect", "logistics"),
+    ("wiegung_service", "inventory"),
+])
+def test_recent_services_keep_their_domain(stem: str, domain: str) -> None:
+    assert service_domain(stem) == domain
+
+
+@pytest.mark.parametrize("stem", ["eudr_anbindung", "eudr_chargen", "eudr_register"])
+def test_eudr_endpoints_belong_to_compliance(stem: str) -> None:
+    assert endpoint_domain(stem) == "dms-compliance"

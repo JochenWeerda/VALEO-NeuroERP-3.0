@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import Body, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -109,9 +109,25 @@ class GelangensbestaetigungFaelligOut(BaseModel):
 
 
 class MahnungOut(BaseModel):
-    """Was das Erinnern zurueckgibt."""
+    """Was das Erinnern zurueckgibt.
 
-    erinnerung_gesendet: bool
+    Bis zum 06.10.2026 stand hier ``erinnerung_gesendet: True`` — neben dem
+    Kommentar „Stub: In production this would send email/fax". Es wurde nichts
+    versendet. Die Erinnerung ist Teil der Nachweiskette nach § 17a UStDV; eine
+    Antwort „gesendet" heisst, dass niemand mehr nachhakt, und die Bestaetigung
+    fehlt am Ende in der Pruefung.
+
+    Jetzt sagt die Antwort, dass der Versuch **festgehalten**, nicht versendet
+    wurde: Der Nachweis, dass jemand erinnern wollte, ist etwas wert; die
+    Behauptung, es sei versendet, ist es nicht.
+    """
+
+    erinnerung_vermerkt: bool
+    #: ``NICHT_KONFIGURIERT``, solange kein Versandweg angebunden ist.
+    versand: str
+    versuche: int
+    angefordert_am: Optional[str] = None
+    hinweis: str
     token: str
 
 
@@ -309,25 +325,48 @@ def list_faellig(
         ) from exc
 
 
+#: Solange kein Versandweg (E-Mail, Fax) angebunden ist, ist dies die Wahrheit
+#: ueber die Erinnerung. Sie steht in der Antwort, damit niemand annimmt, der
+#: Empfaenger sei angeschrieben worden.
+VERSAND_UNKONFIGURIERT = "NICHT_KONFIGURIERT"
+
+
 @router.post(
     "/{entry_id}/mahnung",
     response_model=MahnungOut,
-    summary="Erinnerung senden (Stub)",
+    summary="Erinnerung vermerken",
 )
 def mahnung_senden(
     entry_id: str,
+    angefordert_durch: Optional[str] = Body(default=None, embed=True),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
+    """Haelt fest, dass an die Gelangensbestaetigung erinnert werden soll.
+
+    Es wird **nichts versendet** — es ist kein Versandweg angebunden. Vorher
+    antwortete dieser Weg ``erinnerung_gesendet: true`` und tat nichts; die
+    Erinnerung ist Teil der Nachweiskette nach § 17a UStDV, und eine falsche
+    Quittung heisst, dass niemand mehr nachhakt.
+
+    Festgehalten werden Zeitpunkt, Anzahl der Versuche und wer sie angefordert
+    hat. Das ist der Nachweis, dass erinnert werden sollte.
+    """
     try:
         row = db.execute(
             text(
-                "SELECT token FROM domain_compliance.gelangensbestaetigung "
-                "WHERE id = :id AND tenant_id = :tenant_id"
+                "UPDATE domain_compliance.gelangensbestaetigung "
+                "SET erinnerung_angefordert_am = NOW(), "
+                "    erinnerung_versuche = COALESCE(erinnerung_versuche, 0) + 1, "
+                "    erinnerung_angefordert_durch = :durch "
+                "WHERE id = :id AND tenant_id = :tenant_id "
+                "RETURNING token, erinnerung_versuche, erinnerung_angefordert_am"
             ),
-            {"id": entry_id, "tenant_id": tenant_id},
+            {"id": entry_id, "tenant_id": tenant_id, "durch": angefordert_durch},
         ).fetchone()
+        db.commit()
     except Exception as exc:
+        db.rollback()
         raise HTTPException(
             status_code=503,
             detail={"error": str(exc), "migration_hint": MIGRATION_HINT},
@@ -335,6 +374,21 @@ def mahnung_senden(
     if not row:
         raise HTTPException(status_code=404, detail="Gelangensbestätigung nicht gefunden")
 
-    # Stub: In production this would send email/fax to empfaenger
-    logger.info("Mahnung für Gelangensbestätigung %s versendet (Stub)", entry_id)
-    return {"erinnerung_gesendet": True, "token": row.token}
+    logger.info(
+        "Erinnerung an Gelangensbestaetigung %s vermerkt (Versuch %s, kein Versandweg)",
+        entry_id, row.erinnerung_versuche,
+    )
+    return {
+        "erinnerung_vermerkt": True,
+        "versand": VERSAND_UNKONFIGURIERT,
+        "versuche": int(row.erinnerung_versuche or 0),
+        "angefordert_am": (
+            row.erinnerung_angefordert_am.isoformat()
+            if row.erinnerung_angefordert_am else None
+        ),
+        "hinweis": (
+            "Es ist kein Versandweg angebunden. Der Empfaenger ist zu unterrichten; "
+            "dieser Vermerk haelt nur fest, dass erinnert werden soll."
+        ),
+        "token": row.token,
+    }

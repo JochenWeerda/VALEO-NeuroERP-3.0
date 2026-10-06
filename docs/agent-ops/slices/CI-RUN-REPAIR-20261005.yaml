@@ -17,6 +17,8 @@ file_ownership:
   - Vier zentrale Herstellerfixes und Paket-Lock
   - Tenantgebundene Einkaufs-/Settlement-Buchungsfixtures
   - Kanonische Vertragsregister- und EUDR-UAT-Vertraege
+  - Architektur-Prefix-Zuordnungen und committed-source Inventarindex
+  - UIX-051 CRM-Delegationstest
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.

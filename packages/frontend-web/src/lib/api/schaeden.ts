@@ -13,33 +13,65 @@ export type Versicherung = {
   vertragsnummer: string
   typ: string
   versicherer: string
-  gueltig_bis?: string
+  gueltig_von?: string | null
+  gueltig_bis?: string | null
+  /** Frist zur Schadenanzeige; steht am Vertrag, weil sie je Police gilt. */
+  meldefrist_tage?: number | null
+  ansprechpartner?: string | null
+  kontakt?: string | null
 }
 
 export type SchadenMeldungCreate = {
   art: string
-  datum: string
+  /** Hieß bis 06.10.2026 `datum` — die Spalte heißt `schadendatum`. */
+  schadendatum: string
   ort?: string
   beschreibung: string
   schadenhoehe: number
   versicherung_id?: string
   zeuge?: string
+  erfasst_durch?: string
 }
 
+/**
+ * Eine Schadenmeldung.
+ *
+ * Bis zum 06.10.2026 antwortete das Anlegen `status: "gemeldet"` und schrieb
+ * nichts; die Liste gab eine erfundene Hagelschadenmeldung zurück. Das Erfassen
+ * erzeugt jetzt einen **Entwurf**: Es gibt keinen Versandweg zum Versicherer, und
+ * das System darf nicht behaupten, er sei unterrichtet. Das Melden ist ein
+ * eigener Schritt (`useMeldungMelden`), der festhält, wann, durch wen und auf
+ * welchem Weg.
+ */
 export type SchadenMeldungResponse = {
   id: string
+  tenant_id: string
   meldungsnummer: string
   art: string
-  datum: string
-  ort?: string
+  schadendatum?: string | null
+  ort?: string | null
   beschreibung: string
-  schadenhoehe: number
-  versicherung_id?: string
-  versicherung_bezeichnung?: string
-  zeuge?: string
-  status: string
-  erstellt_am: string
-  aktualisiert_am: string
+  schadenhoehe: number | string
+  versicherung_id?: string | null
+  zeuge?: string | null
+  status: 'ENTWURF' | 'GEMELDET' | 'IN_BEARBEITUNG' | 'REGULIERT' | 'ABGELEHNT'
+  gemeldet_am?: string | null
+  gemeldet_durch?: string | null
+  meldeweg?: string | null
+  regulierungsbetrag?: number | string | null
+  abgelehnt_grund?: string | null
+  /** Abgeleitet aus der Frist des Vertrags, nicht gespeichert. */
+  meldefrist_tage?: number | null
+  melden_bis?: string | null
+  frist_ueberschritten: boolean
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export type MeldungMelden = {
+  meldeweg: 'TELEFON' | 'EMAIL' | 'POST' | 'FAX' | 'PORTAL' | 'PERSOENLICH'
+  gemeldet_durch?: string
+  gemeldet_am?: string
 }
 
 // ========== QUERY KEYS ==========

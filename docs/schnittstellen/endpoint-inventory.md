@@ -169,7 +169,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `ernte_planung` | Ernte-Planungsübersicht — CRUD für Ernteplanung (Schlag, Kultur, Menge, Status). |
 | `ers_settlement` | Einkauf — ERS (Evaluated Receipt Settlement) |
 | `esg_footprint` | UIX-082 ESG charge footprint API. |
-| `etiketten` | Etiketten (Label Printing) API |
+| `etiketten` | Etikettendrucker und Druckauftraege. |
 | `eudr_anbindung` | EUDR — die zwei Richtungen zum EU-Informationssystem (Art. 33). |
 | `eudr_chargen` | EUDR-Chargenkennzeichnung — welche Erklaerung deckt diese Charge? |
 | `eudr_register` | EUDR-Sorgfaltserklaerungen — das Register. |
@@ -399,7 +399,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_storno` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4). |
 | `sanctions_compliance` | Sanctions Compliance API — Verbotsliste / Sanktionsprüfung |
 | `scan` | Mobile-Scan / Barcode-Dispatch API. |
-| `schaeden` | Schaeden (Damage Reports) API |
+| `schaeden` | Schadenmeldungen und Versicherungsvertraege. |
 | `security_monitoring` | Security monitoring surfacing for violation and block events. |
 | `self_billing` | Self-Billing API endpoints. |
 | `service_anfragen` | Service-Anfragen API — CRUD for service requests, feedback, and case closure. |

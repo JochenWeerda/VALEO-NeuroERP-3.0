@@ -10,11 +10,12 @@ import { apiClient } from '@/lib/api-client'
 export type Drucker = {
   id: string
   name: string
-  standort: string
-  typ: string
-  modell: string
-  status: string
-  ip?: string
+  standort?: string | null
+  typ?: string | null
+  modell?: string | null
+  status: 'online' | 'offline' | 'fehler' | 'wartung'
+  ip?: string | null
+  aktiv?: boolean
 }
 
 export type DruckauftragCreate = {
@@ -37,9 +38,19 @@ export type DruckauftragResponse = {
   eingang?: string
   anzahl_etiketten: number
   drucker_id: string
-  drucker_name: string
-  status: string
-  erstellt_am: string
+  drucker_name?: string | null
+  status: 'ANGELEGT' | 'UEBERMITTELT' | 'GEDRUCKT' | 'FEHLER' | 'ABGEBROCHEN'
+  /**
+   * Der Versandstand, getrennt vom Auftragsstand. `NICHT_ANGEBUNDEN` heißt: Der
+   * Auftrag ist gespeichert, aber es ist kein Spooler angebunden — es wurde
+   * nichts gedruckt. Bis zum 06.10.2026 antwortete der Weg `status: "erstellt"`
+   * und schrieb nicht einmal eine Zeile.
+   */
+  uebermittlung: 'NICHT_ANGEBUNDEN' | 'UEBERMITTELT'
+  uebermittelt_am?: string | null
+  gedruckt_am?: string | null
+  fehler?: string | null
+  created_at?: string | null
 }
 
 // ========== QUERY KEYS ==========
