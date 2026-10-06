@@ -309,7 +309,9 @@ async def delete_mischfuttermittel(
     misch_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
+    require_roles(user, WRITE_ROLES)
     item = db.query(Mischfuttermittel).filter(
         and_(Mischfuttermittel.id == misch_id, Mischfuttermittel.tenant_id == tenant_id)
     ).first()

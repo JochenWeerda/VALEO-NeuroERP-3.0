@@ -694,3 +694,68 @@ Auf 22bf4b927 ist Service Security 37449627295 vollstaendig erfolgreich
 (Multichannel-Fix in Linux/GitHub bestaetigt). PostgreSQL, kritische E2E,
 Doku und Superglue bestehen. Smoke, Quality, Gesamt-CI und andere
 Security-Pruefungen sind rot; neue Integrationsabnahme nach Push ausstehend.
+
+
+## Futter-Loeschung: Schreibrolle und strikte Mandantentrennung
+
+Die vier tatsaechlich zuerst ausgefuehrten Artikel-Einzel-/Bulk-
+Loeschhandler in compat.py pruefen get_current_user/WRITE_ROLES vor
+Service-/DB-Zugriff. Auch der nachrangige Mischfutter-Fachdelete hat den
+bisher fehlenden Guard. Keine neue Rolle, Route oder Antwortform; der
+Frontend-Artikelvertrag bleibt bestehen. Andere Futter-Schreibpfade und
+die Katalog-/Frontend-Modellmigration sind weiterhin offene Folgeslices.
+
+soft_delete_artikel bindet die SQL-Abfrage obligatorisch an self.tenant_id.
+Artikel ohne Mandantenzuordnung werden nicht mehr mitgeloescht; fremde und
+null-Mandanten werden wie unbekannte IDs als missing/404 behandelt. Fehlender
+Mandant wirft ValidationFailedError vor DB-Zugriff. Der redundante externe
+tenant_id-Parameter wird nach Abgleich aller vier Verbraucher entfernt,
+so dass die Serviceinstanz die einzige Mandantenquelle ist. Der alte
+_soft_delete_futter_articles-Helfer hat keine Verbraucher und ist entfernt.
+
+37 Tests bestehen in 299,22 Sekunden inklusive main-Import: 22 neue
+Loesch-/SQL-/Rollen-/Dispatchvertraege plus 15 bestehende Listen-/Router-
+Vertraege. First-FULL-Match der echten main:app wird ausgewaehlt; Leser
+und fachfremde Rolle erhalten 403 bevor NoDatabase ueberhaupt eine Abfrage
+akzeptiert. Erlaubter Writer erreicht den echten Service mit SQLAlchemy-
+SQLite-Session; nur eigener Artikel wird deaktiviert. Fremde/null/fehlende
+Einzel-ID liefert 404, Bulk liefert unveraenderte requested/deleted/
+missing_ids/errors. Ein gemeinsamer SQLite-In-Memory-Speicher fuer die
+Suite; explizites BEGIN plus Session-Commit innerhalb Savepoint und aeusserer
+Rollback isolieren alle Tests. Keine PostgreSQL-Fachschreibtests, neue
+Datenbank oder Dockerinstanz. Initiale Pytest-Collectionwarnung durch den
+Hilfsklassennamen TestBase beseitigt (FeedDeleteBase), unveraenderte Logik.
+Bestehende Starlette/httpx-Deprecation ist kein neuer Funktionsfehler.
+
+Groessengate bestanden, ausschliesslich compat.py-Grenze 3621 auf 3589
+gesenkt. Paginierungs-Alt-Eintrag des entfernten Helfers 1 auf 0 entfernt,
+283 Abfragen/256 Funktionen; Baseline-Integritaet gegen ed5650ad2 bestanden.
+Keine Ausnahme oder Schwellenanhebung. 22 Architekturtests bestehen
+(3,34 s); exakte bewerbung_einwilligung_service: hr-Zuordnung integriert
+parallel committed b7b6a042c. Dessen fehlende DB-Abnahme bleibt offen;
+Fachcode, Migration und Masken werden nicht angefasst. Inventare/Index
+aus committed 173a80fbc plus drei eigenen Sicherheitsdateien: 932/932
+Routen, 273/273 Services, 454/454 Endpoint-Module; keine neue Domänengrenze.
+
+Gemeinsamer valeo_probe --status weiterhin Timeout; Docker-Engine HTTP 500,
+Windows-Dienst com.docker.service ist gestoppt. Start-Service wurde versucht,
+scheitert aber am Windows-Recht zum Oeffnen dieses Dienstes. Kein Restart
+laufender Ressourcen, Start neuer Container, Reset oder Migration.
+Katalog bleibt unveraendert und Drift offen. Kein neuer CI-Schema-Upload.
+
+GitHub auf ed5650ad2 bestaetigt OpenAPI, Service Security, PostgreSQL,
+beide E2E, Full Security Agent und Doku. Quality (Katalog plus zwei
+Frontend-Tests), anderer Security Scan und Gesamt-CI weiterhin rot.
+
+
+Finale OpenAPI-Abnahme aus committed 173a80fbc plus drei eigenen
+Sicherheitsdateien: alle bisherigen 3100 Pfade und HTTP-Methoden erhalten;
+exakt neuer /api/v1/personal/applications/{application_id}/einwilligung
+mit GET/POST/DELETE aus b7b6a042c integriert (3101 Pfade).
+render(build_spec()) erneut kanonisch, 41 Routerkonflikte unveraendert.
+Fuer die vier bisherigen Futter-Loeschpfade wurden responses und
+requestBody exakt gegen vorherige Spec verglichen, alle drei Bulk-DTO-
+Schemata ebenfalls identisch. 59 Tests insgesamt bestanden. Generierte
+Artefakte werden nur aus dieser Quelle indexseitig integriert; fremde
+Arbeitsbaumversionen bleiben erhalten. Fehlende Einwilligungs-DB-Abnahme
+und Katalog-/Frontend-Modellharmonisierung werden damit nicht geschlossen.

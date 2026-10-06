@@ -24,6 +24,8 @@ from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.core.logging import get_correlation_id
 from app.api.v1.endpoints.futter_read import router as futter_read_router
+from app.agrar.rations.authz import WRITE_ROLES, require_roles
+from app.auth.deps import User, get_current_user
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AuditLog, LkwAnnahmeQueue
 from app.documents.router_helpers import get_repository, list_from_store, get_from_store, save_to_store
@@ -1156,9 +1158,11 @@ router.include_router(futter_read_router)
 
 @router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter einzel item lÃ¶schen")
 async def delete_futter_einzel_item(
-    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> Response:
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id], tenant_id)
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id])
     if result["deleted"] == 0:
         raise HTTPException(status_code=404, detail="Einzelfuttermittel nicht gefunden")
     return Response(status_code=204)
@@ -1166,17 +1170,21 @@ async def delete_futter_einzel_item(
 
 @router.post("/futter/einzelfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter einzel Bulk")
 async def bulk_delete_futter_einzel(
-    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> FutterBulkDeleteOut:
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids, tenant_id)
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids)
     return FutterBulkDeleteOut(**result)
 
 
 @router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter misch item lÃ¶schen")
 async def delete_futter_misch_item(
-    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> Response:
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id], tenant_id)
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id])
     if result["deleted"] == 0:
         raise HTTPException(status_code=404, detail="Mischfuttermittel nicht gefunden")
     return Response(status_code=204)
@@ -1184,9 +1192,11 @@ async def delete_futter_misch_item(
 
 @router.post("/futter/mischfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter misch Bulk")
 async def bulk_delete_futter_misch(
-    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> FutterBulkDeleteOut:
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids, tenant_id)
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids)
     return FutterBulkDeleteOut(**result)
 
 
@@ -1248,48 +1258,6 @@ class NaehrwertBerechnungResult(BaseModel):
     omd_methode: str
     omd_fan1_pct: float
     modus: str
-
-
-def _soft_delete_futter_articles(
-    db: Session,
-    *,
-    ids: list[str],
-    tenant_id: str | None,
-) -> FutterBulkDeleteOut:
-    filtered_ids = [item_id for item_id in ids if item_id]
-    if not filtered_ids:
-        raise HTTPException(status_code=400, detail="Keine Futtermittel-IDs Ã¼bergeben")
-
-    query = db.query(ArticleModel).filter(ArticleModel.id.in_(filtered_ids))
-    if hasattr(ArticleModel, "tenant_id") and tenant_id:
-        query = query.filter((ArticleModel.tenant_id == tenant_id) | (ArticleModel.tenant_id.is_(None)))
-    articles = query.all()
-    articles_by_id = {str(article.id): article for article in articles}
-
-    deleted = 0
-    errors: list[FutterBulkDeleteErrorOut] = []
-    for item_id in filtered_ids:
-        article = articles_by_id.get(item_id)
-        if article is None:
-            continue
-        try:
-            article.is_active = False
-            deleted += 1
-        except Exception as exc:
-            errors.append(FutterBulkDeleteErrorOut(id=item_id, detail=str(exc)))
-
-    if deleted > 0:
-        db.commit()
-    else:
-        db.rollback()
-
-    missing_ids = [item_id for item_id in filtered_ids if item_id not in articles_by_id]
-    return FutterBulkDeleteOut(
-        requested=len(filtered_ids),
-        deleted=deleted,
-        missing_ids=missing_ids,
-        errors=errors,
-    )
 
 
 @router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult, summary="Naehrwerte berechne")
