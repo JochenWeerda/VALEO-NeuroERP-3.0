@@ -1847,6 +1847,81 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
+## BEWERBUNG-LOESCHLAUF-20261006 — in Arbeit, Claude Code
+
+**Auftrag:** Den Loeschweg nachziehen, den
+[Bewerbermanagement-Ordnung](../quality-assurance/bewerbermanagement-ordnung-20261006.md)
+als Luecke benannt hat: Es gibt einen Loeschweg je Bewerbung, aber **keine Frist
+und keinen Lauf**, der ihn anstoesst.
+
+**Die Pflicht:** Art. 5 Abs. 1 lit. e DSGVO — personenbezogene Daten nicht
+laenger halten als fuer den Zweck noetig. Fuer Bewerberdaten ist der Zweck mit dem
+Verfahren erledigt; die ueblichen sechs Monate nach der Ablehnung leiten sich aus
+§ 15 Abs. 4 AGG ab (zwei Monate Geltendmachung) plus Zustellung und
+Klagefrist-Puffer. `entschieden_am` ist seit dem Vorslice vorhanden und damit der
+Fristanker.
+
+**Drei Entscheidungen, und warum so:**
+
+1. **Eine eigene Aufbewahrungsregel, nicht `gobd_aufbewahrungsrichtlinien`.**
+   Die GoBD-Richtlinie rechnet in **Jahren** und sagt "mindestens so lange"; hier
+   gilt das **Gegenteil** — "hoechstens so lange" — und die Einheit ist der Tag.
+   Zwei entgegengesetzte Pflichten gehoeren nicht in eine Tabelle: Wer sie
+   zusammenlegt, kann spaeter nicht mehr sagen, ob eine Zahl eine Untergrenze oder
+   eine Obergrenze ist.
+2. **Die Loeschsperre wird wiederverwendet.** `public.gobd_loeschsperren` ist
+   trotz ihres Namens keine GoBD-Sache, sondern der allgemeine Begriff: Ein
+   Dokument, das nicht geloescht werden darf. Laeuft eine AGG-Klage, sind die
+   Bewerberdaten **Beweismittel** und duerfen nicht weg. Eine zweite Sperrtabelle
+   waere genau die Dublette, die diese Welle abbaut.
+3. **Ohne Regel wird nicht geloescht.** Gibt es fuer den Mandanten keine
+   Aufbewahrungsregel, weist der Lauf ab — er loescht **nicht** nach einem
+   angenommenen Standardwert. Eine Frist, die niemand beschlossen hat, ist keine
+   Grundlage, um Daten zu vernichten.
+
+**Was gebaut wird** (Migration `bewerbung_loeschlauf_20261006`):
+* `domain_hr.bewerbung_aufbewahrung` — je Mandant eine Regel in **Tagen**, mit
+  gesetzlicher Grundlage und Schalter. Keine Vorbefuellung.
+* `domain_hr.applications.aufbewahrung_einwilligung_bis` — die Einwilligung zur
+  laengeren Aufbewahrung (Talentpool, Art. 6 Abs. 1 lit. a). Wer eingewilligt hat,
+  wird nicht mitgeloescht.
+* `domain_hr.bewerbung_loeschlaeufe` — der Nachweis **ohne Personenbezug**:
+  Zeitpunkt, angewandte Frist, Stichtag, geprueft, geloescht, uebersprungen (je
+  Grund), durch wen. Man muss beweisen koennen, dass geloescht wurde, ohne zu
+  behalten, **was** geloescht wurde.
+
+**Zwei Wege:** `GET /personal/applications/loeschlauf/faellig` zeigt, was faellig
+waere (Trockenlauf — personenbezogene Daten unbesehen zu vernichten ist
+leichtfertig), `POST /personal/applications/loeschlauf` fuehrt aus.
+
+**Dateibesitz:** `alembic/versions/bewerbung_loeschlauf_20261006.py`,
+`app/services/bewerbung_loeschlauf_service.py` (neu),
+`app/api/v1/endpoints/personal_bewerbungen.py` (nur die zwei neuen Wege),
+`app/api/v1/schemas/personal_bewerbung_schemas.py` (nur die neuen Modelle),
+`app/services/bewerbung_service.py` (nur das neue Feld in `FELDER`),
+`tests/test_bewerbung_loeschlauf_vertrag.py` (neu),
+`docs/quality-assurance/bewerbermanagement-ordnung-20261006.md` (nur der offene
+Punkt 3), eigene QA-Doku und dieser Abschnitt.
+
+**Montagereihenfolge:** `/applications/loeschlauf/faellig` muss **vor**
+`/applications/{application_id}` deklariert sein, sonst liest der Platzhalter
+`loeschlauf` als Bewerbungskennung und antwortet 404. Ein Vertrag haelt das fest.
+
+**Abnahme:** Ohne Aufbewahrungsregel loescht der Lauf nichts und sagt warum; mit
+Regel loescht er genau die entschiedenen Bewerbungen, deren Frist abgelaufen ist;
+offene Bewerbungen bleiben unberuehrt; eine Einwilligung und eine aktive
+Loeschsperre schuetzen vor Loeschung und erscheinen im Protokoll als
+uebersprungen; der Trockenlauf aendert nichts; das Protokoll enthaelt **keinen**
+Personenbezug; alles mandantengebunden; Vertraege gegen die frische DB und alle
+Ratschen gruen.
+
+**Risiken:** Ein Loeschlauf vernichtet Daten endgueltig. Er wird **nicht**
+automatisch geplant — das waere ohne Aufsicht leichtfertig; er ist ein Weg, den
+jemand aufruft. Die Einrichtung eines regelmaessigen Laufs und die Festlegung der
+Frist gehoeren dem Datenschutz-Owner. Dass der Lauf ohne Regel nichts tut, kann
+als Fehlfunktion missverstanden werden; die Antwort sagt deshalb ausdruecklich,
+dass eine Regel fehlt.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
