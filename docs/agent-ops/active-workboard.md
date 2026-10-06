@@ -1965,6 +1965,55 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
+## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — in Arbeit, Claude Code
+
+**Auftrag:** Offenen Punkt 4 aus
+[Die Einwilligung zur laengeren Aufbewahrung](../quality-assurance/bewerbung-einwilligung-20261006.md)
+schliessen: Der Wortlaut der Einwilligung ist **freier Text je Erteilung**. Jede
+Erteilung kann einen anderen Text tragen, und niemand merkt es; ein Tippfehler im
+Personalbuero erzeugt still eine neue "Erklaerung". Nachweisbar (Art. 7 Abs. 1
+DSGVO) ist eine Einwilligung erst, wenn feststeht, **welcher Fassung** zugestimmt
+wurde — und dass diese Fassung sich seitdem nicht geaendert hat.
+
+**Vorab geprueft:** Kein vorhandenes Modell fuer versionierte Erklaerungstexte.
+`business_partners.privacy_policy_version` ist ein Etikett ohne Text; die
+CRM-Einwilligungstabellen beschreiben eine andere Erlaubnis (siehe Vorslice). Keine
+Dublette.
+
+**Was gebaut wird** (Migration `bewerbung_erklaerung_fassung_20261006`):
+* `domain_hr.bewerbung_einwilligungserklaerungen` — je Mandant fortlaufende
+  `fassung` (1, 2, 3 …) mit `wortlaut`, `erstellt_am`, `erstellt_durch`. Der
+  Wortlaut ist **unveraenderlich** (Trigger gegen UPDATE): Wer eine Fassung
+  aendert, aendert rueckwirkend, wozu alle frueheren Bewerber eingewilligt haben.
+  Loeschen nur, solange keine Erteilung darauf verweist (FK RESTRICT) — eine nie
+  benutzte Fassung belegt nichts. Derselbe Wortlaut zweimal ist **eine** Fassung.
+  Kein Personenbezug in dieser Tabelle.
+* `bewerbung_einwilligungen.erklaerung_id` (FK) ersetzt `einwilligungstext`:
+  Bestandszeilen werden in Fassungen ueberfuehrt, dann entfaellt die freie Spalte —
+  der Wortlaut steht an **einer** Stelle. Pruefbedingung: Erteilung genau dann mit
+  Fassung. Downgrade stellt den Text aus der Fassung wieder her.
+* `POST /applications/{id}/einwilligung` verlangt `fassung` statt Freitext (noch
+  kein Verbraucher im Frontend). Antworten zeigen Fassung **und** Wortlaut.
+* `GET|POST /applications/einwilligungserklaerungen`,
+  `GET /applications/einwilligungserklaerungen/{fassung}` — vor dem
+  `{application_id}`-Weg montiert. Kein PUT/PATCH/DELETE.
+
+**Dateibesitz:** `alembic/versions/bewerbung_erklaerung_fassung_20261006.py` (neu),
+`app/services/bewerbung_einwilligung_service.py`,
+`app/api/v1/endpoints/personal_bewerbungen.py` (nur Einwilligungs-/Erklaerungswege),
+`app/api/v1/schemas/personal_bewerbung_schemas.py` (nur Einwilligungsmodelle),
+`tests/test_bewerbung_einwilligung_vertrag.py`, neue
+`tests/test_bewerbung_erklaerung_fassung_vertrag.py`, eigene QA-Doku, Punkt 4 der
+Einwilligungs-QA-Doku und dieser Abschnitt. Widerruf bleibt unveraendert (kein
+Rumpf). Spec/Inventare integriert wie ueblich aus committed source.
+
+**Abnahme:** Erteilen ohne oder mit unbekannter/fremder Fassung abgewiesen, ohne zu
+schreiben; Fassungen je Mandant lueckenlos fortlaufend, auch bei gleichzeitigem
+Anlegen; gleicher Wortlaut ergibt 409 mit Verweis auf die vorhandene Fassung; ein
+UPDATE des Wortlauts scheitert in der Datenbank; eine benutzte Fassung ist nicht
+loeschbar; Bestandszeilen ueberfuehrt; Migration hin/zurueck/hin auf `valeo_probe`;
+alle bisherigen Einwilligungs- und Loeschlaufvertraege gruen; fuenf Ratschen gruen.
+
 ## BEWERBUNG-EINWILLIGUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Den offenen Punkt 4 aus
