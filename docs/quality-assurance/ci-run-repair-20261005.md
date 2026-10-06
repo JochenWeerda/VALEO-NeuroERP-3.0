@@ -572,3 +572,30 @@ exakt GET /api/v1/personal/applications/{application_id} wird aus 15fc04c88
 zusaetzlich dokumentiert. 41 doppelte Gruppen bleiben offen. Kein fremder WIP
 wurde fuer die Generierung importiert. Zusammen 15 Futter-/Router- und
 20 Architekturtests bestanden; keine vollstaendige CI-/Security-Freigabe.
+
+
+## Tabellenkatalog: direkter CLI-Start
+
+Quality Gate 37425708197 auf 25d1dcd92 bricht beim direkten Start von
+generate_table_catalog.py --check vor Datenbankzugriff ab: ModuleNotFoundError
+fuer scripts. Der Generator setzt jetzt seinen absoluten Repository-Pfad vor
+den lokalen Hilfsmodul-Imports auf sys.path. Kein Import-Fallback, kein
+Katalog-/Tabellen-/Schemawechsel und keine Gate-Abschwaechung.
+
+Zwei echte Unterprozessvertraege starten die CLI unter python -I mit --help,
+einmal aus dem Repository und einmal aus tmp_path. Rueckgabecode, vorhandene
+--check-Option und fehlerfreier Import werden geprueft. Der isolierte Modus
+schliesst einen zufaellig geerbten PYTHONPATH als vermeintliche Reparatur aus.
+26 Katalog-/Lineage-/Besitz-Unitvertraege bestehen in 1,60 Sekunden. Zwei
+bestehende DB-Integrationstests wurden mit -m 'not integration' ausgewaehlt
+ausgeschlossen; die erste unselektierte Ausfuehrung meldete nur deren fehlende
+require_db-Fixture bei --noconftest (26 bestanden, zwei Setup-Fehler). Keine
+DB-Integrationsabnahme behauptet; keine DB, Migration oder Docker-Ressource.
+
+Auf 25d1dcd92 bestehen OpenAPI, PostgreSQL, beide E2E-Pruefungen, Erntepeak,
+Docs Governance, Docs Build und Full Security Agent. Quality-Frontend bleibt
+mit zwei Fehlern bei 946 bestandenen Tests offen: Schulungen-Altvertrag nurPsm
+und drei statt einer zentralen Worklist-Ueberschrift. Security Scan
+37425707748 und Service Security 37425707763 bleiben fehlgeschlagen; Gesamt-CI
+war bei Sichtung noch in Arbeit. Dieser Fix ist lokal abgenommen; seine neue
+Actions-Abnahme und die unabhaengigen Restbefunde bleiben offen.

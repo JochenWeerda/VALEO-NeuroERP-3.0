@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -14,6 +17,19 @@ from scripts.generate_table_catalog import (
     render_json,
     render_markdown,
 )
+
+
+@pytest.mark.parametrize("foreign_cwd", [False, True])
+def test_direct_cli_starts_without_pythonpath_or_current_directory(foreign_cwd, tmp_path):
+    repository = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [sys.executable, "-I", str(repository / "scripts/generate_table_catalog.py"), "--help"],
+        cwd=tmp_path if foreign_cwd else repository,
+        capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--check" in result.stdout
+    assert "Traceback" not in result.stderr
 
 
 def _sample_catalog() -> dict:
