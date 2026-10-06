@@ -98,6 +98,10 @@ ein nachgezogener Fahrzeug-Identitaetsvertrag gruen. 17 Setupfehler behoben.
 Vier Herstellerpakete adressieren zwei kritische/drei hohe neue CVE;
 Funktionspruefungen einschliesslich Streamabbruch gruen. Docs/OpenAPI/PG/
 kritische E2E auf 4a4104fe1 bestanden. Weitere Security-Befunde bleiben offen.
+**Liefernachweis:** 71cf8a126 auf main, echter develop-Merge a0c6376db;
+fremder Commit 93bd71598 erhalten. Voll-Audit: 0 critical, 3 high,
+18 moderate; die drei ungepatchten hohen Befunde bleiben gate-blockierend.
+Frozen Lock aller 36 Workspaces offline gruen; Actions-Abnahme laeuft.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
