@@ -43,6 +43,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Multichannel-Abnahme:** Sieben nach Import-/Loader-Analyse ungenutzte SDK-Pins entfernt; README kennzeichnet Integrations-/Webhook-Platzhalter ehrlich. Vollstaendige transitive Windows-Aufloesung mit pip-audit 2.10.1: 48 Pakete, null Befunde, Scanner/Gate Exit 0; oauthlib entfallen (GitHub-Ausgangsbericht Linux: 62 Pakete, oauthlib 3.3.1/PYSEC-2026-4114 blockiert). Plattformunterschiede nicht als exakte Paketreduktion behauptet. Import-Pin-Gate bestanden; Dienst mit gesperrten sieben SDK- und OAuth-Imports gestartet, Health HTTP 200, 17 Routen/12 OpenAPI-Pfade, null DB-Verbindungen. 18 vorhandene Audit-/Security-Gate-Regressionen bestanden. Keine Fach-/API-/Schemaaenderung, Datenbank/Container/Migration oder Audit-Ausnahme. Neuer GitHub-Lauf auf d52139d83 bestaetigt weiterhin Service-Fehler vor diesem Fix; neue Linux-Abnahme nach Push ausstehend. Andere Security-/Frontend-/Futter-Befunde bleiben offen.
 
+**Tabellenkatalog-Drift-Evidenz (2026-10-06, reserviert):** Owner Codex-01a0f3fc; scripts/generate_table_catalog.py nur optionaler Export der frisch geernteten Driftdateien, tests/test_generate_table_catalog.py CLI-/Fehler-/Dateischutzvertraege, .github/workflows/quality-gate.yml nur Artefakt desselben bestehenden DB-Jobs, eigene QA/Slice. 37428294896 bestaetigt Importfix, jetzt echte Katalogabweichung. Gemeinsamer valeo_probe --status laeuft in Timeout; Docker-Status antwortet nicht, keine neue DB/Container oder Reset/Start/Migration. Kein aktiver Fremdclaim fuer Generator/Tests/Workflow; Bewerbungs-Loeschlauf und andere WIP geschuetzt. Abnahme: Drift bleibt Exit 1, Erntefehler Exit 2, Export ueberschreibt keine versionierten Dateien und erfolgt nur bei Drift; CI-Artefakt aus bereits bereitgestellter DB. Tatsächliche Katalogaktualisierung erst nach gepruefter Ernte, kein geratenes Schema.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
@@ -1853,7 +1855,7 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
-## BEWERBUNG-LOESCHLAUF-20261006 — in Arbeit, Claude Code
+## BEWERBUNG-LOESCHLAUF-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Den Loeschweg nachziehen, den
 [Bewerbermanagement-Ordnung](../quality-assurance/bewerbermanagement-ordnung-20261006.md)
@@ -1920,6 +1922,38 @@ Loeschsperre schuetzen vor Loeschung und erscheinen im Protokoll als
 uebersprungen; der Trockenlauf aendert nichts; das Protokoll enthaelt **keinen**
 Personenbezug; alles mandantengebunden; Vertraege gegen die frische DB und alle
 Ratschen gruen.
+
+**Abgeschlossen 06.10.2026.** QA:
+[bewerbung-loeschlauf-20261006.md](../quality-assurance/bewerbung-loeschlauf-20261006.md).
+52 Vertraege gegen die frische `valeo_probe` gruen (105 zusammen mit den beiden
+Vorslices), Migration auf frischer **und** gewachsener DB hochgezogen, alle fuenf
+Ratschen gruen.
+
+**Ein Fehler, der teuer gewesen waere:** `public.gobd_loeschsperren` fuehrt ihr
+Woerterbuch auf **englisch** (`ACTIVE`/`RELEASED`/`EXPIRED`). Mein erster Entwurf
+verglich gegen `"AKTIV"` — das haette **jede** Sperre uebergangen und Beweismittel
+vernichtet, und zwar lautlos: Eine Sperre, die nicht greift, sieht wie keine Sperre
+aus. Zwei Vertraege halten den englischen Stand fest. Dasselbe Muster wie
+`shifts_status_ck` im Zeitkonto-Slice.
+
+**Nebenfund (fremd, repariert):** Die Tabellenverweis-Ratsche war rot mit
+`domain_shared.jobs` und `domain_shared.job_artifacts` an einem lebenden Weg
+(`job_runner.py`). Gegen die frische `valeo_probe` gruen — beide legt
+`job_runner_tables_repair_20260625` an, die Revision steht in `alembic_version` der
+Entwicklungsdatenbank, die Tabellen fehlten dort trotzdem (bekannte Drift). Mit dem
+**woertlichen** SQL dieser Revision nachgezogen (idempotent, `IF NOT EXISTS`),
+danach gruen. Kein Codefehler, keine fremde Datei angefasst.
+
+**Mitgezogener Vertrag:** `test_antwortmodelle_sind_typisiert` zaehlte erlaubte
+Antwortmodelle auf. Vier neue Wege haetten nur ein Nachtragen verlangt; die Pruefung
+nennt jetzt die Eigenschaft statt der Liste — jedes Antwortmodell ist im eigenen
+Fach erklaert und nimmt keine unbekannten Felder an (`extra != "allow"` war der
+Mangel).
+
+**Vier offene Punkte** in der QA-Doku: kein Zeitplan (Absicht), keine Maske, kein
+Rechteschutz ueber den Mandanten hinaus (`durchgefuehrt_durch` ist eine Angabe,
+keine geprueufte Identitaet), und kein Weg, die Einwilligung zu setzen oder zu
+widerrufen (Art. 7 Abs. 3 DSGVO).
 
 **Risiken:** Ein Loeschlauf vernichtet Daten endgueltig. Er wird **nicht**
 automatisch geplant — das waere ohne Aufsicht leichtfertig; er ist ein Weg, den
