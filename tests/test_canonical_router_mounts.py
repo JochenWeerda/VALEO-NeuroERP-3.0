@@ -9,6 +9,7 @@ from app.core.config import settings
 from main import app
 
 MOUNTS = [
+    ("app.api.v1.endpoints.credit_debit_memos", ""),
     ("app.finance.router", ""),
     ("app.domains.inventory.api", "/inventory"),
     ("app.domains.agrar.api", "/agrar"),

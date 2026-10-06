@@ -161,6 +161,8 @@ from app.api.v1.endpoints import (
     meldewesen_lifecycle_actions,
     training,
     personal,
+    personal_bewerbungen,
+    personal_lohnabrechnung,
     compliance_dsgvo,
     compliance_whistleblower,
     compliance_whistleblower_lksg,
@@ -1757,6 +1759,22 @@ api_router.include_router(
 api_router.include_router(
     training.router,
     tags=["training", "hr", "onboarding"]
+)
+
+# Personalwege unter einem Prefix, in drei Modulen. Die festen Pfade der beiden
+# herausgenommenen Faecher stehen **vor** `personal.router`: Dort gibt es heute
+# keinen Platzhalter auf oberster Ebene, der sie verschlucken koennte — die
+# Reihenfolge ist festgelegt, damit das auch so bleibt, wenn einer dazukommt.
+# Zerlegt am 06.10.2026, siehe
+# docs/quality-assurance/personal-zerlegung-20261006.md.
+api_router.include_router(
+    personal_bewerbungen.router,
+    tags=["personal", "hr", "recruiting"]
+)
+
+api_router.include_router(
+    personal_lohnabrechnung.router,
+    tags=["personal", "hr", "lohn"]
 )
 
 api_router.include_router(

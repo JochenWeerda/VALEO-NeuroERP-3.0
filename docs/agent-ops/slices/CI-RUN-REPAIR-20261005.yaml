@@ -23,6 +23,8 @@ file_ownership:
   - Canonical-Router-Regressionsvertrag und committed-source OpenAPI
   - Finance-Nebenbuch nur kanonische GET-/POST-Handler und persistenter Anlagevertrag
   - Exakte CRM-Zuordnung interessent_service mit committed-source Architekturindex
+  - Compat-Memo-Routen/Service-Block und ausschliesslich sinkende compat-Godfile-Grenze
+  - Canonical-Memo-OpenAPI-Vertrag und committed-source Inventarintegration
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.

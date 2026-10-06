@@ -7,7 +7,27 @@ Import these instead of defining locally.
 from __future__ import annotations
 
 from typing import Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.api.v1.schemas.base import BaseSchema
+
+
+# ── Offenes Sammelmodell ──────────────────────────────────────────────────────
+
+
+class PersonalOut(BaseSchema):
+    """Offenes Antwortmodell der Personalwege.
+
+    Lag bis zum 06.10.2026 in `endpoints/personal.py` und war damit von den beiden
+    herausgenommenen Modulen nicht erreichbar. Hier steht es **einmal**.
+
+    ``extra="allow"`` heisst: Das Modell beschreibt nichts. Es durch Modelle je Weg
+    zu ersetzen ist ein eigener Slice und ausdruecklich **nicht** Teil der
+    Zerlegung — sonst waere nicht mehr zu unterscheiden, was der Umzug und was die
+    Korrektur gebrochen hat.
+    """
+
+    model_config = ConfigDict(extra="allow")
 
 
 # ── HRM Readiness ─────────────────────────────────────────────────────────────
