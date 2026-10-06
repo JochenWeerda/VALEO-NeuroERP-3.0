@@ -73,30 +73,27 @@ ist wortgleich umgezogen; `personal.py` kennt die sechs Funktionen nicht mehr;
 
 Alle vier Ratschen grün.
 
-## Benannte Mängel — nicht behoben, sondern festgehalten
+## Benannte Mängel — behoben im Folgeslice
 
-Die beiden Fächer tragen Mängel, die der Umzug bewusst nicht angefasst hat. Damit
-sie nicht als behoben gelten, hält `TestBenannteMaengel` zwei davon **als Vertrag**
-fest: Der Test schlägt an, sobald jemand sie behebt, und verlangt dann, dass diese
-Zusage hier mitgeht. Ein Mangel in einem Test ist besser als einer in einer Notiz.
+Die beiden Fächer trugen sieben Mängel, die der Umzug bewusst nicht angefasst hat.
+`TestBenannteMaengel` hielt zwei davon **als Vertrag** fest, damit sie nicht als
+behoben gelten.
 
-| Mangel | Wo |
+**Alle sieben sind seit dem 06.10.2026 behoben** —
+[Bewerbermanagement-Ordnung](bewerbermanagement-ordnung-20261006.md). Die
+Verträge haben sich umgekehrt: `TestMaengelBehoben` hält jetzt fest, dass sie
+nicht zurückkommen.
+
+| Mangel | Behoben durch |
 | --- | --- |
-| `except Exception: raise HTTPException(503, "applications table not available")` — verwischt jeden Fehler zu einer Tabellenaussage, auch einen Rechtefehler oder eine verletzte Prüfbedingung | alle vier Bewerbungswege |
-| `response_model=PersonalOut` mit `extra="allow"` — beschreibt nichts | alle vier Bewerbungswege |
-| Die Bewerbungsliste ist **unbegrenzt** (kein `limit`) | `list_applications` |
-| `APPLICATION_STAGES` ist ein `set` ohne erlaubte Übergänge: Eine abgelehnte Bewerbung lässt sich auf `EINGESTELLT` setzen | `update_application_stage` |
-| `uuid4` statt `uuid7` | `create_application` |
-| Kein Statuswörterbuch in der Datenbank (`domain_hr.applications.status` ist freier Text) | Migration fehlt |
-| Die Lohnwege lesen keinen Mandanten — `tenant_id` wird mit `noqa: ARG001` entgegengenommen und verworfen. Für eine Preview tragbar, für eine Übergabe an DATEV nicht | beide Lohnwege |
+| `except Exception: 503 "applications table not available"` — verwischte jeden Fehler zu einer Tabellenaussage | `bewerbung_service.fehler_deuten`: fehlende Tabelle/Spalte → 503 mit Migrationshinweis, alles andere → 409 mit Grund |
+| `response_model=PersonalOut` mit `extra="allow"` | `BewerbungOut` je Weg |
+| Die Bewerbungsliste war unbegrenzt | `limit`/`offset` |
+| `APPLICATION_STAGES` als `set` ohne Übergänge — eine abgelehnte Bewerbung ließ sich einstellen | `UEBERGAENGE`, aus `LAUFEND` und `ENDGUELTIG` erzeugt |
+| `uuid4` | `uuid7` |
+| `domain_hr.applications.status` war freier Text | `ck_bewerbung_status` plus drei weitere Prüfbedingungen |
+| Die Lohnwege verwarfen den Mandanten (`noqa: ARG001`) | Beide Antworten nennen `mandant` |
 
-Der Vollständigkeit halber: Die Lohnrechnung ist ausdrücklich eine **Preview**;
-der Vorbehalt steht in der Antwort und ist wörtlich erhalten.
+Dass die Lohnrechnung eine **Vorschau** ist, bleibt unverändert und steht
+weiterhin wörtlich in der Antwort.
 
-## Offener Punkt (Handshake)
-
-Die Mängel oben gehören in einen eigenen Slice **Bewerbermanagement**. Er braucht
-eine Migration (Statuswörterbuch mit Übergängen auf `domain_hr.applications`),
-typisierte Antwortmodelle und eine Begrenzung der Liste. Wer ihn nimmt, streicht
-die entsprechenden Zeilen hier und entfernt den zugehörigen Vertrag aus
-`TestBenannteMaengel`.

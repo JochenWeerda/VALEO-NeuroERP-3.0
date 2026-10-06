@@ -27,6 +27,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Portal-Abnahme:** Sechs doppelte Compat-Routen und deren sechs Service-Methoden entfernt; andere Portal-Funktionen erhalten. Statische GET orders/reconciliation und orders/observability stehen jetzt vor orders/{order_id}; AST-Vergleich bestaetigt unveraenderte Handler/Dependencies. 20 Router-/OpenAPI-/Match-/Geschaeftstagtests bestanden (27,50 s). Alle 3096 Pfade/Methoden erhalten, Doppelgruppen 47 auf 41. Compat-Godfile-Grenze 3693 auf 3631 gesenkt; Groessen-, Paginierungs- und Baseline-Integritaetsgate gruen. Inventare/Architekturindex aktuell; Spec aus committed 00485d2ea plus eigenen Hunkdateien indexseitig integriert. Fremde Arbeitsbaumartefakte/Bewerberarbeit geschuetzt, keine DB/Container/Migration. GitHub 7b935a5b1: Docs Governance und Erntepeak erfolgreich, weitere Checks laufen/warten; Security und 41 weitere Routerkonflikte offen.
 
+**Futter-Lesesicherheit (2026-10-06, abgeschlossen):** compat.py nur Extraktion der zwei GET-Futterlisten in futter_read.py mit user/READ_ROLES, ohne Vertragswechsel; neue Datei futter_read.py und dadurch ausschliesslich sinkende compat-Godfile-Grenze sowie committed-source Code-/Architekturinventare; inventory_compat_service.py nur obligatorische tenant_id-Filter dieser beiden ArticleModel-Listen; futter_stamm.py nur fehlenden READ_ROLES-Guard bei list_mischfuttermittel. Frontend futter.ts verwendet noch abweichende Artikel-DTOs; daher kein API-/Modell-Rueckbau in diesem Slice, vorhandene Form bleibt erhalten. Tests realer First-Match-Handler fuer Rollen vor DB und Tenantbindung, eigene QA/Slice/Workboard und committed-source Spec. Kein aktiver Fremdclaim gefunden. Abnahme: beide ausgefuehrten Listen tenantgebunden und role-guarded; vorhandene DTOs/Pfade erhalten. Offene Folgebefunde: zwei konkurrierende GET-Modelle und Compat-Einzel-/Bulk-Loeschpfade muessen gemeinsam mit Frontend harmonisiert werden; keine neue DB/Container/Migration.
+
+**Futter-Leseabnahme:** Beide tatsaechlich ausgefuehrten Artikelprojektionen jetzt tenantgebunden und READ_ROLES-geprueft; fehlender Guard der Mischfutter-Fachliste ergaenzt. Antwortvertrag fuer bestehenden Frontend-Client erhalten; zwei GETs nach futter_read.py extrahiert. 15 Dispatch-/SQL-/Rollen-/Routertests bestanden (30,21 s), Groessen-/Paginierungs-/Baseline-Gates gruen. Compat-Grenze 3631 auf 3621 gesenkt. Alle 3096 Pfade/Methoden erhalten; 41 Doppelgruppen unveraendert, weil Verbraucher-Modellmigration bewusst noch offen. Inventare/Architekturindex aktuell (932 Routen/270 Services/454 Endpoint-Module); Spec aus committed 59fa73073 plus eigenen Sicherheitsdateien indexseitig. Probe vorhanden (fremde Bewerbungsrevision), keine DB/Container/Migration. Offener naechster Futter-Slice: Frontend-DTOs, zwei GET-Modelle und Einzel-/Bulk-Loeschpfade gemeinsam harmonisieren. GitHub 7017d6660 Docs Build/Governance bestanden; Gesamt-CI/Security warten.
+
+**Bewerbungs-Integrationsclaim (2026-10-06, abgeschlossen):** Nach parallelem 15fc04c88 committed-source Spec/Inventare/Architekturindex nachziehen; config/architecture-domain-prefixes.yaml nur exakte bewerbung_service: hr und vorhandener Architektur-Vertragstest. Bewerbungs-Fachcode, Migration und Masken nicht bearbeiten. Neue GET-Methode auf vorhandenem Personal-Detailpfad dokumentieren; keine fremde Arbeitsbaum-Spec uebernehmen.
+
+**Finale Bewerbungsintegration:** Paralleles 15fc04c88 in Spec/Inventare aus committed 817987519 integriert. 3096 Pfade und alle alten HTTP-Methoden erhalten; exakt neue GET-Detailmethode fuer Bewerbung dokumentiert. bewerbung_service exakt hr zugeordnet (domain_hr.applications). 20 Architekturtests bestanden (0,51 s), Index vollstaendig: 932 Routen/271 Services/454 Endpoint-Module; drei Inventare aktuell. Fachcode/Migration/Masken nicht angefasst. Futter-Lesekorrektur 02352757d bleibt erhalten; Futter-Modell-/Loeschgaps und 41 Routerkonflikte weiter offen.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
@@ -1726,7 +1734,7 @@ einer in einer Notiz.
 
 **Doku:** `docs/quality-assurance/personal-zerlegung-20261006.md`.
 
-## BEWERBERMANAGEMENT-ORDNUNG-20261006 — in Arbeit, Claude Code
+## BEWERBERMANAGEMENT-ORDNUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Die sieben Maengel schliessen, die
 [PERSONAL-ZERLEGUNG-20261006](../quality-assurance/personal-zerlegung-20261006.md)
@@ -1789,6 +1797,53 @@ Fehleingabe ist nicht mehr durch Zuruecksetzen zu heilen, sondern durch eine neu
 Bewerbung. Das ist beabsichtigt (eine Ablehnung ist eine Mitteilung an einen
 Menschen), gehoert aber dem Personal-Owner zur Abnahme. Die Begruendungspflicht
 bei Ablehnung ist eine neue Pflichtangabe in der Maske.
+
+**Ergebnis (2026-10-06):** Alle sieben Maengel behoben.
+
+* **Der Fehler nennt seine Ursache:** `fehler_deuten` unterscheidet fehlende
+  Tabelle/Spalte (503 mit Migrationshinweis) von allem anderen (409 mit Grund).
+  Vorher war **jeder** Fehler eine Tabellenaussage und schickte den Leser in die
+  Migration.
+* **Die Stufen haben Uebergaenge**, erzeugt aus `LAUFEND` und `ENDGUELTIG`:
+  Rueckschritt innerhalb der Pipeline ja, aus `EINGESTELLT`/`ABGELEHNT` nein. Dass
+  eine abgelehnte Bewerbung eingestellt werden konnte, war kein Komfort, sondern
+  ein fehlender Nachweis.
+* **Eine Ablehnung braucht einen Grund** (§ 22 AGG) — in einer **eigenen** Spalte,
+  nicht in `notes`: Das ist ein Verlaufsfeld, und ein Grund, der darin untergeht,
+  ist kein Nachweis. Dazu `entschieden_am`/`entschieden_durch`.
+* **Vier Pruefbedingungen in der Datenbank.** Die Migration zaehlt vorher, ob der
+  Bestand fremde Staende fuehrt, und bricht ab statt umzuschreiben (3 Zeilen,
+  `EINGANG`/`VORAUSWAHL`, beide im Woerterbuch). Das Downgrade bricht ab, wenn eine
+  Entscheidung festgehalten ist.
+* **Form, Grenze, Kennung:** `BewerbungOut` je Weg statt `PersonalOut` mit
+  `extra="allow"`, `limit`/`offset`, `extra="forbid"` auf der Eingabe, `uuid7`, und
+  ein neuer Weg `GET /applications/{id}`.
+* **Die Lohnwege nennen den Mandanten** (`mandant`). Der Vorbehalt der Vorschau
+  steht woertlich weiter in der Antwort — ein Vertrag haelt das fest, damit
+  "behoben" nicht als "umgeschrieben" missverstanden wird.
+
+**Die Vertraege haben sich umgekehrt:** `TestBenannteMaengel` verlangte, dass die
+Maengel **noch da** sind; die Klasse heisst jetzt `TestMaengelBehoben` und haelt
+fest, dass sie nicht zurueckkommen. Zwei Vertraege der Zerlegung sind nachgezogen
+(die Pruefung auf die **Form** des Woerterbuchs ist durch eine auf die Stufen
+ersetzt; das SQL des Loeschwegs liegt im Dienst).
+
+**37 neue Vertraege, 53 mit der Zerlegung, 179 in allen Personal-, Lohn- und
+Bewerbungstests gruen**; Migration auf beiden Datenbanken; alle vier Ratschen
+gruen.
+
+**Handshakes:**
+1. `ABGELEHNT` ist endgueltig — eine Fehleingabe heilt nur ein neuer Vorgang.
+   Abnahme beim Personal-Owner.
+2. Die Maske braucht ein Feld fuer den Ablehnungsgrund (neue Pflichtangabe).
+3. **Speicherbegrenzung (Art. 5 Abs. 1 lit. e DSGVO):** Bewerberdaten sind nach
+   Verfahrensende zu loeschen (ueblich sechs Monate nach Ablehnung, § 15 Abs. 4
+   AGG plus Zustellung). Der Loeschweg existiert, aber **kein Lauf und keine
+   Frist** stossen ihn an. `entschieden_am` ist die Grundlage und jetzt vorhanden
+   — der Lauf ist ein eigener Slice.
+4. Ein Weg `EINGESTELLT` -> Personalstamm fehlt; die Pipeline endet im Stand.
+
+**Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

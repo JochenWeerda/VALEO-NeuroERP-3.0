@@ -11366,97 +11366,6 @@
         "title": "ApInvoicesOut",
         "type": "object"
       },
-      "ApplicationIn": {
-        "properties": {
-          "applicant_email": {
-            "maxLength": 200,
-            "title": "Applicant Email",
-            "type": "string"
-          },
-          "applicant_name": {
-            "maxLength": 200,
-            "title": "Applicant Name",
-            "type": "string"
-          },
-          "documents_ref": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Documents Ref"
-          },
-          "position_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Position Id"
-          },
-          "position_title": {
-            "anyOf": [
-              {
-                "maxLength": 200,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Position Title"
-          },
-          "source": {
-            "anyOf": [
-              {
-                "maxLength": 80,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source"
-          }
-        },
-        "required": [
-          "applicant_name",
-          "applicant_email"
-        ],
-        "title": "ApplicationIn",
-        "type": "object"
-      },
-      "ApplicationStagePatch": {
-        "properties": {
-          "note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Note"
-          },
-          "stage": {
-            "description": "EINGANG/VORAUSWAHL/ERSTGESPRAECH/ENDGESPRAECH/ANGEBOT/EINGESTELLT/ABGELEHNT",
-            "title": "Stage",
-            "type": "string"
-          }
-        },
-        "required": [
-          "stage"
-        ],
-        "title": "ApplicationStagePatch",
-        "type": "object"
-      },
       "ApplyTemplateRequest": {
         "description": "Request to apply a booking template",
         "properties": {
@@ -21475,6 +21384,223 @@
           "created_at"
         ],
         "title": "BewegungOut",
+        "type": "object"
+      },
+      "BewerbungIn": {
+        "additionalProperties": false,
+        "properties": {
+          "applicant_email": {
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "Applicant Email",
+            "type": "string"
+          },
+          "applicant_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Applicant Name",
+            "type": "string"
+          },
+          "documents_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documents Ref"
+          },
+          "position_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position Id"
+          },
+          "position_title": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position Title"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "required": [
+          "applicant_name",
+          "applicant_email"
+        ],
+        "title": "BewerbungIn",
+        "type": "object"
+      },
+      "BewerbungOut": {
+        "properties": {
+          "ablehnungsgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ablehnungsgrund"
+          },
+          "applicant_email": {
+            "title": "Applicant Email",
+            "type": "string"
+          },
+          "applicant_name": {
+            "title": "Applicant Name",
+            "type": "string"
+          },
+          "applied_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "documents_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documents Ref"
+          },
+          "endgueltig": {
+            "default": false,
+            "title": "Endgueltig",
+            "type": "boolean"
+          },
+          "entschieden_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entschieden Am"
+          },
+          "entschieden_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entschieden Durch"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "last_updated": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Updated"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "position_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position Id"
+          },
+          "position_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position Title"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "applicant_name",
+          "applicant_email",
+          "status"
+        ],
+        "title": "BewerbungOut",
         "type": "object"
       },
       "BillingConfig": {
@@ -95654,9 +95780,14 @@
           "hinweis": {
             "title": "Hinweis",
             "type": "string"
+          },
+          "mandant": {
+            "title": "Mandant",
+            "type": "string"
           }
         },
         "required": [
+          "mandant",
           "eingabe",
           "ergebnis",
           "hinweis",
@@ -114559,6 +114690,7 @@
         "type": "object"
       },
       "PayrollCloseoutPreviewOut": {
+        "description": "Die Uebergabe an DATEV/FIBU.\n\nBis zum 06.10.2026 nahmen beide Wege `tenant_id` mit `noqa: ARG001` entgegen\nund verwarfen ihn. Fuer eine Rechenvorschau ist das tragbar; fuer eine\nUebergabe nicht: Eine Lohnabrechnung, die nicht sagt, fuer welches Haus sie\ngilt, laesst sich dem falschen zuordnen.",
         "properties": {
           "blockers": {
             "items": {
@@ -114585,6 +114717,10 @@
             "title": "Lines",
             "type": "array"
           },
+          "mandant": {
+            "title": "Mandant",
+            "type": "string"
+          },
           "parameterVersion": {
             "title": "Parameterversion",
             "type": "string"
@@ -114606,6 +114742,7 @@
           }
         },
         "required": [
+          "mandant",
           "period",
           "parameterVersion",
           "status",
@@ -151423,6 +151560,64 @@
           "optional"
         ],
         "title": "StuecklistenPositionOut",
+        "type": "object"
+      },
+      "StufeIn": {
+        "additionalProperties": false,
+        "description": "Ein Stufenwechsel.\n\n``ablehnungsgrund`` ist Pflicht, wenn nach ``ABGELEHNT`` gewechselt wird: Im\nStreitfall traegt der Arbeitgeber die Beweislast (§ 22 AGG).",
+        "properties": {
+          "ablehnungsgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ablehnungsgrund"
+          },
+          "entschieden_durch": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entschieden Durch"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "stage": {
+            "enum": [
+              "EINGANG",
+              "VORAUSWAHL",
+              "ERSTGESPRAECH",
+              "ENDGESPRAECH",
+              "ANGEBOT",
+              "EINGESTELLT",
+              "ABGELEHNT"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage"
+        ],
+        "title": "StufeIn",
         "type": "object"
       },
       "StundenBuchung": {
@@ -372973,10 +373168,11 @@
     },
     "/api/v1/personal/applications": {
       "get": {
-        "description": "Bewerbungen auflisten, optional nach Status oder Stelle filtern.",
+        "description": "Die Bewerbungen des Mandanten, optional nach Stufe oder Stelle gefiltert.",
         "operationId": "list_applications_api_v1_personal_applications_get",
         "parameters": [
           {
+            "description": "EINGANG | VORAUSWAHL | … | ABGELEHNT",
             "in": "query",
             "name": "status",
             "required": false,
@@ -372989,6 +373185,7 @@
                   "type": "null"
                 }
               ],
+              "description": "EINGANG | VORAUSWAHL | … | ABGELEHNT",
               "title": "Status"
             }
           },
@@ -373006,6 +373203,29 @@
                 }
               ],
               "title": "Position Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
             }
           },
           {
@@ -373031,7 +373251,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/PersonalOut"
+                    "$ref": "#/components/schemas/BewerbungOut"
                   },
                   "title": "Response List Applications Api V1 Personal Applications Get",
                   "type": "array"
@@ -373056,7 +373276,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Applications auflisten",
+        "summary": "Bewerbungen auflisten",
         "tags": [
           "personal",
           "hr",
@@ -373067,7 +373287,7 @@
         ]
       },
       "post": {
-        "description": "Neue Bewerbung erfassen (Eingang in Pipeline).",
+        "description": "Erfasst eine Bewerbung im Stand `EINGANG`.",
         "operationId": "create_application_api_v1_personal_applications_post",
         "parameters": [
           {
@@ -373091,7 +373311,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApplicationIn"
+                "$ref": "#/components/schemas/BewerbungIn"
               }
             }
           },
@@ -373102,7 +373322,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PersonalOut"
+                  "$ref": "#/components/schemas/BewerbungOut"
                 }
               }
             },
@@ -373124,7 +373344,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Application anlegen",
+        "summary": "Bewerbung erfassen",
         "tags": [
           "personal",
           "hr",
@@ -373137,7 +373357,7 @@
     },
     "/api/v1/personal/applications/{application_id}": {
       "delete": {
-        "description": "Löscht eine Bewerbung (nur eigener Mandant).",
+        "description": "Löscht eine Bewerbung (nur eigener Mandant).\n\nDer Weg stammt von einem anderen Agenten (`f7fcbdd7c`) und bleibt in der Sache,\nwie er war; nur die Fehlerdeutung ist jetzt dieselbe wie bei den anderen Wegen.",
         "operationId": "delete_application_api_v1_personal_applications__application_id__delete",
         "parameters": [
           {
@@ -373186,7 +373406,73 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Application löschen",
+        "summary": "Bewerbung löschen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      },
+      "get": {
+        "operationId": "get_application_api_v1_personal_applications__application_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BewerbungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bewerbung abrufen",
         "tags": [
           "personal",
           "hr",
@@ -373199,7 +373485,7 @@
     },
     "/api/v1/personal/applications/{application_id}/stage": {
       "patch": {
-        "description": "Pipeline-Stufe einer Bewerbung ändern.",
+        "description": "Wechselt die Pipelinestufe.\n\n`EINGESTELLT` und `ABGELEHNT` sind endgueltig; eine Ablehnung braucht einen\nGrund. Vorher pruefte der Weg nur, ob die Stufe **existiert** — eine abgelehnte\nBewerbung liess sich damit einstellen.",
         "operationId": "update_application_stage_api_v1_personal_applications__application_id__stage_patch",
         "parameters": [
           {
@@ -373232,7 +373518,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApplicationStagePatch"
+                "$ref": "#/components/schemas/StufeIn"
               }
             }
           },
@@ -373243,7 +373529,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PersonalOut"
+                  "$ref": "#/components/schemas/BewerbungOut"
                 }
               }
             },
@@ -373265,7 +373551,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Application stage aktualisieren",
+        "summary": "Stufe wechseln",
         "tags": [
           "personal",
           "hr",

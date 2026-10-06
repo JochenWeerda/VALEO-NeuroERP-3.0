@@ -219,6 +219,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `forderungsgruppen` | Forderungsgruppen [FORG] — Kundensegmentierung für Bestandskontenzuordnung. |
 | `foreign_goods_worklist` | Foreign-goods operator worklist API. |
 | `fuhrpark` | Fuhrpark API Endpoints - zvoove style master data mask. |
+| `futter_read` | Guarded feed list projections preserving the existing frontend read contract. |
 | `futter_stamm` | Futtermittel-Stammdaten & Rezepte API |
 | `futtermittel_qs` | FEED-QS-001 — Futtermittel QS: HACCP-Plaene, VLOG-Meldungen, QS-Leitfaden. |
 | `futtermittel_rezepte` | Futtermittel Rezepturverwaltung |

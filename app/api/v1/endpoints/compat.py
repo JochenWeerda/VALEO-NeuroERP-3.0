@@ -23,6 +23,7 @@ from app.core.data_quality_enforcement import (
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.core.logging import get_correlation_id
+from app.api.v1.endpoints.futter_read import router as futter_read_router
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AuditLog, LkwAnnahmeQueue
 from app.documents.router_helpers import get_repository, list_from_store, get_from_store, save_to_store
@@ -1150,18 +1151,7 @@ class FutterBulkDeleteOut(BaseModel):
     errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
 
 
-@router.get("/futter/einzelfuttermittel", response_model=list[CompatBridgeOut], summary="Einzel futter")
-async def futter_einzel(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
-) -> list[dict[str, Any]]:
-    return FutterCompatService(db, tenant_id).list_einzelfuttermittel()
-
-
-@router.get("/futter/mischfuttermittel", response_model=list[CompatBridgeOut], summary="Misch futter")
-async def futter_misch(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
-) -> list[dict[str, Any]]:
-    return FutterCompatService(db, tenant_id).list_mischfuttermittel()
+router.include_router(futter_read_router)
 
 
 @router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter einzel item lÃ¶schen")
