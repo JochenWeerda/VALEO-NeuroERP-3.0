@@ -148,11 +148,11 @@ auf die Stufen selbst ersetzt, und das SQL des Löschwegs liegt jetzt im Dienst.
    Ablehnung ist eine Mitteilung an einen Menschen), Abnahme beim Personal-Owner.
 2. **Die Begründungspflicht bei Ablehnung** ist eine neue Pflichtangabe; die
    Maske braucht ein Feld dafür.
-3. **Speicherbegrenzung (Art. 5 Abs. 1 lit. e DSGVO):** Bewerberdaten sind nach
-   Abschluss des Verfahrens zu löschen — üblich sind sechs Monate nach der
-   Ablehnung (Frist des § 15 Abs. 4 AGG plus Zustellung). Es gibt einen Löschweg,
-   aber **keine Frist und keinen Lauf**, der ihn anstößt. `entschieden_am` ist die
-   Grundlage dafür und jetzt vorhanden; der Lauf selbst fehlt und ist ein eigener
-   Slice.
+3. ~~**Speicherbegrenzung (Art. 5 Abs. 1 lit. e DSGVO):** Es gibt einen Löschweg,
+   aber keine Frist und keinen Lauf, der ihn anstößt.~~ **Geschlossen am 06.10.2026**
+   — [Der Löschlauf für Bewerberdaten](bewerbung-loeschlauf-20261006.md): eine
+   beschlossene Frist in Tagen je Mandant (ohne Regel wird nicht gelöscht), ein
+   Trockenlauf, der Lauf selbst und ein Protokoll **ohne Personenbezug**. Eine
+   aktive Löschsperre und eine laufende Einwilligung schützen.
 4. Ein Weg, der die Bewerbung einem Mitarbeiter zuordnet (`EINGESTELLT` →
    Personalstamm), fehlt. Heute endet die Pipeline im Stand.
