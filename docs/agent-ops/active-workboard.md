@@ -153,6 +153,11 @@ kanonische erste Montage bleibt. Neuer Test test_canonical_router_mounts.py
 prueft Vollstaendigkeit, Handler/Antwort-/Dependencyvertrag und Eindeutigkeit
 der betroffenen Router. Konflikte anderer Handler bleiben separat offen.
 OpenAPI und Inventare aus committed Source plus diesen eigenen Hunks.
+**Router-Abnahme:** Acht Regressionen gruen (69,20 s). Alle Methoden/Pfade,
+Handler, Antwortmodelle, Status und Dependencies der sechs Router erhalten.
+App-Doppelgruppen 168 -> 55; genau 113 Wiederholungen entfernt. OpenAPI
+bleibt bei denselben 3095 Pfaden/HTTP-Methoden. Drei Inventare und fuenf
+Handbuchartefakte auf committed Source aktuell. Andere Konflikte bleiben offen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
