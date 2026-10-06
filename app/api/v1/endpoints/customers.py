@@ -17,7 +17,7 @@ from ....services.customer_service import CustomerService
 from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Customer, CustomerCreate, CustomerUpdate
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.customers_schemas import CustomersOut
@@ -26,6 +26,54 @@ from app.api.v1.schemas.customers_schemas import CustomersOut
 router = APIRouter()
 
 logger = logging.getLogger(__name__)
+
+
+# ── Interessenten (Register: public.crm_leads) ──────────────────────────────
+# Die Schemata stehen oben, weil der Listenweg weiter unten auf sie zeigt.
+
+class InteressentCreate(BaseModel):
+    """Ein Interessent, wie die Maske ihn erfasst.
+
+    Die Felder heissen deutsch, das Register (`public.crm_leads`) englisch. Die
+    Abbildung steht **einmal** in `interessent_service.als_dict` beziehungsweise
+    `HERKUNFT_ZU_QUELLE` — damit nicht beide Benennungen durch den Code wandern.
+    """
+
+    name: str = Field(min_length=1)
+    ansprechpartner: Optional[str] = None
+    email: Optional[str] = None
+    telefon: Optional[str] = None
+    adresse: Optional[str] = None
+    branche: Optional[str] = None
+    herkunft: str = "SONSTIGES"  # WEBSITE/MESSE/EMPFEHLUNG/KALTAKQUISE/SONSTIGES
+    notizen: Optional[str] = None
+
+
+class InteressentOut(BaseModel):
+    """Der Interessent, wie der Weg ihn nennt.
+
+    Vorher hing an diesen Wegen `CustomersOut` mit `extra="allow"` — ein Modell,
+    das alles erlaubt und deshalb nichts beschreibt.
+    """
+
+    id: str
+    tenant_id: Optional[str] = None
+    #: Nur gesetzt, wenn eine Nummer vermerkt ist. Uebernommene Leads aus der
+    #: Akquise haben keine, und erfunden wird keine.
+    interessenten_nr: Optional[str] = None
+    name: Optional[str] = None
+    ansprechpartner: Optional[str] = None
+    email: Optional[str] = None
+    telefon: Optional[str] = None
+    herkunft: Optional[str] = None
+    branche: Optional[str] = None
+    prioritaet: Optional[str] = None
+    status: Optional[str] = None
+    betreut_von: Optional[str] = None
+    notizen: Optional[str] = None
+    erstellt_am: Optional[str] = None
+
+
 
 DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
@@ -244,24 +292,28 @@ def customer_detail_by_partner(
 
 
 @router.get("/interessenten", summary="Interessenten auflisten",
-    response_model=list[CustomersOut]
+    response_model=list[InteressentOut]
 )
 def list_interessenten(
+    status: Optional[str] = Query(None, description="NEW | CONTACTED | … | CONVERTED"),
+    limit: int = Query(200, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[dict]:
+    """Die Interessenten des Mandanten aus dem Register `public.crm_leads`.
+
+    Bis zum 06.10.2026 las dieser Weg `domain_crm.interessenten` — eine Tabelle,
+    die keine Datenbank hat — und antwortete bei jedem Lesefehler `[]`. Ein Haus,
+    das keine Interessenten sieht, akquiriert nicht und merkt nicht, dass die
+    Liste nur nicht lesbar war.
+    """
     try:
-        rows = db.execute(
-            _text(
-                "SELECT id, interessenten_nr, name, email, telefon, adresse, branche, "
-                "herkunft, notizen, status, erstellt_am "
-                "FROM domain_crm.interessenten WHERE tenant_id=:tenant_id ORDER BY erstellt_am DESC"
-            ),
-            {"tenant_id": tenant_id},
-        ).mappings().all()
-        return [dict(r) for r in rows]
-    except Exception:
-        return []
+        return interessent.auflisten(db, tenant_id, status, limit, offset)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise interessent.nicht_lesbar(db, fehler, "Interessenten", tenant_id) from fehler
 
 
 @router.get("/{customer_id}/sales-eligibility", summary="Customer sales eligibility abrufen",
@@ -338,6 +390,9 @@ import uuid as _uuid
 from datetime import date as _date
 
 from sqlalchemy import text as _text
+
+from app.core.uuid7 import uuid7
+from app.services import interessent_service as interessent
 from pydantic import BaseModel as _BaseModel
 
 
@@ -409,16 +464,6 @@ def umkreissuche(
     return {"ergebnisse": ergebnisse}
 
 
-class InteressentCreate(_BaseModel):
-    name: str
-    email: Optional[str] = None
-    telefon: Optional[str] = None
-    adresse: Optional[str] = None
-    branche: Optional[str] = None
-    herkunft: str = "SONSTIGES"  # WEBSITE/MESSE/EMPFEHLUNG/KALTAKQUISE/SONSTIGES
-    notizen: Optional[str] = None
-
-
 class KonvertierungResult(_BaseModel):
     kunden_nr: str
     name: str
@@ -426,61 +471,38 @@ class KonvertierungResult(_BaseModel):
     status: str  # KUNDE / INTERESSENT
 
 
-@router.post("/interessenten", status_code=status.HTTP_201_CREATED, summary="Interessent anlegen",
-    response_model=CustomersOut
+@router.post("/interessenten", status_code=201, summary="Interessent anlegen",
+    response_model=InteressentOut
 )
 def create_interessent(
     payload: InteressentCreate,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
-    new_id = str(_uuid.uuid4())
-    year = _date.today().year
+    """Legt einen Interessenten im Register an.
 
-    # Determine next sequence number (best-effort)
-    seq = 1
+    Vorher schrieb dieser Weg `domain_crm.interessenten`, fing den Fehlschlag mit
+    `except Exception: db.rollback()` und antwortete trotzdem `201` mit einer
+    Interessentennummer — eine Quittung ohne Vorgang. Jetzt gibt es die Zeile
+    oder einen Fehler.
+    """
     try:
-        row = db.execute(
-            _text(
-                "SELECT COUNT(*) AS cnt FROM domain_crm.interessenten "
-                "WHERE tenant_id=:tenant_id AND EXTRACT(year FROM erstellt_am)=:year"
-            ),
-            {"tenant_id": tenant_id, "year": year},
-        ).first()
-        if row:
-            seq = (row[0] or 0) + 1
-    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
-        pass
-
-    interessenten_nr = f"INT-{year}-{seq:05d}"
-
-    try:
-        db.execute(
-            _text(
-                "INSERT INTO domain_crm.interessenten "
-                "(id, tenant_id, interessenten_nr, name, email, telefon, adresse, "
-                "branche, herkunft, notizen, status, erstellt_am) "
-                "VALUES (:id, :tenant_id, :nr, :name, :email, :telefon, :adresse, "
-                ":branche, :herkunft, :notizen, 'INTERESSENT', NOW())"
-            ),
-            {
-                "id": new_id,
-                "tenant_id": tenant_id,
-                "nr": interessenten_nr,
-                **payload.model_dump(),
-            },
-        )
+        nummer = interessent.naechste_nummer(db, tenant_id)
+        ergebnis = interessent.anlegen(db, tenant_id, str(uuid7()), nummer, payload)
         db.commit()
-    except Exception:
+    except HTTPException:
         db.rollback()
-
-    return {
-        "id": new_id,
-        "interessenten_nr": interessenten_nr,
-        "status": "INTERESSENT",
-        **payload.model_dump(),
-    }
-
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        logger.exception("Interessent nicht anlegbar (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=409,
+            detail={"error": "Interessent nicht angelegt", "grund": str(fehler),
+                    "migration_hint": interessent.MIGRATIONS_HINWEIS["X-Migration-Hint"]},
+            headers=interessent.MIGRATIONS_HINWEIS,
+        ) from fehler
+    return ergebnis
 
 
 @router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren")
@@ -489,56 +511,47 @@ def konvertieren(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
-    # Load Interessent
-    interessent: dict = {}
-    try:
-        row = db.execute(
-            _text(
-                "SELECT * FROM domain_crm.interessenten WHERE id=:id AND tenant_id=:tenant_id"
-            ),
-            {"id": interessent_id, "tenant_id": tenant_id},
-        ).mappings().first()
-        if row:
-            interessent = dict(row)
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"message": "DB unavailable", "migration_hint": "domain_crm.interessenten missing"},
-        )
+    """Macht aus dem Interessenten einen Kunden — in **einer** Transaktion.
 
-    if not interessent:
-        raise HTTPException(status_code=404, detail="Interessent nicht gefunden")
-
-    new_customer_id = str(_uuid.uuid4())
-    kunden_nr = f"KD-{_date.today().year}-{new_customer_id[:6].upper()}"
-    konvertiert_am = _date.today().isoformat()
-
-    # Kundensatz über die kanonische Schicht anlegen (korrektes Schema; Phase 2C).
+    Vorher legte dieser Weg den Kundensatz an und setzte danach den
+    Interessentenstand in einem eigenen `try/except: db.rollback()`. Scheiterte
+    das UPDATE, nahm das `rollback` den Kundensatz mit — dieselbe Transaktion —
+    und die Antwort meldete trotzdem `status: "KUNDE"` samt Kundennummer. Ein Haus
+    haette eine Kundennummer gehabt, zu der es keinen Kunden gibt.
+    """
     from ....services.business_partner_service import BusinessPartnerService
 
-    BusinessPartnerService(db, tenant_id).create_customer_record(
-        customer_id=new_customer_id,
-        customer_number=kunden_nr,
-        name=interessent.get("name", ""),
-        email=interessent.get("email"),
-        phone=interessent.get("telefon"),
-    )
-
-    # Update Interessent status
     try:
-        db.execute(
-            _text(
-                "UPDATE domain_crm.interessenten SET status='KONVERTIERT' WHERE id=:id AND tenant_id=:tenant_id"
-            ),
-            {"id": interessent_id, "tenant_id": tenant_id},
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
+        zeile = interessent.holen(db, tenant_id, interessent_id, sperren=True)
+        interessent.schon_konvertiert(zeile)
 
+        neue_kunden_id = str(uuid7())
+        kunden_nr = f"KD-{_date.today().year}-{neue_kunden_id[-6:].upper()}"
+        BusinessPartnerService(db, tenant_id).create_customer_record(
+            customer_id=neue_kunden_id,
+            customer_number=kunden_nr,
+            name=zeile.get("company") or "",
+            email=zeile.get("email"),
+            phone=zeile.get("phone"),
+        )
+        interessent.stand_setzen(db, tenant_id, interessent_id, interessent.KONVERTIERT)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        logger.exception("Konvertierung fehlgeschlagen (Mandant %s)", tenant_id)
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "Konvertierung nicht durchgefuehrt — es entsteht kein Kunde",
+                "grund": str(fehler),
+            },
+        ) from fehler
     return {
         "kunden_nr": kunden_nr,
-        "name": interessent.get("name", ""),
-        "konvertiert_am": konvertiert_am,
+        "name": zeile.get("company") or "",
+        "konvertiert_am": _date.today().isoformat(),
         "status": "KUNDE",
     }

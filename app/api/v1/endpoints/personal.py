@@ -3200,6 +3200,33 @@ async def update_application_stage(
     return {"id": application_id, "stage": payload.stage, "status": "updated"}
 
 
+@router.delete(
+    "/applications/{application_id}",
+    status_code=204,
+    response_class=Response,
+    response_model=None,
+    summary="Application löschen",
+)
+async def delete_application(
+    application_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Löscht eine Bewerbung (nur eigener Mandant)."""
+    try:
+        deleted = db.execute(
+            text("DELETE FROM domain_hr.applications WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": application_id, "tenant_id": tenant_id},
+        ).rowcount
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="applications table not available")
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Application {application_id} not found")
+    db.commit()
+    return None
+
+
 
 # ── Lohnabrechnung (§ 38 EStG / SGB IV 2025) ─────────────────────────────────
 

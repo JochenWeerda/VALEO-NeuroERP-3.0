@@ -81643,6 +81643,7 @@
         "type": "object"
       },
       "InteressentCreate": {
+        "description": "Ein Interessent, wie die Maske ihn erfasst.\n\nDie Felder heissen deutsch, das Register (`public.crm_leads`) englisch. Die\nAbbildung steht **einmal** in `interessent_service.als_dict` beziehungsweise\n`HERKUNFT_ZU_QUELLE` — damit nicht beide Benennungen durch den Code wandern.",
         "properties": {
           "adresse": {
             "anyOf": [
@@ -81654,6 +81655,17 @@
               }
             ],
             "title": "Adresse"
+          },
+          "ansprechpartner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ansprechpartner"
           },
           "branche": {
             "anyOf": [
@@ -81683,6 +81695,7 @@
             "type": "string"
           },
           "name": {
+            "minLength": 1,
             "title": "Name",
             "type": "string"
           },
@@ -81713,6 +81726,163 @@
           "name"
         ],
         "title": "InteressentCreate",
+        "type": "object"
+      },
+      "InteressentOut": {
+        "description": "Der Interessent, wie der Weg ihn nennt.\n\nVorher hing an diesen Wegen `CustomersOut` mit `extra=\"allow\"` — ein Modell,\ndas alles erlaubt und deshalb nichts beschreibt.",
+        "properties": {
+          "ansprechpartner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ansprechpartner"
+          },
+          "betreut_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betreut Von"
+          },
+          "branche": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branche"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "herkunft": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Herkunft"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "interessenten_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interessenten Nr"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "notizen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notizen"
+          },
+          "prioritaet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prioritaet"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "telefon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefon"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "InteressentOut",
         "type": "object"
       },
       "InterestSetting": {
@@ -263834,8 +264004,50 @@
     },
     "/api/v1/crm/customers/interessenten": {
       "get": {
+        "description": "Die Interessenten des Mandanten aus dem Register `public.crm_leads`.\n\nBis zum 06.10.2026 las dieser Weg `domain_crm.interessenten` — eine Tabelle,\ndie keine Datenbank hat — und antwortete bei jedem Lesefehler `[]`. Ein Haus,\ndas keine Interessenten sieht, akquiriert nicht und merkt nicht, dass die\nListe nur nicht lesbar war.",
         "operationId": "list_interessenten_api_v1_crm_customers_interessenten_get",
         "parameters": [
+          {
+            "description": "NEW | CONTACTED | … | CONVERTED",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "NEW | CONTACTED | … | CONVERTED",
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
           {
             "in": "header",
             "name": "X-Tenant-ID",
@@ -263859,7 +264071,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CustomersOut"
+                    "$ref": "#/components/schemas/InteressentOut"
                   },
                   "title": "Response List Interessenten Api V1 Crm Customers Interessenten Get",
                   "type": "array"
@@ -263891,6 +264103,7 @@
         ]
       },
       "post": {
+        "description": "Legt einen Interessenten im Register an.\n\nVorher schrieb dieser Weg `domain_crm.interessenten`, fing den Fehlschlag mit\n`except Exception: db.rollback()` und antwortete trotzdem `201` mit einer\nInteressentennummer — eine Quittung ohne Vorgang. Jetzt gibt es die Zeile\noder einen Fehler.",
         "operationId": "create_interessent_api_v1_crm_customers_interessenten_post",
         "parameters": [
           {
@@ -263925,7 +264138,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CustomersOut"
+                  "$ref": "#/components/schemas/InteressentOut"
                 }
               }
             },
@@ -263956,6 +264169,7 @@
     },
     "/api/v1/crm/customers/interessenten/{interessent_id}/konvertieren": {
       "post": {
+        "description": "Macht aus dem Interessenten einen Kunden — in **einer** Transaktion.\n\nVorher legte dieser Weg den Kundensatz an und setzte danach den\nInteressentenstand in einem eigenen `try/except: db.rollback()`. Scheiterte\ndas UPDATE, nahm das `rollback` den Kundensatz mit — dieselbe Transaktion —\nund die Antwort meldete trotzdem `status: \"KUNDE\"` samt Kundennummer. Ein Haus\nhaette eine Kundennummer gehabt, zu der es keinen Kunden gibt.",
         "operationId": "konvertieren_api_v1_crm_customers_interessenten__interessent_id__konvertieren_post",
         "parameters": [
           {
@@ -372877,6 +373091,66 @@
           }
         ],
         "summary": "Application anlegen",
+        "tags": [
+          "personal",
+          "hr",
+          "personal",
+          "hr"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/{application_id}": {
+      "delete": {
+        "description": "Löscht eine Bewerbung (nur eigener Mandant).",
+        "operationId": "delete_application_api_v1_personal_applications__application_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Application löschen",
         "tags": [
           "personal",
           "hr",

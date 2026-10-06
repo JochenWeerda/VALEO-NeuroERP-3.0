@@ -1683,3 +1683,87 @@ export const personalSchulungenScreen = {
     statusPlacement: 'afterFields',
   },
 } satisfies ScreenDefinition
+
+export const personalBewerbungenScreen = {
+  schemaVersion: 1,
+  id: 'personal/bewerbungen',
+  domain: 'hr',
+  mode: 'list',
+  title: 'Bewerbungen',
+  subtitle: 'Bewerbungen und Rekrutierungsprozesse',
+  adapter: { type: 'native', sourceId: 'personal/bewerbungen', temporary: false },
+  dataSources: [
+    { key: 'bewerbungen', endpoint: '/api/v1/personal/applications', pageSize: 100 },
+  ],
+  summary: [
+    { key: 'gesamt', label: 'Gesamt', value: '0' },
+    { key: 'offen', label: 'Offen', value: '0' },
+  ],
+  fields: [
+    { key: 'applicant_name', label: 'Bewerber', type: 'text' },
+    { key: 'applicant_email', label: 'E-Mail', type: 'text' },
+    { key: 'position_title', label: 'Stelle', type: 'text' },
+    { key: 'source', label: 'Quelle', type: 'text' },
+  ],
+  workflow: { processKey: 'personal.bewerbungen' },
+  actions: [
+    {
+      key: 'speichern',
+      label: 'Speichern',
+      command: 'personal.saveBewerbung',
+      kind: 'primary',
+      dangerLevel: 'safe',
+      zone: 'header',
+      stubReason: 'Legt eine Bewerbung im Eingang an.',
+    },
+    {
+      key: 'neu',
+      label: 'Neu',
+      command: 'personal.newBewerbung',
+      kind: 'secondary',
+      dangerLevel: 'safe',
+      zone: 'footer',
+      stubReason: 'Leert die Eingabe fuer eine neue Bewerbung.',
+    },
+  ],
+  tables: [
+    {
+      key: 'bewerbungen',
+      label: 'Bewerbungen',
+      dataSourceKey: 'bewerbungen',
+      serverPagination: false,
+      pageSize: 50,
+      virtualized: true,
+      rowHeight: 44,
+      rowDetail: false,
+      rowActions: [
+        {
+          key: 'loeschen',
+          label: 'Löschen',
+          command: 'personal.deleteBewerbung',
+          dangerLevel: 'moderate',
+          disabledWhen: { field: 'gesperrt', values: [true] },
+        },
+      ],
+      columns: [
+        { key: 'applicant_name', label: 'Bewerber', sortable: true, filterable: true, priority: 'primary' },
+        { key: 'position_title', label: 'Stelle', priority: 'secondary' },
+        { key: 'stage', label: 'Stand', priority: 'secondary' },
+        { key: 'applied_at', label: 'Eingang', renderKind: 'date', priority: 'tertiary' },
+      ],
+    },
+  ],
+  noWorkflowReason: 'Der Stand folgt den Bewerbungen in der Pipeline.',
+  layout: {
+    floorplan: 'worklist',
+    density: 'compact',
+    contextRail: 'none',
+    tableProfile: 'standard',
+    columnNavigation: 'single',
+    preferredMode: 'desktopDense',
+    mobileMode: 'mobileStack',
+    touchTargetPx: 44,
+    summaryPlacement: 'footer',
+    statusPlacement: 'afterFields',
+  },
+} satisfies ScreenDefinition

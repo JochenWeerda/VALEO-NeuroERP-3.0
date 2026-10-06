@@ -581,6 +581,7 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  interessent_service: crm
   etikettendruck_service: inventory
   schaden_service: dms-compliance
   eudr_register_service: dms-compliance

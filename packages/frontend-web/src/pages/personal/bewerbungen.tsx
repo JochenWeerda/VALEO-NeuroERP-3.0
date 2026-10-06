@@ -1,109 +1,230 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DataTable } from '@/components/ui/data-table'
-import { Input } from '@/components/ui/input'
-import { ErrorState } from '@/components/ErrorState'
-import { apiClient } from '@/lib/api-client'
-import { Plus, Search, UserCog } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Skeleton } from '@/components/ui/skeleton'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
+import { toast } from 'sonner'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { personalBewerbungenScreen } from '@/masks/capture-screens'
 
-// Backend-Vertrag: GET /api/v1/personal/applications (app/api/v1/endpoints/personal.py,
-// domain_hr.applications) — Pipeline-Stage liegt in der Spalte `status`.
-type ApplicationRow = {
+const STUFEN: Record<string, string> = {
+  EINGANG: 'Eingang',
+  VORAUSWAHL: 'Vorauswahl',
+  ERSTGESPRAECH: 'Erstgespräch',
+  ENDGESPRAECH: 'Endgespräch',
+  ANGEBOT: 'Angebot',
+  EINGESTELLT: 'Eingestellt',
+  ABGELEHNT: 'Abgelehnt',
+}
+
+const ABGESCHLOSSEN = new Set(['EINGESTELLT', 'ABGELEHNT'])
+
+const leer = {
+  applicant_name: '',
+  applicant_email: '',
+  position_title: '',
+  source: '',
+}
+
+function text(value: unknown): string {
+  return String(value ?? '').trim()
+}
+
+type ApplicationApi = {
   id: string
   applicant_name: string
-  position_title: string | null
+  applicant_email?: string | null
+  position_title?: string | null
   status: string
   applied_at: string
+  source?: string | null
 }
 
-type Bewerbung = {
+type BewerbungRow = {
   id: string
-  bewerber_name: string
-  stelle: string
-  stage: 'EINGANG' | 'VORAUSWAHL' | 'ERSTGESPRAECH' | 'ENDGESPRAECH' | 'ANGEBOT' | 'EINGESTELLT' | 'ABGELEHNT'
-  eingangsdatum: string
+  applicantName: string
+  positionTitle: string
+  stage: string
+  appliedAt: string
 }
 
-const STAGE_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
-  EINGANG: 'outline',
-  VORAUSWAHL: 'secondary',
-  ERSTGESPRAECH: 'secondary',
-  ENDGESPRAECH: 'default',
-  ANGEBOT: 'default',
-  EINGESTELLT: 'default',
-  ABGELEHNT: 'destructive',
-}
-
-const STAGES: Bewerbung['stage'][] = ['EINGANG', 'VORAUSWAHL', 'ERSTGESPRAECH', 'ENDGESPRAECH', 'ANGEBOT', 'EINGESTELLT', 'ABGELEHNT']
-
-export default function BewerbungenPage(): JSX.Element {
-  const [search, setSearch] = useState('')
-
-  const { data: bewerbungen = [], isError, error, refetch } = useQuery<Bewerbung[]>({
+export default function PersonalBewerbungenPage(): JSX.Element {
+  const isTouch = useTouchDevice()
+  const queryClient = useQueryClient()
+  const bewerbungen = useQuery({
     queryKey: ['bewerbungen'],
     queryFn: async () => {
-      const rows = (await apiClient.get<ApplicationRow[]>('/api/v1/personal/applications')).data
-      return rows.map((r) => ({
-        id: r.id,
-        bewerber_name: r.applicant_name,
-        stelle: r.position_title ?? '—',
-        stage: (STAGES.includes(r.status as Bewerbung['stage']) ? r.status : 'EINGANG') as Bewerbung['stage'],
-        eingangsdatum: r.applied_at,
+      const rows = (await apiClient.get<ApplicationApi[]>('/api/v1/personal/applications')).data
+      return rows.map((row): BewerbungRow => ({
+        id: row.id,
+        applicantName: row.applicant_name,
+        positionTitle: row.position_title?.trim() || '–',
+        stage: STUFEN[row.status] ? row.status : 'EINGANG',
+        appliedAt: row.applied_at,
       }))
     },
   })
+  const rows = bewerbungen.data ?? []
+  const offen = rows.filter((row) => !ABGESCHLOSSEN.has(row.stage)).length
+  const [saving, setSaving] = useState(false)
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
 
-  if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  useEffect(() => {
+    if (!bewerbungen.isError) return
+    toast.error('Bewerbungen nicht geladen', { description: getAxiosErrorMessage(bewerbungen.error) })
+  }, [bewerbungen.error, bewerbungen.isError])
 
-  const filtered = bewerbungen.filter(
-    (b) =>
-      b.bewerber_name.toLowerCase().includes(search.toLowerCase()) ||
-      b.stelle.toLowerCase().includes(search.toLowerCase()),
-  )
+  const schema = useMemo<ScreenDefinition>(() => ({
+    ...personalBewerbungenScreen,
+    layout: {
+      ...personalBewerbungenScreen.layout,
+      density: isTouch ? 'comfortable' : 'compact',
+    },
+    summary: (personalBewerbungenScreen.summary ?? []).map((item) => ({
+      ...item,
+      value: String(item.key === 'offen' ? offen : rows.length),
+    })),
+    actions: (personalBewerbungenScreen.actions ?? []).map((action) => ({
+      ...action,
+      disabled: action.key === 'speichern' ? saving : false,
+    })),
+  }), [isTouch, offen, rows.length, saving])
 
-  const columns = [
-    { key: 'bewerber_name' as const, label: 'Bewerber', render: (b: Bewerbung) => <span className="font-medium">{b.bewerber_name}</span> },
-    { key: 'stelle' as const, label: 'Stelle' },
-    { key: 'stage' as const, label: 'Stage', render: (b: Bewerbung) => <Badge variant={STAGE_VARIANT[b.stage] ?? 'outline'}>{b.stage}</Badge> },
-    { key: 'eingangsdatum' as const, label: 'Eingangsdatum', render: (b: Bewerbung) => new Date(b.eingangsdatum).toLocaleDateString('de-DE') },
-  ]
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const form = useUniversalFormState({ screen: schema, initialValues: leer })
+
+  const workflow = useMemo<WorkflowState>(() => {
+    const keine = rows.length === 0
+    const label = keine ? 'Keine Bewerbung' : offen > 0 ? 'Pipeline offen' : 'Pipeline abgeschlossen'
+    const naechste = keine
+      ? 'Bewerber und E-Mail eintragen.'
+      : offen > 0
+        ? `${offen} Bewerbung noch in der Pipeline.`
+        : 'Eine weitere Bewerbung erfassen.'
+    return {
+      status: {
+        currentStatus: keine ? 'leer' : offen > 0 ? 'offen' : 'abgeschlossen',
+        statusLabel: label,
+        tone: keine || offen > 0 ? 'warning' : 'success',
+      },
+      nextAllowedActions: [{ actionKey: 'speichern', label: naechste, dangerLevel: 'safe', requiresConfirmation: false }],
+      blockingReasons: keine || offen > 0 ? [{ code: label, message: naechste, blocking: true }] : [],
+      auditTrail: [],
+      policyHints: [],
+      isBlocked: false,
+      isTerminal: false,
+    }
+  }, [offen, rows.length])
+
+  const leeren = useCallback(() => {
+    form.setValue('applicant_name', '')
+    form.setValue('applicant_email', '')
+    form.setValue('position_title', '')
+    form.setValue('source', '')
+  }, [form])
+
+  const speichern = useCallback(async () => {
+    if (saving) return
+    const applicantName = text(form.values.applicant_name)
+    const applicantEmail = text(form.values.applicant_email)
+    if (!applicantName || !applicantEmail) {
+      toast.error('Bewerbung unvollständig', { description: 'Bewerber und E-Mail eintragen.' })
+      return
+    }
+    setSaving(true)
+    try {
+      await apiClient.post('/api/v1/personal/applications', {
+        applicant_name: applicantName,
+        applicant_email: applicantEmail,
+        position_title: text(form.values.position_title) || null,
+        source: text(form.values.source) || null,
+      })
+      toast.success('Bewerbung erfasst', { description: applicantName })
+      await queryClient.invalidateQueries({ queryKey: ['bewerbungen'] })
+      leeren()
+    } catch (error) {
+      toast.error('Bewerbung nicht erfasst', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setSaving(false)
+    }
+  }, [form.values, leeren, queryClient, saving])
+
+  const loeschen = useCallback(async (id: string, name: string) => {
+    if (!id || pendingDeletes.has(id)) return
+    setPendingDeletes((prev) => new Set(prev).add(id))
+    try {
+      await apiClient.delete(`/api/v1/personal/applications/${id}`)
+      toast.success('Bewerbung gelöscht', { description: name })
+      await queryClient.invalidateQueries({ queryKey: ['bewerbungen'] })
+    } catch (error) {
+      toast.error('Bewerbung nicht gelöscht', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setPendingDeletes((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }
+  }, [pendingDeletes, queryClient])
+
+  const handleAction = useCallback(async (key: string, payload: Record<string, unknown> = {}) => {
+    if (key === 'speichern') {
+      await speichern()
+      return
+    }
+    if (key === 'neu') {
+      leeren()
+      return
+    }
+    if (key === 'loeschen') await loeschen(text(payload.id), text(payload.applicant_name))
+  }, [leeren, loeschen, speichern])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { bewerbungen: rows },
+    permissions: { granted: [] },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'personal.saveBewerbung': () => handleAction('speichern'),
+      'personal.newBewerbung': () => handleAction('neu'),
+      'personal.deleteBewerbung': (payload) => handleAction('loeschen', payload),
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, handleAction, rows])
+
+  if (bewerbungen.isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col">
-      <div className="space-y-4 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Bewerbungen</h1>
-            <p className="text-muted-foreground">Bewerbungen und Rekrutierungsprozesse</p>
-          </div>
-          <Button className="gap-2"><Plus className="h-4 w-4" />Neue Bewerbung</Button>
-        </div>
-
-        <div className="grid gap-2 md:grid-cols-4 lg:grid-cols-7">
-          {STAGES.map((stage) => (
-            <Card key={stage}>
-              <CardHeader className="pb-1 pt-3 px-3"><CardTitle className="text-xs">{stage}</CardTitle></CardHeader>
-              <CardContent className="pb-3 px-3">
-                <span className="text-xl font-bold">{bewerbungen.filter((b) => b.stage === stage).length}</span>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><UserCog className="h-5 w-5" />Alle Bewerbungen ({filtered.length})</CardTitle></CardHeader>
-          <CardContent>
-            <div className="mb-4 relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Bewerber oder Stelle suchen..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
-            </div>
-            <DataTable data={filtered} columns={columns} />
-          </CardContent>
-        </Card>
-      </div>
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        workflowState={workflow}
+        tables={{
+          bewerbungen: rows.map((row) => ({
+            id: row.id,
+            applicant_name: row.applicantName,
+            position_title: row.positionTitle,
+            stage: STUFEN[row.stage] ?? 'Eingang',
+            applied_at: row.appliedAt ? row.appliedAt.slice(0, 10) : '',
+            gesperrt: pendingDeletes.has(row.id),
+          })),
+        }}
+        onAction={handleAction}
+      />
     </div>
   )
 }

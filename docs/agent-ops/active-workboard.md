@@ -13,6 +13,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**Nebenbuch-Teilclaim (2026-10-06, abgeschlossen):** app/finance/router.py nur die zwei nachrangigen GET-/POST-Platzhalter der Nebenbuch-Abstimmung; tests/test_canonical_router_mounts.py und neuer Nebenbuch-Regressionsvertrag. Echte mandantengebundene Datenbankhandler bleiben kanonisch; Pflichtperiode wird als YYYY-MM aus abstimmungs_datum abgeleitet und Antwortsummen/-details initialisiert (Anlagevertrag enthaelt nur Datum und Buchungskreis). Keine aktive Fremdbelegung fuer diese Backend-Funktionen gefunden; committed-source Spec/Inventare und eigene QA/Slice werden nachgezogen. Abnahme: eindeutige Registrierung, gespeicherte Anlage, Tenantfilter und 404 bei fehlendem Datensatz; keine neue Datenbank.
+
+**Integrationsclaim (2026-10-06, abgeschlossen):** config/architecture-domain-prefixes.yaml ausschliesslich exakte CRM-Zuordnung interessent_service; tests/test_generate_architecture_index.py entsprechender Vertrag und committed-source architecture-index. Generator meldet genau diesen fehlenden Service aus ef60a6076; dessen kanonische Datenquelle ist crm_leads. Keine Fremdimplementierung veraendern.
+
+**Abnahme Nebenbuch/Integration:** Zwei widerspruechliche Platzhalter entfernt; persistente Anlage initialisiert Pflichtperiode YYYY-MM und Antwortfelder. 13 Nebenbuch-/Router-Vertraege bestanden; vier davon mit explizitem SQLite-BEGIN/Savepoint-Rollback und leerem Anfangsbestand erneut bestanden. Ein gemeinsamer In-Memory-Speicher, keine PostgreSQL-/Docker-Ressource. 19 Architekturtests bestanden; 932/932 Routen, 270/270 Services und 451/451 Endpoints zugeordnet. Spec aus committed 47e799bff plus eigenem Finance-Hunk: alle bisherigen Methoden/Pfade erhalten, einzig neuer Personal-Loeschpfad aus f7fcbdd7c integriert (3096 Pfade); Doppelgruppen 55 auf 53. Inventare/Index indexseitig integriert, fremde Arbeitsbaumfassungen erhalten. GitHub 21015285e: Docs Build/Governance, PostgreSQL und Erntepeak erfolgreich; Gesamt-CI/Security weiter ausstehend. Shared-Index-Race ef60a6076 nahm parallel gestagten Interessenten-Slice auf; dokumentiert in 47e799bff, kein Rewrite/Revert. Weitere Ergebniscommits verwenden isolierten Index mit normalen Hooks.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
@@ -1491,7 +1497,7 @@ Migration auf beiden Datenbanken; alle vier Ratschen gruen; tsc und eslint saube
 
 **Doku:** `docs/quality-assurance/quittung-ohne-vorgang-20261006.md`.
 
-## INTERESSENT-IST-LEAD-20261006 — in Arbeit, Claude Code
+## INTERESSENT-IST-LEAD-20261006 — abgeschlossen, Claude Code
 
 **Befund 1 — drei Modelle fuer einen Begriff, und der benutzte ist der leere.**
 
@@ -1576,6 +1582,106 @@ Mehrschema-Ordnung widerspricht. Der Umzug nach `domain_crm` ist ein eigener
 Slice **mit Daten** (97 Zeilen) und wird hier nur benannt. Die
 Statuswoerter des Bestands sind `NEW`/`CONVERTED` (englisch) — sie bleiben, weil
 Daten darauf stehen; die Zuordnung zum deutschen Weg steht an einer Stelle.
+
+**Ergebnis (2026-10-06):** Die drei Interessentenwege arbeiten auf
+`public.crm_leads`; `domain_crm.interessenten` wird **nicht** angelegt. **Keine
+Migration** — das Register existiert und fuehrt 97 Zeilen. Die Nummer wird in den
+Notizen vermerkt (`[INT-JJJJ-NNNNN]`) und aus der **hoechsten vermerkten**
+gezaehlt statt aus `COUNT(*)`; uebernommene Akquise-Leads tragen keine und
+bekommen keine erfundene. Eigene Antwortmodelle statt `CustomersOut` mit
+`extra="allow"`, Pagination, `uuid7`.
+
+**Die Art.-17-Loeschung trifft jetzt das Register.** Sie anonymisierte
+`domain_crm.leads SET company_name = …` — vier Spalten, die es dort nicht gibt.
+Der Schritt scheiterte, **jeder Loeschantrag zu einem Lead blieb dauerhaft
+`IN_BEARBEITUNG`** (Art. 12 Abs. 3 DSGVO), und die Personendaten in
+`public.crm_leads` blieben unberuehrt. Dass das auffiel, ist das Verdienst des
+vorangegangenen Art.-17-Slices: Ohne dessen Sicherungspunkte und das ehrliche
+Protokoll haette der Antrag "erledigt" gemeldet.
+
+**Die Konvertierung ist eine Transaktion.** Vorher legte der Weg den Kundensatz an
+und setzte den Stand in einem eigenen `try/except: rollback` — das nahm den
+Kundensatz mit, und die Antwort meldete trotzdem `status: "KUNDE"` samt
+Kundennummer. Ein zweiter Durchlauf wird jetzt abgewiesen (er legte einen zweiten
+Kunden an), die Zeile wird mit `FOR UPDATE` gesperrt.
+
+**19 neue Vertraege, 53 im CRM/DSGVO-Umfeld gruen.**
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **2 -> 1**. Es bleibt
+`domain_shared.notifications` (compat.py). Paginierungs-Baseline gesenkt.
+
+**Handshakes:**
+1. `public.crm_leads` liegt im `public`-Schema — Umzug nach `domain_crm` ist ein
+   eigener Slice **mit Daten** und beruehrt `crm_lead_gen_service`,
+   `crm_partner_suche`, `crm_reports`.
+2. `domain_crm.leads` ist leer und meint die Verkaufschance an einem Kunden —
+   gehoert in den CRM-ADR.
+3. `portal_interessent.py` haelt Interessenten **im Speicher**; eine
+   Selbstregistrierung, die einen Neustart nicht uebersteht, ist eine eigene
+   Luecke.
+4. **Fremder Rotstand (Godfile):** `personal.py` ist im geteilten Baum von 3315
+   auf 3342 Zeilen gewachsen (neuer `delete_application`-Weg, nicht committet) und
+   bricht damit die Baseline, die ich im Personal-Slice gesenkt habe — die Ratsche
+   arbeitet wie vorgesehen. Nicht angefasst.
+
+**Doku:** `docs/quality-assurance/interessent-ist-lead-20261006.md`.
+
+**Commit-Lage:** Der Slice-Inhalt (8 Dateien) ist in den **fremden** Commit
+`ef60a6076` ("chore(workboard): claim CI-RUN-REPAIR-20261005 nebenbuch") geraten —
+der geteilte Git-Index, siehe [[shared-tree-commit-isolation]]. Alle acht Dateien
+sind inhaltlich vollstaendig in HEAD und gepusht (geprueft). Wer diesen Commit
+aufraeumt, nimmt den Slice mit: `app/services/interessent_service.py`,
+`app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/compliance_dsgvo.py`,
+`tests/test_interessent_ist_lead_vertrag.py`, `scripts/check_table_references.py`,
+`config/pagination_baseline.json` und die beiden Dokumente.
+
+## PERSONAL-ZERLEGUNG-20261006 — in Arbeit, Claude Code
+
+**Anlass:** `app/api/v1/endpoints/personal.py` ist von 3315 auf 3342 Zeilen
+gewachsen (neuer `delete_application`-Weg, Commit `f7fcbdd7c`) und bricht damit
+die Godfile-Ratsche an der Baseline, die dieser Agent im Slice
+PERSONAL-ORGANISATION-ZEITKONTO-20261006 gesenkt hat. Die Ratsche arbeitet
+richtig: Entweder schrumpft die Datei, oder das Wachstum wird begruendet. Auf
+Nutzeranweisung wird sie **zerlegt**.
+
+**Der Schnitt liegt schon da.** Zwei Faecher am Ende der Datei teilen mit der
+Personalverwaltung nur den Prefix `/personal`:
+
+* **Bewerbermanagement** (Recruiting-Pipeline, `/applications…`) — 149 Zeilen
+* **Lohnabrechnung** (`/lohn/berechnung`, `/lohn/closeout-preview`) — 112 Zeilen
+
+Sie wandern unveraendert in `personal_bewerbungen.py` und
+`personal_lohnabrechnung.py`. **Eine Zerlegung ist keine Gelegenheit, Verhalten zu
+aendern:** Der Code wird nicht angefasst, auch wo er fragwuerdig ist (dazu unten).
+
+**Montagereihenfolge:** `personal.py` hat **keinen** Platzhalterpfad auf oberster
+Ebene (`/{...}`), die neuen Module nur feste Pfade — es gibt also nichts zu
+verschlucken. Die Reihenfolge ist trotzdem festgelegt und begruendet, damit sie
+nicht spaeter zufaellig wird.
+
+**Dateibesitz:** `app/api/v1/endpoints/personal.py` (nur der Rueckbau der zwei
+Abschnitte), `app/api/v1/endpoints/personal_bewerbungen.py` (neu),
+`app/api/v1/endpoints/personal_lohnabrechnung.py` (neu),
+`app/api/v1/api.py` (nur die zwei Montagezeilen),
+`config/godfile_baseline.json` (nur der Eintrag `personal.py`),
+`tests/test_personal_zerlegung_vertrag.py` (neu), eigene QA-Doku und dieser
+Abschnitt.
+**Fremder Code:** Der `delete_application`-Weg stammt von einem anderen Agenten
+(`f7fcbdd7c`) und wandert **wortgleich** mit. Er bleibt dessen Code.
+
+**Abnahme:** Alle Wege sind unter denselben Pfaden erreichbar wie vorher (gleiche
+Methoden, gleiche Antwortmodelle); `personal.py` liegt unter 3315 Zeilen und die
+Baseline ist nachgezogen; kein Weg doppelt montiert; Vertraege und alle Ratschen
+gruen.
+
+**Risiken:** Keine fachliche Aenderung — und damit bleiben die bekannten Maengel
+der beiden Faecher bestehen: `except Exception: raise HTTPException(503,
+"applications table not available")` verwischt jeden Fehler zu einer
+Tabellenaussage, `response_model=PersonalOut` ist ein offenes Modell, die
+Bewerbungsliste ist unbegrenzt, und die Stufen stehen als `set` statt als
+Woerterbuch mit Uebergaengen. Das gehoert in einen eigenen Slice und wird hier
+**benannt, nicht behoben** — sonst waere nicht mehr zu unterscheiden, was der
+Umzug und was die Korrektur gebrochen hat.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

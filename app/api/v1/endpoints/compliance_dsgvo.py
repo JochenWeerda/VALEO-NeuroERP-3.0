@@ -112,9 +112,14 @@ def _namen_des_betroffenen(
             "SELECT company_name FROM domain_crm.customers WHERE id::text = :sid AND tenant_id::text = :tid",
             "SELECT company_name FROM domain_crm.crm_customers WHERE id::text = :sid AND tenant_id::text = :tid",
         ],
+        # Das Register der Interessenten ist `public.crm_leads` — dort stehen die
+        # Namen. `domain_crm.leads` fuehrt `customer_id` und `lead_source`: eine
+        # Verkaufschance an einem bestehenden Kunden, und **keine** Spalten
+        # `company_name`/`contact_person`. Bis zum 06.10.2026 fragte dieser Weg
+        # genau die dort nicht vorhandenen Spalten ab.
         "LEAD": [
-            "SELECT company_name FROM domain_crm.leads WHERE id::text = :sid AND tenant_id::text = :tid",
-            "SELECT contact_person FROM domain_crm.leads WHERE id::text = :sid AND tenant_id::text = :tid",
+            "SELECT company FROM public.crm_leads WHERE id::text = :sid AND tenant_id::text = :tid",
+            "SELECT contact_person FROM public.crm_leads WHERE id::text = :sid AND tenant_id::text = :tid",
         ],
     }
     namen: list[str] = []
@@ -182,11 +187,24 @@ def _anonymize_subject(db: Session, subject_type: str, subject_id: str, tenant_i
                  "DELETE FROM domain_crm.contacts WHERE customer_id::text = :sid", basis),
             ]
         elif typ == "LEAD":
+            # Bis zum 06.10.2026 stand hier ein UPDATE auf
+            # `domain_crm.leads SET company_name = …, contact_person = …` — vier
+            # Spalten, die es dort nicht gibt. Der Schritt scheiterte mit
+            # `UndefinedColumn`, landete als Fehler im Protokoll, und
+            # `_loeschung_ist_vollstaendig` lieferte `False`: **Jeder Loeschantrag
+            # zu einem Lead blieb dauerhaft offen** (Art. 12 Abs. 3 DSGVO), und die
+            # Personendaten blieben unberuehrt — sie liegen in `public.crm_leads`.
             schritte = [
-                ("domain_crm.leads",
-                 "UPDATE domain_crm.leads SET company_name = :anon_name,"
-                 " contact_person = :anon_name, email = :anon_email, phone = NULL"
+                ("public.crm_leads",
+                 "UPDATE public.crm_leads SET company = :anon_name,"
+                 " contact_person = :anon_name, email = :anon_email, phone = NULL,"
+                 " notes = NULL, assigned_to = NULL"
                  " WHERE id::text = :sid AND tenant_id::text = :tid", basis),
+                # Die Verkaufschance fuehrt keine Namen, aber `notes` kann
+                # Personenbezug enthalten. Fehlt die Tabelle, sagt das Protokoll das.
+                ("domain_crm.leads",
+                 "UPDATE domain_crm.leads SET notes = NULL, assigned_to = NULL"
+                 " WHERE customer_id::text = :sid AND tenant_id::text = :tid", basis),
             ]
         elif typ == "EMPLOYEE":
             # Einen Personalstamm gibt es in dieser Datenbank nicht. Das als

@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (96 Masken).
+> Generiert aus `app/core/screen_definitions.py` (97 Masken).
 
 ## Übersicht
 
@@ -83,6 +83,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `logistik/tourenplanung` | Tourenplanung | logistics | niedrig | — | `GET /api/v1/masks/logistik/tourenplanung/agent-contract` |
 | `logistik/verladung` | Verladung | logistics | niedrig | — | `GET /api/v1/masks/logistik/verladung/agent-contract` |
 | `logistik/versandprofile` | Versandprofile | logistics | niedrig | — | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
+| `personal/bewerbungen` | Bewerbungen | hr | niedrig | — | `GET /api/v1/masks/personal/bewerbungen/agent-contract` |
 | `personal/onboarding` | Onboarding | hr | niedrig | — | `GET /api/v1/masks/personal/onboarding/agent-contract` |
 | `personal/qualifikationen` | Qualifikationen | hr | niedrig | — | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
 | `personal/schulungen` | Schulungen | hr | niedrig | — | `GET /api/v1/masks/personal/schulungen/agent-contract` |
@@ -1960,6 +1961,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: hr
+
+### `personal/bewerbungen` — Bewerbungen
+
+**Zweck:** Bewerbungen erfassen. Der Stand folgt den offenen Stufen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/bewerbungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/bewerbungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/bewerbungen/readiness` |
+| Rollout-Route | `/mask-rollout/personal__bewerbungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `bewerbungen` → `/api/v1/personal/applications`
+
+**Beispiel-Prompts:**
+
+- Welche Bewerbung steht noch im Eingang?
+
+**Sensible Felder:** `applicant_email`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt eine Bewerbung im Eingang an.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Bewerbung.` |
+
+---
 
 ### `personal/onboarding` — Onboarding
 
