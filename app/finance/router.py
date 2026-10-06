@@ -15,7 +15,7 @@ from app.finance.schemas import (
     WechselkursCreate, WechselkursResponse, BuchungsschemaCreate,
     BuchungsschemaResponse, Buchungsvorschlag, Kostenstelle, KostenstelleCreate,
     KostenstelleResponse, KostenstellenReport, AbschlussChecklisteCreate, AbschlussChecklisteUpdate,
-    AbschlussChecklisteResponse, NebenbuchAbstimmung, NebenbuchAbstimmungCreate, NebenbuchAbstimmungResponse,
+    AbschlussChecklisteResponse, NebenbuchAbstimmungCreate, NebenbuchAbstimmungResponse,
     IntercompanyBuchungCreate, IntercompanyBuchungResponse,
 )
 
@@ -671,37 +671,7 @@ async def create_abstimmung(
         id=uuid7(),
         tenant_id=tenant_id,
         **data.model_dump(),
-        status="OFFEN",
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
-    )
-    db.add(abstimmung)
-    db.commit()
-    db.refresh(abstimmung)
-    return abstimmung
-
-
-@router.get("/abstimmung/nebenbuch/{id}", response_model=NebenbuchAbstimmungResponse)
-async def get_abstimmung(  # noqa: F811
-    id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
-):
-    """Hole Abstimmung"""
-    raise HTTPException(status_code=404, detail="Abstimmung nicht gefunden")
-
-
-@router.post("/abstimmung/nebenbuch", response_model=NebenbuchAbstimmungResponse)
-async def create_abstimmung(  # noqa: F811
-    data: NebenbuchAbstimmungCreate,
-    tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
-):
-    """Erstelle Abstimmung"""
-    ab = NebenbuchAbstimmung(
-        id=uuid7(),
-        tenant_id=tenant_id,
-        **data.model_dump(),
+        periode=data.abstimmungs_datum.strftime("%Y-%m"),
         status="OFFEN",
         nebenbuch_saldo=0,
         hauptbuch_saldo=0,
@@ -710,7 +680,10 @@ async def create_abstimmung(  # noqa: F811
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()
     )
-    return ab
+    db.add(abstimmung)
+    db.commit()
+    db.refresh(abstimmung)
+    return abstimmung
 
 
 @router.post("/abstimmung/nebenbuch/{id}/ausfuehren")

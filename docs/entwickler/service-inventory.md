@@ -154,6 +154,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `hrm_zeiterfassung_service` | DOM-HRM-004.2 — HRM Zeiterfassung Lifecycle (Einstempeln/Ausstempeln/Korrektur). |
 | `integration_bootstrap` | — |
 | `interaction_state_manager` | Interaction State Manager — NC-002 |
+| `interessent_service` | Interessenten — und zwar die, die es gibt. |
 | `inventory_auxiliary_service` | Controlled inventory count exports, checks, valuation and opening balances. |
 | `inventory_balance_reconciliation` | Abstimmbericht fuer das Bestandshauptbuch (DOM-INV-006). |
 | `inventory_compat_service` | Service layer for compat inventory (lager) and futter domain routes. |

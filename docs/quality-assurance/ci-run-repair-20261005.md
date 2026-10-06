@@ -333,3 +333,54 @@ auf committed Quellen fuenf aktuelle Artefakte. Der Arbeitsbaumcheck meldete
 Drift in drei Handbuchdateien durch fremde laufende ScreenDefinition-Arbeit;
 der isolierte committed-source-Check bestaetigt, dass dieser Slice kein
 Handbuch-Update benoetigt. Fremde Masken-/Handbucharbeit bleibt geschuetzt.
+
+
+## Persistente Nebenbuch-Abstimmung und Integrationsabnahme am 2026-10-06
+
+app/finance/router.py definierte GET und POST fuer die Nebenbuch-Abstimmung
+jeweils zweimal. FastAPI fuehrte die zuerst registrierten DB-Handler aus,
+waehrend Python die gleichnamigen Funktionen und OpenAPI den spaeteren
+Platzhaltern zuordneten. GET meldete dort immer 404, POST erzeugte nur ein
+ungespeichertes Schemaobjekt. Die zwei nachrangigen Platzhalter und der
+ungenutzte Schemaimport sind entfernt. Die echten Handler behalten Auth,
+Tenantfilter, Antwortmodell, Status und Datenbankzugriff.
+
+Die echte Anlage enthielt ausserdem keine NOT-NULL-Pflichtperiode; das
+Create-Schema sieht nur abstimmungs_datum und buchungskreis vor. Der Handler
+leitet daher YYYY-MM aus dem gelieferten Abstimmungsdatum ab und initialisiert
+Summen und nicht_abgestimmte explizit, damit die gespeicherte Antwort dem
+Response-Schema entspricht. Keine Schemaaenderung oder Migration erforderlich.
+
+13 Tests bestehen in 47,88 Sekunden: vier funktionale HTTP-Vertraege plus
+neun Router-Vertraege. Die vier Funktionstests bestehen nach explizitem BEGIN
+fuer SQLite und Savepoint-Rollback nochmals in 1,81 Sekunden. Ein modulweit
+geteilter In-Memory-Speicher prueft echte ORM-Persistenz mit Pflichtfeldern,
+JSON-Antwort und erneutem Lesen, Jahresgrenzen der Periode, Tenantwechsel
+(Detail 404, Liste leer) und fehlende ID. Jeder Test prueft leeren Anfangsbestand.
+Diese Abnahme ersetzt keine PostgreSQL-/Migrationsabnahme. Probe --status
+bestaetigt quittung_ohne_vorgang_20261006; kein Reset und keine neue DB/Container.
+
+Der parallel committed Interessenten-Service fehlte bei der Inventar-Abnahme
+in den Architekturregeln. Seine kanonische Quelle public.crm_leads begruendet
+die exakte Zuordnung interessent_service: crm. 19 Architekturtests bestehen
+in 0,48 Sekunden; committed-source Index --check und --require-complete:
+932/932 Routen, 270/270 Services, 451/451 Endpoints, keine ungemappten Eintraege.
+Alle drei Code-Inventare wurden aus committed Quellen erzeugt und geprueft.
+
+Spec-Quelle ist committed 47e799bff plus eigenem Finance-Hunk. Alle bisherigen
+Pfade/Methoden bleiben erhalten. Einziger neuer Pfad ist der bereits committed
+Personal-Loeschpfad /api/v1/personal/applications/{application_id} aus f7fcbdd7c;
+3096 Pfade insgesamt. Das gerenderte Artefakt ist kanonisch geprueft. Die echte
+App registriert 53 doppelte Methoden/Pfade statt 55; die verbleibenden Konflikte
+zwischen unterschiedlichen Implementierungen sind weiter offen.
+
+Der Claim-Commit ef60a6076 absorbierte gleichzeitig gestagten Interessenten-Code;
+der zugehoerige Handshake steht in 47e799bff. Keine fremden Aenderungen revertiert
+oder umgeschrieben. Weitere Ergebniscommits werden ueber einen separaten Git-Index
+mit normalen Hooks erstellt. Die automatische Freigabe lehnte einen Versuch mit
+core.hooksPath=NUL ab; die sichere Alternative behielt alle Hooks bei.
+
+GitHub-Abnahme auf 21015285e: Docs Build, Docs Governance, PostgreSQL/require_db
+und Erntepeak erfolgreich. Vollstaendige CI und Security warten noch; keine
+Gesamtfreigabe. Einige aeltere konkurrierende Laeufe wurden von GitHub abgebrochen;
+diese sind kein erfolgreicher Gate-Nachweis.

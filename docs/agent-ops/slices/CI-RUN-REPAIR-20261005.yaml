@@ -21,6 +21,8 @@ file_ownership:
   - UIX-051 CRM-Delegationstest
   - main.py nur wiederholte Domain-Montagen; api.py zweite Quality-Montage
   - Canonical-Router-Regressionsvertrag und committed-source OpenAPI
+  - Finance-Nebenbuch nur kanonische GET-/POST-Handler und persistenter Anlagevertrag
+  - Exakte CRM-Zuordnung interessent_service mit committed-source Architekturindex
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
