@@ -102,6 +102,12 @@ kritische E2E auf 4a4104fe1 bestanden. Weitere Security-Befunde bleiben offen.
 fremder Commit 93bd71598 erhalten. Voll-Audit: 0 critical, 3 high,
 18 moderate; die drei ungepatchten hohen Befunde bleiben gate-blockierend.
 Frozen Lock aller 36 Workspaces offline gruen; Actions-Abnahme laeuft.
+**Buchungs-Fixtureclaim (2026-10-06):** Saubere Tests
+test_einkauf_bestellliste_beide_speicher.py nur Freigabe-Fixture mit eigenen
+Konten 5100/1600, Buchungsnachweis und tenantgebundenem Cleanup;
+test_process_kernel_wave100_settlement_completion.py nur FakeDb-Kontoantwort
+mit explizitem Tenant-/Aktiv-/Buchbarkeitsvertrag. Zwei Vollsuite-Failures
+bestaetigt. Keine produktiven Kontopruefungen ersetzen oder abschwaechen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
