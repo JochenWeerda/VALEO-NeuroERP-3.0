@@ -1857,6 +1857,92 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
+## BEWERBUNG-EINWILLIGUNG-20261006 — in Arbeit, Claude Code
+
+**Auftrag:** Den offenen Punkt 4 aus
+[Der Loeschlauf fuer Bewerberdaten](../quality-assurance/bewerbung-loeschlauf-20261006.md)
+schliessen. Der Loeschlauf achtet eine Einwilligung zur laengeren Aufbewahrung
+(Talentpool) — aber **es gibt keinen Weg, sie zu erteilen oder zu widerrufen**. Die
+Spalten sind da und niemand kann sie fuellen.
+
+**Die Pflicht, zweiteilig:**
+
+1. **Art. 7 Abs. 3 DSGVO:** Der Widerruf muss **jederzeit** moeglich sein und darf
+   nicht schwerer sein als die Erteilung. Kein Grund, keine Freigabe, keine
+   Begruendungspflicht — eine Ruecknahme, fuer die man sich rechtfertigen muss, ist
+   keine freie.
+2. **Art. 7 Abs. 1 DSGVO:** Der Verantwortliche muss **nachweisen** koennen, dass
+   eine Einwilligung vorlag. Die zwei Spalten auf `applications` sagen nur *bis
+   wann* und *seit wann* — nicht **wozu**, nicht **wie** erteilt, und nach einem
+   Widerruf steht dort gar nichts mehr. Dann ist nicht mehr zu belegen, warum die
+   Daten im abgelaufenen Zeitraum ueberhaupt noch da waren.
+
+**Die Tabellenfrage zuerst — es gibt schon drei Einwilligungstabellen.**
+`domain_crm.crm_contact_consents` (+ `crm_contact_consent_history`) und
+`domain_crm.crm_consents`. Keine davon wird benutzt, und zwar aus einem Grund:
+
+* Beide haengen an einem **CRM-Kontakt** bzw. **Partner**. Fuer jeden Bewerber
+  einen CRM-Kontakt anzulegen wuerde Bewerberdaten in den Vertrieb traegen — das
+  Gegenteil von Datenminimierung, und der Loeschlauf muesste dann auch dort
+  loeschen.
+* Sie beschreiben eine **andere Erlaubnis**: `channel`, `consent_type`,
+  Double-Opt-In, `ip_address` — das ist die Erlaubnis, **angesprochen** zu werden.
+  Hier geht es um die Erlaubnis, Daten **aufzubewahren**. Wer beides in eine
+  Tabelle legt, laesst einen widerrufenen Werbe-Opt-In wie einen widerrufenen
+  Aufbewahrungs-Opt-In aussehen — und loescht Daten, fuer die die Erlaubnis noch
+  gilt, oder behaelt welche, fuer die sie weg ist.
+
+Das ist die Gegenprobe zur Loeschsperre im Vorslice: Dort war der Begriff
+**derselbe** und die Tabelle wurde wiederverwendet. Hier ist er ein anderer.
+
+**Nebenbefund, nicht Teil dieses Slices:** `crm_consents` und
+`crm_contact_consents` sind **zwei Tabellen fuer einen Begriff** (CRM-Einwilligung),
+die zweite migriert Daten aus der ersten, die erste bleibt stehen. Das gehoert in
+einen eigenen Slice und wird hier nur benannt.
+
+**Was gebaut wird** (Migration `bewerbung_einwilligung_20261006`):
+* `domain_hr.bewerbung_einwilligungen` — ein **fortschreibendes** Verzeichnis:
+  `vorgang` (`ERTEILT`/`WIDERRUFEN`), `erfolgt_am`, `gueltig_bis` (nur bei
+  Erteilung), `kanal`, `einwilligungstext` (der **Wortlaut**, dem zugestimmt wurde
+  — ohne ihn ist nicht nachweisbar, *wozu*), `erfasst_durch`. Kein UPDATE, kein
+  DELETE: Ein Widerruf ist eine **neue Zeile**, keine Aenderung. Wer die Erteilung
+  ueberschreibt, vernichtet den Nachweis, den Art. 7 Abs. 1 verlangt.
+  `ON DELETE CASCADE` auf die Bewerbung: Ist der Mensch geloescht, gibt es keine
+  Aufbewahrung mehr zu rechtfertigen, und ein Nachweis, der nur noch den Namen
+  haelt, ist selbst die Speicherung, die beendet werden sollte.
+* Die zwei Spalten auf `applications` bleiben der **operative Stand**, den der
+  Loeschlauf liest; das Verzeichnis ist der **Nachweis der Vorgaenge**. Beide
+  werden nur von einem Dienst und nur in **einer** Transaktion geschrieben, und ein
+  Vertrag prueft, dass der Stand immer der letzten Zeile entspricht.
+
+**Drei Wege** in `personal_bewerbungen.py`:
+`POST /applications/{id}/einwilligung` erteilt,
+`DELETE /applications/{id}/einwilligung` widerruft (**ohne Rumpf** — ein Widerruf,
+der Angaben verlangt, ist schwerer als die Erteilung),
+`GET /applications/{id}/einwilligung` zeigt Stand und Verzeichnis.
+
+**Dateibesitz:** `alembic/versions/bewerbung_einwilligung_20261006.py`,
+`app/services/bewerbung_einwilligung_service.py` (neu),
+`app/api/v1/endpoints/personal_bewerbungen.py` (nur die drei neuen Wege),
+`app/api/v1/schemas/personal_bewerbung_schemas.py` (nur die neuen Modelle),
+`tests/test_bewerbung_einwilligung_vertrag.py` (neu), eigene QA-Doku, Punkt 4 in
+`bewerbung-loeschlauf-20261006.md` und dieser Abschnitt.
+
+**Abnahme:** Erteilen setzt Stand **und** Verzeichniszeile; Widerrufen braucht
+keinen Rumpf, keinen Grund und wirkt **sofort** (der Loeschlauf nimmt die Bewerbung
+unmittelbar danach mit); die Erteilung bleibt nach dem Widerruf im Verzeichnis
+stehen; eine Einwilligung ohne Wortlaut ist unmoeglich; eine Einwilligung ohne Ende
+ist unmoeglich (Obergrenze, wie bei der Frist — eine Erlaubnis ohne Ende ist ein
+Vorrat); ein Widerruf ohne vorherige Einwilligung sagt das statt stillzuhalten;
+alles mandantengebunden; Vertraege gegen die frische DB und alle fuenf Ratschen
+gruen.
+
+**Risiken:** Der Widerruf macht Daten **loeschfaehig** — der naechste Lauf nimmt
+sie mit. Das ist gewollt, aber es heisst, dass ein versehentlicher Widerruf nicht
+durch erneutes Erteilen zu heilen ist, sobald der Lauf gelaufen ist. Die Reihenfolge
+Widerruf → Lauf ist nicht umkehrbar; die QA-Doku sagt es, und der Trockenlauf bleibt
+der Ort, an dem es auffaellt.
+
 ## BEWERBUNG-LOESCHLAUF-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Den Loeschweg nachziehen, den
