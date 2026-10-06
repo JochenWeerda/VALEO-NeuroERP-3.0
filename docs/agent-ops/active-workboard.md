@@ -13,7 +13,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
-**Nebenbuch-Teilclaim (2026-10-06, reserviert):** app/finance/router.py nur die zwei nachrangigen GET-/POST-Platzhalter der Nebenbuch-Abstimmung; tests/test_canonical_router_mounts.py und neuer Nebenbuch-Regressionsvertrag. Echte mandantengebundene Datenbankhandler bleiben kanonisch. Keine aktive Fremdbelegung fuer diese Backend-Funktionen gefunden; committed-source Spec/Inventare und eigene QA/Slice werden nachgezogen. Abnahme: eindeutige Registrierung, gespeicherte Anlage, Tenantfilter und 404 bei fehlendem Datensatz; keine neue Datenbank.
+**Nebenbuch-Teilclaim (2026-10-06, reserviert):** app/finance/router.py nur die zwei nachrangigen GET-/POST-Platzhalter der Nebenbuch-Abstimmung; tests/test_canonical_router_mounts.py und neuer Nebenbuch-Regressionsvertrag. Echte mandantengebundene Datenbankhandler bleiben kanonisch; Pflichtperiode wird als YYYY-MM aus abstimmungs_datum abgeleitet und Antwortsummen/-details initialisiert (Anlagevertrag enthaelt nur Datum und Buchungskreis). Keine aktive Fremdbelegung fuer diese Backend-Funktionen gefunden; committed-source Spec/Inventare und eigene QA/Slice werden nachgezogen. Abnahme: eindeutige Registrierung, gespeicherte Anlage, Tenantfilter und 404 bei fehlendem Datensatz; keine neue Datenbank.
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
@@ -1621,6 +1621,15 @@ Kunden an), die Zeile wird mit `FOR UPDATE` gesperrt.
    arbeitet wie vorgesehen. Nicht angefasst.
 
 **Doku:** `docs/quality-assurance/interessent-ist-lead-20261006.md`.
+
+**Commit-Lage:** Der Slice-Inhalt (8 Dateien) ist in den **fremden** Commit
+`ef60a6076` ("chore(workboard): claim CI-RUN-REPAIR-20261005 nebenbuch") geraten —
+der geteilte Git-Index, siehe [[shared-tree-commit-isolation]]. Alle acht Dateien
+sind inhaltlich vollstaendig in HEAD und gepusht (geprueft). Wer diesen Commit
+aufraeumt, nimmt den Slice mit: `app/services/interessent_service.py`,
+`app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/compliance_dsgvo.py`,
+`tests/test_interessent_ist_lead_vertrag.py`, `scripts/check_table_references.py`,
+`config/pagination_baseline.json` und die beiden Dokumente.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
