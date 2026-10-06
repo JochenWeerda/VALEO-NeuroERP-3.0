@@ -192,6 +192,9 @@ export function usePurchaseOrders(filters?: {
       return response.data.data
     },
     initialData: EMPTY_PURCHASE_ORDER_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -205,6 +208,9 @@ export function usePurchaseOrder(id: string) {
     },
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -276,6 +282,9 @@ export function usePurchaseOrderStatistics() {
       return response.data
     },
     initialData: EMPTY_PURCHASE_ORDER_STATISTICS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -297,6 +306,9 @@ export function usePurchaseOrderChangelog(id: string) {
     },
     enabled: !!id,
     initialData: EMPTY_PURCHASE_ORDER_CHANGELOG,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 

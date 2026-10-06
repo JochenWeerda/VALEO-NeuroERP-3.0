@@ -126,30 +126,45 @@ export default function ComplianceDashboardPage(): JSX.Element {
     queryKey: ['compliance', 'stats'],
     queryFn: async () => (await apiClient.get<ComplianceStats>('/api/v1/compliance/stats')).data,
     initialData: EMPTY_COMPLIANCE_STATS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const { data: sachkunde, isLoading: loadSachkunde } = useQuery({
     queryKey: ['compliance', 'sachkunde'],
     queryFn: async () => (await apiClient.get<SachkundeRegister>('/api/v1/compliance/sachkunde-register')).data,
     initialData: EMPTY_SACHKUNDE_REGISTER,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const { data: qs, isLoading: loadQs } = useQuery({
     queryKey: ['compliance', 'qs'],
     queryFn: async () => (await apiClient.get<QsCheckliste>('/api/v1/compliance/qs-checkliste')).data,
     initialData: EMPTY_QS_CHECKLISTE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const { data: zulassungen, isLoading: loadZulassungen } = useQuery({
     queryKey: ['compliance', 'zulassungen'],
     queryFn: async () => (await apiClient.get<ZulassungenRegister>('/api/v1/compliance/zulassungen-register')).data,
     initialData: EMPTY_ZULASSUNGEN_REGISTER,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const { data: crossList, isLoading: loadCross } = useQuery({
     queryKey: ['compliance', 'cross-list'],
     queryFn: async () => (await apiClient.get<CrossComplianceList>('/api/v1/compliance/cross-compliance')).data,
     initialData: EMPTY_CROSS_COMPLIANCE_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const isLoading = loadStats || loadSachkunde || loadQs || loadZulassungen || loadCross

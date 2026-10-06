@@ -29,6 +29,9 @@ export function useSustainabilityProviders() {
     queryKey: ['sustainability', 'providers'],
     queryFn: async () => (await apiClient.get<SustainabilityProviders>('/api/v1/sustainability/providers/status')).data,
     initialData: EMPTY_SUSTAINABILITY_PROVIDERS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -43,6 +46,9 @@ export function useSustainabilityPsm(zulassungsnummer: string | null, tenantId =
     ).data,
     enabled: Boolean(zulassungsnummer),
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 60 * 1000,
   })
 }
@@ -77,6 +83,9 @@ export function useEsgReport(year: number, customerId?: string | null) {
       totalCo2eKg: 0,
       byMonth: {},
     } as EsgReportData,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 

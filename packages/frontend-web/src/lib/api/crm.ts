@@ -141,6 +141,9 @@ export function useCustomers(filters?: { search?: string; is_active?: boolean })
       return response.data
     },
     initialData: EMPTY_CUSTOMER_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -153,6 +156,9 @@ export function useCustomer(id: string, options?: { enabled?: boolean }) {
     },
     enabled: !!id && (options?.enabled ?? true),
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -211,6 +217,9 @@ export function useLeads(filters?: { search?: string; status?: string }) {
       return response.data
     },
     initialData: EMPTY_LEAD_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -223,6 +232,9 @@ export function useLead(id: string) {
     },
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -294,6 +306,9 @@ export function useCRMDashboard() {
       return response.data
     },
     initialData: EMPTY_CRM_DASHBOARD,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
   })
@@ -335,6 +350,9 @@ export function useSuppliers(params?: { search?: string; is_active?: boolean }) 
       return response.data
     },
     initialData: EMPTY_SUPPLIER_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }

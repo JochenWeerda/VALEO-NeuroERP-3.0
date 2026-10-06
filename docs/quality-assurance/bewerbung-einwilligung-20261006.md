@@ -100,14 +100,21 @@ und das Verzeichnis zeigt dann beide Erteilungen.
 
 ## Nachweis
 
-> **Offen: die Verträge sind noch nicht gelaufen.** Der Docker-Dienst
-> (`com.docker.service`) ist auf dieser Maschine **gestoppt**, PostgreSQL damit
-> nicht erreichbar; ein Start braucht erhöhte Rechte. Codex hat denselben Zustand im
-> Workboard vermerkt und bewusst nichts gestartet. Migration, Dienst, Wege, Modelle
-> und 42 Verträge sind geschrieben, aber **nicht ausgeführt**: Diese Zeile bleibt
-> stehen, bis sie es sind — ein Nachweis, der nicht gelaufen ist, ist keiner.
+**Gelaufen am 06.10.2026**, nachdem Docker wieder lief. Beim Schreiben des Slices
+war der Docker-Dienst gestoppt; die Verträge waren geschrieben, aber nicht
+ausgeführt, und der Slice blieb so lange in Arbeit.
 
-Geschrieben und bereit:
+| Prüfung | Ergebnis |
+|---|---|
+| `valeo_probe` mit `pruefstand_db.py --keep` von `bewerbung_loeschlauf_20261006` auf Head | Revision `bewerbung_einwilligung_20261006` |
+| Rückweg auf `valeo_probe`: `downgrade` auf den Vorgänger, dann `upgrade head` | Tabelle weg, dann wieder da; Revision stimmt |
+| `valeo_neuro_erp` | stand bereits auf Head (Backend-Start); 0 Zeilen im Verzeichnis |
+| Prüfbedingungen frisch gegen gewachsen | identisch (Primärschlüssel, Fremdschlüssel, fünf Prüfbedingungen) |
+| `tests/test_bewerbung_einwilligung_vertrag.py` gegen `valeo_probe` | **42 bestanden** (98 s) |
+| Nachbar `tests/test_bewerbung_loeschlauf_vertrag.py` gegen `valeo_probe` | **52 bestanden** (53 s) |
+| `scripts/check_table_references.py` | OK: keine neuen Verweise ins Leere (1/25 an der Schwelle) |
+
+Aufruf:
 
 ```
 DATABASE_URL=…/valeo_probe python -m pytest \
@@ -128,15 +135,14 @@ unmöglich; mit der Bewerbung geht der Nachweis; der Stand entspricht immer der
 letzten Zeile; es gibt keinen `PUT`/`PATCH`; der Dienst fasst die CRM-Tabellen nicht
 an; die Wörterbücher stehen in Dienst und Schema deckungsgleich.
 
-Die vier Ratschen ohne Datenbankbedarf (Pagination, Baseline-Integrität, tote
-Transaktionen, Godfiles) sind **grün**; die Tabellenverweis-Ratsche braucht die
-Datenbank und steht noch aus.
+Alle fünf Ratschen sind **grün**: die vier ohne Datenbankbedarf (Pagination,
+Baseline-Integrität, tote Transaktionen, Godfiles) seit dem Schreiben, die
+Tabellenverweis-Ratsche seit dem Nachweislauf.
 
 ## Offene Punkte (Handshake)
 
-1. **Der Nachweis läuft noch nicht.** Siehe oben — zuerst `alembic upgrade head`
-   gegen `valeo_probe` und `valeo_neuro_erp`, dann die Verträge und die fünfte
-   Ratsche.
+1. ~~**Der Nachweis läuft noch nicht.**~~ **Gelaufen am 06.10.2026**: Migration in
+   beiden Datenbanken, 42 Verträge, fünfte Ratsche; siehe Nachweis.
 2. **Keine Maske.** Erteilen und Widerrufen sind nur über die API erreichbar. Der
    Widerruf gehört an eine Stelle, die ein Bewerber oder das Personalbüro ohne
    Umwege findet — Art. 7 Abs. 3 meint auch die Zugänglichkeit.

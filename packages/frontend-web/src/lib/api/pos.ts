@@ -47,6 +47,9 @@ export function useGiftCards() {
     queryKey: ['pos', 'gift-cards'],
     queryFn: async () => (await apiClient.get<GiftCard[]>('/api/v1/pos/gift-cards')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -56,6 +59,9 @@ export function useRabatte() {
     queryKey: ['pos', 'rabatte'],
     queryFn: async () => (await apiClient.get<Rabatt[]>('/api/v1/pos/rabatte')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -65,6 +71,9 @@ export function useSuspendedSales() {
     queryKey: ['pos', 'suspended'],
     queryFn: async () => (await apiClient.get<SuspendedSale[]>('/api/v1/pos/suspended-sales')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -74,6 +83,9 @@ export function useTagesabschluss() {
     queryKey: ['pos', 'tagesabschluss'],
     queryFn: async () => (await apiClient.get<Tagesabschluss>('/api/v1/pos/tagesabschluss')).data,
     initialData: EMPTY_TAGESABSCHLUSS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -83,6 +95,9 @@ export function useTSEJournal() {
     queryKey: ['pos', 'tse-journal'],
     queryFn: async () => (await apiClient.get<TSEEintrag[]>('/api/v1/pos/tse-journal')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -132,6 +147,9 @@ export function useKasseTagesabschlussAktuell(datum?: string) {
     queryFn: async () =>
       (await apiClient.get<KasseTagesabschlussAktuell>(`/api/v1/kasse/tagesabschluss/aktuell${q}`)).data,
     initialData: EMPTY_KASSE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }

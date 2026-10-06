@@ -188,32 +188,50 @@ export default function FinanceReportsPage(): JSX.Element {
     queryKey: ['finance', 'balance-sheet', period],
     queryFn: () => fetchBalanceSheet(period),
     initialData: EMPTY_BALANCE_SHEET,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
   const profitLossQuery = useQuery({
     queryKey: ['finance', 'profit-loss', period],
     queryFn: () => fetchProfitLoss(period),
     initialData: EMPTY_PROFIT_LOSS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
   const previousYearProfitLossQuery = useQuery({
     queryKey: ['finance', 'profit-loss', `${Number(period.slice(0, 4)) - 1}-${period.slice(5)}`],
     queryFn: () => fetchProfitLoss(`${Number(period.slice(0, 4)) - 1}-${period.slice(5)}`),
     initialData: EMPTY_PROFIT_LOSS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
   const bwaQuery = useQuery({
     queryKey: ['finance', 'bwa', period],
     queryFn: () => fetchBwa(period),
     initialData: EMPTY_BWA,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
   const seriesQuery = useQuery({
     queryKey: ['finance', 'profit-loss-series', period],
     queryFn: () => fetchProfitLossSeries(period),
     initialData: EMPTY_PROFIT_LOSS_SERIES,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
   const journalQuery = useQuery({
     queryKey: ['finance', 'journal-entries', period],
     queryFn: () => fetchJournalEntries(period),
     enabled: isJournalOpen,
     initialData: EMPTY_JOURNAL_ENTRIES,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const isLoading =

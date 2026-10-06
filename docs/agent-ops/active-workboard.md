@@ -13,6 +13,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**Shell-Quote-Sicherheitsclaim (2026-10-06, abgeschlossen):** Owner Codex-01a0f3fc; package.json nur bestehende shell-quote-Untergrenze auf Herstellerfix 1.11.0; pnpm-lock.yaml nur shell-quote-Aufloesung, eigene QA/Slice/Workboard. Voll-Audit nach Sharp-Fix meldet neuen critical GHSA-pqg4-j6r4-53mv fuer aufgeloestes 1.10.0; Hersteller korrigiert Kommentar/Zeilenumbruch-Injection in 1.11.0. Kein aktiver fremder Paketclaim/WIP. Abnahme: vier Zeilentrenner nach Kommentartoken abgewiesen, regulaeres Quoting/Parsing erhalten, Lock/Audit; keine Ausnahme, neue DB/Container oder fremde Frontendarbeit.
+
+**Shell-Quote-Abnahme:** Shell-Quote-Abnahme 2026-10-06: Zentraler Override exakt 1.11.0 statt ^1.9.0; Lock ersetzt 1.10.0 durch geprueften Herstellerfix mit neuer Integritaet und drei Verbraucherreferenzen (React-Native CLI, Detox, React-Devtools). Keine anderen Pakete/Importer/Overrides geaendert; automatische lightningcss/detect-libc-Nebenaenderung entfernt. Isolierter Herstellertest bestanden: acht Injection-Versuche (LF, CR, U+2028, U+2029 jeweils unmittelbar und spaeter nach Kommentar) werfen TypeError; zwei normale quote/parse-Roundtrips mit Sonderzeichen, gueltiger Kommentar und Ablehnung ungueltigen Kommentars bestanden. Frozen-Lock aller 36 Workspaces offline bestanden. Finaler vollstaendiger Production-Audit auf exakt 1.11.0: 0 critical, 2 high (node-forge/braces), 14 moderate, 1 low; Sharp und Shell-Quote nicht mehr betroffen. Audit weiterhin Exit 1 wegen verbleibender Befunde; keine Ausnahme oder Gate-Abschwaechung. Keine neue Datenbank/Container, Reset, Migration oder fremde Fach-/Frontend-WIP. Neue GitHub-Abnahme ausstehend.
+
+**Sharp-Sicherheitsclaim (2026-10-06, abgeschlossen):** Owner Codex-01a0f3fc; package.json nur bestehende sharp-Override-Untergrenze 0.35.4 auf Herstellerfix 0.35.5, packages/procurement-domain/package.json nur entsprechender direkter Pin, pnpm-lock.yaml nur aufgeloeste Sharp-/libvips-Familie und erforderliche transitive Aenderungen; eigene QA/Slice/Workboard. Security Scan 37502096089 meldet GHSA-wq5f-xc86-pv6w (sharp <0.35.5). Kein aktiver Claim oder WIP auf diesen drei Dateien; keine Codeimporte im Procurement-src, nur vorhandener tsup external-Eintrag. Abnahme: Lock-Aufloesung, echter nativer SVG/PNG-Verarbeitungsvertrag und Voll-Audit ohne diesen Befund; andere ungepatchte Befunde bleiben offen. Keine neue Datenbank/Container, CI-/Audit-Ausnahme oder fremde Frontend-/Katalogarbeit.
+
+**Sharp-Abnahme:** Sharp-Herstellerfix 2026-10-06: Root-Override und direkter Procurement-Pin ^0.35.4 -> ^0.35.5; Lock ausschliesslich Sharp-/libvips-Familie (je 54 geaenderte Schluessel in packages/snapshots) und Procurement-Importer. Automatische lightningcss/detect-libc-Nebenaenderung entfernt. Frozen-Lock aller 36 Workspaces offline bestanden. Echter isolierter Windows-Nativtest: Sharp 0.35.5, libvips 8.18.7, librsvg 2.63.2; SVG -> skalierter PNG, Dimensionen, rote RGB-Pixel, JPEG und Ablehnung ungueltiger Bilddaten bestanden. Keine Codeimporte im Procurement-src; tsup external erhalten. Voll-Audit: Sharp-Advisory entfallen, weiterhin 2 high (node-forge/braces), 1 critical (shell-quote), 14 moderate/1 low; Exit 1, keine Ausnahme. Keine lokale Docker-/Linux-Scanfreigabe behauptet. Probe --status lesend erreichbar auf bewerbung_einwilligung_20261006; keine neue DB/Container, Migration, Reset oder Fachschreibtests. Fremde Katalog-/Frontend-WIP erhalten. GitHub 1a77ee718: Docs/OpenAPI/PG/beide E2E/Service Security/Full Security Agent/Erntepeak erfolgreich; Quality/Security Scan/Gesamt-CI fehlgeschlagen. Neue Actions-Abnahme des Fixes ausstehend.
+
 **Nebenbuch-Teilclaim (2026-10-06, abgeschlossen):** app/finance/router.py nur die zwei nachrangigen GET-/POST-Platzhalter der Nebenbuch-Abstimmung; tests/test_canonical_router_mounts.py und neuer Nebenbuch-Regressionsvertrag. Echte mandantengebundene Datenbankhandler bleiben kanonisch; Pflichtperiode wird als YYYY-MM aus abstimmungs_datum abgeleitet und Antwortsummen/-details initialisiert (Anlagevertrag enthaelt nur Datum und Buchungskreis). Keine aktive Fremdbelegung fuer diese Backend-Funktionen gefunden; committed-source Spec/Inventare und eigene QA/Slice werden nachgezogen. Abnahme: eindeutige Registrierung, gespeicherte Anlage, Tenantfilter und 404 bei fehlendem Datensatz; keine neue Datenbank.
 
 **Integrationsclaim (2026-10-06, abgeschlossen):** config/architecture-domain-prefixes.yaml ausschliesslich exakte CRM-Zuordnung interessent_service; tests/test_generate_architecture_index.py entsprechender Vertrag und committed-source architecture-index. Generator meldet genau diesen fehlenden Service aus ef60a6076; dessen kanonische Datenquelle ist crm_leads. Keine Fremdimplementierung veraendern.
@@ -1869,7 +1877,7 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
-## FRONTEND-INITIALDATA-MOUNTFETCH-20261006 — in Arbeit, Claude Code
+## FRONTEND-INITIALDATA-MOUNTFETCH-20261006 — abgeschlossen, Claude Code
 
 **Warum jetzt:** Der Windows-Dienst `com.docker.service` ist gestoppt, PostgreSQL
 nicht erreichbar, ein Start braucht erhoehte Rechte. Statt einen Nachweis zu
@@ -1926,12 +1934,89 @@ dass beim Mount **trotz** `staleTime` geladen wird und die Serverdaten den
 Platzhalter ersetzen; `npx tsc --noEmit` ohne neue Fehler; `npm run lint` ohne neue
 Fehler; die neue Ratsche gruen; die vier Backend-Ratschen ohne Datenbankbedarf gruen.
 
+**Abgeschlossen 06.10.2026.** QA:
+[frontend-initialdata-mountfetch-20261006.md](../quality-assurance/frontend-initialdata-mountfetch-20261006.md).
+199 Stellen in 40 Dateien bekommen `initialDataUpdatedAt: 0`; neue Ratsche
+`scripts/check_initial_data.py` (Verstoss = Fehler, Gesamtzahl 205 down-only);
+8 Vitest-Vertraege gruen, `tsc --noEmit` 0 Fehler, `eslint` der 40 Dateien 0 Fehler,
+die vier Backend-Ratschen ohne Datenbankbedarf gruen.
+
+**Ein Fehler im eigenen Werkzeug, aufgefallen durch einen Vertrag:** Das
+Umschreibe-Skript suchte `queryKey`/`queryFn` in den 40 Zeilen oberhalb der Option.
+`useSalesDashboard` hat einen langen `queryFn`-Rumpf — `queryKey` stand 43 Zeilen
+darueber, die Option wurde uebergangen, der Hook blieb kaputt, und die Zahl der
+geaenderten Stellen sah trotzdem richtig aus. Das Skript bestimmt jetzt den
+**umgebenden Aufruf** statt mit einem Zeilenfenster zu raten. Ein Fenster ist keine
+Struktur.
+
+**Index-Isolation:** In 39 der 40 Dateien lag fremdes, nicht committetes WIP
+(`h1`-Klassen, Card-Farben). Gestaged wurde deshalb aus der **HEAD**-Fassung heraus
+(`git hash-object` + `update-index --cacheinfo`); der Commit traegt 597 Einfuegungen
+und **null** Loeschungen, der Arbeitsbaum behaelt das fremde WIP.
+
+**Nicht verdrahtet:** Die Ratsche fehlt in `.github/workflows/quality-gate.yml` — die
+Datei ist von Codex geclaimt (Tabellenkatalog-Drift-Evidenz) und wurde nicht
+angefasst. Einzeiler im bestehenden Backend-Schritt, als offener Punkt 1 notiert.
+
+**Zwei Nebenbefunde** in der QA-Doku: `Promise.allSettled` in den Dashboard-Hooks
+macht aus einem Verbindungsfehler einen Umsatz von 0 EUR; `catch { return [] }` in
+`sales.ts` ist begruendet, traegt aber nur, solange keine Maske Zahlen daraus bildet.
+
 **Risiken:** Mehr Abfragen beim Mount — genau das ist der Zweck; `staleTime` bremst
 weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## BEWERBUNG-EINWILLIGUNG-20261006 — in Arbeit, Claude Code
+## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — in Arbeit, Claude Code
+
+**Auftrag:** Offenen Punkt 4 aus
+[Die Einwilligung zur laengeren Aufbewahrung](../quality-assurance/bewerbung-einwilligung-20261006.md)
+schliessen: Der Wortlaut der Einwilligung ist **freier Text je Erteilung**. Jede
+Erteilung kann einen anderen Text tragen, und niemand merkt es; ein Tippfehler im
+Personalbuero erzeugt still eine neue "Erklaerung". Nachweisbar (Art. 7 Abs. 1
+DSGVO) ist eine Einwilligung erst, wenn feststeht, **welcher Fassung** zugestimmt
+wurde — und dass diese Fassung sich seitdem nicht geaendert hat.
+
+**Vorab geprueft:** Kein vorhandenes Modell fuer versionierte Erklaerungstexte.
+`business_partners.privacy_policy_version` ist ein Etikett ohne Text; die
+CRM-Einwilligungstabellen beschreiben eine andere Erlaubnis (siehe Vorslice). Keine
+Dublette.
+
+**Was gebaut wird** (Migration `bewerbung_erklaerung_fassung_20261006`):
+* `domain_hr.bewerbung_einwilligungserklaerungen` — je Mandant fortlaufende
+  `fassung` (1, 2, 3 …) mit `wortlaut`, `erstellt_am`, `erstellt_durch`. Der
+  Wortlaut ist **unveraenderlich** (Trigger gegen UPDATE): Wer eine Fassung
+  aendert, aendert rueckwirkend, wozu alle frueheren Bewerber eingewilligt haben.
+  Loeschen nur, solange keine Erteilung darauf verweist (FK RESTRICT) — eine nie
+  benutzte Fassung belegt nichts. Derselbe Wortlaut zweimal ist **eine** Fassung.
+  Kein Personenbezug in dieser Tabelle.
+* `bewerbung_einwilligungen.erklaerung_id` (FK) ersetzt `einwilligungstext`:
+  Bestandszeilen werden in Fassungen ueberfuehrt, dann entfaellt die freie Spalte —
+  der Wortlaut steht an **einer** Stelle. Pruefbedingung: Erteilung genau dann mit
+  Fassung. Downgrade stellt den Text aus der Fassung wieder her.
+* `POST /applications/{id}/einwilligung` verlangt `fassung` statt Freitext (noch
+  kein Verbraucher im Frontend). Antworten zeigen Fassung **und** Wortlaut.
+* `GET|POST /applications/einwilligungserklaerungen`,
+  `GET /applications/einwilligungserklaerungen/{fassung}` — vor dem
+  `{application_id}`-Weg montiert. Kein PUT/PATCH/DELETE.
+
+**Dateibesitz:** `alembic/versions/bewerbung_erklaerung_fassung_20261006.py` (neu),
+`app/services/bewerbung_einwilligung_service.py`,
+`app/api/v1/endpoints/personal_bewerbungen.py` (nur Einwilligungs-/Erklaerungswege),
+`app/api/v1/schemas/personal_bewerbung_schemas.py` (nur Einwilligungsmodelle),
+`tests/test_bewerbung_einwilligung_vertrag.py`, neue
+`tests/test_bewerbung_erklaerung_fassung_vertrag.py`, eigene QA-Doku, Punkt 4 der
+Einwilligungs-QA-Doku und dieser Abschnitt. Widerruf bleibt unveraendert (kein
+Rumpf). Spec/Inventare integriert wie ueblich aus committed source.
+
+**Abnahme:** Erteilen ohne oder mit unbekannter/fremder Fassung abgewiesen, ohne zu
+schreiben; Fassungen je Mandant lueckenlos fortlaufend, auch bei gleichzeitigem
+Anlegen; gleicher Wortlaut ergibt 409 mit Verweis auf die vorhandene Fassung; ein
+UPDATE des Wortlauts scheitert in der Datenbank; eine benutzte Fassung ist nicht
+loeschbar; Bestandszeilen ueberfuehrt; Migration hin/zurueck/hin auf `valeo_probe`;
+alle bisherigen Einwilligungs- und Loeschlaufvertraege gruen; fuenf Ratschen gruen.
+
+## BEWERBUNG-EINWILLIGUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Den offenen Punkt 4 aus
 [Der Loeschlauf fuer Bewerberdaten](../quality-assurance/bewerbung-loeschlauf-20261006.md)
@@ -2023,6 +2108,15 @@ Vertraege und die Tabellenverweis-Ratsche. Die vier Ratschen ohne Datenbankbedar
 (Pagination, Baseline-Integritaet, tote Transaktionen, Godfiles) sind gruen. Der
 Slice bleibt **in Arbeit**, bis das nachgeholt ist — ein Nachweis, der nicht gelaufen
 ist, ist keiner.
+
+**Nachweis nachgeholt (06.10.2026, Abend):** Docker lief wieder. `valeo_probe` mit
+`pruefstand_db.py --keep` auf Head migriert (kein Neuaufsetzen, er wird geteilt);
+Rueckweg downgrade/upgrade auf dem Pruefstand sauber. `valeo_neuro_erp` stand schon
+auf Head; die Pruefbedingungen sind in beiden Datenbanken identisch. **42/42
+Vertraege** gegen den Pruefstand gruen, Nachbar Loeschlauf **52/52**,
+Tabellenverweis-Ratsche OK. Damit alle fuenf Ratschen gruen; der Slice ist
+abgeschlossen. Offen bleiben die Punkte 2-4 der QA-Doku (Maske, Selbstwiderruf,
+versionierte Erklaerung) als eigene Slices.
 
 **Ein Fehler im eigenen Entwurf, behoben:** Der Widerruf schrieb `kanal = "WEB"`,
 weil die Spalte `NOT NULL` war — eine Behauptung ueber einen Vorgang, von dem niemand

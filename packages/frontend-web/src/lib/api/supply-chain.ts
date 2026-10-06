@@ -61,6 +61,9 @@ export function useSupplyChainOverview() {
       chargeArticles: [],
       activeVehiclePlates: [],
     } satisfies SupplyChainOverview,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30_000,
   })
 }

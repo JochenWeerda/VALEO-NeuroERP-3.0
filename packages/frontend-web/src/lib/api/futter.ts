@@ -77,6 +77,9 @@ export function useEinzelfutter() {
     queryKey: ['futter', 'einzel'],
     queryFn: async () => (await apiClient.get<Einzelfutter[]>('/api/v1/futter/einzelfuttermittel')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -86,6 +89,9 @@ export function useMischfutter() {
     queryKey: ['futter', 'misch'],
     queryFn: async () => (await apiClient.get<Mischfutter[]>('/api/v1/futter/mischfuttermittel')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -95,6 +101,9 @@ export function useFutterChargen() {
     queryKey: ['futter', 'chargen'],
     queryFn: async () => (await apiClient.get<FutterCharge[]>('/api/v1/futter/chargen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -104,6 +113,9 @@ export function useFutterQualitaet() {
     queryKey: ['futter', 'qualitaet'],
     queryFn: async () => (await apiClient.get<FutterQualitaet[]>('/api/v1/futter/qualitaetskontrolle')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -113,6 +125,9 @@ export function useFutterStatistik() {
     queryKey: ['futter', 'statistik'],
     queryFn: async () => (await apiClient.get<FutterStatistik>('/api/v1/futter/statistik')).data,
     initialData: EMPTY_FUTTER_STATISTIK,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }

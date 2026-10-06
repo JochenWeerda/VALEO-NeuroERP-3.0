@@ -95,6 +95,9 @@ export function useWorkflowStatus(workflowId: string) {
     },
     enabled: !!workflowId,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     refetchInterval: (query) => {
       // Stop polling if workflow is completed or rejected
       const data = query.state.data as Record<string, unknown>

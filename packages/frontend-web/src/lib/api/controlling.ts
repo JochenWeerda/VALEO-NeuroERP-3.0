@@ -48,6 +48,9 @@ export function useControllingKpis() {
       return rows.map(normalize)
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }
@@ -131,6 +134,9 @@ export function useControllingDashboards() {
       return rows.map(normalizeDashboard)
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }
@@ -230,6 +236,9 @@ export function useDashboardWidgets(dashboardId?: string) {
       return rows.map(normalizeWidget)
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }
@@ -327,6 +336,9 @@ export function useKpiTimeseries(kpiId?: string) {
       return rows.map(normalizeTimeseries)
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }
@@ -403,6 +415,9 @@ export function useControllingActions(status?: string) {
       return rows.map(normalizeAction)
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }

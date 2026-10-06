@@ -749,6 +749,9 @@ export function useMitarbeiter(filters?: { search?: string; status?: Mitarbeiter
       return (await apiClient.get<Mitarbeiter[]>(`/api/v1/personal/mitarbeiter?${String(params)}`)).data
     },
     initialData: EMPTY_MITARBEITER_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -1194,6 +1197,9 @@ export function useSchulungen(filters?: { typ?: SchulungTyp; status?: SchulungSt
       return mapped
     },
     initialData: EMPTY_SCHULUNGEN_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -1206,6 +1212,9 @@ export function useMitarbeiterDetail(id?: string) {
       return (await apiClient.get<Mitarbeiter>(`/api/v1/personal/mitarbeiter/${id}`)).data
     },
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }
@@ -1251,6 +1260,9 @@ export function useStundenzettelListe(filters?: { datumVon?: string; datumBis?: 
       return (await apiClient.get<StundenzettelEintrag[]>(`/api/v1/personal/stundenzettel?${String(params)}`)).data
     },
     initialData: EMPTY_STUNDENZETTEL_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30_000,
   })
 }
@@ -1319,6 +1331,9 @@ export function useQualifikationen(filters?: { employeeRef?: string }) {
       return rows.map(toQualification)
     },
     initialData: EMPTY_QUALIFIKATIONEN_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }
@@ -1351,6 +1366,9 @@ export function useOnboardingChecklists() {
       return (await apiClient.get<OnboardingChecklistApi[]>('/api/v1/training/onboarding/checklists')).data
     },
     initialData: EMPTY_ONBOARDING_CHECKLISTS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }
@@ -1366,6 +1384,9 @@ export function useOnboardingRuns(filters?: { employeeRef?: string; status?: Onb
       return rows.map(toOnboardingRun)
     },
     initialData: EMPTY_ONBOARDING_RUNS_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60_000,
   })
 }

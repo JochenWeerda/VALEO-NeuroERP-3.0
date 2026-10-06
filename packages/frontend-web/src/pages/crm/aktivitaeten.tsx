@@ -77,6 +77,9 @@ export default function AktivitaetenPage(): JSX.Element {
       type: typeFilter !== 'all' ? typeFilter : undefined,
     }),
     initialData: EMPTY_ACTIVITIES_RESPONSE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const activities = activitiesData.data

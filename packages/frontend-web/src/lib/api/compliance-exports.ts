@@ -90,6 +90,9 @@ export function useGefahrstoffExport(year?: number): ReturnType<typeof useQuery<
       return (await apiClient.get<HazardExportResponse>(path)).data
     },
     initialData: EMPTY_HAZARD_EXPORT,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -102,6 +105,9 @@ export function useNaehrstoffExport(year: number): ReturnType<typeof useQuery<Nu
     },
     enabled: Number.isInteger(year) && year >= 2000 && year <= 2100,
     initialData: EMPTY_NUTRIENT_EXPORT,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }

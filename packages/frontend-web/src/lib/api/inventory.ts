@@ -79,6 +79,9 @@ export function useWarehouses(filters?: { is_active?: boolean }) {
       return (await apiClient.get<PaginatedResponse<Warehouse>>(`/api/v1/inventory/warehouses?${String(params)}`)).data
     },
     initialData: EMPTY_WAREHOUSE_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -88,6 +91,9 @@ export function useWarehouse(id: string) {
     queryFn: async () => (await apiClient.get<Warehouse>(`/api/v1/inventory/warehouses/${id}`)).data,
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -126,6 +132,9 @@ export function useLotTrace(lotId?: string) {
     queryFn: async () => (await apiClient.get<LotTrace>(`/api/v1/inventory/lots/${lotId}`)).data,
     enabled: Boolean(lotId),
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30_000,
   })
 }
@@ -194,6 +203,9 @@ export function useInventur(filters?: { search?: string }) {
       return { items, total: items.length }
     },
     initialData: EMPTY_INVENTUR_LIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -221,6 +233,9 @@ export function useMhdItems() {
     queryKey: inventoryExtraKeys.mhd(),
     queryFn: async () => (await apiClient.get<{ items: MhdItem[] }>('/api/v1/inventory/mhd-warnings')).data.items,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -230,6 +245,9 @@ export function useRennerItems() {
     queryKey: inventoryExtraKeys.renner(),
     queryFn: async () => (await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/top-sellers')).data.items,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -239,6 +257,9 @@ export function usePennerItems() {
     queryKey: inventoryExtraKeys.penner(),
     queryFn: async () => (await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/slow-movers')).data.items,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -248,6 +269,9 @@ export function useWarteschlange() {
     queryKey: inventoryExtraKeys.warteschlange(),
     queryFn: async () => (await apiClient.get<{ items: LKWEintrag[]; total: number }>('/api/v1/annahme/warteschlange')).data,
     initialData: EMPTY_WARTESCHLANGE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 15 * 1000,
     refetchInterval: 30 * 1000,
   })
@@ -259,6 +283,9 @@ export function useWarteschlangeEintrag(id: string | undefined) {
     queryFn: async () => (await apiClient.get<LKWEintrag>(`/api/v1/annahme/warteschlange/${id}`)).data,
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }

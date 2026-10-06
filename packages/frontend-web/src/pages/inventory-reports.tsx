@@ -75,6 +75,9 @@ export default function InventoryReportsPage() {
       return r.data;
     },
     initialData: EMPTY_STOCK_LEVELS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   });
 
   const { data: alerts } = useQuery({
@@ -84,6 +87,9 @@ export default function InventoryReportsPage() {
       return r.data;
     },
     initialData: EMPTY_ALERTS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   });
 
   const { data: replenishment } = useQuery({
@@ -93,6 +99,9 @@ export default function InventoryReportsPage() {
       return r.data;
     },
     initialData: EMPTY_REPLENISHMENT,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   });
 
   const { data: turnover } = useQuery({
@@ -102,6 +111,9 @@ export default function InventoryReportsPage() {
       return r.data;
     },
     initialData: EMPTY_TURNOVER,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   });
 
   return (

@@ -243,6 +243,9 @@ function makeHook<T>(key: string[], endpoint: string, fallback: T, stale = 2 * 6
       return data as T
     },
     initialData: fallback,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: stale,
   })
 }

@@ -151,6 +151,9 @@ export function useConsents(params?: Record<string, string>) {
     queryKey: ['consents', params],
     queryFn: () => fetchConsents(params),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }
@@ -161,6 +164,9 @@ export function useConsent(id: string) {
     queryFn: () => fetchConsent(id),
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -169,6 +175,9 @@ export function useContactsForConsentSelect() {
     queryKey: ['contacts-consent-select'],
     queryFn: fetchContacts,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data.map((c) => ({
       value: c.id,
@@ -240,6 +249,9 @@ export function useContactLookup() {
     queryKey: ['contacts-lookup'],
     queryFn: fetchContacts,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 
