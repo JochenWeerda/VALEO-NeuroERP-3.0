@@ -321,6 +321,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `payment_runs` | Payment Runs / SEPA API |
 | `periodische_buchungen` | Periodische Buchungen [WZA] — Wiederkehrende FIBU-Buchungen. |
 | `personal` | Personal endpoints for employee list, time entries and timesheets. |
+| `personal_bewerbungen` | Bewerbermanagement — die Recruiting-Pipeline. |
+| `personal_lohnabrechnung` | Lohnabrechnung — Brutto-Netto-Preview und Monats-Closeout. |
 | `pick_lists` | Pick-list endpoints (l3c-pickliste) |
 | `planung_kalender` | UIX-063 planning calendar API. |
 | `policies` | Policy Manager API Endpoints |

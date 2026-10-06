@@ -114979,7 +114979,7 @@
       },
       "PersonalOut": {
         "additionalProperties": true,
-        "description": "Typed response schema for PersonalOut endpoints (extra fields forwarded).",
+        "description": "Offenes Antwortmodell der Personalwege.\n\nLag bis zum 06.10.2026 in `endpoints/personal.py` und war damit von den beiden\nherausgenommenen Modulen nicht erreichbar. Hier steht es **einmal**.\n\n``extra=\"allow\"`` heisst: Das Modell beschreibt nichts. Es durch Modelle je Weg\nzu ersetzen ist ein eigener Slice und ausdruecklich **nicht** Teil der\nZerlegung — sonst waere nicht mehr zu unterscheiden, was der Umzug und was die\nKorrektur gebrochen hat.",
         "properties": {},
         "title": "PersonalOut",
         "type": "object"
@@ -286592,11 +286592,32 @@
     },
     "/api/v1/einkauf/credit-memos": {
       "get": {
+        "description": "Listet alle Gutschriften auf.",
         "operationId": "list_credit_memos_api_v1_einkauf_credit_memos_get",
         "parameters": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "supplier_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -286607,7 +286628,23 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "Supplier Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "settled",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Settled"
             }
           }
         ],
@@ -286617,7 +286654,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/CreditMemoResponse"
                   },
                   "title": "Response List Credit Memos Api V1 Einkauf Credit Memos Get",
                   "type": "array"
@@ -286644,47 +286681,33 @@
         ],
         "summary": "Credit memos auflisten",
         "tags": [
-          "compat"
+          "procurement",
+          "ap",
+          "memos",
+          "procurement",
+          "ap",
+          "memos"
         ]
       },
       "post": {
+        "description": "Erstellt eine neue Gutschrift (Credit Memo).",
         "operationId": "create_credit_memo_api_v1_einkauf_credit_memos_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Payload",
-                "type": "object"
+                "$ref": "#/components/schemas/CreditMemoCreate"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/CreditMemoResponse"
                 }
               }
             },
@@ -286708,7 +286731,12 @@
         ],
         "summary": "Credit memo anlegen",
         "tags": [
-          "compat"
+          "procurement",
+          "ap",
+          "memos",
+          "procurement",
+          "ap",
+          "memos"
         ]
       }
     },
@@ -286873,6 +286901,7 @@
     },
     "/api/v1/einkauf/credit-memos/{memo_id}/settle": {
       "post": {
+        "description": "Verrechnet eine Gutschrift mit offenen Rechnungen.",
         "operationId": "settle_credit_memo_api_v1_einkauf_credit_memos__memo_id__settle_post",
         "parameters": [
           {
@@ -286883,31 +286912,13 @@
               "title": "Memo Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Payload",
-                "type": "object"
+                "$ref": "#/components/schemas/SettlementRequest"
               }
             }
           },
@@ -286918,7 +286929,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/CreditDebitMemosOut"
                 }
               }
             },
@@ -286942,17 +286953,43 @@
         ],
         "summary": "Credit memo settle",
         "tags": [
-          "compat"
+          "procurement",
+          "ap",
+          "memos",
+          "procurement",
+          "ap",
+          "memos"
         ]
       }
     },
     "/api/v1/einkauf/debit-memos": {
       "get": {
+        "description": "Listet alle Belastungen auf.",
         "operationId": "list_debit_memos_api_v1_einkauf_debit_memos_get",
         "parameters": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "supplier_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -286963,7 +287000,23 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "Supplier Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "settled",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Settled"
             }
           }
         ],
@@ -286973,7 +287026,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/DebitMemoResponse"
                   },
                   "title": "Response List Debit Memos Api V1 Einkauf Debit Memos Get",
                   "type": "array"
@@ -287000,47 +287053,33 @@
         ],
         "summary": "Debit memos auflisten",
         "tags": [
-          "compat"
+          "procurement",
+          "ap",
+          "memos",
+          "procurement",
+          "ap",
+          "memos"
         ]
       },
       "post": {
+        "description": "Erstellt eine neue Belastung (Debit Memo).",
         "operationId": "create_debit_memo_api_v1_einkauf_debit_memos_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Payload",
-                "type": "object"
+                "$ref": "#/components/schemas/DebitMemoCreate"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/DebitMemoResponse"
                 }
               }
             },
@@ -287064,7 +287103,12 @@
         ],
         "summary": "Debit memo anlegen",
         "tags": [
-          "compat"
+          "procurement",
+          "ap",
+          "memos",
+          "procurement",
+          "ap",
+          "memos"
         ]
       }
     },
@@ -287229,6 +287273,7 @@
     },
     "/api/v1/einkauf/debit-memos/{memo_id}/settle": {
       "post": {
+        "description": "Verrechnet eine Belastung mit offenen Rechnungen.",
         "operationId": "settle_debit_memo_api_v1_einkauf_debit_memos__memo_id__settle_post",
         "parameters": [
           {
@@ -287239,31 +287284,13 @@
               "title": "Memo Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Payload",
-                "type": "object"
+                "$ref": "#/components/schemas/SettlementRequest"
               }
             }
           },
@@ -287274,7 +287301,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/CreditDebitMemosOut"
                 }
               }
             },
@@ -287298,7 +287325,12 @@
         ],
         "summary": "Debit memo settle",
         "tags": [
-          "compat"
+          "procurement",
+          "ap",
+          "memos",
+          "procurement",
+          "ap",
+          "memos"
         ]
       }
     },
@@ -373028,8 +373060,10 @@
         "tags": [
           "personal",
           "hr",
+          "recruiting",
           "personal",
-          "hr"
+          "hr",
+          "recruiting"
         ]
       },
       "post": {
@@ -373094,8 +373128,10 @@
         "tags": [
           "personal",
           "hr",
+          "recruiting",
           "personal",
-          "hr"
+          "hr",
+          "recruiting"
         ]
       }
     },
@@ -373154,8 +373190,10 @@
         "tags": [
           "personal",
           "hr",
+          "recruiting",
           "personal",
-          "hr"
+          "hr",
+          "recruiting"
         ]
       }
     },
@@ -373231,8 +373269,10 @@
         "tags": [
           "personal",
           "hr",
+          "recruiting",
           "personal",
-          "hr"
+          "hr",
+          "recruiting"
         ]
       }
     },
@@ -374964,8 +375004,10 @@
         "tags": [
           "personal",
           "hr",
+          "lohn",
           "personal",
-          "hr"
+          "hr",
+          "lohn"
         ]
       }
     },
@@ -375031,8 +375073,10 @@
         "tags": [
           "personal",
           "hr",
+          "lohn",
           "personal",
-          "hr"
+          "hr",
+          "lohn"
         ]
       }
     },

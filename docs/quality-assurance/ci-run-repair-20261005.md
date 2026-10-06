@@ -384,3 +384,58 @@ GitHub-Abnahme auf 21015285e: Docs Build, Docs Governance, PostgreSQL/require_db
 und Erntepeak erfolgreich. Vollstaendige CI und Security warten noch; keine
 Gesamtfreigabe. Einige aeltere konkurrierende Laeufe wurden von GitHub abgebrochen;
 diese sind kein erfolgreicher Gate-Nachweis.
+
+
+## Kanonische Lieferantenmemos am 2026-10-06
+
+Sechs Routen fuer Credit-/Debit-Memos waren doppelt registriert: GET/POST
+/einkauf/credit-memos und /einkauf/debit-memos sowie beide POST-settle-Pfade.
+Die echte App fuehrte den zuerst registrierten credit_debit_memos-Handler aus;
+OpenAPI ueberschrieb dessen Vertrag mit der spaeteren Compat-Version.
+Die nachrangige Version beschrieb beispielsweise Create als HTTP 201 mit
+untypisiertem dict und generischem EinkaufDocOut, waehrend die echte Route
+HTTP 200 mit validiertem CreditMemoCreate/DebitMemoCreate und typisierter
+Antwort liefert. Listfilter und SettlementRequest waren ebenfalls verdeckt.
+
+CREDIT-MEMO-OP-001, Wave100 und der Frontend-Verbraucher
+pages/einkauf/gutschriften-belastungen.tsx bestaetigen die bestehende
+Fachimplementierung. Deren Handler und Freigabe-/Buchungs-/OP-Logik bleiben
+unveraendert. Nur die sechs spaeteren Compat-Routen und neun ausschliesslich
+von ihnen verwendete Methoden im EinkaufCompatService sind entfernt.
+Die Verbraucherpruefung in app/tests/services/modules ergab keine weiteren
+Aufrufer; keine historisch konkurrierenden Statusformen ERFASST/VERRECHNET
+oder rein erhaltenden Adapter verbleiben in diesem Service-Block.
+
+19 Tests bestehen in 26,89 Sekunden: zehn Router-Vertraege (Handleridentitaet,
+Antwortmodell, Status, Dependencies, Eindeutigkeit), sechs echte registrierte
+OpenAPI-Vertraege fuer Create/List/Settlement und drei bestehende Wave100-
+Ablauftests, einschliesslich Credit-/Debit-Anlage, Freigabe, Buchung und
+Settlement-Completion. Die OpenAPI-Regressionspruefung verwendet alle real
+registrierten betroffenen Routen, damit ein erneuter spaeterer Compat-Override
+auffaellt. Die fachlichen Tests verwenden den bestehenden Fake-Store;
+Probe --status bestaetigt quittung_ohne_vorgang_20261006. Keine neue Datenbank,
+kein Container, Reset oder Migration.
+
+Der Rueckbau entfernt 66 Endpoint- und 77 Service-Zeilen. Die Godfile-Baseline
+sinkt ausschliesslich fuer compat.py von 3759 auf 3693; Groessenratsche,
+Paginierung (284 Abfragen/257 Funktionen) und Baseline-Integritaet gegen HEAD
+bestehen. Keine Schwelle, Ausnahme oder fremde Baseline erhoeht/geaendert.
+
+OpenAPI stammt aus committed c432d5045 plus den eigenen zwei Rueckbauhunks:
+alle bisherigen 3096 Pfade und HTTP-Methoden exakt erhalten; die echte App
+hat 47 doppelte Methoden/Pfade statt 53. Das Artefakt beschreibt nun die
+tatsaechlichen Memo-DTOs und Statuscodes und besteht erneut render(build_spec()).
+Die anderen 47 Handlerkonflikte bleiben offen; keine globale Eindeutigkeit.
+
+Alle drei Code-Inventare wurden aus committed Quellen erzeugt und geprueft.
+Dabei sind die bereits committed Personal-Split-Module aus c432d5045 integriert;
+deren Code und laufende Maskenarbeit wurden nicht angefasst. Architekturindex
+vollstaendig: 932/932 Routen, 270/270 Services und 453/453 Endpoints, --check
+bestanden. Alle 19 Architekturtests bestehen in 0,41 Sekunden.
+Die globalen Artefakte werden indexseitig geliefert; fremde Arbeitsbaumversionen
+bleiben erhalten. Ergebniscommit nutzt separaten Index mit normalen Hooks.
+
+GitHub 8dd0020eb: Docs Build, Docs Governance, PostgreSQL/require_db und
+Erntepeak erfolgreich. Gesamt-CI und Security queued; abgebrochene OpenAPI-/
+Quality-/E2E-Laeufe sind keine Abnahme. Security- und weitere Routerbefunde
+bleiben explizit offen, bis passende neue Lauf-Evidenz vorliegt.
