@@ -2,14 +2,20 @@
 
 Service handling multi-channel customer interactions including social media, web forms, external systems, and omnichannel communication.
 
-## Features
+## Implementation status
 
-- **Social Media Integration**: Facebook, Twitter, LinkedIn, Instagram connectivity
-- **Web Forms**: Dynamic form generation and submission handling
-- **External Systems**: ERP, e-commerce, marketing automation integrations
-- **Omnichannel Routing**: Unified customer interaction across all channels
-- **Real-time Sync**: Bidirectional data synchronization
-- **Channel Analytics**: Performance tracking across all touchpoints
+The service defines channel, conversation, message, form and integration schemas
+and exposes their HTTP contracts. Platform-specific connectors are not implemented:
+several endpoints return example data or placeholder acknowledgements. The webhook
+signature check is a TODO; no verified platform delivery or synchronization is
+provided by these handlers.
+
+Facebook, Twitter, LinkedIn, Slack, Stripe, Shopify and WooCommerce SDKs are not
+imported or dynamically loaded by the service. Their unused requirements have been
+removed, including the transitive OAuth dependency reported by the service audit.
+Platform names in schemas and example responses remain descriptive data. A future
+connector must implement authentication, signature verification, delivery and tests
+before adding the SDK it actually consumes.
 
 ## API Endpoints
 
@@ -34,6 +40,7 @@ Service handling multi-channel customer interactions including social media, web
 
 - PostgreSQL for multi-channel data storage
 - Redis for webhook queuing and real-time messaging
-- Social media APIs (Facebook Graph API, Twitter API v2, LinkedIn API)
-- Webhook processing for real-time updates
-- Integration with CRM services for unified customer view
+- FastAPI, SQLAlchemy and the pinned HTTP/runtime dependencies in `requirements.txt`
+
+External platform APIs are future integration targets; the current service does not
+require their SDKs.

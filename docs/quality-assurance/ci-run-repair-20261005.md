@@ -599,3 +599,53 @@ und drei statt einer zentralen Worklist-Ueberschrift. Security Scan
 37425707748 und Service Security 37425707763 bleiben fehlgeschlagen; Gesamt-CI
 war bei Sichtung noch in Arbeit. Dieser Fix ist lokal abgenommen; seine neue
 Actions-Abnahme und die unabhaengigen Restbefunde bleiben offen.
+
+
+## Multichannel: ungenutzte Plattform-SDKs entfernt
+
+Service Security 37425707763 scheitert ausschliesslich im Audit von
+services/crm-multichannel/requirements.txt; alle anderen Service-Audits,
+Inventar und crm-ai bestehen. Der heruntergeladene Rohbericht umfasst 62
+Linux-Pakete und genau oauthlib 3.3.1 / PYSEC-2026-4114
+(CVE-2026-49265, GHSA-xpv3-w29h-x7cv), ohne vorhandene reviewed decision.
+Quelle: [Hersteller-Advisory](https://github.com/oauthlib/oauthlib/security/advisories/GHSA-xpv3-w29h-x7cv).
+Scannerbericht nennt 4.0.0 als Fix; Herstellerseite nennt inzwischen 3.3.2.
+Dieser Slice haengt nicht von einer dieser Upgrade-Aussagen ab.
+
+Die gesamte Dienstquelle, inklusive Migrationen und dynamischer Ladepfade,
+verbraucht keines der sieben SDKs facebook-sdk, tweepy, linkedin-api,
+slack-sdk, stripe, shopifyapi und woocommerce. Plattformnamen sind lediglich
+Enum-/Schemawerte oder Beispielantworten; spezifische Connector-Router sind
+nur auskommentiert. Deshalb werden ungenutzte Pins entfernt statt OAuth-Major-
+Upgrades oder not_affected-Ausnahmen einzufuehren (ADR-071/User-Altlastenfreigabe).
+README kennzeichnet den tatsaechlichen Stand: Beispiel-/Platzhalterantworten,
+fehlende Webhook-Signaturpruefung und keine garantierte externe Zustellung.
+Fachcode, Settings, DB-Schemas, API-Pfade und Antworten bleiben unveraendert.
+
+Abnahme:
+
+- python scripts/check_service_import_pins.py services/crm-multichannel:
+  keine fehlenden Pflicht-Pins.
+- python scripts/audit_service_dependencies.py --manifest
+  services/crm-multichannel/requirements.txt: komplette transitive Aufloesung
+  unter Windows/Python 3.11, pip-audit 2.10.1; 48 Pakete, null Befunde,
+  Scanner und unveraendertes Security-Gate Exit 0. oauthlib ist entfallen.
+  Der Linux-Ausgangsbericht und Windows-Abnahme sind verschiedene Plattformen;
+  62 auf 48 wird deshalb nicht als exakte Image-Groessenreduktion verkauft.
+- Dienststart im eigenen Service-Arbeitsverzeichnis mit MetaPathFinder, der
+  die sieben SDK-Module sowie oauthlib/requests_oauthlib aktiv sperrt:
+  17 registrierte Routen, 12 OpenAPI-Pfade, GET /health per echter ASGI-
+  Verarbeitung HTTP 200 mit healthy/crm-multichannel. Null SDK-Imports und
+  null DB-Verbindungen. Lokaler Probe: artifacts/ci-multichannel-no-sdk-probe.py.
+  Engine-URL nutzt absichtlich einen unerreichbaren lokalen Port; kein SQL.
+- 9 Audit-Runner- und 9 Security-Gate-Regressionen bestanden (0,369/0,430 s).
+  Keine Schwellen/Baselines, Workflows oder Entscheidungen abgeschwaecht.
+
+Die erste Startprobe aus dem Repository las dessen fremde .env und scheiterte
+an Extra-Settings. Danach korrekt im Service-cwd ausgefuehrt; keine Settings-
+Aenderung vorgenommen. Eine erste Pfadzahl verwechselt Pfade mit registrierten
+Routen; tatsaechlicher unveraenderter Vertrag ist 12 Pfade/17 Routen.
+Keine Datenbank, Migration, Dockerinstanz oder Installationen in der globalen
+Laufzeit. Neue Linux-/GitHub-Abnahme bleibt nach Push ausstehend. Service
+Security 37428294647 auf d52139d83 ist noch vor diesem Fix rot; weitere
+Frontend-, Container-/Node-Security- und Futter-Befunde bleiben offen.
