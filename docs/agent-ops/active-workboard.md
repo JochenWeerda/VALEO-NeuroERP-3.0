@@ -71,6 +71,10 @@ inventory_lot_bundle_schemas.py um die bereits migrierte boolesche
 eudr_relevant-Spalte ergaenzen. Bestehender DDL-Driftvertrag und true/false-
 Serialisierung pruefen. OpenAPI aus committed Quellen plus diesem eigenen
 Schemahunk regenerieren; keine Migration und keine fremde Spec-WIP.
+**Personal-Kalenderclaim (2026-10-06):** personal_organisation_service.py nur
+default Zeitkontojahr von date.today auf business_today umstellen. Nachgewiesener
+neuer Ratschenbefund aus abgeschlossenem Personal-Slice; bestehende Zeitkonto-
+Vertraege und Kalendergate pruefen. Keine Baseline-Erhoehung.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
