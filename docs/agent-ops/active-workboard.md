@@ -120,6 +120,13 @@ Keine produktiven Guards geaendert, gemeinsame Probe ohne Reset verwendet.
 Zwei kanonische API-Vertraege im abschliessenden Lauf gruen (44,53 s),
 zusammen 20 Tests ohne Skip. Register- und Warenkontraktpfade getrennt;
 EUDR prueft reale nichtnegative Register-/Chargenzaehler.
+**Architektur-Mappingclaim (2026-10-06):** Saubere Prefix-Regeln und
+Architekturindex sowie test_generate_architecture_index.py. Committed-source
+meldet sechs unzugeordnete Services und drei EUDR-Endpunkte. Zuordnung gemaess
+bestehenden Grenzen: EUDR dms-compliance, Frachtbrief/WEBFLEET logistics,
+Preis finance, Mitgliederregister platform, Wiegeschein inventory. Minor: keine
+neue Domaenengrenze/Container/API. Index nur aus committeten Inventaren plus
+eigenen Regeln erzeugen; fremde Inventar-WIP nicht veroeffentlichen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
