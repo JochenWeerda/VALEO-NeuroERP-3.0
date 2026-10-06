@@ -120,6 +120,12 @@ class _FakeQuery:
 
 
 class _FakeExecuteResult:
+    def __init__(self, row=None):
+        self.row = row
+
+    def first(self):
+        return self.row
+
     def fetchone(self):
         return None
     def scalar(self):
@@ -132,11 +138,23 @@ class _FakeDb:
     def __init__(self, settlement: _FakeSettlement):
         self.settlement = settlement
         self.commits = 0
+        self.account_reads = []
 
     def query(self, model):
         return _FakeQuery(self, model)
 
-    def execute(self, *args, **kwargs):
+    def execute(self, statement, params=None, **kwargs):
+        sql = str(statement)
+        if "SELECT id FROM domain_erp.chart_of_accounts" in sql:
+            assert params["tenant_id"] == "tenant-1"
+            assert "tenant_id = :tenant_id" in sql
+            assert "is_active = TRUE" in sql
+            assert "deleted_at IS NULL" in sql
+            assert "COALESCE(is_summary, FALSE) = FALSE" in sql
+            self.account_reads.append(params["value"])
+            own_accounts = {"5000": "account-debit", "3300": "account-supplier", "5490": "account-deductions"}
+            account_id = own_accounts.get(params["value"])
+            return _FakeExecuteResult((account_id,) if account_id else None)
         return _FakeExecuteResult()
 
     def add(self, obj):
@@ -231,7 +249,8 @@ def test_posting_requires_freigabe_before_fibu(monkeypatch):
             "credit_account_deductions": "5490",
         },
     )
-    assert post_resp.status_code == 200
+    assert post_resp.status_code == 200, post_resp.text
+    assert fake_db.account_reads == ["5000", "3300", "5490"]
     assert post_resp.json()["journal_ref"].startswith("JE-SET-")
     assert fake_db.settlement.status == "posted"
     assert fake_db.settlement.posted_journal_ref == post_resp.json()["journal_ref"]

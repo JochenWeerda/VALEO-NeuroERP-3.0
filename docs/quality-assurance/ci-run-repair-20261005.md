@@ -213,3 +213,39 @@ Meilenstein 71cf8a126 ist auf main verifiziert; develop wurde mit dem echten
 Zwei-Eltern-Merge a0c6376db nachgezogen. Die zwischenzeitlich eingebrachte
 Fahrzeug-/Qualifikationsintegration 93bd71598 bleibt erhalten. Neue Actions
 auf 71cf8a126 sind gestartet bzw. eingereiht; keine Gesamtfreigabe behauptet.
+
+
+## Buchungs- und API-Testvertraege am 2026-10-06
+
+Zwei weitere Vollsuite-Failures waren unvollstaendige Testvoraussetzungen.
+Die Einkaufsfreigabe verlangt bereits aktive, nicht geloeschte und buchbare
+Konten des eigenen Mandanten. Ihr Integrationstest legt jetzt ausschliesslich
+fuer den eigenen Testtenant 5100 und 1600 an. Er weist neben FREIGEGEBEN zwei
+Journalzeilen mit genau diesen Konto-IDs sowie ausgeglichene Soll-/Habensummen
+von 31,50 EUR nach. Cleanup entfernt erst eigene Journalzeilen/Buchungen,
+dann eigene Konten und den eigenen Tenant. Fremde Konten bleiben erhalten.
+
+Der Wave-100-Settlement-Fake bildet die SQL-Kontoantwort mit first() ab und
+prueft Tenantparameter, Aktivstatus, Loeschstatus und Ausschluss von
+Summenkonten. Freigabe vor FIBU bleibt zwingend; der Test weist die Aufloesung
+aller drei Kontonummern nach. Beide vollstaendigen Testmodule bestehen mit
+18 Tests in 49,90 Sekunden auf dem vorhandenen Probe bzw. ihrem Unit-Fake.
+Keine produktiven Buchungspruefungen wurden veraendert.
+
+Der Major-Domain-Routertest prueft jetzt /vertraege und /vertraege/analytics
+fuer das zentrale Register sowie /contracts/{contract_id} fuer den separaten
+Warenkontrakt. Dies setzt die bereits dokumentierte Trennung aus
+KONTRAKTREGISTER-20261001 um, ohne alte oder kollidierende Aliasrouten wieder
+anzulegen. Der EUDR-UAT erwartet due_diligence_statements statt erfundener
+pauschaler total-/gesamt-Felder. Ganze, nichtnegative Register- und
+Chargenzaehler sowie ihre Beziehungen werden geprueft; zurueckgezogene
+Erklaerungen bleiben Teil der Gesamtanzahl. Relevante Chargen entsprechen
+der Summe aus nachgewiesenen und offenen Chargen.
+
+Auf dem verifizierten GitHub-Stand 390c571ab bestehen Docs Governance,
+Docs Build und PostgreSQL. Weitere Gesamtpruefungen laufen oder sind noch
+eingereiht. Der CI-Reparaturslice bleibt bis zur Gesamt-Abnahme in Arbeit.
+
+Der abschliessende API-Vertragslauf besteht mit zwei Tests in 44,53 Sekunden
+inklusive der Zaehlregel fuer zurueckgezogene Erklaerungen. Zusammen mit den
+18 Buchungsvertraegen sind 20 gezielte Tests gruen. Kein Test uebersprungen.

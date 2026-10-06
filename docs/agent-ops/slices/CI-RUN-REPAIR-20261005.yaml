@@ -15,6 +15,8 @@ file_ownership:
   - InventoryLotOut EUDR-Kennzeichen und committed-source OpenAPI
   - CRM-/Beleg-Fixtures und Fahrzeug-Identitaetsvertrag
   - Vier zentrale Herstellerfixes und Paket-Lock
+  - Tenantgebundene Einkaufs-/Settlement-Buchungsfixtures
+  - Kanonische Vertragsregister- und EUDR-UAT-Vertraege
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
