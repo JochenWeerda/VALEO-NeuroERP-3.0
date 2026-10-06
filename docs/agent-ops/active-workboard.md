@@ -1939,6 +1939,29 @@ Vorrat); ein Widerruf ohne vorherige Einwilligung sagt das statt stillzuhalten;
 alles mandantengebunden; Vertraege gegen die frische DB und alle fuenf Ratschen
 gruen.
 
+**Stand 06.10.2026:** Migration, Dienst, drei Wege, Modelle und 42 Vertraege
+geschrieben. QA:
+[bewerbung-einwilligung-20261006.md](../quality-assurance/bewerbung-einwilligung-20261006.md).
+
+**Der Nachweis ist NICHT gelaufen.** Der Windows-Dienst `com.docker.service` ist
+**gestoppt**, PostgreSQL damit nicht erreichbar; ein Start braucht erhoehte Rechte
+und wurde **nicht** erzwungen (Codex hat denselben Zustand vermerkt). Nicht gelaufen
+sind: `alembic upgrade head` gegen `valeo_probe` und `valeo_neuro_erp`, die 42
+Vertraege und die Tabellenverweis-Ratsche. Die vier Ratschen ohne Datenbankbedarf
+(Pagination, Baseline-Integritaet, tote Transaktionen, Godfiles) sind gruen. Der
+Slice bleibt **in Arbeit**, bis das nachgeholt ist — ein Nachweis, der nicht gelaufen
+ist, ist keiner.
+
+**Ein Fehler im eigenen Entwurf, behoben:** Der Widerruf schrieb `kanal = "WEB"`,
+weil die Spalte `NOT NULL` war — eine Behauptung ueber einen Vorgang, von dem niemand
+weiss, wie er einging. Die Spalte ist jetzt nullbar und eine Pruefbedingung verlangt
+den Kanal **nur** bei der Erteilung. Ihn beim Widerruf zu erfragen waere die andere
+falsche Antwort: eine Angabe mehr als bei der Erteilung (Art. 7 Abs. 3).
+
+**Nebenbefund:** `domain_crm.crm_consents` und `domain_crm.crm_contact_consents` sind
+zwei Tabellen fuer einen Begriff; die zweite migriert Daten aus der ersten, die erste
+bleibt stehen. Eigener Slice, hier nur benannt.
+
 **Risiken:** Der Widerruf macht Daten **loeschfaehig** — der naechste Lauf nimmt
 sie mit. Das ist gewollt, aber es heisst, dass ein versehentlicher Widerruf nicht
 durch erneutes Erteilen zu heilen ist, sobald der Lauf gelaufen ist. Die Reihenfolge
