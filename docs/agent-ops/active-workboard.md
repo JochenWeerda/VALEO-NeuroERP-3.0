@@ -1869,7 +1869,7 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
-## FRONTEND-INITIALDATA-MOUNTFETCH-20261006 — in Arbeit, Claude Code
+## FRONTEND-INITIALDATA-MOUNTFETCH-20261006 — abgeschlossen, Claude Code
 
 **Warum jetzt:** Der Windows-Dienst `com.docker.service` ist gestoppt, PostgreSQL
 nicht erreichbar, ein Start braucht erhoehte Rechte. Statt einen Nachweis zu
@@ -1925,6 +1925,34 @@ Melde-Vorgang vom 17.07.2026.
 dass beim Mount **trotz** `staleTime` geladen wird und die Serverdaten den
 Platzhalter ersetzen; `npx tsc --noEmit` ohne neue Fehler; `npm run lint` ohne neue
 Fehler; die neue Ratsche gruen; die vier Backend-Ratschen ohne Datenbankbedarf gruen.
+
+**Abgeschlossen 06.10.2026.** QA:
+[frontend-initialdata-mountfetch-20261006.md](../quality-assurance/frontend-initialdata-mountfetch-20261006.md).
+199 Stellen in 40 Dateien bekommen `initialDataUpdatedAt: 0`; neue Ratsche
+`scripts/check_initial_data.py` (Verstoss = Fehler, Gesamtzahl 205 down-only);
+8 Vitest-Vertraege gruen, `tsc --noEmit` 0 Fehler, `eslint` der 40 Dateien 0 Fehler,
+die vier Backend-Ratschen ohne Datenbankbedarf gruen.
+
+**Ein Fehler im eigenen Werkzeug, aufgefallen durch einen Vertrag:** Das
+Umschreibe-Skript suchte `queryKey`/`queryFn` in den 40 Zeilen oberhalb der Option.
+`useSalesDashboard` hat einen langen `queryFn`-Rumpf — `queryKey` stand 43 Zeilen
+darueber, die Option wurde uebergangen, der Hook blieb kaputt, und die Zahl der
+geaenderten Stellen sah trotzdem richtig aus. Das Skript bestimmt jetzt den
+**umgebenden Aufruf** statt mit einem Zeilenfenster zu raten. Ein Fenster ist keine
+Struktur.
+
+**Index-Isolation:** In 39 der 40 Dateien lag fremdes, nicht committetes WIP
+(`h1`-Klassen, Card-Farben). Gestaged wurde deshalb aus der **HEAD**-Fassung heraus
+(`git hash-object` + `update-index --cacheinfo`); der Commit traegt 597 Einfuegungen
+und **null** Loeschungen, der Arbeitsbaum behaelt das fremde WIP.
+
+**Nicht verdrahtet:** Die Ratsche fehlt in `.github/workflows/quality-gate.yml` — die
+Datei ist von Codex geclaimt (Tabellenkatalog-Drift-Evidenz) und wurde nicht
+angefasst. Einzeiler im bestehenden Backend-Schritt, als offener Punkt 1 notiert.
+
+**Zwei Nebenbefunde** in der QA-Doku: `Promise.allSettled` in den Dashboard-Hooks
+macht aus einem Verbindungsfehler einen Umsatz von 0 EUR; `catch { return [] }` in
+`sales.ts` ist begruendet, traegt aber nur, solange keine Maske Zahlen daraus bildet.
 
 **Risiken:** Mehr Abfragen beim Mount — genau das ist der Zweck; `staleTime` bremst
 weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand

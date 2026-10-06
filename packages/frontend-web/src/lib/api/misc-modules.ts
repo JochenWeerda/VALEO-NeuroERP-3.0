@@ -114,6 +114,9 @@ export function usePlanIst(periode?: string) {
       } satisfies PlanIstData
     },
     initialData: { ...EMPTY_PLAN_IST, periode: periode || '' },
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -272,6 +275,9 @@ export function useReklamationen() {
     queryKey: ['qualitaet', 'reklamationen'],
     queryFn: async () => (await apiClient.get<Reklamation[]>('/api/v1/qualitaet/reklamationen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }

@@ -142,6 +142,9 @@ export function usePortalDashboard() {
     queryKey: ['portal', 'dashboard'],
     queryFn: async () => (await apiClient.get<PortalDashboard>('/api/v1/portal/dashboard')).data,
     initialData: EMPTY_PORTAL_DASHBOARD,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -151,6 +154,9 @@ export function usePortalAnfragen() {
     queryKey: ['portal', 'anfragen'],
     queryFn: async () => (await apiClient.get<PortalAnfrage[]>('/api/v1/portal/anfragen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -160,6 +166,9 @@ export function usePortalBestellungen() {
     queryKey: ['portal', 'bestellungen'],
     queryFn: async () => (await apiClient.get<PortalBestellung[]>('/api/v1/portal/bestellungen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -169,6 +178,9 @@ export function usePortalDokumente() {
     queryKey: ['portal', 'dokumente'],
     queryFn: async () => (await apiClient.get<PortalDokument[]>('/api/v1/portal/dokumente')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -181,6 +193,9 @@ export function usePortalLieferscheinCompliance() {
       return resp.data?.data ?? []
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -509,6 +524,9 @@ export function usePortalNaehrstoffbilanzen() {
     queryKey: ['portal', 'bilanzen'],
     queryFn: async () => (await apiClient.get<PortalNaehrstoffbilanz[]>('/api/v1/portal/naehrstoffbilanzen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -518,6 +536,9 @@ export function usePortalRechnungen() {
     queryKey: ['portal', 'rechnungen'],
     queryFn: async () => (await apiClient.get<PortalRechnung[]>('/api/v1/portal/rechnungen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -527,6 +548,9 @@ export function usePortalShop() {
     queryKey: ['portal', 'shop'],
     queryFn: async () => (await apiClient.get<PortalShopProdukt[]>('/api/v1/portal/shop')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -536,6 +560,9 @@ export function usePortalVertraege() {
     queryKey: ['portal', 'vertraege'],
     queryFn: async () => (await apiClient.get<PortalVertrag[]>('/api/v1/portal/vertraege')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -545,6 +572,9 @@ export function usePortalZertifikate() {
     queryKey: ['portal', 'zertifikate'],
     queryFn: async () => (await apiClient.get<PortalZertifikat[]>('/api/v1/portal/zertifikate')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }

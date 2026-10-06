@@ -119,6 +119,9 @@ export function useWeighingTickets(params?: { skip?: number; limit?: number; ten
       return (await apiClient.get<PageResponse<WeighingTicket>>(endpoint)).data
     },
     initialData: EMPTY_WEIGHING_TICKET_PAGE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -153,6 +156,9 @@ export function useOpenContracts() {
       return data.items
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -180,6 +186,9 @@ export function useArticleGroups() {
     queryFn: async () =>
       (await apiClient.get<ArticleGroup[]>('/api/v1/weighing-tickets/article-groups')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -198,6 +207,9 @@ export function useArticlesByGroup(group: string | null) {
     },
     enabled: !!group,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }

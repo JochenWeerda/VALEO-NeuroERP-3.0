@@ -65,6 +65,9 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
     queryFn: async () => (await apiClient.get<Checklist>(`/api/v1/finance/closing-checklists/${id}`)).data,
     enabled: !!id && isValidChecklistId,
     initialData: EMPTY_CHECKLIST,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const completeMutation = useMutation({

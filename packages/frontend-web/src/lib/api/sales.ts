@@ -243,6 +243,9 @@ export function useSalesOrders(filters?: { status?: string; search?: string; cus
     queryKey: salesKeys.orders(filters),
     queryFn: () => fetchOrders(filters ?? {}),
     initialData: EMPTY_SALES_ORDERS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -262,6 +265,9 @@ export function useAuftraege(filters?: { status?: AuftragStatus; search?: string
       return items
     },
     initialData: EMPTY_AUFTRAEGE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -273,6 +279,9 @@ export function useSalesOffers(filters?: { status?: string; search?: string; cus
     queryKey: salesKeys.offers(filters),
     queryFn: () => fetchOffers(filters ?? {}),
     initialData: EMPTY_SALES_OFFERS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -292,6 +301,9 @@ export function useAngebote(filters?: { status?: AngebotStatus; search?: string 
       return items
     },
     initialData: EMPTY_ANGEBOTE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }

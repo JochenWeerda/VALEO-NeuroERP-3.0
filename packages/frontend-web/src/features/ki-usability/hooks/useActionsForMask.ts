@@ -18,5 +18,8 @@ export function useActionsForMask(domain?: string, mask?: string) {
     staleTime: 5 * 60 * 1000,
     enabled: Boolean(domain || mask),
     initialData: { actions: [], total: 0 },
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }

@@ -30,6 +30,9 @@ export default function KontakteListePage(): JSX.Element {
     queryKey: queryKeys.crm.contacts.listFiltered({ search: searchTerm || undefined }),
     queryFn: () => crmService.getContacts({ search: searchTerm || undefined }),
     initialData: EMPTY_CONTACTS_RESPONSE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const contacts = contactsData.data

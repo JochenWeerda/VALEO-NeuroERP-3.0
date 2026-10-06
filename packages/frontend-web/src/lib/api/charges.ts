@@ -120,6 +120,9 @@ export function useCharges() {
     queryKey: chargeKeys.all,
     queryFn: listCharges,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -129,6 +132,9 @@ export function useCharge(id: string | undefined) {
     queryFn: () => getCharge(id as string),
     enabled: Boolean(id),
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -138,6 +144,9 @@ export function useChargeQsReadiness(id: string | undefined) {
     queryFn: () => getChargeQsReadiness(id as string),
     enabled: Boolean(id),
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 

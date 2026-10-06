@@ -53,6 +53,9 @@ export default function AbschlussCockpitPage(): JSX.Element {
     queryKey: ['finance', 'closing-cockpit-summary'],
     queryFn: async () => (await apiClient.get<ClosingCockpitSummary>('/api/v1/finance/closing-checklists/cockpit/summary')).data,
     initialData: EMPTY_CLOSING_COCKPIT_SUMMARY,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30_000,
   })
   const { data: fibuCockpit } = useFibuCockpit()

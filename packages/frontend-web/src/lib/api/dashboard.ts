@@ -175,6 +175,9 @@ export function useSalesDashboard() {
       } as SalesDashboardData
     },
     initialData: EMPTY_SALES_DASHBOARD,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -230,6 +233,9 @@ export function useInventoryDashboard() {
       }
     },
     initialData: EMPTY_INVENTORY_DASHBOARD,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -295,6 +301,9 @@ export function useExecutiveDashboard() {
       } as ExecutiveDashboardData
     },
     initialData: EMPTY_EXECUTIVE_DASHBOARD,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -342,6 +351,9 @@ export function useProcurementDashboard() {
       } as ProcurementDashboardData
     },
     initialData: EMPTY_PROCUREMENT_DASHBOARD,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }

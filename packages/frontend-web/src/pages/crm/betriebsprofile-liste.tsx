@@ -32,6 +32,9 @@ export default function BetriebsprofileListePage(): JSX.Element {
     queryKey: queryKeys.crm.farmProfiles.list(),
     queryFn: () => crmService.getFarmProfiles({ search: searchTerm || undefined }),
     initialData: EMPTY_FARM_PROFILES_RESPONSE,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const profiles = profilesData.data

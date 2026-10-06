@@ -151,6 +151,9 @@ export function useOpportunities(params?: Record<string, string>) {
     queryKey: ['opportunities', params],
     queryFn: () => fetchOpportunities(params),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }
@@ -161,6 +164,9 @@ export function useOpportunity(id: string) {
     queryFn: () => fetchOpportunity(id),
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -169,6 +175,9 @@ export function useCustomersForSelect() {
     queryKey: ['customers-select'],
     queryFn: fetchCustomers,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data.map((c) => ({
       value: c.id,
@@ -182,6 +191,9 @@ export function useContactsForSelect(customerId?: string) {
     queryKey: ['contacts-select', customerId],
     queryFn: () => fetchContacts(customerId),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data.map((c) => ({
       value: c.id,
@@ -231,6 +243,9 @@ export function useCustomerLookup() {
     queryKey: ['customers-lookup'],
     queryFn: fetchCustomers,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 

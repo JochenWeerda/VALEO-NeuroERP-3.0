@@ -127,6 +127,9 @@ export function useStreckengeschaefte(params?: { erledigt?: boolean }) {
     queryKey: ['strecke', 'geschaefte', params],
     queryFn: () => listStreckengeschaefte(params),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }

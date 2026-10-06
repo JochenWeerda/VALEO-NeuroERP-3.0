@@ -120,6 +120,9 @@ export function useAuditLog() {
     queryKey: ['admin', 'audit-log'],
     queryFn: async () => (await apiClient.get<AuditEntry[]>('/api/v1/admin/audit-log')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -129,6 +132,9 @@ export function useBenutzer() {
     queryKey: ['admin', 'benutzer'],
     queryFn: async () => (await apiClient.get<Benutzer[]>('/api/v1/admin/benutzer')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -138,6 +144,9 @@ export function useRollen() {
     queryKey: ['admin', 'rollen'],
     queryFn: async () => (await apiClient.get<Rolle[]>('/api/v1/admin/rollen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -147,6 +156,9 @@ export function useMonitoringAlerts() {
     queryKey: ['admin', 'monitoring', 'alerts'],
     queryFn: async () => (await apiClient.get<MonitoringAlertsResponse>('/api/v1/admin/monitoring/alerts')).data,
     initialData: EMPTY_MONITORING_ALERTS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -156,6 +168,9 @@ export function useMonitoringRules() {
     queryKey: ['admin', 'monitoring', 'rules'],
     queryFn: async () => (await apiClient.get<MonitoringRule[]>('/api/v1/admin/monitoring/rules')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -165,6 +180,9 @@ export function useMonitoringChannels() {
     queryKey: ['admin', 'monitoring', 'channels'],
     queryFn: async () => (await apiClient.get<MonitoringChannel[]>('/api/v1/admin/monitoring/channels')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -174,6 +192,9 @@ export function useSchedulerJobs() {
     queryKey: ['admin', 'monitoring', 'scheduler-jobs'],
     queryFn: async () => (await apiClient.get<SchedulerJob[]>('/api/v1/admin/monitoring/scheduler-jobs')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -289,6 +310,9 @@ export function useReportPermissions(params?: { roleId?: string; reportKey?: str
       return (await apiClient.get<ReportPermission[]>(url)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -338,6 +362,9 @@ export function useConnectorEventQuarantine(params?: { connectorId?: string; lim
       return (await apiClient.get<ConnectorEvent[]>(`/api/v1/admin/mobile/connector-events/quarantine${suffix}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 15 * 1000,
   })
 }
@@ -393,6 +420,9 @@ export function useDataQualityRules(entityType?: string) {
       return (await apiClient.get<DataQualityRule[]>(`/api/v1/admin/data-quality/rules${params}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -401,6 +431,9 @@ export function useDataQualityEntityTypes() {
     queryKey: ['admin', 'data-quality', 'entity-types'],
     queryFn: async () => (await apiClient.get<string[]>('/api/v1/admin/data-quality/entity-types')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 

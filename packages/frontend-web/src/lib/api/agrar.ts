@@ -269,6 +269,9 @@ export function useDuenger(filters?: { search?: string; typ?: string; hersteller
       return { items, total }
     },
     initialData: EMPTY_DUENGER_RESULT,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -282,6 +285,9 @@ export function useDuengerItem(id: string) {
     },
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -341,6 +347,9 @@ export function usePSM(filters?: { search?: string; source?: 'local' | 'bvl' }) 
       return { items, total }
     },
     initialData: EMPTY_PSM_RESULT,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -354,6 +363,9 @@ export function usePSMItem(id: string) {
     },
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -365,6 +377,9 @@ export function useKunden() {
       return extractList<Kunde>(response.data, '/api/v1/agrar/kunden')
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -382,6 +397,9 @@ export function useKundeItem(id: string) {
     },
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -394,6 +412,9 @@ export function useSchlaege(kundeId?: string) {
       return extractList<Schlag>(response.data, '/api/v1/agrar/schlaege')
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -407,6 +428,9 @@ export function useSchlagItem(id: string) {
     },
     enabled: !!id,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 }
 
@@ -513,6 +537,9 @@ export function useAussaaten() {
     queryKey: [...agrarKeys.all, 'aussaaten'],
     queryFn: () => fetchList<Aussaat>('/api/v1/agrar/aussaaten'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -522,6 +549,9 @@ export function useBodenproben() {
     queryKey: [...agrarKeys.all, 'bodenproben'],
     queryFn: () => fetchList<Bodenprobe>('/api/v1/agrar/bodenproben'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -531,6 +561,9 @@ export function useKulturen() {
     queryKey: [...agrarKeys.all, 'kulturen'],
     queryFn: () => fetchList<Kultur>('/api/v1/agrar/kulturen'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -540,6 +573,9 @@ export function useErnten() {
     queryKey: [...agrarKeys.all, 'ernten'],
     queryFn: () => fetchList<Ernte>('/api/v1/agrar/ernte'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -567,6 +603,9 @@ export function useSorten() {
     queryKey: [...agrarKeys.all, 'sorten'],
     queryFn: () => fetchList<Sorte>('/api/v1/agrar/saatgut/sortenregister'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -576,6 +615,9 @@ export function useDuengerKomponenten() {
     queryKey: [...agrarKeys.all, 'duenger-komponenten'],
     queryFn: () => fetchList<DuengerKomponente>('/api/v1/agrar/duenger/komponenten'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -585,6 +627,9 @@ export function useMassnahmen() {
     queryKey: [...agrarKeys.all, 'massnahmen'],
     queryFn: () => fetchList<Massnahme>('/api/v1/agrar/feldbuch/massnahmen'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -631,6 +676,9 @@ export function usePSMAuflagen() {
     queryKey: [...agrarKeys.all, 'psm-auflagen'],
     queryFn: () => fetchList<PSMAuflage>('/api/v1/agrar/psm/auflagen'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -640,6 +688,9 @@ export function useSchadbilder() {
     queryKey: [...agrarKeys.all, 'schadbilder'],
     queryFn: () => fetchList<Schadbild>('/api/v1/agrar/psm/schadbilder'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 60 * 1000,
   })
 }
@@ -649,6 +700,9 @@ export function useWirkstoffGruppen() {
     queryKey: [...agrarKeys.all, 'wirkstoffgruppen'],
     queryFn: () => fetchList<WirkstoffGruppe>('/api/v1/agrar/psm/wirkstoffgruppen'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 60 * 1000,
   })
 }
@@ -658,6 +712,9 @@ export function useWasserschutzZonen() {
     queryKey: [...agrarKeys.all, 'wasserschutz-zonen'],
     queryFn: () => fetchList<WasserschutzZone>('/api/v1/agrar/psm/wasserschutz-zonen'),
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 60 * 1000,
   })
 }
@@ -670,6 +727,9 @@ export function usePSMSachkundeRegister() {
       return extractList<PSMSachkundeNachweis>(response.data, '/api/v1/compliance/sachkunde-register')
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -764,6 +824,9 @@ export function useWetterAktuell(coords?: WetterCoords) {
     },
     enabled: !!coords,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 60 * 1000,   // 10 Min — Wetterdaten ändern sich nicht so schnell
     retry: 1,
   })
@@ -781,6 +844,9 @@ export function useWetterWarnungen(coords?: WetterCoords) {
     },
     enabled: !!coords,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 15 * 60 * 1000,
     retry: 1,
   })
@@ -798,6 +864,9 @@ export function useWetterPrognose(coords?: WetterCoords, tage = 7) {
     },
     enabled: !!coords,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 60 * 1000,   // 30 Min
     retry: 1,
   })
@@ -821,6 +890,9 @@ export function useMaschinen(filters?: { typ?: string; status?: string; customer
       return response.data
     },
     initialData: EMPTY_MASCHINEN_RESULT,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }

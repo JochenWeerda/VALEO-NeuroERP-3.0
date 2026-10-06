@@ -233,6 +233,9 @@ export function useBestellvorschlaege() {
     queryKey: einkaufKeys.vorschlaege(),
     queryFn: async () => (await apiClient.get<Bestellvorschlag[]>('/api/v1/einkauf/bestellvorschlaege')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -278,6 +281,9 @@ export function useEinkaufAnfragen() {
     queryKey: einkaufKeys.anfragen(),
     queryFn: async () => (await apiClient.get<EinkaufAnfrage[]>('/api/v1/einkauf/anfragen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -287,6 +293,9 @@ export function useEinkaufAngebote() {
     queryKey: einkaufKeys.angebote(),
     queryFn: async () => (await apiClient.get<EinkaufAngebot[]>('/api/v1/einkauf/angebote')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -296,6 +305,9 @@ export function useAnlieferavis() {
     queryKey: einkaufKeys.anlieferavis(),
     queryFn: async () => (await apiClient.get<Anlieferavis[]>('/api/v1/einkauf/anlieferavis')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -305,6 +317,9 @@ export function useAuftragsbestaetigungen() {
     queryKey: einkaufKeys.bestaetigungen(),
     queryFn: async () => (await apiClient.get<Auftragsbestaetigung[]>('/api/v1/einkauf/auftragsbestaetigungen')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -314,6 +329,9 @@ export function useRechnungseingaenge() {
     queryKey: einkaufKeys.rechnungseingaenge(),
     queryFn: async () => (await apiClient.get<Rechnungseingang[]>('/api/v1/einkauf/rechnungseingaenge')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -353,6 +371,9 @@ export function useEinkaufReports() {
     queryKey: einkaufKeys.reports(),
     queryFn: async () => (await apiClient.get<{ spend: EinkaufSpendItem[]; performance: EinkaufPerformance[] }>('/api/v1/einkauf/reports')).data,
     initialData: EMPTY_EINKAUF_REPORTS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -369,6 +390,9 @@ export function useEinkaufReportsStandard() {
         }>('/api/v1/einkauf/reports/standard')
       ).data,
     initialData: EMPTY_EINKAUF_REPORTS_STANDARD,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -378,6 +402,9 @@ export function useEinkaufRetouren() {
     queryKey: einkaufKeys.retouren(),
     queryFn: async () => (await apiClient.get<EinkaufRetoure[]>('/api/v1/einkauf/retouren')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -396,6 +423,9 @@ export function useEinkaufLieferscheine() {
     queryKey: einkaufKeys.lieferscheine(),
     queryFn: async () => (await apiClient.get<EinkaufLieferschein[]>('/api/v1/einkauf/lieferscheine')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -422,6 +452,9 @@ export function useEinkaufFrachtauftraege() {
     queryKey: einkaufKeys.frachtauftraege(),
     queryFn: async () => (await apiClient.get<EinkaufFrachtauftrag[]>('/api/v1/einkauf/frachtauftraege')).data,
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -560,6 +593,9 @@ export function useVorschlagLager(params?: {
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -582,6 +618,9 @@ export function useVorschlagVerkauf(params?: {
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -600,6 +639,9 @@ export function useVorschlagRohware(params?: {
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/rohware${qs}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }
@@ -639,6 +681,9 @@ export function useArtikelLagerParameter(article_id?: string) {
       return (await apiClient.get<ArtikelLagerParam[]>(`/api/v1/einkauf/artikel-lager-parameter${qs}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -665,6 +710,9 @@ export function useEinkaufLieferanten(aktiv?: boolean) {
       return (await apiClient.get<EinkaufLieferant[]>(`/api/v1/einkauf/lieferanten${qs}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -678,6 +726,9 @@ export function useEinkaufKontrakte(lieferant_id?: string) {
       return (await apiClient.get<EinkaufKontrakt[]>(`/api/v1/einkauf/kontrakte${qs}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -695,6 +746,9 @@ export function useEinkaufBestellungen(params?: { status?: string; von?: string;
       return (await apiClient.get<EinkaufBestellung[]>(`/api/v1/einkauf/bestellungen${qs}`)).data
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 60 * 1000,
   })
 }

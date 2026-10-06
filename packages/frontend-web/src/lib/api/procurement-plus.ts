@@ -88,6 +88,9 @@ export function useSupplierRatings() {
     queryKey: procurementPlusKeys.supplierRatings(),
     queryFn: async () => (await apiClient.get<{ items: SupplierRating[] }>('/api/v1/einkauf/supplier-ratings')).data.items,
     initialData: EMPTY_SUPPLIER_RATINGS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -108,6 +111,9 @@ export function useSupplierDocuments(supplierId: string) {
       (await apiClient.get<SupplierDocument[]>(`/api/v1/einkauf/suppliers/${encodeURIComponent(supplierId)}/documents`)).data,
     enabled: !!supplierId,
     initialData: EMPTY_SUPPLIER_DOCUMENTS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }
@@ -137,6 +143,9 @@ export function usePoCommunications(poId: string) {
       (await apiClient.get<PoCommunication[]>(`/api/v1/purchase-orders/${encodeURIComponent(poId)}/communications`)).data,
     enabled: !!poId,
     initialData: EMPTY_PO_COMMUNICATIONS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 1000,
   })
 }
@@ -162,6 +171,9 @@ export function useEinkaufAuditTrail(docType: string, docId: string) {
       (await apiClient.get<EinkaufAuditTrail>(`/api/v1/einkauf/audit-trail/${encodeURIComponent(docType)}/${encodeURIComponent(docId)}`)).data,
     enabled: !!docType && !!docId,
     initialData: null,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 1000,
   })
 }
@@ -172,6 +184,9 @@ export function useServiceEntrySheets() {
     queryFn: async () =>
       (await apiClient.get<{ items: ServiceEntrySheet[] }>('/api/v1/einkauf/service-entry-sheets')).data.items,
     initialData: EMPTY_SERVICE_ENTRY_SHEETS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -199,6 +214,9 @@ export function useEdiMessages() {
     queryKey: procurementPlusKeys.ediMessages(),
     queryFn: async () => (await apiClient.get<{ items: EdiMessage[] }>('/api/v1/einkauf/edi/messages')).data.items,
     initialData: EMPTY_EDI_MESSAGES,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
   })
 }

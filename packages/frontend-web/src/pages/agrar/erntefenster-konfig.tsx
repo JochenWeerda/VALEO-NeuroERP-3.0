@@ -76,6 +76,9 @@ export default function ErntefensterKonfigPage(): JSX.Element {
       return Array.isArray(r.data) ? r.data : []
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const { data: campaigns = [], isLoading: campaignsLoading, isError: campaignsError, error: campaignsErr, refetch } = useQuery({
@@ -85,6 +88,9 @@ export default function ErntefensterKonfigPage(): JSX.Element {
       return Array.isArray(r.data) ? r.data : []
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const { data: settlements = [] } = useQuery({
@@ -94,6 +100,9 @@ export default function ErntefensterKonfigPage(): JSX.Element {
       return Array.isArray(r.data) ? r.data : []
     },
     initialData: [],
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const createMutation = useMutation({

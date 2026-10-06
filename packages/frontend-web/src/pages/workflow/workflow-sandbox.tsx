@@ -64,6 +64,9 @@ export default function WorkflowSandboxPage(): JSX.Element {
     queryKey: ['workflow-sandbox', 'process-variants'],
     queryFn: async () => (await apiClient.get<ProcessVariantsResponse>('/api/v1/admin/process-variants')).data,
     initialData: EMPTY_PROCESS_VARIANTS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const {
@@ -76,6 +79,9 @@ export default function WorkflowSandboxPage(): JSX.Element {
     queryKey: ['workflow-sandbox', 'erntefenster-campaigns'],
     queryFn: async () => (await apiClient.get<Campaign[]>('/api/v1/admin/erntefenster-campaigns')).data,
     initialData: EMPTY_CAMPAIGNS,
+    // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
+    // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
+    initialDataUpdatedAt: 0,
   })
 
   const previewMutation = useMutation({
