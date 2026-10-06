@@ -1967,7 +1967,7 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — in Arbeit, Claude Code
+## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Offenen Punkt 4 aus
 [Die Einwilligung zur laengeren Aufbewahrung](../quality-assurance/bewerbung-einwilligung-20261006.md)
@@ -2015,6 +2015,17 @@ Anlegen; gleicher Wortlaut ergibt 409 mit Verweis auf die vorhandene Fassung; ei
 UPDATE des Wortlauts scheitert in der Datenbank; eine benutzte Fassung ist nicht
 loeschbar; Bestandszeilen ueberfuehrt; Migration hin/zurueck/hin auf `valeo_probe`;
 alle bisherigen Einwilligungs- und Loeschlaufvertraege gruen; fuenf Ratschen gruen.
+
+**Abnahme (06.10.2026):** Migration, Dienst, drei neue Wege, Erteilen gegen
+`fassung`. Bestandsueberfuehrung auf `valeo_probe` mit vier Altvorgaengen geprueft
+(upgrade → downgrade → upgrade): zwei Fassungen in Reihenfolge der ersten Verwendung,
+Randleerraum-Dublette zusammengefuehrt, Rueckweg stellt den Text wieder her (getrimmt).
+`valeo_probe` und `valeo_neuro_erp` auf Head, Bedingungen und Trigger identisch.
+**126/126 Vertraege** gruen (32 neu, 42 Einwilligung angepasst, 52 Loeschlauf); alle
+fuenf Ratschen gruen. OpenAPI/Inventare nicht enthalten — Integration aus committed
+source wie bei den Vorslices. Offen: Rollenbindung fuer die ganze Datei
+`personal_bewerbungen.py`, Maske, Selbstwiderruf. QA:
+[bewerbung-erklaerung-fassung-20261006.md](../quality-assurance/bewerbung-erklaerung-fassung-20261006.md).
 
 ## BEWERBUNG-EINWILLIGUNG-20261006 — abgeschlossen, Claude Code
 

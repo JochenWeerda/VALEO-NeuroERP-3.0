@@ -10,7 +10,9 @@ Was diese Verträge festhalten:
   als die Erteilung — kein Rumpf, kein Grund, keine Freigabe. Ein Vertrag prüft, dass
   der Weg überhaupt kein Eingabemodell hat.
 * **Art. 7 Abs. 1 DSGVO:** Die Einwilligung ist **nachweisbar**. Der Widerruf ist eine
-  **neue Zeile**; die Erteilung bleibt mit Wortlaut und Kanal stehen.
+  **neue Zeile**; die Erteilung bleibt mit Fassung, Wortlaut und Kanal stehen. Der
+  Wortlaut kommt aus einer unveraenderlichen Fassung
+  (`test_bewerbung_erklaerung_fassung_vertrag.py`).
 * Der Widerruf wirkt **sofort**: Der nächste Löschlauf nimmt die Bewerbung mit.
 * Stand und Verzeichnis stimmen immer überein — sie werden nur zusammen geschrieben.
 * Beim Widerruf ist der Kanal **leer**, nicht erfunden.
@@ -51,6 +53,7 @@ LAUF = f"{WEG}/loeschlauf"
 
 BEWERBUNGEN = "domain_hr.applications"
 VERZEICHNIS = "domain_hr.bewerbung_einwilligungen"
+ERKLAERUNGEN = "domain_hr.bewerbung_einwilligungserklaerungen"
 REGELN = "domain_hr.bewerbung_aufbewahrung"
 LAEUFE = "domain_hr.bewerbung_loeschlaeufe"
 
@@ -72,12 +75,12 @@ def engine():
         motor = create_engine(DB_URL)
         with motor.connect() as conn:
             tabelle = conn.execute(
-                text("SELECT to_regclass('domain_hr.bewerbung_einwilligungen')")
+                text("SELECT to_regclass('domain_hr.bewerbung_einwilligungserklaerungen')")
             ).scalar()
     except Exception as fehler:  # noqa: BLE001
         pytest.skip(f"Datenbank nicht erreichbar: {fehler}")
     if not tabelle:
-        pytest.skip("Migration bewerbung_einwilligung_20261006 nicht angewandt")
+        pytest.skip("Migration bewerbung_erklaerung_fassung_20261006 nicht angewandt")
     return motor
 
 
@@ -86,8 +89,9 @@ def aufraeumen(engine):
 
     with engine.begin() as v:
         # Das Verzeichnis haengt per CASCADE an den Bewerbungen; die Reihenfolge
-        # bleibt trotzdem ausdruecklich.
-        for tabelle in (VERZEICHNIS, BEWERBUNGEN, LAEUFE, REGELN):
+        # bleibt trotzdem ausdruecklich. Die Fassungen zuletzt: Die Vorgaenge
+        # verweisen auf sie.
+        for tabelle in (VERZEICHNIS, BEWERBUNGEN, LAEUFE, REGELN, ERKLAERUNGEN):
             v.execute(
                 text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"),  # nosec B608
                 {"h": [HAUS_A, HAUS_B]},
@@ -165,14 +169,27 @@ def pfad(bewerbung_id: str) -> str:
     return f"{WEG}/{bewerbung_id}/einwilligung"
 
 
+def fassung_sicherstellen(client, haus: str) -> int:
+    """Die Fassung mit WORTLAUT — angelegt oder, wenn schon da, gefunden."""
+    antwort = client.post(
+        f"{WEG}/einwilligungserklaerungen", json={"wortlaut": WORTLAUT}, headers=kopf(haus)
+    )
+    if antwort.status_code == 409:
+        return antwort.json()["detail"]["fassung"]
+    assert antwort.status_code == 201, antwort.text
+    return antwort.json()["fassung"]
+
+
 def erteilen(client, haus: str, bewerbung_id: str, **felder):
     nutzlast = {
         "gueltig_bis": felder.pop(
             "gueltig_bis", (date.today() + timedelta(days=365)).isoformat()
         ),
         "kanal": felder.pop("kanal", "WEB"),
-        "einwilligungstext": felder.pop("einwilligungstext", WORTLAUT),
     }
+    nutzlast["fassung"] = (
+        felder.pop("fassung") if "fassung" in felder else fassung_sicherstellen(client, haus)
+    )
     nutzlast.update(felder)
     return client.post(pfad(bewerbung_id), json=nutzlast, headers=kopf(haus))
 
@@ -208,13 +225,29 @@ def vorgaenge(engine, bewerbung_id: str) -> list[tuple]:
             tuple(z)
             for z in v.execute(
                 text(
-                    "SELECT vorgang, gueltig_bis, kanal, einwilligungstext "
-                    f"FROM {VERZEICHNIS} WHERE bewerbung_id = :id "  # nosec B608
-                    "ORDER BY erfolgt_am, id"
+                    "SELECT v.vorgang, v.gueltig_bis, v.kanal, e.wortlaut "
+                    f"FROM {VERZEICHNIS} v "  # nosec B608
+                    f"LEFT JOIN {ERKLAERUNGEN} e ON e.id = v.erklaerung_id "
+                    "WHERE v.bewerbung_id = :id "
+                    "ORDER BY v.erfolgt_am, v.id"
                 ),
                 {"id": bewerbung_id},
             ).fetchall()
         ]
+
+
+def erklaerung_id(client, engine, haus: str) -> str:
+    from sqlalchemy import text
+
+    fassung = fassung_sicherstellen(client, haus)
+    with engine.connect() as v:
+        return v.execute(
+            text(
+                f"SELECT id FROM {ERKLAERUNGEN} "  # nosec B608
+                "WHERE tenant_id = :h AND fassung = :f"
+            ),
+            {"h": haus, "f": fassung},
+        ).scalar()
 
 
 # ── 1. Erteilen setzt Stand und Verzeichnis zusammen ────────────────────────
@@ -231,6 +264,7 @@ class TestErteilen:
         assert daten["gueltig_bis"] == bis
         assert daten["kanal"] == "WEB"
         assert daten["einwilligungstext"] == WORTLAUT
+        assert daten["fassung"] == 1
         # Eine Verzeichniszeile ohne Stand waere ein Nachweis ohne Wirkung.
         assert str(spalte(engine, kennung, "aufbewahrung_einwilligung_bis")) == bis
         assert spalte(engine, kennung, "aufbewahrung_einwilligung_am") is not None
@@ -245,11 +279,13 @@ class TestErteilen:
         assert daten["laeuft"] is True
         assert [v["vorgang"] for v in daten["vorgaenge"]] == ["ERTEILT"]
 
-    def test_ohne_wortlaut_kein_nachweis(self, client, engine):
-        # Ohne Wortlaut ist nicht nachweisbar, **wozu** eingewilligt wurde.
+    def test_ohne_fassung_kein_nachweis(self, client, engine):
+        # Ohne Fassung ist nicht nachweisbar, **wozu** eingewilligt wurde.
         kennung = bewerbung_anlegen(engine, HAUS_A)
-        assert erteilen(client, HAUS_A, kennung, einwilligungstext="").status_code == 422
-        assert erteilen(client, HAUS_A, kennung, einwilligungstext=None).status_code == 422
+        fassung_sicherstellen(client, HAUS_A)
+        assert erteilen(client, HAUS_A, kennung, fassung=None).status_code == 422
+        assert erteilen(client, HAUS_A, kennung, fassung=99).status_code == 422
+        assert vorgaenge(engine, kennung) == []
 
     def test_ende_in_der_vergangenheit_abgewiesen(self, client, engine):
         kennung = bewerbung_anlegen(engine, HAUS_A)
@@ -331,7 +367,7 @@ class TestWiderruf:
         widerrufen(client, HAUS_A, kennung)
         zeilen = vorgaenge(engine, kennung)
         assert [z[0] for z in zeilen] == ["ERTEILT", "WIDERRUFEN"]
-        # Wortlaut und Kanal der Erteilung stehen noch da.
+        # Wortlaut (ueber die Fassung) und Kanal der Erteilung stehen noch da.
         assert zeilen[0][2] == "WEB"
         assert zeilen[0][3] == WORTLAUT
 
@@ -434,46 +470,53 @@ class TestVerzeichnis:
     @pytest.mark.parametrize(
         "werte,warum",
         [
-            ("'ERTEILT', NULL, 'WEB', 'Text'", "Erteilung ohne Ende"),
-            ("'ERTEILT', CURRENT_DATE + 10, 'WEB', '   '", "Erteilung ohne Wortlaut"),
-            ("'ERTEILT', CURRENT_DATE + 10, NULL, 'Text'", "Erteilung ohne Kanal"),
+            ("'ERTEILT', NULL, 'WEB', :e", "Erteilung ohne Ende"),
+            ("'ERTEILT', CURRENT_DATE + 10, 'WEB', NULL", "Erteilung ohne Fassung"),
+            ("'ERTEILT', CURRENT_DATE + 10, NULL, :e", "Erteilung ohne Kanal"),
             ("'WIDERRUFEN', CURRENT_DATE + 10, NULL, NULL", "Widerruf mit Ende"),
             ("'WIDERRUFEN', NULL, 'WEB', NULL", "Widerruf mit Kanal"),
             ("'GEAENDERT', NULL, NULL, NULL", "unbekannter Vorgang"),
-            ("'ERTEILT', CURRENT_DATE + 10, 'FAX', 'Text'", "unbekannter Kanal"),
+            ("'ERTEILT', CURRENT_DATE + 10, 'FAX', :e", "unbekannter Kanal"),
         ],
     )
-    def test_die_datenbank_haelt_die_form(self, engine, werte, warum):
+    def test_die_datenbank_haelt_die_form(self, client, engine, werte, warum):
         from sqlalchemy import text
         from sqlalchemy.exc import IntegrityError
 
         kennung = bewerbung_anlegen(engine, HAUS_A)
+        erklaerung = erklaerung_id(client, engine, HAUS_A)
         with pytest.raises(IntegrityError):
             with engine.begin() as v:
                 v.execute(
                     text(
                         f"INSERT INTO {VERZEICHNIS} "  # nosec B608
                         "(id, tenant_id, bewerbung_id, vorgang, gueltig_bis, kanal, "
-                        " einwilligungstext) "
+                        " erklaerung_id) "
                         f"VALUES (:id, :t, :b, {werte})"
                     ),
-                    {"id": str(uuid.uuid4()), "t": HAUS_A, "b": kennung},
+                    {"id": str(uuid.uuid4()), "t": HAUS_A, "b": kennung, "e": erklaerung},
                 )
 
-    def test_ein_vorgang_ohne_bewerbung_ist_unmoeglich(self, engine):
+    def test_ein_vorgang_ohne_bewerbung_ist_unmoeglich(self, client, engine):
         from sqlalchemy import text
         from sqlalchemy.exc import IntegrityError
 
+        erklaerung = erklaerung_id(client, engine, HAUS_A)
         with pytest.raises(IntegrityError):
             with engine.begin() as v:
                 v.execute(
                     text(
                         f"INSERT INTO {VERZEICHNIS} "  # nosec B608
                         "(id, tenant_id, bewerbung_id, vorgang, gueltig_bis, kanal, "
-                        " einwilligungstext) "
-                        "VALUES (:id, :t, :b, 'ERTEILT', CURRENT_DATE + 10, 'WEB', 'Text')"
+                        " erklaerung_id) "
+                        "VALUES (:id, :t, :b, 'ERTEILT', CURRENT_DATE + 10, 'WEB', :e)"
                     ),
-                    {"id": str(uuid.uuid4()), "t": HAUS_A, "b": str(uuid.uuid4())},
+                    {
+                        "id": str(uuid.uuid4()),
+                        "t": HAUS_A,
+                        "b": str(uuid.uuid4()),
+                        "e": erklaerung,
+                    },
                 )
 
     def test_mit_der_bewerbung_geht_der_nachweis(self, client, engine):

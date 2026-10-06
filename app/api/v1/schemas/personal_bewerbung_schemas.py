@@ -187,9 +187,10 @@ class EinwilligungIn(BaseModel):
     #: ohne nahes Ende ist ein Vorrat und kann erneuert werden.
     gueltig_bis: date
     kanal: Kanal
-    #: Der Wortlaut, dem zugestimmt wurde. Ohne ihn ist nicht nachweisbar, **wozu**
-    #: eingewilligt wurde — und eine Einwilligung ohne bestimmten Zweck ist keine.
-    einwilligungstext: str = Field(min_length=1)
+    #: Die Fassung der Einwilligungserklaerung, der zugestimmt wurde — die Nummer auf
+    #: dem Formular. Ohne sie ist nicht nachweisbar, **wozu** eingewilligt wurde. Kein
+    #: freier Text: Zwei Quellen fuer den Wortlaut liefen still auseinander.
+    fassung: int = Field(ge=1)
     erfasst_durch: Optional[str] = Field(default=None, max_length=120)
 
 
@@ -208,6 +209,8 @@ class EinwilligungVorgangOut(BaseModel):
     gueltig_bis: Optional[str] = None
     #: Beim Widerruf leer: nicht erhoben, nicht erfunden.
     kanal: Optional[Kanal] = None
+    #: Bei der Erteilung: welche Fassung, und ihr Wortlaut. Beim Widerruf leer.
+    fassung: Optional[int] = None
     einwilligungstext: Optional[str] = None
     erfasst_durch: Optional[str] = None
 
@@ -220,3 +223,28 @@ class EinwilligungStandOut(BaseModel):
     #: eine abgelaufene Einwilligung schuetzt nicht mehr vor dem Loeschlauf.
     laeuft: bool
     vorgaenge: List[EinwilligungVorgangOut] = Field(default_factory=list)
+
+
+# ── Die Einwilligungserklaerung in Fassungen ────────────────────────────────
+# Nachweisbar ist eine Einwilligung erst, wenn feststeht, welchem Wortlaut
+# zugestimmt wurde. Eine Fassung ist unveraenderlich; ein neuer Wortlaut ist eine
+# neue Fassung.
+
+
+class ErklaerungIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    #: Randleerzeichen werden abgeschnitten; ein Text nur aus Leerraum ist keiner.
+    #: Die Nummer vergibt das System — wer sie mitschickt, wird abgewiesen statt
+    #: still ueberstimmt.
+    wortlaut: str = Field(min_length=1)
+    erstellt_durch: Optional[str] = Field(default=None, max_length=120)
+
+
+class ErklaerungOut(BaseModel):
+    id: str
+    tenant_id: str
+    fassung: int
+    wortlaut: str
+    erstellt_am: Optional[str] = None
+    erstellt_durch: Optional[str] = None

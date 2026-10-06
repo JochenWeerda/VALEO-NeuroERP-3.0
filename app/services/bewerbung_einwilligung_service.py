@@ -20,7 +20,15 @@ sondern Stand und Journal: Geschrieben werden beide nur hier und nur in **einer*
 Transaktion, und ein Vertrag prueft, dass der Stand immer der letzten Zeile
 entspricht.
 
-Siehe ``docs/quality-assurance/bewerbung-einwilligung-20261006.md``.
+**Die Erklaerung in Fassungen.** Erteilt wird gegen eine **Fassung** der
+Einwilligungserklaerung (`domain_hr.bewerbung_einwilligungserklaerungen`), nicht
+gegen freien Text: Nachweisbar ist eine Einwilligung erst, wenn feststeht, welchem
+Wortlaut zugestimmt wurde und dass er sich seitdem nicht geaendert hat. Fassungen
+sind je Mandant fortlaufend, derselbe Wortlaut ist eine Fassung, und die Datenbank
+haelt sie unveraenderlich.
+
+Siehe ``docs/quality-assurance/bewerbung-einwilligung-20261006.md`` und
+``docs/quality-assurance/bewerbung-erklaerung-fassung-20261006.md``.
 """
 
 from __future__ import annotations
@@ -37,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 BEWERBUNGEN = "domain_hr.applications"
 VERZEICHNIS = "domain_hr.bewerbung_einwilligungen"
+ERKLAERUNGEN = "domain_hr.bewerbung_einwilligungserklaerungen"
 
 #: Die beiden Vorgaenge — deckungsgleich mit ``ck_beweinw_vorgang``.
 ERTEILT = "ERTEILT"
@@ -52,10 +61,23 @@ MAX_TAGE = 1095
 
 FELDER = (
     "id, tenant_id, bewerbung_id, vorgang, erfolgt_am, gueltig_bis, kanal, "
-    "einwilligungstext, erfasst_durch"
+    "erfasst_durch"
 )
 
-ZEITFELDER = ("erfolgt_am", "gueltig_bis")
+#: Ein Vorgang mit seiner Fassung. Der Wortlaut heisst in der Antwort weiter
+#: ``einwilligungstext`` — er steht aber nur noch an einer Stelle, in der Fassung.
+VORGANG_MIT_FASSUNG = (
+    "v.id, v.tenant_id, v.bewerbung_id, v.vorgang, v.erfolgt_am, v.gueltig_bis, "
+    "v.kanal, v.erfasst_durch, e.fassung, e.wortlaut AS einwilligungstext"
+)
+
+ERKLAERUNG_FELDER = "id, tenant_id, fassung, wortlaut, erstellt_am, erstellt_durch"
+
+ZEITFELDER = ("erfolgt_am", "gueltig_bis", "erstellt_am")
+
+#: Randleerzeichen machen keinen anderen Text — deckungsgleich mit
+#: ``ck_beweinwerk_wortlaut``.
+LEERRAUM = " \t\r\n"
 
 
 def als_dict(zeile: Any) -> dict:
@@ -91,9 +113,11 @@ def verzeichnis(db: Session, tenant_id: str, bewerbung_id: str, limit: int = 200
     """Alle Vorgaenge zu dieser Bewerbung, neueste zuerst."""
     zeilen = db.execute(
         text(
-            f"SELECT {FELDER} FROM {VERZEICHNIS} "  # nosec B608  # reviewed-safe: FELDER und Tabellenname sind Code-Literale
-            "WHERE tenant_id = :tid AND bewerbung_id = :bid "
-            "ORDER BY erfolgt_am DESC, id DESC LIMIT :limit"
+            f"SELECT {VORGANG_MIT_FASSUNG} FROM {VERZEICHNIS} v "  # nosec B608  # reviewed-safe: Felder und Tabellennamen sind Code-Literale
+            f"LEFT JOIN {ERKLAERUNGEN} e "
+            "  ON e.id = v.erklaerung_id AND e.tenant_id = v.tenant_id "
+            "WHERE v.tenant_id = :tid AND v.bewerbung_id = :bid "
+            "ORDER BY v.erfolgt_am DESC, v.id DESC LIMIT :limit"
         ),
         {"tid": tenant_id, "bid": bewerbung_id, "limit": limit},
     ).mappings().fetchmany(limit)
@@ -133,6 +157,97 @@ def stand(db: Session, tenant_id: str, bewerbung_id: str) -> dict:
     }
 
 
+# ── Die Erklaerung in Fassungen ─────────────────────────────────────────────
+
+
+def erklaerungen_auflisten(db: Session, tenant_id: str, limit: int = 200) -> list[dict]:
+    """Die Fassungen des Mandanten, neueste zuerst."""
+    zeilen = db.execute(
+        text(
+            f"SELECT {ERKLAERUNG_FELDER} FROM {ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: Felder und Tabellenname sind Code-Literale
+            "WHERE tenant_id = :tid ORDER BY fassung DESC LIMIT :limit"
+        ),
+        {"tid": tenant_id, "limit": limit},
+    ).mappings().fetchmany(limit)
+    return [als_dict(z) for z in zeilen]
+
+
+def _erklaerung_holen(db: Session, tenant_id: str, fassung: int) -> Optional[dict]:
+    zeile = db.execute(
+        text(
+            f"SELECT {ERKLAERUNG_FELDER} FROM {ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: Felder und Tabellenname sind Code-Literale
+            "WHERE tenant_id = :tid AND fassung = :fassung"
+        ),
+        {"tid": tenant_id, "fassung": fassung},
+    ).mappings().first()
+    return als_dict(zeile) if zeile else None
+
+
+def erklaerung_lesen(db: Session, tenant_id: str, fassung: int) -> dict:
+    erklaerung = _erklaerung_holen(db, tenant_id, fassung)
+    if not erklaerung:
+        raise HTTPException(
+            status_code=404, detail=f"Fassung {fassung} der Einwilligungserklaerung nicht gefunden"
+        )
+    return erklaerung
+
+
+def erklaerung_anlegen(
+    db: Session,
+    tenant_id: str,
+    neue_id: str,
+    wortlaut: str,
+    erstellt_durch: Optional[str],
+) -> dict:
+    """Legt die naechste Fassung an — oder sagt, welche diesen Wortlaut schon traegt.
+
+    Die Nummer vergibt das System, je Mandant lueckenlos. Zwei gleichzeitige Anlagen
+    werden ueber eine Transaktionssperre je Mandant nacheinander gelegt; die
+    Eindeutigkeit in der Datenbank bleibt die letzte Instanz.
+    """
+    wortlaut = wortlaut.strip(LEERRAUM)
+    if not wortlaut:
+        raise HTTPException(
+            status_code=422,
+            detail="Eine Fassung ohne Wortlaut belegt nichts; ohne Text kein Zweck.",
+        )
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:schluessel, 0))"),
+        {"schluessel": f"bewerbung_einwilligungserklaerung:{tenant_id}"},
+    )
+    vorhanden = db.execute(
+        text(
+            f"SELECT fassung FROM {ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+            "WHERE tenant_id = :tid AND md5(wortlaut) = md5(:wortlaut) AND wortlaut = :wortlaut"
+        ),
+        {"tid": tenant_id, "wortlaut": wortlaut},
+    ).scalar()
+    if vorhanden is not None:
+        # Eine zweite Nummer fuer denselben Text liesse zwei Formulare gleich
+        # aussehen und verschieden heissen.
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "Dieser Wortlaut ist bereits eine Fassung.",
+                "fassung": vorhanden,
+            },
+        )
+    zeile = db.execute(
+        text(
+            f"INSERT INTO {ERKLAERUNGEN} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
+            "(id, tenant_id, fassung, wortlaut, erstellt_durch) "
+            "SELECT :id, :tid, COALESCE(MAX(fassung), 0) + 1, :wortlaut, :durch "
+            f"FROM {ERKLAERUNGEN} WHERE tenant_id = :tid "
+            f"RETURNING {ERKLAERUNG_FELDER}"
+        ),
+        {"id": neue_id, "tid": tenant_id, "wortlaut": wortlaut, "durch": erstellt_durch},
+    ).mappings().first()
+    return als_dict(zeile)
+
+
+# ── Vorgaenge ───────────────────────────────────────────────────────────────
+
+
 def _vorgang_schreiben(
     db: Session,
     tenant_id: str,
@@ -141,15 +256,15 @@ def _vorgang_schreiben(
     vorgang: str,
     gueltig_bis: Optional[date],
     kanal: Optional[str],
-    einwilligungstext: Optional[str],
+    erklaerung: Optional[dict],
     erfasst_durch: Optional[str],
 ) -> dict:
     zeile = db.execute(
         text(
             f"INSERT INTO {VERZEICHNIS} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
             "(id, tenant_id, bewerbung_id, vorgang, gueltig_bis, kanal, "
-            " einwilligungstext, erfasst_durch) "
-            "VALUES (:id, :tid, :bid, :vorgang, CAST(:bis AS date), :kanal, :wortlaut, :durch) "
+            " erklaerung_id, erfasst_durch) "
+            "VALUES (:id, :tid, :bid, :vorgang, CAST(:bis AS date), :kanal, :erklaerung, :durch) "
             f"RETURNING {FELDER}"
         ),
         {
@@ -159,11 +274,14 @@ def _vorgang_schreiben(
             "vorgang": vorgang,
             "bis": gueltig_bis,
             "kanal": kanal,
-            "wortlaut": einwilligungstext,
+            "erklaerung": erklaerung["id"] if erklaerung else None,
             "durch": erfasst_durch,
         },
     ).mappings().first()
-    return als_dict(zeile)
+    ergebnis = als_dict(zeile)
+    ergebnis["fassung"] = erklaerung["fassung"] if erklaerung else None
+    ergebnis["einwilligungstext"] = erklaerung["wortlaut"] if erklaerung else None
+    return ergebnis
 
 
 def erteilen(
@@ -175,6 +293,19 @@ def erteilen(
     Loeschlauf wuerde die Daten trotzdem mitnehmen.
     """
     bewerbung_sperren(db, tenant_id, bewerbung_id)
+
+    # Nur eine Fassung des **eigenen** Mandanten. Eine aeltere ist zulaessig: Wer ein
+    # frueher gedrucktes Formular unterschrieben hat, hat diesem Text zugestimmt.
+    erklaerung = _erklaerung_holen(db, tenant_id, payload.fassung)
+    if not erklaerung:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Fassung {payload.fassung} der Einwilligungserklaerung gibt es fuer "
+                "diesen Mandanten nicht. Ohne Fassung ist nicht nachweisbar, wozu "
+                "eingewilligt wurde."
+            ),
+        )
 
     heute = date.today()
     if payload.gueltig_bis <= heute:
@@ -202,7 +333,7 @@ def erteilen(
         ERTEILT,
         payload.gueltig_bis,
         payload.kanal,
-        payload.einwilligungstext,
+        erklaerung,
         payload.erfasst_durch,
     )
     db.execute(
