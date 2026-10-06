@@ -1245,6 +1245,83 @@ Datenbanken; alle vier Ratschen gruen.
 
 **Doku:** `docs/quality-assurance/personal-organisation-zeitkonto-20261006.md`.
 
+## QUITTUNG-OHNE-VORGANG-20261006 — in Arbeit, Claude Code
+
+**Befund:** Drei Wege quittieren einen Vorgang, der **nicht stattfindet**. Das ist
+nicht derselbe Fehler wie eine fehlende Tabelle: Dort antwortet der Weg 503 und
+jemand merkt es. Hier antwortet er `201` mit einer Nummer.
+
+| Weg | Was er antwortet | Was passiert |
+| --- | --- | --- |
+| `POST /schaeden/meldungen` | `201`, Meldungsnummer `SM-…`, `status: "gemeldet"` | **nichts** — kein INSERT, nur ein Logeintrag |
+| `GET /schaeden/meldungen` | eine Hagelschadenmeldung ueber 12.500 EUR, Zeuge „Hans Mueller" | **erfundene Demo-Daten**, als waeren sie Bestand |
+| `GET /schaeden/versicherungen` | vier Versicherungsvertraege mit Vertragsnummern | erfunden |
+| `POST /etiketten/druckauftrag` | `201`, Auftragsnummer, `status: "erstellt"` | **nichts** — kein INSERT, kein Druck |
+| `GET /etiketten/drucker` | drei Drucker mit IP-Adressen und Status „online" | erfunden |
+| `POST /compliance/gelangensbestaetigung/{id}/erinnerung` | `erinnerung_gesendet: true` | **nichts** — „Stub: In production this would send email/fax" |
+
+**Warum das die schwerste Klasse dieser Welle ist:** Eine Schadenmeldung an die
+Versicherung ist fristgebunden — § 30 Abs. 1 VVG verlangt die Anzeige
+unverzueglich nach Kenntnis, und Hagelpolicen nennen regelmaessig wenige Tage.
+Ein Haus, das eine Meldungsnummer in der Hand hat, meldet nicht noch einmal. Die
+Frist laeuft ab, und der Beweis, dass gemeldet wurde, existiert nie. Dasselbe bei
+der Erinnerung zur Gelangensbestaetigung: Sie ist Teil der Nachweiskette nach
+§ 17a UStDV, und `erinnerung_gesendet: true` heisst, dass niemand mehr nachhakt.
+
+**Die Regel dieses Slices:** *Ein Weg darf nicht quittieren, was er nicht getan
+hat.* Entweder er tut es, oder er sagt, dass er es nicht kann.
+
+**Was angelegt wird** (Migration `quittung_ohne_vorgang_20261006`):
+`domain_erp.versicherungen`, `domain_erp.schaden_meldungen`,
+`domain_erp.drucker`, `domain_erp.druckauftraege` — alle mit `tenant_id`,
+Statuswoerterbuch und den Pruefbedingungen, die der Fachlichkeit entsprechen.
+
+**Die Modellierung, und warum so:**
+* **Die Meldefrist steht am Vertrag, nicht im Code.** `meldefrist_tage` an der
+  Versicherung; `melden_bis` ist am Schaden **abgeleitet** aus Schadendatum plus
+  Frist. Eine Frist, die im Code steht, gilt fuer alle Policen gleich — und das
+  ist sie nicht.
+* **`GEMELDET` braucht einen Zeitpunkt** (`ck_schaden_meldung_datiert`). Ein
+  Status "gemeldet" ohne Wann ist kein Nachweis.
+* **Das Anlegen erzeugt einen `ENTWURF`, nicht eine Meldung.** Das System kann
+  nicht behaupten, der Versicherer sei unterrichtet; es gibt keinen Versandweg.
+  Das Melden ist ein eigener Schritt, der festhaelt **wann und durch wen** — und
+  der sagt, dass die Uebermittlung ausserhalb des Systems erfolgt ist.
+* **Ein Druckauftrag endet bei `ANGELEGT`**, nicht bei `fertig`. Es ist kein
+  Spooler angebunden; der Weg sagt das (`uebermittlung: "NICHT_ANGEBUNDEN"`)
+  statt einen Druck zu behaupten.
+* **Die Erinnerung** wird festgehalten (`erinnerung_angefordert_am`,
+  `erinnerung_versuche`) und die Antwort nennt `versand: "NICHT_KONFIGURIERT"`.
+  Der Nachweis, dass jemand erinnern **wollte**, ist etwas wert; die Behauptung,
+  es sei versendet, ist es nicht.
+
+**Dateibesitz:** `alembic/versions/quittung_ohne_vorgang_20261006.py`,
+`app/services/schaden_service.py` (neu),
+`app/services/etikettendruck_service.py` (neu),
+`app/api/v1/endpoints/schaeden.py`, `app/api/v1/endpoints/etiketten.py`,
+`app/api/v1/endpoints/gelangensbestaetigung.py` (nur der Erinnerungsweg),
+`tests/test_quittung_ohne_vorgang_vertrag.py` (neu),
+`packages/frontend-web/src/pages/schaeden/liste.tsx` und `meldung.tsx`,
+`packages/frontend-web/src/lib/api/schaeden.ts`,
+`packages/frontend-web/src/lib/api/etiketten.ts` (nur die Formen und der
+Statustext), `scripts/check_table_references.py` (nur die Schwelle), eigene
+QA-Doku und dieser Abschnitt.
+
+**Abnahme:** Jeder Schreibweg legt eine Zeile an, und der zugehoerige Leseweg
+findet **genau diese** Zeile (kein Weg antwortet mehr aus einer Literalliste);
+eine Meldung entsteht als `ENTWURF`; `GEMELDET` ohne Zeitpunkt ist unmoeglich;
+`melden_bis` folgt der Frist des Vertrags; ein Druckauftrag behauptet keinen
+Druck; die Erinnerung behauptet keinen Versand, haelt aber den Versuch fest;
+alles mandantengebunden; ein Lesefehler ist ein 503 und keine erfundene Liste;
+Vertraege gegen die frische DB und alle Ratschen gruen.
+
+**Risiken:** Die Masken zeigen danach **leere Listen** statt der gewohnten
+Demo-Daten. Das wird als Rueckschritt wahrgenommen und ist das Gegenteil: Vorher
+stand dort eine Hagelschadenmeldung, die niemand gemeldet hatte. Dass das Melden
+ein eigener Schritt ist, aendert den Ablauf in der Maske — fachliche Abnahme beim
+Versicherungs-Owner. Es wird **kein** Versandweg gebaut (E-Mail, Fax, Spooler);
+das bleibt eine benannte Luecke.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
