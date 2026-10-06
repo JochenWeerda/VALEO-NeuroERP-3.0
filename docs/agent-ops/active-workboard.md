@@ -84,6 +84,8 @@ Gemeinsamer Probe, eigene Tenantdatensaetze; keine Schemaabschwaechung.
 pro Datensatz isolieren und ungenutzten crm_customers-Doppelstamm entfernen.
 resolve_customer verwendet ausschliesslich domain_crm.customers; die alte
 Tabelle fehlt im migrierten Probe. Assertions bleiben auf echte Verknuepfungen gerichtet.
+CRM360-Fixture ebenfalls ohne alten crm_customers-Doppelstamm; Adresse
+als gueltiger JSON-String fuer die migrierte JSONB-Spalte binden.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
