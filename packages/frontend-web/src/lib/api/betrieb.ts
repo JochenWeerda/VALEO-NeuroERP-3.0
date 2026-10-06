@@ -47,7 +47,26 @@ export type LaborAuftrag = {
   folgeaktion?: 'qs_freigeben' | 'charge_sperren' | 'nachpruefung_anlegen' | 'befund_erfassen'
 }
 export type ServiceAnfrage = { id: string; nummer: string; kunde: string; betreff: string; datum: string; prioritaet: 'hoch' | 'normal' | 'niedrig'; status: 'neu' | 'in-bearbeitung' | 'erledigt' }
-export type Schaden = { id: string; nummer: string; art: string; datum: string; ort: string; schadenhoehe: number; status: 'gemeldet' | 'in-pruefung' | 'reguliert' | 'abgelehnt' }
+/**
+ * Eine Schadenmeldung, wie `/api/v1/schaeden/meldungen` sie liefert.
+ *
+ * Bis zum 06.10.2026 zeigte `useSchaeden` auf `/api/v1/schaeden` — eine Route,
+ * die es nicht gibt — und `makeHook` hielt mit `initialData` eine erfundene
+ * Hagelschadenmeldung ueber 12.500 EUR sichtbar. Die Maske zeigte also dauerhaft
+ * eine Attrappe, und der Fehlschlag der Abfrage fiel nicht auf.
+ */
+export type Schaden = {
+  id: string
+  meldungsnummer: string
+  art: string
+  schadendatum?: string | null
+  ort?: string | null
+  beschreibung: string
+  schadenhoehe: number | string
+  status: 'ENTWURF' | 'GEMELDET' | 'IN_BEARBEITUNG' | 'REGULIERT' | 'ABGELEHNT'
+  melden_bis?: string | null
+  frist_ueberschritten?: boolean
+}
 export type Zapfung = { id: string; kennzeichen: string; artikel: string; menge: number; zeitstempel: string; fahrer: string }
 export type Fahrer = { id: string; name: string; fuehrerschein: string; fahrzeug: string; status: 'verfuegbar' | 'unterwegs' | 'pause'; tourenHeute: number }
 export type VerladungItem = { id: string; kennzeichen: string; artikel: string; menge: number; lieferscheinNr: string; datum: string; status: 'geplant' | 'in-verladung' | 'verladen' }
@@ -143,9 +162,6 @@ const fb = {
   serviceAnfragen: [
     { id: '1', nummer: 'SR-2026-001', kunde: 'Landhandel Nord', betreff: 'Lieferverzögerung', datum: '2026-02-10', prioritaet: 'hoch' as const, status: 'neu' as const },
     { id: '2', nummer: 'SR-2026-002', kunde: 'Agrar Müller', betreff: 'Qualitätsreklamation', datum: '2026-02-09', prioritaet: 'normal' as const, status: 'in-bearbeitung' as const },
-  ],
-  schaeden: [
-    { id: '1', nummer: 'SCH-2026-001', art: 'Hagelschaden', datum: '2025-07-15', ort: 'Schlag S-001', schadenhoehe: 12500, status: 'reguliert' as const },
   ],
   zapfungen: [
     { id: '1', kennzeichen: 'AB-LH 101', artikel: 'Diesel', menge: 120.5, zeitstempel: '2026-02-10 07:15', fahrer: 'Schmidt' },
@@ -252,7 +268,11 @@ export const useMarketingKampagnen = makeHook<Kampagne[]>(['marketing', 'kampagn
 export const useProjekte = makeHook<Projekt[]>(['projekte'], '/api/v1/projekte', fb.projekte)
 export const useLaborAuftraege = makeHook<LaborAuftrag[]>(['qualitaet', 'labor'], '/api/v1/qualitaet/labor-auftraege', fb.laborAuftraege)
 export const useServiceAnfragen = makeHook<ServiceAnfrage[]>(['service', 'anfragen'], '/api/v1/service/anfragen', fb.serviceAnfragen)
-export const useSchaeden = makeHook<Schaden[]>(['schaeden'], '/api/v1/schaeden', fb.schaeden)
+// Ohne Vorbefuellung: Eine leere Liste ist die Wahrheit, wenn nichts erfasst
+// ist, und ein Fehlschlag soll als Fehler sichtbar werden.
+export const useSchaeden = makeHook<Schaden[]>(
+  ['schaeden'], '/api/v1/schaeden/meldungen', [],
+)
 export const useZapfungen = makeHook<Zapfung[]>(['tankstelle', 'zapfungen'], '/api/v1/tankstelle/zapfungen', fb.zapfungen)
 type FahrerApi = {
   id: string
@@ -277,7 +297,15 @@ export function mapFahrerZeile(row: FahrerApi): Fahrer {
   }
 }
 
-export const useFahrerListe = makeHook<Fahrer[]>(['transporte', 'fahrer'], '/api/v1/transporte/fahrer', fb.fahrer)
+export function useFahrerListe() {
+  return useQuery({
+    queryKey: ['transporte', 'fahrer'],
+    queryFn: async () => {
+      const { data } = await apiClient.get<FahrerApi[]>('/api/v1/transporte/fahrer')
+      return (Array.isArray(data) ? data : []).map(mapFahrerZeile)
+    },
+  })
+}
 export const useVerladungen = makeHook<VerladungItem[]>(['verladung'], '/api/v1/verladung', fb.verladungen)
 export const useVersicherungen = makeHook<Versicherung[]>(['versicherungen'], '/api/v1/versicherungen', fb.versicherungen)
 export const useRahmenvertraege = makeHook<Vertrag[]>(['vertraege', 'rahmen'], '/api/v1/vertrag/rahmenvertraege', fb.vertraege)

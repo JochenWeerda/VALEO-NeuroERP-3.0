@@ -21,36 +21,67 @@ def test_futter_stamm_endpoints_are_reachable():
 
 
 def test_schaeden_and_etiketten_endpoints_work():
+    """Schaden- und Etikettenwege arbeiten gegen die Datenbank.
+
+    Bis zum 06.10.2026 pruefte dieser Test das Erfundene mit: Er uebergab den
+    Drucker `DR-001`, den es nie gab, und erwartete `201` — weil die Druckerliste
+    aus Literalen bestand und der Schreibweg nichts speicherte. Jetzt wird erst
+    ein Drucker angelegt, und ein unbekannter waere ein 422.
+
+    Dass das Erfassen einen **Entwurf** erzeugt und der Auftrag keinen Druck
+    behauptet, ist der Kern des Slices QUITTUNG-OHNE-VORGANG-20261006.
+    """
     versicherungen = client.get("/api/v1/schaeden/versicherungen", headers=AUTH_HEADERS)
-    drucker = client.get("/api/v1/etiketten/drucker", headers=AUTH_HEADERS)
+    drucker_liste = client.get("/api/v1/etiketten/drucker", headers=AUTH_HEADERS)
+    assert versicherungen.status_code == 200, versicherungen.text
+    assert drucker_liste.status_code == 200, drucker_liste.text
+    assert isinstance(versicherungen.json(), list)
+    assert isinstance(drucker_liste.json(), list)
+
     meldung = client.post(
         "/api/v1/schaeden/meldungen",
         json={
             "art": "hagel",
-            "datum": "2026-04-07",
+            "schadendatum": "2026-04-07",
             "beschreibung": "Hagelschaden im Feldblock 7",
             "schadenhoehe": 1200,
         },
         headers=AUTH_HEADERS,
     )
+    assert meldung.status_code == 201, meldung.text
+    assert meldung.json()["meldungsnummer"].startswith("SM-")
+    # Das Erfassen meldet nicht: Es gibt keinen Versandweg zum Versicherer.
+    assert meldung.json()["status"] == "ENTWURF"
+    assert meldung.json()["gemeldet_am"] is None
+
+    drucker = client.post(
+        "/api/v1/etiketten/drucker",
+        json={"name": "Zebra ZT230 (Parallelinstallation)", "standort": "Annahme"},
+        headers=AUTH_HEADERS,
+    )
+    assert drucker.status_code == 201, drucker.text
+
     druckauftrag = client.post(
         "/api/v1/etiketten/druckauftrag",
         json={
             "chargen_id": "CH-001",
             "anzahl_etiketten": 2,
-            "drucker_id": "DR-001",
+            "drucker_id": drucker.json()["id"],
         },
         headers=AUTH_HEADERS,
     )
-
-    assert versicherungen.status_code == 200, versicherungen.text
-    assert drucker.status_code == 200, drucker.text
-    assert meldung.status_code == 201, meldung.text
     assert druckauftrag.status_code == 201, druckauftrag.text
-    assert isinstance(versicherungen.json(), list)
-    assert isinstance(drucker.json(), list)
-    assert meldung.json()["meldungsnummer"].startswith("SM-")
     assert druckauftrag.json()["auftrags_nr"].startswith("ETK-")
+    # Der Auftrag ist angelegt, nicht gedruckt — es ist kein Spooler angebunden.
+    assert druckauftrag.json()["status"] == "ANGELEGT"
+    assert druckauftrag.json()["uebermittlung"] == "NICHT_ANGEBUNDEN"
+
+    unbekannter_drucker = client.post(
+        "/api/v1/etiketten/druckauftrag",
+        json={"chargen_id": "CH-002", "anzahl_etiketten": 1, "drucker_id": "DR-001"},
+        headers=AUTH_HEADERS,
+    )
+    assert unbekannter_drucker.status_code == 422, unbekannter_drucker.text
 
 
 def test_strecke_produktion_kasse_and_ustva_endpoints_work():

@@ -11,6 +11,15 @@ import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { toast } from '@/hooks/use-toast'
 import { useSchaeden, type Schaden } from '@/lib/api/betrieb'
 
+/** Der Stand, wie das Register ihn fuehrt — `ENTWURF` heisst: noch nicht gemeldet. */
+const STATUS_TEXT: Record<string, string> = {
+  ENTWURF: 'Entwurf — noch nicht gemeldet',
+  GEMELDET: 'Gemeldet',
+  IN_BEARBEITUNG: 'In Bearbeitung',
+  REGULIERT: 'Reguliert',
+  ABGELEHNT: 'Abgelehnt',
+}
+
 export default function SchaedenListePage(): JSX.Element {
   const navigate = useNavigate()
   const isTouch = useTouchDevice()
@@ -21,9 +30,9 @@ export default function SchaedenListePage(): JSX.Element {
     if (!searchTerm) return schaeden
     const term = searchTerm.toLowerCase()
     return schaeden.filter((s) =>
-      s.nummer.toLowerCase().includes(term) ||
+      s.meldungsnummer.toLowerCase().includes(term) ||
       s.art.toLowerCase().includes(term) ||
-      s.ort.toLowerCase().includes(term) ||
+      (s.ort ?? '').toLowerCase().includes(term) ||
       s.status.toLowerCase().includes(term),
     )
   }, [schaeden, searchTerm])
@@ -35,7 +44,7 @@ export default function SchaedenListePage(): JSX.Element {
   const handleExport = () => {
     const header = 'Schadennummer;Art;Datum;Ort;Schadenhoehe;Status\n'
     const rows = filteredSchaeden.map((s) =>
-      [s.nummer, s.art, s.datum, s.ort, s.schadenhoehe, s.status]
+      [s.meldungsnummer, s.art, s.schadendatum ?? '', s.ort ?? '', s.schadenhoehe, s.status]
         .map((value) => `"${String(value).replace(/"/g, '""')}"`)
         .join(';'),
     )
@@ -51,42 +60,43 @@ export default function SchaedenListePage(): JSX.Element {
 
   const columns = [
     {
-      key: 'nummer' as const,
-      label: 'Schadennummer',
+      key: 'meldungsnummer' as const,
+      label: 'Meldungsnummer',
       render: (s: Schaden) => (
         <button type="button" onClick={() => navigate(`/schaeden/${s.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
-          {s.nummer}
+          {s.meldungsnummer}
         </button>
       ),
     },
     { key: 'art' as const, label: 'Schadenart', render: (s: Schaden) => <Badge variant="outline">{s.art}</Badge> },
-    { key: 'datum' as const, label: 'Datum', render: (s: Schaden) => new Date(s.datum).toLocaleDateString('de-DE') },
-    { key: 'ort' as const, label: 'Ort' },
+    { key: 'schadendatum' as const, label: 'Schadendatum', render: (s: Schaden) => (s.schadendatum ? new Date(s.schadendatum).toLocaleDateString('de-DE') : '–') },
+    { key: 'ort' as const, label: 'Ort', render: (s: Schaden) => s.ort ?? '–' },
     {
       key: 'schadenhoehe' as const,
       label: 'Schadenhoehe',
-      render: (s: Schaden) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(s.schadenhoehe),
+      render: (s: Schaden) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Number(s.schadenhoehe)),
     },
     {
       key: 'status' as const,
       label: 'Status',
       render: (s: Schaden) => (
-        <Badge variant={s.status === 'reguliert' ? 'outline' : s.status === 'abgelehnt' ? 'destructive' : 'secondary'}>
-          {s.status === 'gemeldet' ? 'Gemeldet' : s.status === 'in-pruefung' ? 'In Pruefung' : s.status === 'reguliert' ? 'Reguliert' : 'Abgelehnt'}
+        <Badge variant={s.status === 'REGULIERT' ? 'outline' : s.status === 'ABGELEHNT' ? 'destructive' : 'secondary'}>
+          {STATUS_TEXT[s.status] ?? s.status}
         </Badge>
       ),
     },
   ]
 
-  const gesamtSchaden = filteredSchaeden.reduce((sum, s) => sum + s.schadenhoehe, 0)
-  const reguliert = filteredSchaeden.filter((s) => s.status === 'reguliert').length
-  const offenePruefung = filteredSchaeden.filter((s) => s.status === 'in-pruefung')
+  // Geldbeträge kommen als Dezimalzeichenkette aus dem Backend.
+  const gesamtSchaden = filteredSchaeden.reduce((sum, s) => sum + Number(s.schadenhoehe), 0)
+  const reguliert = filteredSchaeden.filter((s) => s.status === 'REGULIERT').length
+  const offenePruefung = filteredSchaeden.filter((s) => s.status === 'IN_BEARBEITUNG')
 
   return (
     <div className="space-y-4 p-3 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">Schaeden</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Schaeden</h1>
           <p className="text-muted-foreground">Schaeden suchen und oeffnen</p>
         </div>
         <Button onClick={() => navigate('/schaeden/meldung')} className="min-h-touch gap-2 touch-manipulation">
