@@ -26,10 +26,14 @@ from typing import Any
 
 from sqlalchemy import create_engine, text
 
+# Direct CLI execution starts with scripts/ on sys.path, even under python -I.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from scripts.table_lineage import attach_lineage, collect_lineage
 from scripts.table_ownership import SCHEMA_TO_DOMAIN, classify_table
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
 MD_OUTPUT = REPO_ROOT / "docs" / "admin" / "table-catalog.md"
 JSON_OUTPUT = REPO_ROOT / "docs" / "admin" / "table-catalog.json"
 
