@@ -2296,68 +2296,6 @@ async def portal_shop(
     return PortalCompatService(db, tenant_id).list_portal_shop()
 
 
-@router.get("/portal/products", response_model=PortalOut, summary="Products portal")
-async def portal_products(
-    kategorie: Optional[str] = Query(None),
-    search: Optional[str] = Query(None),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(200, ge=1, le=500),
-    tenant_id: Optional[str] = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    return PortalCompatService(db, tenant_id or "").list_portal_products(
-        kategorie=kategorie, search=search, skip=skip, limit=limit
-    )
-
-
-@router.get("/portal/orders", response_model=PortalOut, summary="Orders portal")
-async def portal_orders(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=200),
-    status_filter: Optional[str] = Query(None),
-    tenant_id: Optional[str] = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    return PortalCompatService(db, tenant_id or "").list_sales_orders(
-        skip=skip, limit=limit, status_filter=status_filter
-    )
-
-
-@router.get("/portal/orders/{order_id}", response_model=PortalOut, summary="Order detail portal")
-async def portal_order_detail(
-    order_id: str, tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
-) -> dict[str, Any]:
-    try:
-        return PortalCompatService(db, tenant_id or "").get_sales_order(order_id)
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-
-
-@router.post("/portal/orders", response_model=PortalOut, summary="Create order portal")
-async def portal_create_order(
-    body: dict = Body(...),
-    tenant_id: Optional[str] = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    result = PortalCompatService(db, tenant_id or "").create_sales_order(body)
-    db.commit()
-    return result
-
-
-@router.get("/portal/contracts", response_model=list[CompatBridgeOut], summary="Contracts portal")
-async def portal_contracts(
-    tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
-) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id or "").list_portal_contracts()
-
-
-@router.get("/portal/pre-purchases", response_model=list[CompatBridgeOut], summary="Pre purchases portal")
-async def portal_pre_purchases(
-    tenant_id: Optional[str] = Depends(get_tenant_id), db: Session = Depends(get_db)
-) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id or "").list_portal_pre_purchases()
-
-
 @router.get("/portal/vertraege", response_model=list[CompatBridgeOut], summary="Vertraege portal")
 async def portal_vertraege(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)

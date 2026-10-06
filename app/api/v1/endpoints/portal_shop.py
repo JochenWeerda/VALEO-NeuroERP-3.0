@@ -572,67 +572,6 @@ async def list_orders(
     )
 
 
-@router.get("/orders/{order_id}", response_model=OrderResponse, summary="Order abrufen")
-async def get_order(
-    request: Request,
-    order_id: str,
-    tenant_id: str = Query(..., description="Mandanten-ID"),
-    customer_id: Optional[str] = Query(None, description="Kunden-ID"),
-    db: Session = Depends(get_db)
-):
-    """Liefert Details einer Bestellung"""
-    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
-    
-    order = db.query(CustomerOrder).filter(
-        and_(
-            CustomerOrder.id == order_id,
-            CustomerOrder.tenant_id == tenant_id,
-            CustomerOrder.customer_id == effective_customer
-        )
-    ).first()
-    
-    if not order:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Bestellung nicht gefunden"
-        )
-    
-    items = db.query(CustomerOrderItem).filter(
-        CustomerOrderItem.order_id == order.id
-    ).all()
-    
-    return OrderResponse(
-        id=order.id,
-        order_number=order.order_number,
-        order_date=order.order_date,
-        status=OrderStatus(order.status.value),
-        customer_id=order.customer_id,
-        customer_name=order.customer_name,
-        items=[
-            OrderItemResponse(
-                id=item.id,
-                article_id=item.article_id,
-                artikel_nummer=item.article_number,
-                name=item.article_name,
-                quantity=item.quantity,
-                einheit=item.unit,
-                unit_price=item.unit_price,
-                total_price=item.total_price,
-                price_source=PriceSource(item.price_source),
-                quantity_from_credit=item.quantity_from_credit,
-                quantity_at_list_price=item.quantity_at_list_price
-            )
-            for item in items
-        ],
-        total_net=order.total_net,
-        total_gross=order.total_gross,
-        delivery_address=order.delivery_address,
-        delivery_date_requested=order.delivery_date_requested,
-        customer_notes=order.customer_notes,
-        created_at=order.created_at
-    )
-
-
 @router.get("/contracts", response_model=list[PortalShopOut], summary="Contracts auflisten")
 async def list_contracts(
     request: Request,
@@ -888,3 +827,63 @@ async def get_orders_observability(
         },
     }
 
+
+@router.get("/orders/{order_id}", response_model=OrderResponse, summary="Order abrufen")
+async def get_order(
+    request: Request,
+    order_id: str,
+    tenant_id: str = Query(..., description="Mandanten-ID"),
+    customer_id: Optional[str] = Query(None, description="Kunden-ID"),
+    db: Session = Depends(get_db)
+):
+    """Liefert Details einer Bestellung"""
+    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
+    
+    order = db.query(CustomerOrder).filter(
+        and_(
+            CustomerOrder.id == order_id,
+            CustomerOrder.tenant_id == tenant_id,
+            CustomerOrder.customer_id == effective_customer
+        )
+    ).first()
+    
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Bestellung nicht gefunden"
+        )
+    
+    items = db.query(CustomerOrderItem).filter(
+        CustomerOrderItem.order_id == order.id
+    ).all()
+    
+    return OrderResponse(
+        id=order.id,
+        order_number=order.order_number,
+        order_date=order.order_date,
+        status=OrderStatus(order.status.value),
+        customer_id=order.customer_id,
+        customer_name=order.customer_name,
+        items=[
+            OrderItemResponse(
+                id=item.id,
+                article_id=item.article_id,
+                artikel_nummer=item.article_number,
+                name=item.article_name,
+                quantity=item.quantity,
+                einheit=item.unit,
+                unit_price=item.unit_price,
+                total_price=item.total_price,
+                price_source=PriceSource(item.price_source),
+                quantity_from_credit=item.quantity_from_credit,
+                quantity_at_list_price=item.quantity_at_list_price
+            )
+            for item in items
+        ],
+        total_net=order.total_net,
+        total_gross=order.total_gross,
+        delivery_address=order.delivery_address,
+        delivery_date_requested=order.delivery_date_requested,
+        customer_notes=order.customer_notes,
+        created_at=order.created_at
+    )
