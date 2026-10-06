@@ -41,6 +41,17 @@ Architekturzuordnungen, Maskenvertraege und Settlement) sowie Grype und die
 zwei ungepatchten Node-Advisories. Security-Gates und Severity-Schwellen bleiben
 unveraendert; kein Gesamt-Gruennachweis.
 
+Der nachfolgende Quality-Lauf 37375993205 auf dem Personal-Commit 4a5a32e37
+meldet eine neue direkte Kalenderquelle in personal_organisation_service.
+Das Standardjahr folgt jetzt business_today().year; die Kalender-Ratsche
+besteht unveraendert (202 Stellen/112 Dateien). Drei Code-Inventare sind
+aktuell; 44 echte Organigramm-/Zeitkonto-Vertraege bestehen im gemeinsamen Probe.
+Sie pruefen unter anderem Korrekturen, Saldo, Uebertrag und Tenanttrennung.
+Die drei Inventare wurden
+aus committed Backend-/Migrationsquellen nachgezogen und mit --check aktuell.
+Der dort ebenfalls fehlgeschlagene Worklist-Titeltest ist ein weiterer
+Renderer-Befund und bleibt getrennt offen; keine Baseline angehoben.
+
 Die Runs 37359972771, 37359972315, 37359972362, 37359972369,
 37360271159 und 37360270406 belegen unterschiedliche Ursachen.
 Die Korrekturen lassen Baselines, Audit-Schwellen und Pflichtgates bestehen.

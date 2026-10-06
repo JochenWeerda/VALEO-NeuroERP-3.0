@@ -13,13 +13,14 @@ hinausgehenden Stunden), GoBD Rz. 30 ff. (Nachvollziehbarkeit). Siehe
 from __future__ import annotations
 
 import logging
-from datetime import date
 from decimal import Decimal
 from typing import Any, Optional
 
 from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+from app.core.business_time import business_today
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +301,7 @@ def zeitkonto(
     Damit ist der Saldo die Summe der beiden ausgewiesenen Zahlen — und jede
     Stunde steckt in genau einer von ihnen.
     """
-    jahr = jahr or date.today().year
+    jahr = jahr or business_today().year
     monate: dict[str, dict] = {}
     for liste, feld in (
         (ist_stunden(db, tenant_id, employee_ref), "actual_hours"),
