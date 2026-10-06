@@ -155,3 +155,48 @@ Webhooks wurden mit beiden DB-Verbindungen explizit auf dem gemeinsamen Probe
 geprueft. MkDocs (derselbe Buildmodus wie CI), ADR-Nav, Slice-Harness, SQL-,
 Kalender- und Godfile-Ratschen sind gruen. Die Live-Tabellenpruefung ist
 lesend. Kein zusaetzlicher Docker-Container und keine neue Testdatenbank.
+
+
+## Weitere Befunde am 2026-10-06
+
+Die Verkaufsauftrag-Fixtures verwenden alle migrierten Pflichtwerte inklusive
+customer_id, subject, description, currency und version. Der FK-Kunde wird
+vor dem Auftrag angelegt. Global eindeutige Lager-, Artikel-, Kunden- und
+Auftragsnummern sind pro eigenem Testdatensatz isoliert; fremde vorhandene
+Daten wurden nicht geloescht. Entfernte crm_customers-Doppelstaemme werden
+weder angelegt noch beim Aufraeumen angesprochen. Der kanonische Resolver
+liest domain_crm.customers. Die Adressfixture bindet einen gueltigen JSON-String
+fuer die JSONB-Spalte, ohne den erwarteten Strassenwert zu veraendern.
+
+135 CRM-/Beleg-Vertraege bestanden auf dem gemeinsamen valeo_probe in
+66,37 Sekunden. Ein zunaechst separat gepruefter Identitaetstest scheiterte
+auch gegen committed Quellen: Die bereits vorhandene Fahrzeugstamm-Maske
+fehlte in seiner Erwartungsmatrix. Nach Ergaenzung von kennzeichen besteht
+auch dieser Test (0,41 s). Die 17 zuvor beobachteten Fixture-Setupfehler sind
+in diesem gezielten Lauf nicht mehr aufgetreten. Kein Schemareset, kein
+neuer Container und keine neue Testdatenbank. Der Probe meldete die bereits
+vorhandene Revision quittung_ohne_vorgang_20261006.
+
+GitHub-Lauf 37417689053 meldete neue Herstellerfixes. Zentraler Override
+und Lock integrieren proxy-addr 2.0.8, seroval 1.6.3, compression 1.8.2 und
+source-map-js 1.2.2. Damit werden folgende gemeldete CVE durch ihre gepatchten
+Versionen adressiert:
+
+- [Proxy-IP-Spoofing](https://github.com/advisories/GHSA-jqcg-44mw-7w3h)
+- [Seroval Promise-Deserialisierung](https://github.com/advisories/GHSA-p6vx-979v-rg4c)
+- [Seroval unbegrenzte TypedArrays](https://github.com/advisories/GHSA-jp82-f5mq-hwhp)
+- [Kompressionsstream nach Abbruch](https://github.com/advisories/GHSA-vc2v-76pw-4v95)
+- [Source-Map-Offsets](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)
+
+Isoliert bezogene Herstellerpakete ohne Installationsskripte bestehen
+IP-Vertrauensgrenzen, begrenzte Source-Map-Offsets, abgewiesene uebergrosse
+TypedArrays, Serialisierungs-Roundtrip, Gzip-Ausgabe und Freigabe der Streams
+nach normalem und vorzeitigem HTTP-Abschluss. Lock-Aufloesung bestand;
+bekannte Workspace-Peerwarnungen bleiben sichtbar. Die vier alten
+Runtime-Paketversionen kommen im Lock nicht mehr vor. Keine neue Ausnahme
+und keine abgesenkte Security-Schwelle. Node-forge, braces, der historische
+Dockerfile-Rootbefund und weitere Vollsuite-Befunde bleiben offen.
+
+Am verifizierten GitHub-Stand 4a4104fe1 bestehen Docs Governance, Docs Build,
+OpenAPI Drift, PostgreSQL, kritische E2E und Erntepeak. Security Agent bleibt
+wegen seiner Rohbefunde rot; andere neue Laeufe sind noch nicht abgenommen.

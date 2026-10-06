@@ -93,6 +93,11 @@ bestaetigt denselben Fehler; Identitaetsmatrix um kennzeichen ergaenzen.
 proxy-addr 2.0.8, seroval 1.6.3, compression 1.8.2 und source-map-js 1.2.2
 zentral pinnen. GitHub-Lauf 37417689053 meldet zwei kritische und drei hohe
 CVE mit Herstellerfix; keine neue Ausnahme. Verbraucher und Lock pruefen.
+**Meilenstein 2026-10-06:** 135 CRM-/Beleg-Vertraege auf Probe plus
+ein nachgezogener Fahrzeug-Identitaetsvertrag gruen. 17 Setupfehler behoben.
+Vier Herstellerpakete adressieren zwei kritische/drei hohe neue CVE;
+Funktionspruefungen einschliesslich Streamabbruch gruen. Docs/OpenAPI/PG/
+kritische E2E auf 4a4104fe1 bestanden. Weitere Security-Befunde bleiben offen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.

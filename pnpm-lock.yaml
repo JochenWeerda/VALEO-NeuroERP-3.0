@@ -6,6 +6,10 @@ settings:
 
 overrides:
   '@fastify/busboy': 3.2.1
+  proxy-addr: 2.0.8
+  seroval: 1.6.3
+  compression: 1.8.2
+  source-map-js: 1.2.2
   multer: ^2.4.0
   image-size: ^2.0.3
   ws: ^8.21.0
@@ -1074,8 +1078,8 @@ importers:
         specifier: ^0.14.1
         version: 0.14.2
       compression:
-        specifier: ^1.7.4
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1216,8 +1220,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1
       compression:
-        specifier: ^1.7.4
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1702,8 +1706,8 @@ importers:
         specifier: workspace:*
         version: link:../utilities
       compression:
-        specifier: ^1.7.4
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1790,8 +1794,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1
       compression:
-        specifier: ^1.7.4
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1929,8 +1933,8 @@ importers:
         specifier: ^1.18.0
         version: 1.20.0
       compression:
-        specifier: ^1.7.4
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -1972,8 +1976,8 @@ importers:
         specifier: ^1.18.0
         version: 1.20.0
       compression:
-        specifier: ^1.7.4
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -2519,8 +2523,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1
       compression:
-        specifier: ^1.7.4
-        version: 1.8.1
+        specifier: 1.8.2
+        version: 1.8.2
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -9894,8 +9898,8 @@ packages:
     resolution: {integrity: sha512-AF3r7P5dWxL8MxyITRMlORQNaOA2IkAFaTr4k7BUumjPtRpGDTZpl0Pb1XCO6JeDCBdp126Cgs9sMxqSjgYyRg==}
     engines: {node: '>= 0.6'}
 
-  compression@1.8.1:
-    resolution: {integrity: sha512-9mAqGPHLakhCLeNyxPkK4xVo746zQ/czLH1Ky+vkitMnWfWZps8r0qXuwhwizagCRttsL4lfG4pIOvaWLpAP0w==}
+  compression@1.8.2:
+    resolution: {integrity: sha512-o8vI5RE5A6EVVOd9o41jKp41aJom+QTEO/Bx8MYNjexMo/Bv2WOjUfZr+aL0WnYSgymUy6zeguqLTsIhV0gMvQ==}
     engines: {node: '>= 0.8.0'}
 
   confbox@0.1.8:
@@ -14338,8 +14342,8 @@ packages:
   protocol-buffers-schema@3.6.1:
     resolution: {integrity: sha512-VG2K63Igkiv9p76tk1lilczEK1cT+kCjKtkdhw1dQZV3k3IXJbd3o6Ho8b9zJZaHSnT2hKe4I+ObmX9w6m5SmQ==}
 
-  proxy-addr@2.0.7:
-    resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
+  proxy-addr@2.0.8:
+    resolution: {integrity: sha512-5nnx0yGyVUcY6t9RnWcARWtwT9F1D8O9rt08htPvnd49W1IgZtmLkhu9WfMzQj1cFxjHIO6connUNVW5k7AVyQ==}
     engines: {node: '>= 0.10'}
 
   proxy-from-env@2.1.0:
@@ -15090,10 +15094,10 @@ packages:
     resolution: {integrity: sha512-S0xQPhUTefAhNvNWFg0c1J8qJArHt5KdtJ/cFAofo06KD1MVSeFWyl4iiu+ApDIuw0WhjpOfCdgConOfAnLgkw==}
     engines: {node: '>=10'}
     peerDependencies:
-      seroval: ^1.0
+      seroval: 1.6.3
 
-  seroval@1.5.4:
-    resolution: {integrity: sha512-46uFvgrXTVxZcUorgSSRZ4y+ieqLLQRMlG4bnCZKW3qI6BZm7Rg4ntMW4p1mILEEBZWrFlcpp0AyIIlM6jD9iw==}
+  seroval@1.6.3:
+    resolution: {integrity: sha512-5PwLbVPpT4DEki1hYVSSsoxWY6xCNMVucAVLK/CH0mXSDfp/I4KaAex72q80GNt5hpn7CCMGdSpIg4YGqH/wXQ==}
     engines: {node: '>=10'}
 
   serve-static@1.16.2:
@@ -15290,8 +15294,8 @@ packages:
     resolution: {integrity: sha512-/dPCrG1s3ePpWm6yBbxZq5Be1dXGLyLn9Z791chDC3NFrpkVbWGzkBwPN1knaciexFXgRJ7hzdnwZ4stHSDmjg==}
     engines: {node: '>=4'}
 
-  source-map-js@1.2.1:
-    resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
+  source-map-js@1.2.2:
+    resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
 
   source-map-support@0.5.13:
@@ -21982,7 +21986,7 @@ snapshots:
     dependencies:
       '@react-native-community/cli-debugger-ui': 10.0.0
       '@react-native-community/cli-tools': 10.1.1
-      compression: 1.8.1
+      compression: 1.8.2
       connect: 3.7.0
       errorhandler: 1.5.1
       nocache: 3.0.4
@@ -22918,7 +22922,7 @@ snapshots:
       jiti: 2.7.0
       lightningcss: 1.32.0
       magic-string: 0.30.21
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
       tailwindcss: 4.3.1
 
   '@tailwindcss/node@4.3.2':
@@ -22928,7 +22932,7 @@ snapshots:
       jiti: 2.7.0
       lightningcss: 1.32.0
       magic-string: 0.30.21
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
       tailwindcss: 4.3.2
 
   '@tailwindcss/oxide-android-arm64@4.3.1':
@@ -23083,8 +23087,8 @@ snapshots:
     dependencies:
       '@tanstack/history': 1.162.0
       cookie-es: 3.1.1
-      seroval: 1.5.4
-      seroval-plugins: 1.5.4(seroval@1.5.4)
+      seroval: 1.6.3
+      seroval-plugins: 1.5.4(seroval@1.6.3)
 
   '@tanstack/store@0.9.3': {}
 
@@ -24086,7 +24090,7 @@ snapshots:
       amqplib: 0.10.9
       axios: 1.20.0
       bcrypt: 5.1.1
-      compression: 1.8.1
+      compression: 1.8.2
       cors: 2.8.5
       crypto: 1.0.1
       dotenv: 16.6.1
@@ -25724,11 +25728,12 @@ snapshots:
     dependencies:
       mime-db: 1.54.0
 
-  compression@1.8.1:
+  compression@1.8.2:
     dependencies:
       bytes: 3.1.2
       compressible: 2.0.18
       debug: 2.6.9
+      destroy: 1.2.0
       negotiator: 0.6.4
       on-headers: 1.1.0
       safe-buffer: 5.2.1
@@ -27291,7 +27296,7 @@ snapshots:
       on-finished: 2.4.1
       parseurl: 1.3.3
       path-to-regexp: 0.1.13
-      proxy-addr: 2.0.7
+      proxy-addr: 2.0.8
       qs: 6.16.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
@@ -27325,7 +27330,7 @@ snapshots:
       on-finished: 2.4.1
       once: 1.4.0
       parseurl: 1.3.3
-      proxy-addr: 2.0.7
+      proxy-addr: 2.0.8
       qs: 6.16.0
       range-parser: 1.2.1
       router: 2.2.0
@@ -29759,14 +29764,14 @@ snapshots:
     dependencies:
       '@babel/parser': 7.29.7
       '@babel/types': 7.29.7
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
     optional: true
 
   magicast@0.5.5:
     dependencies:
       '@babel/parser': 7.29.7
       '@babel/types': 7.29.7
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   make-dir@2.1.0:
     dependencies:
@@ -31117,7 +31122,7 @@ snapshots:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   postgres-array@2.0.0: {}
 
@@ -31270,7 +31275,7 @@ snapshots:
 
   protocol-buffers-schema@3.6.1: {}
 
-  proxy-addr@2.0.7:
+  proxy-addr@2.0.8:
     dependencies:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
@@ -32122,11 +32127,11 @@ snapshots:
     dependencies:
       type-fest: 0.20.2
 
-  seroval-plugins@1.5.4(seroval@1.5.4):
+  seroval-plugins@1.5.4(seroval@1.6.3):
     dependencies:
-      seroval: 1.5.4
+      seroval: 1.6.3
 
-  seroval@1.5.4: {}
+  seroval@1.6.3: {}
 
   serve-static@1.16.2:
     dependencies:
@@ -32412,7 +32417,7 @@ snapshots:
     dependencies:
       is-plain-obj: 1.1.0
 
-  source-map-js@1.2.1: {}
+  source-map-js@1.2.2: {}
 
   source-map-support@0.5.13:
     dependencies:
