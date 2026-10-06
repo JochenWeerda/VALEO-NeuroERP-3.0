@@ -75,6 +75,11 @@ Schemahunk regenerieren; keine Migration und keine fremde Spec-WIP.
 default Zeitkontojahr von date.today auf business_today umstellen. Nachgewiesener
 neuer Ratschenbefund aus abgeschlossenem Personal-Slice; bestehende Zeitkonto-
 Vertraege und Kalendergate pruefen. Keine Baseline-Erhoehung.
+**CRM-/Beleg-Fixtureclaim (2026-10-06):** tests/test_meridian_beleg_systemweit.py
+nur Stammfixture mit vollstaendigem Verkaufsauftrag und vorher angelegtem
+FK-Kunden; tests/test_crm360_kunde_wird_gefunden.py nur Jahresumsatz-Fixture
+mit allen migrierten Pflichtwerten. 17 Setup-Fehler und ein CI-Failure belegt.
+Gemeinsamer Probe, eigene Tenantdatensaetze; keine Schemaabschwaechung.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
