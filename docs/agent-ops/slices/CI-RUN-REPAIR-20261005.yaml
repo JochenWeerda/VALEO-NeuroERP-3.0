@@ -31,6 +31,7 @@ file_ownership:
   - Fehlender Mischfutter-Fachlisten-Guard und unveraenderter Frontend-Antwortvertrag
   - Bewerbungs-Integration nur committed-source Artefakte und exakte HR-Servicezuordnung
   - Tabellenkatalog-CLI Repository-Pfad und echte isolierte Startvertraege
+  - crm-multichannel nur sieben ungenutzte SDK-Pins und ehrlicher README-Integrationsstand
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
