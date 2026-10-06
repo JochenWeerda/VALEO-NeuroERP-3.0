@@ -160,6 +160,6 @@ gemeldet.
 4. ~~**Die Einwilligung hat keinen Weg.**~~ **Gebaut am 06.10.2026** —
    [Die Einwilligung zur längeren Aufbewahrung](bewerbung-einwilligung-20261006.md):
    Erteilen, Widerrufen (ohne Rumpf, ohne Grund — Art. 7 Abs. 3) und ein
-   fortschreibendes Verzeichnis als Nachweis nach Art. 7 Abs. 1. **Der Nachweis
-   dieses Folgeslices ist noch nicht gelaufen** (PostgreSQL auf dieser Maschine
-   nicht erreichbar); der Punkt bleibt bis dahin offen.
+   fortschreibendes Verzeichnis als Nachweis nach Art. 7 Abs. 1. Nachweis
+   gelaufen am 06.10.2026: 42 Verträge gegen die frische Datenbank, Punkt
+   geschlossen.

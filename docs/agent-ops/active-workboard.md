@@ -1961,7 +1961,7 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## BEWERBUNG-EINWILLIGUNG-20261006 — in Arbeit, Claude Code
+## BEWERBUNG-EINWILLIGUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Den offenen Punkt 4 aus
 [Der Loeschlauf fuer Bewerberdaten](../quality-assurance/bewerbung-loeschlauf-20261006.md)
@@ -2053,6 +2053,15 @@ Vertraege und die Tabellenverweis-Ratsche. Die vier Ratschen ohne Datenbankbedar
 (Pagination, Baseline-Integritaet, tote Transaktionen, Godfiles) sind gruen. Der
 Slice bleibt **in Arbeit**, bis das nachgeholt ist — ein Nachweis, der nicht gelaufen
 ist, ist keiner.
+
+**Nachweis nachgeholt (06.10.2026, Abend):** Docker lief wieder. `valeo_probe` mit
+`pruefstand_db.py --keep` auf Head migriert (kein Neuaufsetzen, er wird geteilt);
+Rueckweg downgrade/upgrade auf dem Pruefstand sauber. `valeo_neuro_erp` stand schon
+auf Head; die Pruefbedingungen sind in beiden Datenbanken identisch. **42/42
+Vertraege** gegen den Pruefstand gruen, Nachbar Loeschlauf **52/52**,
+Tabellenverweis-Ratsche OK. Damit alle fuenf Ratschen gruen; der Slice ist
+abgeschlossen. Offen bleiben die Punkte 2-4 der QA-Doku (Maske, Selbstwiderruf,
+versionierte Erklaerung) als eigene Slices.
 
 **Ein Fehler im eigenen Entwurf, behoben:** Der Widerruf schrieb `kanal = "WEB"`,
 weil die Spalte `NOT NULL` war — eine Behauptung ueber einen Vorgang, von dem niemand
