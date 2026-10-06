@@ -2537,6 +2537,43 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "personal/onboarding",
+      "title": "Onboarding",
+      "domain": "hr",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__onboarding/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/onboarding/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/onboarding/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/onboarding/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt einen Einarbeitungslauf an."
+        },
+        {
+          "key": "neu",
+          "label": "Neu",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer einen neuen Lauf."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "personal/qualifikationen",
       "title": "Qualifikationen",
       "domain": "hr",
@@ -2568,6 +2605,43 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Leert die Eingabe fuer ein neues Profil."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "personal/schulungen",
+      "title": "Schulungen",
+      "domain": "hr",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__schulungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/schulungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/schulungen/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/schulungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt eine Schulungszuweisung an."
+        },
+        {
+          "key": "neu",
+          "label": "Neu",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer eine neue Zuweisung."
         }
       ],
       "sensitive_fields": [],
