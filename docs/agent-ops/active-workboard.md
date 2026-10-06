@@ -1631,6 +1631,54 @@ aufraeumt, nimmt den Slice mit: `app/services/interessent_service.py`,
 `tests/test_interessent_ist_lead_vertrag.py`, `scripts/check_table_references.py`,
 `config/pagination_baseline.json` und die beiden Dokumente.
 
+## PERSONAL-ZERLEGUNG-20261006 — in Arbeit, Claude Code
+
+**Anlass:** `app/api/v1/endpoints/personal.py` ist von 3315 auf 3342 Zeilen
+gewachsen (neuer `delete_application`-Weg, Commit `f7fcbdd7c`) und bricht damit
+die Godfile-Ratsche an der Baseline, die dieser Agent im Slice
+PERSONAL-ORGANISATION-ZEITKONTO-20261006 gesenkt hat. Die Ratsche arbeitet
+richtig: Entweder schrumpft die Datei, oder das Wachstum wird begruendet. Auf
+Nutzeranweisung wird sie **zerlegt**.
+
+**Der Schnitt liegt schon da.** Zwei Faecher am Ende der Datei teilen mit der
+Personalverwaltung nur den Prefix `/personal`:
+
+* **Bewerbermanagement** (Recruiting-Pipeline, `/applications…`) — 149 Zeilen
+* **Lohnabrechnung** (`/lohn/berechnung`, `/lohn/closeout-preview`) — 112 Zeilen
+
+Sie wandern unveraendert in `personal_bewerbungen.py` und
+`personal_lohnabrechnung.py`. **Eine Zerlegung ist keine Gelegenheit, Verhalten zu
+aendern:** Der Code wird nicht angefasst, auch wo er fragwuerdig ist (dazu unten).
+
+**Montagereihenfolge:** `personal.py` hat **keinen** Platzhalterpfad auf oberster
+Ebene (`/{...}`), die neuen Module nur feste Pfade — es gibt also nichts zu
+verschlucken. Die Reihenfolge ist trotzdem festgelegt und begruendet, damit sie
+nicht spaeter zufaellig wird.
+
+**Dateibesitz:** `app/api/v1/endpoints/personal.py` (nur der Rueckbau der zwei
+Abschnitte), `app/api/v1/endpoints/personal_bewerbungen.py` (neu),
+`app/api/v1/endpoints/personal_lohnabrechnung.py` (neu),
+`app/api/v1/api.py` (nur die zwei Montagezeilen),
+`config/godfile_baseline.json` (nur der Eintrag `personal.py`),
+`tests/test_personal_zerlegung_vertrag.py` (neu), eigene QA-Doku und dieser
+Abschnitt.
+**Fremder Code:** Der `delete_application`-Weg stammt von einem anderen Agenten
+(`f7fcbdd7c`) und wandert **wortgleich** mit. Er bleibt dessen Code.
+
+**Abnahme:** Alle Wege sind unter denselben Pfaden erreichbar wie vorher (gleiche
+Methoden, gleiche Antwortmodelle); `personal.py` liegt unter 3315 Zeilen und die
+Baseline ist nachgezogen; kein Weg doppelt montiert; Vertraege und alle Ratschen
+gruen.
+
+**Risiken:** Keine fachliche Aenderung — und damit bleiben die bekannten Maengel
+der beiden Faecher bestehen: `except Exception: raise HTTPException(503,
+"applications table not available")` verwischt jeden Fehler zu einer
+Tabellenaussage, `response_model=PersonalOut` ist ein offenes Modell, die
+Bewerbungsliste ist unbegrenzt, und die Stufen stehen als `set` statt als
+Woerterbuch mit Uebergaengen. Das gehoert in einen eigenen Slice und wird hier
+**benannt, nicht behoben** — sonst waere nicht mehr zu unterscheiden, was der
+Umzug und was die Korrektur gebrochen hat.
+
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
 **Owner:** Codex-01a0f3fc. **Ziel:** Unsichere Bank-Direktbuchung und lokale
