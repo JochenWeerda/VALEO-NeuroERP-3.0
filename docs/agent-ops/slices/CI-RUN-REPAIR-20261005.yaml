@@ -27,6 +27,8 @@ file_ownership:
   - Canonical-Memo-OpenAPI-Vertrag und committed-source Inventarintegration
   - Portal-Compat-Routen/Service-Block, statischer Match vor order_id und sinkende compat-Grenze
   - Portal-OpenAPI-/Router-Vertraege und committed-source Spezifikation
+  - Bestehende Futter-Listenprojektion: Endpoint-Extraktion, READ_ROLES und obligatorische Tenantfilter
+  - Fehlender Mischfutter-Fachlisten-Guard und unveraenderter Frontend-Antwortvertrag
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.

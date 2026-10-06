@@ -494,3 +494,59 @@ Artefakt erneut mit build_spec() verglichen. Reale Doppelgruppen sinken
 von 47 auf 41. Spec und Inventare werden ausschliesslich indexseitig
 integriert; fremde Arbeitsbaumfassungen und laufende Bewerberarbeit bleiben
 erhalten. Die restlichen 41 Routerkonflikte und Security-Befunde bleiben offen.
+
+
+## Mandantengebundene Futtermittel-Leselisten am 2026-10-06
+
+Die zuerst registrierten Compat-GETs fuer Einzelfutter/Mischfutter lasen alle
+aktiven ArticleModel-Datensaetze ohne tenant_id-Filter und ohne READ_ROLES.
+Spaeter registrierte Futter-Stamm-Handler verwenden andere Fachmodelle; die
+Mischfutter-Fachliste hatte selbst ebenfalls keinen READ_ROLES-Guard.
+
+Die Verbraucherpruefung zeigt, dass lib/api/futter.ts und seine Listen noch
+die bestehende Artikelprojektion verwenden. Ein sofortiger GET-Modellwechsel
+wuerde deren Feldvertrag brechen. Deshalb wird in diesem Sicherheits-Slice
+nur die vorhandene Projektion abgesichert: beide Service-Listen verwenden
+ArticleModel.tenant_id == self.tenant_id, behalten Aktivfilter, Limits 500/200
+und ihre Antwortfelder. Beide tatsaechlich ausgefuehrten GETs pruefen den
+bestehenden get_current_user/READ_ROLES-Vertrag vor dem Datenbankzugriff.
+Die Mischfutter-Fachliste erhaelt dieselbe fehlende Lesepruefung.
+
+Die zwei bisherigen Compat-GET-Funktionen sind als unveraenderte Antwort-
+projektion nach futter_read.py extrahiert und am bisherigen Registrierungspunkt
+in compat.router eingebunden. Keine neue Fachfunktion/oeffentlicher Pfad;
+keine zusätzliche Datenhaltung oder Adapter fuer historische Entwicklungsdaten.
+Compat-Godfile-Grenze sinkt von 3631 auf 3621, statt sie fuer Guards anzuheben.
+
+15 Tests bestehen in 30,21 Sekunden: bestehende kanonische Router-Vertraege
+und fuenf fokussierte Sicherheitsabnahmen. Die First-FULL-Match-Funktion der
+echten main:app wird ausgewaehlt und ausgefuehrt: falsche Rolle liefert 403
+vor DB-Zugriff, erlaubte Rolle fuehrt die tenantgebundene, aktive und begrenzte
+Artikelabfrage aus. Bestehende Antwortfelder artikelnummer/preis sind geprueft.
+Zusaetzlich wird die Mischfutter-Fachliste mit einer fachfremden Rolle abgewiesen.
+QueryRecorder verifiziert reale SQL-Ausdruecke; kein Datenbank-Fachschreibtest.
+Probe --status meldet bereits die fremde Revision
+bewerbung_statuswoerterbuch_20261006. Dieser Slice migriert oder setzt sie nicht
+zurueck und legt keine DB/Container an.
+
+Groessen-, Paginierungs- (284 Abfragen/257 Funktionen) und Baseline-Integritaets-
+gate bestehen. Drei committed-source Code-Inventare sind aktuell. Architektur-
+index --require-complete und --check: 932/932 Routen, 270/270 Services,
+454/454 Endpoint-Module. Neues internes Endpoint-Modul nutzt bestehende
+Futter-Prefix-Zuordnung; keine Domänengrenze oder Container geaendert.
+
+Offen: zwei konkurrierende GET-Modelle, Compat-Einzel-/Bulk-Loeschpfade mit
+Artikelmodell und fehlendem Fach-Guard. Einzel-DELETE verdeckt den Fachhandler
+trotz unterschiedlicher Pfadparameternamen. Der naechste Rueckbau muss
+Frontend-Datentypen, Stammlisten, Einzel-/Bulk-Loeschung und kanonischen Feed-
+Katalog gemeinsam harmonisieren. Keine abgeschlossene Schreibberechtigungs-
+oder globale Futter-Abnahme behauptet.
+
+GitHub 7017d6660: Docs Governance und Docs Build erfolgreich; PostgreSQL laeuft,
+weitere Jobs queued. Gesamt-CI und Security bleiben offen. Keine Gate-Ausnahme.
+
+
+Spec-Abnahme aus committed 59fa73073 plus vier eigenen Sicherheitsdateien:
+alle bisherigen 3096 Pfade/Methoden exakt erhalten und erneutes render(build_spec())
+kanonisch. 41 Doppelgruppen unveraendert; kein verfruehtes Kanonisierungsversprechen.
+Artefakte nur indexseitig integriert, fremde Arbeitsbaumfassungen erhalten.

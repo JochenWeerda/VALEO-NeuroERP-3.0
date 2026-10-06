@@ -239,7 +239,9 @@ async def list_mischfuttermittel(
     aktiv: bool = Query(True),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
+    require_roles(user, READ_ROLES)
     try:
         q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
         if aktiv:

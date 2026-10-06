@@ -325,7 +325,7 @@ class FutterCompatService:
     # ── ArticleModel-backed lists ─────────────────────────────────────────────
 
     def list_einzelfuttermittel(self) -> list:
-        items = self.db.query(ArticleModel).filter(ArticleModel.is_active == True).limit(500).all()  # noqa: E712
+        items = self.db.query(ArticleModel).filter(ArticleModel.tenant_id == self.tenant_id, ArticleModel.is_active == True).limit(500).all()  # noqa: E712
         return [
             {
                 "id": i.id,
@@ -341,7 +341,7 @@ class FutterCompatService:
         ]
 
     def list_mischfuttermittel(self) -> list:
-        items = self.db.query(ArticleModel).filter(ArticleModel.is_active == True).limit(200).all()  # noqa: E712
+        items = self.db.query(ArticleModel).filter(ArticleModel.tenant_id == self.tenant_id, ArticleModel.is_active == True).limit(200).all()  # noqa: E712
         return [
             {
                 "id": i.id,
