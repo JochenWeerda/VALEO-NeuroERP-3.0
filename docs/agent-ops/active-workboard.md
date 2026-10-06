@@ -31,6 +31,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Futter-Leseabnahme:** Beide tatsaechlich ausgefuehrten Artikelprojektionen jetzt tenantgebunden und READ_ROLES-geprueft; fehlender Guard der Mischfutter-Fachliste ergaenzt. Antwortvertrag fuer bestehenden Frontend-Client erhalten; zwei GETs nach futter_read.py extrahiert. 15 Dispatch-/SQL-/Rollen-/Routertests bestanden (30,21 s), Groessen-/Paginierungs-/Baseline-Gates gruen. Compat-Grenze 3631 auf 3621 gesenkt. Alle 3096 Pfade/Methoden erhalten; 41 Doppelgruppen unveraendert, weil Verbraucher-Modellmigration bewusst noch offen. Inventare/Architekturindex aktuell (932 Routen/270 Services/454 Endpoint-Module); Spec aus committed 59fa73073 plus eigenen Sicherheitsdateien indexseitig. Probe vorhanden (fremde Bewerbungsrevision), keine DB/Container/Migration. Offener naechster Futter-Slice: Frontend-DTOs, zwei GET-Modelle und Einzel-/Bulk-Loeschpfade gemeinsam harmonisieren. GitHub 7017d6660 Docs Build/Governance bestanden; Gesamt-CI/Security warten.
 
+**Bewerbungs-Integrationsclaim (2026-10-06, reserviert):** Nach parallelem 15fc04c88 committed-source Spec/Inventare/Architekturindex nachziehen; config/architecture-domain-prefixes.yaml nur exakte bewerbung_service: hr und vorhandener Architektur-Vertragstest. Bewerbungs-Fachcode, Migration und Masken nicht bearbeiten. Neue GET-Methode auf vorhandenem Personal-Detailpfad dokumentieren; keine fremde Arbeitsbaum-Spec uebernehmen.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
