@@ -1637,7 +1637,7 @@ aufraeumt, nimmt den Slice mit: `app/services/interessent_service.py`,
 `tests/test_interessent_ist_lead_vertrag.py`, `scripts/check_table_references.py`,
 `config/pagination_baseline.json` und die beiden Dokumente.
 
-## PERSONAL-ZERLEGUNG-20261006 — in Arbeit, Claude Code
+## PERSONAL-ZERLEGUNG-20261006 — abgeschlossen, Claude Code
 
 **Anlass:** `app/api/v1/endpoints/personal.py` ist von 3315 auf 3342 Zeilen
 gewachsen (neuer `delete_application`-Weg, Commit `f7fcbdd7c`) und bricht damit
@@ -1684,6 +1684,41 @@ Bewerbungsliste ist unbegrenzt, und die Stufen stehen als `set` statt als
 Woerterbuch mit Uebergaengen. Das gehoert in einen eigenen Slice und wird hier
 **benannt, nicht behoben** — sonst waere nicht mehr zu unterscheiden, was der
 Umzug und was die Korrektur gebrochen hat.
+
+**Ergebnis (2026-10-06):** `personal.py` **3342 -> 3083** Zeilen, Baseline
+nachgezogen; Godfile-Ratsche gruen. Zwei neue Module:
+`personal_bewerbungen.py` (172 Zeilen) und `personal_lohnabrechnung.py` (133),
+beide mit Prefix `/personal` und **vor** `personal.router` montiert. Alle sechs
+Wege unter denselben Pfaden und Methoden, 65 Personalwege, keiner doppelt.
+
+**Eine Aenderung war noetig:** `PersonalOut` lag **in** `endpoints/personal.py`
+und war von den neuen Modulen nicht erreichbar. Es liegt jetzt in
+`schemas/personal_schemas.py` — dort, wo die Datei im Kopf ohnehin sagt "Import
+these instead of defining locally". Dieselbe Klasse, dasselbe `extra="allow"`,
+eine Definition statt zweier.
+
+**Der fremde `delete_application`-Weg** (`f7fcbdd7c`) ist wortgleich mitgewandert;
+ein Vertrag prueft das ausdruecklich.
+
+**13 neue Vertraege, 139 in allen Personal- und Lohntests gruen**; alle vier
+Ratschen gruen.
+
+**Benannte Maengel als Vertrag:** Die beiden Faecher tragen Maengel, die der Umzug
+bewusst nicht angefasst hat (`except Exception: 503 "applications table not
+available"` verwischt jeden Fehler; `PersonalOut` mit `extra="allow"`; die
+Bewerbungsliste ist unbegrenzt; `APPLICATION_STAGES` ist ein `set` ohne
+Uebergaenge, eine abgelehnte Bewerbung laesst sich auf `EINGESTELLT` setzen;
+`uuid4`; kein Statuswoerterbuch in der Datenbank; die Lohnwege verwerfen den
+Mandanten per `noqa: ARG001`). Zwei davon haelt `TestBenannteMaengel` **als
+Vertrag** fest: Der Test schlaegt an, sobald jemand sie behebt, und verlangt dann,
+dass die Zusage in der QA-Doku mitgeht. Ein Mangel in einem Test ist besser als
+einer in einer Notiz.
+
+**Handshake:** Die Maengel gehoeren in einen eigenen Slice
+**Bewerbermanagement** — mit Migration (Statuswoerterbuch samt Uebergaengen auf
+`domain_hr.applications`), typisierten Antwortmodellen und einer begrenzten Liste.
+
+**Doku:** `docs/quality-assurance/personal-zerlegung-20261006.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
