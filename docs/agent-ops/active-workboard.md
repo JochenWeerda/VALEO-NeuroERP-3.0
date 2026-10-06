@@ -35,6 +35,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Finale Bewerbungsintegration:** Paralleles 15fc04c88 in Spec/Inventare aus committed 817987519 integriert. 3096 Pfade und alle alten HTTP-Methoden erhalten; exakt neue GET-Detailmethode fuer Bewerbung dokumentiert. bewerbung_service exakt hr zugeordnet (domain_hr.applications). 20 Architekturtests bestanden (0,51 s), Index vollstaendig: 932 Routen/271 Services/454 Endpoint-Module; drei Inventare aktuell. Fachcode/Migration/Masken nicht angefasst. Futter-Lesekorrektur 02352757d bleibt erhalten; Futter-Modell-/Loeschgaps und 41 Routerkonflikte weiter offen.
 
+**Tabellenkatalog-CLI (2026-10-06, reserviert):** scripts/generate_table_catalog.py nur Repository-Pfad vor scripts.*-Imports bereitstellen; tests/test_generate_table_catalog.py echte isolierte Direktstart-Regressionen. Quality Gate 37425708197 auf 25d1dcd92 scheitert vor DB-Zugriff mit ModuleNotFoundError scripts. Keine Katalog-/Tabellen-/Schemaaenderung; eigene QA/Slice/Workboard. Abnahme: python -I SCRIPT --help von Repository und fremdem cwd, bestehende Lineage-/Katalogtests. Fremde Renderer-/Personal-WIP nicht anfassen; keine DB/Container/Migration.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
