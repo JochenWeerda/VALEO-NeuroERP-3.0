@@ -168,3 +168,55 @@ class LoeschlaufOut(BaseModel):
     durchgefuehrt_durch: Optional[str] = None
     hinweis: Optional[str] = None
     weitere_faellig: bool = False
+
+
+# ── Die Einwilligung zur laengeren Aufbewahrung ───────────────────────────────
+# Art. 6 Abs. 1 lit. a DSGVO (Talentpool). Art. 7 Abs. 1 verlangt den **Nachweis**,
+# Art. 7 Abs. 3 den jederzeit moeglichen Widerruf, der nicht schwerer sein darf als
+# die Erteilung. Deshalb hat der Widerruf **kein** Eingabemodell: Ein Rumpf waere
+# eine Angabe mehr als bei der Erteilung.
+
+#: Deckungsgleich mit ``ck_beweinw_kanal``.
+Kanal = Literal["WEB", "E_MAIL", "PAPIER", "MUENDLICH"]
+
+
+class EinwilligungIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    #: Bis wann die Erlaubnis reicht. Hoechstens drei Jahre ab heute — eine Erlaubnis
+    #: ohne nahes Ende ist ein Vorrat und kann erneuert werden.
+    gueltig_bis: date
+    kanal: Kanal
+    #: Der Wortlaut, dem zugestimmt wurde. Ohne ihn ist nicht nachweisbar, **wozu**
+    #: eingewilligt wurde — und eine Einwilligung ohne bestimmten Zweck ist keine.
+    einwilligungstext: str = Field(min_length=1)
+    erfasst_durch: Optional[str] = Field(default=None, max_length=120)
+
+
+class EinwilligungVorgangOut(BaseModel):
+    """Eine Zeile des Verzeichnisses — unveraenderlich.
+
+    Ein Widerruf ist eine **neue** Zeile. Wer die Erteilung ueberschreibt,
+    vernichtet den Nachweis, den Art. 7 Abs. 1 verlangt.
+    """
+
+    id: str
+    tenant_id: str
+    bewerbung_id: str
+    vorgang: Literal["ERTEILT", "WIDERRUFEN"]
+    erfolgt_am: Optional[str] = None
+    gueltig_bis: Optional[str] = None
+    #: Beim Widerruf leer: nicht erhoben, nicht erfunden.
+    kanal: Optional[Kanal] = None
+    einwilligungstext: Optional[str] = None
+    erfasst_durch: Optional[str] = None
+
+
+class EinwilligungStandOut(BaseModel):
+    bewerbung_id: str
+    gueltig_bis: Optional[str] = None
+    erteilt_am: Optional[str] = None
+    #: Ob die Erlaubnis **heute** noch gilt. Ein blosses Datum liesse das offen, und
+    #: eine abgelaufene Einwilligung schuetzt nicht mehr vor dem Loeschlauf.
+    laeuft: bool
+    vorgaenge: List[EinwilligungVorgangOut] = Field(default_factory=list)

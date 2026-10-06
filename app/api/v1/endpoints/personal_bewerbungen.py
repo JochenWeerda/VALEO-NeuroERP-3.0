@@ -32,6 +32,9 @@ from app.api.v1.schemas.personal_bewerbung_schemas import (
     AufbewahrungOut,
     BewerbungIn,
     BewerbungOut,
+    EinwilligungIn,
+    EinwilligungStandOut,
+    EinwilligungVorgangOut,
     LoeschlaufIn,
     LoeschlaufOut,
     StufeIn,
@@ -40,6 +43,7 @@ from app.api.v1.schemas.personal_bewerbung_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
+from app.services import bewerbung_einwilligung_service as einwilligung
 from app.services import bewerbung_loeschlauf_service as loeschlauf
 from app.services import bewerbung_service as dienst
 
@@ -308,3 +312,104 @@ async def delete_application(
     except Exception as fehler:  # noqa: BLE001
         raise dienst.fehler_deuten(db, fehler, "Bewerbung loeschen", tenant_id) from fehler
     return None
+
+
+# ── Die Einwilligung zur laengeren Aufbewahrung ───────────────────────────────
+# Art. 6 Abs. 1 lit. a DSGVO (Talentpool). Der Loeschlauf achtete sie schon, aber es
+# gab keinen Weg, sie zu erteilen oder zu widerrufen: Die Spalten waren da und
+# niemand konnte sie fuellen.
+#
+# Diese drei Wege liegen **unter** `/applications/{application_id}` und koennen vom
+# Platzhalter nicht verschluckt werden — ihr Pfad hat ein Segment mehr.
+
+
+@router.get(
+    "/applications/{application_id}/einwilligung",
+    response_model=EinwilligungStandOut,
+    summary="Einwilligung: Stand und Verzeichnis",
+)
+async def get_einwilligung(
+    application_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Der heutige Stand **und** alle Vorgaenge.
+
+    `laeuft` sagt, ob die Erlaubnis heute noch gilt; ein blosses Datum liesse das
+    offen, und eine abgelaufene Einwilligung schuetzt nicht mehr vor dem Loeschlauf.
+    """
+    try:
+        return einwilligung.stand(db, tenant_id, application_id)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Einwilligung lesen", tenant_id) from fehler
+
+
+@router.post(
+    "/applications/{application_id}/einwilligung",
+    status_code=201,
+    response_model=EinwilligungVorgangOut,
+    summary="Einwilligung erteilen",
+)
+async def post_einwilligung(
+    application_id: str,
+    payload: EinwilligungIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Erteilt die Einwilligung.
+
+    Verzeichniszeile **und** operativer Stand in **einer** Transaktion: Eine
+    Verzeichniszeile ohne Stand waere ein Nachweis ohne Wirkung — der Loeschlauf
+    nimmt die Daten trotzdem mit.
+    """
+    try:
+        ergebnis = einwilligung.erteilen(
+            db, tenant_id, application_id, str(uuid7()), payload
+        )
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Einwilligung erteilen", tenant_id) from fehler
+    return ergebnis
+
+
+@router.delete(
+    "/applications/{application_id}/einwilligung",
+    status_code=201,
+    response_model=EinwilligungVorgangOut,
+    summary="Einwilligung widerrufen",
+)
+async def delete_einwilligung(
+    application_id: str,
+    erfasst_durch: Optional[str] = Query(None, max_length=120),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Widerruft die Einwilligung — **ohne Rumpf, ohne Grund, jederzeit**.
+
+    Art. 7 Abs. 3 DSGVO: Der Widerruf darf nicht schwerer sein als die Erteilung.
+    Deshalb verlangt dieser Weg nichts ausser der Bewerbung; `erfasst_durch` ist
+    freiwillig.
+
+    Die Erteilung bleibt im Verzeichnis stehen. Der Widerruf ist eine **neue** Zeile:
+    Wer die Erteilung ueberschreibt, vernichtet den Nachweis, den Art. 7 Abs. 1
+    verlangt.
+
+    **Folge:** Die Bewerbung ist danach wieder loeschfaehig; der naechste Loeschlauf
+    nimmt sie mit, wenn die Frist abgelaufen ist.
+    """
+    try:
+        ergebnis = einwilligung.widerrufen(
+            db, tenant_id, application_id, str(uuid7()), erfasst_durch
+        )
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Einwilligung widerrufen", tenant_id) from fehler
+    return ergebnis

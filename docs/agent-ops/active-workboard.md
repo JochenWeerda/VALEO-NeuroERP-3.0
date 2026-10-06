@@ -49,6 +49,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Loeschlauf-Integrationsabnahme:** Spec/Inventare aus committed b9a71eab4 erzeugt, ohne Bewerbungs-WIP. Alle bisherigen 3096 Pfade und HTTP-Methoden erhalten; exakt vier neue Retention-Pfade mit GET/PUT-Aufbewahrung, GET-Faelligkeit, GET-Laufhistorie und POST-Lauf dokumentiert (3100 Pfade). render(build_spec()) erneut kanonisch; 41 Routerkonflikte unveraendert offen. bewerbung_loeschlauf_service exakt hr zugeordnet; 21 Architekturtests bestanden (1,75 s), 932/932 Routen, 272/272 Services, 454/454 Endpoint-Module; drei Inventare/Index aktuell. Probe --status auch nach Docker-Neustart weiterhin Timeout auf Port 5432, Docker-Engine Status erst HTTP 500, danach keine Antwort (reine Leseabfragen abgebrochen). Kein lokaler Katalog generiert oder veraendert, keine DB/Container/Migration/Reset. CI-Artefaktvorschlag abgelehnt und alle eigenen Exportaenderungen entfernt; keine Freigabeumgehung. Katalog-Drift bleibt explizit offen. GitHub auf 22bf4b927 bestaetigt Multichannel Service Security, PostgreSQL, kritische E2E, Doku und Superglue; Quality/Smoke/Gesamt-CI/andere Security rot.
 
+**Futter-Loeschsicherheit (2026-10-06, abgeschlossen):** Owner Codex-01a0f3fc; compat.py ausschliesslich vier Einzel-/Bulk-Loeschfunktionen mit get_current_user/WRITE_ROLES und unbenutzter _soft_delete_futter_articles-Helfer entfernen (keine Verbraucher in app/tests); inventory_compat_service.py nur soft_delete_artikel obligatorischer self.tenant_id und Null-/Fremdmandant ausschliessen, redundanter tenant_id-Parameter nach Vier-Verbraucher-Abgleich entfernen; futter_stamm.py nur fehlender Guard bei delete_mischfuttermittel; compat-Godfile-Grenze ausschliesslich senken, neuer echter Dispatch-/SQL-Loeschtest, eigene QA/Slice und committed-source Spec/Inventare. Kein aktiver Fremdclaim oder WIP auf diesen Dateien. Abnahme: Leser/fremde Rolle 403 vor DB, Writer nur eigene Artikel deaktiviert, fremde/null IDs als missing, bestehende 204/404/Bulk-DTOs erhalten, kein PostgreSQL-Fachschreibtest; ein gemeinsamer SQLite-In-Memory-Test mit Savepoint-Isolation. Katalog-/Frontend-Modellharmonisierung und andere Futter-Schreibpfade weiter offen; keine neue PostgreSQL-DB/Container/Migration, Baseline-Ausnahme oder Maskenaenderung.
+
+**Futter-Ratschen-Nachtrag (vor Edit):** config/pagination_baseline.json ausschliesslich den entfallenen _soft_delete_futter_articles-Eintrag entfernen (1 auf 0). Der Pruefer meldet genau diesen sinkenden Alt-Eintrag; keine anderen Grenzen/Abfragen veraendern.
+
+**Einwilligungs-Integrationsclaim (2026-10-06, Integration abgeschlossen; fremde DB-Abnahme offen):** config/architecture-domain-prefixes.yaml nur exakte bewerbung_einwilligung_service: hr, tests/test_generate_architecture_index.py entsprechender Zuordnungsvertrag und committed-source Artefakte. Paralleles b7b6a042c fuegt den Dienst und GET/POST/DELETE auf einem neuen Einwilligungspfad hinzu; Fachcode, Migration, laufende Tests und Masken geschuetzt. Seine DB-Abnahme fehlt wegen Docker-Dienststop; Integration bedeutet keine fachliche Freigabe.
+
+**Futter-Loeschabnahme:** Vier echte First-FULL-Match-Handler verlangen WRITE_ROLES vor DB-Zugriff; canonical Mischfutter-DELETE ebenso geschuetzt. Service loescht nur self.tenant_id, ohne Null-/Fremdmandanten; redundanter externer Tenantparameter entfernt, vier Verbraucher angepasst. Unbenutzter _soft_delete_futter_articles-Helfer entfernt. 37 Dispatch-/SQL-/Rollen-/Routertests bestanden (299,22 s inklusive schwergewichtigem main-Import); 22 Architekturtests bestanden (3,34 s). Ein gemeinsamer SQLite-In-Memory-Speicher mit explizitem BEGIN/Savepoint-Rollback prueft echte SQL-Löschfilter und Commit: eigene Artikel deaktiviert, fremde/null Artikel erhalten; 204/404 und Bulk-Zähler unveraendert. Godfile-Grenze nur compat.py 3621 auf 3589 gesenkt; Paginierungs-Alt-Eintrag des entfernten Helfers von 1 auf 0 entfernt (283 Abfragen/256 Funktionen), Baseline-Integritaet gegen ed5650ad2 bestanden. Schema-/Katalog-/Frontend-Modellharmonisierung und weitere Schreibpfade bleiben offen. Docker-Dienst ist gestoppt, Start-Service scheitert an Windows-Rechten; keine neue DB/Container oder Migration. GitHub ed5650ad2 OpenAPI, Service Security, PostgreSQL, beide E2E, Full Security Agent und Doku erfolgreich; Quality/andere Security/Gesamt-CI rot.
+
+**Finale Loesch-/Spec-Abnahme:** Spec aus committed 173a80fbc plus drei eigenen Sicherheitsdateien: alle alten 3100 Pfade/Methoden erhalten, exakt ein neuer Einwilligungspfad mit GET/POST/DELETE aus b7b6a042c (3101 Pfade). render(build_spec()) kanonisch; vier bisherige Futter-Loesch-Antwort-/Requestvertraege und alle drei Bulk-DTOs exakt gleich. 41 Routerkonflikte unveraendert offen. Inventare/Architekturindex aktuell; 59 Tests zusammen bestanden. Fremde Arbeitsbaum-Artefakte bleiben erhalten, keine DB/Container/Migration oder globale Futter-Schreibfreigabe.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
@@ -1859,6 +1869,68 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
+## FRONTEND-INITIALDATA-MOUNTFETCH-20261006 — in Arbeit, Claude Code
+
+**Warum jetzt:** Der Windows-Dienst `com.docker.service` ist gestoppt, PostgreSQL
+nicht erreichbar, ein Start braucht erhoehte Rechte. Statt einen Nachweis zu
+behaupten, den ich nicht fuehren kann, nehme ich einen Slice, der **ohne Datenbank**
+pruefbar ist: Vitest mit gemocktem `apiClient`.
+
+**Der Fehler, und er ist schon einmal aufgefallen.** Am 17.07.2026 meldete der
+Nutzer: „Ackerschlagkartei zeigte initial weder Schlaege noch Massnahmen — erst nach
+einer Mutation erschienen die Seed-Daten." Ursache steht im Regressionstest
+`src/__tests__/lib/portal-feldbuch-hooks.test.tsx`:
+
+> `initialData: []` + `staleTime` liess React Query die leere Liste als **frische**
+> Daten werten, der Mount-Fetch entfiel.
+
+Das ist kein Schoenheitsfehler. `initialData` schreibt den Platzhalter in den Cache,
+**als waere er geladen**; mit `staleTime: 2 * 60 * 1000` gilt er zwei Minuten als
+frisch, und die Abfrage fragt den Server in dieser Zeit **gar nicht**. Die Maske
+zeigt „keine Eintraege", und niemand sieht, dass nie gefragt wurde.
+
+Behoben wurde es 2026-07-17 fuer **zwei** Hooks (`portal.ts`, auf
+`placeholderData`). **205 weitere Fundstellen** in 49 Dateien tragen denselben
+Fehler, 177 davon in `src/lib/api/`. Sieben Stellen haben die Gegenmassnahme
+(`initialDataUpdatedAt: 0`) — der Weg ist also im Haus bekannt und nur nicht gegangen.
+
+**Was dieser Slice tut — und was nicht.**
+
+* **Tut:** Jede `initialData`-Option in einer Abfrage bekommt
+  `initialDataUpdatedAt: 0`. Damit ist der Platzhalter **sofort veraltet**, der
+  Mount-Fetch findet statt, und die Form der Daten bleibt unveraendert: **kein**
+  Aufrufer bricht, **keine** Typaenderung.
+* **Tut:** Eine Ratsche, die eine neue `initialData`-Option ohne
+  `initialDataUpdatedAt: 0` abweist und die Gesamtzahl der `initialData`-Stellen
+  down-only festschreibt.
+* **Tut nicht:** Die Umstellung auf `placeholderData`. Das ist das richtige Ziel —
+  `placeholderData` schreibt den Cache nicht an und markiert sich als Platzhalter —
+  aber es macht `data` im Fehlerfall `undefined` und damit **jeden** Aufrufer
+  typaenderungspflichtig. Das in einem Zug mit 205 Stellen zu tun, waere ein Umbau
+  ohne Einzelnachweis. Die Ratsche haelt die Zahl fest, damit der Weg weitergeht.
+* **Bleibt offen und wird benannt:** Im **Fehlerfall** steht der Platzhalter weiter
+  sichtbar da — `data` bleibt der Fallback, `isError` ist wahr, und eine Maske, die
+  `isError` nicht liest, zeigt eine Attrappe. Der Mount-Fetch ist die eine Haelfte
+  des Fehlers; die andere liegt in den Masken.
+
+**Dateibesitz:** `packages/frontend-web/src/lib/api/*.ts` und die
+`initialData`-Stellen in `src/pages/**`, `src/features/**` (nur diese Option),
+`scripts/check_initial_data.py` (neu),
+`packages/frontend-web/src/__tests__/lib/initialdata-mountfetch.test.tsx` (neu),
+eigene QA-Doku, dieser Abschnitt. **`portal.ts` Feldbuch-Hooks bleiben unangetastet**
+— sie sind schon auf `placeholderData` und ihr Regressionstest gehoert dem
+Melde-Vorgang vom 17.07.2026.
+
+**Abnahme:** Die neuen Vertraege zeigen an mehreren Hooks aus verschiedenen Dateien,
+dass beim Mount **trotz** `staleTime` geladen wird und die Serverdaten den
+Platzhalter ersetzen; `npx tsc --noEmit` ohne neue Fehler; `npm run lint` ohne neue
+Fehler; die neue Ratsche gruen; die vier Backend-Ratschen ohne Datenbankbedarf gruen.
+
+**Risiken:** Mehr Abfragen beim Mount — genau das ist der Zweck; `staleTime` bremst
+weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
+ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
+waren.
+
 ## BEWERBUNG-EINWILLIGUNG-20261006 — in Arbeit, Claude Code
 
 **Auftrag:** Den offenen Punkt 4 aus
@@ -1938,6 +2010,29 @@ ist unmoeglich (Obergrenze, wie bei der Frist — eine Erlaubnis ohne Ende ist e
 Vorrat); ein Widerruf ohne vorherige Einwilligung sagt das statt stillzuhalten;
 alles mandantengebunden; Vertraege gegen die frische DB und alle fuenf Ratschen
 gruen.
+
+**Stand 06.10.2026:** Migration, Dienst, drei Wege, Modelle und 42 Vertraege
+geschrieben. QA:
+[bewerbung-einwilligung-20261006.md](../quality-assurance/bewerbung-einwilligung-20261006.md).
+
+**Der Nachweis ist NICHT gelaufen.** Der Windows-Dienst `com.docker.service` ist
+**gestoppt**, PostgreSQL damit nicht erreichbar; ein Start braucht erhoehte Rechte
+und wurde **nicht** erzwungen (Codex hat denselben Zustand vermerkt). Nicht gelaufen
+sind: `alembic upgrade head` gegen `valeo_probe` und `valeo_neuro_erp`, die 42
+Vertraege und die Tabellenverweis-Ratsche. Die vier Ratschen ohne Datenbankbedarf
+(Pagination, Baseline-Integritaet, tote Transaktionen, Godfiles) sind gruen. Der
+Slice bleibt **in Arbeit**, bis das nachgeholt ist — ein Nachweis, der nicht gelaufen
+ist, ist keiner.
+
+**Ein Fehler im eigenen Entwurf, behoben:** Der Widerruf schrieb `kanal = "WEB"`,
+weil die Spalte `NOT NULL` war — eine Behauptung ueber einen Vorgang, von dem niemand
+weiss, wie er einging. Die Spalte ist jetzt nullbar und eine Pruefbedingung verlangt
+den Kanal **nur** bei der Erteilung. Ihn beim Widerruf zu erfragen waere die andere
+falsche Antwort: eine Angabe mehr als bei der Erteilung (Art. 7 Abs. 3).
+
+**Nebenbefund:** `domain_crm.crm_consents` und `domain_crm.crm_contact_consents` sind
+zwei Tabellen fuer einen Begriff; die zweite migriert Daten aus der ersten, die erste
+bleibt stehen. Eigener Slice, hier nur benannt.
 
 **Risiken:** Der Widerruf macht Daten **loeschfaehig** — der naechste Lauf nimmt
 sie mit. Das ist gewollt, aber es heisst, dass ein versehentlicher Widerruf nicht

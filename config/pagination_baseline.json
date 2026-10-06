@@ -64,7 +64,6 @@
     "app/api/v1/endpoints/commodity_positions.py::_coverage_override_map": 1,
     "app/api/v1/endpoints/compat.py::_bestellungen_als_compat": 1,
     "app/api/v1/endpoints/compat.py::_repair_lkw_article_reference": 2,
-    "app/api/v1/endpoints/compat.py::_soft_delete_futter_articles": 1,
     "app/api/v1/endpoints/compat.py::supplier_documents": 1,
     "app/api/v1/endpoints/compliance.py::get_compliance_stats": 1,
     "app/api/v1/endpoints/compliance.py::list_cross_compliance": 1,

@@ -354,14 +354,14 @@ class FutterCompatService:
             for i in items
         ]
 
-    def soft_delete_artikel(self, ids: list, tenant_id: Optional[str] = None) -> dict:
+    def soft_delete_artikel(self, ids: list) -> dict:
+        if not self.tenant_id:
+            raise ValidationFailedError("Mandant fuer Futtermittel-Loeschung fehlt")
         if not ids:
             raise ValidationFailedError("Keine Futtermittel-IDs übergeben")
-        query = self.db.query(ArticleModel).filter(ArticleModel.id.in_(ids))
-        if hasattr(ArticleModel, "tenant_id") and tenant_id:
-            query = query.filter(
-                (ArticleModel.tenant_id == tenant_id) | (ArticleModel.tenant_id.is_(None))
-            )
+        query = self.db.query(ArticleModel).filter(
+            ArticleModel.id.in_(ids), ArticleModel.tenant_id == self.tenant_id,
+        )
         articles = query.all()
         articles_by_id = {str(a.id): a for a in articles}
         deleted, errors, missing_ids = 0, [], []

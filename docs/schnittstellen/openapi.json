@@ -57809,6 +57809,191 @@
         "title": "EinvoiceGenerateIn",
         "type": "object"
       },
+      "EinwilligungIn": {
+        "additionalProperties": false,
+        "properties": {
+          "einwilligungstext": {
+            "minLength": 1,
+            "title": "Einwilligungstext",
+            "type": "string"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "gueltig_bis": {
+            "format": "date",
+            "title": "Gueltig Bis",
+            "type": "string"
+          },
+          "kanal": {
+            "enum": [
+              "WEB",
+              "E_MAIL",
+              "PAPIER",
+              "MUENDLICH"
+            ],
+            "title": "Kanal",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gueltig_bis",
+          "kanal",
+          "einwilligungstext"
+        ],
+        "title": "EinwilligungIn",
+        "type": "object"
+      },
+      "EinwilligungStandOut": {
+        "properties": {
+          "bewerbung_id": {
+            "title": "Bewerbung Id",
+            "type": "string"
+          },
+          "erteilt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erteilt Am"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "laeuft": {
+            "title": "Laeuft",
+            "type": "boolean"
+          },
+          "vorgaenge": {
+            "items": {
+              "$ref": "#/components/schemas/EinwilligungVorgangOut"
+            },
+            "title": "Vorgaenge",
+            "type": "array"
+          }
+        },
+        "required": [
+          "bewerbung_id",
+          "laeuft"
+        ],
+        "title": "EinwilligungStandOut",
+        "type": "object"
+      },
+      "EinwilligungVorgangOut": {
+        "description": "Eine Zeile des Verzeichnisses — unveraenderlich.\n\nEin Widerruf ist eine **neue** Zeile. Wer die Erteilung ueberschreibt,\nvernichtet den Nachweis, den Art. 7 Abs. 1 verlangt.",
+        "properties": {
+          "bewerbung_id": {
+            "title": "Bewerbung Id",
+            "type": "string"
+          },
+          "einwilligungstext": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einwilligungstext"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "erfolgt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfolgt Am"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kanal": {
+            "anyOf": [
+              {
+                "enum": [
+                  "WEB",
+                  "E_MAIL",
+                  "PAPIER",
+                  "MUENDLICH"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kanal"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "vorgang": {
+            "enum": [
+              "ERTEILT",
+              "WIDERRUFEN"
+            ],
+            "title": "Vorgang",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "bewerbung_id",
+          "vorgang"
+        ],
+        "title": "EinwilligungVorgangOut",
+        "type": "object"
+      },
       "EinzelfuttermittelIn": {
         "properties": {
           "art": {
@@ -374193,6 +374378,236 @@
           }
         ],
         "summary": "Bewerbung abrufen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/{application_id}/einwilligung": {
+      "delete": {
+        "description": "Widerruft die Einwilligung — **ohne Rumpf, ohne Grund, jederzeit**.\n\nArt. 7 Abs. 3 DSGVO: Der Widerruf darf nicht schwerer sein als die Erteilung.\nDeshalb verlangt dieser Weg nichts ausser der Bewerbung; `erfasst_durch` ist\nfreiwillig.\n\nDie Erteilung bleibt im Verzeichnis stehen. Der Widerruf ist eine **neue** Zeile:\nWer die Erteilung ueberschreibt, vernichtet den Nachweis, den Art. 7 Abs. 1\nverlangt.\n\n**Folge:** Die Bewerbung ist danach wieder loeschfaehig; der naechste Loeschlauf\nnimmt sie mit, wenn die Frist abgelaufen ist.",
+        "operationId": "delete_einwilligung_api_v1_personal_applications__application_id__einwilligung_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "erfasst_durch",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Erfasst Durch"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinwilligungVorgangOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligung widerrufen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      },
+      "get": {
+        "description": "Der heutige Stand **und** alle Vorgaenge.\n\n`laeuft` sagt, ob die Erlaubnis heute noch gilt; ein blosses Datum liesse das\noffen, und eine abgelaufene Einwilligung schuetzt nicht mehr vor dem Loeschlauf.",
+        "operationId": "get_einwilligung_api_v1_personal_applications__application_id__einwilligung_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinwilligungStandOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligung: Stand und Verzeichnis",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      },
+      "post": {
+        "description": "Erteilt die Einwilligung.\n\nVerzeichniszeile **und** operativer Stand in **einer** Transaktion: Eine\nVerzeichniszeile ohne Stand waere ein Nachweis ohne Wirkung — der Loeschlauf\nnimmt die Daten trotzdem mit.",
+        "operationId": "post_einwilligung_api_v1_personal_applications__application_id__einwilligung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EinwilligungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinwilligungVorgangOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligung erteilen",
         "tags": [
           "personal",
           "hr",

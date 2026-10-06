@@ -33,6 +33,9 @@ file_ownership:
   - Tabellenkatalog-CLI Repository-Pfad und echte isolierte Startvertraege
   - crm-multichannel nur sieben ungenutzte SDK-Pins und ehrlicher README-Integrationsstand
   - Bewerbungs-Loeschlauf nur committed-source Schnittstellen/Inventare und exakte HR-Zuordnung
+  - Vier Futter-Artikel-Loeschpfade WRITE_ROLES und obligatorischer eigener Tenant; Mischfutter-Fachdelete Guard
+  - Unbenutzter Loeschhelfer entfernt; ausschliesslich sinkende Groessen-/Pagination-Ratschen
+  - Einwilligungs-Service nur exakte HR-Zuordnung und committed-source Schnittstellenintegration
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
