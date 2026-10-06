@@ -86,6 +86,10 @@ resolve_customer verwendet ausschliesslich domain_crm.customers; die alte
 Tabelle fehlt im migrierten Probe. Assertions bleiben auf echte Verknuepfungen gerichtet.
 CRM360-Fixture ebenfalls ohne alten crm_customers-Doppelstamm; Adresse
 als gueltiger JSON-String fuer die migrierte JSONB-Spalte binden.
+**Security-Nachclaim (2026-10-06):** Saubere package.json/pnpm-lock.yaml nur
+proxy-addr 2.0.8, seroval 1.6.3, compression 1.8.2 und source-map-js 1.2.2
+zentral pinnen. GitHub-Lauf 37417689053 meldet zwei kritische und drei hohe
+CVE mit Herstellerfix; keine neue Ausnahme. Verbraucher und Lock pruefen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
