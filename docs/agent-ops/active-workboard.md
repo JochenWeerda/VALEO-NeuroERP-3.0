@@ -66,6 +66,11 @@ die bereits committed native Weiterleitung statt entferntes KIM-Sidebar-Layout
 umstellen; leads-smoke.spec.ts auf den kanonischen Titel Kundenakte plus
 Lead-Daten/Feldvertrag nachziehen. Budget bleibt bestehen, Redirect-/Entity-/Tab-
 Kontext wird explizit geprueft. Keine Masken-/Renderer-WIP uebernehmen.
+**EUDR-Antwortclaim (2026-10-06):** InventoryLotOut in
+inventory_lot_bundle_schemas.py um die bereits migrierte boolesche
+eudr_relevant-Spalte ergaenzen. Bestehender DDL-Driftvertrag und true/false-
+Serialisierung pruefen. OpenAPI aus committed Quellen plus diesem eigenen
+Schemahunk regenerieren; keine Migration und keine fremde Spec-WIP.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
