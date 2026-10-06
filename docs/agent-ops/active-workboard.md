@@ -86,6 +86,9 @@ resolve_customer verwendet ausschliesslich domain_crm.customers; die alte
 Tabelle fehlt im migrierten Probe. Assertions bleiben auf echte Verknuepfungen gerichtet.
 CRM360-Fixture ebenfalls ohne alten crm_customers-Doppelstamm; Adresse
 als gueltiger JSON-String fuer die migrierte JSONB-Spalte binden.
+**Beleg-Vertragsnachclaim:** test_identitaet_je_belegmaske fehlt die bereits
+committete fuhrpark/fahrzeug-stamm-Maske. Isolierter committed-source-Test
+bestaetigt denselben Fehler; Identitaetsmatrix um kennzeichen ergaenzen.
 **Security-Nachclaim (2026-10-06):** Saubere package.json/pnpm-lock.yaml nur
 proxy-addr 2.0.8, seroval 1.6.3, compression 1.8.2 und source-map-js 1.2.2
 zentral pinnen. GitHub-Lauf 37417689053 meldet zwei kritische und drei hohe
