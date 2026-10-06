@@ -65,10 +65,17 @@ UEBERGAENGE.update({stand: () for stand in ENDGUELTIG})
 FELDER = (
     "id, tenant_id, applicant_name, applicant_email, position_id, position_title, "
     "source, documents_ref, status, notes, ablehnungsgrund, entschieden_am, "
-    "entschieden_durch, applied_at, last_updated"
+    "entschieden_durch, aufbewahrung_einwilligung_bis, aufbewahrung_einwilligung_am, "
+    "applied_at, last_updated"
 )
 
-ZEITFELDER = ("entschieden_am", "applied_at", "last_updated")
+ZEITFELDER = (
+    "entschieden_am",
+    "aufbewahrung_einwilligung_bis",
+    "aufbewahrung_einwilligung_am",
+    "applied_at",
+    "last_updated",
+)
 
 MIGRATIONS_HINWEIS = {
     "X-Migration-Hint": "Run: alembic upgrade head (bewerbung_statuswoerterbuch_20261006)"

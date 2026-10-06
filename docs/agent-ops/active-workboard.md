@@ -43,6 +43,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Multichannel-Abnahme:** Sieben nach Import-/Loader-Analyse ungenutzte SDK-Pins entfernt; README kennzeichnet Integrations-/Webhook-Platzhalter ehrlich. Vollstaendige transitive Windows-Aufloesung mit pip-audit 2.10.1: 48 Pakete, null Befunde, Scanner/Gate Exit 0; oauthlib entfallen (GitHub-Ausgangsbericht Linux: 62 Pakete, oauthlib 3.3.1/PYSEC-2026-4114 blockiert). Plattformunterschiede nicht als exakte Paketreduktion behauptet. Import-Pin-Gate bestanden; Dienst mit gesperrten sieben SDK- und OAuth-Imports gestartet, Health HTTP 200, 17 Routen/12 OpenAPI-Pfade, null DB-Verbindungen. 18 vorhandene Audit-/Security-Gate-Regressionen bestanden. Keine Fach-/API-/Schemaaenderung, Datenbank/Container/Migration oder Audit-Ausnahme. Neuer GitHub-Lauf auf d52139d83 bestaetigt weiterhin Service-Fehler vor diesem Fix; neue Linux-Abnahme nach Push ausstehend. Andere Security-/Frontend-/Futter-Befunde bleiben offen.
 
+**Tabellenkatalog-Drift-Evidenz (2026-10-06, verworfen):** Geplanter CI-Artefaktexport durch automatische Freigabepruefung wegen interner Schema-Metadaten abgelehnt; keine Uebertragung/Commit. User hat Docker Desktop wieder gestartet. Alle drei eigenen uncommitteten Exporthunks in Generator, Test und Workflow entfernt; bestaetigter Direktstart-Fix bleibt erhalten. Statt Export vorhandenen gemeinsamen Pruefstand lokal lesen, keine neue DB/Container.
+
+**Tabellenkatalog-/Loeschlauf-Integration (2026-10-06, Integration abgeschlossen; Katalog offen):** Owner Codex-01a0f3fc; docs/admin/table-catalog.json/md nur vorhandene versionierte Katalogartefakte aus gemeinsamer lokaler Probe-Ernte und committed Backendquelle; config/architecture-domain-prefixes.yaml nur exakte HR-Zuordnung bewerbung_loeschlauf_service und bestehender Architektur-Vertragstest; Spec/Inventare/Index ausschliesslich aus committed b9a71eab4, eigene QA/Slice/Workboard. Keine Bewerbungs-Fachcode-/Migrations-/Maskenaenderung oder fremde Artefaktfassung. Abnahme: Probe --status plus Revision entspricht committed Migration, kanonischer Katalog --check und keine Lineagefehler, alte OpenAPI-Pfade/Methoden erhalten plus vier Retention-Pfade mit fuenf Methoden, vollstaendige Inventare. Keine neue DB/Container, Reset, Migration, CI-Artefaktupload oder Gate-Ausnahme. Bei weiterhin fehlendem Probe nur unabhaengige Schnittstellenintegration, Katalog offen halten.
+
+**Loeschlauf-Integrationsabnahme:** Spec/Inventare aus committed b9a71eab4 erzeugt, ohne Bewerbungs-WIP. Alle bisherigen 3096 Pfade und HTTP-Methoden erhalten; exakt vier neue Retention-Pfade mit GET/PUT-Aufbewahrung, GET-Faelligkeit, GET-Laufhistorie und POST-Lauf dokumentiert (3100 Pfade). render(build_spec()) erneut kanonisch; 41 Routerkonflikte unveraendert offen. bewerbung_loeschlauf_service exakt hr zugeordnet; 21 Architekturtests bestanden (1,75 s), 932/932 Routen, 272/272 Services, 454/454 Endpoint-Module; drei Inventare/Index aktuell. Probe --status auch nach Docker-Neustart weiterhin Timeout auf Port 5432, Docker-Engine Status erst HTTP 500, danach keine Antwort (reine Leseabfragen abgebrochen). Kein lokaler Katalog generiert oder veraendert, keine DB/Container/Migration/Reset. CI-Artefaktvorschlag abgelehnt und alle eigenen Exportaenderungen entfernt; keine Freigabeumgehung. Katalog-Drift bleibt explizit offen. GitHub auf 22bf4b927 bestaetigt Multichannel Service Security, PostgreSQL, kritische E2E, Doku und Superglue; Quality/Smoke/Gesamt-CI/andere Security rot.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
@@ -1853,7 +1859,93 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
-## BEWERBUNG-LOESCHLAUF-20261006 — in Arbeit, Claude Code
+## BEWERBUNG-EINWILLIGUNG-20261006 — in Arbeit, Claude Code
+
+**Auftrag:** Den offenen Punkt 4 aus
+[Der Loeschlauf fuer Bewerberdaten](../quality-assurance/bewerbung-loeschlauf-20261006.md)
+schliessen. Der Loeschlauf achtet eine Einwilligung zur laengeren Aufbewahrung
+(Talentpool) — aber **es gibt keinen Weg, sie zu erteilen oder zu widerrufen**. Die
+Spalten sind da und niemand kann sie fuellen.
+
+**Die Pflicht, zweiteilig:**
+
+1. **Art. 7 Abs. 3 DSGVO:** Der Widerruf muss **jederzeit** moeglich sein und darf
+   nicht schwerer sein als die Erteilung. Kein Grund, keine Freigabe, keine
+   Begruendungspflicht — eine Ruecknahme, fuer die man sich rechtfertigen muss, ist
+   keine freie.
+2. **Art. 7 Abs. 1 DSGVO:** Der Verantwortliche muss **nachweisen** koennen, dass
+   eine Einwilligung vorlag. Die zwei Spalten auf `applications` sagen nur *bis
+   wann* und *seit wann* — nicht **wozu**, nicht **wie** erteilt, und nach einem
+   Widerruf steht dort gar nichts mehr. Dann ist nicht mehr zu belegen, warum die
+   Daten im abgelaufenen Zeitraum ueberhaupt noch da waren.
+
+**Die Tabellenfrage zuerst — es gibt schon drei Einwilligungstabellen.**
+`domain_crm.crm_contact_consents` (+ `crm_contact_consent_history`) und
+`domain_crm.crm_consents`. Keine davon wird benutzt, und zwar aus einem Grund:
+
+* Beide haengen an einem **CRM-Kontakt** bzw. **Partner**. Fuer jeden Bewerber
+  einen CRM-Kontakt anzulegen wuerde Bewerberdaten in den Vertrieb traegen — das
+  Gegenteil von Datenminimierung, und der Loeschlauf muesste dann auch dort
+  loeschen.
+* Sie beschreiben eine **andere Erlaubnis**: `channel`, `consent_type`,
+  Double-Opt-In, `ip_address` — das ist die Erlaubnis, **angesprochen** zu werden.
+  Hier geht es um die Erlaubnis, Daten **aufzubewahren**. Wer beides in eine
+  Tabelle legt, laesst einen widerrufenen Werbe-Opt-In wie einen widerrufenen
+  Aufbewahrungs-Opt-In aussehen — und loescht Daten, fuer die die Erlaubnis noch
+  gilt, oder behaelt welche, fuer die sie weg ist.
+
+Das ist die Gegenprobe zur Loeschsperre im Vorslice: Dort war der Begriff
+**derselbe** und die Tabelle wurde wiederverwendet. Hier ist er ein anderer.
+
+**Nebenbefund, nicht Teil dieses Slices:** `crm_consents` und
+`crm_contact_consents` sind **zwei Tabellen fuer einen Begriff** (CRM-Einwilligung),
+die zweite migriert Daten aus der ersten, die erste bleibt stehen. Das gehoert in
+einen eigenen Slice und wird hier nur benannt.
+
+**Was gebaut wird** (Migration `bewerbung_einwilligung_20261006`):
+* `domain_hr.bewerbung_einwilligungen` — ein **fortschreibendes** Verzeichnis:
+  `vorgang` (`ERTEILT`/`WIDERRUFEN`), `erfolgt_am`, `gueltig_bis` (nur bei
+  Erteilung), `kanal`, `einwilligungstext` (der **Wortlaut**, dem zugestimmt wurde
+  — ohne ihn ist nicht nachweisbar, *wozu*), `erfasst_durch`. Kein UPDATE, kein
+  DELETE: Ein Widerruf ist eine **neue Zeile**, keine Aenderung. Wer die Erteilung
+  ueberschreibt, vernichtet den Nachweis, den Art. 7 Abs. 1 verlangt.
+  `ON DELETE CASCADE` auf die Bewerbung: Ist der Mensch geloescht, gibt es keine
+  Aufbewahrung mehr zu rechtfertigen, und ein Nachweis, der nur noch den Namen
+  haelt, ist selbst die Speicherung, die beendet werden sollte.
+* Die zwei Spalten auf `applications` bleiben der **operative Stand**, den der
+  Loeschlauf liest; das Verzeichnis ist der **Nachweis der Vorgaenge**. Beide
+  werden nur von einem Dienst und nur in **einer** Transaktion geschrieben, und ein
+  Vertrag prueft, dass der Stand immer der letzten Zeile entspricht.
+
+**Drei Wege** in `personal_bewerbungen.py`:
+`POST /applications/{id}/einwilligung` erteilt,
+`DELETE /applications/{id}/einwilligung` widerruft (**ohne Rumpf** — ein Widerruf,
+der Angaben verlangt, ist schwerer als die Erteilung),
+`GET /applications/{id}/einwilligung` zeigt Stand und Verzeichnis.
+
+**Dateibesitz:** `alembic/versions/bewerbung_einwilligung_20261006.py`,
+`app/services/bewerbung_einwilligung_service.py` (neu),
+`app/api/v1/endpoints/personal_bewerbungen.py` (nur die drei neuen Wege),
+`app/api/v1/schemas/personal_bewerbung_schemas.py` (nur die neuen Modelle),
+`tests/test_bewerbung_einwilligung_vertrag.py` (neu), eigene QA-Doku, Punkt 4 in
+`bewerbung-loeschlauf-20261006.md` und dieser Abschnitt.
+
+**Abnahme:** Erteilen setzt Stand **und** Verzeichniszeile; Widerrufen braucht
+keinen Rumpf, keinen Grund und wirkt **sofort** (der Loeschlauf nimmt die Bewerbung
+unmittelbar danach mit); die Erteilung bleibt nach dem Widerruf im Verzeichnis
+stehen; eine Einwilligung ohne Wortlaut ist unmoeglich; eine Einwilligung ohne Ende
+ist unmoeglich (Obergrenze, wie bei der Frist — eine Erlaubnis ohne Ende ist ein
+Vorrat); ein Widerruf ohne vorherige Einwilligung sagt das statt stillzuhalten;
+alles mandantengebunden; Vertraege gegen die frische DB und alle fuenf Ratschen
+gruen.
+
+**Risiken:** Der Widerruf macht Daten **loeschfaehig** — der naechste Lauf nimmt
+sie mit. Das ist gewollt, aber es heisst, dass ein versehentlicher Widerruf nicht
+durch erneutes Erteilen zu heilen ist, sobald der Lauf gelaufen ist. Die Reihenfolge
+Widerruf → Lauf ist nicht umkehrbar; die QA-Doku sagt es, und der Trockenlauf bleibt
+der Ort, an dem es auffaellt.
+
+## BEWERBUNG-LOESCHLAUF-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Den Loeschweg nachziehen, den
 [Bewerbermanagement-Ordnung](../quality-assurance/bewerbermanagement-ordnung-20261006.md)
@@ -1920,6 +2012,38 @@ Loeschsperre schuetzen vor Loeschung und erscheinen im Protokoll als
 uebersprungen; der Trockenlauf aendert nichts; das Protokoll enthaelt **keinen**
 Personenbezug; alles mandantengebunden; Vertraege gegen die frische DB und alle
 Ratschen gruen.
+
+**Abgeschlossen 06.10.2026.** QA:
+[bewerbung-loeschlauf-20261006.md](../quality-assurance/bewerbung-loeschlauf-20261006.md).
+52 Vertraege gegen die frische `valeo_probe` gruen (105 zusammen mit den beiden
+Vorslices), Migration auf frischer **und** gewachsener DB hochgezogen, alle fuenf
+Ratschen gruen.
+
+**Ein Fehler, der teuer gewesen waere:** `public.gobd_loeschsperren` fuehrt ihr
+Woerterbuch auf **englisch** (`ACTIVE`/`RELEASED`/`EXPIRED`). Mein erster Entwurf
+verglich gegen `"AKTIV"` — das haette **jede** Sperre uebergangen und Beweismittel
+vernichtet, und zwar lautlos: Eine Sperre, die nicht greift, sieht wie keine Sperre
+aus. Zwei Vertraege halten den englischen Stand fest. Dasselbe Muster wie
+`shifts_status_ck` im Zeitkonto-Slice.
+
+**Nebenfund (fremd, repariert):** Die Tabellenverweis-Ratsche war rot mit
+`domain_shared.jobs` und `domain_shared.job_artifacts` an einem lebenden Weg
+(`job_runner.py`). Gegen die frische `valeo_probe` gruen — beide legt
+`job_runner_tables_repair_20260625` an, die Revision steht in `alembic_version` der
+Entwicklungsdatenbank, die Tabellen fehlten dort trotzdem (bekannte Drift). Mit dem
+**woertlichen** SQL dieser Revision nachgezogen (idempotent, `IF NOT EXISTS`),
+danach gruen. Kein Codefehler, keine fremde Datei angefasst.
+
+**Mitgezogener Vertrag:** `test_antwortmodelle_sind_typisiert` zaehlte erlaubte
+Antwortmodelle auf. Vier neue Wege haetten nur ein Nachtragen verlangt; die Pruefung
+nennt jetzt die Eigenschaft statt der Liste — jedes Antwortmodell ist im eigenen
+Fach erklaert und nimmt keine unbekannten Felder an (`extra != "allow"` war der
+Mangel).
+
+**Vier offene Punkte** in der QA-Doku: kein Zeitplan (Absicht), keine Maske, kein
+Rechteschutz ueber den Mandanten hinaus (`durchgefuehrt_durch` ist eine Angabe,
+keine geprueufte Identitaet), und kein Weg, die Einwilligung zu setzen oder zu
+widerrufen (Art. 7 Abs. 3 DSGVO).
 
 **Risiken:** Ein Loeschlauf vernichtet Daten endgueltig. Er wird **nicht**
 automatisch geplant — das waere ohne Aufsicht leichtfertig; er ist ein Weg, den

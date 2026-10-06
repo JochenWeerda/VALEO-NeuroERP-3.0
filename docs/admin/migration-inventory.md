@@ -110,6 +110,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `bank_gl_binding_20261001` | Persist an explicit tenant-bound bank-to-ledger link; no inferred backfill. |
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
+| `bewerbung_loeschlauf_20261006` | Der Loeschlauf fuer Bewerberdaten — Frist, Einwilligung und Nachweis. |
 | `bewerbung_statuswoerterbuch_20261006` | Die Bewerbungspipeline bekommt ein Woerterbuch — in der Datenbank. |
 | `billing_batch_20260821` | Billing batch orchestration and audit. |
 | `bp_merge_tab23_json_20260330` | Merge heads + domain_crm.business_partners.tab_23 JSONB (Tab-23 Stammdaten) |

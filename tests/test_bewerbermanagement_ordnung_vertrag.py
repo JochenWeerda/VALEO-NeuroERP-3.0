@@ -351,21 +351,41 @@ class TestFehlerdeutung:
 
 class TestFormUndGrenze:
     def test_antwortmodelle_sind_typisiert(self):
-        """Vorher hingen alle Wege an `PersonalOut` mit `extra="allow"`."""
+        """Vorher hingen alle Wege an `PersonalOut` mit `extra="allow"`.
+
+        Die Prüfung nennt nicht mehr eine feste Liste erlaubter Modelle — der Slice
+        BEWERBUNG-LOESCHLAUF-20261006 hat vier Wege ergänzt, und eine Aufzählung
+        hätte hier nur verlangt, sie nachzutragen. Geprüft wird die Eigenschaft, auf
+        die es ankommt: **jedes** Antwortmodell ist in diesem Fach erklärt und nimmt
+        keine unbekannten Felder an.
+        """
+        import typing
+
+        from pydantic import BaseModel
+
         from app.api.v1.endpoints import personal_bewerbungen as modul
+        from app.api.v1.schemas import personal_bewerbung_schemas as fach
         from app.api.v1.schemas.personal_bewerbung_schemas import BewerbungOut
 
-        from typing import List
+        def kern(modell):
+            """`List[X]`/`list[X]` sind dasselbe Versprechen wie `X`."""
+            argumente = typing.get_args(modell)
+            return argumente[0] if argumente else modell
 
         modelle = {
-            getattr(r, "response_model", None)
+            kern(getattr(r, "response_model", None))
             for r in modul.router.routes
             if "applications" in r.path
-        }
-        # `typing.List[...]` und `list[...]` sind dasselbe Versprechen.
-        erlaubt = {BewerbungOut, list[BewerbungOut], List[BewerbungOut], None}
-        assert modelle <= erlaubt, modelle - erlaubt
+        } - {None}
+
         assert BewerbungOut in modelle
+        for modell in modelle:
+            assert issubclass(modell, BaseModel), modell
+            # In diesem Fach erklärt — nicht ein Sammelmodell aus der Nachbarschaft.
+            assert getattr(fach, modell.__name__, None) is modell, modell
+            # `extra="allow"` war der Mangel: Ein Modell, das alles erlaubt,
+            # beschreibt nichts.
+            assert modell.model_config.get("extra") != "allow", modell.__name__
 
     def test_die_liste_ist_begrenzt(self, client):
         for _ in range(3):

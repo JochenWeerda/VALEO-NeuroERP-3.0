@@ -28,13 +28,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.personal_bewerbung_schemas import (
+    AufbewahrungIn,
+    AufbewahrungOut,
     BewerbungIn,
     BewerbungOut,
+    LoeschlaufIn,
+    LoeschlaufOut,
     StufeIn,
+    TrockenlaufOut,
 )
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
+from app.services import bewerbung_loeschlauf_service as loeschlauf
 from app.services import bewerbung_service as dienst
 
 logger = logging.getLogger(__name__)
@@ -77,6 +83,157 @@ async def create_application(
         raise
     except Exception as fehler:  # noqa: BLE001
         raise dienst.fehler_deuten(db, fehler, "Bewerbung anlegen", tenant_id) from fehler
+    return ergebnis
+
+
+# ── Speicherbegrenzung (Art. 5 Abs. 1 lit. e DSGVO) ──────────────────────────
+# Diese vier Wege stehen **vor** ``/applications/{application_id}``. Stuenden sie
+# danach, wuerde der Platzhalter ``aufbewahrung`` und ``loeschlaeufe`` als
+# Bewerbungskennung lesen und 404 antworten. Ein Vertrag haelt die Reihenfolge fest.
+
+
+@router.get("/applications/aufbewahrung", response_model=AufbewahrungOut,
+            summary="Aufbewahrungsfrist für Bewerberdaten lesen")
+async def get_bewerbung_aufbewahrung(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Die beschlossene Frist — oder 404, wenn keine beschlossen ist.
+
+    Kein Standardwert: Eine Frist, die niemand beschlossen hat, ist keine
+    Grundlage, um Daten zu vernichten.
+    """
+    try:
+        regel = loeschlauf.regel(db, tenant_id)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Aufbewahrungsfrist lesen", tenant_id) from fehler
+    if not regel:
+        raise loeschlauf.ohne_regel(tenant_id)
+    if regel.get("beschluss_am") is not None and hasattr(regel["beschluss_am"], "isoformat"):
+        regel["beschluss_am"] = regel["beschluss_am"].isoformat()
+    regel["aktiv"] = True
+    return regel
+
+
+@router.put("/applications/aufbewahrung", response_model=AufbewahrungOut,
+            summary="Aufbewahrungsfrist für Bewerberdaten festlegen")
+async def set_bewerbung_aufbewahrung(
+    payload: AufbewahrungIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Legt die Frist fest. Je Mandant gilt **eine**.
+
+    Die Frist ist eine Entscheidung des Hauses und wird deshalb nicht geraten.
+    Ueblich sind 180 Tage nach der Entscheidung — zwei Monate Geltendmachung nach
+    § 15 Abs. 4 AGG plus Zustellung und Klagefrist-Puffer.
+    """
+    try:
+        ergebnis = loeschlauf.regel_setzen(db, tenant_id, str(uuid7()), payload)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(
+            db, fehler, "Aufbewahrungsfrist festlegen", tenant_id
+        ) from fehler
+    return ergebnis
+
+
+@router.get("/applications/loeschlauf/faellig", response_model=TrockenlaufOut,
+            summary="Trockenlauf: was gelöscht würde")
+async def get_loeschlauf_faellig(
+    limit: int = Query(1000, ge=1, le=5000),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Zeigt, was faellig waere — und aendert nichts.
+
+    Personenbezogene Daten unbesehen zu vernichten ist leichtfertig; deshalb gibt
+    es den Trockenlauf vor dem Lauf. Er nennt auch, **warum** eine Zeile bleibt:
+    eine Loeschsperre (die Daten sind Beweismittel) oder eine Einwilligung.
+    """
+    try:
+        regel = loeschlauf.regel(db, tenant_id)
+        if not regel:
+            raise loeschlauf.ohne_regel(tenant_id)
+        tage = int(regel["aufbewahrung_tage"])
+        faellige = loeschlauf.faellige(db, tenant_id, tage, limit)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Trockenlauf", tenant_id) from fehler
+    return {
+        "aufbewahrung_tage": tage,
+        "stichtag": loeschlauf.stichtag(tage).isoformat(),
+        "gesetzliche_grundlage": regel["gesetzliche_grundlage"],
+        "geprueft": len(faellige),
+        "wird_geloescht": sum(1 for z in faellige if z["wird_geloescht"]),
+        "uebersprungen_sperre": sum(
+            1 for z in faellige if z["bleibt_wegen"] == "LOESCHSPERRE"
+        ),
+        "uebersprungen_einwilligung": sum(
+            1 for z in faellige if z["bleibt_wegen"] == "EINWILLIGUNG"
+        ),
+        "weitere_faellig": len(faellige) >= limit,
+        "faellige": faellige,
+    }
+
+
+@router.get("/applications/loeschlaeufe", response_model=List[LoeschlaufOut],
+            summary="Durchgeführte Löschläufe")
+async def list_loeschlaeufe(
+    limit: int = Query(100, ge=1, le=1000),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """Der Nachweis gegenüber der Aufsicht: Zahlen, keine Namen."""
+    try:
+        return loeschlauf.laeufe(db, tenant_id, limit)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Loeschlaeufe lesen", tenant_id) from fehler
+
+
+@router.post("/applications/loeschlauf", status_code=201, response_model=LoeschlaufOut,
+             summary="Löschlauf durchführen")
+async def post_loeschlauf(
+    payload: LoeschlaufIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Loescht die faelligen Bewerbungen und schreibt den Nachweis.
+
+    Loeschung und Protokoll liegen in **einer** Transaktion: Ein Protokoll ohne
+    Loeschung waere eine falsche Zusage, eine Loeschung ohne Protokoll ein
+    unbelegter Eingriff.
+
+    Offene Bewerbungen bleiben unberuehrt (ihnen fehlt der Fristanker), eine aktive
+    Loeschsperre und eine laufende Einwilligung schuetzen vor Loeschung und
+    erscheinen als uebersprungen.
+    """
+    try:
+        regel = loeschlauf.regel(db, tenant_id)
+        if not regel:
+            raise loeschlauf.ohne_regel(tenant_id)
+        ergebnis = loeschlauf.lauf_ausfuehren(
+            db, tenant_id, str(uuid7()), regel, payload.durchgefuehrt_durch, payload.limit
+        )
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Loeschlauf", tenant_id) from fehler
+    logger.info(
+        "Loeschlauf %s (Mandant %s): %s geprueft, %s geloescht, %s gesperrt, %s eingewilligt",
+        ergebnis["id"], tenant_id, ergebnis["geprueft"], ergebnis["geloescht"],
+        ergebnis["uebersprungen_sperre"], ergebnis["uebersprungen_einwilligung"],
+    )
     return ergebnis
 
 

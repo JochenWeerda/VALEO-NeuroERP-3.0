@@ -32,6 +32,7 @@ file_ownership:
   - Bewerbungs-Integration nur committed-source Artefakte und exakte HR-Servicezuordnung
   - Tabellenkatalog-CLI Repository-Pfad und echte isolierte Startvertraege
   - crm-multichannel nur sieben ungenutzte SDK-Pins und ehrlicher README-Integrationsstand
+  - Bewerbungs-Loeschlauf nur committed-source Schnittstellen/Inventare und exakte HR-Zuordnung
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.

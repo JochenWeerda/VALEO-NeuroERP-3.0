@@ -649,3 +649,48 @@ Keine Datenbank, Migration, Dockerinstanz oder Installationen in der globalen
 Laufzeit. Neue Linux-/GitHub-Abnahme bleibt nach Push ausstehend. Service
 Security 37428294647 auf d52139d83 ist noch vor diesem Fix rot; weitere
 Frontend-, Container-/Node-Security- und Futter-Befunde bleiben offen.
+
+
+## Katalog-Drift offen; committed Bewerbungs-Loeschlauf integriert
+
+Quality Gate 37428294896 bestaetigt den vorherigen Generator-Importfix und
+meldet jetzt echte Abweichung beider physischer Katalogdateien. Gemeinsamer
+valeo_probe --status laeuft auf Port 5432 in Timeout. User startet Docker
+Desktop wieder; erneute lesende Statuspruefung bleibt Timeout, Engine-
+Containerstatus liefert zunaechst HTTP 500, danach keine Antwort. Lang
+wartende reine Leseabfragen abgebrochen. Keine neue DB/Dockerinstanz, kein
+Reset, Start oder Migration, keine Fachtests auf der Entwicklungsdatenbank.
+
+Ein geplanter optionaler Driftexport aus derselben CI-Datenbank mit
+GitHub-Artefaktupload wurde durch automatische Freigabepruefung wegen
+Uebertragung interner Schema-Metadaten abgelehnt. Es fand keine Uebertragung
+oder Commit dieses Vorschlags statt. Die drei eigenen uncommitteten Hunk-
+Bloecke in Generator, Tests und Workflow sind entfernt; Direktstart-Fix
+bleibt unveraendert. Keine Umgehung, Export- oder Gate-Ausnahme. Bestehender
+versionierter Tabellenkatalog unveraendert und Drift ausdruecklich offen.
+
+Unabhaengige Integration: paralleler committed b9a71eab4 liefert den
+Bewerbungs-Loeschlauf. Spec/Inventare wurden aus genau dieser Backendquelle
+erzeugt; Fachcode, Migration, Masken und laufende neue Einwilligungsarbeit
+nicht angefasst. Exakte Servicezuordnung bewerbung_loeschlauf_service: hr
+folgt dessen domain_hr-Tabellen. 21 Architekturtests bestehen (1,75 s).
+Drei Code-Inventare sind aktuell; Architekturindex --require-complete
+und --check: 932/932 Routen, 272/272 Services, 454/454 Endpoint-Module.
+
+Spec-Abnahme erhaelt alle alten 3096 Pfade und Methoden und erlaubt exakt:
+
+- GET/PUT /api/v1/personal/applications/aufbewahrung
+- GET /api/v1/personal/applications/loeschlauf/faellig
+- GET /api/v1/personal/applications/loeschlaeufe
+- POST /api/v1/personal/applications/loeschlauf
+
+3100 Pfade; render(build_spec()) erneut kanonisch. 41 doppelte
+Pfad-/Methodengruppen bleiben unveraendert offen. Artefakte nur indexseitig
+aus committed Quelle; fremde Arbeitsbaumfassungen bleiben erhalten.
+Kein API-Gate abgeschwaecht; tatsaechliche Katalogerneuerung benoetigt
+weiterhin den erreichbaren bestehenden gemeinsamen Pruefstand.
+
+Auf 22bf4b927 ist Service Security 37449627295 vollstaendig erfolgreich
+(Multichannel-Fix in Linux/GitHub bestaetigt). PostgreSQL, kritische E2E,
+Doku und Superglue bestehen. Smoke, Quality, Gesamt-CI und andere
+Security-Pruefungen sind rot; neue Integrationsabnahme nach Push ausstehend.

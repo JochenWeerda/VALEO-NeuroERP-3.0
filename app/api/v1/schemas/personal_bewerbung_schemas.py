@@ -8,7 +8,8 @@ Datenbankzeilen zurueck, das Anlegen ``{id, status}``, der Stufenwechsel
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from datetime import date
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -68,3 +69,102 @@ class BewerbungOut(BaseModel):
     last_updated: Optional[str] = None
     #: Abgeleitet: Aus `EINGESTELLT` und `ABGELEHNT` fuehrt kein Weg heraus.
     endgueltig: bool = False
+    #: Die Einwilligung zur laengeren Aufbewahrung (Talentpool, Art. 6 Abs. 1 lit. a
+    #: DSGVO). Wer eingewilligt hat, wird vom Loeschlauf nicht mitgenommen.
+    aufbewahrung_einwilligung_bis: Optional[str] = None
+    aufbewahrung_einwilligung_am: Optional[str] = None
+
+
+# ── Speicherbegrenzung: Frist, Trockenlauf, Lauf ─────────────────────────────
+# Art. 5 Abs. 1 lit. e DSGVO. Die Frist steht in **Tagen**, nicht in Jahren: Sechs
+# Monate sind kein Jahr, und eine Frist, die man aufrunden muss, haelt Daten
+# laenger als noetig. Das Gegenstueck — die GoBD-Richtlinie — rechnet in Jahren und
+# sagt "mindestens so lange"; hier gilt "hoechstens so lange".
+
+
+class AufbewahrungIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    #: Hoechstens drei Jahre; darueber waere es kein Aufbewahren, sondern ein Vorrat.
+    aufbewahrung_tage: int = Field(ge=1, le=1095)
+    gesetzliche_grundlage: str = Field(min_length=1, max_length=200)
+    beschluss_am: Optional[date] = None
+    beschluss_durch: Optional[str] = Field(default=None, max_length=120)
+
+
+class AufbewahrungOut(BaseModel):
+    id: str
+    tenant_id: str
+    aufbewahrung_tage: int
+    gesetzliche_grundlage: str
+    beschluss_am: Optional[str] = None
+    beschluss_durch: Optional[str] = None
+    aktiv: bool = True
+
+
+class FaelligOut(BaseModel):
+    """Eine Zeile des Trockenlaufs.
+
+    Sie traegt den Namen noch — anders koennte niemand pruefen, was er loescht.
+    Ins Protokoll kommt er **nicht**.
+    """
+
+    id: str
+    applicant_name: Optional[str] = None
+    applicant_email: Optional[str] = None
+    status: str
+    entschieden_am: Optional[str] = None
+    aufbewahrung_einwilligung_bis: Optional[str] = None
+    wird_geloescht: bool
+    #: ``LOESCHSPERRE`` oder ``EINWILLIGUNG`` — warum diese Zeile bleibt.
+    bleibt_wegen: Optional[Literal["LOESCHSPERRE", "EINWILLIGUNG"]] = None
+
+
+class TrockenlaufOut(BaseModel):
+    aufbewahrung_tage: int
+    stichtag: str
+    gesetzliche_grundlage: str
+    geprueft: int
+    wird_geloescht: int
+    uebersprungen_sperre: int
+    uebersprungen_einwilligung: int
+    #: Wahr, wenn die Grenze erreicht wurde — dann ist dies nicht alles.
+    weitere_faellig: bool = False
+    faellige: List[FaelligOut] = Field(default_factory=list)
+
+
+class LoeschlaufIn(BaseModel):
+    """Der Auftrag zum Lauf.
+
+    Beide Felder sind Pflicht, und das ist Absicht: Ein Loeschlauf vernichtet
+    personenbezogene Daten endgueltig. ``durchgefuehrt_durch`` macht den Eingriff
+    einem Menschen zurechenbar, ``bestaetigung`` verhindert, dass ein versehentlich
+    abgeschickter POST Daten vernichtet.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    durchgefuehrt_durch: str = Field(min_length=1, max_length=120)
+    bestaetigung: Literal["ENDGUELTIG LOESCHEN"]
+    #: Obergrenze je Lauf. Ein abgeschnittener Lauf sagt das in ``weitere_faellig``.
+    limit: int = Field(default=1000, ge=1, le=5000)
+
+
+class LoeschlaufOut(BaseModel):
+    """Der Nachweis: Zahlen, keine Namen.
+
+    Man muss beweisen koennen, **dass** geloescht wurde, ohne zu behalten,
+    **was** geloescht wurde.
+    """
+
+    id: str
+    gestartet_am: Optional[str] = None
+    aufbewahrung_tage: int
+    stichtag: str
+    geprueft: int
+    geloescht: int
+    uebersprungen_sperre: int
+    uebersprungen_einwilligung: int
+    durchgefuehrt_durch: Optional[str] = None
+    hinweis: Optional[str] = None
+    weitere_faellig: bool = False

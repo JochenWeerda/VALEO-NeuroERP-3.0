@@ -16352,6 +16352,108 @@
         "title": "AuditOut",
         "type": "object"
       },
+      "AufbewahrungIn": {
+        "additionalProperties": false,
+        "properties": {
+          "aufbewahrung_tage": {
+            "maximum": 1095.0,
+            "minimum": 1.0,
+            "title": "Aufbewahrung Tage",
+            "type": "integer"
+          },
+          "beschluss_am": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschluss Am"
+          },
+          "beschluss_durch": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschluss Durch"
+          },
+          "gesetzliche_grundlage": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Gesetzliche Grundlage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "aufbewahrung_tage",
+          "gesetzliche_grundlage"
+        ],
+        "title": "AufbewahrungIn",
+        "type": "object"
+      },
+      "AufbewahrungOut": {
+        "properties": {
+          "aktiv": {
+            "default": true,
+            "title": "Aktiv",
+            "type": "boolean"
+          },
+          "aufbewahrung_tage": {
+            "title": "Aufbewahrung Tage",
+            "type": "integer"
+          },
+          "beschluss_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschluss Am"
+          },
+          "beschluss_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschluss Durch"
+          },
+          "gesetzliche_grundlage": {
+            "title": "Gesetzliche Grundlage",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "aufbewahrung_tage",
+          "gesetzliche_grundlage"
+        ],
+        "title": "AufbewahrungOut",
+        "type": "object"
+      },
       "AufgabePatch": {
         "properties": {
           "beschreibung": {
@@ -21486,6 +21588,28 @@
               }
             ],
             "title": "Applied At"
+          },
+          "aufbewahrung_einwilligung_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aufbewahrung Einwilligung Am"
+          },
+          "aufbewahrung_einwilligung_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aufbewahrung Einwilligung Bis"
           },
           "documents_ref": {
             "anyOf": [
@@ -61852,6 +61976,89 @@
         "title": "FaelligBelegOut",
         "type": "object"
       },
+      "FaelligOut": {
+        "description": "Eine Zeile des Trockenlaufs.\n\nSie traegt den Namen noch — anders koennte niemand pruefen, was er loescht.\nIns Protokoll kommt er **nicht**.",
+        "properties": {
+          "applicant_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applicant Email"
+          },
+          "applicant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applicant Name"
+          },
+          "aufbewahrung_einwilligung_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aufbewahrung Einwilligung Bis"
+          },
+          "bleibt_wegen": {
+            "anyOf": [
+              {
+                "enum": [
+                  "LOESCHSPERRE",
+                  "EINWILLIGUNG"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bleibt Wegen"
+          },
+          "entschieden_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entschieden Am"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "wird_geloescht": {
+            "title": "Wird Geloescht",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "wird_geloescht"
+        ],
+        "title": "FaelligOut",
+        "type": "object"
+      },
       "FahrerPatch": {
         "properties": {
           "aktuelles_fahrzeug_id": {
@@ -95469,6 +95676,118 @@
           "address"
         ],
         "title": "LocationInfo",
+        "type": "object"
+      },
+      "LoeschlaufIn": {
+        "additionalProperties": false,
+        "description": "Der Auftrag zum Lauf.\n\nBeide Felder sind Pflicht, und das ist Absicht: Ein Loeschlauf vernichtet\npersonenbezogene Daten endgueltig. ``durchgefuehrt_durch`` macht den Eingriff\neinem Menschen zurechenbar, ``bestaetigung`` verhindert, dass ein versehentlich\nabgeschickter POST Daten vernichtet.",
+        "properties": {
+          "bestaetigung": {
+            "const": "ENDGUELTIG LOESCHEN",
+            "title": "Bestaetigung",
+            "type": "string"
+          },
+          "durchgefuehrt_durch": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Durchgefuehrt Durch",
+            "type": "string"
+          },
+          "limit": {
+            "default": 1000,
+            "maximum": 5000.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "durchgefuehrt_durch",
+          "bestaetigung"
+        ],
+        "title": "LoeschlaufIn",
+        "type": "object"
+      },
+      "LoeschlaufOut": {
+        "description": "Der Nachweis: Zahlen, keine Namen.\n\nMan muss beweisen koennen, **dass** geloescht wurde, ohne zu behalten,\n**was** geloescht wurde.",
+        "properties": {
+          "aufbewahrung_tage": {
+            "title": "Aufbewahrung Tage",
+            "type": "integer"
+          },
+          "durchgefuehrt_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durchgefuehrt Durch"
+          },
+          "geloescht": {
+            "title": "Geloescht",
+            "type": "integer"
+          },
+          "geprueft": {
+            "title": "Geprueft",
+            "type": "integer"
+          },
+          "gestartet_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gestartet Am"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "stichtag": {
+            "title": "Stichtag",
+            "type": "string"
+          },
+          "uebersprungen_einwilligung": {
+            "title": "Uebersprungen Einwilligung",
+            "type": "integer"
+          },
+          "uebersprungen_sperre": {
+            "title": "Uebersprungen Sperre",
+            "type": "integer"
+          },
+          "weitere_faellig": {
+            "default": false,
+            "title": "Weitere Faellig",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "aufbewahrung_tage",
+          "stichtag",
+          "geprueft",
+          "geloescht",
+          "uebersprungen_sperre",
+          "uebersprungen_einwilligung"
+        ],
+        "title": "LoeschlaufOut",
         "type": "object"
       },
       "LogCreateIn": {
@@ -157254,6 +157573,61 @@
           "new_status"
         ],
         "title": "TriggerIn",
+        "type": "object"
+      },
+      "TrockenlaufOut": {
+        "properties": {
+          "aufbewahrung_tage": {
+            "title": "Aufbewahrung Tage",
+            "type": "integer"
+          },
+          "faellige": {
+            "items": {
+              "$ref": "#/components/schemas/FaelligOut"
+            },
+            "title": "Faellige",
+            "type": "array"
+          },
+          "geprueft": {
+            "title": "Geprueft",
+            "type": "integer"
+          },
+          "gesetzliche_grundlage": {
+            "title": "Gesetzliche Grundlage",
+            "type": "string"
+          },
+          "stichtag": {
+            "title": "Stichtag",
+            "type": "string"
+          },
+          "uebersprungen_einwilligung": {
+            "title": "Uebersprungen Einwilligung",
+            "type": "integer"
+          },
+          "uebersprungen_sperre": {
+            "title": "Uebersprungen Sperre",
+            "type": "integer"
+          },
+          "weitere_faellig": {
+            "default": false,
+            "title": "Weitere Faellig",
+            "type": "boolean"
+          },
+          "wird_geloescht": {
+            "title": "Wird Geloescht",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "aufbewahrung_tage",
+          "stichtag",
+          "gesetzliche_grundlage",
+          "geprueft",
+          "wird_geloescht",
+          "uebersprungen_sperre",
+          "uebersprungen_einwilligung"
+        ],
+        "title": "TrockenlaufOut",
         "type": "object"
       },
       "TrocknungIn": {
@@ -373345,6 +373719,352 @@
           }
         ],
         "summary": "Bewerbung erfassen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/aufbewahrung": {
+      "get": {
+        "description": "Die beschlossene Frist — oder 404, wenn keine beschlossen ist.\n\nKein Standardwert: Eine Frist, die niemand beschlossen hat, ist keine\nGrundlage, um Daten zu vernichten.",
+        "operationId": "get_bewerbung_aufbewahrung_api_v1_personal_applications_aufbewahrung_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AufbewahrungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aufbewahrungsfrist für Bewerberdaten lesen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      },
+      "put": {
+        "description": "Legt die Frist fest. Je Mandant gilt **eine**.\n\nDie Frist ist eine Entscheidung des Hauses und wird deshalb nicht geraten.\nUeblich sind 180 Tage nach der Entscheidung — zwei Monate Geltendmachung nach\n§ 15 Abs. 4 AGG plus Zustellung und Klagefrist-Puffer.",
+        "operationId": "set_bewerbung_aufbewahrung_api_v1_personal_applications_aufbewahrung_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AufbewahrungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AufbewahrungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aufbewahrungsfrist für Bewerberdaten festlegen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/loeschlaeufe": {
+      "get": {
+        "description": "Der Nachweis gegenüber der Aufsicht: Zahlen, keine Namen.",
+        "operationId": "list_loeschlaeufe_api_v1_personal_applications_loeschlaeufe_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LoeschlaufOut"
+                  },
+                  "title": "Response List Loeschlaeufe Api V1 Personal Applications Loeschlaeufe Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Durchgeführte Löschläufe",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/loeschlauf": {
+      "post": {
+        "description": "Loescht die faelligen Bewerbungen und schreibt den Nachweis.\n\nLoeschung und Protokoll liegen in **einer** Transaktion: Ein Protokoll ohne\nLoeschung waere eine falsche Zusage, eine Loeschung ohne Protokoll ein\nunbelegter Eingriff.\n\nOffene Bewerbungen bleiben unberuehrt (ihnen fehlt der Fristanker), eine aktive\nLoeschsperre und eine laufende Einwilligung schuetzen vor Loeschung und\nerscheinen als uebersprungen.",
+        "operationId": "post_loeschlauf_api_v1_personal_applications_loeschlauf_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoeschlaufIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoeschlaufOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Löschlauf durchführen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/loeschlauf/faellig": {
+      "get": {
+        "description": "Zeigt, was faellig waere — und aendert nichts.\n\nPersonenbezogene Daten unbesehen zu vernichten ist leichtfertig; deshalb gibt\nes den Trockenlauf vor dem Lauf. Er nennt auch, **warum** eine Zeile bleibt:\neine Loeschsperre (die Daten sind Beweismittel) oder eine Einwilligung.",
+        "operationId": "get_loeschlauf_faellig_api_v1_personal_applications_loeschlauf_faellig_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 1000,
+              "maximum": 5000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrockenlaufOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Trockenlauf: was gelöscht würde",
         "tags": [
           "personal",
           "hr",
