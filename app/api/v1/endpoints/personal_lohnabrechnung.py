@@ -32,6 +32,8 @@ class LohnBerechnungRequest(BaseModel):
 
 
 class LohnBerechnungResponse(BaseModel):
+    #: Der Mandant, fuer den gerechnet wurde — siehe PayrollCloseoutPreviewOut.
+    mandant: str
     eingabe: dict[str, Any]
     ergebnis: dict[str, Any]
     hinweis: str
@@ -56,6 +58,16 @@ class PayrollCloseoutPreviewIn(BaseModel):
 
 
 class PayrollCloseoutPreviewOut(BaseModel):
+    """Die Uebergabe an DATEV/FIBU.
+
+    Bis zum 06.10.2026 nahmen beide Wege `tenant_id` mit `noqa: ARG001` entgegen
+    und verwarfen ihn. Fuer eine Rechenvorschau ist das tragbar; fuer eine
+    Uebergabe nicht: Eine Lohnabrechnung, die nicht sagt, fuer welches Haus sie
+    gilt, laesst sich dem falschen zuordnen.
+    """
+
+    #: Der Mandant, fuer den gerechnet wurde.
+    mandant: str
     period: str
     parameterVersion: str
     status: str
@@ -72,7 +84,7 @@ class PayrollCloseoutPreviewOut(BaseModel):
 )
 async def berechne_lohn(
     payload: LohnBerechnungRequest,
-    tenant_id: str = Depends(get_tenant_id),  # noqa: ARG001 - mandantenpflichtiger Payroll-Kontext
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     from app.services.lohn_service import berechne_netto
 
@@ -86,6 +98,7 @@ async def berechne_lohn(
         year=payload.jahr,
     )
     return {
+        "mandant": tenant_id,
         "eingabe": payload.model_dump(),
         "ergebnis": ergebnis.as_dict(),
         "hinweis": "Preview-Berechnung. Produktiv massgeblich sind amtlicher BMF-PAP, DATEV-/Steuerberaterfreigabe und freigegebene SV-Parameter.",
@@ -104,7 +117,7 @@ async def berechne_lohn(
 )
 async def preview_payroll_closeout(
     payload: PayrollCloseoutPreviewIn,
-    tenant_id: str = Depends(get_tenant_id),  # noqa: ARG001 - Payroll bleibt mandantenpflichtig.
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     from decimal import Decimal
 
@@ -130,4 +143,5 @@ async def preview_payroll_closeout(
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return closeout.as_dict()
+    # Der Mandant kommt aus dem Kopf; die Rechnung selbst kennt ihn nicht.
+    return {"mandant": tenant_id, **closeout.as_dict()}

@@ -1728,7 +1728,7 @@ einer in einer Notiz.
 
 **Doku:** `docs/quality-assurance/personal-zerlegung-20261006.md`.
 
-## BEWERBERMANAGEMENT-ORDNUNG-20261006 — in Arbeit, Claude Code
+## BEWERBERMANAGEMENT-ORDNUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Die sieben Maengel schliessen, die
 [PERSONAL-ZERLEGUNG-20261006](../quality-assurance/personal-zerlegung-20261006.md)
@@ -1791,6 +1791,53 @@ Fehleingabe ist nicht mehr durch Zuruecksetzen zu heilen, sondern durch eine neu
 Bewerbung. Das ist beabsichtigt (eine Ablehnung ist eine Mitteilung an einen
 Menschen), gehoert aber dem Personal-Owner zur Abnahme. Die Begruendungspflicht
 bei Ablehnung ist eine neue Pflichtangabe in der Maske.
+
+**Ergebnis (2026-10-06):** Alle sieben Maengel behoben.
+
+* **Der Fehler nennt seine Ursache:** `fehler_deuten` unterscheidet fehlende
+  Tabelle/Spalte (503 mit Migrationshinweis) von allem anderen (409 mit Grund).
+  Vorher war **jeder** Fehler eine Tabellenaussage und schickte den Leser in die
+  Migration.
+* **Die Stufen haben Uebergaenge**, erzeugt aus `LAUFEND` und `ENDGUELTIG`:
+  Rueckschritt innerhalb der Pipeline ja, aus `EINGESTELLT`/`ABGELEHNT` nein. Dass
+  eine abgelehnte Bewerbung eingestellt werden konnte, war kein Komfort, sondern
+  ein fehlender Nachweis.
+* **Eine Ablehnung braucht einen Grund** (§ 22 AGG) — in einer **eigenen** Spalte,
+  nicht in `notes`: Das ist ein Verlaufsfeld, und ein Grund, der darin untergeht,
+  ist kein Nachweis. Dazu `entschieden_am`/`entschieden_durch`.
+* **Vier Pruefbedingungen in der Datenbank.** Die Migration zaehlt vorher, ob der
+  Bestand fremde Staende fuehrt, und bricht ab statt umzuschreiben (3 Zeilen,
+  `EINGANG`/`VORAUSWAHL`, beide im Woerterbuch). Das Downgrade bricht ab, wenn eine
+  Entscheidung festgehalten ist.
+* **Form, Grenze, Kennung:** `BewerbungOut` je Weg statt `PersonalOut` mit
+  `extra="allow"`, `limit`/`offset`, `extra="forbid"` auf der Eingabe, `uuid7`, und
+  ein neuer Weg `GET /applications/{id}`.
+* **Die Lohnwege nennen den Mandanten** (`mandant`). Der Vorbehalt der Vorschau
+  steht woertlich weiter in der Antwort — ein Vertrag haelt das fest, damit
+  "behoben" nicht als "umgeschrieben" missverstanden wird.
+
+**Die Vertraege haben sich umgekehrt:** `TestBenannteMaengel` verlangte, dass die
+Maengel **noch da** sind; die Klasse heisst jetzt `TestMaengelBehoben` und haelt
+fest, dass sie nicht zurueckkommen. Zwei Vertraege der Zerlegung sind nachgezogen
+(die Pruefung auf die **Form** des Woerterbuchs ist durch eine auf die Stufen
+ersetzt; das SQL des Loeschwegs liegt im Dienst).
+
+**37 neue Vertraege, 53 mit der Zerlegung, 179 in allen Personal-, Lohn- und
+Bewerbungstests gruen**; Migration auf beiden Datenbanken; alle vier Ratschen
+gruen.
+
+**Handshakes:**
+1. `ABGELEHNT` ist endgueltig — eine Fehleingabe heilt nur ein neuer Vorgang.
+   Abnahme beim Personal-Owner.
+2. Die Maske braucht ein Feld fuer den Ablehnungsgrund (neue Pflichtangabe).
+3. **Speicherbegrenzung (Art. 5 Abs. 1 lit. e DSGVO):** Bewerberdaten sind nach
+   Verfahrensende zu loeschen (ueblich sechs Monate nach Ablehnung, § 15 Abs. 4
+   AGG plus Zustellung). Der Loeschweg existiert, aber **kein Lauf und keine
+   Frist** stossen ihn an. `entschieden_am` ist die Grundlage und jetzt vorhanden
+   — der Lauf ist ein eigener Slice.
+4. Ein Weg `EINGESTELLT` -> Personalstamm fehlt; die Pipeline endet im Stand.
+
+**Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

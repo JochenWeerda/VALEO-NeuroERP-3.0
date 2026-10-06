@@ -113,26 +113,38 @@ class TestDateigroesse:
 
 
 class TestUmzugOhneAenderung:
-    def test_der_code_ist_wortgleich_umgezogen(self):
-        """Stichproben, die bei einer stillen Aenderung auffallen wuerden."""
-        bewerbung = BEWERBUNGEN.read_text(encoding="utf-8")
-        lohn = LOHN.read_text(encoding="utf-8")
+    def test_der_fachliche_kern_ist_beim_umzug_geblieben(self):
+        """Stichproben, die bei einer stillen Aenderung auffallen wuerden.
 
-        # Das Stufenwoerterbuch samt seiner Form (ein `set`) ist unveraendert.
-        assert (
-            'APPLICATION_STAGES = {"EINGANG", "VORAUSWAHL", "ERSTGESPRAECH", '
-            '"ENDGESPRAECH", "ANGEBOT", "EINGESTELLT", "ABGELEHNT"}'
-        ) in bewerbung
+        Die Pruefung auf die **Form** des Stufenwoerterbuchs (ein `set`) stand hier
+        bis zum 06.10.2026. Der Folgeslice
+        BEWERBERMANAGEMENT-ORDNUNG-20261006 hat es durch eine Uebergangstabelle
+        ersetzt — absichtlich und begruendet. Was bleibt, ist die Pruefung auf die
+        Stufen selbst und auf den Vorbehalt der Lohnrechnung: Eine Korrektur darf
+        die Fachlichkeit nicht nebenbei verschieben.
+        """
+        lohn = LOHN.read_text(encoding="utf-8")
+        from app.services import bewerbung_service as dienst
+
+        assert set(dienst.STUFEN) == {
+            "EINGANG", "VORAUSWAHL", "ERSTGESPRAECH", "ENDGESPRAECH",
+            "ANGEBOT", "EINGESTELLT", "ABGELEHNT",
+        }
         # Der Vorbehalt der Lohnrechnung ist woertlich derselbe.
         assert "Produktiv massgeblich sind amtlicher BMF-PAP" in lohn
         # Die Beitragsgrundlagen stehen unveraendert im Weg.
         assert '"bbg_kv_monat": 5812.50' in lohn
 
     def test_der_fremde_loeschweg_ist_mitgewandert(self):
-        """`delete_application` stammt von einem anderen Agenten (f7fcbdd7c)."""
+        """`delete_application` stammt von einem anderen Agenten (f7fcbdd7c).
+
+        Der Weg ist geblieben; sein SQL liegt seit dem Folgeslice im Dienst, damit
+        alle vier Wege dieselbe Fehlerdeutung haben.
+        """
         bewerbung = BEWERBUNGEN.read_text(encoding="utf-8")
+        dienst = Path("app/services/bewerbung_service.py").read_text(encoding="utf-8")
         assert "async def delete_application(" in bewerbung
-        assert "DELETE FROM domain_hr.applications WHERE id = :id AND tenant_id" in bewerbung
+        assert "DELETE FROM {BEWERBUNGEN} WHERE id = :id AND tenant_id = :tid" in dienst
 
     def test_personal_kennt_die_beiden_faecher_nicht_mehr(self):
         quelle = PERSONAL.read_text(encoding="utf-8")
@@ -157,28 +169,54 @@ class TestUmzugOhneAenderung:
         assert schemata.count("class PersonalOut(") == 1
 
 
-class TestBenannteMaengel:
-    """Was der Umzug **nicht** behoben hat — damit es nicht als behoben gilt.
+class TestMaengelBehoben:
+    """Die Maengel, die der Umzug festhielt, sind behoben.
 
-    Ein Vertrag, der einen Mangel festhält, ist besser als eine Notiz: Er fällt
-    auf, wenn jemand ihn behebt, und verlangt dann, dass die Zusage hier mitgeht.
+    `TestBenannteMaengel` stand hier bis zum 06.10.2026 und verlangte, dass die
+    Maengel **noch da** sind — damit sie nicht als behoben gelten. Der Slice
+    BEWERBERMANAGEMENT-ORDNUNG-20261006 hat sie behoben, also kehren die Tests
+    sich um: Jetzt halten sie fest, dass sie nicht zurueckkommen.
     """
 
-    def test_der_fehlerweg_verwischt_noch_jeden_fehler(self):
+    def test_der_fehler_nennt_seine_ursache(self):
+        """Vorher wurde **jeder** Fehler zu "applications table not available"."""
         bewerbung = BEWERBUNGEN.read_text(encoding="utf-8")
-        assert 'detail="applications table not available"' in bewerbung, (
-            "Behoben? Dann gehoert der Mangel aus der QA-Doku gestrichen."
-        )
+        anweisungen = [
+            z for z in bewerbung.splitlines()
+            if "applications table not available" in z
+            and not z.lstrip().startswith(("#", "*"))
+            and "``" not in z
+        ]
+        assert not anweisungen
+        assert "fehler_deuten" in bewerbung
 
-    def test_die_bewerbungsliste_ist_noch_unbegrenzt(self):
+    def test_die_bewerbungsliste_ist_begrenzt(self):
         baum = ast.parse(BEWERBUNGEN.read_text(encoding="utf-8"))
         for knoten in ast.walk(baum):
             if isinstance(knoten, ast.AsyncFunctionDef) and knoten.name == "list_applications":
-                namen = {
-                    a.arg for a in knoten.args.args + knoten.args.kwonlyargs
-                }
-                assert "limit" not in namen, (
-                    "Begrenzt? Dann gehoert der Mangel aus der QA-Doku gestrichen."
-                )
+                namen = {a.arg for a in knoten.args.args + knoten.args.kwonlyargs}
+                assert "limit" in namen
+                assert "offset" in namen
                 return
         pytest.fail("list_applications nicht gefunden")
+
+    def test_die_stufen_haben_uebergaenge(self):
+        """Eine abgelehnte Bewerbung laesst sich nicht mehr einstellen."""
+        from app.services import bewerbung_service as dienst
+
+        assert dienst.UEBERGAENGE["ABGELEHNT"] == ()
+        assert dienst.UEBERGAENGE["EINGESTELLT"] == ()
+        assert "EINGESTELLT" in dienst.UEBERGAENGE["ANGEBOT"]
+
+    def test_die_lohnwege_nennen_den_mandanten(self):
+        lohn = LOHN.read_text(encoding="utf-8")
+        signaturen = [
+            z for z in lohn.splitlines()
+            if "noqa: ARG001" in z and "tenant_id" in z and "Depends" in z
+        ]
+        assert not signaturen
+        assert '"mandant": tenant_id' in lohn
+
+    def test_der_vorbehalt_der_lohnrechnung_ist_geblieben(self):
+        """Behoben heisst nicht umgeschrieben: Die Rechnung bleibt eine Vorschau."""
+        assert "Produktiv massgeblich sind amtlicher BMF-PAP" in LOHN.read_text(encoding="utf-8")
