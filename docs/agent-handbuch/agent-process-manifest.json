@@ -2537,6 +2537,45 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "personal/bewerbungen",
+      "title": "Bewerbungen",
+      "domain": "hr",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__bewerbungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/bewerbungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/bewerbungen/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/bewerbungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt eine Bewerbung im Eingang an."
+        },
+        {
+          "key": "neu",
+          "label": "Neu",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer eine neue Bewerbung."
+        }
+      ],
+      "sensitive_fields": [
+        "applicant_email"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "personal/onboarding",
       "title": "Onboarding",
       "domain": "hr",

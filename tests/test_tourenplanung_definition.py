@@ -14,6 +14,7 @@ from app.core.screen_definitions_capture import (
     build_fuhrpark_fahrzeug_stamm_screen_definition,
     build_personal_onboarding_screen_definition,
     build_personal_schulungen_screen_definition,
+    build_personal_bewerbungen_screen_definition,
     build_personal_qualifikationen_screen_definition,
     build_fuhrpark_rechnungen_screen_definition,
     build_fuhrpark_terminarten_screen_definition,
@@ -332,3 +333,37 @@ def test_schulungen_folgen_der_faelligkeit() -> None:
     assert "DEMO" not in block
     assert governance_errors(definition) == []
     assert get_screen_definition("personal/schulungen")["id"] == "personal/schulungen"
+
+
+def test_bewerbungen_folgen_der_pipeline() -> None:
+    definition = build_personal_bewerbungen_screen_definition()
+    block = _block("personalBewerbungenScreen")
+    felder = ["applicant_name", "applicant_email", "position_title", "source"]
+    assert definition["id"] == "personal/bewerbungen"
+    assert definition["title"] == "Bewerbungen"
+    assert definition["domain"] == "hr"
+    assert [field["key"] for field in definition["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/personal/applications"
+    assert "/api/v1/personal/applications" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    assert definition["tables"][0]["rowActions"][0]["key"] == "loeschen"
+    assert definition["tables"][0]["columns"][0]["priority"] == "primary"
+    assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("personal/bewerbungen")["id"] == "personal/bewerbungen"
+
+
+def test_applications_haben_loesch_route() -> None:
+    from app.api.v1.endpoints import personal as personal_ep
+
+    loesch = [
+        route
+        for route in personal_ep.router.routes
+        if getattr(route, "path", "").endswith("/applications/{application_id}")
+        and "DELETE" in (getattr(route, "methods", set()) or set())
+    ]
+    assert loesch, "DELETE /applications/{application_id} fehlt am Personal-Router"
