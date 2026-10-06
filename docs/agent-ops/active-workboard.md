@@ -127,6 +127,14 @@ bestehenden Grenzen: EUDR dms-compliance, Frachtbrief/WEBFLEET logistics,
 Preis finance, Mitgliederregister platform, Wiegeschein inventory. Minor: keine
 neue Domaenengrenze/Container/API. Index nur aus committeten Inventaren plus
 eigenen Regeln erzeugen; fremde Inventar-WIP nicht veroeffentlichen.
+**Integrationsnachclaim:** Fremder abgeschlossener Commit 8d6eb5afd bleibt
+erhalten. Seine zwei Services etikettendruck_service (inventory, wie der
+Endpoint) und schaden_service (dms-compliance) ebenfalls genau zuordnen.
+Drei Inventare nur aus diesem committed Source erneuern, bestehender Claim.
+**UIX-Testnachclaim:** Saubere test_uix051_legacy_route_migration.py nur
+Customer360-Wrapper-Vertrag: bestehende PartyNativePage-Delegation bis
+UniversalNativeDetailPage pruefen, inklusive Entity/Tab und Screen-ID.
+Kein Masken-/Renderer-WIP und keine Gate-Ausnahme.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
