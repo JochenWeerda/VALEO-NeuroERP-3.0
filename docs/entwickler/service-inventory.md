@@ -46,6 +46,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `atlas_customs_service` | ATLAS Zollausfuhr Service — Implementierung nach Zollkodex der Union (UZK). |
 | `audit_hardening` | Audit Hardening Service — NC-D1/D2 |
 | `bedarfsdeckung_service` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt". |
+| `bewerbung_loeschlauf_service` | Der Loeschlauf fuer Bewerberdaten. |
 | `bewerbung_service` | Bewerbungspipeline — ein Woerterbuch mit Uebergaengen und ein ehrlicher Fehler. |
 | `billing_batch_service` | Billing-batch orchestration over canonical invoice and self-billing sources. |
 | `business_partner_service` | Service layer for BusinessPartner aggregate management. |
