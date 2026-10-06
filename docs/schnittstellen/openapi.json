@@ -378216,11 +378216,24 @@
     },
     "/api/v1/portal/contracts": {
       "get": {
-        "operationId": "portal_contracts_api_v1_portal_contracts_get",
+        "description": "Listet alle aktiven Kontrakte des Kunden",
+        "operationId": "list_contracts_api_v1_portal_contracts_get",
         "parameters": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "description": "Mandanten-ID",
+            "in": "query",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "description": "Mandanten-ID",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kunden-ID",
+            "in": "query",
+            "name": "customer_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -378231,7 +378244,8 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "description": "Kunden-ID",
+              "title": "Customer Id"
             }
           }
         ],
@@ -378241,9 +378255,9 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalShopOut"
                   },
-                  "title": "Response Portal Contracts Api V1 Portal Contracts Get",
+                  "title": "Response List Contracts Api V1 Portal Contracts Get",
                   "type": "array"
                 }
               }
@@ -378266,9 +378280,11 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Contracts portal",
+        "summary": "Contracts auflisten",
         "tags": [
-          "compat"
+          "portal",
+          "shop",
+          "customer"
         ]
       }
     },
@@ -382157,8 +382173,56 @@
     },
     "/api/v1/portal/orders": {
       "get": {
-        "operationId": "portal_orders_api_v1_portal_orders_get",
+        "description": "Listet Bestellungen des Kunden",
+        "operationId": "list_orders_api_v1_portal_orders_get",
         "parameters": [
+          {
+            "description": "Mandanten-ID",
+            "in": "query",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "description": "Mandanten-ID",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kunden-ID",
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Kunden-ID",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "description": "Filter nach Status",
+            "in": "query",
+            "name": "status_filter",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/OrderStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter nach Status",
+              "title": "Status Filter"
+            }
+          },
           {
             "in": "query",
             "name": "skip",
@@ -382175,43 +382239,11 @@
             "name": "limit",
             "required": false,
             "schema": {
-              "default": 50,
-              "maximum": 200,
+              "default": 20,
+              "maximum": 100,
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status_filter",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status Filter"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -382220,7 +382252,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalOut"
+                  "$ref": "#/components/schemas/OrderList"
                 }
               }
             },
@@ -382242,17 +382274,32 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Orders portal",
+        "summary": "Orders auflisten",
         "tags": [
-          "compat"
+          "portal",
+          "shop",
+          "customer"
         ]
       },
       "post": {
-        "operationId": "portal_create_order_api_v1_portal_orders_post",
+        "description": "Erstellt eine neue Bestellung aus dem Kundenportal.\n\nBerücksichtigt automatisch:\n- Vorkauf-Guthaben (wird zuerst verwendet)\n- Kontrakt-Preise (falls verfügbar)\n- Listenpreise (als Fallback)\n\nIdempotency: Header X-Idempotency-Key verhindert doppelte Bestellungen.",
+        "operationId": "create_order_api_v1_portal_orders_post",
         "parameters": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "description": "Mandanten-ID",
+            "in": "query",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "description": "Mandanten-ID",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kunden-ID",
+            "in": "query",
+            "name": "customer_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -382263,7 +382310,8 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "description": "Kunden-ID",
+              "title": "Customer Id"
             }
           }
         ],
@@ -382271,20 +382319,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
+                "$ref": "#/components/schemas/OrderCreate"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalOut"
+                  "$ref": "#/components/schemas/OrderResponse"
                 }
               }
             },
@@ -382306,9 +382352,11 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create order portal",
+        "summary": "Order anlegen",
         "tags": [
-          "compat"
+          "portal",
+          "shop",
+          "customer"
         ]
       }
     },
@@ -382432,7 +382480,8 @@
     },
     "/api/v1/portal/orders/{order_id}": {
       "get": {
-        "operationId": "portal_order_detail_api_v1_portal_orders__order_id__get",
+        "description": "Liefert Details einer Bestellung",
+        "operationId": "get_order_api_v1_portal_orders__order_id__get",
         "parameters": [
           {
             "in": "path",
@@ -382444,8 +382493,20 @@
             }
           },
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "description": "Mandanten-ID",
+            "in": "query",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "description": "Mandanten-ID",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kunden-ID",
+            "in": "query",
+            "name": "customer_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -382456,7 +382517,8 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "description": "Kunden-ID",
+              "title": "Customer Id"
             }
           }
         ],
@@ -382465,7 +382527,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalOut"
+                  "$ref": "#/components/schemas/OrderResponse"
                 }
               }
             },
@@ -382487,9 +382549,11 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Order detail portal",
+        "summary": "Order abrufen",
         "tags": [
-          "compat"
+          "portal",
+          "shop",
+          "customer"
         ]
       }
     },
@@ -382583,11 +382647,24 @@
     },
     "/api/v1/portal/pre-purchases": {
       "get": {
-        "operationId": "portal_pre_purchases_api_v1_portal_pre_purchases_get",
+        "description": "Listet alle aktiven Vorkäufe/Guthaben des Kunden",
+        "operationId": "list_pre_purchases_api_v1_portal_pre_purchases_get",
         "parameters": [
           {
-            "in": "header",
-            "name": "X-Tenant-ID",
+            "description": "Mandanten-ID",
+            "in": "query",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "description": "Mandanten-ID",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kunden-ID",
+            "in": "query",
+            "name": "customer_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -382598,7 +382675,8 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "description": "Kunden-ID",
+              "title": "Customer Id"
             }
           }
         ],
@@ -382608,9 +382686,9 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/CompatBridgeOut"
+                    "$ref": "#/components/schemas/PortalShopOut"
                   },
-                  "title": "Response Portal Pre Purchases Api V1 Portal Pre Purchases Get",
+                  "title": "Response List Pre Purchases Api V1 Portal Pre Purchases Get",
                   "type": "array"
                 }
               }
@@ -382633,9 +382711,11 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Pre purchases portal",
+        "summary": "Pre purchases auflisten",
         "tags": [
-          "compat"
+          "portal",
+          "shop",
+          "customer"
         ]
       }
     },
@@ -382879,9 +382959,40 @@
     },
     "/api/v1/portal/products": {
       "get": {
-        "operationId": "portal_products_api_v1_portal_products_get",
+        "description": "Liefert Produkte für das Kundenportal mit Kontrakt- und Vorkauf-Informationen.\n\nProdukte werden angereichert mit:\n- Kontrakt-Status und -Preise falls Rahmenvertrag existiert\n- Vorkauf-Guthaben falls vorhanden\n- Letzte Bestellung für \"Erneut bestellen\" Funktion",
+        "operationId": "get_portal_products_api_v1_portal_products_get",
         "parameters": [
           {
+            "description": "Mandanten-ID",
+            "in": "query",
+            "name": "tenant_id",
+            "required": true,
+            "schema": {
+              "description": "Mandanten-ID",
+              "title": "Tenant Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kunden-ID (falls nicht aus Token)",
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Kunden-ID (falls nicht aus Token)",
+              "title": "Customer Id"
+            }
+          },
+          {
+            "description": "Filter nach Kategorie",
             "in": "query",
             "name": "kategorie",
             "required": false,
@@ -382894,10 +383005,12 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter nach Kategorie",
               "title": "Kategorie"
             }
           },
           {
+            "description": "Suchbegriff",
             "in": "query",
             "name": "search",
             "required": false,
@@ -382910,6 +383023,7 @@
                   "type": "null"
                 }
               ],
+              "description": "Suchbegriff",
               "title": "Search"
             }
           },
@@ -382929,27 +383043,11 @@
             "name": "limit",
             "required": false,
             "schema": {
-              "default": 200,
-              "maximum": 500,
+              "default": 50,
+              "maximum": 200,
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -382958,7 +383056,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PortalOut"
+                  "$ref": "#/components/schemas/PortalProductList"
                 }
               }
             },
@@ -382980,9 +383078,11 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Products portal",
+        "summary": "Portal products abrufen",
         "tags": [
-          "compat"
+          "portal",
+          "shop",
+          "customer"
         ]
       }
     },

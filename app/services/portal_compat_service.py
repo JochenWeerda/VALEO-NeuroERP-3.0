@@ -2,8 +2,7 @@
 from __future__ import annotations
 
 import logging
-import uuid as _uuid_mod
-from typing import Any, Optional
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -308,136 +307,6 @@ class PortalCompatService:
                 "verfuegbar": float(a.available_stock or 0) > 0,
             }
             for a in articles
-        ]
-
-    def list_portal_products(
-        self,
-        kategorie: Optional[str] = None,
-        search: Optional[str] = None,
-        skip: int = 0,
-        limit: int = 200,
-    ) -> dict:
-        q = self.db.query(ArticleModel).filter(ArticleModel.is_active == True)  # noqa: E712
-        if kategorie and kategorie != "alle":
-            q = q.filter(ArticleModel.category == kategorie)
-        if search:
-            q = q.filter(ArticleModel.name.ilike(f"%{search}%"))
-        total = q.count()
-        articles = q.order_by(ArticleModel.name.asc()).offset(skip).limit(limit).all()
-        items = [
-            {
-                "id": str(a.id),
-                "artikelnummer": str(getattr(a, "article_number", a.id)),
-                "name": a.name,
-                "kategorie": a.category or "sonstiges",
-                "beschreibung": getattr(a, "description", None) or "",
-                "einheit": a.unit or "Stk",
-                "preis": float(a.sales_price or 0),
-                "rabattPreis": None,
-                "verfuegbar": float(a.available_stock or 0) > 0,
-                "bestand": float(a.available_stock or 0),
-                "zertifikate": [],
-                "letzteBestellung": None,
-                "contractStatus": "NONE",
-                "contractPrice": None,
-                "contractRemainingQty": None,
-                "contractTotalQty": None,
-                "isPrePurchase": False,
-                "prePurchasePrice": None,
-                "prePurchaseTotalQty": None,
-                "prePurchaseRemainingQty": None,
-            }
-            for a in articles
-        ]
-        return {"items": items, "total": total, "page": skip // limit if limit else 0, "size": limit,
-                "has_contracts": 0, "has_pre_purchases": 0}
-
-    def list_sales_orders(self, skip: int = 0, limit: int = 50, status_filter: Optional[str] = None) -> dict:
-        orders = list_docs(self.db, "sales_order", limit=limit, tenant_id=self.tenant_id)
-        if status_filter:
-            orders = [o for o in orders if o.get("status") == status_filter]
-        items = [
-            {
-                "id": o.get("id", ""),
-                "order_number": o.get("number") or o.get("order_number", ""),
-                "order_date": (o.get("created_at", "")[:10] if o.get("created_at") else
-                               o.get("datum", "")[:10] if o.get("datum") else ""),
-                "status": o.get("status", "SUBMITTED"),
-                "item_count": len(o.get("positions") or o.get("items") or []),
-                "total_net": float(o.get("total_net") or o.get("total_amount") or o.get("totalAmount") or 0),
-                "main_article": (
-                    (o.get("positions") or o.get("items") or [{}])[0].get("bezeichnung") or
-                    (o.get("positions") or o.get("items") or [{}])[0].get("name") or ""
-                ) if (o.get("positions") or o.get("items")) else "",
-            }
-            for o in orders
-        ]
-        return {"items": items, "total": len(items)}
-
-    def get_sales_order(self, order_id: str) -> dict:
-        orders = list_docs(self.db, "sales_order", limit=1000, tenant_id=self.tenant_id)
-        for o in orders:
-            if str(o.get("id")) == order_id:
-                return o
-        raise EntityNotFoundError(f"Bestellung {order_id} nicht gefunden")
-
-    def create_sales_order(self, body: dict) -> dict:
-        from app.documents.router_helpers import save_to_store, get_repository
-        order_id = str(_uuid_mod.uuid4())
-        order = {
-            "id": order_id,
-            "number": f"PA-{order_id[:8].upper()}",
-            "status": "SUBMITTED",
-            "created_at": now_iso(),
-            "tenant_id": self.tenant_id,
-            **body,
-        }
-        repo = doc_repo(self.db)
-        repo.save("sales_order", order_id, order)
-        return order
-
-    def list_portal_contracts(self) -> list:
-        try:
-            contracts = list_docs(self.db, "kontrakt", limit=200, tenant_id=self.tenant_id)
-        except Exception:
-            contracts = []
-        return [
-            {
-                "id": c.get("id", ""),
-                "contract_number": c.get("nummer") or c.get("contract_number", ""),
-                "article_name": c.get("artikel_name") or c.get("article_name", ""),
-                "article_number": c.get("artikel_nummer") or c.get("article_number", ""),
-                "contract_price": float(c.get("preis") or c.get("contract_price") or 0),
-                "list_price": float(c.get("listenpreis") or c.get("list_price") or 0),
-                "unit": c.get("einheit") or c.get("unit", "kg"),
-                "total_quantity": float(c.get("gesamtmenge") or c.get("total_quantity") or 0),
-                "remaining_quantity": float(c.get("verbleibende_menge") or c.get("remaining_quantity") or 0),
-                "status": c.get("status", "ACTIVE"),
-                "valid_until": c.get("laufzeit_bis") or c.get("valid_until", ""),
-            }
-            for c in contracts
-        ]
-
-    def list_portal_pre_purchases(self) -> list:
-        try:
-            pps = list_docs(self.db, "vorkauf", limit=200, tenant_id=self.tenant_id)
-        except Exception:
-            pps = []
-        return [
-            {
-                "id": p.get("id", ""),
-                "pre_purchase_number": p.get("nummer") or p.get("pre_purchase_number", ""),
-                "article_name": p.get("artikel_name") or p.get("article_name", ""),
-                "article_number": p.get("artikel_nummer") or p.get("article_number", ""),
-                "pre_purchase_price": float(p.get("preis") or p.get("pre_purchase_price") or 0),
-                "current_list_price": float(p.get("listenpreis") or p.get("current_list_price") or 0),
-                "unit": p.get("einheit") or p.get("unit", "kg"),
-                "total_quantity": float(p.get("gesamtmenge") or p.get("total_quantity") or 0),
-                "remaining_quantity": float(p.get("verbleibende_menge") or p.get("remaining_quantity") or 0),
-                "payment_date": p.get("zahldatum") or p.get("payment_date", ""),
-                "valid_until": p.get("laufzeit_bis") or p.get("valid_until"),
-            }
-            for p in pps
         ]
 
     def list_portal_vertraege(self) -> list:

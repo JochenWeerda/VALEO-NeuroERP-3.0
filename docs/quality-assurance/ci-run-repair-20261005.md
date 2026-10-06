@@ -439,3 +439,58 @@ GitHub 8dd0020eb: Docs Build, Docs Governance, PostgreSQL/require_db und
 Erntepeak erfolgreich. Gesamt-CI und Security queued; abgebrochene OpenAPI-/
 Quality-/E2E-Laeufe sind keine Abnahme. Security- und weitere Routerbefunde
 bleiben explizit offen, bis passende neue Lauf-Evidenz vorliegt.
+
+
+## Kanonisches Kundenportal und statische Auswertungen am 2026-10-06
+
+Die echte App registrierte sechs Portal-Aufrufe mehrfach: GET products,
+orders, orders/{order_id}, contracts, pre-purchases und POST orders.
+portal_shop.py ist zuerst registriert und wird ausgefuehrt; compat.py
+ueberschrieb dessen OpenAPI-Vertraege mit generischen Antwortmodellen,
+untypisiertem Create-Body und abweichender Mandantenuebergabe. Der aktive
+Frontend-Verbraucher lib/services/portal-service.ts verwendet bereits
+PortalProductList, OrderCreate/OrderResponse und tenant_id als Queryparameter.
+
+Nur die sechs nachrangigen Compat-Routen und ihre sechs ausschliesslich
+von dort verwendeten PortalCompatService-Methoden sind entfernt. Andere
+Portal-/Lieferantenfunktionen bleiben erhalten. Der Rueckbau entfernt
+62 Endpoint-Zeilen und 130 Service-Zeilen plus einen ungenutzten UUID-Import;
+der ungenutzte Any-Importanteil ist ebenfalls entfernt. Verbraucherpruefung
+in app/tests/services/modules bestaetigt keine weiteren Aufrufer dieser
+Service-Methoden. Kein neuer Adapter, keine Migration und keine Datenloeschung.
+
+GET orders/{order_id} war vor GET orders/reconciliation und orders/observability
+registriert. Damit wertete FastAPI die statischen Auswertungsnamen als
+Bestell-ID aus. Der unveraenderte Detailhandler wird jetzt nach beiden
+statischen GET-Routen registriert. Der AST-Vergleich gegen committed HEAD
+bestaetigt identische Funktionen, Decorators und Dependencies fuer das
+vollstaendige Portal-Shop-Modul; ausschliesslich Reihenfolge geaendert.
+Bestehende Geschaeftstag-, Bestell- und Kundenlogik bleibt unveraendert.
+Diese Aenderung ist keine neue Authentifizierungs-/Berechtigungsabnahme.
+
+20 Tests bestehen in 27,50 Sekunden: kanonische Router-Vertraege, sechs
+OpenAPI-Vertraege aus den real registrierten Portal-Routen, drei First-FULL-
+Match-Abnahmen (beide statischen Auswertungen und normale Bestell-ID) und
+bestehender Geschaeftstag-Test. Create dokumentiert weiterhin tatsaechliches
+HTTP 201, OrderCreate und OrderResponse; Produkte/Bestelllisten/Detail und
+Anspruchslisten dokumentieren ihre tatsaechlichen Typen und tenant_id.
+Die Match-Tests starten keine App-Lifespan und schreiben keine Fachdaten.
+Probe --status: quittung_ohne_vorgang_20261006; kein Reset, neue DB/Container.
+
+Die Godfile-Baseline sinkt ausschliesslich fuer compat.py von 3693 auf 3631.
+Dateigroessenratsche, Paginierung (284 Abfragen/257 Funktionen) und
+Baseline-Integritaet gegen HEAD bestehen. Alle drei committed-source
+Code-Inventare und der bestehende Architekturindex --check sind aktuell;
+keine Domains, Container oder API-Pfade hinzugefuegt/entfernt.
+
+GitHub 7b935a5b1: Docs Governance und Erntepeak erfolgreich; Docs Build,
+PostgreSQL und OpenAPI laufen noch, weitere Gesamt-/Security-Jobs warten.
+Keine Gesamtfreigabe und keine Abschwaechung der bestehenden Gates.
+
+
+Kanonische Spec-Abnahme aus committed 00485d2ea plus drei eigenen Portal-
+Hunks: exakt dieselben 3096 Pfade und HTTP-Methoden erhalten; gerendertes
+Artefakt erneut mit build_spec() verglichen. Reale Doppelgruppen sinken
+von 47 auf 41. Spec und Inventare werden ausschliesslich indexseitig
+integriert; fremde Arbeitsbaumfassungen und laufende Bewerberarbeit bleiben
+erhalten. Die restlichen 41 Routerkonflikte und Security-Befunde bleiben offen.
