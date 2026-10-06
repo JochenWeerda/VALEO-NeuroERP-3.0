@@ -80,7 +80,6 @@
     "app/api/v1/endpoints/crm_kim.py::_safe": 1,
     "app/api/v1/endpoints/crm_partner_suche.py::_safe": 1,
     "app/api/v1/endpoints/customer_extensions.py::customer_geo_search": 1,
-    "app/api/v1/endpoints/customers.py::list_interessenten": 1,
     "app/api/v1/endpoints/disposition.py::get_disposition_stats": 1,
     "app/api/v1/endpoints/dms_images.py::list_dms_documents": 1,
     "app/api/v1/endpoints/dms_images.py::list_dms_images": 1,

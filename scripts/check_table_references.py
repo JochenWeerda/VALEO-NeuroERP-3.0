@@ -138,7 +138,13 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 #: `.drucker` an. Die beiden Wege quittierten vorher einen Vorgang, der nicht
 #: stattfand — sie nannten die Tabellen nur im Kommentar
 #: ("In production: INSERT INTO …").
-BASELINE_LEBEND = 2
+#:
+#: 2026-10-06, lebend 2 -> 1: `domain_crm.interessenten` wird nicht angelegt,
+#: sondern abgeloest — die Interessentenwege lesen und schreiben
+#: `public.crm_leads`, das Register mit 97 Zeilen aus der
+#: Durchdringungs-Akquise. Es bleibt `domain_shared.notifications`
+#: (compat.py).
+BASELINE_LEBEND = 1
 BASELINE_RUHEND = 25
 
 ENDPUNKTE = pathlib.Path("app/api/v1/endpoints")

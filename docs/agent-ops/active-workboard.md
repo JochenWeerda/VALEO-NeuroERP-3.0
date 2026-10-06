@@ -13,6 +13,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**Nebenbuch-Teilclaim (2026-10-06, reserviert):** app/finance/router.py nur die zwei nachrangigen GET-/POST-Platzhalter der Nebenbuch-Abstimmung; tests/test_canonical_router_mounts.py und neuer Nebenbuch-Regressionsvertrag. Echte mandantengebundene Datenbankhandler bleiben kanonisch. Keine aktive Fremdbelegung fuer diese Backend-Funktionen gefunden; committed-source Spec/Inventare und eigene QA/Slice werden nachgezogen. Abnahme: eindeutige Registrierung, gespeicherte Anlage, Tenantfilter und 404 bei fehlendem Datensatz; keine neue Datenbank.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
@@ -1491,7 +1493,7 @@ Migration auf beiden Datenbanken; alle vier Ratschen gruen; tsc und eslint saube
 
 **Doku:** `docs/quality-assurance/quittung-ohne-vorgang-20261006.md`.
 
-## INTERESSENT-IST-LEAD-20261006 — in Arbeit, Claude Code
+## INTERESSENT-IST-LEAD-20261006 — abgeschlossen, Claude Code
 
 **Befund 1 — drei Modelle fuer einen Begriff, und der benutzte ist der leere.**
 
@@ -1576,6 +1578,49 @@ Mehrschema-Ordnung widerspricht. Der Umzug nach `domain_crm` ist ein eigener
 Slice **mit Daten** (97 Zeilen) und wird hier nur benannt. Die
 Statuswoerter des Bestands sind `NEW`/`CONVERTED` (englisch) — sie bleiben, weil
 Daten darauf stehen; die Zuordnung zum deutschen Weg steht an einer Stelle.
+
+**Ergebnis (2026-10-06):** Die drei Interessentenwege arbeiten auf
+`public.crm_leads`; `domain_crm.interessenten` wird **nicht** angelegt. **Keine
+Migration** — das Register existiert und fuehrt 97 Zeilen. Die Nummer wird in den
+Notizen vermerkt (`[INT-JJJJ-NNNNN]`) und aus der **hoechsten vermerkten**
+gezaehlt statt aus `COUNT(*)`; uebernommene Akquise-Leads tragen keine und
+bekommen keine erfundene. Eigene Antwortmodelle statt `CustomersOut` mit
+`extra="allow"`, Pagination, `uuid7`.
+
+**Die Art.-17-Loeschung trifft jetzt das Register.** Sie anonymisierte
+`domain_crm.leads SET company_name = …` — vier Spalten, die es dort nicht gibt.
+Der Schritt scheiterte, **jeder Loeschantrag zu einem Lead blieb dauerhaft
+`IN_BEARBEITUNG`** (Art. 12 Abs. 3 DSGVO), und die Personendaten in
+`public.crm_leads` blieben unberuehrt. Dass das auffiel, ist das Verdienst des
+vorangegangenen Art.-17-Slices: Ohne dessen Sicherungspunkte und das ehrliche
+Protokoll haette der Antrag "erledigt" gemeldet.
+
+**Die Konvertierung ist eine Transaktion.** Vorher legte der Weg den Kundensatz an
+und setzte den Stand in einem eigenen `try/except: rollback` — das nahm den
+Kundensatz mit, und die Antwort meldete trotzdem `status: "KUNDE"` samt
+Kundennummer. Ein zweiter Durchlauf wird jetzt abgewiesen (er legte einen zweiten
+Kunden an), die Zeile wird mit `FOR UPDATE` gesperrt.
+
+**19 neue Vertraege, 53 im CRM/DSGVO-Umfeld gruen.**
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **2 -> 1**. Es bleibt
+`domain_shared.notifications` (compat.py). Paginierungs-Baseline gesenkt.
+
+**Handshakes:**
+1. `public.crm_leads` liegt im `public`-Schema — Umzug nach `domain_crm` ist ein
+   eigener Slice **mit Daten** und beruehrt `crm_lead_gen_service`,
+   `crm_partner_suche`, `crm_reports`.
+2. `domain_crm.leads` ist leer und meint die Verkaufschance an einem Kunden —
+   gehoert in den CRM-ADR.
+3. `portal_interessent.py` haelt Interessenten **im Speicher**; eine
+   Selbstregistrierung, die einen Neustart nicht uebersteht, ist eine eigene
+   Luecke.
+4. **Fremder Rotstand (Godfile):** `personal.py` ist im geteilten Baum von 3315
+   auf 3342 Zeilen gewachsen (neuer `delete_application`-Weg, nicht committet) und
+   bricht damit die Baseline, die ich im Personal-Slice gesenkt habe — die Ratsche
+   arbeitet wie vorgesehen. Nicht angefasst.
+
+**Doku:** `docs/quality-assurance/interessent-ist-lead-20261006.md`.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 
