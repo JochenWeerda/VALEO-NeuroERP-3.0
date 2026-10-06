@@ -54,6 +54,13 @@ Cache-/Krypto-Pakete werden nach bestehenden ADRs getrennt bewertet.
 auf die tatsaechlichen Frontend-Quellen begrenzen, indexseitiger Minimalhunk
 auf committed CSS. Fremde Token-/Layout-WIP bleiben erhalten. CSS-Kompilation,
 Klassenabdeckung und Browser-WCAG pruefen; keine Timeout-Erhoehung.
+**Vollsuite-Testclaim (2026-10-06):** tests/test_hrm_compliance_pos.py nur
+entfernte Runtime-DDL-Mocks und explizite Tenantparameter; runtime_sweep_category_d
+nur lokaler Opportunity-Fallback-Vertrag; welle5_response_models nur Trennung
+von erfolgreichen Antworten und bereits gesperrtem 409-Kassenabschluss.
+Keine produktiven DDL-Helfer wieder einfuehren, keine Assertions entfernen;
+aktuelle Tenant-/Fallback-/Sperrvertraege pruefen. Historische Claims abgeschlossen,
+keine geaenderten Arbeitsbaumdateien in diesem Teilclaim.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
