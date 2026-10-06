@@ -15,6 +15,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Nebenbuch-Teilclaim (2026-10-06, reserviert):** app/finance/router.py nur die zwei nachrangigen GET-/POST-Platzhalter der Nebenbuch-Abstimmung; tests/test_canonical_router_mounts.py und neuer Nebenbuch-Regressionsvertrag. Echte mandantengebundene Datenbankhandler bleiben kanonisch; Pflichtperiode wird als YYYY-MM aus abstimmungs_datum abgeleitet und Antwortsummen/-details initialisiert (Anlagevertrag enthaelt nur Datum und Buchungskreis). Keine aktive Fremdbelegung fuer diese Backend-Funktionen gefunden; committed-source Spec/Inventare und eigene QA/Slice werden nachgezogen. Abnahme: eindeutige Registrierung, gespeicherte Anlage, Tenantfilter und 404 bei fehlendem Datensatz; keine neue Datenbank.
 
+**Integrationsclaim (2026-10-06, reserviert):** config/architecture-domain-prefixes.yaml ausschliesslich exakte CRM-Zuordnung interessent_service; tests/test_generate_architecture_index.py entsprechender Vertrag und committed-source architecture-index. Generator meldet genau diesen fehlenden Service aus ef60a6076; dessen kanonische Datenquelle ist crm_leads. Keine Fremdimplementierung veraendern.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
