@@ -53,6 +53,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Futter-Ratschen-Nachtrag (vor Edit):** config/pagination_baseline.json ausschliesslich den entfallenen _soft_delete_futter_articles-Eintrag entfernen (1 auf 0). Der Pruefer meldet genau diesen sinkenden Alt-Eintrag; keine anderen Grenzen/Abfragen veraendern.
 
+**Einwilligungs-Integrationsclaim (2026-10-06, reserviert):** config/architecture-domain-prefixes.yaml nur exakte bewerbung_einwilligung_service: hr, tests/test_generate_architecture_index.py entsprechender Zuordnungsvertrag und committed-source Artefakte. Paralleles b7b6a042c fuegt den Dienst und GET/POST/DELETE auf einem neuen Einwilligungspfad hinzu; Fachcode, Migration, laufende Tests und Masken geschuetzt. Seine DB-Abnahme fehlt wegen Docker-Dienststop; Integration bedeutet keine fachliche Freigabe.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
