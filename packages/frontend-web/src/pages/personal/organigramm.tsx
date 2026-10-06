@@ -14,19 +14,15 @@ type OrgUnit = {
   children?: OrgUnit[]
 }
 
-function buildTree(units: OrgUnit[]): OrgUnit[] {
-  const map = new Map<string, OrgUnit>()
-  units.forEach((u) => map.set(u.id, { ...u, children: [] }))
-  const roots: OrgUnit[] = []
-  map.forEach((u) => {
-    if (u.parent_id && map.has(u.parent_id)) {
-      const parent = map.get(u.parent_id)
-      if (parent) { parent.children = parent.children ?? []; parent.children.push(u) }
-    } else {
-      roots.push(u)
-    }
-  })
-  return roots
+/**
+ * Der Endpunkt liefert den Baum schon verschachtelt (`org_chart`), also wird er
+ * hier nicht zweimal gebaut. Bis zum 06.10.2026 las diese Maske `data.units` —
+ * ein Feld, das es in der Antwort nie gab. Sie zeigte deshalb immer „Keine
+ * Organisationseinheiten vorhanden", auch als der Endpunkt noch 503 antwortete,
+ * weil `domain_hr.org_units` in keiner Datenbank existierte.
+ */
+function zaehleEinheiten(units: OrgUnit[]): number {
+  return units.reduce((summe, u) => summe + 1 + zaehleEinheiten(u.children ?? []), 0)
 }
 
 function OrgNode({ unit, depth = 0 }: { unit: OrgUnit; depth?: number }): JSX.Element {
@@ -46,25 +42,29 @@ function OrgNode({ unit, depth = 0 }: { unit: OrgUnit; depth?: number }): JSX.El
 }
 
 export default function OrganigrammPage(): JSX.Element {
-  const { data, isError, error, refetch } = useQuery<{ units: OrgUnit[] }>({
+  const { data, isError, error, refetch } = useQuery<{ org_chart: OrgUnit[] }>({
     queryKey: ['org-chart'],
-    queryFn: async () => (await apiClient.get<{ units: OrgUnit[] }>('/api/v1/personal/org-chart')).data,
+    queryFn: async () =>
+      (await apiClient.get<{ org_chart: OrgUnit[] }>('/api/v1/personal/org-chart')).data,
   })
 
   if (isError) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
 
-  const tree = buildTree(data?.units ?? [])
+  const tree = data?.org_chart ?? []
+  const anzahl = zaehleEinheiten(tree)
 
   return (
     <div className="flex flex-col">
       <div className="space-y-4 p-6">
         <div>
-          <h1 className="text-3xl font-bold">Organigramm</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Organigramm</h1>
           <p className="text-muted-foreground">Organisationsstruktur und Abteilungen</p>
         </div>
 
         <Card>
-          <CardHeader><CardTitle>Organisationsstruktur ({data?.units.length ?? 0} Einheiten)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Organisationsstruktur ({anzahl} Einheiten)</CardTitle>
+          </CardHeader>
           <CardContent>
             {tree.length === 0 && <p className="text-sm text-muted-foreground">Keine Organisationseinheiten vorhanden.</p>}
             {tree.map((root) => (

@@ -19,7 +19,8 @@ test.describe('CRM - Leads @smoke', () => {
     await waitForAppReady(adminPage);
 
     await expect(adminPage).toHaveURL(/\/crm\/lead\/(new|neu)$/);
-    await expect(adminPage.locator('h1').first()).toContainText(/Lead/i, { timeout: 15000 });
+    await expect(adminPage.getByRole('heading', { name: 'Kundenakte', exact: true })).toBeVisible({ timeout: 15000 });
+    await expect(adminPage.getByText('CRM / Interessent', { exact: true })).toBeVisible();
     // Feldlabels der nativen Lead-Maske (ScreenDefinition crm/lead, UIX-Rollout):
     // "Firma" aus dem Alt-Formular heisst dort "Unternehmen".
     await expect(adminPage.getByLabel(/Unternehmen/i).first()).toBeVisible();

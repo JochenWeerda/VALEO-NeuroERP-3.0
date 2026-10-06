@@ -9,6 +9,49 @@ last_reviewed: 2026-10-05
 
 # CI-Reparatur 2026-10-05
 
+## Fortsetzung 2026-10-06
+
+Run 37374442374 auf 1784c66b1: 15355 bestanden, 19 fehlgeschlagen und
+17 Setup-Fehler; diese Zahl ist keine Vollsuite-Freigabe. Frontend-Build,
+Docs/Governance, PostgreSQL-Job und kritische E2E bestanden getrennt.
+
+Fuenf HRM/POS-Vertraege mockten entfernte Runtime-DDL-Helfer. Die Mocks
+sind entfernt; Aufrufe uebergeben den Tenant und pruefen dessen SQL-Bindung.
+Opportunity-Ausfall prueft den vorhandenen tenantgebundenen lokalen Fallback
+statt einen direkten Aufruf mit FastAPI-Depends-Platzhaltern. Der Typwaechter
+beruecksichtigt den expliziten 409-Kassenabschluss; dessen keine-Erfolgsantwort-
+und keine-DB-Mutation-Vertraege bleiben aktiv. 51 gezielte Backendpruefungen
+einschliesslich DDL-Drift und echtem Kassen-/Journalbestand bestehen im vorhandenen
+valeo_probe (Revision quittung_ohne_vorgang_20261006), ohne Reset oder Migration.
+
+InventoryLotOut ergaenzt die migrierte boolesche Spalte eudr_relevant; GET-
+Antworten duerfen dieses gespeicherte Compliance-Kennzeichen nicht verlieren.
+Die zentrale OpenAPI wird aus committed Quellen plus diesem Schemahunk erzeugt.
+Sie enthaelt 3092 Pfade und zieht auch die bereits committed Personal-
+Vertragsaenderungen aus 4a5a32e37 nach; fremde Arbeitsbaumartefakte bleiben erhalten.
+Elf bestehende Lot-/Materialfluss-Antwortvertraege bestehen zusaetzlich.
+
+CRM-Smokes des Runs 37374442347 erwarteten noch das entfernte KIM-Sidebar-
+Layout und den alten Lead-Titel. Vier aktualisierte Browserpruefungen bestehen
+in 30,8 Sekunden: Kundenlisten-Weiterleitung unter unveraendertem Zeitbudget,
+Deep-Link mit Kundenkennung/Register sowie native Lead-Felder und Kontext.
+
+Offen bleiben weitere Vollsuite-Befunde (unter anderem SalesOrder-Fixtures,
+Architekturzuordnungen, Maskenvertraege und Settlement) sowie Grype und die
+zwei ungepatchten Node-Advisories. Security-Gates und Severity-Schwellen bleiben
+unveraendert; kein Gesamt-Gruennachweis.
+
+Der nachfolgende Quality-Lauf 37375993205 auf dem Personal-Commit 4a5a32e37
+meldet eine neue direkte Kalenderquelle in personal_organisation_service.
+Das Standardjahr folgt jetzt business_today().year; die Kalender-Ratsche
+besteht unveraendert (202 Stellen/112 Dateien). Drei Code-Inventare sind
+aktuell; 44 echte Organigramm-/Zeitkonto-Vertraege bestehen im gemeinsamen Probe.
+Sie pruefen unter anderem Korrekturen, Saldo, Uebertrag und Tenanttrennung.
+Die drei Inventare wurden
+aus committed Backend-/Migrationsquellen nachgezogen und mit --check aktuell.
+Der dort ebenfalls fehlgeschlagene Worklist-Titeltest ist ein weiterer
+Renderer-Befund und bleibt getrennt offen; keine Baseline angehoben.
+
 Die Runs 37359972771, 37359972315, 37359972362, 37359972369,
 37360271159 und 37360270406 belegen unterschiedliche Ursachen.
 Die Korrekturen lassen Baselines, Audit-Schwellen und Pflichtgates bestehen.

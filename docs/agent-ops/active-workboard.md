@@ -54,6 +54,27 @@ Cache-/Krypto-Pakete werden nach bestehenden ADRs getrennt bewertet.
 auf die tatsaechlichen Frontend-Quellen begrenzen, indexseitiger Minimalhunk
 auf committed CSS. Fremde Token-/Layout-WIP bleiben erhalten. CSS-Kompilation,
 Klassenabdeckung und Browser-WCAG pruefen; keine Timeout-Erhoehung.
+**Vollsuite-Testclaim (2026-10-06):** tests/test_hrm_compliance_pos.py nur
+entfernte Runtime-DDL-Mocks und explizite Tenantparameter; runtime_sweep_category_d
+nur lokaler Opportunity-Fallback-Vertrag; welle5_response_models nur Trennung
+von erfolgreichen Antworten und bereits gesperrtem 409-Kassenabschluss.
+Keine produktiven DDL-Helfer wieder einfuehren, keine Assertions entfernen;
+aktuelle Tenant-/Fallback-/Sperrvertraege pruefen. Historische Claims abgeschlossen,
+keine geaenderten Arbeitsbaumdateien in diesem Teilclaim.
+**CRM-Smoke-Testclaim (2026-10-06):** kim-performance-smoke.spec.ts auf
+die bereits committed native Weiterleitung statt entferntes KIM-Sidebar-Layout
+umstellen; leads-smoke.spec.ts auf den kanonischen Titel Kundenakte plus
+Lead-Daten/Feldvertrag nachziehen. Budget bleibt bestehen, Redirect-/Entity-/Tab-
+Kontext wird explizit geprueft. Keine Masken-/Renderer-WIP uebernehmen.
+**EUDR-Antwortclaim (2026-10-06):** InventoryLotOut in
+inventory_lot_bundle_schemas.py um die bereits migrierte boolesche
+eudr_relevant-Spalte ergaenzen. Bestehender DDL-Driftvertrag und true/false-
+Serialisierung pruefen. OpenAPI aus committed Quellen plus diesem eigenen
+Schemahunk regenerieren; keine Migration und keine fremde Spec-WIP.
+**Personal-Kalenderclaim (2026-10-06):** personal_organisation_service.py nur
+default Zeitkontojahr von date.today auf business_today umstellen. Nachgewiesener
+neuer Ratschenbefund aus abgeschlossenem Personal-Slice; bestehende Zeitkonto-
+Vertraege und Kalendergate pruefen. Keine Baseline-Erhoehung.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
@@ -67,6 +88,12 @@ node-forge/braces ohne gepatchtes Release offen. CSS-Quellensuche als
 Browser-Timeout-Ursache behoben: acht WCAG-Routen in 21,5 s bestanden.
 GitHub Docs/OpenAPI im zweiten Versuch gruen; nicht gestartete Jobs wegen
 fehlender Runner erneut angestossen. Kein vollstaendig gruener CI-Stand.
+**Fortsetzung 2026-10-06:** 51 Backend-/DDL-/Kassenvertraege und elf
+Lot-/Materialfluss-Vertraege gruen; vier native CRM-Smokes gruen (30,8 s).
+InventoryLotOut behaelt eudr_relevant. OpenAPI aus a5de275ce plus eigenem
+Schemahunk aktualisiert, inklusive committed Personal-Vertraegen.
+Vollsuite 1784c66b1 hatte 19 Failures/17 Setup-Fehler bei 15355 bestandenen
+Tests; weitere Fixtures, Masken/Architektur und Security bleiben offen.
 
 ## HANDSHAKE-GAP-CLOSURE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 
@@ -1106,7 +1133,7 @@ Befund: Die Information lag da, sie wurde nur nicht gelesen.
 **Doku:** `docs/quality-assurance/preismodell-kundenstufe-20261005.md`,
 ADR `docs/architecture/domains/preise/fuehrendes-modell.md`.
 
-## PERSONAL-ORGANISATION-ZEITKONTO-20261006 — in Arbeit, Claude Code
+## PERSONAL-ORGANISATION-ZEITKONTO-20261006 — abgeschlossen, Claude Code
 
 **Befund:** Drei Verweise ins Leere in `personal.py`, und sie haengen an zwei
 Faechern, die beide nachweispflichtig sind.
@@ -1188,6 +1215,139 @@ zeigen danach etwas anderes — richtiger, aber anderes. Die Abnahme der
 Saldodefinition gehoert dem Personal-Owner. `shifts.assigned_employee_refs` ist
 eine JSONB-Liste ohne Fremdschluessel auf die Person; das bleibt so und wird
 benannt.
+
+**Ergebnis (2026-10-06):** Migration
+`personal_organisation_zeitkonto_20261006` legt `domain_hr.org_units` und
+`domain_hr.time_account_adjustments` an — mit `tenant_id`, sieben
+Pruefbedingungen und zwei `RESTRICT`-Fremdschluesseln (Elternverweis,
+Kostenstelle). `domain_hr.schichten` wird **nicht** nachgebaut: Die Planstunden
+kommen aus der vorhandenen `domain_hr.shifts`, gerechnet aus `starts_at`/`ends_at`
+und nur fuer zugeordnete, nicht abgesagte Schichten. Das Statuswoerterbuch dort
+ist englisch (`planned/warning/blocked/cancelled`) und steht jetzt einmal im
+Dienst.
+
+**Zyklenschutz dreifach:** Pruefbedingung fuer den trivialen Fall, Pruefung beim
+Umhaengen (409, **bevor** der Zyklus entsteht), Tiefengrenze beim Lesen (409 statt
+gekuerzter Baum).
+
+**Saldoformel richtiggestellt:** Uebertrag = (Ist − Plan + Korrekturen) der
+Vorperioden, laufende Periode analog, Saldo = Summe. Die Korrektur zaehlt genau
+einmal (vorher zweimal), und der "Uebertrag" ist kein Lebenssummenwert mehr
+(vorher Ist-Stunden aller Vorjahre).
+
+**Maske:** `organigramm.tsx` las `data.units` — ein Feld, das die Antwort nie
+hatte. Sie haette also auch nach der Migration "Keine Organisationseinheiten
+vorhanden" gezeigt. Liest jetzt `org_chart` und baut den Baum nicht zweimal.
+
+**Godfile:** Logik in `app/services/personal_organisation_service.py`;
+`personal.py` 3345 -> **3315** Zeilen, Baseline nachgezogen.
+
+**Zwei Funde des Pruefstands:** Eine Addition von 24 Stunden **auf einen
+`time`-Wert** rechnet modulo 24 und ergab fuer die Nachtschicht −16 Stunden —
+richtig ist die Addition auf das Intervall. Und `time_entries` hat eine
+Bereichspruefung, die meinen Testwert von 40 Stunden an einem Tag zu Recht
+abwies.
+
+**Altlasttest:** `test_time_account_uses_canonical_time_entries_columns` mockte
+`domain_hr.schichten` in die Welt und bestaetigte damit die doppelt gezaehlte
+Korrektur. Ersetzt durch drei Tests auf Tabellenziel, Saldogleichung und
+Zyklenschutz.
+
+**44 neue Vertraege, 48 mit den ersetzten Unittests gruen**; Migration auf beiden
+Datenbanken; alle vier Ratschen gruen.
+
+**Ratsche:** Tabellenverweise an lebenden Wegen **7 -> 4**. Es bleiben:
+`domain_crm.interessenten` (customers.py), `domain_erp.druckauftraege`
+(etiketten.py), `domain_erp.schaden_meldungen` (schaeden.py),
+`domain_shared.notifications` (compat.py).
+
+**Handshakes:**
+1. `uebertrag_vorperioden` ersetzt `transferred_from_prev_period` und bedeutet
+   etwas anderes (richtiger, aber anderes). Abnahme der Saldodefinition beim
+   Personal-Owner.
+2. `shifts.assigned_employee_refs` bleibt eine JSONB-Liste ohne Fremdschluessel
+   auf die Person.
+3. Die Einheitenart `GESCHAEFTSBEREICH` ist neu; das Woerterbuch steht an einer
+   Stelle, falls im Haus eine andere Gliederung gilt.
+
+**Doku:** `docs/quality-assurance/personal-organisation-zeitkonto-20261006.md`.
+
+## QUITTUNG-OHNE-VORGANG-20261006 — in Arbeit, Claude Code
+
+**Befund:** Drei Wege quittieren einen Vorgang, der **nicht stattfindet**. Das ist
+nicht derselbe Fehler wie eine fehlende Tabelle: Dort antwortet der Weg 503 und
+jemand merkt es. Hier antwortet er `201` mit einer Nummer.
+
+| Weg | Was er antwortet | Was passiert |
+| --- | --- | --- |
+| `POST /schaeden/meldungen` | `201`, Meldungsnummer `SM-…`, `status: "gemeldet"` | **nichts** — kein INSERT, nur ein Logeintrag |
+| `GET /schaeden/meldungen` | eine Hagelschadenmeldung ueber 12.500 EUR, Zeuge „Hans Mueller" | **erfundene Demo-Daten**, als waeren sie Bestand |
+| `GET /schaeden/versicherungen` | vier Versicherungsvertraege mit Vertragsnummern | erfunden |
+| `POST /etiketten/druckauftrag` | `201`, Auftragsnummer, `status: "erstellt"` | **nichts** — kein INSERT, kein Druck |
+| `GET /etiketten/drucker` | drei Drucker mit IP-Adressen und Status „online" | erfunden |
+| `POST /compliance/gelangensbestaetigung/{id}/erinnerung` | `erinnerung_gesendet: true` | **nichts** — „Stub: In production this would send email/fax" |
+
+**Warum das die schwerste Klasse dieser Welle ist:** Eine Schadenmeldung an die
+Versicherung ist fristgebunden — § 30 Abs. 1 VVG verlangt die Anzeige
+unverzueglich nach Kenntnis, und Hagelpolicen nennen regelmaessig wenige Tage.
+Ein Haus, das eine Meldungsnummer in der Hand hat, meldet nicht noch einmal. Die
+Frist laeuft ab, und der Beweis, dass gemeldet wurde, existiert nie. Dasselbe bei
+der Erinnerung zur Gelangensbestaetigung: Sie ist Teil der Nachweiskette nach
+§ 17a UStDV, und `erinnerung_gesendet: true` heisst, dass niemand mehr nachhakt.
+
+**Die Regel dieses Slices:** *Ein Weg darf nicht quittieren, was er nicht getan
+hat.* Entweder er tut es, oder er sagt, dass er es nicht kann.
+
+**Was angelegt wird** (Migration `quittung_ohne_vorgang_20261006`):
+`domain_erp.versicherungen`, `domain_erp.schaden_meldungen`,
+`domain_erp.drucker`, `domain_erp.druckauftraege` — alle mit `tenant_id`,
+Statuswoerterbuch und den Pruefbedingungen, die der Fachlichkeit entsprechen.
+
+**Die Modellierung, und warum so:**
+* **Die Meldefrist steht am Vertrag, nicht im Code.** `meldefrist_tage` an der
+  Versicherung; `melden_bis` ist am Schaden **abgeleitet** aus Schadendatum plus
+  Frist. Eine Frist, die im Code steht, gilt fuer alle Policen gleich — und das
+  ist sie nicht.
+* **`GEMELDET` braucht einen Zeitpunkt** (`ck_schaden_meldung_datiert`). Ein
+  Status "gemeldet" ohne Wann ist kein Nachweis.
+* **Das Anlegen erzeugt einen `ENTWURF`, nicht eine Meldung.** Das System kann
+  nicht behaupten, der Versicherer sei unterrichtet; es gibt keinen Versandweg.
+  Das Melden ist ein eigener Schritt, der festhaelt **wann und durch wen** — und
+  der sagt, dass die Uebermittlung ausserhalb des Systems erfolgt ist.
+* **Ein Druckauftrag endet bei `ANGELEGT`**, nicht bei `fertig`. Es ist kein
+  Spooler angebunden; der Weg sagt das (`uebermittlung: "NICHT_ANGEBUNDEN"`)
+  statt einen Druck zu behaupten.
+* **Die Erinnerung** wird festgehalten (`erinnerung_angefordert_am`,
+  `erinnerung_versuche`) und die Antwort nennt `versand: "NICHT_KONFIGURIERT"`.
+  Der Nachweis, dass jemand erinnern **wollte**, ist etwas wert; die Behauptung,
+  es sei versendet, ist es nicht.
+
+**Dateibesitz:** `alembic/versions/quittung_ohne_vorgang_20261006.py`,
+`app/services/schaden_service.py` (neu),
+`app/services/etikettendruck_service.py` (neu),
+`app/api/v1/endpoints/schaeden.py`, `app/api/v1/endpoints/etiketten.py`,
+`app/api/v1/endpoints/gelangensbestaetigung.py` (nur der Erinnerungsweg),
+`tests/test_quittung_ohne_vorgang_vertrag.py` (neu),
+`packages/frontend-web/src/pages/schaeden/liste.tsx` und `meldung.tsx`,
+`packages/frontend-web/src/lib/api/schaeden.ts`,
+`packages/frontend-web/src/lib/api/etiketten.ts` (nur die Formen und der
+Statustext), `scripts/check_table_references.py` (nur die Schwelle), eigene
+QA-Doku und dieser Abschnitt.
+
+**Abnahme:** Jeder Schreibweg legt eine Zeile an, und der zugehoerige Leseweg
+findet **genau diese** Zeile (kein Weg antwortet mehr aus einer Literalliste);
+eine Meldung entsteht als `ENTWURF`; `GEMELDET` ohne Zeitpunkt ist unmoeglich;
+`melden_bis` folgt der Frist des Vertrags; ein Druckauftrag behauptet keinen
+Druck; die Erinnerung behauptet keinen Versand, haelt aber den Versuch fest;
+alles mandantengebunden; ein Lesefehler ist ein 503 und keine erfundene Liste;
+Vertraege gegen die frische DB und alle Ratschen gruen.
+
+**Risiken:** Die Masken zeigen danach **leere Listen** statt der gewohnten
+Demo-Daten. Das wird als Rueckschritt wahrgenommen und ist das Gegenteil: Vorher
+stand dort eine Hagelschadenmeldung, die niemand gemeldet hatte. Dass das Melden
+ein eigener Schritt ist, aendert den Ablauf in der Maske — fachliche Abnahme beim
+Versicherungs-Owner. Es wird **kein** Versandweg gebaut (E-Mail, Fax, Spooler);
+das bleibt eine benannte Luecke.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-05
+last_reviewed: 2026-10-06
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -206,6 +206,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `operator_agent_service` | OPERATOR-AGENT-001 — ERP-Operator-Agent: Proposal + kontrollierte LOW-Schreibaktionen. |
 | `pdf_service` | PDF Service |
 | `pdf_template_service` | PDF Template Service |
+| `personal_organisation_service` | Organigramm und Arbeitszeitkonto — eine Wahrheit uber Baum und Saldo. |
 | `personal_service` | Service layer for HR/Personal domain queries (Mitarbeiter, Zeiterfassung, Abwesenheiten). |
 | `pii_detector` | PII Detector + Masker — NC-C1/C2 |
 | `policy_registry` | Policy Registry — NC-G4 |
