@@ -84,6 +84,12 @@ node-forge/braces ohne gepatchtes Release offen. CSS-Quellensuche als
 Browser-Timeout-Ursache behoben: acht WCAG-Routen in 21,5 s bestanden.
 GitHub Docs/OpenAPI im zweiten Versuch gruen; nicht gestartete Jobs wegen
 fehlender Runner erneut angestossen. Kein vollstaendig gruener CI-Stand.
+**Fortsetzung 2026-10-06:** 51 Backend-/DDL-/Kassenvertraege und elf
+Lot-/Materialfluss-Vertraege gruen; vier native CRM-Smokes gruen (30,8 s).
+InventoryLotOut behaelt eudr_relevant. OpenAPI aus a5de275ce plus eigenem
+Schemahunk aktualisiert, inklusive committed Personal-Vertraegen.
+Vollsuite 1784c66b1 hatte 19 Failures/17 Setup-Fehler bei 15355 bestandenen
+Tests; weitere Fixtures, Masken/Architektur und Security bleiben offen.
 
 ## HANDSHAKE-GAP-CLOSURE-20261005 — abgeschlossen, Codex (Chat 01a0f3fc)
 

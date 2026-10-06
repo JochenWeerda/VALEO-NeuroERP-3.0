@@ -3,8 +3,7 @@ Tests: HRM Organigramm, DSGVO, Whistleblower, POS Multi-Zahlung, Promotions
 """
 from __future__ import annotations
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-from datetime import date, timedelta
+from unittest.mock import MagicMock
 import asyncio
 
 
@@ -104,10 +103,9 @@ def test_whistleblower_submit_returns_only_token():
         severity="HOCH",
     )
 
-    with patch("app.api.v1.endpoints.compliance_whistleblower._ensure_table"):
-        result = asyncio.run(
-            submit_report(payload=payload, db=db)
-        )
+    result = asyncio.run(submit_report(payload=payload, db=db, tenant_id="t-1"))
+    assert db.execute.call_args.args[1]["tid"] == "t-1"
+    db.commit.assert_called_once()
 
     assert "token" in result
     assert "message" in result
@@ -122,10 +120,7 @@ def test_whistleblower_token_is_12_chars():
 
     payload = ReportIn(category="SICHERHEIT", description="Test", severity="MITTEL")
 
-    with patch("app.api.v1.endpoints.compliance_whistleblower._ensure_table"):
-        result = asyncio.run(
-            submit_report(payload=payload, db=db)
-        )
+    result = asyncio.run(submit_report(payload=payload, db=db, tenant_id="t-1"))
     assert len(result["token"]) == 12
 
 
@@ -136,12 +131,10 @@ def test_whistleblower_status_not_found():
     db = _mock_db()
     db.execute.return_value.fetchone.return_value = None
 
-    with patch("app.api.v1.endpoints.compliance_whistleblower._ensure_table"):
-        with pytest.raises(HTTPException) as exc:
-            asyncio.run(
-                report_status(token="WRONGTOKEN12", db=db)
-            )
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(report_status(token="WRONGTOKEN12", db=db, tenant_id="t-1"))
     assert exc.value.status_code == 404
+    assert db.execute.call_args.args[1]["tid"] == "t-1"
 
 
 # ── POS Multi-Zahlung ─────────────────────────────────────────────────────
@@ -204,10 +197,8 @@ def test_promotion_percent_discount():
 
     payload = PromotionCheckIn(article_id="art-1", quantity=2.0, price=50.0)
 
-    with patch("app.api.v1.endpoints.pos_payments._ensure_tables"):
-        result = asyncio.run(
-            check_promotion(payload=payload, db=db, tenant_id="t-1")
-        )
+    result = asyncio.run(check_promotion(payload=payload, db=db, tenant_id="t-1"))
+    assert db.execute.call_args.args[1]["tid"] == "t-1"
     assert result["applicable"] is True
     assert result["discount_amount"] == pytest.approx(10.0)  # 100 * 10% = 10
 
@@ -220,9 +211,6 @@ def test_promotion_not_applicable_no_match():
 
     payload = PromotionCheckIn(article_id="art-99", quantity=1.0, price=20.0)
 
-    with patch("app.api.v1.endpoints.pos_payments._ensure_tables"):
-        result = asyncio.run(
-            check_promotion(payload=payload, db=db, tenant_id="t-1")
-        )
+    result = asyncio.run(check_promotion(payload=payload, db=db, tenant_id="t-1"))
     assert result["applicable"] is False
     assert result["discount_amount"] == 0.0

@@ -6,7 +6,7 @@ Die Feldlisten sind nicht aus Migrationen rekonstruiert, sondern aus
 Datenbank, wird jedes Modell hier gegen die reale DDL geprueft.
 
 Die gelesenen Tabellen liegen in ``domain_inventory``:
-``inventory_lots`` (15 Spalten) und ``inventory_stock_movements`` (35 Spalten).
+``inventory_lots`` (16 Spalten) und ``inventory_stock_movements`` (35 Spalten).
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ class InventoryLotOut(BaseModel):
     """Eine Zeile aus ``domain_inventory.inventory_lots``.
 
     ``GET /lager/lots`` liefert ``SELECT *`` — deshalb bildet dieses Modell alle
-    15 Spalten ab. ``POST /lager/lots`` gibt nur die zehn Felder zurueck, die es
+    16 Spalten ab. ``POST /lager/lots`` gibt nur die zehn Felder zurueck, die es
     selbst gesetzt hat; die uebrigen bleiben leer.
     """
 
@@ -43,6 +43,7 @@ class InventoryLotOut(BaseModel):
     sperrgrund: Optional[str] = None
     qs_status: Optional[str] = None
     received_at: Optional[date] = None
+    eudr_relevant: bool = Field(False, description="Charge unterliegt der EUDR-Sorgfaltspflicht")
 
 
 class LotConsumeOut(BaseModel):

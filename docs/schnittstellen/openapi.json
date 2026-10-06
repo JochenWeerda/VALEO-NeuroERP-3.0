@@ -82467,7 +82467,7 @@
         "type": "object"
       },
       "InventoryLotOut": {
-        "description": "Eine Zeile aus ``domain_inventory.inventory_lots``.\n\n``GET /lager/lots`` liefert ``SELECT *`` — deshalb bildet dieses Modell alle\n15 Spalten ab. ``POST /lager/lots`` gibt nur die zehn Felder zurueck, die es\nselbst gesetzt hat; die uebrigen bleiben leer.",
+        "description": "Eine Zeile aus ``domain_inventory.inventory_lots``.\n\n``GET /lager/lots`` liefert ``SELECT *`` — deshalb bildet dieses Modell alle\n16 Spalten ab. ``POST /lager/lots`` gibt nur die zehn Felder zurueck, die es\nselbst gesetzt hat; die uebrigen bleiben leer.",
         "properties": {
           "article_id": {
             "title": "Article Id",
@@ -82488,6 +82488,12 @@
           "current_qty": {
             "title": "Current Qty",
             "type": "string"
+          },
+          "eudr_relevant": {
+            "default": false,
+            "description": "Charge unterliegt der EUDR-Sorgfaltspflicht",
+            "title": "Eudr Relevant",
+            "type": "boolean"
           },
           "herkunft": {
             "anyOf": [
@@ -108573,6 +108579,8 @@
         "type": "object"
       },
       "OrgUnitIn": {
+        "additionalProperties": false,
+        "description": "Eine Organisationseinheit. Die Arten stehen im Dienst, nicht zweimal hier.",
         "properties": {
           "cost_center_id": {
             "anyOf": [
@@ -108598,6 +108606,7 @@
           },
           "name": {
             "maxLength": 200,
+            "minLength": 1,
             "title": "Name",
             "type": "string"
           },
@@ -108619,7 +108628,13 @@
           },
           "unit_type": {
             "default": "ABTEILUNG",
-            "pattern": "^(ABTEILUNG|TEAM|STANDORT|KOSTENSTELLE)$",
+            "enum": [
+              "ABTEILUNG",
+              "TEAM",
+              "STANDORT",
+              "KOSTENSTELLE",
+              "GESCHAEFTSBEREICH"
+            ],
             "title": "Unit Type",
             "type": "string"
           }
@@ -108632,7 +108647,30 @@
         "type": "object"
       },
       "OrgUnitPatch": {
+        "additionalProperties": false,
         "properties": {
+          "aktiv": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aktiv"
+          },
+          "cost_center_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Center Id"
+          },
           "manager_ref": {
             "anyOf": [
               {
@@ -108647,6 +108685,8 @@
           "name": {
             "anyOf": [
               {
+                "maxLength": 200,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -108669,6 +108709,13 @@
           "unit_type": {
             "anyOf": [
               {
+                "enum": [
+                  "ABTEILUNG",
+                  "TEAM",
+                  "STANDORT",
+                  "KOSTENSTELLE",
+                  "GESCHAEFTSBEREICH"
+                ],
                 "type": "string"
               },
               {
@@ -154700,6 +154747,7 @@
         "type": "object"
       },
       "TimeAccountAdjustIn": {
+        "additionalProperties": false,
         "properties": {
           "adjustment_date": {
             "anyOf": [
@@ -154713,12 +154761,24 @@
             "title": "Adjustment Date"
           },
           "delta_hours": {
-            "description": "Positive = Gutschrift, Negative = Abbuchung",
+            "description": "Positiv = Gutschrift, negativ = Abbuchung",
             "title": "Delta Hours",
             "type": "number"
           },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
           "reason": {
             "maxLength": 400,
+            "minLength": 1,
             "title": "Reason",
             "type": "string"
           }
@@ -373814,7 +373874,7 @@
     },
     "/api/v1/personal/org-chart": {
       "get": {
-        "description": "Gesamtes Organigramm als verschachtelter Baum.",
+        "description": "Das Organigramm als verschachtelter Baum.",
         "operationId": "get_org_chart_api_v1_personal_org_chart_get",
         "parameters": [
           {
@@ -373861,7 +373921,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Org chart abrufen",
+        "summary": "Organigramm abrufen",
         "tags": [
           "personal",
           "hr",
@@ -373872,7 +373932,7 @@
     },
     "/api/v1/personal/org-chart/{unit_id}": {
       "get": {
-        "description": "Teilbaum ab einer bestimmten Org-Einheit.",
+        "description": "Der Teilbaum ab einer Einheit.",
         "operationId": "get_org_subtree_api_v1_personal_org_chart__unit_id__get",
         "parameters": [
           {
@@ -373928,7 +373988,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Org subtree abrufen",
+        "summary": "Teilbaum abrufen",
         "tags": [
           "personal",
           "hr",
@@ -373939,7 +373999,7 @@
     },
     "/api/v1/personal/org-units": {
       "post": {
-        "description": "Neue Abteilung / Team / Standort / Kostenstelle anlegen.",
+        "description": "Legt eine Abteilung, ein Team, einen Standort oder eine Kostenstelle an.",
         "operationId": "create_org_unit_api_v1_personal_org_units_post",
         "parameters": [
           {
@@ -373996,7 +374056,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Org unit anlegen",
+        "summary": "Organisationseinheit anlegen",
         "tags": [
           "personal",
           "hr",
@@ -374007,7 +374067,7 @@
     },
     "/api/v1/personal/org-units/{unit_id}": {
       "patch": {
-        "description": "Org-Einheit umbenennen oder Elternteil ändern.",
+        "description": "Aendert eine Einheit. Ein Umhaengen, das einen Zyklus ergaebe, wird abgewiesen.",
         "operationId": "patch_org_unit_api_v1_personal_org_units__unit_id__patch",
         "parameters": [
           {
@@ -374073,7 +374133,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Org unit aktualisieren",
+        "summary": "Organisationseinheit aendern",
         "tags": [
           "personal",
           "hr",
@@ -374602,7 +374662,7 @@
     },
     "/api/v1/personal/time-accounts/{employee_ref}": {
       "get": {
-        "description": "Arbeitszeitkonto: Saldo, Monats-Breakdown, Übertrag aus Vorperiode.",
+        "description": "Saldo, Uebertrag und Monatsaufstellung.\n\nJede Stunde steckt in genau einer ausgewiesenen Zahl: Der Saldo ist die Summe\naus Uebertrag der Vorperioden, laufender Periode und Folgeperioden.",
         "operationId": "get_time_account_api_v1_personal_time_accounts__employee_ref__get",
         "parameters": [
           {
@@ -374612,6 +374672,22 @@
             "schema": {
               "title": "Employee Ref",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "jahr",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Jahr"
             }
           },
           {
@@ -374658,7 +374734,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Time account abrufen",
+        "summary": "Arbeitszeitkonto abrufen",
         "tags": [
           "personal",
           "hr",
@@ -374669,7 +374745,7 @@
     },
     "/api/v1/personal/time-accounts/{employee_ref}/adjust": {
       "post": {
-        "description": "Manuelle Saldo-Korrektur (Urlaubsabgeltung, Übertrag etc.).",
+        "description": "Manuelle Saldokorrektur — mit Grund, sonst gar nicht.",
         "operationId": "adjust_time_account_api_v1_personal_time_accounts__employee_ref__adjust_post",
         "parameters": [
           {
@@ -374735,7 +374811,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Time account adjust",
+        "summary": "Zeitkonto korrigieren",
         "tags": [
           "personal",
           "hr",

@@ -33,6 +33,12 @@ WELLE5_PFADE = {
 def _response_models(module):
     out = {}
     for route in module.router.routes:
+        # An intentionally blocked operation has no successful response model.
+        # Its HTTP-409/no-write contract is covered by test_cash_close_retirement.
+        if module is finance_module and route.path == "/cash/close-day":
+            assert route.status_code == 409
+            assert 409 in route.responses
+            continue
         for method in route.methods:
             if method in ("GET", "POST", "PUT", "PATCH", "DELETE"):
                 out[(route.path, method)] = route.response_model

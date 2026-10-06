@@ -1,4 +1,5 @@
 import json
+from unittest.mock import MagicMock
 
 import httpx
 import pytest
@@ -111,10 +112,17 @@ async def test_crm_opportunity_list_degrades_when_downstream_unreachable(monkeyp
 
     monkeypatch.setattr(opportunities, "crm_list_opportunities", _raise_downstream)
 
-    response = await opportunities.list_opportunities(skip=0, limit=50)
+    db = MagicMock()
+    db.execute.return_value.scalar_one.return_value = 0
+    db.execute.return_value.mappings.return_value.all.return_value = []
+    response = await opportunities.list_opportunities(
+        tenant_id="tenant-1", status=None, assigned_to=None, skip=0, limit=50, db=db
+    )
 
     assert response.total == 0
     assert response.items == []
+    assert db.execute.call_count == 2
+    assert [call.args[1]["tid"] for call in db.execute.call_args_list] == ["tenant-1", "tenant-1"]
 
 
 @pytest.mark.asyncio

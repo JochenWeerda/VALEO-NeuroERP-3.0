@@ -11,6 +11,8 @@ file_ownership:
   - Eigene QA und committed-source OpenAPI-Artefakt
   - Minimale UI-Vertraege, Router-/Code-Inventare und busboy-Paketpin
   - Zentraler CSS-Quellenbereich als indexseitiger Minimalhunk
+  - HRM/POS-, Opportunity-, Fehlerantwort- und native CRM-Smoke-Testvertraege
+  - InventoryLotOut EUDR-Kennzeichen und committed-source OpenAPI
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
