@@ -38,9 +38,13 @@ export function formatCellValue(value: unknown, renderKind: RenderColumnKind | u
     case 'currency':
       return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(value))
     case 'date':
-      try { return new Date(String(value)).toLocaleDateString('de-DE') } catch { return String(value) }
-    case 'datetime':
-      try { return new Date(String(value)).toLocaleString('de-DE') } catch { return String(value) }
+    case 'datetime': {
+      const raw = String(value).trim()
+      if (!raw) return '–'
+      const date = new Date(raw)
+      if (Number.isNaN(date.getTime())) return '–'
+      return renderKind === 'date' ? date.toLocaleDateString('de-DE') : date.toLocaleString('de-DE')
+    }
     case 'boolean':
       return value ? 'Ja' : 'Nein'
     case 'status':

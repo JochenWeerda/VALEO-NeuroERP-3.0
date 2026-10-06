@@ -11,6 +11,8 @@ from app.core.screen_definitions_capture import (
     build_logistik_tour_fracht_arbeitsraum_screen_definition,
     build_logistik_tourenplanung_screen_definition,
     build_fuhrpark_ausgehende_dokumente_screen_definition,
+    build_fuhrpark_fahrzeug_stamm_screen_definition,
+    build_personal_qualifikationen_screen_definition,
     build_fuhrpark_rechnungen_screen_definition,
     build_fuhrpark_terminarten_screen_definition,
     build_logistik_versandprofile_screen_definition,
@@ -237,3 +239,52 @@ def test_ausgehende_belege_folgen_dem_formular() -> None:
     assert "DEMO" not in block
     assert governance_errors(definition) == []
     assert get_screen_definition("fuhrpark/ausgehende-dokumente")["id"] == "fuhrpark/ausgehende-dokumente"
+
+
+def test_fahrzeug_stamm_folgt_kennzeichen_und_typ() -> None:
+    definition = build_fuhrpark_fahrzeug_stamm_screen_definition()
+    block = _block("fuhrparkFahrzeugStammScreen")
+    register = ["allgemein", "technik", "erwerb", "termine", "funktionen"]
+    felder = ["kennzeichen", "typ", "kaufsumme_eur", "naechster_tuev_termin", "drucker_name"]
+    assert definition["id"] == "fuhrpark/fahrzeug-stamm"
+    assert definition["title"] == "Fahrzeug-Stamm"
+    assert definition["identityField"] == "kennzeichen"
+    assert [tab["key"] for tab in definition["tabs"]] == register
+    assert _first_keys(block, register) == sorted(_first_keys(block, register))
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["floorplan"] == "objectPage"
+    assert definition["layout"]["contextRail"] == "workflow"
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert derived_screen_type(definition) == "DETAIL"
+    assert "statusPlacement: 'afterFields'" in block
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/fuhrpark/fahrzeuge"
+    assert "/api/v1/fuhrpark/fahrzeuge" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    loeschen = next(action for action in definition["actions"] if action["key"] == "loeschen")
+    assert loeschen["dangerLevel"] == "destructive"
+    assert loeschen["requiresConfirmation"] is True
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("fuhrpark/fahrzeug-stamm")["id"] == "fuhrpark/fahrzeug-stamm"
+
+
+def test_qualifikationen_folgen_der_gueltigkeit() -> None:
+    definition = build_personal_qualifikationen_screen_definition()
+    block = _block("personalQualifikationenScreen")
+    felder = ["employee_ref", "role_code", "qualification_level", "skills", "valid_until"]
+    assert definition["id"] == "personal/qualifikationen"
+    assert definition["title"] == "Qualifikationen"
+    assert definition["domain"] == "hr"
+    assert [field["key"] for field in definition["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert "Grundkenntnis" in block
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/training/qualifications"
+    assert "/api/v1/training/qualifications" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    assert definition["tables"][0]["columns"][0]["priority"] == "primary"
+    assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("personal/qualifikationen")["id"] == "personal/qualifikationen"

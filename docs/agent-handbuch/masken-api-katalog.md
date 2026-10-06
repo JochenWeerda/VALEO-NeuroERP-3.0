@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-05
+last_reviewed: 2026-10-06
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (92 Masken).
+> Generiert aus `app/core/screen_definitions.py` (94 Masken).
 
 ## Übersicht
 
@@ -63,6 +63,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
+| `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | mittel | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
 | `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
 | `fuhrpark/rechnungen` | Fuhrpark-Rechnungen | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/rechnungen/agent-contract` |
 | `fuhrpark/terminarten` | Terminarten | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/terminarten/agent-contract` |
@@ -82,6 +83,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `logistik/tourenplanung` | Tourenplanung | logistics | niedrig | — | `GET /api/v1/masks/logistik/tourenplanung/agent-contract` |
 | `logistik/verladung` | Verladung | logistics | niedrig | — | `GET /api/v1/masks/logistik/verladung/agent-contract` |
 | `logistik/versandprofile` | Versandprofile | logistics | niedrig | — | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
+| `personal/qualifikationen` | Qualifikationen | hr | niedrig | — | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
 | `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
@@ -1955,6 +1957,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+## Domäne: hr
+
+### `personal/qualifikationen` — Qualifikationen
+
+**Zweck:** Qualifikationsprofile anlegen. Der Stand folgt der Gueltigkeit.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/qualifikationen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/qualifikationen/readiness` |
+| Rollout-Route | `/mask-rollout/personal__qualifikationen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `qualifikationen` → `/api/v1/training/qualifications`
+
+**Beispiel-Prompts:**
+
+- Welches Profil hat noch kein Gueltig-bis?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt ein Qualifikationsprofil an.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer ein neues Profil.` |
+
+---
+
 ## Domäne: integration
 
 ### `schnittstelle/legacy-adapter-monitor` — Standard-/Unimet-Adapter
@@ -2250,6 +2283,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `speichern` | Speichern | safe | nein | `Legt einen Belegtyp an oder aktualisiert den gewaehlten.` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer einen neuen Belegtyp.` |
+
+---
+
+### `fuhrpark/fahrzeug-stamm` — Fahrzeug-Stamm
+
+**Zweck:** Fahrzeugakte anlegen und aendern. Der Stand folgt Kennzeichen und Typ.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
+| Readiness | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/readiness` |
+| Rollout-Route | `/mask-rollout/fuhrpark__fahrzeug-stamm/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `fahrzeug` → `/api/v1/fuhrpark/fahrzeuge`
+
+**Beispiel-Prompts:**
+
+- Welches Fahrzeug hat noch keinen TUEV-Termin?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt das Fahrzeug an oder aktualisiert die Akte.` |
+| `liste` | Zur Liste | safe | nein | `Wechselt zur Fahrzeugliste.` |
+| `drucker` | Drucker einrichten | safe | nein | `Hinterlegt den Drucker an der Fahrzeugakte.` |
+| `drucken` | Drucken | safe | nein | `Druckt die Fahrzeugakte.` |
+| `unfall` | Unfall-Anzeige | moderate | nein | `Erfasst eine Unfallanzeige zum Fahrzeug.` |
+| `loeschen` | Fahrzeug löschen | destructive | nein | `Loescht die Fahrzeugakte nach Bestaetigung.` |
 
 ---
 

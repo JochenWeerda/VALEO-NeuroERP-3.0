@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
+import { Skeleton } from '@/components/ui/skeleton'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
+import { toast } from 'sonner'
+import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createFuhrparkFahrzeug,
   deleteFuhrparkFahrzeug,
@@ -16,308 +19,377 @@ import {
   setupFuhrparkDrucker,
   unfallAnzeige,
   updateFuhrparkFahrzeug,
+  type FuhrparkFahrzeug,
   type FuhrparkFahrzeugPayload,
 } from '@/lib/api/fuhrpark'
-import { getAxiosErrorMessage } from '@/lib/api-client'
+import { fuhrparkFahrzeugStammScreen } from '@/masks/capture-screens'
 
-function dateOnly(value?: string | null): string {
-  if (!value) return ''
-  return value.slice(0, 10)
+const DRUCKER = 'Groothusen/Kyocera M3540dn Fach 1'
+const DATUM = [
+  'erstzulassung',
+  'bestelldatum',
+  'kaufdatum',
+  'verkaufsdatum',
+  'abmeldedatum',
+  'naechster_tuev_termin',
+  'naechster_asu_termin',
+  'naechste_inspektion',
+] as const
+const JA_NEIN = [
+  'is_neu',
+  'fahrtenschreiber_vorhanden',
+  'ahk_vorhanden',
+  'ladekran_vorhanden',
+  'km_stand_alle_eintraege',
+  'versicherung_haftpflicht',
+  'versicherung_kasko',
+  'winterreifen_vorhanden',
+  'winterreifen_eingelagert',
+  'handy_freisprecheinrichtung',
+] as const
+const GANZE = ['afa_jahre', 'leasingdauer_monate'] as const
+const ZAHLEN = [
+  'leistung_kw',
+  'kaufsumme_eur',
+  'afa_eur_jaehrlich',
+  'afa_eur_monatlich',
+  'leasingrate_eur',
+  'kfz_steuer_eur',
+  'versicherung_satz_eur_monat',
+  'leergewicht_kg',
+  'nutzlast_kg',
+  'gesamtgewicht_kg',
+  'anhaengerlast_kg',
+] as const
+const TEXTE = [
+  'ro_nummer',
+  'betrieb',
+  'bereich',
+  'pol_kennzeichen',
+  'kennzeichen',
+  'verwendung',
+  'kfz_brief_nummer',
+  'typ',
+  'schadstoffgruppe',
+  'kraftstoff',
+  'fahrgestellnummer',
+  'ausstattung',
+  'fahrer_name',
+  'fahrer_vorname',
+  'bestellnummer',
+  'haendler',
+  'zustand',
+  'kostenstelle',
+  'abschreibungsart',
+  'leasinggesellschaft',
+  'kfz_steuernummer',
+  'kontierung',
+  'finanzamt',
+  'versicherungs_gesellschaft',
+  'versicherungsschein_nr',
+  'handy_fabrikat',
+  'handy_rufnummer',
+] as const
+const AKTEN_AKTIONEN = ['drucker', 'drucken', 'unfall', 'loeschen']
+
+function text(value: unknown): string {
+  return String(value ?? '').trim()
 }
 
-function parseDate(value: string): string | null {
-  return value ? `${value}T00:00:00.000Z` : null
+function dateOnly(value: unknown): string {
+  const raw = text(value)
+  return raw ? raw.slice(0, 10) : ''
 }
 
-function useFormState(): [FuhrparkFahrzeugPayload, (next: Partial<FuhrparkFahrzeugPayload>) => void] {
-  const [form, setForm] = useState<FuhrparkFahrzeugPayload>({
-    ro_nummer: '',
-    is_neu: false,
-    betrieb: '',
-    bereich: '',
-    pol_kennzeichen: '',
-    kennzeichen: '',
-    typ: '',
-    marke: '',
-    modell: '',
-    baujahr: undefined,
-    verwendung: '',
-    kfz_brief_nummer: '',
-    schadstoffgruppe: '',
-    leistung_kw: undefined,
-    kraftstoff: '',
-    fahrgestellnummer: '',
-    erstzulassung: null,
-    ausstattung: '',
-    fahrtenschreiber_vorhanden: false,
-    ahk_vorhanden: false,
-    ladekran_vorhanden: false,
-    fahrer_name: '',
-    fahrer_vorname: '',
-    kilometerstand: 0,
-    km_stand_alle_eintraege: false,
-    bestellnummer: '',
-    bestelldatum: null,
-    haendler: '',
+function parseDate(value: unknown): string | null {
+  const raw = dateOnly(value)
+  return raw ? `${raw}T00:00:00.000Z` : null
+}
+
+function nummer(value: unknown): number | undefined {
+  if (value == null || value === '') return undefined
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+function leerwerte(): Record<string, unknown> {
+  const values: Record<string, unknown> = {
     zustand: 'neu',
-    kaufsumme_eur: undefined,
-    kaufdatum: null,
-    verkaufsdatum: null,
-    abmeldedatum: null,
-    kostenstelle: '',
-    abschreibungsart: '',
-    afa_jahre: undefined,
-    afa_eur_jaehrlich: undefined,
-    afa_eur_monatlich: undefined,
-    leasingdauer_monate: undefined,
-    leasinggesellschaft: '',
-    leasingrate_eur: undefined,
-    kfz_steuer_eur: undefined,
-    kfz_steuernummer: '',
-    kontierung: '',
-    finanzamt: '',
-    versicherungs_gesellschaft: '',
-    versicherungsschein_nr: '',
-    versicherung_satz_eur_monat: undefined,
-    versicherung_haftpflicht: false,
-    versicherung_kasko: false,
-    naechster_tuev_termin: null,
-    naechster_asu_termin: null,
-    naechste_inspektion: null,
-    leergewicht_kg: undefined,
-    nutzlast_kg: undefined,
-    gesamtgewicht_kg: undefined,
-    anhaengerlast_kg: undefined,
-    winterreifen_vorhanden: false,
-    winterreifen_eingelagert: false,
-    handy_freisprecheinrichtung: false,
-    handy_fabrikat: '',
-    handy_rufnummer: '',
-    status: 'verfuegbar',
-  })
-  const patch = (next: Partial<FuhrparkFahrzeugPayload>) => setForm((prev) => ({ ...prev, ...next }))
-  return [form, patch]
+    kilometerstand: '',
+    drucker_name: DRUCKER,
+    unfall_ort: '',
+    unfall_beschreibung: '',
+  }
+  for (const key of TEXTE) values[key] = key === 'zustand' ? 'neu' : ''
+  for (const key of DATUM) values[key] = ''
+  for (const key of JA_NEIN) values[key] = false
+  for (const key of GANZE) values[key] = ''
+  for (const key of ZAHLEN) values[key] = ''
+  return values
 }
 
 export default function FuhrparkFahrzeugStammPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const isNew = !id || id === 'neu'
   const navigate = useNavigate()
-  const { toast } = useToast()
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
-  const [printerName, setPrinterName] = useState('Groothusen/Kyocera M3540dn Fach 1')
-  const [unfallOrt, setUnfallOrt] = useState('')
-  const [unfallBeschreibung, setUnfallBeschreibung] = useState('')
-  const [form, patch] = useFormState()
-
   const fahrzeugQuery = useQuery({
     queryKey: ['fuhrpark', 'fahrzeug', id],
     queryFn: () => getFuhrparkFahrzeug(id as string),
     enabled: !isNew,
   })
-
-  useEffect(() => {
-    if (!fahrzeugQuery.data) return
-    patch(fahrzeugQuery.data)
-  }, [fahrzeugQuery.data])
-
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      if (isNew) return createFuhrparkFahrzeug(form)
-      return updateFuhrparkFahrzeug(id as string, form)
-    },
-    onSuccess: (saved) => {
-      toast({ title: 'Fahrzeug gespeichert', description: saved.kennzeichen })
-      void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'fahrzeuge'] })
-      navigate(`/fuhrpark/fahrzeug/${saved.id}`)
-    },
-    onError: (error: unknown) => {
-      toast({ title: 'Fehler', description: getAxiosErrorMessage(error), variant: 'destructive' })
-    },
+  const geladen = useRef<FuhrparkFahrzeug | null>(null)
+  const applied = useRef<string | null>(null)
+  const [pending, setPending] = useState<Set<string>>(new Set())
+  const form = useUniversalFormState({
+    screen: fuhrparkFahrzeugStammScreen,
+    initialValues: leerwerte(),
   })
 
-  const actionsDisabled = isNew || !id
+  useEffect(() => {
+    if (!fahrzeugQuery.isError) return
+    toast.error('Fahrzeug nicht geladen', { description: getAxiosErrorMessage(fahrzeugQuery.error) })
+  }, [fahrzeugQuery.error, fahrzeugQuery.isError])
 
-  const payloadForSave = useMemo((): FuhrparkFahrzeugPayload => ({
-    ...form,
-    erstzulassung: form.erstzulassung ? parseDate(dateOnly(form.erstzulassung)) : null,
-    bestelldatum: form.bestelldatum ? parseDate(dateOnly(form.bestelldatum)) : null,
-    kaufdatum: form.kaufdatum ? parseDate(dateOnly(form.kaufdatum)) : null,
-    verkaufsdatum: form.verkaufsdatum ? parseDate(dateOnly(form.verkaufsdatum)) : null,
-    abmeldedatum: form.abmeldedatum ? parseDate(dateOnly(form.abmeldedatum)) : null,
-    naechster_tuev_termin: form.naechster_tuev_termin ? parseDate(dateOnly(form.naechster_tuev_termin)) : null,
-    naechster_asu_termin: form.naechster_asu_termin ? parseDate(dateOnly(form.naechster_asu_termin)) : null,
-    naechste_inspektion: form.naechste_inspektion ? parseDate(dateOnly(form.naechste_inspektion)) : null,
-  }), [form])
+  const uebernehmen = useCallback((row: FuhrparkFahrzeug) => {
+    geladen.current = row
+    for (const key of TEXTE) form.setValue(key, text(row[key]))
+    for (const key of DATUM) form.setValue(key, dateOnly(row[key]))
+    for (const key of JA_NEIN) form.setValue(key, row[key] === true)
+    for (const key of GANZE) form.setValue(key, row[key] ?? '')
+    for (const key of ZAHLEN) form.setValue(key, row[key] ?? '')
+    form.setValue('kilometerstand', row.kilometerstand ?? '')
+    form.setValue('zustand', text(row.zustand) || 'neu')
+  }, [form])
+
+  useEffect(() => {
+    const row = fahrzeugQuery.data
+    if (!row || applied.current === row.id) return
+    applied.current = row.id
+    uebernehmen(row)
+  }, [fahrzeugQuery.data, uebernehmen])
+
+  const schema = useMemo<ScreenDefinition>(() => {
+    const km = nummer(form.values.kilometerstand)
+    const tuev = dateOnly(form.values.naechster_tuev_termin)
+    return {
+      ...fuhrparkFahrzeugStammScreen,
+      layout: {
+        ...fuhrparkFahrzeugStammScreen.layout,
+        density: isTouch ? 'comfortable' : 'compact',
+      },
+      summary: (fuhrparkFahrzeugStammScreen.summary ?? []).map((item) => ({
+        ...item,
+        value: item.key === 'tuev' ? (tuev || 'offen') : String(km ?? 0),
+      })),
+      actions: (fuhrparkFahrzeugStammScreen.actions ?? []).map((action) => ({
+        ...action,
+        disabled: pending.has(action.key) || (AKTEN_AKTIONEN.includes(action.key) && isNew),
+      })),
+    }
+  }, [form.values.kilometerstand, form.values.naechster_tuev_termin, isNew, isTouch, pending])
+
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+
+  const workflow = useMemo<WorkflowState>(() => {
+    const kennzeichen = text(form.values.kennzeichen)
+    const typ = text(form.values.typ)
+    const offen = kennzeichen.length < 2 || typ.length < 2
+    const label = offen ? 'Stamm offen' : isNew ? 'Bereit zum Speichern' : 'Fahrzeug hinterlegt'
+    const naechste = offen
+      ? 'Kennzeichen und Typ eintragen.'
+      : isNew
+        ? 'Speichern legt die Akte an.'
+        : 'Akte ändern oder einen Termin nachtragen.'
+    return {
+      status: {
+        currentStatus: offen ? 'offen' : isNew ? 'bereit' : 'hinterlegt',
+        statusLabel: label,
+        tone: offen ? 'warning' : 'success',
+      },
+      nextAllowedActions: [{ actionKey: 'speichern', label: naechste, dangerLevel: 'safe', requiresConfirmation: false }],
+      blockingReasons: offen ? [{ code: label, message: naechste, blocking: true }] : [],
+      auditTrail: [],
+      policyHints: [],
+      isBlocked: false,
+      isTerminal: false,
+    }
+  }, [form.values.kennzeichen, form.values.typ, isNew])
+
+  const payload = useCallback((): FuhrparkFahrzeugPayload => {
+    const basis = geladen.current
+    const werte = form.values
+    const gebaut: Record<string, unknown> = {
+      kennzeichen: text(werte.kennzeichen),
+      typ: text(werte.typ),
+      zustand: text(werte.zustand) || 'neu',
+      kilometerstand: nummer(werte.kilometerstand) ?? 0,
+      status: basis?.status || 'verfuegbar',
+      marke: basis?.marke ?? null,
+      modell: basis?.modell ?? null,
+      baujahr: basis?.baujahr ?? null,
+    }
+    for (const key of TEXTE) {
+      if (key === 'kennzeichen' || key === 'typ' || key === 'zustand') continue
+      gebaut[key] = text(werte[key]) || null
+    }
+    for (const key of DATUM) gebaut[key] = parseDate(werte[key])
+    for (const key of JA_NEIN) gebaut[key] = werte[key] === true
+    for (const key of GANZE) gebaut[key] = nummer(werte[key]) == null ? null : Math.trunc(nummer(werte[key]) as number)
+    for (const key of ZAHLEN) gebaut[key] = nummer(werte[key]) ?? null
+    return gebaut as FuhrparkFahrzeugPayload
+  }, [form.values])
+
+  const mitPending = useCallback(async (key: string, work: () => Promise<void>) => {
+    if (pending.has(key)) return
+    setPending((prev) => new Set(prev).add(key))
+    try {
+      await work()
+    } finally {
+      setPending((prev) => {
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+    }
+  }, [pending])
+
+  const speichern = useCallback(async () => {
+    const kennzeichen = text(form.values.kennzeichen)
+    const typ = text(form.values.typ)
+    if (kennzeichen.length < 2 || kennzeichen.length > 20) {
+      toast.error('Kennzeichen fehlt', { description: 'Das Kennzeichen braucht 2 bis 20 Zeichen.' })
+      return
+    }
+    if (typ.length < 2 || typ.length > 50) {
+      toast.error('Typ fehlt', { description: 'Der Typ braucht 2 bis 50 Zeichen.' })
+      return
+    }
+    const body = payload()
+    await mitPending('speichern', async () => {
+      try {
+        const saved = isNew
+          ? await createFuhrparkFahrzeug(body)
+          : await updateFuhrparkFahrzeug(id as string, body)
+        toast.success('Fahrzeug gespeichert', { description: saved.kennzeichen })
+        await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'fahrzeuge'] })
+        await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'fahrzeug', saved.id] })
+        if (isNew) navigate(`/fuhrpark/fahrzeug/${saved.id}`)
+        else uebernehmen(saved)
+      } catch (error) {
+        toast.error('Fahrzeug nicht gespeichert', { description: getAxiosErrorMessage(error) })
+      }
+    })
+  }, [form.values.kennzeichen, form.values.typ, id, isNew, mitPending, navigate, payload, queryClient, uebernehmen])
+
+  const loeschen = useCallback(async () => {
+    if (isNew || !id || pending.has('loeschen')) return
+    if (!window.confirm('Fahrzeug wirklich löschen? Dieser Vorgang ist nicht rückgängig.')) return
+    await mitPending('loeschen', async () => {
+      try {
+        await deleteFuhrparkFahrzeug(id)
+        toast.success('Fahrzeug gelöscht')
+        await queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'fahrzeuge'] })
+        navigate('/fuhrpark/fahrzeuge')
+      } catch (error) {
+        toast.error('Fahrzeug nicht gelöscht', { description: getAxiosErrorMessage(error) })
+      }
+    })
+  }, [id, isNew, mitPending, navigate, pending, queryClient])
+
+  const drucker = useCallback(async () => {
+    if (isNew || !id) return
+    const name = text(form.values.drucker_name)
+    if (name.length < 2) {
+      toast.error('Drucker fehlt', { description: 'Der Druckername braucht mindestens zwei Zeichen.' })
+      return
+    }
+    await mitPending('drucker', async () => {
+      try {
+        await setupFuhrparkDrucker(id, name)
+        toast.success('Drucker eingerichtet', { description: name })
+      } catch (error) {
+        toast.error('Drucker nicht eingerichtet', { description: getAxiosErrorMessage(error) })
+      }
+    })
+  }, [form.values.drucker_name, id, isNew, mitPending])
+
+  const drucken = useCallback(async () => {
+    if (isNew || !id) return
+    await mitPending('drucken', async () => {
+      try {
+        await printFuhrparkAkte(id)
+        toast.success('Fahrzeugakte gedruckt')
+      } catch (error) {
+        toast.error('Akte nicht gedruckt', { description: getAxiosErrorMessage(error) })
+      }
+    })
+  }, [id, isNew, mitPending])
+
+  const unfall = useCallback(async () => {
+    if (isNew || !id) return
+    const ort = text(form.values.unfall_ort)
+    const beschreibung = text(form.values.unfall_beschreibung)
+    if (ort.length < 2 || beschreibung.length < 3) {
+      toast.error('Unfallanzeige unvollständig', { description: 'Ort und Beschreibung eintragen.' })
+      return
+    }
+    await mitPending('unfall', async () => {
+      try {
+        await unfallAnzeige(id, { datum: new Date().toISOString(), ort, beschreibung })
+        toast.success('Unfallanzeige erfasst', { description: ort })
+        form.setValue('unfall_ort', '')
+        form.setValue('unfall_beschreibung', '')
+      } catch (error) {
+        toast.error('Unfallanzeige nicht erfasst', { description: getAxiosErrorMessage(error) })
+      }
+    })
+  }, [form, id, isNew, mitPending])
+
+  const handleAction = useCallback(async (key: string) => {
+    if (key === 'speichern') await speichern()
+    else if (key === 'liste') navigate('/fuhrpark/fahrzeuge')
+    else if (key === 'drucker') await drucker()
+    else if (key === 'drucken') await drucken()
+    else if (key === 'unfall') await unfall()
+    else if (key === 'loeschen') await loeschen()
+  }, [drucken, drucker, loeschen, navigate, speichern, unfall])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { fahrzeug: geladen.current },
+    permissions: { granted: [] },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'fuhrpark.saveFahrzeug': () => handleAction('speichern'),
+      'fuhrpark.openFahrzeugListe': () => handleAction('liste'),
+      'fuhrpark.setupDrucker': () => handleAction('drucker'),
+      'fuhrpark.printAkte': () => handleAction('drucken'),
+      'fuhrpark.reportUnfall': () => handleAction('unfall'),
+      'fuhrpark.deleteFahrzeug': () => handleAction('loeschen'),
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, handleAction, navigate])
+
+  if (!isNew && fahrzeugQuery.isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Fuhrpark Fahrzeug-Stamm</h1>
-          <p className="text-muted-foreground">Erfassungsmaske nach zvoove-Struktur</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/fuhrpark/fahrzeuge')}>Zur Liste</Button>
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending || !payloadForSave.kennzeichen || !payloadForSave.typ}>Speichern</Button>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader><CardTitle>Allgemein</CardTitle></CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-6">
-          <div><Label>RO-Nummer</Label><Input value={form.ro_nummer ?? ''} onChange={(e) => patch({ ro_nummer: e.target.value })} /></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.is_neu)} onCheckedChange={(v) => patch({ is_neu: Boolean(v) })} /><Label>Neu</Label></div>
-          <div><Label>Betrieb</Label><Input value={form.betrieb ?? ''} onChange={(e) => patch({ betrieb: e.target.value })} /></div>
-          <div><Label>Bereich</Label><Input value={form.bereich ?? ''} onChange={(e) => patch({ bereich: e.target.value })} /></div>
-          <div><Label>Pol. Kennzeichen</Label><Input value={form.pol_kennzeichen ?? ''} onChange={(e) => patch({ pol_kennzeichen: e.target.value })} /></div>
-          <div><Label>Kennzeichen</Label><Input value={form.kennzeichen} onChange={(e) => patch({ kennzeichen: e.target.value })} /></div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Techn. Daten / Fahrer</CardTitle></CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-4">
-          <div><Label>Verwendung</Label><Input value={form.verwendung ?? ''} onChange={(e) => patch({ verwendung: e.target.value })} /></div>
-          <div><Label>Kfz-Brief-Nummer</Label><Input value={form.kfz_brief_nummer ?? ''} onChange={(e) => patch({ kfz_brief_nummer: e.target.value })} /></div>
-          <div><Label>Typ</Label><Input value={form.typ} onChange={(e) => patch({ typ: e.target.value })} /></div>
-          <div><Label>Schadstoffgruppe</Label><Input value={form.schadstoffgruppe ?? ''} onChange={(e) => patch({ schadstoffgruppe: e.target.value })} /></div>
-          <div><Label>Leistung (kW)</Label><Input type="number" value={form.leistung_kw ?? ''} onChange={(e) => patch({ leistung_kw: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Kraftstoff</Label><Input value={form.kraftstoff ?? ''} onChange={(e) => patch({ kraftstoff: e.target.value })} /></div>
-          <div><Label>Fahrgestellnummer</Label><Input value={form.fahrgestellnummer ?? ''} onChange={(e) => patch({ fahrgestellnummer: e.target.value })} /></div>
-          <div><Label>Erstzulassung</Label><Input type="date" value={dateOnly(form.erstzulassung)} onChange={(e) => patch({ erstzulassung: parseDate(e.target.value) })} /></div>
-          <div className="md:col-span-2"><Label>Ausstattung</Label><Textarea value={form.ausstattung ?? ''} onChange={(e) => patch({ ausstattung: e.target.value })} rows={2} /></div>
-          <div className="mt-7 flex items-center gap-3"><Checkbox checked={Boolean(form.fahrtenschreiber_vorhanden)} onCheckedChange={(v) => patch({ fahrtenschreiber_vorhanden: Boolean(v) })} /><Label>Fahrtenschreiber vorhanden</Label></div>
-          <div className="mt-7 flex items-center gap-3"><Checkbox checked={Boolean(form.ahk_vorhanden)} onCheckedChange={(v) => patch({ ahk_vorhanden: Boolean(v) })} /><Label>AHK vorhanden</Label></div>
-          <div className="mt-7 flex items-center gap-3"><Checkbox checked={Boolean(form.ladekran_vorhanden)} onCheckedChange={(v) => patch({ ladekran_vorhanden: Boolean(v) })} /><Label>Ladekran vorhanden</Label></div>
-          <div><Label>Fahrer Name</Label><Input value={form.fahrer_name ?? ''} onChange={(e) => patch({ fahrer_name: e.target.value })} /></div>
-          <div><Label>Fahrer Vorname</Label><Input value={form.fahrer_vorname ?? ''} onChange={(e) => patch({ fahrer_vorname: e.target.value })} /></div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Erwerb / Wirtschaftliche Daten</CardTitle></CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-4">
-          <div><Label>Bestellnummer</Label><Input value={form.bestellnummer ?? ''} onChange={(e) => patch({ bestellnummer: e.target.value })} /></div>
-          <div><Label>Bestelldatum</Label><Input type="date" value={dateOnly(form.bestelldatum)} onChange={(e) => patch({ bestelldatum: parseDate(e.target.value) })} /></div>
-          <div><Label>Haendler</Label><Input value={form.haendler ?? ''} onChange={(e) => patch({ haendler: e.target.value })} /></div>
-          <div><Label>Zustand (neu/gebraucht)</Label><Input value={form.zustand ?? ''} onChange={(e) => patch({ zustand: e.target.value })} /></div>
-          <div><Label>Kaufsumme EUR</Label><Input type="number" value={form.kaufsumme_eur ?? ''} onChange={(e) => patch({ kaufsumme_eur: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Kaufdatum</Label><Input type="date" value={dateOnly(form.kaufdatum)} onChange={(e) => patch({ kaufdatum: parseDate(e.target.value) })} /></div>
-          <div><Label>Verkaufsdatum</Label><Input type="date" value={dateOnly(form.verkaufsdatum)} onChange={(e) => patch({ verkaufsdatum: parseDate(e.target.value) })} /></div>
-          <div><Label>Abmeldedatum</Label><Input type="date" value={dateOnly(form.abmeldedatum)} onChange={(e) => patch({ abmeldedatum: parseDate(e.target.value) })} /></div>
-          <div><Label>Kostenstelle</Label><Input value={form.kostenstelle ?? ''} onChange={(e) => patch({ kostenstelle: e.target.value })} /></div>
-          <div><Label>Abschreibungsart</Label><Input value={form.abschreibungsart ?? ''} onChange={(e) => patch({ abschreibungsart: e.target.value })} /></div>
-          <div><Label>Afa Jahre</Label><Input type="number" value={form.afa_jahre ?? ''} onChange={(e) => patch({ afa_jahre: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Afa EUR jaehrlich</Label><Input type="number" value={form.afa_eur_jaehrlich ?? ''} onChange={(e) => patch({ afa_eur_jaehrlich: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Afa EUR monatlich</Label><Input type="number" value={form.afa_eur_monatlich ?? ''} onChange={(e) => patch({ afa_eur_monatlich: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Leasingdauer (Mon.)</Label><Input type="number" value={form.leasingdauer_monate ?? ''} onChange={(e) => patch({ leasingdauer_monate: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Leasinggesellschaft</Label><Input value={form.leasinggesellschaft ?? ''} onChange={(e) => patch({ leasinggesellschaft: e.target.value })} /></div>
-          <div><Label>Leasingrate EUR</Label><Input type="number" value={form.leasingrate_eur ?? ''} onChange={(e) => patch({ leasingrate_eur: Number(e.target.value) || undefined })} /></div>
-          <div><Label>KFZ-Steuer EUR</Label><Input type="number" value={form.kfz_steuer_eur ?? ''} onChange={(e) => patch({ kfz_steuer_eur: Number(e.target.value) || undefined })} /></div>
-          <div><Label>KFZ-Steuernummer</Label><Input value={form.kfz_steuernummer ?? ''} onChange={(e) => patch({ kfz_steuernummer: e.target.value })} /></div>
-          <div><Label>Kontierung</Label><Input value={form.kontierung ?? ''} onChange={(e) => patch({ kontierung: e.target.value })} /></div>
-          <div><Label>Finanzamt</Label><Input value={form.finanzamt ?? ''} onChange={(e) => patch({ finanzamt: e.target.value })} /></div>
-          <div><Label>Versicherungs-Gesellschaft</Label><Input value={form.versicherungs_gesellschaft ?? ''} onChange={(e) => patch({ versicherungs_gesellschaft: e.target.value })} /></div>
-          <div><Label>Versicherungsschein-Nr.</Label><Input value={form.versicherungsschein_nr ?? ''} onChange={(e) => patch({ versicherungsschein_nr: e.target.value })} /></div>
-          <div><Label>Satz EUR / Monat</Label><Input type="number" value={form.versicherung_satz_eur_monat ?? ''} onChange={(e) => patch({ versicherung_satz_eur_monat: Number(e.target.value) || undefined })} /></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.versicherung_haftpflicht)} onCheckedChange={(v) => patch({ versicherung_haftpflicht: Boolean(v) })} /><Label>Haftpflicht</Label></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.versicherung_kasko)} onCheckedChange={(v) => patch({ versicherung_kasko: Boolean(v) })} /><Label>Kasko</Label></div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Termine / Kilometerstand / Lasten</CardTitle></CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-4">
-          <div><Label>Naechster TUEV-Termin</Label><Input type="date" value={dateOnly(form.naechster_tuev_termin)} onChange={(e) => patch({ naechster_tuev_termin: parseDate(e.target.value) })} /></div>
-          <div><Label>Naechster ASU-Termin</Label><Input type="date" value={dateOnly(form.naechster_asu_termin)} onChange={(e) => patch({ naechster_asu_termin: parseDate(e.target.value) })} /></div>
-          <div><Label>Naechste Inspektion</Label><Input type="date" value={dateOnly(form.naechste_inspektion)} onChange={(e) => patch({ naechste_inspektion: parseDate(e.target.value) })} /></div>
-          <div><Label>Km-Stand</Label><Input type="number" value={form.kilometerstand ?? 0} onChange={(e) => patch({ kilometerstand: Number(e.target.value) || 0 })} /></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={!form.km_stand_alle_eintraege} onCheckedChange={(v) => patch({ km_stand_alle_eintraege: !v })} /><Label>Aktuelle Eintraege</Label></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.km_stand_alle_eintraege)} onCheckedChange={(v) => patch({ km_stand_alle_eintraege: Boolean(v) })} /><Label>Alle Eintraege</Label></div>
-          <div><Label>Leergewicht (kg)</Label><Input type="number" value={form.leergewicht_kg ?? ''} onChange={(e) => patch({ leergewicht_kg: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Nutzlast (kg)</Label><Input type="number" value={form.nutzlast_kg ?? ''} onChange={(e) => patch({ nutzlast_kg: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Gesamtgewicht (kg)</Label><Input type="number" value={form.gesamtgewicht_kg ?? ''} onChange={(e) => patch({ gesamtgewicht_kg: Number(e.target.value) || undefined })} /></div>
-          <div><Label>Anhaengerlast (kg)</Label><Input type="number" value={form.anhaengerlast_kg ?? ''} onChange={(e) => patch({ anhaengerlast_kg: Number(e.target.value) || undefined })} /></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.winterreifen_vorhanden)} onCheckedChange={(v) => patch({ winterreifen_vorhanden: Boolean(v) })} /><Label>Winterreifen vorhanden</Label></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.winterreifen_eingelagert)} onCheckedChange={(v) => patch({ winterreifen_eingelagert: Boolean(v) })} /><Label>Eingelagert</Label></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.handy_freisprecheinrichtung)} onCheckedChange={(v) => patch({ handy_freisprecheinrichtung: Boolean(v) })} /><Label>Handy-Freispr.-Einr.</Label></div>
-          <div><Label>Handy-Fabrikat</Label><Input value={form.handy_fabrikat ?? ''} onChange={(e) => patch({ handy_fabrikat: e.target.value })} /></div>
-          <div><Label>Handy-Ruf-Nummer</Label><Input value={form.handy_rufnummer ?? ''} onChange={(e) => patch({ handy_rufnummer: e.target.value })} /></div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Funktionen</CardTitle></CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-4">
-          <div className="md:col-span-2 flex gap-2">
-            <Input value={printerName} onChange={(e) => setPrinterName(e.target.value)} placeholder="Druckername" />
-            <Button
-              variant="outline"
-              disabled={actionsDisabled}
-              onClick={async () => {
-                try {
-                  await setupFuhrparkDrucker(id as string, printerName)
-                  toast({ title: 'Drucker eingerichtet' })
-                } catch (error) {
-                  toast({ title: 'Drucker-Setup fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
-                }
-              }}
-            >
-              Drucker einrichten
-            </Button>
-          </div>
-          <Button
-            variant="outline"
-            disabled={actionsDisabled}
-            onClick={async () => {
-              try {
-                await printFuhrparkAkte(id as string)
-                toast({ title: 'Fahrzeugakte gedruckt' })
-              } catch (error) {
-                toast({ title: 'Druck fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
-              }
-            }}
-          >
-            Drucken
-          </Button>
-          <Button
-            variant="destructive"
-            disabled={actionsDisabled}
-            onClick={async () => {
-              if (!confirm('Fahrzeug wirklich loeschen? Dieser Vorgang ist nicht rueckgaengig.')) return
-              try {
-                await deleteFuhrparkFahrzeug(id as string)
-                toast({ title: 'Fahrzeug geloescht' })
-                void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'fahrzeuge'] })
-                navigate('/fuhrpark/fahrzeuge')
-              } catch (error) {
-                toast({ title: 'Loeschen fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
-              }
-            }}
-          >
-            Fahrzeug loeschen
-          </Button>
-          <div><Input placeholder="Unfall-Ort" value={unfallOrt} onChange={(e) => setUnfallOrt(e.target.value)} /></div>
-          <div className="md:col-span-2"><Input placeholder="Unfall-Beschreibung" value={unfallBeschreibung} onChange={(e) => setUnfallBeschreibung(e.target.value)} /></div>
-          <Button
-            variant="outline"
-            disabled={actionsDisabled || !unfallOrt || !unfallBeschreibung}
-            onClick={async () => {
-              try {
-                await unfallAnzeige(id as string, { datum: new Date().toISOString(), ort: unfallOrt, beschreibung: unfallBeschreibung })
-                toast({ title: 'Unfallanzeige erfasst' })
-                setUnfallOrt('')
-                setUnfallBeschreibung('')
-              } catch (error) {
-                toast({ title: 'Unfallanzeige fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
-              }
-            }}
-          >
-            Unfall - Anzeige
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        workflowState={workflow}
+        onAction={handleAction}
+      />
     </div>
   )
 }
