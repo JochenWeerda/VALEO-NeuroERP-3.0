@@ -1861,6 +1861,68 @@ gruen.
 
 **Doku:** `docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`.
 
+## FRONTEND-INITIALDATA-MOUNTFETCH-20261006 — in Arbeit, Claude Code
+
+**Warum jetzt:** Der Windows-Dienst `com.docker.service` ist gestoppt, PostgreSQL
+nicht erreichbar, ein Start braucht erhoehte Rechte. Statt einen Nachweis zu
+behaupten, den ich nicht fuehren kann, nehme ich einen Slice, der **ohne Datenbank**
+pruefbar ist: Vitest mit gemocktem `apiClient`.
+
+**Der Fehler, und er ist schon einmal aufgefallen.** Am 17.07.2026 meldete der
+Nutzer: „Ackerschlagkartei zeigte initial weder Schlaege noch Massnahmen — erst nach
+einer Mutation erschienen die Seed-Daten." Ursache steht im Regressionstest
+`src/__tests__/lib/portal-feldbuch-hooks.test.tsx`:
+
+> `initialData: []` + `staleTime` liess React Query die leere Liste als **frische**
+> Daten werten, der Mount-Fetch entfiel.
+
+Das ist kein Schoenheitsfehler. `initialData` schreibt den Platzhalter in den Cache,
+**als waere er geladen**; mit `staleTime: 2 * 60 * 1000` gilt er zwei Minuten als
+frisch, und die Abfrage fragt den Server in dieser Zeit **gar nicht**. Die Maske
+zeigt „keine Eintraege", und niemand sieht, dass nie gefragt wurde.
+
+Behoben wurde es 2026-07-17 fuer **zwei** Hooks (`portal.ts`, auf
+`placeholderData`). **205 weitere Fundstellen** in 49 Dateien tragen denselben
+Fehler, 177 davon in `src/lib/api/`. Sieben Stellen haben die Gegenmassnahme
+(`initialDataUpdatedAt: 0`) — der Weg ist also im Haus bekannt und nur nicht gegangen.
+
+**Was dieser Slice tut — und was nicht.**
+
+* **Tut:** Jede `initialData`-Option in einer Abfrage bekommt
+  `initialDataUpdatedAt: 0`. Damit ist der Platzhalter **sofort veraltet**, der
+  Mount-Fetch findet statt, und die Form der Daten bleibt unveraendert: **kein**
+  Aufrufer bricht, **keine** Typaenderung.
+* **Tut:** Eine Ratsche, die eine neue `initialData`-Option ohne
+  `initialDataUpdatedAt: 0` abweist und die Gesamtzahl der `initialData`-Stellen
+  down-only festschreibt.
+* **Tut nicht:** Die Umstellung auf `placeholderData`. Das ist das richtige Ziel —
+  `placeholderData` schreibt den Cache nicht an und markiert sich als Platzhalter —
+  aber es macht `data` im Fehlerfall `undefined` und damit **jeden** Aufrufer
+  typaenderungspflichtig. Das in einem Zug mit 205 Stellen zu tun, waere ein Umbau
+  ohne Einzelnachweis. Die Ratsche haelt die Zahl fest, damit der Weg weitergeht.
+* **Bleibt offen und wird benannt:** Im **Fehlerfall** steht der Platzhalter weiter
+  sichtbar da — `data` bleibt der Fallback, `isError` ist wahr, und eine Maske, die
+  `isError` nicht liest, zeigt eine Attrappe. Der Mount-Fetch ist die eine Haelfte
+  des Fehlers; die andere liegt in den Masken.
+
+**Dateibesitz:** `packages/frontend-web/src/lib/api/*.ts` und die
+`initialData`-Stellen in `src/pages/**`, `src/features/**` (nur diese Option),
+`scripts/check_initial_data.py` (neu),
+`packages/frontend-web/src/__tests__/lib/initialdata-mountfetch.test.tsx` (neu),
+eigene QA-Doku, dieser Abschnitt. **`portal.ts` Feldbuch-Hooks bleiben unangetastet**
+— sie sind schon auf `placeholderData` und ihr Regressionstest gehoert dem
+Melde-Vorgang vom 17.07.2026.
+
+**Abnahme:** Die neuen Vertraege zeigen an mehreren Hooks aus verschiedenen Dateien,
+dass beim Mount **trotz** `staleTime` geladen wird und die Serverdaten den
+Platzhalter ersetzen; `npx tsc --noEmit` ohne neue Fehler; `npm run lint` ohne neue
+Fehler; die neue Ratsche gruen; die vier Backend-Ratschen ohne Datenbankbedarf gruen.
+
+**Risiken:** Mehr Abfragen beim Mount — genau das ist der Zweck; `staleTime` bremst
+weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
+ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
+waren.
+
 ## BEWERBUNG-EINWILLIGUNG-20261006 — in Arbeit, Claude Code
 
 **Auftrag:** Den offenen Punkt 4 aus
