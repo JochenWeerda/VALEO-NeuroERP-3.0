@@ -365,8 +365,8 @@ class TestGS1SSCCEndpoints:
 class TestComplianceEndpoints:
     """TC-API-006: Compliance Endpoints liefern korrekte Struktur."""
 
-    def test_eudr_status_returns_total_field(self):
-        """TC-API-006a: GET /compliance/eudr → Objekt mit 'total' Feld."""
+    def test_eudr_status_returns_register_and_lot_counts(self):
+        """TC-API-006a: EUDR meldet echte Register- und Chargenzaehler."""
         resp = _CLIENT.get("/api/v1/compliance/eudr", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200, (
@@ -374,9 +374,14 @@ class TestComplianceEndpoints:
         )
         data = resp.json()
         assert isinstance(data, dict), "TC-API-006a: Response muss ein Objekt sein"
-        assert any(k in data for k in ("total", "batches_total", "gesamt")), (
-            f"TC-API-006a: Kein Gesamtanzahl-Feld gefunden. Keys: {list(data.keys())}"
-        )
+        for key in ("due_diligence_statements", "statements_submitted", "statements_draft",
+                    "statements_unassessed", "lots_relevant", "lots_covered", "lots_open"):
+            assert type(data[key]) is int, f"TC-API-006a: {key} muss eine ganze Anzahl sein"
+            assert data[key] >= 0
+        # Zurueckgezogene Erklaerungen bleiben im Gesamtregister erhalten.
+        assert data["statements_submitted"] + data["statements_draft"] <= data["due_diligence_statements"]
+        assert data["statements_unassessed"] <= data["due_diligence_statements"]
+        assert data["lots_covered"] + data["lots_open"] == data["lots_relevant"]
 
     def test_sanctions_pruefen_returns_treffer_list(self):
         """TC-API-006b: POST /compliance/sanctions/pruefen → Objekt mit 'treffer' Liste."""

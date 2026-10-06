@@ -247,6 +247,7 @@ def lieferant(engine):
                 "DELETE FROM domain_erp.journal_entry_lines WHERE journal_entry_id IN "
                 "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
                 "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
+                "DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t",
                 "DELETE FROM domain_shared.tenants WHERE id = :t",
             ):
                 v.execute(text(sql), {"t": mandant})
@@ -351,14 +352,18 @@ def test_storno_ueber_compat_wirkt_am_beleg(client, engine, lieferant) -> None:
 
 
 def test_die_freigabe_bucht_und_geht_durch(client, engine, lieferant) -> None:
-    """Die Freigabe setzt kein Kennzeichen, sie bucht.
-
-    Solange der Kontenrahmen leer war, scheiterte sie an "Active
-    chart-of-accounts entry not found: 6000" — und das zu Recht: Eine Freigabe,
-    die nicht buchen kann, soll nicht so tun als ob. Seit die Konten gesaet
-    sind, geht sie durch.
-    """
+    """Freigabe bucht auf aktive eigene Konten und setzt den Belegstatus."""
     from sqlalchemy import text
+
+    konten = {nr: str(uuid.uuid4()) for nr in ("5100", "1600")}
+    with engine.begin() as v:
+        for nr, account_id in konten.items():
+            v.execute(text(
+                "INSERT INTO domain_erp.chart_of_accounts "
+                "(id, tenant_id, account_number, account_name, account_type, is_active, is_summary) "
+                "VALUES (:id, :t, :nr, 'Freigabe-Testkonto', :typ, TRUE, FALSE)"
+            ), {"id": account_id, "t": lieferant["mandant"], "nr": nr,
+                "typ": "EXPENSE" if nr == "5100" else "LIABILITY"})
 
     beleg = client.post(
         "/api/v1/purchase-orders",
@@ -382,6 +387,17 @@ def test_die_freigabe_bucht_und_geht_durch(client, engine, lieferant) -> None:
             {"id": beleg["id"]},
         ).scalar()
     assert status == "freigegeben"
+    with engine.connect() as v:
+        zeilen = v.execute(text(
+            "SELECT l.account_id, l.debit_amount, l.credit_amount "
+            "FROM domain_erp.journal_entry_lines l "
+            "JOIN domain_erp.journal_entries j ON j.id = l.journal_entry_id "
+            "WHERE j.tenant_id = :t"
+        ), {"t": lieferant["mandant"]}).mappings().all()
+    assert len(zeilen) == 2
+    assert {z["account_id"] for z in zeilen} == set(konten.values())
+    assert sum(float(z["debit_amount"]) for z in zeilen) == pytest.approx(31.5)
+    assert sum(float(z["credit_amount"]) for z in zeilen) == pytest.approx(31.5)
 
 
 def test_die_gebuchten_konten_gibt_es_wirklich(engine) -> None:

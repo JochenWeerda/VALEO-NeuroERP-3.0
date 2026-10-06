@@ -113,6 +113,13 @@ test_major_domain_router_registration.py nur kanonischer Registerpfad
 /vertraege (Entscheidung KONTRAKTREGISTER-20261001); UAT-Vertrag nur EUDR-
 Status mit due_diligence_statements und konsistenten Chargenzaehlern.
 Bestehende API-Vertraege pruefen, keine alten Alias-Endpunkte einfuehren.
+**Buchungsabnahme:** 18 Einkaufs-/Settlement-Vertraege gruen (49,90 s).
+Freigabe weist ausgeglichene Journalzeilen auf eigenen Konten nach;
+Settlement-Fake prueft Tenant, Aktivstatus und Buchbarkeit der Kontoantwort.
+Keine produktiven Guards geaendert, gemeinsame Probe ohne Reset verwendet.
+Zwei kanonische API-Vertraege im abschliessenden Lauf gruen (44,53 s),
+zusammen 20 Tests ohne Skip. Register- und Warenkontraktpfade getrennt;
+EUDR prueft reale nichtnegative Register-/Chargenzaehler.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
