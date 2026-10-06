@@ -197185,7 +197185,8 @@
         ],
         "summary": "Get Quality Evidence",
         "tags": [
-          "quality-evidence",
+          "admin",
+          "quality",
           "admin",
           "quality"
         ]
@@ -197242,7 +197243,8 @@
         ],
         "summary": "Get Drift Status",
         "tags": [
-          "quality-evidence",
+          "admin",
+          "quality",
           "admin",
           "quality"
         ]
@@ -204727,9 +204729,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger auflisten",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       },
@@ -204786,9 +204793,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger anlegen",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       }
@@ -204867,9 +204879,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger suchen",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       }
@@ -204916,9 +204933,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger-Kennzahlen",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       }
@@ -204969,9 +204991,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger deaktivieren",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       },
@@ -205027,9 +205054,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger abrufen",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       },
@@ -205095,9 +205127,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger aktualisieren",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       },
@@ -205163,9 +205200,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Duenger aktualisieren",
         "tags": [
-          "Agrar",
+          "agrar",
           "duenger"
         ]
       }
@@ -211776,9 +211818,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Psm",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       },
@@ -211835,9 +211882,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Psm",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -211896,9 +211948,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Price Alerts",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -211993,9 +212050,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Price History",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212067,9 +212129,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Start Competitor Monitoring",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212130,9 +212197,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Scrape Competitor Data",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212214,9 +212286,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Search Competitor Products",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212235,9 +212312,14 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Psm Monitoring",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212724,9 +212806,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Schadbilder auflisten",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212805,9 +212892,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Search Psm",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212854,9 +212946,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Psm Stats",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212923,9 +213020,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Sync Proplanta Psm",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -212972,9 +213074,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Run Due Schedules",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213041,9 +213148,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Schedule Sync",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213099,9 +213211,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Sync Schedule",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       },
@@ -213167,9 +213284,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Sync Schedule",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213216,9 +213338,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Sync Status",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213315,9 +213442,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Wasserschutz Zonen",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213336,9 +213468,14 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Wasserschutz Telemetry",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213378,9 +213515,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Wasserschutz Zone",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213431,9 +213573,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Psm",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       },
@@ -213505,9 +213652,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Psm",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       },
@@ -213573,9 +213725,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Psm",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213647,9 +213804,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upload Farmer Declaration",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -213721,9 +213883,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Farmer Declaration Status",
         "tags": [
-          "Agrar",
+          "agrar",
           "psm"
         ]
       }
@@ -226563,9 +226730,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut auflisten",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       },
@@ -226622,9 +226794,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut anlegen",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       }
@@ -226703,9 +226880,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut suchen",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       }
@@ -226752,9 +226934,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut-Kennzahlen",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       }
@@ -226805,9 +226992,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut deaktivieren",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       },
@@ -226863,9 +227055,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut abrufen",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       },
@@ -226931,9 +227128,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut aktualisieren",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       },
@@ -226999,9 +227201,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Saatgut aktualisieren",
         "tags": [
-          "Agrar",
+          "agrar",
           "saatgut"
         ]
       }
@@ -239928,9 +240135,16 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Audit log anlegen",
         "tags": [
-          "Audit"
+          "audit",
+          "compliance",
+          "gobd"
         ]
       }
     },
@@ -240102,9 +240316,16 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Audit logs abrufen",
         "tags": [
-          "Audit"
+          "audit",
+          "compliance",
+          "gobd"
         ]
       }
     },
@@ -240152,9 +240373,16 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Audit stats abrufen",
         "tags": [
-          "Audit"
+          "audit",
+          "compliance",
+          "gobd"
         ]
       }
     },
@@ -330917,9 +331145,15 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "User data exportieren",
         "tags": [
-          "GDPR"
+          "gdpr",
+          "compliance"
         ]
       }
     },
@@ -330969,9 +331203,15 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "User data löschen",
         "tags": [
-          "GDPR"
+          "gdpr",
+          "compliance"
         ]
       }
     },
@@ -331028,9 +331268,15 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Portable data exportieren",
         "tags": [
-          "GDPR"
+          "gdpr",
+          "compliance"
         ]
       }
     },
@@ -335362,9 +335608,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Articles auflisten",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       },
@@ -335421,9 +335672,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article anlegen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -335492,9 +335748,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article images anreichern",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -335573,9 +335834,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Articles suchen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -335626,9 +335892,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article löschen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       },
@@ -335684,9 +335955,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       },
@@ -335752,9 +336028,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article aktualisieren",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -335812,9 +336093,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article discounts abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -335872,9 +336158,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article documents abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -335932,9 +336223,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article image abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -336010,9 +336306,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article position context abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -336070,9 +336371,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article prices abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -336148,9 +336454,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article stock abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -336285,9 +336596,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article stock movements abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -336345,9 +336661,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Article suppliers abrufen",
         "tags": [
-          "Inventory",
+          "inventory",
           "articles"
         ]
       }
@@ -336768,7 +337089,7 @@
         ],
         "summary": "List Charge Lineage",
         "tags": [
-          "Inventory",
+          "inventory",
           "charge-lineage"
         ]
       },
@@ -336831,7 +337152,7 @@
         ],
         "summary": "Create Charge Lineage",
         "tags": [
-          "Inventory",
+          "inventory",
           "charge-lineage"
         ]
       }
@@ -337974,7 +338295,7 @@
         ],
         "summary": "Get Inventory Value",
         "tags": [
-          "Inventory",
+          "inventory",
           "inventory-reports"
         ]
       }
@@ -338044,7 +338365,7 @@
         ],
         "summary": "Get Purchase Order Suggestions",
         "tags": [
-          "Inventory",
+          "inventory",
           "inventory-reports"
         ]
       }
@@ -338110,7 +338431,7 @@
         ],
         "summary": "Get Replenishment Suggestions",
         "tags": [
-          "Inventory",
+          "inventory",
           "inventory-reports"
         ]
       }
@@ -338176,7 +338497,7 @@
         ],
         "summary": "Get Slow Moving Inventory",
         "tags": [
-          "Inventory",
+          "inventory",
           "inventory-reports"
         ]
       }
@@ -338230,7 +338551,7 @@
         ],
         "summary": "Get Stock Alerts",
         "tags": [
-          "Inventory",
+          "inventory",
           "inventory-reports"
         ]
       }
@@ -338316,7 +338637,7 @@
         ],
         "summary": "Get Stock Levels Report",
         "tags": [
-          "Inventory",
+          "inventory",
           "inventory-reports"
         ]
       }
@@ -338382,7 +338703,7 @@
         ],
         "summary": "Get Turnover Analysis",
         "tags": [
-          "Inventory",
+          "inventory",
           "inventory-reports"
         ]
       }
@@ -338593,7 +338914,7 @@
         ],
         "summary": "List Stock Movements",
         "tags": [
-          "Inventory",
+          "inventory",
           "stock-movements"
         ]
       },
@@ -338657,7 +338978,7 @@
         ],
         "summary": "Create Stock Movement",
         "tags": [
-          "Inventory",
+          "inventory",
           "stock-movements"
         ]
       }
@@ -338734,7 +339055,7 @@
         ],
         "summary": "Get Article Movement Summary",
         "tags": [
-          "Inventory",
+          "inventory",
           "stock-movements"
         ]
       }
@@ -338792,7 +339113,7 @@
         ],
         "summary": "Delete Stock Movement",
         "tags": [
-          "Inventory",
+          "inventory",
           "stock-movements"
         ]
       },
@@ -338855,7 +339176,7 @@
         ],
         "summary": "Get Stock Movement",
         "tags": [
-          "Inventory",
+          "inventory",
           "stock-movements"
         ]
       },
@@ -338928,7 +339249,7 @@
         ],
         "summary": "Update Stock Movement",
         "tags": [
-          "Inventory",
+          "inventory",
           "stock-movements"
         ]
       }
@@ -338994,7 +339315,7 @@
         ],
         "summary": "Run Storage Fee Engine",
         "tags": [
-          "Inventory",
+          "inventory",
           "storage-fees"
         ]
       }
@@ -339059,7 +339380,7 @@
         ],
         "summary": "List Storage Fee Runs",
         "tags": [
-          "Inventory",
+          "inventory",
           "storage-fees"
         ]
       }
@@ -339121,7 +339442,7 @@
         ],
         "summary": "Get Storage Fee Run",
         "tags": [
-          "Inventory",
+          "inventory",
           "storage-fees"
         ]
       }
@@ -339263,9 +339584,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Warehouses",
         "tags": [
-          "Inventory",
+          "inventory",
           "warehouses"
         ]
       },
@@ -339322,9 +339648,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Warehouse",
         "tags": [
-          "Inventory",
+          "inventory",
           "warehouses"
         ]
       }
@@ -339375,9 +339706,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Warehouse",
         "tags": [
-          "Inventory",
+          "inventory",
           "warehouses"
         ]
       },
@@ -339433,9 +339769,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Warehouse",
         "tags": [
-          "Inventory",
+          "inventory",
           "warehouses"
         ]
       },
@@ -339501,9 +339842,14 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Warehouse",
         "tags": [
-          "Inventory",
+          "inventory",
           "warehouses"
         ]
       }
@@ -342838,6 +343184,7 @@
         ],
         "summary": "Kontrakte auflisten",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       },
@@ -342900,6 +343247,7 @@
         ],
         "summary": "Kontrakt anlegen",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -342964,6 +343312,7 @@
         ],
         "summary": "Amendment templates auflisten",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -343027,6 +343376,7 @@
         ],
         "summary": "Verkauf kontrakte lookup",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -343110,6 +343460,7 @@
         ],
         "summary": "Positionen abrufen",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -343465,6 +343816,7 @@
         ],
         "summary": "Kontrakt löschen",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       },
@@ -343526,6 +343878,7 @@
         ],
         "summary": "Kontrakt abrufen",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       },
@@ -343597,6 +343950,7 @@
         ],
         "summary": "Kontrakt aktualisieren",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       },
@@ -343669,6 +344023,7 @@
         ],
         "summary": "Kontrakt replace",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -343732,6 +344087,7 @@
         ],
         "summary": "Amendments auflisten",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       },
@@ -343803,6 +344159,7 @@
         ],
         "summary": "Amendment anlegen",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -343885,6 +344242,7 @@
         ],
         "summary": "Amendment status aktualisieren",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -343948,6 +344306,7 @@
         ],
         "summary": "Kontrakt audit auflisten",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -344020,6 +344379,7 @@
         ],
         "summary": "Kontrakt stornieren",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -344125,6 +344485,7 @@
         ],
         "summary": "Kontrakt movements auflisten",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       },
@@ -344196,6 +344557,7 @@
         ],
         "summary": "Kontrakt movement anlegen",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -344259,6 +344621,7 @@
         ],
         "summary": "Kontrakt screen summary abrufen",
         "tags": [
+          "kontrakte",
           "kontrakte",
           "kontrakte",
           "screen-summary"
@@ -344366,6 +344729,7 @@
         "tags": [
           "kontrakte",
           "kontrakte",
+          "kontrakte",
           "screen-summary"
         ]
       }
@@ -344469,6 +344833,7 @@
         ],
         "summary": "Kontrakt: Umsaetze",
         "tags": [
+          "kontrakte",
           "kontrakte",
           "kontrakte",
           "screen-summary"
@@ -344584,6 +344949,7 @@
         "tags": [
           "kontrakte",
           "kontrakte",
+          "kontrakte",
           "screen-summary"
         ]
       }
@@ -344652,6 +345018,7 @@
         ],
         "summary": "Was von jeder Position noch abrufbar ist",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -344732,6 +345099,7 @@
         ],
         "summary": "Abrufe eines Kontrakts auflisten",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       },
@@ -344804,6 +345172,7 @@
         ],
         "summary": "Menge abrufen",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -344877,6 +345246,7 @@
         ],
         "summary": "Abruf stornieren",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -344950,6 +345320,7 @@
         ],
         "summary": "Abruf freigeben",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }
@@ -345032,6 +345403,7 @@
         ],
         "summary": "Abruf als geliefert melden",
         "tags": [
+          "kontrakte",
           "kontrakte"
         ]
       }

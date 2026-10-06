@@ -144,6 +144,20 @@ CRM-Delegation prueft Entity/Tab bis zum zentralen Renderer.
 bestaetigt; echte main:app-Spec indexseitig regenerieren. Fremde Spec-WIP
 bleibt erhalten, bestehende Operation-ID-Warnungen bleiben offen.
 3095 Pfade kanonisch verifiziert; acht betroffene Pfade, drei davon neu.
+**Router-Eindeutigkeitsclaim (2026-10-06):** main.py nur wiederholte
+Montagen von Inventory, Agrar, Audit, GDPR und Kontrakte entfernen;
+app/api/v1/api.py nur zweite Quality-Evidence-Montage entfernen. Dateien
+sauber, 168 doppelte Methoden/Pfade auf committed App nachgewiesen.
+Diese sechs Montageursachen betreffen 113 identische Doppelregistrierungen;
+kanonische erste Montage bleibt. Neuer Test test_canonical_router_mounts.py
+prueft Vollstaendigkeit, Handler/Antwort-/Dependencyvertrag und Eindeutigkeit
+der betroffenen Router. Konflikte anderer Handler bleiben separat offen.
+OpenAPI und Inventare aus committed Source plus diesen eigenen Hunks.
+**Router-Abnahme:** Acht Regressionen gruen (69,20 s). Alle Methoden/Pfade,
+Handler, Antwortmodelle, Status und Dependencies der sechs Router erhalten.
+App-Doppelgruppen 168 -> 55; genau 113 Wiederholungen entfernt. OpenAPI
+bleibt bei denselben 3095 Pfaden/HTTP-Methoden. Drei Inventare und fuenf
+Handbuchartefakte auf committed Source aktuell. Andere Konflikte bleiben offen.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.

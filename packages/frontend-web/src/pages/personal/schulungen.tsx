@@ -1,250 +1,284 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from '@/app/routing/typed-router'
-import { Callout } from '@/components/ui/callout'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DataTable } from '@/components/ui/data-table'
-import { Input } from '@/components/ui/input'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
-import { AlertTriangle, Award, FileDown, Plus, Search } from 'lucide-react'
-import { useSchulungen, type Schulung } from '@/lib/api/personal'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
+import { toast } from 'sonner'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
-import { exportToCSV } from '@/lib/export-utils'
-import { useToast } from '@/hooks/use-toast'
+import { personalKeys } from '@/lib/api/personal'
+import { personalSchulungenScreen } from '@/masks/capture-screens'
 
-export default function SchulungenPage(): JSX.Element {
-  const navigate = useNavigate()
+const leer = {
+  employee_ref: '',
+  course_id: '',
+  assigned_by: '',
+  due_date: '',
+}
+
+function text(value: unknown): string {
+  return String(value ?? '').trim()
+}
+
+type CourseApi = { id: string; course_code: string; title: string; is_active: boolean }
+
+type AssignmentApi = {
+  id: string
+  course_id: string
+  course_code?: string
+  course_title?: string
+  employee_ref: string
+  assigned_by?: string | null
+  due_date?: string | null
+  status?: string
+}
+
+type SchulungRow = {
+  id: string
+  employeeRef: string
+  courseId: string
+  courseCode?: string
+  courseTitle?: string
+  assignedBy?: string
+  dueDate?: string
+  statusLabel: string
+  ablaufend: boolean
+  abgelaufen: boolean
+}
+
+function stand(item: AssignmentApi): Pick<SchulungRow, 'statusLabel' | 'ablaufend' | 'abgelaufen'> {
+  if (item.status === 'overdue') {
+    return { statusLabel: 'Abgelaufen', ablaufend: false, abgelaufen: true }
+  }
+  if (item.status === 'completed') {
+    return { statusLabel: 'Abgeschlossen', ablaufend: false, abgelaufen: false }
+  }
+  if (!item.due_date) {
+    return { statusLabel: 'Gültig', ablaufend: false, abgelaufen: false }
+  }
+  const due = new Date(item.due_date)
+  if (Number.isNaN(due.getTime())) {
+    return { statusLabel: 'Gültig', ablaufend: false, abgelaufen: false }
+  }
+  const now = new Date()
+  if (due < now) {
+    return { statusLabel: 'Abgelaufen', ablaufend: false, abgelaufen: true }
+  }
+  const warnung = new Date()
+  warnung.setDate(warnung.getDate() + 60)
+  if (due <= warnung) {
+    return { statusLabel: 'Läuft ab', ablaufend: true, abgelaufen: false }
+  }
+  return { statusLabel: 'Gültig', ablaufend: false, abgelaufen: false }
+}
+
+function toRow(item: AssignmentApi): SchulungRow {
+  const label = stand(item)
+  return {
+    id: item.id,
+    employeeRef: item.employee_ref,
+    courseId: item.course_id,
+    courseCode: item.course_code || undefined,
+    courseTitle: item.course_title || undefined,
+    assignedBy: item.assigned_by || undefined,
+    dueDate: item.due_date || undefined,
+    ...label,
+  }
+}
+
+export default function PersonalSchulungenPage(): JSX.Element {
   const isTouch = useTouchDevice()
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [nurPsm, setNurPsm] = useState(false)
-  const [nurAblaufende, setNurAblaufende] = useState(false)
-  const { data: schulungen, isLoading } = useSchulungen()
-  const list = useMemo(() => schulungen ?? [], [schulungen])
-
-  const ablaufend = useMemo(() =>
-    list.filter((s) => {
-      if (!s.gueltigBis) return false
-      const ablauf = new Date(s.gueltigBis)
-      const warnung = new Date()
-      warnung.setMonth(warnung.getMonth() + 2)
-      return ablauf <= warnung && ablauf >= new Date()
-    }).length
-  , [list])
-
-  const filtered = useMemo(() => {
-    return list.filter((sch) => {
-      if (searchTerm) {
-        const s = searchTerm.toLowerCase()
-        const matchesSearch = sch.mitarbeiter.toLowerCase().includes(s) || sch.thema.toLowerCase().includes(s)
-        if (!matchesSearch) return false
-      }
-      if (nurPsm && !String(sch.typ ?? sch.thema ?? '').toLowerCase().includes('psm')) return false
-      if (nurAblaufende) {
-        if (!sch.gueltigBis) return false
-        const ablauf = new Date(sch.gueltigBis)
-        const warnung = new Date()
-        warnung.setMonth(warnung.getMonth() + 2)
-        if (!(ablauf <= warnung && ablauf >= new Date())) return false
-      }
-      return true
-    })
-  }, [list, searchTerm, nurPsm, nurAblaufende])
-
-  const columns = [
-    {
-      key: 'mitarbeiter' as const,
-      label: 'Mitarbeiter',
-      render: (s: Schulung) => (
-        <div>
-          <button type="button" onClick={() => navigate(`/personal/mitarbeiter/${s.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
-            {s.mitarbeiter}
-          </button>
-          <div className="text-xs text-muted-foreground font-mono">{s.personalnr}</div>
-        </div>
-      ),
+  const queryClient = useQueryClient()
+  const kurse = useQuery({
+    queryKey: ['training', 'courses'],
+    queryFn: async () => (await apiClient.get<CourseApi[]>('/api/v1/training/courses')).data,
+  })
+  const schulungen = useQuery({
+    queryKey: personalKeys.schulungen(),
+    queryFn: async () => {
+      const rows = (await apiClient.get<AssignmentApi[]>('/api/v1/training/assignments')).data
+      return rows.map(toRow)
     },
-    { key: 'typ' as const, label: 'Typ', render: (s: Schulung) => <Badge variant="outline">{s.typ}</Badge> },
-    { key: 'thema' as const, label: 'Schulungsthema' },
-    { key: 'datum' as const, label: 'Datum', render: (s: Schulung) => new Date(s.datum).toLocaleDateString('de-DE') },
-    { key: 'dauer' as const, label: 'Dauer', render: (s: Schulung) => `${s.dauer}h` },
-    { key: 'schulungsleiter' as const, label: 'Schulungsleiter' },
-    {
-      key: 'zertifikatNr' as const,
-      label: 'Zertifikat',
-      render: (s: Schulung) => (s.zertifikatNr ? <span className="font-mono text-sm">{s.zertifikatNr}</span> : <span className="text-muted-foreground">–</span>),
+  })
+  const rows = schulungen.data ?? []
+  const ablaufend = rows.filter((row) => row.ablaufend).length
+  const offen = rows.filter((row) => row.ablaufend || row.abgelaufen).length
+  const [saving, setSaving] = useState(false)
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!schulungen.isError && !kurse.isError) return
+    const error = schulungen.error ?? kurse.error
+    toast.error('Schulungen nicht geladen', { description: getAxiosErrorMessage(error) })
+  }, [kurse.error, kurse.isError, schulungen.error, schulungen.isError])
+
+  const schema = useMemo<ScreenDefinition>(() => ({
+    ...personalSchulungenScreen,
+    layout: {
+      ...personalSchulungenScreen.layout,
+      density: isTouch ? 'comfortable' : 'compact',
     },
-    {
-      key: 'gueltigBis' as const,
-      label: 'Gültig bis',
-      render: (s: Schulung) => {
-        if (!s.gueltigBis) return <span className="text-muted-foreground">–</span>
-        const ablauf = new Date(s.gueltigBis)
-        const isExpiring = ablauf <= new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
-        return (
-          <span className={isExpiring ? 'font-semibold text-status-warning' : ''}>
-            {ablauf.toLocaleDateString('de-DE')}
-          </span>
-        )
+    summary: (personalSchulungenScreen.summary ?? []).map((item) => ({
+      ...item,
+      value: String(item.key === 'ablaufend' ? ablaufend : rows.length),
+    })),
+    fields: (personalSchulungenScreen.fields ?? []).map((field) => (
+      field.key === 'course_id'
+        ? {
+            ...field,
+            options: (kurse.data ?? [])
+              .filter((course) => course.is_active)
+              .map((course) => ({
+                value: course.id,
+                label: `${course.course_code} – ${course.title}`,
+              })),
+          }
+        : field
+    )),
+    actions: (personalSchulungenScreen.actions ?? []).map((action) => ({
+      ...action,
+      disabled: action.key === 'speichern' ? saving : false,
+    })),
+  }), [ablaufend, isTouch, kurse.data, rows.length, saving])
+
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const form = useUniversalFormState({ screen: schema, initialValues: leer })
+
+  const workflow = useMemo<WorkflowState>(() => {
+    const keine = rows.length === 0
+    const label = keine ? 'Keine Schulung' : offen > 0 ? 'Nachweis offen' : 'Schulungen hinterlegt'
+    const naechste = keine
+      ? 'Mitarbeiter-Referenz und Schulungskurs eintragen.'
+      : offen > 0
+        ? `${offen} Nachweis prüfungsbedürftig.`
+        : 'Eine weitere Zuweisung anlegen.'
+    return {
+      status: {
+        currentStatus: keine ? 'leer' : offen > 0 ? 'offen' : 'hinterlegt',
+        statusLabel: label,
+        tone: keine || offen > 0 ? 'warning' : 'success',
       },
-    },
-    {
-      key: 'status' as const,
-      label: 'Status',
-      render: (s: Schulung) => (
-        <Badge variant={s.status === 'gueltig' ? 'outline' : s.status === 'ablaufend' ? 'secondary' : 'destructive'}>
-          {s.status === 'gueltig' ? 'Gültig' : s.status === 'ablaufend' ? 'Läuft ab' : 'Abgelaufen'}
-        </Badge>
-      ),
-    },
-  ]
+      nextAllowedActions: [{ actionKey: 'speichern', label: naechste, dangerLevel: 'safe', requiresConfirmation: false }],
+      blockingReasons: keine || offen > 0 ? [{ code: label, message: naechste, blocking: true }] : [],
+      auditTrail: [],
+      policyHints: [],
+      isBlocked: false,
+      isTerminal: false,
+    }
+  }, [offen, rows.length])
 
-  if (isLoading) {
+  const leeren = useCallback(() => {
+    form.setValue('employee_ref', '')
+    form.setValue('course_id', '')
+    form.setValue('assigned_by', '')
+    form.setValue('due_date', '')
+  }, [form])
+
+  const speichern = useCallback(async () => {
+    if (saving) return
+    const employeeRef = text(form.values.employee_ref)
+    const courseId = text(form.values.course_id)
+    if (!employeeRef || !courseId) {
+      toast.error('Zuweisung unvollständig', { description: 'Mitarbeiter-Referenz und Schulungskurs eintragen.' })
+      return
+    }
+    setSaving(true)
+    try {
+      await apiClient.post('/api/v1/training/assignments', {
+        data: {
+          employee_ref: employeeRef,
+          course_id: courseId,
+          assigned_by: text(form.values.assigned_by) || null,
+          due_date: text(form.values.due_date) || null,
+          status: 'assigned',
+        },
+      })
+      toast.success('Schulung erfasst', { description: employeeRef })
+      await queryClient.invalidateQueries({ queryKey: personalKeys.schulungen() })
+      leeren()
+    } catch (error) {
+      toast.error('Schulung nicht erfasst', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setSaving(false)
+    }
+  }, [form.values, leeren, queryClient, saving])
+
+  const loeschen = useCallback(async (id: string, name: string) => {
+    if (!id || pendingDeletes.has(id)) return
+    setPendingDeletes((prev) => new Set(prev).add(id))
+    try {
+      await apiClient.delete(`/api/v1/training/assignments/${id}`)
+      toast.success('Schulung gelöscht', { description: name })
+      await queryClient.invalidateQueries({ queryKey: personalKeys.schulungen() })
+    } catch (error) {
+      toast.error('Schulung nicht gelöscht', { description: getAxiosErrorMessage(error) })
+    } finally {
+      setPendingDeletes((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    }
+  }, [pendingDeletes, queryClient])
+
+  const handleAction = useCallback(async (key: string, payload: Record<string, unknown>) => {
+    if (key === 'speichern') {
+      await speichern()
+      return
+    }
+    if (key === 'neu') {
+      leeren()
+      return
+    }
+    if (key === 'loeschen') await loeschen(text(payload.id), text(payload.employee_ref))
+  }, [leeren, loeschen, speichern])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { schulungen: rows },
+    permissions: { granted: [] },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'personal.saveSchulung': () => handleAction('speichern', {}),
+      'personal.newSchulung': () => handleAction('neu', {}),
+      'personal.deleteSchulung': (payload) => handleAction('loeschen', payload),
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, handleAction, rows])
+
+  if (schulungen.isLoading || kurse.isLoading) {
     return (
-      <div className="space-y-4 p-3 md:p-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid gap-4 md:grid-cols-4">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
-        </div>
-        <Skeleton className="h-64" />
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 p-3 md:p-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-center gap-3">
-          <Award className="h-10 w-10 text-primary" />
-          <div>
-            <h1 className="text-2xl font-bold md:text-3xl">Schulungsnachweise</h1>
-            <p className="text-muted-foreground">Nachweise suchen und pruefen</p>
-          </div>
-        </div>
-        <Button onClick={() => navigate('/personal/schulung-neu')} className="min-h-touch gap-2 touch-manipulation">
-          <Plus className="h-4 w-4" />
-          Schulung erfassen
-        </Button>
-      </div>
-
-      {ablaufend > 0 && (
-        <Card className="border-status-warning/40 bg-status-warning/10">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 text-status-warning">
-              <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{ablaufend} Schulung(en) laufen in den nächsten 2 Monaten ab!</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Callout variant="info" className="rounded-lg p-4 text-sm">
-        <div className="flex items-center gap-2">
-          <Award className="h-4 w-4" />
-          <p className="font-semibold">Pflicht-Schulungen Landhandel</p>
-        </div>
-        <p className="mt-1">
-          <strong>PSM:</strong> § 9 PflSchG (Sachkunde) • <strong>Gabelstapler:</strong> DGUV Vorschrift 68 •
-          <strong>Erste Hilfe:</strong> DGUV Vorschrift 1 • <strong>Gefahrstoffe:</strong> GefStoffV § 14
-        </p>
-      </Callout>
-
-      {!isTouch ? (
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Schulungen Gesamt</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{list.length}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Gültig</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-status-success">{list.filter((s) => s.status === 'gueltig').length}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Laufen ab (60 Tage)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-status-warning">{ablaufend}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Abgelaufen</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-status-error">{list.filter((s) => s.status === 'abgelaufen').length}</span>
-          </CardContent>
-        </Card>
-      </div>
-      ) : null}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Suche & Filter</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input aria-label="Suche Schulungen" placeholder="Mitarbeiter, Thema" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-h-touch pl-10" />
-            </div>
-            <Button variant={nurPsm ? 'default' : 'outline'} className="min-h-touch touch-manipulation" onClick={() => setNurPsm((v) => !v)}>Nur PSM</Button>
-            <Button variant={nurAblaufende ? 'default' : 'outline'} className="min-h-touch touch-manipulation" onClick={() => setNurAblaufende((v) => !v)}>Nur ablaufende</Button>
-            <Button
-              variant="outline"
-              className="min-h-touch gap-2 touch-manipulation"
-              onClick={() => {
-                if (filtered.length === 0) {
-                  toast({ title: 'Kein Export', description: 'Keine Schulungen in der aktuellen Sicht.', variant: 'destructive' })
-                  return
-                }
-                exportToCSV(
-                  filtered.map((s) => ({
-                    mitarbeiter: s.mitarbeiter,
-                    personalnr: s.personalnr,
-                    typ: s.typ,
-                    thema: s.thema,
-                    datum: s.datum,
-                    gueltigBis: s.gueltigBis ?? '',
-                    status: s.status,
-                  })),
-                  `schulungen-${new Date().toISOString().slice(0, 10)}.csv`,
-                  [
-                    { key: 'mitarbeiter', label: 'Mitarbeiter' },
-                    { key: 'personalnr', label: 'Personalnr' },
-                    { key: 'typ', label: 'Typ' },
-                    { key: 'thema', label: 'Thema' },
-                    { key: 'datum', label: 'Datum' },
-                    { key: 'gueltigBis', label: 'Gueltig bis' },
-                    { key: 'status', label: 'Status' },
-                  ],
-                )
-              }}
-            >
-              <FileDown className="h-4 w-4" />
-              Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={filtered} columns={columns} />
-        </CardContent>
-      </Card>
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        workflowState={workflow}
+        tables={{
+          schulungen: rows.map((row) => ({
+            id: row.id,
+            employee_ref: row.employeeRef,
+            kurs: row.courseTitle || row.courseCode || row.courseId,
+            status: row.statusLabel,
+            due_date: row.dueDate ? row.dueDate.slice(0, 10) : '',
+            assigned_by: row.assignedBy ?? '',
+            gesperrt: pendingDeletes.has(row.id),
+          })),
+        }}
+        onAction={handleAction}
+      />
     </div>
   )
 }

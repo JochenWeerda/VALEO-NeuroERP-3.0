@@ -2344,10 +2344,6 @@ api_router.include_router(whatsapp_webhook.router, prefix="/whatsapp", tags=["Wh
 from app.api.v1.endpoints import whatsapp_notify  # noqa: E402
 api_router.include_router(whatsapp_notify.router, prefix="/whatsapp", tags=["WhatsApp"])
 
-# INTEGRATION-EVIDENCE-BOARD-001: Quality Evidence API
-from app.api.v1.endpoints import quality_evidence  # noqa: E402
-api_router.include_router(quality_evidence.router, tags=["quality-evidence"])
-
 # Annahme-Warteschlange (Ernte-Annahme / Wareneingang)
 from app.api.v1.endpoints import annahme  # noqa: E402
 api_router.include_router(annahme.router, tags=["annahme", "warteschlange"])

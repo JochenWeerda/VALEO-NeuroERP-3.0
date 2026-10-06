@@ -12,6 +12,8 @@ from app.core.screen_definitions_capture import (
     build_logistik_tourenplanung_screen_definition,
     build_fuhrpark_ausgehende_dokumente_screen_definition,
     build_fuhrpark_fahrzeug_stamm_screen_definition,
+    build_personal_onboarding_screen_definition,
+    build_personal_schulungen_screen_definition,
     build_personal_qualifikationen_screen_definition,
     build_fuhrpark_rechnungen_screen_definition,
     build_fuhrpark_terminarten_screen_definition,
@@ -288,3 +290,45 @@ def test_qualifikationen_folgen_der_gueltigkeit() -> None:
     assert "DEMO" not in block
     assert governance_errors(definition) == []
     assert get_screen_definition("personal/qualifikationen")["id"] == "personal/qualifikationen"
+
+
+def test_onboarding_folgt_den_offenen_laeufen() -> None:
+    definition = build_personal_onboarding_screen_definition()
+    block = _block("personalOnboardingScreen")
+    felder = ["employee_ref", "checklist_id", "assigned_by", "due_date"]
+    assert definition["id"] == "personal/onboarding"
+    assert definition["title"] == "Onboarding"
+    assert definition["domain"] == "hr"
+    assert [field["key"] for field in definition["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/training/onboarding/runs"
+    assert "/api/v1/training/onboarding/runs" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    assert definition["tables"][0]["columns"][0]["priority"] == "primary"
+    assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("personal/onboarding")["id"] == "personal/onboarding"
+
+
+def test_schulungen_folgen_der_faelligkeit() -> None:
+    definition = build_personal_schulungen_screen_definition()
+    block = _block("personalSchulungenScreen")
+    felder = ["employee_ref", "course_id", "assigned_by", "due_date"]
+    assert definition["id"] == "personal/schulungen"
+    assert definition["title"] == "Schulungen"
+    assert definition["domain"] == "hr"
+    assert [field["key"] for field in definition["fields"]] == felder
+    assert _first_keys(block, felder) == sorted(_first_keys(block, felder))
+    assert definition["layout"]["statusPlacement"] == "afterFields"
+    assert derived_screen_type(definition) == "WORKLIST"
+    assert definition["dataSources"][0]["endpoint"] == "/api/v1/training/assignments"
+    assert "/api/v1/training/assignments" in block
+    assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
+    assert definition["tables"][0]["columns"][0]["priority"] == "primary"
+    assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
+    assert "DEMO" not in block
+    assert governance_errors(definition) == []
+    assert get_screen_definition("personal/schulungen")["id"] == "personal/schulungen"

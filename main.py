@@ -50,7 +50,6 @@ from app.routers.fibu_router import router as fibu_router  # Finanzbuchhaltung (
 from app.routers.translations_router import router as translations_router  # Übersetzungen (/api/translations)
 from app.routers.vies_router import router as vies_router  # VIES USt-IdNr.-Prüfung (/api/vies)
 from app.routers.contracts_router import router as contracts_router  # Verträge (contracts-v2 Maske)
-from app.api.v1.endpoints.kontrakte import router as kontrakte_router  # Valeo Kontraktmodul
 from app.api.v1.endpoints import opportunities as opportunities_endpoints  # CRM-Sales (Frontend /api/crm-sales)
 
 # Import domain-specific routers with error handling
@@ -492,18 +491,7 @@ if einkauf_router:
 if purchase_workflow_router:
     app.include_router(purchase_workflow_router, prefix="/api/purchase-workflow", tags=["Procurement", "Workflow"])
 
-# Legacy domain routers
-try:
-    from app.domains.inventory.api import router as inventory_router
-    app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
-except ImportError:
-    logger.debug("Inventory router not available (optional module)")
-
-try:
-    from app.domains.agrar.api import router as agrar_router
-    app.include_router(agrar_router, prefix="/api/v1/agrar", tags=["Agrar"])
-except ImportError:
-    logger.debug("Agrar router not available (optional module)")
+# Inventory and Agrar are mounted once through api_router.
 
 # Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
 @app.post("/api/mcp/analytics/kpis")
@@ -539,13 +527,7 @@ from app.api.v1.endpoints.system_metrics import router as system_metrics_router
 app.include_router(health_router, tags=["Health"])
 app.include_router(system_metrics_router, prefix="/api/v1/metrics", tags=["System Metrics"])
 
-# Include Audit API (Compliance)
-from app.api.v1.endpoints.audit import router as audit_router
-app.include_router(audit_router, prefix="/api/v1/audit", tags=["Audit"])
-
-# Include GDPR API (Compliance)
-from app.api.v1.endpoints.gdpr import router as gdpr_router
-app.include_router(gdpr_router, prefix="/api/v1/gdpr", tags=["GDPR"])
+# Audit and GDPR are mounted once through api_router.
 
 # Include RAG API (Phase 3 - Semantic Search) - TEMPORARILY DISABLED for CRM testing
 # from app.api.v1.endpoints.rag import router as rag_router
@@ -593,7 +575,6 @@ app.include_router(admin_dms_router)
 
 # Verträge-API für Frontend contracts-v2 (GET /api/contracts → { items: [] })
 app.include_router(contracts_router)
-app.include_router(kontrakte_router, prefix="/api/v1")
 
 # CRM Opportunities unter /api/crm-sales/opportunities (Frontend createApiClient('/api/crm-sales/opportunities'))
 app.include_router(opportunities_endpoints.router, prefix="/api/crm-sales/opportunities", tags=["crm-sales"])

@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (94 Masken).
+> Generiert aus `app/core/screen_definitions.py` (96 Masken).
 
 ## Übersicht
 
@@ -83,7 +83,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `logistik/tourenplanung` | Tourenplanung | logistics | niedrig | — | `GET /api/v1/masks/logistik/tourenplanung/agent-contract` |
 | `logistik/verladung` | Verladung | logistics | niedrig | — | `GET /api/v1/masks/logistik/verladung/agent-contract` |
 | `logistik/versandprofile` | Versandprofile | logistics | niedrig | — | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
+| `personal/onboarding` | Onboarding | hr | niedrig | — | `GET /api/v1/masks/personal/onboarding/agent-contract` |
 | `personal/qualifikationen` | Qualifikationen | hr | niedrig | — | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
+| `personal/schulungen` | Schulungen | hr | niedrig | — | `GET /api/v1/masks/personal/schulungen/agent-contract` |
 | `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
@@ -1959,6 +1961,35 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: hr
 
+### `personal/onboarding` — Onboarding
+
+**Zweck:** Einarbeitungslaeufe anlegen. Der Stand folgt den offenen Laeufen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/onboarding/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/onboarding/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/onboarding/readiness` |
+| Rollout-Route | `/mask-rollout/personal__onboarding/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `laeufe` → `/api/v1/training/onboarding/runs`
+
+**Beispiel-Prompts:**
+
+- Welcher Lauf ist noch nicht abgeschlossen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt einen Einarbeitungslauf an.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer einen neuen Lauf.` |
+
+---
+
 ### `personal/qualifikationen` — Qualifikationen
 
 **Zweck:** Qualifikationsprofile anlegen. Der Stand folgt der Gueltigkeit.
@@ -1985,6 +2016,35 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `speichern` | Speichern | safe | nein | `Legt ein Qualifikationsprofil an.` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer ein neues Profil.` |
+
+---
+
+### `personal/schulungen` — Schulungen
+
+**Zweck:** Schulungszuweisungen anlegen. Der Stand folgt den offenen Nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/schulungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/schulungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/schulungen/readiness` |
+| Rollout-Route | `/mask-rollout/personal__schulungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `schulungen` → `/api/v1/training/assignments`
+
+**Beispiel-Prompts:**
+
+- Welche Schulung laeuft in den naechsten 60 Tagen ab?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Speichern | safe | nein | `Legt eine Schulungszuweisung an.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Zuweisung.` |
 
 ---
 

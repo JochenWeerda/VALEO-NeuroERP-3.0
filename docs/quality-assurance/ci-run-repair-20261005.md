@@ -300,3 +300,36 @@ Kanonische Spec-Abnahme: 3095 Pfade, acht geaenderte Pfade fuer Etiketten,
 Schadenmeldungen/Versicherungen und Gelangensbestaetigungs-Mahnung. Drei
 Pfade sind neu. Erneutes render(build_spec()) stimmt mit dem gespeicherten
 Artefakt ueberein. Backendquelle bleibt committed 8d6eb5afd.
+
+
+## Eindeutige Router-Montagen am 2026-10-06
+
+Die echte committed main:app registrierte 168 Methoden/Pfade mehrfach.
+113 dieser Gruppen entstanden durch spaetere Wiederholungen bereits
+kanonisch eingebundener Router. main.py bindet Inventory, Agrar, Audit,
+GDPR und Kontrakte deshalb nicht erneut ein; api.py entfernt ausschliesslich
+die zweite Quality-Evidence-Montage. Die erste Montage und ihre vorhandenen
+Abhaengigkeiten bleiben massgeblich. Kein dynamischer Dedup-Filter und keine
+Router-Allowlist verdecken Konflikte.
+
+Acht Regressionen bestehen in 69,20 Sekunden. Sie pruefen fuer jeden Endpunkt
+der sechs Router alle Methoden/Pfade, genau einen Treffer, dieselbe Handler-
+Identitaet, dasselbe Antwortmodell/Status und die enthaltenen Dependency-Calls.
+Die betroffenen Module haben keine doppelten Methoden/Pfade mehr. Die Tests
+pruefen Registrierungsmetadaten ohne Fachdatenmutation oder App-Lifespan;
+DB-Konfiguration verweist auf den vorhandenen Probe. --status bestaetigt
+Revision quittung_ohne_vorgang_20261006. Keine Datenbank, kein Container,
+kein Reset und keine Migration angelegt.
+
+Die OpenAPI-Spec stammt aus committed 8c1308ca6 plus den beiden eigenen
+Montagehunks. Der Vergleich bestaetigt exakt dieselben 3095 Pfade und dieselben
+HTTP-Methoden je Pfad; das gerenderte Artefakt wird erneut kanonisch geprueft.
+Die real registrierte App hat danach 55 doppelte Methoden/Pfade statt 168.
+Andere Handlerkonflikte und die zwei Nebenbuch-Doppeldefinitionen im alten
+Finance-Router bleiben offen; keine Gesamt-Eindeutigkeit behauptet.
+
+Alle drei Code-Inventare sind unveraendert aktuell. Das Agent-Handbuch meldet
+auf committed Quellen fuenf aktuelle Artefakte. Der Arbeitsbaumcheck meldete
+Drift in drei Handbuchdateien durch fremde laufende ScreenDefinition-Arbeit;
+der isolierte committed-source-Check bestaetigt, dass dieser Slice kein
+Handbuch-Update benoetigt. Fremde Masken-/Handbucharbeit bleibt geschuetzt.
