@@ -140,6 +140,10 @@ Regeln: 932/932 Routen, 269/269 Services, 451/451 Endpoints; --check gruen.
 67 Vertragspruefungen bestanden (0,74 s). Acht Service-/drei Endpoint-
 Zuordnungen explizit abgesichert. Fremde Inventar-WIP bleibt erhalten;
 CRM-Delegation prueft Entity/Tab bis zum zentralen Renderer.
+**OpenAPI-Integrationsnachtrag:** Drift auf committed Backend 8d6eb5afd
+bestaetigt; echte main:app-Spec indexseitig regenerieren. Fremde Spec-WIP
+bleibt erhalten, bestehende Operation-ID-Warnungen bleiben offen.
+3095 Pfade kanonisch verifiziert; acht betroffene Pfade, drei davon neu.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
