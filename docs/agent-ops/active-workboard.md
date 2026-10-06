@@ -108,6 +108,11 @@ Konten 5100/1600, Buchungsnachweis und tenantgebundenem Cleanup;
 test_process_kernel_wave100_settlement_completion.py nur FakeDb-Kontoantwort
 mit explizitem Tenant-/Aktiv-/Buchbarkeitsvertrag. Zwei Vollsuite-Failures
 bestaetigt. Keine produktiven Kontopruefungen ersetzen oder abschwaechen.
+**API-Testvertragsclaim (2026-10-06):** Saubere Dateien
+test_major_domain_router_registration.py nur kanonischer Registerpfad
+/vertraege (Entscheidung KONTRAKTREGISTER-20261001); UAT-Vertrag nur EUDR-
+Status mit due_diligence_statements und konsistenten Chargenzaehlern.
+Bestehende API-Vertraege pruefen, keine alten Alias-Endpunkte einfuehren.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
