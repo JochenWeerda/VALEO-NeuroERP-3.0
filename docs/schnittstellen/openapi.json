@@ -23365,6 +23365,20 @@
         "title": "Body_approve_override_api_v1_positions_overrides__override_id__approve_post",
         "type": "object"
       },
+      "Body_cancel_druckauftrag_api_v1_etiketten_druckauftrag__auftrag_id__delete": {
+        "properties": {
+          "grund": {
+            "minLength": 1,
+            "title": "Grund",
+            "type": "string"
+          }
+        },
+        "required": [
+          "grund"
+        ],
+        "title": "Body_cancel_druckauftrag_api_v1_etiketten_druckauftrag__auftrag_id__delete",
+        "type": "object"
+      },
       "Body_cancel_kontrakt_api_v1_kontrakte__contract_id__cancel_post": {
         "properties": {
           "reason": {
@@ -23707,6 +23721,23 @@
           }
         },
         "title": "Body_lookup_verkauf_kontrakte_api_v1_kontrakte_lookup_verkauf_post",
+        "type": "object"
+      },
+      "Body_mahnung_senden_api_v1_gelangensbestaetigung__entry_id__mahnung_post": {
+        "properties": {
+          "angefordert_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Angefordert Durch"
+          }
+        },
+        "title": "Body_mahnung_senden_api_v1_gelangensbestaetigung__entry_id__mahnung_post",
         "type": "object"
       },
       "Body_portal_import_api_v1_portal_feldbuch_import_post": {
@@ -51818,11 +51849,11 @@
         "title": "DropoffInfo",
         "type": "object"
       },
-      "DruckauftragCreate": {
+      "DruckauftragIn": {
+        "additionalProperties": false,
         "properties": {
           "anzahl_etiketten": {
             "default": 1,
-            "description": "Anzahl Etiketten",
             "minimum": 1.0,
             "title": "Anzahl Etiketten",
             "type": "integer"
@@ -51830,47 +51861,61 @@
           "artikel": {
             "anyOf": [
               {
+                "maxLength": 200,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Artikelbezeichnung",
             "title": "Artikel"
           },
           "chargen_id": {
-            "description": "Chargen-ID",
+            "description": "Chargenkennung",
+            "minLength": 1,
             "title": "Chargen Id",
             "type": "string"
           },
           "drucker_id": {
-            "description": "Ziel-Drucker ID",
+            "description": "Kennung des Zieldruckers",
+            "minLength": 1,
             "title": "Drucker Id",
             "type": "string"
           },
           "eingang": {
             "anyOf": [
               {
+                "format": "date",
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Eingangsdatum (YYYY-MM-DD)",
             "title": "Eingang"
+          },
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
           },
           "lieferant": {
             "anyOf": [
               {
+                "maxLength": 200,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Lieferant",
             "title": "Lieferant"
           },
           "menge": {
@@ -51891,10 +51936,10 @@
           "chargen_id",
           "drucker_id"
         ],
-        "title": "DruckauftragCreate",
+        "title": "DruckauftragIn",
         "type": "object"
       },
-      "DruckauftragResponse": {
+      "DruckauftragOut": {
         "properties": {
           "anzahl_etiketten": {
             "title": "Anzahl Etiketten",
@@ -51919,13 +51964,31 @@
             "title": "Chargen Id",
             "type": "string"
           },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
           "drucker_id": {
             "title": "Drucker Id",
             "type": "string"
           },
           "drucker_name": {
-            "title": "Drucker Name",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drucker Name"
           },
           "eingang": {
             "anyOf": [
@@ -51938,9 +52001,38 @@
             ],
             "title": "Eingang"
           },
-          "erstellt_am": {
-            "title": "Erstellt Am",
-            "type": "string"
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "fehler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fehler"
+          },
+          "gedruckt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gedruckt Am"
           },
           "id": {
             "title": "Id",
@@ -51971,27 +52063,133 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "uebermittelt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uebermittelt Am"
+          },
+          "uebermittlung": {
+            "title": "Uebermittlung",
+            "type": "string"
           }
         },
         "required": [
           "id",
+          "tenant_id",
           "auftrags_nr",
           "chargen_id",
-          "artikel",
-          "menge",
-          "lieferant",
-          "eingang",
           "anzahl_etiketten",
           "drucker_id",
-          "drucker_name",
           "status",
-          "erstellt_am"
+          "uebermittlung"
         ],
-        "title": "DruckauftragResponse",
+        "title": "DruckauftragOut",
         "type": "object"
       },
-      "Drucker": {
+      "DruckerIn": {
+        "additionalProperties": false,
         "properties": {
+          "ip": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip"
+          },
+          "modell": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modell"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "standort": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standort"
+          },
+          "status": {
+            "default": "offline",
+            "enum": [
+              "online",
+              "offline",
+              "fehler",
+              "wartung"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "zebra, cab, sato, …",
+            "title": "Typ"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "DruckerIn",
+        "type": "object"
+      },
+      "DruckerOut": {
+        "properties": {
+          "aktiv": {
+            "title": "Aktiv",
+            "type": "boolean"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -52008,35 +52206,59 @@
             "title": "Ip"
           },
           "modell": {
-            "title": "Modell",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modell"
           },
           "name": {
             "title": "Name",
             "type": "string"
           },
           "standort": {
-            "title": "Standort",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standort"
           },
           "status": {
             "title": "Status",
             "type": "string"
           },
-          "typ": {
-            "title": "Typ",
+          "tenant_id": {
+            "title": "Tenant Id",
             "type": "string"
+          },
+          "typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typ"
           }
         },
         "required": [
           "id",
+          "tenant_id",
           "name",
-          "standort",
-          "typ",
-          "modell",
-          "status"
+          "status",
+          "aktiv"
         ],
-        "title": "Drucker",
+        "title": "DruckerOut",
         "type": "object"
       },
       "DruckerSetupPayload": {
@@ -96183,19 +96405,45 @@
         "type": "object"
       },
       "MahnungOut": {
-        "description": "Was das Erinnern zurueckgibt.",
+        "description": "Was das Erinnern zurueckgibt.\n\nBis zum 06.10.2026 stand hier ``erinnerung_gesendet: True`` — neben dem\nKommentar „Stub: In production this would send email/fax\". Es wurde nichts\nversendet. Die Erinnerung ist Teil der Nachweiskette nach § 17a UStDV; eine\nAntwort „gesendet\" heisst, dass niemand mehr nachhakt, und die Bestaetigung\nfehlt am Ende in der Pruefung.\n\nJetzt sagt die Antwort, dass der Versuch **festgehalten**, nicht versendet\nwurde: Der Nachweis, dass jemand erinnern wollte, ist etwas wert; die\nBehauptung, es sei versendet, ist es nicht.",
         "properties": {
-          "erinnerung_gesendet": {
-            "title": "Erinnerung Gesendet",
+          "angefordert_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Angefordert Am"
+          },
+          "erinnerung_vermerkt": {
+            "title": "Erinnerung Vermerkt",
             "type": "boolean"
+          },
+          "hinweis": {
+            "title": "Hinweis",
+            "type": "string"
           },
           "token": {
             "title": "Token",
             "type": "string"
+          },
+          "versand": {
+            "title": "Versand",
+            "type": "string"
+          },
+          "versuche": {
+            "title": "Versuche",
+            "type": "integer"
           }
         },
         "required": [
-          "erinnerung_gesendet",
+          "erinnerung_vermerkt",
+          "versand",
+          "versuche",
+          "hinweis",
           "token"
         ],
         "title": "MahnungOut",
@@ -100213,6 +100461,95 @@
           "betrag_eur"
         ],
         "title": "MeldungCreateRequest",
+        "type": "object"
+      },
+      "MeldungMelden": {
+        "additionalProperties": false,
+        "description": "Der Versicherer wurde unterrichtet — ausserhalb des Systems.",
+        "properties": {
+          "gemeldet_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO-Zeitpunkt; ohne Angabe gilt jetzt",
+            "title": "Gemeldet Am"
+          },
+          "gemeldet_durch": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gemeldet Durch"
+          },
+          "meldeweg": {
+            "enum": [
+              "TELEFON",
+              "EMAIL",
+              "POST",
+              "FAX",
+              "PORTAL",
+              "PERSOENLICH"
+            ],
+            "title": "Meldeweg",
+            "type": "string"
+          }
+        },
+        "required": [
+          "meldeweg"
+        ],
+        "title": "MeldungMelden",
+        "type": "object"
+      },
+      "MeldungStand": {
+        "additionalProperties": false,
+        "properties": {
+          "abgelehnt_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abgelehnt Grund"
+          },
+          "regulierungsbetrag": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regulierungsbetrag"
+          },
+          "status": {
+            "enum": [
+              "IN_BEARBEITUNG",
+              "REGULIERT",
+              "ABGELEHNT"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "MeldungStand",
         "type": "object"
       },
       "MeldungTransitionRequest": {
@@ -140636,10 +140973,13 @@
         "title": "ScenarioCreate",
         "type": "object"
       },
-      "SchadenMeldungCreate": {
+      "SchadenMeldungIn": {
+        "additionalProperties": false,
         "properties": {
           "art": {
-            "description": "Schadenart: hagel, frost, feuer, unfall, diebstahl",
+            "description": "hagel, frost, feuer, …",
+            "maxLength": 30,
+            "minLength": 1,
             "title": "Art",
             "type": "string"
           },
@@ -140649,26 +140989,37 @@
             "title": "Beschreibung",
             "type": "string"
           },
-          "datum": {
-            "description": "Schadendatum (YYYY-MM-DD)",
-            "title": "Datum",
-            "type": "string"
-          },
-          "ort": {
+          "erfasst_durch": {
             "anyOf": [
               {
+                "maxLength": 120,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Schadenort z.B. Schlag S-001",
+            "title": "Erfasst Durch"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Ort"
+          },
+          "schadendatum": {
+            "format": "date",
+            "title": "Schadendatum",
+            "type": "string"
           },
           "schadenhoehe": {
             "default": 0,
-            "description": "Geschätzte Schadenhöhe in EUR",
             "minimum": 0.0,
             "title": "Schadenhoehe",
             "type": "number"
@@ -140682,10 +141033,32 @@
                 "type": "null"
               }
             ],
-            "description": "ID der zuständigen Versicherung",
             "title": "Versicherung Id"
           },
           "zeuge": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zeuge"
+          }
+        },
+        "required": [
+          "art",
+          "schadendatum",
+          "beschreibung"
+        ],
+        "title": "SchadenMeldungIn",
+        "type": "object"
+      },
+      "SchadenMeldungOut": {
+        "properties": {
+          "abgelehnt_grund": {
             "anyOf": [
               {
                 "type": "string"
@@ -140694,23 +141067,7 @@
                 "type": "null"
               }
             ],
-            "description": "Name(n) der Zeugen",
-            "title": "Zeuge"
-          }
-        },
-        "required": [
-          "art",
-          "datum",
-          "beschreibung"
-        ],
-        "title": "SchadenMeldungCreate",
-        "type": "object"
-      },
-      "SchadenMeldungResponse": {
-        "properties": {
-          "aktualisiert_am": {
-            "title": "Aktualisiert Am",
-            "type": "string"
+            "title": "Abgelehnt Grund"
           },
           "art": {
             "title": "Art",
@@ -140720,17 +141077,91 @@
             "title": "Beschreibung",
             "type": "string"
           },
-          "datum": {
-            "title": "Datum",
-            "type": "string"
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
           },
-          "erstellt_am": {
-            "title": "Erstellt Am",
-            "type": "string"
+          "erfasst_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erfasst Durch"
+          },
+          "frist_ueberschritten": {
+            "default": false,
+            "title": "Frist Ueberschritten",
+            "type": "boolean"
+          },
+          "gemeldet_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gemeldet Am"
+          },
+          "gemeldet_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gemeldet Durch"
           },
           "id": {
             "title": "Id",
             "type": "string"
+          },
+          "meldefrist_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meldefrist Tage"
+          },
+          "melden_bis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Melden Bis"
+          },
+          "meldeweg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meldeweg"
           },
           "meldungsnummer": {
             "title": "Meldungsnummer",
@@ -140747,15 +141178,18 @@
             ],
             "title": "Ort"
           },
-          "schadenhoehe": {
-            "title": "Schadenhoehe",
-            "type": "number"
+          "regulierungsbetrag": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regulierungsbetrag"
           },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "versicherung_bezeichnung": {
+          "schadendatum": {
             "anyOf": [
               {
                 "type": "string"
@@ -140764,7 +141198,30 @@
                 "type": "null"
               }
             ],
-            "title": "Versicherung Bezeichnung"
+            "title": "Schadendatum"
+          },
+          "schadenhoehe": {
+            "title": "Schadenhoehe",
+            "type": "number"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
           },
           "versicherung_id": {
             "anyOf": [
@@ -140791,20 +141248,14 @@
         },
         "required": [
           "id",
+          "tenant_id",
           "meldungsnummer",
           "art",
-          "datum",
-          "ort",
           "beschreibung",
           "schadenhoehe",
-          "versicherung_id",
-          "versicherung_bezeichnung",
-          "zeuge",
-          "status",
-          "erstellt_am",
-          "aktualisiert_am"
+          "status"
         ],
-        "title": "SchadenMeldungResponse",
+        "title": "SchadenMeldungOut",
         "type": "object"
       },
       "SchadenPayload": {
@@ -160734,11 +161185,141 @@
         "title": "VersandprofileOut",
         "type": "object"
       },
-      "Versicherung": {
+      "VersicherungIn": {
+        "additionalProperties": false,
         "properties": {
+          "ansprechpartner": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ansprechpartner"
+          },
+          "bezeichnung": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Bezeichnung",
+            "type": "string"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "gueltig_von": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Von"
+          },
+          "kontakt": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontakt"
+          },
+          "meldefrist_tage": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meldefrist Tage"
+          },
+          "typ": {
+            "enum": [
+              "hagel",
+              "haftpflicht",
+              "feuer",
+              "kasko",
+              "inhalt",
+              "transport",
+              "sonstige"
+            ],
+            "title": "Typ",
+            "type": "string"
+          },
+          "versicherer": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Versicherer",
+            "type": "string"
+          },
+          "vertragsnummer": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Vertragsnummer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bezeichnung",
+          "vertragsnummer",
+          "typ",
+          "versicherer"
+        ],
+        "title": "VersicherungIn",
+        "type": "object"
+      },
+      "VersicherungOut": {
+        "properties": {
+          "aktiv": {
+            "title": "Aktiv",
+            "type": "boolean"
+          },
+          "ansprechpartner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ansprechpartner"
+          },
           "bezeichnung": {
             "title": "Bezeichnung",
             "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
           },
           "gueltig_bis": {
             "anyOf": [
@@ -160751,8 +161332,45 @@
             ],
             "title": "Gueltig Bis"
           },
+          "gueltig_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Von"
+          },
           "id": {
             "title": "Id",
+            "type": "string"
+          },
+          "kontakt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontakt"
+          },
+          "meldefrist_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meldefrist Tage"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
             "type": "string"
           },
           "typ": {
@@ -160770,12 +161388,14 @@
         },
         "required": [
           "id",
+          "tenant_id",
           "bezeichnung",
           "vertragsnummer",
           "typ",
-          "versicherer"
+          "versicherer",
+          "aktiv"
         ],
-        "title": "Versicherung",
+        "title": "VersicherungOut",
         "type": "object"
       },
       "VersicherungPatch": {
@@ -293321,8 +293941,98 @@
       }
     },
     "/api/v1/etiketten/druckauftrag": {
+      "get": {
+        "description": "Die Druckauftraege des Mandanten — mit Versandstand.",
+        "operationId": "list_druckauftraege_api_v1_etiketten_druckauftrag_get",
+        "parameters": [
+          {
+            "description": "ANGELEGT | UEBERMITTELT | …",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ANGELEGT | UEBERMITTELT | …",
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DruckauftragOut"
+                  },
+                  "title": "Response List Druckauftraege Api V1 Etiketten Druckauftrag Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Druckauftraege auflisten",
+        "tags": [
+          "etiketten",
+          "druck",
+          "etiketten",
+          "druck"
+        ]
+      },
       "post": {
-        "description": "Druckauftrag für Etiketten erstellen und an Drucker senden.",
+        "description": "Legt den Druckauftrag an.\n\nDer Auftrag wird gespeichert, **nicht** gedruckt: Es ist kein Spooler\nangebunden, und die Antwort nennt das im Feld ``uebermittlung``. Ein\nunbekannter Drucker ist ein 422 — vorher ging jede Kennung durch, weil die\nListe aus Literalen bestand.",
         "operationId": "create_druckauftrag_api_v1_etiketten_druckauftrag_post",
         "parameters": [
           {
@@ -293346,7 +294056,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DruckauftragCreate"
+                "$ref": "#/components/schemas/DruckauftragIn"
               }
             }
           },
@@ -293357,7 +294067,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DruckauftragResponse"
+                  "$ref": "#/components/schemas/DruckauftragOut"
                 }
               }
             },
@@ -293388,11 +294098,100 @@
         ]
       }
     },
+    "/api/v1/etiketten/druckauftrag/{auftrag_id}": {
+      "delete": {
+        "description": "Bricht einen Auftrag ab. Ein gedruckter Auftrag wird nicht abgebrochen —\nEtiketten im Umlauf macht kein Abbruch rueckgaengig.",
+        "operationId": "cancel_druckauftrag_api_v1_etiketten_druckauftrag__auftrag_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "auftrag_id",
+            "required": true,
+            "schema": {
+              "title": "Auftrag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_cancel_druckauftrag_api_v1_etiketten_druckauftrag__auftrag_id__delete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DruckauftragOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Druckauftrag abbrechen",
+        "tags": [
+          "etiketten",
+          "druck",
+          "etiketten",
+          "druck"
+        ]
+      }
+    },
     "/api/v1/etiketten/drucker": {
       "get": {
-        "description": "Alle verfügbaren Etikettendrucker.",
+        "description": "Die Etikettendrucker des Mandanten. Vorher standen hier drei Literale.",
         "operationId": "list_drucker_api_v1_etiketten_drucker_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
           {
             "in": "header",
             "name": "X-Tenant-ID",
@@ -293416,7 +294215,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Drucker"
+                    "$ref": "#/components/schemas/DruckerOut"
                   },
                   "title": "Response List Drucker Api V1 Etiketten Drucker Get",
                   "type": "array"
@@ -293442,6 +294241,71 @@
           }
         ],
         "summary": "Drucker auflisten",
+        "tags": [
+          "etiketten",
+          "druck",
+          "etiketten",
+          "druck"
+        ]
+      },
+      "post": {
+        "operationId": "create_drucker_api_v1_etiketten_drucker_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DruckerIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DruckerOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Drucker anlegen",
         "tags": [
           "etiketten",
           "druck",
@@ -330984,6 +331848,7 @@
     },
     "/api/v1/gelangensbestaetigung/{entry_id}/mahnung": {
       "post": {
+        "description": "Haelt fest, dass an die Gelangensbestaetigung erinnert werden soll.\n\nEs wird **nichts versendet** — es ist kein Versandweg angebunden. Vorher\nantwortete dieser Weg ``erinnerung_gesendet: true`` und tat nichts; die\nErinnerung ist Teil der Nachweiskette nach § 17a UStDV, und eine falsche\nQuittung heisst, dass niemand mehr nachhakt.\n\nFestgehalten werden Zeitpunkt, Anzahl der Versuche und wer sie angefordert\nhat. Das ist der Nachweis, dass erinnert werden sollte.",
         "operationId": "mahnung_senden_api_v1_gelangensbestaetigung__entry_id__mahnung_post",
         "parameters": [
           {
@@ -331012,6 +331877,15 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_mahnung_senden_api_v1_gelangensbestaetigung__entry_id__mahnung_post"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -331039,7 +331913,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Erinnerung senden (Stub)",
+        "summary": "Erinnerung vermerken",
         "tags": [
           "Gelangensbestätigung",
           "UStDV"
@@ -418793,11 +419667,11 @@
     },
     "/api/v1/schaeden/meldungen": {
       "get": {
-        "description": "Alle Schadenmeldungen des Mandanten.",
+        "description": "Die Schadenmeldungen des Mandanten.\n\nVorher gab dieser Weg eine erfundene Hagelschadenmeldung zurueck. Eine leere\nListe ist jetzt die Wahrheit, wenn nichts erfasst ist — ein Lesefehler ist ein\n503.",
         "operationId": "list_schadenmeldungen_api_v1_schaeden_meldungen_get",
         "parameters": [
           {
-            "description": "Filter nach Status",
+            "description": "ENTWURF | GEMELDET | …",
             "in": "query",
             "name": "status",
             "required": false,
@@ -418810,8 +419684,20 @@
                   "type": "null"
                 }
               ],
-              "description": "Filter nach Status",
+              "description": "ENTWURF | GEMELDET | …",
               "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             }
           },
           {
@@ -418837,7 +419723,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/SchadenMeldungResponse"
+                    "$ref": "#/components/schemas/SchadenMeldungOut"
                   },
                   "title": "Response List Schadenmeldungen Api V1 Schaeden Meldungen Get",
                   "type": "array"
@@ -418871,7 +419757,7 @@
         ]
       },
       "post": {
-        "description": "Neue Schadenmeldung anlegen.",
+        "description": "Erfasst den Schaden als **Entwurf**.\n\nNicht als „gemeldet\": Es gibt keinen Versandweg zum Versicherer, und das\nSystem darf nicht behaupten, er sei unterrichtet. Dafuer gibt es\n``POST /schaeden/meldungen/{id}/melden``.",
         "operationId": "create_schadenmeldung_api_v1_schaeden_meldungen_post",
         "parameters": [
           {
@@ -418895,7 +419781,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SchadenMeldungCreate"
+                "$ref": "#/components/schemas/SchadenMeldungIn"
               }
             }
           },
@@ -418906,7 +419792,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SchadenMeldungResponse"
+                  "$ref": "#/components/schemas/SchadenMeldungOut"
                 }
               }
             },
@@ -418928,7 +419814,225 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Schadenmeldung anlegen",
+        "summary": "Schadenmeldung erfassen (Entwurf)",
+        "tags": [
+          "schaeden",
+          "versicherung",
+          "schaeden",
+          "versicherung"
+        ]
+      }
+    },
+    "/api/v1/schaeden/meldungen/{meldung_id}": {
+      "get": {
+        "operationId": "get_schadenmeldung_api_v1_schaeden_meldungen__meldung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchadenMeldungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schadenmeldung abrufen",
+        "tags": [
+          "schaeden",
+          "versicherung",
+          "schaeden",
+          "versicherung"
+        ]
+      },
+      "patch": {
+        "description": "Bearbeitung, Regulierung oder Ablehnung — mit Betrag beziehungsweise Grund.",
+        "operationId": "set_stand_api_v1_schaeden_meldungen__meldung_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeldungStand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchadenMeldungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bearbeitungsstand setzen",
+        "tags": [
+          "schaeden",
+          "versicherung",
+          "schaeden",
+          "versicherung"
+        ]
+      }
+    },
+    "/api/v1/schaeden/meldungen/{meldung_id}/melden": {
+      "post": {
+        "description": "Haelt fest, dass der Versicherer unterrichtet wurde.\n\nDas System **uebermittelt nicht**. Es verzeichnet wann, durch wen und auf\nwelchem Weg — das ist der Nachweis, den § 30 Abs. 1 VVG braucht, und etwas\nanderes als die Behauptung, eine Software habe gemeldet.",
+        "operationId": "melden_api_v1_schaeden_meldungen__meldung_id__melden_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeldungMelden"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchadenMeldungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Meldung an den Versicherer festhalten",
         "tags": [
           "schaeden",
           "versicherung",
@@ -418939,9 +420043,21 @@
     },
     "/api/v1/schaeden/versicherungen": {
       "get": {
-        "description": "Alle Versicherungsverträge des Mandanten.",
+        "description": "Die Vertraege des Mandanten. Vorher standen hier vier Literale.",
         "operationId": "list_versicherungen_api_v1_schaeden_versicherungen_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
           {
             "in": "header",
             "name": "X-Tenant-ID",
@@ -418965,7 +420081,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Versicherung"
+                    "$ref": "#/components/schemas/VersicherungOut"
                   },
                   "title": "Response List Versicherungen Api V1 Schaeden Versicherungen Get",
                   "type": "array"
@@ -418990,7 +420106,73 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Versicherungen auflisten",
+        "summary": "Versicherungsvertraege auflisten",
+        "tags": [
+          "schaeden",
+          "versicherung",
+          "schaeden",
+          "versicherung"
+        ]
+      },
+      "post": {
+        "description": "Legt einen Vertrag an — samt Meldefrist, aus der die Fristen folgen.",
+        "operationId": "create_versicherung_api_v1_schaeden_versicherungen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersicherungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersicherungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Versicherungsvertrag anlegen",
         "tags": [
           "schaeden",
           "versicherung",

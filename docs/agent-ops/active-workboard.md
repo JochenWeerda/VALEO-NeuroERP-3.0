@@ -140,6 +140,10 @@ Regeln: 932/932 Routen, 269/269 Services, 451/451 Endpoints; --check gruen.
 67 Vertragspruefungen bestanden (0,74 s). Acht Service-/drei Endpoint-
 Zuordnungen explizit abgesichert. Fremde Inventar-WIP bleibt erhalten;
 CRM-Delegation prueft Entity/Tab bis zum zentralen Renderer.
+**OpenAPI-Integrationsnachtrag:** Drift auf committed Backend 8d6eb5afd
+bestaetigt; echte main:app-Spec indexseitig regenerieren. Fremde Spec-WIP
+bleibt erhalten, bestehende Operation-ID-Warnungen bleiben offen.
+3095 Pfade kanonisch verifiziert; acht betroffene Pfade, drei davon neu.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.
@@ -1472,6 +1476,92 @@ Migration auf beiden Datenbanken; alle vier Ratschen gruen; tsc und eslint saube
    Quittung — aber ein Modellierungsrueckstand.
 
 **Doku:** `docs/quality-assurance/quittung-ohne-vorgang-20261006.md`.
+
+## INTERESSENT-IST-LEAD-20261006 — in Arbeit, Claude Code
+
+**Befund 1 — drei Modelle fuer einen Begriff, und der benutzte ist der leere.**
+
+| Tabelle | Spalten | Zeilen (Dev) | Wer |
+| --- | --- | --- | --- |
+| `public.crm_leads` | company, contact_person, email, phone, source, potential, priority, status, … | **97** | `crm_lead_gen_service`, `crm_partner_suche`, `crm_reports` |
+| `domain_crm.leads` | customer_id, lead_source, estimated_value, probability, … | 0 | `compliance_dsgvo` |
+| `domain_crm.interessenten` | — | **existiert nicht** | `customers.py` |
+
+`domain_crm.leads` haengt an einem **customer_id**: Das ist eine Verkaufschance an
+einem bestehenden Kunden, kein Interessent. `public.crm_leads` ist das Register,
+das Daten fuehrt — die uebernommenen Leads aus der Durchdringungs-Akquise
+(`source`: `lkv`, `gap`). `domain_crm.interessenten` wird **nicht angelegt**:
+Ein vierter Begriff fuer dieselbe Sache waere das Gegenteil einer Ordnung.
+
+**Befund 2 — die Quittung ohne Vorgang, noch einmal.**
+`POST /customers/interessenten` faengt den INSERT-Fehlschlag
+(`except Exception: db.rollback()`) und antwortet trotzdem mit `201`, einer
+Interessentennummer und `status: "INTERESSENT"`. Die Liste faengt den Lesefehler
+und antwortet `[]`. Die Nummer kommt aus `COUNT(*) + 1` mit
+`except: pass` — also mehrfach dieselbe.
+
+**Befund 3 — die Loeschung nach Art. 17 DSGVO trifft die leere Tabelle.**
+`compliance_dsgvo` anonymisiert fuer `subject_type = "LEAD"`:
+
+```sql
+UPDATE domain_crm.leads SET company_name = :anon_name,
+       contact_person = :anon_name, email = :anon_email, phone = NULL
+```
+
+Diese **vier Spalten gibt es dort nicht** — `domain_crm.leads` fuehrt
+`customer_id`, `lead_source`, `estimated_value`. Der Schritt scheitert mit
+`UndefinedColumn`, landet (richtig) als Fehler im Protokoll, und
+`_loeschung_ist_vollstaendig` liefert `False`: **Jeder Loeschantrag zu einem Lead
+bleibt dauerhaft offen.** Gleichzeitig bleiben die Personendaten unberuehrt, denn
+sie liegen in `public.crm_leads` — 97 Zeilen mit Namen, E-Mail und Telefon.
+
+Zwei Pflichten verletzt auf einmal: Art. 17 Abs. 1 DSGVO (Loeschung) und Art. 12
+Abs. 3 (Bescheid innerhalb eines Monats). Dass die Fehlerbehandlung dort sauber
+ist und den Fehlschlag **sichtbar** macht, ist das Verdienst des vorangegangenen
+Art.-17-Slices — ohne ihn haette niemand gemerkt, dass nichts geloescht wird.
+
+**Befund 4 — `konvertieren` quittiert einen Kunden, den es verwirft.**
+Der Weg legt ueber `BusinessPartnerService.create_customer_record` einen echten
+Kundensatz an und setzt danach den Interessentenstand in einem eigenen
+`try/except: db.rollback()`. Scheitert dieses UPDATE, nimmt das `rollback` **den
+Kundensatz mit** (dieselbe Transaktion) — und die Antwort meldet trotzdem
+`status: "KUNDE"` samt Kundennummer. Ein Haus haette eine Kundennummer, zu der es
+keinen Kunden gibt.
+
+**Ziel:**
+1. Die Interessentenwege lesen und schreiben `public.crm_leads`.
+   `domain_crm.interessenten` wird abgeloest, nicht angelegt.
+2. Die Art.-17-Loeschung trifft `public.crm_leads` — dort liegen die Daten. An
+   `domain_crm.leads` bleibt nur, was es dort an Personenbezug geben kann
+   (`notes`).
+3. Kein Weg quittiert mehr einen Fehlschlag: Der INSERT-Fehler ist ein 409, die
+   Konvertierung ist **eine** Transaktion, und die Nummer kommt aus der hoechsten
+   vergebenen statt aus `COUNT(*)`.
+
+**Dateibesitz:** `app/services/interessent_service.py` (neu),
+`app/api/v1/endpoints/customers.py` (nur die drei Interessentenwege),
+`app/api/v1/endpoints/compliance_dsgvo.py` (nur die LEAD-Schritte und die
+Namenssuche), `tests/test_interessent_ist_lead_vertrag.py` (neu),
+`scripts/check_table_references.py` (nur die Schwelle), eigene QA-Doku und dieser
+Abschnitt.
+**Keine Migration:** `public.crm_leads` existiert und fuehrt die Daten. Es wird
+keine Tabelle angelegt und keine geloescht.
+**Nicht angefasst:** `crm_lead_gen_service`, `crm_partner_suche`, `crm_reports`
+— sie lesen dieselbe Tabelle und bleiben gueltig; `domain_crm.leads` als
+Verkaufschance bleibt bestehen.
+
+**Abnahme:** Ein angelegter Interessent ist in `public.crm_leads` wiederzufinden
+und erscheint in der Liste; ein Schreibfehler ist ein 409 und keine Quittung; die
+Nummer ist je Mandant eindeutig; die Konvertierung ist atomar (kein Kundensatz
+ohne Standwechsel und umgekehrt); eine Art.-17-Loeschung zu einem Lead
+anonymisiert `public.crm_leads` und schliesst den Antrag ab; alles
+mandantengebunden; Vertraege gegen die frische DB und alle Ratschen gruen.
+
+**Risiken:** `public.crm_leads` liegt im `public`-Schema, was der
+Mehrschema-Ordnung widerspricht. Der Umzug nach `domain_crm` ist ein eigener
+Slice **mit Daten** (97 Zeilen) und wird hier nur benannt. Die
+Statuswoerter des Bestands sind `NEW`/`CONVERTED` (englisch) — sie bleiben, weil
+Daten darauf stehen; die Zuordnung zum deutschen Weg steht an einer Stelle.
 
 ## BANK-DIRECTBOOK-RETIREMENT-20261001 — abgeschlossen, Codex (Chat 01a0f3fc)
 

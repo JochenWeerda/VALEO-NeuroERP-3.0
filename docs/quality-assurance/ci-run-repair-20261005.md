@@ -286,3 +286,17 @@ laufenden Frontend-Aenderungen werden veroeffentlicht. Insgesamt bestehen
 Der Security-Lauf 37419090073 auf 390c571ab ist weiterhin rot: ZAP, Trivy
 und Bandit bestanden; Grype und Dependency Audit scheiterten. Diese Befunde
 werden durch die Inventar-/UIX-Korrektur nicht behoben; keine Gesamtfreigabe.
+
+
+Die zusaetzliche OpenAPI-Integrationspruefung auf committed Quellen meldete
+Drift durch die Schaden-/Etiketten-Integration 8d6eb5afd. Deshalb wird die
+Spec ebenfalls ausschliesslich aus diesem Backendstand regeneriert und
+indexseitig veroeffentlicht. Die fremde Arbeitsbaum-Spec bleibt erhalten.
+Der Generator verwendet weiterhin die echte main:app und die kanonische
+Version 3.0.0; keine Test-App oder Pfadausnahme. Bereits bestehende Warnungen
+ueber doppelte Operation-IDs bleiben sichtbar und werden hier nicht geloest.
+
+Kanonische Spec-Abnahme: 3095 Pfade, acht geaenderte Pfade fuer Etiketten,
+Schadenmeldungen/Versicherungen und Gelangensbestaetigungs-Mahnung. Drei
+Pfade sind neu. Erneutes render(build_spec()) stimmt mit dem gespeicherten
+Artefakt ueberein. Backendquelle bleibt committed 8d6eb5afd.
