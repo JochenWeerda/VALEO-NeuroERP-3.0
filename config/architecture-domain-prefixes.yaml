@@ -581,6 +581,14 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  etikettendruck_service: inventory
+  schaden_service: dms-compliance
+  eudr_register_service: dms-compliance
+  frachtbrief_service: logistics
+  genossenschaft_service: platform
+  preisfindung_service: finance
+  webfleet_connect: logistics
+  wiegung_service: inventory
   webhook_service: platform
   document_allocation_service: platform
   studio_draft_store: platform
@@ -614,6 +622,9 @@ exact_service_stems:
   kaeufergruppe: crm
 
 exact_endpoint_stems:
+  eudr_anbindung: dms-compliance
+  eudr_chargen: dms-compliance
+  eudr_register: dms-compliance
   document_allocations: platform
   studio_drafts: platform
   billing_batch: finance

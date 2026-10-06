@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-05
+# Architecture Index — generiert 2026-10-06
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-05T18:37:34Z'
+generated_at: '2026-10-06T05:46:28Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -327,6 +327,7 @@ domains:
     - feeding_supply_service
     - geo_pipeline
     - harvest_acceptance_service
+    - kontrakt_disposition_service
     - kontrakt_movement_sync
     - kontrakt_position_service
     - kontrakte_adapters
@@ -927,7 +928,9 @@ domains:
     - docflow_source_proposals
     - document_control_projection
     - document_control_service
+    - eudr_register_service
     - pii_detector
+    - schaden_service
     backend_endpoints:
     - atlas_zollausfuhr
     - audit
@@ -948,6 +951,9 @@ domains:
     - document_control
     - dokumente
     - edi_api
+    - eudr_anbindung
+    - eudr_chargen
+    - eudr_register
     - gdpr
     - gdpr_art30_ropa
     - gdpr_art33_breach
@@ -1204,6 +1210,7 @@ domains:
     - pos_compat_service
     - pos_fiscal_document_service
     - pos_tagesabschluss_service
+    - preisfindung_service
     - query_center_service
     - tse_fiskaly_service
     - vies_service
@@ -1350,6 +1357,7 @@ domains:
     - hrm_abwesenheit_service
     - hrm_zeiterfassung_service
     - lohn_service
+    - personal_organisation_service
     - personal_service
     backend_endpoints:
     - hrm_abwesenheit
@@ -1438,6 +1446,7 @@ domains:
     - article_import
     - article_units_bridge
     - articles_service
+    - etikettendruck_service
     - foreign_goods_worklist_service
     - inventory_auxiliary_service
     - inventory_balance_reconciliation
@@ -1456,6 +1465,7 @@ domains:
     - position_snapshot_service
     - report_print_service
     - warehouse_service
+    - wiegung_service
     backend_endpoints:
     - article_extensions
     - articles
@@ -1578,9 +1588,11 @@ domains:
     - /versand/paket-etikett
     - /versand/versand-avis
     backend_services:
+    - frachtbrief_service
     - lkv_pipeline
     - logistics_disposition_service
     - logistics_epod_service
+    - webfleet_connect
     backend_endpoints:
     - fuhrpark
     - logistics_freight
@@ -1759,6 +1771,7 @@ domains:
     - external_mock_harness_service
     - fast_track
     - gap_pipeline_service
+    - genossenschaft_service
     - guardrails
     - integration_bootstrap
     - interaction_state_manager
@@ -2034,10 +2047,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 932
   frontend_routes_mapped: 932
-  backend_services_total: 259
-  backend_services_mapped: 259
-  backend_endpoints_total: 448
-  backend_endpoints_mapped: 448
+  backend_services_total: 269
+  backend_services_mapped: 269
+  backend_endpoints_total: 451
+  backend_endpoints_mapped: 451
 unmapped:
   frontend_routes: []
   backend_services: []

@@ -249,3 +249,40 @@ eingereiht. Der CI-Reparaturslice bleibt bis zur Gesamt-Abnahme in Arbeit.
 Der abschliessende API-Vertragslauf besteht mit zwei Tests in 44,53 Sekunden
 inklusive der Zaehlregel fuer zurueckgezogene Erklaerungen. Zusammen mit den
 18 Buchungsvertraegen sind 20 gezielte Tests gruen. Kein Test uebersprungen.
+
+
+## Architekturindex und CRM-Delegation am 2026-10-06
+
+Ein lokaler gruener Architekturtest war kein belastbarer Liefernachweis:
+Die fremd bearbeiteten Inventare im Arbeitsbaum enthielten die betroffenen
+Services nicht. Der isolierte Generator auf committed Quellen meldete sechs
+unzugeordnete Services und drei EUDR-Endpunkte. Die kanonischen Prefix-Regeln
+enthalten jetzt genaue Zuordnungen fuer EUDR (dms-compliance), Frachtbrief
+und WEBFLEET (logistics), Preisfindung (finance), Mitgliederregister (platform)
+und Wiegeschein (inventory). Grundlage fuer die Wiegescheinzuordnung ist
+das bereits fuehrende domain_inventory.weighing_tickets, nicht die entfernte
+Doppelwiegungstabelle. Dies ist eine Minor-Inventarkorrektur ohne neue Grenzen,
+Container oder API-Vertraege.
+
+Der zwischenzeitlich fremd integrierte Commit 8d6eb5afd bleibt erhalten.
+Seine Services fuer Etikettendruck und Schaeden werden entsprechend ihren
+bereits zugeordneten Endpoints inventory bzw. dms-compliance zugeordnet.
+Drei Code-Inventare werden ausschliesslich aus committed Backend-/Migrations-
+quellen regeneriert und indexseitig integriert. Die fremden Arbeitsbaum-
+fassungen der Inventare bleiben erhalten. Der Architekturindex wird daraus
+und aus den eigenen Prefix-Regeln erzeugt. Strict-Abnahme: 932/932 Routen,
+269/269 Services, 451/451 Endpoints zugeordnet; anschliessender --check gruen.
+Acht konkrete Servicezuordnungen und drei EUDR-Zuordnungen werden auch dann
+geprueft, wenn lokale Inventare unvollstaendig sind.
+
+Der UIX-051-Test fuer die Kundenmaske folgt jetzt der vorhandenen Delegation
+Customer360NativePage -> PartyNativePage -> UniversalNativeDetailPage.
+Er prueft Route-/Query-ID, Tabkontext, die richtige Customer-/Lead-Screen-ID
+und deren Weitergabe an den zentralen Renderer. Andere Wrapper bleiben auf
+ihren direkten Screen-ID-Vertrag geprueft. Keine Masken, Renderer oder
+laufenden Frontend-Aenderungen werden veroeffentlicht. Insgesamt bestehen
+67 Architektur-/UIX-Migrationsvertraege in 0,74 Sekunden.
+
+Der Security-Lauf 37419090073 auf 390c571ab ist weiterhin rot: ZAP, Trivy
+und Bandit bestanden; Grype und Dependency Audit scheiterten. Diese Befunde
+werden durch die Inventar-/UIX-Korrektur nicht behoben; keine Gesamtfreigabe.

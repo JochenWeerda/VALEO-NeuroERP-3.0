@@ -135,6 +135,11 @@ Drei Inventare nur aus diesem committed Source erneuern, bestehender Claim.
 Customer360-Wrapper-Vertrag: bestehende PartyNativePage-Delegation bis
 UniversalNativeDetailPage pruefen, inklusive Entity/Tab und Screen-ID.
 Kein Masken-/Renderer-WIP und keine Gate-Ausnahme.
+**Architektur-/UIX-Abnahme:** Strict auf committed Source plus eigenen
+Regeln: 932/932 Routen, 269/269 Services, 451/451 Endpoints; --check gruen.
+67 Vertragspruefungen bestanden (0,74 s). Acht Service-/drei Endpoint-
+Zuordnungen explizit abgesichert. Fremde Inventar-WIP bleibt erhalten;
+CRM-Delegation prueft Entity/Tab bis zum zentralen Renderer.
 **Abnahme:** Docs/Nav/Harness und Tabellenbesitz gruen; Merge uebernimmt
 bereits eingefuehrte Ratschen ohne Rueckschritt; echte Regressionen bleiben
 rot. Gepushte Korrekturen und neue GitHub-Lauf-Evidence.

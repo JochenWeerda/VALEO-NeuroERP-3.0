@@ -368,6 +368,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `produktgruppen_kaeufer_20260604` | Käuferlogik je Produktgruppe + echte Signal-Herkunft. |
 | `projektion_cursor_20260930` | Die Projektionsbuchhaltung bekommt eine Migration. |
 | `query_center_20260821` | Safe query-center definitions and audit. |
+| `quittung_ohne_vorgang_20261006` | Vier Tabellen fuer drei Wege, die bisher nur quittiert haben. |
 | `rations_feeding_control_20260711` | Persisted feeding-control logs (DLG 01/2025 F1). |
 | `rations_integrations_20260712` | Rations integration import journal. |
 | `rations_zugang_dsgvo_20260420` | rations_zugang DSGVO access control table |
