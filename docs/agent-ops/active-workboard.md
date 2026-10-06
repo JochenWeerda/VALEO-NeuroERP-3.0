@@ -51,6 +51,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Futter-Loeschsicherheit (2026-10-06, reserviert):** Owner Codex-01a0f3fc; compat.py ausschliesslich vier Einzel-/Bulk-Loeschfunktionen mit get_current_user/WRITE_ROLES und unbenutzter _soft_delete_futter_articles-Helfer entfernen (keine Verbraucher in app/tests); inventory_compat_service.py nur soft_delete_artikel obligatorischer self.tenant_id und Null-/Fremdmandant ausschliessen, redundanter tenant_id-Parameter nach Vier-Verbraucher-Abgleich entfernen; futter_stamm.py nur fehlender Guard bei delete_mischfuttermittel; compat-Godfile-Grenze ausschliesslich senken, neuer echter Dispatch-/SQL-Loeschtest, eigene QA/Slice und committed-source Spec/Inventare. Kein aktiver Fremdclaim oder WIP auf diesen Dateien. Abnahme: Leser/fremde Rolle 403 vor DB, Writer nur eigene Artikel deaktiviert, fremde/null IDs als missing, bestehende 204/404/Bulk-DTOs erhalten, kein PostgreSQL-Fachschreibtest; ein gemeinsamer SQLite-In-Memory-Test mit Savepoint-Isolation. Katalog-/Frontend-Modellharmonisierung und andere Futter-Schreibpfade weiter offen; keine neue PostgreSQL-DB/Container/Migration, Baseline-Ausnahme oder Maskenaenderung.
 
+**Futter-Ratschen-Nachtrag (vor Edit):** config/pagination_baseline.json ausschliesslich den entfallenen _soft_delete_futter_articles-Eintrag entfernen (1 auf 0). Der Pruefer meldet genau diesen sinkenden Alt-Eintrag; keine anderen Grenzen/Abfragen veraendern.
+
 **Owner:** Codex-01a0f3fc. **Ziel:** Aktuelle GitHub-Rotlaeufe ursachengerecht
 beheben und neue Lauf-Evidenz pruefen; keine Schutzgates abschalten.
 **Dateibesitz:** Slice-Pflichtfelder eigener Finance-Slices, ADR-Navigation
