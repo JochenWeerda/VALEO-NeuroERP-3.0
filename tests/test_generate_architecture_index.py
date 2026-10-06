@@ -77,6 +77,7 @@ def test_build_index_has_logistics_and_hr_domains() -> None:
 
 
 @pytest.mark.parametrize("stem,domain", [
+    ("bewerbung_service", "hr"),
     ("interessent_service", "crm"),
     ("etikettendruck_service", "inventory"),
     ("schaden_service", "dms-compliance"),

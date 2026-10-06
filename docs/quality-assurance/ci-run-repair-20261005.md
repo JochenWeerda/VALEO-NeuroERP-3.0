@@ -550,3 +550,25 @@ Spec-Abnahme aus committed 59fa73073 plus vier eigenen Sicherheitsdateien:
 alle bisherigen 3096 Pfade/Methoden exakt erhalten und erneutes render(build_spec())
 kanonisch. 41 Doppelgruppen unveraendert; kein verfruehtes Kanonisierungsversprechen.
 Artefakte nur indexseitig integriert, fremde Arbeitsbaumfassungen erhalten.
+
+
+## Integration der parallelen Bewerbungs-Lieferung
+
+15fc04c88 wurde waehrend der Futter-Abnahme committed und fuegt einen
+Bewerbungsservice, eine Migration und GET auf dem bestehenden Personal-
+Detailpfad hinzu. Dessen Fachcode/Migration/Masken wurden nicht angefasst.
+Alle drei Code-Inventare werden erneut aus committed 817987519 erzeugt;
+die exakte Zuordnung bewerbung_service: hr folgt domain_hr.applications.
+Architekturindex --require-complete und --check bestehen mit 932/932 Routen,
+271/271 Services und 454/454 Endpoint-Modulen. 20 Architektur-Vertragstests
+bestehen in 0,51 Sekunden. Artefakte werden indexseitig integriert, fremde
+Arbeitsbaumversionen bleiben erhalten. Die zusaetzliche Integration schliesst
+keine der dokumentierten Futter-Schreib-/Modellluecken.
+
+
+Die finale Spec aus committed 817987519 besteht erneut render(build_spec()).
+Alle 3096 Pfade bleiben erhalten; alle alten Methoden bleiben erhalten und
+exakt GET /api/v1/personal/applications/{application_id} wird aus 15fc04c88
+zusaetzlich dokumentiert. 41 doppelte Gruppen bleiben offen. Kein fremder WIP
+wurde fuer die Generierung importiert. Zusammen 15 Futter-/Router- und
+20 Architekturtests bestanden; keine vollstaendige CI-/Security-Freigabe.

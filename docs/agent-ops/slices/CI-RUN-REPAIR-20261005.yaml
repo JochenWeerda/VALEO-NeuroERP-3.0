@@ -29,6 +29,7 @@ file_ownership:
   - Portal-OpenAPI-/Router-Vertraege und committed-source Spezifikation
   - Bestehende Futter-Listenprojektion: Endpoint-Extraktion, READ_ROLES und obligatorische Tenantfilter
   - Fehlender Mischfutter-Fachlisten-Guard und unveraenderter Frontend-Antwortvertrag
+  - Bewerbungs-Integration nur committed-source Artefakte und exakte HR-Servicezuordnung
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
