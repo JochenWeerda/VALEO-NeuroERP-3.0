@@ -13,6 +13,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**Gesamtziel-/Interessenten-Teilclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; interessent_service.py nur HTTP-faehiger X-Migration-Hint, tests/test_sammelabrechnung_interessent_waagen_vorlage.py nur kanonischer Interessenten-Anlagevertrag plus echte HTTP-Fehlerantworten; neue Gesamtziel-QA und eigene Slice-/Workboard-Doku. GitHub 00de664df meldet UnicodeEncodeError auf dem Fehlerweg und veralteten COUNT-Mock. Kein WIP oder aktiver Fremdclaim auf diesen Dateien; INTERESSENT-IST-LEAD abgeschlossen. Annahme: ASCII-Hinweis behaelt Schema-/Migrationsinformation; 409 bei Anlage- und 503 bei Lesefehler unveraendert. Abnahme: echte FastAPI-Antwort mit Header, Rollback ohne Commit, exakte persistierte Lead-Antwort und Tenant-/Nummernparameter. Keine DB-Verbindung, neue DB/Container oder Migration. Mandant-Finanz/CRM/Einkauf, Masken und Katalog bleiben bei ihren aktiven Besitzern. Gesamtziel-QA gleicht Chat, Handshakes, Code und Actions ab; historische Abnahmen sind keine aktuelle Vollfreigabe.
+
+**Gesamtziel-/Interessenten-Abnahme (2026-10-07):** Code-/Chat-/Handshake-Abgleich in [Gesamtziel-QA](../quality-assurance/code-repair-stabilization-status-20261007.md). 00de664df PostgreSQL/OpenAPI/Doku/beide E2E/Service Security gruen, Quality/Security/Gesamt-CI rot: acht Backend-/zwei Frontend-Fehler. Vier Mandant-/Finanz-/CRM-/Einkaufsbefunde bei aktivem Fremdbesitz; 41 Routerkonflikte, Journal-/Futter-/Waageintegration, Bewerber-Selbstzugang/UI-Rollen/Akteursidentitaet weiter offen. Interessenten-HTTP-Headerfehler GET/POST zweimal red reproduziert, jetzt 503/409 statt UnicodeEncodeError; Rollback genau einmal ohne Commit. Alter COUNT-Anlagetest prueft Jahres-/Maximalnummer, exakte gespeicherte Lead-Antwort und Tenantbindung. Alle 18 Modulvertraege gruen, null Skip, Exit 0 (1,87 s), keine DB-Verbindung/Container/Migration. Gesamtziel nicht abgeschlossen; neue Actions-Abnahme erforderlich. Fremde WIP und bereits gestagte Aenderungen bleiben erhalten.
+
 **Personal-Rollenclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; personal_bewerbungen.py ausschliesslich rollenbezogene Route-Dependencies fuer alle 16 Wege, neuer Test test_personal_bewerbungen_roles.py; eigene QA/Slice/Workboard und committed-source OpenAPI/Inventare/Katalog. Handshakes aller drei Bewerbungs-Slices melden fehlenden Rollenschutz; kein aktiver Fremdclaim oder WIP auf Backenddatei. Annahme explizit: neue Fachrollen folgen vorhandener DOMAIN_LESEN/BEARBEITEN/ADMIN-Konvention: PERSONAL_LESEN/B.../ADMIN plus admin/manager lesen; PERSONAL_BEARBEITEN/ADMIN plus admin/manager bearbeiten; nur PERSONAL_ADMIN/admin fuer Aufbewahrung setzen, endgueltigen Loeschlauf, Bewerbung loeschen und Fassungen anlegen. Widerruf verlangt dieselbe Bearbeitungsrolle wie Erteilung, weiterhin ohne Pflichtbody; kein Bewerber-Selbstzugang behauptet. Zentrale require_roles-Factory wird wiederverwendet, keine alternative Tokenpruefung. Abnahme: alle echten Routerwege ohne/falsche Rolle 403 vor DB, passende Rollen erreichen DB, kein Token verweigert, Wire-Vertraege und Tenantfilter unveraendert. Kein PostgreSQL-Schreibtest, neue DB/Container, Reset oder Migration; fremde Masken-WIP geschuetzt. Doku-Nachclaim vor Edit: neue zentrale QA personal-bewerbungen-rollenschutz-20261007.md; bestehende Bewerbungs-Loeschlauf-, Einwilligungs-, Fassungs- und Masken-QA ausschliesslich Rollen-Handshakes nachziehen, keine fremden Fachentscheidungen.
 
 **Personal-Rollenabnahme:** Personal-Rollenschutz abgeschlossen: Alle 16 Bewerbungswege verwenden die zentrale Rollen-Factory mit get_current_user vor DB-Zugriff. Acht Lesepfade, vier Bearbeitungswege, vier Verwaltungswege; manager hat keine Verwaltungsrechte, fachfremde Rollen werden abgewiesen. 161 Rollen-/Token-/Dispatch-Vertraege plus 163 bestehende Bewerbungs-/Loeschlauf-/Einwilligungs-/Fassungsvertraege auf gemeinsamem Probe: 324 bestanden, null Skip, Exit 0 in 65,99 s. Strukturvergleich alle Handlerkoerper/Signaturen/Tenantfilter unveraendert. main.app bestaetigt alle 16 als erste FULL-Matches; 3103 Pfade und saemtliche DTO-/Request-/Response-/Parametervertraege exakt erhalten, kanonische Spec. 41 Routerkonflikte unveraendert offen. Drei Inventare und Architekturindex --check bestanden (committed Frontend-Routen aus 81407bc6d integriert: 935 Routen/273 Services/454 Endpoint-Module). Katalog 659 Tabellen mit aktueller committed Masken-Lineage lesend geerntet, --check bestanden. Fremde Masken-/Aktions-WIP erhalten; keine neue Datenbank/Container, Migration oder Reset. Alte Rollen-Handshakes in vier QA-Dokumenten nachgezogen; zentrale Rollen-QA erklaert Akteursidentitaet, Bewerber-Selbstwiderruf und UI-Rollensteuerung als separate offene Punkte. Initiale lokale Teilsuite-Coverage/Diagnoseabsturz dokumentiert, final gezielt --no-cov; globaler CI-Gate unveraendert. GitHub bea6fbbdb Docs Build/Governance/OpenAPI/PostgreSQL erfolgreich; Quality/kritische E2E/Service Security abgebrochen, Smoke/Security/Gesamt-CI fehlgeschlagen. Neue Abnahme dieses Fixes ausstehend.
@@ -1975,7 +1979,62 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## MASK-AKTIONEN-WIRKUNG-20261007 — in Arbeit, Claude Code
+## MANDANT-FINANZ-CRM-EINKAUF-20261007 — in Arbeit, Claude Code
+
+**Auftrag (User 07.10.2026: "alle 4 Befunde fertig bearbeiten"):** die vier Befunde aus
+[Mask-Aktionen-Wirkung](../quality-assurance/mask-aktionen-wirkung-20261007.md).
+Bei der Vorpruefung zeigte sich jeder breiter als benannt:
+
+1. **Zahlungslaeufe** (`payment_runs.py`): **alle acht** Wege nehmen den Mandanten
+   aus `Query("system")` (`/plan` sogar aus dem Rumpf), keiner prueft eine Rolle. Das
+   Frontend schickt nie `tenant_id` mit — die ganze Oberflaeche lief auf "system".
+   Freigabe ohne Vier-Augen-Pruefung; `approved_by` ist freier Text.
+2. **Eingangsrechnungen** (`ap_invoices.py`): **das ganze Modul** ohne Mandant —
+   Anlegen, Lesen, Aendern, Loeschen, Liste, Freigabe und **Buchen** (Journal +
+   offener Posten mit dem Mandanten aus dem Dokument). Der Speicher `documents` ist
+   global nach `doc_number` eindeutig: Anlegen ueberschreibt eine fremde Rechnung
+   gleicher Nummer.
+3. **Opportunities** (`opportunities.py`): Lesen/Aendern/Loeschen/Aktivitaet ohne
+   Mandant (crm-sales wird ohne Mandant gefragt, die lokale Ausweichtabelle ohne
+   Filter gelesen); Aktivitaeten gehen in eine Tabelle, die keine Migration anlegt,
+   der Reiter liest aus einer anderen, die auf frischer DB fehlt.
+4. **Angebote** (`einkauf_compat_service.py`): **alle** Lesewege lesen nicht
+   existierende Spalten, `except: return None` macht "nicht gefunden" daraus; die
+   Umwandlung erfindet eine Sammelposition statt die Angebotspositionen zu nehmen,
+   committet die Bestellung vor dem Angebotsstatus und kann doppelt bestellen.
+
+**Behebung:**
+1. Mandant ueberall aus `get_tenant_id`; Rollen `FINANCE_LESEN/BEARBEITEN/ADMIN`
+   (Muster wie Codex' Personal-Rollenschutz); Freigabe und Ausfuehrung nur
+   `FINANCE_ADMIN`/`admin`; Freigeber = angemeldeter Nutzer; Migration
+   `payment_runs.created_by`, **Vier-Augen**: Ersteller darf nicht freigeben.
+2. Mandant aus dem Kontext bei jedem Weg, `tenantId` beim Anlegen gesetzt, fremde
+   Rechnung nie ueberschrieben (409), fremde/mandantenlose = 404, Liste gefiltert;
+   Rollen wie 1; Freigeber = angemeldeter Nutzer.
+3. Eine Mandantenpruefung fuer jede aufgeloeste Opportunity (crm-sales oder lokal);
+   Aktivitaeten in `domain_crm.activities` + Migration `opportunity_id`; Reiter liest
+   dort; Mask-Aktion `create_activity` wieder echt angeschlossen.
+4. Spalten korrekt (`angebotsnummer`, `gesamtbetrag`), kein verschluckter Fehler,
+   Positionen aus `einkauf_angebote_positionen`, ein Commit (Bestellung + Status),
+   keine zweite Bestellung; Mask-Aktion `bestellen` wieder echt angeschlossen.
+
+**Nicht Teil (benannt):** globale Eindeutigkeit `documents.doc_number` ueber alle
+Belegarten (Plattform); Pipeline/Forecast der Opportunities (`:tid IS NULL`).
+
+**Dateibesitz:** `app/api/v1/endpoints/payment_runs.py`, `ap_invoices.py`,
+`opportunities.py`, `mask_actions.py`, `app/services/einkauf_compat_service.py`,
+`purchase_order_service.py` (nur optionaler `commit`-Parameter),
+`mask_rollout_summary_service.py` (nur Opportunity-Aktivitaeten-Reiter),
+`app/core/screen_definitions.py` (nur die zwei Aktionen), neue Migration
+`mandant_finanz_crm_20261007`, Frontend nur, falls ein Aufruf den Mandanten im
+Query braucht, neue Vertraege, eigene QA-Doku.
+
+**Abnahme:** gegen `valeo_probe`: fremder Mandant sieht/aendert/gibt nichts frei
+(je Modul), ohne Rolle 403, Ersteller gibt nicht frei, Angebot wird mit Positionen
+genau einmal zur Bestellung, Opportunity-Aktivitaet erscheint im Reiter; Migration
+hin/zurueck/hin; bestehende Fachsuiten und Ratschen gruen.
+
+## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen
 in `app/api/v1/endpoints/mask_actions.py` schreibt fachlich — sie bauen ein
@@ -2023,6 +2082,23 @@ meldet den Grund; fremder Mandant 404/abgewiesen; dryRun schreibt nichts und mel
 fehlendes Objekt/falschen Zustand. Statisch: kein Handler in `mask_actions.py`
 meldet Erfolg ohne Fachaufruf; jede SD-Aktion mit `commandEndpoint` zeigt auf einen
 existierenden Weg. Bestehende SD-/UIX-Vertraege gruen.
+
+**Abnahme (07.10.2026):** Es waren **zwoelf**, nicht neun: auch `ap_invoices`
+(Eingangsrechnung freigeben), `open_items` (Mahnen) und `einkauf_kpis` (neue
+Bestellung) meldeten Erfolg ohne Wirkung. Fuenf delegieren jetzt an den Fachweg
+(Zahlungslauf, Lieferschein-Druck, Reklamation, Eingangsrechnung, Mahnstufe), eine
+springt in die Bestellerfassung, sechs sind ehrlich nicht verfuegbar (`stubReason`,
+Handler entfernt). `run_delegated_mask_action`: Pruefung gegen die DB in jedem Modus,
+Mutation+Audit+Ereignis in einem Commit, fachlicher Grund statt Pauschalmeldung.
+Drei Tests, die den Fake festschrieben, umgestellt. **29** neue Vertraege gegen
+`valeo_probe`, **1035** Fach-/SD-/UIX-Tests gruen (1 rot vorbestehend:
+`fahrzeug-stamm` `destructive`), fuenf Ratschen gruen. Neue Befunde (eigene Slices,
+Finanz/CRM/Einkauf): Mandant aus Query bei `approve_payment_run`, ohne Filter bei
+`approve_ap_invoice`, `add_opportunity_activity` ohne Mandant und gegen fehlende
+Tabelle, `convert_angebot_to_order` liest nicht existierende Spalten (nie
+funktioniert), `eskaliere_mahnstufe` ohne Existenzpruefung. OpenAPI/Inventare: 7
+Pfade entfallen, Integration aus committed source. QA:
+[mask-aktionen-wirkung-20261007.md](../quality-assurance/mask-aktionen-wirkung-20261007.md).
 
 ## BEWERBUNG-EINWILLIGUNG-MASKE-20261007 — abgeschlossen, Claude Code
 

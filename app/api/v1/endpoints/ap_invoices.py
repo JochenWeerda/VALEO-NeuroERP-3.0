@@ -495,23 +495,30 @@ async def action_freigeben(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    from app.services.mask_action_runtime_service import run_mask_action
+    """Delegiert an den Freigabeweg. Bis zum 07.10.2026 meldete diese Aktion Erfolg,
+    ohne die Rechnung anzufassen."""
+    from app.services.mask_action_runtime_service import run_delegated_mask_action
 
-    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
-        return {
-            "summary": "Eingangsrechnung freigegeben.",
-            "affectedIds": [eid],
-            "mutation": {"approval_status": "approved", "invoice_id": eid},
-        }
+    async def pruefen(db_: Session, payload: dict, eid: str, tid: str) -> list[dict]:
+        rechnung = get_from_store("ap_invoice", eid, get_repository(db_))
+        # Der Freigabeweg liest ohne Mandantenfilter; hier wird er nachgeholt.
+        if not rechnung or str(rechnung.get("tenantId") or "") != tid:
+            return [{"field": "_entity", "message": "Eingangsrechnung nicht gefunden.", "severity": "blocking"}]
+        return []
 
-    result = run_mask_action(
+    async def freigeben(db_: Session, payload: dict, eid: str, tid: str) -> str:
+        await approve_ap_invoice(eid, approved_by=str(payload.get("freigegeben_von") or "Maske"), db=db_)
+        return "Eingangsrechnung freigegeben."
+
+    result = await run_delegated_mask_action(
         db,
         action_key="freigeben",
         entity_type="ap_invoice",
         entity_id=entity_id,
         tenant_id=tenant_id,
         body=body,
-        execute_fn=execute,
+        check_fn=pruefen,
+        delegate_fn=freigeben,
         outbox_event_type="finance.ap_invoice.approved",
     )
     return result.model_dump()

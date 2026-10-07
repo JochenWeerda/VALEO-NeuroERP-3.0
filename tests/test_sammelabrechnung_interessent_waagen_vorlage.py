@@ -271,20 +271,21 @@ def test_sammelabrechnung_delete_entwurf_ok():
 def test_interessent_create_generates_nr():
     app, db = _app_customers()
 
-    # COUNT query returns 0
-    count_mock = MagicMock()
-    count_mock.first.return_value = (0,)
+    year_mock = MagicMock()
+    year_mock.scalar.return_value = 2026
+    max_mock = MagicMock()
+    max_mock.scalar.return_value = 7
     insert_mock = MagicMock()
-
-    call_count = [0]
-
-    def side_effect(*args, **kwargs):
-        call_count[0] += 1
-        if call_count[0] == 1:
-            return count_mock
-        return insert_mock
-
-    db.execute.side_effect = side_effect
+    insert_mock.mappings.return_value.first.return_value = {
+        "id": "00000000-0000-0000-0000-000000000008",
+        "tenant_id": TENANT_ID,
+        "company": "Mustermann GmbH",
+        "email": "info@mustermann.de",
+        "source": "website",
+        "status": "NEW",
+        "notes": "[INT-2026-00008]",
+    }
+    db.execute.side_effect = [year_mock, max_mock, insert_mock]
 
     client = TestClient(app)
     resp = client.post("/customers/interessenten", json={
@@ -294,7 +295,37 @@ def test_interessent_create_generates_nr():
     })
     assert resp.status_code == 201
     data = resp.json()
-    assert data["interessenten_nr"].startswith("INT-")
+    assert data["interessenten_nr"] == "INT-2026-00008"
+    assert data["name"] == "Mustermann GmbH"
+    assert data["status"] == "NEW"
+    assert data["tenant_id"] == TENANT_ID
+    calls = db.execute.call_args_list
+    assert "MAX(SUBSTRING" in str(calls[1].args[0])
+    assert calls[1].args[1]["tid"] == TENANT_ID
+    assert "INSERT INTO public.crm_leads" in str(calls[2].args[0])
+    assert calls[2].args[1]["notizen"] == "[INT-2026-00008]"
+    assert calls[2].args[1]["tid"] == TENANT_ID
+    db.commit.assert_called_once()
+    db.rollback.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("method,path,status", [
+    ("GET", "/customers/interessenten", 503),
+    ("POST", "/customers/interessenten", 409),
+])
+def test_interessent_database_error_is_an_http_response(method, path, status):
+    app, db = _app_customers()
+    db.execute.side_effect = RuntimeError("Datenbank nicht erreichbar")
+    kwargs = {"json": {"name": "Testfirma"}} if method == "POST" else {}
+    response = TestClient(app).request(method, path, **kwargs)
+    assert response.status_code == status
+    hint = response.headers["X-Migration-Hint"]
+    assert "public.crm_leads" in hint
+    assert "alembic upgrade head" in hint
+    assert response.json()["detail"]["migration_hint"] == hint
+    db.rollback.assert_called_once()
+    db.commit.assert_not_called()
 
 
 @pytest.mark.unit

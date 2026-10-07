@@ -57,7 +57,7 @@ FELDER = (
 )
 
 MIGRATIONS_HINWEIS = {
-    "X-Migration-Hint": "public.crm_leads fehlt — Run: alembic upgrade head"
+    "X-Migration-Hint": "public.crm_leads fehlt - Run: alembic upgrade head"
 }
 
 

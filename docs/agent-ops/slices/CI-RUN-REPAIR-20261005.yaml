@@ -40,6 +40,8 @@ file_ownership:
   - shell-quote exakt 1.11.0 mit Kommentar-Injection-Regression und Voll-Audit
   - Fassungsintegration nur committed-source Artefakte und bestehender lokaler Probe-Katalog
   - Alle 16 Bewerbungswege Rollen-Dependencies, Dispatch-Tests und QA-Handshakes
+  - Interessenten-Service nur HTTP-Migrationsheader und kanonischer Anlagetest mit Fehlerantworten
+  - Gesamtziel-Reparaturbestand mit aktuellem Actions-Nachweis und aktivem Fremdbesitz
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.

@@ -788,7 +788,7 @@ def build_supplier_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.lieferant.update"},
-            {"key": "neue_bestellung", "label": "Bestellung anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "einkauf.bestellung.create", "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung", "method": "POST"},
+            {"key": "neue_bestellung", "label": "Bestellung anlegen", "kind": "secondary", "dangerLevel": "safe", "permission": "einkauf.bestellung.create", "navigationRoute": "/einkauf/bestellungen/neu"},
         ],
         "noWorkflowReason": "Lieferantenstamm ist ein Verwaltungsobjekt — Prozessstatus liegt in den Bestellungen, nicht im Stammsatz.",
         "agentContract": {
@@ -937,8 +937,10 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "permission": "crm.activity.create",
-                "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
-                "method": "POST",
+                "stubReason": (
+                    "Noch kein Fachweg: Der Aktivitaeten-Weg der Opportunity schreibt in eine "
+                    "Tabelle, die keine Migration anlegt, und prueft den Mandanten nicht."
+                ),
             },
         ],
         "noWorkflowReason": "Opportunity-Phasen werden manuell gesteuert — kein automatischer Prozess-Lebenszyklus erforderlich.",
@@ -1769,7 +1771,7 @@ def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren", "method": "POST"},
+            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "stubReason": "Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst."},
         ],
         "noWorkflowReason": "Lagerbewegungen sind Buchungsbelege ohne eigenstaendigen Workflow — Storno ist die einzige Mutation.",
         "agentContract": {
@@ -1858,8 +1860,7 @@ def build_agrar_harvest_settlement_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "permission": "agrar.abrechnung.drucken",
-                "commandEndpoint": "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken",
-                "method": "POST",
+                "stubReason": "Noch kein Fachweg: Fuer Ernte-Abrechnungen gibt es keinen Druckdienst.",
             },
         ],
         "noWorkflowReason": "Ernte-Abrechnung wird manuell freigegeben — Auszahlung erfolgt ueber separaten Finance-Zahlungslauf (finance/payment-run).",
@@ -2293,7 +2294,7 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
                              {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                          ]}]},
         ],
-        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen", "method": "POST"}],
+        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "stubReason": "Noch kein Fachweg: Die Umwandlung Angebot -> Bestellung liest Spalten, die keine Migration anlegt."}],
         "noWorkflowReason": "Angebots-Status wird durch Bestellvorgang gesetzt — kein separater Workflow.",
         "agentContract": {
             "businessPurpose": "Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.",
@@ -2337,7 +2338,7 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
                              {"key": "charge", "label": "Charge", "width": 120},
                          ]}]},
         ],
-        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "commandEndpoint": "/api/v1/lager/artikel/{entity_id}/actions/wareneingang", "method": "POST"}],
+        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "stubReason": "Noch kein Fachweg: Ein Wareneingang wird gegen die Bestellung gebucht; vom Avis aus fehlt diese Verbindung."}],
         "noWorkflowReason": "Avis-Status wird durch Wareneingangsbuchung automatisch gesetzt.",
         "agentContract": {
             "businessPurpose": "Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.",
@@ -2761,7 +2762,7 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.lead.update"},
-            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren", "method": "POST"},
+            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "stubReason": "Noch kein Fachweg: Es gibt keinen Uebergang Lead -> Opportunity; die vorhandene Konvertierung erzeugt einen Kunden."},
         ],
         "workflow": {
             "processKey": "crm-party-lifecycle",
