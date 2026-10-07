@@ -148,6 +148,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |

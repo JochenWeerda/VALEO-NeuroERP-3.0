@@ -1919,9 +1919,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": "lager.wareneingang.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Noch kein Fachweg: Ein Wareneingang wird gegen die Bestellung gebucht; vom Avis aus fehlt diese Verbindung."
+          "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -4197,5 +4197,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 71
+  "event_count": 72
 }

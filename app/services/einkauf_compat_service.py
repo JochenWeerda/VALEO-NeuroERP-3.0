@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 from typing import Any, Optional
 
 from sqlalchemy.orm import Session
@@ -479,7 +480,7 @@ class EinkaufCompatService:
         bereits bestelltes nicht noch einmal (Zeilensperre gegen Doppelklick).
         """
         from sqlalchemy import text
-        from app.services.purchase_order_service import PurchaseOrderService
+        from app.services.procurement_service import ProcurementService
         row = self._load_angebot_raw_row(angebot_id)
         if row is None:
             raise EntityNotFoundError("Angebot", angebot_id)
@@ -496,19 +497,29 @@ class EinkaufCompatService:
         if not positionen:
             raise ValidationFailedError("Ein Angebot ohne Positionen wird nicht bestellt.")
         try:
-            po = await PurchaseOrderService(self.db, self.tenant_id).create_purchase_order({
-                "subject": m.get("artikel_name") or f"Angebot {m.get('angebots_nummer')}",
-                "description": f"Erzeugt aus Angebot {m.get('angebots_nummer') or m.get('id')} "
-                               f"von {m.get('lieferant_name') or 'Lieferant'}",
-                "supplierId": m.get("lieferant_id"),
-                "deliveryDate": m.get("gueltig_bis").isoformat()[:10] if m.get("gueltig_bis") else None,
-                "externalReference": m.get("angebots_nummer") or str(m.get("id")),
-                "items": [{"description": z.bezeichnung or z.artikel_nr or f"Position {z.pos_nr}",
-                           "articleNumber": z.artikel_nr,
-                           "quantity": float(z.menge or 0),
-                           "unitPrice": float(z.einheitspreis or 0),
-                           "unit": z.einheit or "Stk"} for z in positionen],
-                "notes": f"Lieferant: {m.get('lieferant_name') or 'unbekannt'}",
+            lieferant = uuid.UUID(str(m.get("lieferant_id") or ""))
+        except ValueError:
+            lieferant = None
+        if lieferant is None or not self.db.execute(text(
+            "SELECT 1 FROM domain_einkauf.lieferanten WHERE id = CAST(:id AS uuid) AND tenant_id = :tid"
+        ), {"id": str(lieferant), "tid": self.tenant_id}).scalar():
+            raise ValidationFailedError("Ein Angebot ohne Lieferanten dieses Mandanten wird nicht bestellt.")
+        try:
+            # Kanonisch: domain_einkauf.bestellungen - dort liest die Bestellungs-Maske, und
+            # die offenen Mengen sind die Grundlage des Wareneingangs.
+            po = ProcurementService(self.db, self.tenant_id).create_bestellung({
+                "lieferant_id": m.get("lieferant_id"),
+                "bestelldatum": business_today(),
+                "lieferdatum_wunsch": m.get("gueltig_bis"),
+                "angebot_nr": m.get("angebots_nummer") or str(m.get("id")),
+                "notiz": f"Erzeugt aus Angebot {m.get('angebots_nummer') or m.get('id')} "
+                         f"von {m.get('lieferant_name') or 'Lieferant'}",
+                "positionen": [{"artikel_nr": z.artikel_nr or "",
+                                "artikel_bezeichnung": z.bezeichnung or z.artikel_nr or f"Position {z.pos_nr}",
+                                "menge": float(z.menge or 0),
+                                "einzelpreis": float(z.einheitspreis or 0),
+                                "einheit": z.einheit or "Stk",
+                                "preis_einheit": z.einheit or "Stk"} for z in positionen],
             }, commit=False)
             self.db.execute(text(
                 "UPDATE einkauf_angebote SET status = 'IN_BESTELLUNG', updated_at = CURRENT_TIMESTAMP "
@@ -521,7 +532,7 @@ class EinkaufCompatService:
         self._invalidate()
         return {"message": "Angebot in Bestellung ueberfuehrt",
                 "purchaseOrderId": po.get("id"),
-                "purchaseOrderNumber": po.get("purchaseOrderNumber"),
+                "purchaseOrderNumber": po.get("bestellnummer"),
                 "status": "IN_BESTELLUNG"}
 
     # ── Anlieferavis ──────────────────────────────────────────────────────────

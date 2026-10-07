@@ -2344,7 +2344,12 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
                              {"key": "charge", "label": "Charge", "width": 120},
                          ]}]},
         ],
-        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "stubReason": "Noch kein Fachweg: Ein Wareneingang wird gegen die Bestellung gebucht; vom Avis aus fehlt diese Verbindung."}],
+        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang", "method": "POST",
+            "inputFields": [
+                {"key": "lieferschein_nr", "label": "Lieferschein-Nr.", "type": "text", "required": True},
+                {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
+                 "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id", "labelKey": "name"}},
+            ]}],
         "noWorkflowReason": "Avis-Status wird durch Wareneingangsbuchung automatisch gesetzt.",
         "agentContract": {
             "businessPurpose": "Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.",

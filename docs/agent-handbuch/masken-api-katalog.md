@@ -1266,7 +1266,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `wareneingang` | Wareneingang buchen | moderate | nein | `Noch kein Fachweg: Ein Wareneingang wird gegen die Bestellung gebucht; vom Avis aus fehlt diese Verbindung.` |
+| `wareneingang` | Wareneingang buchen | moderate | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang` |
 
 ---
 

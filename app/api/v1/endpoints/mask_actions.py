@@ -373,3 +373,55 @@ async def action_opportunity_create_activity(
         delegate_fn=anlegen,
         outbox_event_type="crm.opportunity.activity_created",
     )
+
+
+# ---------------------------------------------------------------------------
+# einkauf/anlieferavis → wareneingang
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/einkauf/anlieferavis/{entity_id}/actions/wareneingang",
+    response_model=MaskActionResult,
+    summary="Wareneingang aus dem Anlieferavis buchen (SPEC-P1-04)",
+)
+async def action_avis_wareneingang(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """Lieferschein-Nr. und Lager fragt die Maske deklarativ (``inputFields``)."""
+    from app.services.wareneingang_avis_service import (
+        WareneingangAvisError,
+        buche_wareneingang_aus_avis,
+        pruefe_wareneingang,
+    )
+
+    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
+        try:
+            pruefe_wareneingang(db_, eid, tid, str(payload.get("lager_id") or ""), str(payload.get("lieferschein_nr") or ""))
+        except WareneingangAvisError as exc:
+            return _fehler(str(exc))
+        return []
+
+    async def buchen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
+        try:
+            ergebnis = buche_wareneingang_aus_avis(
+                db_, eid, tid, str(payload["lager_id"]), str(payload["lieferschein_nr"]), payload.get("operator")
+            )
+        except WareneingangAvisError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return (f"Wareneingang zu Bestellung {ergebnis['bestellnummer']} gebucht "
+                f"({ergebnis['positionen']} Positionen, Lieferschein {ergebnis['lieferschein_nr']}).")
+
+    return await run_delegated_mask_action(
+        db,
+        action_key="wareneingang",
+        entity_type="anlieferavis",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        check_fn=pruefen,
+        delegate_fn=buchen,
+        outbox_event_type="einkauf.wareneingang.gebucht",
+    )
