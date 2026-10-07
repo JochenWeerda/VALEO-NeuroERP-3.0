@@ -1,8 +1,10 @@
 # GAP-Analyse FiBU - Identifizierte LÃ¼cken
 
+> **HISTORISCH.** Aktuelle Finance-Gaps: [`docs/gap/executive-summary-20261007.md`](../../gap/executive-summary-20261007.md) §3–4 und Open Gaps JOURNAL/CASH/BANK. P0 „FIBU-AR-03 fehlt komplett“ gilt nicht mehr.
+
 **Datum:** 2025-11-24
 **Basis:** FiBU Capability Model v1.0 + Finance Module Exploration
-**Status:** Complete
+**Status:** archiviert
 **PrioritÃ¤t:** MUSS/SOLL/KANN basierend auf Lastenheft
 
 ## Zusammenfassung

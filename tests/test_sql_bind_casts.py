@@ -88,3 +88,38 @@ def test_gate_laeuft_ueber_das_repository_sauber_durch() -> None:
 
     treffer = find_hits(("app", "modules", "services", "tools", "scripts"))
     assert treffer == [], [f"{h[0]}:{h[1]}" for h in treffer]
+
+
+def test_gate_checks_untracked_and_space_paths_while_retiring_deleted_file(tmp_path, monkeypatch):
+    import subprocess
+    from scripts.check_sql_bind_casts import find_hits
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    app = tmp_path / "app"
+    app.mkdir()
+    retired = app / "retired.py"
+    retired.write_text('query = "SELECT :bad::jsonb"\n', encoding="utf-8")
+    subprocess.run(["git", "-C", str(tmp_path), "add", "--", "app/retired.py"], check=True)
+    retired.unlink()
+    fresh = app / "new code.py"
+    fresh.write_text('query = "SELECT :payload::jsonb"\n', encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    hits = find_hits(("app",))
+    assert [(h[0], h[2]) for h in hits] == [("app/new code.py", "payload")]
+    fresh.write_text('query = "SELECT CAST(:payload AS jsonb)"\n', encoding="utf-8")
+    assert find_hits(("app",)) == []
+
+
+def test_gate_does_not_hide_read_permission_errors(tmp_path, monkeypatch):
+    import subprocess
+    import scripts.check_sql_bind_casts as gate
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    (tmp_path / "app").mkdir()
+    (tmp_path / "app" / "current.py").write_text("query = 1\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    def denied(path):
+        raise PermissionError(path)
+    monkeypatch.setattr(gate, "read_text", denied)
+    with pytest.raises(PermissionError):
+        gate.find_hits(("app",))

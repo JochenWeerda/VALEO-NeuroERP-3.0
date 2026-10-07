@@ -84,9 +84,6 @@
     "app/api/v1/endpoints/dms_images.py::list_dms_images": 1,
     "app/api/v1/endpoints/dms_images.py::search_dms_documents": 1,
     "app/api/v1/endpoints/dms_inbox.py::get_inbox": 1,
-    "app/api/v1/endpoints/ebilanz_elster.py::list_exports": 1,
-    "app/api/v1/endpoints/ebilanz_elster.py::list_meldungen": 1,
-    "app/api/v1/endpoints/ebilanz_elster.py::list_ustva": 1,
     "app/api/v1/endpoints/edi_api.py::get_offene_nachrichten": 1,
     "app/api/v1/endpoints/edi_api.py::list_partner": 1,
     "app/api/v1/endpoints/einkauf_lieferschein.py::_list_positions": 1,
@@ -251,7 +248,6 @@
     "app/api/v1/endpoints/warehouse_transfers.py::list_bin_locations": 1,
     "app/api/v1/endpoints/warehouse_transfers.py::post_transfer": 1,
     "app/api/v1/endpoints/wartung.py::list_protokolle": 1,
-    
     "app/api/v1/endpoints/weighing_tickets.py::list_article_groups": 1,
     "app/api/v1/endpoints/zertifikate.py::get_zertifikate_stats": 1,
     "app/api/v1/endpoints/zertifikate.py::list_zertifikate": 1,

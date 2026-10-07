@@ -62,3 +62,7 @@ Der zentrale Legacy-Adapterrahmen nimmt `l3_standard`- und `unimet`-Payloads
 hashgebunden auf und fuehrt sie nur bis in ein kanonisches, abgestimmtes
 Staging. Finance-Zielbuchungen bleiben gesperrt, bis Kundenformat, Mapping und
 fachliche Pilotfreigabe vorliegen.
+
+## eBilanz-Persistenz und ELSTER-Grenze (2026-10-07)
+
+[QA und Betriebsnachweis](../../../quality-assurance/ebilanz-honest-persistence-20261007.md): Entwurfsmetadaten liegen im Alembic-geführten domain_finance.ebilanz_exports; keine Request-DDL. Validierung und Übertragung bleiben ohne vollständiges XBRL/echten ERiC-Nachweis gesperrt. Der entfernte Simulator und historische Tickets begründen keinen behördlichen Empfang.

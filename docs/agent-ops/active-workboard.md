@@ -11,7 +11,52 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BESTANDSBUCH-EINKAUF-20261007 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-07. **Ziel:** die fuenf benannten Befunde aus
+MANDANT-FINANZ-CRM-EINKAUF-20261007 beheben: (1) Inventar-API nimmt den Mandanten aus
+Query/Standardmandant, (2) `InventoryService` verlangt fuer `out` eine negative Menge
+gegen die Richtungstabelle, (3) `DELETE /inventory/stock-movements/{id}` loescht
+Buchungen ohne Bestandskorrektur, (4) Bestell-Altbelege im Dokumentspeicher +
+`register_artifact` verschluckt Fehler und committet fremde Arbeit, (5)
+Lieferschein-Abgleich/-Einbuchen mit `Query("system")`, ohne Wiederholungsschutz und
+ohne Lagerbezug. **Dateibesitz:** `app/domains/inventory/api/*`,
+`app/domains/inventory/application/services/inventory_service.py`,
+`app/services/inventory_correction_service.py`, `app/core/gobd_artifact.py` + die vier
+Aufrufer, `app/api/v1/endpoints/einkauf_lieferschein.py`, Bestell-Compat-Wege in
+`compat.py`, `app/services/warehouse_service.py::book_stock_movement`,
+`pages/lager/lagerbewegungen.tsx`, `lib/services/stock-movement-service.ts`, eine additive
+Migration, neue Tests. Fremde WIP (eBilanz, CI-Repair) unberuehrt.
+
+
+## USABILITY-SYSTEMAUDIT-20261007 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-07 (Stufe-1 Experten-Systemaudit).
+**Ziel:** ERP-Usability-Methodik (ISO 9241-11/110, Singh/Wesson) auf VALEO
+systemweit anwenden; Vergleichsdossier gegen Tier-1, Light (light.inc) und
+AI-native Peers ERPClaw / OpenLedger / TaxHacker / OpenAccountants.
+**Dateibesitz:** `docs/quality-assurance/usability-erp-audit-protocol-20261007.md`,
+`docs/quality-assurance/usability-erp-vergleichsdossier-20261007.md`,
+`docs/gap/usability-systemaudit-matrix-20261007.csv`,
+`docs/gap/usability-systemaudit-findings-20261007.csv`, Open-Gaps-Verweis und
+dieser Abschnitt. Kein Produktcode; fremde Claims unberuehrt.
+**Abnahme:** 10 Domänencluster gescored; Tiefen-Tasks O2C/S2P/Ernte/Finance/CRM/Voice;
+SUS-Experten-Schnitt ~66; drei Finance-Blocker und Peer-Ableitungen dokumentiert;
+Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
+**Nachweis:** Protokoll + Dossier + Matrix CSV.
+
+**Nachtrag Gap-Hub (2026-10-07):** Archiv-Gaps 2025 (~38 % Maturity) durch
+`docs/gap/README.md`, `executive-summary-20261007.md` und
+`domain-maturity-matrix-20261007.csv` ersetzt; Archive mit HISTORISCH-Banner;
+`docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
+
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**eBilanz-Scheinwirkung/Schema (2026-10-07):** [QA](../quality-assurance/ebilanz-honest-persistence-20261007.md). Echte tenantgebundene Entwurfsmetadaten statt XML-/Paket-Scheinerfolg; Datenbankfehler 503/Rollback, fremde/fehlende Export-IDs 404, Listen SQL-LIMIT/fetchmany. Request-DDL entfernt, additive Migration uebernimmt bestehenden Entwicklungsstand ohne Zeilen zu loeschen/umzuschreiben. Zentraler Finance-Rollenschutz vor DB-Zugriff. Ausschliesslich dort konsumierter ERIC-Simulator entfernt; ohne vollstaendiges XBRL/echt bestaetigte externe ERIC-Anbindung bleiben Validieren/Uebertragen/UStVA 409, keine fingierten Tickets oder ANGENOMMEN-Projektion. Readiness offen statt falschem repo_ready; historische Tickets nur NICHT_BESTAETIGT, Daten erhalten. 84 neue/bestehende PG-/HTTP-/Scanner-Vertraege ohne Skip gruen (12,22 s), davor Phase-23-Gesamtpfade mit 38 Vertraegen gruen; alle neun Improvement-Checks stabil gruen (26,0 s). SQL-Bind-Gate prueft neue/getrackte Quelldateien mit Nullpfaden und gezielt Git-Loeschstatus, echte temporaere Git-Vertraege; unberechtigte Lesefehler bleiben hart. Baselines nur -3 .all-Abfragen/-2 Kalenderstellen, keine neuen Ausnahmen. Gemeinsamer valeo_probe unter Migrationclaim/Nutzungspruefung, eigene Testdaten ueber Transaktionen/Savepoints; keine neue DB/Container/Reset. OpenAPI, drei Inventare und Architektur 935/276/454 komplett nachgezogen. Vollstaendiges XBRL/amtliche Taxonomie/realer ERIC-Empfang bleiben echte offene Fachwege; Gesamtkatalog, Security und weitere globale Restbefunde separat, kein pauschaler Gruenstatus. Vorheriger Lead/PDF-PostgreSQL-GitHub-Lauf 37663669984 erfolgreich.
+
+**EBILANZ-GATE-RETIREMENT-20261007 (abgeschlossen):** Owner Codex-01a0f3fc. Beim geclaimten Simulationsrueckbau brechen bestehende SQL-Bind-Scans an einer absichtlich geloeschten getrackten Datei ab; ungetrackter neuer Code wurde bisher gar nicht geprueft. Besitz scripts/check_sql_bind_casts.py und dessen Testhunks: bestehende/ungecommitete Quelldateien pruefen, nur von Git als geloescht erkannte Pfade auslassen, sonst Lesefehler weiter hart. Reale temporaere Git-Testrepos pruefen geloeschte Datei, neue Datei und Pfad mit Leerzeichen, keine DB/Container. config/business_time_usage_baseline.json nur exakt die zwei entfernten direkten Tagesquellen absenken, config/pagination_baseline.json nur exakt drei entfernte ungebundene eBilanz-Abfragen absenken; keine Erhoehung/Ausnahme. Endpoint verwendet SQL-LIMIT plus fetchmany. Pflichtgates streng erhalten und nachweisen.
+
+**EBILANZ-HONEST-PERSISTENCE-20261007 (abgeschlossen):** Owner Codex-01a0f3fc. P0-Scheinwirkung und Schema-Drift belegte offene Altlast: ebilanz_elster.py erstellt Tabellen im Request, verschluckt Datenbankfehler, bestaetigt Validierung ohne Dokument und ELSTER-Erfolg mit simulierter Ticketnummer; eric_submission_service.py wird nur dort konsumiert. Dateibesitz Endpoint, ausschliesslich dessen veralteter Simulationsservice (Rueckbau nach Verbraucherpruefung), neue additive Migration ebilanz_persist_20261007 als kanonischer Export-Entwurf mit bestehender Tabellenform und Tenantindex, bestehende eBilanz-Testhunks plus neue isolierte PG-/HTTP-Vertraege. Keine echte externe Steueruebertragung ausloesen, kein neuer Anbieter oder Zertifikats-Scheinintegration. Export/Listen speichern bzw. lesen reale tenantgebundene Entwurfsmetadaten und melden DB-Fehler; ohne vollstaendiges XBRL und ERiC bleiben Validierung/Uebertragung explizit gesperrt. UStVA-Scheinuebertragung ebenfalls gesperrt, keine fingierten Tickets; historische ungepruefte Tickets/Statuswerte niemals als behoerdlich angenommen darstellen. Fremde Daten/Statuswerte nicht bereinigen. Migration unter Probe-Nutzungs-/Advisory-Pruefung, keine neue DB/Container/Reset. QA, Finance-Domain-Pack, Open-Gaps, Gesamtzielbericht, Slice, Workboard und committed-source Inventare/Architektur/OpenAPI nachziehen. Abnahme keine Request-DDL, keine Falschbestaetigung bei fehlender/fremder ID oder Datenbankfehler, Mandanten-/Rollen-/Pagingvertrage, exact needs_live_db-CI-Vertrag und strikte Gates. Fremde Finance-/Katalog-/Frontend-WIP geschuetzt.
 
 **User-Entscheidungen Lead/PDF (2026-10-07):** [QA](../quality-assurance/user-decisions-lead-pdf-20261007.md), [ADR-078](../adr/adr-078-canonical-lead-postgresql-pdf.md). public.crm_leads kanonischer Masken-CRUD fuer beide Slash-Schreibweisen, fuenf konkurrierende Alt-Handler entfernt, kein externer Standardmandant. Qualifizierung mit eigenem ausgewaehltem bestehenden Kunden erzeugt genau eine echte Opportunity atomar mit Lead/Audit/Outbox; Vorschauen schreiben nichts. Ernte-PDF-Bytes mit Hash/Header/Version/PostgreSQL-Schluessel gespeichert, Download tenantgebunden mit Integritaetspruefung, Inhalt gegen Aenderung/Loeschung geschuetzt, Fehler kein Erfolg. Reale PDF-Altfehler partner_id/name_1 und Artikel-Tenant ebenfalls korrigiert. 106 neue/bestehende Vertraege ohne Skip gruen; elf neue Tests nochmals unter echtem needs_live_db/strict-CI-Vertrag gruen (3,49 s). Maskeninventur 99 nativ/0 bekannte Luecken; acht Logistikaktionen bereits b2a63f451 vorhanden, erneut geprueft. Neun Improvement-Gates stabil gruen. OpenAPI 3104 Pfade, drei neue, keine entfernt; doppelte Gruppen 33 -> 30. Drei Inventare, Architektur 935/277/454 vollstaendig und fuenf Handbuchartefakte --check gruen. Additive Migration auf vorhandenem gemeinsamen valeo_probe unter Nutzungs-/Advisory-Claim, keine neue DB/Container/Reset; neue Testdaten via aeusserer Transaktion/Savepoints vollstaendig zurueckgenommen. Fremde Katalog-/Frontend-/Buchungs-WIP erhalten. Lead-Routing-/Assign-Altkonsumenten, Gesamtatomizitaet FIBU+nachgelagertes Archiv, Katalogdrift, 30 Routergruppen und zwei ungepatchte Node-High bleiben eigene offene Befunde; frische Actions-Abnahme folgt.
 
@@ -2027,7 +2072,7 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## MANDANT-FINANZ-CRM-EINKAUF-20261007 — in Arbeit, Claude Code
+## MANDANT-FINANZ-CRM-EINKAUF-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "alle 4 Befunde fertig bearbeiten"):** die vier Befunde aus
 [Mask-Aktionen-Wirkung](../quality-assurance/mask-aktionen-wirkung-20261007.md).
@@ -2119,6 +2164,12 @@ Abrechnung drucken — PDF existiert, aber kein Archiv speichert Inhalte: Artefa
 tragen nur Hash+Schluessel, `register_artifact` verschluckt Fehler, `archive_service`
 schreibt nach `data/` (kein Volume). Ablageort ist eine Betriebsentscheidung.
 (3) Acht Logistik-Aktionen ohne `command`-Deklaration (Codex-Masken).
+
+**Abnahme (07.10.2026):** Alle vier Befunde behoben (`42f8fe6c3`, `5db4b4944`), alle
+fruehere Luecken mit echtem Fachweg (Storno `71aecf2ae`, `inputFields`/Opportunity
+`54a659699`, Wareneingang + kanonische Bestellung `28e6133ed`, Lead + PDF-Archiv und
+Logistik von Codex `e71e0731e`/`b2a63f451`). Gate: 0 bekannte Luecken. QA:
+[mandant-finanz-crm-einkauf-20261007.md](../quality-assurance/mandant-finanz-crm-einkauf-20261007.md).
 
 ## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 

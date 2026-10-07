@@ -1,174 +1,32 @@
-# GAP-Analyse Dokumentation
+# GAP-Analyse Dokumentation — HISTORISCH (2025)
 
-**Zweck:** Systematische Analyse der Funktionsabdeckung von VALEO NeuroERP im Vergleich zu ERP-Referenzsystemen (SAP / Oracle / Community ERP Enterprise)
+> **VERALTET — nicht mehr Source of Truth.**  
+> Aktueller Gap-Stand ab 2026-10-07:  
+> **[`docs/gap/README.md`](../../gap/README.md)** ·  
+> [`docs/gap/executive-summary-20261007.md`](../../gap/executive-summary-20261007.md)
 
-**Status:** In Progress
+Die Zahlen und P0-Listen in diesem Archiv (u. a. „~38 % Maturity“, FIBU-AR-03 „fehlt komplett“) beschreiben den Stand **2025-01** und wurden durch Domänen-Closure 2026-05/06, L3-Inventur und Usability-Systemaudit 2026-10 überholt.
 
----
-
-## ðŸ“‹ Dokumente
-
-### 1. Capability Models (Referenz)
-
-- **[capability-model.md](./capability-model.md)** - Allgemeines Capability Model (Ãœbersicht)
-- **[procurement-capability-model.md](./procurement-capability-model.md)** - Detailliertes Procurement Capability Model (28 Capabilities)
-- **[capability-model-sales.md](./capability-model-sales.md)** - Sales/Order-to-Cash Capability Model
-- **[capability-model-crm-marketing.md](./capability-model-crm-marketing.md)** - CRM & Marketing Capability Model
-
-### 2. GAP-Analysen
-
-- **[gaps.md](./gaps.md)** - Detaillierte GAP-Analyse Finance/FiBU (33 Capabilities)
-- **[finance-fiori-gap-analysis.md](./finance-fiori-gap-analysis.md)** - GAP-Analyse Finanz Suite vs. SAP Fiori Referenz (konsolidiert, P0-SchlieÃŸung)
-- **[procurement-gaps.md](./procurement-gaps.md)** - Detaillierte GAP-Analyse Procurement/Einkauf (28 Capabilities)
-- **[gaps-sales.md](./gaps-sales.md)** - Detaillierte GAP-Analyse Sales/Order-to-Cash (31 Capabilities)
-- **[gaps-crm-marketing.md](./gaps-crm-marketing.md)** - Detaillierte GAP-Analyse CRM & Marketing (32 Capabilities)
-
-### 3. Matrizen (CSV)
-
-- **[matrix.csv](./matrix.csv)** - Gesamt-Matrix Finance + Procurement (61 Capabilities)
-- **[matrix-sales.csv](./matrix-sales.csv)** - Sales/Order-to-Cash Matrix (31 Capabilities)
-- **[matrix-crm-marketing.csv](./matrix-crm-marketing.csv)** - CRM & Marketing Matrix (32 Capabilities)
-  - Format: CSV mit Semikolon-Trenner
-  - Spalten: Capability_ID, Capability, Subcapability, PrioritÃ¤t, Status, Evidence, Gap-Beschreibung, LÃ¶sungstyp, PrioritÃ¤t, Owner, Notes, Baseline_ERP
+Dateien hier nur noch als historische Momentaufnahme / Audit-Trail behalten. Keine Roadmaps, Claims oder Management-Reports daraus ableiten.
 
 ---
 
-## ðŸ“Š Aktuelle Ãœbersicht
+## Historischer Inhalt (2025, unverändert als Archiv)
 
-### Finance/FiBU
-- **Gesamt:** 33 Capabilities
-- **Yes:** 1 (3%)
-- **Partial:** 15 (45%)
-- **No:** 17 (52%)
+### Capability Models
 
-### Procurement/Einkauf
-- **Gesamt:** 28 Capabilities
-- **Yes:** 0 (0%)
-- **Partial:** 12 (43%)
-- **No:** 16 (57%)
+- [capability-model.md](./capability-model.md)
+- [procurement-capability-model.md](./procurement-capability-model.md)
+- [capability-model-sales.md](./capability-model-sales.md)
+- [capability-model-crm-marketing.md](./capability-model-crm-marketing.md)
 
-### Sales/Order-to-Cash
-- **Gesamt:** 31 Capabilities
-- **Status:** Siehe `gaps-sales.md` fÃ¼r Details
+### GAP-Analysen (Stand 2025)
 
-### CRM & Marketing
-- **Gesamt:** 32 Capabilities
-- **Status:** Siehe `gaps-crm-marketing.md` fÃ¼r Details
+- [executive-summary.md](./executive-summary.md) → ersetzt durch `docs/gap/executive-summary-20261007.md`
+- [gaps.md](./gaps.md), [procurement-gaps.md](./procurement-gaps.md), [gaps-sales.md](./gaps-sales.md), [gaps-crm-marketing.md](./gaps-crm-marketing.md), [gaps-agriculture.md](./gaps-agriculture.md)
+- [finance-fiori-gap-analysis.md](./finance-fiori-gap-analysis.md)
+- [consolidated-overview.md](./consolidated-overview.md), [implementation-roadmap.md](./implementation-roadmap.md)
 
-### Gesamt (Finance + Procurement + Sales + CRM/Marketing)
-- **Gesamt:** 124 Capabilities
-- **Status:** In Progress - Detaillierte Analyse pro Domain verfÃ¼gbar
+### Matrizen (CSV, 2025)
 
----
-
-## ðŸŽ¯ Priorisierung
-
-### P0 - Kritisch (MUSS, PrioritÃ¤t 1)
-- **Finance:** 4 Capabilities
-- **Procurement:** 4 Capabilities
-- **Gesamt:** 8 kritische Gaps
-
-### P1 - Hoch (MUSS, PrioritÃ¤t 2)
-- **Finance:** 7 Capabilities
-- **Procurement:** 4 Capabilities
-- **Gesamt:** 11 wichtige Gaps
-
-### P2 - Mittel (SOLL, PrioritÃ¤t 3)
-- **Finance:** 13 Capabilities
-- **Procurement:** 9 Capabilities
-- **Gesamt:** 22 nice-to-have Gaps
-
-### P3 - Niedrig (KANN, PrioritÃ¤t 4-5)
-- **Finance:** 5 Capabilities
-- **Procurement:** 3 Capabilities
-- **Gesamt:** 8 optionale Gaps
-
----
-
-## ðŸ“ˆ Maturity-Vergleich
-
-| Domain | VALEO | SAP | Oracle | Community ERP |
-|--------|-------|-----|--------|------|
-| **Finance** | 48% | 100% | 100% | 85% |
-| **Procurement** | 35% | 100% | 100% | 80% |
-| **Gesamt** | 42% | 100% | 100% | 83% |
-
----
-
-## ðŸš€ Implementierungs-Roadmap
-
-### Phase 1: Kritische Gaps (P0) - 10-14 Wochen
-**Finance:**
-1. FIBU-AR-03: ZahlungseingÃ¤nge & Matching (2-3 Wochen)
-2. FIBU-AP-02: Eingangsrechnungen (2-3 Wochen)
-3. FIBU-GL-05: Periodensteuerung (2 Wochen)
-4. FIBU-COMP-01: GoBD / Audit Trail UI (1-2 Wochen)
-
-**Procurement:**
-1. PROC-GR-01: Wareneingang (3-4 Wochen)
-2. PROC-IV-02: 2/3-Wege-Abgleich (2-3 Wochen)
-3. PROC-PO-02: PO-Ã„nderungen & Storno (2 Wochen)
-4. PROC-REQ-01: Bedarfsmeldung vervollstÃ¤ndigen (1 Woche)
-
-### Phase 2: Wichtige Gaps (P1) - 8-12 Wochen
-**Finance:** 7 Capabilities
-**Procurement:** 4 Capabilities
-
-### Phase 3: Nice-to-Have (P2-P3) - 25-35 Wochen
-**Finance:** 18 Capabilities
-**Procurement:** 12 Capabilities
-
----
-
-## ðŸ“ NÃ¤chste Schritte
-
-1. âœ… Capability Models erstellt
-2. âœ… GAP-Matrizen erstellt
-3. âœ… Detaillierte GAP-Analysen erstellt
-4. â³ Evidence sammeln (Screenshots, Playwright-Traces, API-Docs)
-5. â³ Implementierungsplan mit Stakeholdern abstimmen
-6. â³ Weitere Domains analysieren (Sales, CRM, Inventory, etc.)
-
----
-
-## ðŸ” Verwendung
-
-### FÃ¼r Entwickler
-- Siehe `gaps.md` oder `procurement-gaps.md` fÃ¼r detaillierte Gap-Beschreibungen
-- Siehe `matrix.csv` fÃ¼r tabellarische Ãœbersicht
-- Jede Capability enthÃ¤lt: Status, Typ, Beschreibung, LÃ¶sung, Owner, Effort
-
-### FÃ¼r Projektmanager
-- Siehe Zusammenfassung oben fÃ¼r Priorisierung
-- Siehe Implementierungs-Roadmap fÃ¼r Planung
-- Siehe Maturity-Vergleich fÃ¼r Benchmarking
-
-### FÃ¼r Stakeholder
-- Siehe Capability Models fÃ¼r Funktionsumfang
-- Siehe GAP-Analysen fÃ¼r LÃ¼cken
-- Siehe Maturity-Vergleich fÃ¼r Standortbestimmung
-
----
-
-## ðŸ“š Referenzen
-
-- **ERP-Referenz:** SAP MM, Oracle Procurement, Community ERP Enterprise Purchase
-- **Compliance:** GoBD, HGB, GMP+, ISO, RED II
-- **Architektur:** MSOA, DDD, Event-Driven
-
----
-
----
-
-## ðŸ“„ Weitere Dokumente
-
-- **[executive-summary.md](./executive-summary.md)** - Executive Summary fÃ¼r Management/Stakeholder â­
-- **[consolidated-overview.md](./consolidated-overview.md)** - Konsolidierte GesamtÃ¼bersicht aller Domains
-- **[implementation-roadmap.md](./implementation-roadmap.md)** - Detaillierte Implementierungs-Roadmap mit Tasks und Sprints
-
----
-
-**Letzte Aktualisierung:** 2025-01-27
-
-
-
+- [matrix.csv](./matrix.csv), [matrix-sales.csv](./matrix-sales.csv), [matrix-crm-marketing.csv](./matrix-crm-marketing.csv), [matrix-agriculture.csv](./matrix-agriculture.csv), [finance-fiori-matrix.csv](./finance-fiori-matrix.csv)

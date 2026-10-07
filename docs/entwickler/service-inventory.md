@@ -102,7 +102,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `document_control_service` | Central document-control exception worklist (Beleg-Kontrolle). |
 | `einkauf_compat_service` | Service layer for compat einkauf domain routes. |
 | `einvoice_generator` | E-Rechnung XRechnung/ZUGFeRD Generator (EN 16931). |
-| `eric_submission_service` | ELSTER ERiC Submission Service für eBilanz-Übertragung. |
 | `esg_footprint_service` | ESG-CO2e-Fussabdruck je Charge (UIX-082) — auditierbarer Berechnungskern. |
 | `etikettendruck_service` | Drucker und Druckauftraege — ein Auftrag, der gespeichert ist. |
 | `eudr_register_service` | EUDR-Register — die gemeinsame Mitte der drei Wege. |

@@ -47,6 +47,7 @@ file_ownership:
   - Eindeutige typisierte Historien, echte Praesente-Route/DTO und isolierter Schema-/HTTP-Vertrag
   - Exakte Finance-Zuordnung payment_run_freigabe und committed Inventar-/Handbuch-Nachzug
 acceptance:
+  - eBilanz-Scheinerfolg und Laufzeit-DDL entfernt, Entwürfe echt tenantgebunden; fehlende XBRL-/ERIC-Fachwege gesperrt, Simulator entfernt, 84 Verträge/neun Gates grün, Baselines nur gesenkt.
   - User-Entscheidungen Lead/PDF integriert: kanonisches Register, echte qualifizierte Opportunity, PostgreSQL-PDF-Inhalte/Version/Download, echte Fehler und bestehende Logistikdeklarationen.
   - Fuenf neue Kalenderquellen zentralisiert, Einwilligungs- und Retention-SQL harmonisiert, Tageswert pro Avis/Loeschlauf; 209 Tests und neun Improvement-Checks gruen, Baseline nur abgesenkt.
   - Acht verdeckte Einkaufs-GET-POST-PUT-Altpfade entfernt; 3974 Vertraege erhalten, 89 Tests gruen, ein ehrlicher Bestelllisten-Skip, Doppelgruppen noch 33.

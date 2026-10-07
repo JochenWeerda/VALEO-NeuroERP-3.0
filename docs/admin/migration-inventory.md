@@ -167,6 +167,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `driver_time_events_20260516` | add driver_time_events table |
 | `dsgvo_loeschantraege_20260917` | Loeschantraege nach Art. 17 DSGVO bekommen ihre Tabelle. |
 | `e7238c2e17a1_merge_inventory_operations_and_` | merge inventory_operations and futtermittel heads |
+| `ebilanz_persist_20261007` | Own the existing eBilanz draft schema; requests never create tables. |
 | `eca81651f8ba_merge_multiple_heads` | Merge multiple heads |
 | `einkauf_3wm_invoice_verification_20260613` | Einkauf 3-Wege-Match: domain_einkauf.invoice_verification Alembic migration. |
 | `einkauf_bestellung_fuehrend_20260918` | L3-Felder und drei Bestellfaelle an domain_einkauf.bestellungen. |

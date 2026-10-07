@@ -133,11 +133,16 @@ class TestUIX053CommandEndpoints:
         assert actions["stornieren"].get("requiresConfirmation") is True
 
     @pytest.mark.parametrize("screen_id,action_key", [
+        ("lager/stock-movement", "stornieren"),
+        ("einkauf/angebot", "bestellen"),
         ("crm/lead", "qualifizieren"),
+        ("einkauf/anlieferavis", "wareneingang"),
+        ("crm/opportunity", "create_activity"),
+        ("agrar/harvest-settlement", "drucken"),
     ])
-    def test_ohne_fachweg_sagt_die_maske_nicht_verfuegbar(self, screen_id: str, action_key: str):
-        # Diese Aktionen waren "aktiviert" und meldeten Erfolg ohne Wirkung
-        # (Befund 07.10.2026). Ohne Fachweg: stubReason, kein Endpunkt.
+    def test_jede_frueher_vorgetaeuschte_aktion_hat_einen_fachweg(self, screen_id: str, action_key: str):
+        # Diese Aktionen meldeten bis 07.10.2026 Erfolg ohne Wirkung, danach waren
+        # sie benannte Luecken. Jetzt hat jede einen echten Fachweg.
         a = self._get_actions(screen_id)[action_key]
-        assert "commandEndpoint" not in a
-        assert a.get("stubReason", "").startswith("Noch kein Fachweg")
+        assert a.get("commandEndpoint", "").startswith("/api/v1/")
+        assert "stubReason" not in a
