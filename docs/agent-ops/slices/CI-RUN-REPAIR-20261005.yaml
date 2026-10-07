@@ -47,6 +47,7 @@ file_ownership:
   - Eindeutige typisierte Historien, echte Praesente-Route/DTO und isolierter Schema-/HTTP-Vertrag
   - Exakte Finance-Zuordnung payment_run_freigabe und committed Inventar-/Handbuch-Nachzug
 acceptance:
+  - Acht verdeckte Einkaufs-GET-POST-PUT-Altpfade entfernt; 3974 Vertraege erhalten, 89 Tests gruen, ein ehrlicher Bestelllisten-Skip, Doppelgruppen noch 33.
   - Acht Logistik-Deklarationsluecken geschlossen, acht historische Ausnahmen entfernt; 791 Backend-/33 Frontend-Vertraege und Handbuch gruen, Fachrestwege fremd erhalten.
   - Auf 79a0ed571 sechs Node-Behavior-Vertraege und Linux-Grype-Trivy-ZAP-Bandit gruen; Security ausschliesslich fuer zwei ungepatchte Node-High-Befunde rot.
   - Vier echte Fachaktionspfade nachgezogen, OpenAPI 3101 Pfade, Inventare/Architektur 935-275-454 komplett; 24 Architekturvertraege gruen, fuenf Handbuchartefakte lesend aktuell.

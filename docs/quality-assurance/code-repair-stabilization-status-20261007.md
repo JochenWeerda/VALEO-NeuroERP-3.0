@@ -18,6 +18,8 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+[Kanonische Einkaufsrouten](einkauf-canonical-route-contracts-20261007.md): acht verdeckte Alt-Handler entfernt, alle 3974 Pfad-/Methodenvertraege erhalten; 89 Tests gruen, ein bestehender leerer Default-Listen-Test ehrlich uebersprungen. Doppelgruppen jetzt 33. Einzigartige historische DELETE-Wege und unechter Bestellimport bleiben offen. Aktuelles Quality auf `b2a63f451`: Frontend/WCAG gruen; Business-Time-Inventur und physischer Tabellenkatalog rot, Node-Audit bekannte zwei High.
+
 [Logistik-Aktionsdeklarationen](logistics-action-declarations-20261007.md): alle
 acht Seitenaktionen mit echten Navigations-/Callback-Wegen im Backend und
 Fallback versehen; acht historische Ausnahmen entfernt. 791 Backendvertraege,
@@ -34,7 +36,7 @@ weiter nachweisen; kein pauschaler Gruenstatus.
 Fachaktionspfade nachgezogen, keine Pfade entfernt; OpenAPI 3101 Pfade, drei
 Inventare und kompletter Architekturindex (935/275/454) aktuell. 24
 Architekturvertraege und fuenf fremde Handbuchartefakte lesend geprueft.
-Die 41 doppelten API-Pfad-/Methodengruppen sind dabei erneut bestaetigt.
+Damals 41 doppelte API-Pfad-/Methodengruppen; mit der Einkaufsbereinigung noch 33 offen.
 
 [NPM-Herstellerfixes](npm-security-releases-20261007.md): zwoelf Paketpins,
 frozen Lockfile auf 36 committed Workspaces und sechs reale Offline-Vertraege
@@ -53,13 +55,12 @@ Der [KIM-Navigations-Smoke](kim-navigation-smoke-20261007.md) ist lokal reparier
 gueltige isolierte Kunden-Lesefixture statt nicht existierendem PERF-K1;
 native Identitaetsanzeige/Registerwahl und fehlender Kunde separat geprueft,
 zwei Chromium-Vertraege gruen. Kein Produkt- oder Persistenz-Scheinerfolg;
-frischer GitHub-Lauf bleibt erforderlich.
+GitHub-Smoke auf `b2a63f451` ebenfalls gruen.
 
 Weitere Teilabnahme: [CPython-Herstellerfix](cpython-upstream-security-20261007.md)
 hebt das Backend-Image auf echtes 3.13.16, entfernt drei ueberholte Backports und
 erhaelt den nachweislich notwendigen POP3-Schutz. Fuenf Runtime-Sicherheitstests
-bestanden; neuer Tarfile-Vertrag auf 3.13.15 bewusst rot. Linux-/Grype-Abnahme
-und Node-Audit bleiben offen.
+bestanden; neuer Tarfile-Vertrag auf 3.13.15 bewusst rot. Linux-/Grype-Abnahme auf `79a0ed571` gruen; Node-Audit bleibt offen.
 
 Teilabnahme dieser Abarbeitung: [Native Vertragsreparaturen](native-mask-contract-repairs-20261007.md)
 schliessen sechs der elf Backend-Fehler auf `3e7142c48` und beide Frontendbefunde
@@ -82,7 +83,7 @@ Dies schliesst andere rote Gates nicht automatisch.
 | P1 | Frische Backend-Vollsuite abnehmen | Die historischen elf Fehler sind lokal durch 813 plus 71 gezielte Vertraege abgedeckt. [PostgreSQL-Lauf auf c466af7de](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37644389765) gruen; dies ersetzt die weiterhin ausstehende komplette Pipeline-Abnahme nicht. |
 | P1 | Frisches Frontend-Quality Gate abnehmen | Schulungen-Delegation und Titelduplikate lokal mit 38 Tests plus TypeScript geschlossen. [Quality auf c466af7de](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37644390353) wegen Folgepush abgebrochen; kein neuer erfolgreicher Vollnachweis. Fremde Renderer-WIP erhalten. |
 | P1 | Frisches CI-Schema und physischer Tabellenkatalog harmonisieren | Lokal 659 Tabellen geprueft; kein Ersatz fuer frische CI-Abnahme. Generator, Test und Quality-Workflow sind fremde WIP. Kein Reset oder neue Testdatenbank. |
-| P1 | 41 doppelte API-Pfad-/Methodenregistrierungen beseitigen | Letzter main.app-/OpenAPI-Abgleich im Personal-Rollenschutz: ausgefuehrten Handler, DTO und Verbraucher gemeinsam kanonisieren, keine pauschale Compat-Loeschung. |
+| P1 | 33 doppelte API-Pfad-/Methodenregistrierungen beseitigen | Letzter main.app-/OpenAPI-Abgleich im Personal-Rollenschutz: ausgefuehrten Handler, DTO und Verbraucher gemeinsam kanonisieren, keine pauschale Compat-Loeschung. |
 | P1 | Finanzbuchungen durchgehend zentral und atomar | [Open Gaps](../project-context/open-gaps-and-known-issues.md): echter Kassenabschluss, Consumer der commit-freien Journaltransaktion, weitere Rohschreiber/Periodensperren, Anlage-/Schema-/Bewertungskanonisierung und Hauptbuch-/Bankintegrationsnachweise. `L3-JOURNAL-SOURCE-20260910` hat fremden aktiven Besitz. |
 | P1 | Futter-Schreibwege und Modelle harmonisieren | Listen-/Loeschschutz geschlossen; weitere Anlage-/Aenderungs-/Rezepturwege, ArticleModel-Projektion gegen FutterStamm/Einzel-/Mischfutter und Frontend-DTO-Verbraucher bleiben getrennte Arbeit. |
 | P1 | Bewerbungsprozess vollstaendig und nachvollziehbar | 16 Rollenwege geschlossen; Selbstwiderruf fuer Bewerber, UI-Rollensteuerung und authentifizierter Akteur statt frei gelieferter `durchgefuehrt_durch`/`erfasst_durch` offen. |
