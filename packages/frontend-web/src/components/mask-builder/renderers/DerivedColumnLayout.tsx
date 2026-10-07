@@ -8,7 +8,7 @@ import { ColumnLayoutRenderer, isNarrowColumnSplit, type NavigationColumn } from
 import { FastFormRenderer } from './FastFormRenderer'
 import { FastTabRenderer } from './FastTabRenderer'
 import { FastTableRenderer } from './FastTableRenderer'
-import { layoutClasses } from './render-utils'
+import { layoutClasses, repeatsCaption } from './render-utils'
 import { rowIdentity } from './row-identity'
 import { SelectedRecordPanel } from './SelectedRecordPanel'
 
@@ -121,6 +121,7 @@ export function DerivedColumnLayout({
       <FastTableRenderer
         key={tableKey}
         table={tablePlan}
+        suppressHeading={repeatsCaption(tablePlan.label, plan.shell.title)}
         rows={tables[tableKey] ?? []}
         page={tableQueryStates?.[tableKey]?.page}
         sort={tableQueryStates?.[tableKey]?.sort}

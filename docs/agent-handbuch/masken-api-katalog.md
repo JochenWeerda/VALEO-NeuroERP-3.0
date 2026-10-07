@@ -63,7 +63,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
-| `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | mittel | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
+| `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | hoch | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
 | `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
 | `fuhrpark/rechnungen` | Fuhrpark-Rechnungen | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/rechnungen/agent-contract` |
 | `fuhrpark/terminarten` | Terminarten | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/terminarten/agent-contract` |
@@ -2474,7 +2474,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `drucker` | Drucker einrichten | safe | nein | `Hinterlegt den Drucker an der Fahrzeugakte.` |
 | `drucken` | Drucken | safe | nein | `Druckt die Fahrzeugakte.` |
 | `unfall` | Unfall-Anzeige | moderate | nein | `Erfasst eine Unfallanzeige zum Fahrzeug.` |
-| `loeschen` | Fahrzeug löschen | destructive | nein | `Loescht die Fahrzeugakte nach Bestaetigung.` |
+| `loeschen` | Fahrzeug löschen | high | nein | `Loescht die Fahrzeugakte nach Bestaetigung.` |
 
 ---
 

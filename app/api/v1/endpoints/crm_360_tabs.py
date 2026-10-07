@@ -26,6 +26,7 @@ from app.api.v1.schemas.crm_customer_tab import (
     CustomerOffersTabOut,
     CustomerOrdersTabOut,
     CustomerPricesTabOut,
+    CustomerGiftsTabOut,
     CustomerTasksTabOut,
 )
 from app.core.database import get_db
@@ -369,6 +370,31 @@ async def get_customer_tab_preise(
         customer_id=customer_id, tab_key="preise", tenant_id=tenant_id,
         page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
         filter_plan=filter_plan, filter_plan_legacy=None, db=db,
+    )
+
+
+@router.get(
+    "/{customer_id}/tabs/praesente",
+    response_model=CustomerGiftsTabOut,
+    tags=["crm", "customers", "screen-summary"],
+    summary="Kunde: Praesente",
+)
+async def get_customer_tab_praesente(
+    customer_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=50),
+    q: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None),
+    filter_plan_legacy: Optional[str] = Query(None, alias="filterPlan", include_in_schema=False),
+    db: Session = Depends(get_db),
+):
+    return await get_customer_tab_data(
+        customer_id=customer_id, tab_key="praesente", tenant_id=tenant_id,
+        page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir,
+        filter_plan=filter_plan, filter_plan_legacy=filter_plan_legacy, db=db,
     )
 
 

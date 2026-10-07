@@ -3081,7 +3081,7 @@
       "agent_contract_url": "/api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract",
       "screen_definition_url": "/api/v1/masks/fuhrpark/fahrzeug-stamm/screen-definition",
       "readiness_url": "/api/v1/masks/fuhrpark/fahrzeug-stamm/readiness",
-      "risk_summary": "medium",
+      "risk_summary": "high",
       "actions": [
         {
           "key": "speichern",
@@ -3141,7 +3141,7 @@
         {
           "key": "loeschen",
           "label": "Fahrzeug löschen",
-          "dangerLevel": "destructive",
+          "dangerLevel": "high",
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": null,

@@ -108,6 +108,16 @@ Maske `listDetail` oder `listDetailDetail` ausdrücklich setzt. Der
 `UniversalMaskRenderer` leitet die Spalten aus dem Plan ab — ohne
 Einzel-JSX je Maske.
 
+Vertragsabnahme 2026-10-07: Die Backend-Inventur respektiert ausdrueckliches
+`single` ebenso wie der Compiler; konzentrierte Erfassungen werden nicht durch
+ein widersprechendes Testdefault zu `listDetail`. Fahrzeug-Loeschen verwendet
+die gueltige Stufe `high` mit Bestaetigung in Python und TypeScript.
+Eine einzige Navigationsspalte braucht keine Ansichtenleiste; Tabellen mit
+demselben Titel wie der Seitenkopf unterdruecken ihre wiederholte Ueberschrift
+zentral in FastTabRenderer und DerivedColumnLayout. Mehrspaltennavigation bleibt
+erhalten. Typisierte benannte Historien werden wie Seiten-`items` geprueft;
+mehrdeutige oder untypisierte Zeilen bleiben ein blockierender Feldvertragsbefund.
+
 Fach-Admins und Agenten erzeugen Entwürfe im Masken-Studio
 (`/admin/screen-studio`). Ausgabe ist eine normale ScreenDefinition unter
 `tenant/<slug>`; Validate und Publish nutzen denselben Gate-Pfad. Nach

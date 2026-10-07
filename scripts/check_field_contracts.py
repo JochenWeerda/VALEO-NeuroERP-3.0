@@ -22,7 +22,8 @@ groessere Haelfte (305 gegen 204) und haben dasselbe Versagen: Eine Spalte mit
 falschem Schluessel bleibt leer, und leer sieht aus wie „nichts erfasst".
 
 Eine Zeilenform ist lesbar, wenn die Antwort eine Liste typisierter Zeilen ist
-(``list[ZeileOut]``) oder eine Seiten-Huelle mit typisiertem ``items``. Wo die
+(``list[ZeileOut]``), eine Seiten-Huelle mit typisiertem ``items`` oder eine
+Huelle mit genau einer benannten typisierten Liste. Wo die
 Zeile nicht deklariert ist, zaehlt die Quelle als **nicht pruefbar** — dieselbe
 Ratsche wie beim Kopf.
 
@@ -126,8 +127,8 @@ def _eigenschaften(spec: dict, operation: dict | None) -> set[str] | None:
 def _zeilenform(spec: dict, operation: dict | None) -> set[str] | None:
     """Die Feldnamen **einer Zeile** — oder None, wenn sie nicht deklariert ist.
 
-    Zwei Formen kommen vor: eine Liste typisierter Zeilen und eine Seiten-Huelle
-    mit typisiertem ``items``. Alles andere sagt ueber die Zeile nichts.
+    Typisierte Arrays, Seiten-``items`` und eindeutige benannte Historien.
+    Mehrdeutige oder untypisierte Listen sagen ueber die Zeile nichts.
     """
     if not operation:
         return None
@@ -140,7 +141,19 @@ def _zeilenform(spec: dict, operation: dict | None) -> set[str] | None:
     if not schema.get("$ref"):
         return None
     huelle = _komponente(spec, schema)
-    items = _komponente(spec, (huelle.get("properties") or {}).get("items") or {})
+    properties = huelle.get("properties") or {}
+    # Named typed histories (e.g. consent.vorgaenge) also declare their rows.
+    # Never guess between multiple lists or treat an untyped list as a contract.
+    candidates = [
+        _komponente(spec, value) for value in properties.values()
+        if _komponente(spec, value).get("type") == "array"
+    ]
+    if "items" in properties:
+        items = _komponente(spec, properties["items"])
+    elif len(candidates) == 1:
+        items = candidates[0]
+    else:
+        return None
     if items.get("type") == "array" or "items" in items:
         return _objektfelder(_komponente(spec, items.get("items") or {}))
     if items.get("properties"):

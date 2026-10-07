@@ -316,6 +316,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
 | `mail_workspace_20260821` | Role based ERP mail workspace. |
+| `mandant_finanz_crm_20261007` | Ersteller eines Zahlungslaufs, Opportunity an der Aktivitaet. |
 | `mask_action_audit_20260921` | Persist the audit contract already used by native mask commands. |
 | `mask_frontend_bridges_20260917` | Tabellen fuer Masken-Bruecken, die bisher ins Leere zeigten. |
 | `mcp_tool_executions_20260921` | Transactional replay journal for authenticated ERP tool calls. |

@@ -75,14 +75,14 @@ export function ColumnLayoutRenderer({ pattern, columns, source }: {
     : visible.length === 2 ? 'minmax(280px, 1fr) minmax(400px, 1.6fr)' : 'minmax(0, 1fr)'
   return (
     <div ref={root} data-column-navigation={pattern} data-column-source={source} data-visible-columns={visible.length}>
-      <nav aria-label="Ansichten" className="mb-2 flex flex-wrap items-center gap-2">
+      {columns.length > 1 && <nav aria-label="Ansichten" className="mb-2 flex flex-wrap items-center gap-2">
         {active > 0 && <Button type="button" variant="outline" onClick={() => setActiveKey(columns[active - 1].key)} className="min-h-touch">Zurück zu {columns[active - 1].title}</Button>}
         {columns.map((column, index) => <Button key={column.key} type="button"
           variant={index === active ? 'secondary' : 'ghost'} aria-current={index === active ? 'page' : undefined}
           aria-controls={`${id}-${index}`} onClick={() => setActiveKey(column.key)} className="min-h-touch">{column.title}</Button>)}
         {columns.length > 1 && <Button type="button" variant="outline" aria-pressed={fullScreen}
           onClick={() => setFullScreen(value => !value)} className="min-h-touch">{fullScreen ? 'Geteilte Ansicht' : 'Vollansicht'}</Button>}
-      </nav>
+      </nav>}
       <div className="grid gap-3" style={{ gridTemplateColumns: grid }}>
         {columns.map((column, index) => <section key={column.key} id={`${id}-${index}`}
           aria-label={column.title} hidden={!visible.includes(column)}

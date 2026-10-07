@@ -26,7 +26,9 @@ def test_every_native_screen_declares_column_navigation() -> None:
         if floorplan in FORBIDDEN:
             assert nav == "single", screen_id
         if floorplan in LIST_PLANS and _has_tables(screen):
-            assert nav == "listDetail", (screen_id, nav)
+            # An explicit single-column capture/broad table overrides the default.
+            declared = SCREEN_DEFINITION_BUILDERS[screen_id]().get("layout", {}).get("columnNavigation")
+            assert nav == (declared or "listDetail"), (screen_id, nav)
 
 
 def test_futtermittel_analysen_is_list_detail_worklist() -> None:

@@ -1775,7 +1775,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
                 "label": "Fahrzeug löschen",
                 "command": "fuhrpark.deleteFahrzeug",
                 "kind": "secondary",
-                "dangerLevel": "destructive",
+                "dangerLevel": "high",
                 "zone": "footer",
                 "requiresConfirmation": True,
                 "stubReason": "Loescht die Fahrzeugakte nach Bestaetigung.",

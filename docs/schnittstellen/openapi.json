@@ -41850,6 +41850,98 @@
         "title": "CustomerExtensionsOut",
         "type": "object"
       },
+      "CustomerGiftRowOut": {
+        "description": "Die vorhandenen SQL-Spalten des Praesente-Verzeichnisses.",
+        "properties": {
+          "gift_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gift Date"
+          },
+          "gift_name": {
+            "default": "",
+            "title": "Gift Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "occasion": {
+            "default": "",
+            "title": "Occasion",
+            "type": "string"
+          },
+          "quantity": {
+            "default": 0.0,
+            "title": "Quantity",
+            "type": "number"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "CustomerGiftRowOut",
+        "type": "object"
+      },
+      "CustomerGiftsTabOut": {
+        "additionalProperties": true,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerGiftRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "default": 25,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "tab_key": {
+            "title": "Tab Key",
+            "type": "string"
+          },
+          "table_key": {
+            "title": "Table Key",
+            "type": "string"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tab_key",
+          "table_key"
+        ],
+        "title": "CustomerGiftsTabOut",
+        "type": "object"
+      },
       "CustomerHistoryTabOut": {
         "additionalProperties": true,
         "properties": {
@@ -114837,11 +114929,6 @@
             "description": "Geplantes Ausführungsdatum",
             "format": "date",
             "title": "Execution Date",
-            "type": "string"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
             "type": "string"
           }
         },
@@ -209618,80 +209705,6 @@
         ]
       }
     },
-    "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken": {
-      "post": {
-        "operationId": "action_harvest_settlement_drucken_api_v1_agrar_harvest_settlements__entity_id__actions_drucken_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "title": "Entity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MaskActionResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Ernte-Abrechnung drucken (SPEC-P1-04)",
-        "tags": [
-          "mask-actions"
-        ]
-      }
-    },
     "/api/v1/agrar/inventory/low-stock": {
       "get": {
         "description": "AGR-INV-04: Artikel mit Bestand unter/am Schwellwert (Saatgut, Dünger, PSM).",
@@ -267820,6 +267833,162 @@
         ]
       }
     },
+    "/api/v1/crm/customers/{customer_id}/tabs/praesente": {
+      "get": {
+        "operationId": "get_customer_tab_praesente_api_v1_crm_customers__customer_id__tabs_praesente_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "title": "Customer Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Filter Plan"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerGiftsTabOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde: Praesente",
+        "tags": [
+          "crm",
+          "customers",
+          "360",
+          "crm",
+          "customers",
+          "screen-summary"
+        ]
+      }
+    },
     "/api/v1/crm/customers/{customer_id}/tabs/preise": {
       "get": {
         "description": "Preisvereinbarungen des Partners.",
@@ -273570,80 +273739,6 @@
         ]
       }
     },
-    "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": {
-      "post": {
-        "operationId": "action_crm_qualifizieren_api_v1_crm_leads__entity_id__actions_qualifizieren_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "title": "Entity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MaskActionResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Lead als Opportunity qualifizieren (SPEC-P1-04)",
-        "tags": [
-          "mask-actions"
-        ]
-      }
-    },
     "/api/v1/crm/leads/{lead_id}": {
       "delete": {
         "description": "Delete lead",
@@ -274475,80 +274570,6 @@
         "tags": [
           "CRM",
           "CRM"
-        ]
-      }
-    },
-    "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": {
-      "post": {
-        "operationId": "action_opportunity_create_activity_api_v1_crm_opportunities__entity_id__actions_create_activity_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "title": "Entity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MaskActionResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "CRM-Aktivität für Opportunity anlegen (SPEC-P1-04)",
-        "tags": [
-          "mask-actions"
         ]
       }
     },
@@ -286327,80 +286348,6 @@
         ]
       }
     },
-    "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen": {
-      "post": {
-        "operationId": "action_einkauf_bestellen_api_v1_einkauf_bestellungen__entity_id__actions_bestellen_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "title": "Entity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MaskActionResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Bestellung aus Angebot erteilen (SPEC-P1-04)",
-        "tags": [
-          "mask-actions"
-        ]
-      }
-    },
     "/api/v1/einkauf/bestellvorschlaege": {
       "get": {
         "operationId": "list_bestellvorschlaege_api_v1_einkauf_bestellvorschlaege_get",
@@ -290508,83 +290455,6 @@
         "tags": [
           "Einkauf",
           "Einkauf"
-        ]
-      }
-    },
-    "/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung": {
-      "post": {
-        "operationId": "action_neue_bestellung_api_v1_einkauf_lieferanten__entity_id__actions_neue_bestellung_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "title": "Entity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Bestellung anlegen (SPEC-P1-04)",
-        "tags": [
-          "einkauf",
-          "kpi",
-          "einkauf",
-          "kpi"
         ]
       }
     },
@@ -301513,7 +301383,7 @@
     },
     "/api/v1/finance/ap/approval-workflow/approve": {
       "post": {
-        "description": "Approve or reject an AP invoice.",
+        "description": "Approve or reject an AP invoice.\n\nFreigeber ist der **angemeldete Nutzer**. Bis 07.10.2026 zaehlte der Workflow\nverschiedene Freigeber ueber ``approved_by`` aus dem Rumpf — eine Person konnte\neine Zwei-Stufen-Freigabe mit zwei Namen erfuellen.",
         "operationId": "approve_invoice_api_v1_finance_ap_approval_workflow_approve_post",
         "parameters": [
           {
@@ -301936,6 +301806,22 @@
               ],
               "title": "Supplier Id"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -301982,6 +301868,24 @@
       "post": {
         "description": "Erstellt eine neue Eingangsrechnung (Kreditoren).",
         "operationId": "create_ap_invoice_api_v1_finance_ap_invoices__post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -302032,6 +301936,7 @@
     },
     "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben": {
       "post": {
+        "description": "Delegiert an den Freigabeweg. Bis zum 07.10.2026 meldete diese Aktion Erfolg,\nohne die Rechnung anzufassen.",
         "operationId": "action_freigeben_api_v1_finance_ap_invoices__entity_id__actions_freigeben_post",
         "parameters": [
           {
@@ -302122,6 +302027,22 @@
               "title": "Invoice Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -302173,6 +302094,22 @@
               "title": "Invoice Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -302223,6 +302160,22 @@
             "schema": {
               "title": "Invoice Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -302276,7 +302229,7 @@
     },
     "/api/v1/finance/ap/invoices/{invoice_id}/approve": {
       "post": {
-        "description": "Genehmigt eine Eingangsrechnung (für Freigabeworkflow).",
+        "description": "Genehmigt eine Eingangsrechnung (für Freigabeworkflow).\n\nFreigeber ist der angemeldete Nutzer; ``approved_by`` wird nicht mehr uebernommen.",
         "operationId": "approve_ap_invoice_api_v1_finance_ap_invoices__invoice_id__approve_post",
         "parameters": [
           {
@@ -302289,12 +302242,37 @@
             }
           },
           {
+            "description": "Ignoriert — Freigeber ist der angemeldete Nutzer",
             "in": "query",
             "name": "approved_by",
-            "required": true,
+            "required": false,
             "schema": {
-              "title": "Approved By",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Ignoriert — Freigeber ist der angemeldete Nutzer",
+              "title": "Approved By"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -302357,6 +302335,22 @@
             "schema": {
               "title": "Posted By",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -318414,15 +318408,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -318472,15 +318470,19 @@
         "operationId": "create_payment_run_api_v1_finance_payment_runs_post",
         "parameters": [
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -318536,6 +318538,24 @@
       "post": {
         "description": "Zahlungslauf planen: Vorschlag aus offenen Posten (Kreditoren) erzeugen.\nLiefert eine Liste vorgeschlagener Zahlungen zur Auswahl für einen Zahlungslauf.",
         "operationId": "plan_payment_run_api_v1_finance_payment_runs_plan_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -318673,15 +318693,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -318725,7 +318749,7 @@
     },
     "/api/v1/finance/payment-runs/{run_id}/approve": {
       "post": {
-        "description": "Approve a payment run.",
+        "description": "Gibt frei. Freigeber = angemeldeter Nutzer (nicht ``approved_by``); Vier-Augen-Prinzip.",
         "operationId": "approve_payment_run_api_v1_finance_payment_runs__run_id__approve_post",
         "parameters": [
           {
@@ -318738,15 +318762,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -318754,11 +318782,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApprovePaymentRunRequest"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ApprovePaymentRunRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Request"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -318813,15 +318848,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -318888,15 +318927,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -318963,15 +319006,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -349151,80 +349198,6 @@
         ]
       }
     },
-    "/api/v1/lager/artikel/{entity_id}/actions/wareneingang": {
-      "post": {
-        "operationId": "action_lager_wareneingang_api_v1_lager_artikel__entity_id__actions_wareneingang_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "title": "Entity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MaskActionResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Wareneingang buchen (SPEC-P1-04)",
-        "tags": [
-          "mask-actions"
-        ]
-      }
-    },
     "/api/v1/lager/auslagerung": {
       "post": {
         "description": "Auslagerung buchen â€” StockMovement mit Strategie (FIFO/FEFO/Manuell).",
@@ -351467,80 +351440,6 @@
           "lager",
           "silo",
           "twin"
-        ]
-      }
-    },
-    "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren": {
-      "post": {
-        "operationId": "action_lager_stornieren_api_v1_lager_stock_movements__entity_id__actions_stornieren_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "title": "Entity Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MaskActionResult"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Lagerbewegung stornieren (SPEC-P1-04)",
-        "tags": [
-          "mask-actions"
         ]
       }
     },

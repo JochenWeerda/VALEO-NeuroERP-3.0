@@ -227,3 +227,18 @@ class CustomerPriceRowOut(BaseSchema):
 
 class CustomerPricesTabOut(CustomerTabOut):
     items: list[CustomerPriceRowOut] = Field(default_factory=list)
+
+
+class CustomerGiftRowOut(BaseSchema):
+    """Die vorhandenen SQL-Spalten des Praesente-Verzeichnisses."""
+
+    id: str
+    year: Optional[int] = None
+    gift_date: Optional[str] = None
+    occasion: str = ""
+    gift_name: str = ""
+    quantity: float = 0.0
+
+
+class CustomerGiftsTabOut(CustomerTabOut):
+    items: list[CustomerGiftRowOut] = Field(default_factory=list)
