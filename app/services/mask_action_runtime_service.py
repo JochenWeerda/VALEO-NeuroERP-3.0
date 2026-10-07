@@ -282,6 +282,14 @@ async def run_delegated_mask_action(
             validationErrors=[{"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}],
         )
 
+    # Eine fehlende Begruendung ist ein Formfehler der Anfrage — vor jeder Datenbank.
+    if mode == "execute" and require_audit_reason and not (audit_reason or "").strip():
+        return MaskActionResult(
+            actionKey=action_key, mode=mode, success=False,
+            error="auditReason ist für diese Aktion erforderlich.",
+            validationErrors=[{"field": "_auditReason", "message": "Pflichtfeld", "severity": "blocking"}],
+        )
+
     try:
         fehler = await check_fn(db, payload, entity_id, tenant_id)
     except Exception as exc:  # noqa: BLE001 — Pruefung als Antwort, nicht als 500
@@ -304,13 +312,6 @@ async def run_delegated_mask_action(
         return MaskActionResult(
             actionKey=action_key, mode=mode, success=False,
             error=fehler[0]["message"], validationErrors=fehler,
-        )
-
-    if require_audit_reason and not (audit_reason or "").strip():
-        return MaskActionResult(
-            actionKey=action_key, mode=mode, success=False,
-            error="auditReason ist für diese Aktion erforderlich.",
-            validationErrors=[{"field": "_auditReason", "message": "Pflichtfeld", "severity": "blocking"}],
         )
 
     try:

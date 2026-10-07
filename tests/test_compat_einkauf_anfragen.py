@@ -20,7 +20,7 @@ def test_get_einkauf_anfrage_returns_contract_payload(monkeypatch):
     monkeypatch.setattr(
         compat,
         "_load_einkauf_anfrage",
-        lambda db, anfrage_id: {
+        lambda db, anfrage_id, tenant_id: {
             "id": anfrage_id,
             "anfrageNummer": "BANF-2026-001",
             "typ": "BANF",
@@ -49,7 +49,7 @@ def test_get_einkauf_anfrage_returns_contract_payload(monkeypatch):
 
 def test_get_einkauf_anfrage_returns_404_when_unknown(monkeypatch):
     _disable_dev_token(monkeypatch)
-    monkeypatch.setattr(compat, "_load_einkauf_anfrage", lambda db, anfrage_id: None)
+    monkeypatch.setattr(compat, "_load_einkauf_anfrage", lambda db, anfrage_id, tenant_id: None)
 
     response = client.get(
         "/api/v1/einkauf/anfragen/unbekannt",

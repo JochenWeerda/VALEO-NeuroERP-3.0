@@ -40,7 +40,7 @@ class PurchaseOrderService:
         for d in docs:
             if str(d.get("id")) == po_id or str(d.get("purchaseOrderNumber")) == po_id:
                 return d
-        raise EntityNotFoundError(f"Purchase order {po_id} not found")
+        raise EntityNotFoundError("Purchase order", po_id)
 
     # ── List / Get ──────────────────────────────────────────────────────────────
 
@@ -85,7 +85,8 @@ class PurchaseOrderService:
 
     # ── Create ──────────────────────────────────────────────────────────────────
 
-    async def create_purchase_order(self, payload: dict) -> dict:
+    async def create_purchase_order(self, payload: dict, *, commit: bool = True) -> dict:
+        # commit=False: der Aufrufer schliesst die Einheit (z. B. Angebot -> Bestellung + Status).
         now = now_iso()
         po_number = payload.get("purchaseOrderNumber") or (
             f"PO-{now[:10].replace('-', '')}-{str(uuid4())[:6].upper()}"
@@ -135,7 +136,7 @@ class PurchaseOrderService:
             ],
         }
         repo = doc_repo(self.db)
-        repo.save("purchase_order", po_number, doc)
+        repo.save("purchase_order", po_number, doc, commit=commit)
         await enqueue_event(
             self.db,
             event_type="purchase_order.created",
@@ -149,8 +150,9 @@ class PurchaseOrderService:
             },
             tenant_id=self.tenant_id,
         )
-        self._invalidate()
-        self.db.commit()
+        if commit:
+            self._invalidate()
+            self.db.commit()
         return doc
 
     # ── Patch ───────────────────────────────────────────────────────────────────

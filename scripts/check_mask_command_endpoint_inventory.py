@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
-"""SPEC-P1-04 — Inventur: keine stubReason auf nativen ScreenDefinitions.
+"""SPEC-P1-04 — Inventur: keine Aktion einer nativen Maske ohne Weg.
 
-Prüft alle ScreenDefinitions mit adapter.temporary=False.
+Prüft alle ScreenDefinitions mit adapter.temporary=False. Eine Aktion hat einen Weg,
+wenn sie einen ``commandEndpoint``, einen gueltigen ``inputFlow``, eine
+``navigationRoute`` oder ein ``command`` hat (Capture-Masken: die Seite verdrahtet den
+Befehl; ihr ``stubReason`` ist dort Beschreibung, kein Stub).
+
+**Bekannte Luecken** (``stubReason`` ohne jeden Weg) sind nur aus ``BEKANNTE_LUECKEN``
+erlaubt — die Liste darf nur schrumpfen. Bis 07.10.2026 verbot dieses Gate jeden
+``stubReason``; das hat Endpunkte erzwungen, die ``success: true`` meldeten, ohne etwas
+zu tun (docs/quality-assurance/mask-aktionen-wirkung-20261007.md).
+
 Exit 0 = OK, Exit 1 = Verstöße.
 """
 from __future__ import annotations
@@ -13,6 +22,30 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition  # noqa: E402
+
+
+#: Ehrliche Luecken: kein Fachweg oder keine Eingabe in der Maske. Nur schrumpfen.
+BEKANNTE_LUECKEN = {
+    "agrar/harvest-settlement/drucken",
+    "crm/lead/qualifizieren",
+    "crm/opportunity/create_activity",
+    "einkauf/anlieferavis/wareneingang",
+}
+
+
+#: Vorbestehend: Die Seite fuehrt diese Aktionen ueber ihren Schluessel aus
+#: (``if key === ...``), die SD deklariert aber kein ``command``. Keine Luecke im
+#: Fachweg, eine in der Deklaration. Nur schrumpfen (``command`` nachtragen).
+SEITENAKTIONEN_OHNE_BEFEHL = {
+    "logistik/frachtbrief/verladung",
+    "logistik/frachttabellen/anlegen",
+    "logistik/frachttabellen/position",
+    "logistik/tour-fracht-arbeitsraum/fracht",
+    "logistik/tour-fracht-arbeitsraum/probe",
+    "logistik/tour-fracht-arbeitsraum/tabellen",
+    "logistik/tour-fracht-arbeitsraum/touren",
+    "logistik/verladung/neu",
+}
 
 
 def valid_input_flow(action: dict) -> bool:
@@ -40,8 +73,15 @@ def main() -> int:
 
         for action in sd.get("actions", []):
             key = action.get("key", "?")
-            if action.get("stubReason"):
-                violations.append(f"{screen_id}/{key}: stubReason={action['stubReason']!r}")
+            hat_weg = bool(
+                action.get("commandEndpoint") or action.get("command")
+                or action.get("navigationRoute") or valid_input_flow(action)
+            )
+            erlaubt = BEKANNTE_LUECKEN | SEITENAKTIONEN_OHNE_BEFEHL
+            if action.get("stubReason") and not hat_weg and f"{screen_id}/{key}" not in erlaubt:
+                violations.append(f"{screen_id}/{key}: neue Luecke ohne Weg, stubReason={action['stubReason']!r}")
+            if f"{screen_id}/{key}" in erlaubt and hat_weg:
+                violations.append(f"{screen_id}/{key}: hat jetzt einen Weg — aus der Ausnahmeliste streichen")
 
             endpoint = action.get("commandEndpoint")
             if action.get("inputFlow") and not valid_input_flow(action):
@@ -69,7 +109,8 @@ def main() -> int:
         1 for sid in SCREEN_DEFINITION_BUILDERS
         if not (get_screen_definition(sid) or {}).get("adapter", {}).get("temporary", True)
     )
-    print(f"Mask commandEndpoint inventory OK ({native_count} native ScreenDefinitions, 0 stubReason).")
+    print(f"Mask commandEndpoint inventory OK ({native_count} native ScreenDefinitions, "
+          f"{len(BEKANNTE_LUECKEN)} bekannte Luecken).")
     return 0
 
 

@@ -44,7 +44,7 @@ class PortalCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("portal_order", order_id)
         if doc is None:
-            raise EntityNotFoundError(f"Portal order {order_id} not found")
+            raise EntityNotFoundError("Portal order", order_id)
         return doc
 
     async def create_order(self, payload: dict) -> dict:
@@ -60,7 +60,7 @@ class PortalCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("portal_order", order_id)
         if doc is None:
-            raise EntityNotFoundError(f"Portal order {order_id} not found")
+            raise EntityNotFoundError("Portal order", order_id)
         doc = {**doc, **payload, "updated_at": now_iso()}
         repo.save("portal_order", order_id, doc)
         return doc
@@ -69,7 +69,7 @@ class PortalCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("portal_order", order_id)
         if doc is None:
-            raise EntityNotFoundError(f"Portal order {order_id} not found")
+            raise EntityNotFoundError("Portal order", order_id)
         if doc.get("status") in ("STORNIERT", "ABGESCHLOSSEN"):
             from app.core.exceptions import ConflictError
             raise ConflictError("Order cannot be cancelled in current status")
@@ -91,7 +91,7 @@ class PortalCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("portal_product", product_id)
         if doc is None:
-            raise EntityNotFoundError(f"Product {product_id} not found")
+            raise EntityNotFoundError("Product", product_id)
         return doc
 
     # ── Contracts ─────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ class PortalCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("portal_contract", contract_id)
         if doc is None:
-            raise EntityNotFoundError(f"Contract {contract_id} not found")
+            raise EntityNotFoundError("Contract", contract_id)
         return doc
 
     # ── Invoices ──────────────────────────────────────────────────────────────
@@ -115,7 +115,7 @@ class PortalCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("portal_invoice", invoice_id)
         if doc is None:
-            raise EntityNotFoundError(f"Invoice {invoice_id} not found")
+            raise EntityNotFoundError("Invoice", invoice_id)
         return doc
 
     # ── Notifications ─────────────────────────────────────────────────────────
@@ -127,7 +127,7 @@ class PortalCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("portal_notification", notification_id)
         if doc is None:
-            raise EntityNotFoundError(f"Notification {notification_id} not found")
+            raise EntityNotFoundError("Notification", notification_id)
         doc["read"] = True
         doc["read_at"] = now_iso()
         repo.save("portal_notification", notification_id, doc)

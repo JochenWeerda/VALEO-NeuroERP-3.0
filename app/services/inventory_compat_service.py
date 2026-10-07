@@ -86,7 +86,7 @@ class InventoryCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("inventur", inventur_id)
         if doc is None:
-            raise EntityNotFoundError(f"Inventur {inventur_id} not found")
+            raise EntityNotFoundError("Inventur", inventur_id)
         return doc
 
     # ── InventoryCount (DB-backed) ────────────────────────────────────────────
@@ -122,7 +122,7 @@ class InventoryCompatService:
     def delete_inventur_count(self, item_id: str) -> None:
         row = self.db.query(InventoryCount).filter(InventoryCount.id == item_id).first()
         if not row:
-            raise EntityNotFoundError(f"Inventur-Eintrag {item_id} nicht gefunden")
+            raise EntityNotFoundError("Inventur-Eintrag", item_id)
         self.db.delete(row)
         self.db.commit()
 
@@ -201,7 +201,7 @@ class InventoryCompatService:
             (Charge.id == lot_id) | (Charge.chargen_id == lot_id),
         ).first()
         if not lot:
-            raise EntityNotFoundError(f"Lot {lot_id} not found")
+            raise EntityNotFoundError("Lot", lot_id)
         return {
             "id": lot.id,
             "lotId": lot.chargen_id,
@@ -222,7 +222,7 @@ class InventoryCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("inventur", inventur_id)
         if doc is None:
-            raise EntityNotFoundError(f"Inventur {inventur_id} not found")
+            raise EntityNotFoundError("Inventur", inventur_id)
         if doc.get("status") == "ABGESCHLOSSEN":
             from app.core.exceptions import ConflictError
             raise ConflictError("Inventur already closed")
@@ -250,7 +250,7 @@ class FutterCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("futterart", futterart_id)
         if doc is None:
-            raise EntityNotFoundError(f"Futterart {futterart_id} not found")
+            raise EntityNotFoundError("Futterart", futterart_id)
         return doc
 
     async def create_futterart(self, payload: dict) -> dict:
@@ -263,7 +263,7 @@ class FutterCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("futterart", futterart_id)
         if doc is None:
-            raise EntityNotFoundError(f"Futterart {futterart_id} not found")
+            raise EntityNotFoundError("Futterart", futterart_id)
         doc = {**doc, **payload, "updated_at": now_iso()}
         repo.save("futterart", futterart_id, doc)
         return doc
@@ -272,7 +272,7 @@ class FutterCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("futterart", futterart_id)
         if doc is None:
-            raise EntityNotFoundError(f"Futterart {futterart_id} not found")
+            raise EntityNotFoundError("Futterart", futterart_id)
         repo.delete("futterart", futterart_id)
         return {"deleted": True, "id": futterart_id}
 
@@ -283,7 +283,7 @@ class FutterCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("ration", ration_id)
         if doc is None:
-            raise EntityNotFoundError(f"Ration {ration_id} not found")
+            raise EntityNotFoundError("Ration", ration_id)
         return doc
 
     async def create_ration(self, payload: dict) -> dict:
@@ -298,7 +298,7 @@ class FutterCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("ration", ration_id)
         if doc is None:
-            raise EntityNotFoundError(f"Ration {ration_id} not found")
+            raise EntityNotFoundError("Ration", ration_id)
         doc = {**doc, **payload, "updated_at": now_iso()}
         repo.save("ration", ration_id, doc)
         return doc

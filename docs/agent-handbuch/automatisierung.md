@@ -100,6 +100,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `lager.auslagerung.created` | outbox | `app/services/inventory_compat_service.py` |
 | `lager.einlagerung.created` | outbox | `app/services/inventory_compat_service.py` |
+| `lager.stock_movement.storniert` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 
 ### Lager / Materialfluss
 
@@ -145,6 +146,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
+| `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |

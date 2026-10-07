@@ -55,7 +55,6 @@ class TestUIX051DryRunFormat:
     (``tests/test_mask_aktionen_wirkung.py``)."""
 
     @pytest.mark.parametrize("fn_name", [
-        "action_lager_stornieren",
         "action_einkauf_bestellen",
         "action_lager_wareneingang",
         "action_crm_qualifizieren",
@@ -135,8 +134,6 @@ class TestUIX053CommandEndpoints:
         assert actions["stornieren"].get("requiresConfirmation") is True
 
     @pytest.mark.parametrize("screen_id,action_key", [
-        ("lager/stock-movement", "stornieren"),
-        ("einkauf/angebot", "bestellen"),
         ("crm/lead", "qualifizieren"),
         ("einkauf/anlieferavis", "wareneingang"),
     ])

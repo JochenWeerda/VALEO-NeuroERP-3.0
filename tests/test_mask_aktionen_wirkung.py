@@ -49,9 +49,7 @@ AP_FREIGABE = "/api/v1/finance/ap/invoices/{}/actions/freigeben"
 OHNE_FACHWEG = {
     "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": "crm/lead",
     "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": "crm/opportunity",
-    "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen": "einkauf/angebot",
     "/api/v1/lager/artikel/{entity_id}/actions/wareneingang": "einkauf/anlieferavis",
-    "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren": "lager/stock-movement",
     "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken": "agrar/harvest-settlement",
 }
 
@@ -218,7 +216,8 @@ class TestZahlungslauf:
         ).json()
         assert antwort["success"] is True, antwort
         assert wert(engine, "SELECT status FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "approved"
-        assert wert(engine, "SELECT approved_by FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "Kasse"
+        # Freigeber ist der angemeldete Nutzer (Dev-Token), nicht "freigegeben_von" im Rumpf.
+        assert wert(engine, "SELECT approved_by FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "dev"
         assert spuren(engine, HAUS_A, "freigeben") == (1, 1)
 
     def test_ein_freigegebener_lauf_wird_nicht_nochmals_freigegeben(self, client, engine):

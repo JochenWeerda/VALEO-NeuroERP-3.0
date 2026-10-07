@@ -60,11 +60,19 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(src).not.toContain('text-blue-600')
   })
 
-  it('stellt Schulungen mit wirkenden Filtern', () => {
+  it('stellt Schulungen ueber den nativen Builder mit Stand und echten Zeilen', () => {
     const src = read('../../pages/personal/schulungen.tsx')
-    expect(src).toContain('nurPsm')
-    expect(src).toContain('nurAblaufende')
-    expect(src).toContain('min-h-11 font-medium text-primary')
+    const definitions = read('../../masks/capture-screens.ts')
+    const start = definitions.indexOf('export const personalSchulungenScreen')
+    const end = definitions.indexOf('\nexport const ', start + 1)
+    const definition = definitions.slice(start, end < 0 ? undefined : end)
+    expect(start).toBeGreaterThanOrEqual(0)
+    expect(src).toContain('personalSchulungenScreen')
+    expect(src).toContain('compileRenderPlanFromScreenDefinition')
+    expect(src).toContain('<UniversalMaskRenderer')
+    expect(src).toContain('schulungen: rows.map')
+    expect(definition).toContain("key: 'status'")
+    expect(definition).toContain("label: 'Stand'")
     expect(src).not.toContain('bg-orange-50')
   })
 

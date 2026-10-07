@@ -648,10 +648,10 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT id, activity_type, subject, due_date, status
-                    FROM domain_crm.crm_activities
+                    SELECT id, type AS activity_type, title AS subject, date AS due_date, status
+                    FROM domain_crm.activities
                     WHERE tenant_id = :tenant_id AND opportunity_id = :opportunity_id
-                    ORDER BY due_date DESC NULLS LAST
+                    ORDER BY date DESC NULLS LAST
                     LIMIT 200
                     """
                 ),

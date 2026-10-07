@@ -12,6 +12,7 @@ from decimal import Decimal
 import logging
 
 from app.core.database import get_db
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from app.core.tenant import get_tenant_id
 from app.core.data_quality_enforcement import (
     build_dq_error_detail,
@@ -131,10 +132,25 @@ def calculate_invoice_totals(invoice: SalesInvoice) -> SalesInvoice:
     return invoice
 
 
+def _rechnung(repo: Any, invoice_id: str, tenant_id: str) -> dict:
+    """Die Rechnung dieses Mandanten — fremd oder mandantenlos ist 404.
+
+    Bis 07.10.2026 lasen alle Wege dieses Moduls ohne Mandant; Buchen schrieb
+    Journal und offenen Posten mit dem Mandanten aus dem Dokument.
+    """
+    from app.api.v1.endpoints.ap_approval_workflow import _ensure_invoice_tenant_access
+
+    return _ensure_invoice_tenant_access(get_from_store("ap_invoice", invoice_id, repo), tenant_id)
+
+
 @router.post("/", summary="Ap invoice anlegen",
-    response_model=ApInvoicesOut, status_code=201
+    response_model=ApInvoicesOut, status_code=201, dependencies=[Depends(finance_write)]
 )
-async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
+async def create_ap_invoice(
+    doc: SalesInvoice,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
     """Erstellt eine neue Eingangsrechnung (Kreditoren)."""
     logger.info(f"Creating AP invoice: {doc.number}")
     try:
@@ -148,7 +164,13 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
             raise HTTPException(status_code=422, detail=build_dq_error_detail("APRechnung", dq_result))
 
         repo = get_repository(db)
-        result = save_to_store("ap_invoice", doc.number, doc.model_dump(), repo)
+        # Der Speicher ist global nach Nummer eindeutig: Anlegen darf eine fremde
+        # (oder eigene) Rechnung gleicher Nummer nicht ueberschreiben.
+        if get_from_store("ap_invoice", doc.number, repo):
+            raise HTTPException(status_code=409, detail=f"Rechnungsnummer {doc.number} ist bereits vergeben")
+        daten = doc.model_dump()
+        daten["tenantId"] = tenant_id
+        result = save_to_store("ap_invoice", doc.number, daten, repo)
         return {"status": "ok", "message": "AP Invoice created", "data": result}
     except HTTPException:
         raise
@@ -158,28 +180,27 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
 
 
 @router.get("/{invoice_id}", summary="Ap invoice abrufen",
-    response_model=FinanceApInvoiceOut
+    response_model=FinanceApInvoiceOut, dependencies=[Depends(finance_read)]
 )
-async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
+async def get_ap_invoice(
+    invoice_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Ruft eine Eingangsrechnung anhand ihrer ID ab."""
     logger.info(f"Fetching AP invoice: {invoice_id}")
-    repo = get_repository(db)
-    invoice = get_from_store("ap_invoice", invoice_id, repo)
-    if not invoice:
-        raise HTTPException(status_code=404, detail="AP Invoice not found")
+    invoice = _rechnung(get_repository(db), invoice_id, tenant_id)
     return await _enrich_invoice_with_approval(invoice, db)
 
 
 @router.put("/{invoice_id}", summary="Ap invoice aktualisieren",
-    response_model=ApInvoicesOut
+    response_model=ApInvoicesOut, dependencies=[Depends(finance_write)]
 )
-async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = Depends(get_db)) -> dict:
+async def update_ap_invoice(
+    invoice_id: str, doc: SalesInvoice, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Aktualisiert eine bestehende Eingangsrechnung."""
     logger.info(f"Updating AP invoice: {invoice_id}")
     repo = get_repository(db)
-    existing_invoice = get_from_store("ap_invoice", invoice_id, repo)
-    if not existing_invoice:
-        raise HTTPException(status_code=404, detail="AP Invoice not found")
+    _rechnung(repo, invoice_id, tenant_id)
 
     doc.number = invoice_id  # Ensure number matches ID
     doc = calculate_invoice_totals(doc)  # Recalculate totals
@@ -187,12 +208,14 @@ async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = De
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("APRechnung", dq_result))
 
-    result = save_to_store("ap_invoice", doc.number, doc.model_dump(), repo)
+    daten = doc.model_dump()
+    daten["tenantId"] = tenant_id
+    result = save_to_store("ap_invoice", doc.number, daten, repo)
     return {"status": "ok", "message": "AP Invoice updated", "data": result}
 
 
 @router.get("/", summary="Ap invoices auflisten",
-    response_model=list[ApInvoicesOut]
+    response_model=list[ApInvoicesOut], dependencies=[Depends(finance_read)]
 )
 async def list_ap_invoices(
     skip: int = 0,
@@ -200,7 +223,8 @@ async def list_ap_invoices(
     query: Optional[str] = None,
     status: Optional[str] = None,
     supplier_id: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> List[dict]:
     """Listet Eingangsrechnungen auf, optional mit Filterung."""
     logger.info(f"Listing AP invoices with skip={skip}, limit={limit}, query={query}, status={status}, supplier_id={supplier_id}")
@@ -210,6 +234,8 @@ async def list_ap_invoices(
 
     filtered_invoices = []
     for inv in all_invoices:
+        if str(inv.get("tenantId") or "") != tenant_id:
+            continue
         enriched = await _enrich_invoice_with_approval(inv, db)
         match = True
         if query and not (query.lower() in enriched.get("number", "").lower() or
@@ -227,12 +253,15 @@ async def list_ap_invoices(
 
 
 @router.delete("/{invoice_id}", summary="Ap invoice löschen",
-    response_model=StatusResponse
+    response_model=StatusResponse, dependencies=[Depends(finance_admin)]
 )
-async def delete_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict:
+async def delete_ap_invoice(
+    invoice_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
     """Löscht eine Eingangsrechnung."""
     logger.info(f"Deleting AP invoice: {invoice_id}")
     repo = get_repository(db)
+    _rechnung(repo, invoice_id, tenant_id)
     success = delete_from_store("ap_invoice", invoice_id, repo)
     if not success:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
@@ -240,21 +269,24 @@ async def delete_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> d
 
 
 @router.post("/{invoice_id}/approve", summary="Ap invoice genehmigen",
-    response_model=ApInvoicesOut
+    response_model=ApInvoicesOut, dependencies=[Depends(finance_admin)]
 )
 async def approve_ap_invoice(
     invoice_id: str,
-    approved_by: str = Query(...),
-    db: Session = Depends(get_db)
+    approved_by: Optional[str] = Query(None, description="Ignoriert — Freigeber ist der angemeldete Nutzer"),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(finance_admin),
 ) -> dict:
-    """Genehmigt eine Eingangsrechnung (für Freigabeworkflow)."""
+    """Genehmigt eine Eingangsrechnung (für Freigabeworkflow).
+
+    Freigeber ist der angemeldete Nutzer; ``approved_by`` wird nicht mehr uebernommen.
+    """
+    approved_by = str(user.get("sub") or "").strip()
     logger.info(f"Approving AP invoice: {invoice_id} by {approved_by}")
     repo = get_repository(db)
-    invoice = get_from_store("ap_invoice", invoice_id, repo)
-    if not invoice:
-        raise HTTPException(status_code=404, detail="AP Invoice not found")
+    invoice = _rechnung(repo, invoice_id, tenant_id)
 
-    tenant_id = invoice.get("tenantId", "system")
     gateway = endpoint_gateways.get_approval_workflow_gateway()
     if gateway is None:
         from app.api.v1.endpoints.ap_approval_workflow import approve_invoice
@@ -268,6 +300,7 @@ async def approve_ap_invoice(
             })(),
             tenant_id=tenant_id,
             db=db,
+            user=user,
         )
     else:
         current_status = await gateway.get_status(invoice_id, tenant_id, db)
@@ -287,19 +320,19 @@ async def approve_ap_invoice(
 
 
 @router.post("/{invoice_id}/post", summary="Ap invoice erstellen",
-    response_model=ApInvoicesOut
+    response_model=ApInvoicesOut, dependencies=[Depends(finance_admin)]
 )
 async def post_ap_invoice(
     invoice_id: str,
     posted_by: str = Query(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Bucht eine Eingangsrechnung (erzeugt GL-Buchung + OP)."""
     logger.info(f"Posting AP invoice: {invoice_id} by {posted_by}")
     repo = get_repository(db)
-    invoice = get_from_store("ap_invoice", invoice_id, repo)
-    if not invoice:
-        raise HTTPException(status_code=404, detail="AP Invoice not found")
+    # Ab hier ist invoice["tenantId"] der gepruefte Mandant.
+    invoice = _rechnung(repo, invoice_id, tenant_id)
 
     # Check approval status via workflow API
     try:
@@ -488,12 +521,14 @@ async def post_ap_invoice(
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 
 
-@router.post("/{entity_id}/actions/freigeben", response_model=TypedObjectOut, summary="Eingangsrechnung freigeben (SPEC-P1-04)")
+@router.post("/{entity_id}/actions/freigeben", response_model=TypedObjectOut, summary="Eingangsrechnung freigeben (SPEC-P1-04)",
+             dependencies=[Depends(finance_admin)])
 async def action_freigeben(
     entity_id: str,
     body: dict = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(finance_admin),
 ):
     """Delegiert an den Freigabeweg. Bis zum 07.10.2026 meldete diese Aktion Erfolg,
     ohne die Rechnung anzufassen."""
@@ -507,7 +542,7 @@ async def action_freigeben(
         return []
 
     async def freigeben(db_: Session, payload: dict, eid: str, tid: str) -> str:
-        await approve_ap_invoice(eid, approved_by=str(payload.get("freigegeben_von") or "Maske"), db=db_)
+        await approve_ap_invoice(eid, approved_by=None, db=db_, tenant_id=tid, user=user)
         return "Eingangsrechnung freigegeben."
 
     result = await run_delegated_mask_action(

@@ -32,7 +32,7 @@ class AgribusinessService:
         repo = doc_repo(self.db)
         doc = repo.get("field_service_task", task_id)
         if doc is None:
-            raise EntityNotFoundError(f"Field service task {task_id} not found")
+            raise EntityNotFoundError("Field service task", task_id)
         return doc
 
     async def create_field_service_task(self, payload: dict) -> dict:
@@ -48,7 +48,7 @@ class AgribusinessService:
         repo = doc_repo(self.db)
         doc = repo.get("field_service_task", task_id)
         if doc is None:
-            raise EntityNotFoundError(f"Field service task {task_id} not found")
+            raise EntityNotFoundError("Field service task", task_id)
         doc = {**doc, **payload, "updated_at": now_iso()}
         repo.save("field_service_task", task_id, doc)
         return doc
@@ -57,7 +57,7 @@ class AgribusinessService:
         repo = doc_repo(self.db)
         doc = repo.get("field_service_task", task_id)
         if doc is None:
-            raise EntityNotFoundError(f"Field service task {task_id} not found")
+            raise EntityNotFoundError("Field service task", task_id)
         doc["status"] = "ABGESCHLOSSEN"
         doc["completion"] = completion_data
         doc["completed_at"] = now_iso()
@@ -103,7 +103,7 @@ class AgribusinessService:
         repo = doc_repo(self.db)
         doc = repo.get("benachrichtigung", notification_id)
         if doc is None:
-            raise EntityNotFoundError(f"Benachrichtigung {notification_id} not found")
+            raise EntityNotFoundError("Benachrichtigung", notification_id)
         doc["gelesen"] = True
         doc["gelesen_at"] = now_iso()
         repo.save("benachrichtigung", notification_id, doc)

@@ -10,6 +10,8 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+
+from app.core.tenant import get_tenant_id
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -705,11 +707,13 @@ class StornoIn(BaseModel):
 async def storno_bestandskorrektur(
     korrektur_id: str,
     body: StornoIn,
-    x_tenant_id: Optional[str] = None,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
-    """Storno-Gegenbuchung zur Bestandskorrektur (idempotent via storno_ref)."""
-    tenant_id = x_tenant_id or DEFAULT_TENANT
+    """Storno-Gegenbuchung zu einer Lagerbewegung (idempotent via storno_ref).
+
+    Der Mandant kommt aus dem Kontext; bis 07.10.2026 aus einem Query-Parameter.
+    """
     from app.services.inventory_correction_service import storno_korrektur, CorrectionError
     try:
         return storno_korrektur(

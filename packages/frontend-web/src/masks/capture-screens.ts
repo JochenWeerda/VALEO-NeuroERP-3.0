@@ -1303,7 +1303,7 @@ export const fuhrparkFahrzeugStammScreen = {
       label: 'Fahrzeug löschen',
       command: 'fuhrpark.deleteFahrzeug',
       kind: 'secondary',
-      dangerLevel: 'destructive',
+      dangerLevel: 'high',
       zone: 'footer',
       requiresConfirmation: true,
       stubReason: 'Loescht die Fahrzeugakte nach Bestaetigung.',

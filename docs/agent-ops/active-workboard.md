@@ -13,6 +13,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**CPython-Abnahme (2026-10-07):** [QA](../quality-assurance/cpython-upstream-security-20261007.md): echtes Backend-Python 3.13.16, offizieller Docker-Manifest vorhanden; drei durch Herstellerfix ueberholte Backports entfernt. POP3-Guard nach belegtem Hersteller-Fehler weiterhin erforderlich, mit unveraenderter Patch-SHA256 erhalten. Fuenf Runtime-Vertraege auf offizieller Windows-Embed-Laufzeit plus genau diesem Backport gruen; Tarfile-Vertrag auf offizieller 3.13.15-Quelle bewusst rot, auf 3.13.16 gruen. POP3-Patch-Anwendung auf Originalquelle --check gruen. Keine Ignore-/Scanner-Schwellwert-Aenderung, keine DB/Container/Image-Pull/Systeminstallation. Linux-Imagebau, aktueller Grype-Scan und Node-Audit bleiben offen.
+
+**CPython-Herstellerfix-Claim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; Dockerfile.backend nur offizielles Python 3.13.16 statt 3.13.15, bestehende Security-Behavior-Pruefung und belegbar ueberholte Backportdateien nach Verbraucher-/Verhaltensabgleich. Herstellerrelease 30.09.2026 behebt CVE-2026-82049; offizieller Docker-Manifest 3.13.16-slim-bookworm lesend vorhanden. Kein WIP oder aktiver Fremdclaim auf diesen Dateien; alter Security-Slice abgeschlossen. Abnahme: vier bestehende Verhaltenstests auf Herstellerlaufzeit, gezielter Tarfile-Regressionsvertrag, no version spoof/Ignore, Scanner unveraendert. Nicht im Release enthaltene Fixes bleiben real angewendet und geprueft, keine Sicherheitsregression zum Abbau von Altlasten. Offline pruefen mit eigenem kleinen Windows-Embed-Runtime-Artefakt; kein Systeminstall, Container/Image-Pull, DB, Reset oder Migration. QA/Gesamtziel/Slice/Workboard nachziehen; Linux-/Grype-Abnahme ueber vorhandene CI.
+
+**Masken-/Vertragsabnahme (2026-10-07):** [QA](../quality-assurance/native-mask-contract-repairs-20261007.md): 813 Pythonvertraege gruen/0 Skip (52,72 s), 23 Architekturvertraege, 38 Frontendtests und TypeScript --noEmit Exit 0. Gueltiges high fuer Fahrzeug-Loeschen; explizites single respektiert; Bewerbungsaktionen/kanonischer Router geprueft; zentrale Ein-Spalten-/Tabellentitelduplikate entfernt; native Schulungen-Delegation. Praesente echt typisiert vor generischem Pfad mit Tenantfilter und altem Filter-Alias; eindeutige benannte Historien geprueft, mehrdeutige/untypisierte bleiben rot. OpenAPI --check gruen mit 3097 Pfaden: sieben bereits committete Scheinaktionen entfallen, ein Praesente-Pfad neu. Drei Inventare, Architektur --check --require-complete (935/274/454), Handbuch fuenf Artefakte und Godfile-Ratsche gruen. Drei Renderer nur indexseitige Minimalhunks; fremde WIP erhalten. Architektur-Arbeitsbaum versehentlich regeneriert, explizit in QA dokumentiert und nicht uebernommen; geliefert isolierter Index. Neue Actions-Abnahme erforderlich; fuenf SPEC-P1-04-, KIM-Smoke-, Security-/fachliche Integrationsbefunde offen; keine DB/Container/Migration/Reset.
+
+**Zahlungsfreigabe-Integrationsclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; config/architecture-domain-prefixes.yaml ausschliesslich payment_run_freigabe: finance, bestehender Architektur-Zuordnungsvertrag plus committed Index. af2b90fac fuehrt den Dienst ein, --require-complete meldet genau diesen fehlenden Eintrag. Kein WIP/aktiver Fremdclaim auf Mapping/Test; fremder Dienst und laufende Mandant-Finanz-Reparatur bleiben unveraendert. Abnahme: vollstaendige Zuordnung, vorhandene Inventar-/Generatorgates; keine neue Domain, DB, Container oder Migration.
+
+**Titel-Minimalnachclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; ColumnLayoutRenderer nur Navigation bei mehr als einer Spalte und DerivedColumnLayout nur vorhandenes repeatsCaption fuer Tabellenueberschrift. Zwei zusaetzliche indexseitige Hunks auf committed Quellen; fremde Arbeitsbaum-WIP beider Dateien bleiben erhalten. DOM-Gegenprobe zeigt H1 plus unnoetigen Ein-Spalten-Navigationsbutton plus Tabellen-H3; FastTab-Hunk allein schliesst diesen abgeleiteten Renderweg nicht. Bestehender zehnteiliger Framework-Test muss mit exakt einer sichtbaren Benennung bestehen; Mehrspaltennavigation weiter pruefen. Keine Layoutklassen oder Schutzgates aendern.
+
+**Masken-/Vertrags-Teilclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; screen_definitions_capture.py und capture-screens.ts nur Fahrzeug-Loeschstufe destructive -> high mit Bestaetigung; tests/test_tourenplanung_definition.py nur bestehende Bewerbungsaktionen und kanonischer Router; tests/test_meridian_column_navigation_inventory.py nur dokumentierten expliziten single-Vertrag; Schulungen-Source-Test auf native Builder-Delegation; FastTabRenderer ausschliesslich indexseitige Titelunterdrueckung auf committed Quelle, fremde Layout-WIP erhalten. scripts/check_field_contracts.py nur typisierte benannte Zeilenliste mit eindeutiger Auswahl, neuer isolierter Schema-Regressionsvertrag; crm_360_tabs.py/crm_customer_tab.py nur echte typisierte Praesente-Route vor generischem Pfad und HTTP-Vertrag. Eigene QA/Gesamtziel/Slice/Workboard, Meridian-Doku und committed-source OpenAPI/Inventare/Handbuch. Kein aktiver Fremdclaim fuer diese Hunkbereiche gefunden; Mandant-Finanz/CRM/Einkauf und Katalog unveraendert fremd. Abnahme: relevante CI-Vertraege gruen, keine ungeltigen/mehrdeutigen Schemata akzeptieren, echte Zeilen-/Tenantantwort, Pfade erhalten, keine Masken-Schutzgates abschwaechen. Stub-Fachwege bleiben bis echter Implementierung offen; kein vorgetaeuschter Erfolg. Keine neue DB/Container, Reset oder Migration.
+
 **Gesamtziel-/Interessenten-Teilclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; interessent_service.py nur HTTP-faehiger X-Migration-Hint, tests/test_sammelabrechnung_interessent_waagen_vorlage.py nur kanonischer Interessenten-Anlagevertrag plus echte HTTP-Fehlerantworten; neue Gesamtziel-QA und eigene Slice-/Workboard-Doku. GitHub 00de664df meldet UnicodeEncodeError auf dem Fehlerweg und veralteten COUNT-Mock. Kein WIP oder aktiver Fremdclaim auf diesen Dateien; INTERESSENT-IST-LEAD abgeschlossen. Annahme: ASCII-Hinweis behaelt Schema-/Migrationsinformation; 409 bei Anlage- und 503 bei Lesefehler unveraendert. Abnahme: echte FastAPI-Antwort mit Header, Rollback ohne Commit, exakte persistierte Lead-Antwort und Tenant-/Nummernparameter. Keine DB-Verbindung, neue DB/Container oder Migration. Mandant-Finanz/CRM/Einkauf, Masken und Katalog bleiben bei ihren aktiven Besitzern. Gesamtziel-QA gleicht Chat, Handshakes, Code und Actions ab; historische Abnahmen sind keine aktuelle Vollfreigabe.
 
 **Gesamtziel-/Interessenten-Abnahme (2026-10-07):** Code-/Chat-/Handshake-Abgleich in [Gesamtziel-QA](../quality-assurance/code-repair-stabilization-status-20261007.md). 00de664df PostgreSQL/OpenAPI/Doku/beide E2E/Service Security gruen, Quality/Security/Gesamt-CI rot: acht Backend-/zwei Frontend-Fehler. Vier Mandant-/Finanz-/CRM-/Einkaufsbefunde bei aktivem Fremdbesitz; 41 Routerkonflikte, Journal-/Futter-/Waageintegration, Bewerber-Selbstzugang/UI-Rollen/Akteursidentitaet weiter offen. Interessenten-HTTP-Headerfehler GET/POST zweimal red reproduziert, jetzt 503/409 statt UnicodeEncodeError; Rollback genau einmal ohne Commit. Alter COUNT-Anlagetest prueft Jahres-/Maximalnummer, exakte gespeicherte Lead-Antwort und Tenantbindung. Alle 18 Modulvertraege gruen, null Skip, Exit 0 (1,87 s), keine DB-Verbindung/Container/Migration. Gesamtziel nicht abgeschlossen; neue Actions-Abnahme erforderlich. Fremde WIP und bereits gestagte Aenderungen bleiben erhalten.
@@ -2033,6 +2045,30 @@ Query braucht, neue Vertraege, eigene QA-Doku.
 (je Modul), ohne Rolle 403, Ersteller gibt nicht frei, Angebot wird mit Positionen
 genau einmal zur Bestellung, Opportunity-Aktivitaet erscheint im Reiter; Migration
 hin/zurueck/hin; bestehende Fachsuiten und Ratschen gruen.
+
+**Zwischenstand (07.10.2026): Befunde 1 und 2 fertig.** Zahlungslaeufe: alle acht
+Wege mit Mandant aus dem Kontext und Rollenmatrix; `created_by` + Vier-Augen
+(`app/services/payment_run_freigabe.py`); Freigeber = angemeldeter Nutzer.
+Eingangsrechnungen: alle Wege mandantengebunden (`tenantId` im Dokument, fremd und
+mandantenlos = 404, kein Ueberschreiben fremder Nummern = 409); Freigabe-Workflow mit
+Rollen, Freigeber = angemeldeter Nutzer (eine Person erfuellte vorher eine
+Zwei-Stufen-Freigabe mit zwei Namen). Dabei behoben, weil sonst nichts davon wirkt:
+Workflow las/schrieb `ap_approvals` mit Spalten, die es in **keiner** DB gibt
+(`approval_request_id`, `approved_at`), und `json.loads` auf JSONB liess schon das
+Anlegen einer Regel scheitern. 265 Tests gruen, Ratschen gruen. Befunde 3 und 4 folgen.
+
+**Zwischenstand 2 (07.10.2026): Befunde 3 und 4 fertig.** Opportunities: Mandant
+bei Liste, Einzelabfrage, Aendern, Loeschen, Stufe, Pipeline, Prognose, Anlegen
+(Rumpf waehlt keinen Mandanten mehr); Aktivitaeten in `domain_crm.activities`
+(+`opportunity_id`), Reiter liest dort. Angebote: richtige Spalten, kein verschluckter
+Fehler, Mandant in `list_bids` und den vier Einzel-Ladern (`compat.py` las fest
+"default"), Umwandlung mit Positionen in **einem** Commit, kein zweites Mal, ohne
+Positionen keine erfundene Bestellung; Mask-Aktion `bestellen` echt angeschlossen.
+Systemisch mitbehoben: `DocumentRepository.save` fehlte (42 Aufrufe in neun Diensten
+seit 15.05.2026), 50 `EntityNotFoundError` mit einem statt zwei Argumenten (jedes
+"nicht gefunden" = 500) + AST-Waechter. 2187 Tests gruen. **Offen (User 07.10.2026:
+"Ein fehlender Fachweg braucht eine echte Implementierung"):** die fuenf Aktionen in
+`BEKANNTE_LUECKEN` bekommen echte Fachwege; die Liste wird leer.
 
 ## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 

@@ -938,8 +938,9 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
                 "dangerLevel": "safe",
                 "permission": "crm.activity.create",
                 "stubReason": (
-                    "Noch kein Fachweg: Der Aktivitaeten-Weg der Opportunity schreibt in eine "
-                    "Tabelle, die keine Migration anlegt, und prueft den Mandanten nicht."
+                    "Noch nicht in der Maske: Betreff und Typ kann die native Maske noch nicht "
+                    "erfassen. Der Fachweg POST /crm/opportunities/{id}/activities ist "
+                    "mandantengebunden und schreibt in den Reiter Aktivitaeten."
                 ),
             },
         ],
@@ -1771,7 +1772,7 @@ def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "stubReason": "Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst."},
+            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "auditReasonRequired": True, "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren", "method": "POST"},
         ],
         "noWorkflowReason": "Lagerbewegungen sind Buchungsbelege ohne eigenstaendigen Workflow — Storno ist die einzige Mutation.",
         "agentContract": {
@@ -2294,7 +2295,7 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
                              {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                          ]}]},
         ],
-        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "stubReason": "Noch kein Fachweg: Die Umwandlung Angebot -> Bestellung liest Spalten, die keine Migration anlegt."}],
+        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen", "method": "POST", "requiresConfirmation": True}],
         "noWorkflowReason": "Angebots-Status wird durch Bestellvorgang gesetzt — kein separater Workflow.",
         "agentContract": {
             "businessPurpose": "Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.",

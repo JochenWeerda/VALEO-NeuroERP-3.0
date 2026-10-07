@@ -264,7 +264,7 @@ def test_fahrzeug_stamm_folgt_kennzeichen_und_typ() -> None:
     assert "/api/v1/fuhrpark/fahrzeuge" in block
     assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
     loeschen = next(action for action in definition["actions"] if action["key"] == "loeschen")
-    assert loeschen["dangerLevel"] == "destructive"
+    assert loeschen["dangerLevel"] == "high"
     assert loeschen["requiresConfirmation"] is True
     assert "DEMO" not in block
     assert governance_errors(definition) == []
@@ -349,7 +349,9 @@ def test_bewerbungen_folgen_der_pipeline() -> None:
     assert definition["dataSources"][0]["endpoint"] == "/api/v1/personal/applications"
     assert "/api/v1/personal/applications" in block
     assert [action["key"] for action in definition["actions"] if action["kind"] == "primary"] == ["speichern"]
-    assert definition["tables"][0]["rowActions"][0]["key"] == "loeschen"
+    actions = {action["key"]: action for action in definition["tables"][0]["rowActions"]}
+    assert {"einwilligung", "loeschen"} <= actions.keys()
+    assert actions["loeschen"]["disabledWhen"] == {"field": "gesperrt", "values": [True]}
     assert definition["tables"][0]["columns"][0]["priority"] == "primary"
     assert definition["tables"][0]["columns"][-1]["priority"] == "tertiary"
     assert "DEMO" not in block
@@ -358,7 +360,7 @@ def test_bewerbungen_folgen_der_pipeline() -> None:
 
 
 def test_applications_haben_loesch_route() -> None:
-    from app.api.v1.endpoints import personal as personal_ep
+    from app.api.v1.endpoints import personal_bewerbungen as personal_ep
 
     loesch = [
         route
@@ -366,4 +368,4 @@ def test_applications_haben_loesch_route() -> None:
         if getattr(route, "path", "").endswith("/applications/{application_id}")
         and "DELETE" in (getattr(route, "methods", set()) or set())
     ]
-    assert loesch, "DELETE /applications/{application_id} fehlt am Personal-Router"
+    assert len(loesch) == 1, "Genau ein DELETE-Weg am kanonischen Bewerbungsrouter erforderlich"

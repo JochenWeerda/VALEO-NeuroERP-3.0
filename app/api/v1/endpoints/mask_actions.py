@@ -10,8 +10,7 @@ ohne fachliche Wirkung. Das Ereignis ``finance.payment_run.approved`` speiste di
 Projektion ``payment_run_cockpit``: Ein nicht freigegebener Zahlungslauf erschien im
 Lesemodell als freigegeben. Jetzt delegiert jeder Handler an den echten Fachweg
 (``run_delegated_mask_action``). Die sechs Aktionen ohne Fachweg (Lead qualifizieren,
-Opportunity-Aktivitaet, Angebot bestellen, Wareneingang am Artikel, Lagerbewegung
-stornieren, Ernteabrechnung drucken) haben keinen Endpunkt mehr; ihre Maske nennt
+Opportunity-Aktivitaet, Wareneingang am Artikel, Ernteabrechnung drucken) haben keinen Endpunkt mehr; ihre Maske nennt
 den ``stubReason``. Siehe ``docs/quality-assurance/mask-aktionen-wirkung-20261007.md``.
 """
 from __future__ import annotations
@@ -23,6 +22,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.auth.finance_roles import finance_admin
 from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 
@@ -41,12 +41,14 @@ def _fehler(nachricht: str, feld: str = "_entity") -> list[dict[str, Any]]:
     "/finance/payment-runs/{entity_id}/actions/freigeben",
     response_model=MaskActionResult,
     summary="Zahlungslauf freigeben (SPEC-P1-04)",
+    dependencies=[Depends(finance_admin)],
 )
 async def action_payment_run_freigeben(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(finance_admin),
 ) -> MaskActionResult:
     async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
         status = db_.execute(
@@ -62,14 +64,9 @@ async def action_payment_run_freigeben(
     async def freigeben(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
         from app.api.v1.endpoints.payment_runs import ApprovePaymentRunRequest, approve_payment_run
 
-        # Der Mandant kommt aus dem geprueften Kontext, nicht aus dem Query-Parameter
-        # des Fachwegs.
-        await approve_payment_run(
-            eid,
-            ApprovePaymentRunRequest(approved_by=str(payload.get("freigegeben_von") or "Maske")),
-            tenant_id=tid,
-            db=db_,
-        )
+        # Mandant aus dem Kontext, Freigeber = angemeldeter Nutzer; der Fachweg
+        # prueft das Vier-Augen-Prinzip.
+        await approve_payment_run(eid, ApprovePaymentRunRequest(), tenant_id=tid, db=db_, user=user)
         return "Zahlungslauf freigegeben."
 
     return await run_delegated_mask_action(
@@ -195,4 +192,120 @@ async def action_reklamation_abschliessen(
         check_fn=pruefen,
         delegate_fn=abschliessen,
         outbox_event_type="qualitaet.reklamation.closed",
+    )
+
+
+# ---------------------------------------------------------------------------
+# einkauf/angebot → bestellen
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/einkauf/angebote/{entity_id}/actions/bestellen",
+    response_model=MaskActionResult,
+    summary="Bestellung aus Angebot erstellen (SPEC-P1-04)",
+)
+async def action_angebot_bestellen(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
+        from app.services.einkauf_compat_service import _NICHT_BESTELLBAR, EinkaufCompatService
+
+        zeile = EinkaufCompatService(db_, tid)._load_angebot_raw_row(eid)
+        if zeile is None:
+            return _fehler("Angebot nicht gefunden.")
+        status = str(zeile._mapping.get("status") or "").upper()
+        if status in _NICHT_BESTELLBAR:
+            return _fehler(f"Angebot ist {status} und wird nicht bestellt.")
+        positionen = db_.execute(
+            text("SELECT COUNT(*) FROM einkauf_angebote_positionen WHERE angebot_id = :id"),
+            {"id": zeile._mapping.get("id")},
+        ).scalar()
+        return [] if positionen else _fehler("Ein Angebot ohne Positionen wird nicht bestellt.")
+
+    async def bestellen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
+        from app.services.einkauf_compat_service import EinkaufCompatService
+
+        ergebnis = await EinkaufCompatService(db_, tid).convert_angebot_to_order(eid)
+        return f"Bestellung {ergebnis.get('purchaseOrderNumber')} aus Angebot erstellt."
+
+    return await run_delegated_mask_action(
+        db,
+        action_key="bestellen",
+        entity_type="angebot",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        check_fn=pruefen,
+        delegate_fn=bestellen,
+        outbox_event_type="einkauf.bestellung.created_from_angebot",
+    )
+
+
+# ---------------------------------------------------------------------------
+# lager/stock-movement → stornieren
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/lager/stock-movements/{entity_id}/actions/stornieren",
+    response_model=MaskActionResult,
+    summary="Lagerbewegung stornieren (SPEC-P1-04)",
+)
+async def action_lager_stornieren(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """Gegenbuchung ueber den Storno-Dienst; die Begruendung wird zur Bemerkung."""
+
+    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
+        from app.services.inventory_movement_direction import signed_quantity
+        from app.services.inventory_stock_balance import current_stock
+
+        zeile = db_.execute(
+            text(
+                "SELECT movement_type, quantity, source_document_type, article_id, warehouse_id "
+                "FROM domain_inventory.inventory_stock_movements WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"id": eid, "tid": tid},
+        ).mappings().first()
+        if zeile is None:
+            return _fehler("Lagerbewegung nicht gefunden.")
+        if str(zeile["source_document_type"] or "").upper() == "STORNO":
+            return _fehler("Ein Storno wird nicht storniert.")
+        wirkung = signed_quantity(zeile["movement_type"], float(zeile["quantity"] or 0))
+        if wirkung == 0:
+            return _fehler("Die Bewegung ist bestandsneutral; es gibt nichts zu stornieren.")
+        bestand = current_stock(db_, tenant_id=tid, article_id=str(zeile["article_id"]),
+                                warehouse_id=str(zeile["warehouse_id"]))
+        if bestand - wirkung < 0:
+            return _fehler("Der Storno machte den Bestand negativ; die Ware ist bereits weiter gebucht.")
+        return []
+
+    async def stornieren(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
+        from app.services.inventory_correction_service import CorrectionError, storno_korrektur
+
+        try:
+            ergebnis = storno_korrektur(db_, eid, tid, bemerkung=payload.get("_begruendung"))
+        except CorrectionError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return f"Gegenbuchung {ergebnis['movement_type']} {ergebnis['quantity']:g} gebucht."
+
+    # Die Begruendung des Stornos ist die Bemerkung der Gegenbuchung.
+    nutzlast = dict(body)
+    nutzlast["_begruendung"] = body.get("_auditReason")
+    return await run_delegated_mask_action(
+        db,
+        action_key="stornieren",
+        entity_type="stock_movement",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=nutzlast,
+        check_fn=pruefen,
+        delegate_fn=stornieren,
+        outbox_event_type="lager.stock_movement.storniert",
+        require_audit_reason=True,
     )

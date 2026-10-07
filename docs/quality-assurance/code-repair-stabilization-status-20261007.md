@@ -18,6 +18,20 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+Weitere Teilabnahme: [CPython-Herstellerfix](cpython-upstream-security-20261007.md)
+hebt das Backend-Image auf echtes 3.13.16, entfernt drei ueberholte Backports und
+erhaelt den nachweislich notwendigen POP3-Schutz. Fuenf Runtime-Sicherheitstests
+bestanden; neuer Tarfile-Vertrag auf 3.13.15 bewusst rot. Linux-/Grype-Abnahme
+und Node-Audit bleiben offen.
+
+Teilabnahme dieser Abarbeitung: [Native Vertragsreparaturen](native-mask-contract-repairs-20261007.md)
+schliessen sechs der elf Backend-Fehler auf `3e7142c48` und beide Frontendbefunde
+lokal: 813 Pythonvertraege, 23 Architekturvertraege, 38 Frontendtests und TypeScript
+gruen. OpenAPI/Inventare/Handbuch folgen den bereits committeten sieben ehrlichen
+Action-Loeschungen; Praesente neu typisiert. Neue Actions-Abnahme bleibt erforderlich.
+Fuenf SPEC-P1-04-Befunde, KIM-Smoke, Security und die fachlichen Integrationen
+sind weiterhin offen; die historische Liste unten dokumentiert ihren Ausgangspunkt.
+
 Auf `00de664df` erfolgreich: PostgreSQL `require_db` (37610643657), OpenAPI
 (37610643398), Docs Build/Governance, Service Security, Full Security Agent,
 E2E Smoke (37610643388), kritische E2E (37610643487), Erntepeak.

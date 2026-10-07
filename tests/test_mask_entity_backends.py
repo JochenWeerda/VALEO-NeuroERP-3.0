@@ -44,7 +44,7 @@ def test_get_einkauf_angebot_returns_contract_payload(monkeypatch):
     monkeypatch.setattr(
         compat,
         "_load_einkauf_angebot",
-        lambda db, angebot_id: {
+        lambda db, angebot_id, tenant_id: {
             "id": angebot_id,
             "angebotNummer": "ANG-2026-009",
             "lieferant": "Auricher Suessmost GmbH",
@@ -66,7 +66,7 @@ def test_get_einkauf_angebot_returns_contract_payload(monkeypatch):
 
 def test_get_einkauf_angebot_returns_404_when_unknown(monkeypatch):
     _disable_dev_token(monkeypatch)
-    monkeypatch.setattr(compat, "_load_einkauf_angebot", lambda db, angebot_id: None)
+    monkeypatch.setattr(compat, "_load_einkauf_angebot", lambda db, angebot_id, tenant_id: None)
     response = client.get(
         "/api/v1/einkauf/angebote/unbekannt",
         headers={**AUTH_HEADERS, **TENANT_HEADER},
@@ -80,7 +80,7 @@ def test_get_anlieferavis_returns_contract_payload(monkeypatch):
     monkeypatch.setattr(
         compat,
         "_load_einkauf_anlieferavis",
-        lambda db, avis_id: {
+        lambda db, avis_id, tenant_id: {
             "id": avis_id,
             "avisNummer": "AVIS-44",
             "lieferant": "Nordsaat GmbH",
@@ -101,7 +101,7 @@ def test_get_auftragsbestaetigung_returns_contract_payload(monkeypatch):
     monkeypatch.setattr(
         compat,
         "_load_einkauf_auftragsbestaetigung",
-        lambda db, bestaetigung_id: {
+        lambda db, bestaetigung_id, tenant_id: {
             "id": bestaetigung_id,
             "bestaetigungsNummer": "AB-88",
             "bestellung": "PO-2026-188",

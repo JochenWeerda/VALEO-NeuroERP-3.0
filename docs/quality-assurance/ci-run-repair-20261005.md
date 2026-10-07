@@ -11,6 +11,14 @@ last_reviewed: 2026-10-05
 
 ## Gesamtziel-Abgleich 2026-10-07
 
+Fortsetzung: [Native Masken-/Antwortvertraege](native-mask-contract-repairs-20261007.md).
+813 Python-, 23 Architektur- und 38 Frontendvertraege sowie TypeScript gruen;
+sechs aktuelle Backend- und zwei Frontendbefunde geschlossen. SPEC-P1-04-Fachwege,
+KIM-Smoke, Security und Gesamt-CI bleiben offen. OpenAPI folgt af2b90fac mit sieben
+entfernten Scheinaktionen und einem typisierten Praesente-Pfad; keine Altstubs
+wieder eingebaut. Inventare/Index/Handbuch nur aus committed Quelle plus eigenen
+Hunks, drei Renderer indexseitig mit erhaltenem fremdem Arbeitsbaum.
+
 [Priorisierter Reparaturstand](code-repair-stabilization-status-20261007.md):
 `00de664df` besteht PostgreSQL, OpenAPI, Docs, beide E2E und Service Security;
 Quality, Security Scan und Gesamt-CI weiter rot. Backend acht Fehler bei

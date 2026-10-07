@@ -63,7 +63,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
-| `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | mittel | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
+| `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | hoch | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
 | `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
 | `fuhrpark/rechnungen` | Fuhrpark-Rechnungen | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/rechnungen/agent-contract` |
 | `fuhrpark/terminarten` | Terminarten | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/terminarten/agent-contract` |
@@ -1104,7 +1104,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `create_activity` | Aktivitaet anlegen | safe | nein | `Noch kein Fachweg: Der Aktivitaeten-Weg der Opportunity schreibt in eine Tabelle, die keine Migration anlegt, und prueft den Mandanten nicht.` |
+| `create_activity` | Aktivitaet anlegen | safe | nein | `Noch nicht in der Maske: Betreff und Typ kann die native Maske noch nicht erfassen. Der Fachweg POST /crm/opportunities/{id}/activities ist mandantengebunden und schreibt in den Reiter Aktivitaeten.` |
 
 ---
 
@@ -1232,7 +1232,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bestellen` | Bestellung erstellen | safe | nein | `Noch kein Fachweg: Die Umwandlung Angebot -> Bestellung liest Spalten, die keine Migration anlegt.` |
+| `bestellen` | Bestellung erstellen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/actions/bestellen` |
 
 ---
 
@@ -2386,7 +2386,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `stornieren` | Stornieren | high | ja | `Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst.` |
+| `stornieren` | Stornieren | high | ja | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
 
 ---
 
@@ -2474,7 +2474,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `drucker` | Drucker einrichten | safe | nein | `Hinterlegt den Drucker an der Fahrzeugakte.` |
 | `drucken` | Drucken | safe | nein | `Druckt die Fahrzeugakte.` |
 | `unfall` | Unfall-Anzeige | moderate | nein | `Erfasst eine Unfallanzeige zum Fahrzeug.` |
-| `loeschen` | Fahrzeug löschen | destructive | nein | `Loescht die Fahrzeugakte nach Bestaetigung.` |
+| `loeschen` | Fahrzeug löschen | high | nein | `Loescht die Fahrzeugakte nach Bestaetigung.` |
 
 ---
 

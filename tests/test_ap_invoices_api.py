@@ -6,6 +6,8 @@ DQ-Validierung, Approval-Workflow-Pfade.
 """
 from __future__ import annotations
 
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -120,7 +122,9 @@ def test_get_nonexistent_ap_invoice_returns_404():
 
 def test_create_ap_invoice_minimal():
     payload = {
-        "number": "AP-TEST-001",
+        # Eindeutig je Lauf: Seit 07.10.2026 ueberschreibt Anlegen keine vorhandene
+        # Rechnung mehr (409); die feste Nummer liess den zweiten Lauf scheitern.
+        "number": f"AP-TEST-{uuid.uuid4().hex[:10]}",
         "date": "2026-05-07",
         "customerId": "supplier-1",
         "dueDate": "2026-06-07",

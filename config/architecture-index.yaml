@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-07
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-07T10:48:57Z'
+generated_at: '2026-10-07T14:57:19Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1208,6 +1208,7 @@ domains:
     - ist_aggregation_service
     - l3_report_catalog_service
     - meldewesen_lifecycle_service
+    - payment_run_freigabe
     - pos_accounting_service
     - pos_compat_service
     - pos_fiscal_document_service
@@ -2057,8 +2058,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 935
   frontend_routes_mapped: 935
-  backend_services_total: 273
-  backend_services_mapped: 273
+  backend_services_total: 274
+  backend_services_mapped: 274
   backend_endpoints_total: 454
   backend_endpoints_mapped: 454
 unmapped:

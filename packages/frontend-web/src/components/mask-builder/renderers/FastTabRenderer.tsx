@@ -5,7 +5,7 @@ import type { TableQueryState } from '../runtime/types'
 import { FastFormRenderer } from './FastFormRenderer'
 import { FastTableRenderer } from './FastTableRenderer'
 import { RowDetailBand } from './RowDetailBand'
-import { layoutClasses } from './render-utils'
+import { layoutClasses, repeatsCaption } from './render-utils'
 import { rowIdentity } from './row-identity'
 
 export const FastTabRenderer = memo(function FastTabRenderer({
@@ -78,6 +78,7 @@ export const FastTabRenderer = memo(function FastTabRenderer({
           <div key={tableKey}>
             <FastTableRenderer
               table={tablePlan}
+              suppressHeading={repeatsCaption(tablePlan.label, plan.shell.title)}
               rows={rows}
               page={tableQueryStates?.[tableKey]?.page}
               sort={tableQueryStates?.[tableKey]?.sort}
