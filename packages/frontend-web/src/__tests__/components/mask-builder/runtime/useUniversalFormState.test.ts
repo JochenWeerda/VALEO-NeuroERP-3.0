@@ -112,4 +112,33 @@ describe('useUniversalFormState', () => {
     await act(async () => { await Promise.all([p1!, p2!]) })
     expect(onSubmit).toHaveBeenCalledTimes(1)
   })
+
+  // Sichtpruefung 07.10.2026: Eine frisch geoeffnete Maske meldete "Pflichtfeld"
+  // fuer Felder, die noch niemand angefasst hatte. Die Pruefung bleibt vollstaendig
+  // (validationPlan, fieldErrors); nur die Anzeige wartet auf Beruehrung oder Versuch.
+  describe('sichtbare Fehler', () => {
+    it('zeigt beim Oeffnen keinen Fehler, sperrt aber trotzdem', () => {
+      const { result } = renderHook(() => useUniversalFormState({ screen: SCREEN, initialValues: { name: '' } }))
+      expect(result.current.validationPlan.hasBlockingErrors).toBe(true)
+      expect(result.current.visibleFieldErrors).toEqual({})
+    })
+
+    it('zeigt den Fehler eines bearbeiteten Feldes', () => {
+      const { result } = renderHook(() => useUniversalFormState({ screen: SCREEN, initialValues: { name: 'A' } }))
+      act(() => result.current.setValue('name', ''))
+      expect(result.current.visibleFieldErrors?.name).toHaveLength(1)
+    })
+
+    it('zeigt alle Fehler nach revealErrors und nach einem Absendeversuch', async () => {
+      const onSubmit = vi.fn()
+      const { result } = renderHook(() => useUniversalFormState({ screen: SCREEN, initialValues: { name: '' }, onSubmit }))
+      act(() => result.current.revealErrors?.())
+      expect(result.current.visibleFieldErrors?.name).toHaveLength(1)
+      act(() => result.current.resetForm())
+      expect(result.current.visibleFieldErrors).toEqual({})
+      await act(async () => { await result.current.submit() })
+      expect(onSubmit).not.toHaveBeenCalled()
+      expect(result.current.visibleFieldErrors?.name).toHaveLength(1)
+    })
+  })
 })

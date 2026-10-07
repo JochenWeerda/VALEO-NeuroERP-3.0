@@ -13,6 +13,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**Personal-Rollenclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; personal_bewerbungen.py ausschliesslich rollenbezogene Route-Dependencies fuer alle 16 Wege, neuer Test test_personal_bewerbungen_roles.py; eigene QA/Slice/Workboard und committed-source OpenAPI/Inventare/Katalog. Handshakes aller drei Bewerbungs-Slices melden fehlenden Rollenschutz; kein aktiver Fremdclaim oder WIP auf Backenddatei. Annahme explizit: neue Fachrollen folgen vorhandener DOMAIN_LESEN/BEARBEITEN/ADMIN-Konvention: PERSONAL_LESEN/B.../ADMIN plus admin/manager lesen; PERSONAL_BEARBEITEN/ADMIN plus admin/manager bearbeiten; nur PERSONAL_ADMIN/admin fuer Aufbewahrung setzen, endgueltigen Loeschlauf, Bewerbung loeschen und Fassungen anlegen. Widerruf verlangt dieselbe Bearbeitungsrolle wie Erteilung, weiterhin ohne Pflichtbody; kein Bewerber-Selbstzugang behauptet. Zentrale require_roles-Factory wird wiederverwendet, keine alternative Tokenpruefung. Abnahme: alle echten Routerwege ohne/falsche Rolle 403 vor DB, passende Rollen erreichen DB, kein Token verweigert, Wire-Vertraege und Tenantfilter unveraendert. Kein PostgreSQL-Schreibtest, neue DB/Container, Reset oder Migration; fremde Masken-WIP geschuetzt. Doku-Nachclaim vor Edit: neue zentrale QA personal-bewerbungen-rollenschutz-20261007.md; bestehende Bewerbungs-Loeschlauf-, Einwilligungs-, Fassungs- und Masken-QA ausschliesslich Rollen-Handshakes nachziehen, keine fremden Fachentscheidungen.
+
+**Personal-Rollenabnahme:** Personal-Rollenschutz abgeschlossen: Alle 16 Bewerbungswege verwenden die zentrale Rollen-Factory mit get_current_user vor DB-Zugriff. Acht Lesepfade, vier Bearbeitungswege, vier Verwaltungswege; manager hat keine Verwaltungsrechte, fachfremde Rollen werden abgewiesen. 161 Rollen-/Token-/Dispatch-Vertraege plus 163 bestehende Bewerbungs-/Loeschlauf-/Einwilligungs-/Fassungsvertraege auf gemeinsamem Probe: 324 bestanden, null Skip, Exit 0 in 65,99 s. Strukturvergleich alle Handlerkoerper/Signaturen/Tenantfilter unveraendert. main.app bestaetigt alle 16 als erste FULL-Matches; 3103 Pfade und saemtliche DTO-/Request-/Response-/Parametervertraege exakt erhalten, kanonische Spec. 41 Routerkonflikte unveraendert offen. Drei Inventare und Architekturindex --check bestanden (committed Frontend-Routen aus 81407bc6d integriert: 935 Routen/273 Services/454 Endpoint-Module). Katalog 659 Tabellen mit aktueller committed Masken-Lineage lesend geerntet, --check bestanden. Fremde Masken-/Aktions-WIP erhalten; keine neue Datenbank/Container, Migration oder Reset. Alte Rollen-Handshakes in vier QA-Dokumenten nachgezogen; zentrale Rollen-QA erklaert Akteursidentitaet, Bewerber-Selbstwiderruf und UI-Rollensteuerung als separate offene Punkte. Initiale lokale Teilsuite-Coverage/Diagnoseabsturz dokumentiert, final gezielt --no-cov; globaler CI-Gate unveraendert. GitHub bea6fbbdb Docs Build/Governance/OpenAPI/PostgreSQL erfolgreich; Quality/kritische E2E/Service Security abgebrochen, Smoke/Security/Gesamt-CI fehlgeschlagen. Neue Abnahme dieses Fixes ausstehend.
+
 **Fassungs-Integrationsclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; committed-source OpenAPI, drei Code-Inventare und Architekturindex fuer ac69c26f0; eigene QA/Slice/Workboard. Docs Build 37512887149 scheitert am Migrationsinventar, OpenAPI 37512887459 an fehlender Fassungsintegration. Fremder Fachcode, Migration, Tests und Frontend-WIP bleiben unveraendert. Abnahme: alle bisherigen Pfade/Methoden erhalten, exakt neue Erklaerungswege und kanonischer fassung-Vertrag, Generatoren --check. Bestehender Katalogclaim bleibt lesend auf gemeinsamem Probe; keine Migration/Reset, neue DB/Container oder CI-Schema-Upload.
 
 **Fassungs-/Katalog-Abnahme:** Fassungsintegration 2026-10-07: Spec/Inventare aus committed 0dbd76e6f (Backend ac69c26f0) ohne fremde Arbeitsbaumquellen. Alle 3101 bisherigen Pfade/Methoden erhalten; genau zwei neue Erklaerungspfade mit GET/POST und GET {fassung}, jetzt 3103 Pfade. EinwilligungIn verlangt fassung >=1 statt freiem einwilligungstext; render(build_spec()) kanonisch. 41 bestehende Routerkonflikte bleiben offen. Drei Code-Inventare --check und Architekturindex --check --require-complete bestanden: 932 Routen/273 Services/454 Endpoint-Module. Gemeinsamer Probe lesend auf bewerbung_erklaerung_fassung_20261006; Katalog aus committed Generator/Backend zweimal geerntet und --check bestanden, 659 Tabellen (vorher 641), 41 neue und 23 entfallene Tabellennamen gegen altes Artefakt. Keine Datenbankaenderung, Migration, Reset, neue DB/Container oder CI-Schema-Upload. Lokal bestandener Katalogabgleich ist keine frische CI-Schemaabnahme; diese folgt im neuen Lauf. Fremde Frontend-/Generator-/Spec-WIP erhalten. GitHub ac69c26f0: PG/Service Security/Full Security Agent/kritische E2E/Doku-Governance/Erntepeak erfolgreich; Docs Build wegen Migration-Inventar, OpenAPI und Quality wegen fehlender Specintegration rot. Zwei Frontend-Testbefunde, Security, Smoke/UAT/Gesamt-CI bleiben offen.
@@ -1970,6 +1974,122 @@ macht aus einem Verbindungsfehler einen Umsatz von 0 EUR; `catch { return [] }` 
 weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
+
+## MASK-AKTIONEN-WIRKUNG-20261007 — in Arbeit, Claude Code
+
+**Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen
+in `app/api/v1/endpoints/mask_actions.py` schreibt fachlich — sie bauen ein
+Ergebnis-Dict, schreiben Audit und Outbox und antworten `success: true`. Die Masken
+bestaetigen damit Freigaben, Bestellungen, Stornos, die nie stattfanden. Schlimmer:
+Das Ereignis `finance.payment_run.approved` speist die Projektion
+`payment_run_cockpit` — ein nicht freigegebener Zahlungslauf erscheint im Lesemodell
+als freigegeben. Gegenprobe: Alle neun Pfade sind die einzigen aktiven Handler; kein
+Outbox-Konsument fuehrt die Mutation nach (nur Projektionen).
+
+**Behebung je Aktion:**
+
+| Aktion | Weg |
+|---|---|
+| Zahlungslauf freigeben | Delegation an `payment_runs.approve_payment_run` |
+| Lieferschein drucken | Delegation an `sales_delivery_notes.print_delivery_note` |
+| Reklamation abschliessen | Delegation an `reklamation_api.transition_status` (Ziel `geschlossen`, Zustandsmaschine) |
+| Angebot → Bestellung | Delegation an `EinkaufCompatService.convert_angebot_to_order` |
+| Opportunity-Aktivitaet, Lead qualifizieren, Lagerbewegung stornieren, Wareneingang am Artikel, Ernteabrechnung drucken | **kein echter Fachweg** → Fake-Handler entfernt, SD-Aktion `stubReason` ohne `commandEndpoint` (Projektkonvention) |
+
+**Transaktion:** `run_mask_action` erhaelt einen Delegationsmodus — Audit- und
+Outbox-Zeilen werden in die Sitzung gelegt, dann ruft er den Fachweg, dessen eigener
+Commit Mutation, Audit und Ereignis **atomar** schreibt. Scheitert der Fachweg:
+Rollback, und die Maske zeigt den **fachlichen** Grund (`HTTPException.detail`)
+statt einer Pauschalmeldung. dryRun prueft gegen die Datenbank (Objekt da, Zustand
+passt), statt "Validierung erfolgreich" ohne Pruefung zu melden.
+
+**Nicht Teil (Befunde, benannt):** `approve_payment_run` nimmt den Mandanten aus
+einem Query-Parameter (Vorgabe `"system"`) statt aus dem geprueften Kontext und
+prueft keine Rolle; `add_opportunity_activity` prueft den Mandanten nicht und
+schreibt in eine Tabelle, die keine Migration anlegt (500 auf frischer DB). Beides
+Finanz-/CRM-Bereich, eigene Slices. Rollenpruefung der Bewerbungswege: Codex
+(`cf87267da`).
+
+**Dateibesitz:** `app/api/v1/endpoints/mask_actions.py`,
+`app/services/mask_action_runtime_service.py`, die betroffenen Aktions-Eintraege in
+`app/core/screen_definitions.py` (nur `commandEndpoint`/`stubReason` dieser neun
+Aktionen), neuer Vertrag `tests/test_mask_aktionen_wirkung.py`, eigene QA-Doku.
+Keine Aenderung an den vier Fach-Endpunkten.
+
+**Abnahme:** Gegen `valeo_probe`: jede delegierte Aktion aendert den Fachdatensatz
+(Status/Bestellung) und schreibt Audit+Outbox in derselben Transaktion; ein
+gescheiterter Fachweg hinterlaesst weder Mutation noch Audit noch Ereignis und
+meldet den Grund; fremder Mandant 404/abgewiesen; dryRun schreibt nichts und meldet
+fehlendes Objekt/falschen Zustand. Statisch: kein Handler in `mask_actions.py`
+meldet Erfolg ohne Fachaufruf; jede SD-Aktion mit `commandEndpoint` zeigt auf einen
+existierenden Weg. Bestehende SD-/UIX-Vertraege gruen.
+
+## BEWERBUNG-EINWILLIGUNG-MASKE-20261007 — abgeschlossen, Claude Code
+
+**Auftrag:** Offenen Punkt 2 aus
+[Die Einwilligung zur laengeren Aufbewahrung](../quality-assurance/bewerbung-einwilligung-20261006.md)
+schliessen: Erteilen und Widerrufen sind nur ueber die API erreichbar, Fassungen
+anlegen ebenso. Art. 7 Abs. 3 DSGVO meint auch die **Zugaenglichkeit** — der
+Widerruf gehoert an eine Stelle, die das Personalbuero ohne Umwege findet.
+**User-Vorgabe:** keine handgebaute Maske, sondern Mask-Builder und Screen
+Definitions.
+
+**Weg (geprueft, warum so):** `UniversalNativeDetailPage` sammelt fuer Aktionen
+keine Eingaben (`inputFlow` ist im Frontend nur Dokumentation) und erwartet
+`ActionResult`-Antworten. Deshalb das bestehende **Capture-Muster** wie bei der
+Bewerbungen-Arbeitsliste und dem Fahrzeug-Stamm: SD im Backend-Register
+(`screen_definitions_capture.py`) und als Kopie in `masks/capture-screens.ts`,
+gerendert von `UniversalMaskRenderer` mit Formularzustand; die Seite liefert nur
+Daten, Auswahloptionen und Aktions-Handler — kein eigenes Feld- oder Tabellen-JSX.
+
+**Was gebaut wird:**
+* SD `personal/bewerbung-einwilligung` (objectPage, Route
+  `personal/bewerbung/:id/einwilligung`): Stand (laeuft bis / erteilt am),
+  Erteilen (Fassung als Auswahl aus den Fassungen, gueltig bis, Kanal,
+  erfasst durch; Wortlaut der gewaehlten Fassung zur Ansicht), Verzeichnis als
+  Tabelle. Aktionen Erteilen und Widerrufen — Widerruf mit **einem** Klick plus
+  Bestaetigung, ohne Grund und ohne Eingabe.
+* SD `personal/einwilligungserklaerungen` (worklist): Fassungen mit Wortlaut,
+  neue Fassung anlegen. Kein Bearbeiten, kein Loeschen (unveraenderlich).
+* Bewerbungen-Arbeitsliste: Zeilenaktion "Einwilligung" und Weg zu den Fassungen.
+
+**Dateibesitz:** `app/core/screen_definitions_capture.py` (zwei neue Builder, eine
+Zeilen-/Fussaktion im Bewerbungen-Builder), `app/core/screen_definitions.py` (nur
+Register-, Synonym- und Listenrouten-Eintraege der zwei SDs),
+`packages/frontend-web/src/masks/capture-screens.ts` (entsprechend),
+`src/lib/api/bewerbung-einwilligung.ts`, `src/pages/personal/bewerbung-einwilligung.tsx`,
+`src/pages/personal/einwilligungserklaerungen.tsx` (neu),
+`src/pages/personal/bewerbungen.tsx`, `src/app/route-aliases.json` plus generierte
+Routendateien, Navigationseintrag in `domains/operations.tsx`, neue Tests
+(`tests/test_bewerbung_einwilligung_masken.py`, Vitest unter
+`__tests__/pages/personal/`), eigene QA-Doku, Punkt 2 der Einwilligungs-QA-Doku.
+
+**Abnahme:** beide SDs `generatorReady`, Advisory 1,0, Governance ohne Fehler,
+UX-Lint ohne Fehler, Meridian-Regeln (kein technischer Schluessel im Kopf);
+Vitest: Erteilen schickt Fassung/Ende/Kanal, Widerruf schickt **keinen** Rumpf,
+Doppelklick-Schutz, Fehler sichtbar, Fassungsoptionen aus der API; Fassung
+anlegen mit 409-Hinweis auf vorhandene Nummer; tsc und Lint der neuen Dateien gruen.
+
+**Abnahme (07.10.2026):** Zwei Screen Definitions im Register (Backend +
+`capture-screens.ts`), beide `generatorReady`, Advisory 1,0, Governance/UX-Lint ohne
+Fehler; Seiten liefern nur Daten, Optionen und Handler. Widerruf ein Klick mit
+Bestaetigung ohne Feld und ohne Rumpf; Fassungen ohne Aenderungsweg; Erteilen ohne
+Vorauswahl der Fassung. **20** SD-Vertraege, **131** systemweite SD-Vertraege (Meridian-
+Identitaet `applicant_name` eingetragen), **14** Vitest, **25** Frontend-Nachbarn gruen;
+`tsc` 0 Fehler, ESLint 0 Fehler, Routing-Integritaet und Navigationsziele bestanden.
+**Nicht gelaufen:** Sichtpruefung in der App (Backend-Image vor den Fassungs-Wegen,
+Frontend auf 3001 ohne Antwort; kein Neubau ungefragt). **Nebenbefund:** keiner der
+neun `execute`-Handler in `mask_actions.py` schreibt fachlich — Erfolg ohne Wirkung,
+eigener Slice. QA:
+[bewerbung-einwilligung-maske-20261007.md](../quality-assurance/bewerbung-einwilligung-maske-20261007.md).
+
+**Sichtpruefung nachgeholt (07.10.2026):** Backend neu gestartet (Quellcode
+eingebunden), Vite 3001, Playwright gegen echte API. Gefunden und behoben: Auswahlfeld
+ohne leere Option zeigte eine nie getroffene Wahl (`FieldRenderer`, alle Masken);
+Pflichtfeld-Meldungen beim Oeffnen (`visibleFieldErrors`/`revealErrors` in
+`useUniversalFormState`, Sperre unveraendert); Maske: Leeren nach Erfolg, Datumsformat.
+Frontend-Vollauf 963 gruen, 8 rot aus fremdem WIP (button/input/checkbox) und
+Schulungen-Altvertrag. Rollenpruefung der Bewerbungswege uebernimmt Codex (`cf87267da`).
 
 ## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — abgeschlossen, Claude Code
 

@@ -143,7 +143,10 @@ Tabellenverweis-Ratsche seit dem Nachweislauf.
 
 1. ~~**Der Nachweis läuft noch nicht.**~~ **Gelaufen am 06.10.2026**: Migration in
    beiden Datenbanken, 42 Verträge, fünfte Ratsche; siehe Nachweis.
-2. **Keine Maske.** Erteilen und Widerrufen sind nur über die API erreichbar. Der
+2. ~~**Keine Maske.**~~ **Geschlossen am 07.10.2026** —
+   [Die Masken zur Einwilligung](bewerbung-einwilligung-maske-20261007.md): Erteilen
+   und Widerrufen aus der Bewerbungsliste, Fassungen in eigener Maske, beides über
+   Screen Definitions. Ursprünglicher Befund: Erteilen und Widerrufen sind nur über die API erreichbar. Der
    Widerruf gehört an eine Stelle, die ein Bewerber oder das Personalbüro ohne
    Umwege findet — Art. 7 Abs. 3 meint auch die Zugänglichkeit.
 3. **Kein Widerruf durch den Bewerbenden selbst.** Beide Wege setzen ein internes
@@ -157,3 +160,8 @@ Tabellenverweis-Ratsche seit dem Nachweislauf.
    der Nachweis. Eine **versionierte** Einwilligungserklärung (eine Fassung, viele
    Erteilungen) wäre das nächste Stück Ordnung; heute kann jede Erteilung einen
    anderen Text tragen, und niemand merkt es.
+
+
+## Rollenschutz nachgezogen am 07.10.2026
+
+[Rollenschutz vom 07.10.2026](personal-bewerbungen-rollenschutz-20261007.md): Erteilung und interner Widerruf verlangen dieselbe Bearbeitungsrolle. Kein Pflichtbody beim Widerruf; Bewerber-Selbstzugang bleibt offen.

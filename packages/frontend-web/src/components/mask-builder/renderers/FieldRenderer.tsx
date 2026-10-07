@@ -117,7 +117,10 @@ export function FieldRenderer({
           id={field.key}
           value={renderValue(value)}
           disabled={isReadOnly}
-          placeholder={field.placeholder}
+          // Ohne leere Option zeigt der Browser die erste Option als gewaehlt,
+          // waehrend der Wert leer ist — eine Auswahl, die niemand getroffen hat.
+          placeholder={field.placeholder ?? 'Bitte wählen'}
+          ariaLabel={field.label}
           options={(field.options ?? []).map((option) => ({ value: String(option.value), label: option.label }))}
           onValueChange={onChange ? (v) => onChange(v) : () => undefined}
         />

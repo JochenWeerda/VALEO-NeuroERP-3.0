@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-06",
+  "generatedAt": "2026-10-07",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -2537,6 +2537,68 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "personal/bewerbung-einwilligung",
+      "title": "Einwilligung zur Aufbewahrung",
+      "domain": "hr",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__bewerbung-einwilligung/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/bewerbung-einwilligung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/bewerbung-einwilligung/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/bewerbung-einwilligung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "erteilen",
+          "label": "Einwilligung erteilen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Erteilt die Einwilligung gegen die gewaehlte Fassung."
+        },
+        {
+          "key": "widerrufen",
+          "label": "Einwilligung widerrufen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Widerruft die Einwilligung sofort, ohne Grund."
+        },
+        {
+          "key": "zurueck",
+          "label": "Zu den Bewerbungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Bewerbungsliste."
+        },
+        {
+          "key": "erklaerungen",
+          "label": "Einwilligungserklärungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung."
+        }
+      ],
+      "sensitive_fields": [
+        "applicant_name",
+        "erfasst_durch"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "personal/bewerbungen",
       "title": "Bewerbungen",
       "domain": "hr",
@@ -2568,11 +2630,59 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Leert die Eingabe fuer eine neue Bewerbung."
+        },
+        {
+          "key": "erklaerungen",
+          "label": "Einwilligungserklärungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung."
         }
       ],
       "sensitive_fields": [
         "applicant_email"
       ],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "personal/einwilligungserklaerungen",
+      "title": "Einwilligungserklärungen",
+      "domain": "hr",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__einwilligungserklaerungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/einwilligungserklaerungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/einwilligungserklaerungen/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/einwilligungserklaerungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Fassung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt die naechste Fassung an; sie ist danach unveraenderlich."
+        },
+        {
+          "key": "neu",
+          "label": "Neu",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer eine neue Fassung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {

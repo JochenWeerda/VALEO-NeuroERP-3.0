@@ -42,6 +42,7 @@ from app.api.v1.schemas.personal_bewerbung_schemas import (
     StufeIn,
     TrockenlaufOut,
 )
+from app.auth.deps import require_roles
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -51,11 +52,17 @@ from app.services import bewerbung_service as dienst
 
 logger = logging.getLogger(__name__)
 
+# Fachrollen ergaenzen die vorhandenen globalen Administrator-/Managerrollen.
+# Aufbewahrung, Loeschung und verbindliche Fassungen verlangen Verwaltung.
+personal_read = require_roles("PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager")
+personal_write = require_roles("PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager")
+personal_admin = require_roles("PERSONAL_ADMIN", "admin")
+
 router = APIRouter(prefix="/personal", tags=["personal", "hr", "recruiting"])
 
 
 @router.get("/applications", response_model=List[BewerbungOut],
-            summary="Bewerbungen auflisten")
+            summary="Bewerbungen auflisten", dependencies=[Depends(personal_read)])
 async def list_applications(
     status: Optional[str] = Query(None, description="EINGANG | VORAUSWAHL | … | ABGELEHNT"),
     position_id: Optional[str] = Query(None),
@@ -74,7 +81,7 @@ async def list_applications(
 
 
 @router.post("/applications", status_code=201, response_model=BewerbungOut,
-             summary="Bewerbung erfassen")
+             summary="Bewerbung erfassen", dependencies=[Depends(personal_write)])
 async def create_application(
     payload: BewerbungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -99,7 +106,7 @@ async def create_application(
 
 
 @router.get("/applications/aufbewahrung", response_model=AufbewahrungOut,
-            summary="Aufbewahrungsfrist für Bewerberdaten lesen")
+            summary="Aufbewahrungsfrist für Bewerberdaten lesen", dependencies=[Depends(personal_read)])
 async def get_bewerbung_aufbewahrung(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -124,7 +131,7 @@ async def get_bewerbung_aufbewahrung(
 
 
 @router.put("/applications/aufbewahrung", response_model=AufbewahrungOut,
-            summary="Aufbewahrungsfrist für Bewerberdaten festlegen")
+            summary="Aufbewahrungsfrist für Bewerberdaten festlegen", dependencies=[Depends(personal_admin)])
 async def set_bewerbung_aufbewahrung(
     payload: AufbewahrungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -150,7 +157,7 @@ async def set_bewerbung_aufbewahrung(
 
 
 @router.get("/applications/loeschlauf/faellig", response_model=TrockenlaufOut,
-            summary="Trockenlauf: was gelöscht würde")
+            summary="Trockenlauf: was gelöscht würde", dependencies=[Depends(personal_read)])
 async def get_loeschlauf_faellig(
     limit: int = Query(1000, ge=1, le=5000),
     tenant_id: str = Depends(get_tenant_id),
@@ -190,7 +197,7 @@ async def get_loeschlauf_faellig(
 
 
 @router.get("/applications/loeschlaeufe", response_model=List[LoeschlaufOut],
-            summary="Durchgeführte Löschläufe")
+            summary="Durchgeführte Löschläufe", dependencies=[Depends(personal_read)])
 async def list_loeschlaeufe(
     limit: int = Query(100, ge=1, le=1000),
     tenant_id: str = Depends(get_tenant_id),
@@ -206,7 +213,7 @@ async def list_loeschlaeufe(
 
 
 @router.post("/applications/loeschlauf", status_code=201, response_model=LoeschlaufOut,
-             summary="Löschlauf durchführen")
+             summary="Löschlauf durchführen", dependencies=[Depends(personal_admin)])
 async def post_loeschlauf(
     payload: LoeschlaufIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -253,7 +260,7 @@ async def post_loeschlauf(
 
 
 @router.get("/applications/einwilligungserklaerungen", response_model=List[ErklaerungOut],
-            summary="Fassungen der Einwilligungserklärung")
+            summary="Fassungen der Einwilligungserklärung", dependencies=[Depends(personal_read)])
 async def list_erklaerungen(
     limit: int = Query(200, ge=1, le=1000),
     tenant_id: str = Depends(get_tenant_id),
@@ -269,7 +276,7 @@ async def list_erklaerungen(
 
 
 @router.post("/applications/einwilligungserklaerungen", status_code=201,
-             response_model=ErklaerungOut, summary="Neue Fassung der Einwilligungserklärung")
+             response_model=ErklaerungOut, summary="Neue Fassung der Einwilligungserklärung", dependencies=[Depends(personal_admin)])
 async def post_erklaerung(
     payload: ErklaerungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -294,7 +301,7 @@ async def post_erklaerung(
 
 
 @router.get("/applications/einwilligungserklaerungen/{fassung}", response_model=ErklaerungOut,
-            summary="Eine Fassung der Einwilligungserklärung")
+            summary="Eine Fassung der Einwilligungserklärung", dependencies=[Depends(personal_read)])
 async def get_erklaerung(
     fassung: int,
     tenant_id: str = Depends(get_tenant_id),
@@ -309,7 +316,7 @@ async def get_erklaerung(
 
 
 @router.get("/applications/{application_id}", response_model=BewerbungOut,
-            summary="Bewerbung abrufen")
+            summary="Bewerbung abrufen", dependencies=[Depends(personal_read)])
 async def get_application(
     application_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -324,7 +331,7 @@ async def get_application(
 
 
 @router.patch("/applications/{application_id}/stage", response_model=BewerbungOut,
-              summary="Stufe wechseln")
+              summary="Stufe wechseln", dependencies=[Depends(personal_write)])
 async def update_application_stage(
     application_id: str,
     payload: StufeIn,
@@ -359,7 +366,7 @@ async def update_application_stage(
     response_class=Response,
     response_model=None,
     summary="Bewerbung löschen",
-)
+ dependencies=[Depends(personal_admin)])
 async def delete_application(
     application_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -394,7 +401,7 @@ async def delete_application(
     "/applications/{application_id}/einwilligung",
     response_model=EinwilligungStandOut,
     summary="Einwilligung: Stand und Verzeichnis",
-)
+ dependencies=[Depends(personal_read)])
 async def get_einwilligung(
     application_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -418,7 +425,7 @@ async def get_einwilligung(
     status_code=201,
     response_model=EinwilligungVorgangOut,
     summary="Einwilligung erteilen",
-)
+ dependencies=[Depends(personal_write)])
 async def post_einwilligung(
     application_id: str,
     payload: EinwilligungIn,
@@ -449,7 +456,7 @@ async def post_einwilligung(
     status_code=201,
     response_model=EinwilligungVorgangOut,
     summary="Einwilligung widerrufen",
-)
+ dependencies=[Depends(personal_write)])
 async def delete_einwilligung(
     application_id: str,
     erfasst_durch: Optional[str] = Query(None, max_length=120),

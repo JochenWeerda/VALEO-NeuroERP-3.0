@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-07
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (97 Masken).
+> Generiert aus `app/core/screen_definitions.py` (99 Masken).
 
 ## Übersicht
 
@@ -83,7 +83,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `logistik/tourenplanung` | Tourenplanung | logistics | niedrig | — | `GET /api/v1/masks/logistik/tourenplanung/agent-contract` |
 | `logistik/verladung` | Verladung | logistics | niedrig | — | `GET /api/v1/masks/logistik/verladung/agent-contract` |
 | `logistik/versandprofile` | Versandprofile | logistics | niedrig | — | `GET /api/v1/masks/logistik/versandprofile/agent-contract` |
+| `personal/bewerbung-einwilligung` | Einwilligung zur Aufbewahrung | hr | mittel | — | `GET /api/v1/masks/personal/bewerbung-einwilligung/agent-contract` |
 | `personal/bewerbungen` | Bewerbungen | hr | niedrig | — | `GET /api/v1/masks/personal/bewerbungen/agent-contract` |
+| `personal/einwilligungserklaerungen` | Einwilligungserklärungen | hr | niedrig | — | `GET /api/v1/masks/personal/einwilligungserklaerungen/agent-contract` |
 | `personal/onboarding` | Onboarding | hr | niedrig | — | `GET /api/v1/masks/personal/onboarding/agent-contract` |
 | `personal/qualifikationen` | Qualifikationen | hr | niedrig | — | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
 | `personal/schulungen` | Schulungen | hr | niedrig | — | `GET /api/v1/masks/personal/schulungen/agent-contract` |
@@ -1962,6 +1964,41 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: hr
 
+### `personal/bewerbung-einwilligung` — Einwilligung zur Aufbewahrung
+
+**Zweck:** Einwilligung zur laengeren Aufbewahrung einer Bewerbung erteilen oder widerrufen; das Verzeichnis ist der Nachweis nach Art. 7 Abs. 1 DSGVO.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/bewerbung-einwilligung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/bewerbung-einwilligung/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/bewerbung-einwilligung/readiness` |
+| Rollout-Route | `/mask-rollout/personal__bewerbung-einwilligung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `bewerbung` → `/api/v1/personal/applications/{entity_id}`
+- `einwilligung` → `/api/v1/personal/applications/{entity_id}/einwilligung`
+- `fassungen` → `/api/v1/personal/applications/einwilligungserklaerungen`
+
+**Beispiel-Prompts:**
+
+- Bis wann darf die Bewerbung {entity_id} aufbewahrt werden?
+
+**Sensible Felder:** `applicant_name, erfasst_durch`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `erteilen` | Einwilligung erteilen | safe | nein | `Erteilt die Einwilligung gegen die gewaehlte Fassung.` |
+| `widerrufen` | Einwilligung widerrufen | moderate | nein | `Widerruft die Einwilligung sofort, ohne Grund.` |
+| `zurueck` | Zu den Bewerbungen | safe | nein | `Wechselt zur Bewerbungsliste.` |
+| `erklaerungen` | Einwilligungserklärungen | safe | nein | `Oeffnet die Fassungen der Einwilligungserklaerung.` |
+
+---
+
 ### `personal/bewerbungen` — Bewerbungen
 
 **Zweck:** Bewerbungen erfassen. Der Stand folgt den offenen Stufen.
@@ -1990,6 +2027,36 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `speichern` | Speichern | safe | nein | `Legt eine Bewerbung im Eingang an.` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Bewerbung.` |
+| `erklaerungen` | Einwilligungserklärungen | safe | nein | `Oeffnet die Fassungen der Einwilligungserklaerung.` |
+
+---
+
+### `personal/einwilligungserklaerungen` — Einwilligungserklärungen
+
+**Zweck:** Fassungen der Einwilligungserklaerung fuer Bewerbungen fuehren; erteilt wird immer gegen eine Fassung.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/einwilligungserklaerungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/einwilligungserklaerungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/einwilligungserklaerungen/readiness` |
+| Rollout-Route | `/mask-rollout/personal__einwilligungserklaerungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `fassungen` → `/api/v1/personal/applications/einwilligungserklaerungen`
+
+**Beispiel-Prompts:**
+
+- Welche Fassung der Einwilligungserklaerung ist die neueste?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Fassung anlegen | safe | nein | `Legt die naechste Fassung an; sie ist danach unveraenderlich.` |
+| `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Fassung.` |
 
 ---
 
