@@ -49,7 +49,6 @@ AP_FREIGABE = "/api/v1/finance/ap/invoices/{}/actions/freigeben"
 OHNE_FACHWEG = {
     "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": "crm/lead",
     "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": "crm/opportunity",
-    "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen": "einkauf/angebot",
     "/api/v1/lager/artikel/{entity_id}/actions/wareneingang": "einkauf/anlieferavis",
     "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren": "lager/stock-movement",
     "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken": "agrar/harvest-settlement",

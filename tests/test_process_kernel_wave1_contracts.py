@@ -366,7 +366,7 @@ def test_ap_invoice_legacy_approve_facade_delegates_to_workflow(monkeypatch):
             applicable_rule=None,
         )
 
-    async def fake_approve_invoice(action, tenant_id, db):
+    async def fake_approve_invoice(action, tenant_id, db, user=None):
         return build_approval_status_response(
             invoice_id=action.invoice_id,
             tenant_id=tenant_id,
@@ -402,7 +402,9 @@ def test_ap_invoice_legacy_approve_facade_delegates_to_workflow(monkeypatch):
         )
     )
 
-    response = asyncio.run(ap_invoices.approve_ap_invoice("inv-legacy", approved_by="lead", db=None))
+    response = asyncio.run(ap_invoices.approve_ap_invoice(
+        "inv-legacy", approved_by=None, db=None, tenant_id="tenant-wave1", user={"sub": "lead", "roles": ["FINANCE_ADMIN"]}
+    ))
 
     assert response["status"] == "ok"
     assert response["data"]["status"] == "approved"
@@ -474,9 +476,9 @@ def test_ap_approval_reject_syncs_invoice_to_abgelehnt(monkeypatch):
             query_str = str(query)
             if "FROM domain_erp.ap_approval_requests" in query_str:
                 return type("Result", (), {"fetchone": lambda self: ("req-1", "inv-reject", 2, None, "pending")})()
-            if "SELECT approved_by, approved_at, comment" in query_str and "action = 'approve'" in query_str:
+            if "SELECT approved_by, created_at, comment" in query_str and "action = 'approve'" in query_str:
                 return type("Result", (), {"fetchall": lambda self: approvals_rows})()
-            if "SELECT approved_by, approved_at, comment" in query_str and "action = 'reject'" in query_str:
+            if "SELECT approved_by, created_at, comment" in query_str and "action = 'reject'" in query_str:
                 return type("Result", (), {"fetchall": lambda self: rejections_rows})()
             if "SELECT id FROM domain_erp.ap_approvals" in query_str:
                 return type("Result", (), {"fetchone": lambda self: None})()
@@ -564,7 +566,7 @@ def test_ap_invoice_detail_returns_workflow_snapshot(monkeypatch):
         )
     )
 
-    response = asyncio.run(ap_invoices.get_ap_invoice("inv-snapshot", db=None))
+    response = asyncio.run(ap_invoices.get_ap_invoice("inv-snapshot", db=None, tenant_id="tenant-wave1"))
 
     assert response["approval_status"] == "partially_approved"
     assert response["approval_required_approvals"] == 2
@@ -631,7 +633,7 @@ def test_ap_invoice_list_filters_zur_freigabe_via_workflow_status(monkeypatch):
         )
     )
 
-    response = asyncio.run(ap_invoices.list_ap_invoices(status="ZUR_FREIGABE", db=None))
+    response = asyncio.run(ap_invoices.list_ap_invoices(status="ZUR_FREIGABE", db=None, tenant_id="tenant-wave1"))
 
     assert len(response) == 1
     assert response[0]["number"] == "inv-pending"
@@ -729,7 +731,7 @@ def test_payment_run_approve_request_accepts_legacy_empty_body_and_uses_default_
 
     class DummyResult:
         def fetchone(self):
-            return ("run-1",)
+            return ("run-1", None)  # (Status|Kennung, Ersteller) — Ersteller unbekannt
 
     class DummyDb:
         def execute(self, _query, params):
@@ -770,7 +772,10 @@ def test_payment_run_approve_request_accepts_legacy_empty_body_and_uses_default_
     monkeypatch.setattr(payment_runs, "get_payment_run", fake_get_payment_run)
 
     request = payment_runs.ApprovePaymentRunRequest.model_validate({})
-    response = asyncio.run(payment_runs.approve_payment_run("run-1", request, tenant_id="tenant-wave1", db=DummyDb()))
+    # Seit 07.10.2026 ist der Freigeber der angemeldete Nutzer, nicht ein Rumpf-Default.
+    response = asyncio.run(payment_runs.approve_payment_run(
+        "run-1", request, tenant_id="tenant-wave1", db=DummyDb(), user={"sub": "api", "roles": ["FINANCE_ADMIN"]}
+    ))
 
     assert captured["approved_by"] == "api"
     assert captured["committed"] is True
@@ -1165,7 +1170,7 @@ def test_ap_invoice_detail_carries_semantic_status(monkeypatch):
         )
     )
 
-    response = asyncio.run(ap_invoices.get_ap_invoice("inv-semantic", db=None))
+    response = asyncio.run(ap_invoices.get_ap_invoice("inv-semantic", db=None, tenant_id="tenant-wave1"))
 
     assert response["semantic_status"] == "TEILWEISE_FREIGEGEBEN"
 
@@ -1230,7 +1235,7 @@ def test_ap_invoice_list_filter_uses_semantic_status(monkeypatch):
         )
     )
 
-    response = asyncio.run(ap_invoices.list_ap_invoices(status="FREIGEGEBEN", db=None))
+    response = asyncio.run(ap_invoices.list_ap_invoices(status="FREIGEGEBEN", db=None, tenant_id="tenant-wave1"))
 
     assert len(response) == 1
     assert response[0]["number"] == "inv-approved"

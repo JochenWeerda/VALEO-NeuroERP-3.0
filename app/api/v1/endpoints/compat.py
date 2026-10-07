@@ -820,11 +820,14 @@ async def einkauf_anfragen_list(
     return EinkaufCompatService(db, tenant_id).list_anfragen()
 
 
-def _load_einkauf_anfrage(db: Session, anfrage_id: str):
-    """Module-level loader so tests can monkeypatch it."""
+def _load_einkauf_anfrage(db: Session, anfrage_id: str, tenant_id: str):
+    """Module-level loader so tests can monkeypatch it.
+
+    Bis 07.10.2026 lasen diese vier Lader fest mit dem Mandanten "default".
+    """
     from app.services.einkauf_compat_service import EinkaufCompatService as _Svc  # local to avoid circular
     try:
-        return _Svc(db, "default").get_anfrage(anfrage_id)
+        return _Svc(db, tenant_id).get_anfrage(anfrage_id)
     except EntityNotFoundError:
         return None
 
@@ -833,7 +836,7 @@ def _load_einkauf_anfrage(db: Session, anfrage_id: str):
 async def einkauf_anfrage_get(
     anfrage_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    result = _load_einkauf_anfrage(db, anfrage_id)
+    result = _load_einkauf_anfrage(db, anfrage_id, tenant_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Anfrage not found")
     return result
@@ -867,10 +870,10 @@ async def einkauf_angebote_list(
     return EinkaufCompatService(db, tenant_id).list_angebote()
 
 
-def _load_einkauf_angebot(db: Session, angebot_id: str):
+def _load_einkauf_angebot(db: Session, angebot_id: str, tenant_id: str):
     from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
     try:
-        return _Svc(db, "default").get_angebot(angebot_id)
+        return _Svc(db, tenant_id).get_angebot(angebot_id)
     except EntityNotFoundError:
         return None
 
@@ -879,7 +882,7 @@ def _load_einkauf_angebot(db: Session, angebot_id: str):
 async def einkauf_angebot_get(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    result = _load_einkauf_angebot(db, angebot_id)
+    result = _load_einkauf_angebot(db, angebot_id, tenant_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Angebot not found")
     return result
@@ -932,10 +935,10 @@ async def einkauf_anlieferavis_list(
     return EinkaufCompatService(db, tenant_id).list_anlieferavis()
 
 
-def _load_einkauf_anlieferavis(db: Session, avis_id: str):
+def _load_einkauf_anlieferavis(db: Session, avis_id: str, tenant_id: str):
     from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
     try:
-        return _Svc(db, "default").get_anlieferavis(avis_id)
+        return _Svc(db, tenant_id).get_anlieferavis(avis_id)
     except EntityNotFoundError:
         return None
 
@@ -944,7 +947,7 @@ def _load_einkauf_anlieferavis(db: Session, avis_id: str):
 async def einkauf_anlieferavis_get(
     avis_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    result = _load_einkauf_anlieferavis(db, avis_id)
+    result = _load_einkauf_anlieferavis(db, avis_id, tenant_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Anlieferavis not found")
     return result
@@ -970,10 +973,10 @@ async def einkauf_auftragsbestaetigungen_list(
     return EinkaufCompatService(db, tenant_id).list_auftragsbestaetigungen()
 
 
-def _load_einkauf_auftragsbestaetigung(db: Session, bestaetigung_id: str):
+def _load_einkauf_auftragsbestaetigung(db: Session, bestaetigung_id: str, tenant_id: str):
     from app.services.einkauf_compat_service import EinkaufCompatService as _Svc
     try:
-        return _Svc(db, "default").get_auftragsbestaetigung(bestaetigung_id)
+        return _Svc(db, tenant_id).get_auftragsbestaetigung(bestaetigung_id)
     except EntityNotFoundError:
         return None
 
@@ -986,7 +989,7 @@ def _load_einkauf_auftragsbestaetigung(db: Session, bestaetigung_id: str):
 async def einkauf_auftragsbestaetigung_get(
     bestaetigung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    result = _load_einkauf_auftragsbestaetigung(db, bestaetigung_id)
+    result = _load_einkauf_auftragsbestaetigung(db, bestaetigung_id, tenant_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Auftragsbestaetigung not found")
     return result

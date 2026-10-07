@@ -13,6 +13,8 @@ from uuid import uuid4
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
+from app.auth.deps import get_current_user
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
@@ -94,6 +96,8 @@ def execution_case():
     app = FastAPI()
     app.include_router(payment_runs.router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
+    # Seit 07.10.2026: Mandant aus dem Header, Ausfuehrung nur FINANCE_ADMIN.
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "test", "roles": ["FINANCE_ADMIN"]}
     with TestClient(app) as client:
         yield db, client, ids
     db.rollback()
@@ -109,7 +113,7 @@ def execution_case():
 def execute(case):
     _, client, ids = case
     return client.post(f"/finance/payment-runs/{ids['run']}/execute",
-                       params={"tenant_id": ids["tenant"]}, json={"executed_by": "test"})
+                       headers={"X-Tenant-ID": ids["tenant"]}, json={"executed_by": "test"})
 
 
 def state(db, ids):
@@ -221,9 +225,10 @@ def test_concurrent_requests_only_execute_once(execution_case):
             app = FastAPI()
             app.include_router(payment_runs.router, prefix="/finance")
             app.dependency_overrides[get_db] = lambda: own_db
+            app.dependency_overrides[get_current_user] = lambda: {"sub": "test", "roles": ["FINANCE_ADMIN"]}
             with TestClient(app) as client:
                 response = client.post(f"/finance/payment-runs/{ids['run']}/execute",
-                                       params={"tenant_id": ids["tenant"]},
+                                       headers={"X-Tenant-ID": ids["tenant"]},
                                        json={"executed_by": "test"})
             return response.status_code, own_db.commits
 

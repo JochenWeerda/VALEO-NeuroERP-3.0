@@ -10,7 +10,7 @@ ohne fachliche Wirkung. Das Ereignis ``finance.payment_run.approved`` speiste di
 Projektion ``payment_run_cockpit``: Ein nicht freigegebener Zahlungslauf erschien im
 Lesemodell als freigegeben. Jetzt delegiert jeder Handler an den echten Fachweg
 (``run_delegated_mask_action``). Die sechs Aktionen ohne Fachweg (Lead qualifizieren,
-Opportunity-Aktivitaet, Angebot bestellen, Wareneingang am Artikel, Lagerbewegung
+Opportunity-Aktivitaet, Wareneingang am Artikel, Lagerbewegung
 stornieren, Ernteabrechnung drucken) haben keinen Endpunkt mehr; ihre Maske nennt
 den ``stubReason``. Siehe ``docs/quality-assurance/mask-aktionen-wirkung-20261007.md``.
 """
@@ -193,4 +193,53 @@ async def action_reklamation_abschliessen(
         check_fn=pruefen,
         delegate_fn=abschliessen,
         outbox_event_type="qualitaet.reklamation.closed",
+    )
+
+
+# ---------------------------------------------------------------------------
+# einkauf/angebot → bestellen
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/einkauf/angebote/{entity_id}/actions/bestellen",
+    response_model=MaskActionResult,
+    summary="Bestellung aus Angebot erstellen (SPEC-P1-04)",
+)
+async def action_angebot_bestellen(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
+        from app.services.einkauf_compat_service import _NICHT_BESTELLBAR, EinkaufCompatService
+
+        zeile = EinkaufCompatService(db_, tid)._load_angebot_raw_row(eid)
+        if zeile is None:
+            return _fehler("Angebot nicht gefunden.")
+        status = str(zeile._mapping.get("status") or "").upper()
+        if status in _NICHT_BESTELLBAR:
+            return _fehler(f"Angebot ist {status} und wird nicht bestellt.")
+        positionen = db_.execute(
+            text("SELECT COUNT(*) FROM einkauf_angebote_positionen WHERE angebot_id = :id"),
+            {"id": zeile._mapping.get("id")},
+        ).scalar()
+        return [] if positionen else _fehler("Ein Angebot ohne Positionen wird nicht bestellt.")
+
+    async def bestellen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
+        from app.services.einkauf_compat_service import EinkaufCompatService
+
+        ergebnis = await EinkaufCompatService(db_, tid).convert_angebot_to_order(eid)
+        return f"Bestellung {ergebnis.get('purchaseOrderNumber')} aus Angebot erstellt."
+
+    return await run_delegated_mask_action(
+        db,
+        action_key="bestellen",
+        entity_type="angebot",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        check_fn=pruefen,
+        delegate_fn=bestellen,
+        outbox_event_type="einkauf.bestellung.created_from_angebot",
     )

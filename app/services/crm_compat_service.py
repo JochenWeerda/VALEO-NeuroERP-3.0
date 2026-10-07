@@ -55,7 +55,7 @@ class CrmCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("crm_customer", customer_id)
         if doc is None:
-            raise EntityNotFoundError(f"Customer {customer_id} not found")
+            raise EntityNotFoundError("Customer", customer_id)
         return doc
 
     def list_cases(self, status: Optional[str] = None) -> list:
@@ -82,14 +82,14 @@ class CrmCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("crm_case", case_id)
         if doc is None:
-            raise EntityNotFoundError(f"Case {case_id} not found")
+            raise EntityNotFoundError("Case", case_id)
         return doc
 
     def update_case(self, case_id: str, payload: dict) -> dict:
         repo = doc_repo(self.db)
         doc = repo.get("crm_case", case_id)
         if doc is None:
-            raise EntityNotFoundError(f"Case {case_id} not found")
+            raise EntityNotFoundError("Case", case_id)
         doc = {**doc, **payload, "updated_at": now_iso()}
         repo.save("crm_case", case_id, doc)
         return doc

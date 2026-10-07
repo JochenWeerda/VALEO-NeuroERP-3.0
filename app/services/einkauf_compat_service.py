@@ -31,6 +31,22 @@ _RECHNUNG_TRANSITIONS = {
 }
 
 
+#: Die Tabelle heisst ``angebotsnummer``/``gesamtbetrag``; Artikel und Lieferzeit stehen
+#: an den Positionen. Bis 07.10.2026 las jeder Angebots-Weg Spalten, die keine
+#: Migration anlegt, und ein ``except`` machte "nicht gefunden" daraus.
+_ANGEBOT_FELDER = (
+    "a.id, a.angebotsnummer AS angebots_nummer, a.anfrage_id, a.lieferant_id, a.lieferant_name, "
+    "(SELECT p.bezeichnung FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id "
+    " ORDER BY p.pos_nr, p.id LIMIT 1) AS artikel_name, "
+    "a.gesamtbetrag AS netto_summe, a.waehrung, a.gueltig_bis, a.status, "
+    "(SELECT MAX(p.lieferzeit_tage) FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id) "
+    "AS lieferzeit_tage, a.created_at"
+)
+
+#: Ein Angebot in diesen Zustaenden wird nicht (noch einmal) bestellt.
+_NICHT_BESTELLBAR = {"IN_BESTELLUNG", "BESTELLT", "ABGELEHNT"}
+
+
 class EinkaufCompatService:
     def __init__(self, db: Session, tenant_id: str) -> None:
         self.db = db
@@ -353,7 +369,7 @@ class EinkaufCompatService:
         except Exception:
             row = None
         if row is None:
-            raise EntityNotFoundError(f"Anfrage {anfrage_id} not found")
+            raise EntityNotFoundError("Anfrage", anfrage_id)
         return self._anfrage_row_to_dict(row._mapping)
 
     def _load_anfrage_raw_row(self, anfrage_id: str) -> Any:
@@ -373,7 +389,7 @@ class EinkaufCompatService:
         from app.services.purchase_order_service import PurchaseOrderService
         row = self._load_anfrage_raw_row(anfrage_id)
         if row is None:
-            raise EntityNotFoundError(f"Anfrage {anfrage_id} not found")
+            raise EntityNotFoundError("Anfrage", anfrage_id)
         m = row._mapping
         po = await PurchaseOrderService(self.db, self.tenant_id).create_purchase_order({
             "subject": m.get("artikel") or f"Anfrage {m.get('anfrage_nummer')}",
@@ -396,13 +412,10 @@ class EinkaufCompatService:
 
     def list_bids(self, anfrage_id: str) -> list:
         from sqlalchemy import text
-        try:
-            rows = self.db.execute(text(
-                "SELECT id, angebots_nummer, lieferant_name, netto_summe, waehrung, status, created_at "
-                "FROM einkauf_angebote WHERE anfrage_id = :fid ORDER BY created_at DESC"
-            ), {"fid": anfrage_id}).fetchall()
-        except Exception:
-            return []
+        rows = self.db.execute(text(
+            f"SELECT {_ANGEBOT_FELDER} FROM einkauf_angebote a "  # nosec B608  # reviewed-safe: Feldliste ist ein Code-Literal
+            "WHERE a.anfrage_id = :fid AND a.tenant_id = :tid ORDER BY a.created_at DESC LIMIT 500"
+        ), {"fid": anfrage_id, "tid": self.tenant_id}).fetchall()
         return [
             {
                 "id": str(r._mapping.get("id")),
@@ -420,34 +433,25 @@ class EinkaufCompatService:
 
     def list_angebote(self) -> list:
         from sqlalchemy import text
-        try:
-            rows = self.db.execute(text(
-                "SELECT id, angebots_nummer, anfrage_id, lieferant_name, artikel_name, "
-                "netto_summe, gueltig_bis, status, lieferzeit_tage, created_at "
-                "FROM einkauf_angebote WHERE tenant_id = :tid ORDER BY created_at DESC LIMIT 500"
-            ), {"tid": self.tenant_id}).fetchall()
-        except Exception:
-            return []
+        rows = self.db.execute(text(
+            f"SELECT {_ANGEBOT_FELDER} FROM einkauf_angebote a "  # nosec B608  # reviewed-safe: Feldliste ist ein Code-Literal
+            "WHERE a.tenant_id = :tid ORDER BY a.created_at DESC LIMIT 500"
+        ), {"tid": self.tenant_id}).fetchall()
         return [self._angebot_row_to_dict(r._mapping) for r in rows]
 
     def get_angebot(self, angebot_id: str) -> dict:
         row = self._load_angebot_raw_row(angebot_id)
         if row is None:
-            raise EntityNotFoundError(f"Angebot {angebot_id} not found")
+            raise EntityNotFoundError("Angebot", angebot_id)
         return self._angebot_row_to_dict(row._mapping)
 
     def _load_angebot_raw_row(self, angebot_id: str) -> Any:
         from sqlalchemy import text
-        try:
-            return self.db.execute(text(
-                "SELECT id, angebots_nummer, anfrage_id, lieferant_name, artikel_name, "
-                "netto_summe, gueltig_bis, status, lieferzeit_tage, created_at "
-                "FROM einkauf_angebote "
-                "WHERE (id = :aid OR angebots_nummer = :aid) AND tenant_id = :tid "
-                "ORDER BY created_at DESC LIMIT 1"
-            ), {"aid": angebot_id, "tid": self.tenant_id}).fetchone()
-        except Exception:
-            return None
+        return self.db.execute(text(
+            f"SELECT {_ANGEBOT_FELDER} FROM einkauf_angebote a "  # nosec B608  # reviewed-safe: Feldliste ist ein Code-Literal
+            "WHERE (a.id = :aid OR a.angebotsnummer = :aid) AND a.tenant_id = :tid "
+            "ORDER BY a.created_at DESC LIMIT 1"
+        ), {"aid": angebot_id, "tid": self.tenant_id}).fetchone()
 
     def update_angebot_status(
         self, angebot_id: str, new_status: str, change_type: str
@@ -455,7 +459,7 @@ class EinkaufCompatService:
         from sqlalchemy import text
         row = self._load_angebot_raw_row(angebot_id)
         if row is None:
-            raise EntityNotFoundError(f"Angebot {angebot_id} not found")
+            raise EntityNotFoundError("Angebot", angebot_id)
         m = row._mapping
         self.db.execute(text(
             "UPDATE einkauf_angebote SET status = :status, updated_at = CURRENT_TIMESTAMP "
@@ -468,29 +472,52 @@ class EinkaufCompatService:
                 "angebotNummer": m.get("angebots_nummer") or str(m.get("id"))}
 
     async def convert_angebot_to_order(self, angebot_id: str) -> dict:
+        """Macht aus dem Angebot **eine** Bestellung — mit seinen Positionen.
+
+        Bestellung und Angebotsstatus entstehen in **einem** Commit. Ein Angebot ohne
+        Positionen wird nicht bestellt (vorher: eine erfundene Sammelposition), ein
+        bereits bestelltes nicht noch einmal (Zeilensperre gegen Doppelklick).
+        """
         from sqlalchemy import text
         from app.services.purchase_order_service import PurchaseOrderService
         row = self._load_angebot_raw_row(angebot_id)
         if row is None:
-            raise EntityNotFoundError(f"Angebot {angebot_id} not found")
+            raise EntityNotFoundError("Angebot", angebot_id)
         m = row._mapping
-        po = await PurchaseOrderService(self.db, self.tenant_id).create_purchase_order({
-            "subject": m.get("artikel_name") or f"Angebot {m.get('angebots_nummer')}",
-            "description": f"Erzeugt aus Angebot {m.get('angebots_nummer') or m.get('id')} "
-                           f"von {m.get('lieferant_name') or 'Lieferant'}",
-            "deliveryDate": m.get("gueltig_bis").isoformat()[:10] if m.get("gueltig_bis") else None,
-            "externalReference": m.get("angebots_nummer") or str(m.get("id")),
-            "items": [{"description": m.get("artikel_name") or "Angebotsposition",
-                       "quantity": 1,
-                       "unitPrice": float(m.get("netto_summe") or 0),
-                       "unit": "Stk"}],
-            "notes": f"Lieferant: {m.get('lieferant_name') or 'unbekannt'}",
-        })
-        self.db.execute(text(
-            "UPDATE einkauf_angebote SET status = 'IN_BESTELLUNG', updated_at = CURRENT_TIMESTAMP "
-            "WHERE id = :id AND tenant_id = :tid"
-        ), {"id": m.get("id"), "tid": self.tenant_id})
-        self.db.commit()
+        aktuell = self.db.execute(text(
+            "SELECT status FROM einkauf_angebote WHERE id = :id AND tenant_id = :tid FOR UPDATE"
+        ), {"id": m.get("id"), "tid": self.tenant_id}).scalar()
+        if str(aktuell or "").upper() in _NICHT_BESTELLBAR:
+            raise ConflictError(f"Angebot {m.get('angebots_nummer') or m.get('id')} ist {aktuell} und wird nicht bestellt.")
+        positionen = self.db.execute(text(
+            "SELECT pos_nr, artikel_nr, bezeichnung, menge, einheit, einheitspreis "
+            "FROM einkauf_angebote_positionen WHERE angebot_id = :id ORDER BY pos_nr, id LIMIT 500"
+        ), {"id": m.get("id")}).fetchmany(500)
+        if not positionen:
+            raise ValidationFailedError("Ein Angebot ohne Positionen wird nicht bestellt.")
+        try:
+            po = await PurchaseOrderService(self.db, self.tenant_id).create_purchase_order({
+                "subject": m.get("artikel_name") or f"Angebot {m.get('angebots_nummer')}",
+                "description": f"Erzeugt aus Angebot {m.get('angebots_nummer') or m.get('id')} "
+                               f"von {m.get('lieferant_name') or 'Lieferant'}",
+                "supplierId": m.get("lieferant_id"),
+                "deliveryDate": m.get("gueltig_bis").isoformat()[:10] if m.get("gueltig_bis") else None,
+                "externalReference": m.get("angebots_nummer") or str(m.get("id")),
+                "items": [{"description": z.bezeichnung or z.artikel_nr or f"Position {z.pos_nr}",
+                           "articleNumber": z.artikel_nr,
+                           "quantity": float(z.menge or 0),
+                           "unitPrice": float(z.einheitspreis or 0),
+                           "unit": z.einheit or "Stk"} for z in positionen],
+                "notes": f"Lieferant: {m.get('lieferant_name') or 'unbekannt'}",
+            }, commit=False)
+            self.db.execute(text(
+                "UPDATE einkauf_angebote SET status = 'IN_BESTELLUNG', updated_at = CURRENT_TIMESTAMP "
+                "WHERE id = :id AND tenant_id = :tid"
+            ), {"id": m.get("id"), "tid": self.tenant_id})
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
         self._invalidate()
         return {"message": "Angebot in Bestellung ueberfuehrt",
                 "purchaseOrderId": po.get("id"),
@@ -524,7 +551,7 @@ class EinkaufCompatService:
         except Exception:
             row = None
         if row is None:
-            raise EntityNotFoundError(f"Anlieferavis {avis_id} not found")
+            raise EntityNotFoundError("Anlieferavis", avis_id)
         return self._anlieferavis_row_to_dict(row._mapping)
 
     def transition_anlieferavis(self, avis_id: str, action: str) -> dict:
@@ -541,7 +568,7 @@ class EinkaufCompatService:
         except Exception:
             row = None
         if row is None:
-            raise EntityNotFoundError(f"Anlieferavis {avis_id} not found")
+            raise EntityNotFoundError("Anlieferavis", avis_id)
         new_status = status_map[action]
         self.db.execute(text(
             "UPDATE einkauf_anlieferavis SET status = :status, updated_at = CURRENT_TIMESTAMP "
@@ -578,7 +605,7 @@ class EinkaufCompatService:
         except Exception:
             row = None
         if row is None:
-            raise EntityNotFoundError(f"Auftragsbestaetigung {bestaetigung_id} not found")
+            raise EntityNotFoundError("Auftragsbestaetigung", bestaetigung_id)
         return self._auftragsbestaetigung_row_to_dict(row._mapping)
 
     def transition_auftragsbestaetigung(self, bestaetigung_id: str, action: str) -> dict:
@@ -595,7 +622,7 @@ class EinkaufCompatService:
         except Exception:
             row = None
         if row is None:
-            raise EntityNotFoundError(f"Auftragsbestaetigung {bestaetigung_id} not found")
+            raise EntityNotFoundError("Auftragsbestaetigung", bestaetigung_id)
         new_status = status_map[action]
         self.db.execute(text(
             "UPDATE einkauf_auftragsbestaetigungen SET status = :status, updated_at = CURRENT_TIMESTAMP "
@@ -676,7 +703,7 @@ class EinkaufCompatService:
         valid_statuses, new_status, err_msg = allowed[action]
         pair = self._get_rechnung_id_status(rechnung_id)
         if not pair:
-            raise EntityNotFoundError(f"Rechnungseingang {rechnung_id} nicht gefunden")
+            raise EntityNotFoundError("Rechnungseingang", rechnung_id)
         rid, old_status = pair
         if old_status not in valid_statuses:
             raise ValidationFailedError(f"{err_msg}. Aktuell: {old_status}")
@@ -779,7 +806,7 @@ class EinkaufCompatService:
         for r in self.list_retouren():
             if str(r.get("id")) == retour_id or str(r.get("nummer")) == retour_id:
                 return r
-        raise EntityNotFoundError(f"Retoure {retour_id} not found")
+        raise EntityNotFoundError("Retoure", retour_id)
 
     async def create_retoure(self, payload: dict) -> dict:
         from sqlalchemy import text
@@ -868,7 +895,7 @@ class EinkaufCompatService:
     def update_service_entry_sheet(self, ses_id: str, payload: dict) -> dict:
         target = self._find_ses(ses_id)
         if target is None:
-            raise EntityNotFoundError(f"Service Entry Sheet {ses_id} not found")
+            raise EntityNotFoundError("Service Entry Sheet", ses_id)
         target.update({k: v for k, v in payload.items() if v is not None})
         target["updatedAt"] = now_iso()
         repo = doc_repo(self.db)
@@ -909,7 +936,7 @@ class EinkaufCompatService:
         target = next((m for m in all_msgs
                        if str(m.get("id")) == msg_id or str(m.get("number")) == msg_id), None)
         if target is None:
-            raise EntityNotFoundError(f"EDI message {msg_id} not found")
+            raise EntityNotFoundError("EDI message", msg_id)
         target["status"] = "ACKNOWLEDGED"
         target["ackAt"] = now_iso()
         repo = doc_repo(self.db)
@@ -945,6 +972,6 @@ class EinkaufCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("supplier_document", doc_id)
         if doc is None or doc.get("supplier_id") != supplier_id:
-            raise EntityNotFoundError(f"Document {doc_id} not found for supplier {supplier_id}")
+            raise EntityNotFoundError("Document", doc_id)
         repo.delete("supplier_document", doc_id)
         return {"deleted": True, "id": doc_id}

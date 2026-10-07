@@ -1104,7 +1104,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `create_activity` | Aktivitaet anlegen | safe | nein | `Noch kein Fachweg: Der Aktivitaeten-Weg der Opportunity schreibt in eine Tabelle, die keine Migration anlegt, und prueft den Mandanten nicht.` |
+| `create_activity` | Aktivitaet anlegen | safe | nein | `Noch nicht in der Maske: Betreff und Typ kann die native Maske noch nicht erfassen. Der Fachweg POST /crm/opportunities/{id}/activities ist mandantengebunden und schreibt in den Reiter Aktivitaeten.` |
 
 ---
 
@@ -1232,7 +1232,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bestellen` | Bestellung erstellen | safe | nein | `Noch kein Fachweg: Die Umwandlung Angebot -> Bestellung liest Spalten, die keine Migration anlegt.` |
+| `bestellen` | Bestellung erstellen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/actions/bestellen` |
 
 ---
 

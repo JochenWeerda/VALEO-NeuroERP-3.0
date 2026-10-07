@@ -16,11 +16,12 @@ class TestSpecP104CommandInventory:
 
         assert main() == 0
 
+    # Ernte-Abrechnung drucken und Opportunity-Aktivitaet sind seit 07.10.2026 ehrliche
+    # Luecken (BEKANNTE_LUECKEN im Gate) statt Endpunkte ohne Wirkung.
     @pytest.mark.parametrize("screen_id,action_key", [
         ("sales/delivery-note", "drucken"),
-        ("agrar/harvest-settlement", "drucken"),
-        ("crm/opportunity", "create_activity"),
         ("finance/payment-run", "freigeben"),
+        ("einkauf/angebot", "bestellen"),
     ])
     def test_new_endpoints_wired(self, screen_id: str, action_key: str):
         sd = get_screen_definition(screen_id)
@@ -31,22 +32,21 @@ class TestSpecP104CommandInventory:
 
 
 class TestSpecP104ActionRuntimeModes:
-    @pytest.mark.asyncio
-    async def test_stornieren_dry_run_no_commit(self):
-        from app.api.v1.endpoints.mask_actions import action_lager_stornieren
+    def test_stornieren_hat_keinen_vorgetaeuschten_handler(self):
+        # Bis 07.10.2026 meldete der Trockenlauf Erfolg und die Ausfuehrung auch —
+        # ohne Storno. Es gibt keinen Storno-Dienst; die Maske nennt die Luecke.
+        from app.api.v1.endpoints import mask_actions
 
-        db = MagicMock()
-        result = await action_lager_stornieren("mov-1", body={"_mode": "dryRun"}, db=db, tenant_id="t1")
-        assert result.success is True
-        assert result.mode == "dryRun"
-        assert result.proposedChanges is not None
-        db.commit.assert_not_called()
+        assert not hasattr(mask_actions, "action_lager_stornieren")
 
     @pytest.mark.asyncio
     async def test_payment_run_requires_audit_reason(self):
         from app.api.v1.endpoints.mask_actions import action_payment_run_freigeben
 
         db = MagicMock()
-        result = await action_payment_run_freigeben("pr-1", body={"_mode": "execute"}, db=db, tenant_id="t1")
+        result = await action_payment_run_freigeben(
+            "pr-1", body={"_mode": "execute"}, db=db, tenant_id="t1", user={"sub": "kasse", "roles": ["FINANCE_ADMIN"]}
+        )
         assert result.success is False
         assert "auditReason" in (result.error or "")
+        db.execute.assert_not_called()

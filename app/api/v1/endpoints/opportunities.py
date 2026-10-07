@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....services.customer_reference import resolve_customer
 from ....integrations.crm_core_client import (
     create_opportunity as crm_create_opportunity,
@@ -38,10 +39,16 @@ OPPORTUNITY_STAGES = ["LEAD", "QUALIFIZIERT", "ANGEBOT", "VERHANDLUNG", "GEWONNE
 
 
 @router.post("/", response_model=Opportunity, status_code=status.HTTP_201_CREATED, summary="Opportunity anlegen")
-async def create_opportunity(opportunity_data: OpportunityCreate):
-    """Create a new sales opportunity via crm-sales."""
+async def create_opportunity(opportunity_data: OpportunityCreate, tenant_id: str = Depends(get_tenant_id)):
+    """Create a new sales opportunity via crm-sales.
+
+    Der Mandant kommt aus dem Kontext; ein ``tenant_id`` im Rumpf waehlt keinen
+    fremden Mandanten (bis 07.10.2026 tat er das).
+    """
+    daten = opportunity_data.model_dump()
+    daten["tenant_id"] = tenant_id
     try:
-        created = await crm_create_opportunity(opportunity_data.model_dump())
+        created = await crm_create_opportunity(daten)
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:
@@ -51,7 +58,7 @@ async def create_opportunity(opportunity_data: OpportunityCreate):
 
 @router.get("/", response_model=PaginatedResponse[Opportunity], summary="Opportunities auflisten")
 async def list_opportunities(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     status: Optional[str] = Query(None, description="Filter by status"),
     assigned_to: Optional[str] = Query(None, description="Filter by assigned user"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
@@ -118,7 +125,7 @@ def _opportunity_from_local(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _local_opportunity(db: Session, opportunity_id: str) -> dict[str, Any] | None:
+def _local_opportunity(db: Session, opportunity_id: str, tenant_id: str) -> dict[str, Any] | None:
     row = db.execute(
         text(
             """
@@ -126,12 +133,32 @@ def _local_opportunity(db: Session, opportunity_id: str) -> dict[str, Any] | Non
                    expected_close_date, status, stage, source, assigned_to, customer_id,
                    created_at, COALESCE(updated_at, created_at) AS updated_at
             FROM domain_crm.crm_opportunities
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tid
             """
         ),
-        {"id": opportunity_id},
+        {"id": opportunity_id, "tid": tenant_id},
     ).mappings().first()
     return _opportunity_from_local(dict(row)) if row else None
+
+
+async def _opportunity_im_mandanten(db: Session, opportunity_id: str, tenant_id: str) -> dict[str, Any]:
+    """Die Opportunity dieses Mandanten — aus crm-sales oder lokal — sonst 404.
+
+    Bis 07.10.2026 wurde crm-sales ohne Mandant gefragt und die lokale Tabelle ohne
+    Filter gelesen. Der Vergleich gilt fuer beide Quellen; eine Opportunity ohne
+    Mandant sieht niemand.
+    """
+    try:
+        opportunity = await crm_get_opportunity(opportunity_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code != 404:
+            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+        opportunity = _local_opportunity(db, opportunity_id, tenant_id)
+    except (httpx.RequestError, RuntimeError):
+        opportunity = _local_opportunity(db, opportunity_id, tenant_id)
+    if not opportunity or str(opportunity.get("tenant_id") or "") != tenant_id:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    return opportunity
 
 
 def _local_opportunities(
@@ -205,7 +232,7 @@ async def list_stages():
 
 @router.get("/pipeline", response_model=OpportunitiesOut, tags=["crm", "opportunities"], summary="Pipeline abrufen")
 async def get_pipeline(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Kanban-View: Opportunities gruppiert nach Stage."""
@@ -280,7 +307,7 @@ async def get_pipeline(
 
 @router.get("/forecast", response_model=OpportunitiesOut, summary="Forecast abrufen")
 async def get_forecast(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     period: Optional[str] = Query(None, description="YYYY-MM"),
     db: Session = Depends(get_db),
 ):
@@ -374,6 +401,7 @@ async def patch_opportunity_stage(
     opportunity_id: str,
     new_stage: str = Query(..., description="Target stage (LEAD/QUALIFIZIERT/ANGEBOT/VERHANDLUNG/GEWONNEN/VERLOREN)"),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Stage-Wechsel mit Timestamp-Log in stage_history."""
     new_stage = new_stage.upper()
@@ -385,8 +413,8 @@ async def patch_opportunity_stage(
     try:
         # Check exists
         row = db.execute(
-            text("SELECT id, stage, stage_history FROM opportunities WHERE id = :oid"),
-            {"oid": opportunity_id},
+            text("SELECT id, stage, stage_history FROM opportunities WHERE id = :oid AND tenant_id = :tid"),
+            {"oid": opportunity_id, "tid": tenant_id},
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Opportunity nicht gefunden")
@@ -407,10 +435,10 @@ async def patch_opportunity_stage(
                     probability = :prob,
                     stage_history = CAST(:hist AS jsonb),
                     updated_at = NOW()
-                WHERE id = :oid
+                WHERE id = :oid AND tenant_id = :tid
                 """
             ),
-            {"stage": new_stage, "prob": prob, "hist": json.dumps(history), "oid": opportunity_id},
+            {"stage": new_stage, "prob": prob, "hist": json.dumps(history), "oid": opportunity_id, "tid": tenant_id},
         )
         db.commit()
     except HTTPException:
@@ -442,65 +470,57 @@ async def add_opportunity_activity(
     notes: Optional[str] = Query(None),
     assigned_to: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    """Aktivität zur Opportunity hinzufügen."""
-    try:
-        # Verify opportunity exists
-        row = db.execute(
-            text("SELECT id FROM opportunities WHERE id = :oid"),
-            {"oid": opportunity_id},
-        ).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Opportunity nicht gefunden")
+    """Aktivität zur Opportunity hinzufügen.
 
-        # Try to insert into activities table
-        sql = text(
-            """
-            INSERT INTO activities (id, opportunity_id, activity_type, subject, notes, assigned_to, created_at)
-            VALUES (gen_random_uuid(), :oid, :atype, :subject, :notes, :assigned_to, NOW())
-            RETURNING id, created_at
-            """
-        )
-        result = db.execute(sql, {
-            "oid": opportunity_id,
-            "atype": activity_type.upper(),
-            "subject": subject,
-            "notes": notes,
-            "assigned_to": assigned_to,
-        }).fetchone()
+    Bis 07.10.2026 ohne Mandant und in eine Tabelle ``activities`` mit
+    ``opportunity_id``, die keine Migration anlegt. Jetzt: nur im eigenen Mandanten,
+    in ``domain_crm.activities`` — dort liest der Reiter der Opportunity-Maske.
+    """
+    opportunity = await _opportunity_im_mandanten(db, opportunity_id, tenant_id)
+    try:
+        result = db.execute(
+            text(
+                """
+                INSERT INTO domain_crm.activities
+                    (id, tenant_id, opportunity_id, type, title, customer, contact_person,
+                     date, status, assigned_to, description, created_at, updated_at)
+                VALUES (gen_random_uuid()::text, :tid, :oid, :atype, :subject, :customer, :person,
+                        NOW(), 'offen', :assigned_to, :notes, NOW(), NOW())
+                RETURNING id, created_at
+                """
+            ),
+            {
+                "tid": tenant_id,
+                "oid": opportunity_id,
+                "atype": activity_type.upper()[:20],
+                "subject": subject[:200],
+                "customer": str(opportunity.get("customer_name") or opportunity.get("customer_id") or "")[:100],
+                "person": (assigned_to or "Opportunity")[:100],
+                "assigned_to": (assigned_to or "")[:100],
+                "notes": notes,
+            },
+        ).fetchone()
         db.commit()
-        return {
-            "id": str(result[0]),
-            "opportunity_id": opportunity_id,
-            "activity_type": activity_type.upper(),
-            "subject": subject,
-            "created_at": str(result[1]),
-        }
-    except HTTPException:
-        raise
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Aktivitaet konnte nicht erstellt werden: {exc}") from exc
+    return {
+        "id": str(result[0]),
+        "opportunity_id": opportunity_id,
+        "activity_type": activity_type.upper(),
+        "subject": subject,
+        "created_at": str(result[1]),
+    }
 
 
 @router.get("/{opportunity_id}", response_model=Opportunity, summary="Opportunity abrufen")
-async def get_opportunity(opportunity_id: str, db: Session = Depends(get_db)):
-    """Get a specific sales opportunity by ID."""
-    try:
-        opportunity = await crm_get_opportunity(opportunity_id)
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == 404:
-            opportunity = _local_opportunity(db, opportunity_id)
-            if opportunity is None:
-                raise HTTPException(status_code=404, detail="Opportunity not found") from exc
-        else:
-            raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
-    except (httpx.RequestError, RuntimeError) as exc:
-        opportunity = _local_opportunity(db, opportunity_id)
-        if opportunity is None:
-            raise HTTPException(status_code=404, detail="Opportunity not found") from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve opportunity: {exc}") from exc
+async def get_opportunity(
+    opportunity_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+):
+    """Get a specific sales opportunity by ID — nur im eigenen Mandanten."""
+    opportunity = await _opportunity_im_mandanten(db, opportunity_id, tenant_id)
     result = Opportunity.model_validate(opportunity)
     # Resolved within the opportunity's own tenant, so the name never crosses tenants.
     customer_ref = str(result.customer_id) if result.customer_id else None
@@ -511,8 +531,14 @@ async def get_opportunity(opportunity_id: str, db: Session = Depends(get_db)):
 
 
 @router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren")
-async def update_opportunity(opportunity_id: str, opportunity_data: OpportunityUpdate):
-    """Update a sales opportunity via crm-sales."""
+async def update_opportunity(
+    opportunity_id: str,
+    opportunity_data: OpportunityUpdate,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Update a sales opportunity via crm-sales — nur im eigenen Mandanten."""
+    await _opportunity_im_mandanten(db, opportunity_id, tenant_id)
     try:
         updated = await crm_update_opportunity(opportunity_id, opportunity_data.model_dump(exclude_unset=True))
     except httpx.HTTPStatusError as exc:
@@ -527,8 +553,11 @@ async def update_opportunity(opportunity_id: str, opportunity_data: OpportunityU
 @router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Opportunity löschen",
     response_model=None
 )
-async def delete_opportunity(opportunity_id: str):
-    """Delete a sales opportunity via crm-sales."""
+async def delete_opportunity(
+    opportunity_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+):
+    """Delete a sales opportunity via crm-sales — nur im eigenen Mandanten."""
+    await _opportunity_im_mandanten(db, opportunity_id, tenant_id)
     try:
         await crm_delete_opportunity(opportunity_id)
     except httpx.HTTPStatusError as exc:

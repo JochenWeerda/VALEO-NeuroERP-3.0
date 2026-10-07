@@ -27,7 +27,7 @@ class PosCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("pos_suspended_sale", sale_id)
         if doc is None:
-            raise EntityNotFoundError(f"Suspended sale {sale_id} not found")
+            raise EntityNotFoundError("Suspended sale", sale_id)
         return doc
 
     async def suspend_sale(self, payload: dict) -> dict:
@@ -41,7 +41,7 @@ class PosCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("pos_suspended_sale", sale_id)
         if doc is None:
-            raise EntityNotFoundError(f"Suspended sale {sale_id} not found")
+            raise EntityNotFoundError("Suspended sale", sale_id)
         if doc.get("status") == "RESUMED":
             raise ConflictError("Sale already resumed")
         doc["status"] = "RESUMED"
@@ -53,7 +53,7 @@ class PosCompatService:
         repo = doc_repo(self.db)
         doc = repo.get("pos_suspended_sale", sale_id)
         if doc is None:
-            raise EntityNotFoundError(f"Suspended sale {sale_id} not found")
+            raise EntityNotFoundError("Suspended sale", sale_id)
         repo.delete("pos_suspended_sale", sale_id)
         return {"deleted": True, "id": sale_id}
 

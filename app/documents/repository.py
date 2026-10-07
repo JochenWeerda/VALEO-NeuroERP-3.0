@@ -20,6 +20,15 @@ class DocumentRepository:
     def __init__(self, db: Session):
         self.db = db
     
+    def save(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True) -> dict:
+        """Kurzform von :meth:`save_document`.
+
+        42 Aufrufe in neun Diensten (Bestellungen, Annahme, Aussendienst, …) rufen
+        seit dem 15.05.2026 ``repo.save`` — eine Methode, die es nie gab; jeder dieser
+        Wege scheiterte mit ``AttributeError``. Gefunden am 07.10.2026.
+        """
+        return self.save_document(doc_type, doc_number, data, commit=commit)
+
     def save_document(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True) -> dict:
         """Speichert ein Dokument; commit=False belässt die Transaktion beim Aufrufer."""
         try:

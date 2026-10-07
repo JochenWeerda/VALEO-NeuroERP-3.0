@@ -495,7 +495,10 @@ async def approve_invoice(
     verschiedene Freigeber ueber ``approved_by`` aus dem Rumpf — eine Person konnte
     eine Zwei-Stufen-Freigabe mit zwei Namen erfuellen.
     """
-    action.approved_by = str(user.get("sub") or "").strip()
+    if isinstance(user, dict):
+        # Ueber den Weg: der angemeldete Nutzer. Interne Aufrufer (AP-Freigabe)
+        # uebergeben den Freigeber selbst — dort ist er schon der angemeldete Nutzer.
+        action.approved_by = str(user.get("sub") or "").strip()
     try:
         # Get approval request
         query = text("""

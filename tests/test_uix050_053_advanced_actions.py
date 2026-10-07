@@ -136,7 +136,6 @@ class TestUIX053CommandEndpoints:
 
     @pytest.mark.parametrize("screen_id,action_key", [
         ("lager/stock-movement", "stornieren"),
-        ("einkauf/angebot", "bestellen"),
         ("crm/lead", "qualifizieren"),
         ("einkauf/anlieferavis", "wareneingang"),
     ])

@@ -1793,7 +1793,7 @@
           "permission": "crm.activity.create",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Noch kein Fachweg: Der Aktivitaeten-Weg der Opportunity schreibt in eine Tabelle, die keine Migration anlegt, und prueft den Mandanten nicht."
+          "stubReason": "Noch nicht in der Maske: Betreff und Typ kann die native Maske noch nicht erfassen. Der Fachweg POST /crm/opportunities/{id}/activities ist mandantengebunden und schreibt in den Reiter Aktivitaeten."
         }
       ],
       "sensitive_fields": [
@@ -1886,11 +1886,11 @@
           "label": "Bestellung erstellen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "einkauf.angebot.order",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Noch kein Fachweg: Die Umwandlung Angebot -> Bestellung liest Spalten, die keine Migration anlegt."
+          "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -4197,5 +4197,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 68
+  "event_count": 69
 }

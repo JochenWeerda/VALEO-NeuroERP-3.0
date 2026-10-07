@@ -29,7 +29,7 @@ class AnnahmeService:
         repo = doc_repo(self.db)
         doc = repo.get("lkw_queue", entry_id)
         if doc is None:
-            raise EntityNotFoundError(f"LKW queue entry {entry_id} not found")
+            raise EntityNotFoundError("LKW queue entry", entry_id)
         return doc
 
     async def register_lkw(self, payload: dict) -> dict:
@@ -65,7 +65,7 @@ class AnnahmeService:
         repo = doc_repo(self.db)
         doc = repo.get("lkw_queue", entry_id)
         if doc is None:
-            raise EntityNotFoundError(f"LKW queue entry {entry_id} not found")
+            raise EntityNotFoundError("LKW queue entry", entry_id)
         if doc.get("status") != "WARTEND":
             raise ConflictError(f"Cannot call LKW in status '{doc.get('status')}'")
         doc["status"] = "GERUFEN"
@@ -77,7 +77,7 @@ class AnnahmeService:
         repo = doc_repo(self.db)
         doc = repo.get("lkw_queue", entry_id)
         if doc is None:
-            raise EntityNotFoundError(f"LKW queue entry {entry_id} not found")
+            raise EntityNotFoundError("LKW queue entry", entry_id)
         doc["status"] = "ABGEFERTIGT"
         doc["completed_at"] = now_iso()
         repo.save("lkw_queue", entry_id, doc)
@@ -87,7 +87,7 @@ class AnnahmeService:
         repo = doc_repo(self.db)
         doc = repo.get("lkw_queue", entry_id)
         if doc is None:
-            raise EntityNotFoundError(f"LKW queue entry {entry_id} not found")
+            raise EntityNotFoundError("LKW queue entry", entry_id)
         repo.delete("lkw_queue", entry_id)
         return {"deleted": True, "id": entry_id}
 
@@ -138,7 +138,7 @@ class AnnahmeService:
             .first()
         )
         if not row:
-            raise EntityNotFoundError(f"LKW-Eintrag {reg_id} nicht gefunden")
+            raise EntityNotFoundError("LKW-Eintrag", reg_id)
         return self._lkw_row_to_dict(row, position=0)
 
     def patch_lkw_db(self, reg_id: str, status: Optional[str], klaerung: Optional[dict]) -> dict:
@@ -152,7 +152,7 @@ class AnnahmeService:
             .first()
         )
         if not row:
-            raise EntityNotFoundError(f"LKW-Eintrag {reg_id} nicht gefunden")
+            raise EntityNotFoundError("LKW-Eintrag", reg_id)
         if status is not None:
             row.status = status
         if klaerung is not None:
@@ -173,7 +173,7 @@ class AnnahmeService:
             .first()
         )
         if not row:
-            raise EntityNotFoundError(f"LKW-Eintrag {reg_id} nicht gefunden")
+            raise EntityNotFoundError("LKW-Eintrag", reg_id)
         if row.article_id:
             return {"status": "already_set", "article_id": row.article_id, "artikel": row.artikel}
 
@@ -290,14 +290,14 @@ class AnnahmeService:
         repo = doc_repo(self.db)
         doc = repo.get("qualitaets_check", check_id)
         if doc is None:
-            raise EntityNotFoundError(f"Qualitaets-Check {check_id} not found")
+            raise EntityNotFoundError("Qualitaets-Check", check_id)
         return doc
 
     async def complete_qualitaets_check(self, check_id: str, result: dict) -> dict:
         repo = doc_repo(self.db)
         doc = repo.get("qualitaets_check", check_id)
         if doc is None:
-            raise EntityNotFoundError(f"Qualitaets-Check {check_id} not found")
+            raise EntityNotFoundError("Qualitaets-Check", check_id)
         doc["status"] = "ABGESCHLOSSEN"
         doc["result"] = result
         doc["completed_at"] = now_iso()

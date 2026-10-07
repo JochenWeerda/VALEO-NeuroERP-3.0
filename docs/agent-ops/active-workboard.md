@@ -2053,6 +2053,19 @@ Workflow las/schrieb `ap_approvals` mit Spalten, die es in **keiner** DB gibt
 (`approval_request_id`, `approved_at`), und `json.loads` auf JSONB liess schon das
 Anlegen einer Regel scheitern. 265 Tests gruen, Ratschen gruen. Befunde 3 und 4 folgen.
 
+**Zwischenstand 2 (07.10.2026): Befunde 3 und 4 fertig.** Opportunities: Mandant
+bei Liste, Einzelabfrage, Aendern, Loeschen, Stufe, Pipeline, Prognose, Anlegen
+(Rumpf waehlt keinen Mandanten mehr); Aktivitaeten in `domain_crm.activities`
+(+`opportunity_id`), Reiter liest dort. Angebote: richtige Spalten, kein verschluckter
+Fehler, Mandant in `list_bids` und den vier Einzel-Ladern (`compat.py` las fest
+"default"), Umwandlung mit Positionen in **einem** Commit, kein zweites Mal, ohne
+Positionen keine erfundene Bestellung; Mask-Aktion `bestellen` echt angeschlossen.
+Systemisch mitbehoben: `DocumentRepository.save` fehlte (42 Aufrufe in neun Diensten
+seit 15.05.2026), 50 `EntityNotFoundError` mit einem statt zwei Argumenten (jedes
+"nicht gefunden" = 500) + AST-Waechter. 2187 Tests gruen. **Offen (User 07.10.2026:
+"Ein fehlender Fachweg braucht eine echte Implementierung"):** die fuenf Aktionen in
+`BEKANNTE_LUECKEN` bekommen echte Fachwege; die Liste wird leer.
+
 ## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen
