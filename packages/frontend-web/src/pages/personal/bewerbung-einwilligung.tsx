@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { formatReadOnlyValue } from '@/components/mask-builder/renderers/FieldRenderer'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -60,6 +61,11 @@ function datum(value: unknown): string {
   return text(value).slice(0, 10)
 }
 
+/** Wie der Builder ein Datumsfeld zeigt — ein Format auf der ganzen Maske. */
+function anzeige(value: unknown): string {
+  return formatReadOnlyValue('date', datum(value))
+}
+
 export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
   const { id = '' } = useParams<{ id?: string }>()
   const navigate = useNavigate()
@@ -99,7 +105,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
       ...item,
       value: item.key === 'stand'
         ? (laeuft ? 'läuft' : hatEinwilligung ? 'abgelaufen' : 'keine')
-        : (datum(stand.data?.gueltig_bis) || '–'),
+        : (anzeige(stand.data?.gueltig_bis) || '–'),
     })),
     tabs: personalBewerbungEinwilligungScreen.tabs.map((tab) => ({
       ...tab,
@@ -108,7 +114,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
             ...field,
             options: fassungen.map((erklaerung) => ({
               value: String(erklaerung.fassung),
-              label: `Fassung ${erklaerung.fassung}${erklaerung.erstellt_am ? ` vom ${datum(erklaerung.erstellt_am)}` : ''}`,
+              label: `Fassung ${erklaerung.fassung}${erklaerung.erstellt_am ? ` vom ${anzeige(erklaerung.erstellt_am)}` : ''}`,
             })),
           }
         : field)),
@@ -135,7 +141,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
     setValue('applicant_name', text(kopf.data.applicant_name))
     setValue('position_title', text(kopf.data.position_title) || '–')
     setValue('stand_gueltig_bis', datum(stand.data.gueltig_bis))
-    setValue('stand_erteilt_am', datum(stand.data.erteilt_am) || '–')
+    setValue('stand_erteilt_am', datum(stand.data.erteilt_am))
   }, [kopf.data, setValue, stand.data])
 
   // Der Wortlaut folgt der gewaehlten Fassung; er ist nie eine eigene Eingabe.
@@ -155,6 +161,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
     const gueltigBis = datum(form.values.gueltig_bis)
     const kanal = text(form.values.kanal) as Kanal
     if (!fassung || !gueltigBis || !kanal) {
+      form.revealErrors?.()
       toast.error('Einwilligung unvollständig', { description: 'Fassung, Gültig bis und Kanal angeben.' })
       return
     }
@@ -167,18 +174,18 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
         erfasst_durch: text(form.values.erfasst_durch) || null,
       })
       toast.success('Einwilligung erteilt', {
-        description: `Fassung ${vorgang.fassung ?? fassung}, gültig bis ${datum(vorgang.gueltig_bis) || gueltigBis}`,
+        description: `Fassung ${vorgang.fassung ?? fassung}, gültig bis ${anzeige(vorgang.gueltig_bis ?? gueltigBis)}`,
       })
-      setValue('fassung', '')
-      setValue('gueltig_bis', '')
-      setValue('erfasst_durch', '')
+      // Leeren ohne die Felder als bearbeitet zu markieren — sonst meldet eine
+      // gelungene Erteilung "Pflichtfeld".
+      form.resetForm({ ...form.values, fassung: '', gueltig_bis: '', erfasst_durch: '', wortlaut: '' })
       await neuLaden()
     } catch (error) {
       toast.error('Einwilligung nicht erteilt', { description: getAxiosErrorMessage(error) })
     } finally {
       setPending(null)
     }
-  }, [form.values, id, neuLaden, pending, setValue])
+  }, [form, id, neuLaden, pending])
 
   const widerrufen = useCallback(async () => {
     if (pending) return
@@ -207,7 +214,7 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
   const workflow = useMemo<WorkflowState>(() => {
     const label = laeuft ? 'Einwilligung läuft' : hatEinwilligung ? 'Einwilligung abgelaufen' : 'Keine Einwilligung'
     const naechste = laeuft
-      ? `Aufbewahrt bis ${datum(stand.data?.gueltig_bis)}. Ein Widerruf wirkt sofort.`
+      ? `Aufbewahrt bis ${anzeige(stand.data?.gueltig_bis)}. Ein Widerruf wirkt sofort.`
       : fassungen.length === 0
         ? 'Zuerst eine Fassung der Einwilligungserklärung anlegen.'
         : 'Die Aufbewahrung richtet sich nach der beschlossenen Frist.'

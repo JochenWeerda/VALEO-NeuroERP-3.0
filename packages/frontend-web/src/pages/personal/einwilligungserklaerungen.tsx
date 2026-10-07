@@ -61,12 +61,11 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
 
   const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
-  const { setValue } = form
+  const { resetForm } = form
 
-  const leeren = useCallback(() => {
-    setValue('wortlaut', '')
-    setValue('erstellt_durch', '')
-  }, [setValue])
+  // Ohne die Felder als bearbeitet zu markieren — ein leerer Wortlaut nach dem
+  // Anlegen ist kein Fehler.
+  const leeren = useCallback(() => resetForm({ ...leer }), [resetForm])
 
   const anlegen = useCallback(async () => {
     if (saving) return
@@ -102,12 +101,13 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
     }
     if (key !== 'anlegen') return
     if (!text(form.values.wortlaut)) {
+      form.revealErrors?.()
       toast.error('Fassung unvollständig', { description: 'Den Wortlaut eintragen, der unterschrieben wird.' })
       return
     }
     // Nach dem Anlegen ist der Text nicht mehr aenderbar — einmal hinsehen.
     setAnlegenFragen(true)
-  }, [form.values.wortlaut, leeren])
+  }, [form, leeren])
 
   const workflow = useMemo<WorkflowState>(() => {
     const keine = fassungen.length === 0
@@ -117,7 +117,7 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
     return {
       status: {
         currentStatus: keine ? 'leer' : 'vorhanden',
-        statusLabel: keine ? 'Keine Fassung' : `${fassungen.length} Fassungen`,
+        statusLabel: keine ? 'Keine Fassung' : fassungen.length === 1 ? '1 Fassung' : `${fassungen.length} Fassungen`,
         tone: keine ? 'warning' : 'success',
       },
       nextAllowedActions: [{ actionKey: 'anlegen', label: naechste, dangerLevel: 'safe', requiresConfirmation: true }],

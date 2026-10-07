@@ -42,7 +42,7 @@ const FastFieldItem = memo(function FastFieldItem({
   if (!field.visible) return null
 
   const value = getValue(payload, field.dataPath)
-  const fieldErrors = formState?.fieldErrors[field.key] ?? []
+  const fieldErrors = (formState?.visibleFieldErrors ?? formState?.fieldErrors)?.[field.key] ?? []
   const hasBlockingError = fieldErrors.some((e) => e.severity === 'blocking')
   const isEditable = formState !== undefined && !field.readOnly
 

@@ -107,7 +107,7 @@ describe('Einwilligung zur Aufbewahrung', () => {
   it('bietet die Fassungen der API als Auswahl und zeigt deren Wortlaut', async () => {
     render(mitAbfragen(<PersonalBewerbungEinwilligungPage />))
     await waitFor(() => expect(mocks.plan?.fieldsByKey.fassung.options).toHaveLength(2))
-    expect(mocks.plan?.fieldsByKey.fassung.options?.[0]).toEqual({ value: '2', label: 'Fassung 2 vom 2026-10-02' })
+    expect(mocks.plan?.fieldsByKey.fassung.options?.[0]).toEqual({ value: '2', label: 'Fassung 2 vom 02.10.2026' })
     // Keine Vorauswahl: Welche Fassung unterschrieben wurde, sagt der Mensch.
     expect(mocks.form?.values.fassung).toBe('')
     eingeben('Fassung der Erklärung', '1')
@@ -135,6 +135,9 @@ describe('Einwilligung zur Aufbewahrung', () => {
     await act(async () => { fertig({ fassung: 2, gueltig_bis: '2027-10-01' }) })
     await waitFor(() => expect(mocks.toastSuccess).toHaveBeenCalledWith('Einwilligung erteilt', expect.anything()))
     await waitFor(() => expect(knopf).toBeEnabled())
+    // Sichtpruefung 07.10.2026: Das Leeren nach dem Erfolg meldete "Pflichtfeld".
+    expect(mocks.form?.values.fassung).toBe('')
+    expect(mocks.form?.visibleFieldErrors).toEqual({})
   })
 
   it('erteilt nichts, solange Fassung, Ende oder Kanal fehlen', async () => {
@@ -146,6 +149,8 @@ describe('Einwilligung zur Aufbewahrung', () => {
     fireEvent.click(knopf)
     await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith('Einwilligung unvollständig', expect.anything()))
     expect(mocks.erteileEinwilligung).not.toHaveBeenCalled()
+    // Jetzt zeigt die Maske, was fehlt.
+    expect(Object.keys(mocks.form?.visibleFieldErrors ?? {}).sort()).toEqual(['gueltig_bis', 'kanal'])
   })
 
   it('zeigt den Grund, wenn das Erteilen scheitert', async () => {

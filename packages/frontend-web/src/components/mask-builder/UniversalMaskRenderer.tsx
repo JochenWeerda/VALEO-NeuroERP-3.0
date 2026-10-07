@@ -264,7 +264,7 @@ function RenderFromPlan({
       window.clearTimeout(timer)
     }
   }, [locateField, activeTab])
-  const formMessages: ScreenMessage[] = Object.values(formState?.fieldErrors ?? {}).flat().map((error, index) => ({
+  const formMessages: ScreenMessage[] = Object.values(formState?.visibleFieldErrors ?? formState?.fieldErrors ?? {}).flat().map((error, index) => ({
     key: `field-${error.fieldKey}-${index}`, fieldKey: error.fieldKey, message: error.message,
     severity: error.severity === 'blocking' ? 'error' : error.severity,
   }))

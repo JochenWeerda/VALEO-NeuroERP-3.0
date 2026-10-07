@@ -67,11 +67,35 @@ Navigation: Personal → Einwilligungserklärungen.
 | ESLint der geänderten Dateien | 0 Fehler |
 | Routing-Integrität, Navigationsziele | bestanden (935 Routen) |
 
-**Nicht geprüft: die Sichtprüfung in der laufenden App.** Der Backend-Container läuft
-mit einem Image vor den Fassungs-Wegen (`GET …/einwilligungserklaerungen` antwortet
-dort noch mit dem alten Platzhalter-404), und das Frontend antwortete auf Port 3001
-nicht. Ein Neubau des Images oder eigene Server in der geteilten Umgebung wurden nicht
-ungefragt gestartet.
+## Sichtprüfung (07.10.2026, nachgeholt)
+
+Backend-Container neu gestartet (der Quellcode ist eingebunden; ein Neubau war nicht
+nötig, der Prozess hatte nur den alten Stand geladen), Vite-Dev-Server auf 3001,
+Playwright headless gegen echte API und Entwicklungsdatenbank. Durchgespielt: Maske
+öffnen, Fassung/Ende/Kanal wählen, erteilen, widerrufen mit Bestätigung, erneut
+erteilen, Verzeichnis, Fassung ohne Wortlaut anlegen, Bewerbungsliste mit Zeilenaktion.
+Keine API-Fehler. Prüfdaten (eine Bewerbung, eine Fassung) danach entfernt.
+
+**Drei Fehler gefunden und behoben — zwei davon in der Plattform:**
+
+1. **Eine Auswahl ohne Platzhalter täuschte eine Wahl vor.** `FieldRenderer` gab
+   `NativeSelect` keinen Platzhalter; ohne leere Option zeigt der Browser die erste
+   Option, während der Wert leer ist. Die Maske zeigte „Fassung 1“, das Formular
+   meldete im selben Atemzug „Pflichtfeld“. Jetzt hat jedes Mask-Builder-Auswahlfeld
+   eine leere Option („Bitte wählen“, oder den Platzhalter der SD); der zugängliche
+   Name bleibt die Feldbezeichnung.
+2. **Pflichtfeld-Meldungen beim Öffnen.** `useUniversalFormState` meldete jeden
+   Fehler sofort. Neu: `visibleFieldErrors` — Fehler bearbeiteter Felder sofort, alle
+   nach einem Absendeversuch oder `revealErrors()`. `fieldErrors` und
+   `validationPlan` bleiben unverändert vollständig (die Sperre gilt weiter für alle
+   Felder); nur die Anzeige in `UniversalMaskRenderer` und `FastFormRenderer` wartet.
+3. **In der Maske selbst:** Nach erfolgreichem Erteilen meldete das Leeren der Felder
+   „Pflichtfeld“ (jetzt `resetForm`), Daten erschienen gemischt ISO und deutsch (jetzt
+   überall das Format des Builders), „1 Fassungen“.
+
+Vollständiger Frontend-Lauf danach: 963 bestanden, 8 rot — alle aus fremder laufender
+Arbeit an `button.tsx`/`input.tsx`/`checkbox.tsx` (Höhenklassen) und dem bekannten
+Schulungen-Altvertrag, keiner zu Auswahl oder Fehleranzeige.
 
 ## Nebenbefund (nicht Teil dieses Slices)
 
@@ -86,7 +110,7 @@ etwas, das nicht geschehen ist. Eigener Slice.
 
 ## Offene Punkte (Handshake)
 
-1. **Sichtprüfung** in der laufenden App nach Neubau des Backend-Images.
+1. ~~**Sichtprüfung**~~ — gelaufen, siehe oben.
 2. **Rollenbindung** für die ganze Datei `personal_bewerbungen.py` (aus dem Vorslice).
 3. **Selbstwiderruf** durch den Bewerbenden (Punkt 3 der Einwilligungs-Doku).
 4. **Erfolg ohne Wirkung** in `mask_actions.py` (Nebenbefund oben).

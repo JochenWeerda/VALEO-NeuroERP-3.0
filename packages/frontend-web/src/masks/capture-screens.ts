@@ -1857,7 +1857,7 @@ export const personalBewerbungEinwilligungScreen = {
         { key: 'applicant_name', label: 'Bewerber', type: 'text', readOnly: true },
         { key: 'position_title', label: 'Stelle', type: 'text', readOnly: true },
         { key: 'stand_gueltig_bis', label: 'Läuft bis', type: 'date', readOnly: true },
-        { key: 'stand_erteilt_am', label: 'Erteilt am', type: 'text', readOnly: true },
+        { key: 'stand_erteilt_am', label: 'Erteilt am', type: 'date', readOnly: true },
         {
           key: 'fassung',
           label: 'Fassung der Erklärung',

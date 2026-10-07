@@ -35,6 +35,14 @@ export interface UniversalFormState {
   values: Record<string, unknown>
   dirtyState: DirtyState
   fieldErrors: Record<string, FieldError[]>
+  /**
+   * Was die Maske anzeigt: Fehler bearbeiteter Felder sofort, alle erst nach einem
+   * Absendeversuch oder `revealErrors()`. Die Sperre (`validationPlan`) gilt immer
+   * fuer alle Felder — nur die Meldung wartet.
+   */
+  visibleFieldErrors?: Record<string, FieldError[]>
+  /** Fuer Seiten mit eigenen Aktionen statt `submit()`: alle Fehler zeigen. */
+  revealErrors?: () => void
   submitState: SubmitState
   submitError: string | null
   validationPlan: ValidationPlan

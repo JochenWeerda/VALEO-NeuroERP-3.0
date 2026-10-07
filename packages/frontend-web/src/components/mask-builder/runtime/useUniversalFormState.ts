@@ -40,6 +40,7 @@ export function useUniversalFormState({
   const [dirtyFields, setDirtyFields] = useState<Set<string>>(new Set())
   const [submitState, setSubmitState] = useState<SubmitState>('idle')
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [revealed, setRevealed] = useState(false)
   const initialRef = useRef<Record<string, unknown>>(initialValues)
   const submittingRef = useRef(false)
 
@@ -63,6 +64,14 @@ export function useUniversalFormState({
     return errors
   }, [rules, values])
 
+  // Eine frisch geoeffnete Maske meldet nichts, was noch niemand angefasst hat.
+  const visibleFieldErrors = useMemo<Record<string, FieldError[]>>(() => {
+    if (revealed) return fieldErrors
+    return Object.fromEntries(Object.entries(fieldErrors).filter(([key]) => dirtyFields.has(key)))
+  }, [dirtyFields, fieldErrors, revealed])
+
+  const revealErrors = useCallback(() => setRevealed(true), [])
+
   const validationPlan = useMemo<ValidationPlan>(() => ({
     rules,
     hasBlockingErrors: Object.values(fieldErrors).some((errs) =>
@@ -81,10 +90,13 @@ export function useUniversalFormState({
     setDirtyFields(new Set())
     setSubmitState('idle')
     setSubmitError(null)
+    setRevealed(false)
     if (newValues) initialRef.current = { ...newValues }
   }, [])
 
   const submit = useCallback(async () => {
+    // Ein Versuch zeigt, was fehlt — auch wenn er an der Sperre endet.
+    setRevealed(true)
     if (submittingRef.current || validationPlan.hasBlockingErrors || !onSubmit) return
     submittingRef.current = true
     setSubmitState('submitting')
@@ -111,6 +123,8 @@ export function useUniversalFormState({
     values,
     dirtyState,
     fieldErrors,
+    visibleFieldErrors,
+    revealErrors,
     submitState,
     submitError,
     validationPlan,

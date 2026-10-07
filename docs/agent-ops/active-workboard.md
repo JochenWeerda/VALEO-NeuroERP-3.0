@@ -2032,6 +2032,14 @@ neun `execute`-Handler in `mask_actions.py` schreibt fachlich — Erfolg ohne Wi
 eigener Slice. QA:
 [bewerbung-einwilligung-maske-20261007.md](../quality-assurance/bewerbung-einwilligung-maske-20261007.md).
 
+**Sichtpruefung nachgeholt (07.10.2026):** Backend neu gestartet (Quellcode
+eingebunden), Vite 3001, Playwright gegen echte API. Gefunden und behoben: Auswahlfeld
+ohne leere Option zeigte eine nie getroffene Wahl (`FieldRenderer`, alle Masken);
+Pflichtfeld-Meldungen beim Oeffnen (`visibleFieldErrors`/`revealErrors` in
+`useUniversalFormState`, Sperre unveraendert); Maske: Leeren nach Erfolg, Datumsformat.
+Frontend-Vollauf 963 gruen, 8 rot aus fremdem WIP (button/input/checkbox) und
+Schulungen-Altvertrag. Rollenpruefung der Bewerbungswege uebernimmt Codex (`cf87267da`).
+
 ## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Offenen Punkt 4 aus

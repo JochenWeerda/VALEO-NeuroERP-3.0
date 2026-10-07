@@ -2434,7 +2434,7 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
                     {"key": "applicant_name", "label": "Bewerber", "type": "text", "readOnly": True},
                     {"key": "position_title", "label": "Stelle", "type": "text", "readOnly": True},
                     {"key": "stand_gueltig_bis", "label": "Läuft bis", "type": "date", "readOnly": True},
-                    {"key": "stand_erteilt_am", "label": "Erteilt am", "type": "text", "readOnly": True},
+                    {"key": "stand_erteilt_am", "label": "Erteilt am", "type": "date", "readOnly": True},
                     {
                         "key": "fassung",
                         "label": "Fassung der Erklärung",
