@@ -2076,6 +2076,20 @@ seit 15.05.2026), 50 `EntityNotFoundError` mit einem statt zwei Argumenten (jede
 "Ein fehlender Fachweg braucht eine echte Implementierung"):** die fuenf Aktionen in
 `BEKANNTE_LUECKEN` bekommen echte Fachwege; die Liste wird leer.
 
+**Zwischenstand 3 (07.10.2026), User: "Ein fehlender Fachweg braucht eine echte
+Implementierung" / "Mask-Builder und Screen Definitions":** Echt umgesetzt und gepusht:
+Lagerbewegung stornieren (`71aecf2ae`, Gegenbuchung ueber die Richtungstabelle),
+deklarative Aktions-Eingaben `inputFields` + `ActionInputDialog` im Mask-Builder und
+Opportunity-Aktivitaet (`54a659699`), Wareneingang aus dem Anlieferavis mit Lagerzugang
+und Angebot -> kanonische Bestellung (`28e6133ed`). Lueckenliste im Gate: noch 2.
+**Offen, Entscheidung beim User:** (1) Lead qualifizieren — die Lead-Maske liest den
+externen crm-core mit festem Standardmandanten, kanonisch ist `public.crm_leads`
+(Slice INTERESSENT-IST-LEAD); die Opportunity braucht eine Kunden-UUID. (2) Ernte-
+Abrechnung drucken — PDF existiert, aber kein Archiv speichert Inhalte: Artefakte
+tragen nur Hash+Schluessel, `register_artifact` verschluckt Fehler, `archive_service`
+schreibt nach `data/` (kein Volume). Ablageort ist eine Betriebsentscheidung.
+(3) Acht Logistik-Aktionen ohne `command`-Deklaration (Codex-Masken).
+
 ## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen
