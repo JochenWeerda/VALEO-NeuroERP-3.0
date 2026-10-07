@@ -25,10 +25,7 @@ from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_d
 
 
 #: Ehrliche Luecken: kein Fachweg oder keine Eingabe in der Maske. Nur schrumpfen.
-BEKANNTE_LUECKEN = {
-    "agrar/harvest-settlement/drucken",
-    "crm/lead/qualifizieren",
-}
+BEKANNTE_LUECKEN: set[str] = set()
 
 
 def valid_input_flow(action: dict) -> bool:

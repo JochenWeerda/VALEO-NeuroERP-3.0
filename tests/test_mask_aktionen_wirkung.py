@@ -45,10 +45,10 @@ REKLAMATION = "/api/v1/reklamationen/{}/actions/abschliessen"
 MAHNEN = "/api/v1/finance/open-items/{}/actions/mahnen"
 AP_FREIGABE = "/api/v1/finance/ap/invoices/{}/actions/freigeben"
 
-#: Aktionen ohne Fachweg — Pfad und warum.
-OHNE_FACHWEG = {
+#: Nach expliziter User-Entscheidung implementierte Fachwege.
+NEUE_FACHWEGE = {
     "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": "crm/lead",
-    "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken": "agrar/harvest-settlement",
+    "/api/v1/agrar/settlements/{entity_id}/actions/drucken": "agrar/harvest-settlement",
 }
 
 
@@ -358,24 +358,24 @@ class TestEingangsrechnung:
 # ── 4. Keine Aktion ohne Fachweg ────────────────────────────────────────────
 
 
-class TestOhneFachweg:
-    @pytest.mark.parametrize("pfad", sorted(OHNE_FACHWEG))
-    def test_kein_endpunkt_mehr(self, pfad):
+class TestNeueFachwege:
+    @pytest.mark.parametrize("pfad", sorted(NEUE_FACHWEGE))
+    def test_genau_ein_echter_endpunkt(self, pfad):
         from app.main import app
 
         treffer = [r for r in app.routes if getattr(r, "path", "") == pfad]
-        assert treffer == [], f"{pfad} meldete Erfolg ohne Wirkung und darf nicht mehr montiert sein"
+        assert len(treffer) == 1, f"{pfad} muss genau einmal montiert sein"
 
-    @pytest.mark.parametrize("pfad,screen_id", sorted(OHNE_FACHWEG.items()))
-    def test_die_maske_sagt_nicht_verfuegbar(self, pfad, screen_id):
+    @pytest.mark.parametrize("pfad,screen_id", sorted(NEUE_FACHWEGE.items()))
+    def test_die_maske_deklariert_den_echten_fachweg(self, pfad, screen_id):
         from app.core.screen_definitions import get_screen_definition
 
         sd = get_screen_definition(screen_id)
         endpunkte = [a.get("commandEndpoint") for a in sd.get("actions", [])]
-        assert pfad not in endpunkte
+        assert pfad in endpunkte
         aktion = pfad.rsplit("/", 1)[-1]
         eintrag = next(a for a in sd["actions"] if a["key"] == aktion)
-        assert eintrag.get("stubReason"), f"{screen_id}/{aktion}: stubReason fehlt"
+        assert not eintrag.get("stubReason"), f"{screen_id}/{aktion}: echter Fachweg darf kein Stub sein"
 
 
 class TestNeueBestellung:

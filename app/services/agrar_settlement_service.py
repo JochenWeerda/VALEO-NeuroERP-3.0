@@ -618,12 +618,12 @@ class AgrarSettlementService:
 
         settlement, deductions = self.get_settlement(settlement_id)
         supplier = self.db.query(BusinessPartner).filter(
-            BusinessPartner.id == settlement.supplier_id,
+            BusinessPartner.partner_id == settlement.supplier_id,
             BusinessPartner.tenant_id == self.tenant_id,
         ).first()
         article = None
         if settlement.article_id:
-            article = self.db.query(Article).filter(Article.id == settlement.article_id).first()
+            article = self.db.query(Article).filter(Article.id == settlement.article_id, Article.tenant_id == self.tenant_id).first()
 
         pdf_svc = SettlementPdfService(self.db, self.tenant_id)
         if archive:
@@ -686,12 +686,12 @@ class AgrarSettlementService:
             from app.infrastructure.models import Article
             from app.infrastructure.models import BusinessPartner
             supplier = self.db.query(BusinessPartner).filter(
-                BusinessPartner.id == settlement.supplier_id,
+                BusinessPartner.partner_id == settlement.supplier_id,
                 BusinessPartner.tenant_id == self.tenant_id,
             ).first()
             article = None
             if settlement.article_id:
-                article = self.db.query(Article).filter(Article.id == settlement.article_id).first()
+                article = self.db.query(Article).filter(Article.id == settlement.article_id, Article.tenant_id == self.tenant_id).first()
             deductions_rows = self.get_settlement(settlement_id)[1]
             pdf_meta = SettlementPdfService(self.db, self.tenant_id).generate_and_archive(
                 settlement, deductions_rows, supplier, article

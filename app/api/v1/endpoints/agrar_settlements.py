@@ -17,6 +17,7 @@ from app.core.tenant import get_tenant_id
 from app.services.agrar_settlement_service import AgrarSettlementService
 from app.services.customer_reference import resolve_reference
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
+from app.auth.deps import require_roles
 from app.services.admin_core_service import AdminCoreService
 
 from app.api.v1.schemas.base import BaseSchema
@@ -497,6 +498,17 @@ async def export_settlement_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.get("/archive/{artifact_id}", response_class=FastAPIResponse, summary="Archiviertes Abrechnungs-PDF abrufen")
+def archived_settlement_pdf(
+    artifact_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(require_roles("HARVEST_LESEN", "HARVEST_BEARBEITEN", "HARVEST_ADMIN", "AGRAR_LESEN", "AGRAR_BEARBEITEN", "AGRAR_ADMIN", "admin", "manager")),
+):
+    from app.services.settlement_document_archive_service import read_pdf
+    content, filename = read_pdf(db, tenant_id, artifact_id)
+    return FastAPIResponse(content=content, media_type="application/pdf",
+                           headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
 # ============================================================================

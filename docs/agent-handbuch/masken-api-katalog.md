@@ -519,7 +519,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `drucken` | Abrechnung drucken | safe | nein | `Noch kein Fachweg: Fuer Ernte-Abrechnungen gibt es keinen Druckdienst.` |
+| `drucken` | Abrechnung drucken | safe | nein | `/api/v1/agrar/settlements/{entity_id}/actions/drucken` |
 
 ---
 
@@ -1023,7 +1023,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `qualifizieren` | Als Opportunity qualifizieren | safe | nein | `Noch kein Fachweg: Es gibt keinen Uebergang Lead -> Opportunity; die vorhandene Konvertierung erzeugt einen Kunden.` |
+| `qualifizieren` | Als Opportunity qualifizieren | safe | nein | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
 
 ---
 

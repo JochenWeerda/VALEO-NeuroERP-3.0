@@ -1866,7 +1866,7 @@ def build_agrar_harvest_settlement_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "permission": "agrar.abrechnung.drucken",
-                "stubReason": "Noch kein Fachweg: Fuer Ernte-Abrechnungen gibt es keinen Druckdienst.",
+                "commandEndpoint": "/api/v1/agrar/settlements/{entity_id}/actions/drucken", "method": "POST",
             },
         ],
         "noWorkflowReason": "Ernte-Abrechnung wird manuell freigegeben — Auszahlung erfolgt ueber separaten Finance-Zahlungslauf (finance/payment-run).",
@@ -2773,7 +2773,7 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.lead.update"},
-            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "stubReason": "Noch kein Fachweg: Es gibt keinen Uebergang Lead -> Opportunity; die vorhandene Konvertierung erzeugt einen Kunden."},
+            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren", "method": "POST", "inputFields": [{"key": "customer_id", "label": "Kunde", "type": "select", "required": True, "optionsSource": {"endpoint": "/api/v1/crm/customers/", "valueKey": "id", "labelKey": "company_name"}}]},
         ],
         "workflow": {
             "processKey": "crm-party-lifecycle",

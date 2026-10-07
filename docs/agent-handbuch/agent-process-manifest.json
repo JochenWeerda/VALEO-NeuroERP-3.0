@@ -1236,9 +1236,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "agrar.abrechnung.drucken",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Noch kein Fachweg: Fuer Ernte-Abrechnungen gibt es keinen Druckdienst."
+          "commandEndpoint": "/api/v1/agrar/settlements/{entity_id}/actions/drucken",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -1710,9 +1710,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.lead.qualify",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Noch kein Fachweg: Es gibt keinen Uebergang Lead -> Opportunity; die vorhandene Konvertierung erzeugt einen Kunden."
+          "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -4197,5 +4197,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 72
+  "event_count": 74
 }

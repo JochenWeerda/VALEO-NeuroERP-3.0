@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import io
 import logging
 from datetime import datetime
@@ -23,7 +22,7 @@ from reportlab.platypus import (
 )
 from sqlalchemy.orm import Session
 
-from app.core.gobd_artifact import register_artifact
+from app.services.settlement_document_archive_service import archive_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -42,43 +41,15 @@ class SettlementPdfService:
     # ── Public API ────────────────────────────────────────────────────────────
 
     def generate_and_archive(
-        self,
-        settlement: Any,
-        deductions: list[Any],
-        supplier: Optional[Any],
-        article: Optional[Any],
+        self, settlement: Any, deductions: list[Any], supplier: Optional[Any],
+        article: Optional[Any], *, commit: bool = True, created_by: Optional[str] = None,
     ) -> dict:
-        """Generate PDF bytes, compute SHA-256, register GoBD artifact.
-
-        Returns dict with keys: filename, content_type, size_bytes, artifact_path, sha256.
-        """
+        """Archive the exact PDF bytes; failure cannot confirm an archived document."""
         pdf_bytes = self._build_pdf(settlement, deductions, supplier, article)
-        sha256 = hashlib.sha256(pdf_bytes).hexdigest()
-        filename = f"abrechnung_{settlement.settlement_number or settlement.id}.pdf"
-        artifact_path = f"agrar/settlements/{settlement.id}/{filename}"
-
-        try:
-            register_artifact(
-                self.db,
-                self.tenant_id,
-                str(settlement.id),
-                "settlement_pdf",
-                sha256,
-                artifact_path,
-                file_name=filename,
-                created_by=None,
-            )
-        except Exception:
-            logger.warning("GoBD artifact registration failed for settlement %s", settlement.id)
-
-        return {
-            "filename": filename,
-            "content_type": "application/pdf",
-            "size_bytes": len(pdf_bytes),
-            "artifact_path": artifact_path,
-            "sha256": sha256,
-            "pdf_bytes": pdf_bytes,
-        }
+        meta = archive_pdf(self.db, self.tenant_id, settlement, pdf_bytes, created_by)
+        if commit:
+            self.db.commit()
+        return meta
 
     def generate_bytes(
         self,
@@ -138,7 +109,7 @@ class SettlementPdfService:
         story.append(Paragraph("Lieferant", h2))
         if supplier:
             sup_data = [
-                ["Name:", supplier.name or ""],
+                ["Name:", getattr(supplier, "name_1", None) or getattr(supplier, "name", "") or ""],
                 ["Nummer:", getattr(supplier, "partner_number", "") or ""],
                 ["Adresse:", _fmt_address(supplier)],
             ]
@@ -238,7 +209,7 @@ class SettlementPdfService:
             small,
         ))
         story.append(Paragraph(
-            "Dieses Dokument ist maschinell erstellt und revisionssicher archiviert.",
+            "Maschinell erstellter Abrechnungsbeleg. Der Archivnachweis wird durch eine Archiv-ID erbracht.",
             small,
         ))
 

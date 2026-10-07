@@ -104,3 +104,7 @@ duplizieren.
 Native CRM-Detailmasken melden erfolgreiche Oeffnungen an die persoenliche
 Recent-Document-Projektion. Die Ausgabe bleibt tenant-/benutzergebunden und
 wird bei jedem Lesen gegen die aktuelle `CRM_LESEN`-Rolle geprueft.
+
+## Lead- und PDF-Entscheidung (2026-10-07)
+
+[ADR-078](../../../adr/adr-078-canonical-lead-postgresql-pdf.md) legt das lokale Leadregister, die echte Qualifizierung und das PostgreSQL-PDF-Archiv fest. [QA und Betriebsnachweis](../../../quality-assurance/user-decisions-lead-pdf-20261007.md).

@@ -82,6 +82,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `crm_kontakt_service` | Kunden-Kontakte (Kontakthistorie + Wiedervorlage) für das Kunden-Cockpit. |
 | `crm_kunden_map_service` | CRM-Kundenkarte — alle Kunden (public.kunden) als GeoJSON-POIs. |
 | `crm_lead_gen_service` | CRM Lead-Generierung — region-universale Lead-Kandidaten aus offenen Quellen. |
+| `crm_lead_service` | The lead mask and qualification use the INTERESSENT-IST-LEAD register. |
 | `crm_merge_service` | Kunden-Zusammenführung (DOM-CRM-004.2). |
 | `crm_notification_service` | CRM-Benachrichtigungen — internes In-App-Postfach + externe Fachberater-Mail. |
 | `crm_ownership_service` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung & Übergabe. |
@@ -264,6 +265,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `security_observability` | Central observability for security-relevant block and violation events. |
 | `semantic_e2e_chain_service` | SEMANTIC-E2E-MATRIX-001 — Semantische Prozessketten-Validierung. |
 | `settlement_approval_service` | Approval workflow service for Agrar settlements (AGRAR-SET-FREIGABE). |
+| `settlement_document_archive_service` | Persistent settlement PDF versions in the existing PostgreSQL Docflow archive. |
 | `settlement_drying_service` | Drying calculation service for Agrar settlements (AGRAR-SET-TROCKNUNG). |
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |

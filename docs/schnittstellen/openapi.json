@@ -92975,6 +92975,112 @@
         "title": "LeadCountOut",
         "type": "object"
       },
+      "LeadCreate": {
+        "properties": {
+          "assigned_to": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          },
+          "company_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Company Name",
+            "type": "string"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "estimated_value": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Value"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "priority": {
+            "default": "medium",
+            "maxLength": 20,
+            "title": "Priority",
+            "type": "string"
+          },
+          "source": {
+            "default": "unknown",
+            "maxLength": 100,
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "default": "NEW",
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "required": [
+          "company_name"
+        ],
+        "title": "LeadCreate",
+        "type": "object"
+      },
       "LeadKandidatIn": {
         "properties": {
           "name": {
@@ -93471,6 +93577,123 @@
           }
         },
         "title": "LeadUebernahmeOut",
+        "type": "object"
+      },
+      "LeadUpdate": {
+        "properties": {
+          "assigned_to": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "estimated_value": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Value"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "LeadUpdate",
         "type": "object"
       },
       "LeasingRueckgabePayload": {
@@ -113835,7 +114058,7 @@
           "items": {
             "description": "List of items",
             "items": {
-              "$ref": "#/components/schemas/app__api__v1__schemas__crm__Lead"
+              "$ref": "#/components/schemas/app__api__v1__endpoints__leads__Lead"
             },
             "title": "Items",
             "type": "array"
@@ -176604,6 +176827,142 @@
         "title": "KostenstellenReport",
         "type": "object"
       },
+      "app__api__v1__endpoints__leads__Lead": {
+        "properties": {
+          "assigned_to": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned To"
+          },
+          "company_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Company Name",
+            "type": "string"
+          },
+          "contact_person": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Person"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "estimated_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Value"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "priority": {
+            "default": "medium",
+            "maxLength": 20,
+            "title": "Priority",
+            "type": "string"
+          },
+          "qualified_opportunity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualified Opportunity Id"
+          },
+          "source": {
+            "default": "unknown",
+            "maxLength": 100,
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "default": "NEW",
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "company_name",
+          "id",
+          "tenant_id"
+        ],
+        "title": "Lead",
+        "type": "object"
+      },
       "app__api__v1__endpoints__legacy_interface_adapters__IntakeIn": {
         "properties": {
           "external_id": {
@@ -179821,410 +180180,6 @@
         "title": "Customer",
         "type": "object"
       },
-      "app__api__v1__schemas__crm__Lead": {
-        "description": "Full lead schema",
-        "properties": {
-          "assigned_to": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Assigned user ID",
-            "title": "Assigned To"
-          },
-          "company_name": {
-            "description": "Company name",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Company Name",
-            "type": "string"
-          },
-          "contact_person": {
-            "description": "Contact person",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Contact Person",
-            "type": "string"
-          },
-          "converted_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Conversion timestamp",
-            "title": "Converted At"
-          },
-          "converted_to_customer_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Converted customer ID",
-            "title": "Converted To Customer Id"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Creation timestamp",
-            "title": "Created At"
-          },
-          "deleted_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Deletion timestamp",
-            "title": "Deleted At"
-          },
-          "email": {
-            "description": "Contact email",
-            "format": "email",
-            "title": "Email",
-            "type": "string"
-          },
-          "estimated_value": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Estimated deal value",
-            "title": "Estimated Value"
-          },
-          "id": {
-            "description": "Lead ID",
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "is_active": {
-            "default": true,
-            "description": "Whether the record is active",
-            "title": "Is Active",
-            "type": "boolean"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "maxLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Contact phone",
-            "title": "Phone"
-          },
-          "priority": {
-            "default": "medium",
-            "description": "Lead priority",
-            "maxLength": 10,
-            "title": "Priority",
-            "type": "string"
-          },
-          "source": {
-            "description": "Lead source",
-            "maxLength": 50,
-            "title": "Source",
-            "type": "string"
-          },
-          "status": {
-            "description": "Lead status",
-            "maxLength": 20,
-            "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "description": "Tenant ID",
-            "format": "uuid",
-            "title": "Tenant Id",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Last update timestamp",
-            "title": "Updated At"
-          }
-        },
-        "required": [
-          "source",
-          "status",
-          "company_name",
-          "contact_person",
-          "email",
-          "id",
-          "tenant_id"
-        ],
-        "title": "Lead",
-        "type": "object"
-      },
-      "app__api__v1__schemas__crm__LeadCreate": {
-        "description": "Schema for creating a lead",
-        "properties": {
-          "assigned_to": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Assigned user ID",
-            "title": "Assigned To"
-          },
-          "company_name": {
-            "description": "Company name",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Company Name",
-            "type": "string"
-          },
-          "contact_person": {
-            "description": "Contact person",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Contact Person",
-            "type": "string"
-          },
-          "email": {
-            "description": "Contact email",
-            "format": "email",
-            "title": "Email",
-            "type": "string"
-          },
-          "estimated_value": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Estimated deal value",
-            "title": "Estimated Value"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "maxLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Contact phone",
-            "title": "Phone"
-          },
-          "priority": {
-            "default": "medium",
-            "description": "Lead priority",
-            "maxLength": 10,
-            "title": "Priority",
-            "type": "string"
-          },
-          "source": {
-            "description": "Lead source",
-            "maxLength": 50,
-            "title": "Source",
-            "type": "string"
-          },
-          "status": {
-            "description": "Lead status",
-            "maxLength": 20,
-            "title": "Status",
-            "type": "string"
-          },
-          "tenant_id": {
-            "description": "Tenant ID",
-            "format": "uuid",
-            "title": "Tenant Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "source",
-          "status",
-          "company_name",
-          "contact_person",
-          "email",
-          "tenant_id"
-        ],
-        "title": "LeadCreate",
-        "type": "object"
-      },
-      "app__api__v1__schemas__crm__LeadUpdate": {
-        "description": "Schema for updating a lead",
-        "properties": {
-          "assigned_to": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Assigned user ID",
-            "title": "Assigned To"
-          },
-          "company_name": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Company name",
-            "title": "Company Name"
-          },
-          "contact_person": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Contact person",
-            "title": "Contact Person"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Contact email",
-            "title": "Email"
-          },
-          "estimated_value": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Estimated deal value",
-            "title": "Estimated Value"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "maxLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Contact phone",
-            "title": "Phone"
-          },
-          "priority": {
-            "anyOf": [
-              {
-                "maxLength": 10,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Lead priority",
-            "title": "Priority"
-          },
-          "source": {
-            "anyOf": [
-              {
-                "maxLength": 50,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Lead source",
-            "title": "Source"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "maxLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Lead status",
-            "title": "Status"
-          }
-        },
-        "title": "LeadUpdate",
-        "type": "object"
-      },
       "app__api__v1__schemas__crm__Opportunity": {
         "description": "Full opportunity schema",
         "properties": {
@@ -181798,240 +181753,6 @@
           "updated_at"
         ],
         "title": "Lead",
-        "type": "object"
-      },
-      "app__crm__schemas__LeadCreate": {
-        "properties": {
-          "assigned_to": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assigned To"
-          },
-          "company": {
-            "maxLength": 255,
-            "minLength": 1,
-            "title": "Company",
-            "type": "string"
-          },
-          "contact_person": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contact Person"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "expected_close_date": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expected Close Date"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone"
-          },
-          "potential": {
-            "default": 0,
-            "title": "Potential",
-            "type": "number"
-          },
-          "priority": {
-            "$ref": "#/components/schemas/LeadPriority",
-            "default": "medium"
-          },
-          "source": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source"
-          },
-          "status": {
-            "$ref": "#/components/schemas/LeadStatus",
-            "default": "new"
-          }
-        },
-        "required": [
-          "company"
-        ],
-        "title": "LeadCreate",
-        "type": "object"
-      },
-      "app__crm__schemas__LeadUpdate": {
-        "properties": {
-          "assigned_to": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assigned To"
-          },
-          "company": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Company"
-          },
-          "contact_person": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Contact Person"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "expected_close_date": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expected Close Date"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone"
-          },
-          "potential": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Potential"
-          },
-          "priority": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/LeadPriority"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "source": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/LeadStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "title": "LeadUpdate",
         "type": "object"
       },
       "app__crm__schemas__Opportunity": {
@@ -229905,6 +229626,64 @@
         ]
       }
     },
+    "/api/v1/agrar/settlements/archive/{artifact_id}": {
+      "get": {
+        "operationId": "archived_settlement_pdf_api_v1_agrar_settlements_archive__artifact_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "artifact_id",
+            "required": true,
+            "schema": {
+              "title": "Artifact Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Archiviertes Abrechnungs-PDF abrufen",
+        "tags": [
+          "agrar",
+          "settlements",
+          "self-billing"
+        ]
+      }
+    },
     "/api/v1/agrar/settlements/billing-weight/preview": {
       "post": {
         "operationId": "preview_billing_weight_api_v1_agrar_settlements_billing_weight_preview_post",
@@ -231257,6 +231036,80 @@
           "self-billing",
           "agrar",
           "trocknung"
+        ]
+      }
+    },
+    "/api/v1/agrar/settlements/{entity_id}/actions/drucken": {
+      "post": {
+        "operationId": "action_settlement_drucken_api_v1_agrar_settlements__entity_id__actions_drucken_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ernte-Abrechnung als PDF in PostgreSQL archivieren",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -273042,7 +272895,6 @@
     },
     "/api/v1/crm/leads": {
       "get": {
-        "description": "List all leads",
         "operationId": "list_leads_api_v1_crm_leads_get",
         "parameters": [
           {
@@ -273052,151 +272904,6 @@
             "schema": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/LeadStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "priority",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/LeadPriority"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Priority"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/app__crm__schemas__Lead"
-                  },
-                  "title": "Response List Leads Api V1 Crm Leads Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Leads",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      },
-      "post": {
-        "description": "Create new lead",
-        "operationId": "create_lead_api_v1_crm_leads_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__LeadCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Lead"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Create Lead",
-        "tags": [
-          "CRM",
-          "CRM"
-        ]
-      }
-    },
-    "/api/v1/crm/leads/": {
-      "get": {
-        "operationId": "list_leads_api_v1_crm_leads__get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
                   "type": "string"
                 },
                 {
@@ -273207,7 +272914,6 @@
             }
           },
           {
-            "description": "Search in company/contact",
             "in": "query",
             "name": "search",
             "required": false,
@@ -273220,7 +272926,6 @@
                   "type": "null"
                 }
               ],
-              "description": "Search in company/contact",
               "title": "Search"
             }
           },
@@ -273245,6 +272950,195 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_Lead_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Leads",
+        "tags": [
+          "crm",
+          "leads"
+        ]
+      },
+      "post": {
+        "operationId": "create_lead_api_v1_crm_leads_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeadCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__api__v1__endpoints__leads__Lead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Lead",
+        "tags": [
+          "crm",
+          "leads"
+        ]
+      }
+    },
+    "/api/v1/crm/leads/": {
+      "get": {
+        "operationId": "list_leads_api_v1_crm_leads__get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -273283,11 +273177,29 @@
       },
       "post": {
         "operationId": "create_lead_api_v1_crm_leads__post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__api__v1__schemas__crm__LeadCreate"
+                "$ref": "#/components/schemas/LeadCreate"
               }
             }
           },
@@ -273298,7 +273210,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__crm__Lead"
+                  "$ref": "#/components/schemas/app__api__v1__endpoints__leads__Lead"
                 }
               }
             },
@@ -273380,9 +273292,83 @@
         ]
       }
     },
+    "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": {
+      "post": {
+        "operationId": "qualify_lead_api_v1_crm_leads__entity_id__actions_qualifizieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lead als Opportunity qualifizieren",
+        "tags": [
+          "crm",
+          "leads"
+        ]
+      }
+    },
     "/api/v1/crm/leads/{lead_id}": {
       "delete": {
-        "description": "Delete lead",
         "operationId": "delete_lead_api_v1_crm_leads__lead_id__delete",
         "parameters": [
           {
@@ -273396,7 +273382,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -273407,7 +273393,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -273426,14 +273412,18 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Delete Lead",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lead loeschen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "leads"
         ]
       },
       "get": {
-        "description": "Get lead by ID",
         "operationId": "get_lead_api_v1_crm_leads__lead_id__get",
         "parameters": [
           {
@@ -273447,7 +273437,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -273458,7 +273448,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -273467,7 +273457,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Lead"
+                  "$ref": "#/components/schemas/app__api__v1__endpoints__leads__Lead"
                 }
               }
             },
@@ -273484,14 +273474,18 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Lead",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lead abrufen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "leads"
         ]
       },
       "put": {
-        "description": "Update lead",
         "operationId": "update_lead_api_v1_crm_leads__lead_id__put",
         "parameters": [
           {
@@ -273505,7 +273499,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -273516,7 +273510,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -273524,7 +273518,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__LeadUpdate"
+                "$ref": "#/components/schemas/LeadUpdate"
               }
             }
           },
@@ -273535,7 +273529,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Lead"
+                  "$ref": "#/components/schemas/app__api__v1__endpoints__leads__Lead"
                 }
               }
             },
@@ -273552,10 +273546,15 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Update Lead",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lead aktualisieren",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "leads"
         ]
       }
     },

@@ -9,6 +9,7 @@ from app.core.config import settings
 from main import app
 
 MOUNTS = [
+    ("app.api.v1.endpoints.leads", "/crm/leads"),
     ("app.api.v1.endpoints.portal_shop", "/portal"),
     ("app.api.v1.endpoints.credit_debit_memos", ""),
     ("app.finance.router", ""),
