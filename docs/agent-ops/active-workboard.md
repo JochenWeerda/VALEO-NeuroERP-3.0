@@ -1975,6 +1975,61 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
+## MANDANT-FINANZ-CRM-EINKAUF-20261007 — in Arbeit, Claude Code
+
+**Auftrag (User 07.10.2026: "alle 4 Befunde fertig bearbeiten"):** die vier Befunde aus
+[Mask-Aktionen-Wirkung](../quality-assurance/mask-aktionen-wirkung-20261007.md).
+Bei der Vorpruefung zeigte sich jeder breiter als benannt:
+
+1. **Zahlungslaeufe** (`payment_runs.py`): **alle acht** Wege nehmen den Mandanten
+   aus `Query("system")` (`/plan` sogar aus dem Rumpf), keiner prueft eine Rolle. Das
+   Frontend schickt nie `tenant_id` mit — die ganze Oberflaeche lief auf "system".
+   Freigabe ohne Vier-Augen-Pruefung; `approved_by` ist freier Text.
+2. **Eingangsrechnungen** (`ap_invoices.py`): **das ganze Modul** ohne Mandant —
+   Anlegen, Lesen, Aendern, Loeschen, Liste, Freigabe und **Buchen** (Journal +
+   offener Posten mit dem Mandanten aus dem Dokument). Der Speicher `documents` ist
+   global nach `doc_number` eindeutig: Anlegen ueberschreibt eine fremde Rechnung
+   gleicher Nummer.
+3. **Opportunities** (`opportunities.py`): Lesen/Aendern/Loeschen/Aktivitaet ohne
+   Mandant (crm-sales wird ohne Mandant gefragt, die lokale Ausweichtabelle ohne
+   Filter gelesen); Aktivitaeten gehen in eine Tabelle, die keine Migration anlegt,
+   der Reiter liest aus einer anderen, die auf frischer DB fehlt.
+4. **Angebote** (`einkauf_compat_service.py`): **alle** Lesewege lesen nicht
+   existierende Spalten, `except: return None` macht "nicht gefunden" daraus; die
+   Umwandlung erfindet eine Sammelposition statt die Angebotspositionen zu nehmen,
+   committet die Bestellung vor dem Angebotsstatus und kann doppelt bestellen.
+
+**Behebung:**
+1. Mandant ueberall aus `get_tenant_id`; Rollen `FINANCE_LESEN/BEARBEITEN/ADMIN`
+   (Muster wie Codex' Personal-Rollenschutz); Freigabe und Ausfuehrung nur
+   `FINANCE_ADMIN`/`admin`; Freigeber = angemeldeter Nutzer; Migration
+   `payment_runs.created_by`, **Vier-Augen**: Ersteller darf nicht freigeben.
+2. Mandant aus dem Kontext bei jedem Weg, `tenantId` beim Anlegen gesetzt, fremde
+   Rechnung nie ueberschrieben (409), fremde/mandantenlose = 404, Liste gefiltert;
+   Rollen wie 1; Freigeber = angemeldeter Nutzer.
+3. Eine Mandantenpruefung fuer jede aufgeloeste Opportunity (crm-sales oder lokal);
+   Aktivitaeten in `domain_crm.activities` + Migration `opportunity_id`; Reiter liest
+   dort; Mask-Aktion `create_activity` wieder echt angeschlossen.
+4. Spalten korrekt (`angebotsnummer`, `gesamtbetrag`), kein verschluckter Fehler,
+   Positionen aus `einkauf_angebote_positionen`, ein Commit (Bestellung + Status),
+   keine zweite Bestellung; Mask-Aktion `bestellen` wieder echt angeschlossen.
+
+**Nicht Teil (benannt):** globale Eindeutigkeit `documents.doc_number` ueber alle
+Belegarten (Plattform); Pipeline/Forecast der Opportunities (`:tid IS NULL`).
+
+**Dateibesitz:** `app/api/v1/endpoints/payment_runs.py`, `ap_invoices.py`,
+`opportunities.py`, `mask_actions.py`, `app/services/einkauf_compat_service.py`,
+`purchase_order_service.py` (nur optionaler `commit`-Parameter),
+`mask_rollout_summary_service.py` (nur Opportunity-Aktivitaeten-Reiter),
+`app/core/screen_definitions.py` (nur die zwei Aktionen), neue Migration
+`mandant_finanz_crm_20261007`, Frontend nur, falls ein Aufruf den Mandanten im
+Query braucht, neue Vertraege, eigene QA-Doku.
+
+**Abnahme:** gegen `valeo_probe`: fremder Mandant sieht/aendert/gibt nichts frei
+(je Modul), ohne Rolle 403, Ersteller gibt nicht frei, Angebot wird mit Positionen
+genau einmal zur Bestellung, Opportunity-Aktivitaet erscheint im Reiter; Migration
+hin/zurueck/hin; bestehende Fachsuiten und Ratschen gruen.
+
 ## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen
