@@ -1,5 +1,8 @@
 # GAP-Analyse Procurement / Einkauf - Identifizierte LÃ¼cken
 
+> **HISTORISCH.** Aktuell: [`docs/gap/executive-summary-20261007.md`](../../gap/executive-summary-20261007.md) (Einkauf hoch–mittel). Maturity 35 % / „fehlt komplett“ nicht fortschreiben.
+
+
 **Datum:** 2025-01-27
 **Basis:** Procurement Capability Model v1.0 + Einkauf Module Exploration
 **Status:** In Progress

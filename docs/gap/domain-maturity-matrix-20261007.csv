@@ -1,0 +1,13 @@
+domain_id,domain_name,maturity_2025_archive,maturity_202610,landhandel_sor,tier1_ux_gap,ai_future_gap,evidence,top_open_items,supersedes_archive
+D01,Verkauf_O2C,partial_~40,hoch,stark,mittel,mittel,L3 inventur; domain-depth; pages/verkauf|sales; ProcessRibbon,Masken-Framework-Konsistenz; MCP-Schreiben,gaps-sales.md
+D02,Einkauf_S2P,35pct_viele_No,hoch_mittel,stark,mittel,mittel,domain-depth 3-Wege/RFQ; mask-aktionen; MANDANT 202610,Router-Doppelgruppen; Compat-DTO,procurement-gaps.md
+D03,Finance_FiBu,48pct_P0_No,mittel,mittel,hoch,hoch,Open Gaps JOURNAL/CASH/BANK; usability C06 SUS~58,Close; Journal-Atomizitaet; Agentic Finance; Bank-Proof,gaps.md executive-summary
+D04,CRM_Marketing,~30pct,hoch,stark,mittel,mittel,KIM ObjectPage; ADR-078 Lead; opportunities Mandant,MCP Write; Legacy Assign-Lead,gaps-crm-marketing.md
+D05,Lager_WMS,archiv_schwach,hoch,stark,mittel,niedrig,L3 inventur FEFO/Inventur/Fremdware; pages/lager,Table-Profile/Terminal-Dichte,—
+D06,Agrar_Ernte_Waage,archiv_separat,hoch,sehr_stark,niedrig,mittel,L3 Waage/Ernte; uix-bedienwege; Ernte-PDF ADR-078,Hardware-Gate; Voice-Wiegen,gaps-agriculture.md
+D07,Logistik_Fuhrpark,—,hoch,stark,mittel,niedrig,logistics-action-declarations; native Capture SDs,Spezialmasken Meridian-Abdeckung,—
+D08,Personal_HR,—,hoch_mittel,mittel,mittel,niedrig,Personal-Rollen; Bewerbung Einwilligung/Loeschlauf,UI-Rollen; Bewerber-Selbstzugang,—
+D09,Compliance_Meldewesen,—,mittel,mittel_hoch_DE,mittel,hoch,meldewesen; ESG; Open Gaps,Tax-Skill-MCP; globale Guides,—
+D10,POS_Portal,—,mittel,mittel,mittel,niedrig,portal canonization; POS pages,Channel-UX; TSE extern,—
+D11,Kontrakte_Strecke_NaWaRo,—,hoch,sehr_stark,niedrig,niedrig,kontrakt disposition; strecke native SDs,Feinauswertungen,—
+D12,KI_Agent_MCP,—,mittel_duenn,mittel,hoch,sehr_hoch,ki-usability ~78 Actions; MCP tools partial write,Action-Dichte; Policy-Agents; Local OCR,—

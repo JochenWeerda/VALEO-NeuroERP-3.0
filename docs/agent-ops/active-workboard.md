@@ -11,6 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## USABILITY-SYSTEMAUDIT-20261007 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-07 (Stufe-1 Experten-Systemaudit).
+**Ziel:** ERP-Usability-Methodik (ISO 9241-11/110, Singh/Wesson) auf VALEO
+systemweit anwenden; Vergleichsdossier gegen Tier-1, Light (light.inc) und
+AI-native Peers ERPClaw / OpenLedger / TaxHacker / OpenAccountants.
+**Dateibesitz:** `docs/quality-assurance/usability-erp-audit-protocol-20261007.md`,
+`docs/quality-assurance/usability-erp-vergleichsdossier-20261007.md`,
+`docs/gap/usability-systemaudit-matrix-20261007.csv`,
+`docs/gap/usability-systemaudit-findings-20261007.csv`, Open-Gaps-Verweis und
+dieser Abschnitt. Kein Produktcode; fremde Claims unberuehrt.
+**Abnahme:** 10 Domänencluster gescored; Tiefen-Tasks O2C/S2P/Ernte/Finance/CRM/Voice;
+SUS-Experten-Schnitt ~66; drei Finance-Blocker und Peer-Ableitungen dokumentiert;
+Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
+**Nachweis:** Protokoll + Dossier + Matrix CSV.
+
+**Nachtrag Gap-Hub (2026-10-07):** Archiv-Gaps 2025 (~38 % Maturity) durch
+`docs/gap/README.md`, `executive-summary-20261007.md` und
+`domain-maturity-matrix-20261007.csv` ersetzt; Archive mit HISTORISCH-Banner;
+`docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
+
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
 **User-Entscheidungen Lead/PDF (2026-10-07):** [QA](../quality-assurance/user-decisions-lead-pdf-20261007.md), [ADR-078](../adr/adr-078-canonical-lead-postgresql-pdf.md). public.crm_leads kanonischer Masken-CRUD fuer beide Slash-Schreibweisen, fuenf konkurrierende Alt-Handler entfernt, kein externer Standardmandant. Qualifizierung mit eigenem ausgewaehltem bestehenden Kunden erzeugt genau eine echte Opportunity atomar mit Lead/Audit/Outbox; Vorschauen schreiben nichts. Ernte-PDF-Bytes mit Hash/Header/Version/PostgreSQL-Schluessel gespeichert, Download tenantgebunden mit Integritaetspruefung, Inhalt gegen Aenderung/Loeschung geschuetzt, Fehler kein Erfolg. Reale PDF-Altfehler partner_id/name_1 und Artikel-Tenant ebenfalls korrigiert. 106 neue/bestehende Vertraege ohne Skip gruen; elf neue Tests nochmals unter echtem needs_live_db/strict-CI-Vertrag gruen (3,49 s). Maskeninventur 99 nativ/0 bekannte Luecken; acht Logistikaktionen bereits b2a63f451 vorhanden, erneut geprueft. Neun Improvement-Gates stabil gruen. OpenAPI 3104 Pfade, drei neue, keine entfernt; doppelte Gruppen 33 -> 30. Drei Inventare, Architektur 935/277/454 vollstaendig und fuenf Handbuchartefakte --check gruen. Additive Migration auf vorhandenem gemeinsamen valeo_probe unter Nutzungs-/Advisory-Claim, keine neue DB/Container/Reset; neue Testdaten via aeusserer Transaktion/Savepoints vollstaendig zurueckgenommen. Fremde Katalog-/Frontend-/Buchungs-WIP erhalten. Lead-Routing-/Assign-Altkonsumenten, Gesamtatomizitaet FIBU+nachgelagertes Archiv, Katalogdrift, 30 Routergruppen und zwei ungepatchte Node-High bleiben eigene offene Befunde; frische Actions-Abnahme folgt.

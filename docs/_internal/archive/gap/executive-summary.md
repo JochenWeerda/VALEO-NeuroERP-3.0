@@ -1,8 +1,12 @@
 # Executive Summary - VALEO NeuroERP GAP-Analyse
 
+> **HISTORISCH (2025-01-27) — nicht zitieren.**  
+> Aktuell: [`docs/gap/executive-summary-20261007.md`](../../gap/executive-summary-20261007.md)  
+> Die Kennzahl „~38 % Maturity“ und die P0-Liste „fehlt komplett“ sind überholt.
+
 **Datum:** 2025-01-27
 **Zielgruppe:** Management, Stakeholder, EntscheidungstrÃ¤ger
-**Status:** Final
+**Status:** Final — archiviert
 
 ---
 

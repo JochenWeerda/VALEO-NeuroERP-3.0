@@ -1,8 +1,10 @@
 # GAP-Closure Umsetzungsübersicht — Stand 2026-03-05
 
+> **HISTORISCH / Zwischenstand.** Die Kennzahl „38 % → ~88 %“ ist eine interne Closure-Welle und **kein** aktueller Management-Reifegrad. Aktuell: [`docs/gap/executive-summary-20261007.md`](../gap/executive-summary-20261007.md).
+
 **Referenz:** [.cursor/plans/gap-closure_master_plan_ab0cb3b1.plan.md](../.cursor/plans/gap-closure_master_plan_ab0cb3b1.plan.md)
 
-**Maturity-Fortschritt:** 38% → **~88%**
+**Maturity-Fortschritt (damalige Welle):** 38% → **~88%**
 
 ---
 

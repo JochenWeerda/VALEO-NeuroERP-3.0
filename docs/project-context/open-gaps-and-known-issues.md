@@ -11,6 +11,31 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
+
+Kanonische Gap-Übersicht: [docs/gap/README.md](../gap/README.md),
+[Executive Summary](../gap/executive-summary-20261007.md),
+[Domänenreife CSV](../gap/domain-maturity-matrix-20261007.csv).
+Die 2025er Archiv-Dateien unter `docs/_internal/archive/gap/` (inkl. „~38 %
+Maturity“ und P0 „fehlt komplett“) sind historisch und keine Priorisierungsquelle.
+Dieses Open-Gaps-Dokument bleibt der **Detail-Tracker**; der Hub die
+Management-/Domänenübersicht.
+
+## USABILITY-SYSTEMAUDIT — Stufe-1 Systemaudit (2026-10-07)
+
+Systemweites Experten-Usability-Audit und Vergleichsdossier geliefert:
+[Protokoll](../quality-assurance/usability-erp-audit-protocol-20261007.md),
+[Dossier](../quality-assurance/usability-erp-vergleichsdossier-20261007.md),
+[Matrix](../gap/usability-systemaudit-matrix-20261007.csv),
+[Findings](../gap/usability-systemaudit-findings-20261007.csv). SUS-Experten-Schnitt
+~66 (±8). **Neue priorisierte UX/Future-Gaps (nicht als erledigt werten):**
+U-C06-01/02/04 (agentic Finance, immutable Agent-Ledger-Muster, echter
+Kassenabschluss) P0; Action-Dichte/MCP-Schreiben, Local-OCR (TaxHacker-Muster),
+Steuer-Skill-MCP (OpenAccountants), Masken-Framework-Abschmelzung,
+Finance-IA-Konsolidierung P1. Light (light.inc) und Peers ERPClaw/OpenLedger
+sind Zukunftsspiegel, kein Ersatz der Landhandel-SoR. Stufe-2 SUS mit
+Endnutzern steht aus.
+
 ## USER-DECISIONS-LEAD-PDF — Entscheidungsrest geschlossen (2026-10-07)
 
 Lead-Maske/Qualifizierung verwenden public.crm_leads und einen ausgewaehlten eigenen Kunden; echte lokale Opportunity atomar mit Audit/Outbox. Ernte-PDFs liegen vollstaendig und versioniert in PostgreSQL, mit mandantengebundenem Download und Hashpruefung. Acht Logistikdeklarationen bereits b2a63f451 geliefert, erneut geprueft. [ADR-078](../adr/adr-078-canonical-lead-postgresql-pdf.md), [QA](../quality-assurance/user-decisions-lead-pdf-20261007.md). Die physische Domain-Verlagerung von Leads sowie Gesamtatomizitaet der FIBU-Verbuchung mit nachgelagerter Archivierung bleiben eigene offene Fach-Slices. Alte Hash-only-Belege enthalten kein PDF und werden nicht als wiederherstellbar bestaetigt. Die alte Round-robin-/Assign-Lead-API verwendet noch das Nebenmodell und bleibt ein gesonderter Altverbraucher.

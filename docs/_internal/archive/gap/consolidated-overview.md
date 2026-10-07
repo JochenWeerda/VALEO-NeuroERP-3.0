@@ -1,7 +1,9 @@
 # GAP-Analyse Konsolidierte Ãœbersicht
 
+> **HISTORISCH — nicht zitieren.** Aktuell: [`docs/gap/executive-summary-20261007.md`](../../gap/executive-summary-20261007.md). Die Maturity-~38%-Tabelle unten ist überholt.
+
 **Datum:** 2025-01-27
-**Status:** In Progress
+**Status:** archiviert
 **Zweck:** GesamtÃ¼bersicht aller GAP-Analysen fÃ¼r VALEO NeuroERP
 
 ---

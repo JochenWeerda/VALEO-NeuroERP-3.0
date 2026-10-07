@@ -4,9 +4,9 @@ type: reference
 audience: [entwickler, product]
 owner: Claude Code
 status: umgesetzt
-last_reviewed: 2026-06-27
-version: 3.0.0
-description: "WEITGEHEND UMGESETZT 2026-05-17: Erste Closure-Welle hat alle grossen Luecken repo-seitig geschlossen (Verkauf, Einkauf, Finance, CRM, Logistik, HRM, Compliance, Futtermittel, POS, Kontrakte). Verbleibende Punkte in open-gaps-and-known-issues.md verfolgbar."
+last_reviewed: 2026-10-07
+version: 3.1.0
+description: "WEITGEHEND UMGESETZT 2026-05-17: Erste Closure-Welle hat alle grossen Luecken repo-seitig geschlossen. Management-Reife und Top-Gaps ab 2026-10 im Gap-Hub; Details weiter in open-gaps."
 ---
 
 # Domain-Tiefe: Ist-Soll-Vergleich und Umsetzungsplan
@@ -15,9 +15,10 @@ description: "WEITGEHEND UMGESETZT 2026-05-17: Erste Closure-Welle hat alle gros
 **Massstab:** Marktführende ERP-Systeme, etablierte ERP-Plattformen, Odoo 17 Enterprise
 **Zielmarkt:** Agrarhandel / Landhandel / Genossenschaften
 
-> Dieses Dokument ist die **operative Source-of-Truth** fuer alle Ausbauvorhaben
-> zur fachlichen Vertiefung der Domains. Es ersetzt keine Wave-STATUS.md,
-> sondern fuehrt den Auftrag und den Fortschritt auf Domain-Ebene.
+> **Aktualisierung 2026-10-07:** Management-Reife und priorisierte Top-Gaps liegen im
+> [Gap-Hub](../gap/README.md) / [Executive Summary 2026-10](../gap/executive-summary-20261007.md).
+> Dieses Dokument bleibt der **historische Soll-Katalog und Closure-Nachweis** der
+> Welle 2026-05/06 — keine Wave-STATUS.md, keine aktuelle 38 %-Archivzahl.
 
 ## Aktualisierung 2026-05-17: Repo-seitige Closure-Welle
 

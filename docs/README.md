@@ -4,8 +4,8 @@ type: explanation
 audience: [entwickler, agent, product, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-27
-version: 3.0.0
+last_reviewed: 2026-10-07
+version: 3.1.0
 description: Verbindlicher Einstiegspunkt für die Projektdokumentation — Alias für docs/index.md.
 ---
 
@@ -24,7 +24,9 @@ Die vollständige Startseite mit Diátaxis-Navigation liegt unter **[index.md](i
 | Architektur | [Architektur-Index](architecture/index.md) → [arc42](architecture/arc42/01-einfuehrung.md) |
 | Entscheidungen | [ADR-Index](adr/README.md) |
 | Dependency-Security | [ADR-071](adr/adr-071-security-dependency-gate.md) · [Ist-Stand](quality-assurance/security-dependency-status-2026-09-15.md) · [Gate-QA](quality-assurance/security-dependency-policy-2026-09-15.md) |
-| Offene Lücken | [Open Gaps](project-context/open-gaps-and-known-issues.md) |
+| Gap-Übersicht (aktuell) | [Gap-Hub](gap/README.md) · [Executive Summary 2026-10](gap/executive-summary-20261007.md) |
+| Offene Lücken (Detail) | [Open Gaps](project-context/open-gaps-and-known-issues.md) |
+| Usability / AI-Vergleich | [Vergleichsdossier 2026-10](quality-assurance/usability-erp-vergleichsdossier-20261007.md) |
 | Mask Runtime Status | [Universal Mask Runtime](architecture/uix/universal-mask-runtime-status.md) |
 | Startseite / Launchpad | [Spaces/Pages](design/launchpad-spaces.md) · [Informationshierarchie](design/launchpad-informationshierarchie.md) · [Anwender-Bedienwege](design/uix-anwender-bedienwege.md) |
 
